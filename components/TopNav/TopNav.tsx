@@ -185,6 +185,14 @@ export default function TopNav() {
   const isLoginRoute = pathname === loginRoute
   const isSignupRoute = pathname === signupRoute
 
+  const searchParams = useSearchParams()
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+
+  // Hide TopNav on teams page or if source is onboarding
+  if (isSignupRoute || source === ONBOARDING_SOURCE) {
+    return null
+  }
+
   useEffect(() => {
     const isDocsBasePath = pathname.startsWith('/docs')
     setIsDocsBasePath(isDocsBasePath)
@@ -218,9 +226,6 @@ export default function TopNav() {
   const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null)
   const delay = 500
 
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
-
   // Product dropdown handlers
   const handleMouseEnterProduct = () => {
     clearTimeout(timeoutId)
@@ -249,10 +254,6 @@ export default function TopNav() {
 
   const handleResourcesDropdownClick = () => {
     setIsOpenResources(false)
-  }
-
-  if (source === ONBOARDING_SOURCE) {
-    return null
   }
 
   return (
