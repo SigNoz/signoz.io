@@ -3,7 +3,7 @@ title: Monitoring Backstage with OpenTelemetry:Closing the observability blind s
 slug: monitoring-backstage-with-opentelemetry
 date: 2025-06-02
 tags: [openTelemetry]
-authors: [elizabeth_mathew, shivanshu]
+authors: [elizabeth_mathew, shivanshu, ekansh_gupta]
 description: Learn how to monitor Backstage, the developer portal, using OpenTelemetry. This guide covers the importance of observability, common failure modes, and a step-by-step implementation to ensure your Backstage instance is fully instrumented.
 image: /img/blog/2025/06/backstage-flow.webp
 keywords: [monitoring, observability, OpenTelemetry, Backstage, developer portal, instrumentation, metrics, traces, logs]
@@ -70,7 +70,7 @@ In summary, OpenTelemetry provides the tools to instrument and export Backstage�
 
 To get Backstage emitting telemetry, we need to integrate the OpenTelemetry Node.js SDK into the Backstage backend service. Backstage is built on Node/Express, so we can leverage OTel’s Node auto-instrumentation to capture many out-of-the-box data points like HTTP requests and certain database or HTTP client calls. We can also add manual instrumentation for anything custom.
 
-### **Step 1: Install OpenTelemetry packages**
+### Step 1: Install OpenTelemetry packages
 
 In your Backstage project, add the OTel SDK and the auto-instrumentation package [and any exporters you plan to use]:
 
@@ -85,7 +85,7 @@ yarn --cwd packages/backend add @opentelemetry/exporter-trace-otlp-http @opentel
 
 *(If you prefer Prometheus for metrics or a different exporter, adjust accordingly. Backstage’s documentation uses a Prometheus exporter in their example, but here we’ll use OTLP exporters to send data to an OpenTelemetry Collector.)*
 
-### **Step 2: Create an instrumentation startup file**
+### Step 2: Create an instrumentation startup file
 
 In the Backstage backend source [usually packages/backend/src], create a file named instrumentation.js [or tracing.js]. This file will initialise the OTel SDK **before** the rest of Backstage loads. It’s important that this runs first, so that all incoming requests and library calls are instrumented from the start.
 
@@ -138,7 +138,7 @@ Let’s break down what this does:
     This initialises the SDK and registers the global OpenTelemetry tracer and meter providers, so instrumentation is active.
     
 
-### **Step 3: Load the instrumentation at startup**
+### Step 3: Load the instrumentation at startup
 
 We need to ensure instrumentation.js is loaded before the Backstage server starts. In development, one convenient method is to modify the start script in packages/backend/package.json:
 
@@ -156,16 +156,16 @@ At this point, if you start Backstage, it should begin emitting telemetry:
 - Traces of incoming requests and internal operations will be captured.
 - **Metrics** defined by Backstage or OTel auto-instrumentation will be collected. By default, Backstage’s core plugins already define many useful metrics when OTel is enabled.
 
-### **Step 4: Verify telemetry data**
+### Step 4: Verify telemetry data
 
  You can check that your OTel Collector or SigNoz is receiving data. With OTLP and SigNoz, you’d look in the SigNoz UI for your service name or check the collector logs to ensure data is flowing. 
-<Figure src="/img/blog/2025/06/backstage-traces-flow.webp" alt="Backstage traces flow to SigNoz" caption="Backstage traces flow to SigNoz" />
+<Figure src="/img/blog/2025/06/backstage-traces.webp" alt="Backstage traces flow to SigNoz" caption="Backstage traces flow to SigNoz" />
 
 ## Advanced Use Cases and Benefits
 
 Beyond basic monitoring, instrumenting Backstage with OpenTelemetry opens the door to more advanced observability scenarios,
 
-### **Alerting on Plugin Failures:**
+### Alerting on Plugin Failures:
 
 Once Backstage emits metrics and error traces, you can set up alerts for abnormal conditions.
 
@@ -175,13 +175,13 @@ You could also create a custom metric for “plugin failure count” by incremen
 
 With OTel data centralised in a backend, defining such alerts becomes straightforward.
 
-### **Performance Profiling**
+### Performance Profiling
 
 Traces allow you to perform performance analysis of Backstage. By looking at trace timelines, you can identify slow operations and bottlenecks. For instance, if loading the Backstage homepage is slow, a trace might reveal that one plugin’s API call is the culprit. You can measure durations of database queries, external API calls, or heavy in-memory operations. Moreover, metrics like histograms of response times [e.g., the scaffolder.task.duration histogram] can show you long-term performance trends and variance. 
 
 This data helps with capacity planning and optimising Backstage’s performance.
 
-### **Observability of CI/CD and ArgoCD Integrations**
+### Observability of CI/CD and ArgoCD Integrations
 
 Those features must be reliable if you’ve integrated your CI/CD pipelines or GitOps [ArgoCD] into Backstage. By instrumenting Backstage’s interactions with these systems, you gain insight into the health of your delivery pipelines through Backstage. 
 
