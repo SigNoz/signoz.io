@@ -173,17 +173,26 @@ const resourcesDropdownItems = {
 
 export default function TopNav() {
   const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // All hooks must be called at the top level, before any conditional returns
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isDocsBasePath, setIsDocsBasePath] = useState(false)
   const [showMainMenu, setShowMainMenu] = useState(false)
   const [activeTab, setActiveTab] = useState(TABS.GUIDES)
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
-  const router = useRouter()
+  const [isOpen, setIsOpen] = useState(false)
+  const [isOpenResources, setIsOpenResources] = useState(false)
+  const [timeoutId, setTimeoutId] = useState<any>(null)
+  const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null)
 
   const loginRoute = '/login/'
   const signupRoute = '/teams/'
   const isLoginRoute = pathname === loginRoute
   const isSignupRoute = pathname === signupRoute
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  const delay = 500
 
   useEffect(() => {
     const isDocsBasePath = pathname.startsWith('/docs')
@@ -212,14 +221,10 @@ export default function TopNav() {
     }
   }, [pathname])
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [isOpenResources, setIsOpenResources] = useState(false)
-  const [timeoutId, setTimeoutId] = useState<any>(null)
-  const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null)
-  const delay = 500
-
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  // Hide TopNav on teams page or if source is onboarding
+  if (isSignupRoute || source === ONBOARDING_SOURCE) {
+    return null
+  }
 
   // Product dropdown handlers
   const handleMouseEnterProduct = () => {
@@ -249,10 +254,6 @@ export default function TopNav() {
 
   const handleResourcesDropdownClick = () => {
     setIsOpenResources(false)
-  }
-
-  if (source === ONBOARDING_SOURCE) {
-    return null
   }
 
   return (
