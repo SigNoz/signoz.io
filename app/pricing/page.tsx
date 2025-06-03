@@ -5,6 +5,7 @@ import { evaluateFeatureFlag } from '@/utils/growthbookServer'
 import { EXPERIMENTS } from '@/constants/experiments'
 import PricingV1 from './pricingv1/PricingV1'
 import { ExperimentTracker } from '@/components/ExperimentTracker'
+import Chatbase from '@/components/Chatbase'
 
 export const metadata: Metadata = {
   title: {
@@ -25,20 +26,43 @@ export default async function PricingPage() {
     EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.flagName
   )
 
+  // Check if the chatbase bubble experiment is enabled
+  const isChatbaseBubbleVariant = await evaluateFeatureFlag(EXPERIMENTS.CHATBASE_BUBBLE.flagName)
+
   // Render PricingV1 for the test variant, otherwise render the current Pricing component
-  return isCloudFirstVariant ? (
-    <ExperimentTracker
-      experimentId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.id}
-      variantId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.variants.VARIANT}
-    >
-      <PricingV1 />
-    </ExperimentTracker>
-  ) : (
-    <ExperimentTracker
-      experimentId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.id}
-      variantId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.variants.CONTROL}
-    >
-      <Pricing />
-    </ExperimentTracker>
+  return (
+    <>
+      {isCloudFirstVariant ? (
+        <ExperimentTracker
+          experimentId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.id}
+          variantId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.variants.VARIANT}
+        >
+          <PricingV1 />
+        </ExperimentTracker>
+      ) : (
+        <ExperimentTracker
+          experimentId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.id}
+          variantId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.variants.CONTROL}
+        >
+          <Pricing />
+        </ExperimentTracker>
+      )}
+
+      {isChatbaseBubbleVariant ? (
+        <ExperimentTracker
+          experimentId={EXPERIMENTS.CHATBASE_BUBBLE.id}
+          variantId={EXPERIMENTS.CHATBASE_BUBBLE.variants.VARIANT}
+        >
+          <Chatbase />
+        </ExperimentTracker>
+      ) : (
+        <ExperimentTracker
+          experimentId={EXPERIMENTS.CHATBASE_BUBBLE.id}
+          variantId={EXPERIMENTS.CHATBASE_BUBBLE.variants.CONTROL}
+        >
+          <></>
+        </ExperimentTracker>
+      )}
+    </>
   )
 }
