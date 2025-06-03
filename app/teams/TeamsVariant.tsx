@@ -34,7 +34,7 @@ interface Region {
 // Variant Navbar component (now integrated into layout)
 export const VariantNavbar = () => {
   return (
-    <div className="fixed left-0  right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px]">
+    <div className="fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px]">
       <div className="bg-signoz_ink-600 flex h-full w-full items-center px-4 md:pl-12 lg:w-5/12 lg:pl-16">
         <div className="flex justify-start">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
@@ -639,7 +639,7 @@ const TeamsVariant: React.FC = () => {
   )
 
   return (
-    <div className="variant-teams-container bg-signoz_ink-600 flex min-h-screen flex-col">
+    <div className="variant-teams-container bg-signoz_ink-600 flex flex-col">
       <VariantNavbar />
 
       <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row">
