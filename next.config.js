@@ -101,6 +101,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/security/',
+          destination: 'https://trust.signoz.io/',
+          permanent: true,
+        },
+        {
           source: '/comparisons/signoz-vs-datadog/',
           destination: '/product-comparison/signoz-vs-datadog/',
           permanent: true,
