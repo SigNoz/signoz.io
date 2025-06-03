@@ -1,0 +1,149 @@
+---
+date: 2025-03-27
+id: migrate-to-signoz-cloud
+title: Migrate from Self-Hosted SigNoz to SigNoz Cloud
+description: Process about how to migrate from Self-Hosted SigNoz to SigNoz Cloud
+---
+
+## Why Migrate to SigNoz Cloud?
+
+Migrating to SigNoz Cloud offers a range of benefits that enhance your monitoring and observability experience:
+
+- **Simplified Management**: By moving to the cloud, you eliminate the need for manual updates, scaling, and maintenance, ensuring a hassle-free experience.
+
+- **Scalability**: SigNoz Cloud automatically adjusts to your growing data needs, ensuring that you can scale up or down effortlessly without worrying about infrastructure limitations.
+
+- **Security and Compliance**: The cloud version provides enhanced security features and compliance with industry standards, giving you peace of mind when it comes to data safety.
+
+- **High Availability and Reliability**: Enjoy the benefits of cloud infrastructure's built-in redundancy and uptime guarantees, ensuring your monitoring setup is always available.
+
+- **Access to New Features**: Get access to the latest SigNoz features and updates automatically with no need to worry about migrations.
+
+## Steps to Migrate from Self-Hosted SigNoz to SigNoz Cloud
+
+<Tabs>
+<TabItem value="own-collector" label="Using OTel Collector Agent" default>
+
+If you're using your own OpenTelemetry Collector [agent](https://opentelemetry.io/docs/collector/deployment/agent/) that forwards data to SigNoz self-hosted, you need to update both the endpoint and add the ingestion key.
+
+### 1. Update Your OTel Collector Configuration
+
+In your OpenTelemetry Collector configuration file (usually `config.yaml`), update the exporters section:
+
+```yaml
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+```
+
+Replace:
+- `<region>` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>` with your actual ingestion key from [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### 2. Restart Your Collector
+Restart your OpenTelemetry Collector to apply the new configuration.
+
+</TabItem>
+<TabItem value="direct-to-signoz" label="Direct to Self-Hosted SigNoz">
+
+If you're sending telemetry data directly from your applications to SigNoz self-hosted's [built-in collector](https://signoz.io/docs/architecture/), you have two migration options:
+
+### Option A: Set up your own OTel Collector (Recommended)
+
+**Step 1: Deploy OpenTelemetry Collector**
+
+<Tabs>
+<TabItem value="k8s" label="Kubernetes">
+
+Follow the [Kubernetes OTel Collector installation guide](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) to install OpenTelemetry Collector in your Kubernetes infrastructure. Make sure to configure it with the proper [ingestion endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for SigNoz Cloud.
+
+</TabItem>
+<TabItem value="vm" label="VM/Server">
+
+Follow the [VM OTel Collector installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install OpenTelemetry Collector on your VM/server. Make sure to configure it with the proper [ingestion endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for SigNoz Cloud.
+
+</TabItem>
+</Tabs>
+
+**Step 2: Update Application Configuration**
+Point your applications to send data to your new collector (for example `http://localhost:4317` for gRPC or `http://localhost:4318` for HTTP).
+
+### Option B: Send directly to SigNoz Cloud
+
+Update your application's telemetry configuration using [OpenTelemetry instrumentation](https://signoz.io/docs/instrumentation/) to send directly to SigNoz Cloud:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Replace:
+- `<region>` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>` with your actual ingestion key from [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+</Tabs>
+
+## Migrate Dashboards & Metadata
+
+Regardless of your setup, you'll need to migrate your dashboards and configurations:
+
+- SigNoz support will handle the migration of your metadata, including dashboards, alerts, views, pipelines, users, and other configurations from your self-hosted instance to the cloud.
+- To begin the migration, provide the SQLite DB file from your self-hosted SigNoz instance. This can typically be found in the location where your SigNoz instance stores the database (usually `/path/to/sigNoz/database.db`).
+- Compress the SQLite DB file and send it to [SigNoz support](https://signoz.io/support/). Our team will manually import the necessary data from selected tables to ensure a smooth migration of your metadata.
+- Once the process is complete, you will have all your dashboards and metadata in SigNoz Cloud, ready for use.
+
+## Verify Migration
+
+- Confirm that data is flowing to SigNoz Cloud
+- Verify all dashboards and metadata have been migrated correctly by checking your cloud tenant.
+
+## Estimate SigNoz Cloud bill
+
+To estimate your SigNoz Cloud bill on the basis of your SigNoz Self-Hosted usage, follow the steps below:
+
+1. Truncate your usage tables:
+```
+truncate table signoz_metrics.usage on cluster cluster;
+truncate table signoz_metrics.usage on cluster cluster;
+truncate table signoz_logs.usage on cluster cluster;
+```
+
+2. Restart your SigNoz OTel collectors
+
+3. Keep on running and ingesting normal volumes for over 24hrs
+
+4. Now connect to ClickHouse
+
+Follow this [documentation](https://signoz.io/docs/operate/clickhouse/connect-to-clickhouse/)
+
+Run below queries to get dump of usage tables:
+
+The below query retrieves all records from the `signoz_logs.usage` table into a CSV file named `logs_usage.csv` with column names as headers.
+
+```
+SELECT *
+FROM signoz_logs.usage
+INTO OUTFILE 'logs_usage.csv'
+FORMAT CSVWithNames
+```
+
+The below query retrieves all records from the `signoz_traces.usage` table into a CSV file named `traces_usage.csv` with column names as headers.
+
+```
+SELECT *
+FROM signoz_traces.usage
+INTO OUTFILE 'traces_usage.csv'
+FORMAT CSVWithNames
+```
+
+The below query retrieves all records from the `signoz_metrics.usage` table into a CSV file named `metrics_usage.csv` with column names as headers.
+```
+SELECT *
+FROM signoz_metrics.usage
+INTO OUTFILE 'metrics_usage.csv'
+FORMAT CSVWithNames
+```
+
