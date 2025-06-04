@@ -125,8 +125,8 @@ processors:
     timeout: 100ms
 
 exporters:
-  logging:
-    logLevel: debug
+  debug:
+    verbosity: detailed
   # OTLP for Tracetest
   otlp/tracetest:
     endpoint: tracetest:4317 # Send traces to Tracetest.
@@ -144,11 +144,11 @@ service:
     traces/tracetest: # Pipeline to send data to Tracetest
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, otlp/tracetest]
+      exporters: [debug, otlp/tracetest]
     traces/signoz: # Pipeline to send data to Signoz
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, otlp/signoz]
+      exporters: [debug, otlp/signoz]
 ```
 
 Next, edit the config to add your SigNoz endpoint.

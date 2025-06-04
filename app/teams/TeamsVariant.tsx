@@ -6,8 +6,6 @@ import Image from 'next/image'
 import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
-import { ExperimentTracker } from '@/components/ExperimentTracker'
-import { EXPERIMENTS } from '@/constants/experiments'
 import TrackingLink from '@/components/TrackingLink'
 import { Tooltip } from '@nextui-org/react'
 
@@ -36,7 +34,7 @@ interface Region {
 // Variant Navbar component (now integrated into layout)
 export const VariantNavbar = () => {
   return (
-    <div className="fixed left-0  right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px]">
+    <div className="fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px]">
       <div className="bg-signoz_ink-600 flex h-full w-full items-center px-4 md:pl-12 lg:w-5/12 lg:pl-16">
         <div className="flex justify-start">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
@@ -231,7 +229,7 @@ const Testimonial: React.FC = () => {
   }
 
   return (
-    <div className="relative flex h-full max-w-md flex-col items-center justify-center p-8">
+    <div className="relative flex h-[calc(100vh-56px)] max-w-md flex-col items-center justify-center p-8">
       <blockquote className="space-y-6 border-0">
         <div className="text-4xl text-signoz_vanilla-100/30">"</div>
         <p className="text-2xl font-medium text-signoz_vanilla-100">{currentTestimonial.quote}</p>
@@ -641,46 +639,41 @@ const TeamsVariant: React.FC = () => {
   )
 
   return (
-    <ExperimentTracker
-      experimentId={EXPERIMENTS.TEAMS_PAGE.id}
-      variantId={EXPERIMENTS.TEAMS_PAGE.variants.VARIANT}
-    >
-      <div className="variant-teams-container bg-signoz_ink-600 flex min-h-screen flex-col">
-        <VariantNavbar />
+    <div className="variant-teams-container bg-signoz_ink-600 flex flex-col">
+      <VariantNavbar />
 
-        <div className="flex min-h-screen flex-col pt-[56px] lg:flex-row">
-          {/* Left section - Sign up form */}
-          <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[20vh] lg:w-5/12 lg:p-12 lg:pt-[20vh]">
-            <div className="w-full">
-              {!isSubmitting && submitFailed ? (
-                <ErrorState />
-              ) : (
-                <SignupFormIsolated
-                  onSignup={handleSignUp}
-                  isSubmitting={isSubmitting}
-                  errors={errors}
-                />
-              )}
-            </div>
-
-            <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block">
-              <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
-                <span>OpenTelemetry Native.</span>
-                <span>Unfied Signals.</span>
-                <span>Predictable Pricing.</span>
-              </p>
-            </div>
+      <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row">
+        {/* Left section - Sign up form */}
+        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+20vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+20vh)]">
+          <div className="w-full">
+            {!isSubmitting && submitFailed ? (
+              <ErrorState />
+            ) : (
+              <SignupFormIsolated
+                onSignup={handleSignUp}
+                isSubmitting={isSubmitting}
+                errors={errors}
+              />
+            )}
           </div>
 
-          {/* Right section - Testimonials */}
-          <div className="relative hidden border-l border-signoz_slate-500 bg-signoz_ink-300 lg:flex lg:w-7/12">
-            <div className="mt-[-56px] flex w-full items-center justify-center">
-              <Testimonial />
-            </div>
+          <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block">
+            <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
+              <span>OpenTelemetry Native.</span>
+              <span>Unfied Signals.</span>
+              <span>Predictable Pricing.</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Right section - Testimonials */}
+        <div className="relative hidden border-l border-signoz_slate-500 bg-signoz_ink-300 lg:flex lg:w-7/12">
+          <div className="flex w-full items-center justify-center">
+            <Testimonial />
           </div>
         </div>
       </div>
-    </ExperimentTracker>
+    </div>
   )
 }
 

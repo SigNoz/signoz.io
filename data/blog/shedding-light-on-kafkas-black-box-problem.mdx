@@ -1,0 +1,201 @@
+---
+title: Shedding Light on Kafka’s Black Box Problem (with OpenTelemetry)
+slug: shedding-light-on-kafkas-black-box-problem
+date: 2025-05-26
+tags: [openTelemetry]
+authors: [elizabeth_mathew]
+description: Kafka has become a go-to choice for event-driven systems today, but its black box nature can make it hard to monitor. This blog explores how OpenTelemetry can help observe Kafka ecosystems, providing insights into distributed tracing and metrics collection.
+image: /img/blog/2025/05/kafka-cover.webp
+keywords: [kafka, openTelemetry, observability, distributed tracing, kafka metrics, kafka consumer lag, kafka ecosystem]
+---
+
+
+*"All language is but a poor translation."* — Franz Kafka
+
+This quote by Franz Kafka reminds me of the time when I used to look at metrics from “Apache Kafka” topics trying to figure out what was causing the huge lags and manually deleting the messages in certain partitions to get rid of polluted messages. Yep, pretty *lost in translation*.
+
+I wasn’t aware of the power of observability for a Kafka producer-topic-consumer system. I used to be one of those people who would spin up kafka-ui on my docker, connect it to my kafka instance to see what was really happening, and still ended up getting very little insights.
+
+<Figure src="/img/blog/2025/05/kafkaui.webp" alt="kafka-ui" caption="UI for Apache Kafka" />
+
+
+That’s just until now.
+
+I’ve realised these event-driven systems could benefit from observability. A  lot. This blog is an attempt to educate the importance of observability in kafka producer-topic-consumer systems (referred to as kafka ecosystems from now) and how we can power it with OpenTelemetry.
+
+## What does it mean for a Kafka Ecosystem to be Observable?
+
+We can say a system is ‘observable’ if we can measure its internal states by using knowledge of its external outputs [classic definition of observable systems]. When we extend this concept to Kafka Ecosystems, we can think of two aspects,
+
+- Metrics like consumer lag, partition latency, drop rate, and request-response rates directly inform us about the system's health.
+- Complete visibility into the journey of a message from the moment it’s produced, through Kafka’s internals, to its final processing by a consumer.
+
+Being able to drill down into “what’s causing the issue” from the surfaced metrics is the true meaning and power of observability, which comes in handy especially for event-driven systems like Kafka, where we wouldn’t know the absolute point of failure quickly without sufficient context.
+
+Context becomes difficult to maintain across Kafka ecosystems, which are inherently asynchronous in nature; communication is decoupled, meaning there’s no direct or continuous transaction linking producers and consumers. This is amplified with producers and consumers often living in separate microservices. 
+That’s where OpenTelemetry steps in, enabling injection and extraction of trace context across Kafka messages, which is referred to as ‘context propagation’. This makes it possible to stitch together the full journey of an event, making message flows ‘observable’.
+
+## Using OpenTelemetry [OTel] to Observe a Kafka Ecosystem
+
+By now, we have understood that for Kafka ecosystems to be observable, they should support distributed tracing as well as capture metrics well. OpenTelemetry makes it possible to achieve observability for event-driven systems without a lot of hassle (*at least partially*). 
+
+### Distributed Tracing
+
+What we mean by distributed tracing for Kafka ecosystems is being able to trace the journey of a message all the way from the producer till it completes being processed by the consumer.  This is achieved via context propagation.
+The concept of context propagation is to pass context for a single message from the producer to the consumer so that it can be tied to a single trace. In simple terms, this is done by “injection” of the trace context by the producer into the kafka message header and “extraction” of the same context by the consumer from the header of the message.
+
+<Figure src="/img/blog/2025/05/trace-journey.webp" alt="trace-journey" caption="A complete journey of a kafka message visualised by Trace Explorer" />
+
+A complete journey of a kafka message visualised by Trace Explorer
+
+The magic of OpenTelemetry is that context propagation is performed automatically for most languages. You can check the table below to know if your preferred language supports automatic context propagation.
+
+| Language | Kafka Client Support | Automatic Context Propagation |
+| --- | --- | --- |
+| **Java** | Yes (e.g., `kafka-clients`) | Yes |
+| **Python** | Yes (e.g., `kafka-python`) | Yes |
+| **Node.js** | Yes (e.g., `kafkajs`) | Yes |
+| **.NET** | Yes (e.g., `Confluent.Kafka`) | Yes |
+| **Go** | Partial (`kafka-go`) |  Partial |
+| **PHP** | Partial |  Partial |
+
+### Kafka Metrics
+
+We have three sources of metrics when instrumenting a kafka ecosystem.
+
+- The metrics collected by OTel when auto-instrumenting/ manually instrumenting with a metrics collector.
+- Metrics scraped by the jmx reciever
+- Metrics scraped by the kafkametrics reciever
+
+Metrics collected by OTel on instrumenting your producer/ consumer is the same as the generic metrics collected by OTel from any application and gives values for error rates, latency etc.
+
+Of these, the last two are more insightful, they are also specific to kafka in a sense. Let’s look at them in greater detail.
+
+**JMX Metrics**
+Kafka exposes a comprehensive set of metrics through Java Management Extensions (JMX), providing insights into the health and performance of brokers, producers, and consumers. These metrics include indicators such as `UnderReplicatedPartitions`, `BytesInPerSec`, and `RequestHandlerAvgIdlePercent`, which are crucial for monitoring broker performance, partition health, and I/O pressure.
+
+The OTel collector offers a [JMX receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/jmxreceiver) that works in conjunction with the OTel [JMX Metric Gatherer](https://github.com/open-telemetry/opentelemetry-java-contrib/blob/main/jmx-metrics/README.md). This setup allows for the collection of Kafka metrics and their conversion into the OpenTelemetry Protocol (OTLP) format for further analysis.
+This also requires a few changes to your config, but not your code. Let’s say you have spun up a kafka docker instance, you will have to update the config to include some of these env variables. These changes essentially ask the kafka instance to expose jmx metrics at a specified port, which is later scraped by our OTel collector.
+Changes in the docker-compose under kafka container:
+
+```yaml
+services:
+	kafka:
+		ports:
+		    - "9092:9092" 
+		    - "9999:9999"
+		environemnt:
+				KAFKA_JMX_PORT: 9999
+				      KAFKA_JMX_HOSTNAME: kafka
+				      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote \
+				                      -Dcom.sun.management.jmxremote.authenticate=false \
+				                      -Dcom.sun.management.jmxremote.ssl=false \
+				                      -Dcom.sun.management.jmxremote.port=9999
+				                      -Dcom.sun.management.jmxremote.rmi.port=9999 \
+				                      -Djava.rmi.server.hostname=kafka"
+				
+```
+
+Then we register jmx as one of our receivers in the OTel collector.
+
+```yaml
+receivers:
+	jmx:
+	    jar_path: /otel/opentelemetry-jmx-metrics.jar
+	    endpoint: service:jmx:rmi:///jndi/rmi://kafka:9999/jmxrmi
+	    target_system: kafka
+	    collection_interval: 10s
+```
+
+**Kafka Metrics**
+
+The [Kafka Metrics Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md) is a component of the OpenTelemetry Collector Contrib module designed to collect metrics directly from Kafka brokers. It focuses mainly on high-level operational metrics, including:
+
+- **Broker Metrics**: e.g., broker uptime, request rates.
+- **Topic Metrics**: e.g., message rates, partition counts.
+- **Partition Metrics**: e.g., partition sizes, replication status.
+- **Consumer Group Metrics**: e.g., lag per consumer group, offset commits.
+
+This receiver connects to Kafka brokers and gathers these metrics, converting them into OTLP format.
+
+We must register kafkametrics receiver in our OTel collector, as shown below.
+
+```yaml
+receivers:
+	kafkametrics:
+	    cluster_alias: kafka-prod
+	    brokers: ["kafka:9092"] ## port where your kafka instance is running
+	    scrapers:
+	      - brokers
+	      - topics
+	      - consumers
+```
+
+<Admonition>
+The configuration of your Kafka instance and the corresponding ports in the OpenTelemetry Collector depend on how your Kafka cluster and Collector are set up. The code snippets below provide a reference implementation to guide you. Make sure to include the relevant receivers in your Collector pipeline configuration to ensure metrics and traces are properly ingested.
+</Admonition>
+
+## Monitoring a Kafka Ecosystem
+
+ After we collect traces and metrics from our Kafka ecosystems, we send them to an observability backend. In this case, I’ll be using SigNoz, which provides a [messaging queues feature](https://signoz.io/docs/messaging-queues/overview/) that gives deep insights about our Kafka ecosystem.
+
+Let’s see how the metrics collected with OpenTelemetry, when visualised, help us quickly analyse one of the most common issues with Kafka - A Consumer Lag. You can see the post-mortem report of a kafka consumer lag below.
+
+## Post-mortem of a Kafka Consumer Lag
+
+**Date:** May 20, 2025
+
+**Duration:** ~15 minutes
+
+**Detected At:** 08:00 AM IST
+
+**Resolved By:** 08:15 AM IST
+
+**Severity:** Minor (No downstream impact)
+
+<Figure src="/img/blog/2025/05/consumer-lag-view.webp" alt="consumer-lag" caption="Consumer Lag View as visualised by SigNoz" />
+
+
+At 08:01 AM IST, a significant spike in consumer lag was observed for the Kafka topic **cg2-topic2 across partitions 0 and 2**. The lag persisted for approximately 10–15 minutes before fully recovering. 
+
+Although in this case, the consumers auto-recovered and cleared the backlog without any human intervention, it is important to reflect and drill down into the lag to rule out any potential issues.
+
+The spike was isolated and brief, suggesting either:
+
+- A short producer burst is verifiable by checking producer throughput.
+- Or a temporary consumer slowdown, maybe a GC pause, a transient stall or heavy processing.
+
+Surprisingly, when the producer throughput was checked, for the interval when the spike was observed vs a random interval, a huge difference was not observed.
+
+<Figure src="/img/blog/2025/05/comparison.webp" alt="comparison" caption="Comparison of the time interval when spike occurred vs a random time interval as visualised by SigNoz’s Producer Latency View" />
+
+Checking logs and traces from the consumer also did not point to any consumer-side issues.
+
+Taking a look at the ‘metric view’ visualisation, a small correlation was observed. 
+
+<Figure src="/img/blog/2025/05/metrics-view.webp" alt="kafka-metrics-view" caption="Visualisation of Metrics View for Kafka by SigNoz" />
+
+
+A **dip in broker network throughput around 7:20 AM**, followed by a **spike in consumer lag around 8:00 AM**, strongly suggests this sequence:
+
+1. **07:20 AM – Broker Network Throughput Dips**
+    - Kafka brokers weren’t sending as much data to consumers.
+    - Could be due to:
+        - Network throttling/saturation
+        - Temporary network blip (packet loss, DNS issue, etc.)
+2. **07:20–08:00 AM – Messages Accumulate**
+    - Producers continued publishing at a steady rate.
+    - A transient network glitch on the broker side prevented messages from reaching consumers efficiently.
+    - As a result, consumers fell behind in fetching messages, leading to a buildup of unconsumed messages in Kafka.
+3. **08:00 AM – Lag Spikes**
+    - Consumer lag becomes visible as the message backlog grows.
+    - After the network stabilises, consumers likely **catch up quickly,** explaining the brief spike.
+
+Producer and consumer metrics remained stable throughout. The lag buildup was possibly triggered by a broker network throughput dip at 07:20 AM. Now, we can safely rule this out as a transient network error.
+
+## Key Takeaways
+
+- We can effectively monitor Kafka systems using OpenTelemetry, moving beyond traditional monitoring methods like kafka-ui.
+- There are three main sources of Kafka metrics are discussed: OTel instrumentation metrics, JMX metrics (via jmx receiver), and Kafka-specific metrics (via kafkametrics receiver).
+- A post-mortem analysis of a Kafka consumer lag incident demonstrates how observability tools help diagnose issues, revealing how a network throughput dip led to temporary message accumulation.
+- Setting up alerts is important to detect and address potential issues before they escalate into major problems.

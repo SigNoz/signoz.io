@@ -402,6 +402,30 @@ const docsSideNav = [
             ],
           },
           {
+            label: 'Security & Compliance',
+            type: 'category',
+            isExpanded: false,
+            // route: '',
+            items: [
+              //     'userguide/overview',
+              {
+                type: 'doc',
+                route: '/docs/userguide/authentication',
+                label: 'Authentication',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/sso-authentication',
+                label: 'SSO',
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/security-and-compliance/saml-authentication',
+                label: 'SAML',
+              },
+            ],
+          },
+          {
             type: 'category',
             label: 'Configuration',
             route: '/docs/operate/configuration',
@@ -660,6 +684,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/instrumentation/opentelemetry-nginx',
             label: 'NGINX',
+          },
+          {
+            type: 'doc',
+            route: '/docs/instrumentation/opentelemetry-wordpress',
+            label: 'WordPress',
           },
           {
             type: 'category',
@@ -1439,7 +1468,6 @@ const docsSideNav = [
     label: 'Frontend & Mobile Monitoring',
     type: 'category',
     isExpanded: false,
-    className: 'new-doc',
     route: '/docs/frontend-and-mobile-monitoring',
     items: [
       {
@@ -1481,6 +1509,19 @@ const docsSideNav = [
     className: 'new-doc',
     route: '/docs/integrations/integrations-list',
     items: [
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'One Click Integrations (AWS)',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/s3-sync',
+            className: 'new-doc',
+            label: 'S3 Sync',
+          }
+        ],
+      },
       {
         label: 'Temporal',
         type: 'category',
@@ -1549,7 +1590,6 @@ const docsSideNav = [
   {
     label: 'Messaging Queues',
     type: 'category',
-    className: 'new-doc',
     isExpanded: false,
     // route: '',
     items: [
@@ -1673,25 +1713,6 @@ const docsSideNav = [
     type: 'doc',
     route: '/docs/userguide/exceptions',
     label: 'Monitoring Exceptions',
-  },
-  {
-    label: 'Security & Compliance',
-    type: 'category',
-    isExpanded: false,
-    // route: '',
-    items: [
-      //     'userguide/overview',
-      {
-        type: 'doc',
-        route: '/docs/userguide/authentication',
-        label: 'Authentication',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/sso-authentication',
-        label: 'SSO & SAML',
-      },
-    ],
   },
   {
     label: 'Ingestion',
@@ -1855,17 +1876,30 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Migrate From Datadog',
+    label: 'Migrate to SigNoz',
     type: 'category',
     isExpanded: false,
     route: '/docs/migration/migrate-from-datadog',
     items: [
       {
-        type: 'doc',
-        route: '/docs/migration/opentelemetry-datadog-receiver',
-        label: 'Using Datadog OTLP receiver',
+        label: 'From Datadog',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-datadog',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/opentelemetry-datadog-receiver',
+            label: 'Using Datadog OTLP receiver',
+          },
+        ],
       },
-    ],
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-to-signoz-cloud',
+        label: 'From SigNoz OSS to Cloud',
+      },
+    ]
   },
   {
     label: 'Migrate From LGTM Stack',
@@ -2433,7 +2467,6 @@ const docsSideNav = [
     route: '/docs/community/llm-monitoring',
     label: 'LLM Monitoring',
     type: 'doc',
-    className: 'new-doc',
   },
   {
     label: 'Community',

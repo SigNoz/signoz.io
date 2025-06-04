@@ -803,10 +803,6 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> VPC Peering
                       </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
-                        <CircleCheckSolid /> Query API Keys (access data from anywhere)
-                      </li>
                     </ul>
                   </div>
                   {/* <div className={styles.packageDetailBlock}>
@@ -942,6 +938,14 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> OTel-Native Messaging Queue Monitoring
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> SSO support with Google OAuth
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> Query API Keys
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
@@ -1104,11 +1108,7 @@ const PricingPlans = () => {
                     <ul className="ul-no-padding">
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
-                        <CircleCheckSolid /> SSO and SAML Support
-                      </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
-                        <CircleCheckSolid /> Dashboard locking
+                        <CircleCheckSolid /> SAML Support
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
@@ -1118,10 +1118,7 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> Monitor Health of SigNoz
                       </li>
-                      <li className="flex items-center gap-3">
-                        {' '}
-                        <CircleCheckSolid /> Query API Keys (access data from anywhere)
-                      </li>
+                      
                     </ul>
                   </div>
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
@@ -1455,7 +1452,13 @@ const ExploreAllFeature = () => {
         section: 'Configuration',
         features: [
           {
-            feature: 'SSO/SAML support',
+            feature: 'SSO Support',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
+            feature: 'SAML Support',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
@@ -1480,7 +1483,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Access Data in SigNoz from Anywhere (via API keys)',
-            inCommunity: <CrossSolid />,
+            inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
           },
