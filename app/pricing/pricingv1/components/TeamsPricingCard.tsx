@@ -15,7 +15,7 @@ export default function TeamsPricingCard() {
               Teams
             </h3>
             <p className="text-base text-gray-400">
-              For teams that need high-performing applications.
+              For fast-scaling teams that need observability to scale with them.
             </p>
           </div>
           <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
