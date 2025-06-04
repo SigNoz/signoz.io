@@ -28,7 +28,15 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   // Check if the chatbase bubble experiment is enabled
-  const isChatbaseBubbleVariant = await evaluateFeatureFlag(EXPERIMENTS.CHATBASE_BUBBLE.flagName)
+  const isChatbaseBubbleVariant = await evaluateFeatureFlag(
+    EXPERIMENTS.CHATBASE_BUBBLE?.flagName || 'chatbase-bubble-experiment'
+  )
+
+  // Safety check for experiment configuration
+  const chatbaseExperiment = EXPERIMENTS.CHATBASE_BUBBLE
+  const experimentId = chatbaseExperiment?.id || 'chatbase-bubble-experiment'
+  const variantId = chatbaseExperiment?.variants?.VARIANT || 'with-chatbase-bubble'
+  const controlId = chatbaseExperiment?.variants?.CONTROL || 'no-chatbase-bubble'
 
   return (
     <NextUIProvider>
@@ -47,17 +55,11 @@ export default async function Page() {
           <GetStarted page="homepage" />
         </main>
         {isChatbaseBubbleVariant ? (
-          <ExperimentTracker
-            experimentId={EXPERIMENTS.CHATBASE_BUBBLE.id}
-            variantId={EXPERIMENTS.CHATBASE_BUBBLE.variants.VARIANT}
-          >
+          <ExperimentTracker experimentId={experimentId} variantId={variantId}>
             <Chatbase />
           </ExperimentTracker>
         ) : (
-          <ExperimentTracker
-            experimentId={EXPERIMENTS.CHATBASE_BUBBLE.id}
-            variantId={EXPERIMENTS.CHATBASE_BUBBLE.variants.CONTROL}
-          >
+          <ExperimentTracker experimentId={experimentId} variantId={controlId}>
             <></>
           </ExperimentTracker>
         )}

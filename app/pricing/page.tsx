@@ -23,43 +23,44 @@ export const metadata: Metadata = {
 export default async function PricingPage() {
   // Check if the cloud-first experiment is enabled
   const isCloudFirstVariant = await evaluateFeatureFlag(
-    EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.flagName
+    EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE?.flagName || 'cloud-first-pricing-page'
   )
 
   // Check if the chatbase bubble experiment is enabled
-  const isChatbaseBubbleVariant = await evaluateFeatureFlag(EXPERIMENTS.CHATBASE_BUBBLE.flagName)
+  const isChatbaseBubbleVariant = await evaluateFeatureFlag(
+    EXPERIMENTS.CHATBASE_BUBBLE?.flagName || 'chatbase-bubble-experiment'
+  )
+
+  // Safety checks for experiment configurations
+  const cloudFirstExperiment = EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE
+  const cloudFirstExperimentId = cloudFirstExperiment?.id || 'cloud-first-pricing-page'
+  const cloudFirstVariantId = cloudFirstExperiment?.variants?.VARIANT || 'without-self-host-tab'
+  const cloudFirstControlId = cloudFirstExperiment?.variants?.CONTROL || 'with-self-host-tab'
+
+  const chatbaseExperiment = EXPERIMENTS.CHATBASE_BUBBLE
+  const chatbaseExperimentId = chatbaseExperiment?.id || 'chatbase-bubble-experiment'
+  const chatbaseVariantId = chatbaseExperiment?.variants?.VARIANT || 'with-chatbase-bubble'
+  const chatbaseControlId = chatbaseExperiment?.variants?.CONTROL || 'no-chatbase-bubble'
 
   // Render PricingV1 for the test variant, otherwise render the current Pricing component
   return (
     <>
       {isCloudFirstVariant ? (
-        <ExperimentTracker
-          experimentId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.id}
-          variantId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.variants.VARIANT}
-        >
+        <ExperimentTracker experimentId={cloudFirstExperimentId} variantId={cloudFirstVariantId}>
           <PricingV1 />
         </ExperimentTracker>
       ) : (
-        <ExperimentTracker
-          experimentId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.id}
-          variantId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.variants.CONTROL}
-        >
+        <ExperimentTracker experimentId={cloudFirstExperimentId} variantId={cloudFirstControlId}>
           <Pricing />
         </ExperimentTracker>
       )}
 
       {isChatbaseBubbleVariant ? (
-        <ExperimentTracker
-          experimentId={EXPERIMENTS.CHATBASE_BUBBLE.id}
-          variantId={EXPERIMENTS.CHATBASE_BUBBLE.variants.VARIANT}
-        >
+        <ExperimentTracker experimentId={chatbaseExperimentId} variantId={chatbaseVariantId}>
           <Chatbase />
         </ExperimentTracker>
       ) : (
-        <ExperimentTracker
-          experimentId={EXPERIMENTS.CHATBASE_BUBBLE.id}
-          variantId={EXPERIMENTS.CHATBASE_BUBBLE.variants.CONTROL}
-        >
+        <ExperimentTracker experimentId={chatbaseExperimentId} variantId={chatbaseControlId}>
           <></>
         </ExperimentTracker>
       )}
