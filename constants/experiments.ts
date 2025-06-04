@@ -73,5 +73,13 @@ export const EXPERIMENTS = {
     },
     flagName: 'cloud-first-pricing-page',
   },
+  CHATBASE_BUBBLE: {
+    id: 'chatbase-bubble-experiment',
+    variants: {
+      CONTROL: 'no-chatbase-bubble',
+      VARIANT: 'with-chatbase-bubble',
+    },
+    flagName: 'chatbase-bubble-experiment',
+  },
   // Add more experiments here as needed
 } as const
