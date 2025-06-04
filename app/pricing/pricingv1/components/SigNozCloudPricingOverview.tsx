@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { ArrowRight, CheckCircle } from 'lucide-react'
+import { ArrowDownRight, ArrowRight, CheckCircle, Hash } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
 
@@ -80,7 +80,7 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
         </div>
 
         {/* Get Started button */}
-        <div className="justify-left my-6 flex items-center">
+        <div className="my-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <TrackingLink
             id="pricing-page-get-started-card-cta"
             href="/teams"
@@ -88,28 +88,33 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
             clickName="Sign Up Button"
             clickLocation="Pricing Overview Card"
             clickText="Get Started - Free"
+            className="flex-1 sm:flex-[0.6]"
           >
-            <Button className="flex items-center justify-center gap-2 font-bold">
-              Get Started - Free <ArrowRight className="h-4 w-4" />
+            <Button
+              type={Button.TYPES.PRIMARY}
+              className="!w-full !px-16 py-3 text-lg font-bold shadow-lg transition-all duration-200 hover:shadow-xl"
+            >
+              Get Started - Free <ArrowRight className="h-5 w-5" />
             </Button>
           </TrackingLink>
-          <button
+
+          <TrackingLink
             id="pricing-page-estimate-your-monthly-bill-card-cta"
-            className="bg-transparent px-4 py-2 text-signoz_robin-300 opacity-80 transition-colors duration-200 hover:text-signoz_robin-400"
+            href="#estimate-your-monthly-bill"
+            clickType="Secondary CTA"
+            clickName="Pricing Calculator Button"
+            clickLocation="Pricing Overview Card"
+            clickText="Estimate Your Monthly Bill"
+            className="flex-1 sm:flex-[0.4]"
           >
-            <TrackingLink
-              id="pricing-page-estimate-your-monthly-bill-card-cta"
-              href="#estimate-your-monthly-bill"
-              clickType="Secondary CTA"
-              clickName="Pricing Calculator Button"
-              clickLocation="Pricing Overview Card"
-              clickText="Estimate Your Monthly Bill"
-              className="flex items-center justify-center"
+            <Button
+              type={Button.TYPES.SECONDARY}
+              className="!w-full !px-6 !py-3 text-base font-semibold"
             >
               Estimate Your Monthly Bill
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </TrackingLink>
-          </button>
+              <ArrowDownRight className="h-4 w-4" />
+            </Button>
+          </TrackingLink>
         </div>
 
         {/* Pricing info */}
