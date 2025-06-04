@@ -368,7 +368,7 @@ receivers:
     subscription: projects/<your-project-id>/subscriptions/<name-of-the-pub-sub-subscription>
     encoding: cloud_logging # Make sure to use cloud_logging for logs
 exporters:
-  logging:
+  debug:
     loglevel: debug  # Options: debug, info, warn, error
   otlphttp:
     endpoint: "http://localhost:4318"  # Replace with your SigNoz OTLP HTTP endpoint
@@ -377,7 +377,7 @@ service:
   pipelines:
     logs:
       receivers: [googlecloudpubsub/logs]
-      exporters: [logging,otlphttp]        
+      exporters: [debug,otlphttp]        
 ```
 
 Here `localhost:4318` is pointing to SigNoz's collector, use VM IP address or domain name in case of running `otel-collector-contrib` on some other host.
