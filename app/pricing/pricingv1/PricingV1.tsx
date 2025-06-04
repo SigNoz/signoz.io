@@ -10,7 +10,7 @@ import { TrustedByTeams } from '@/components/trusted-by'
 import QuickStartCloud from '@/components/QuickStartCloud'
 import FAQ from './components/FAQ'
 import StartupProgram from './components/StartupProgram'
-import SigNozCloudPricingOverview from '@/components/SigNozCloudPricingOverviewCard/SigNozCloudPricingOverview'
+import SigNozCloudPricingOverview from './components/SigNozCloudPricingOverview'
 
 export default function PricingV1Page() {
   return (
