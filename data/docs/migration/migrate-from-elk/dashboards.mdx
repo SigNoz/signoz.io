@@ -4,18 +4,17 @@ id: dashboards
 title: Migrate dashboards from ELK Stack
 description: Migrating dashboards from ELK Stack to SigNoz. How to migrate dashboards from ELK to SigNoz.
 ---
-## Migrating Dashboards: From Kibana to SigNoz**
 
-Migrating dashboards from Kibana to SigNoz requires manual recreation due to fundamental differences in the underlying data storage, query languages, and dashboard schemas.There is no direct import mechanism for Kibana dashboards into SigNoz.
+Migrating dashboards from [Kibana](https://github.com/elastic/kibana) to SigNoz requires manual recreation due to fundamental differences in the underlying data storage, query languages, and dashboard schemas.There is no direct import mechanism for Kibana dashboards into SigNoz.
 
 **Understanding the Differences:**
 
 * **Query Language:**  
-  * **Kibana:** Relies on [KQL (Kibana Query Language)](https://www.elastic.co/docs/explore-analyze/query-filter/languages/kql) or the more powerful Lucene syntax to query data stored in Elasticsearch.68 These languages are optimized for searching and filtering text within potentially semi-structured JSON documents stored in an inverted index.Key syntax elements include field:value, range queries like field:, boolean operators (AND, OR, NOT), existence checks (_exists_:field), and wildcards (\*, ?).Lucene offers advanced features like regex and fuzzy search. 
-  * **SigNoz:** Primarily uses ClickHouse SQL for querying metrics, traces, and logs stored in its columnar database. It also provides a visual Query Builder that generates ClickHouse SQL or PromQL-compatible queries, and supports direct PromQL for metrics. ClickHouse SQL is designed for fast analytical processing (aggregations, filtering, joins) over large structured datasets.
+  * **Kibana:** Relies on [KQL (Kibana Query Language)](https://www.elastic.co/docs/explore-analyze/query-filter/languages/kql) or the more powerful Lucene syntax to query data stored in Elasticsearch. These languages are optimized for searching and filtering text within potentially semi-structured JSON documents stored in an inverted index. Key syntax elements include `field:value`, range queries like field:, boolean operators (AND, OR, NOT), existence checks (_exists_:field), and wildcards (\*, ?).Lucene offers advanced features like regex and fuzzy search. 
+  * **SigNoz:** Primarily uses ClickHouse SQL for querying metrics, traces, and logs stored in its columnar database. It also provides a visual Query Builder that generates ClickHouse SQL or PromQL compatible queries, and supports direct PromQL for metrics. ClickHouse SQL is designed for fast analytical processing (aggregations, filtering, joins) over large structured datasets.
 * **Data Model:**  
   * **Kibana:** Visualizations query Elasticsearch indices containing JSON documents. The structure can be flexible but querying often relies on specific field names within those documents.  
-  * **SigNoz:** Visualizations query structured tables within ClickHouse (e.g., signoz_index_v2, signoz_metrics, logs) with predefined columns and flexible tag maps (attributes_string, attributes_number, etc.).Understanding the target SigNoz ClickHouse schema is necessary for writing effective queries.  
+  * **SigNoz:** Visualizations query structured tables within ClickHouse (e.g., signoz_index_v2, signoz_metrics, logs) with predefined columns and flexible tag maps (attributes_string, attributes_number, etc.). Understanding the target SigNoz ClickHouse schema is necessary for writing effective queries.  
 * **Visualization Capabilities:**  
   * Both platforms offer common visualization types like time series charts, bar charts, pie charts, tables, and single value displays (Value/Stat in SigNoz).  
   * SigNoz provides specialized observability visualizations like Flamegraphs and Gantt charts for traces, and Service Maps for dependencies. Kibana has its own specific visualizations like Tag Clouds, Heat Maps, and potentially more advanced map layers or custom Vega/TSVB charts.  

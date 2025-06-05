@@ -1,20 +1,19 @@
 ---
 date: 2025-05-06
-id: migrate-from-elk-logs
+id: logs
 title: Migrate logs from ELK Stack
 description: Migrating logs from ELK Stack to SigNoz. How to migrate logs from ELK to SigNoz.
 ---
-## **Migrating Logs: From Filebeat/Logstash to SigNoz**
 
-Migrating logs involves replacing [Filebeat](https://www.elastic.co/beats/filebeat) and/or [Logstash](https://www.elastic.co/logstash) with the OpenTelemetry Collector, configured to collect, process, and forward logs to SigNoz.
+Migrating logs involves replacing [Filebeat](https://www.elastic.co/beats/filebeat) and/or [Logstash](https://www.elastic.co/logstash) with the [OpenTelemetry](https://signoz.io/why-opentelemetry/) (OTel) Collector, configured to collect, process, and forward logs to SigNoz.
 
-**Replacing Log Shippers and Processors:**
+## Replacing Log Shippers and Processors:
 
 Several strategies can be employed, depending on the complexity of the existing ELK logging pipeline:
 
 * **Strategy 1: Replacing Filebeat with OTel agent:**  
   * This is the most direct approach for collecting logs from files, replacing Filebeat's role.
-  * Deploy the OTel Collector as an agent(e.g., [DaemonSet in Kubernetes](/docs/tutorial/kubernetes-infra-metrics) , standalone [binary on VMs](/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine) ) where logs are generated.
+  * Deploy the OTel Collector as an agent(e.g., [DaemonSet in Kubernetes](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) , standalone [binary on VMs](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) ) where logs are generated.
   * Configure the [logs](/docs/userguide/collect_kubernetes_pod_logs) in Signoz to target the necessary log files. 
   * Key filelog configurations include:  
     * include: Glob patterns for log file paths (e.g., `/var/log/app/*.log`).  
