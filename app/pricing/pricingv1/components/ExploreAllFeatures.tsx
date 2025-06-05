@@ -62,11 +62,11 @@ const ALL_FEATURES_DATA = {
           className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
           clickType="Primary CTA"
           clickName="Sign Up Button"
-          clickText="Get Started"
+          clickText="Get Started - Free"
           clickLocation="Explore All Features Table"
           id="btn-get-started-pricing-table"
         >
-          Get Started
+          Get Started - Free
         </TrackingLink>
       ),
     },
@@ -746,13 +746,13 @@ const ExploreAllFeatures: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
+          <div className="grid grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]">
             {ALL_FEATURES_DATA.HEADER.map((header, idx) => (
               <div
                 key={idx}
                 className={`${
                   idx === 2
-                    ? `flex flex-col justify-between rounded-lg !rounded-b-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]`
+                    ? `relative z-10 flex scale-105 transform flex-col justify-between rounded-lg !rounded-b-none border border-signoz_slate-400/20 bg-signoz_ink-500 p-3 shadow-2xl sm:bg-[#16181d]`
                     : idx !== 0
                       ? `flex flex-col justify-between rounded-lg p-3 bg-opacity-${idx * 10}`
                       : 'hidden md:block'
@@ -774,12 +774,12 @@ const ExploreAllFeatures: React.FC = () => {
           <div key={sectionIdx}>
             {/* Section header */}
             <div className="sticky top-[220px] z-10 bg-[#0f1013]">
-              <div className="grid grid-cols-1 gap-1 sm:grid-cols-3 md:grid-cols-[3fr_1fr_1fr_1fr]">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-[3fr_1fr_1fr_1fr]">
                 <div className="mb-3 mt-8 py-2 pl-6 pr-2 text-center text-sm font-medium sm:text-lg md:text-left">
                   {section.section}
                 </div>
                 <div></div>
-                <div className="bg-signoz_ink-500 sm:bg-[#16181d]"></div>
+                <div className="relative z-10 scale-105 transform border-x border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-[#16181d]"></div>
                 <div></div>
               </div>
             </div>
@@ -789,14 +789,14 @@ const ExploreAllFeatures: React.FC = () => {
             <div className="grid grid-cols-1">
               {section.features.map((feature, featureIdx) => (
                 <div key={featureIdx}>
-                  <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
+                  <div className="grid grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]">
                     <h4 className="col-span-3 m-0 py-4 pl-6 pr-2 text-center text-sm font-normal text-signoz_vanilla-400 sm:py-5 md:col-span-1 md:text-left">
                       {feature.feature}
                     </h4>
                     <div className="flex items-center justify-center rounded-lg p-4 sm:p-5">
                       {feature.inCommunity}
                     </div>
-                    <div className="flex items-center justify-center rounded-lg rounded-none bg-signoz_ink-500 p-4 sm:bg-[#16181d] sm:p-5">
+                    <div className="relative z-10 flex scale-105 transform items-center justify-center rounded-lg rounded-none border-x border-signoz_slate-400/20 bg-signoz_ink-500 p-4 shadow-2xl sm:bg-[#16181d] sm:p-5">
                       {feature.inTeams}
                     </div>
                     <div className="flex items-center justify-center rounded-lg p-4 sm:p-5">
@@ -811,10 +811,10 @@ const ExploreAllFeatures: React.FC = () => {
         ))}
 
         {/* Bottom rounded corner for Teams column */}
-        <div className="grid h-[18px] grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
+        <div className="grid h-[18px] grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]">
           <div />
           <div />
-          <div className="rounded-lg !rounded-t-none bg-signoz_ink-500 sm:bg-[#16181d]" />
+          <div className="relative z-10 scale-105 transform rounded-lg !rounded-t-none border-x border-b border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-[#16181d]" />
           <div />
         </div>
       </div>
