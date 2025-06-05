@@ -107,9 +107,72 @@ const PricingCalculator: React.FC = () => {
 
   // Used to track whether we're client-side rendered
   const [isMounted, setIsMounted] = useState(false)
+  const [showCopiedToast, setShowCopiedToast] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
+
+    // Load configuration from URL parameters on mount
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const tracesParam = urlParams.get('traces')
+      const logsParam = urlParams.get('logs')
+      const metricsParam = urlParams.get('metrics')
+      const tracesRetentionParam = urlParams.get('tracesRetention')
+      const logsRetentionParam = urlParams.get('logsRetention')
+      const metricsRetentionParam = urlParams.get('metricsRetention')
+
+      if (tracesParam) {
+        const value = parseInt(tracesParam)
+        if (!isNaN(value) && value >= 0) {
+          setInputTracesValue(value.toString())
+          setTracesValue(
+            value === 0 ? 0 : logToLinear(Math.min(value, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
+          )
+        }
+      }
+
+      if (logsParam) {
+        const value = parseInt(logsParam)
+        if (!isNaN(value) && value >= 0) {
+          setInputLogsValue(value.toString())
+          setLogsValue(
+            value === 0 ? 0 : logToLinear(Math.min(value, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
+          )
+        }
+      }
+
+      if (metricsParam) {
+        const value = parseInt(metricsParam)
+        if (!isNaN(value) && value >= 0) {
+          setInputMetricsValue(value.toString())
+          setMetricsValue(
+            value === 0 ? 0 : logToLinear(Math.min(value, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
+          )
+        }
+      }
+
+      if (tracesRetentionParam) {
+        const value = parseInt(tracesRetentionParam)
+        if (!isNaN(value) && TRACES_AND_LOGS_PRICES[value]) {
+          setTracesRetentionPeriod(value)
+        }
+      }
+
+      if (logsRetentionParam) {
+        const value = parseInt(logsRetentionParam)
+        if (!isNaN(value) && TRACES_AND_LOGS_PRICES[value]) {
+          setLogsRetentionPeriod(value)
+        }
+      }
+
+      if (metricsRetentionParam) {
+        const value = parseInt(metricsRetentionParam)
+        if (!isNaN(value) && METRICS_PRICES[value]) {
+          setMetricsRetentionPeriod(value)
+        }
+      }
+    }
   }, [])
 
   // Handle slider changes
@@ -165,6 +228,41 @@ const PricingCalculator: React.FC = () => {
   // Copy link to clipboard
   const copyLinkToClipboard = () => {
     navigator.clipboard.writeText('https://signoz.io/pricing/pricingv1/#estimate-your-monthly-bill')
+  }
+
+  // Generate shareable URL with current calculator settings
+  const generateShareableURL = () => {
+    const currentURL = new URL(window.location.href)
+    const params = new URLSearchParams()
+
+    if (inputTracesValue !== '0') {
+      params.set('traces', inputTracesValue)
+      params.set('tracesRetention', tracesRetentionPeriod.toString())
+    }
+    if (inputLogsValue !== '0') {
+      params.set('logs', inputLogsValue)
+      params.set('logsRetention', logsRetentionPeriod.toString())
+    }
+    if (inputMetricsValue !== '0') {
+      params.set('metrics', inputMetricsValue)
+      params.set('metricsRetention', metricsRetentionPeriod.toString())
+    }
+
+    currentURL.search = params.toString()
+    currentURL.hash = 'estimate-your-monthly-bill'
+    return currentURL.toString()
+  }
+
+  // Share calculator configuration with team
+  const shareWithTeam = async () => {
+    try {
+      const shareableURL = generateShareableURL()
+      await navigator.clipboard.writeText(shareableURL)
+      setShowCopiedToast(true)
+      setTimeout(() => setShowCopiedToast(false), 3000)
+    } catch (err) {
+      console.error('Failed to copy URL:', err)
+    }
   }
 
   // Get price per unit based on type and retention period
@@ -264,39 +362,76 @@ const PricingCalculator: React.FC = () => {
       id="estimate-your-monthly-bill"
       className="pricing-calculator mb-6 mt-0 w-full rounded-md border border-dashed border-signoz_slate-400 p-3 md:p-4"
     >
-      <div className="mb-4">
-        <span className="group relative text-lg font-semibold text-signoz_vanilla-100 md:text-2xl">
-          Estimate your monthly bill
+      <div className="mb-4 flex items-start justify-between">
+        <div className="flex-1">
+          <span className="group relative text-lg font-semibold text-signoz_vanilla-100 md:text-2xl">
+            Estimate your monthly bill
+            {isMounted && (
+              <a
+                href="#estimate-your-monthly-bill"
+                onClick={copyLinkToClipboard}
+                className="ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                aria-label="Copy link to this section"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="#4E74F8"
+                  className="linkicon h-6 w-6"
+                >
+                  <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+                  <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+                </svg>
+              </a>
+            )}
+          </span>
           {isMounted && (
-            <a
-              href="#estimate-your-monthly-bill"
-              onClick={copyLinkToClipboard}
-              className="ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-              aria-label="Copy link to this section"
+            <p className="mt-1 text-sm text-signoz_vanilla-400">
+              You can also set data ingestion limits so you never get a surprise bill.
+              <Link
+                href="https://signoz.io/docs/ingestion/signoz-cloud/keys/"
+                className="ml-1 font-medium text-signoz_robin-400"
+              >
+                Learn more
+                <ArrowUpRight className="inline" size={16} />
+              </Link>
+            </p>
+          )}
+        </div>
+
+        {isMounted && (
+          <div className="relative ml-4">
+            <button
+              onClick={shareWithTeam}
+              className="flex items-center gap-2 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-3 py-2 text-sm text-signoz_vanilla-100 transition-colors hover:bg-signoz_ink-300"
+              aria-label="Share calculator configuration with your team"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="#4E74F8"
-                className="linkicon h-6 w-6"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
-                <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                <polyline points="16,6 12,2 8,6" />
+                <line x1="12" y1="2" x2="12" y2="15" />
               </svg>
-            </a>
-          )}
-        </span>
-        {isMounted && (
-          <p className="mt-1 text-sm text-signoz_vanilla-400">
-            You can also set data ingestion limits so you never get a surprise bill.
-            <Link
-              href="https://signoz.io/docs/ingestion/signoz-cloud/keys/"
-              className="ml-1 font-medium text-signoz_robin-400"
-            >
-              Learn more
-              <ArrowUpRight className="inline" size={16} />
-            </Link>
-          </p>
+              Share with your team
+            </button>
+
+            {/* Toast notification positioned near the button */}
+            {showCopiedToast && (
+              <div className="absolute right-0 top-full mt-2 w-max rounded-md bg-signoz_robin-500 px-3 py-2 text-sm text-white shadow-lg">
+                <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-signoz_robin-500"></div>
+                Configuration copied to clipboard!
+              </div>
+            )}
+          </div>
         )}
       </div>
 
