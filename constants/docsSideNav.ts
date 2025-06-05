@@ -1699,7 +1699,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/cicd/github/github-actions-traces',
             label: 'Traces',
-          }
+          },
         ],
       },
     ],
