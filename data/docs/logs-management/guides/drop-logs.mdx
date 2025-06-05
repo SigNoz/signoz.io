@@ -23,8 +23,6 @@ logs:
 ```
 </Admonition>
 
-For Kubernetes environments, you can also configure log exclusion/inclusion using the k8s-infra chart configuration. See our [Kubernetes pod logs collection guide](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/#excludeincludefilter-logs-collection) for simpler exclude/include options based on namespaces, pods, or containers.
-
 ## Drop Logs 
 1. Drop logs by log level / severity text
 
@@ -45,7 +43,6 @@ processors:
       log_record:
         - 'IsMatch(body, ".*password.*")'
 ```
-
 
 3. Drop logs by resource attributes (like service.name, host.name, k8s.pod.name, etc.)
 
@@ -86,6 +83,15 @@ processors:
       log_record:
         - IsMatch(attributes["http.method"], "GET|POST")
 ```
+
+7. Exclude/Include/Filter logs in Kubernetes environments
+
+For Kubernetes environments, you can also configure log exclusion/inclusion using the k8s-infra chart configuration. This provides a simpler way to exclude or include logs based on namespaces, pods, or containers without writing custom OpenTelemetry processors.
+
+See our [Kubernetes pod logs collection guide](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/#excludeincludefilter-logs-collection) for detailed configuration examples including:
+- Excluding logs from specific namespaces, pods, or containers
+- Including only logs from specific namespaces, pods, or containers  
+- Using filter operators for expression-based filtering
 
 Refer to the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor) for more details on how to configure the filter processor.
 
