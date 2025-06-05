@@ -773,7 +773,7 @@ const ExploreAllFeatures: React.FC = () => {
         {ALL_FEATURES_DATA.ROWS.map((section, sectionIdx) => (
           <div key={sectionIdx}>
             {/* Section header */}
-            <div className="sticky top-[200px] z-10 bg-[#0f1013] pt-4">
+            <div className="sticky top-[220px] z-10 bg-[#0f1013]">
               <div className="grid grid-cols-1 gap-1 sm:grid-cols-3 md:grid-cols-[3fr_1fr_1fr_1fr]">
                 <div className="mb-3 mt-8 py-2 pl-6 pr-2 text-center text-sm font-medium sm:text-lg md:text-left">
                   {section.section}
@@ -790,16 +790,16 @@ const ExploreAllFeatures: React.FC = () => {
               {section.features.map((feature, featureIdx) => (
                 <div key={featureIdx}>
                   <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
-                    <h4 className="col-span-3 m-0 py-3 pl-6 pr-2 text-center text-sm font-normal text-signoz_vanilla-400 md:col-span-1 md:text-left">
+                    <h4 className="col-span-3 m-0 py-4 pl-6 pr-2 text-center text-sm font-normal text-signoz_vanilla-400 sm:py-5 md:col-span-1 md:text-left">
                       {feature.feature}
                     </h4>
-                    <div className="flex items-center justify-center rounded-lg p-3">
+                    <div className="flex items-center justify-center rounded-lg p-4 sm:p-5">
                       {feature.inCommunity}
                     </div>
-                    <div className="flex items-center justify-center rounded-lg rounded-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]">
+                    <div className="flex items-center justify-center rounded-lg rounded-none bg-signoz_ink-500 p-4 sm:bg-[#16181d] sm:p-5">
                       {feature.inTeams}
                     </div>
-                    <div className="flex items-center justify-center rounded-lg p-3">
+                    <div className="flex items-center justify-center rounded-lg p-4 sm:p-5">
                       {feature.inEnterprise}
                     </div>
                   </div>
