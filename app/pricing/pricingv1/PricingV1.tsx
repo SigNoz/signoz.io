@@ -10,7 +10,8 @@ import { TrustedByTeams } from '@/components/trusted-by'
 import QuickStartCloud from '@/components/QuickStartCloud'
 import FAQ from './components/FAQ'
 import StartupProgram from './components/StartupProgram'
-import SigNozCloudPricingOverview from '@/components/SigNozCloudPricingOverviewCard/SigNozCloudPricingOverview'
+import SigNozCloudPricingOverview from './components/SigNozCloudPricingOverview'
+import InstrumentationSupport from './components/InstrumentationSupport'
 
 export default function PricingV1Page() {
   return (
@@ -38,9 +39,25 @@ export default function PricingV1Page() {
             <EnterpriseCard />
           </div>
 
-          {/* Pricing calculator - now below the cards */}
-          <div className="mx-auto mt-10 w-full lg:max-w-6xl">
-            <PricingCalculator />
+          {/* Enhanced Pricing calculator section */}
+          <div className="relative mx-auto mb-20 mt-20 w-full lg:max-w-6xl">
+            {/* Glow effect */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-signoz_robin-500/20 to-signoz_cherry-500/20 blur-xl" />
+
+            <div className="relative rounded-xl border-[0.5px] border-signoz_robin-500/30 bg-signoz_ink-400 p-8 md:p-12">
+              <div className="mb-8 text-center">
+                <div className="mb-4 inline-flex items-center rounded-full border border-signoz_robin-500/30 bg-signoz_robin-500/20 px-4 py-2 text-sm font-medium text-signoz_robin-300">
+                  🧮 Pricing Calculator
+                </div>
+                <h2 className="mb-4 text-2xl font-bold text-signoz_vanilla-100 md:text-3xl">
+                  Calculate Your Exact Costs
+                </h2>
+                <p className="mx-auto max-w-2xl text-lg text-signoz_vanilla-400">
+                  Get an instant estimate based on your usage. No surprises, no hidden fees.
+                </p>
+              </div>
+              <PricingCalculator />
+            </div>
           </div>
         </div>
 
@@ -51,6 +68,7 @@ export default function PricingV1Page() {
 
         {/* Startup Program Section */}
         <StartupProgram />
+        <InstrumentationSupport />
         <WhySelectSignoz isInPricingPage />
 
         <FAQ />

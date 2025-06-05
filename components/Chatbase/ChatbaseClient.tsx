@@ -118,7 +118,9 @@ export default function ChatbaseClient({ className, userId, userHash }: Chatbase
 // Extend the Window interface to include Chatbase types
 declare global {
   interface Window {
-    chatbase: any
+    chatbase: any & {
+      setInitialMessages?: (messages: string[]) => void
+    }
     chatbaseUserConfig?: {
       user_id: string
       user_hash?: string
