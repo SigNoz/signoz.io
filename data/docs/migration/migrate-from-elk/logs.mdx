@@ -14,30 +14,28 @@ Several strategies can be employed, depending on the complexity of the existing 
 * **Strategy 1: Replacing Filebeat with OTel agent:**  
   * This is the most direct approach for collecting logs from files, replacing Filebeat's role.
   * Deploy the OTel Collector as an agent(e.g., [DaemonSet in Kubernetes](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) , standalone [binary on VMs](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) ) where logs are generated.
-  * Configure the [logs](/docs/userguide/collect_kubernetes_pod_logs) in Signoz to target the necessary log files. 
-  * Key filelog configurations include:  
+  * Configure the [logs in SigNoz](https://signoz.io/docs/userguide/logs/) to target the necessary log files. 
+  * Key configurations include:  
     * include: Glob patterns for log file paths (e.g., `/var/log/app/*.log`).  
     * exclude: Glob patterns to exclude specific files.  
     * start_at: end (tail new logs) or beginning (read from start).  
     * multiline: For logs spanning multiple lines (e.g., stack traces), using `line_start_pattern` or `line_end_pattern`.  
-    * operators: A pipeline of parsing and transformation steps applied within the receiver itself (e.g., `regex_parser`, `json_parser`, `timestamp`, `severity`, `attribute`).This can handle basic parsing previously done by Filebeat modules or simple Logstash filters.  
-* **Strategy 2: Forwarding from Logstash to Signoz(Transitional):**  
-  * If you have complex Logstash pipelines you wish to retain temporarily, you can [configure Logstash to forward logs](docs/userguide/logstash_to_signoz) to an Signoz.
+    * [operators](https://signoz.io/blog/opentelemetry-operator-complete-guide/): A pipeline of parsing and transformation steps applied within the receiver itself (e.g., `regex_parser`, `json_parser`, `timestamp`, `severity`, `attribute`).This can handle basic parsing previously done by Filebeat modules or simple Logstash filters.  
+* **Strategy 2: Forwarding from Logstash to SigNoz(Transitional):**  
+  * If you have complex Logstash pipelines you wish to retain temporarily, you can [configure Logstash to forward logs](https://signoz.io/docs/userguide/logstash_to_signoz/) to an SigNoz.
   * The OTel Collector then forwards the received logs to SigNoz.  
 
 **Verification:**
 
-* Ensure logs are appearing in the SigNoz "Logs" explorer. 
+* Ensure logs are appearing in the SigNoz [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/). 
 * Verify that timestamps, severity levels, and attributes are parsed correctly according to the processor configurations.  
 * Check that filters are working as expected (e.g., debug logs are dropped).  
 * If trace context (trace IDs, span IDs) is expected in logs, confirm it's being parsed and that log-trace correlation works in the SigNoz UI.
 
----
 
-As part of the migration, you might need to modify your logs pipelines. SigNoz offers several features to enhance your logs:
+As part of the migration, you might need to modify your logs pipelines. SigNoz offers several features to enhance your logs. Below are some of them:
 
-- **[Log Pipelines](/docs/logs-pipelines/introduction/)**: Parse and structure logs with processors like JSON, regex, and grok
-- **[Log Querying](/docs/userguide/logs_query_builder/)**: Advanced query capabilities for searching and filtering logs
-- **[Log-Trace Correlation](/docs/logs-pipelines/guides/trace/)**: Link logs with related traces for contextual debugging
+- **[Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/)**: Parse and structure logs with processors like JSON, regex, and grok
+- **[Log Querying](https://signoz.io/docs/userguide/logs_query_builder/)**: Advanced query capabilities for searching and filtering logs
+- **[Log-Trace Correlation](https://signoz.io/opentelemetry/correlating-traces-logs-metrics-nodejs/)**: Link logs with related traces for contextual debugging
 
-You can also use [Logs Explorer](/docs/product-features/logs-explorer/) to query logs and confirm that they are being sent correctly to SigNoz.
