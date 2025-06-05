@@ -26,11 +26,11 @@ Migrating distributed traces involves replacing the proprietary [Elastic APM age
   3. Create a tracing.js (or similar) file to configure the OTel NodeSDK
  4.  Run the application using the tracing setup: `export OTEL_SERVICE_NAME="my-express-app"; node -r ./tracing.js your-app-entrypoint.js`. Environment variables like `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME` can also be used for configuration.
 
-**Elastic OpenTelemetry Bridge (Go):**
+## Elastic OpenTelemetry Bridge for Go
 
-For applications where a "big bang" migration is too risky, Elastic provides a [bridge library](https://pkg.go.dev/go.elastic.co/apm/module/apmotel/v2) for Go applications.
+For applications where a migration is too risky, Elastic provides a [bridge library](https://pkg.go.dev/go.elastic.co/apm/module/apmotel/v2) for Go applications. This bridge allows the OTel Go SDK to coexist with the Elastic APM Go agent. When configured, spans created using the OTel SDK are captured and exported via the existing Elastic APM agent pipeline. This enables an [atomic migration](https://www.elastic.co/docs/solutions/security/get-started/automatic-migration).
 
-* This bridge allows the OTel Go SDK to coexist with the Elastic APM Go agent.  
+  
 * When configured, spans created using the OTel SDK are captured and exported via the existing Elastic APM agent pipeline.  
 * This enables an "atomic migration":  
   1. Add the bridge configuration.  
