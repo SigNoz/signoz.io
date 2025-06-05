@@ -505,7 +505,7 @@ const ALL_FEATURES_DATA = {
         },
         {
           feature: 'Dashboard Locking & Access control',
-          inCommunity: <CrossSolid />,
+          inCommunity: <CheckSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },
