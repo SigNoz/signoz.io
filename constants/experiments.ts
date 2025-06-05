@@ -14,6 +14,8 @@ export const EXPERIMENTS = {
       NO_QUICKSTART: 'no-quickstart',
     },
     flagName: 'docs-header-experiment-part-two',
+    concluded: true,
+    defaultVariant: 'no-quickstart',
   },
   DOCS_HEADER: {
     id: 'docs-header-with-only-quick-start',
@@ -52,6 +54,8 @@ export const EXPERIMENTS = {
       START_SENDING_DATA: 'start-sending-data-free-copy',
     },
     flagName: 'home-header-cta-copy',
+    concluded: true,
+    defaultVariant: 'get-started-free-copy',
   },
   TEAMS_PAGE: {
     id: 'teams-page-focused-layout-experiment',
@@ -60,6 +64,22 @@ export const EXPERIMENTS = {
       VARIANT: 'without-nav-bar-and-footer',
     },
     flagName: 'teams-page-focused-layout-experiment',
+  },
+  CLOUD_FIRST_PRICING_PAGE: {
+    id: 'cloud-first-pricing-page',
+    variants: {
+      CONTROL: 'with-self-host-tab',
+      VARIANT: 'without-self-host-tab',
+    },
+    flagName: 'cloud-first-pricing-page',
+  },
+  CHATBASE_BUBBLE: {
+    id: 'chatbase-bubble-experiment',
+    variants: {
+      CONTROL: 'no-chatbase-bubble',
+      VARIANT: 'with-chatbase-bubble',
+    },
+    flagName: 'chatbase-bubble-experiment',
   },
   // Add more experiments here as needed
 } as const

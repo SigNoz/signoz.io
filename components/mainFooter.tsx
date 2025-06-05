@@ -15,9 +15,10 @@ function Footer() {
   const searchParams = useSearchParams()
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
   const isLoginRoute = pathname === '/login/'
+  const isTeamsRoute = pathname === '/teams/'
   const isOnboardingRoute = source === ONBOARDING_SOURCE
 
-  if (isLoginRoute || isOnboardingRoute) {
+  if (isLoginRoute || isTeamsRoute || isOnboardingRoute) {
     return null
   }
 
@@ -79,6 +80,11 @@ function Footer() {
                     Dashboard Templates
                   </Link>
                   <ArrowUpRight size={16} />
+                </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                  <Link href="https://newsletter.signoz.io/" target="_blank">
+                    Newsletter
+                  </Link>
                 </div>
               </div>
             </div>

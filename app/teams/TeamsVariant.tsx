@@ -6,9 +6,8 @@ import Image from 'next/image'
 import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
-import { ExperimentTracker } from '@/components/ExperimentTracker'
-import { EXPERIMENTS } from '@/constants/experiments'
 import TrackingLink from '@/components/TrackingLink'
+import { Tooltip } from '@nextui-org/react'
 
 interface ErrorsProps {
   fullName?: string
@@ -52,6 +51,7 @@ export const VariantNavbar = () => {
       </div>
       <div className="hidden h-full items-center justify-end bg-signoz_ink-300 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
         <TrackingLink
+          target="_blank"
           clickType="Nav Click"
           clickName="Docs Link"
           clickLocation="teams_variant"
@@ -62,9 +62,21 @@ export const VariantNavbar = () => {
           <ExternalLink className="mr-2 h-4 w-4" />
           Documentation
         </TrackingLink>
+        <TrackingLink
+          target="_blank"
+          clickType="Nav Click"
+          clickName="Pricing Link"
+          clickLocation="teams_variant"
+          clickText="Pricing"
+          href="/pricing/"
+          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
+        >
+          Pricing
+        </TrackingLink>
       </div>
       <div className="bg-signoz_ink-600 flex h-full items-center justify-end px-4 md:px-8 lg:hidden">
         <TrackingLink
+          target="_blank"
           clickType="Nav Click"
           clickName="Docs Link"
           clickLocation="teams_variant"
@@ -114,10 +126,10 @@ const testimonials = [
   },
   {
     quote:
-      'Setup was a breeze—we had the OpenTelemetry collector running and monitoring in no time.',
-    author: 'Niranjan Ravichandra, Co-founder & CTO, Cedana',
-    avatar: '/img/case_study/profile-photos/cedana.webp',
-    url: '/case-study/cedana/',
+      "We've been using SigNoz since 2023 in production, been great to see the product keep on improving and growing.",
+    author: 'Alexei Z., Senior Software Engineer, Uken Games',
+    avatar: '/img/case_study/profile-photos/uken.webp',
+    url: 'https://www.linkedin.com/posts/activity-7329258209225900034-ez5Z',
   },
   {
     quote:
@@ -217,7 +229,7 @@ const Testimonial: React.FC = () => {
   }
 
   return (
-    <div className="relative flex h-full max-w-md flex-col items-center justify-center p-8">
+    <div className="relative flex h-[calc(100vh-56px)] max-w-md flex-col items-center justify-center p-8">
       <blockquote className="space-y-6 border-0">
         <div className="text-4xl text-signoz_vanilla-100/30">"</div>
         <p className="text-2xl font-medium text-signoz_vanilla-100">{currentTestimonial.quote}</p>
@@ -627,46 +639,41 @@ const TeamsVariant: React.FC = () => {
   )
 
   return (
-    <ExperimentTracker
-      experimentId={EXPERIMENTS.TEAMS_PAGE.id}
-      variantId={EXPERIMENTS.TEAMS_PAGE.variants.VARIANT}
-    >
-      <div className="variant-teams-container bg-signoz_ink-600 flex min-h-screen flex-col">
-        <VariantNavbar />
+    <div className="variant-teams-container bg-signoz_ink-600 flex flex-col">
+      <VariantNavbar />
 
-        <div className="flex min-h-screen flex-col pt-[56px] lg:flex-row">
-          {/* Left section - Sign up form */}
-          <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[20vh] lg:w-5/12 lg:p-12 lg:pt-[20vh]">
-            <div className="w-full">
-              {!isSubmitting && submitFailed ? (
-                <ErrorState />
-              ) : (
-                <SignupFormIsolated
-                  onSignup={handleSignUp}
-                  isSubmitting={isSubmitting}
-                  errors={errors}
-                />
-              )}
-            </div>
-
-            <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block">
-              <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
-                <span>OpenTelemetry Native.</span>
-                <span>Unfied Signals.</span>
-                <span>Predictable Pricing.</span>
-              </p>
-            </div>
+      <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row">
+        {/* Left section - Sign up form */}
+        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+20vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+20vh)]">
+          <div className="w-full">
+            {!isSubmitting && submitFailed ? (
+              <ErrorState />
+            ) : (
+              <SignupFormIsolated
+                onSignup={handleSignUp}
+                isSubmitting={isSubmitting}
+                errors={errors}
+              />
+            )}
           </div>
 
-          {/* Right section - Testimonials */}
-          <div className="relative hidden border-l border-signoz_slate-500 bg-signoz_ink-300 lg:flex lg:w-7/12">
-            <div className="mt-[-56px] flex w-full items-center justify-center">
-              <Testimonial />
-            </div>
+          <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block">
+            <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
+              <span>OpenTelemetry Native.</span>
+              <span>Unfied Signals.</span>
+              <span>Predictable Pricing.</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Right section - Testimonials */}
+        <div className="relative hidden border-l border-signoz_slate-500 bg-signoz_ink-300 lg:flex lg:w-7/12">
+          <div className="flex w-full items-center justify-center">
+            <Testimonial />
           </div>
         </div>
       </div>
-    </ExperimentTracker>
+    </div>
   )
 }
 

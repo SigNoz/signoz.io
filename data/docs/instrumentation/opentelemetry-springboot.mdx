@@ -118,7 +118,7 @@ In case you encounter an issue where all applications do not get listed in the s
 
 You can auto-instrument sending traces from Java Springboot application using one of the following methods:
 
-1. Using Kubernetes OTel Operator
+1. Using Kubernetes OTel Operator (recommended)
 2. Using OTel Collector Agent
 
 <Tabs>
@@ -165,7 +165,7 @@ Installing the OpenTelemetry Operator sets up the necessary components and confi
 
 Once the `opentelemetry-operator` has been deployed, you can proceed with the creation of the OpenTelemetry Collector (`otelcol`) instance. The OpenTelemetry Collector collects, processes, and exports telemetry data.
 
-There are different deployment modes for the OpenTelemetryCollector, and you can specify them in the spec.mode section of the custom resource. The available deployment modes are:
+There are different deployment modes for the `OpenTelemetryCollector`, and you can specify them in the spec.mode section of the custom resource. The available deployment modes are:
 
 - [Daemonset](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
 - [Sidecar](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
@@ -230,7 +230,6 @@ kind: Instrumentation
 metadata:
   name: traces-instrumentation
 spec:
-  exporter:
   exporter:
     endpoint: https://ingest.{region}.signoz.cloud:443  # replace {region} with your region
   env:
