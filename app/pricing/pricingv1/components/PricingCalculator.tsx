@@ -6,6 +6,7 @@ import { ArrowUpRight, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import Button from '../../../../components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
+import TrackingButton from '../../../../components/TrackingButton'
 
 // Format numbers for display
 const formatNumber = (number: number) =>
@@ -401,8 +402,12 @@ const PricingCalculator: React.FC = () => {
 
         {isMounted && (
           <div className="relative ml-4">
-            <button
+            <TrackingButton
               onClick={shareWithTeam}
+              clickType="Copy to Clipboard"
+              clickName="Share Pricing Calculator Configuration"
+              clickLocation="Pricing Calculator Header"
+              clickText="Share with your team"
               className="flex items-center gap-2 rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-3 py-2 text-sm text-signoz_vanilla-100 transition-colors hover:bg-signoz_ink-300"
               aria-label="Share calculator configuration with your team"
             >
@@ -422,7 +427,7 @@ const PricingCalculator: React.FC = () => {
                 <line x1="12" y1="2" x2="12" y2="15" />
               </svg>
               Share with your team
-            </button>
+            </TrackingButton>
 
             {/* Toast notification positioned near the button */}
             {showCopiedToast && (
