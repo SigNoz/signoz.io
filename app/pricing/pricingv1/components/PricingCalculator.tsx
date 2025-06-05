@@ -93,14 +93,14 @@ const PricingCalculator: React.FC = () => {
   )
 
   // State for slider values
-  const [tracesValue, setTracesValue] = useState(logToLinear(20, MIN_LOG_VALUE, MAX_VALUE))
-  const [inputTracesValue, setInputTracesValue] = useState('20')
+  const [tracesValue, setTracesValue] = useState(0)
+  const [inputTracesValue, setInputTracesValue] = useState('0')
 
-  const [logsValue, setLogsValue] = useState(logToLinear(100, MIN_LOG_VALUE, MAX_VALUE))
-  const [inputLogsValue, setInputLogsValue] = useState('100')
+  const [logsValue, setLogsValue] = useState(0)
+  const [inputLogsValue, setInputLogsValue] = useState('0')
 
-  const [metricsValue, setMetricsValue] = useState(logToLinear(80, MIN_LOG_VALUE, MAX_VALUE))
-  const [inputMetricsValue, setInputMetricsValue] = useState('80')
+  const [metricsValue, setMetricsValue] = useState(0)
+  const [inputMetricsValue, setInputMetricsValue] = useState('0')
 
   // State for active tab in mobile view
   const [activeTab, setActiveTab] = useState('traces')
