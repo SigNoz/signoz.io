@@ -1588,50 +1588,6 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'CICD Monitoring',
-    type: 'category',
-    className: 'new-doc',
-    isExpanded: false,
-    // route: '',
-    items: [
-      {
-        label: 'GitHub',
-        type: 'category',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/cicd/github/github-metrics',
-            label: 'Metrics',
-          },
-          {
-            type: 'doc',
-            route: '/docs/cicd/github/github-actions-traces',
-            label: 'Traces',
-          },
-        ],
-      },
-      {
-        label: 'Jenkins',
-        type: 'category',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/cicd/jenkins/agent-node-monitoring',
-            label: 'Metrics',
-          },
-          {
-            type: 'doc',
-            route: '/docs/cicd/jenkins/jenkins-tracing',
-            label: 'Traces',
-          },
-        ],
-      }
-
-    ],
-  },
-  {
     label: 'Messaging Queues',
     type: 'category',
     isExpanded: false,
@@ -1746,6 +1702,23 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        label: 'Jenkins',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cicd/jenkins/agent-node-monitoring',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/cicd/jenkins/jenkins-tracing',
+            label: 'Traces',
+          },
+        ],
+      }
     ],
   },
   {
