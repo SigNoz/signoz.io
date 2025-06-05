@@ -1,139 +1,96 @@
 ---
 date: 2025-04-28
 id: jenkins-tracing
-title: Jenkins Tracing with OpenTelemetry on Signoz via Open Telemetry plugin 
+title: Jenkins Traces
 description: Instrument Jenkins with OpenTelemetry and send traces to SigNoz
 ---
    
 ## Overview 
-This integration helps you to monitor and observe Jenkins with OpenTelemetry by visualizing jenkins jobs and pipelines executions as distributed traces.
-
-This document will show you how to:
-- configure the Jenkins OpenTelemetry plugin
-- Configure the Signoz Otel collector
-- Visualize the traces in Signoz Traces section 
-
-To know more about tracing refer [here](../../traces-management/guides)
+This integration helps you to monitor and observe Jenkins with OpenTelemetry by visualizing jenkins jobs and pipelines executions as distributed traces in SigNoz
+To know more about tracing refer [here](https://signoz.io/docs/instrumentation/overview/)
 
 ## Prerequisites
-
 - Jenkins [>2.479.3]
-- SigNoz Cloud(optional)
-  - endpoint URL
-  - api key
 
-### Configure Signoz Otel collector
-For installation refer this [doc](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine)
-    
-#### Otel collector configuration
+### Setup
+
+SigNoz runs its own OTel collector in both the Self-Hosted and Cloud version
+
+### Install and Configure Jenkins OpenTelemetry plugin
+* For installation refer [here](https://plugins.jenkins.io/opentelemetry/)
+
 <Tabs>
 
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-  * Add the httpcheck receiver to the config and set up the collector OTLP exporter to send data to SigNoz Cloud.
+### Step 1: Set the OTLP Endpoint
+Navigate to Manage Jenkins -> System -> OpenTelemetry section
 
-    ```yaml {2-6,9-14}
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-          http:
-    ...
-    exporters:
-      otlp:
-        endpoint: "ingest.{region}.signoz.cloud:443"
-        tls:
-          insecure: false
-        headers:
-          "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
-    ...
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
-    ```
+Depending on the choice of your region for the SigNoz cloud, the ingest endpoint will vary according to this table.
+  | Region | Endpoint |
+  | --- | --- |
+  | US |  ingest.us.signoz.cloud:443 |
+  | IN |  ingest.in.signoz.cloud:443 |
+  | EU | ingest.eu.signoz.cloud:443 |
 
-    Depending on the choice of your region for the SigNoz cloud, the ingest endpoint will vary according to this table.
+### Step 2: Set the Authentication headers
+In the same section click on Authentication and select **Header Authentication**
 
-    | Region | Endpoint |
-    | --- | --- |
-    | US |  ingest.us.signoz.cloud:443 |
-    | IN |  ingest.in.signoz.cloud:443 |
-    | EU | ingest.eu.signoz.cloud:443 |
+Add Header key as **signoz-ingestion-key** and value as SigNoz_Ingestion_Key
 
-    The HTTP Check Receiver can be used for synthetic checks against HTTP endpoints. This receiver will make a request to the specified endpoint using the configured method. This scraper generates a metric labelled for each HTTP response status class with a value of 1 if the status code matches the class.
-    
-    The OTLP receivers requires grpc protocol to efficient delivery of the traces
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/cicd/jenkins/jenkins-otel-cloud-config.webp"
+        alt="Jenkins OTel plugin configuration for SigNoz cloud"
+    />
+    <figcaption>
+        <i>
+        Jenkins OTel plugin configuration for SigNoz cloud
+        </i>
+    </figcaption>
+</figure>
+
+Note: Replace \<signoz-ingestion-key\> with your ingestion key
 
 </TabItem>
 
 <TabItem value='self-host' label='Self-Host' default>
 
-* Add the httpcheck receiver to the config file
-    ```yaml {2-6,9-14}
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-          http:
-    ...
-    exporters:
-      otlp:
-        endpoint: "<YOUR_SIGNOZ_HOST>:4317"
-        tls:
-          insecure: false
-        headers:
-          "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
-    ...
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
-    ```
-Replace  YOUR_SIGNOZ_HOST with the host where self-hosted signoz is configured
-
-</TabItem>
-</Tabs>
-
-### Install and Configure Jenkins OpenTelemetry plugin
-* For installation refer [here](https://plugins.jenkins.io/opentelemetry/)
-
-* Navigate to Manage Jenkins -> System -> OpenTelemetry section 
+Navigate to Manage Jenkins -> System -> OpenTelemetry section 
 <figure data-zoomable align="center">
     <img
         src="/img/docs/cicd/jenkins/jenkins-otel-config.webp"
-        alt="Jenkins system configuration for OLTP exporter"
+        alt="Jenkins OTel plugin configuration for Self-Hosted SigNoz"
     />
     <figcaption>
         <i>
-        Jenkins system configuration for OLTP exporter
+        Jenkins OTel plugin configuration for Self-Hosted SigNoz
         </i>
     </figcaption>
 </figure>
 
-Enter the OLTP_EXPORTER_ENDPOINT in the textbox and configure OLTP exporter authentication if configured or set **No Authentication**
+Enter the SigNoz self-hosted endpoint in the textbox and set **No Authentication**
 
-## Visualize the traces in Signoz Traces section
+</TabItem>
+</Tabs>
+
+## Visualize the traces in SigNoz Traces section
 
 <figure data-zoomable align="center">
     <img
         src="/img/docs/cicd/jenkins/jenkins-traces.webp"
-        alt="Jenkins pipelines traces on Signoz UI"
+        alt="Jenkins pipelines traces on SigNoz UI"
     />
     <figcaption>
         <i>
-        Jenkins pipelines traces on Signoz UI
+        Jenkins pipelines traces on SigNoz UI
         </i>
     </figcaption>
 </figure>
 
 ## Jenkinsfile custom spans
 
-With the Otel plugin installed, you can also configure custom spans in your Jenkins pipelines
+With the OTel plugin installed, you can also configure custom spans in your Jenkins pipelines
 
 ```groovy
   pipeline {
@@ -157,3 +114,7 @@ With the Otel plugin installed, you can also configure custom spans in your Jenk
 ```
 
 For more details about spans refer [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#span)
+
+## Conclusion
+
+Jenkins Otel plugin can be used to visualize Jenkins traces effectively on SigNoz

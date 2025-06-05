@@ -1,12 +1,12 @@
 ---
 date: 2025-04-28
 id: agent-node-monitoring
-title: Jenkins Host monitoring via OtelAgent plugin
+title: Jenkins Host monitoring
 description: Instrument Jenkins with OpenTelemetry and send traces & metrics to SigNoz
 ---
 
 ## Overview
-This plugin integrates with the Opentelemetry Collector and Node exporter for monitoring of build agents.
+This plugin integrates with the Opentelemetry Collector and Node exporter for monitoring of Jenkins build agents.
 
 It does this by deploying the Prometheus node exporter and Opentelemetry (Otel) Collector on job agents. The Otel Collector will scrape the metrics from node exporter. 
 
@@ -15,7 +15,9 @@ It does this by deploying the Prometheus node exporter and Opentelemetry (Otel) 
 - Jenkins [>2.479]
 
 
-### Install and configure Otel agent metrics plugin
+### Setup
+
+#### Step 1: Install Otel agent metrics plugin
 * For installation refer [here](https://plugins.jenkins.io/opentelemetry-agent-metrics/)
 
 * Navigate to Manage Jenkins -> System -> onMonit section
@@ -32,15 +34,19 @@ It does this by deploying the Prometheus node exporter and Opentelemetry (Otel) 
     </figcaption>
 </figure>
 
-### Agent node configuration required for the plugin
+#### Step 2: Configure OTel agent metrics plugin
+
+#### Agent node configuration required for the plugin
 
 The plugin requires two binaries - **otel-contrib** and **node_exporter** to be installed on the jenkins agents
 
 These executables can either be:
 
 * present on the PATH of the agents
-* downloaded from a URL on the agents. For this the global plugin option "Artifact download base URL" must be configured.
+* downloaded from a URL on the agents. For this the global plugin option **Artifact download base URL** must be configured.
 * uploaded from the Jenkins master. For this the executables must be manually stored under the JENKINS_HOME directory in the opentelemetry-agent-metrics subdirectory.
+
+more info about this from the Jenkins plugin [docs](https://plugins.jenkins.io/opentelemetry-agent-metrics/#plugin-content-example)
 
 <figure data-zoomable align="left">
     <img
@@ -65,6 +71,11 @@ These executables can either be:
     </i>
     </figcaption>
 </figure>
+
+## Conclusion
+
+This setup will allow monitoring of Jenkins agent metrics using jenkins OTel agent on SigNoz
+
 
 
 
