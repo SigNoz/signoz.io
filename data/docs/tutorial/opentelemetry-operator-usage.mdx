@@ -70,13 +70,18 @@ spec:
           http:
     processors:
       batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
     exporters:
       debug:
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch]
+          processors: [batch, resource/env]
           exporters: [debug]
 EOF
 ```
@@ -159,13 +164,18 @@ spec:
         protocols:
           thrift_compact:
     processors:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
     exporters:
       debug:
     service:
       pipelines:
         traces:
           receivers: [jaeger]
-          processors: []
+          processors: [resource/env]
           exporters: [debug]
 EOF
 ```
@@ -312,6 +322,11 @@ spec:
           grpc:
     processors:
       batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
     exporters:
       debug:
       otlp:
@@ -324,11 +339,11 @@ spec:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch]
+          processors: [batch, resource/env]
           exporters: [debug, otlp]
         metrics:
           receivers: [otlp]
-          processors: [batch]
+          processors: [batch, resource/env]
           exporters: [debug, otlp]
 EOF
 ```
@@ -363,6 +378,11 @@ spec:
           grpc:
     processors:
       batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
     exporters:
       debug:
       otlp:
@@ -373,11 +393,11 @@ spec:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch]
+          processors: [batch, resource/env]
           exporters: [debug, otlp]
         metrics:
           receivers: [otlp]
-          processors: [batch]
+          processors: [batch, resource/env]
           exporters: [debug, otlp]
 EOF
 ```
