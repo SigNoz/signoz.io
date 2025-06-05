@@ -365,7 +365,7 @@ const PricingCalculator: React.FC = () => {
     >
       <div className="mb-4 flex items-start justify-between">
         <div className="flex-1">
-          <span className="group relative text-lg font-semibold text-signoz_vanilla-100 md:text-2xl">
+          <span className="group relative text-lg font-semibold text-signoz_vanilla-100/90 md:text-2xl">
             Estimate your monthly bill
             {isMounted && (
               <a
