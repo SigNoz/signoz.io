@@ -14,17 +14,26 @@ Migrating distributed traces involves replacing the proprietary [Elastic APM age
   * **Automatic Instrumentation:** OpenTelemetry offers automatic instrumentation capabilities for many popular frameworks and libraries, similar to Elastic APM's approach. Examples include the **OTel Java agent** for Java, `auto-instrumentations-node` for Node.js and various SDKs for other [languages](https://signoz.io/docs/instrumentation/). This often provides the quickest path to getting traces with minimal code changes.  
   * **Manual Instrumentation:** For custom code sections or frameworks not covered by auto-instrumentation, use the OpenTelemetry SDK's [Tracer API](/docs/traces-management/trace-api/overview) to manually create and manage spans. This involves obtaining a Tracer, starting spans, setting attributes, recording events, and ensuring spans are ended correctly. Elastic APM's concepts of "transactions" generally map to [root spans](https://signoz.io/blog/distributed-tracing-span/) in OpenTelemetry. Here's how you can manually instrument your [NodeJS application](https://signoz.io/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/).
 
-## Code Migration Examples
+## Migration Steps
 
-* [Go Migration](https://signoz.io/opentelemetry/go/)
-  * Replace `go.elastic.co/apm/v2` and related module imports (e.g., apmhttp) with `go.opentelemetry.io/otel`, `go.opentelemetry.io/otel/trace`, and OTel contrib instrumentation modules (e.g., otelhttp).  
-  * Replace `apm.DefaultTracer().StartTransaction(...)` and `apm.StartSpan(...)` calls with `tracer := otel.Tracer("my-instrumentation-library"); ctx, span := tracer.Start(ctx, "span-name",...)`. Ensure the context returned by `tracer.Start` is propagated.  
-  * Update HTTP handler wrapping from `apmhttp.Wrap` to `otelhttp.NewHandler`.  
-* **[JavaScript/Express Migration](https://signoz.io/docs/instrumentation/opentelemetry-express/)**  
-  1. Remove Elastic APM agent initialization and dependencies.  
-  2. Install OTel dependencies: `npm install --save @opentelemetry/api @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node @opentelemetry/exporter-trace-otlp-grpc (or -http). For specific instrumentation: npm install --save @opentelemetry/instrumentation-express`.  
-  3. Create a tracing.js (or similar) file to configure the OTel NodeSDK
- 4.  Run the application using the tracing setup: `export OTEL_SERVICE_NAME="my-express-app"; node -r ./tracing.js your-app-entrypoint.js`. Environment variables like `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME` can also be used for configuration.
+### 1. **Remove and Replace Dependencies**
+- Uninstall Elastic APM libraries
+- Install OpenTelemetry SDK, API, auto-instrumentation, and exporters for your [language](https://signoz.io/docs/instrumentation/)
+
+### 2. **Configure OpenTelemetry**
+- Create configuration file to initialize OpenTelemetry SDK
+- Set up exporters and automatic instrumentation
+- Configure service name and telemetry destination
+
+### 3. **Update Code**
+- Replace APM tracing calls with OpenTelemetry equivalents
+- Update HTTP middleware/handlers to use OpenTelemetry versions
+- Ensure proper context propagation between spans
+
+### 4. **Deploy and Validate**
+- Set environment variables (`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`)
+- Update application startup to load OpenTelemetry first
+- Test that telemetry data flows correctly to your observability platform
 
 ## Elastic OpenTelemetry Bridge for Go
 
@@ -49,7 +58,7 @@ For applications where a migration is too risky, Elastic provides a [bridge libr
 
 The migration of tracing is often the most involved part of moving from ELK to SigNoz because it directly impacts application code and dependencies. Unlike metrics or logs, where changes can sometimes be confined to agent or collector configurations, trace migration necessitates re-instrumentation using OpenTelemetry SDKs.This requires developer effort, careful testing, and a solid understanding of OpenTelemetry concepts like spans, context propagation, and resource attributes. Strategies like phased rollouts or bridging mechanisms (where available) are essential to manage the inherent risks.
 
-SigNoz provides advanced features for analyzing traces. Below are some of them:
+## Signoz Traces Features
 - **[Trace Explorer](/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces
 - **[Service Map](/docs/userguide/service-map/)**: Visualize dependencies between services
 - **[Exceptions Monitoring](/docs/userguide/exceptions/)**: Track and analyze application exceptions
