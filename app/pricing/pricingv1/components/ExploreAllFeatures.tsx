@@ -773,9 +773,9 @@ const ExploreAllFeatures: React.FC = () => {
         {ALL_FEATURES_DATA.ROWS.map((section, sectionIdx) => (
           <div key={sectionIdx}>
             {/* Section header */}
-            <div className="grid grid-cols-1">
+            <div className="sticky top-[200px] z-10 bg-[#0f1013] pt-4">
               <div className="grid grid-cols-1 gap-1 sm:grid-cols-3 md:grid-cols-[3fr_1fr_1fr_1fr]">
-                <div className="mb-3 mt-12 py-2 pl-6 pr-2 text-center text-sm font-medium md:text-left">
+                <div className="mb-3 mt-8 py-2 pl-6 pr-2 text-center text-sm font-medium sm:text-lg md:text-left">
                   {section.section}
                 </div>
                 <div></div>
