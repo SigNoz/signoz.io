@@ -90,6 +90,47 @@ const ALL_FEATURES_DATA = {
   ],
   ROWS: [
     {
+      section: 'Choose When',
+      features: [
+        {
+          feature: 'Best suited for your needs when you',
+          inCommunity: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              🛠️ Have DevOps expertise & want full control
+            </div>
+          ),
+          inTeams: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              ☁️ Want zero operational overhead & quick setup
+            </div>
+          ),
+          inEnterprise: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              🏢 Want dedicated environments or bring-your-own-cloud
+            </div>
+          ),
+        },
+        {
+          feature: 'Ideal for',
+          inCommunity: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              Solo developers & small startups
+            </div>
+          ),
+          inTeams: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              Teams scaling fast & growing companies
+            </div>
+          ),
+          inEnterprise: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              Orgs with compliance & security requirements
+            </div>
+          ),
+        },
+      ],
+    },
+    {
       section: 'APM & Distributed Tracing',
       features: [
         {
@@ -683,6 +724,28 @@ const ExploreAllFeatures: React.FC = () => {
       <div className="mx-auto mb-10 mt-6">
         {/* Header - Using CSS sticky positioning for smoother scrolling */}
         <div className="sticky top-[56px] z-20 bg-[#0f1013]">
+          <div className="my-6">
+            <div className="grid grid-cols-1">
+              <div className="mx-6 flex justify-center">
+                <TrackingLink
+                  href="/teams/"
+                  className="cursor-pointer rounded-full border border-signoz_slate-400 bg-signoz_ink-400 px-6 py-3 text-center transition-all duration-200 hover:border-signoz_robin-500/50 hover:bg-signoz_ink-300 hover:shadow-lg"
+                  clickType="Secondary CTA"
+                  clickName="Pro Tip Pill"
+                  clickText="Most teams start with Teams Cloud free trial to test with real data, then decide based on their specific needs. You can always migrate between options as your requirements evolve!"
+                  clickLocation="Explore All Features Pro Tip"
+                  id="btn-pro-tip-teams-link"
+                >
+                  <p className="m-0 text-xs text-signoz_vanilla-400 hover:text-signoz_vanilla-300">
+                    <span className="font-medium text-signoz_vanilla-200">💡 Pro tip:</span> Most
+                    teams start with Teams Cloud free trial to test with real data, then decide
+                    based on their specific needs. You can always migrate between options as your
+                    requirements evolve!
+                  </p>
+                </TrackingLink>
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
             {ALL_FEATURES_DATA.HEADER.map((header, idx) => (
               <div
