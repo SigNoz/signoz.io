@@ -1,0 +1,130 @@
+---
+date: 2025-05-12
+id: traces
+title: Migrate Traces from New Relic
+description: Migrating traces from New Relic to SigNoz. How to migrate APM traces from New Relic to SigNoz.
+---
+
+Migrating distributed tracing from New Relic to SigNoz involves replacing New Relic APM agents with OpenTelemetry instrumentation. This guide will walk you through the process for different scenarios.
+
+## Understanding Trace Collection Differences
+
+Before migrating, it's important to understand the key differences between New Relic and SigNoz tracing:
+
+| Feature                | New Relic                                | SigNoz                                | Notes                                               |
+|------------------------|------------------------------------------|---------------------------------------|-----------------------------------------------------|
+| **Collection Method**      | Proprietary APM agents, OpenTelemetry support | OpenTelemetry native                 | SigNoz is built specifically for OpenTelemetry      |
+| **Sampling**               | Head-based and tail-based sampling       | Head-based and tail-based sampling    | Both support similar sampling approaches            |
+| **Visualization**          | Distributed tracing UI                   | Comprehensive trace analysis UI       | Similar capabilities with different interfaces       |
+| **Service Maps**           | Available                                | Available                             | Both provide dependency visualization                |
+| **Span Attributes**        | Custom attributes & dimensions           | OpenTelemetry attributes              | Different naming conventions                         |
+
+## Migration Approaches
+
+The approach for migrating traces depends on how you're currently collecting traces in New Relic.
+
+### 1. For Applications Already Using OpenTelemetry with New Relic
+
+If your applications are already instrumented with OpenTelemetry and sending data to New Relic:
+
+1. Update your OpenTelemetry configuration to point to SigNoz instead of New Relic
+2. Modify your exporter configuration. Here's a generic example:
+
+```yaml
+# Before: New Relic OTLP endpoint
+otlp:
+  endpoint: "https://otlp.nr-data.net:4317"
+  headers:
+    "api-key": "NEW_RELIC_LICENSE_KEY"
+
+# After: SigNoz OTLP endpoint
+otlp:
+  # For SigNoz Cloud
+  endpoint: "ingest.{region}.signoz.cloud:443"
+  headers:
+    "signoz-ingestion-key": "<your-ingestion-key>"
+  tls:
+    insecure: false
+
+  # For Self-hosted SigNoz
+  # endpoint: "<signoz-otel-collector>:4317"
+  # tls:
+  #   insecure: true
+```
+
+### 2. Replacing New Relic APM Agents with OpenTelemetry
+
+For applications using New Relic's proprietary APM agents:
+
+1. Remove the New Relic agent from your application
+2. Follow the appropriate [SigNoz instrumentation guide](/docs/instrumentation/) for your programming language
+3. Configure the OpenTelemetry SDK to send trace data to SigNoz
+
+SigNoz provides detailed instrumentation guides for various languages and frameworks including:
+- [Java](/docs/instrumentation/java)
+- [Python](/docs/instrumentation/python)
+- [Node.js](/docs/instrumentation/nodejs)
+- [Go](/docs/instrumentation/golang)
+- [Ruby](/docs/instrumentation/ruby)
+- [.NET](/docs/instrumentation/dotnet)
+- [PHP](/docs/instrumentation/php)
+Check this [document](https://signoz.io/docs/instrumentation/) for a list of languages and frameworks
+#### Example: Migrating from New Relic Java Agent to OpenTelemetry
+
+**Step 1**: Remove the New Relic Java agent configuration from your application:
+- Remove the `-javaagent:/path/to/newrelic.jar` JVM argument
+- Remove any New Relic configuration files (e.g., `newrelic.yml`)
+
+**Step 2**: Add the OpenTelemetry Java agent:
+- Download the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases)
+- Add the agent to your JVM arguments:
+
+```bash
+java -javaagent:/path/to/opentelemetry-javaagent.jar \
+     -Dotel.service.name=your-service-name \
+     -Dotel.exporter.otlp.endpoint=http://<SigNoz endpoint>:4317 \
+     -jar your-application.jar
+```
+
+For more detailed instructions, see the [SigNoz Java Instrumentation document](/docs/instrumentation/java).
+
+## Attribute Mapping
+
+When migrating from New Relic to SigNoz, you'll need to map [New Relic's span attributes](https://docs.newrelic.com/attribute-dictionary/) to [OpenTelemetry's semantic conventions](https://opentelemetry.io/docs/specs/semconv/general/trace/). Here are some common mappings:
+
+| New Relic Attribute           | OpenTelemetry Attribute           |
+|-------------------------------|------------------------------------|
+| `entity.name`                 | `service.name`                     |
+| `entity.type`                 | `service.namespace`                |
+| `transactionName`             | `http.route`                       |
+| `http.method`                 | `http.request.method`              |
+| `http.url`                    | `url.full`                         |
+| `http.statusCode`             | `http.response.status_code`        |
+| `error.message`               | `exception.message`                |
+| `error.class`                 | `exception.type`                   |
+| `error.stack`                 | `exception.stacktrace`             |
+| `db.statement`                | `db.statement`                     |
+| `db.instance`                 | `db.name`                          |
+| `span.kind`                   | `span.kind`                        |
+| `peer.hostname`               | `server.address`                   |
+
+## Verifying Trace Migration
+
+After migrating your instrumentation, verify that traces are being received correctly:
+
+1. Navigate to the **APM** section in SigNoz
+2. Look for your service in the list of services
+3. Check basic metrics like p99 latency, error rate, and requests per second
+4. Click on your service to view traces
+5. Verify that spans are being captured correctly with the expected attributes
+
+Compare key metrics between New Relic and SigNoz during the migration period to ensure data consistency.
+
+## Next Steps
+
+Once your traces are successfully migrating to SigNoz, consider:
+
+- [Creating dashboards](/docs/migration/migrate-from-newrelic/dashboards) with trace-based panels
+- [Setting up trace-based alerts](/docs/alerts-management/trace-based-alerts/) for performance and error monitoring
+- [Correlating traces with logs](/docs/logs-pipelines/guides/trace/) for comprehensive troubleshooting
+- [Exploring the Service Map](/docs/userguide/service-map/) to better understand your application architecture

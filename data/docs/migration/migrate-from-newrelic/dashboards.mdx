@@ -1,0 +1,124 @@
+---
+date: 2025-05-12
+id: dashboards
+title: Migrate Dashboards from New Relic
+description: Migrating dashboards from New Relic to SigNoz. How to migrate dashboards from New Relic to SigNoz.
+---
+
+New Relic dashboards need to be recreated in SigNoz due to differences in the dashboard JSON schemas between the platforms. This guide will help you transition your dashboards effectively.
+
+## Understanding Dashboard Differences
+
+While both platforms offer rich dashboarding capabilities, there are some key differences to be aware of:
+
+| Feature             | New Relic                | SigNoz                                         | Notes                                                |
+|---------------------|--------------------------|------------------------------------------------|------------------------------------------------------|
+| **Query Language**      | NRQL                     | PromQL (metrics), ClickHouse SQL (logs/traces) | Queries will need to be translated                   |
+| **Variables**           | Query, List, Text-field  | Query, Dropdown, Custom                        | Similar functionality with different implementation  |
+| **Visualization Types** | Multiple chart types     | Common chart types                             | Some specialized visualizations may need alternatives |
+| **Data Sources**        | NRDB                     | ClickHouse, Prometheus-compatible              | Unified data source in SigNoz                        |
+
+## Using Pre-built Dashboard Templates
+
+SigNoz provides several pre-built dashboard templates that can serve as starting points for your monitoring needs. These templates can replace many of the common dashboards you might have in New Relic.
+
+### Available Templates
+
+Here are some of the pre-built dashboards available in the [SigNoz Dashboard Templates repository](https://github.com/SigNoz/dashboards) that can replace common New Relic dashboards:
+
+| New Relic Dashboard Type    | SigNoz Template Equivalent                                                                                              | Description                                        |
+|-----------------------------|------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
+| Infrastructure Monitoring   | [Host Metrics](https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics.json)*                            | CPU, memory, disk, and network metrics for hosts   |
+| Kubernetes Monitoring       | [Kubernetes Cluster](https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-cluster-metrics.json)* | Overview of Kubernetes cluster health and performance |
+| Redis Monitoring            | [Redis Overview](https://github.com/SigNoz/dashboards/blob/main/redis/redis-overview.json)                              | Redis server performance metrics                   |
+| MySQL Database              | [MySQL](https://github.com/SigNoz/dashboards/blob/main/mysql/mysql-otlp-v1.json)                                        | MySQL database performance and health              |
+| PostgreSQL Database         | [PostgreSQL](https://github.com/SigNoz/dashboards/blob/main/postgresql/postgresql.json)                                 | PostgreSQL database metrics                        |
+| MongoDB Monitoring          | [MongoDB](https://github.com/SigNoz/dashboards/blob/main/mongodb/mongodb.json)                                          | MongoDB server metrics                             |
+| JVM Application Monitoring  | [JVM Metrics](https://github.com/SigNoz/dashboards/blob/main/jvm/jvm-metrics-by-service.json)                           | JVM performance metrics for Java applications      |
+| APM Performance             | [APM Metrics](https://github.com/SigNoz/dashboards/blob/main/apm/apm-metrics.json)                                      | General application performance monitoring         |
+| HTTP API Monitoring         | [HTTP API Monitoring](https://github.com/SigNoz/dashboards/blob/main/apm/http-api-monitoring.json)                      | HTTP endpoints performance monitoring              |
+| NGINX Web Server            | [NGINX](https://github.com/SigNoz/dashboards/blob/main/nginx/nginx.json)                                                | NGINX web server metrics                           |
+| RabbitMQ                    | [RabbitMQ](https://github.com/SigNoz/dashboards/blob/main/rabbitmq/rabbitmq.json)                                       | RabbitMQ message broker metrics                    |
+| Container Metrics           | [Docker Container Metrics](https://github.com/SigNoz/dashboards/blob/main/container-metrics/docker/container-metrics-by-host.json) | Docker container performance metrics          |
+| HAProxy                     | [HAProxy](https://github.com/SigNoz/dashboards/blob/main/haproxy/haproxy.json)                                          | HAProxy load balancer metrics                      |
+| Apache Web Server           | [Apache](https://github.com/SigNoz/dashboards/blob/main/apache-web-server/apache.json)                                   | Apache web server performance metrics              |
+| ClickHouse                  | [ClickHouse Overview](https://github.com/SigNoz/dashboards/blob/main/clickhouse/clickhouse-overview.json)                | ClickHouse database metrics                        |
+
+📝 **Note:** SigNoz provides a built-in [Infrastructure Monitoring module](/docs/infrastructure-monitoring/overview/) that covers both host and Kubernetes monitoring. The above dashboards are optional and can be used for additional customization if needed.
+
+### Importing a Dashboard Template
+
+To import a dashboard template:
+
+1. Navigate to `Dashboards` in SigNoz
+2. Click `+ New Dashboard`
+3. Click `Import JSON`
+4. Either paste the JSON content or upload the JSON file from the repository
+
+<Figure src="/img/docs/metrics/docker/importing_dashboard.webp" alt="Importing a dashboard in SigNoz" caption="Importing a dashboard template in SigNoz" />
+
+## Requesting Custom Dashboards
+
+You can also request SigNoz to help you with creating custom dashboards. To request a custom dashboard, please create a [GitHub issue](https://github.com/SigNoz/signoz/issues/new?assignees=&labels=dashboard-template&template=request_dashboard.md&title=%5BDashboard+Request%5D+) providing details about the dashboard you want to create.
+
+## Creating Custom Dashboards
+
+For New Relic dashboards without an existing template in SigNoz, you'll need to create custom dashboards. This is particularly important for specialized business dashboards or those with unique metrics specific to your applications.
+
+### Panel Types and Visualization Options
+
+When recreating your New Relic dashboards in SigNoz, it's important to understand which visualization types are available. SigNoz supports most of the common panel types available in New Relic:
+
+| Panel Type      | New Relic | SigNoz | Notes                                                        |
+|-----------------|-----------|--------|--------------------------------------------------------------|
+| Time Series     | ✓         | ✓      | Both platforms support time series visualization             |
+| Bar Chart       | ✓         | ✓      | Both support categorical data visualization                  |
+| Pie Chart       | ✓         | ✓      | Both support proportional data visualization                 |
+| Table           | ✓         | ✓      | Both support tabular data display                            |
+| Histogram       | ✓         | ✓      | Both support distribution visualization                      |
+| Value/Billboard | ✓         | ✓      | Single value display with thresholds                         |
+| Funnel          | ✓         | -      | Not directly supported in SigNoz                             |
+| Bullet Chart    | ✓         | -      | Similar functionality can be achieved with other chart types |
+| JSON            | ✓         | -      | Not currently supported                                      |
+
+For panels that don't have a direct equivalent in SigNoz, consider how you might achieve similar functionality using the available visualization types. For example, a funnel visualization might be replaced with a series of value panels or a bar chart showing conversion stages.
+
+Please refer to [Panel Types](/docs/dashboards/panel-types/) documentation for more details on the panel types supported by SigNoz.
+
+### Creating a Dashboard
+
+To create a custom dashboard:
+
+1. Navigate to **Dashboards** in SigNoz
+2. Click **+ New Dashboard**
+3. Use the dashboard editor to add panels
+4. Configure each panel with the appropriate metrics and visualization type
+5. Save your dashboard with a descriptive name
+
+When migrating complex New Relic dashboards, it's helpful to:
+- Take screenshots of your New Relic dashboards for reference
+- Note which metrics are used in each panel
+- Identify the equivalent metrics in SigNoz's data model
+
+Please follow [Manage Dashboards in SigNoz documentation](/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard/) for more detailed instructions.
+
+### Migrating Dashboard Variables
+
+If your New Relic dashboards use variables for filtering content, you'll need to recreate these in SigNoz:
+
+1. In your dashboard, click the gear icon to access dashboard settings
+2. Navigate to the **Variables** tab
+3. Click **Add Variable**
+4. Configure the variable type (Query, Custom, etc.) and options
+5. Use the variables in your panel queries with syntax `$variable_name`
+
+For more information, see the [Variables documentation](/docs/userguide/manage-variables/).
+
+## Next Steps
+
+Once your dashboards are successfully migrated to SigNoz, consider:
+
+- [Migrating additional metrics](/docs/migration/migrate-from-newrelic/metrics) for your dashboards
+- [Setting up alerts](/docs/migration/migrate-from-newrelic/alerts) based on these metrics
+- [Migrating your traces](/docs/migration/migrate-from-newrelic/traces) for end-to-end observability
+- [Migrating your logs](/docs/migration/migrate-from-newrelic/logs) to complete your observability stack

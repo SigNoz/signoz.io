@@ -1936,6 +1936,40 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Migrate From New Relic',
+    className: 'new-doc',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/migration/migrate-from-newrelic',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/metrics',
+        label: 'Migrating Metrics',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/traces',
+        label: 'Migrating Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/logs',
+        label: 'Migrating Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/dashboards',
+        label: 'Migrating Dashboards',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/alerts',
+        label: 'Migrating Alerts',
+      },
+    ],
+  },
+  {
     label: 'Azure Monitoring',
     type: 'category',
     isExpanded: false,

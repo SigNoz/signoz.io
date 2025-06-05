@@ -1,0 +1,94 @@
+---
+date: 2025-05-12
+id: alerts
+title: Migrate Alerts from New Relic
+description: Migrating alerts from New Relic to SigNoz. How to migrate alert configurations from New Relic to SigNoz.
+---
+
+Migrating alerts from New Relic to SigNoz involves recreating your alert conditions and notification channels in the SigNoz platform. This guide will help you transition your alerting setup effectively.
+
+## Understanding Alert Differences
+
+Before migrating, it's important to understand the key differences between New Relic and SigNoz alerts:
+
+| Feature             | New Relic                               | SigNoz                                | Notes                                               |
+|---------------------|----------------------------------------|---------------------------------------|-----------------------------------------------------|
+| **Alert Types**     | Threshold, NRQL, Anomaly, Baseline     | Metrics, Traces, Logs, Anomaly, Exceptions | Similar coverage with different implementation  |
+| **Notification Channels** | Multiple integrations                 | Email, Slack, Teams, PagerDuty, Webhook, etc. | Common channels supported                        |
+| **Query Language**      | NRQL                                   | PromQL, ClickHouse SQL                | Different query languages for alert conditions      |
+| **Management**          | UI, API, Terraform                     | UI, API, Terraform                    | Similar management options                          |
+
+## Setting Up Notification Channels
+
+Before migrating alerts, you'll need to set up notification channels in SigNoz. Both New Relic and SigNoz support various notification channels, though there are some differences in the available integrations.
+
+### Notification Channel Comparison
+
+| Notification Channel | New Relic             | SigNoz               |
+|----------------------|-----------------------|----------------------|
+| Email                | ✓                     | ✓                    |
+| Slack                | ✓                     | ✓                    |
+| Microsoft Teams      | ✓                     | ✓                    |
+| PagerDuty            | ✓                     | ✓                    |
+| OpsGenie             | ✓                     | ✓                    |
+| Webhook              | ✓                     | ✓                    |
+| Incident.io          | Via Webhook           | ✓                    |
+| Rootly               | Via Webhook           | ✓                    |
+| Zenduty              | Via Webhook           | ✓                    |
+| ServiceNow           | ✓                     | Via Webhook          |
+| Jira                 | ✓                     | Via Webhook          |
+| AWS EventBridge      | ✓                     | Via Webhook          |
+| xMatters             | ✓                     | Via Webhook          |
+| VictorOps/Splunk     | ✓                     | Via Webhook          |
+
+If a specific notification channel is not natively supported by SigNoz, you can use the Webhook channel type to integrate with these systems. This provides flexibility to connect with virtually any service that accepts webhook notifications.
+
+To set up a notification channel in SigNoz:
+
+1. Navigate to `Settings -> Alert Channel`
+2. Click `+ New Alert Channel`
+3. Select the channel type and configure the required settings
+
+For detailed setup instructions, refer to the [Alerts Notification Channel](/docs/alerts-management/notification-channel/) documentation.
+
+## Migrating Alert Conditions
+
+SigNoz provides a comprehensive alert management system that supports:
+
+- **[Metrics-based alerts](/docs/alerts-management/metrics-based-alerts/)**: Monitor metric values and trigger alerts based on thresholds
+- **[Trace-based alerts](/docs/alerts-management/trace-based-alerts/)**: Alert on trace metrics like latency or error rates
+- **[Log-based alerts](/docs/alerts-management/log-based-alerts/)**: Create alerts based on log patterns or frequencies
+- **[Anomaly-based alerts](/docs/alerts-management/anomaly-based-alerts/)**: Trigger alerts when metrics deviate from normal patterns
+- **[Exceptions-based alerts](/docs/alerts-management/exceptions-based-alerts/)**: Alert on application exceptions
+
+Both Metrics-based and Anomaly-based alerts support using PromQL queries to define the alert condition, meaning you can use the same queries you used in New Relic NRQL alerts with appropriate translation.
+
+### Converting New Relic NRQL Alerts to SigNoz
+
+Here are examples of converting common New Relic NRQL alert conditions to SigNoz:
+
+| Alert Type        | New Relic NRQL                                                              | SigNoz Query                                                            |
+|-------------------|-----------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| High CPU Usage    | `SELECT average(cpuPercent) FROM SystemSample WHERE hostname = 'host1'`     | `avg(system_cpu_usage{host="host1"})`                                   |
+| High Error Rate   | `SELECT percentage(count(*), WHERE error IS true) FROM Transaction`         | `sum(rate(http_server_request_count{status_code=~"5.."}[5m])) / sum(rate(http_server_request_count[5m])) * 100` |
+| High Latency      | `SELECT average(duration) FROM Transaction WHERE appName = 'MyApp'`         | `avg(http_server_duration_milliseconds{service_name="MyApp"})`          |
+
+## Using Terraform for Alert Management
+
+If you manage alert rules as code in New Relic (for example, using `newrelic` Terraform provider), you can continue using the same approach when migrating to SigNoz by utilizing the [SigNoz Terraform Provider](/docs/alerts-management/terraform-provider-signoz/).
+
+## Verifying Alert Migration
+
+After migrating your alerts to SigNoz, verify that they're working correctly:
+
+1. Test alerts by temporarily lowering thresholds or triggering test conditions
+2. Verify that notifications are sent to the configured channels
+3. Monitor for any missed alerts during the transition period
+4. Gradually migrate all alerts, starting with non-critical ones
+
+## Next Steps
+
+Once your alerts are successfully migrated to SigNoz, consider:
+
+- [Migrating dashboards](/docs/migration/migrate-from-newrelic/dashboards) to visualize metrics related to your alerts
+- [Configuring maintenance windows](/docs/alerts-management/planned-maintenance/) to manage alert silencing during planned maintenance
