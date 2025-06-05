@@ -11,6 +11,7 @@ import QuickStartCloud from '@/components/QuickStartCloud'
 import FAQ from './components/FAQ'
 import StartupProgram from './components/StartupProgram'
 import SigNozCloudPricingOverview from './components/SigNozCloudPricingOverview'
+import InstrumentationSupport from './components/InstrumentationSupport'
 
 export default function PricingV1Page() {
   return (
@@ -67,6 +68,7 @@ export default function PricingV1Page() {
 
         {/* Startup Program Section */}
         <StartupProgram />
+        <InstrumentationSupport />
         <WhySelectSignoz isInPricingPage />
 
         <FAQ />
