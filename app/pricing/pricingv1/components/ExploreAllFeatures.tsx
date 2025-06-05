@@ -718,7 +718,7 @@ const ExploreAllFeatures: React.FC = () => {
   return (
     <>
       <ChatbaseScrollTrigger
-        triggerElementId="apm-section"
+        triggerElementId="choose-when-section"
         messages={[
           '👋 Hey, how can I help you get started?',
           'Exploring SigNoz Pricing or Features? Share your usecase to find the right plan for you and see the relevant docs.',
@@ -728,15 +728,15 @@ const ExploreAllFeatures: React.FC = () => {
         id="all-features"
         className="relative !m-0 !mx-auto !w-[100vw] border !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]"
       >
-        <div className="mx-auto mb-10 mt-6">
+        <div className="mx-auto mb-10 mt-6 ">
           {/* Header - Using CSS sticky positioning for smoother scrolling */}
-          <div className="sticky top-[56px] z-20 bg-[#0f1013]">
-            <div className="my-6">
+          <div className="sticky top-[74px] z-20 bg-[#0f1013]">
+            <div className="my-12">
               <div className="grid grid-cols-1">
                 <div className="mx-6 flex justify-center">
                   <TrackingLink
                     href="/teams/"
-                    className="cursor-pointer rounded-full border border-signoz_slate-400 bg-signoz_ink-400 px-6 py-3 text-center transition-all duration-200 hover:border-signoz_robin-500/50 hover:bg-signoz_ink-300 hover:shadow-lg"
+                    className="absolute -top-10 my-6 cursor-pointer rounded-full border border-signoz_slate-400 bg-signoz_ink-400 px-6 py-3 text-center transition-all duration-200 hover:border-signoz_robin-500/50 hover:bg-signoz_ink-300 hover:shadow-lg"
                     clickType="Secondary CTA"
                     clickName="Pro Tip Pill"
                     clickText="Most teams start with Teams Cloud free trial to test with real data, then decide based on their specific needs. You can always migrate between options as your requirements evolve!"
@@ -780,7 +780,7 @@ const ExploreAllFeatures: React.FC = () => {
           {ALL_FEATURES_DATA.ROWS.map((section, sectionIdx) => (
             <div
               key={sectionIdx}
-              id={section.section === 'APM & Distributed Tracing' ? 'apm-section' : undefined}
+              id={section.section === 'Choose When' ? 'choose-when-section' : undefined}
             >
               {/* Section header */}
               <div className="sticky top-[220px] z-10 bg-[#0f1013]">

@@ -257,9 +257,7 @@ export default function ChatbaseScrollTrigger({
             window.chatbase.setInitialMessages(messages)
 
             // Add persistent pulsing dot near the chat widget
-            setTimeout(() => {
-              addPersistentPulsingDot()
-            }, 300)
+            addPersistentPulsingDot()
 
             setHasTriggeredMessage(true)
             console.log('Chatbase message set and bubble attention added')
