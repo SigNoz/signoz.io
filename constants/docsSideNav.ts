@@ -1908,31 +1908,31 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/migration/migrate-from-grafana',
     items: [
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/metrics',
-          label: 'Migrating Metrics',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/traces',
-          label: 'Migrating Traces',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/logs',
-          label: 'Migrating Logs',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/dashboards',
-          label: 'Migrating Dashboards',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/alerts',
-          label: 'Migrating Alerts',
-        },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/metrics',
+        label: 'Migrating Metrics',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/traces',
+        label: 'Migrating Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/logs',
+        label: 'Migrating Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/dashboards',
+        label: 'Migrating Dashboards',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/alerts',
+        label: 'Migrating Alerts',
+      },
     ],
   },
   {
@@ -1942,31 +1942,31 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/migration/migrate-from-newrelic',
     items: [
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-newrelic/metrics',
-          label: 'Migrating Metrics',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-newrelic/traces',
-          label: 'Migrating Traces',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-newrelic/logs',
-          label: 'Migrating Logs',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-newrelic/dashboards',
-          label: 'Migrating Dashboards',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-newrelic/alerts',
-          label: 'Migrating Alerts',
-        },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/metrics',
+        label: 'Migrating Metrics',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/traces',
+        label: 'Migrating Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/logs',
+        label: 'Migrating Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/dashboards',
+        label: 'Migrating Dashboards',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-newrelic/alerts',
+        label: 'Migrating Alerts',
+      },
     ],
   },
   {
