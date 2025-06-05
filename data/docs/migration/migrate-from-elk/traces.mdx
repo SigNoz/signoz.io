@@ -38,18 +38,18 @@ For applications where a migration is too risky, Elastic provides a [bridge libr
   3. Once all instrumentation is migrated, remove the Elastic APM agent and the bridge, and configure the OTel SDK to export directly or via a standard OTel Collector. 
 * While this specific bridge is for Go, the concept of gradual migration or dual instrumentation might be possible in other languages using community tools or custom solutions.
 
-**Verification:**
+## Verification
 
 * Generate traffic/requests in the newly instrumented application. OpenTelemetry SDKs often buffer data, so ensure sufficient activity occurs.
 * Navigate to the SigNoz UI. Check the "Services" list for your application.
 * Explore the "Traces" tab, applying filters as needed, to confirm traces are being received.
 * Examine individual traces using flamegraphs and Gantt charts to ensure spans are correctly nested and timed.
-* Check the Service Map (Beta) for dependencies.
+* Check the Service Map for dependencies.
 
 
 The migration of tracing is often the most involved part of moving from ELK to SigNoz because it directly impacts application code and dependencies. Unlike metrics or logs, where changes can sometimes be confined to agent or collector configurations, trace migration necessitates re-instrumentation using OpenTelemetry SDKs.This requires developer effort, careful testing, and a solid understanding of OpenTelemetry concepts like spans, context propagation, and resource attributes. Strategies like phased rollouts or bridging mechanisms (where available) are essential to manage the inherent risks.
 
-SigNoz provides advanced features for analyzing traces:
+SigNoz provides advanced features for analyzing traces. Below are some of them:
 - **[Trace Explorer](/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces
 - **[Service Map](/docs/userguide/service-map/)**: Visualize dependencies between services
 - **[Exceptions Monitoring](/docs/userguide/exceptions/)**: Track and analyze application exceptions
