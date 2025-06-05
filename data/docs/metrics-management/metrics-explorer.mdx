@@ -1,0 +1,332 @@
+---
+date: 2025-06-06
+title: Metrics Explorer
+id: metrics-explorer
+---
+
+# Metrics Explorer
+
+## Overview
+
+Metrics Explorer provides instant visibility into all metrics flowing into your SigNoz deployment. This feature automatically discovers, categorizes, and visualizes every metric being ingested, giving you a complete view of your metrics ecosystem without needing to build dashboards first.
+
+Unlike traditional monitoring workflows that require you to guess metric names from dropdowns, Metrics Explorer shows you exactly what's being ingested with real-time metadata including types, sample counts, time series cardinality, and data sources.
+
+## When to Use & Key Benefits
+
+Metrics Explorer delivers specific benefits in these common scenarios:
+
+- **During service onboarding**: Instantly verify that new integrations (AWS, Kubernetes, custom exporters) are working correctly by seeing which metrics are being ingested and from which sources.
+
+- **When troubleshooting alerts**: Quickly investigate alert-related metrics by jumping directly from alerts to see recent activity, metadata, and correlate with related metrics—all without building temporary dashboards.
+
+- **For cost optimization**: Identify high-volume metrics, detect unused or misconfigured metrics, and spot instrumentation redundancies to optimize your observability pipeline.
+
+- **During incident response**: Use the query playground to run ad hoc analyses, compare multiple metrics side-by-side, and correlate performance issues across different services and hosts.
+
+## How It Works
+
+Metrics Explorer leverages your existing OpenTelemetry instrumentation to automatically collect and organize metrics metadata. The feature works by analyzing:
+
+| Attribute | Description | Example |
+|-----------|-------------|---------|
+| Metric Name | The identifier for the metric | `http_requests_total` |
+| Metric Type | Counter, Gauge, Histogram, or Summary | `counter` |
+| Labels/Tags | Dimensional metadata attached to metrics | `service="api", method="GET"` |
+| Sample Count | Number of data points received | `1,234,567` |
+| Time Series | Unique metric name + label combinations | `5,432` |
+| Units | Measurement units for the metric | `seconds`, `bytes`, `requests` |
+
+These attributes are used to automatically categorize metrics, calculate cardinality and volume, identify data sources, and provide searchable metadata for quick discovery.
+
+## Feature Walkthrough
+
+### Summary View
+
+The Metrics Explorer landing page displays all metrics currently being ingested into SigNoz.
+
+![Metrics Explorer summary view showing all ingested metrics and their types.](/img/blog/2025/05/metrics-explorer-dashboard.webp)
+
+The main table shows metrics with detailed information including:
+
+- **METRIC NAME**: The full metric identifier
+- **TYPE**: Counter, Gauge, Histogram, or Summary
+- **UNITS**: Measurement units (when available)
+- **SAMPLES**: Total number of data points received
+- **TIME SERIES**: Number of unique metric + label combinations
+- **LAST RECEIVED**: When the metric was last ingested (e.g., "2m ago", "1h ago")
+- **SOURCES**: Services, hosts, or integrations sending this metric
+
+You can:
+- **Search by metric name** using the search icon in the metric name column header
+- **Sort by any column** by clicking its header to organize by volume, activity, or type
+- **Filter metrics** using the left panel to narrow down by service, host, or metric type
+- **Toggle proportion view** to see which metrics consume the most ingestion resources
+- **Click on any metric** to view detailed information and start investigating
+
+![Metrics Explorer interface with search and filter options for finding specific metrics.](/img/blog/2025/05/alert to metrics.webp)
+
+### Exploring Individual Metrics
+
+When you select a metric, you can navigate through different analysis modes:
+
+- **Metadata View**: Shows complete metric information, labels, and editable descriptions
+- **Query Playground**: Interactive environment for running ad hoc queries and visualizations
+- **Activity Timeline**: Historical view of metric ingestion and recent changes
+
+#### Metadata View
+
+From the Metadata View, you can:
+
+**See comprehensive metric details** with information for:
+- **METRIC TYPE** (Counter/Gauge/Histogram/Summary)
+- **UNIT** and editable description
+- **LABEL DIMENSIONS** and their cardinality
+- **INGESTION RATE** (samples per second)
+- **TIME SERIES COUNT** and growth trends
+- **DATA SOURCES** (services, hosts, integrations)
+
+**Edit metric metadata** including:
+- Custom descriptions for team clarity
+- Unit standardization across integrations
+- Tags and categorization
+
+**Analyze cardinality** by viewing:
+- Top label values and their frequencies
+- High-cardinality dimensions that might impact costs
+- Label distribution across different sources
+
+#### Query Playground
+
+![Metrics Explorer query playground for running ad hoc metric queries and visualizing results.](/img/blog/2025/05/metrics_explorer.gif)
+
+The Query Playground offers a powerful environment for metric exploration:
+
+**Interactive query building** with:
+- **Metric selection** with autocomplete and filtering
+- **Label filtering** using dropdown selectors or manual entry
+- **Aggregation functions** (sum, avg, max, min, rate, etc.)
+- **Time range selection** from minutes to months
+- **Grouping capabilities** by any label dimension
+
+**Real-time visualization** featuring:
+- **Line charts** for time series data
+- **Multiple query comparison** on the same chart
+- **Zoom and pan** for detailed time range analysis
+- **Data table view** showing raw query results
+
+**One-click actions** to:
+- **Add to dashboard** - Save useful queries as dashboard panels
+- **Create alerts** - Set up monitoring based on query results
+- **Share queries** - Copy query links for team collaboration
+- **Export data** - Download results for external analysis
+
+#### Activity Timeline
+
+The Activity Timeline provides insights into metric behavior over time:
+
+**Recent activity tracking** showing:
+- **Last ingestion timestamp** and frequency patterns
+- **Sample rate changes** and volume trends
+- **New label appearances** and cardinality evolution
+- **Error or gap detection** in metric flow
+
+**Historical analysis** with:
+- **Ingestion pattern visualization** over days, weeks, or months
+- **Volume trend analysis** to identify growth or decline
+- **Source attribution** showing which services contribute most data
+- **Correlation suggestions** with related metrics
+
+## Data Visualizations
+
+### Metric Volume Analysis
+
+**Sample Count Distribution**
+Shows the distribution of sample counts across all metrics, helping identify:
+- High-volume metrics consuming most ingestion capacity
+- Low-volume or potentially unused metrics
+- Trends in data volume over time
+- Opportunities for optimization
+
+**Time Series Cardinality**
+Displays cardinality distribution across metrics:
+- Metrics with highest unique label combinations
+- Cardinality growth trends over time
+- Impact of new label dimensions
+- Cost implications of high-cardinality metrics
+
+### Source Attribution
+
+**Service Breakdown**
+Shows which services are contributing the most metrics data:
+- Metrics count per service
+- Sample volume per service
+- New metrics introduced by each service
+- Service-specific metric health status
+
+**Integration Overview**
+Provides visibility into external data sources:
+- AWS, Kubernetes, database integrations
+- Custom application metrics
+- Infrastructure monitoring metrics
+- Third-party service metrics
+
+### Performance Insights
+
+**Ingestion Rate Monitoring**
+Tracks how quickly metrics are being processed:
+- Real-time ingestion rates
+- Peak usage patterns
+- Processing delays or bottlenecks
+- Capacity planning insights
+
+**Query Performance**
+Shows how different metrics perform in queries:
+- Average query response times
+- Most frequently queried metrics
+- Complex query identification
+- Optimization recommendations
+
+## Advanced Features
+
+### Metric Correlation
+
+**Related Metrics Discovery**
+Automatically suggests metrics that often change together:
+- Infrastructure metrics that correlate with application performance
+- Business metrics that relate to technical metrics
+- Cross-service metric relationships
+- Anomaly detection across related metrics
+
+**Smart Grouping**
+Organizes metrics by logical relationships:
+- Service-based grouping for application metrics
+- Infrastructure grouping for system metrics
+- Business domain clustering
+- Custom categorization options
+
+### Cost Optimization Tools
+
+**Volume Analysis**
+Identify metrics consuming the most resources:
+- Top metrics by sample count
+- Highest cardinality metrics
+- Fastest-growing metrics over time
+- Duplicate or redundant metrics
+
+**Cleanup Recommendations**
+Automated suggestions for optimization:
+- Unused metrics detection
+- Misconfigured metric identification
+- Cardinality reduction opportunities
+- Retention policy recommendations
+
+### Integration Workflows
+
+**Dashboard Creation**
+Seamless transition from exploration to monitoring:
+- One-click dashboard panel creation
+- Pre-configured visualization types
+- Automatic layout suggestions
+- Template sharing across teams
+
+**Alert Configuration**
+Direct alert setup from query results:
+- Threshold-based alerts
+- Anomaly detection alerts
+- Multi-metric correlation alerts
+- Notification channel integration
+
+## Best Practices
+
+### Efficient Exploration Strategy
+
+**Start with Summary View**: Begin by understanding your complete metrics landscape before diving into specific metrics.
+
+**Use Search Effectively**: Leverage the search functionality to quickly find metrics by name patterns or keywords.
+
+**Filter by Context**: Use service, host, or integration filters to focus on relevant metrics during investigation.
+
+**Monitor Cardinality**: Regularly review high-cardinality metrics to prevent cost surprises and performance issues.
+
+### Troubleshooting Workflows
+
+**Alert-Driven Investigation**: When receiving alerts, jump directly to Metrics Explorer to see current metric status and recent activity.
+
+**Service-Focused Analysis**: Use service filters to isolate metrics related to specific components during incidents.
+
+**Time-Based Correlation**: Compare metrics during incident timeframes to identify patterns and root causes.
+
+**Cross-Metric Analysis**: Use the query playground to correlate multiple metrics and understand system-wide impacts.
+
+### Cost Management
+
+**Regular Auditing**: Perform weekly reviews of metric volume and cardinality trends to identify optimization opportunities.
+
+**Cleanup Planning**: Use the unused metrics detection to safely remove unnecessary instrumentation.
+
+**Growth Monitoring**: Track metric growth rates to predict future capacity needs and budget planning.
+
+**Efficiency Tracking**: Monitor improvements after optimization efforts to validate cost reduction strategies.
+
+## Technical Specifications
+
+### Supported Metric Types
+
+- **Counter**: Monotonically increasing values (e.g., request counts, error counts)
+- **Gauge**: Point-in-time measurements (e.g., memory usage, queue size)
+- **Histogram**: Distribution of values with configurable buckets (e.g., response times)
+- **Summary**: Client-side quantile calculations (e.g., percentile measurements)
+
+### Query Capabilities
+
+- **PromQL Support**: Full compatibility with Prometheus Query Language for complex queries
+- **OpenTelemetry Native**: Built specifically for OpenTelemetry metrics format and conventions
+- **Real-time Processing**: Live analysis of incoming metrics without delay
+- **Historical Analysis**: Query across configurable time ranges from minutes to months
+- **Advanced Aggregations**: Support for spatial and temporal aggregation functions
+
+### Performance Characteristics
+
+- **Sub-second Response**: Most queries return results in under 1 second
+- **High-Volume Support**: Handles billions of samples and millions of time series
+- **Scalable Architecture**: Horizontal scaling support for growing deployments
+- **Optimized Storage**: ClickHouse backend ensures fast query performance
+- **Efficient Indexing**: Smart indexing for rapid metric discovery and filtering
+
+## Troubleshooting
+
+### Common Issues
+
+**Metrics not appearing in Summary View:**
+- Verify metrics are being sent to the correct SigNoz endpoint
+- Check that OpenTelemetry instrumentation is properly configured
+- Confirm metric naming follows OpenTelemetry conventions
+- Ensure time range includes recent data ingestion
+
+**Slow query performance in playground:**
+- Reduce time range for queries over large datasets
+- Use specific label filters to limit data scope
+- Avoid queries on extremely high-cardinality metrics
+- Consider using aggregation functions to reduce data volume
+
+**Missing or incorrect metadata:**
+- Verify OpenTelemetry instrumentation includes proper metric metadata
+- Check integration configuration for metadata passing
+- Use the editable metadata feature to correct or add missing information
+- Ensure metric units and descriptions are set at the source
+
+**High cardinality warnings:**
+- Review label dimensions that might have unlimited values
+- Implement label value normalization in instrumentation
+- Consider using histogram metrics instead of individual gauges for distributions
+- Set up cardinality limits in metric exporters
+
+### Support and Feedback
+
+For questions, issues, or feature requests:
+
+- **Community Slack**: Join the SigNoz community for real-time discussions and support
+- **GitHub Issues**: Report bugs or request new features through the official repository
+- **Email Support**: Contact the SigNoz team directly for deployment or configuration assistance
+- **Documentation**: Refer to comprehensive guides and tutorials in the SigNoz documentation
