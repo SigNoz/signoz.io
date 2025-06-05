@@ -1,23 +1,23 @@
 ---
 date: 2025-05-06
-id: migrate-from-elk-traces
+id: traces
 title: Migrate traces from ELK Stack
 description: Migrating traces from ELK Stack to SigNoz. How to migrate traces from ELK to SigNoz.
 ---
 
-Migrating distributed tracing involves replacing the proprietary [Elastic APM agents](https://www.elastic.co/docs/solutions/observability/apm/elastic-apm-agents) within your applications with standard [OpenTelemetry SDKs](https://opentelemetry.io/docs/languages/) and configuring them to send trace data to SigNoz.
+Migrating distributed traces involves replacing the proprietary [Elastic APM agents](https://www.elastic.co/docs/solutions/observability/apm/elastic-apm-agents) within your applications with standard [OpenTelemetry SDKs](https://opentelemetry.io/docs/languages/) and configuring them to send trace data to SigNoz.
 
-**Replacing Elastic APM Agents:**
+## Replacing Elastic APM Agents
 
-* **Core Task:** The fundamental step is to remove the Elastic APM agent dependencies and initialization code from your applications and replace them with the equivalent OpenTelemetry SDKs and instrumentation [libraries for the specific proframming language](/docs/instrumentation/).
+* **Core Task:** The fundamental step is to remove the Elastic APM agent dependencies and initialization code from your applications and replace them with the equivalent OpenTelemetry SDKs and instrumentation libraries for the specific [programming languages](https://opentelemetry.io/docs/languages/java/instrumentation/).
 * **Instrumentation Approach:**  
-  * **Automatic Instrumentation:** OpenTelemetry offers automatic instrumentation capabilities for many popular frameworks and libraries, similar to Elastic APM's approach. Examples include the OTel Java agent, `@opentelemetry/auto-instrumentations-node` for Node.js, and various `opentelemetry-instrumentation` packages for Python.This often provides the quickest path to getting traces with minimal code changes.  
-  * **Manual Instrumentation:** For custom code sections or frameworks not covered by auto-instrumentation, use the OpenTelemetry SDK's [Tracer API](/docs/traces-management/trace-api/overview) to manually create and manage spans. This involves obtaining a Tracer, starting spans (tracer.Start in Go, tracer.startSpan in JS/Python), setting attributes, recording events, and ensuring spans are ended correctly. Elastic APM's concepts of "transactions" generally map to "root spans" (spans with no parent) in OpenTelemetry.
+  * **Automatic Instrumentation:** OpenTelemetry offers automatic instrumentation capabilities for many popular frameworks and libraries, similar to Elastic APM's approach. Examples include the **OTel Java agent** for Java, `auto-instrumentations-node` for Node.js and various SDKs for other [languages](https://signoz.io/docs/instrumentation/). This often provides the quickest path to getting traces with minimal code changes.  
+  * **Manual Instrumentation:** For custom code sections or frameworks not covered by auto-instrumentation, use the OpenTelemetry SDK's [Tracer API](/docs/traces-management/trace-api/overview) to manually create and manage spans. This involves obtaining a Tracer, starting spans, setting attributes, recording events, and ensuring spans are ended correctly. Elastic APM's concepts of "transactions" generally map to [root spans](https://signoz.io/blog/distributed-tracing-span/) in OpenTelemetry. Here's how you can manually instrument your [NodeJS application](https://signoz.io/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/).
 
-**Code Migration Examples:**
+## Code Migration Examples
 
-* **[Go Migration](https://signoz.io/opentelemetry/go/)**  
-  * Replace `go.elastic.co/apm/v2` and related module imports (e.g., apmhttp) with go.`opentelemetry.io/otel`, `go.opentelemetry.io/otel/trace`, and OTel contrib instrumentation modules (e.g., otelhttp).  
+* [Go Migration](https://signoz.io/opentelemetry/go/)
+  * Replace `go.elastic.co/apm/v2` and related module imports (e.g., apmhttp) with `go.opentelemetry.io/otel`, `go.opentelemetry.io/otel/trace`, and OTel contrib instrumentation modules (e.g., otelhttp).  
   * Replace `apm.DefaultTracer().StartTransaction(...)` and `apm.StartSpan(...)` calls with `tracer := otel.Tracer("my-instrumentation-library"); ctx, span := tracer.Start(ctx, "span-name",...)`. Ensure the context returned by `tracer.Start` is propagated.  
   * Update HTTP handler wrapping from `apmhttp.Wrap` to `otelhttp.NewHandler`.  
 * **[JavaScript/Express Migration](https://signoz.io/docs/instrumentation/opentelemetry-express/)**  
