@@ -1425,7 +1425,7 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'CICD',
+    label: 'CICD Monitoring',
     type: 'category',
     isExpanded: false,
     // route: '/docs/cicd',
