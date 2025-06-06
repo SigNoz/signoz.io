@@ -66,7 +66,10 @@ Enter the SigNoz self-hosted endpoint in the textbox and set **No Authentication
 </TabItem>
 </Tabs>
 
-## Visualize the traces in SigNoz under **Traces** section
+## Visualize Traces in SigNoz
+
+In your SigNoz UI, head over to the Traces Tab, and you should be able to see your traces.
+You can use the [trace explorer](https://signoz.io/docs/product-features/trace-explorer/) to filter and analyze your traces.
 
 <figure data-zoomable align="center">
     <img
@@ -80,9 +83,13 @@ Enter the SigNoz self-hosted endpoint in the textbox and set **No Authentication
     </figcaption>
 </figure>
 
-## Jenkinsfile custom spans
+## Custom Spans in Jenkinsfile
 
-With the OTel plugin installed, you can also configure custom spans in your Jenkins pipelines
+With the OTel plugin installed, you can enhance your Jenkins pipelines with custom observability by adding span attributes, creating custom spans, and enriching trace data. 
+
+### Adding Custom Span Attributes
+
+The following example shows how to add custom attributes to the current span within your Jenkins pipeline:
 
 ```groovy
   pipeline {
@@ -105,4 +112,12 @@ With the OTel plugin installed, you can also configure custom spans in your Jenk
   }
 ```
 
-For more details about spans refer [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#span)
+What this code does:
+
+* withSpanAttribute(): A Jenkins OTel plugin function that adds custom key-value metadata to spans
+* key: 'my-error-prone-span': The attribute name that will appear in your trace data
+* value: 'new-traces': The attribute value associated with the key
+* type: 'STRING': Specifies the data type of the attribute (can be STRING, LONG, DOUBLE, or BOOLEAN)
+* target: 'CURRENT_SPAN': Indicates that the attribute should be added to the currently active span (the stage span in this case)
+
+
