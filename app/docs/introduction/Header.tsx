@@ -4,6 +4,18 @@ import SubHeading from '@/components/ui/SubHeading'
 import SearchBar from '@/components/ui/SearchBar'
 
 export default function Header() {
+  const searchPlaceholders = [
+    "Hey, I'm SigNoz AI! Ask me anything about SigNoz...",
+    'How do I send Python traces to SigNoz?',
+    'Instrument Node.js app for APM',
+    'Set up log collection from Docker containers',
+    'Migrate from Datadog to SigNoz',
+    'Visualize Prometheus metrics in SigNoz',
+    'How to send Kubernetes logs?',
+    'Migrate from Grafana to SigNoz',
+    'Set up SigNoz Cloud for my team',
+  ]
+
   return (
     <div className="mx-auto mb-12 w-full max-w-6xl">
       <div className="text-center">
@@ -17,7 +29,11 @@ export default function Header() {
 
         {/* Search Bar */}
         <div className="mt-8 flex justify-center">
-          <SearchBar className="w-full max-w-2xl" />
+          <SearchBar
+            placeholder={searchPlaceholders}
+            clickLocation="Docs Header"
+            className="hidden w-full max-w-2xl sm:flex"
+          />
         </div>
       </div>
     </div>

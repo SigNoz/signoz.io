@@ -46,27 +46,13 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
       aria-modal="true"
       aria-labelledby="chat-modal-title"
     >
-      <div className="relative mx-4 h-[90vh] max-h-[800px] w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-4">
-          <h2 id="chat-modal-title" className="text-lg font-semibold text-gray-900">
-            SigNoz Assistant
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-2 transition-colors duration-200 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-signoz_robin-500"
-            aria-label="Close chat modal"
-          >
-            <XMarkIcon className="h-5 w-5 text-gray-500" />
-          </button>
-        </div>
-
+      <div className="relative mx-4 h-[80vh] w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
         {/* Chat iframe content */}
         <div className="h-full w-full bg-white">
           <iframe
             src="https://www.chatbase.co/chatbot-iframe/ZXMN63dnzm9r1LEY0He6U"
             width="100%"
-            style={{ height: 'calc(100% - 73px)', minHeight: '600px' }}
+            style={{ height: '100%', minHeight: '400px' }}
             frameBorder="0"
             title="SigNoz Chat Assistant"
             allow="microphone"
