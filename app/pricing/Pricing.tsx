@@ -1118,7 +1118,6 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> Monitor Health of SigNoz
                       </li>
-                      
                     </ul>
                   </div>
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
@@ -1374,7 +1373,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Alert as Code',
-            inCommunity: <CrossSolid />,
+            inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
           },
