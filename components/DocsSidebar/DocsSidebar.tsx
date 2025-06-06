@@ -93,8 +93,17 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   }, [pathname])
 
   const renderDoc = (doc: Doc) => {
-    const isActiveRoute = activeRoute === `${doc.route}/`
+    // Normalize both routes for comparison
+    const normalizeRoute = (route: string) => (route.endsWith('/') ? route.slice(0, -1) : route)
+    const normalizedActiveRoute = normalizeRoute(activeRoute || '')
+    const normalizedDocRoute = normalizeRoute(doc.route)
     const isGetStarted = doc.route === '/docs' && doc.label === 'Get Started'
+
+    // Special case: "Get Started" should be active when on /docs/introduction/ (since /docs/ redirects there)
+    const isActiveRoute = isGetStarted
+      ? normalizedActiveRoute === normalizedDocRoute ||
+        normalizedActiveRoute === '/docs/introduction'
+      : normalizedActiveRoute === normalizedDocRoute
 
     return (
       <li
@@ -133,7 +142,11 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   }
 
   const renderCategory = (category: Category) => {
-    const isActiveRoute = activeRoute === `${category.route}/`
+    // Normalize both routes for comparison
+    const normalizeRoute = (route: string) => (route.endsWith('/') ? route.slice(0, -1) : route)
+    const normalizedActiveRoute = normalizeRoute(activeRoute || '')
+    const normalizedCategoryRoute = normalizeRoute(category.route || '')
+    const isActiveRoute = normalizedActiveRoute === normalizedCategoryRoute
 
     return (
       <li key={category.label} className="group mx-2 my-1">
