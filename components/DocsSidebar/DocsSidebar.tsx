@@ -93,26 +93,48 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   }, [pathname])
 
   const renderDoc = (doc: Doc) => {
-    const isActiveRoute = activeRoute === `${doc.route}/`
+    // Normalize both routes for comparison
+    const normalizeRoute = (route: string) => (route.endsWith('/') ? route.slice(0, -1) : route)
+    const normalizedActiveRoute = normalizeRoute(activeRoute || '')
+    const normalizedDocRoute = normalizeRoute(doc.route)
+    const isGetStarted = doc.route === '/docs' && doc.label === 'Get Started'
+
+    // Special case: "Get Started" should be active when on /docs/introduction/ (since /docs/ redirects there)
+    const isActiveRoute = isGetStarted
+      ? normalizedActiveRoute === normalizedDocRoute ||
+        normalizedActiveRoute === '/docs/introduction'
+      : normalizedActiveRoute === normalizedDocRoute
 
     return (
       <li
         key={doc.route}
         id={`#${doc.route}`}
-        className={`doc flex cursor-pointer truncate pl-[16px] pt-[8px] text-lg font-normal ${
-          isActiveRoute
-            ? 'active-route text-white'
-            : 'text-gray-300 hover:text-white hover:underline'
+        className={`group transition-all duration-200 ${
+          isGetStarted ? 'mb-4 ml-4 mr-2 mt-2' : 'mx-2 my-1'
         }`}
         onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
         <Link
           href={doc.route}
-          className={`line-clamp-2 flex w-full items-center gap-2 ${doc.className}`}
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
+            isGetStarted
+              ? `font-medium ${
+                  isActiveRoute
+                    ? 'border border-blue-500 bg-blue-500/10 text-blue-400'
+                    : 'border border-gray-600 text-gray-200 hover:border-blue-500 hover:bg-blue-500/5 hover:text-blue-400'
+                }`
+              : `${
+                  isActiveRoute
+                    ? 'bg-blue-500/10 text-blue-400 shadow-sm'
+                    : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                }`
+          } ${doc.className || ''}`}
         >
-          <FileText className="flex-none" size={12} />
-          <Tooltip content={doc.label}>
-            <div className="sidebar-label line-clamp-2 text-sm"> {doc.label} </div>
+          {!isGetStarted && (
+            <FileText className="flex-shrink-0 opacity-60 group-hover:opacity-100" size={14} />
+          )}
+          <Tooltip content={doc.label} placement="right" delay={500}>
+            <span className="truncate font-medium">{doc.label}</span>
           </Tooltip>
         </Link>
       </li>
@@ -120,35 +142,50 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   }
 
   const renderCategory = (category: Category) => {
-    const isActiveRoute = activeRoute === `${category.route}/`
+    // Normalize both routes for comparison
+    const normalizeRoute = (route: string) => (route.endsWith('/') ? route.slice(0, -1) : route)
+    const normalizedActiveRoute = normalizeRoute(activeRoute || '')
+    const normalizedCategoryRoute = normalizeRoute(category.route || '')
+    const isActiveRoute = normalizedActiveRoute === normalizedCategoryRoute
 
     return (
-      <li key={category.label} className="pt-[8px] md:pl-[0px] lg:pl-[16px]">
+      <li key={category.label} className="group mx-2 my-1">
         <Link href={category.route || ''}>
           <div
             onClick={() => toggleIsExpandedByLabel(category.label)}
-            className={`folder flex cursor-pointer items-center gap-2 text-sm text-gray-200 hover:text-white ${category.className} ${isActiveRoute ? 'active-route text-white' : ''}`}
+            className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+              isActiveRoute
+                ? 'bg-blue-500/10 text-blue-400'
+                : 'text-gray-200 hover:bg-gray-800/50 hover:text-white'
+            } ${category.className || ''}`}
           >
-            {category.isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-
-            <span className={`sidebar-label text-sm font-normal`}>{category.label}</span>
+            <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
+              {category.isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </div>
+            <Tooltip content={category.label} placement="right" delay={500}>
+              <span className="truncate font-medium">{category.label}</span>
+            </Tooltip>
           </div>
         </Link>
         {category.isExpanded && (
-          <ul className={`ml-2 pl-0`}>
+          <div className="mt-1">
             {category.link && category.link.type === 'generated-index' && (
-              <div className="ml-2 mt-2">
-                <h4
-                  className={`mb-2 truncate text-sm font-normal text-gray-300 hover:text-white hover:underline ${
-                    isActiveRoute ? 'active-route text-white' : ''
-                  }`}
-                >
-                  {category.link.title}
-                </h4>
+              <div className="mx-5 mb-2 mt-2">
+                <Tooltip content={category.link.title} placement="right" delay={500}>
+                  <h4
+                    className={`truncate text-xs font-medium text-gray-400 ${
+                      isActiveRoute ? 'text-blue-400' : 'hover:text-gray-300'
+                    }`}
+                  >
+                    {category.link.title}
+                  </h4>
+                </Tooltip>
               </div>
             )}
-            {category?.items?.map(renderItem)}
-          </ul>
+            <ul className="ml-4 space-y-0.5 border-l border-gray-700/50 pl-0">
+              {category?.items?.map(renderItem)}
+            </ul>
+          </div>
         )}
       </li>
     )
@@ -189,9 +226,9 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   return (
     <nav
       ref={sidebarRef}
-      className="w-100 docs-sidebar sticky top-[48px] overflow-y-auto pl-0 text-white md:pt-0 lg:p-4 lg:pt-4"
+      className="docs-sidebar sticky top-[48px] h-full w-full overflow-y-auto py-4 text-white"
     >
-      <ul className="list-none p-0 pl-0">{sideNav.map(renderItem)}</ul>
+      <ul className="list-none space-y-1 p-0">{sideNav.map(renderItem)}</ul>
     </nav>
   )
 }
