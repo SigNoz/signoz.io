@@ -1479,7 +1479,7 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/web-vitals',
+        route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
         label: 'Web Vitals',
       },
       {
