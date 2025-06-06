@@ -83,6 +83,10 @@ module.exports = () => {
           protocol: 'https',
           hostname: 'avatars.githubusercontent.com',
         },
+        {
+          protocol: 'http',
+          hostname: 'localhost',
+        },
       ],
     },
     async headers() {
