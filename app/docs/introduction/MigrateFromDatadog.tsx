@@ -13,17 +13,17 @@ interface MigrationLinkData {
 const migrationLinks: MigrationLinkData[] = [
   {
     title: 'Migration Guide',
-    description: 'Step-by-step guide to migrate from DataDog',
+    description: 'Step-by-step guide to migrate from Datadog',
     href: '/docs/migration/migrate-from-datadog/',
     icon: <BookText size={20} className="text-signoz_robin-500" />,
     clickName: 'Datadog Migration Guide Link',
   },
   {
-    title: 'Cost Comparison',
-    description: 'Compare SigNoz and DataDog pricing',
-    href: '/product-comparison/signoz-vs-datadog/#value-for-money',
-    icon: <Calculator size={20} className="text-signoz_robin-500" />,
-    clickName: 'Datadog Cost Comparison Link',
+    title: 'Migrate from Grafana',
+    description: 'Step-by-step guide to migrate from Grafana',
+    href: '/docs/migration/migrate-from-grafana/',
+    icon: <BookText size={20} className="text-signoz_robin-500" />,
+    clickName: 'Grafana Migration Guide Link',
   },
 ]
 
@@ -34,10 +34,10 @@ export default function MigrateFromDatadog() {
     <div className="mx-auto mb-12 w-full max-w-7xl">
       <div className="mb-6 text-left">
         <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
-          Migrate from DataDog
+          Migrate from Datadog or Grafana
         </h2>
         <p className="text-base text-signoz_vanilla-400">
-          Seamlessly transition from DataDog to SigNoz
+          Seamlessly transition from Datadog or Grafana to SigNoz
         </p>
       </div>
 
