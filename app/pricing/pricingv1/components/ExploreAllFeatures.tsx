@@ -1,7 +1,5 @@
 import React from 'react'
-import Link from 'next/link'
 import TrackingLink from '../../../../components/TrackingLink'
-import Button from '../../../../components/Button/Button'
 import {
   CheckSolid,
   CrossSolid,
@@ -10,6 +8,7 @@ import {
   ServerSolid,
 } from '../../../../components/homepage-icons/icons'
 import Line from '../../../../components/ui/Line'
+import ChatbaseScrollTrigger from './ChatbaseScrollTrigger'
 
 // Plan header type
 type PlanHeader = {
@@ -62,11 +61,11 @@ const ALL_FEATURES_DATA = {
           className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
           clickType="Primary CTA"
           clickName="Sign Up Button"
-          clickText="Get Started"
+          clickText="Get Started - Free"
           clickLocation="Explore All Features Table"
           id="btn-get-started-pricing-table"
         >
-          Get Started
+          Get Started - Free
         </TrackingLink>
       ),
     },
@@ -89,6 +88,47 @@ const ALL_FEATURES_DATA = {
     },
   ],
   ROWS: [
+    {
+      section: 'Choose When',
+      features: [
+        {
+          feature: 'Best suited for your needs when you',
+          inCommunity: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              🛠️ Have DevOps expertise & want full control
+            </div>
+          ),
+          inTeams: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              ☁️ Want zero operational overhead & quick setup
+            </div>
+          ),
+          inEnterprise: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              🏢 Want dedicated environments or bring-your-own-cloud
+            </div>
+          ),
+        },
+        {
+          feature: 'Ideal for',
+          inCommunity: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              Solo developers & small startups
+            </div>
+          ),
+          inTeams: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              Teams scaling fast & growing companies
+            </div>
+          ),
+          inEnterprise: (
+            <div className="text-center text-xs text-signoz_vanilla-400">
+              Orgs with compliance & security requirements
+            </div>
+          ),
+        },
+      ],
+    },
     {
       section: 'APM & Distributed Tracing',
       features: [
@@ -505,7 +545,7 @@ const ALL_FEATURES_DATA = {
         },
         {
           feature: 'Dashboard Locking & Access control',
-          inCommunity: <CrossSolid />,
+          inCommunity: <CheckSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },
@@ -676,86 +716,120 @@ const ALL_FEATURES_DATA = {
 
 const ExploreAllFeatures: React.FC = () => {
   return (
-    <div
-      id="all-features"
-      className="relative !m-0 !mx-auto !w-[100vw] border !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]"
-    >
-      <div className="mx-auto mb-10 mt-6">
-        {/* Header - Using CSS sticky positioning for smoother scrolling */}
-        <div className="sticky top-[56px] z-20 bg-[#0f1013]">
-          <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
-            {ALL_FEATURES_DATA.HEADER.map((header, idx) => (
-              <div
-                key={idx}
-                className={`${
-                  idx === 2
-                    ? `flex flex-col justify-between rounded-lg !rounded-b-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]`
-                    : idx !== 0
-                      ? `flex flex-col justify-between rounded-lg p-3 bg-opacity-${idx * 10}`
-                      : 'hidden md:block'
-                }`}
-              >
-                <div className="flex flex-col gap-1">
-                  <h2 className="m-0 text-sm max-sm:h-16 md:text-base">{header.heading}</h2>
-                  <p className="text-xs text-signoz_vanilla-400">{header.desc}</p>
+    <>
+      <ChatbaseScrollTrigger
+        triggerElementId="choose-when-section"
+        messages={[
+          '👋 Hey, how can I help you get started?',
+          'Exploring SigNoz Pricing or Features? Share your usecase to find the right plan for you and see the relevant docs.',
+        ]}
+      />
+      <div
+        id="all-features"
+        className="relative !m-0 !mx-auto !w-[100vw] border !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]"
+      >
+        <div className="mx-auto mb-10 mt-6 ">
+          {/* Header - Using CSS sticky positioning for smoother scrolling */}
+          <div className="sticky top-[74px] z-20 bg-[#0f1013]">
+            <div className="my-12">
+              <div className="grid grid-cols-1">
+                <div className="mx-6 flex justify-center">
+                  <TrackingLink
+                    href="/teams/"
+                    className="absolute -top-10 my-6 cursor-pointer rounded-full border border-signoz_slate-400 bg-signoz_ink-400 px-6 py-3 text-center transition-all duration-200 hover:border-signoz_robin-500/50 hover:bg-signoz_ink-300 hover:shadow-lg"
+                    clickType="Secondary CTA"
+                    clickName="Pro Tip Pill"
+                    clickText="Most teams start with Teams Cloud free trial to test with real data, then decide based on their specific needs. You can always migrate between options as your requirements evolve!"
+                    clickLocation="Explore All Features Pro Tip"
+                    id="btn-pro-tip-teams-link"
+                  >
+                    <p className="m-0 text-xs text-signoz_vanilla-400 hover:text-signoz_vanilla-300">
+                      <span className="font-medium text-signoz_vanilla-200">💡 Pro tip:</span> Most
+                      teams start with Teams Cloud free trial to test with real data, then decide
+                      based on their specific needs. You can always migrate between options as your
+                      requirements evolve!
+                    </p>
+                  </TrackingLink>
                 </div>
-                <div className="flex w-full justify-center">{header.action}</div>
-              </div>
-            ))}
-          </div>
-          <Line />
-        </div>
-
-        {/* Feature sections */}
-        {ALL_FEATURES_DATA.ROWS.map((section, sectionIdx) => (
-          <div key={sectionIdx}>
-            {/* Section header */}
-            <div className="grid grid-cols-1">
-              <div className="grid grid-cols-1 gap-1 sm:grid-cols-3 md:grid-cols-[3fr_1fr_1fr_1fr]">
-                <div className="mb-3 mt-12 py-2 pl-6 pr-2 text-center text-sm font-medium md:text-left">
-                  {section.section}
-                </div>
-                <div></div>
-                <div className="bg-signoz_ink-500 sm:bg-[#16181d]"></div>
-                <div></div>
               </div>
             </div>
-            <Line />
-
-            {/* Features in this section */}
-            <div className="grid grid-cols-1">
-              {section.features.map((feature, featureIdx) => (
-                <div key={featureIdx}>
-                  <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
-                    <h4 className="col-span-3 m-0 py-3 pl-6 pr-2 text-center text-sm font-normal text-signoz_vanilla-400 md:col-span-1 md:text-left">
-                      {feature.feature}
-                    </h4>
-                    <div className="flex items-center justify-center rounded-lg p-3">
-                      {feature.inCommunity}
-                    </div>
-                    <div className="flex items-center justify-center rounded-lg rounded-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]">
-                      {feature.inTeams}
-                    </div>
-                    <div className="flex items-center justify-center rounded-lg p-3">
-                      {feature.inEnterprise}
-                    </div>
+            <div className="grid grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]">
+              {ALL_FEATURES_DATA.HEADER.map((header, idx) => (
+                <div
+                  key={idx}
+                  className={`${
+                    idx === 2
+                      ? `relative z-10 flex scale-105 transform flex-col justify-between rounded-lg !rounded-b-none border border-signoz_slate-400/20 bg-signoz_ink-500 p-3 shadow-2xl sm:bg-[#16181d]`
+                      : idx !== 0
+                        ? `flex flex-col justify-between rounded-lg p-3 bg-opacity-${idx * 10}`
+                        : 'hidden md:block'
+                  }`}
+                >
+                  <div className="flex flex-col gap-1">
+                    <h2 className="m-0 text-sm max-sm:h-16 md:text-base">{header.heading}</h2>
+                    <p className="text-xs text-signoz_vanilla-400">{header.desc}</p>
                   </div>
-                  <Line />
+                  <div className="flex w-full justify-center">{header.action}</div>
                 </div>
               ))}
             </div>
+            <Line />
           </div>
-        ))}
 
-        {/* Bottom rounded corner for Teams column */}
-        <div className="grid h-[18px] grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
-          <div />
-          <div />
-          <div className="rounded-lg !rounded-t-none bg-signoz_ink-500 sm:bg-[#16181d]" />
-          <div />
+          {/* Feature sections */}
+          {ALL_FEATURES_DATA.ROWS.map((section, sectionIdx) => (
+            <div
+              key={sectionIdx}
+              id={section.section === 'Choose When' ? 'choose-when-section' : undefined}
+            >
+              {/* Section header */}
+              <div className="sticky top-[220px] z-10 bg-[#0f1013]">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-[3fr_1fr_1fr_1fr]">
+                  <div className="mb-3 mt-8 py-2 pl-6 pr-2 text-center text-sm font-medium sm:text-lg md:text-left">
+                    {section.section}
+                  </div>
+                  <div></div>
+                  <div className="relative z-10 scale-105 transform border-x border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-[#16181d]"></div>
+                  <div></div>
+                </div>
+              </div>
+              <Line />
+
+              {/* Features in this section */}
+              <div className="grid grid-cols-1">
+                {section.features.map((feature, featureIdx) => (
+                  <div key={featureIdx}>
+                    <div className="grid grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]">
+                      <h4 className="col-span-3 m-0 py-4 pl-6 pr-2 text-center text-sm font-normal text-signoz_vanilla-400 sm:py-5 md:col-span-1 md:text-left">
+                        {feature.feature}
+                      </h4>
+                      <div className="flex items-center justify-center rounded-lg p-4 sm:p-5">
+                        {feature.inCommunity}
+                      </div>
+                      <div className="relative z-10 flex scale-105 transform items-center justify-center rounded-lg rounded-none border-x border-signoz_slate-400/20 bg-signoz_ink-500 p-4 shadow-2xl sm:bg-[#16181d] sm:p-5">
+                        {feature.inTeams}
+                      </div>
+                      <div className="flex items-center justify-center rounded-lg p-4 sm:p-5">
+                        {feature.inEnterprise}
+                      </div>
+                    </div>
+                    <Line />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Bottom rounded corner for Teams column */}
+          <div className="grid h-[18px] grid-cols-3 gap-4 md:grid-cols-[3fr_1fr_1fr_1fr]">
+            <div />
+            <div />
+            <div className="relative z-10 scale-105 transform rounded-lg !rounded-t-none border-x border-b border-signoz_slate-400/20 bg-signoz_ink-500 shadow-2xl sm:bg-[#16181d]" />
+            <div />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

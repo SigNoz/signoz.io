@@ -1477,7 +1477,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Dashboard Locking & Access control',
-            inCommunity: <CrossSolid />,
+            inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
           },

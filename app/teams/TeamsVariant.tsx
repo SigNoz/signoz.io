@@ -126,10 +126,10 @@ const testimonials = [
   },
   {
     quote:
-      'Setup was a breeze—we had the OpenTelemetry collector running and monitoring in no time.',
-    author: 'Niranjan Ravichandra, Co-founder & CTO, Cedana',
-    avatar: '/img/case_study/profile-photos/cedana.webp',
-    url: '/case-study/cedana/',
+      "We've been using SigNoz since 2023 in production, been great to see the product keep on improving and growing.",
+    author: 'Alexei Z., Senior Software Engineer, Uken Games',
+    avatar: '/img/case_study/profile-photos/uken.webp',
+    url: 'https://www.linkedin.com/posts/activity-7329258209225900034-ez5Z',
   },
   {
     quote:
