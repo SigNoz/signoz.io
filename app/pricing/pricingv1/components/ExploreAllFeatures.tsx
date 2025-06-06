@@ -395,7 +395,7 @@ const ALL_FEATURES_DATA = {
         },
         {
           feature: 'Alert as Code',
-          inCommunity: <CrossSolid />,
+          inCommunity: <CheckSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },
