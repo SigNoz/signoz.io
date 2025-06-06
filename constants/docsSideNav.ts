@@ -420,7 +420,8 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/manage/administrator-guide/security-and-compliance/saml-authentication',
+                route:
+                  '/docs/manage/administrator-guide/security-and-compliance/saml-authentication',
                 label: 'SAML',
               },
             ],
@@ -518,10 +519,10 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Python',
-            route: '/docs/instrumentation/python',
+            route: '/docs/instrumentation/opentelemetry-python',
             // link: {
             // type: 'doc',
-            // route: '/docs/instrumentation/python',
+            // route: '/docs/instrumentation/opentelemetry-python',
             // title: 'Python',
             // description: 'Learn how to instrument Python applications with OpenTelemetry',
             // slug: 'instrumentation/python',
@@ -529,32 +530,32 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/django',
+                route: '/docs/instrumentation/opentelemetry-django',
                 label: 'Django ',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/fastapi',
+                route: '/docs/instrumentation/opentelemetry-fastapi',
                 label: 'FastAPI ',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/flask',
+                route: '/docs/instrumentation/opentelemetry-flask',
                 label: 'Flask ',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/falcon',
+                route: '/docs/instrumentation/opentelemetry-falcon',
                 label: 'Falcon ',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/hypercorn-unicorn-support',
+                route: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support',
                 label: 'Hypercorn/Unicorn ',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/celery',
+                route: '/docs/instrumentation/opentelemetry-celery',
                 label: 'Celery Worker OpenTelemetry Setup',
               },
             ],
@@ -563,18 +564,18 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Java',
-            route: '/docs/instrumentation/java',
+            route: '/docs/instrumentation/opentelemetry-java',
             // link: {
             // type: 'doc',
-            // route: '/docs/instrumentation/java',
-            // title: 'Python',
-            // description: 'Learn how to instrument Python applications with OpenTelemetry',
-            // slug: 'instrumentation/python',
+            // route: '/docs/instrumentation/opentelemetry-java',
+            // title: 'Java',
+            // description: 'Learn how to instrument Java applications with OpenTelemetry',
+            // slug: 'instrumentation/java',
             // },
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/springboot',
+                route: '/docs/instrumentation/opentelemetry-springboot',
                 label: 'Spring Boot',
               },
               {
@@ -585,12 +586,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/tomcat',
+                route: '/docs/instrumentation/opentelemetry-tomcat',
                 label: 'Tomcat',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/jboss',
+                route: '/docs/instrumentation/opentelemetry-jboss',
                 label: 'JBoss',
               },
             ],
@@ -599,33 +600,33 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Javascript',
-            route: '/docs/instrumentation/javascript',
+            route: '/docs/instrumentation/opentelemetry-javascript',
             // link: {
             // type: 'doc',
-            // route: '/docs/instrumentation/javascript',
-            // title: 'Python',
-            // description: 'Learn how to instrument Python applications with OpenTelemetry',
-            // slug: 'instrumentation/python',
+            // route: '/docs/instrumentation/opentelemetry-javascript',
+            // title: 'JavaScript',
+            // description: 'Learn how to instrument JavaScript applications with OpenTelemetry',
+            // slug: 'instrumentation/javascript',
             // },
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/express',
+                route: '/docs/instrumentation/opentelemetry-express',
                 label: 'Express',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/nestjs',
+                route: '/docs/instrumentation/opentelemetry-nestjs',
                 label: 'NestJS',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/angular',
+                route: '/docs/instrumentation/opentelemetry-angular',
                 label: 'Angular',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/nextjs',
+                route: '/docs/instrumentation/opentelemetry-nextjs',
                 label: 'NextJS',
               },
               {
@@ -643,32 +644,32 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Golang',
-            route: '/docs/instrumentation/golang',
+            route: '/docs/instrumentation/opentelemetry-golang',
           },
           {
             type: 'doc',
             label: 'PHP',
-            route: '/docs/instrumentation/php',
+            route: '/docs/instrumentation/opentelemetry-php',
           },
           {
             type: 'doc',
             label: '.NET',
-            route: '/docs/instrumentation/dotnet',
+            route: '/docs/instrumentation/opentelemetry-dotnet',
           },
           {
             type: 'doc',
             label: 'Ruby on Rails',
-            route: '/docs/instrumentation/ruby-on-rails',
+            route: '/docs/instrumentation/opentelemetry-ruby-on-rails',
           },
           {
             type: 'doc',
             label: 'Elixir',
-            route: '/docs/instrumentation/elixir',
+            route: '/docs/instrumentation/opentelemetry-elixir',
           },
           {
             type: 'doc',
             label: 'Rust',
-            route: '/docs/instrumentation/rust',
+            route: '/docs/instrumentation/opentelemetry-rust',
           },
           {
             type: 'doc',
@@ -678,7 +679,7 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Swift',
-            route: '/docs/instrumentation/swift',
+            route: '/docs/instrumentation/opentelemetry-swift',
           },
           {
             type: 'doc',
@@ -711,7 +712,8 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     label: 'NodeJS',
-                    route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
+                    route:
+                      '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs',
                   },
                 ],
               },
@@ -1519,7 +1521,7 @@ const docsSideNav = [
             route: '/docs/integrations/aws/s3-sync',
             className: 'new-doc',
             label: 'S3 Sync',
-          }
+          },
         ],
       },
       {
@@ -1676,7 +1678,7 @@ const docsSideNav = [
         route: '/docs/external-api-monitoring/setup',
         label: 'Setup',
       },
-    ]
+    ],
   },
   {
     label: 'CICD Monitoring',
@@ -1899,7 +1901,7 @@ const docsSideNav = [
         route: '/docs/migration/migrate-to-signoz-cloud',
         label: 'From SigNoz OSS to Cloud',
       },
-    ]
+    ],
   },
   {
     label: 'Migrate From LGTM Stack',
