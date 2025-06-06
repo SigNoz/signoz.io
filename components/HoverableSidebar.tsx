@@ -51,21 +51,17 @@ const HoverableSidebar: React.FC = () => {
 
   return (
     <div className="hidden lg:block">
-      {/* Compact square menu button */}
-      <div
-        className={`fixed top-20 z-50 cursor-pointer transition-all duration-300 ${
-          isOpen ? 'left-64' : 'left-6'
-        }`}
-        onClick={toggleSidebar}
-      >
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-600/50 bg-gray-800/90 shadow-sm backdrop-blur-sm hover:bg-gray-700/90">
-          {isOpen ? (
-            <X size={16} className="text-gray-300" />
-          ) : (
+      {/* Compact square menu button - only show when closed */}
+      {!isOpen && (
+        <div
+          className="fixed left-6 top-[71px] z-50 cursor-pointer transition-all duration-300"
+          onClick={toggleSidebar}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded border border-gray-600/50 bg-gray-800/90 shadow-sm backdrop-blur-sm hover:bg-gray-700/90">
             <Menu size={16} className="text-gray-300" />
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Collapsible Sidebar - styled exactly like docs layout */}
       <div
