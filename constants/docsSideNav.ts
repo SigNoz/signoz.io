@@ -1485,22 +1485,22 @@ const docsSideNav = [
       {
         type: 'doc',
         label: 'Swift UI',
-        route: '/docs/instrumentation/mobile-instrumentation/swiftUi',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftUi',
       },
       {
         type: 'doc',
         label: 'Java',
-        route: '/docs/instrumentation/mobile-instrumentation/java',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java',
       },
       {
         type: 'doc',
         label: 'Kotlin',
-        route: '/docs/instrumentation/mobile-instrumentation/kotlin',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin',
       },
       {
         type: 'doc',
         label: 'Flutter',
-        route: '/docs/instrumentation/mobile-instrumentation/flutter',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter',
       },
     ],
   },
