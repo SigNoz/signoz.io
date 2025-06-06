@@ -1,0 +1,410 @@
+---
+date: 2024-12-15
+id: severity-parsing
+title: Parse Log Severity Levels with Pipelines
+---
+
+## Overview
+
+Log severity levels are crucial for filtering, alerting, and understanding the importance of log entries. The Severity Parser in SigNoz allows you to extract and map severity levels from various log field formats, ensuring consistent log level categorization across diverse log sources.
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/logs/pipelines/severity-parser-overview.png"
+    alt="Log severity levels properly parsed and displayed in SigNoz"
+  />
+  <figcaption>
+    <i>
+      Log severity levels properly parsed and displayed in SigNoz
+    </i>
+  </figcaption>
+</figure>
+
+With severity parsing, you can:
+- **Standardize severity levels** across different applications and services
+- **Filter logs efficiently** by severity (DEBUG, INFO, WARN, ERROR, etc.)
+- **Create severity-based alerts** to monitor critical issues
+- **Map custom severity values** to standard OpenTelemetry severity levels
+- **Handle HTTP status codes** with special range mapping (2xx, 3xx, 4xx, 5xx)
+
+## Prerequisites
+- You are [sending logs to SigNoz](/docs/userguide/logs).
+- Your logs contain severity information in log attributes, resource attributes, or body text.
+
+## Understanding Severity Levels
+
+SigNoz supports the standard OpenTelemetry severity levels:
+
+| Severity Level | Numeric Value | Description |
+|---|---|---|
+| TRACE | 1-4 | Finest granularity of events |
+| DEBUG | 5-8 | Information useful for debugging |
+| INFO | 9-12 | Informational messages |
+| WARN | 13-16 | Warning conditions |
+| ERROR | 17-20 | Error conditions |
+| FATAL | 21-24 | Fatal error conditions |
+
+## Common Severity Parsing Scenarios
+
+### Scenario 1: Text-based Severity Levels
+
+Many applications log severity as text values like "debug", "info", "warning", "error".
+
+**Example log entry:**
+```json
+{
+  "body": "User authentication failed",
+  "attributes": {
+    "level": "error",
+    "service": "auth-service"
+  }
+}
+```
+
+### Scenario 2: HTTP Status Code Mapping
+
+Web applications often use HTTP status codes that need to be mapped to severity levels.
+
+**Example log entry:**
+```json
+{
+  "body": "GET /api/users - 500 Internal Server Error",
+  "attributes": {
+    "http_status": "500",
+    "method": "GET"
+  }
+}
+```
+
+### Scenario 3: Custom Numeric Levels
+
+Some applications use custom numeric severity scales.
+
+**Example log entry:**
+```json
+{
+  "body": "Database connection timeout",
+  "attributes": {
+    "priority": "3",
+    "component": "database"
+  }
+}
+```
+
+## Create a Severity Parsing Pipeline
+
+Follow these steps to create a pipeline that extracts and maps severity levels from your log fields.
+
+### Step 1: Navigate to Logs Pipelines Page
+
+Hover over the **Logs** menu in the sidebar and click on the **Logs Pipeline** submenu item.
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/logs/pipelines/navigate-to-logs-pipelines.png"
+    alt="Sidebar navigation for getting to Logs Pipelines page"
+  />
+  <figcaption>
+    <i>
+      Sidebar navigation for getting to Logs Pipelines page
+    </i>
+  </figcaption>
+</figure>
+
+### Step 2: Create a New Pipeline
+
+- Open the "Create New Pipeline" dialog.
+    - If you do not have existing pipelines, press the **"New Pipeline"** button.
+    - If you already have some pipelines, press the **"Enter Edit Mode"** button and then click the **"Add a New Pipeline"** button.
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/logs/pipelines/add-new-pipeline-modal.png"
+    alt="Create New Pipeline dialog"
+  />
+  <figcaption>
+    <i>
+      Create New Pipeline dialog
+    </i>
+  </figcaption>
+</figure>
+
+- Provide details about the pipeline:
+    - Use the **Name** field to give your pipeline a descriptive name like "Severity Parser - Auth Service"
+    - Use the **Description** field to explain what this pipeline does
+    - Use the **Filter** field to select the logs you want to process. Examples:
+        - `service = "auth-service"` - for specific service logs
+        - `attributes.level exists` - for logs that have a level attribute
+        - `attributes.http_status exists` - for logs with HTTP status codes
+    - Use the **Filtered Logs Preview** to verify your filter selects the correct logs
+
+- Press the **"Create"** button when everything looks correct.
+
+### Step 3: Add Severity Parser Processor
+
+Expand the newly created pipeline and add the severity parser processor.
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/logs/pipelines/json-pipeline-add-processor-button.png"
+    alt="Expanding a pipeline shows the Add Processor button"
+  />
+  <figcaption>
+    <i>
+      Expanding a pipeline shows the Add Processor button
+    </i>
+  </figcaption>
+</figure>
+
+- Click the **Add Processor** button to open the processor dialog
+- Select `Severity Parser` in the **Select Processor Type** field
+- Configure the processor fields:
+
+#### Basic Configuration
+
+| Field | Description | Example |
+|---|---|---|
+| **Name of Severity Parsing Processor** | Descriptive name for the processor | "Parse Level Attribute" |
+| **Parse Severity Value From** | Log field containing severity value | `attributes.level` |
+
+#### Severity Level Mapping
+
+Configure how values map to each severity level. All values are case-insensitive.
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/logs/pipelines/severity-parser-configuration.png"
+    alt="Severity Parser processor configuration dialog"
+  />
+  <figcaption>
+    <i>
+      Severity Parser processor configuration dialog
+    </i>
+  </figcaption>
+</figure>
+
+**Example configurations for different scenarios:**
+
+#### For Standard Text Levels:
+- **Values for level TRACE**: `trace, verbose`
+- **Values for level DEBUG**: `debug, dbg`
+- **Values for level INFO**: `info, information, notice`
+- **Values for level WARN**: `warn, warning, caution`
+- **Values for level ERROR**: `error, err, failure`
+- **Values for level FATAL**: `fatal, critical, panic`
+
+#### For HTTP Status Codes:
+- **Values for level DEBUG**: `1xx`
+- **Values for level INFO**: `2xx, 3xx`
+- **Values for level WARN**: `4xx`
+- **Values for level ERROR**: `5xx`
+- **Values for level FATAL**: `503, 504`
+
+#### For Custom Numeric Levels:
+- **Values for level TRACE**: `0`
+- **Values for level DEBUG**: `1`
+- **Values for level INFO**: `2`
+- **Values for level WARN**: `3`
+- **Values for level ERROR**: `4`
+- **Values for level FATAL**: `5`
+
+- Press the **Create** button to add the processor
+
+### Step 4: Preview and Validate Pipeline Processing
+
+Before deploying, test your pipeline with sample logs to ensure it works correctly.
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/logs/pipelines/severity-pipeline-preview.png"
+    alt="Pipeline Preview showing severity levels being parsed correctly"
+  />
+  <figcaption>
+    <i>
+      Pipeline Preview showing severity levels being parsed correctly
+    </i>
+  </figcaption>
+</figure>
+
+- Click the "eye" icon for your pipeline to open the Pipeline Preview Dialog
+- The preview shows sample logs that match your pipeline filter
+- Press the **Simulate Processing** button to test severity parsing
+- Expand processed logs to verify:
+    - The `severity_text` field is populated correctly
+    - The `severity_number` field matches the expected numeric value
+    - Unmapped values are handled appropriately
+
+If you see issues, close the preview, edit your processor configuration, and test again.
+
+### Step 5: Save and Deploy Pipeline
+
+Once you've verified the pipeline works correctly:
+
+- Press the **Save Configuration** button at the bottom of the pipelines list
+- Monitor deployment status in the **Change History** tab
+- Wait a few minutes for the pipeline to deploy and process new logs
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/logs/pipelines/change-history.png"
+    alt="Pipelines Change History showing deployment status"
+  />
+  <figcaption>
+    <i>
+      Pipelines Change History showing deployment status
+    </i>
+  </figcaption>
+</figure>
+
+## Advanced Severity Parsing Patterns
+
+### Parsing Severity from Log Body
+
+If severity information is embedded in the log body text, you'll need to extract it first using a Regex or Grok processor, then apply severity parsing.
+
+**Example log:**
+```
+2024-12-15 10:30:15 [ERROR] Database connection failed
+```
+
+**Step 1: Extract severity with Regex processor**
+- **Pattern**: `\[(?P<level>[A-Z]+)\]`
+- **Parse From**: `body`
+- **Parse To**: `attributes`
+
+**Step 2: Apply severity parser**
+- **Parse Severity Value From**: `attributes.level`
+
+### Conditional Severity Mapping
+
+For logs where severity depends on multiple factors, you can chain processors:
+
+```json
+{
+  "body": "HTTP request completed",
+  "attributes": {
+    "status_code": "404",
+    "response_time": "2.5s"
+  }
+}
+```
+
+You might want 404s to be WARN but other 4xx codes to be ERROR:
+
+**Processor 1: Add processor for specific handling**
+- **Field**: `attributes.severity_level`
+- **Value**: `EXPR(attributes.status_code == "404" ? "warn" : (attributes.status_code >= "400" AND attributes.status_code < "500" ? "error" : "info"))`
+
+**Processor 2: Severity parser**
+- **Parse Severity Value From**: `attributes.severity_level`
+
+### Multiple Severity Sources
+
+If logs have multiple potential severity sources, create separate pipelines with different filters:
+
+**Pipeline 1**: For logs with `attributes.level`
+- **Filter**: `attributes.level exists`
+- **Parse From**: `attributes.level`
+
+**Pipeline 2**: For logs with HTTP status codes
+- **Filter**: `attributes.http_status exists AND NOT attributes.level exists`
+- **Parse From**: `attributes.http_status`
+
+## Special Cases and Tips
+
+### HTTP Status Code Ranges
+
+The severity parser supports special range syntax for HTTP status codes:
+
+- `2xx` maps status codes 200-299
+- `3xx` maps status codes 300-399  
+- `4xx` maps status codes 400-499
+- `5xx` maps status codes 500-599
+
+### Case Sensitivity
+
+All severity value matching is case-insensitive, so "ERROR", "error", and "Error" are treated the same.
+
+### Unmapped Values
+
+Values that don't match any configured mapping will:
+- Leave the existing severity unchanged if already set
+- Not set any severity if none exists
+
+### Performance Considerations
+
+- Place more specific filters earlier in your pipeline list
+- Use narrow filters to reduce processing overhead
+- Consider the order of processors within a pipeline
+
+## Verification and Testing
+
+After deploying your severity parsing pipeline:
+
+### 1. Check Logs Explorer
+
+Navigate to the Logs Explorer and verify:
+- Severity levels appear correctly in log entries
+- You can filter by severity using the severity dropdown
+- Severity-based queries work as expected
+
+### 2. Test Severity Filtering
+
+Try filtering logs by different severity levels:
+```
+severity_text = "ERROR"
+severity_number >= 17
+```
+
+### 3. Create Severity-based Alerts
+
+Set up alerts based on parsed severity levels:
+- High ERROR rate alerts
+- Any FATAL level log alerts
+- Service-specific severity patterns
+
+## Troubleshooting
+
+### Severity Not Being Parsed
+
+**Check:**
+- Pipeline filter matches your logs
+- Field path is correct (case-sensitive)
+- Value mappings include your severity values
+- Pipeline is deployed successfully
+
+### Incorrect Severity Mapping
+
+**Solutions:**
+- Review value mappings for typos
+- Check for case sensitivity issues
+- Verify range mappings (2xx, 3xx, etc.)
+- Use pipeline preview to debug
+
+### Performance Issues
+
+**Optimizations:**
+- Use more specific pipeline filters
+- Place frequently used pipelines first
+- Combine related processors in single pipelines
+- Monitor pipeline processing metrics
+
+## Best Practices
+
+1. **Standardize Early**: Set up severity parsing as soon as you start sending logs
+2. **Use Consistent Mappings**: Maintain the same severity mappings across services
+3. **Document Mappings**: Keep a record of your severity mapping decisions
+4. **Test Thoroughly**: Always preview pipelines before deploying
+5. **Monitor Performance**: Watch for processing delays or errors
+6. **Regular Reviews**: Periodically review and update severity mappings
+
+## Next Steps
+
+Once you have severity parsing configured:
+
+- Set up [severity-based alerts](/docs/alerts-management) for critical issues
+- Create [dashboards](/docs/dashboards) showing severity trends
+- Use severity levels in [log queries](/docs/userguide/logs_query_builder) for efficient filtering
+- Combine with [trace parsing](/docs/logs-pipelines/guides/trace) for comprehensive observability
+
+With proper severity parsing, your logs become much more useful for monitoring, debugging, and maintaining your applications. The ability to quickly filter and alert on severity levels is essential for effective observability.
