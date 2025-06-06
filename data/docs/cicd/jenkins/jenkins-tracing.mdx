@@ -1,7 +1,7 @@
 ---
 date: 2025-04-28
 id: jenkins-tracing
-title: Jenkins Traces
+title: Jenkins Tracing
 description: Instrument Jenkins with OpenTelemetry and send traces to SigNoz
 ---
    
@@ -11,8 +11,9 @@ To know more about tracing refer [here](https://signoz.io/docs/instrumentation/o
 
 ## Prerequisites
 - Jenkins [>2.479.3]
+- Administrative access to Jenkins controller
 
-### Setup
+## Setup
 
 SigNoz runs its own OTel collector in both the Self-Hosted and Cloud version
 
@@ -26,17 +27,10 @@ SigNoz runs its own OTel collector in both the Self-Hosted and Cloud version
 ### Step 1: Set the OTLP Endpoint
 Navigate to Manage Jenkins -> System -> OpenTelemetry section
 
-Depending on the choice of your region for the SigNoz cloud, the ingest endpoint will vary according to this table.
-  | Region | Endpoint |
-  | --- | --- |
-  | US |  ingest.us.signoz.cloud:443 |
-  | IN |  ingest.in.signoz.cloud:443 |
-  | EU | ingest.eu.signoz.cloud:443 |
-
 ### Step 2: Set the Authentication headers
 In the same section click on Authentication and select **Header Authentication**
 
-Add Header key as **signoz-ingestion-key** and value as SigNoz_Ingestion_Key
+Add Header key as **signoz-ingestion-key** and create a Jenkins credential of type **Secret text** and store the SigNoz_Ingestion_Key
 
 <figure data-zoomable align="center">
     <img
@@ -50,13 +44,11 @@ Add Header key as **signoz-ingestion-key** and value as SigNoz_Ingestion_Key
     </figcaption>
 </figure>
 
-Note: Replace \<signoz-ingestion-key\> with your ingestion key
-
 </TabItem>
 
 <TabItem value='self-host' label='Self-Host' default>
 
-Navigate to Manage Jenkins -> System -> OpenTelemetry section 
+Now, navigate to **Manage Jenkins** -> **System** -> **OpenTelemetry** section 
 <figure data-zoomable align="center">
     <img
         src="/img/docs/cicd/jenkins/jenkins-otel-config.webp"
@@ -74,7 +66,7 @@ Enter the SigNoz self-hosted endpoint in the textbox and set **No Authentication
 </TabItem>
 </Tabs>
 
-## Visualize the traces in SigNoz Traces section
+## Visualize the traces in SigNoz under **Traces** section
 
 <figure data-zoomable align="center">
     <img
@@ -114,7 +106,3 @@ With the OTel plugin installed, you can also configure custom spans in your Jenk
 ```
 
 For more details about spans refer [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#span)
-
-## Conclusion
-
-Jenkins Otel plugin can be used to visualize Jenkins traces effectively on SigNoz

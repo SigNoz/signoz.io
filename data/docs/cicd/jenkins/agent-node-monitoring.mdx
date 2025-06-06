@@ -1,26 +1,41 @@
 ---
 date: 2025-04-28
 id: agent-node-monitoring
-title: Jenkins Host monitoring
-description: Instrument Jenkins with OpenTelemetry and send traces & metrics to SigNoz
+title: Jenkins Agent Node monitoring
+description: Instrument Jenkins with OpenTelemetry and send metrics to SigNoz
 ---
 
 ## Overview
-This plugin integrates with the Opentelemetry Collector and Node exporter for monitoring of Jenkins build agents.
+[Jenkins](https://www.jenkins.io/) is an automation server that enables developers to build, test, and deploy their applications through continuous integration and continuous delivery (CI/CD) pipelines. This document will help you monitor your Jenkins build agents' metrics using SigNoz.
 
-It does this by deploying the Prometheus node exporter and Opentelemetry (Otel) Collector on job agents. The Otel Collector will scrape the metrics from node exporter. 
+## Prerequisites
 
-### Prerequisites
+- Jenkins (>2.479)
+- Jenkins pipelines that you want to monitor
+- Jenkins OpenTelemetry [plugin] (https://signoz.io/docs/cicd/jenkins/jenkins-tracing/#install-and-configure-jenkins-opentelemetry-plugin) installed 
+- Administrative access to Jenkins controller
 
-- Jenkins [>2.479]
 
+## Setup
 
-### Setup
+### Step 1: Install OTel agent metrics plugin
+* For installing the plugin, please refer to [this documentation](https://plugins.jenkins.io/opentelemetry-agent-metrics/#plugin-content-web-ui-install)
 
-#### Step 1: Install Otel agent metrics plugin
-* For installation refer [here](https://plugins.jenkins.io/opentelemetry-agent-metrics/)
+### Step 2: Agent node configuration required for the plugin
 
-* Navigate to Manage Jenkins -> System -> onMonit section
+#### Setup the executable source on the Jenkins Agent Nodes
+
+In order for this plugin to work 2 executables are run on the agents **otel-contrib** and **node_exporter**
+
+The binaries(depending on the Agent OS amd64/arm64) can be installed on the agents using any of the below methods
+* present on the PATH of the agents
+* downloaded from a URL on the agents. For this the global plugin option **Artifact download base URL** must be configured(refer the image below)
+* uploaded from the Jenkins master. For this the executables must be manually stored under the JENKINS_HOME directory in the opentelemetry-agent-metrics subdirectory.
+
+more info about this from the Jenkins plugin [docs](https://plugins.jenkins.io/opentelemetry-agent-metrics/#plugin-content-example)
+
+#### Configure OTel agent metrics plugin(required if using Artifact download base URL)
+Now, navigate to **Manage Jenkins** -> **System** -> **onMonit** section
 
 <figure data-zoomable align="left">
     <img
@@ -34,19 +49,9 @@ It does this by deploying the Prometheus node exporter and Opentelemetry (Otel) 
     </figcaption>
 </figure>
 
-#### Step 2: Configure OTel agent metrics plugin
+## Output
 
-#### Agent node configuration required for the plugin
-
-The plugin requires two binaries - **otel-contrib** and **node_exporter** to be installed on the jenkins agents
-
-These executables can either be:
-
-* present on the PATH of the agents
-* downloaded from a URL on the agents. For this the global plugin option **Artifact download base URL** must be configured.
-* uploaded from the Jenkins master. For this the executables must be manually stored under the JENKINS_HOME directory in the opentelemetry-agent-metrics subdirectory.
-
-more info about this from the Jenkins plugin [docs](https://plugins.jenkins.io/opentelemetry-agent-metrics/#plugin-content-example)
+Metrics visible in SigNoZ under Metrics Tab.
 
 <figure data-zoomable align="left">
     <img
@@ -71,12 +76,3 @@ more info about this from the Jenkins plugin [docs](https://plugins.jenkins.io/o
     </i>
     </figcaption>
 </figure>
-
-## Conclusion
-
-This setup will allow monitoring of Jenkins agent metrics using jenkins OTel plugin on SigNoz
-
-
-
-
-
