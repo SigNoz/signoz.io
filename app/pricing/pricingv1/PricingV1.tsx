@@ -50,7 +50,7 @@ export default function PricingV1Page() {
                   🧮 Pricing Calculator
                 </div>
                 <h2 className="mb-4 text-2xl font-bold text-signoz_vanilla-100 md:text-3xl">
-                  Calculate Your Exact Costs
+                  Calculate Your Exact Monthly Bill
                 </h2>
                 <p className="mx-auto max-w-2xl text-lg text-signoz_vanilla-400">
                   Get an instant estimate based on your usage. No surprises, no hidden fees.
