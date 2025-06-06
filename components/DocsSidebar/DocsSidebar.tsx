@@ -124,7 +124,9 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
           {!isGetStarted && (
             <FileText className="flex-shrink-0 opacity-60 group-hover:opacity-100" size={14} />
           )}
-          <span className="truncate font-medium">{doc.label}</span>
+          <Tooltip content={doc.label} placement="right" delay={500}>
+            <span className="truncate font-medium">{doc.label}</span>
+          </Tooltip>
         </Link>
       </li>
     )
@@ -147,20 +149,24 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
             <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
               {category.isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </div>
-            <span className="truncate font-medium">{category.label}</span>
+            <Tooltip content={category.label} placement="right" delay={500}>
+              <span className="truncate font-medium">{category.label}</span>
+            </Tooltip>
           </div>
         </Link>
         {category.isExpanded && (
           <div className="mt-1">
             {category.link && category.link.type === 'generated-index' && (
               <div className="mx-5 mb-2 mt-2">
-                <h4
-                  className={`truncate text-xs font-medium text-gray-400 ${
-                    isActiveRoute ? 'text-blue-400' : 'hover:text-gray-300'
-                  }`}
-                >
-                  {category.link.title}
-                </h4>
+                <Tooltip content={category.link.title} placement="right" delay={500}>
+                  <h4
+                    className={`truncate text-xs font-medium text-gray-400 ${
+                      isActiveRoute ? 'text-blue-400' : 'hover:text-gray-300'
+                    }`}
+                  >
+                    {category.link.title}
+                  </h4>
+                </Tooltip>
               </div>
             )}
             <ul className="ml-4 space-y-0.5 border-l border-gray-700/50 pl-0">
