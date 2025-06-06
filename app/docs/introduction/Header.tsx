@@ -1,6 +1,7 @@
 import React from 'react'
 import Heading from '@/components/ui/Heading'
 import SubHeading from '@/components/ui/SubHeading'
+import SearchBar from '@/components/ui/SearchBar'
 
 export default function Header() {
   return (
@@ -13,6 +14,11 @@ export default function Header() {
           Learn how to monitor and troubleshoot your applications with SigNoz using step-by-step
           guides, reference docs, and video tutorials.
         </SubHeading>
+
+        {/* Search Bar */}
+        <div className="mt-8 flex justify-center">
+          <SearchBar className="w-full max-w-2xl" />
+        </div>
       </div>
     </div>
   )
