@@ -3,7 +3,11 @@ import Heading from '@/components/ui/Heading'
 import SubHeading from '@/components/ui/SubHeading'
 import SearchBar from '@/components/ui/SearchBar'
 
-export default function Header() {
+interface HeaderProps {
+  showSearchBar?: boolean
+}
+
+export default function Header({ showSearchBar = false }: HeaderProps) {
   const searchPlaceholders = [
     "Hey, I'm SigNoz AI! Ask me anything about SigNoz...",
     'How do I send Python traces to SigNoz?',
@@ -27,14 +31,16 @@ export default function Header() {
           guides, reference docs, and video tutorials.
         </SubHeading>
 
-        {/* Search Bar */}
-        <div className="mt-8 flex justify-center">
-          <SearchBar
-            placeholder={searchPlaceholders}
-            clickLocation="Docs Header"
-            className="hidden w-full max-w-2xl sm:flex"
-          />
-        </div>
+        {/* Search Bar - Only show if experiment flag is enabled */}
+        {showSearchBar && (
+          <div className="mt-8 flex justify-center">
+            <SearchBar
+              placeholder={searchPlaceholders}
+              clickLocation="Docs Header"
+              className="hidden w-full max-w-2xl sm:flex"
+            />
+          </div>
+        )}
       </div>
     </div>
   )
