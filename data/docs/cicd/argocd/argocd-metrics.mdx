@@ -1,0 +1,126 @@
+---
+title: Monitor ArgoCD 
+description: Learn how to configure ArgoCD metrics monitoring and visualization with SigNoz
+id: argocd-metrics
+---
+
+## Overview
+
+
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/) is a declarative, GitOps continuous delivery tool for Kubernetes that exposes metrics at several endpoints. This document will help you monitor your ArgoCD [metrics](https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/) using SigNoz.
+
+## Prerequisites
+
+Ensure you have:
+
+- A running ArgoCD installation on your Kubernetes cluster
+
+## Setup
+
+### Step 1. Configure OpenTelemetry Collector
+
+To collect ArgoCD metrics and send them to SigNoz, you need to configure the OpenTelemetry Collector with a Prometheus receiver. Follow this [document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup your OTel collector.
+
+#### Add Prometheus Receiver
+
+Ensure that the `prometheus` receiver is added to the collector`config.yaml` file. Make sure to set the targets as shown in the [config] code block (https://github.com/SigNoz/dashboards/blob/main/argocd/readme.md#configure-opentelemetry-collector) below.
+
+```yaml
+prometheus:
+  config:
+    global:
+      scrape_interval: 60s
+    scrape_configs:
+      - job_name: argocd-metrics # A logical label used to group the set of targets being scraped; helps in querying and identifying metrics from this specific service (ArgoCD in this case)
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+          - targets:
+            - localhost:8082  # Application metrics
+            - localhost:8083  # API Server metrics
+            - localhost:8084  # Repository Server metrics
+```
+Checkout this [link](https://github.com/SigNoz/dashboards/blob/main/argocd/readme.md#configure-opentelemetry-collector) to see the complete configuration file.
+
+<Admonition type="info">
+ Replace `localhost` with appropriate hostnames or service names if your ArgoCD is running in a different namespace or cluster.
+</Admonition>
+
+### Step 2. Import ArgoCD Dashboard 
+
+Once your ArgoCD metrics are flowing into SigNoz, you can utilize the pre-built ArgoCD dashboard to monitor your deployment.
+
+1. Download the ArgoCD dashboard JSON from [SigNoz Dashboards Repository](https://github.com/SigNoz/dashboards/blob/main/argocd/argocd.json)
+
+2. Import the dashboard in SigNoz:
+   - Navigate to Dashboards in your SigNoz UI
+   - Click on "Import Dashboard" in the top-right corner
+   - Upload the downloaded JSON file
+   - Click "Import"
+
+For more information on managing dashboards, refer this [document](https://signoz.io/docs/userguide/manage-dashboards/).
+
+## Dashboard Features
+
+The ArgoCD Dashboard provides comprehensive visibility into your ArgoCD deployment.
+
+### Dashboard Variables
+
+The dashboard includes variables that you can use to filter your data:
+
+- `{{namespace}}`: Namespace of the application
+- `{{health.status}}`: Health status of the application
+- `{{repo}}`: Name of the repository
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/cicd/argocd/argocd-overview.webp"
+        alt="ArgoCD Dashboard Overview"
+    />
+    <figcaption>
+        <i>ArgoCD Dashboard Overview</i>
+    </figcaption>
+</figure>
+
+### Dashboard Metrics 
+
+The dashboard displays key metrics to give you a complete view of your deployment status. It has the following sections:
+
+1. **Overall Status** - Monitor the number of applications and repository server status
+2. **Application Health** - Track healthy, processing, suspended, and degraded applications
+3. **Synchronization Status** - Monitor synced and out-of-sync applications
+4. **Controller Performance** - Track sync activity, reconciliation metrics, and Kubernetes API activity
+5. **Cluster and Repository Statistics** - Monitor cluster cache age, resource objects, and Git operations
+To get a details about metrics in each section, follow this [link](https://github.com/SigNoz/dashboards/blob/main/argocd/readme.md#sections).
+This dashboard enables you to proactively monitor your GitOps workflow, identify potential issues before they impact your deployments, and ensure the smooth operation of your ArgoCD instance.
+
+## Troubleshooting
+
+If you're not seeing ArgoCD metrics in SigNoz, try the following steps:
+
+1. **Verify endpoint accessibility**
+   - Ensure the OpenTelemetry Collector can access the ArgoCD metrics endpoints
+   - Check network policies or firewall rules that might be blocking access
+
+2. **Check service discovery**
+   - If using Kubernetes, make sure service names and ports are correct
+   - Verify that the service selectors match the pod labels
+
+3. **Inspect collector logs**
+   - Look for any scrape errors in the OpenTelemetry Collector logs
+   - Run `kubectl logs -n <namespace> <otel-collector-pod-name>` to check for any errors
+
+4. **Validate metrics format**
+   - Make sure ArgoCD is correctly exposing Prometheus-formatted metrics
+   - Try accessing the metrics endpoints directly using port-forwarding:
+     ```
+     kubectl port-forward svc/argocd-metrics 8082:8082 -n argocd
+     curl localhost:8082/metrics
+     ```
+
+5. **Check ArgoCD version**
+   - Ensure you're using a version of ArgoCD that exposes metrics
+   - Some metrics might be available only in specific versions
+
+If you continue to experience issues, check the [SigNoz community forum](https://community.signoz.io/) or [open an issue on GitHub](https://github.com/SigNoz/signoz/issues) for further assistance.
+
