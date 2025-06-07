@@ -38,7 +38,7 @@ export default async function DocsIntroductionPage() {
   return (
     <>
       <HoverableSidebar />
-      <Header />
+      <Header showSearchBar={isChatbaseBubbleVariant} />
       <SendData />
       <Monitor />
       <Integrations />
