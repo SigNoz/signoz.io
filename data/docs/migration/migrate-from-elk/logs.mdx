@@ -1,0 +1,41 @@
+---
+date: 2025-05-06
+id: logs
+title: Migrate logs from ELK Stack
+description: Migrating logs from ELK Stack to SigNoz. How to migrate logs from ELK to SigNoz.
+---
+
+Migrating logs involves replacing [Filebeat](https://www.elastic.co/beats/filebeat) and/or [Logstash](https://www.elastic.co/logstash) with the [OpenTelemetry](https://signoz.io/why-opentelemetry/) (OTel) Collector, configured to collect, process, and forward logs to SigNoz.
+
+## Replacing Log Shippers and Processors:
+
+Several strategies can be employed, depending on the complexity of the existing ELK logging pipeline:
+
+* **Strategy 1: Replacing Filebeat with OTel agent:**  
+  * This is the most direct approach for collecting logs from files, replacing Filebeat's role.
+  * Deploy the OTel Collector as an agent(e.g., [DaemonSet in Kubernetes](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) , standalone [binary on VMs](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) ) where logs are generated.
+  * Configure the [logs in SigNoz](https://signoz.io/docs/userguide/logs/) to target the necessary log files. 
+  * Key configurations include:  
+    * include: Glob patterns for log file paths (e.g., `/var/log/app/*.log`).  
+    * exclude: Glob patterns to exclude specific files.  
+    * start_at: end (tail new logs) or beginning (read from start).  
+    * multiline: For logs spanning multiple lines (e.g., stack traces), using `line_start_pattern` or `line_end_pattern`.  
+    * [operators](https://signoz.io/blog/opentelemetry-operator-complete-guide/): A pipeline of parsing and transformation steps applied within the receiver itself (e.g., `regex_parser`, `json_parser`, `timestamp`, `severity`, `attribute`).This can handle basic parsing previously done by Filebeat modules or simple Logstash filters.  
+* **Strategy 2: Forwarding from Logstash to SigNoz(Transitional):**  
+  * If you have complex Logstash pipelines you wish to retain temporarily, you can [configure Logstash to forward logs](https://signoz.io/docs/userguide/logstash_to_signoz/) to an SigNoz.
+  * The OTel Collector then forwards the received logs to SigNoz.  
+
+**Verification:**
+
+* Ensure logs are appearing in the SigNoz [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/). 
+* Verify that timestamps, severity levels, and attributes are parsed correctly according to the processor configurations.  
+* Check that filters are working as expected (e.g., debug logs are dropped).  
+* If trace context (trace IDs, span IDs) is expected in logs, confirm it's being parsed and that log-trace correlation works in the SigNoz UI.
+
+
+## Signoz logs features
+
+- **[Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/)**: Parse and structure logs with processors like JSON, regex, and grok
+- **[Log Querying](https://signoz.io/docs/userguide/logs_query_builder/)**: Advanced query capabilities for searching and filtering logs
+- **[Log-Trace Correlation](https://signoz.io/opentelemetry/correlating-traces-logs-metrics-nodejs/)**: Link logs with related traces for contextual debugging
+
