@@ -8,14 +8,14 @@ import { useLogEvent } from '@/hooks/useLogEvent'
 interface SearchBarProps {
   placeholder?: string | string[]
   className?: string
-  rotationInterval?: number // milliseconds, defaults to 1500
+  rotationInterval?: number // milliseconds, defaults to 2000
   clickLocation?: string // Location where the SearchBar is used for tracking
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = 'Ask anything about SigNoz...',
   className = '',
-  rotationInterval = 1500,
+  rotationInterval = 2000,
   clickLocation = 'page', // default fallback location
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
