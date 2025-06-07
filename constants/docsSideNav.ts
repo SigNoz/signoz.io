@@ -1952,6 +1952,40 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Migrate From ELK Stack',
+    className: 'new-doc',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/migration/migrate-from-elk',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-elk/metrics',
+        label: 'Migrating Metrics',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-elk/traces',
+        label: 'Migrating Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-elk/logs',
+        label: 'Migrating Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-elk/dashboards',
+        label: 'Migrating Dashboards',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-elk/alerts',
+        label: 'Migrating Alerts',
+      },
+    ],
+  },
+  {
     label: 'Migrate From New Relic',
     className: 'new-doc',
     type: 'category',
