@@ -125,37 +125,51 @@ You can navigate and filter metrics using:
 
 ### Exploring Individual Metrics
 
-When you click on a specific metric, you can access detailed information through the metadata panel:
+When you click on a specific metric, you can access detailed information through three separate sections:
 
-#### Metadata View
+#### Basic Information Section
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/metadata-view-detailed.webp"
-      alt="Detailed metadata view showing comprehensive metric information and attributes"
-    />
-    <figcaption>
-      <i>
-        Detailed metadata view showing comprehensive metric information and attributes
-      </i>
-    </figcaption>
-</figure>
+The top section displays essential metric details:
 
-The metadata panel shows:
-
-**Basic Information**:
-- **Metric Type**: Displayed as a colored badge (e.g., "GAUGE")
-- **Description**: Human-readable description of the metric's purpose
-- **Unit**: Measurement unit (e.g., "{pod}")
-- **Temporality**: Specification of how the metric data is aggregated
-
-**Sample Data**:
 - **SAMPLES**: Shows the volume of data points (e.g., "40.8M+")
 - **TIME SERIES**: Displays total and active time series count (e.g., "531 total — 466 active")
 - **LAST RECEIVED**: Timestamp of the most recent data ingestion
 
-**Attributes Section**:
-The "All Attributes" section displays the unique identifiers and values associated with the metric, which helps in understanding the metric's dimensional structure and cardinality.
+#### Metadata Section
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/metrics-explorer/metadata-view-detailed.webp"
+      alt="Detailed metadata view showing comprehensive metric information"
+    />
+    <figcaption>
+      <i>
+        Detailed metadata view showing comprehensive metric information
+      </i>
+    </figcaption>
+</figure>
+
+The Metadata section provides configurable information about the metric:
+
+- **Metric Type**: Displayed as a colored badge (e.g., "GAUGE")
+- **Description**: Human-readable description of the metric's purpose (editable)
+- **Unit**: Measurement unit specification (e.g., "{pod}")
+- **Temporality**: Specification of how the metric data is aggregated
+
+#### All Attributes Section
+
+The "All Attributes" section is separate from metadata and displays the dimensional structure of the metric:
+
+- **Unique Identifiers**: Shows the specific attribute values associated with the metric
+- **Cardinality Information**: Displays the range of values for each attribute
+- **Sample Values**: Lists examples of the actual attribute values being ingested
+- **Search Functionality**: Allows filtering through attribute values
+
+This section helps you understand:
+- The dimensional complexity of the metric
+- Which attributes contribute to cardinality
+- The actual values being sent for each dimension
+- Potential optimization opportunities for high-cardinality attributes
 
 #### Explorer Interface
 
@@ -205,7 +219,7 @@ Metrics Explorer provides several tools to help optimize your observability cost
 - Compare ingestion volumes across different services and integrations
 
 **Cardinality Management**:
-- View detailed attribute breakdowns for each metric
+- View detailed attribute breakdowns in the All Attributes section
 - Identify high-cardinality dimensions that might impact costs
 - Monitor time series growth patterns
 - Spot potential cardinality explosions before they become problems
@@ -258,16 +272,16 @@ Set up monitoring alerts by:
 1. **Start with Proportion View**: Use the treemap to identify metrics consuming the most resources
 2. **Filter by Service**: Narrow down metrics by specific services or integrations
 3. **Use Time Range Controls**: Adjust time windows to focus on relevant periods
-4. **Monitor Cardinality**: Regularly check attribute distributions to prevent cardinality issues
+4. **Monitor Cardinality**: Regularly check the All Attributes section to prevent cardinality issues
 5. **Set Up Alerts**: Create monitoring rules for metrics that impact your key services
 
 ### Troubleshooting Common Issues
 
 **High Cardinality Metrics**:
-- Review attribute sections to identify problematic dimensions
+- Review the All Attributes section to identify problematic dimensions
 - Check for unbounded label values (timestamps, user IDs, etc.)
 - Consider aggregating or filtering high-cardinality attributes
-- Monitor time series growth trends
+- Monitor time series growth trends in the basic information section
 
 **Missing Metrics**:
 - Verify instrumentation is properly configured
