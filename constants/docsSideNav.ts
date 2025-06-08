@@ -1588,6 +1588,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/snowflake',
+        label: 'Snowflake',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/aws-rds-postgres',
         label: 'AWS RDS PostgreSQL',
       },
