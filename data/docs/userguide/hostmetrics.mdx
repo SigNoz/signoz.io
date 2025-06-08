@@ -89,6 +89,11 @@ processors:
     detectors: [env, system]
     system:
       hostname_sources: [os]
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: staging
+      action: upsert
 extensions:
   health_check:
   zpages:
@@ -105,7 +110,7 @@ service:
   pipelines:
     metrics/hostmetrics:
       receivers: [hostmetrics]
-      processors: [resourcedetection]
+      processors: [resourcedetection, resource/env]
       exporters: [otlp]
 ```
 

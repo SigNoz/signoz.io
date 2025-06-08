@@ -144,6 +144,11 @@ receivers:
     encoding: raw_text
 processors:
   batch: {}
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
 exporters:
   otlp:
     endpoint: "ingest.<region>.signoz.cloud:443"
@@ -163,7 +168,7 @@ service:
       exporters: [otlp]
     logs:
       receivers: [otlp, googlecloudpubsub]
-      processors: [batch]
+      processors: [batch, resource/env]
       exporters: [otlp]
 ```
 
@@ -395,6 +400,11 @@ receivers:
     encoding: raw_text
 processors:
   batch: {}
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
 exporters:
   clickhouselogsexporter:
     dsn: tcp://clickhouse:9000/
@@ -410,7 +420,7 @@ service:
   pipelines:
     logs:
       receivers: [otlp, googlecloudpubsub]
-      processors: [batch]
+      processors: [batch, resource/env]
       exporters: [clickhouselogsexporter]
 ```
 

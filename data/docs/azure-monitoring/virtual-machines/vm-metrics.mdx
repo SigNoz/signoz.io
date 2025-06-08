@@ -89,6 +89,11 @@ processors:
     timeout: 2s
     system:
       hostname_sources: [dns, os] 
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod # can be dev, prod, staging etc. based on your environment
+      action: upsert
 extensions:
   health_check: {}
   zpages: {}
@@ -109,7 +114,7 @@ service:
       exporters: [otlp]
     metrics/internal:
       receivers: [prometheus, hostmetrics]
-      processors: [resourcedetection, batch]
+      processors: [resourcedetection, batch, resource/env]
       exporters: [otlp]
     traces:
       receivers: [otlp]

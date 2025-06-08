@@ -398,6 +398,11 @@ spec:
             endpoint: 0.0.0.0:4318
     processors:
       batch: {}
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: prod # can be dev, prod, staging etc. based on your environment
+          action: upsert
     exporters:
       debug: {}
       otlp:
@@ -410,7 +415,7 @@ spec:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch]
+          processors: [batch, resource/env]
           exporters: [otlp]
 ```
 

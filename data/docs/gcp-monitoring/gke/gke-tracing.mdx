@@ -131,6 +131,11 @@ data:
         - env
         override: true
         timeout: 2s
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: prod # can be dev, prod, staging etc. based on your environment
+          action: upsert
     receivers:
       filelog/k8s:
         exclude:
@@ -283,6 +288,7 @@ data:
           processors:
           - k8sattributes
           - batch
+          - resource/env
           receivers:
           - otlp
       telemetry:
@@ -666,6 +672,11 @@ data:
         - env
         override: true
         timeout: 2s
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: prod # can be dev, prod, staging etc. based on your environment
+          action: upsert
     receivers:
       filelog/k8s:
         exclude:
@@ -818,6 +829,7 @@ data:
           processors:
           - k8sattributes
           - batch
+          - resource/env
           receivers:
           - otlp
       telemetry:
