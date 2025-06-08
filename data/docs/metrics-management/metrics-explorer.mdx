@@ -4,13 +4,11 @@ title: Metrics Explorer
 id: metrics-explorer
 ---
 
-# Metrics Explorer
-
 ## Overview
 
-Metrics Explorer provides instant visibility into all metrics flowing into your SigNoz deployment. This feature automatically discovers, categorizes, and visualizes every metric being ingested, giving you a complete view of your metrics ecosystem without needing to build dashboards first.
+Metrics Explorer provides instant visibility into all metrics flowing into your SigNoz deployment. This feature automatically discovers, categorises, and visualises every metric being ingested, giving you a complete view of your metrics ecosystem without needing to build dashboards first.
 
-Unlike traditional monitoring workflows that require you to guess metric names from dropdowns, Metrics Explorer shows you exactly what's being ingested with real-time metadata including types, sample counts, time series cardinality, and data sources.
+Unlike traditional monitoring workflows that require you to guess metric names from dropdowns, Metrics Explorer shows you exactly what's being ingested with real-time metadata, including types, sample counts, time series cardinality, and data sources.
 
 <figure data-zoomable align="center">
     <img
@@ -49,19 +47,19 @@ Metrics Explorer leverages your existing OpenTelemetry instrumentation to automa
 | Time Series | Unique metric name + label combinations | `5,432` |
 | Units | Measurement units for the metric | `seconds`, `bytes`, `requests` |
 
-These attributes are used to automatically categorize metrics, calculate cardinality and volume, identify data sources, and provide searchable metadata for quick discovery.
+These attributes automatically categorise metrics, calculate cardinality and volume, identify data sources, and provide searchable metadata for quick discovery.
 
 ## Feature Walkthrough
 
 ### Summary View
 
-The Metrics Explorer main interface provides two primary visualization modes:
+The Metrics Explorer main interface provides two primary visualisation modes:
 
 #### Proportion View
 
 <figure data-zoomable align="center">
     <img
-      src="/img/docs/metrics-explorer/proportion-view-visualization.webp"
+      src="/img/docs/metrics-explorer/proportion-view.webp"
       alt="Proportion view showing metrics consumption and ingestion resource usage"
     />
     <figcaption>
@@ -71,18 +69,18 @@ The Metrics Explorer main interface provides two primary visualization modes:
     </figcaption>
 </figure>
 
-The Proportion View presents a treemap visualization that shows the relative volume of metrics being ingested. Each rectangle represents a metric, with the size proportional to its ingestion volume. This view helps you:
+The Proportion View presents a treemap visualisation that shows the relative volume of metrics being ingested. Each rectangle represents a metric, with the size proportional to its ingestion volume. This view helps you:
 
 - **Identify high-volume metrics** that consume the most ingestion resources
 - **Spot anomalies** in metric volume distribution
 - **Understand proportional impact** of different metrics on your system
-- **Quickly locate** metrics that might need optimization
+- **Quickly locate** metrics that might need optimisation
 
 #### List View
 
 <figure data-zoomable align="center">
     <img
-      src="/img/docs/metrics-explorer/summary-view-main-table.webp"
+      src="/img/docs/metrics-explorer/list-view.webp"
       alt="Metrics Explorer list view showing detailed metrics information in tabular format"
     />
     <figcaption>
@@ -120,7 +118,6 @@ You can navigate and filter metrics using:
 - **Search Filter**: Use the search bar at the top to filter metrics by name or keywords
 - **Column Sorting**: Click on any column header to sort metrics by that attribute
 - **Time Range Selection**: Adjust the time window (shown as "Last 30 minutes" in the top right)
-- **View Toggle**: Switch between Proportion View and List View using the view selector
 - **Pagination**: Navigate through large metric lists using the pagination controls at the bottom
 
 ### Exploring Individual Metrics
@@ -144,7 +141,7 @@ The top section displays essential metric details:
     />
     <figcaption>
       <i>
-        Detailed metadata view showing comprehensive metric information
+        Detailed metadata section showing comprehensive metric information
       </i>
     </figcaption>
 </figure>
@@ -156,33 +153,37 @@ The Metadata section provides configurable information about the metric:
 - **Unit**: Measurement unit specification (e.g., "{pod}")
 - **Temporality**: Specification of how the metric data is aggregated
 
-#### 3. All Attributes Section
+If you feel the Metric Type, description, or temporality is incorrect, you can edit them using the **edit button**.
 
-*Note: This section is completely separate from the metadata section above*
+#### 3. All Attributes Section
 
 The "All Attributes" section displays the dimensional structure of the metric:
 
 - **Unique Identifiers**: Shows the specific attribute values associated with the metric
-- **Cardinality Information**: Displays the range of values for each attribute
-- **Sample Values**: Lists examples of the actual attribute values being ingested
 - **Search Functionality**: Allows filtering through attribute values
 
-This section helps you understand:
-- The dimensional complexity of the metric
-- Which attributes contribute to cardinality
-- The actual values being sent for each dimension
-- Potential optimization opportunities for high-cardinality attributes
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/metrics-explorer/all-attributes-view-detailed.webp"
+      alt="Detailed All attributes section"
+    />
+    <figcaption>
+      <i>
+        Detailed metadata view showing comprehensive metric information
+      </i>
+    </figcaption>
+</figure>
 
-#### Explorer Interface
+### Explorer Interface
 
 <figure data-zoomable align="center">
     <img
       src="/img/docs/metrics-explorer/query-playground-interface.webp"
-      alt="Explorer interface showing query building and visualization capabilities"
+      alt="Explorer interface showing query building and visualisation capabilities"
     />
     <figcaption>
       <i>
-        Explorer interface showing query building and visualization capabilities
+        Explorer interface showing query building and visualisation capabilities
       </i>
     </figcaption>
 </figure>
@@ -194,7 +195,7 @@ The Explorer tab provides an interactive query building environment:
 - **WHERE Clause**: Add filters using the search interface for attribute-based filtering
 - **Sum By**: Group results by specific attributes or dimensions
 - **Aggregation Controls**: Set conditions for time-based aggregation and filters
-- **Legend Format**: Customize how the query results are displayed
+- **Legend Format**: Customise how the query results are displayed
 
 **Visualization Options**:
 - **Y-axis Unit Selection**: Choose appropriate units for the visualization
@@ -212,13 +213,25 @@ The Explorer tab provides an interactive query building environment:
 
 Similar to the [Saved Views feature](https://signoz.io/docs/product-features/saved-view/#how-to-use-saved-views) available in Logs and Traces Explorer, Metrics Explorer also supports saving your query configurations for quick access later.
 
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/metrics-explorer/saved-view-interface.webp"
+      alt="Saved View in Metrics Explorer"
+    />
+    <figcaption>
+      <i>
+        Saved View in Metrics Explorer
+      </i>
+    </figcaption>
+</figure>
+
 ### How to Use Saved Views
 
 **Saving a View:**
 1. Configure your metric query with desired filters and parameters in the Explorer interface
 2. Click the **"Save this view"** button 
 3. Enter a descriptive label for easy identification
-4. Confirm to save your view - a popup will confirm successful saving
+4. Confirm to save your view - a pop-up will confirm successful saving
 
 **Accessing Saved Views:**
 - Use the dropdown at the bottom of the Explorer interface
@@ -235,94 +248,6 @@ Similar to the [Saved Views feature](https://signoz.io/docs/product-features/sav
 - **Performance Monitoring**: Save views for key metrics you check regularly during daily operations
 - **Incident Response**: Quick access to critical metrics during outages and troubleshooting sessions
 - **Team Collaboration**: Share common metric views across team members for consistent monitoring
-- **Cost Analysis**: Monitor high-cardinality or high-volume metrics to optimize observability costs
+- **Cost Analysis**: Monitor high-cardinality or high-volume metrics to optimise observability costs
 - **Routine Health Checks**: Create daily dashboard-style views without rebuilding filters each time
 
-## Advanced Features
-
-### Cost Optimization Tools
-
-Metrics Explorer provides several tools to help optimize your observability costs:
-
-**Volume Analysis**:
-- Identify metrics consuming the most resources through the Proportion View
-- Track sample count trends over time to spot growing metrics
-- Analyze time series cardinality to understand dimensional complexity
-- Compare ingestion volumes across different services and integrations
-
-**Cardinality Management**:
-- View detailed attribute breakdowns in the All Attributes section
-- Identify high-cardinality dimensions that might impact costs
-- Monitor time series growth patterns
-- Spot potential cardinality explosions before they become problems
-
-### Integration Workflows
-
-**Dashboard Creation**:
-From the Explorer interface, you can:
-- Save queries as reusable views
-- Add visualizations directly to dashboards
-- Create templated dashboards for similar metrics
-- Share query configurations across teams
-
-**Alert Configuration**:
-Set up monitoring alerts by:
-- Defining threshold-based conditions
-- Creating anomaly detection rules
-- Configuring notification channels
-- Setting up multi-metric correlation alerts
-
-## Technical Specifications
-
-### Supported Metric Types
-
-- **Counter**: Monotonically increasing values (e.g., request counts, error counts)
-- **Gauge**: Point-in-time measurements (e.g., memory usage, queue size)
-- **Histogram**: Distribution of values with configurable buckets (e.g., response times)
-- **Summary**: Client-side quantile calculations (e.g., percentile measurements)
-
-### Query Capabilities
-
-- **PromQL Support**: Full compatibility with Prometheus Query Language for complex queries
-- **OpenTelemetry Native**: Built specifically for OpenTelemetry metrics format and conventions
-- **Real-time Processing**: Live analysis of incoming metrics without delay
-- **Historical Analysis**: Query across configurable time ranges from minutes to months
-- **Advanced Aggregations**: Support for spatial and temporal aggregation functions
-
-### Performance Characteristics
-
-- **Sub-second Response**: Most queries return results in under 1 second
-- **High-Volume Support**: Handles billions of samples and millions of time series
-- **Scalable Architecture**: Horizontal scaling support for growing deployments
-- **Optimized Storage**: ClickHouse backend ensures fast query performance
-- **Efficient Indexing**: Smart indexing for rapid metric discovery and filtering
-
-## Best Practices
-
-### Effective Exploration Strategies
-
-1. **Start with Proportion View**: Use the treemap to identify metrics consuming the most resources
-2. **Filter by Service**: Narrow down metrics by specific services or integrations
-3. **Use Time Range Controls**: Adjust time windows to focus on relevant periods
-4. **Monitor Cardinality**: Regularly check the All Attributes section to prevent cardinality issues
-5. **Set Up Alerts**: Create monitoring rules for metrics that impact your key services
-
-### Troubleshooting Common Issues
-
-**High Cardinality Metrics**:
-- Review the All Attributes section to identify problematic dimensions
-- Check for unbounded label values (timestamps, user IDs, etc.)
-- Consider aggregating or filtering high-cardinality attributes
-- Monitor time series growth trends in the basic information section
-
-**Missing Metrics**:
-- Verify instrumentation is properly configured
-- Check service discovery and metric collection settings
-- Review OpenTelemetry collector configuration
-- Ensure proper metric naming conventions
-
-**Performance Issues**:
-- Use time range filtering to reduce query scope
-- Optimize queries by limiting attribute dimensions
-- Consider data retention policies for historical metrics
-- Monitor ingestion rates and processing delays
