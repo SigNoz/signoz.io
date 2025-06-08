@@ -55,48 +55,9 @@ These attributes are used to automatically categorize metrics, calculate cardina
 
 ### Summary View
 
-The Metrics Explorer landing page displays all metrics currently being ingested into SigNoz.
+The Metrics Explorer main interface provides two primary visualization modes:
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/summary-view-main-table.webp"
-      alt="Metrics Explorer summary view showing all ingested metrics and their types"
-    />
-    <figcaption>
-      <i>
-        Metrics Explorer summary view showing all ingested metrics and their types
-      </i>
-    </figcaption>
-</figure>
-
-The main table shows metrics with detailed information including:
-
-- **METRIC NAME**: The full metric identifier
-- **TYPE**: Counter, Gauge, Histogram, or Summary
-- **UNITS**: Measurement units (when available)
-- **SAMPLES**: Total number of data points received
-- **TIME SERIES**: Number of unique metric + label combinations
-- **LAST RECEIVED**: When the metric was last ingested (e.g., "2m ago", "1h ago")
-- **SOURCES**: Services, hosts, or integrations sending this metric
-
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/search-and-filter-interface.webp"
-      alt="Metrics Explorer search and filter interface for finding specific metrics"
-    />
-    <figcaption>
-      <i>
-        Metrics Explorer search and filter interface for finding specific metrics
-      </i>
-    </figcaption>
-</figure>
-
-You can:
-- **Search by metric name** using the search icon in the metric name column header
-- **Sort by any column** by clicking its header to organize by volume, activity, or type
-- **Filter metrics** using the left panel to narrow down by service, host, or metric type
-- **Toggle proportion view** to see which metrics consume the most ingestion resources
-- **Click on any metric** to view detailed information and start investigating
+#### Proportion View
 
 <figure data-zoomable align="center">
     <img
@@ -110,318 +71,160 @@ You can:
     </figcaption>
 </figure>
 
+The Proportion View presents a treemap visualization that shows the relative volume of metrics being ingested. Each rectangle represents a metric, with the size proportional to its ingestion volume. This view helps you:
+
+- **Identify high-volume metrics** that consume the most ingestion resources
+- **Spot anomalies** in metric volume distribution
+- **Understand proportional impact** of different metrics on your system
+- **Quickly locate** metrics that might need optimization
+
+#### List View
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/metrics-explorer/summary-view-main-table.webp"
+      alt="Metrics Explorer list view showing detailed metrics information in tabular format"
+    />
+    <figcaption>
+      <i>
+        Metrics Explorer list view showing detailed metrics information in tabular format
+      </i>
+    </figcaption>
+</figure>
+
+The List View displays all metrics in a comprehensive table format with the following columns:
+
+- **METRIC**: The full metric identifier with search capability
+- **DESCRIPTION**: Description of what the metric measures
+- **TYPE**: Metric type indicator (GAUGE, HISTOGRAM, etc.)
+- **UNIT**: Measurement units for the metric
+- **SAMPLES**: Total number of data points received (e.g., "178.6K+")
+- **TIME SERIES**: Number of unique metric + label combinations (e.g., "1.5K+")
+
+#### Navigation and Filtering
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/metrics-explorer/search-and-filter-interface.webp"
+      alt="Metrics Explorer search and filter interface for finding specific metrics"
+    />
+    <figcaption>
+      <i>
+        Metrics Explorer search and filter interface for finding specific metrics
+      </i>
+    </figcaption>
+</figure>
+
+You can navigate and filter metrics using:
+
+- **Search Filter**: Use the search bar at the top to filter metrics by name or keywords
+- **Column Sorting**: Click on any column header to sort metrics by that attribute
+- **Time Range Selection**: Adjust the time window (shown as "Last 30 minutes" in the top right)
+- **View Toggle**: Switch between Proportion View and List View using the view selector
+- **Pagination**: Navigate through large metric lists using the pagination controls at the bottom
+
 ### Exploring Individual Metrics
 
-When you select a metric, you can navigate through different analysis modes:
-
-- **Metadata View**: Shows complete metric information, labels, and editable descriptions
-- **Query Playground**: Interactive environment for running ad hoc queries and visualizations
-- **Activity Timeline**: Historical view of metric ingestion and recent changes
+When you click on a specific metric, you can access detailed information through the metadata panel:
 
 #### Metadata View
 
 <figure data-zoomable align="center">
     <img
       src="/img/docs/metrics-explorer/metadata-view-detailed.webp"
-      alt="Detailed metadata view showing comprehensive metric information and labels"
+      alt="Detailed metadata view showing comprehensive metric information and attributes"
     />
     <figcaption>
       <i>
-        Detailed metadata view showing comprehensive metric information and labels
+        Detailed metadata view showing comprehensive metric information and attributes
       </i>
     </figcaption>
 </figure>
 
-From the Metadata View, you can:
+The metadata panel shows:
 
-**See comprehensive metric details** with information for:
-- **METRIC TYPE** (Counter/Gauge/Histogram/Summary)
-- **UNIT** and editable description
-- **LABEL DIMENSIONS** and their cardinality
-- **INGESTION RATE** (samples per second)
-- **TIME SERIES COUNT** and growth trends
-- **DATA SOURCES** (services, hosts, integrations)
+**Basic Information**:
+- **Metric Type**: Displayed as a colored badge (e.g., "GAUGE")
+- **Description**: Human-readable description of the metric's purpose
+- **Unit**: Measurement unit (e.g., "{pod}")
+- **Temporality**: Specification of how the metric data is aggregated
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/cardinality-analysis-interface.webp"
-      alt="Cardinality analysis interface showing label dimensions and frequency distribution"
-    />
-    <figcaption>
-      <i>
-        Cardinality analysis interface showing label dimensions and frequency distribution
-      </i>
-    </figcaption>
-</figure>
+**Sample Data**:
+- **SAMPLES**: Shows the volume of data points (e.g., "40.8M+")
+- **TIME SERIES**: Displays total and active time series count (e.g., "531 total — 466 active")
+- **LAST RECEIVED**: Timestamp of the most recent data ingestion
 
-**Edit metric metadata** including:
-- Custom descriptions for team clarity
-- Unit standardization across integrations
-- Tags and categorization
+**Attributes Section**:
+The "All Attributes" section displays the unique identifiers and values associated with the metric, which helps in understanding the metric's dimensional structure and cardinality.
 
-**Analyze cardinality** by viewing:
-- Top label values and their frequencies
-- High-cardinality dimensions that might impact costs
-- Label distribution across different sources
-
-#### Query Playground
+#### Explorer Interface
 
 <figure data-zoomable align="center">
     <img
       src="/img/docs/metrics-explorer/query-playground-interface.webp"
-      alt="Query playground interface for running ad hoc metric queries and visualizing results"
+      alt="Explorer interface showing query building and visualization capabilities"
     />
     <figcaption>
       <i>
-        Query playground interface for running ad hoc metric queries and visualizing results
+        Explorer interface showing query building and visualization capabilities
       </i>
     </figcaption>
 </figure>
 
-The Query Playground offers a powerful environment for metric exploration:
+The Explorer tab provides an interactive query building environment:
 
-**Interactive query building** with:
-- **Metric selection** with autocomplete and filtering
-- **Label filtering** using dropdown selectors or manual entry
-- **Aggregation functions** (sum, avg, max, min, rate, etc.)
-- **Time range selection** from minutes to months
-- **Grouping capabilities** by any label dimension
+**Query Configuration**:
+- **Metrics Selection**: Choose metrics from a dropdown with autocompletion
+- **WHERE Clause**: Add filters using the search interface for attribute-based filtering
+- **Sum By**: Group results by specific attributes or dimensions
+- **Aggregation Controls**: Set conditions for time-based aggregation and filters
+- **Legend Format**: Customize how the query results are displayed
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/real-time-visualization-charts.webp"
-      alt="Real-time metric visualization with line charts and comparison capabilities"
-    />
-    <figcaption>
-      <i>
-        Real-time metric visualization with line charts and comparison capabilities
-      </i>
-    </figcaption>
-</figure>
+**Visualization Options**:
+- **Y-axis Unit Selection**: Choose appropriate units for the visualization
+- **Time Range Control**: Adjust the query time window
+- **Chart Rendering**: View results in various chart formats
+- **Real-time Updates**: Get live updates as new data arrives
 
-**Real-time visualization** featuring:
-- **Line charts** for time series data
-- **Multiple query comparison** on the same chart
-- **Zoom and pan** for detailed time range analysis
-- **Data table view** showing raw query results
-
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/one-click-actions-interface.webp"
-      alt="One-click actions interface for creating dashboards and alerts from query results"
-    />
-    <figcaption>
-      <i>
-        One-click actions interface for creating dashboards and alerts from query results
-      </i>
-    </figcaption>
-</figure>
-
-**One-click actions** to:
-- **Add to dashboard** - Save useful queries as dashboard panels
-- **Create alerts** - Set up monitoring based on query results
-- **Share queries** - Copy query links for team collaboration
-- **Export data** - Download results for external analysis
-
-#### Activity Timeline
-
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/activity-timeline-view.webp"
-      alt="Activity timeline showing metric ingestion patterns and historical changes"
-    />
-    <figcaption>
-      <i>
-        Activity timeline showing metric ingestion patterns and historical changes
-      </i>
-    </figcaption>
-</figure>
-
-The Activity Timeline provides insights into metric behavior over time:
-
-**Recent activity tracking** showing:
-- **Last ingestion timestamp** and frequency patterns
-- **Sample rate changes** and volume trends
-- **New label appearances** and cardinality evolution
-- **Error or gap detection** in metric flow
-
-**Historical analysis** with:
-- **Ingestion pattern visualization** over days, weeks, or months
-- **Volume trend analysis** to identify growth or decline
-- **Source attribution** showing which services contribute most data
-- **Correlation suggestions** with related metrics
-
-## Data Visualizations
-
-### Metric Volume Analysis
-
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/volume-analysis-dashboard.webp"
-      alt="Metric volume analysis dashboard showing sample count distribution and trends"
-    />
-    <figcaption>
-      <i>
-        Metric volume analysis dashboard showing sample count distribution and trends
-      </i>
-    </figcaption>
-</figure>
-
-**Sample Count Distribution**
-Shows the distribution of sample counts across all metrics, helping identify:
-- High-volume metrics consuming most ingestion capacity
-- Low-volume or potentially unused metrics
-- Trends in data volume over time
-- Opportunities for optimization
-
-**Time Series Cardinality**
-Displays cardinality distribution across metrics:
-- Metrics with highest unique label combinations
-- Cardinality growth trends over time
-- Impact of new label dimensions
-- Cost implications of high-cardinality metrics
-
-### Source Attribution
-
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/source-attribution-breakdown.webp"
-      alt="Source attribution breakdown showing metrics contribution by services and integrations"
-    />
-    <figcaption>
-      <i>
-        Source attribution breakdown showing metrics contribution by services and integrations
-      </i>
-    </figcaption>
-</figure>
-
-**Service Breakdown**
-Shows which services are contributing the most metrics data:
-- Metrics count per service
-- Sample volume per service
-- New metrics introduced by each service
-- Service-specific metric health status
-
-**Integration Overview**
-Provides visibility into external data sources:
-- AWS, Kubernetes, database integrations
-- Custom application metrics
-- Infrastructure monitoring metrics
-- Third-party service metrics
-
-### Performance Insights
-
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/performance-insights-monitoring.webp"
-      alt="Performance insights dashboard showing ingestion rates and query performance metrics"
-    />
-    <figcaption>
-      <i>
-        Performance insights dashboard showing ingestion rates and query performance metrics
-      </i>
-    </figcaption>
-</figure>
-
-**Ingestion Rate Monitoring**
-Tracks how quickly metrics are being processed:
-- Real-time ingestion rates
-- Peak usage patterns
-- Processing delays or bottlenecks
-- Capacity planning insights
-
-**Query Performance**
-Shows how different metrics perform in queries:
-- Average query response times
-- Most frequently queried metrics
-- Complex query identification
-- Optimization recommendations
+**Action Buttons**:
+- **Stage & Run Query**: Execute the configured query
+- **Save this view**: Preserve query configurations for reuse
+- **Create an Alert**: Set up monitoring alerts based on the query
+- **Add to Dashboard**: Include the visualization in existing dashboards
 
 ## Advanced Features
 
-### Metric Correlation
-
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/metric-correlation-discovery.webp"
-      alt="Metric correlation discovery interface showing related metrics and smart grouping"
-    />
-    <figcaption>
-      <i>
-        Metric correlation discovery interface showing related metrics and smart grouping
-      </i>
-    </figcaption>
-</figure>
-
-**Related Metrics Discovery**
-Automatically suggests metrics that often change together:
-- Infrastructure metrics that correlate with application performance
-- Business metrics that relate to technical metrics
-- Cross-service metric relationships
-- Anomaly detection across related metrics
-
-**Smart Grouping**
-Organizes metrics by logical relationships:
-- Service-based grouping for application metrics
-- Infrastructure grouping for system metrics
-- Business domain clustering
-- Custom categorization options
-
 ### Cost Optimization Tools
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/cost-optimization-tools.webp"
-      alt="Cost optimization tools showing volume analysis and cleanup recommendations"
-    />
-    <figcaption>
-      <i>
-        Cost optimization tools showing volume analysis and cleanup recommendations
-      </i>
-    </figcaption>
-</figure>
+Metrics Explorer provides several tools to help optimize your observability costs:
 
-**Volume Analysis**
-Identify metrics consuming the most resources:
-- Top metrics by sample count
-- Highest cardinality metrics
-- Fastest-growing metrics over time
-- Duplicate or redundant metrics
+**Volume Analysis**:
+- Identify metrics consuming the most resources through the Proportion View
+- Track sample count trends over time to spot growing metrics
+- Analyze time series cardinality to understand dimensional complexity
+- Compare ingestion volumes across different services and integrations
 
-**Cleanup Recommendations**
-Automated suggestions for optimization:
-- Unused metrics detection
-- Misconfigured metric identification
-- Cardinality reduction opportunities
-- Retention policy recommendations
+**Cardinality Management**:
+- View detailed attribute breakdowns for each metric
+- Identify high-cardinality dimensions that might impact costs
+- Monitor time series growth patterns
+- Spot potential cardinality explosions before they become problems
 
 ### Integration Workflows
 
-<figure data-zoomable align="center">
-    <img
-      src="/img/docs/metrics-explorer/integration-workflows-interface.webp"
-      alt="Integration workflows interface for dashboard creation and alert configuration"
-    />
-    <figcaption>
-      <i>
-        Integration workflows interface for dashboard creation and alert configuration
-      </i>
-    </figcaption>
-</figure>
+**Dashboard Creation**:
+From the Explorer interface, you can:
+- Save queries as reusable views
+- Add visualizations directly to dashboards
+- Create templated dashboards for similar metrics
+- Share query configurations across teams
 
-**Dashboard Creation**
-Seamless transition from exploration to monitoring:
-- One-click dashboard panel creation
-- Pre-configured visualization types
-- Automatic layout suggestions
-- Template sharing across teams
-
-**Alert Configuration**
-Direct alert setup from query results:
-- Threshold-based alerts
-- Anomaly detection alerts
-- Multi-metric correlation alerts
-- Notification channel integration
+**Alert Configuration**:
+Set up monitoring alerts by:
+- Defining threshold-based conditions
+- Creating anomaly detection rules
+- Configuring notification channels
+- Setting up multi-metric correlation alerts
 
 ## Technical Specifications
 
@@ -447,3 +250,33 @@ Direct alert setup from query results:
 - **Scalable Architecture**: Horizontal scaling support for growing deployments
 - **Optimized Storage**: ClickHouse backend ensures fast query performance
 - **Efficient Indexing**: Smart indexing for rapid metric discovery and filtering
+
+## Best Practices
+
+### Effective Exploration Strategies
+
+1. **Start with Proportion View**: Use the treemap to identify metrics consuming the most resources
+2. **Filter by Service**: Narrow down metrics by specific services or integrations
+3. **Use Time Range Controls**: Adjust time windows to focus on relevant periods
+4. **Monitor Cardinality**: Regularly check attribute distributions to prevent cardinality issues
+5. **Set Up Alerts**: Create monitoring rules for metrics that impact your key services
+
+### Troubleshooting Common Issues
+
+**High Cardinality Metrics**:
+- Review attribute sections to identify problematic dimensions
+- Check for unbounded label values (timestamps, user IDs, etc.)
+- Consider aggregating or filtering high-cardinality attributes
+- Monitor time series growth trends
+
+**Missing Metrics**:
+- Verify instrumentation is properly configured
+- Check service discovery and metric collection settings
+- Review OpenTelemetry collector configuration
+- Ensure proper metric naming conventions
+
+**Performance Issues**:
+- Use time range filtering to reduce query scope
+- Optimize queries by limiting attribute dimensions
+- Consider data retention policies for historical metrics
+- Monitor ingestion rates and processing delays
