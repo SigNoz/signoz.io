@@ -16,10 +16,8 @@ Before you begin, ensure you have:
 2. An OpenTelemetry (OTEL) Collector with access to Snowflake
    - [Install the OTEL Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)(v0.88.0 or newer) if not done already 
    - Ensure you can provide config files and set environment variables for the collector
-   - Ensure the OTEL collector has access to Snowflake for metrics collection
 
-
-## Collecting Snowflake Metrics
+## Setup
 
 ### Step 1: Create the Collector Config File
 
@@ -90,13 +88,14 @@ export SNOWFLAKE_PASSWORD="<snowflake-password>"
 export SNOWFLAKE_WAREHOUSE="<snowflake-warehouse>"
 
 # region specific SigNoz cloud ingestion endpoint
-export OTLP_DESTINATION_ENDPOINT="ingest.{REGION}.signoz.cloud:443"
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
 
 # your SigNoz ingestion key
-export SIGNOZ_INGESTION_KEY="signoz-ingestion-key"
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
 ```
 
-You can find more details about SigNoz ingestion keys and regions [here](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
+- Set the <region> to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace <your-ingestion-key> with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3: Use the Collector Config File
 
@@ -105,27 +104,15 @@ Add the following flag to your collector run command:
 --config snowflake-metrics-collection-config.yaml
 ```
 
-**Note:** The collector can use multiple config files by specifying multiple `--config` flags.
-
 ## Snowflake Dashboard
 
-Once SigNoz has started listening to the Snowflake data, head over to the `Dashboards` tab and search for Snowflake, this will show you a newly created dashboard which shows
-different Snowflake metrics.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/snowflake/snowflake-integration-dashboard.webp" alt="Dashboard for monitoring Snowflake Metrics"/>
-    <figcaption><i>Dashboard for monitoring Snowflake Metrics</i></figcaption>
-</figure>
-
-### Dashboard asset
-
-You can also import the dashboard.
+You can import the Snowflake dashboard.
 
 Go to Dashboards => New Dashboard => Import JSON
 
 Download JSON from [link](https://github.com/SigNoz/dashboards/blob/main/snowflake/snowflake-otlp-v1.json).
 
-Feel free to reach out to us if data does not start appearing in the dashboard after 2-3 minutes. Here are sample screenshots from the dashboard:
+Here are sample screenshots from the dashboard:
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/integrations/snowflake/billing-and-credit-usage.webp" alt="Snowflake Billing and Credit Usage Metrics"/>
@@ -153,7 +140,8 @@ Feel free to reach out to us if data does not start appearing in the dashboard a
 </figure>
 
 
-### Snowflake metrics
+<details> 
+<summary> Complete list of Snowflake metrics </summary>
 
 - **Name**: The name of the metric.
 - **Type**: The type of the metric (e.g., Sum, Gauge).
@@ -199,3 +187,5 @@ Feel free to reach out to us if data does not start appearing in the dashboard a
 | snowflake_storage_failsafe_bytes_total                | Gauge  | Bytes   | Number of bytes of data in Fail-safe                                                                             |
 
 You can refer [this](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/snowflakereceiver/documentation.md) page for more details about the Snowflake metrics.
+
+</details>
