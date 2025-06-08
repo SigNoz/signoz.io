@@ -350,6 +350,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/laravel/',
+          destination: '/docs/instrumentation/opentelemetry-laravel/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/python/',
           destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
