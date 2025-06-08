@@ -20,7 +20,7 @@ export function GameResults({ isWon, score = 0, timeTaken, targetWord }: GameRes
 
   const handleShare = async () => {
     // const shareText = `🎮 SigNoz Wordle\n🏆 Score: ${score} pts\n🎯 Word: ${targetWord}\n\nPlay now at ${window.location.href}`;
-    const shareText = `Hey there, I just played today's Wordle by SigNoz and got a score of ${score}. Can you beat me 😉? Try it out at https://wordle.signoz.io/todayswordle.`
+    const shareText = `Hey there, I just played today's Wordle by SigNoz and got a score of ${score}. Can you beat me 😉? Try it out at ${window.location.href}`
     try {
       await navigator.clipboard.writeText(shareText);
       setIsCopied(true);
@@ -66,7 +66,7 @@ export function GameResults({ isWon, score = 0, timeTaken, targetWord }: GameRes
 
       <div className="text-center mt-6">
         <p className="text-gray-400 text-sm sm:text-base">
-          Today's word was '{targetWord}' are key-value-effect labels applied to nodes to repel pods, only those with matching tolerations can be scheduled onto those nodes. 
+          Today's word was '{targetWord}' which are key-value-effect labels applied to nodes to repel pods, only those with matching tolerations can be scheduled onto those nodes. 
           You can apply a Taint to a node using the kubectl taint command.
         </p>
         <a 
