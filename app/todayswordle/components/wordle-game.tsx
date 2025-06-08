@@ -4,24 +4,49 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { GameConfig, GameState, LetterState, GameStatus } from '../types';
 import { Keyboard } from './keyboard';
 import { GameBoard } from './game-board';
+import { WordleHeader } from './wordle-header';
+import { GameResults } from './game-results';
+import { getGameState } from '../lib/cookie-utils';
+
+const MAX_TIME = 86400; // 24 hours in seconds
+const MAX_ATTEMPTS = 5;
 
 interface WordleGameProps {
   targetWord: string;
   config?: Partial<GameConfig>;
+  elapsedTime: number;
+  gameStatus: GameStatus;
+  onGameWon: (attempts: number) => void;
+  onGameLost: () => void;
 }
 
 const DEFAULT_CONFIG: GameConfig = {
   wordLength: 5,
-  maxAttempts: 6
+  maxAttempts: 5
 };
 
-export function WordleGame({ targetWord, config = {} }: WordleGameProps) {
+function getGameScore(attempts: number, elapsedTime: number) {
+  if(getGameState().wonScore)
+    return getGameState().wonScore
+
+  const score = Math.ceil(((MAX_TIME / elapsedTime) * (MAX_ATTEMPTS / attempts)))
+  return score
+}
+
+export function WordleGame({ 
+  targetWord, 
+  config = {}, 
+  elapsedTime,
+  onGameWon,
+  onGameLost,
+  gameStatus,
+}: WordleGameProps) {
   const gameConfig = { ...DEFAULT_CONFIG, ...config };
   const [currentGuess, setCurrentGuess] = useState('');
   const [gameState, setGameState] = useState<GameState>({
     currentRow: 0,
     currentCol: 0,
-    gameStatus: GameStatus.PLAYING,
+    gameStatus: gameStatus,
     guesses: [],
     letterStates: new Map()
   });
@@ -29,26 +54,34 @@ export function WordleGame({ targetWord, config = {} }: WordleGameProps) {
   const updateLetterStates = useCallback((guess: string) => {
     const newStates = new Map(gameState.letterStates);
     
-    for (let i = 0; i < guess.length; i++) {
+    // First pass: Mark all CORRECT letters
+    for (let i = 0; i < gameConfig.wordLength; i++) {
       const letter = guess[i].toUpperCase();
       if (letter === targetWord[i].toUpperCase()) {
         newStates.set(letter, LetterState.CORRECT);
-      } else if (targetWord.toUpperCase().includes(letter)) {
-        if (newStates.get(letter) !== LetterState.CORRECT) {
-          newStates.set(letter, LetterState.PRESENT);
-        }
-      } else {
-        if (!newStates.has(letter)) {
-          newStates.set(letter, LetterState.ABSENT);
+      }
+    }
+
+    // Second pass: Mark PRESENT or ABSENT letters
+    for (let i = 0; i < gameConfig.wordLength; i++) {
+      const letter = guess[i].toUpperCase();
+      if (letter !== targetWord[i].toUpperCase()) {
+        if (targetWord.toUpperCase().includes(letter)) {
+          // Only mark as PRESENT if not already CORRECT
+          if (newStates.get(letter) !== LetterState.CORRECT) {
+            newStates.set(letter, LetterState.PRESENT);
+          }
+        } else {
+          // Only mark as ABSENT if not already marked
+          if (!newStates.has(letter)) {
+            newStates.set(letter, LetterState.ABSENT);
+          }
         }
       }
     }
 
-    setGameState(prev => ({
-      ...prev,
-      letterStates: newStates
-    }));
-  }, [targetWord, gameState.letterStates]);
+    return newStates;
+  }, [targetWord, gameConfig.wordLength, gameState.letterStates]);
 
   const handleKeyPress = useCallback((key: string) => {
     if (gameState.gameStatus !== 'playing') return;
@@ -62,13 +95,16 @@ export function WordleGame({ targetWord, config = {} }: WordleGameProps) {
       if (currentGuess.length !== gameConfig.wordLength) return;
 
       const newGuesses = [...gameState.guesses, currentGuess];
-      updateLetterStates(currentGuess);
-
+      const newLetterStates = updateLetterStates(currentGuess);
+      
       let newStatus: GameStatus = gameState.gameStatus;
       if (currentGuess.toUpperCase() === targetWord.toUpperCase()) {
         newStatus = GameStatus.WON;
-      } else if (newGuesses.length === gameConfig.maxAttempts) {
+        onGameWon(getGameScore(newGuesses.length, elapsedTime) as number);
+      } 
+      else if (newGuesses.length === gameConfig.maxAttempts) {
         newStatus = GameStatus.LOST;
+        onGameLost();
       }
 
       setGameState(prev => ({
@@ -76,7 +112,8 @@ export function WordleGame({ targetWord, config = {} }: WordleGameProps) {
         currentRow: prev.currentRow + 1,
         currentCol: 0,
         gameStatus: newStatus,
-        guesses: newGuesses
+        guesses: newGuesses,
+        letterStates: newLetterStates
       }));
       setCurrentGuess('');
       return;
@@ -85,7 +122,7 @@ export function WordleGame({ targetWord, config = {} }: WordleGameProps) {
     if (currentGuess.length < gameConfig.wordLength) {
       setCurrentGuess(prev => prev + key.toLowerCase());
     }
-  }, [currentGuess, gameState, gameConfig, targetWord, updateLetterStates]);
+  }, [currentGuess, gameState, gameConfig, targetWord, updateLetterStates, onGameWon, onGameLost]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -101,10 +138,27 @@ export function WordleGame({ targetWord, config = {} }: WordleGameProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyPress]);
+  if (gameState.gameStatus !== GameStatus.PLAYING) {
+    return (
+      <GameResults 
+        isWon={gameState.gameStatus === GameStatus.WON}
+        score={gameState.gameStatus === GameStatus.WON ? getGameScore(gameState.guesses.length, elapsedTime) as number : 0}
+        timeTaken={elapsedTime}
+        targetWord={targetWord}
+      />
+    );
+  }
 
   return (
-    <div className="grid grid-cols-2 items-center ml-[350px]">
-      <div className="flex justify-end pr-8 ml-20">
+    <div className="flex flex-col items-center gap-4">
+      <div className="flex justify-center w-full max-w-[450px] pt-10 sm:pt-0">
+        <WordleHeader 
+          currentAttempts={gameState.guesses.length}
+          maxAttempts={gameConfig.maxAttempts}
+          elapsedTime={elapsedTime}
+        />
+      </div>
+      <div className="flex justify-center">
         <GameBoard
           guesses={gameState.guesses}
           currentGuess={currentGuess}
@@ -112,7 +166,7 @@ export function WordleGame({ targetWord, config = {} }: WordleGameProps) {
           config={gameConfig}
         />
       </div>
-      <div className="pl-8">
+      <div className="flex justify-center">
         <Keyboard
           onKeyPress={handleKeyPress}
           letterStates={gameState.letterStates}

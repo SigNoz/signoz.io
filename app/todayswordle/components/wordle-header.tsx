@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useEffect, useState, FC } from 'react';
-import { Orbitron } from 'next/font/google';
+import { Lexend, Orbitron } from 'next/font/google';
 import { BiTime } from 'react-icons/bi';
 import { HiLightBulb } from 'react-icons/hi2';
+import { RiMenu3Line } from 'react-icons/ri';
 import { cn } from '../../lib/utils';
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['500'] });
+const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] });
 
 enum Difficulty {
   EASY = 'EASY',
@@ -19,9 +21,11 @@ interface WordleHeaderProps {
   maxAttempts: number;
   hint?: string;
   level?: Difficulty;
+  elapsedTime: number;
 }
 
 interface TimerProps {
+  elapsedTime: number;
   className?: string;
 }
 
@@ -82,26 +86,14 @@ function getLevelColor(level: Difficulty) {
     }
   };
 
-function Timer() {
-  const [time, setTime] = useState(getTimeFromCookie());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTime(prev => {
-        const newTime = Math.max(0, prev + 1);
-        return newTime;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [time]);
-
-  const minutes = Math.floor(time / 60);
-  const seconds = time % 60;
+function Timer({ elapsedTime }: TimerProps) {
+  const minutes = Math.floor(elapsedTime / 60);
+  const seconds = elapsedTime % 60;
 
   return (
     <div className="flex items-center gap-2 text-[#4558c4]">
       <BiTime className="w-5 h-5" />
-      <span className={`${orbitron.className}`}>
+      <span className={`${orbitron.className} text-[20px]`}>
         {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
       </span>
     </div>
@@ -111,9 +103,9 @@ function Timer() {
 function Level({ level, className }: StatusProps) {
   return (
     <div className={cn("flex items-center gap-2 text-[#4558c4]", className)}>
-      <span className="text-[12px]">Difficulty:</span>
+      <span className={`text-[14px] ${lexend.className}`}>Difficulty:</span>
       <span className={cn(
-        "px-1 py-0.5 rounded text-sm",
+        "px-1 py-0.5 rounded text-[20px]",
         `${orbitron.className}`,
         getLevelColor(level)
       )}>
@@ -172,11 +164,12 @@ export const WordleHeader: React.FC<WordleHeaderProps> = ({
   maxAttempts,
   hint = "Wear all your observability caps and buckle up!",
   level = Difficulty.MEDIUM,
+  elapsedTime,
 }) => {
   return (
-    <div className="w-full max-w-[500px] space-y-3 p-4 bg-black/30 backdrop-blur-md rounded-lg border-2 border-[#233457] box-shadow-[rgba(112, 153, 234, 0.8)]">
-      <div className="flex items-center justify-between">
-        <Timer />
+    <div className="w-full space-y-4 p-4 sm:p-6 bg-black/30 backdrop-blur-md rounded-lg border-2 border-[#233457] box-shadow-[rgba(112, 153, 234, 0.8)] neon-box-border">
+      <div className="flex items-center justify-between gap-4">
+        <Timer elapsedTime={elapsedTime} />
         <Level level={level} />
       </div>
       
@@ -186,8 +179,8 @@ export const WordleHeader: React.FC<WordleHeaderProps> = ({
       />
       
       
-        <HintBox hint={hint} />
-        <LegendBox />
+        {/* <HintBox hint={hint} />
+        <LegendBox /> */}
       
     </div>
   );

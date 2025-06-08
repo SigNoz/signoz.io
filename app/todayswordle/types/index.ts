@@ -6,6 +6,7 @@ export enum LetterState {
 }
 
 export enum GameStatus {
+  NOT_STARTED = 'not_started',
   PLAYING = 'playing',
   WON = 'won',
   LOST = 'lost'
