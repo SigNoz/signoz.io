@@ -3,7 +3,7 @@ import qs from 'qs';
 const API_URL = process.env.SIGNOZ_CMS_API_URL;
 const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH;
 
-enum DeploymentType {
+export enum DeploymentType {
   CLOUD_ONLY = 'Cloud Only',
   SELF_HOSTED = 'Self Hosted',
 }

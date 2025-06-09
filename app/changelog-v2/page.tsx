@@ -1,12 +1,9 @@
-import ChangelogRenderer from '@/components/ChangelogRenderer/ChangelogRenderer'
-import { fetchChangelogEntries } from '../../utils/strapi'
+import ChangelogRenderer from '@/components/Changelog/Renderer/ChangelogRenderer'
+import ChangelogFooter from '@/components/Changelog/Footer/ChangelogFooter'
+import { DeploymentType, fetchChangelogEntries } from '../../utils/strapi'
 
-// const markdown = `
-// May 8, 2025\n# External API monitoring, new dashboards and more\n\n![feature-graphic-2.webp](http://localhost:1337/uploads/feature_graphic_2_a9a37a3068.webp)\n\n## External API Monitoring\n\nWe've spent the last couple of months [rebuilding](https://google.com) search from the ground up. The UI has been refined. We've improved how we display results as well as the accuracy, for instance for words split with / or _. You can now reliably use \"phrase matching\", -negative keywords AND boolean operators in your search queries.\n\nNot only that, but results will show comments, documents, and projects as well as issues.\n\n## Fixes & Improvements\n\n- We've spent the last couple of months rebuilding search from the ground up.\n- We've spent the last couple of months rebuilding search from the ground up.\n- We've spent the last couple of months rebuilding search from the ground up.
-// `
-
-const Changelog: React.FC = async () => {
-  const changelogEntries = await fetchChangelogEntries()
+const Changelog = async () => {
+  const changelogEntries = await fetchChangelogEntries(DeploymentType.CLOUD_ONLY)
 
   return (
     <section className="container mx-auto mt-8 flex w-full flex-col gap-7">
@@ -23,6 +20,7 @@ const Changelog: React.FC = async () => {
           <ChangelogRenderer key={entry.id} changelog={entry} />
         ))}
       </div>
+      <ChangelogFooter />
     </section>
   )
 }
