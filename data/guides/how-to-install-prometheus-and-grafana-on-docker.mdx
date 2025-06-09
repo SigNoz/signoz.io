@@ -2,225 +2,352 @@
 
 title: How to Set Up Prometheus and Grafana on Docker - A Guide
 slug: how-to-install-prometheus-and-grafana-on-docker
-date: 2024-08-01
-tags: [prometheus]
-authors: [ankit_anand]
+date: 2025-06-09
+tags: [prometheus, grafana, docker, monitoring, containerization, metrics, visualization]
+authors: [adil_shaikh, ankit_anand]
 description: Learn how to install Prometheus and Grafana on Docker with this comprehensive guide. Step-by-step instructions for setup, configuration, and monitoring.
 keywords: [Prometheus, Grafana, Docker, monitoring, installation, containerization, metrics, visualization]
 
 ---
 
-This guide walks you through the process of installing and configuring these tools using Docker containers. You'll learn how to deploy Prometheus and Grafana, connect them, and start monitoring your Docker environment effectively.
+Monitoring containerized environments effectively is crucial for debugging, capacity planning, and maintaining uptime. In this guide, we'll walk through a hands-on setup of Prometheus and Grafana entirely on Docker, ideal for local development, POCs, or staging environments, no Kubernetes required.
 
 ## Why Use Docker for Prometheus and Grafana?
 
-Docker simplifies the deployment and management of Prometheus and Grafana. Here's why containerization is beneficial for these monitoring tools:
+Docker simplifies and secures the deployment of Prometheus and Grafana with these key benefits:
 
-1. **Easy deployment**: Docker containers package all dependencies, making installation straightforward.
-2. **Scalability**: You can easily scale your monitoring setup as your infrastructure grows.
-3. **Consistency**: Containers ensure consistent environments across development, testing, and production.
-4. **Simple updates**: Upgrading to new versions is as simple as pulling the latest Docker images.
+1. **Isolation & Security**
+    
+    Containers provide process isolation via namespaces and cgroups. Combined with Docker's security features like seccomp and read-only filesystems, this reduces risk and surface area for attacks.
+    
+2. **Persistent Storage**
+    
+    Docker volumes retain Prometheus TSDB data and Grafana configs across restarts, ensuring observability data isn’t lost during container lifecycle events.
+    
+3. **Network Control**
+    
+    Docker networks (bridge, overlay) enable secure, isolated communication. Port mapping and firewall rules limit external exposure (e.g., 9090, 3000), enhancing security.
+    
+4. **Environment Consistency**
+    
+    Docker guarantees consistent behavior across dev, staging, and prod, eliminating environment drift and simplifying debugging.
+    
 
 ## Prerequisites for Installing Prometheus and Grafana on Docker
 
-Before you begin, ensure you have:
+Before setting up, ensure the following prerequisites are met to avoid compatibility or runtime issues:
 
-- Docker and Docker Compose installed on your system
-- Basic understanding of containerization concepts
-- Sufficient system resources (CPU, RAM, and storage)
-- Available network ports for Prometheus and Grafana
+- **Docker ≥ 20.10 and Docker Compose ≥ 1.29** installed. <a href="https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Install Docker</a> | <a href="https://docs.docker.com/compose/install/" rel="noopener noreferrer nofollow" target="_blank">Install Compose</a>
+- **System resources**: Minimum 2 vCPUs, 4 GB RAM, and 2 GB of free disk space.
+- **Open ports**: Ensure default ports — 9090 (Prometheus), 3000 (Grafana), and optionally 8080 (cAdvisor) — are available, unless you've configured these services to use different ports.
+- **Administrative privileges**: `sudo` or root access to install Docker and manage containers.
 
 ## Step-by-Step Guide to Install Prometheus on Docker
 
-Let's start by setting up Prometheus:
+Prometheus is a robust monitoring and alerting system, and Docker makes it easy to deploy and manage. Follow these steps to containerize Prometheus using Docker Compose.
 
-1. Create a Docker network for Prometheus and Grafana:
-
-```bash
-docker network create monitoring
-
-```
-
-1. Create a Prometheus configuration file named `prometheus.yml`:
-
-```yaml
-global:
-  scrape_interval: 15s
-
-scrape_configs:
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
-
-```
-
-1. Create a Docker Compose file named `docker-compose.yml`:
-
-```yaml
-version: '3'
-services:
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - 9090:9090
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+1. **Create a Dedicated Docker Network**
+    
+    Create a user-defined bridge network for Prometheus and Grafana to enable container-to-container communication without exposing internal ports externally.
+    
+    ```jsx
+    docker network create monitoring
+    ```
+    
+    <Figure src="/img/guides/2025/06/how-to-install-prometheus-and-grafana-on-docker-image.webp" alt="command: docker network ls" caption="command: docker network ls" />
+    
+2. **Create a Prometheus Configuration File**
+    
+    Define scrape settings and specify the Prometheus server itself as a target in a file named `prometheus.yml`:
+    
+    ```
+    global:
+      scrape_interval: 15s  # Frequency of metric scraping
+    
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+    ```
+    
+    📌 *This configuration tells Prometheus to scrape metrics from itself every 15 seconds.*
+    
+3. **Create a Docker Compose File**
+    
+    Define the Prometheus container setup in `docker-compose.yml`. Pin the image version for stability and map the configuration file as a volume.
+    
+    ```jsx
+    version: '3.8'
+    
+    services:
+      prometheus:
+        image: prom/prometheus:v2.52.0
+        container_name: prometheus
+        ports:
+          - "9090:9090"
+        volumes:
+          - ./prometheus.yml:/etc/prometheus/prometheus.yml
+        networks:
+          - monitoring
+        restart: unless-stopped
+    
     networks:
-      - monitoring
+      monitoring:
+        external: true
+    ```
+    
+    📝 *Using `restart: unless-stopped` ensures Prometheus restarts automatically if it crashes or the system reboots.*
+    
+4. **Launch Prometheus**
+    
+    Start the service in detached mode:
+    
+    ```jsx
+    docker-compose up -d
+    ```
+    
+5. **Verify Prometheus is Running**
+    
+    Check if the container is active:
+    
+    ```
+    docker ps
+    ```
+    
+    You should see the `prometheus` container listed and listening on port `9090`.
+    
+    <Figure src="/img/guides/2025/06/how-to-install-prometheus-and-grafana-on-docker-image%201.webp" alt="command: docker ps" caption="command: docker ps" />
+    
+6. **Access the Prometheus UI**
 
-networks:
-  monitoring:
-    external: true
+Navigate to `http://localhost:9090` in your browser. You should see the Prometheus web interface.
 
-```
+### Troubleshooting
 
-1. Run Prometheus:
+If Prometheus doesn't start:
 
-```bash
-docker-compose up -d
+- Check logs:
+    
+    ```bash
+    docker-compose logs prometheus
+    ```
+    
+- Ensure the config file path and syntax are correct.
+- Confirm port `9090` is not in use.
 
-```
+## Configuring Prometheus for Metric Collection
 
-1. Verify the Prometheus container is running:
+To monitor your services, Prometheus must know where to pull metrics from. This is done by defining scrape jobs in the configuration file.
 
-```bash
-docker ps
-
-```
-
-You should see the Prometheus container listed and running.
-
-### Configuring Prometheus for Metric Collection
-
-To collect metrics from your applications:
-
-1. Add scrape configurations to `prometheus.yml`:
-
-```yaml
-scrape_configs:
-  - job_name: 'my-app'
-    static_configs:
-      - targets: ['app-host:app-port']
-
-```
-
-Adjust scrape intervals and timeout settings as needed.
-
-1. Restart the Prometheus container to apply changes:
-
-```bash
-docker-compose restart prometheus
-
-```
-
-1. Access the Prometheus UI at `http://localhost:9090` to verify metric collection.
+1. **Add a New Scrape Job to `prometheus.yml`**
+    
+    Each job in Prometheus represents a set of targets that expose metrics. Update your configuration file to include your app:
+    
+    ```yaml
+    scrape_configs:
+      - job_name: 'my-app'  # Descriptive name for the service
+        static_configs:
+          - targets: ['app-host:8000']  # Replace with container name or IP and port
+    ```
+    
+    📌 *Ensure `app-host` is resolvable from within the Prometheus container—use a Docker service name or internal container name if they're on the same network.*
+    
+    💡 *You can also customize the scrape interval per job:*
+    
+    ```yaml
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    ```
+    
+2. **Restart Prometheus to Apply the New Configuration**
+    
+    Use Docker Compose to reload the updated configuration:
+    
+    ```bash
+    docker-compose restart prometheus
+    ```
+    
+    🔍 *Alternatively, use `docker exec` to test the config before restarting:*
+    
+    ```bash
+    docker exec -it prometheus promtool check config /etc/prometheus/prometheus.yml
+    ```
+    
+3. **Verify Metric Collection in the Prometheus UI**
+    - Open: <a href="http://localhost:9090/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:9090</a>
+    - Go to **Status → Targets** to ensure your new job appears and is marked as **UP**
+    - Use the **Graph** tab to query example metrics, such as:
+        
+        <Figure src="/img/guides/2025/06/how-to-install-prometheus-and-grafana-on-docker-image%202.webp" alt="Prometheus graph using PromQL Query" caption="Prometheus graph using PromQL Query" />
+        
 
 ## Installing Grafana on Docker
 
-Now, let's add Grafana to our setup:
+Grafana is a powerful visualization tool that complements Prometheus by turning raw metrics into insightful dashboards. By containerizing Grafana with Docker, you can easily manage, deploy, and persist your monitoring setup alongside Prometheus.
 
-1. Update the `docker-compose.yml` file to include Grafana:
-
-```yaml
-version: '3'
-services:
-  prometheus:
-    # ... (previous Prometheus configuration)
-
-  grafana:
-    image: grafana/grafana
-    ports:
-      - 3000:3000
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=your_password
+1. **Update Your `docker-compose.yml` to Include Grafana**
+    
+    Update your Docker Compose file to include Grafana as a service. This setup ensures persistent storage, environment configuration, and seamless integration with your monitoring network:
+    
+    ```yaml
+    version: '3.8'
+    
+    services:
+      prometheus:
+        image: prom/prometheus:v2.52.0
+        # ... existing Prometheus config
+    
+      grafana:
+        image: grafana/grafana:10.2.2
+        container_name: grafana
+        ports:
+          - "3000:3000"
+        environment:
+          - GF_SECURITY_ADMIN_PASSWORD=your_password
+        volumes:
+          - grafana-storage:/var/lib/grafana
+        networks:
+          - monitoring
+        restart: unless-stopped
+    
+    volumes:
+      grafana-storage:
+    
     networks:
-      - monitoring
+      monitoring:
+        external: true
+    ```
+    
+    📌 *Using a named volume ensures Grafana persists dashboards and data sources across container restarts.*
+    
+2. **Launch Grafana**
+    
+    Run the following command to bring up the updated stack:
+    
+    ```bash
+    docker-compose up -d
+    ```
+    
+    <Figure src="/img/guides/2025/06/how-to-install-prometheus-and-grafana-on-docker-image%203.webp" alt="Command: docker-compose up -d" caption="Command: docker-compose up -d" />
+    
+    Once running, access the web interface at:
+    
+    ➡️ <a href="http://localhost:3000/" rel="noopener noreferrer nofollow" target="_blank">**http://localhost:3000**</a>
+    
 
-networks:
-  monitoring:
-    external: true
+## Connecting Grafana to Prometheus
 
-```
+To visualize Prometheus metrics effectively in Grafana, the first step is to establish a connection between the two. This involves configuring Prometheus as a data source and building a dashboard to display meaningful insights.
 
-1. Run the updated Docker Compose configuration:
+1. **Set up Prometheus as a Data Source in Grafana**
+    - Navigate to Connections → Data Sources → Add data source in the left side panel.
+        
+        <Figure src="/img/guides/2025/06/how-to-install-prometheus-and-grafana-on-docker-image%204.webp" alt="Adding a data source in Grafana" caption="Adding a data source in Grafana" />
+        
+    - Enter the **Prometheus server URL** in the configuration field.
+        
+        <Figure src="/img/guides/2025/06/how-to-install-prometheus-and-grafana-on-docker-image%205.webp" alt="Enter Prometheus server URL in the config field" caption="Enter Prometheus server URL in the config field" />
+        
+    - Configure authentication settings (if required).
+    - Click "**Save & Test**" to verify the connection
+2. **Create a New Dashboard and Panel**
+    - Navigate to **Dashboards** → **New Dashboard** → Click on the **Add Visualization** button
+        
+        <Figure src="/img/guides/2025/06/how-to-install-prometheus-and-grafana-on-docker-image%206.webp" alt="Create a new dashboard and add a visualization" caption="Create a new dashboard and add a visualization" />
+        
+    - Select **Prometheus** from the data source dropdown
+        
+        <Figure src="/img/guides/2025/06/how-to-install-prometheus-and-grafana-on-docker-image%207.webp" alt="Select Prometheus as the data source" caption="Select Prometheus as the data source" />
+        
+    - Choose the appropriate visualization type
+3. **Input Your PromQL Expression**
+    - In the query editor, enter your metric division expression. For example, to calculate CPU usage for each core:
+        
+        ```
+        100 - (rate(node_cpu_seconds_total{mode="idle"}[5m]) * 100
+        ```
+        
+        This query breaks down CPU usage for each core individually, showing how much time each core is spending on active tasks over a 5-minute interval.
+        
+        <Figure src="/img/guides/2025/06/how-to-install-prometheus-and-grafana-on-docker-image_(6).webp" alt="PromQL expression for CPU usage" caption="PromQL expression for CPU usage" />
+        
 
-```bash
-docker-compose up -d
+## Monitoring Docker with cAdvisor
 
-```
+While Prometheus is excellent at scraping and storing metrics, it needs exporters to expose metrics from different systems. **cAdvisor (Container Advisor)** is a lightweight exporter developed by Google that collects real-time resource usage and performance metrics directly from Docker containers. It provides detailed insights such as:
 
-1. Access the Grafana web interface at `http://localhost:3000`.
+- CPU and memory usage
+- Network I/O
+- Filesystem utilization
+- Container lifecycle stats
 
-### Connecting Grafana to Prometheus
+This makes cAdvisor an essential tool for gaining **container-level observability**, especially when you're working with microservices or multiple Docker containers.
 
-To visualize Prometheus data in Grafana:
-
-1. Log in to Grafana (default username: admin, password: your_password).
-2. Go to Configuration > Data Sources.
-3. Click "Add data source" and select Prometheus.
-4. Set the URL to `http://prometheus:9090`.
-5. Click "Save & Test" to verify the connection.
-
-## Creating Dashboards in Grafana
-
-With Grafana connected to Prometheus, you can create custom dashboards:
-
-1. Click the "+" icon in the sidebar and select "Dashboard".
-2. Add a new panel and select Prometheus as the data source.
-3. Write PromQL queries to visualize your metrics.
-4. Customize the panel with various visualization options.
-
-**Pro tip**: Import pre-built dashboards for common applications to jumpstart your monitoring.
-
-## Monitoring Your Docker Environment
-
-To monitor your Docker environment:
-
-1. Add cAdvisor to your `docker-compose.yml`:
-
-```yaml
-cadvisor:
-  image: gcr.io/cadvisor/cadvisor
-  ports:
-    - 8080:8080
-  volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:ro
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
-    - /var/run/docker.sock:/var/run/docker.sock:ro # Add only if you have your containers running on Mac
-  networks:
-    - monitoring
-
-```
-
-1. Update Prometheus configuration to scrape cAdvisor metrics:
-
-```yaml
-scrape_configs:
-  - job_name: 'cadvisor'
-    static_configs:
-      - targets: ['cadvisor:8080']
-
-```
-
-1. Restart your containers:
-
-```bash
-docker-compose up -d
-
-```
-
-1. Create a Docker-specific dashboard in Grafana using cAdvisor metrics.
+1. **Add cAdvisor to Your `docker-compose.yml`:**
+    
+    Add the following service to your existing Docker Compose setup:
+    
+    ```yaml
+    cadvisor:
+        image: gcr.io/cadvisor/cadvisor:v0.47.2
+        container_name: cadvisor
+        ports:
+          - "8080:8080"
+        volumes:
+          - /:/rootfs:ro
+          - /var/run:/var/run:ro
+          - /sys:/sys:ro
+          - /var/lib/docker/:/var/lib/docker:ro
+          - /var/run/docker.sock:/var/run/docker.sock:ro  # Only needed on Docker Desktop for Mac
+        networks:
+          - monitoring
+        restart: unless-stopped
+    
+    ```
+    
+    📝 *cAdvisor provides insights like memory, CPU, and network usage for each container.*
+    
+2. **Update `prometheus.yml` to Scrape cAdvisor**
+    
+    Now that cAdvisor is part of your stack, configure Prometheus to collect metrics from it:
+    
+    ```yaml
+    scrape_configs:
+      - job_name: 'cadvisor'
+        static_configs:
+          - targets: ['cadvisor:8080']
+    ```
+    
+3. **Restart the Stack**
+    
+    Apply your changes and restart the Docker stack:
+    
+    ```bash
+    docker-compose up -d
+    ```
+    
+    Once it's up and running, you’ll start seeing per-container metrics in Prometheus and can visualize them in Grafana for deeper analysis.
+    
 
 ## Best Practices and Optimization
 
-To ensure optimal performance:
+To maximize performance, reliability, and security in your monitoring setup:
 
-- Secure Prometheus and Grafana with authentication and HTTPS.
-- Manage data retention to balance storage usage and historical data needs.
-- Set up alerting in Prometheus and integrate with Grafana for notifications.
-- Regularly update your Docker images to benefit from the latest features and security patches.
+- **Secure your stack**:
+    - Enable authentication for both Prometheus and Grafana.
+    - Serve both tools behind a reverse proxy with HTTPS (e.g., Nginx + Let's Encrypt).
+    - Use network policies or firewalls to restrict access to monitoring ports.
+- **Optimize storage**:
+    - Configure Prometheus's `-storage.tsdb.retention.time` to limit historical data retention based on your storage capacity.
+    - Regularly clean up unused dashboards or data sources in Grafana.
+- **Alert proactively**:
+    - Define alerting rules in Prometheus and route them using Alertmanager.
+    - Integrate alerts with tools like Slack, PagerDuty, or email.
+    - Use Grafana's alerting engine for panel-based threshold alerts.
+- **Maintain your stack**:
+    - Pin image versions to avoid unexpected changes (`grafana/grafana:10.2.2`, `prom/prometheus:v2.52.0`).
+    - Monitor Prometheus's own metrics (e.g., `prometheus_tsdb_head_series`) to detect performance bottlenecks.
+    - Backup volumes (`prometheus-data`, `grafana-storage`) regularly.
 
 ## Key Takeaways
 
@@ -231,30 +358,61 @@ To ensure optimal performance:
 
 ## FAQs
 
-### What are the system requirements for running Prometheus and Grafana on Docker?
+### What are the minimum system requirements?
 
-The minimum requirements depend on your monitoring scope. For small to medium deployments, a system with 2 CPU cores, 4GB RAM, and 20GB storage is typically sufficient.
+For small to medium workloads:
 
-### Can I use Prometheus and Grafana to monitor non-Docker environments?
+- **CPU**: 2 cores
+- **Memory**: 4–8 GB RAM
+- **Disk**: 20–50 GB (SSD preferred for better Prometheus performance)
 
-Yes, Prometheus can scrape metrics from various sources, including non-containerized applications and services.
+For production or large-scale environments, scale based on data volume and scrape intervals.
 
-### How do I secure my Prometheus and Grafana installations?
+### Can Prometheus and Grafana monitor non-Docker applications?
 
-Use strong passwords, implement authentication, enable HTTPS, and restrict network access to these services.
+Yes. Prometheus can scrape metrics from:
 
-### What are some common issues when setting up Prometheus and Grafana, and how can I resolve them?
+- Bare-metal or VM-hosted services
+- Kubernetes clusters
+- Cloud services (via exporters)
+- Custom apps exposing `/metrics` endpoints
 
-Common issues include network connectivity problems, incorrect configuration, and resource constraints. Troubleshoot by checking logs, verifying configurations, and ensuring sufficient system resources.
+### How can I secure my setup?
+
+- Use strong credentials and environment variables (`GF_SECURITY_ADMIN_PASSWORD`)
+- Reverse proxy with HTTPS (e.g., Nginx or Traefik)
+- Restrict network access via firewalls or `docker-compose` network isolation
+- Enable Grafana alerting audit logs and role-based access
+
+### What are common setup issues and their solutions?
+
+| Issue | Solution |
+| --- | --- |
+| Prometheus can’t scrape metrics | Verify targets in `prometheus.yml` and container DNS |
+| Grafana can’t connect to Prometheus | Check `http://prometheus:9090` URL and Docker network |
+| High memory usage | Tune scrape intervals and retention time |
+| Dashboard data is missing | Ensure correct time range and valid PromQL queries |
 
 ## Visualizing Prometheus Metrics with SigNoz
 
-While Grafana is a popular choice for visualizing Prometheus metrics, SigNoz offers a more integrated solution. SigNoz combines metrics, traces, and logs in a single platform, providing a comprehensive observability solution.
+While **Grafana** is an industry-standard visualization platform, [**SigNoz**](https://signoz.io/) offers an integrated alternative that combines metrics, traces, and logs.
 
-To get started with SigNoz:
+### Why SigNoz?
 
-<GetStartedSigNoz />
+- Built-in support for **OpenTelemetry**
+- Unified observability: metrics + traces + logs
+- Seamless backend powered by ClickHouse
+- Intuitive UI and PromQL support
+- Self-hosted and managed cloud options
 
-SigNoz offers both cloud and open-source versions, giving you flexibility in your monitoring setup. Experience the ease of modern observability with SigNoz and take your monitoring to the next level. It also provides advanced querying capabilities and custom dashboard creation, similar to Grafana.
+### Getting Started with SigNoz
 
-Whether you choose Grafana or SigNoz, visualizing your Prometheus metrics is a crucial step in understanding and optimizing your systems' performance. Start exploring your metrics today and unlock the power of data-driven decision making.
+You can deploy SigNoz with [Docker Compose](https://signoz.io/docs/install/docker/) or [Kubernetes](https://signoz.io/docs/install/kubernetes/) in minutes. For example:
+
+```bash
+git clone https://github.com/SigNoz/signoz.git
+cd signoz/deploy/docker
+docker-compose up -d
+```
+
+Once running, access the UI at `http://localhost:8080`.
