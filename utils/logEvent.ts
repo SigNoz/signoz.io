@@ -51,7 +51,7 @@ export const logEventServerSide = async (payload: LogEventPayload, tunnelEndpoin
 
 // Bot detection patterns - shared between client and server
 export const BOT_USER_AGENT_PATTERNS = [
-  // AI/LLM Bots
+  // AI/LLM Bots (General patterns)
   /gpt/i,
   /openai/i,
   /claude/i,
@@ -62,7 +62,42 @@ export const BOT_USER_AGENT_PATTERNS = [
   /palm/i,
   /gemini/i,
 
-  // Search Engine Crawlers
+  // AI Data Scrapers (Specific bots from Dark Visitors)
+  /gptbot/i, // OpenAI's official crawler
+  /claudebot/i, // Anthropic's official crawler
+  /ccbot/i, // Common Crawl (trains many LLMs)
+  /google-extended/i, // Google's AI training crawler
+  /applebot-extended/i, // Apple's AI training crawler
+  /bytespider/i, // ByteDance/TikTok AI crawler
+  /ai2bot/i, // AI2 research institute
+  /diffbot/i, // Diffbot AI crawler
+  /meta-externalagent/i, // Meta's AI training crawler
+  /facebookbot/i, // Facebook's AI crawler
+  /pangubot/i, // Huawei's AI crawler
+  /timpibot/i, // Timpi's AI crawler
+  /omgili/i, // Webz.io AI training data
+  /webzio-extended/i, // Webz.io extended crawler
+  /cohere-training-data-crawler/i, // Cohere's training crawler
+
+  // AI Assistants (User-triggered)
+  /chatgpt-user/i, // ChatGPT user-triggered requests
+  /perplexity-user/i, // Perplexity user requests
+  /duckassistbot/i, // DuckDuckGo AI assistant
+  /meta-externalfetcher/i, // Meta AI link fetching
+
+  // AI Search Crawlers
+  /amazonbot/i, // Amazon/Alexa search
+  /applebot/i, // Apple/Siri search
+  /oai-searchbot/i, // OpenAI SearchGPT
+  /perplexitybot/i, // Perplexity search crawler
+  /youbot/i, // You.com AI search
+
+  // Undocumented AI Agents
+  /anthropic-ai/i, // Unofficial Anthropic agent
+  /claude-web/i, // Undocumented Claude web agent
+  /cohere-ai/i, // Unofficial Cohere agent
+
+  // Search Engine Crawlers (Traditional)
   /googlebot/i,
   /bingbot/i,
   /slurp/i,
