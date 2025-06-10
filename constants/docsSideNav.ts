@@ -201,6 +201,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: "Deploying on ECS",
+            route: '/docs/install/ecs'
+          },
+          {
+            type: 'doc',
             label: 'Troubleshooting',
             route: '/docs/install/troubleshooting',
           },
