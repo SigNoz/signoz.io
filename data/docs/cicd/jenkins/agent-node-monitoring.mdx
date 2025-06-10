@@ -21,7 +21,7 @@ description: Instrument Jenkins with OpenTelemetry and send metrics to SigNoz
 ### Step 1: Install OTel agent metrics plugin
 * For installing the plugin, please refer to [this documentation](https://plugins.jenkins.io/opentelemetry-agent-metrics/#plugin-content-web-ui-install)
 
-### Step 2: Agent node configuration required for the plugin
+### Step 2: Agent node configuration
 
 #### Setup the executable source on the Jenkins Agent Nodes
 
@@ -30,11 +30,13 @@ In order for this plugin to work 2 executables are run on the agents **otel-cont
 The binaries(depending on the Agent OS amd64/arm64) can be installed on the agents using any of the below methods
 * present on the PATH of the agents
 * downloaded from a URL on the agents. For this the global plugin option **Artifact download base URL** must be configured(refer the image below)
-* uploaded from the Jenkins master. For this the executables must be manually stored under the JENKINS_HOME directory in the opentelemetry-agent-metrics subdirectory.
+* uploaded from the Jenkins master. For this the executables must be manually stored under the JENKINS_HOME directory in the **opentelemetry-agent-metrics** subdirectory(subdirectory to be created under **JENKINS_HOME** of Jenkins Master)
 
-more info about this from the Jenkins plugin [docs](https://plugins.jenkins.io/opentelemetry-agent-metrics/#plugin-content-example)
+More information about these executables and their setup can be found in this [document](https://plugins.jenkins.io/opentelemetry-agent-metrics/#plugin-content-setup-the-executable-source).
 
-#### Configure OTel agent metrics plugin(required if using Artifact download base URL)
+#### (Optional)Configure OTel agent metrics plugin
+This configuration is required only when using Artifact download base URL to fetch the binaries
+
 Now, navigate to **Manage Jenkins** -> **System** -> **onMonit** section
 
 <figure data-zoomable align="left">
@@ -49,10 +51,11 @@ Now, navigate to **Manage Jenkins** -> **System** -> **onMonit** section
     </figcaption>
 </figure>
 
-## Output
+## View metrics in SigNoz
 
-Metrics visible in SigNoZ under Metrics Tab.
+To see your metrics, head over to the **Metrics** Tab in your SigNoz UI and search for your metric.
 
+### Image showing all available Jenkins agent metrics under Metrics Tab
 <figure data-zoomable align="left">
     <img
         src="/img/docs/cicd/jenkins/agent-metrics.webp"
@@ -65,6 +68,7 @@ Metrics visible in SigNoZ under Metrics Tab.
     </figcaption>
 </figure>
 
+### Image showing a detailed view of a selected metric **jvm_system_cpu_load_1m**
 <figure data-zoomable align="left">
     <img
         src="/img/docs/cicd/jenkins/node-cpu.webp"
