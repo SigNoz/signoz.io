@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react'
-import { logEvent, LogEventPayload } from '../utils/logEvent'
+import { logEvent, LogEventPayload, detectBotClientSide } from '../utils/logEvent'
 import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '../utils/userUtils'
 
 const INITIAL_REFERRER_KEY = 'app_initial_referrer'
@@ -65,6 +65,9 @@ export const useLogEvent = () => {
       // Use provided groupId or extract it from userId if available
       const resolvedGroupId = groupId || extractGroupIdFromEmail(userId)
 
+      // Detect bots on client side for additional coverage
+      const clientBotDetection = detectBotClientSide()
+
       const enhancedAttributes = {
         ...attributes,
         custom_os: getOS(),
@@ -73,6 +76,11 @@ export const useLogEvent = () => {
         custom_webdriver: getWebdriver(),
         custom_headless: isHeadless(),
         custom_source: 'web',
+        // Enhanced bot detection attributes
+        custom_is_bot_client: clientBotDetection.isBot,
+        custom_bot_type_client: clientBotDetection.botType,
+        custom_bot_detection_reason: clientBotDetection.reason,
+        custom_has_javascript: true, // This runs in JS context
       }
 
       const eventPayload: LogEventPayload = {
