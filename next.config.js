@@ -84,8 +84,8 @@ module.exports = () => {
           hostname: 'avatars.githubusercontent.com',
         },
         {
-          protocol: 'http',
-          hostname: 'localhost',
+          protocol: 'https',
+          hostname: 'cms.signoz.cloud',
         },
       ],
     },
