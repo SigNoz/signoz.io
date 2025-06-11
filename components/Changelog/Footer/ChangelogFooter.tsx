@@ -20,7 +20,7 @@ const ChangelogFooter: React.FC<{ pagination: TPagination }> = ({ pagination }) 
     setCurrentPage(page)
     const queryParams = new URLSearchParams(window.location.search)
     queryParams.set('page', page.toString())
-    router.push(`/changelog?${queryParams.toString()}`, { scroll: false })
+    router.push(`/changelog?${queryParams.toString()}`, { scroll: true })
   }
 
   const pageStart = pagination.pageSize * pagination.page - 1
@@ -31,8 +31,11 @@ const ChangelogFooter: React.FC<{ pagination: TPagination }> = ({ pagination }) 
       <div className="absolute -bottom-14 left-0 hidden h-20 w-px -translate-y-full bg-signoz_slate-400 lg:block">
         <div className="absolute bottom-0 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-signoz_slate-400" />
       </div>
-      <span className="text-sm text-signoz_vanilla-100">
-        <b>{pageStart}</b>-<b>{pageEnd}</b> of {pagination.total}
+      <span className="flex items-center text-sm text-signoz_vanilla-100">
+        <b>{pageStart}</b>
+        <span className="mx-1 inline-block h-0.5 w-5 bg-signoz_vanilla-100"></span>
+        <b>{pageEnd}</b>&nbsp;
+        <span className="text-signoz_vanilla-400">of {pagination.total}</span>
       </span>
       <Pagination
         total={pagination.total}
