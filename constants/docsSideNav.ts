@@ -31,6 +31,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/product-features/metrics-explorer',
+            label: 'Metrics Explorer',
+          },
+          {
+            type: 'doc',
             route: '/docs/product-features/trace-explorer',
             label: 'Trace Explorer',
           },

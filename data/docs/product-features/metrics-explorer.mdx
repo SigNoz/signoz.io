@@ -1,0 +1,176 @@
+---
+date: 2025-06-11
+id: metrics-explorer
+title: Metrics Explorer in SigNoz
+---
+
+## Introduction
+
+The Metrics Explorer page in SigNoz enables developers and SREs to interactively explore, query, and visualize metrics collected from their applications and infrastructure—all in one unified interface.
+
+There are three main sections in the Metrics Explorer:
+
+- [Summary View](#summary-view)
+- [Explorer View](#explorer-view)
+- [Inspect View](#inspect-view)
+
+## Operations on Data
+
+### Search
+
+The search feature in Metrics Explorer allows you to find different metrics based on various attributes. Users can filter using specific attribute keys and values.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-search.webp" alt="Search feature in Metrics Explorer" />
+    <figcaption><i>Search by attributes in Metrics Explorer</i></figcaption>
+</figure>
+
+You can also search for metrics by their metric names.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-search-metric-name.webp" alt="Search by metric name in Metrics Explorer" />
+    <figcaption><i>Search by metric name in Metrics Explorer</i></figcaption>
+</figure>
+
+## Views
+
+There are three available views in Metrics Explorer:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-views.gif" alt="Different Views in Metrics Explorer" />
+    <figcaption><i>Different views available in Metrics Explorer</i></figcaption>
+</figure>
+
+### Summary View
+
+As the name suggests, this view provides a summarized overview of all available metrics. Users can search, apply filters, and inspect various details about each metric.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-summary-view.gif" alt="Summary View in Metrics Explorer" />
+    <figcaption><i>Summary View in Metrics Explorer</i></figcaption>
+</figure>
+
+#### Timeseries
+
+A timeseries represents a unique combination of a metric name and its associated label set, capturing how the metric evolves over time for a specific context (like a pod, container, or host).
+The number of timeseries a metric has doesn't depend on how many attributes it contains, but rather on the **number of unique combinations of attribute values**.
+Only attributes that vary contribute to distinct timeseries—static or unused labels don’t increase timeseries count.
+For example, a metric with 10 attributes will result in just one timeseries if all the values remain constant, but could generate thousands if a few labels vary frequently.
+
+#### Samples
+
+Samples are the raw data points collected over time for each timeseries, consisting of a timestamp and a value.
+While timeseries define the structure of the data, samples define its volume—a single timeseries can contain thousands of samples depending on the scrape interval and selected time range.
+A high sample count doesn’t necessarily imply high cardinality but does impact storage, query performance, and dashboard responsiveness.
+For instance, 10,000 timeseries scraped every 15 seconds can generate over 40 million samples per hour.
+
+The Summary View is divided into two parts:
+
+- TreeMap View
+- Table View
+
+---
+
+#### TreeMap View
+
+The TreeMap View provides a visual breakdown of metric cardinality by illustrating how different metrics contribute to total timeseries and sample volume.
+Each rectangle represents a distinct metric, and its size reflects its relative contribution. This allows users to easily spot metrics with high cardinality or high sample generation.
+It helps in optimizing resource usage, identifying outliers, and making informed decisions around instrumentation and retention.
+
+Users can toggle the TreeMap to view data based on either timeseries or samples.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-treemap-view.gif" alt="TreeMap View in Metrics Explorer" />
+    <figcaption><i>TreeMap View in Metrics Explorer</i></figcaption>
+</figure>
+
+---
+
+#### Table View
+
+The Table View presents a structured overview of all metrics in the selected time range, allowing you to inspect metadata and usage statistics at a glance.
+Each row displays the metric name, description, unit, number of timeseries, and number of samples—helping you evaluate the purpose and impact of each metric.
+This makes it easier to detect under-documented or bloated metrics and streamline observability workflows.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-table-view.gif" alt="Table View in Metrics Explorer" />
+    <figcaption><i>Table View in Metrics Explorer</i></figcaption>
+</figure>
+
+**Note:** Both the Treemap and Table Views reflect data only for the **selected time range**, ensuring that all timeseries and sample counts are relevant and scoped.
+
+---
+
+By clicking on any specific metric, users can explore its detailed metadata and label structure.
+The detailed view shows all keys and values (labels), total and active timeseries, and the timestamp of the last received sample—crucial for spotting inactive or stale metrics.
+This empowers teams to fine-tune metrics, eliminate noise, and optimize data pipelines.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-detailed-view.gif" alt="Detailed Metrics View in Metrics Explorer" />
+    <figcaption><i>Detailed Metrics View in Metrics Explorer</i></figcaption>
+</figure>
+
+Users can also edit metric metadata such as unit, description, metric type, and temporality.
+Note that changes to **Metric Type and Temporality** only affect SigNoz’s interpretation and calculations—they do not alter the data at the source.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-update-view.gif" alt="Update Metric Details in Metrics Explorer" />
+    <figcaption><i>Update Metric Details in Metrics Explorer</i></figcaption>
+</figure>
+
+---
+
+### Explorer View
+
+The Explorer View acts as a **playground** where users can freely experiment with metrics and queries.
+You can write and run multiple queries, visualize them side-by-side, and compare trends—all within one panel.
+This is ideal for ad-hoc analysis, debugging, and exploratory data investigation before committing to dashboards or alerts.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-explorer-view.gif" alt="Explorer View in Metrics Explorer" />
+    <figcaption><i>Explorer View in Metrics Explorer</i></figcaption>
+</figure>
+
+In SigNoz, the **One Chart per Query** mode lets users visualize each query in a separate chart.
+This is helpful when comparing metrics with different units (e.g., CPU in percentage vs memory in bytes) but similar trends.
+By splitting them visually, you preserve clarity and avoid scale distortion, making it easier to analyze patterns independently and in correlation.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-one-chart.gif" alt="One Chart per query in Metrics Explorer" />
+    <figcaption><i>One Chart per query in Metrics Explorer</i></figcaption>
+</figure>
+
+Users can also **save custom views** in the Explorer for quick access to frequently used queries during incident response or analysis.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-save-views.gif" alt="Save a view in Metrics Explorer" />
+    <figcaption><i>Save a view in Metrics Explorer</i></figcaption>
+</figure>
+
+---
+
+#### Related Metrics
+
+The Related Metrics section enhances troubleshooting by surfacing metrics that commonly occur alongside the one you’re analyzing.
+Based on shared labels or similar trends, this view helps uncover dependencies, correlations, or cascading failures.
+For example, a spike in `cpu.utilization` may correlate with `container.restarts` or `k8s.pod.cpu.limit`, guiding you toward the root cause faster.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-related-metrics.gif" alt="Related Metrics in Metrics Explorer" />
+    <figcaption><i>Related Metrics in Metrics Explorer</i></figcaption>
+</figure>
+
+---
+
+### Inspect View
+
+The Inspect View is a learning and debugging tool that helps users understand **how their queries are processed**.
+It visually demonstrates how space (label-based) and temporal (time-based) aggregations work, and how multiple raw timeseries combine to form the final output.
+This helps users identify the most suitable aggregation strategy—like summing across containers, averaging across nodes, or picking the max over time.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/metrics-explorer/metrics-explorer-inspect-metrics.gif" alt="Inspect Metrics in Metrics Explorer" />
+    <figcaption><i>Inspect Metrics in Metrics Explorer</i></figcaption>
+</figure>
+
+Users can toggle between graph and table views, and use the **Point Inspector** to examine how different timeseries contribute to a specific data point—enhancing transparency and learning.
