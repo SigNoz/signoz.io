@@ -1,0 +1,681 @@
+---
+date: 2025-06-11
+id: ecs
+title: Deploying to ECS
+description: Learn how to install SigNoz on ECS
+---
+import CloneRepo from '@/components/shared/clone-repo.md'
+import RetentionInfo from '@/components/shared/retention-info.mdx'
+
+<HostingDecision />
+
+Amazon ECS gives you a fully managed control plane for orchestrating containers, while EC2‑backed capacity providers let you tie an Auto Scaling Group (ASG) to the cluster so that your compute pool grows and shrinks with demand. Running SigNoz on this foundation combines open‑source observability with native AWS elasticity and cost control:
+
+- **ECS (EC2 launch type)** — lets you use custom AMIs, instance sizes, or spot instances for heavier ClickHouse workloads.
+
+- **Capacity provider** — automatically adds / removes EC2 instances as task demand fluctuates (no manual ASG tweaking).
+
+- **SigNoz components**:
+  - SigNoz
+  - SigNoz Collector
+  - Clickhouse
+  - Zookeeper
+
+
+## 1. Prerequisites
+
+Before you begin, ensure you have the following in place:
+
+- **[AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)** installed and configured with appropriate credentials and region.  
+- An **AWS account** with adequate service quotas for:
+  - [Amazon EBS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volumes.html) (block storage)
+  - [Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html) (compute instances)
+  - [IAM](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started.html) (identity & access management)  
+- **[Amazon ECS cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/create-cluster.html)** already created, with **Capacity Providers** enabled (EC2 + Auto Scaling Group)  
+  - Read more: [ECS Capacity Providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-capacity-providers.html)  
+- **IAM roles** for your tasks:
+  - **Task Execution Role** with the managed policy `AmazonECSTaskExecutionRolePolicy`  
+    - Docs: [Creating an ECS task execution IAM role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html)  
+  - **Task Role** for SigNoz containers (attach only the permissions your services need)  
+- **SigNoz container images** (`signoz/*:<version>`) pushed to a registry reachable by ECS (e.g. [Amazon ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) or Docker Hub)  
+- A **private S3 bucket** (optional) for storing custom ClickHouse configs or backups  
+- A **Custom AMI** or **[Launch Template](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html)** (optional) if you need custom kernel settings or plan to use Spot instances  
+- *(Optional)* **[Amazon EFS](https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html)** or **EBS volumes** attached & mounted on your ECS instances for persistent data (ClickHouse, dashboards, configs)
+
+> **EBS sizing note**  SigNoz stores metrics/traces in ClickHouse—start with a **gp3** volume (20 GiB, 3 000 IOPS, 125 MiB/s) and monitor usage to scale as needed.
+
+
+## 2. Network Stack
+
+### 2.1. CloudFormation Template
+
+Save the JSON below as `sigz-network.json`.
+
+```jsonc
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Network stack for SigNoz on ECS (generic)",
+  "Parameters": {
+    "VpcCidr":              {"Type": "String", "Description": "CIDR for the VPC (e.g., 10.0.0.0/16)"},
+    "PublicSubnet1Cidr":    {"Type": "String"},
+    "PublicSubnet2Cidr":    {"Type": "String"},
+    "PrivateSubnet1Cidr":   {"Type": "String"},
+    "PrivateSubnet2Cidr":   {"Type": "String"},
+    "AZ1": {"Type": "AWS::EC2::AvailabilityZone::Name"},
+    "AZ2": {"Type": "AWS::EC2::AvailabilityZone::Name"}
+  },
+  "Resources": {
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": {"Ref": "VpcCidr"},
+        "EnableDnsSupport": true,
+        "EnableDnsHostnames": true,
+        "Tags": [{"Key": "Name", "Value": "sigz-vpc"}]
+      }
+    },
+
+    "InternetGateway": {"Type": "AWS::EC2::InternetGateway"},
+    "VPCGatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {"Ref": "Vpc"},
+        "InternetGatewayId": {"Ref": "InternetGateway"}
+      }
+    },
+
+    "PublicSubnet1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {"Ref": "Vpc"},
+        "CidrBlock": {"Ref": "PublicSubnet1Cidr"},
+        "AvailabilityZone": {"Ref": "AZ1"},
+        "MapPublicIpOnLaunch": true,
+        "Tags": [{"Key": "Name", "Value": "sigz-pub-1"}]
+      }
+    },
+    "PublicSubnet2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {"Ref": "Vpc"},
+        "CidrBlock": {"Ref": "PublicSubnet2Cidr"},
+        "AvailabilityZone": {"Ref": "AZ2"},
+        "MapPublicIpOnLaunch": true,
+        "Tags": [{"Key": "Name", "Value": "sigz-pub-2"}]
+      }
+    },
+
+    "PrivateSubnet1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {"Ref": "Vpc"},
+        "CidrBlock": {"Ref": "PrivateSubnet1Cidr"},
+        "AvailabilityZone": {"Ref": "AZ1"},
+        "Tags": [{"Key": "Name", "Value": "sigz-priv-1"}]
+      }
+    },
+    "PrivateSubnet2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {"Ref": "Vpc"},
+        "CidrBlock": {"Ref": "PrivateSubnet2Cidr"},
+        "AvailabilityZone": {"Ref": "AZ2"},
+        "Tags": [{"Key": "Name", "Value": "sigz-priv-2"}]
+      }
+    },
+
+    "EIPNat": {"Type": "AWS::EC2::EIP", "Properties": {"Domain": "vpc"}},
+    "NatGateway": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "SubnetId": {"Ref": "PublicSubnet1"},
+        "AllocationId": {"Fn::GetAtt": ["EIPNat", "AllocationId"]},
+        "Tags": [{"Key": "Name", "Value": "sigz-nat"}]
+      }
+    },
+
+    "PublicRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {"VpcId": {"Ref": "Vpc"}}
+    },
+    "PublicRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "VPCGatewayAttachment",
+      "Properties": {
+        "RouteTableId": {"Ref": "PublicRouteTable"},
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {"Ref": "InternetGateway"}
+      }
+    },
+
+    "PrivateRouteTable": {"Type": "AWS::EC2::RouteTable", "Properties": {"VpcId": {"Ref": "Vpc"}}},
+    "PrivateRoute": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {"Ref": "PrivateRouteTable"},
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {"Ref": "NatGateway"}
+      }
+    },
+
+    "PubAssoc1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {"SubnetId": {"Ref": "PublicSubnet1"}, "RouteTableId": {"Ref": "PublicRouteTable"}}
+    },
+    "PubAssoc2": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {"SubnetId": {"Ref": "PublicSubnet2"}, "RouteTableId": {"Ref": "PublicRouteTable"}}
+    },
+    "PrivAssoc1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {"SubnetId": {"Ref": "PrivateSubnet1"}, "RouteTableId": {"Ref": "PrivateRouteTable"}}
+    },
+    "PrivAssoc2": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {"SubnetId": {"Ref": "PrivateSubnet2"}, "RouteTableId": {"Ref": "PrivateRouteTable"}}
+    }
+  },
+  "Outputs": {
+    "VpcId":            {"Value": {"Ref": "Vpc"}},
+    "PublicSubnetIds":  {"Value": {"Fn::Join": [",", [{"Ref": "PublicSubnet1"}, {"Ref": "PublicSubnet2"}]]}},
+    "PrivateSubnetIds": {"Value": {"Fn::Join": [",", [{"Ref": "PrivateSubnet1"}, {"Ref": "PrivateSubnet2"}]]}}
+  }
+}
+```
+
+### 2.2  Create the Stack
+
+<Tabs>
+<TabItem label="CLI" value="cli">
+
+```bash
+aws cloudformation deploy \
+  --template-file sigz-network.json \
+  --stack-name sigz-network \
+  --parameter-overrides \
+      VpcCidr=<VPC_CIDR> \
+      PublicSubnet1Cidr=<PUB1_CIDR> PublicSubnet2Cidr=<PUB2_CIDR> \
+      PrivateSubnet1Cidr=<PRIV1_CIDR> PrivateSubnet2Cidr=<PRIV2_CIDR> \
+      AZ1=<AZ1> AZ2=<AZ2> \
+  --capabilities CAPABILITY_NAMED_IAM
+```
+</TabItem>
+
+<TabItem label="Console" value="console">
+
+1. Navigate to **CloudFormation → Create stack**.
+2. Upload `sigz-network.json`, click **Next**.
+3. Fill in parameter values (CIDRs, AZs).
+4. Acknowledge IAM capabilities → **Create stack**.
+
+</TabItem>
+</Tabs>
+> **Note on EBS traffic**  Private subnets route outbound traffic through the NAT Gateway. Estimate \~5 GB/mo per ClickHouse backup when sizing NAT data‑processing costs.
+
+## 3  IAM Roles & Policies
+
+### 3.1  Trust Policy
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {"Service": "ecs-tasks.amazonaws.com"},
+    "Action": "sts:AssumeRole"
+  }]
+}
+```
+
+### 3.2  Execution Role (CLI)
+
+```bash
+aws iam create-role --role-name <SigNozECSTaskExecutionRole> --assume-role-policy-document file://ecs-trust.json
+aws iam attach-role-policy --role-name <SigNozECSTaskExecutionRole> --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+```
+
+### 3.3  Task Role (least privilege)
+
+```bash
+aws iam create-role --role-name <SigNozTaskRole> --assume-role-policy-document file://ecs-trust.json
+# Add permissions only if SigNoz needs them.
+```
+
+**Console path**  `IAM → Roles → Create role → Trusted entity = ECS Task` → attach policies.
+
+
+## 4  Launch Template, ASG, and Capacity Provider
+
+### 4.1  Launch Template
+
+Include **User‑data** that installs the ECS agent and joins the cluster.
+
+```bash
+aws ec2 create-launch-template \
+  --launch-template-name <SigNozLaunchTemplate> \
+  --version-description initial \
+  --launch-template-data '{
+      "ImageId": "<AMI_ID>",
+      "InstanceType": "t3.large",
+      "IamInstanceProfile": {"Arn": "arn:aws:iam::<ACCOUNT_ID>:instance-profile/<ECSInstanceProfile>"},
+      "UserData": "<BASE64-ENCODED-USERDATA>"
+    }'
+```
+
+*(Console: EC2 → Launch templates → **Create launch template**.)*
+
+### 4.2  Auto Scaling Group (ASG)
+
+```bash
+aws autoscaling create-auto-scaling-group \
+  --auto-scaling-group-name <SigNozASG> \
+  --launch-template LaunchTemplateName=<SigNozLaunchTemplate>,Version='$Latest' \
+  --vpc-zone-identifier "<PrivateSubnet1>,<PrivateSubnet2>" \
+  --desired-capacity 2 --min-size 2 --max-size 6
+```
+
+### 4.3  Capacity Provider
+
+```bash
+aws ecs create-capacity-provider \
+  --name <SigNozCapProvider> \
+  --auto-scaling-group-provider '{"autoScalingGroupArn":"<ASG_ARN>","managedScaling":{"status":"ENABLED","targetCapacity":80}}'
+
+aws ecs put-cluster-capacity-providers \
+  --cluster <ECS_CLUSTER> \
+  --capacity-providers <SigNozCapProvider> \
+  --default-capacity-provider-strategy capacityProvider=<SigNozCapProvider>,weight=1,base=0
+```
+
+*(Console: ECS → Clusters → Capacity providers.)*
+
+
+## 5  Task Definitions
+
+Below is a single, all-in-one ECS task definition JSON that includes every SigNoz component in one task: 
+- init-clickhouse
+- clickhouse
+- zookeeper-1
+- SigNoz 
+- Otel-collector
+- Schema-migrator-sync and schema-migrator-async.
+
+
+Each section below shows one `containerDefinition` snippet. Replace all `<…>` placeholders with your own values.
+
+### 1. init-clickhouse
+
+```json
+{
+  "name": "init-clickhouse",
+  "image": "clickhouse/clickhouse-server:24.1.2-alpine",
+  "cpu": 256,
+  "memory": 256,
+  "memoryReservation": 256,
+  "essential": false,
+  "entryPoint": ["sh", "-c"],
+  "command": [
+    "version=\"v0.0.1\" && node_os=$(uname -s | tr '[:upper:]' '[:lower:]') && node_arch=$(uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \\
+     echo \"Fetching histogram-binary for ${node_os}/${node_arch}\" && cd /tmp && \\
+     wget -O histogram-quantile.tar.gz \"https://github.com/SigNoz/signoz/releases/download/histogram-quantile%2F${version}/histogram-quantile_${node_os}_${node_arch}.tar.gz\" && \\
+     tar -xvzf histogram-quantile.tar.gz && mv histogram-quantile /var/lib/clickhouse/user_scripts/histogramQuantile"
+  ],
+  "mountPoints": [
+    {
+      "sourceVolume": "signoz-clickhouse-zookeeper",
+      "containerPath": "/var/lib/clickhouse/user_scripts"
+    }
+  ],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "init-clickhouse"
+    }
+  }
+}
+````
+
+### 2. config-fetcher
+
+```json
+{
+  "name": "config-fetcher",
+  "image": "amazon/aws-cli:2.27.32",
+  "cpu": 10,
+  "memory": 102,
+  "memoryReservation": 102,
+  "essential": false,
+  "entryPoint": ["aws"],
+  "command": [
+    "s3", "cp",
+    "s3://<YOUR_CONFIG_BUCKET>/common/clickhouse/config.xml",
+    "/etc/clickhouse-server/config.xml"
+  ],
+  "mountPoints": [
+    {
+      "sourceVolume": "signoz-clickhouse-zookeeper",
+      "containerPath": "/etc/clickhouse-server"
+    }
+  ],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "config-fetcher"
+    }
+  }
+}
+```
+
+### 3. clickhouse
+
+```json
+{
+  "name": "clickhouse",
+  "image": "clickhouse/clickhouse-server:24.1.2-alpine",
+  "cpu": 1024,
+  "memory": 512,
+  "memoryReservation": 512,
+  "essential": true,
+  "portMappings": [
+    { "containerPort": 9000, "hostPort": 9000, "protocol": "tcp" },
+    { "containerPort": 8123, "hostPort": 8123, "protocol": "tcp" },
+    { "containerPort": 9363, "hostPort": 9363, "protocol": "tcp" }
+  ],
+  "dependsOn": [
+    { "containerName": "init-clickhouse", "condition": "COMPLETE" },
+    { "containerName": "zookeeper-1",     "condition": "HEALTHY" },
+    { "containerName": "config-fetcher",   "condition": "COMPLETE" }
+  ],
+  "mountPoints": [
+    {
+      "sourceVolume": "signoz-clickhouse-zookeeper",
+      "containerPath": "/var/lib/clickhouse"
+    },
+    {
+      "sourceVolume": "signoz-clickhouse-zookeeper",
+      "containerPath": "/etc/clickhouse-server"
+    }
+  ],
+  "healthCheck": {
+    "command": ["CMD-SHELL", "wget --spider -q 0.0.0.0:8123/ping || exit 1"],
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3,
+    "startPeriod": 30
+  },
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "clickhouse"
+    }
+  }
+}
+```
+
+### 4. Zookeeper
+
+```json
+{
+  "name": "zookeeper-1",
+  "image": "bitnami/zookeeper:3.7.1",
+  "cpu": 512,
+  "memory": 512,
+  "memoryReservation": 512,
+  "essential": true,
+  "portMappings": [
+    { "containerPort": 2181, "hostPort": 2181, "protocol": "tcp" },
+    { "containerPort": 2888, "hostPort": 2888, "protocol": "tcp" },
+    { "containerPort": 3888, "hostPort": 3888, "protocol": "tcp" },
+    { "containerPort": 9141, "hostPort": 9141, "protocol": "tcp" }
+  ],
+  "environment": [
+    { "name": "ALLOW_ANONYMOUS_LOGIN",        "value": "yes" },
+    { "name": "ZOO_SERVER_ID",                "value": "1"   },
+    { "name": "ZOO_ENABLE_PROMETHEUS_METRICS","value": "yes" },
+    { "name": "ZOO_AUTOPURGE_INTERVAL",       "value": "1"   },
+    { "name": "ZOO_PROMETHEUS_METRICS_PORT_NUMBER","value":"9141"}
+  ],
+  "healthCheck": {
+    "command": ["CMD-SHELL","curl -s -m 2 http://localhost:8080/commands/ruok | grep error | grep null"],
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3,
+    "startPeriod": 30
+  },
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "zookeeper"
+    }
+  }
+}
+```
+
+### 5. signoz
+
+```json
+{
+  "name": "signoz",
+  "image": "signoz/signoz:<VERSION>",
+  "cpu": 512,
+  "memory": 512,
+  "memoryReservation": 256,
+  "essential": true,
+  "portMappings": [
+    { "containerPort": 8080, "hostPort": 8080, "protocol": "tcp" }
+  ],
+  "command": ["--config=/root/config/prometheus.yml"],
+  "environment": [
+    { "name": "SIGNOZ_ALERTMANAGER_PROVIDER",       "value": "signoz" },
+    { "name": "SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN","value": "tcp://clickhouse:9000" },
+    { "name": "SIGNOZ_SQLSTORE_SQLITE_PATH",         "value": "/var/lib/signoz/signoz.db" },
+    { "name": "STORAGE",                             "value": "clickhouse" },
+    { "name": "TELEMETRY_ENABLED",                   "value": "true" },
+
+  ],
+  "mountPoints": [
+    { "sourceVolume": "signoz-config",     "containerPath": "/root/config"      },
+    { "sourceVolume": "signoz-sqlite",     "containerPath": "/var/lib/signoz" }
+  ],
+  "healthCheck": {
+    "command": ["CMD","wget","--spider","-q","localhost:8080/api/v1/health"],
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3,
+    "startPeriod": 0
+  },
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "signoz"
+    }
+  }
+}
+```
+
+### 6. otel-collector
+
+```json
+{
+  "name": "otel-collector",
+  "image": "signoz/signoz-otel-collector:<OTELCOL_TAG>",
+  "cpu": 512,
+  "memory": 512,
+  "memoryReservation": 256,
+  "essential": false,
+  "portMappings": [
+    { "containerPort": 4317, "hostPort": 4317, "protocol": "tcp" },
+    { "containerPort": 4318, "hostPort": 4318, "protocol": "tcp" }
+  ],
+  "command": [
+    "--config=/etc/otel-collector-config.yaml",
+    "--manager-config=/etc/manager-config.yaml",
+    "--copy-path=/var/tmp/collector-config.yaml",
+    "--feature-gates=-pkg.translator.prometheus.NormalizeName"
+  ],
+  "dependsOn": [
+    { "containerName": "signoz", "condition": "HEALTHY" }
+  ],
+  "mountPoints": [
+    { "sourceVolume": "otel-config", "containerPath": "/etc" }
+  ],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "otel-collector"
+    }
+  }
+}
+```
+
+### 7. schema-migrator-sync
+
+```json
+{
+  "name": "schema-migrator-sync",
+  "image": "signoz/signoz-schema-migrator:<OTELCOL_TAG>",
+  "cpu": 128,
+  "memory": 256,
+  "memoryReservation": 128,
+  "essential": false,
+  "command": ["sync", "--dsn=tcp://clickhouse:9000", "--up="],
+  "dependsOn": [
+    { "containerName": "clickhouse", "condition": "HEALTHY" }
+  ],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "schema-migrator-sync"
+    }
+  }
+}
+```
+
+
+### 8. schema-migrator-async
+
+```json
+{
+  "name": "schema-migrator-async",
+  "image": "signoz/signoz-schema-migrator:<OTELCOL_TAG>",
+  "cpu": 128,
+  "memory": 256,
+  "memoryReservation": 128,
+  "essential": false,
+  "command": ["async", "--dsn=tcp://clickhouse:9000", "--up="],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "schema-migrator-async"
+    }
+  }
+}
+```
+
+
+### 9. Volumes
+
+```json
+ "volumes": [
+            {
+                "name": "signoz-clickhouse-zookeeper",
+                "configuredAtLaunch": true
+            }
+        ],
+```
+
+### 10. General Task Definitions config
+
+```json
+  "taskDefinition": {
+    "family": "signoz-full-stack",
+    "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskRole",
+    "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["EC2"],
+    "runtimePlatform": {
+      "cpuArchitecture": "X86_64",
+      "operatingSystemFamily": "LINUX"
+    },
+    "cpu": "1843",
+    "memory": "1536",
+    "containerDefinitions": {...}",
+    "volumes": {...},
+  }
+
+
+```
+
+### 6.  Register the Task Definitions
+
+```bash
+aws ecs register-task-definition --cli-input-json file://clickhouse-zookeeper.json
+# repeat for other Task Definitions
+```
+
+## 7  Create ECS Services
+
+<Tabs>
+<TabItem label="CLI" value="cli">
+Create one service per component, using the **capacity provider strategy**.
+
+```bash
+aws ecs create-service \
+  --cluster <ECS_CLUSTER> \
+  --service-name signoz-clickhouse-svc \
+  --task-definition signoz-clickhouse-zookeeper:<REV> \
+  --desired-count 1 \
+  --capacity-provider-strategy capacityProvider=<SigNozCapProvider>,weight=1,base=0 \
+  --network-configuration "awsvpcConfiguration={subnets=[<PrivateSubnet1>,<PrivateSubnet2>],securityGroups=[<SG_ID>],assignPublicIp=DISABLED}" \
+  --enable-execute-command \
+  --deployment-circuit-breaker enable=true,rollback=true
+```
+</TabItem>
+
+<TabItem label="Console" value="console">
+
+1. ECS → Clusters → *Your cluster* → **Create service**.
+2. Launch type=*Capacity provider*.
+3. Choose `<SigNozCapProvider>`.
+4. Select task definition and desired count.
+5. Choose the private subnets & security group.
+6. Repeat for each component.
+</TabItem>
+</Tabs>
+
+## 8 Scaling & Capacity
+
+| Layer                       | Metric                                 | Action                                |
+| --------------------------- | -------------------------------------- | ------------------------------------- |
+| **Capacity Provider (ASG)** | Avg CPU > 70 %                         | scale‑out by +1 EC2 instance          |
+| **ECS Service**             | `CPUUtilization` / `MemoryUtilization` | adjust `desiredCount` (min 1 → max N) |
+| **ClickHouse EBS**          | IOPS / throughput saturation           | raise gp3 IOPS or volume size         |
+
+Managed Scaling on the capacity provider handles most scale‑out events automatically.
+
+
+## Cleanup Commands (CLI)
+
+```bash
+# Scale down all services
+aws ecs update-service --cluster <ECS_CLUSTER> --service <SERVICE> --desired-count 0
+# Delete services (after tasks stop)
+aws ecs delete-service --cluster <ECS_CLUSTER> --service <SERVICE> --force
+# Optionally delete capacity provider, cluster, ASG, and network stack
+```
