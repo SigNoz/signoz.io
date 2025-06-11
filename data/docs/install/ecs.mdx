@@ -477,15 +477,12 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
     { "name": "SIGNOZ_ALERTMANAGER_PROVIDER",       "value": "signoz" },
     { "name": "SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN","value": "tcp://clickhouse:9000" },
     { "name": "SIGNOZ_SQLSTORE_SQLITE_PATH",         "value": "/var/lib/signoz/signoz.db" },
-    { "name": "DASHBOARDS_PATH",                     "value": "/root/config/dashboards" },
     { "name": "STORAGE",                             "value": "clickhouse" },
-    { "name": "GODEBUG",                             "value": "netdns=go" },
     { "name": "TELEMETRY_ENABLED",                   "value": "true" },
-    { "name": "DEPLOYMENT_TYPE",                     "value": "docker-standalone-amd" }
+
   ],
   "mountPoints": [
     { "sourceVolume": "signoz-config",     "containerPath": "/root/config"      },
-    { "sourceVolume": "signoz-dashboards", "containerPath": "/root/config/dashboards" },
     { "sourceVolume": "signoz-sqlite",     "containerPath": "/var/lib/signoz" }
   ],
   "healthCheck": {
@@ -525,10 +522,6 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
     "--manager-config=/etc/manager-config.yaml",
     "--copy-path=/var/tmp/collector-config.yaml",
     "--feature-gates=-pkg.translator.prometheus.NormalizeName"
-  ],
-  "environment": [
-    { "name": "OTEL_RESOURCE_ATTRIBUTES",        "value": "host.name=signoz-host,os.type=linux" },
-    { "name": "LOW_CARDINAL_EXCEPTION_GROUPING", "value": "false" }
   ],
   "dependsOn": [
     { "containerName": "signoz", "condition": "HEALTHY" }
