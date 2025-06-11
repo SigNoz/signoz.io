@@ -5,22 +5,24 @@ title: Deploying on ECS
 description: Learn how to install SigNoz on ECS
 ---
 
-This guide walks you through running the full SigNoz stack on an **EC2‑backed Amazon ECS cluster** that uses an **Auto Scaling Group (ASG) capacity provider**. All templates are shown in full—replace the placeholders (`<…>`) with values that suit *your* AWS account.
+Amazon ECS gives you a fully managed control plane for orchestrating containers, while EC2‑backed capacity providers let you tie an Auto Scaling Group (ASG) to the cluster so that your compute pool grows and shrinks with demand. Running SigNoz on this foundation combines open‑source observability with native AWS elasticity and cost control:
+
+ECS (EC2 launch type) — lets you use custom AMIs, instance sizes, or spot instances for heavier ClickHouse workloads.
+
+Capacity provider — automatically adds / removes EC2 instances as task demand fluctuates (no manual ASG tweaking).
+
+SigNoz components — ClickHouse + ZooKeeper, OpenTelemetry Collector, Query‑service, and Front‑end UI, each in its own task definition.
 
 
-## 1. General Prerequisites
+## 1. Prerequisites
 
-| Item                                                                              | Purpose                                             |
-| --------------------------------------------------------------------------------- | --------------------------------------------------- |
-| **AWS CLI v2** installed and configured                                           | Needed for all CLI commands                         |
-| **AWS account** with adequate limits (EBS, EC2, IAM)                              | Infrastructure provisioning                         |
-| **SigNoz container images** in a registry reachable by ECS (`signoz/*:<version>`) | Runtime images                                      |
-| **A private S3 bucket** (optional)                                                | Store custom ClickHouse configs or backups          |
-| **Custom AMI / Launch template** (optional)                                       | Use for optimized kernel settings or spot instances |
+- AWS CLI v2 installed and configured
+- AWS account with adequate limits (EBS, EC2, IAM)
+- SigNoz container images in a registry reachable by ECS (`signoz/*:<version>`)
+- A private S3 bucket(optional) to store custom ClickHouse configs or backups
+- Custom AMI / Launch template** (optional)
 
 > **Note**  SigNoz stores metrics and traces in ClickHouse. Plan **gp3 EBS volumes** with enough capacity and IOPS. A starting point is 20 GiB, 3 000 IOPS, 125 MiB/s throughput; adjust as usage grows.
-
----
 
 ## 2. Network Stack
 
@@ -189,8 +191,6 @@ aws cloudformation deploy \
 </Tabs>
 > **Note on EBS traffic**  Private subnets route outbound traffic through the NAT Gateway. Estimate \~5 GB/mo per ClickHouse backup when sizing NAT data‑processing costs.
 
----
-
 ## 3  IAM Roles & Policies
 
 ### 3.1  Trust Policy
@@ -222,7 +222,6 @@ aws iam create-role --role-name <SigNozTaskRole> --assume-role-policy-document f
 
 **Console path**  `IAM → Roles → Create role → Trusted entity = ECS Task` → attach policies.
 
----
 
 ## 4  Launch Template, ASG, and Capacity Provider
 
@@ -272,158 +271,351 @@ aws ecs put-cluster-capacity-providers \
 
 ## 5  Task Definitions
 
-### 5.1  ClickHouse + ZooKeeper
+Below is a single, all-in-one ECS task definition JSON that includes every SigNoz component in one task: 
+- init-clickhouse
+- clickhouse
+- zookeeper-1
+- SigNoz 
+- Otel-collector
+- Schema-migrator-sync and schema-migrator-async.
 
-```jsonc
+
+Each section below shows one `containerDefinition` snippet. Replace all `<…>` placeholders with your own values.
+
+## 1. init-clickhouse
+
+```json
 {
-  "family": "signoz-clickhouse-zookeeper",
-  "networkMode": "awsvpc",
-  "cpu": "1843",
-  "memory": "1536",
-  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/<SigNozECSTaskExecutionRole>",
-  "taskRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/<SigNozTaskRole>",
-  "requiresCompatibilities": ["EC2"],
-  "volumes": [
+  "name": "init-clickhouse",
+  "image": "clickhouse/clickhouse-server:24.1.2-alpine",
+  "cpu": 256,
+  "memory": 256,
+  "memoryReservation": 256,
+  "essential": false,
+  "entryPoint": ["sh", "-c"],
+  "command": [
+    "version=\"v0.0.1\" && node_os=$(uname -s | tr '[:upper:]' '[:lower:]') && node_arch=$(uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \\
+     echo \"Fetching histogram-binary for ${node_os}/${node_arch}\" && cd /tmp && \\
+     wget -O histogram-quantile.tar.gz \"https://github.com/SigNoz/signoz/releases/download/histogram-quantile%2F${version}/histogram-quantile_${node_os}_${node_arch}.tar.gz\" && \\
+     tar -xvzf histogram-quantile.tar.gz && mv histogram-quantile /var/lib/clickhouse/user_scripts/histogramQuantile"
+  ],
+  "mountPoints": [
     {
-      "name": "signoz-clickhouse-zookeeper",
-      "managedEBSVolume": {
-        "size": 20,                // adjust per retention needs
-        "type": "gp3"
-      }
+      "sourceVolume": "signoz-clickhouse-zookeeper",
+      "containerPath": "/var/lib/clickhouse/user_scripts"
     }
   ],
-  "containerDefinitions": [
-    // 1️⃣ Initialise ClickHouse with histogram‑quantile UDF
-    {
-      "name": "init-clickhouse",
-      "image": "clickhouse/clickhouse-server:<clickhouse_version>",
-      "cpu": 256,
-      "memory": 256,
-      "essential": false,
-      "entryPoint": ["sh", "-c"],
-      "command": [
-        "version=\"v0.0.1\" && \",
-        "node_os=$(uname -s | tr '[:upper:]' '[:lower:]') && \",
-        "node_arch=$(uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \",
-        "wget -qO- https://github.com/SigNoz/signoz/releases/download/histogram-quantile%2F${version}/histogram-quantile_${node_os}_${node_arch}.tar.gz | tar -xz -C /tmp && \",
-        "mv /tmp/histogram-quantile /var/lib/clickhouse/user_scripts/histogramQuantile"
-      ],
-      "mountPoints": [
-        {"sourceVolume": "signoz-clickhouse-zookeeper", "containerPath": "/var/lib/clickhouse/user_scripts"}
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-          "awslogs-region": "<AWS_REGION>",
-          "awslogs-stream-prefix": "init-clickhouse"
-        }
-      }
-    },
-
-    // 2️⃣ ClickHouse server
-    {
-      "name": "clickhouse",
-      "image": "clickhouse/clickhouse-server:<clickhouse_version>",
-      "cpu": 1024,
-      "memory": 512,
-      "portMappings": [
-        {"containerPort": 9000, "protocol": "tcp"},
-        {"containerPort": 8123, "protocol": "tcp"},
-        {"containerPort": 9363, "protocol": "tcp"}
-      ],
-      "mountPoints": [
-        {"sourceVolume": "signoz-clickhouse-zookeeper", "containerPath": "/var/lib/clickhouse"},
-        {"sourceVolume": "signoz-clickhouse-zookeeper", "containerPath": "/etc/clickhouse-server"}
-      ],
-      "dependsOn": [
-        {"containerName": "init-clickhouse", "condition": "COMPLETE"},
-        {"containerName": "zookeeper-1",    "condition": "HEALTHY"},
-        {"containerName": "config-fetcher",  "condition": "COMPLETE"}
-      ],
-      "healthCheck": {
-        "command": ["CMD-SHELL", "wget --spider -q 0.0.0.0:8123/ping || exit 1"],
-        "interval": 30, "timeout": 5, "retries": 3, "startPeriod": 30
-      },
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-          "awslogs-region": "<AWS_REGION>",
-          "awslogs-stream-prefix": "clickhouse"
-        }
-      }
-    },
-
-    // 3️⃣ ZooKeeper (single node)
-    {
-      "name": "zookeeper-1",
-      "image": "bitnami/zookeeper:<zk_version>",
-      "cpu": 512,
-      "memory": 512,
-      "portMappings": [
-        {"containerPort": 2181}, {"containerPort": 2888}, {"containerPort": 3888}, {"containerPort": 9141}
-      ],
-      "environment": [
-        {"name": "ALLOW_ANONYMOUS_LOGIN", "value": "yes"},
-        {"name": "ZOO_SERVER_ID", "value": "1"},
-        {"name": "ZOO_ENABLE_PROMETHEUS_METRICS", "value": "yes"}
-      ],
-      "healthCheck": {
-        "command": ["CMD-SHELL", "curl -s -m 2 http://localhost:8080/commands/ruok | grep error | grep null"],
-        "interval": 30, "timeout": 5, "retries": 3, "startPeriod": 30
-      },
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-          "awslogs-region": "<AWS_REGION>",
-          "awslogs-stream-prefix": "zookeeper"
-        }
-      }
-    },
-
-    // 4️⃣ Fetch custom ClickHouse configs from S3 (optional)
-    {
-      "name": "config-fetcher",
-      "image": "amazon/aws-cli:2.27.32",
-      "cpu": 10,
-      "memory": 128,
-      "essential": false,
-      "entryPoint": ["aws"],
-      "command": ["s3", "cp", "s3://<CONFIG_BUCKET>/clickhouse/config.xml", "/etc/clickhouse-server/config.xml"],
-      "mountPoints": [
-        {"sourceVolume": "signoz-clickhouse-zookeeper", "containerPath": "/etc/clickhouse-server"}
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/aws/ecs/<LOG_GROUP>",
-          "awslogs-region": "<AWS_REGION>",
-          "awslogs-stream-prefix": "config-fetcher"
-        }
-      }
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "init-clickhouse"
     }
-  ]
+  }
+}
+````
+
+## 2. config-fetcher
+
+```json
+{
+  "name": "config-fetcher",
+  "image": "amazon/aws-cli:2.27.32",
+  "cpu": 10,
+  "memory": 102,
+  "memoryReservation": 102,
+  "essential": false,
+  "entryPoint": ["aws"],
+  "command": [
+    "s3", "cp",
+    "s3://<YOUR_CONFIG_BUCKET>/common/clickhouse/config.xml",
+    "/etc/clickhouse-server/config.xml"
+  ],
+  "mountPoints": [
+    {
+      "sourceVolume": "signoz-clickhouse-zookeeper",
+      "containerPath": "/etc/clickhouse-server"
+    }
+  ],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "config-fetcher"
+    }
+  }
 }
 ```
 
-> **Why four containers?**  ClickHouse requires ZooKeeper for distributed coordination and a one‑time init job to load the histogram UDF. The optional `config-fetcher` pulls your hardened ClickHouse configs from S3.
+## 3. clickhouse
 
+```json
+{
+  "name": "clickhouse",
+  "image": "clickhouse/clickhouse-server:24.1.2-alpine",
+  "cpu": 1024,
+  "memory": 512,
+  "memoryReservation": 512,
+  "essential": true,
+  "portMappings": [
+    { "containerPort": 9000, "hostPort": 9000, "protocol": "tcp" },
+    { "containerPort": 8123, "hostPort": 8123, "protocol": "tcp" },
+    { "containerPort": 9363, "hostPort": 9363, "protocol": "tcp" }
+  ],
+  "dependsOn": [
+    { "containerName": "init-clickhouse", "condition": "COMPLETE" },
+    { "containerName": "zookeeper-1",     "condition": "HEALTHY" },
+    { "containerName": "config-fetcher",   "condition": "COMPLETE" }
+  ],
+  "mountPoints": [
+    {
+      "sourceVolume": "signoz-clickhouse-zookeeper",
+      "containerPath": "/var/lib/clickhouse"
+    },
+    {
+      "sourceVolume": "signoz-clickhouse-zookeeper",
+      "containerPath": "/etc/clickhouse-server"
+    }
+  ],
+  "healthCheck": {
+    "command": ["CMD-SHELL", "wget --spider -q 0.0.0.0:8123/ping || exit 1"],
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3,
+    "startPeriod": 30
+  },
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "clickhouse"
+    }
+  }
+}
+```
+
+## 4. zookeeper-1
+
+```json
+{
+  "name": "zookeeper-1",
+  "image": "bitnami/zookeeper:3.7.1",
+  "cpu": 512,
+  "memory": 512,
+  "memoryReservation": 512,
+  "essential": true,
+  "portMappings": [
+    { "containerPort": 2181, "hostPort": 2181, "protocol": "tcp" },
+    { "containerPort": 2888, "hostPort": 2888, "protocol": "tcp" },
+    { "containerPort": 3888, "hostPort": 3888, "protocol": "tcp" },
+    { "containerPort": 9141, "hostPort": 9141, "protocol": "tcp" }
+  ],
+  "environment": [
+    { "name": "ALLOW_ANONYMOUS_LOGIN",        "value": "yes" },
+    { "name": "ZOO_SERVER_ID",                "value": "1"   },
+    { "name": "ZOO_ENABLE_PROMETHEUS_METRICS","value": "yes" },
+    { "name": "ZOO_AUTOPURGE_INTERVAL",       "value": "1"   },
+    { "name": "ZOO_PROMETHEUS_METRICS_PORT_NUMBER","value":"9141"}
+  ],
+  "healthCheck": {
+    "command": ["CMD-SHELL","curl -s -m 2 http://localhost:8080/commands/ruok | grep error | grep null"],
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3,
+    "startPeriod": 30
+  },
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "zookeeper"
+    }
+  }
+}
+```
+
+## 5. signoz
+
+```json
+{
+  "name": "signoz",
+  "image": "signoz/signoz:<VERSION>",
+  "cpu": 512,
+  "memory": 512,
+  "memoryReservation": 256,
+  "essential": true,
+  "portMappings": [
+    { "containerPort": 8080, "hostPort": 8080, "protocol": "tcp" }
+  ],
+  "command": ["--config=/root/config/prometheus.yml"],
+  "environment": [
+    { "name": "SIGNOZ_ALERTMANAGER_PROVIDER",       "value": "signoz" },
+    { "name": "SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN","value": "tcp://clickhouse:9000" },
+    { "name": "SIGNOZ_SQLSTORE_SQLITE_PATH",         "value": "/var/lib/signoz/signoz.db" },
+    { "name": "DASHBOARDS_PATH",                     "value": "/root/config/dashboards" },
+    { "name": "STORAGE",                             "value": "clickhouse" },
+    { "name": "GODEBUG",                             "value": "netdns=go" },
+    { "name": "TELEMETRY_ENABLED",                   "value": "true" },
+    { "name": "DEPLOYMENT_TYPE",                     "value": "docker-standalone-amd" }
+  ],
+  "mountPoints": [
+    { "sourceVolume": "signoz-config",     "containerPath": "/root/config"      },
+    { "sourceVolume": "signoz-dashboards", "containerPath": "/root/config/dashboards" },
+    { "sourceVolume": "signoz-sqlite",     "containerPath": "/var/lib/signoz" }
+  ],
+  "healthCheck": {
+    "command": ["CMD","wget","--spider","-q","localhost:8080/api/v1/health"],
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3,
+    "startPeriod": 0
+  },
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "signoz"
+    }
+  }
+}
+```
+
+## 6. otel-collector
+
+```json
+{
+  "name": "otel-collector",
+  "image": "signoz/signoz-otel-collector:<OTELCOL_TAG>",
+  "cpu": 512,
+  "memory": 512,
+  "memoryReservation": 256,
+  "essential": false,
+  "portMappings": [
+    { "containerPort": 4317, "hostPort": 4317, "protocol": "tcp" },
+    { "containerPort": 4318, "hostPort": 4318, "protocol": "tcp" }
+  ],
+  "command": [
+    "--config=/etc/otel-collector-config.yaml",
+    "--manager-config=/etc/manager-config.yaml",
+    "--copy-path=/var/tmp/collector-config.yaml",
+    "--feature-gates=-pkg.translator.prometheus.NormalizeName"
+  ],
+  "environment": [
+    { "name": "OTEL_RESOURCE_ATTRIBUTES",        "value": "host.name=signoz-host,os.type=linux" },
+    { "name": "LOW_CARDINAL_EXCEPTION_GROUPING", "value": "false" }
+  ],
+  "dependsOn": [
+    { "containerName": "signoz", "condition": "HEALTHY" }
+  ],
+  "mountPoints": [
+    { "sourceVolume": "otel-config", "containerPath": "/etc" }
+  ],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "otel-collector"
+    }
+  }
+}
+```
+
+## 7. schema-migrator-sync
+
+```json
+{
+  "name": "schema-migrator-sync",
+  "image": "signoz/signoz-schema-migrator:<OTELCOL_TAG>",
+  "cpu": 128,
+  "memory": 256,
+  "memoryReservation": 128,
+  "essential": false,
+  "command": ["sync", "--dsn=tcp://clickhouse:9000", "--up="],
+  "dependsOn": [
+    { "containerName": "clickhouse", "condition": "HEALTHY" }
+  ],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "schema-migrator-sync"
+    }
+  }
+}
+```
+
+
+## 8. schema-migrator-async
+
+```json
+{
+  "name": "schema-migrator-async",
+  "image": "signoz/signoz-schema-migrator:<OTELCOL_TAG>",
+  "cpu": 128,
+  "memory": 256,
+  "memoryReservation": 128,
+  "essential": false,
+  "command": ["async", "--dsn=tcp://clickhouse:9000", "--up="],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/aws/ecs/<LOG_GROUP>",
+      "awslogs-region": "<AWS_REGION>",
+      "awslogs-stream-prefix": "schema-migrator-async"
+    }
+  }
+}
+```
+
+
+## 9. Volumes
+
+```json
+ "volumes": [
+            {
+                "name": "signoz-clickhouse-zookeeper",
+                "configuredAtLaunch": true
+            }
+        ],
+```
+
+## 10. General Task Definitions config
+
+```json
+  "taskDefinition": {
+    "family": "signoz-full-stack",
+    "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskRole",
+    "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["EC2"],
+    "runtimePlatform": {
+      "cpuArchitecture": "X86_64",
+      "operatingSystemFamily": "LINUX"
+    },
+    "cpu": "1843",
+    "memory": "1536",
+    "containerDefinitions": {...}",
+    "volumes": {...},
+  }
+
+
+```
 
 ### 5.5  Register the Task Definitions
-
-### 
-Console:   ECS → *Task definitions* → **Create** → JSON.
 
 ### Register via CLI
 
 ```bash
 aws ecs register-task-definition --cli-input-json file://clickhouse-zookeeper.json
-# repeat for other JSON files
+# repeat for other Task Definitions
 ```
-
----
 
 ## 6  Create ECS Services
 
