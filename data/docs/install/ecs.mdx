@@ -4,25 +4,46 @@ id: ecs
 title: Deploying on ECS
 description: Learn how to install SigNoz on ECS
 ---
+import CloneRepo from '@/components/shared/clone-repo.md'
+import RetentionInfo from '@/components/shared/retention-info.mdx'
 
-Amazon ECS gives you a fully managed control plane for orchestrating containers, while EC2‑backed capacity providers let you tie an Auto Scaling Group (ASG) to the cluster so that your compute pool grows and shrinks with demand. Running SigNoz on this foundation combines open‑source observability with native AWS elasticity and cost control:
+<HostingDecision />
 
-ECS (EC2 launch type) — lets you use custom AMIs, instance sizes, or spot instances for heavier ClickHouse workloads.
+Amazon ECS gives you a fully managed control plane for orchestrating containers, while EC2‑backed capacity providers let you tie an Auto Scaling Group (ASG) to the cluster so that your compute pool grows and shrinks with demand. Running SigNoz on this foundation combines open‑source observability with native AWS elasticity and cost control:
 
-Capacity provider — automatically adds / removes EC2 instances as task demand fluctuates (no manual ASG tweaking).
+- **ECS (EC2 launch type)** — lets you use custom AMIs, instance sizes, or spot instances for heavier ClickHouse workloads.
 
-SigNoz components — ClickHouse + ZooKeeper, OpenTelemetry Collector, Query‑service, and Front‑end UI, each in its own task definition.
+- **Capacity provider** — automatically adds / removes EC2 instances as task demand fluctuates (no manual ASG tweaking).
+
+- **SigNoz components**:
+  - SigNoz
+  - SigNoz Collector
+  - Clickhouse
+  - Zookeeper
 
 
 ## 1. Prerequisites
 
-- AWS CLI v2 installed and configured
-- AWS account with adequate limits (EBS, EC2, IAM)
-- SigNoz container images in a registry reachable by ECS (`signoz/*:<version>`)
-- A private S3 bucket(optional) to store custom ClickHouse configs or backups
-- Custom AMI / Launch template** (optional)
+Before you begin, ensure you have the following in place:
 
-> **Note**  SigNoz stores metrics and traces in ClickHouse. Plan **gp3 EBS volumes** with enough capacity and IOPS. A starting point is 20 GiB, 3 000 IOPS, 125 MiB/s throughput; adjust as usage grows.
+- **[AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)** installed and configured with appropriate credentials and region.  
+- An **AWS account** with adequate service quotas for:
+  - [Amazon EBS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volumes.html) (block storage)
+  - [Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html) (compute instances)
+  - [IAM](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started.html) (identity & access management)  
+- **[Amazon ECS cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/create-cluster.html)** already created, with **Capacity Providers** enabled (EC2 + Auto Scaling Group)  
+  - Read more: [ECS Capacity Providers](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-capacity-providers.html)  
+- **IAM roles** for your tasks:
+  - **Task Execution Role** with the managed policy `AmazonECSTaskExecutionRolePolicy`  
+    - Docs: [Creating an ECS task execution IAM role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html)  
+  - **Task Role** for SigNoz containers (attach only the permissions your services need)  
+- **SigNoz container images** (`signoz/*:<version>`) pushed to a registry reachable by ECS (e.g. [Amazon ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) or Docker Hub)  
+- A **private S3 bucket** (optional) for storing custom ClickHouse configs or backups  
+- A **Custom AMI** or **[Launch Template](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html)** (optional) if you need custom kernel settings or plan to use Spot instances  
+- *(Optional)* **[Amazon EFS](https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html)** or **EBS volumes** attached & mounted on your ECS instances for persistent data (ClickHouse, dashboards, configs)
+
+> **EBS sizing note**  SigNoz stores metrics/traces in ClickHouse—start with a **gp3** volume (20 GiB, 3 000 IOPS, 125 MiB/s) and monitor usage to scale as needed.
+
 
 ## 2. Network Stack
 
@@ -282,7 +303,7 @@ Below is a single, all-in-one ECS task definition JSON that includes every SigNo
 
 Each section below shows one `containerDefinition` snippet. Replace all `<…>` placeholders with your own values.
 
-## 1. init-clickhouse
+### 1. init-clickhouse
 
 ```json
 {
@@ -316,7 +337,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 }
 ````
 
-## 2. config-fetcher
+### 2. config-fetcher
 
 ```json
 {
@@ -349,7 +370,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 }
 ```
 
-## 3. clickhouse
+### 3. clickhouse
 
 ```json
 {
@@ -397,7 +418,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 }
 ```
 
-## 4. zookeeper-1
+### 4. zookeeper-1
 
 ```json
 {
@@ -438,7 +459,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 }
 ```
 
-## 5. signoz
+### 5. signoz
 
 ```json
 {
@@ -485,7 +506,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 }
 ```
 
-## 6. otel-collector
+### 6. otel-collector
 
 ```json
 {
@@ -526,7 +547,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 }
 ```
 
-## 7. schema-migrator-sync
+### 7. schema-migrator-sync
 
 ```json
 {
@@ -552,7 +573,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 ```
 
 
-## 8. schema-migrator-async
+### 8. schema-migrator-async
 
 ```json
 {
@@ -575,7 +596,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 ```
 
 
-## 9. Volumes
+### 9. Volumes
 
 ```json
  "volumes": [
@@ -586,7 +607,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
         ],
 ```
 
-## 10. General Task Definitions config
+### 10. General Task Definitions config
 
 ```json
   "taskDefinition": {
@@ -608,16 +629,14 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 
 ```
 
-### 5.5  Register the Task Definitions
-
-### Register via CLI
+### 6.  Register the Task Definitions
 
 ```bash
 aws ecs register-task-definition --cli-input-json file://clickhouse-zookeeper.json
 # repeat for other Task Definitions
 ```
 
-## 6  Create ECS Services
+## 7  Create ECS Services
 
 <Tabs>
 <TabItem label="CLI" value="cli">
@@ -639,7 +658,7 @@ aws ecs create-service \
 <TabItem label="Console" value="console">
 
 1. ECS → Clusters → *Your cluster* → **Create service**.
-2. Launch type = *Capacity provider*.
+2. Launch type=*Capacity provider*.
 3. Choose `<SigNozCapProvider>`.
 4. Select task definition and desired count.
 5. Choose the private subnets & security group.
@@ -647,7 +666,7 @@ aws ecs create-service \
 </TabItem>
 </Tabs>
 
-## 7  Scaling & Capacity
+## 8 Scaling & Capacity
 
 | Layer                       | Metric                                 | Action                                |
 | --------------------------- | -------------------------------------- | ------------------------------------- |
