@@ -12,7 +12,7 @@ const Changelog = async () => {
       <div className="flex flex-col gap-3">
         <h1 className="text-3xl font-semibold text-signoz_vanilla-100">Changelog</h1>
         <div className={`flex items-center gap-4 ${Styles['subscribe-cta-container']}`}>
-          <p>Subscribe for updates</p>
+          <p className="text-base text-signoz_robin-400">Subscribe for updates</p>
           <span className="block h-1 w-1 rounded-full bg-signoz_slate-200" />
           <p className="text-base text-signoz_vanilla-400">Follow us on Twitter</p>
         </div>
