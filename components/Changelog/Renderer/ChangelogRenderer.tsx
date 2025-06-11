@@ -21,10 +21,10 @@ function renderMedia(media: Media) {
     return (
       <Image
         src={`${mediaUrl}${media.url}`}
-        alt={media.documentId || 'Media'}
+        alt={media.alternativeText || 'Media'}
         width={800}
         height={600}
-        className="my-3 h-auto w-full rounded"
+        className="my-3 h-auto w-full overflow-hidden rounded border border-signoz_slate-400"
       />
     )
   }

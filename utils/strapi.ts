@@ -2,6 +2,7 @@ import qs from 'qs'
 
 const API_URL = process.env.SIGNOZ_CMS_API_URL
 const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH
+const API_SUBSCRIPTION_PATH = process.env.SIGNOZ_CMS_SUBSCRIPTION_PATH
 
 export enum DeploymentType {
   ALL = 'All',
@@ -21,6 +22,7 @@ export type Media = {
   ext: string
   url: string
   mime: string
+  alternativeText: string
   [key: string]: any // Allow other fields (e.g., mime, size) to be flexible
 }
 
@@ -88,7 +90,7 @@ export const fetchChangelogEntries = async (
           sort: ['sort_order:asc'],
           populate: {
             media: {
-              fields: 'id,ext,url,mime', // Specify the fields you want to include
+              fields: 'id,ext,url,mime,alternativeText', // Specify the fields you want to include
             },
           },
         },
@@ -140,5 +142,30 @@ export const fetchChangelogEntries = async (
   } catch (error) {
     console.error('Error fetching changelog entries:', error)
     throw error
+  }
+}
+
+export const saveChangelogSubscription = async (email: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}${API_SUBSCRIPTION_PATH}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        data: {
+          email,
+        },
+      }),
+    })
+    if (!response.ok) {
+      const errorMessage = await response.text()
+      console.error('Network response was not ok:', errorMessage)
+      return false
+    }
+    return true
+  } catch (error) {
+    console.error('Error saving changelog subscription:', error)
+    return false
   }
 }
