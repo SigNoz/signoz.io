@@ -56,7 +56,7 @@ const ChangelogRenderer: React.FC<ChangelogRendererProps> = ({ changelog }) => {
   return (
     <div
       key={changelog.id}
-      className={`relative flex flex-col px-4 md:px-8 lg:pb-28 ${Styles['changelog-container']}`}
+      className={`relative flex flex-col px-4 pb-28 md:px-8 ${Styles['changelog-container']}`}
     >
       <span className="mb-5 text-sm text-signoz_vanilla-400">{formattedDate}</span>
       <div className="absolute -bottom-1.5 left-0 top-1.5 hidden w-px bg-signoz_slate-400 lg:block">

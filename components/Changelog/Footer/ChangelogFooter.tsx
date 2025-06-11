@@ -1,17 +1,26 @@
 'use client'
 import Pagination from '@signozhq/pagination'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { TPagination } from '@/utils/strapi'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 
 const ChangelogFooter: React.FC<{ pagination: TPagination }> = ({ pagination }) => {
   const { page } = useParams()
   const [currentPage, setCurrentPage] = useState(page ? parseInt(page as string, 10) : 1)
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const curPage = searchParams.get('page')
+    const page = curPage ? parseInt(curPage, 10) : 1
+    setCurrentPage(page)
+  }, [])
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    router.push('/changelog?page=' + page)
+    const queryParams = new URLSearchParams(window.location.search)
+    queryParams.set('page', page.toString())
+    router.push(`/changelog?${queryParams.toString()}`, { scroll: false })
   }
 
   const pageStart = pagination.pageSize * pagination.page - 1

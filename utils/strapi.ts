@@ -4,8 +4,15 @@ const API_URL = process.env.SIGNOZ_CMS_API_URL
 const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH
 
 export enum DeploymentType {
+  ALL = 'All',
   CLOUD_ONLY = 'Cloud Only',
-  SELF_HOSTED = 'Self Hosted',
+  OSS_ONLY = 'OSS Only',
+}
+
+export const DeploymentTypeColors: Record<DeploymentType, string> = {
+  [DeploymentType.ALL]: 'bg-signoz_robin-500',
+  [DeploymentType.CLOUD_ONLY]: 'bg-signoz_sakura-500',
+  [DeploymentType.OSS_ONLY]: 'bg-signoz_sienna-500',
 }
 
 export type Media = {
@@ -94,7 +101,8 @@ export const fetchChangelogEntries = async (
 
     if (
       params?.deployment_type &&
-      Object.values(DeploymentType).includes(params?.deployment_type)
+      Object.values(DeploymentType).includes(params?.deployment_type) &&
+      params.deployment_type !== DeploymentType.ALL
     ) {
       queryObject.populate.features['filters'] = {
         ...queryObject.populate.features['filters'],
@@ -110,8 +118,6 @@ export const fetchChangelogEntries = async (
       arrayFormat: 'repeat', // Use repeat format for arrays
     })
 
-    const url = `${API_URL}${API_PATH}${queryParams}`
-    console.log('Fetching changelog entries from:', url)
     const response = await fetch(`${API_URL}${API_PATH}${queryParams}`, {
       headers: {
         'Cache-Control': 'no-store', // Avoid caching
