@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { SparklesIcon } from '@heroicons/react/24/outline'
 import ChatModal from './ChatModal'
 import useSearchShortcut from '@/hooks/useSearchShortcut'
 import { useLogEvent } from '@/hooks/useLogEvent'
@@ -79,7 +79,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         role="button"
         aria-label="Open search and chat interface"
       >
-        <MagnifyingGlassIcon className="mr-3 h-5 w-5 flex-shrink-0 text-signoz_vanilla-400" />
+        <SparklesIcon className="mr-3 h-5 w-5 flex-shrink-0 text-signoz_vanilla-400" />
         <span className="flex-1 text-left text-sm text-signoz_vanilla-400 transition-all duration-300">
           {currentPlaceholder}
         </span>
