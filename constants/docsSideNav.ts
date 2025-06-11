@@ -201,7 +201,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: "Deploying on ECS",
+            label: "Deploying to ECS",
             route: '/docs/install/ecs'
           },
           {
