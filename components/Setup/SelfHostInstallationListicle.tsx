@@ -10,6 +10,7 @@ import {
   SiHelm,
   SiArgo,
   SiLinux,
+  SiAmazonecs
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -19,7 +20,7 @@ import IconCardGrid from '../Card/IconCardGrid'
  */
 interface SelfHostInstallationListicleProps {
   /** Pre-select section: docker | binary | kubernetes | all */
-  platform?: 'docker' | 'binary' | 'kubernetes' | 'all'
+  platform?: 'all' | 'docker' | 'binary' | 'kubernetes' | 'others'
 }
 
 export default function SelfHostInstallationListicle({
@@ -31,6 +32,8 @@ export default function SelfHostInstallationListicle({
     { id: 'docker', label: 'Docker' },
     { id: 'binary', label: 'Binary' },
     { id: 'kubernetes', label: 'Kubernetes' },
+    { id: 'others', label: 'Others' },
+
   ] as const
 
   const [activeSection, setActiveSection] = useState<
@@ -65,6 +68,7 @@ export default function SelfHostInstallationListicle({
   const doIcon = <SiDigitalocean className="h-7 w-7 text-sky-400" />
   const helmIcon = <SiHelm className="h-7 w-7 text-indigo-500" />
   const argocdIcon = <SiArgo className="h-7 w-7 text-gray-500" />
+  const awsEcsIcon = <SiAmazonecs className="h-7 w-7 text-amber-500" />
 
   // Docker: Standalone, Swarm, SELinux
   const renderDocker = () => (
@@ -116,12 +120,26 @@ export default function SelfHostInstallationListicle({
     </div>
   )
 
+  const renderOthers = () => (
+    <div className="mb-10">
+      <h2 className="mb-4 text-2xl font-semibold">Install on Others</h2>
+      <IconCardGrid
+        sectionName="Others"
+        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+        cards={[
+          { name: 'ECS', href: '/docs/install/ecs/', icon: awsEcsIcon, clickName: 'Deploy to ECS' },
+        ]}
+      />
+    </div>
+  )
   return (
     <div>
       <NavigationPills />
       {(activeSection === 'all' || activeSection === 'docker') && renderDocker()}
       {(activeSection === 'all' || activeSection === 'binary') && renderBinary()}
       {(activeSection === 'all' || activeSection === 'kubernetes') && renderKubernetes()}
+      {(activeSection === 'all' || activeSection === 'others') && renderOthers()}
+
     </div>
   )
 }
