@@ -59,7 +59,7 @@ type ChangelogApiResponse = {
   }
 }
 
-type ChangelogByIdApiResponse = {
+export type ChangelogByIdApiResponse = {
   data: ReleaseChangelog
   meta: {}
 }
