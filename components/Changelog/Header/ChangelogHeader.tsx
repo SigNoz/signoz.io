@@ -69,7 +69,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
     setIsSubmitting(true)
     const savedSuccessFully = await saveChangelogSubscription(email)
     setIsSubmitting(false)
-    if (savedSuccessFully) {
+    if (!savedSuccessFully) {
       setErrors((prev) => ({ ...prev, email: 'Failed to save email. Please try again.' }))
       return
     }

@@ -91,24 +91,16 @@ const ChangelogRenderer: React.FC<ChangelogRendererProps> = ({ changelog }) => {
             ))}
           </div>
         )}
-        {changelog.bug_fixes && changelog.bug_fixes.length > 0 && (
+        {changelog.bug_fixes && (
           <div className="flex flex-col">
             <h2>Bug Fixes</h2>
-            <ul>
-              {changelog.bug_fixes.map((bugFix, index) => (
-                <li key={index}>{bugFix}</li>
-              ))}
-            </ul>
+            {renderMarkdown(changelog.bug_fixes)}
           </div>
         )}
-        {changelog.maintenance && changelog.maintenance.length > 0 && (
+        {changelog.maintenance && (
           <div className="flex flex-col">
             <h2>Maintenance</h2>
-            <ul>
-              {changelog.maintenance.map((maintenance, idx) => (
-                <li key={idx}>{maintenance}</li>
-              ))}
-            </ul>
+            {renderMarkdown(changelog.maintenance)}
           </div>
         )}
       </div>

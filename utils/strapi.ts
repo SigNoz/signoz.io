@@ -1,8 +1,8 @@
 import qs from 'qs'
 
-const API_URL = process.env.SIGNOZ_CMS_API_URL
+const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
 const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH
-const API_SUBSCRIPTION_PATH = process.env.SIGNOZ_CMS_SUBSCRIPTION_PATH
+const API_SUBSCRIPTION_PATH = process.env.NEXT_PUBLIC_SIGNOZ_CMS_SUBSCRIPTION_PATH
 
 export enum DeploymentType {
   ALL = 'All',
@@ -44,8 +44,8 @@ export type ReleaseChangelog = {
   documentId: string
   version: string
   release_date: string
-  bug_fixes: string[]
-  maintenance: string[] | null
+  bug_fixes: string
+  maintenance: string | null
   createdAt: string
   updatedAt: string
   publishedAt: string
@@ -106,15 +106,19 @@ export const fetchChangelogEntries = async (
       },
     }
 
+    // If a specific deployment type is provided, filter out the others, All will not be excluded
     if (
       params?.deployment_type &&
       Object.values(DeploymentType).includes(params?.deployment_type) &&
       params.deployment_type !== DeploymentType.ALL
     ) {
+      const excludedDeploymentTypes = Object.values(DeploymentType).filter(
+        (type) => type !== params?.deployment_type && type !== DeploymentType.ALL
+      )
       queryObject.populate.features['filters'] = {
         ...queryObject.populate.features['filters'],
         deployment_type: {
-          $eq: params.deployment_type,
+          $notIn: excludedDeploymentTypes, // Exclude the specified deployment type
         },
       }
     }
@@ -152,6 +156,7 @@ export const fetchChangelogEntries = async (
 
 export const saveChangelogSubscription = async (email: string): Promise<boolean> => {
   try {
+    console.log({ url: `${API_URL}${API_SUBSCRIPTION_PATH}` })
     const response = await fetch(`${API_URL}${API_SUBSCRIPTION_PATH}`, {
       method: 'POST',
       headers: {
