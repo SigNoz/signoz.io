@@ -20,7 +20,7 @@ import IconCardGrid from '../Card/IconCardGrid'
  */
 interface SelfHostInstallationListicleProps {
   /** Pre-select section: docker | binary | kubernetes | all */
-  platform?: 'docker' | 'binary' | 'kubernetes' | 'Other' | 'all'
+  platform?: 'all' | 'docker' | 'binary' | 'kubernetes' | 'others'
 }
 
 export default function SelfHostInstallationListicle({
