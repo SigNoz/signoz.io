@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { ReleaseChangelog, Media } from '@/utils/strapi'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Link as LinkIcon } from 'lucide-react'
 import { sluggify } from '@/utils/common'
 
 function renderMarkdown(markdownContent: string) {
@@ -73,25 +74,17 @@ const ChangelogRenderer: React.FC<ChangelogRendererProps> = ({ changelog }) => {
           <div className="flex flex-col gap-7">
             {changelog.features.map((feature, index) => (
               <div className="flex flex-col" key={feature.id}>
-                {index === 0 ? (
-                  <h2>
-                    <Link
-                      className="!text-signoz_vanilla-100 !no-underline"
-                      href={getChangelogLink(feature.title)}
-                    >
-                      {feature.title}
-                    </Link>
-                  </h2>
-                ) : (
-                  <h2 id={sluggify(feature.title)}>
-                    <Link
-                      className="!text-signoz_vanilla-100 !no-underline"
-                      href={`#${sluggify(feature.title)}`}
-                    >
-                      {feature.title}
-                    </Link>
-                  </h2>
-                )}
+                <h2 id={sluggify(feature.title)}>
+                  <Link
+                    className="group flex items-center gap-2 !text-signoz_vanilla-100 !no-underline"
+                    href={
+                      index === 0 ? getChangelogLink(feature.title) : `#${sluggify(feature.title)}`
+                    }
+                  >
+                    {feature.title}
+                    <LinkIcon size={16} className="hidden group-hover:block" />
+                  </Link>
+                </h2>
                 {feature.media && renderMedia(feature.media)}
                 {renderMarkdown(feature.description)}
               </div>
