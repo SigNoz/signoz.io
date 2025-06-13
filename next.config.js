@@ -83,6 +83,10 @@ module.exports = () => {
           protocol: 'https',
           hostname: 'avatars.githubusercontent.com',
         },
+        {
+          protocol: 'https',
+          hostname: 'cms.signoz.cloud',
+        },
       ],
     },
     async headers() {
