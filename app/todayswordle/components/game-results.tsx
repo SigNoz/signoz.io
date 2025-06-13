@@ -20,7 +20,7 @@ export function GameResults({ isWon, score = 0, timeTaken, targetWord }: GameRes
 
   const handleShare = async () => {
     // const shareText = `🎮 SigNoz Wordle\n🏆 Score: ${score} pts\n🎯 Word: ${targetWord}\n\nPlay now at ${window.location.href}`;
-    const shareText = `Hey there, I just played today's Wordle by SigNoz and got a score of ${score}. Can you beat me 😉? Try it out at ${window.location.href}`
+    const shareText = `Hey there, I just played today's Wordle by SigNoz and got a score of ${score}. Can you beat me 😉? Try it out at https://wordle.signoz.io/todayswordle.`
     try {
       await navigator.clipboard.writeText(shareText);
       setIsCopied(true);
