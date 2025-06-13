@@ -6,13 +6,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Link as LinkIcon } from 'lucide-react'
 import { sluggify } from '@/utils/common'
+import { SupportedImageTypes, SupportedVideoTypes } from '@/utils/strapi'
 
 function renderMarkdown(markdownContent: string) {
-  return (
-    <div className={`${Styles['changelog-markdown-container']}`}>
-      <ReactMarkdown>{markdownContent}</ReactMarkdown>
-    </div>
-  )
+  return <ReactMarkdown>{markdownContent}</ReactMarkdown>
 }
 
 function renderMedia(media: Media) {
@@ -20,7 +17,7 @@ function renderMedia(media: Media) {
 
   const mediaUrl = process.env.SIGNOZ_CMS_API_URL || 'https://cms.signoz.cloud'
 
-  if (['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(media.ext)) {
+  if (SupportedImageTypes.includes(media.ext)) {
     return (
       <Image
         src={`${mediaUrl}${media.url}`}
@@ -31,7 +28,7 @@ function renderMedia(media: Media) {
       />
     )
   }
-  if (['.mp4', '.webm'].includes(media.ext)) {
+  if (SupportedVideoTypes.includes(media.ext)) {
     return (
       <video
         autoPlay

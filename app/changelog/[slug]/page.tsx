@@ -6,6 +6,8 @@ import { fetchChangelogById } from 'utils/strapi'
 import { notFound } from 'next/navigation'
 import { ChangelogByIdApiResponse } from 'utils/strapi'
 
+export const dynamicParams = false
+
 export default async function Page({ params }: { params: { slug: string } }) {
   const changelogId = params.slug.split('-').pop()
   let changelogResponse: ChangelogByIdApiResponse | null = null

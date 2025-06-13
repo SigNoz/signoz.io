@@ -19,6 +19,7 @@ interface Props {
 const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
   const router = useRouter()
+  const emailRegex = new RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [errors, setErrors] = useState<ErrorsProps>({})
@@ -62,7 +63,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
     if (!email) {
       setErrors((prev) => ({ ...prev, email: 'Email is required' }))
       return
-    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+    } else if (!emailRegex.test(email)) {
       setErrors((prev) => ({ ...prev, email: 'Please enter a valid email' }))
       return
     }
@@ -139,7 +140,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
                       </label>
                       <div className="flex">
                         <input
-                          type="email"
+                          type="text"
                           id="email"
                           disabled={isSubmitting}
                           name="email"

@@ -4,6 +4,9 @@ const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL
 const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH
 const API_SUBSCRIPTION_PATH = process.env.NEXT_PUBLIC_SIGNOZ_CMS_SUBSCRIPTION_PATH
 
+export const SupportedImageTypes = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+export const SupportedVideoTypes = ['.mp4', '.webm']
+
 export enum DeploymentType {
   ALL = 'All',
   CLOUD_ONLY = 'Cloud Only',
