@@ -38,7 +38,7 @@ function renderMedia(media: Media) {
         controls
         controlsList="nodownload noplaybackrate"
         loop
-        className="my-3 h-auto w-full rounded"
+        className="my-3 h-auto w-full rounded border border-signoz_slate-400"
       >
         <source src={`${mediaUrl}${media.url}`} type={media.mime} />
         Your browser does not support the video tag.

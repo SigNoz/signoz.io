@@ -23,12 +23,12 @@ const ChangelogFooter: React.FC<{ pagination: TPagination }> = ({ pagination }) 
     router.push(`/changelog?${queryParams.toString()}`, { scroll: true })
   }
 
-  const pageStart = pagination.pageSize * pagination.page - 1
-  const pageEnd = pageStart + pagination.pageSize - 1
+  const pageStart = pagination.pageSize * (pagination.page - 1) + 1
+  const pageEnd = pageStart + Math.min(pagination.pageSize, pagination.total) - 1
 
   return (
-    <div className="relative flex items-center justify-between px-4 md:px-8">
-      <div className="absolute -bottom-14 left-0 hidden h-20 w-px -translate-y-full bg-signoz_slate-400 lg:block">
+    <div className="relative flex min-h-20 items-center justify-between px-4 md:px-8">
+      <div className="absolute -bottom-11 left-0 hidden h-20 w-px -translate-y-full bg-signoz_slate-400 lg:block">
         <div className="absolute bottom-0 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-signoz_slate-400" />
       </div>
       <span className="flex items-center text-sm text-signoz_vanilla-100">

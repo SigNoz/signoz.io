@@ -18,7 +18,7 @@ const Changelog = async ({ searchParams }: ChangelogProps) => {
 
   const changelogsResponse = await fetchChangelogEntries({
     page: currentPage,
-    pageSize: 2,
+    pageSize: 10,
     deployment_type: deploymentType,
   })
 
