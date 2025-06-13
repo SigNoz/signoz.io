@@ -14,7 +14,7 @@ export default function EnterpriseCard() {
               Enterprise
             </h3>
             <p className="text-base text-gray-400">
-              For larger orgs with advanced security, compliance and support.
+              For larger orgs that need data residency, compliance and support.
             </p>
           </div>
           <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">

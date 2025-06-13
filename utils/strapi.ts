@@ -1,15 +1,14 @@
 const API_URL = process.env.SIGNOZ_CMS_API_URL;
 const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH;
 
-interface ChangelogEntry {
+export interface ChangelogEntry {
   id: string;
-  attributes: {
-    title: string;
-    description: string;
-    date: string;
-    createdAt: string;
-    updatedAt: string;
-  };
+  documentId: string;
+  title: string;
+  description: string;
+  date: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface ChangelogResponse {
@@ -30,7 +29,7 @@ export const fetchChangelogEntries = async (): Promise<ChangelogEntry[]> => {
     if (!response.ok) {
       const errorMessage = await response.text();
       throw new Error(`Network response was not ok: ${errorMessage}`);
-    }
+    }  
 
     const data: ChangelogResponse = await response.json();
     return data.data;

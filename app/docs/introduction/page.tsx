@@ -15,6 +15,7 @@ import Chatbase from '@/components/Chatbase'
 import { evaluateFeatureFlag } from '@/utils/growthbookServer'
 import { EXPERIMENTS } from '@/constants/experiments'
 import { ExperimentTracker } from '@/components/ExperimentTracker'
+import HoverableSidebar from '@/components/HoverableSidebar'
 
 export const metadata: Metadata = {
   title: 'Introduction to SigNoz - Open Source Observability Platform',
@@ -36,7 +37,8 @@ export default async function DocsIntroductionPage() {
 
   return (
     <>
-      <Header />
+      <HoverableSidebar />
+      <Header showSearchBar={isChatbaseBubbleVariant} />
       <SendData />
       <Monitor />
       <Integrations />
