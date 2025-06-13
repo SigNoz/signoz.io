@@ -59,6 +59,11 @@ type ChangelogApiResponse = {
   }
 }
 
+type ChangelogByIdApiResponse = {
+  data: ReleaseChangelog
+  meta: {}
+}
+
 export type TPagination = {
   page: number
   pageSize: number
@@ -66,7 +71,7 @@ export type TPagination = {
   total: number
 }
 
-type ReleaseChangelogResponse = {
+type ChangelogEntriesResponse = {
   changelogs: ReleaseChangelog[]
   pagination: TPagination
 }
@@ -79,7 +84,7 @@ interface FetchChangelogEntriesParams {
 
 export const fetchChangelogEntries = async (
   params: FetchChangelogEntriesParams
-): Promise<ReleaseChangelogResponse> => {
+): Promise<ChangelogEntriesResponse> => {
   try {
     const queryObject = {
       sort: {
@@ -167,5 +172,50 @@ export const saveChangelogSubscription = async (email: string): Promise<boolean>
   } catch (error) {
     console.error('Error saving changelog subscription:', error)
     return false
+  }
+}
+
+export const fetchChangelogById = async (
+  changelogId: string
+): Promise<ChangelogByIdApiResponse> => {
+  try {
+    const queryObject = {
+      populate: {
+        features: {
+          sort: ['sort_order:asc'],
+          populate: {
+            media: {
+              fields: 'id,ext,url,mime,alternativeText', // Specify the fields you want to include
+            },
+          },
+        },
+      },
+    }
+    const queryParams = qs.stringify(queryObject, {
+      encode: false, // Prevent encoding of square brackets
+      addQueryPrefix: true, // Add '?' at the beginning
+      arrayFormat: 'repeat', // Use repeat format for arrays
+    })
+
+    console.log(`${API_URL}${API_PATH}/${changelogId}${queryParams}`)
+
+    const response = await fetch(`${API_URL}${API_PATH}/${changelogId}${queryParams}`, {
+      headers: {
+        'Cache-Control': 'no-store', // Avoid caching
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+      cache: 'no-store', // For fetch requests
+    })
+
+    if (!response.ok) {
+      const errorMessage = await response.text()
+      throw new Error(`Network response was not ok: ${errorMessage}`)
+    }
+    const data: ChangelogByIdApiResponse = await response.json()
+    return data
+  } catch (error) {
+    console.error(`Error fetching changelog by id ${changelogId}:`, error)
+    throw error
   }
 }

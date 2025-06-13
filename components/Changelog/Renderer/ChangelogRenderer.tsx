@@ -3,6 +3,8 @@ import Styles from './styles.module.css'
 import { format } from 'date-fns'
 import { ReleaseChangelog, Media } from '@/utils/strapi'
 import Image from 'next/image'
+import Link from 'next/link'
+import { sluggify } from '@/utils/common'
 
 function renderMarkdown(markdownContent: string) {
   return (
@@ -53,6 +55,10 @@ interface ChangelogRendererProps {
 const ChangelogRenderer: React.FC<ChangelogRendererProps> = ({ changelog }) => {
   const formattedDate = format(new Date(changelog.release_date), 'MMMM dd, yyyy')
 
+  const getChangelogLink = (title: string) => {
+    return `/changelog/${sluggify(changelog.release_date)}-${sluggify(title)}-${changelog.documentId}`
+  }
+
   return (
     <div
       key={changelog.id}
@@ -65,9 +71,27 @@ const ChangelogRenderer: React.FC<ChangelogRendererProps> = ({ changelog }) => {
       <div className="flex flex-col gap-7">
         {changelog.features && changelog.features.length > 0 && (
           <div className="flex flex-col gap-7">
-            {changelog.features.map((feature) => (
+            {changelog.features.map((feature, index) => (
               <div className="flex flex-col" key={feature.id}>
-                <h2>{feature.title}</h2>
+                {index === 0 ? (
+                  <h2>
+                    <Link
+                      className="!text-signoz_vanilla-100 !no-underline"
+                      href={getChangelogLink(feature.title)}
+                    >
+                      {feature.title}
+                    </Link>
+                  </h2>
+                ) : (
+                  <h2 id={sluggify(feature.title)}>
+                    <Link
+                      className="!text-signoz_vanilla-100 !no-underline"
+                      href={`#${sluggify(feature.title)}`}
+                    >
+                      {feature.title}
+                    </Link>
+                  </h2>
+                )}
                 {feature.media && renderMedia(feature.media)}
                 {renderMarkdown(feature.description)}
               </div>

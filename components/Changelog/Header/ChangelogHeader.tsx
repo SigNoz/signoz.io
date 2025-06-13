@@ -11,7 +11,11 @@ interface ErrorsProps {
   email?: string
 }
 
-const ChangelogHeader: React.FC = () => {
+interface Props {
+  showFilters?: boolean
+}
+
+const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -83,22 +87,24 @@ const ChangelogHeader: React.FC = () => {
           Subscribe for updates
         </button>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        {Object.values(DeploymentType).map((type) => (
-          <button
-            key={type}
-            className={`flex items-center gap-1.5 rounded-full border border-signoz_slate-400  py-1 pl-3 pr-2 text-xs text-signoz_vanilla-100 ${
-              currentDeploymentType === type ? 'bg-signoz_slate-400' : ''
-            }`}
-            onClick={() => handleDeploymentTypeChange(type)}
-          >
-            <span
-              className={`block h-1.5 w-1.5 flex-shrink-0 rounded-full ${DeploymentTypeColors[type]}`}
-            ></span>
-            <span className="uppercase">{type}</span>
-          </button>
-        ))}
-      </div>
+      {showFilters && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {Object.values(DeploymentType).map((type) => (
+            <button
+              key={type}
+              className={`flex items-center gap-1.5 rounded-full border border-signoz_slate-400  py-1 pl-3 pr-2 text-xs text-signoz_vanilla-100 ${
+                currentDeploymentType === type ? 'bg-signoz_slate-400' : ''
+              }`}
+              onClick={() => handleDeploymentTypeChange(type)}
+            >
+              <span
+                className={`block h-1.5 w-1.5 flex-shrink-0 rounded-full ${DeploymentTypeColors[type]}`}
+              ></span>
+              <span className="uppercase">{type}</span>
+            </button>
+          ))}
+        </div>
+      )}
       <Modal
         size="xl"
         backdrop="blur"
