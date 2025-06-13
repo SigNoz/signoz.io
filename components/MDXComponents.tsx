@@ -45,7 +45,7 @@ import LogsInstrumentationListicle from './Logs/LogsInstrumentationListicle'
 import IntegrationsListicle from './Integrations/IntegrationsListicle'
 import HostingDecision from './shared/HostingDecision'
 import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
-import K8sInstallationListicle from './Setup/K8SInstallationListicle'
+import K8sInstallationListicle from './Setup/K8sInstallationListicle'
 
 export const components: MDXComponents = {
   Image,
