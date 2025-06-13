@@ -165,8 +165,8 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
                           )}
                         </button>
                       </div>
-                      {errors['email'] && (
-                        <span className="text-xs text-signoz_cherry-500">{errors['email']}</span>
+                      {errors.email && (
+                        <span className="text-xs text-signoz_cherry-500">{errors.email}</span>
                       )}
                     </form>
                   </div>
