@@ -6,6 +6,7 @@ import { DeploymentType, DeploymentTypeColors } from '@/utils/strapi'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, Loader2 } from 'lucide-react'
 import { saveChangelogSubscription } from '@/utils/strapi'
+import Link from 'next/link'
 
 interface ErrorsProps {
   email?: string
@@ -82,10 +83,18 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
       <h1 className={`text-3xl font-semibold text-signoz_vanilla-100 ${Styles['header-title']}`}>
         Changelog
       </h1>
-      <div className={Styles['subscribe-cta-container']}>
+      <div className={`${Styles['subscribe-cta-container']} flex items-center gap-4`}>
         <button className="text-base text-signoz_robin-400" onClick={handleSubscribeClick}>
           Subscribe for updates
         </button>
+        <span className="block h-1 w-1 rounded-full bg-signoz_slate-200"></span>
+        <Link
+          href="https://www.linkedin.com/company/signozio"
+          target="_blank"
+          className="text-base text-signoz_vanilla-400"
+        >
+          Follow us on LinkedIn
+        </Link>
       </div>
       {showFilters && (
         <div className="mt-4 flex flex-wrap gap-2">
@@ -98,7 +107,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
               onClick={() => handleDeploymentTypeChange(type)}
             >
               <span
-                className={`block h-1.5 w-1.5 flex-shrink-0 rounded-full ${DeploymentTypeColors[type]}`}
+                className={`block h-1.5 w-1.5 flex-shrink-0 rounded-full ${DeploymentTypeColors[type]} ${type === DeploymentType.OSS_ONLY ? 'bg-signoz_sienna-500' : ''}`}
               ></span>
               <span className="uppercase">{type}</span>
             </button>

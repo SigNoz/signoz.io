@@ -26,7 +26,7 @@ function renderMedia(media: Media) {
         src={`${mediaUrl}${media.url}`}
         alt={media.alternativeText || 'Media'}
         width={800}
-        height={600}
+        height={420}
         className="my-3 h-auto w-full overflow-hidden rounded border border-signoz_slate-400"
       />
     )
