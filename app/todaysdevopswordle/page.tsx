@@ -2,21 +2,25 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import './styles.css';
-import { Orbitron } from 'next/font/google';
-import { WordleHeader } from './components/wordle-header';
+import { Lexend, Orbitron } from 'next/font/google';
 import { WordleGame } from './components/wordle-game';
 import { HowToPlayDrawer } from './components/how-to-play-drawer';
-import { FaCode } from 'react-icons/fa6';
 import { initializeGameState, setGameWon, setGameLost, getGameState } from './lib/cookie-utils';
 import { GameStatus } from './types';
+import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
+import { IoHeart } from 'react-icons/io5';
+
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['400'] });
+const lexend = Lexend({ subsets: ['latin'], weight: ['400'] });
 
 export default function WordlePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [gameState, setGameState] = useState<GameStatus>(GameStatus.NOT_STARTED);
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   console.log("gameStatebeg", gameState)
   useEffect(() => {
@@ -36,13 +40,37 @@ export default function WordlePage() {
     }
   }, []);
 
+  // Handle navbar visibility on scroll
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const scrollDelta = currentScrollY - lastScrollY;
+          // Hide navbar when scrolling down more than 10px, show when scrolling up
+          if (scrollDelta > 10 && currentScrollY > 50) {
+            setIsNavbarVisible(false);
+          } else if (scrollDelta < -10 || currentScrollY <= 50) {
+            setIsNavbarVisible(true);
+          }
+          setLastScrollY(currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   const startTimer = () => {
     if (timerInterval) clearInterval(timerInterval);
     if (gameState === GameStatus.NOT_STARTED) {
-    const interval = setInterval(() => {
-      setElapsedTime(prev => prev + 1);
-    }, 1000);
-    setTimerInterval(interval);
+      const interval = setInterval(() => {
+        setElapsedTime(prev => prev + 1);
+      }, 1000);
+      setTimerInterval(interval);
     }
   };
 
@@ -72,35 +100,36 @@ export default function WordlePage() {
   }, [timerInterval]);
 
   return (
-    <div className="min-h-screen overflow-y-auto">
+    <div className="wordle-page">
       <div className="absolute inset-0 bg-gradient-to-br from-red-900/30 via-red-900/10 to-black" />
-      <div className="absolute top-[20%] right-0 w-[300px] h-[400px] bg-red-500/10 rounded-full blur-[280px]" />
+      <div className="absolute top-[10%] right-0 w-[300px] h-[400px] bg-red-500/10 rounded-full blur-[280px]" />
       <div className="absolute bottom-0 right-0 w-[400px] h-[500px] bg-gradient-to-tl from-red-800/30 via-red-600/15 to-transparent rounded-full blur-[180px]" />
-      
-      <div className="relative z-10 flex flex-col min-h-screen w-full">
-        <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-4 sm:px-6 py-4">
+
+      <div className="relative z-10 flex flex-col w-full">
+        <nav className={`fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-2 sm:px-6 py-2 transition-transform duration-300 ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'
+          }`}>
           <div className="flex items-center">
-            <p className={`text-sm sm:text-base tracking-wide ${orbitron.className} neon-text pt-2`}>
-              Wordle By SigNoz
+            <p className={`text-sm sm:text-base tracking-wide ${orbitron.className} neon-text pt-3 sm:pt-0`}>
+              Devops Wordle
             </p>
           </div>
           <div className="flex items-center">
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="text-[#FF4C4C] hover:text-[#ff6666] transition-colors flex items-center justify-center px-0"
+              className="text-[#FF4C4C] hover:text-[#ff6666]  flex items-center transition-colors justify-center px-0"
               aria-label="Open menu"
             >
-              <FaCode className="w-4 h-4 sm:w-6 sm:h-6 neon-code-icon"/>
+              <HiOutlineQuestionMarkCircle className="w-4 h-4 sm:w-8 sm:h-20 neon-question" />
             </button>
           </div>
         </nav>
 
         <Suspense fallback={<div className="text-red-800">Loading...</div>}>
-          <main className="flex flex-col items-center w-full p-4 sm:p-6">
-            <div className="w-full mt-6 sm:mt-8">
+          <main className="flex flex-col items-center w-full p-2 sm:pt-6 pt-16">
+            <div className="w-full mt-4 sm:mt-4">
               {gameState !== GameStatus.NOT_STARTED && (
-                <WordleGame 
-                  targetWord='TAINT'
+                <WordleGame
+                  targetWord='ALERT'
                   elapsedTime={elapsedTime}
                   gameStatus={gameState}
                   onGameWon={handleGameWon}
@@ -108,11 +137,24 @@ export default function WordlePage() {
                 />
               )}
             </div>
+            <div className="relative z-[1] text-center bg-red">
+              <p className={`text-gray-400 text-[12px] pt-3 ${lexend.className}`}>
+                Made with <IoHeart className="inline w-8 h-6 text-[#FF4C4C] neon-heart px-1 pb-1" /> by{' '}
+                <a
+                  href="https://signoz.io"
+                  className="hover:text-[#ff6666] transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  SigNoz
+                </a>
+              </p>
+            </div>
           </main>
         </Suspense>
       </div>
 
-      <HowToPlayDrawer 
+      <HowToPlayDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onStartGame={handleStartGame}

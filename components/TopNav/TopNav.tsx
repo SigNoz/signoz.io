@@ -189,6 +189,7 @@ export default function TopNav() {
 
   const loginRoute = '/login/'
   const signupRoute = '/teams/'
+  const wordleRoute = '/todaysdevopswordle/'
   const isLoginRoute = pathname === loginRoute
   const isSignupRoute = pathname === signupRoute
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
@@ -222,7 +223,7 @@ export default function TopNav() {
   }, [pathname])
 
   // Hide TopNav on teams page or if source is onboarding
-  if (isSignupRoute || source === ONBOARDING_SOURCE) {
+  if (isSignupRoute|| wordleRoute || source === ONBOARDING_SOURCE) {
     return null
   }
 

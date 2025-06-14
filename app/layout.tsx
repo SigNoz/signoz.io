@@ -14,6 +14,7 @@ import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
 import { GrowthBookProvider } from '@/components/GrowthBookProvider'
 import { AnonymousIdSetter } from './anonymous-id-setter'
+import ConditionalMain from '@/components/ConditionalMain'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -112,7 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div className="relative flex h-screen flex-col justify-between ">
                   <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
                     <TopNav />
-                    <main className="mb-auto mt-[48px]">{children}</main>
+                    <ConditionalMain children={children}/>
                   </SearchProvider>
                   <MainFooter />
                 </div>

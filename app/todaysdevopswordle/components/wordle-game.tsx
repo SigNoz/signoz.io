@@ -6,7 +6,10 @@ import { Keyboard } from './keyboard';
 import { GameBoard } from './game-board';
 import { WordleHeader } from './wordle-header';
 import { GameResults } from './game-results';
+import { Toast } from './toast';
 import { getGameState } from '../lib/cookie-utils';
+import wordExists from 'word-exists';
+
 
 const MAX_TIME = 86400; // 24 hours in seconds
 const MAX_ATTEMPTS = 5;
@@ -26,16 +29,24 @@ const DEFAULT_CONFIG: GameConfig = {
 };
 
 function getGameScore(attempts: number, elapsedTime: number) {
-  if(getGameState().wonScore)
+  if (getGameState().wonScore)
     return getGameState().wonScore
 
   const score = Math.ceil(((MAX_TIME / elapsedTime) * (MAX_ATTEMPTS / attempts)))
   return score
 }
 
-export function WordleGame({ 
-  targetWord, 
-  config = {}, 
+export function isValidWord(word: string): boolean {
+  // Convert to lowercase for validation
+  const normalizedWord = word.toLowerCase();
+  
+  // Check if word exists in dictionary
+  return wordExists(normalizedWord);
+} 
+
+export function WordleGame({
+  targetWord,
+  config = {},
   elapsedTime,
   onGameWon,
   onGameLost,
@@ -43,6 +54,9 @@ export function WordleGame({
 }: WordleGameProps) {
   const gameConfig = { ...DEFAULT_CONFIG, ...config };
   const [currentGuess, setCurrentGuess] = useState('');
+  const [isShaking, setIsShaking] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
   const [gameState, setGameState] = useState<GameState>({
     currentRow: 0,
     currentCol: 0,
@@ -53,7 +67,7 @@ export function WordleGame({
 
   const updateLetterStates = useCallback((guess: string) => {
     const newStates = new Map(gameState.letterStates);
-    
+
     // First pass: Mark all CORRECT letters
     for (let i = 0; i < gameConfig.wordLength; i++) {
       const letter = guess[i].toUpperCase();
@@ -92,16 +106,30 @@ export function WordleGame({
     }
 
     if (key === 'ENTER') {
-      if (currentGuess.length !== gameConfig.wordLength) return;
+      // Validate the word
+      if (currentGuess.length !== gameConfig.wordLength) {
+        setIsShaking(true);
+        setToastMessage("Too short.");
+        setShowToast(true);
+        setTimeout(() => setIsShaking(false), 500);
+        return;
+      }
+      if (!isValidWord(currentGuess)) {
+        setIsShaking(true);
+        setToastMessage('Not a valid word.');
+        setShowToast(true);
+        setTimeout(() => setIsShaking(false), 500);
+        return;
+      }
 
       const newGuesses = [...gameState.guesses, currentGuess];
       const newLetterStates = updateLetterStates(currentGuess);
-      
+
       let newStatus: GameStatus = gameState.gameStatus;
       if (currentGuess.toUpperCase() === targetWord.toUpperCase()) {
         newStatus = GameStatus.WON;
         onGameWon(getGameScore(newGuesses.length, elapsedTime) as number);
-      } 
+      }
       else if (newGuesses.length === gameConfig.maxAttempts) {
         newStatus = GameStatus.LOST;
         onGameLost();
@@ -140,19 +168,25 @@ export function WordleGame({
   }, [handleKeyPress]);
   if (gameState.gameStatus !== GameStatus.PLAYING) {
     return (
-      <GameResults 
+      <GameResults
         isWon={gameState.gameStatus === GameStatus.WON}
         score={gameState.gameStatus === GameStatus.WON ? getGameScore(gameState.guesses.length, elapsedTime) as number : 0}
         timeTaken={elapsedTime}
         targetWord={targetWord}
+        guesses={gameState.guesses}
       />
     );
   }
 
   return (
     <div className="flex flex-col items-center gap-4">
+      <Toast 
+        message={toastMessage}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
       <div className="flex justify-center w-full max-w-[450px] pt-10 sm:pt-0">
-        <WordleHeader 
+        <WordleHeader
           currentAttempts={gameState.guesses.length}
           maxAttempts={gameConfig.maxAttempts}
           elapsedTime={elapsedTime}
@@ -164,6 +198,7 @@ export function WordleGame({
           currentGuess={currentGuess}
           targetWord={targetWord}
           config={gameConfig}
+          isShaking={isShaking}
         />
       </div>
       <div className="flex justify-center">

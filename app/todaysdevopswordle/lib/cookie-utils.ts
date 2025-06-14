@@ -9,7 +9,7 @@ export function getEndOfDay(): Date {
 }
 
 export function setCookie(name: string, value: string) {
-  document.cookie = `${name}=${value}; path=/todayswordle; expires=${getEndOfDay().toUTCString()}`;
+  document.cookie = `${name}=${value}; path=/todaysdevopswordle; expires=${getEndOfDay().toUTCString()}`;
 }
 
 export function getCookie(name: string) {

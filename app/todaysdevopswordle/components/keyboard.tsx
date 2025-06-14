@@ -28,7 +28,7 @@ function getKeyStyle(key: string, letterState?: LetterState) {
     case LetterState.CORRECT:
       return `${baseStyle} bg-[#4558c4] text-white border-none`;
     case LetterState.PRESENT:
-      return `${baseStyle}  bg-red-500 text-white border-none`;
+      return `${baseStyle}  bg-[#F8BA48] text-white border-none`;
     case LetterState.ABSENT:
       return `${baseStyle} bg-gray-800 text-gray-600 border-none`;
     default:
@@ -46,7 +46,8 @@ export function Keyboard({ onKeyPress, letterStates }: {
   }
 
   return (
-    <div className="w-full max-w-[500px] p-2 sm:p-4">
+    <>
+    <div className="w-full max-w-[500px] pt-2 sm:pt-1">
       {KEYBOARD_ROWS.map((row, rowIndex) => (
         <div key={rowIndex} className="flex justify-center mb-1 sm:mb-2">
           {row.map((key) => {
@@ -64,5 +65,6 @@ export function Keyboard({ onKeyPress, letterStates }: {
         </div>
       ))}
     </div>
+    </>
   );
 } 

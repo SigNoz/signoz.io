@@ -9,6 +9,7 @@ import { GameStatus } from '../types';
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['400', '500'] });
 const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] });
+const HINT = "You personal 3am wake-up call!"
 
 interface HowToPlayDrawerProps {
   isOpen: boolean;
@@ -86,7 +87,7 @@ export function HowToPlayDrawer({
         <Content className={`bg-black/80 flex flex-col rounded-t-[30px] h-[98%] fixed bottom-0 left-0 right-0 z-50 ${lexend.className}`}>
           <div className="absolute inset-0 bg-gradient-to-br from-[#FF4C4C]/10 via-[#FF4C4C]/10 to-[#FF4C4C]/15 rounded-t-[30px]" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent rounded-t-[30px]" />
-          <div className="p-4 bg-gradient-to-b from-black/50 to-transparent rounded-t-[30px] flex-1 overflow-auto relative">
+          <div className="p-3 bg-gradient-to-b from-black/50 to-transparent rounded-t-[30px] flex-1 overflow-auto relative">
             <div className="max-w-md mx-auto space-y-8 sm:max-w-lg md:max-w-2xl lg:max-w-4xl">
               <h2 className={`neon-text text-4xl mb-6 text-center font-light tracking-wider mb-[60px] ${orbitron.className}`}>
                 HOW TO PLAY &lt;/&gt;
@@ -94,7 +95,7 @@ export function HowToPlayDrawer({
 
               <div className="bg-[#1B224B]/30 rounded-lg p-6 border border-[#233457] relative neon-box-border">
                 <p className="text-gray-400 text-center text-base sm:text-lg">
-                Pods steer clear when this is present unless they're built to tolerate it.
+                Today's hint: {HINT}
                 </p>
                 <div className="absolute -top-15 left-1/2 transform -translate-x-1/2">
                   <HiLightBulb className="w-10 h-10 text-[#4558c4] neon-bulb" />
@@ -102,19 +103,19 @@ export function HowToPlayDrawer({
               </div>
 
               <div className="space-y-4">
-                <h3 className={`text-[#4558c4] font-[400] text-xl sm:text-2xl text-center items-center mb-6 ${orbitron.className}`}>LEGEND</h3>
-                <div className="grid grid-cols-3 gap-8 place-items-center">
-                  <div className="flex  items-center text-center gap-3">
+                <h3 className={`text-[#4558c4] font-[400] text-xl sm:text-2xl text-center items-center mb-6 ${orbitron.className}`}>COLOR GUIDE</h3>
+                <div className="grid grid-cols-1 place-items-center sm:grid-cols-3 gap-3 sm:gap-8 sm:place-items-center">
+                  <div className="flex items-center text-center gap-3">
                     <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-[#FF4C4C] rounded neon-box-red" />
-                    <span className="text-gray-400 text-sm sm:text-base">Letter present</span>
+                    <span className="text-gray-400 text-sm sm:text-base">Letter not present in the word</span>
                   </div>
                   <div className="flex items-center text-center gap-3">
                     <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-[#4558c4] rounded neon-box-blue" />
-                    <span className="text-gray-400 text-sm sm:text-base">Perfect spot!</span>
+                    <span className="text-gray-400 text-sm sm:text-base">Letter present & correct spot</span>
                   </div>
                   <div className="flex items-center text-center gap-3">
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 border-2 border-[#233457] rounded neon-box-border" />
-                    <span className="text-gray-400 text-sm sm:text-base">Letter absent</span>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-yellow-600 rounded neon-box-yellow" />
+                    <span className="text-gray-400 text-sm sm:text-base">Letter present but wrong spot</span>
                   </div>
                 </div>
               </div>
@@ -131,7 +132,7 @@ export function HowToPlayDrawer({
                   <IoHeart className="text-[#FF4C4C] w-6 h-6 animate-pulse-heart" />
                 </div>
                 <p className="text-gray-400 text-center text-sm sm:text-base lg:text-lg">
-                  This is a venture by SigNoz made with love to teach evolving terminologies and concepts around observability, devops and monitoring in a fun way!
+                  This is a project by SigNoz made with love to teach evolving terminologies and concepts around observability, devops and monitoring in a fun way!
                 </p>
               </div>
 
