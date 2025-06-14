@@ -4,7 +4,6 @@ import React, { useEffect, useState, FC } from 'react';
 import { Lexend, Orbitron } from 'next/font/google';
 import { BiTime } from 'react-icons/bi';
 import { HiLightBulb } from 'react-icons/hi2';
-import { RiMenu3Line } from 'react-icons/ri';
 import { cn } from '../../lib/utils';
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['500'] });

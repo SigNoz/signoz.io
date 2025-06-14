@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Lexend, Orbitron } from 'next/font/google';
+import { Lexend } from 'next/font/google';
 
 const lexend = Lexend({ subsets: ['latin'], weight: ['400'] });
 

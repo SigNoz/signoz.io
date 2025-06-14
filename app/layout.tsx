@@ -113,7 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div className="relative flex h-screen flex-col justify-between ">
                   <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
                     <TopNav />
-                    <ConditionalMain children={children}/>
+                    <ConditionalMain>{children}</ConditionalMain>
                   </SearchProvider>
                   <MainFooter />
                 </div>
