@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     absolute: 'DevOps Wordle | SigNoz',
   },
   description:
-    'This game was created to help you learn the evolving language of observability, DevOps, and monitoring in a playful way. After each game, you\'ll find resources to explore the day\'s word.',
+    'This game was created to help you learn the evolving language of observability, DevOps, and monitoring in a playful way. After each game, you will find resources to explore the word.',
 }
 
 export default async function WordleWebPage() {
