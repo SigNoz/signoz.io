@@ -48,6 +48,16 @@ const getOS = (): string => {
   return 'unknown'
 }
 
+const getTimezone = (): string => {
+  if (typeof window === 'undefined') return 'unknown'
+
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone
+  } catch (error) {
+    return 'unknown'
+  }
+}
+
 export const useLogEvent = () => {
   useEffect(() => {
     getInitialReferrer()
@@ -68,6 +78,7 @@ export const useLogEvent = () => {
       const enhancedAttributes = {
         ...attributes,
         custom_os: getOS(),
+        custom_timezone: getTimezone(),
         custom_initial_referrer: getInitialReferrer(),
         custom_user_agent: getUserAgent(),
         custom_webdriver: getWebdriver(),
