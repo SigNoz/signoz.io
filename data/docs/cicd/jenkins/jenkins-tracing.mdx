@@ -1,0 +1,124 @@
+---
+date: 2025-04-28
+id: jenkins-tracing
+title: Jenkins Tracing
+description: Instrument Jenkins with OpenTelemetry and send traces to SigNoz
+---
+   
+## Overview 
+This integration helps you to monitor and observe Jenkins with OpenTelemetry by visualizing jenkins jobs and pipelines executions as distributed traces in SigNoz
+To know more about tracing refer [here](https://signoz.io/docs/instrumentation/overview/)
+
+## Prerequisites
+- Jenkins [>2.479.3]
+- Administrative access to Jenkins controller
+
+## Setup
+
+### Step 1: Install and Configure Jenkins OpenTelemetry plugin
+* For installing the plugin, please refer to [this documentation](https://plugins.jenkins.io/opentelemetry-agent-metrics/).
+
+<Tabs>
+
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+### Step 2: Set the OTLP Endpoint
+Navigate to Manage Jenkins -> System -> OpenTelemetry section
+
+In the OTLP Endpoint section, add your SigNoz ingestion endpoint `ingest.<region>.signoz.cloud`
+Set the \<region\> to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+
+### Step 3: Set the Authentication headers
+In the same section click on Authentication and select **Header Authentication**
+
+Add Header key as **signoz-ingestion-key** and create a Jenkins credential of type **Secret text** and store the SigNoz_Ingestion_Key
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/cicd/jenkins/jenkins-otel-cloud-config.webp"
+        alt="Jenkins OTel plugin configuration for SigNoz cloud"
+    />
+    <figcaption>
+        <i>
+        Jenkins OTel plugin configuration for SigNoz cloud
+        </i>
+    </figcaption>
+</figure>
+
+</TabItem>
+
+<TabItem value='self-host' label='Self-Host' default>
+
+Now, navigate to **Manage Jenkins** -> **System** -> **OpenTelemetry** section 
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/cicd/jenkins/jenkins-otel-config.webp"
+        alt="Jenkins OTel plugin configuration for Self-Hosted SigNoz"
+    />
+    <figcaption>
+        <i>
+        Jenkins OTel plugin configuration for Self-Hosted SigNoz
+        </i>
+    </figcaption>
+</figure>
+
+Enter the SigNoz self-hosted endpoint in the OTLP endpoint textbox and set **No Authentication**
+
+</TabItem>
+</Tabs>
+
+## Visualize Traces in SigNoz
+
+In your SigNoz UI, head over to the Traces Tab, and you should be able to see your traces.
+You can use the [trace explorer](https://signoz.io/docs/product-features/trace-explorer/) to filter and analyze your traces.
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/cicd/jenkins/jenkins-traces.webp"
+        alt="Jenkins pipelines traces on SigNoz UI"
+    />
+    <figcaption>
+        <i>
+        Jenkins pipelines traces on SigNoz UI
+        </i>
+    </figcaption>
+</figure>
+
+## Custom Spans in Jenkinsfile
+
+With the OTel plugin installed, you can enhance your Jenkins pipelines with custom observability by adding span attributes, creating custom spans, and enriching trace data. 
+
+### Adding Custom Span Attributes
+
+The following example shows how to add custom attributes to the current span within your Jenkins pipeline:
+
+```groovy
+  pipeline {
+    agent any
+    stages {
+      stage('Add Custom Span Attribute') {
+          steps {
+            script {
+              withSpanAttribute(
+                  key: 'my-error-prone-span',
+                  value: 'new-traces',
+                  type: 'STRING',
+                  target: 'CURRENT_SPAN'
+              )
+              echo 'Custom span attribute added'
+            }
+          }
+        }
+    }
+  }
+```
+
+What this code does:
+
+* withSpanAttribute(): A Jenkins OTel plugin function that adds custom key-value metadata to spans
+* key: 'my-error-prone-span': The attribute name that will appear in your trace data
+* value: 'new-traces': The attribute value associated with the key
+* type: 'STRING': Specifies the data type of the attribute (can be STRING, LONG, DOUBLE, or BOOLEAN)
+* target: 'CURRENT_SPAN': Indicates that the attribute should be added to the currently active span (the stage span in this case)
+
+
