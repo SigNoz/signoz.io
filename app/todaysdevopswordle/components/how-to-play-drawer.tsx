@@ -146,7 +146,7 @@ export function HowToPlayDrawer({
                 Made with <IoHeart className="inline w-9 h-6 text-[#FF4C4C] neon-heart px-1 pb-1" /> by{' '}
                 <a
                   href="https://signoz.io"
-                  className="hover:text-[#ff6666] transition-colors"
+                  className="hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
