@@ -326,7 +326,8 @@ const SignupFormIsolated: React.FC<{
   onSignup: (payload: any) => Promise<void>
   isSubmitting: boolean
   errors: ErrorsProps
-}> = ({ onSignup, isSubmitting, errors }) => {
+  logEvent: (event: any) => void
+}> = ({ onSignup, isSubmitting, errors, logEvent }) => {
   const [formState, setFormState] = useState({
     workEmail: '',
     dataRegion: 'us',
@@ -367,6 +368,21 @@ const SignupFormIsolated: React.FC<{
   const handleSubmit = useCallback(
     (event) => {
       event.preventDefault()
+
+      // Log click event for debugging
+      logEvent({
+        eventType: 'track',
+        eventName: 'Website Click',
+        attributes: {
+          clickType: 'Button Click',
+          clickName: 'Sign Up Button Click',
+          clickLocation: 'Teams Form',
+          clickText: 'Start Your Free Trial',
+          email: formState.workEmail,
+          dataRegion: formState.dataRegion,
+        },
+      })
+
       onSignup({
         email: formState.workEmail,
         region: {
@@ -378,7 +394,7 @@ const SignupFormIsolated: React.FC<{
         },
       })
     },
-    [formState, onSignup]
+    [formState, onSignup, logEvent]
   )
 
   return (
@@ -653,6 +669,7 @@ const TeamsVariant: React.FC = () => {
                 onSignup={handleSignUp}
                 isSubmitting={isSubmitting}
                 errors={errors}
+                logEvent={logEvent}
               />
             )}
           </div>
