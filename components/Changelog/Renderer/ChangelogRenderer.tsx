@@ -15,12 +15,10 @@ function renderMarkdown(markdownContent: string) {
 function renderMedia(media: Media) {
   if (!media || !media.url) return null
 
-  const mediaUrl = process.env.SIGNOZ_CMS_API_URL || 'https://cms.signoz.cloud'
-
   if (SupportedImageTypes.includes(media.ext)) {
     return (
       <Image
-        src={`${mediaUrl}${media.url}`}
+        src={media.url}
         alt={media.alternativeText || 'Media'}
         width={800}
         height={420}
@@ -37,7 +35,7 @@ function renderMedia(media: Media) {
         loop
         className="my-3 h-auto w-full rounded border border-signoz_slate-400"
       >
-        <source src={`${mediaUrl}${media.url}`} type={media.mime} />
+        <source src={media.url} type={media.mime} />
         Your browser does not support the video tag.
       </video>
     )

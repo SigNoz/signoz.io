@@ -85,7 +85,7 @@ module.exports = () => {
         },
         {
           protocol: 'https',
-          hostname: 'cms.signoz.cloud',
+          hostname: 'storage.googleapis.com',
         },
       ],
     },
