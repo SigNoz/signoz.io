@@ -13,6 +13,12 @@ export enum DeploymentType {
   OSS_ONLY = 'OSS Only',
 }
 
+export const DeploymentTypeLabels = {
+  [DeploymentType.ALL]: 'All',
+  [DeploymentType.CLOUD_ONLY]: 'Cloud',
+  [DeploymentType.OSS_ONLY]: 'Community Edition',
+}
+
 export const DeploymentTypeColors: Record<DeploymentType, string> = {
   [DeploymentType.ALL]: 'bg-signoz_robin-500',
   [DeploymentType.CLOUD_ONLY]: 'bg-signoz_sakura-500',
