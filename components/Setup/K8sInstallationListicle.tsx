@@ -73,7 +73,7 @@ export default function K8sInstallationListicle() {
     { name: 'Openshift',
       href: '/docs/install/kubernetes/openshift', 
       icon: redhatOpenshiftIcon, 
-      clickName: 'Deploy to Openshift' 
+      clickName: 'Deploy to OpenShift' 
     },
 
   ]
