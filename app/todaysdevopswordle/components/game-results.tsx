@@ -99,7 +99,7 @@ export function GameResults({ isWon, score = 0, timeTaken, targetWord, guesses }
           aren't working as expected, ensuring your app stays resilient.
         </p>
         <a 
-          href="https://signoz.io/blog/introducing-anomaly-detection-for-smarter-alerts/" 
+          href="https://overcast.blog/6-types-of-kubernetes-probes-you-should-be-using-in-2024-205441e43ac2" 
           target="_blank"
           className={`text-[#4558c4] hover:text-[#5569d7] inline-block hover:underline text-sm`}
         >
