@@ -1,0 +1,194 @@
+---
+date: 2025-06-17
+id: openshift
+title: Deploying to Openshift
+description: Instructions to install SigNoz on Openshift cluster
+---
+
+import CommonPrerequisites from '@/components/shared/k8s-common-prerequisites.md'
+import K8sInstall from '@/components/shared/k8s-install.mdx'
+import K8sOtelDemo from '@/components/shared/k8s-oteldemo.mdx'
+import K8sNextSteps from '@/components/shared/k8s-next-steps.md'
+import Admonition from '@/components/Admonition/Admonition'
+
+
+<HostingDecision />
+
+## Prerequisites
+
+- Set up a Openshift cluster - OCP/ROSA/CRC (see the [official Openshift documentation][1] for more info).
+- `oc` cli configured
+
+
+<CommonPrerequisites />
+
+## Configuring the Security Context Constraints (SCC)
+
+OpenShift enforces SecurityContextConstraints (SCCs) to control what actions pods can perform and what resources they can access—similar to how RBAC controls user permissions. SCCs let administrators define the security conditions a pod must meet to be admitted and run in the cluster (see the [official Openshift documentation][4] for more info)
+
+### SCCs for the SigNoz Installation
+
+We need to define the following SCC for supporting the running signoz on OC:
+
+```yaml
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: signoz-scc
+allowPrivilegedContainer: false
+runAsUser:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+volumes:
+  - persistentVolumeClaim
+  - emptyDir               
+  - configMap        
+  - projected         
+  - downwardAPI          
+  - hostPath
+readOnlyRootFilesystem: false
+allowHostDirVolumePlugin: true
+users:
+  # These are the Service Accounts which are created during the Installation
+  - system:serviceaccount:<NAMESPACE>:signoz-clickhouse
+  - system:serviceaccount:<NAMESPACE:default
+
+```
+
+### Apply the SCCs 
+
+Use the Kubectl to add the SCCs to OC cluster
+```bash
+kubectl apply -f signoz_scc.yaml
+```
+
+OR 
+
+Use the `oc` cli 
+```bash
+oc apply -f signoz_scc.yaml
+```
+
+## Install SigNoz
+
+### Helm Installation
+
+The SigNoz Helm [chart](https://github.com/SigNoz/charts) will install the following components into your Kubernetes cluster:
+
+- SigNoz
+- SigNoz Collector
+- Clickhouse
+- Zookeeper
+
+1. Find a storage class to use in your cluster:
+
+```bash
+kubectl get storageclass
+```
+
+2. Create a `values.yaml` file that will contain the configuration for the chart. Here is a minimal example to get started:
+
+```yaml
+global:
+  storageClass: <storage-class>
+
+clickhouse:
+  installCustomStorageClass: true
+```
+You can find an exhaustive list of the parameters [here](https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration).
+
+<Admonition type="info">
+For Openshift Autopilot, you need to setup the storageclasses with compatible provisioner (see the [official Openshift documentation][3] for more info)
+
+</Admonition>
+
+3. Install SigNoz:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update
+helm install signoz signoz/signoz \
+   --namespace <namespace> --create-namespace \
+   --wait \
+   --timeout 1h \
+   -f values.yaml
+```
+
+### Test the installation
+
+1. In another terminal, port-forward signoz on its http port. (By default, signoz exposes its http server on port 8080.)
+
+```bash
+kubectl port-forward -n <namespace> svc/signoz 8080:8080
+```
+
+2. Run the following command to check the health of signoz:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/health
+```
+
+3. If the installation is successful, you should see the following output:
+
+```bash
+{"status":"ok"}
+```
+
+<Admonition type="info">
+By default, retention period is set to **7 days** for logs and traces, and **30 days** for metrics.
+To change this, navigate to the **General** tab on the **Settings** page of SigNoz UI.
+
+For more details, refer to https://signoz.io/docs/userguide/retention-period.
+</Admonition>
+
+
+
+## (Optional) Install OpenTelemetry Demo
+
+<K8sOtelDemo />
+
+
+## (Optional) Add the SCCs for running K8s-Infra (Kubernetes Monitroing)
+
+We require following SCCs to be added the openshift cluster for the installation of K8s-infra for Kubernetes Monitroing
+
+```yaml
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: signoz-k8s-infra-agent-scc
+allowPrivilegedContainer: false
+allowHostPorts: true
+runAsUser:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+volumes:
+  - persistentVolumeClaim
+  - configMap              
+  - projected          
+  - downwardAPI      
+  - hostPath
+  - secret
+readOnlyRootFilesystem: false
+allowHostDirVolumePlugin: true
+# <— bind this SCC only to the k8s-infra-otel-agent in the namespace
+users:
+  - system:serviceaccount:<NAMESPACE>:k8s-infra-otel-agent
+```
+
+## Next Steps
+
+<K8sNextSteps />
+
+---
+
+[1]: https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.2/html/manage_cluster/creating-a-cluster
+[2]: https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration
+[3]: https://docs.redhat.com/en/documentation/red_hat_openshift_container_storage/4.6/html-single/managing_and_allocating_storage_resources/index
+[4]: https://docs.redhat.com/en/documentation/openshift_container_platform/3.11/html/cluster_administration/admin-guide-manage-scc

@@ -179,6 +179,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                label: 'Deploying to Openshift',
+                route: '/docs/install/kubernetes/openshift',
+              },
+              {
+                type: 'doc',
                 label: 'Deploying to Digital Ocean',
                 route: '/docs/install/digital-ocean',
               },
