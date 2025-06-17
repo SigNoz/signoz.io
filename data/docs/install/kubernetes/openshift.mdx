@@ -26,9 +26,7 @@ import Admonition from '@/components/Admonition/Admonition'
 
 OpenShift enforces SecurityContextConstraints (SCCs) to control what actions pods can perform and what resources they can access—similar to how RBAC controls user permissions. SCCs let administrators define the security conditions a pod must meet to be admitted and run in the cluster (see the [official Openshift documentation][4] for more info)
 
-### SCCs for the SigNoz Installation
-
-We need to define the following SCC for supporting the running signoz on OC:
+We need to define the following SCC for running signoz on OpenShift cluster:
 
 ```yaml
 apiVersion: security.openshift.io/v1
@@ -58,15 +56,11 @@ users:
 
 ```
 
-### Apply the SCCs 
-
 Use the Kubectl to add the SCCs to OC cluster
 ```bash
 kubectl apply -f signoz_scc.yaml
 ```
-
-OR 
-
+Or
 Use the `oc` cli 
 ```bash
 oc apply -f signoz_scc.yaml
@@ -151,7 +145,7 @@ For more details, refer to https://signoz.io/docs/userguide/retention-period.
 <K8sOtelDemo />
 
 
-## (Optional) Add the SCCs for running K8s-Infra (Kubernetes Monitroing)
+## (Optional) SCCs for running K8s-Infra (Kubernetes Monitroing)
 
 We require following SCCs to be added the openshift cluster for the installation of K8s-infra for Kubernetes Monitroing
 

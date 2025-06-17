@@ -10,7 +10,8 @@ import {
   SiHelm,
   SiArgo,
   SiLinux,
-  SiAmazonecs
+  SiAmazonecs,
+  SiRedhatopenshift
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -69,6 +70,7 @@ export default function SelfHostInstallationListicle({
   const helmIcon = <SiHelm className="h-7 w-7 text-indigo-500" />
   const argocdIcon = <SiArgo className="h-7 w-7 text-gray-500" />
   const awsEcsIcon = <SiAmazonecs className="h-7 w-7 text-amber-500" />
+  const redhatOpenshiftIcon = <SiRedhatopenshift className='h-7 w-7 text-red-800' />
 
   // Docker: Standalone, Swarm, SELinux
   const renderDocker = () => (
@@ -115,6 +117,8 @@ export default function SelfHostInstallationListicle({
           { name: 'Other Platform', href: '/docs/install/kubernetes/others', icon: helmIcon, clickName: 'Deploy to Other Platform' },
           { name: 'Local', href: '/docs/install/kubernetes/local', icon: k8sIcon, clickName: 'Deploy Locally' },
           { name: 'ArgoCD', href: '/docs/install/argocd', icon: argocdIcon, clickName: 'Deploy with ArgoCD' },
+          { name: 'Openshift', href: '/docs/install/kubernetes/openshift', icon: redhatOpenshiftIcon, clickName: 'Deploy to Openshift' },
+
         ]}
       />
     </div>
