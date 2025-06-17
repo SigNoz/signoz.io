@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import Styles from './styles.module.css'
 import { Modal, ModalContent, ModalBody, useDisclosure, ModalHeader } from '@nextui-org/react'
-import { DeploymentType, DeploymentTypeColors } from '@/utils/strapi'
+import { DeploymentType, DeploymentTypeColors, DeploymentTypeLabels } from '@/utils/strapi'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, Loader2 } from 'lucide-react'
 import { saveChangelogSubscription } from '@/utils/strapi'
@@ -110,7 +110,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
               <span
                 className={`block h-1.5 w-1.5 flex-shrink-0 rounded-full ${DeploymentTypeColors[type]} ${type === DeploymentType.OSS_ONLY ? 'bg-signoz_sienna-500' : ''}`}
               ></span>
-              <span className="uppercase">{type}</span>
+              <span className="uppercase">{DeploymentTypeLabels[type]}</span>
             </button>
           ))}
         </div>
