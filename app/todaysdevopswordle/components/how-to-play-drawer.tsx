@@ -9,7 +9,7 @@ import { GameStatus } from '../types';
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['400', '500'] });
 const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] });
-const HINT = "You personal 3am wake-up call!"
+const HINT = "I keep asking: are you alive and well?"
 
 interface HowToPlayDrawerProps {
   isOpen: boolean;

@@ -95,8 +95,8 @@ export function GameResults({ isWon, score = 0, timeTaken, targetWord, guesses }
 
       <div className="text-center mb-10">
         <p className="text-gray-400 text-[15px] leading-[1.6]">
-          Today's word was '{targetWord}' which in observability is a system-generated notification triggered when predefined conditions such as a metric 
-          threshold breach, anomaly detection, or specific log events—are met, enabling teams to promptly identify issues.
+          Today's word was '{targetWord}' which in K8s is a periodic check that determines if a container is healthy and ready to receive traffic. Probes help the system restart or stop containers that 
+          aren't working as expected, ensuring your app stays resilient.
         </p>
         <a 
           href="https://signoz.io/blog/introducing-anomaly-detection-for-smarter-alerts/" 

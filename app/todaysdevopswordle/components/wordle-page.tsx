@@ -129,7 +129,7 @@ export default function DevopsWordle() {
             <div className="w-full mt-4 sm:mt-4">
               {gameState !== GameStatus.NOT_STARTED && (
                 <WordleGame
-                  targetWord='ALERT'
+                  targetWord='PROBE'
                   elapsedTime={elapsedTime}
                   gameStatus={gameState}
                   onGameWon={handleGameWon}
