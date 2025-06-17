@@ -10,7 +10,6 @@ export const metadata: Metadata = {
     title: 'DevOps Wordle | SigNoz',
     description:
       'This game was created to help you learn the evolving language of observability, DevOps, and monitoring in a playful way. After each game, you will find resources to explore the word.',
-    images: '/img/wordle/devops-wordle-meta.webp',
   },
   description:
     'This game was created to help you learn the evolving language of observability, DevOps, and monitoring in a playful way. After each game, you will find resources to explore the word.',
