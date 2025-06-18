@@ -82,7 +82,7 @@ export function HowToPlayDrawer({
   return (
     <Root open={isOpen} onOpenChange={onClose} dismissible={false}>
       <Portal>
-        <Overlay className="fixed inset-0 z-50 bg-black/80" />
+        <Overlay className="fixed inset-0 z-[3147483646] bg-black/80" />
         <Content
           className={`fixed bottom-0 left-0 right-0 z-[3147483646] flex h-[98%] flex-col rounded-t-[30px] bg-black/80 ${lexend.className}`}
         >
