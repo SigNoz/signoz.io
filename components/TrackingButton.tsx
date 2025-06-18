@@ -17,6 +17,7 @@ interface TrackingButtonProps {
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
   id?: string
+  title?: string
 }
 
 /**
@@ -33,6 +34,7 @@ export default function TrackingButton({
   type = 'button',
   disabled,
   id,
+  title,
   ...rest
 }: TrackingButtonProps) {
   const pathname = usePathname()
@@ -65,6 +67,7 @@ export default function TrackingButton({
       type={type}
       disabled={disabled}
       id={id}
+      title={title}
       {...rest}
     >
       {children}
