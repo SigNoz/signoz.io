@@ -94,9 +94,10 @@ export function GameResults({
         </div>
       </div>
 
-      <div className="x-cta pt-1 text-center">
-        <p className="text-[18px] text-gray-400 ">
-          <TrackingLink
+
+      <div className="x-cta text-center pt-1" > 
+        <p className="text-gray-400 text-[18px] ">
+        <TrackingLink
             href="https://x.com/signozhq"
             target="_blank"
             clickType="external_link"
@@ -105,9 +106,9 @@ export function GameResults({
             clickText="~ A new wordle is released every midnight on X ~"
             className="inline-block text-[#4558c4] hover:text-[#5569d7] hover:underline"
           >
-            ~ A new wordle is released every midnight on X ~
-          </TrackingLink>
-        </p>
+            ~ A new wordle is released daily at 12:00 AM ET on X ~
+          </TrackingLink>        
+          </p>
       </div>
 
       {/* Tapering red line separator */}
