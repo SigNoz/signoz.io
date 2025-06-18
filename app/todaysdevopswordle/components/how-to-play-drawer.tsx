@@ -84,7 +84,7 @@ export function HowToPlayDrawer({
       <Portal>
         <Overlay className="fixed inset-0 z-50 bg-black/80" />
         <Content
-          className={`fixed bottom-0 left-0 right-0 z-50 flex h-[98%] flex-col rounded-t-[30px] bg-black/80 ${lexend.className}`}
+          className={`fixed bottom-0 left-0 right-0 z-[3147483646] flex h-[98%] flex-col rounded-t-[30px] bg-black/80 ${lexend.className}`}
         >
           <div className="absolute inset-0 rounded-t-[30px] bg-gradient-to-br from-[#FF4C4C]/10 via-[#FF4C4C]/10 to-[#FF4C4C]/15" />
           <div className="absolute inset-0 rounded-t-[30px] bg-gradient-to-t from-black/80 via-transparent to-transparent" />
