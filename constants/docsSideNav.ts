@@ -1516,6 +1516,12 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/integrations/aws/one-click-aws-integrations',
+            className: 'new-doc',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
             route: '/docs/integrations/aws/s3-sync',
             className: 'new-doc',
             label: 'S3 Sync',
