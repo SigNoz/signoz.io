@@ -118,12 +118,12 @@ export function GameResults({
 
       <div className="mb-10 text-center">
         <p className="text-[15px] leading-[1.6] text-gray-400">
-          Today's word was '{targetWord}' which in K8s is a periodic check that determines if a
-          container is healthy and ready to receive traffic. Probes help the system restart or stop
-          containers that aren't working as expected, ensuring your app stays resilient.
+          Today's word was '{targetWord}' which marks a node unschedulable and gracefully evicts all pods, 
+          preparing it for maintenance or removal while minimizing downtime. You can use 'kubectl drain' 
+          to drain a node.
         </p>
         <TrackingLink
-          href="https://overcast.blog/6-types-of-kubernetes-probes-you-should-be-using-in-2024-205441e43ac2"
+          href="https://medium.com/@maheshwar.ramkrushna/draining-and-uncordoning-in-kubernetes-managing-pod-eviction-and-node-scheduling-8a37ce15a3ae"
           target="_blank"
           clickType="external_link"
           clickName="blog_post_link"

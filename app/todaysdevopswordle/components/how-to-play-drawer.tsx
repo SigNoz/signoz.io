@@ -10,7 +10,7 @@ import TrackingButton from '../../../components/TrackingButton'
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['400', '500'] })
 const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] })
-const HINT = 'I keep asking: are you alive and well?'
+const HINT = 'A gentle way to empty a node before saying goodbye.'
 
 interface HowToPlayDrawerProps {
   isOpen: boolean
