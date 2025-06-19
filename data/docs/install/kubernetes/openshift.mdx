@@ -34,9 +34,19 @@ This guide walks you through creating the necessary SCC, installing SigNoz with 
 
 ### Step 1: Configure Security Context Constraints (SCC)
 
-OpenShift enforces [Security Context Constraints (SCCs)](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html-single/authentication_and_authorization/index#managing-pod-security-policies) to control what actions pods can perform and what resources they can access, similar to how RBAC controls user permissions. SCCs let administrators define a pod's security conditions for admission and running in the cluster.
+OpenShift enforces [Security Context Constraints (SCCs)](https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html-single/authentication_and_authorization/index#managing-pod-security-policies) to control what actions pods can perform and what resources they can access, similar to how RBAC controls user permissions. 
 
-We need to define the following SCC for running SigNoz on OpenShift cluster:
+SCCs let administrators define a pod's security conditions for admission and running in the cluster. SCCs consists following key settings:
+
+- `RunAsUser`: Specifies the user ID under which SigNoz runs. You must configure this constraint to allow a non-root user ID.
+
+- `SELinuxContext`:  Sets the SELinux label for the containers. Only adjust this if SigNoz must run as root; non-root deployments usually don’t need special SELinux rules.
+
+- `FSGroup`: Specifies the fsGroup IDs for file system access. You must configure this constraint to give SigNoz group access to the files it needs.
+
+- `Volumes`: Specifies the persistent volumes used for storage. You must configure this constraint to give SigNoz access to the volumes it needs.
+
+**To run SigNoz on an OpenShift cluster, create an SCC with these key settings**:
 
 ```yaml
 apiVersion: security.openshift.io/v1
