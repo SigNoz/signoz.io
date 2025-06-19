@@ -179,7 +179,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                label: 'Deploying to Openshift',
+                label: 'Deploying to OpenShift',
                 route: '/docs/install/kubernetes/openshift',
               },
               {
