@@ -7,6 +7,8 @@ import {
   SiDigitalocean,
   SiHelm,
   SiKubernetes,
+  SiRedhatopenshift,
+  SiArgo
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -21,6 +23,8 @@ export default function K8sInstallationListicle() {
   const gcpIcon = <SiGooglecloud className="h-7 w-7 text-blue-400" />
   const doIcon = <SiDigitalocean className="h-7 w-7 text-sky-400" />
   const helmIcon = <SiHelm className="h-7 w-7 text-indigo-500" />
+  const redhatOpenshiftIcon = <SiRedhatopenshift className='h-7 w-7 text-red-800' />
+  const argocdIcon = <SiArgo className="h-7 w-7 text-gray-500" />
 
   // Kubernetes installation cards
   const cards = [
@@ -63,9 +67,15 @@ export default function K8sInstallationListicle() {
     {
       name: 'ArgoCD',
       href: '/docs/install/argocd',
-      icon: <SiHelm className="h-7 w-7 text-gray-500" />, // Using Helm icon for ArgoCD
+      icon: argocdIcon, // Using Helm icon for ArgoCD
       clickName: 'Deploy with ArgoCD',
     },
+    { name: 'Openshift',
+      href: '/docs/install/kubernetes/openshift', 
+      icon: redhatOpenshiftIcon, 
+      clickName: 'Deploy to OpenShift' 
+    },
+
   ]
 
   return (
