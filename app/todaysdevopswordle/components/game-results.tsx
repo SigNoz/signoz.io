@@ -106,7 +106,7 @@ export function GameResults({
             clickText="~ A new wordle is released every midnight on X ~"
             className="inline-block text-[#4558c4] hover:text-[#5569d7] hover:underline"
           >
-            ~ A new wordle is released daily at 12:00 AM ET on X ~
+            ~ A new wordle is released daily on X ~
           </TrackingLink>        
           </p>
       </div>
