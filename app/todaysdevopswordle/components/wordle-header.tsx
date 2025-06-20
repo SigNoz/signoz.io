@@ -12,7 +12,7 @@ const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] });
 enum Difficulty {
   EASY = 'EASY',
   MEDIUM = 'MEDIUM',
-  DIFFICULT = 'DIFFICULT'
+  DIFFICULT = 'HARD'
 }
 
 interface WordleHeaderProps {
@@ -162,7 +162,7 @@ export const WordleHeader: React.FC<WordleHeaderProps> = ({
   currentAttempts,
   maxAttempts,
   hint = "Wear all your observability caps and buckle up!",
-  level = Difficulty.MEDIUM,
+  level = Difficulty.DIFFICULT,
   elapsedTime,
 }) => {
   return (
