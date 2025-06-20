@@ -1055,6 +1055,11 @@ const docsSideNav = [
                 route: '/docs/logs-pipelines/guides/nested-json',
                 label: 'Parse Nested JSON',
               },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/severity-parsing',
+                label: 'Severity Parsing',
+              },
             ],
           },
         ],
