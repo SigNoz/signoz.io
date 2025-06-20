@@ -31,21 +31,20 @@ Here's how the log should look after we apply our pipeline transformations:
 
 ```json
 {
-  "timestamp": "2025-01-25T10:00:00Z",
   "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
   "severity_text": "INFO",
   "severity_number": 9,
-  "attributes": {
-    "parsed_body": {
-      "otel": {
-        "trace_id": "000000000000000018c51935df0b93b9",
-        "span_id": "18c51935df0b93b9",
-        "severity_text": "info",
-        "severity_number": "4"
-      }
-    },
-    "day.sale.count": "1"
-  }
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
 }
 ```
 
@@ -85,19 +84,20 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
 
 ```json
 {
-  "timestamp": "2025-01-25T10:00:00Z",
   "body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"trace_id\":\"000000000000000018c51935df0b93b9\",\"span_id\":\"18c51935df0b93b9\",\"severity_text\":\"info\",\"severity_number\":\"4\"}}",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
   "attributes": {
-    "parsed_body": {
-      "message": "applying telemetry collection strategy for region",
-      "otel": {
-        "trace_id": "000000000000000018c51935df0b93b9",
-        "span_id": "18c51935df0b93b9", 
-        "severity_text": "info",
-        "severity_number": "4"
-      }
-    }
-  }
+    "log.file.name": "app.log",
+    "parsed_body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
 }
 ```
 
@@ -108,24 +108,26 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
 ## Step 2: Move Processor – Extract the Message Field to `body`
 
 Now that `message` is available at `attributes.parsed_body.message`, we can move it to the top-level `body` to clearly indicate that this is the main log message.
+This is an optional step and you can skip it if you want.
 
 ### Before Moving Message
 
 ```json
 {
-  "timestamp": "2025-01-25T10:00:00Z",
-  "body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{...}}",
+  "body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"trace_id\":\"000000000000000018c51935df0b93b9\",\"span_id\":\"18c51935df0b93b9\",\"severity_text\":\"info\",\"severity_number\":\"4\"}}",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
   "attributes": {
-    "parsed_body": {
-      "message": "applying telemetry collection strategy for region",
-      "otel": {
-        "trace_id": "000000000000000018c51935df0b93b9",
-        "span_id": "18c51935df0b93b9",
-        "severity_text": "info", 
-        "severity_number": "4"
-      }
-    }
-  }
+    "log.file.name": "app.log",
+    "parsed_body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
 }
 ```
 
@@ -145,18 +147,20 @@ Now that `message` is available at `attributes.parsed_body.message`, we can move
 
 ```json
 {
-  "timestamp": "2025-01-25T10:00:00Z",
   "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
   "attributes": {
-    "parsed_body": {
-      "otel": {
-        "trace_id": "000000000000000018c51935df0b93b9",
-        "span_id": "18c51935df0b93b9",
-        "severity_text": "info",
-        "severity_number": "4"
-      }
-    }
-  }
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
 }
 ```
 
@@ -172,18 +176,20 @@ Now we'll use the Severity Parser to extract the severity information from the n
 
 ```json
 {
-  "timestamp": "2025-01-25T10:00:00Z",
   "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
   "attributes": {
-    "parsed_body": {
-      "otel": {
-        "trace_id": "000000000000000018c51935df0b93b9",
-        "span_id": "18c51935df0b93b9",
-        "severity_text": "info",
-        "severity_number": "4"
-      }
-    }
-  }
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
 }
 ```
 
@@ -207,21 +213,20 @@ Now we'll use the Severity Parser to extract the severity information from the n
 
 ```json
 {
-  "timestamp": "2025-01-25T10:00:00Z",
   "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
   "severity_text": "INFO",
   "severity_number": 9,
-  "attributes": {
-    "parsed_body": {
-      "otel": {
-        "trace_id": "000000000000000018c51935df0b93b9",
-        "span_id": "18c51935df0b93b9",
-        "severity_text": "info",
-        "severity_number": "4"
-      }
-    },
-    "day.sale.count": "1"
-  }
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
 }
 ```
 
@@ -230,9 +235,30 @@ Now we'll use the Severity Parser to extract the severity information from the n
 - `severity_number` is automatically set to 9 (the OpenTelemetry numeric value for INFO level).
 - The original severity fields remain in the nested structure.
 
-{/* ## Step 4: Move and Clean Up – Organize Final Structure
+## Step 4 (Optional): Move and Clean Up – Organize Final Structure
 
-Finally, let's move the trace information to a cleaner location and remove the temporary parsed_body structure.
+Finally, let's move the trace information to a cleaner location and remove the temporary `parsed_body` structure.
+
+### Before cleanup
+
+```json
+{
+  "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "INFO",
+  "severity_number": 9,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
 
 ### Move Trace Information
 
@@ -240,16 +266,42 @@ Finally, let's move the trace information to a cleaner location and remove the t
 - **Type**: Move
 - **Name**: MoveOtelFields
 - **From**: `attributes.parsed_body.otel`
-- **To**: `attributes.otel` */}
+- **To**: `attributes.otel`
 
+### Remove parsed_body attribute
+
+**Processor Configuration:**
+- **Type**: Remove
+- **Name**: RemoveParsedBody
+- **From**: `attributes.parsed_body`
+
+### After cleanup
+
+```json
+{
+  "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "otel": "{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "INFO",
+  "severity_number": 9,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
 
 ## Final Outcome
 
 After applying these three processors in sequence, your log now has:
 - The main log message clearly displayed in `body`.
 - Properly mapped severity levels at the top level for filtering and alerting.
-- Trace information preserved in `attributes.parsed_body.otel`.
-- All original resource and attribute information maintained.
+- Trace information preserved in `attributes.otel`.
 
 With these steps, you've successfully extracted severity information from nested JSON structures and mapped it to standard OpenTelemetry severity fields, enabling proper log level categorization and filtering in SigNoz.
 
