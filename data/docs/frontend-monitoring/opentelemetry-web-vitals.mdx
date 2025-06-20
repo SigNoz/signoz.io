@@ -10,7 +10,7 @@ This documentation provides a step-by-step guide to setting up web vitals monito
 ## Overview
 Web vitals are essential metrics to measure the user experience on your website. SigNoz allows you to monitor these vitals seamlessly using OpenTelemetry. The key web vitals are:
 - Largest Contentful Paint (LCP)
-- First Input Delay (FID)
+- First Input Delay (FID) / Interaction to Next Paint (INP)
 - Cumulative Layout Shift (CLS)
 - Time to First Byte (TTFB)
 - Total Blocking Time (TBT)
@@ -75,72 +75,147 @@ metrics.setGlobalMeterProvider(myServiceMeterProvider);
 Use the web-vitals library to capture key performance metrics like CLS, FID, LCP, TTFB, and FCP. 
 These metrics are captured through callback functions that you define.
 
-```ts
-import { onCLS, onFCP, onFID, onLCP, onTTFB } from 'web-vitals';
+<Tabs groupId="web-vitals-version">
+  <TabItem value="latest" label="Latest Web Vitals (v5+)" default>
+    ```ts
+    import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
 
-function yourCustomCallback(metric) {
-  // Send the metric to your analytics server or perform any custom logic
-}
+    function yourCustomCallback(metric) {
+      // Send the metric to your analytics server or perform any custom logic
+    }
 
-onCLS(yourCustomCallback);
-onFID(yourCustomCallback);
-onLCP(yourCustomCallback);
-onTTFB(yourCustomCallback);
-onFCP(yourCustomCallback);
+    onCLS(yourCustomCallback);
+    onINP(yourCustomCallback);
+    onLCP(yourCustomCallback);
+    onTTFB(yourCustomCallback);
+    onFCP(yourCustomCallback);
 
-```
+    ```
+
+  </TabItem>
+  <TabItem value="legacy" label="Legacy Web Vitals (< v5)">
+    ```ts
+    import { onCLS, onFCP, onFID, onLCP, onTTFB } from 'web-vitals';
+
+    function yourCustomCallback(metric) {
+      // Send the metric to your analytics server or perform any custom logic
+    }
+
+    onCLS(yourCustomCallback);
+    onFID(yourCustomCallback);
+    onLCP(yourCustomCallback);
+    onTTFB(yourCustomCallback);
+    onFCP(yourCustomCallback);
+
+    ```
+
+  </TabItem>
+</Tabs>
 
 ### Step 5: Export Web Vitals
 Using OpenTelemetry, create Observable Async Gauges to periodically observe and export these metrics. 
 This ensures that the captured web vitals are correctly recorded and sent to SigNoz for monitoring.
 
+<Tabs groupId="web-vitals-export">
+  <TabItem value="latest" label="Latest Web Vitals (v5+)" default>
+  ```ts
+    import { metrics } from '@opentelemetry/api';
+    import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
+
+    const meter = metrics.getMeter('web-vitals');
+    const lcp = meter.createHistogram('lcp');
+    const cls = meter.createObservableGauge('cls');
+    const inp = meter.createHistogram('inp');
+    const ttfb = meter.createHistogram('ttfb');
+    const fcp = meter.createHistogram('fcp');
+
+    function sendToAnalytics(metric) {
+      switch (metric.name) {
+        case 'LCP': {
+          lcp.record(metric.value);
+          break;
+        }
+        case 'CLS': {
+          cls.addCallback((result) => {
+            result.observe(metric.value);
+          });
+          break;
+        }
+        case 'INP': {
+          inp.record(metric.value);
+          break;
+        }
+        case 'TTFB': {
+          ttfb.record(metric.value);
+          break;
+        }
+        case 'FCP': {
+          fcp.record(metric.value);
+          break;
+        }
+        default: {
+          console.log('unexpected metric name');
+        }
+      }
+    }
+
+    onCLS(sendToAnalytics);
+    onINP(sendToAnalytics);
+    onLCP(sendToAnalytics);
+    onTTFB(sendToAnalytics);
+    onFCP(sendToAnalytics);
+```
+</TabItem>
+<TabItem value="legacy" label="Legacy Web Vitals (< v5)">
 ```ts
-import { metrics } from '@opentelemetry/api';
-import { onCLS, onFCP, onFID, onLCP, onTTFB } from 'web-vitals';
+  import { metrics } from '@opentelemetry/api';
+  import { onCLS, onFCP, onFID, onLCP, onTTFB } from 'web-vitals';
 
-const meter = metrics.getMeter('web-vitals');
-const lcp = meter.createHistogram('lcp');
-const cls = meter.createObservableGauge('cls');
-const fid = meter.createHistogram('fid');
-const ttfb = meter.createHistogram('ttfb');
-const fcp = meter.createHistogram('fcp');
+  const meter = metrics.getMeter('web-vitals');
+  const lcp = meter.createHistogram('lcp');
+  const cls = meter.createObservableGauge('cls');
+  const fid = meter.createHistogram('fid');
+  const ttfb = meter.createHistogram('ttfb');
+  const fcp = meter.createHistogram('fcp');
 
-function sendToAnalytics(metric) {
-  switch (metric.name) {
-    case 'LCP': {
-      lcp.record(metric.value);
-      break;
-    }
-    case 'CLS': {
-      cls.addCallback((result) => {
-        result.observe(metric.value);
-      });
-      break;
-    }
-    case 'FID': {
-      fid.record(metric.value);
-      break;
-    }
-    case 'TTFB': {
-      ttfb.record(metric.value);
-      break;
-    }
-    case 'FCP': {
-      fcp.record(metric.value);
-      break;
-    }
-    default: {
-      console.log('unexpected metric name');
+  function sendToAnalytics(metric) {
+    switch (metric.name) {
+      case 'LCP': {
+        lcp.record(metric.value);
+        break;
+      }
+      case 'CLS': {
+        cls.addCallback((result) => {
+          result.observe(metric.value);
+        })
+        break;
+      }
+      case 'FID': {
+        fid.record(metric.value);
+        break;
+      }
+      case 'TTFB': {
+        ttfb.record(metric.value);
+        break;
+      }
+      case 'FCP': {
+        fcp.record(metric.value);
+        break;
+      }
+      default: {
+        console.log('unexpected metric name');
+      }
     }
   }
-}
 
-onCLS(sendToAnalytics);
-onFID(sendToAnalytics);
-onLCP(sendToAnalytics);
-onTTFB(sendToAnalytics);
-onFCP(sendToAnalytics);
-```
+  onCLS(sendToAnalytics);
+  onFID(sendToAnalytics);
+  onLCP(sendToAnalytics);
+  onTTFB(sendToAnalytics);
+  onFCP(sendToAnalytics);
+````
+  </TabItem>
+</Tabs>
 
 This code captures web vitals (LCP, CLS, FID, TTFB, FCP) using the web-vitals library and logs these metrics, 
 setting up observable gauges with OpenTelemetry to record the values for each metric. It defines a callback function, 
