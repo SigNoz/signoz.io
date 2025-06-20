@@ -118,9 +118,8 @@ export function GameResults({
 
       <div className="mb-10 text-center">
         <p className="text-[15px] leading-[1.6] text-gray-400">
-          Today's word was '{targetWord}' which marks a node unschedulable and gracefully evicts all pods, 
-          preparing it for maintenance or removal while minimizing downtime. You can use 'kubectl drain' 
-          to drain a node.
+          Today's word was '{targetWord}' which permits unlimited read/write access to resources within a namespace. This role can create roles 
+          and role bindings within a particular namespace. It does not permit write access to the namespace itself.
         </p>
         <TrackingLink
           href="https://medium.com/@maheshwar.ramkrushna/draining-and-uncordoning-in-kubernetes-managing-pod-eviction-and-node-scheduling-8a37ce15a3ae"
