@@ -12,7 +12,7 @@ const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] });
 enum Difficulty {
   EASY = 'EASY',
   MEDIUM = 'MEDIUM',
-  DIFFICULT = 'DIFFICULT'
+  DIFFICULT = 'HARD'
 }
 
 interface WordleHeaderProps {
