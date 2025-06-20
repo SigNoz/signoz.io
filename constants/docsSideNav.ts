@@ -1352,6 +1352,18 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'PromQl Query',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/write-a-prom-query-with-new-format',
+            label: 'PromQl Query New Format',
+          },
+        ],
+      },
     ],
   },
   {
