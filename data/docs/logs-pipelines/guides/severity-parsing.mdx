@@ -10,21 +10,10 @@ In many logging setups, severity information is embedded within JSON structures 
 
 ## Example Log
 
-Throughout this guide, we'll reference the following example log entry:
+Throughout this guide, we'll reference the following example raw log entry:
 
 ```json
-{
-  "timestamp": "2025-01-25T10:00:00Z",
-  "body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"trace_id\":\"000000000000000018c51935df0b93b9\",\"span_id\":\"18c51935df0b93b9\",\"severity_text\":\"info\",\"severity_number\":\"4\"}}",
-  "resource": {
-    "k8s.component.name": "controller",
-    "k8s.container.name": "controller",
-    "k8s.pod.name": "nginx-ingress-data-controller-ccc549bb9-sb4bp"
-  },
-  "attributes": {
-    "day.sale.count": "1"
-  }
-}
+{"message":"applying telemetry collection strategy for region","otel":{"trace_id":"000000000000000018c51935df0b93b9","span_id":"18c51935df0b93b9","severity_text":"info","severity_number":"4"}}
 ```
 
 - The `body` field contains a JSON string with fields like `message` and `otel.severity_text`.
@@ -56,11 +45,6 @@ Here's how the log should look after we apply our pipeline transformations:
       }
     },
     "day.sale.count": "1"
-  },
-  "resource": {
-    "k8s.component.name": "controller", 
-    "k8s.container.name": "controller",
-    "k8s.pod.name": "nginx-ingress-data-controller-ccc549bb9-sb4bp"
   }
 }
 ```
@@ -82,18 +66,7 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
 ### Before Parsing
 
 ```json
-{
-  "timestamp": "2025-01-25T10:00:00Z",
-  "body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"trace_id\":\"000000000000000018c51935df0b93b9\",\"span_id\":\"18c51935df0b93b9\",\"severity_text\":\"info\",\"severity_number\":\"4\"}}",
-  "resource": {
-    "k8s.component.name": "controller",
-    "k8s.container.name": "controller", 
-    "k8s.pod.name": "nginx-ingress-data-controller-ccc549bb9-sb4bp"
-  },
-  "attributes": {
-    "day.sale.count": "1"
-  }
-}
+{"message":"applying telemetry collection strategy for region","otel":{"trace_id":"000000000000000018c51935df0b93b9","span_id":"18c51935df0b93b9","severity_text":"info","severity_number":"4"}}
 ```
 
 ### Processor Configuration
@@ -102,6 +75,11 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
 - **Name**: ParseBodyJson
 - **Parse From**: `body`
 - **Parse To**: `attributes.parsed_body`
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/logs-pipelines/severity-guide-step1.webp" alt="Converting to Structured Attributes"/>
+<figcaption><i>Converting to Structured Attributes</i></figcaption>
+</figure>
 
 ### After Parsing
 
@@ -118,13 +96,7 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
         "severity_text": "info",
         "severity_number": "4"
       }
-    },
-    "day.sale.count": "1"
-  },
-  "resource": {
-    "k8s.component.name": "controller",
-    "k8s.container.name": "controller",
-    "k8s.pod.name": "nginx-ingress-data-controller-ccc549bb9-sb4bp"
+    }
   }
 }
 ```
@@ -152,8 +124,7 @@ Now that `message` is available at `attributes.parsed_body.message`, we can move
         "severity_text": "info", 
         "severity_number": "4"
       }
-    },
-    "day.sale.count": "1"
+    }
   }
 }
 ```
@@ -164,6 +135,11 @@ Now that `message` is available at `attributes.parsed_body.message`, we can move
 - **Name**: MoveMessageToBody
 - **From**: `attributes.parsed_body.message`
 - **To**: `body`
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/logs-pipelines/severity-guide-step2.webp" alt="Converting to Structured Attributes"/>
+<figcaption><i>Converting to Structured Attributes</i></figcaption>
+</figure>
 
 ### After Moving Message
 
@@ -179,8 +155,7 @@ Now that `message` is available at `attributes.parsed_body.message`, we can move
         "severity_text": "info",
         "severity_number": "4"
       }
-    },
-    "day.sale.count": "1"
+    }
   }
 }
 ```
@@ -207,8 +182,7 @@ Now we'll use the Severity Parser to extract the severity information from the n
         "severity_text": "info",
         "severity_number": "4"
       }
-    },
-    "day.sale.count": "1"
+    }
   }
 }
 ```
@@ -223,6 +197,11 @@ Now we'll use the Severity Parser to extract the severity information from the n
 - **Values for level WARN**: `warn, warning`
 - **Values for level ERROR**: `error, err`
 - **Values for level FATAL**: `fatal, critical`
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/logs-pipelines/severity-guide-step3.webp" alt="Converting to Structured Attributes"/>
+<figcaption><i>Converting to Structured Attributes</i></figcaption>
+</figure>
 
 ### After Parsing Severity
 
@@ -242,11 +221,6 @@ Now we'll use the Severity Parser to extract the severity information from the n
       }
     },
     "day.sale.count": "1"
-  },
-  "resource": {
-    "k8s.component.name": "controller",
-    "k8s.container.name": "controller",
-    "k8s.pod.name": "nginx-ingress-data-controller-ccc549bb9-sb4bp"
   }
 }
 ```
@@ -255,6 +229,19 @@ Now we'll use the Severity Parser to extract the severity information from the n
 - `severity_text` is now set to "INFO" at the top level.
 - `severity_number` is automatically set to 9 (the OpenTelemetry numeric value for INFO level).
 - The original severity fields remain in the nested structure.
+
+{/* ## Step 4: Move and Clean Up – Organize Final Structure
+
+Finally, let's move the trace information to a cleaner location and remove the temporary parsed_body structure.
+
+### Move Trace Information
+
+**Processor Configuration:**
+- **Type**: Move
+- **Name**: MoveOtelFields
+- **From**: `attributes.parsed_body.otel`
+- **To**: `attributes.otel` */}
+
 
 ## Final Outcome
 
@@ -266,65 +253,3 @@ After applying these three processors in sequence, your log now has:
 
 With these steps, you've successfully extracted severity information from nested JSON structures and mapped it to standard OpenTelemetry severity fields, enabling proper log level categorization and filtering in SigNoz.
 
-## Testing Your Pipeline
-
-You can test this pipeline using the following cURL request:
-
-```bash
-curl --location 'http://localhost:4318/v1/logs' \
---header 'Content-Type: application/json' \
---data '{
-    "resourceLogs": [
-        {
-            "resource": {
-                "attributes": [
-                    {
-                        "key": "k8s.component.name",
-                        "value": {
-                            "stringValue": "controller"
-                        }
-                    },
-                    {
-                        "key": "k8s.container.name",
-                        "value": {
-                            "stringValue": "controller"
-                        }
-                    },
-                    {
-                        "key": "k8s.pod.name",
-                        "value": {
-                            "stringValue": "nginx-ingress-data-controller-ccc549bb9-sb4bp"
-                        }
-                    }
-                ]
-            },
-            "scopeLogs": [
-                {
-                    "scope": {
-                        "name": "localtesting"
-                    },
-                    "logRecords": [
-                        {
-                            "timeUnixNano": "0",
-                            "flags": 0,
-                            "body": {
-                                "stringValue": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"trace_id\":\"000000000000000018c51935df0b93b9\",\"span_id\":\"18c51935df0b93b9\",\"severity_text\":\"info\",\"severity_number\":\"4\"}}"
-                            },
-                            "attributes": [
-                                {
-                                    "key": "day.sale.count",
-                                    "value": {
-                                        "stringValue": "1"
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
-}'
-```
-
-After setting up your pipeline and sending this test log, you should see the severity information properly extracted and mapped in your SigNoz logs explorer.
