@@ -103,7 +103,7 @@ export function GameResults({
             clickType="external_link"
             clickName="x_twitter_follow"
             clickLocation="game_results"
-            clickText="~ A new wordle is released every midnight on X ~"
+            clickText="~ A new wordle is released every midnight~"
             className="inline-block text-[#4558c4] hover:text-[#5569d7] hover:underline"
           >
             ~ A new wordle is released daily on X ~
@@ -118,11 +118,11 @@ export function GameResults({
 
       <div className="mb-10 text-center">
         <p className="text-[15px] leading-[1.6] text-gray-400">
-          Today's word was '{targetWord}' which permits unlimited read/write access to resources within a namespace. This role can create roles 
-          and role bindings within a particular namespace. It does not permit write access to the namespace itself.
+          Today's word was '{targetWord}' which is a K8s object that sets hard limits on the resources that can be consumed within a specific namespace. This helps control 
+          the total resource consumption and restricts how much CPU, memory, and other resources a namespace can request or consume.
         </p>
         <TrackingLink
-          href="https://medium.com/@maheshwar.ramkrushna/draining-and-uncordoning-in-kubernetes-managing-pod-eviction-and-node-scheduling-8a37ce15a3ae"
+          href="https://www.perfectscale.io/blog/kubernetes-resource-quotas-limit-ranges"
           target="_blank"
           clickType="external_link"
           clickName="blog_post_link"
