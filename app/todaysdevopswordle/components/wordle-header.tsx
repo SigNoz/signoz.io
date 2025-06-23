@@ -162,7 +162,7 @@ export const WordleHeader: React.FC<WordleHeaderProps> = ({
   currentAttempts,
   maxAttempts,
   hint = "Wear all your observability caps and buckle up!",
-  level = Difficulty.DIFFICULT,
+  level = Difficulty.EASY,
   elapsedTime,
 }) => {
   return (
