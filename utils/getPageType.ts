@@ -81,6 +81,7 @@ export const getPageType = (pathname: string): string => {
   if (normalizedPath === '/support') return 'Support Page'
   if (normalizedPath === '/launch-week') return 'Launch Week Listing Page'
   if (normalizedPath === '/changelog') return 'Change Log Listing Page'
+  if (normalizedPath.startsWith('/changelog/')) return 'Changelog Page'
   if (normalizedPath === '/product-comparison') return 'Product Comparison Listing Page'
   if (normalizedPath.startsWith('/product-comparison/')) {
     if (normalizedPath === '/product-comparison/datadog-savings') return 'DataDog Saving Form Page'
