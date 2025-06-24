@@ -10,7 +10,7 @@ import TrackingButton from '../../../components/TrackingButton'
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['400', '500'] })
 const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] })
-const HINT = "Alters the present without starting from scratch."
+const HINT = 'Alters the present without starting from scratch.'
 
 interface HowToPlayDrawerProps {
   isOpen: boolean
@@ -97,7 +97,7 @@ export function HowToPlayDrawer({
               </h2>
 
               <div className="neon-box-border hint-box-attention relative rounded-lg border border-[#233457] bg-[#1B224B]/30 p-6">
-                <p className="text-center text-base text-gray-400 sm:text-lg">
+                <p className="m-0 text-center text-base text-gray-400 sm:text-lg">
                   Today's hint: {HINT}
                 </p>
                 <div className="absolute -top-8 left-1/2 -translate-x-1/2 transform ">
