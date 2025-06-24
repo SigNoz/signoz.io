@@ -13,15 +13,13 @@ keywords: [nextjs logging, structured logs, opentelemetry nextjs, logs with trac
 
 <ArticleSeriesTop seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-logging" />
 
-## Structured Logging in Next.js with OpenTelemetry
-
 Traces tell you **what** happened and **when**. Logs tell you **why**. When something breaks, logs are often your first clue—and if they’re correlated with traces, they can cut debugging time down from hours to minutes.
 
 In this section, we’ll wire up end-to-end structured logging across both server and browser environments in your Next.js app, complete with trace correlation and SigNoz integration.
 
 ### Why You Need More Than `console.log`
 
-Traditional logging is fine for local development—but production needs more:
+Traditional logging is fine for local development but production needs more:
 
 - Structured, searchable logs
 - Logs tied to specific user actions or trace spans
@@ -35,21 +33,13 @@ With OpenTelemetry + SigNoz, you can:
 - Analyze structured metadata (userId, URL, duration, etc.)
 - Monitor logs from both the client and server
 
-## The Architecture
 
-```
-[Browser] ─▶ [browser-logger.ts] ─▶ /api/logs ─▶ logger.ts ─▶ logs-exporter.ts ─▶ OTEL Collector ─▶ SigNoz
-```
-
----
-
-## 1. Server-Side Logging with Trace Context
+## Server-Side Logging with Trace Context
 
 ### Step 1: Install Required Packages
 
 ```bash
 npm install @opentelemetry/api-logs @opentelemetry/sdk-logs @opentelemetry/exporter-logs-otlp-http pino
-
 ```
 
 **Dependency Breakdown:**
@@ -504,9 +494,8 @@ export const serverLogger = new PinoLogger(pinoLogger);
 
 ```
 
----
 
-## 2. Client-Side Logging with Auto-Export
+## Client-Side Logging with Auto-Export
 
 ### Step 5: Create Browser Logger
 
@@ -847,22 +836,44 @@ export async function POST(request: NextRequest) {
 
 This route receives browser logs and sends them to the collector with trace context.
 
----
 
-## 3. Instrumentation Hook
+## Instrumentation Hook
 
 ### Step 7: Add to `instrumentation.ts`
 
 ```jsx
-// instrumentation.tsexport async function register() {
-  if (process.env.NEXT_RUNTIME === "nodejs") {
-    // Initialize tracing    await import("@vercel/otel");    // Initialize logs export    const { initializeLogsExporter } = await import("./lib/logs-exporter");    initializeLogsExporter();  }
+import { registerOTel } from "@vercel/otel";
+import { initializeLogsExporter } from "./lib/logs-exporter";
+
+export function register() {
+  registerOTel({
+    serviceName: "nextjs-observability-demo",
+    instrumentationConfig: {
+      fetch: {
+        // Propagate context to all external URLs to enable proper tracing
+        propagateContextUrls: [
+          /jsonplaceholder\.typicode\.com/,
+          /httpbin\.org/,
+          /api\.openweathermap\.org/,
+          // Add more external domains as needed
+        ],
+        // Don't ignore any URLs - we want to trace all external calls
+        ignoreUrls: [],
+        // Enable resource naming for better span identification
+        resourceNameTemplate: "{http.method} {http.host}{http.target}",
+      },
+    },
+  });
+
+  // Initialize logs exporter for OpenTelemetry
+  initializeLogsExporter();
 }
+
 ```
 
----
 
-## 4. Logs Demo Page
+
+## Logs Demo Page
 
 ### Step 8: Create `logs-demo/page.tsx`
 
@@ -872,9 +883,9 @@ Create a page that lets you trigger logs from browser and server:
 - Generate and view structured logs
 - Verify export to collector and SigNoz
 
----
 
-## 5. View Logs in SigNoz
+
+## View Logs in SigNoz
 
 ### Step 9: Explore Your Logs
 
@@ -888,5 +899,10 @@ Create a page that lets you trigger logs from browser and server:
 - Correlate with full request trace via `traceId`
     
     <Figure src="/img/blog/2025/06/opentelemetry-nextjs-logging-image%202.webp" alt="" caption="" />The real power of working with logs and traces in SigNoz comes from correlation - click “Inspect in Trace” or the trace ID to jump directly to the corresponding trace when checking a log or “Go to related logs” from any trace details page.
+
+
+## Next: Production Deployment and Scaling
+
+With instrumentation, metrics, and logging in place, you're ready for production. In the next article, we'll cover deploying your instrumented Next.js app, choosing between collector vs direct exporter setups, implementing smart sampling strategies, and setting up production-grade alerting.
 
 <ArticleSeriesBottom seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-logging" />

@@ -13,8 +13,6 @@ keywords: [web vitals, nextjs, frontend monitoring, opentelmetry browser, widget
 
 <ArticleSeriesTop seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-web-vitals" />
 
-## Instrumenting the Browser with Web Vitals
-
 Web vitals are critical to understanding real-world user experience. Metrics like loading time, layout stability, and interactivity directly impact how users perceive your app—and they influence SEO rankings too.
 
 By capturing these metrics with OpenTelemetry and visualizing them in a tool like SigNoz, you get a complete view of frontend performance, tightly correlated with backend traces.
@@ -24,8 +22,8 @@ By capturing these metrics with OpenTelemetry and visualizing them in a tool lik
 | **LCP** | Load time for main content | ≤ 2.5s | 2.5–4.0s | > 4.0s |
 | **INP** | Interaction responsiveness | ≤ 200ms | 200–500ms | > 500ms |
 | **CLS** | Layout shift stability | ≤ 0.1 | 0.1–0.25 | > 0.25 |
-| **FCP** | First visible render | — | — | — |
-| **TTFB** | Time until first byte received | — | — | — |
+| **FCP** | First visible render | ≤ 1.8s | 1.8–3.0s | > 3.0s |
+| **TTFB** | Time until first byte received | ≤ 800ms | 800ms–1.8s | > 1.8s |
 
 Use these metrics to set baselines, identify regressions, and drive performance improvements where they actually matter: in the user’s browser.
 
@@ -97,7 +95,6 @@ export function initializeWebVitals() {
 
 ```
 
----
 
 ### 3. Add WebVitalsProvider
 
@@ -115,7 +112,6 @@ export function WebVitalsProvider({ children }: { children: React.ReactNode }) {
 }
 ```
 
----
 
 ### 4. Use in Your Layout
 
@@ -135,7 +131,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ```
 
----
+
 
 ### 5. Enable CORS for the Collector
 
@@ -152,7 +148,7 @@ receivers:
 
 ```
 
----
+
 
 ### 6. Visualize in SigNoz
 
@@ -161,7 +157,7 @@ receivers:
     
     <Figure src="/img/blog/2025/06/opentelemetry-nextjs-web-vitals-image.webp" alt="" caption="" />- Create a dashboard to track these over time
     
-    <Figure src="/img/blog/2025/06/opentelemetry-nextjs-web-vitals-image%201.webp" alt="" caption="" />---
+    <Figure src="/img/blog/2025/06/opentelemetry-nextjs-web-vitals-image%201.webp" alt="" caption="" />
 
 ### Quick Tips
 
@@ -177,7 +173,7 @@ Third-party widgets—chatbots, analytics, ads, support tools—bring useful fun
 
 You can’t instrument **inside** a third-party `<iframe>` or `<script>`, but you **can** measure its impact on your app.
 
----
+
 
 ### **The Strategy: Wrap and Measure**
 
@@ -211,7 +207,7 @@ export function ThirdPartyWidget() {
 
 This span tracks how long the widget takes to load and reports it to your tracing backend (e.g., SigNoz). Repeat this pattern for other widgets as needed.
 
-### **Why It’s Worth Doing**
+### Why It’s Worth Doing
 
 **Find Slow Widgets**: Know exactly which scripts are hurting UX
 
@@ -222,5 +218,10 @@ This span tracks how long the widget takes to load and reports it to your tracin
 **Improve CWV Scores**: Clean up your LCP/INP by ditching bloated embeds
 
 Third-party performance isn’t a black box anymore. If it runs on your page, you should be tracking it.
+
+
+## Next: Structured Logging with Trace Correlation
+
+While metrics tell you **what** is happening, logs tell you **why**. In the next article, we'll implement structured logging across both server and browser environments—with full trace correlation so you can jump from a performance spike directly to the relevant log entries.
 
 <ArticleSeriesBottom seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-web-vitals" />

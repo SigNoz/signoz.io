@@ -13,7 +13,6 @@ keywords: [nextjs, opentelemetry, production monitoring, collector vs exporter, 
 
 <ArticleSeriesTop seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-production" />
 
-## Deploying the Instrumented NextJS App to Production
 
 Once you’ve instrumented your Next.js app with OpenTelemetry, the next step is getting it into production. Whether you’re shipping via Vercel or running your own infra, the setup has some key differences worth noting.
 
@@ -45,9 +44,8 @@ OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.YOUR-REGION.signoz.cloud:443
 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=your-token
 ```
 
----
 
-### 🛠️ Option 2: Self-Hosting (Docker / K8s)
+### Option 2: Self-Hosting (Docker / K8s)
 
 Prefer full control? Running your app on your own infra with Docker or Kubernetes gives you more power — but also more responsibility.
 
@@ -73,7 +71,6 @@ Prefer full control? Running your app on your own infra with Docker or Kubernete
 | Observability | 🔌 Built-in integrations | 🔧 Fully customizable |
 | Best for | Fast-moving teams, hybrid apps | Teams needing full control or compliance |
 
----
 
 Pick what fits your team’s speed, scale, and infra appetite. Either way, with OpenTelemetry and SigNoz in place, you’re set up to ship and debug confidently in production.
 
@@ -81,7 +78,6 @@ Pick what fits your team’s speed, scale, and infra appetite. Either way, with 
 
 Choosing between an OpenTelemetry **Collector** and a **Direct Exporter** setup is one of the most important architectural decisions you’ll make. It affects how flexible, scalable, and robust your observability pipeline is — especially in production.
 
----
 
 ### Collector Approach (Recommended)
 
@@ -89,7 +85,9 @@ This is the most flexible and production-friendly setup. Instead of sending tele
 
 ### Architecture:
 
-<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-CleanShot_2025-06-20_at_15.17.002x.webp" alt="" caption="" />### Why use a Collector?
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-CleanShot_2025-06-20_at_15.17.002x.webp" alt="" caption="" />
+
+### Why use a Collector?
 
 - **Vendor-agnostic** — Switch observability backends without touching app code
 - **Data processing** — Add batching, filtering, sampling, enrichment
@@ -162,7 +160,7 @@ export function register() {
 
 ```
 
----
+
 
 ### Direct Exporter Approach
 
@@ -170,7 +168,9 @@ With this approach, your app sends telemetry data straight to your observability
 
 ### Architecture
 
-<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-CleanShot_2025-06-20_at_15.18.262x.webp" alt="" caption="" />### Pros:
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-CleanShot_2025-06-20_at_15.18.262x.webp" alt="" caption="" />
+
+### Pros:
 
 - Simpler to set up — fewer moving parts
 - Lower latency — no intermediate hop
@@ -204,7 +204,7 @@ export function register() {
 
 ```
 
----
+
 
 ### TL;DR - Which One to Choose?
 
@@ -217,7 +217,7 @@ export function register() {
 | Multi-backend output |  Easy fan-out | ❌ Not supported |
 | Best for | Prod, large apps | Dev, small projects |
 
----
+
 
 In short: **use a collector** in production if you care about reliability, flexibility, or long-term maintainability. Use direct exporters only for quick setups or demos where speed > control.
 
@@ -286,7 +286,9 @@ curl http://localhost:3000/api/heavy-database-query
 - Notification channels (Slack, email, PagerDuty)
 - Auto-resolve when things calm down
 
-<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-image%202.webp" alt="" caption="" />## Maintaining Alert Hygiene
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-image%202.webp" alt="" caption="" />
+
+## Maintaining Alert Hygiene
 
 Set it and forget it? Nope. Keep alert fatigue away with regular tuning:
 
@@ -309,7 +311,7 @@ Next time something breaks at 2AM, you’ll already know why.
 
 Once you instrument your app with OpenTelemetry, you’ll quickly realize it can generate **a lot** of data. That’s where sampling comes in — it lets you retain visibility without flooding your backend (or your bill).
 
----
+
 
 ### What Sampling Actually Means
 
@@ -481,23 +483,8 @@ OpenTelemetry unlocks powerful observability, but it’s not magic. You need to 
 
 OpenTelemetry does introduce overhead. You’re generating spans, propagating context, exporting data—it all costs CPU, memory, and network.
 
-### 🧪 Real-World Benchmark (20 requests/endpoint)
 
-| Operation | No OTel | With OTel | Impact |
-| --- | --- | --- | --- |
-| SSR Homepage | 45.68ms | 44.43ms |  *-2.7%* |
-| Protected Route | 64.43ms | 63.50ms |  *-1.4%* |
-| External API Route | 218.63ms | 333.63ms | ❌ *+52.6%* |
-| Overall Avg | 109.58ms | 147.19ms | ❌ *+34.3%* |
-| Memory | 711MB | 558MB |  *-21.5%* |
-
-> ✔️ SSR pages? Minimal impact.
-> 
-> 
-> ❌ API routes with external calls? That’s where the cost shows up.
-> 
-
-### 💡 Optimization Strategy
+### Optimization Strategy
 
 - Reduce sampling on high-traffic, low-value routes (e.g., `/api/health`)
 - Batch and buffer span exports
@@ -511,26 +498,12 @@ const shouldSample = (route: string) => {
 }
 ```
 
----
-
 ### 2. Cold Starts (Serverless + Edge)
 
 Cold starts in Vercel functions or edge environments can be amplified by OTel initialization.
 
-### 🧪 Cold Start Comparison (Avg of 5 runs)
 
-| Metric | No OTel | With OTel | Delta |
-| --- | --- | --- | --- |
-| Server startup | 1457ms | 1766ms | ❌ +21% |
-| First request | 3848ms | 4274ms | ❌ +11% |
-
-> 🔍 Real impact depends on baseline.
-> 
-> 
-> In prod, absolute overhead is usually lower than in dev.
-> 
-
-### ⚙️ Mitigation Techniques
+### Mitigation Techniques
 
 ```
 // Lazy init
@@ -551,7 +524,7 @@ process.on('beforeExit', async () => {
 });
 ```
 
----
+
 
 ### 3. Missing Spans
 
@@ -592,9 +565,9 @@ setTimeout(() => {
 
 ```
 
----
 
-### 🧠 Detection Strategy
+
+### Detection Strategy
 
 Add instrumentation coverage checks:
 
@@ -619,9 +592,9 @@ global.fetch = (...args) => {
 
 ```
 
----
 
-## 🏁 Final Thoughts
+
+## Final Thoughts
 
 ### Observability Changes How You Build
 
@@ -641,7 +614,7 @@ This guide wasn’t just about tracing code—it’s about **building smarter sy
 | Wait for user reports | Alerts fire first |
 | React after deploy | Optimize before deploy |
 
----
+
 
 ## Key Takeaways
 
@@ -664,7 +637,7 @@ This guide wasn’t just about tracing code—it’s about **building smarter sy
 - Built for OpenTelemetry-native apps
 - Trace + logs + metrics in one UI
 - Works great for Next.js out of the box
-- Open-source or managed—your call
+- Open-source or managed - your call
 
 **Build better. Debug faster. Sleep deeper.**
 
