@@ -38,7 +38,7 @@ const FeaturedSeries = () => {
 
   return (
     <div className="mb-8">
-      <Link href="/opentelemetry/nextjs">
+      <Link href={nextjsSeries.seriesOverviewHref}>
         <div className="flex cursor-pointer flex-col">
           <div className="mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-all hover:bg-signoz_ink-300 dark:border-signoz_ink-500 dark:bg-signoz_ink-400 dark:hover:bg-signoz_ink-300">
             <div className="content">

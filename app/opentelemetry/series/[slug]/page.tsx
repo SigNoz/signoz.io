@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : `${siteUrl}/img/blog/common/signoz-cover.webp`
 
   return {
-    title: `${seriesData.name} - Complete Tutorial Series | SigNoz`,
+    title: `${seriesData.name} - Complete Tutorial Series`,
     description: seriesData.description,
     keywords: seriesData.keywords?.join(', '),
     alternates: {
