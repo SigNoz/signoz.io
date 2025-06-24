@@ -464,6 +464,11 @@ module.exports = () => {
           destination: '/docs/manage/administrator-guide/configuration/smtp-email-invitations/',
           permanent: true,
         },
+        {
+          source: '/guides/what-is-opentelemetry/',
+          destination: '/blog/what-is-opentelemetry/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {

@@ -1,1478 +1,162 @@
 ---
 
-title: 💰 Why DataDog Pricing is so Complex - See Plans, Estimate Costs, and Optimize 
+title: Datadog Pricing Main Caveats Explained [Updated for 2025]
 slug: datadog-pricing
-date: 2024-11-01
-tags: [Observability]
-authors: [yuvraj]
-description: "Compare Datadog pricing plans, calculate costs, and learn expert optimization strategies. Includes real case studies, pricing calculator, and cost-saving tips for Infrastructure, APM, Logs & more."
-keywords: [datadog pricing, observability costs, monitoring expenses, APM pricing, log management costs]
+date: 2025-06-24
+tags: [Datadog, Pricing, Observability, SigNoz, OpenTelemetry]
+authors: [ankit_anand]
+description: Datadog is a powerful observability platform, but its complex pricing model often leads to surprise bills. Learn about the key pricing caveats, breakdown of core costs, and why SigNoz offers a simpler, more transparent alternative built on OpenTelemetry.
+keywords: [datadog pricing, datadog billing issues, custom metrics cost, datadog logs cost, datadog host pricing, signoz alternative, datadog vs signoz, observability tools, opentelemetry native]
 
 ---
 
-<head>
-  <script
-    type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Datadog Pricing - Understanding, Estimating, and Optimizing",
-  "alternativeHeadline": "Navigate Datadog's pricing structure, estimate costs, and find optimization strategies [Based on Latest DataDog Pricing of 2024]",
-  "author": {
-    "@type": "Person",
-    "name": "Yuvraj"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2024-11-01T00:00:00Z",
-  "dateModified": "2024-11-01T00:00:00Z",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/blog/datadog-pricing/"
-  },
-  "description": "Explore Datadog's pricing structure, plans, and cost optimization strategies. Learn how to navigate pricing tiers and compare alternatives for effective observability solutions.",
-  "keywords": "datadog pricing, observability costs, monitoring expenses, APM pricing, log management costs",
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "Datadog",
-      "description": "A monitoring and analytics platform for IT infrastructure and cloud services"
-    },
-    {
-      "@type": "Thing",
-      "name": "Observability",
-      "description": "The ability to measure a system's current state based on the data it generates"
-    },
-    {
-      "@type": "Thing",
-      "name": "Application Performance Monitoring",
-      "description": "The practice of monitoring software applications to ensure they perform as expected"
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "Datadog",
-      "applicationCategory": "Monitoring Platform"
-    },
-    {
-      "@type": "SoftwareApplication", 
-      "name": "SigNoz",
-      "applicationCategory": "Observability Platform"
-    }
-  ],
-  "mainEntity": {
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Why is Datadog so expensive?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Datadog charges based on several factors like host count, data volume, and user activity, which can quickly add up."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I use Datadog for free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, Datadog offers a free tier, but it is limited in features and data retention. It is primarily designed to give users a taste of the platform's capabilities."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is Datadog worth it?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Datadog can be worth it if you need a comprehensive, easy-to-use observability tool and are willing to pay for the convenience and features. However, for many organizations, the costs can escalate quickly, and alternatives like SigNoz might provide similar functionality at a lower cost."
-        }
-      }
-    ]
-  },
-  "offers": {
-    "@type": "AggregateOffer",
-    "offerCount": 12,
-    "lowPrice": 0.10,
-    "highPrice": 84,
-    "priceCurrency": "USD",
-    "priceValidUntil": "2024-12-31",
-    "offers": [
-      {
-        "@type": "Offer",
-        "name": "Infrastructure Monitoring - Pro",
-        "price": 15,
-        "priceCurrency": "USD",
-        "priceValidUntil": "2024-12-31",
-        "description": "Per host per month (billed annually)",
-        "availability": "https://schema.org/InStock",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Infrastructure Monitoring Pro",
-          "description": "Centralized monitoring of systems, services, and serverless functions"
-        }
-      },
-      {
-        "@type": "Offer",
-        "name": "APM",
-        "price": 31,
-        "priceCurrency": "USD",
-        "priceValidUntil": "2024-12-31",
-        "description": "Per host per month (billed annually)",
-        "availability": "https://schema.org/InStock",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Application Performance Monitoring",
-          "description": "End-to-end distributed traces, service health metrics, and 15-day historical search & analytics"
-        }
-      },
-      {
-        "@type": "Offer",
-        "name": "Log Management",
-        "price": 0.10,
-        "priceCurrency": "USD",
-        "priceValidUntil": "2024-12-31",
-        "description": "Per GB ingested per month (billed annually)",
-        "availability": "https://schema.org/InStock",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Log Management",
-          "description": "Ingest, process, and analyze logs with out-of-the-box parsing for 200+ log sources"
-        }
-      },
-      {
-        "@type": "Offer",
-        "name": "Real User Monitoring",
-        "price": 1.50,
-        "priceCurrency": "USD",
-        "priceValidUntil": "2024-12-31",
-        "description": "Per 1,000 sessions per month (billed annually)",
-        "availability": "https://schema.org/InStock",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Real User Monitoring",
-          "description": "Track user journeys, performance metrics, and session replays"
-        }
-      },
-      {
-        "@type": "Offer",
-        "name": "Database Monitoring",
-        "price": 70,
-        "priceCurrency": "USD",
-        "priceValidUntil": "2024-12-31",
-        "description": "Per database host per month (billed annually)",
-        "availability": "https://schema.org/InStock",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Database Monitoring",
-          "description": "Track normalized query performance trends and correlate with infrastructure metrics"
-        }
-      },
-      {
-        "@type": "Offer",
-        "name": "Synthetic Monitoring",
-        "price": 5,
-        "priceCurrency": "USD",
-        "priceValidUntil": "2024-12-31",
-        "description": "Per 1,000 tests per month (billed annually)",
-        "availability": "https://schema.org/InStock",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Synthetic Monitoring",
-          "description": "API tests, browser tests, and multi-step journeys"
-        }
-      },
-      {
-        "@type": "Offer",
-        "name": "Security Monitoring",
-        "price": 0.20,
-        "priceCurrency": "USD",
-        "priceValidUntil": "2024-12-31",
-        "description": "Per GB per month (billed annually)",
-        "availability": "https://schema.org/InStock",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Security Monitoring",
-          "description": "Threat detection, compliance monitoring, and SIEM functionality"
-        }
-      },
-      {
-        "@type": "Offer",
-        "name": "Cloud Workload Security",
-        "price": 15,
-        "priceCurrency": "USD",
-        "priceValidUntil": "2024-12-31",
-        "description": "Per host per month (billed annually)",
-        "availability": "https://schema.org/InStock",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "Cloud Workload Security",
-          "description": "Stand-alone threat detection across Linux, Windows, Kubernetes, Docker, and AWS Fargate"
-        }
-      }
-    ]
-  }
-}) }}
-  />
-</head>
+Datadog is one of the most popular and widely used observability platforms out there. With a market capitalisation of 40 billion USD, it stands as the leader of companies in the observability domain. The product is great, and it offers a wide array of features. But one common complaint against Datadog is its pricing and billing practices.
 
-Datadog is a popular observability platform, but understanding its pricing structure can be challenging. **Whether you're just starting with Datadog or are receiving hefty bills**, this guide will help you understand its pricing model, estimate your potential costs, and find ways to optimize them.
+<Figure src="/img/blog/2025/06/datadog-pricing-datadog-pricing-reddit-rant-dark.webp" alt="Surprise bills are one of the common complaints againts Datadog (Source: Reddit)" caption="Surprise bills are one of the common complaints againts Datadog (Source: Reddit)" />
 
-You can use the below tool to estimate your Datadog bill.
+In this blog, we will cover these things:
 
-## Estimate Your Datadog Bill
+- Main caveats in Datadog’s pricing
+- A simplified breakdown of Datadog core product pricing
+- Introducing Signoz - a simpler and predictable Datadog alternative
 
-Use our interactive tool to estimate your Datadog bill based on your expected usage:
+If you’re thinking of adopting Datadog as your observability tool, you should definitely be aware of these caveats or pain points in their billing practices.
 
-<DatadogPricingCalculator />
+## Main caveats in Datadog pricing explained
 
-Note that the above calculator assumes the following:
+The core of the confusion with Datadog's pricing lies in its multi-dimensional, usage-based model. You're not just paying for one thing; you're charged across various products, each with its own pricing metric. This can lead to unpredictable bills that are difficult to forecast and control.
 
-- 15 day retention for logs
-- No additional span ingestion
-- No container, custom metric, and custom event usage
-- No on-demand usage
+Here are some of the most common pain points users experience:
 
-To get detailed pricing information for each datadog product, refer to the [Product wise datadog pricing section](#product-wise-pricing-of-datadog).
+### Per-Host Billing Punishes Modern Architectures
 
-**Questions answered in this article:**
+Datadog's pricing for Infrastructure and APM is often tied to the number of hosts you're monitoring. In an era of dynamic, containerized environments and microservices, this model can feel outdated and punitive. We've seen teams resort to using larger, more expensive instances just to minimise their Datadog host count, a clear sign of optimising for the observability tool rather than for their own architecture.
 
-1. How does DataDog pricing work?
-2. What are the different pricing models used by DataDog?
-3. How to optimize DataDog Bills?
-4. Will switching to a more affordable solution impact the features available to you?
-5. Will switching to a more affordable solution impact the performance of your observability setup?
+The price for core services like Infrastructure monitoring starts at \$15 per host/month and APM & continuous profiler starts at \$31 per host/month.
 
+The definition of a "host" is broad (a VM, a Kubernetes node, an Azure App Service Plan, etc.), and you are billed using a **high-water mark** system. Datadog measures your host count every hour, discards the top 1% of hours with the highest usage, and then bills you for the entire month based on the next highest hour. This model protects you from very brief, anomalous spikes but penalizes you for any period of **sustained** high usage.
 
-If you are new, we highly recommend you to first understand the fundamentals of datadog pricing discussed in the next section.
+Let’s understand this with an example,
 
-<div className="mb-8">
-  <h2 className="text-xl font-bold text-white">
-    Datadog Plans and Pricing Summary
-  </h2>
+You run an application on 50 hosts. For a 5-day marketing event, you scale up to 200 hosts to handle the increased load. At the end of the month, Datadog ignores the top 1% of hours (roughly 7 hours of your peak usage) but sees that for the rest of that 5-day period, your host count was consistently 200.
 
-  <div className="grid md:grid-cols-2 gap-6">
-    {[
-      {
-        title: 'Infrastructure Monitoring - Pro',
-        price: '$15/host/month',
-        note: 'Centralized monitoring of systems, services, and serverless functions',
-        link: '#infrastructure-monitoring'
-      },
-      {
-        title: 'APM',
-        price: '$31/host/month',
-        note: 'End-to-end distributed traces, service health metrics, and 15-day historical search & analytics',
-        link: '#apm-application-performance-monitoring'
-      },
-      {
-        title: 'Log Management',
-        price: '$0.10/GB',
-        note: 'Ingest, process, and analyze logs with out-of-the-box parsing for 200+ log sources',
-        link: '#log-monitoring'
-      },
-      {
-        title: 'Real User Monitoring',
-        price: '$1.50/1000 sessions',
-        note: 'User journey tracking, performance metrics, session replays, and error tracking',
-        link: '#real-user-monitoring-rum'
-      },
-      {
-        title: 'Database Monitoring',
-        price: '$70/host/month',
-        note: 'Monitor database performance, queries, and explain plans with 3-month retention',
-        link: '#database-monitoring'
-      },
-      {
-        title: 'Synthetic Monitoring',
-        price: '$5/1000 tests',
-        note: 'API tests, browser tests, and multi-step journeys',
-        link: '#synthetic-monitoring'
-      },
-      {
-        title: 'Security Monitoring',
-        price: '$0.20/GB',
-        note: 'Threat detection, compliance monitoring, and SIEM functionality',
-        link: '#cloud-security-management'
-      },
-      {
-        title: 'Incident Management',
-        price: 'User-based',
-        note: 'Incident tracking and response coordination',
-        link: '#product-wise-pricing-of-datadog'
-      }
-    ].map((plan, index) => (
-      <div key={index} className="p-3 border border-gray-700 rounded-lg bg-gray-850 hover:border-blue-500 transition-all">
-        <h3 className="font-semibold text-sm mb-1 mt-0 text-white truncate">{plan.title}</h3>
-        <p className="text-lg font-bold text-blue-400 mb-1">{plan.price}</p>
-        <p className="text-xs text-gray-400 line-clamp-2 mb-2">{plan.note}</p>
-        <a 
-          href={plan.link} 
-          className="text-xs text-blue-400 hover:text-blue-300 no-underline transition-colors inline-flex items-center"
-        >
-          Learn more <span className="ml-1">→</span>
-        </a>
-      </div>
-    ))}
-  </div>
-</div>
+Your APM bill for that month will be calculated based on the high-water mark of **200 hosts**, not your typical 50.
 
-
-## Who Should Care About Datadog Pricing?
-
-Datadog's pricing can be a critical consideration for many organizations, particularly if:
-
-
-<div className="grid grid-cols-1 md:grid-cols-3 gap-6 rounded-xl py-4 mb-6">
-      <div className="bg-gray-700 rounded-lg py-3 px-4 flex flex-col items-start space-y-2 hover:bg-gray-600 transition-colors duration-300">
-        <span className="text-2xl">💰</span>
-        <p className="text-white text-left">Experiencing unexpected cost spikes and need to understand the root causes.</p>
-      </div>
-      <div className="bg-gray-700 rounded-lg py-3 px-4 flex flex-col items-start space-y-2 hover:bg-gray-600 transition-colors duration-300">
-        <span className="text-2xl">📈</span>
-        <p className="text-white text-left">Planning infrastructure expansion and want to forecast associated expenses accurately.</p>
-      </div>
-      <div className="bg-gray-700 rounded-lg py-3 px-4 flex flex-col items-start space-y-2 hover:bg-gray-600 transition-colors duration-300">
-        <span className="text-2xl">🔬</span>
-        <p className="text-white text-left">Considering Datadog and need to evaluate its cost-effectiveness for your specific use case.</p>
-      </div>
-</div>
-
-Given the variability in pricing depending on usage patterns, many users have shared their frustration on platforms like Reddit and Twitter about unpredictable costs. We at SigNoz understand these concerns, and this guide aims to provide clarity and help you make informed decisions.
-
-
- <div className="flex space-x-4 overflow-x-auto snap-x snap-mandatory scroll-smooth items-center">
-   
-   <div className="flex-shrink-0 w-full md:w-8/12 h-60 snap-start">
-     <iframe
-       id="reddit-embed-1"
-       src="https://www.redditmedia.com/r/devops/comments/zz4naq/datadog_i_do_not_understand_the_pricing_model/?ref_source=embed&amp;ref=share&amp;embed=true&amp;showmedia=false&amp;theme=dark"
-       sandbox="allow-scripts allow-same-origin allow-popups"
-       className="w-full h-full border-none"
-       scrolling="no"
-     ></iframe>
-   </div>
-
-   <div className="flex-shrink-0 w-full md:w-8/12 h-60 snap-start">
-     <iframe
-       id="reddit-embed-2"
-       src="https://www.redditmedia.com/r/devops/comments/zz4naq/datadog_i_do_not_understand_the_pricing_model/j2am1eg/?depth=1&amp;showmore=false&amp;embed=true&amp;showmedia=false&amp;theme=dark"
-       sandbox="allow-scripts allow-same-origin allow-popups"
-       className="w-full h-full border-none"
-       scrolling="no"
-     ></iframe>
-   </div>
-   
-   
-
-   <div className="flex-shrink-0 w-full md:w-8/12 h-60 snap-start">
-     <iframe
-       id="reddit-embed-3"
-       src="https://www.redditmedia.com/r/kubernetes/comments/15b1057/datadog_costs_that_high/?ref_source=embed&amp;ref=share&amp;embed=true&amp;showmedia=false&amp;theme=dark"
-       sandbox="allow-scripts allow-same-origin allow-popups"
-       className="w-full h-full border-none"
-       scrolling="no"
-     ></iframe>
-   </div>
-  
-   
-   <div className="flex-shrink-0 w-full md:w-8/12 h-60 snap-start">
-     <iframe
-       id="reddit-embed-4"
-       src="https://www.redditmedia.com/r/sysadmin/comments/12qa7n4/how_on_earth_do_people_deal_with_datadogs_billing/?ref_source=embed&amp;ref=share&amp;embed=true&amp;showmedia=false&amp;theme=dark"
-       sandbox="allow-scripts allow-same-origin allow-popups"
-       className="w-full h-full border-none"
-       scrolling="no"
-     ></iframe>
-   </div>
- </div>
-
-## Datadog Pricing 101
-
-Datadog pricing involves two main models: **committed use pricing** and **on-demand pricing**. <br />
-Committed use offers lower rates but requires a forecast of your usage in advance, while on-demand pricing is more flexible but generally more expensive.
-
-### Different Pricing Models
-
-Datadog's pricing structure is built around three main models, each tailored to different products and specific monitoring requirements:
-
-<div className="flex flex-col md:flex-row items-center">
-  <div className="w-full md:w-1/2 pr-0 md:pr-4 mb-4 md:mb-0">
-    <p><strong>🖥️ &nbsp;Host-Based Pricing</strong>: Used for products like APM and Infrastructure Monitoring, where you're charged per host monitored.</p>
-
-    <p><strong>📊 &nbsp;Volume-Based Pricing</strong>: Applicable for products like logs and synthetics, where you pay based on the volume of data ingested.</p>
-
-    <p><strong>👥 &nbsp;User-Based Pricing</strong>: Active user pricing is applied to products like Incident Management, where the costs depend on the number of active users.</p>
-  </div>
-  <div className="w-full md:w-1/2">
-    <Figure src="/img/blog/2024/10/datadog-pricing-pricing-models.webp" alt="" caption="" className="w-full" />
-  </div>
-</div>
-
-We will understand each of the models in detail in the later part of the article, let's first understand what makes datadog pricing difficult to understand and predict.
-
-## Why Datadog Pricing Is Difficult to Understand & Predict
-
-Datadog has a huge fleet of products and sub-products, each with its unique pricing model, which makes it challenging to get a clear understanding of the overall cost. Factors like autoscaling and dynamic workloads further complicate cost predictability.
-
-👉 As your business grows and infrastructure scales, your Datadog bill scales as well, often making it hard to forecast costs.
-
-<div className="ml-2">
-Imagine scaling up a new feature only to realize that it drastically increased the volume of metrics collected. A sudden spike from \$200 per month to \$2500 due to unanticipated data ingestion can be a wake-up call to optimize and monitor your observability setup more closely. 
-</div>
-
-👉 Developers may not always be aware of the full cost implications, especially when infrastructure changes, making budgeting difficult.
-
-<div className="ml-2">
-For instance, a developer might enable detailed logging for troubleshooting but forget to disable it after the issue is resolved, leading to an unexpected spike in log volume and causing costs to soar from \$500 to \$5000 per month. 
-</div>
-
-For many developers, cost management isn't just about usage—it's about understanding the broader implications of how and when resources are being used. This can lead to unexpected surprises during billing, particularly when infrastructure changes occur rapidly.
-
-## Understanding Different Datadog Pricing Models
-
-Let's dive deep into each of the pricing models used by Datadog for their various products.
-
-### Host-Based Pricing
-
-**Host-Based Pricing** is used for products like APM and Infrastructure Monitoring. Below, we break down the details of how it works, the challenges it presents, and ways to optimize it effectively:
-
-<div className="md:grid md:grid-cols-[auto,1fr] gap-x-4">
-  <div className="font-bold">Products</div>
-  <div className="mt-4">APM, Infrastructure Monitoring, Container Monitoring, Network Performance Monitoring, Serverless Monitoring, Universal Service Monitoring.</div>
-
-  <div className="font-bold self-start mt-4">How It Works</div>
-  <div className="mt-4">
-    <p>Costs are calculated based on the number of active hosts being monitored at any given time. For example, if you are monitoring 10 hosts, you will be billed for those hosts on an hourly basis throughout the month. If you autoscale during peak periods to 20 hosts, your bill will reflect this higher usage.</p>
-
-    <p className="mt-2"><strong>When You Commit (Hybrid Monthly/Hourly Plan - MHP)</strong>: On a hybrid monthly/hourly plan, Datadog charges a minimum monthly commitment for a set number of hosts. If the number of hosts exceeds this commitment, Datadog charges an additional hourly rate for those extra hosts. This plan can help you save costs if you have predictable host usage with occasional spikes.</p>
-
-    <p className="mt-2"><strong>When You Don't Commit (High Watermark Plan - HWMP)</strong>: On a high watermark plan, the billable count of hosts is calculated at the end of the month using the maximum count (high-water mark) of the lower 99 percent of usage for those hours. Datadog excludes the top 1 percent to reduce the impact of spikes in usage on your bill. This plan can be more flexible but tends to be more expensive if you have frequent and unpredictable spikes in usage.</p>
-  </div>
-
-  <div className="font-bold self-start mt-4">Challenges</div>
-  <div className="mt-4">
-    <p>One of the major challenges with host-based pricing is the unpredictability caused by autoscaling. For instance, if you autoscale to meet a traffic spike, your number of active hosts can increase substantially, resulting in a higher bill. This makes it difficult to stick to a budget when your infrastructure is elastic.</p>
-    <Figure src="/img/blog/2024/10/datadog-pricing-image.webp" alt="" caption="" className="w-full md:w-3/4 mx-auto" />
-  </div>
-
-  <div className="font-bold self-start mt-2">Optimization Tips</div>
-  <div className="mt-2">
-    <p>To mitigate costs, commit to the minimum number of hosts you need under normal operations and use dynamic optimization tools to manage autoscaling efficiently. Another helpful approach is to track and analyze peak usage patterns to better anticipate and plan for cost increases.</p>
-  </div>
-</div>
+- **Your Bill:** **\$6,200** (200 hosts x \$31/month)
+- **Your Expectation (based on average):** Closer to \$2,260
+    
+    You pay for your peak week for the entire month, forcing you to make architectural choices based on monitoring costs, not application needs.
     
 
-### Volume-Based Pricing
+One other issue with Datadog’s host-based pricing model is its **container trap,** as host-based pricing is especially dangerous in a containerised environment. The recommended setup is one Datadog Agent per host (e.g., per Kubernetes node). If you mistakenly configure an agent to run in **every container/pod**, each of those pods will be billed as a separate host. A simple misconfiguration on a 50-node cluster running hundreds of pods could increase your bill by 10x or more.
 
-**Volume-Based Pricing** is used for products such as Logs, Synthetics, APM Ingestion, Database Monitoring, and Observability Pipelines.
+### The 'Custom Metric Tax' on Modern Observability
 
-<div className="md:grid md:grid-cols-[auto,1fr] gap-x-4">
-  <div className="font-bold">Products</div>
-  <div className="mt-4">Logs, Synthetics, APM Ingestion, Database Monitoring, Observability Pipelines</div>
+This is often the most unpredictable and painful part of a Datadog bill. Datadog charges a premium for "custom metrics," which are any metrics not from a standard integration. This includes virtually all metrics you'd create for your own application, and critically, **all metrics sent via the open-source standard OpenTelemetry (OTel)** are billed as custom.
 
-  <div className="font-bold self-start mt-4">How It Works</div>
-  <div className="mt-4">
-    <p>In volume-based pricing, you are billed based on the amount of data ingested, indexed, and stored in Datadog. This model is often used for data-heavy environments where significant volumes of logs and metrics are produced.</p>
+At scale, the cost of custom metrics in Datadog’s billing can [constitute up to 52% of your total billing](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz).
 
-    <p className="mt-2">For example, if your application generates 300 GB of log data, you will incur charges for every gigabyte ingested, indexed, and stored. The more data you process, the higher the cost.</p>
+<Figure src="/img/blog/2025/06/datadog-pricing-datadog-custom-metrics-billing.webp" alt="" caption="" />**Custom metrics billing can constitute a significant portion of your total bill with Datadog ([Learn More](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz))**
 
-    <p className="mt-2"><strong>Commit to Volume</strong>: Datadog offers the ability to commit to a specific data volume to secure a reduced rate. However, if your usage exceeds the committed volume, any additional data will be billed at the on-demand rate, which is generally higher.</p>
-  </div>
+The cost is driven by **cardinality**—the number of unique combinations of a metric name and its tags (`host`, `endpoint`, `customer_id`, etc.). Adding a single tag with many unique values can cause your metric count, and therefore your bill, to explode.
 
-  <div className="font-bold self-start mt-4">Challenges</div>
-  <div className="mt-4">
-    <p>Volume-based pricing can lead to unpredictable costs, especially in dynamic environments where log volumes fluctuate. Enabling verbose logging during incidents, for instance, can significantly increase the data ingested, resulting in higher expenses. Developers may unintentionally drive up costs by adding new logs or increasing synthetic API tests without considering the implications.</p>
-    <Figure src="/img/blog/2024/10/datadog-pricing-image%201.webp" alt="" caption="" className="w-full md:w-3/4 mx-auto" />
-  </div>
-
-  <div className="font-bold self-start mt-2">Optimization Tips</div>
-  <div className="mt-2">
-    <ul>
-      <li><strong>Commit Strategically</strong>: Committing to a predictable data volume can save up to 50% compared to on-demand pricing. If you can reasonably forecast your needs, committing is a smart way to lower costs.</li>
-      <li><strong>Log Filtering and Sampling</strong>: Reduce data volume by filtering out unnecessary logs or using sampling techniques to ingest only the most relevant logs.</li>
-      <li><strong>Quotas and Alerts</strong>: Set quotas on data ingestion and alerts to warn of unusually high log volumes, preventing budget overruns due to unexpected spikes.</li>
-    </ul>
-  </div>
-</div>
-
-### User-Based Pricing
-
-**User-Based Pricing** is used for products like Incident Management.
-
-This is probably the easiest to understand pricing model in DataDog, yet it can increase your bill amount quickly if you work in a large org where a lot of folks need access to the product. Here's how it works in more detail:
-
-<div className="md:grid md:grid-cols-[auto,1fr] gap-x-4">
-  <div className="font-bold">Products</div>
-  <div className="mt-4">Incident Management, CI Pipeline Visibility, Test Visibility</div>
-
-  <div className="font-bold self-start mt-4">How It Works</div>
-  <div className="mt-4">
-    <p>This model charges based on the number of active users interacting with the product. For example, if your team has five active users managing incidents through Datadog, you will be billed according to the number of users who have access to and interact with the system each month.</p>
-  </div>
-
-  <div className="font-bold self-start mt-4">Challenges</div>
-  <div className="mt-4">
-    <p>Costs can quickly rise if more users need access, especially during incidents when cross-functional teams might need to log in simultaneously.</p>
-    <Figure src="/img/blog/2024/10/datadog-pricing-image%202.webp" alt="" caption="" className="w-full md:w-3/4 mx-auto" />
-  </div>
-
-  <div className="font-bold self-start mt-2">Optimization Tips</div>
-  <div className="mt-2">
-    <ul>
-      <li>Limit access to only those who absolutely need it.</li>
-      <li>Consider creating shared accounts for certain roles (with careful management) to avoid incurring high costs.</li>
-      <li>Review user activity regularly and remove inactive users.</li>
-    </ul>
-  </div>
-</div>
-
-## Understanding Datadog Additional Products Pricing
-
-Another important aspect of Datadog pricing is the add-ons that you can use to enhance your observability stack. Let's go through a detailed breakdown of the pricing structure for Datadog's add-on services, helping you evaluate their value and manage associated costs effectively.
-
-### Custom Metrics Pricing
-
-**Custom Metrics Pricing** is used for adding specific metrics unique to your business across multiple Datadog products.
-
-This pricing model can quickly become complex due to the potential for high cardinality in custom metrics. Here's a detailed breakdown:
-
-<div className="md:grid md:grid-cols-[auto,1fr] gap-x-4">
-  <div className="font-bold">Products</div>
-  <div className="mt-4">Infrastructure Monitoring, APM, Logs, and other products that support custom metrics</div>
-
-  <div className="font-bold self-start mt-4">How It Works</div>
-  <div className="mt-4">
-    <p>Custom metrics are billed based on the number of unique metric-series (cardinality) and tags used. Each unique combination of a metric and its associated tags counts as a separate billable entity.</p>
-    <p>For example, if you track response times for different endpoints and add tags like `region` and `environment`, the unique combinations can quickly add up, increasing costs.</p>
-    <details>
-      <summary><strong>🤔 &nbsp; What is a tag?</strong></summary>
-      <p>A tag is a label or metadata that you attach to your metrics, logs, or traces to provide additional context and make them easier to organize, filter, and search.</p>
-      <p>Tags help you understand the source and meaning of your data. For example, if you are collecting metrics from different servers or services, you can use tags to distinguish between them. By tagging your data, you can group or filter it based on meaningful attributes, such as environment, service, or region.</p>
-      <p>Here are some common examples of tags:</p>
-      <ul>
-        <li><strong>Environment</strong>: `env:production`, `env:staging`</li>
-        <li><strong>Service</strong>: `service:web-app`, `service:payment-service`</li>
-        <li><strong>Region</strong>: `region:us-east-1`, `region:eu-west-1`</li>
-        <li><strong>Instance Type</strong>: `instance-type:t2.medium`</li>
-        <li><strong>Custom Tags</strong>: You can also create custom tags like `team:frontend`, `feature:experiment-a`</li>
-      </ul>
-      <p>Tags are very useful because they help you answer questions like:</p>
-      <ul>
-        <li>What is the CPU usage of all servers in the `production` environment?</li>
-        <li>How many requests are hitting a particular `service` in the `us-east-1` region?</li>
-        <li>Are error rates higher on a specific instance type?</li>
-      </ul>
-      <p>However, tags with high cardinality, meaning tags that can have an extremely large number of unique values (e.g., `user_id` or `session_id`), can become problematic. This is because they can lead to a significant increase in the amount of data being stored and processed, leading to higher costs and performance issues.</p>
-    </details>
-  </div>
-
-  <div className="font-bold self-start mt-4">Challenges</div>
-  <div className="mt-4">
-    <p>The main issue is the unpredictable nature of high cardinality. Each unique tag combination adds a new metric series, leading to a rapid increase in costs. This makes it challenging to control expenses, especially in complex environments with extensive monitoring needs.</p>
-    <p>Additionally, distribution/histogram custom metrics are billed at <a href="https://docs.datadoghq.com/account_management/billing/custom_metrics/?tab=histogram" rel="noopener noreferrer nofollow" target="_blank">least 5 times higher</a> than Gauges/Counters, further complicating cost management.</p>
+- **The Price:**
+    - **Pro Plan Allotment:** 100 custom metrics per host.
+    - **Overage Cost:** **\$5.00 per 100 custom metrics/month** (for metrics over your allotment, billed on the monthly average).
+- Billing Impact Example:
     
-    <h3>Play with Custom Metrics</h3>
-    Use this interactive tool to understand the impact of high cardinality on your custom metric costs:
-
-    <CustomMetricPlayground />
-
-  </div>
-
-  <div className="font-bold self-start mt-2">Optimization Tips</div>
-  <div className="mt-2">
-    To control costs, limit the use of high-cardinality tags such as user IDs or session IDs. Instead, focus on aggregating data that is meaningful for long-term trends. Regularly audit and remove unused custom metrics that do not add significant value.
-  </div>
-</div>
-
-### Container Monitoring Pricing
-
-Container Monitoring in Datadog offers comprehensive insights into containerized workloads, enabling teams to proactively manage performance, troubleshoot issues, and ensure optimal resource utilization across dynamic environments.
-
-<div className="md:grid md:grid-cols-[auto,1fr] gap-x-4">
-  <div className="font-bold">Products</div>
-  <div className="mt-4">Kubernetes Monitoring, Docker Monitoring, and other container-based monitoring solutions</div>
-
-  <div className="font-bold self-start mt-4">How It Works</div>
-  <div className="mt-4">
-    <p>Datadog charges based on the number of unique containers monitored. Each container, regardless of its lifespan, contributes to the bill. For instance, if you have 100 containers running across multiple clusters, the billing is based on the total number of monitored containers, irrespective of their lifecycle.</p>
-  </div>
-
-  <div className="font-bold self-start mt-4">Challenges</div>
-  <div className="mt-4">
-    <p>The main challenge lies in the high dynamicity of container environments, especially in Kubernetes. Containers can be rapidly spun up and down based on load, leading to fluctuating costs. Even ephemeral containers that last only seconds incur costs, which can accumulate over time.</p>
-  </div>
-
-  <div className="font-bold self-start mt-2">Optimization Tips</div>
-  <div className="mt-2">
-    To manage costs, monitor only critical containers and set policies to exclude transient or non-essential containers. Using tools like resource quotas and limits can help ensure that container usage remains within a predictable range. Alternatively, consider open-source monitoring tools like Prometheus for less critical workloads, as they can offer more predictable costs.
-  </div>
-</div>
+    You want to monitor API latency with a metric named api.request.latency. You have 10 API endpoints, and you want to track latency by the HTTP status code (e.g., 200, 404, 500) and by the customer tier (free, pro, enterprise).
+    
+    Let's calculate the potential number of unique metrics (timeseries):
+    
+    > 10 endpoints ** 3 status codes ** 3 customer tiers = 90 unique custom metrics
+    > 
+    
+    This is for **just one metric name**. If you add another tag with high cardinality, like `customer_id`, the count can instantly jump into the thousands, triggering significant overage fees.
+    
+- The "Metrics without Limits™" Caveat:
+    
+    To manage this, Datadog offers "Metrics without Limits™," which lets you control which tags are indexed (and thus searchable). While this can lower costs, it introduces its own complexity and a new charge:
+    
+    - **Indexed Metrics:** You are billed the standard overage rate for the metrics you choose to index with specific tags.
+    - **Ingested Metrics:** You also pay a separate, smaller fee (**\$0.10 per 100 metrics**) for **all** the original metric combinations you sent to Datadog before your tags were filtered.
+    
+    Essentially, you are either paying a high price for full visibility or juggling two different charges to reduce it, adding another layer of complexity to your bill.
     
 
-## How to Optimize Datadog Pricing
+### You Pay Twice for Log Management
 
-Now let's discuss some strategies that can significantly reduce your Datadog Pricing without compromising on observability.
+Datadog's log management pricing is a classic "two-part tariff" designed to look inexpensive at first glance but can become costly as you actually use the service. You are billed on two separate axes—first to collect your logs (`Ingest`), and then a second, much higher fee to make them searchable (`Index`).
 
-### #1: Use Committed Pricing
+- **The Price:**
+    - **Ingest:** **\$0.10 per GB** to collect, process, and archive your logs.
+    - **Index:** **\$1.70 per million log events** to make them searchable for 15 days.
+- **The Problem:** This model forces you to pay twice for the same data if you want it to be useful for debugging. You must pay to collect every gigabyte of logs, but to get real-time query and alerting capabilities, you must **also** pay the much higher per-event indexing fee. This creates a strong financial disincentive to log comprehensively.
 
-Analyze your usage and commit to a specific number of hosts or data volume to save up to 50% compared to on-demand rates.
+Imagine your application generates a modest 200 GB of logs in a month, which equates to roughly 100 million log events.
 
-### #2: Use Cost Monitoring Tools
+1. **Ingest Cost:** You are first charged **\$20** (200 GB x \$0.10) just to get the logs into Datadog's system.
+2. **Indexing Cost:** To make these logs searchable for your developers during an incident, you then pay an additional **\$170** (100 million events x \$1.70).
 
-Transition from end-of-month billing surprises to daily cost monitoring. Set alerts for spikes in log volume or host count.
+Your total bill is **\$190**. To cut costs, you might decide to only index 20% of your logs. While this lowers your bill, it means that during an outage, 80% of your potentially critical log data is not immediately searchable, defeating the purpose of a centralized logging platform. You are forced to choose between cost and visibility right when you need visibility the most.
 
-The earlier you catch anomalies and cost spikes, the earlier you can address their root cause, and the more predictable your end of the month payment will be.
+## A Simplified Breakdown of Datadog's Core Product Pricing
 
-Reasons for cost spikes could be:
+To give you a clearer picture, here’s a simplified overview of how Datadog prices its main offerings.
 
-- 🏷️ Unknowingly adding a high cardinality tag to a custom metric.
-- 🚀 Spinning up a testing environment and forgetting it.
-- 🆕 A new feature is released to production that you didn't foresee its usage increase.
+**(Note: Prices are based on publicly available information for annual billing as of June 2025 and may be subject to change. It's always best to consult Datadog's official pricing page for the latest figures.)**
 
-### #3: Reduce Waste and Idle Monitoring
+### A Simplified Breakdown of Datadog's Core Product Pricing
 
-Many engineers, especially newer ones, don't realize observability costs money. They think adding a log or metric is just writing code, which is free.
+| **Product** | **Common Pricing Metric** | **Typical Starting Price (Annual Billing)** | **Key Considerations** |
+| --- | --- | --- | --- |
+| **Infrastructure** | Per host per month | \$15 | Costs increase with container usage; high-water mark billing applies. |
+| **APM & Continuous Profiler** | Per host per month | \$31 | Can become very expensive in distributed or microservices architectures. |
+| **Log Management** | Per GB Ingested & Per Million Events Indexed | \$0.10 / GB (Ingest) + \$1.70 / Million Events (Index) | You pay twice for logs you want to search, making comprehensive logging costly. |
+| **Custom Metrics** | Per 100 metrics per month (beyond allotment) | \$5.00 | A major source of hidden costs, especially for users of OpenTelemetry. |
+| **Real User Monitoring (RUM)** | Per 1,000 sessions per month | \$1.50 | Directly scales with your user traffic, can be expensive for high-traffic sites. |
+| **Synthetic API Tests** | Per 10,000 test runs per month | \$5.00 | Cost depends on the frequency and number of locations you test from. |
+| **Synthetic Browser Tests** | Per 1,000 test runs per month | \$12.00 | More expensive tests that simulate a full user journey in a browser. |
+| **Database Monitoring** | Per database host per month | \$70 | A premium product; costs add up quickly if you have many database instances. |
+| **Cloud Security Management** | Per host per month | \$15 | Adds security monitoring capabilities to your infrastructure observability. |
+| **Application Security Management** | Per service per month | \$33 | Analyzes code-level vulnerabilities within your applications. |
 
-Try to make your team aware that observability has a price tag. Help them understand that every new log or metric they add will impact costs.
+## Why SigNoz is a Simpler, More Predictable Datadog Alternative
 
-- Turn off debug logs in production. Only log what is necessary.
-- Use DataDog's logs as metrics to reduce logs volume.
-- Remove custom metrics that are not used. A good rule is remove any custom metric that is not being used in any dashboard.
-- Make sure that your **Synthetic tests** are actually used and alerted on by at least one **active** Monitor and scheduled at reasonable intervals.
-- Ensure that you only **monitor hosts** you care about **and not all your fleet by default.**
-    
-Consider using cheaper open source tools for "general monitoring", and use the full extent of the Datadog platform for your most valuable hosts and services
-    
+If you're looking for a powerful observability solution without the complex and often surprising pricing, SigNoz is an excellent alternative to Datadog. Here's why:
 
+### OpenTelemetry Native - No vendor lock-in in your code
 
-### #4: Migrate to Alternatives
+SigNoz is built from the ground up to be OpenTelemetry native. This means we fully leverage OTel's semantic conventions, providing deeper, out-of-the-box insights. Unlike Datadog, **we don't charge you extra for "custom metrics" when you're using OpenTelemetry**. This fundamental difference means you can embrace open standards without the fear of a massive bill.
 
-If the cost of Datadog is becoming unsustainable, consider switching to a commercial or open-source alternative. Several options are available, each with its unique strengths:
+We've also recently launched features that double down on our OTel-native approach, including:
 
-- **SigNoz**: SigNoz is an **open-source alternative built on top of OpenTelemetry**, providing cost-effective observability. It offers a full-stack observability platform similar to Datadog, without the high costs associated with proprietary solutions. SigNoz also has a transparent pricing model with no hidden costs, which helps you better predict your monitoring expenses.
-  [![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
+- **[Trace Funnels](https://signoz.io/blog/tracing-funnels-observability-distributed-systems/):** Intelligently sample and analyze traces to focus on what's important.
+- **[External API Monitoring](https://signoz.io/docs/application-monitoring/api-monitoring/):** Gain visibility into the performance of third-party APIs your application depends on.
+- **[Out-of-the-box Messaging Queue Monitoring](https://signoz.io/blog/opentelemetry-powered-kafka-celery-monitoring/):** Effortlessly monitor popular queuing systems.
 
-- **Prometheus + Grafana**: For those who prefer open-source tools and have the infrastructure capability, Prometheus and Grafana are a powerful combination. Prometheus handles metrics collection efficiently, while Grafana offers powerful visualization tools. Although it requires more setup and management, it can significantly reduce costs if self-hosted.
+### Flexible Hosting Options for Every Stage of Growth
 
-- **New Relic**: New Relic is a strong commercial alternative that offers a range of observability tools. While its pricing model is still usage and user based, it provides competitive features and is worth evaluating if you need a fully managed solution with similar functionality to Datadog.
+We believe you shouldn't be locked into a single deployment model. SigNoz offers a range of options to meet your needs as you scale:
 
-- **Dynatrace**: Dynatrace offers advanced observability features, including AI-powered insights. Its pricing can be complex, but it may provide more value for enterprises needing highly automated and intelligent monitoring capabilities.
+- **[SigNoz Cloud](https://signoz.io/docs/cloud/):** A fully-managed, scalable solution for teams that want to focus on their core business without the overhead of managing an observability platform.
+- **[SigNoz Enterprise](https://signoz.io/enterprise/):** For organizations with strict data residency or privacy requirements, we offer a self-hosted enterprise edition (bring-your-own-cloud or on-premise) with dedicated support and advanced security features.
+- **[SigNoz Community](https://signoz.io/docs/install/self-host/):** A self-hosted, open-source version that's perfect for getting started and for teams with the capability to manage their own infrastructure.
 
-You can find a comprehensive list of [DataDog Alternatives here.](https://signoz.io/blog/datadog-alternatives/)
+### Simple, Transparent, Usage-Based Pricing
 
-When comparing these options, keep in mind your organization's specific needs, technical expertise, and budget. SigNoz is especially well-suited for companies that want a straightforward, predictable pricing model and are comfortable with open-source technology.
+Our [pricing model](https://signoz.io/pricing/) is designed to be straightforward and predictable. We primarily charge based on the volume of data you send us. It’s as simple as \$0.3 per GB of ingested logs, \$0.3 per GB of ingested traces, and \$0.1 per mil samples.
 
-For more details on SigNoz's offerings, you can explore:
-- [How SigNoz approaches Application Performance Monitoring](/application-performance-monitoring/)
-- [How SigNoz manages Logs](/log-management/)
-- [Working with Metrics and Dashboards in SigNoz](/metrics-and-dashboards/)
+There are no "weird" pricing levers like per-host charges that force you to alter your architecture. Our goal is a simple, scalable model that grows with you.
 
-## Trade-Offs of Moving Away from Datadog Due to Pricing
+With SigNoz, you get:
 
-### Pricing vs Features
+- **No surprise bills:** Our pricing is easy to understand and forecast.
+- **Cost-effective at scale:** As your data volume grows, our pricing remains competitive.
+- **Freedom to architect your systems as you see fit:** We don't penalize you for using modern, dynamic infrastructure.
 
-**Will switching to a more affordable solution impact the features available to you?**
+## The Bottom Line
 
-Switching to a more affordable solution may impact the features available to you, depending on your observability needs. SigNoz offers most of the core observability features, such as metrics, traces, and logs in a single pane at a significantly lower price compared to Datadog. 
+While Datadog is a feature-rich platform, its complex and often punitive pricing model can be a significant drawback for many teams. Even then Datadog can be suitable for companies looking for a lot of features in one tool starting from APM to cloud siem and digital experience monitoring. But there will be significant pain and loss of valuable engineering bandwidth if you ever want to move out of Datadog due to its unpredictable costs. 
 
-However, it's essential to consider which specific features you use the most. For example, SigNoz provides excellent support for metrics and tracing with OpenTelemetry integration, but some advanced features of Datadog, like network performance monitoring or AI-based anomaly detection, may not be available in the same capacity.
-
-Alternatives like **Prometheus + Grafana** offer comprehensive monitoring and visualization capabilities, but they require more manual setup and maintenance, which can be a trade-off if your team is limited in engineering resources. **New Relic** and **Dynatrace** also provide robust observability tools but can be costly depending on the feature set you require.
-
-### Pricing vs Performance
-
-**Will switching to a more affordable solution impact the performance of your observability setup?**
-
-When considering performance, it's crucial to evaluate if lower-cost alternatives like SigNoz can meet the demands of your specific workloads. SigNoz is designed to handle high-throughput environments and provides real-time metrics and traces, making it suitable for most applications. However, if you need advanced analytics or AI-powered insights, **Dynatrace** or **New Relic** might be more appropriate, albeit at a higher cost.
-
-For many users, performance differences between Datadog and alternatives like SigNoz are negligible, especially for standard observability tasks. 
-
-It's important to match the solution to your performance requirements and consider whether the extra features justify the additional cost, or if a simpler, more affordable tool like SigNoz can meet your needs without the overhead.
-
-## Product-Wise Pricing of Datadog
-
-Now, that we understand the fundamental pricing models used by Datadog, let's dive into the product-wise pricing of Datadog.
-We will discuss the pricing of core Datadog products, the value they provide, and the challenges you might face and of course the better alternatives in each case.
-
-### Log Monitoring
-
-<VerticalTabs tabData={{
-  "Pricing": (
-    <>
-      <p>Volume-based pricing, charged per GB of ingested, indexed, and stored logs.</p>
-      
-      <p><strong>Log Billing Breakdown</strong>:</p>
-      <ul>
-        <li><strong>Ingestion</strong>: Starting at $0.10 per ingested or scanned GB per month (billed annually or $0.10 on-demand). Ingest, process, enrich, live tail, and archive all your logs with out-of-the-box parsing for 200+ log sources.</li>
-        <li><strong>Standard Indexing</strong>: $1.70 per million log events per month (billed annually or $2.55 on-demand). Offers 15-day retention for real-time exploration, alerting, and dashboards with mission-critical logs.</li>
-        <li><strong>Flex Storage</strong>: Starting at $0.05 per million events stored per month (billed annually or $0.075 on-demand). Flexible long-term retention up to 15 months for historical investigations or security, audit, and compliance use cases.</li>
-        <li><strong>Flex Logs Starter</strong>: Starting at $0.60 per million events stored per month (billed annually or $0.90 on-demand). Retention options of 6, 12, or 15 months for long-term log retention without the need to rehydrate.</li>
-        <li><strong>Log Forwarding to Custom Destinations</strong>: Starting at $0.25 per GB outbound per destination per month for centralizing log processing, enrichment, and routing to multiple destinations.</li>
-        <li><strong>Rehydration</strong>:  Logs stored beyond the initial retention period can be rehydrated if needed at $0.10 per compressed GB scanned, plus the indexing cost for the selected retention period.</li>
-      </ul>
-
-      <p><strong>Important Note</strong>: Costs are incurred for logs even if they are not actively used, as long as they are processed, stored, or indexed by Datadog.</p>
-
-      <p><strong>Understanding "Million Events"</strong>: In Datadog's pricing model, "million events" refers to the number of individual log entries or records processed. While ingestion is measured in GB, indexing and storage are often priced per million events. This allows for more granular pricing based on the actual number of log entries, rather than just their raw data size. It's important to consider both the volume (GB) and the number of events when estimating costs.</p>
-    </>
-  ),
-  "Features": (
-    <ul>
-      <li>Real-time log analysis</li>
-      <li>Customizable alerts</li>
-      <li>Centralized logging</li>
-      <li>Out-of-the-box parsing for 200+ log sources</li>
-      <li>Log-based metrics</li>
-      <li>Dynamic routing</li>
-      <li>Flexible retention options</li>
-      <li>PCI and HIPAA compliance support</li>
-      <li>Real-time alerting</li>
-      <li>Unlimited sources</li>
-      <li>Full-text search</li>
-    </ul>
-  ),
-  "Challenges": (
-    <ul>
-      <li>Log volume can increase unexpectedly, leading to unpredictable costs.</li>
-      <li>Retention periods also add to the expense if not managed well.</li>
-      <li>The distinction between GB ingested and million events can be confusing when estimating costs.</li>
-    </ul>
-  ),
-  "Solutions": (
-    <ul>
-      <li>Use log filtering and sampling to reduce the volume of ingested logs.</li>
-      <li>Set retention policies that align with your business requirements.</li>
-      <li>Monitor both GB ingested and number of events to better predict and manage costs.</li>
-    </ul>
-  ),
-  "Alternatives": (
-    <ul>
-      <li><strong>Elastic Stack</strong>: Open-source, flexible, but requires self-management</li>
-      <li><strong>Splunk</strong>: More expensive, but robust for large-scale enterprises</li>
-      <li><strong>SigNoz</strong>: Cost-effective, open-source with better control over pricing</li>
-      <div className="my-2"> </div>
-      <GetStartedSigNoz />
-    </ul>
-  ),
-  "Common Questions": (
-    <>
-      <ol>
-        <li>
-          <strong>Can I reduce log ingestion costs without losing critical data?</strong><br />
-          Yes, through log filtering and log sampling. Filter out unnecessary logs and sample high-volume log sources to reduce ingestion costs while keeping critical logs for analysis.
-        </li>
-        <li>
-          <strong>What happens if my needs change during my annual commitment?</strong><br />
-          You can make adjustments to your plan as your needs evolve. Contact your Datadog sales representative to modify your plan.
-        </li>
-        <li>
-          <strong>How can I estimate the cost of my usage more accurately?</strong><br />
-          Perform a trial period, track log volumes over time, and apply the Datadog pricing model. Datadog provides tools and dashboards to help visualize log volume and estimate monthly costs. Pay attention to both GB ingested and the number of events processed.
-        </li>
-        <li>
-          <strong>What can I do if my logs exceed the committed ingestion volume?</strong><br />
-          You will not lose data or visibility. Datadog bills the additional volume at +50% of the annual price for logs that exceed the commitment.
-        </li>
-        <li>
-          <strong>How do I balance between GB ingested and million events in my cost estimation?</strong><br />
-          Monitor both metrics closely. Some logs may be small in size but high in number, while others might be larger but fewer. Understanding your log patterns will help you optimize for both ingestion (GB) and indexing/storage (million events) costs.
-        </li>
-      </ol>
-    </>
-  )
-}} />
-
-### APM (Application Performance Monitoring)
-
-
-
-<VerticalTabs tabData={{
-  "Pricing": (
-    <ul>
-      <li>Host-based pricing, starting at $31 per host per month (billed annually) or $36 on-demand</li>
-      <li>Various plans available:
-        <ul>
-          <li>APM: $31 per host per month, includes end-to-end distributed traces, service health metrics, and 15-day historical search & analytics.</li>
-          <li>APM Pro: $35 per host per month, includes everything in APM plus Data Streams Monitoring.</li>
-          <li>APM Enterprise: $40 per host per month, includes APM Pro features along with Continuous Profiler for deeper code-level insights</li>
-          <li>APM DevSecOps: $36 per host per month, adds OSS vulnerability detection with Software Composition Analysis (SCA)</li>
-          <li>APM DevSecOps Pro: $40 per host per month, builds on the respective plans with SCA for enhanced security monitoring</li>
-          <li>APM DevSecOps Enterprise: $45 per host per month.</li>
-        </ul>
-      </li>
-      <li>Additional span ingestion: $0.10/GB beyond the included 150GB per APM host</li>
-      <li>Note: A span represents a unit of work or operation within a distributed system. It's a fundamental component of distributed tracing, capturing timing and contextual information about a specific operation. For example, a span might represent a single database query, an HTTP request, or a function call. The 150GB per APM host typically covers millions of spans, but high-volume applications may exceed this, leading to additional costs.</li>
-    </ul>
-  ),
-  "Features": (
-    <ul>
-      <li>Distributed tracing</li>
-      <li>Service maps</li>
-      <li>Code-level visibility</li>
-      <li>Anomaly detection</li>
-      <li>Automatic dependency mapping</li>
-      <li>End-to-end latency metrics</li>
-      <li>CPU and memory profiling</li>
-      <li>OSS vulnerability detection</li>
-    </ul>
-  ),
-  "Challenges": (
-    <ul>
-      <li>High cardinality can increase costs rapidly</li>
-      <li>Autoscaling during high traffic periods can lead to spikes in host count, resulting in higher bills</li>
-    </ul>
-  ),
-  "Solutions": (
-    <ul>
-      <li>Limit high-cardinality metrics by optimizing tags</li>
-      <li>Commit to the minimum host requirement and adjust dynamically to avoid high on-demand rates</li>
-    </ul>
-  ),
-  "Alternatives": (
-    <ul>
-      <li><strong>New Relic</strong>: Similar feature set, competitive for enterprises</li>
-      <li><strong>Dynatrace</strong>: AI-driven insights but more expensive</li>
-      <li><strong>SigNoz</strong>: Predictable pricing with open-source benefits</li>
-      <div className="my-2"> </div>
-      <GetStartedSigNoz />
-    </ul>
-  ),
-  "Common Questions": (
-    <>
-      <ol>
-        <li>
-          <strong>What counts as a billable APM host?</strong><br />
-          A host that is actively generating traces submitted to the Datadog platform.
-        </li>
-        <li>
-          <strong>What kind of billing plan is required?</strong><br />
-          Every APM host requires Pro or Enterprise Infrastructure Monitoring.
-        </li>
-        <li>
-          <strong>Can I switch plans?</strong><br />
-          Yes, existing customers can switch plans.
-        </li>
-        <li>
-          <strong>Is Pro or Enterprise Infrastructure Monitoring required on every APM Host?</strong><br />
-          Yes.
-        </li>
-        <li>
-          <strong>What languages does APM support?</strong><br />
-          Java, Python, Ruby, Go, Node, .NET, and PHP.
-        </li>
-        <li>
-          <strong>Can I run APM with containers?</strong><br />
-          Yes, containerized environments and AWS Fargate are supported.
-        </li>
-        <li>
-          <strong>What is the difference between ingestion and retention?</strong><br />
-          Ingestion allows all traces to be available for live search, while retention stores selected traces for longer analysis.
-        </li>
-        <li>
-          <strong>Can I add custom instrumentation?</strong><br />
-          Yes, custom instrumentation is supported.
-        </li>
-        <li>
-          <strong>Does trace sampling impact RED metrics?</strong><br />
-          No, RED metrics are calculated based on 100% of traffic.
-        </li>
-        <li>
-          <strong>Can I ingest additional spans?</strong><br />
-          Yes. Datadog provides a default allocation of 150GB per APM host for Ingested Spans. However, you have the option to ingest additional traces and spans for a 15-minute live trace search and analytics period at a rate of $0.10/GB. It's worth noting that the 150GB allocation is aggregated across all your APM hosts. For instance, if you have two APM hosts where one ingests 250GB and the other ingests 50GB (totaling 300GB), you won't incur any additional charges for ingestion that month as it falls within the combined allocation.
-        </li>
-      </ol>
-    </>
-  )
-}} />
-
-
-### Infrastructure Monitoring
-
-<VerticalTabs tabData={{
-  "Pricing": (
-    <>
-      <p>Host-based, starting at $15 per host per month (billed annually) or $18 on-demand. Three pricing tiers are available:</p>
-      <ul>
-        <li><strong>Free</strong>: Includes core collection and visualization features for up to 5 hosts, with 1-day metric retention.</li>
-        <li><strong>Pro</strong>: Starting at $15 per host per month. Offers centralized monitoring of systems, services, and serverless functions, including full-resolution data retention for 15 months, alerts, container monitoring, custom metrics, SSO with SAML, and outlier detection.</li>
-        <li><strong>Enterprise</strong>: Starting at $23 per host per month (billed annually). Adds advanced administrative features, automated insights with Watchdog, anomaly detection, forecast monitoring, live processes, and more.</li>
-      </ul>
-      <p><strong>Additional Pricing Details:</strong></p>
-      <ul>
-        <li>Container monitoring: 5-10 free containers per host license. Additional containers at $0.002 per container per hour or $1 per container per month prepaid.</li>
-        <li>Custom metrics: 100 for Pro, 200 for Enterprise per host. Additional at $1 per 100 metrics per month.</li>
-        <li>Custom events: 500 for Pro, 1000 for Enterprise per host. Additional at $2 per 100,000 events (annual) or $3 (on-demand).</li>
-      </ul>
-    </>
-  ),
-  "Features": (
-    <ul>
-      <li>Real-time monitoring of servers, containers, and cloud infrastructure</li>
-      <li>Customizable dashboards</li>
-      <li>Out-of-the-box dashboards for 750+ integrations</li>
-      <li>Alerts</li>
-      <li>Enterprise-grade security</li>
-      <li>Full-resolution data retention</li>
-      <li>Anomaly detection</li>
-      <li>Automated insights</li>
-    </ul>
-  ),
-  "Challenges": (
-    <p>Monitoring ephemeral infrastructure can lead to unpredictable costs as containers and instances spin up and down frequently.</p>
-  ),
-  "Solutions": (
-    <ul>
-      <li>Monitor only critical infrastructure</li>
-      <li>Set dynamic policies for scaling</li>
-      <li>Focus on essential metrics to control costs</li>
-    </ul>
-  ),
-  "Alternatives": (
-    <ul>
-      <li><strong>Prometheus + Grafana</strong>: Requires more manual setup but is cost-effective</li>
-      <li><strong>Zabbix</strong>: Open-source but less advanced features</li>
-    </ul>
-  ),
-  "Common Questions": (
-    <>
-      <ol>
-        <li>
-          <strong>How do you define a host?</strong><br />
-          A host is any physical or virtual OS instance monitored with Datadog, such as a server, VM, node, or App Service Plan instance.
-        </li>
-        <li>
-          <strong>How do I monitor containers?</strong><br />
-          The Datadog Agent runs in a container alongside other containers on a host, collecting metrics from neighboring containers and the host itself. Depending on your plan, you can monitor 5 or 10 containers free for each host license. Additional containers are billed at $0.002 per container per hour. You can also purchase prepaid containers at $1 per container per month.
-        </li>
-        <li>
-          <strong>What is a custom metric?</strong><br />
-          Custom metrics allow you to monitor your own applications and business metrics, such as ad revenue, shopping cart abandonment rates, or in-game economy health. These metrics can be invaluable when combined with infrastructure metrics.
-        </li>
-        <li>
-          <strong>How many custom metrics are allotted per host?</strong><br />
-          Datadog offers 100 custom metrics for Infrastructure Pro and 200 for Infrastructure Enterprise per host.
-        </li>
-        <li>
-          <strong>How do I get charged for additional custom metrics?</strong><br />
-          Additional custom metrics are charged as low as $1 per 100 metrics per month.
-        </li>
-        <li>
-          <strong>How does Datadog count and meter custom metrics?</strong><br />
-          Custom metrics are counted hourly and averaged monthly across your entire account, not on a per-host basis.
-        </li>
-        <li>
-          <strong>What is a custom event?</strong><br />
-          Custom events are user-defined events from custom applications, such as deployment tools or scheduled maintenance jobs. They can be correlated with performance metrics, used for alerting, and enriched with processing pipelines.
-        </li>
-        <li>
-          <strong>How many events are allotted per host?</strong><br />
-          Datadog offers 500 custom events per host for Pro plans and 1000 for Enterprise plans, averaged across your entire account. Beyond this limit, Datadog charges $2 for 100,000 custom events (billed annually or $3 on-demand).
-        </li>
-        <li>
-          <strong>What compliance frameworks does DevSecOps support?</strong><br />
-          DevSecOps Pro and Enterprise support over 15 industry benchmarks, including CIS, PCI DSS, and SOC 2.
-        </li>
-        <li>
-          <strong>Are there other billing options?</strong><br />
-          Annual, monthly, and hourly plans are available, and billing plans can be customized to meet specific needs.
-        </li>
-      </ol>
-    </>
-  )
-}} />
-
-### Database Monitoring
-
-<VerticalTabs tabData={{
-  "Pricing": (
-    <>
-      <p>Starting at $70 per database host per month (billed annually) or $84 on-demand.</p>
-      <ul>
-        <li>Track normalized query performance trends using database-generated metrics.</li>
-        <li>Correlate query performance with database infrastructure metrics.</li>
-        <li>Extract valuable data without compromising database security.</li>
-        <li>Access insights for database hosts, clusters, and applications.</li>
-      </ul>
-    </>
-  ),
-  "Features": (
-    <ul>
-      <li>Query performance analysis</li>
-      <li>Anomaly detection</li>
-      <li>In-depth explain plans</li>
-      <li>Out-of-the-box slow query detection</li>
-      <li>Tag-based query filtering</li>
-      <li>Access to hundreds of relevant database metrics</li>
-      <li>Unlimited user accounts</li>
-      <li>Total visibility into databases (Postgres, MySQL, SQL Server, Oracle)</li>
-    </ul>
-  ),
-  "Challenges": (
-    <p>High database activity can lead to increased monitoring costs.</p>
-  ),
-  "Solutions": (
-    <ul>
-      <li>Optimize queries and monitor only critical databases.</li>
-      <li>Set query thresholds to reduce unnecessary monitoring.</li>
-    </ul>
-  ),
-  "Alternatives": (
-    <ul>
-      <li><strong>Percona Monitoring and Management</strong> (open-source)</li>
-      <li><strong>SolarWinds Database Performance Analyzer</strong> (more feature-rich but costly)</li>
-    </ul>
-  ),
-  "Common Questions": (
-    <>
-      <ol>
-        <li>
-          <strong>How do you define a database host?</strong><br />
-          A database host is any physical or virtual instance hosting your database that you monitor with Datadog.
-        </li>
-        <li>
-          <strong>What databases are supported?</strong><br />
-          Datadog supports Postgres (9.6+), MySQL (5.6+), SQL Server (2012, 2014, 2016, 2017, 2019), and Oracle (11g, 12c, 18c, 19c, 21c).
-        </li>
-        <li>
-          <strong>Can I purchase Database Monitoring (DBM) standalone?</strong><br />
-          No, you need to be an existing Infrastructure Monitoring customer to purchase DBM.
-        </li>
-        <li>
-          <strong>What are (query) explain plans and how are they useful?</strong><br />
-          Explain plans describe the steps used to access data, enabling you to locate hotspots in your queries.
-        </li>
-        <li>
-          <strong>How long is DBM data retained?</strong><br />
-          Query metrics are retained for 3 months, while explain plans and query samples are retained for 15 days.
-        </li>
-        <li>
-          <strong>Does DBM require an additional agent?</strong><br />
-          No, it works with the existing Datadog Agent.
-        </li>
-        <li>
-          <strong>What are normalized queries?</strong><br />
-          Identical queries with different parameters are grouped by obfuscating the parameters, referred to as normalized queries.
-        </li>
-        <li>
-          <strong>Can I exceed the allotment of normalized queries?</strong><br />
-          Yes, Datadog can accommodate additional normalized queries for an extra charge.
-        </li>
-        <li>
-          <strong>Are there other billing options?</strong><br />
-          Annual and monthly plans are available, and plans can be customized to meet specific needs.
-        </li>
-      </ol>
-    </>
-  )
-}} />
-
-### Real User Monitoring (RUM)
-
-<VerticalTabs tabData={{
-  "Pricing": (
-    <>
-      <p>Session-based, charged per 1,000 sessions. Starting at $1.50 per 1,000 sessions per month (billed annually) or $2.20 on-demand.</p>
-      <p><strong>RUM & Session Replay</strong>: Starting at $1.80 per 1,000 sessions per month (billed annually) or $2.60 on-demand. Includes video-like replays of user sessions and heatmaps.</p>
-    </>
-  ),
-  "Features": (
-    <ul>
-      <li>User journey tracking</li>
-      <li>Performance metrics</li>
-      <li>Session replays</li>
-      <li>Funnel analysis</li>
-      <li>Frustration signals</li>
-      <li>Error tracking</li>
-      <li>Automatic and custom tracking of page views and user actions</li>
-      <li>Visual replay of user sessions</li>
-      <li>Heatmaps</li>
-    </ul>
-  ),
-  "Challenges": (
-    <p>Costs can escalate with high user traffic, especially during peak periods.</p>
-  ),
-  "Solutions": (
-    <ul>
-      <li>Use sampling to reduce session volume.</li>
-      <li>Track only important user interactions to optimize usage.</li>
-    </ul>
-  ),
-  "Alternatives": (
-    <ul>
-      <li><strong>Google Analytics</strong> (free but limited in observability)</li>
-      <li><strong>PostHog</strong> (Powerful and affordable solution)</li>
-    </ul>
-  ),
-  "Common Questions": (
-    <>
-      <ol>
-        <li>
-          <strong>How is a session defined?</strong><br />
-          A session is a user journey on your web application. It expires after 15 minutes of inactivity and lasts up to 4 hours.
-        </li>
-        <li>
-          <strong>What data does Datadog's RUM collect?</strong><br />
-          Events across browser and mobile applications, including page views, actions, resources, and long tasks. Custom events can also be instrumented.
-        </li>
-        <li>
-          <strong>How does Session Replay work?</strong><br />
-          It captures changes in the web page code (DOM and DOM-mutations) to recreate a user's experience in real-time in the browser.
-        </li>
-        <li>
-          <strong>What mobile languages are supported for instrumentation?</strong><br />
-          Android (Java, Kotlin), iOS (Swift, Objective-C), React Native, and Flutter.
-        </li>
-        <li>
-          <strong>Can I view logs from my browser or mobile app in RUM?</strong><br />
-          Yes, these logs are automatically tied to the corresponding RUM session.
-        </li>
-        <li>
-          <strong>How can I begin setting up for RUM?</strong><br />
-          Setup steps can be found in Datadog's documentation for Browser, Session Replay, and Mobile RUM.
-        </li>
-      </ol>
-    </>
-  )
-}} />
-
-### Synthetic Monitoring
-
-<VerticalTabs tabData={{
-  "Pricing": (
-    <>
-      <p>Volume-based, charged per synthetic check. Starting at $5 per 10,000 API test runs per month (billed annually) or $7.20 on-demand. Browser testing starts at $12 per 1,000 test runs per month. Mobile App Testing starts at $50 per 100 test runs per month.</p>
-    </>
-  ),
-  "Features": (
-    <ul>
-      <li>Uptime monitoring</li>
-      <li>API checks</li>
-      <li>Browser automation for user scenarios</li>
-      <li>Proactive visibility</li>
-      <li>Mobile app testing on real devices</li>
-      <li>Continuous testing for CI environments</li>
-    </ul>
-  ),
-  "Challenges": (
-    <p>High frequency of synthetic checks can lead to increased costs.</p>
-  ),
-  "Solutions": (
-    <ul>
-      <li>Reduce the frequency of non-critical tests</li>
-      <li>Prioritize key user paths</li>
-    </ul>
-  ),
-  "Alternatives": (
-    <ul>
-      <li><strong>Checkly</strong> (affordable synthetic monitoring)</li>
-      <li><strong>Pingdom</strong> (good for website uptime monitoring)</li>
-    </ul>
-  ),
-  "Common Questions": (
-    <>
-      <ol>
-        <li>
-          <strong>What's the difference between API Tests and Browser Tests?</strong><br />
-          API Tests monitor single endpoints or URLs, whereas Browser Tests monitor web user journeys that may involve several actions and pages. Multistep API tests are available to chain several API requests together.
-        </li>
-        <li>
-          <strong>Are you able to alert on Synthetic monitors?</strong><br />
-          Yes, alerts are built in and triggered automatically when tests fail. Datadog integrates with collaboration tools like Slack, PagerDuty, and ServiceNow.
-        </li>
-        <li>
-          <strong>Can I view endpoint requests end-to-end?</strong><br />
-          Yes, with the APM integration, synthetic tests can be linked to corresponding back-end, code-level insights for minimal mean time to resolution.
-        </li>
-        <li>
-          <strong>Is there any extra charge for using private locations?</strong><br />
-          No, there are no additional costs to set up a private location. All test runs are billed as if run from managed locations.
-        </li>
-        <li>
-          <strong>What counts as a test run?</strong><br />
-          Each hit on your endpoint or full transaction (25 steps) counts as one run. Multistep API tests count each step as an individual run.
-        </li>
-        <li>
-          <strong>Does Mobile App Testing use real devices?</strong><br />
-          Yes, Mobile App Testing uses real devices, providing realistic testing conditions. Tests run sequentially by default but can run in parallel with additional concurrency slots.
-        </li>
-        <li>
-          <strong>What is Continuous Testing?</strong><br />
-          A toolkit that offers integration testing with CI providers like GitHub Actions and Jenkins. Tests can be run in parallel to reduce pipeline durations.
-        </li>
-      </ol>
-    </>
-  )
-}} />
-
-### Cloud Security Management
-
-<VerticalTabs tabData={{
-  "Pricing": (
-    <>
-      <p>Host-based pricing depending on the services monitored. Starting at $10 per host per month for Pro (billed annually or $12 on-demand), or $25 per host per month for Enterprise (billed annually or $30 on-demand).</p>
-      <p><strong>Cloud Workload Security (stand-alone)</strong>: Starting at $15 per host per month (billed annually or $18 on-demand).</p>
-    </>
-  ),
-  "Features": (
-    <>
-      <p><strong>Pro</strong>:</p>
-      <ul>
-        <li>Continuous scanning for misconfigurations</li>
-        <li>Resource inventory</li>
-        <li>Vulnerability management for container images</li>
-        <li>Kubernetes Security Posture Management (KSPM)</li>
-        <li>Workflows to automate remediation</li>
-      </ul>
-      <p><strong>Enterprise</strong>:</p>
-      <ul>
-        <li>Includes everything in Pro, plus:</li>
-        <li>Vulnerability management for hosts</li>
-        <li>Infrastructure entitlement management (CIEM)</li>
-        <li>Real-time threat detection</li>
-        <li>Case management</li>
-        <li>Increased container allotment (20 containers per host)</li>
-      </ul>
-      <p><strong>Cloud Workload Security (CWS)</strong>:</p>
-      <ul>
-        <li>Stand-alone threat detection across Linux, Windows, Kubernetes, Docker, and AWS Fargate ECS/EKS</li>
-        <li>File integrity monitoring</li>
-        <li>Deep file & process activity monitoring</li>
-        <li>Network anomaly detection</li>
-      </ul>
-    </>
-  ),
-  "Challenges": (
-    <p>High monitoring costs for extensive cloud infrastructure.</p>
-  ),
-  "Solutions": (
-    <ul>
-      <li>Monitor only critical services</li>
-      <li>Optimize security policies to reduce unnecessary alerts</li>
-    </ul>
-  ),
-  "Alternatives": (
-    <ul>
-      <li><strong>AWS Security Hub</strong></li>
-      <li><strong>Azure Security Center</strong></li>
-    </ul>
-  ),
-  "Common Questions": (
-    <>
-      <ol>
-        <li>
-          <strong>Who is this for?</strong><br />
-          CSM Pro is built to support multiple teams in discovering their existing cloud infrastructure, identifying issues that require attention, and evaluating their compliance readiness with cloud security posture management, all while providing guidance on how to address those gaps effectively.
-        </li>
-        <li>
-          <strong>Can I purchase CSM Pro for some hosts, and CSM Enterprise for the rest of my hosts?</strong><br />
-          No, you may either purchase CSM Pro or CSM Enterprise for your organization, but not both.
-        </li>
-        <li>
-          <strong>What kind of billing plan do I need to run CSM Pro or Enterprise?</strong><br />
-          Every billable CSM Pro or CSM Enterprise host requires the purchase of Pro or Enterprise Infrastructure Monitoring.
-        </li>
-        <li>
-          <strong>What counts as a billable host?</strong><br />
-          A host is any physical or virtual OS instance that you monitor with Datadog. It could be a server, VM, node (in the case of Kubernetes), or App Service Plan instance (in the case of Azure App Services).
-        </li>
-        <li>
-          <strong>What capabilities are included in CSM Pro?</strong><br />
-          Continuous scanning for misconfigurations, vulnerability management for container images, a full inventory of your cloud resources, case management, and 5 workflow executions per host per license.
-        </li>
-        <li>
-          <strong>What capabilities are included in CSM Enterprise?</strong><br />
-          Includes continuous scanning for misconfigurations, vulnerability management for container images and hosts, real-time threat detection, cloud infrastructure entitlement management, anomalous workload profile detection, a full inventory of your cloud resources, case management, 20 workflow executions per host, and 20 containers included per host license.
-        </li>
-        <li>
-          <strong>Why are CWS and CSM Pro listed on my bill?</strong><br />
-          If you are using CSM Enterprise on demand, your bill will temporarily show the line items CSM Pro and Cloud Workload Security. Those will be transitioned out by the end of the year and replaced by a line item for CSM Enterprise only.
-        </li>
-        <li>
-          <strong>What environments does CWS support?</strong><br />
-          We support most major Linux distributions, Windows Servers, and container runtimes including Docker and Kubernetes to provide unparalleled visibility into your workloads.
-        </li>
-      </ol>
-    </>
-  )
-}} />
-
-| Product | Pricing Model | Key Features | Challenges | Solutions | Alternatives |
-| --- | --- | --- | --- | --- | --- |
-| Log Monitoring 📜 | Volume-based | Real-time log analysis, alerts | High retention costs ⚠️ | Log filtering, retention policies 💡 | Elastic Stack, Splunk, SigNoz |
-| APM 🚀 | Host-based | Distributed tracing, service maps | High cardinality, autoscaling costs ⚠️ | Optimize tags, commit rates 💡 | New Relic, Dynatrace, SigNoz |
-| Infrastructure Monitoring 🏗️ | Host-based | Server/container monitoring | Unpredictable container costs ⚠️ | Monitor critical infra only 💡 | Prometheus, Zabbix |
-| Database Monitoring 📊 | Volume-based | Query performance, anomaly alerts | High activity monitoring costs ⚠️ | Optimize queries, thresholds 💡 | SigNoz, Percona, SolarWinds |
-| Real User Monitoring 👥 | Session-based | User journey tracking | High session costs ⚠️ | Sampling, focus key interactions 💡 | Google Analytics |
-| Synthetic Monitoring 🤖 | Volume-based | API/browser tests | High frequency check costs ⚠️ | Prioritize key tests 💡 | Checkly, Pingdom |
-| Cloud Security Management 🔒 | Host/Volume-based | Threat detection, compliance | High monitoring costs ⚠️ | Monitor critical services only 💡 | AWS Security Hub, Azure Security |
-| Application Security 🛡️ | Service-based | Vulnerability scanning | High costs with microservices ⚠️ | Focus on critical applications 💡 | Snyk, Checkmarx |
-| Cloud SIEM 🛠️ | Volume-based | Log management, threat detection | High ingestion costs ⚠️ | Targeted log collection 💡 | Splunk, Graylog |
-| CI Pipeline Visibility 🔄 | User/Activity-based | Build/test insights | High activity costs ⚠️ | Optimize build frequency 💡 | CircleCI, GitLab CI/CD |
-| Incident Management 🚨 | User-based | Incident tracking, RCA | High user access costs ⚠️ | Restrict incident 💡 | PagerDuty, Opsgenie |
-
-## Datadog Pricing Case Studies
-
-Several organizations have shared their experiences with Datadog's pricing challenges and their efforts to optimize or move away from the platform to reduce costs and improve observability management.
-
-### Case Study #1: Coinbase's $65M Datadog Bill
-
-<div className="md:flex md:items-start">
-  <div className="md:flex-1">
-    <div className="md:float-right md:ml-4 md:mb-4 md:w-1/5">
-      <Figure src="/img/blog/2024/10/datadog-pricing-coinbase-logo.webp" alt="Coinbase Logo" caption="Coinbase Logo (courtesy: Coinbase)" />
-    </div>
-    <p>
-      In 2021, Coinbase faced an enormous $65 million bill from Datadog, largely due to the scaling demands and high observability costs during a boom period for the crypto industry. The high costs prompted Coinbase to evaluate alternatives, leading to the establishment of an in-house observability team. They explored switching from Datadog to a more cost-effective solution using Prometheus, Grafana, and Clickhouse. Despite initial plans to move away from Datadog, Coinbase eventually renegotiated a more favorable deal with Datadog, reducing their future observability expenses significantly while maintaining Datadog's advanced feature set. You can read the full story on the <a href="https://blog.pragmaticengineer.com/datadog-65m-year-customer-mystery/" rel="noopener noreferrer nofollow" target="_blank">Pragmatic Engineer blog</a>.
-    </p>
-  </div>
-</div>
-
-### Case Study #2: Why Bands Went with an Open Source Solution for Their Observability Setup
-
-<div className="md:flex md:items-start">
-  <div className="md:flex-1">
-    <div className="md:float-right md:ml-4 md:mb-4 md:w-1/5">
-      <Figure src="/img/blog/2024/10/datadog-pricing-bands-logo.webp" alt="Bands Logo" caption="Bands Logo (courtesy: Bands)" />
-    </div>
-    <p>
-      Bands, a platform aimed at helping musicians manage their careers, initially used Mixpanel for tracking but found it inadequate for backend observability. As their platform scaled, the need for a robust, cost-effective observability tool became crucial. Shiv, Bands' CTO and an ex-Coinbase engineer, had firsthand experience with the months spent optimizing data sent to Datadog at Coinbase, which he saw as a waste of precious engineering bandwidth.
-    </p>
-    
-    <div className="w-full mb-4">
-      <iframe 
-        width="100%" 
-        height="315" 
-        src="https://www.youtube.com/embed/lwRSrDo6N48?si=9uatweQrBVDgGC2v" 
-        title="YouTube video player" 
-        frameBorder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        referrerPolicy="strict-origin-when-cross-origin" 
-        allowFullScreen
-      />
-    </div>
-    
-    <p>
-      After evaluating various options, Bands chose SigNoz for its predictable billing and comprehensive features. SigNoz's ability to monitor over 50 third-party integrations efficiently, combined with its seamless support and ease of integration, made it the ideal choice for Bands. You can read the full case study <a href="https://signoz.io/case-study/bands/" target="_blank">here</a>.
-    </p>
-  </div>
-</div>
-
-## Is Datadog Right for My Organization?
-
-Datadog can be a powerful tool for observability, but it's important to understand whether it aligns with your organization's stage and needs. Here's a breakdown to help you decide:
-
-### Small Startups
-
-Datadog's free tier could be a good starting point if you're just getting off the ground. It provides essential features to help you get visibility into your infrastructure without an initial financial commitment. However, as your infrastructure and traffic grow, you may find that costs escalate quickly, making it challenging to maintain cost efficiency. For small-scale usage, Datadog's ease of setup and feature set can be ideal, but careful monitoring of your usage is crucial. Alternatively, using open-source solutions like [SigNoz](https://signoz.io/), which integrates seamlessly with <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a>, can be more future proof and can provide more predictable costs and flexibility.
-
-### Medium-Sized Businesses
-
-If your organization is scaling, Datadog's committed pricing can help you manage costs, but scaling brings complexity. The costs tied to increasing host counts, log volume, and additional features like custom metrics can quickly get out of control. You need to be strategic about which metrics to track and which hosts to monitor, as overuse can result in unexpectedly high bills. This stage is where many businesses struggle with the unpredictability of Datadog's pricing. Open-source solutions like SigNoz, with its predictable pricing and powerful observability features, can be a good alternative to maintain control over costs.
-
-### Enterprise-Level Organizations
-
-For larger enterprises, Datadog offers custom pricing tiers and volume discounts, which can be attractive. However, enterprise-level needs often require advanced features such as AI-based anomaly detection, network performance monitoring, and multi-cloud observability, which can drive up costs even with discounts. At this scale, it's worth evaluating whether the features provided by Datadog justify the cost compared to building an in-house observability solution or considering alternatives like open-source platforms. SigNoz, in combination with OpenTelemetry, offers an enterprise-grade observability stack with transparent costs, making it a viable option for large-scale operations.
-
-### General Guidance
-
-- **If You're Just Starting Out**: Datadog might be a good option for its ease of use and feature-rich platform. The initial free tier is helpful for startups to get off the ground without immediate costs. SigNoz can also be considered for its open-source benefits and cost transparency.
-- **As You Scale**: Costs can become unpredictable and harder to manage. Consider ways to optimize, such as using committed pricing, reducing the number of tracked metrics, or focusing on core functionalities. Alternatively, evaluate open-source options like SigNoz to help keep costs under control.
-- **When Complexity Grows**: At larger scales, it may be worth exploring alternatives, whether it's negotiating custom contracts with Datadog, using more targeted monitoring solutions, or switching to open-source platforms like Prometheus, Grafana, and SigNoz for better cost control and customization.
-
-## FAQs
-
-<FAQAccordion
-  faqs={[
-    {
-      question: "Why is Datadog so expensive?",
-      answer: "Datadog charges based on several factors like host count, data volume, and user activity, which can quickly add up."
-    },
-    {
-      question: "Can I use Datadog for free?",
-      answer: "Yes, Datadog offers a free tier, but it is limited in features and data retention. It is primarily designed to give users a taste of the platform's capabilities."
-    },
-    {
-      question: "Is Datadog worth it?",
-      answer: "Datadog can be worth it if you need a comprehensive, easy-to-use observability tool and are willing to pay for the convenience and features. However, for many organizations, the costs can escalate quickly, and alternatives like SigNoz might provide similar functionality at a lower cost."
-    },
-    {
-      question: "What is the weakness of Datadog?",
-      answer: "One of the primary weaknesses of Datadog is its complex and often unpredictable pricing, which can make cost management challenging, especially for scaling organizations. Additionally, the dependency on multiple agents for different services can add operational overhead."
-    },
-    {
-      question: "Who is the competitor of Datadog?",
-      answer: "Competitors of Datadog include SigNoz, New Relic, Splunk, Dynatrace, and Prometheus + Grafana. Each of these platforms has its strengths and weaknesses, depending on your specific observability needs."
-    },
-    {
-      question: "Is New Relic cheaper than Datadog?",
-      answer: "In many cases, New Relic's pricing can be more competitive than Datadog, especially if you leverage volume discounts or commit to a certain usage level. However, the exact cost depends on the features you need and your usage pattern."
-    },
-    {
-      question: "Which is better, Splunk or Datadog?",
-      answer: "Splunk is known for its powerful log management and analytics capabilities, while Datadog is strong in monitoring and APM. Which is better depends on your use case—if you need extensive log analysis, Splunk may be better. If you need end-to-end observability, Datadog could be more suitable."
-    },
-    {
-      question: "Is Datadog better than Grafana?",
-      answer: "Datadog is a more comprehensive observability platform with built-in integrations and analytics, while Grafana is primarily a visualization tool that works well with data sources like Prometheus. Datadog is better if you want an all-in-one solution, whereas Grafana provides more customization and cost control when used with open-source components."
-    },
-    {
-      question: "Is Datadog free for personal use?",
-      answer: "Datadog's free tier can be used for personal projects, but it is limited in features and data retention. It is primarily designed to give users a taste of the platform's capabilities."
-    },
-    {
-      question: "Why is Datadog better than Prometheus?",
-      answer: "Datadog offers a more complete, out-of-the-box observability experience, including APM, logs, and infrastructure monitoring, without the need for extensive setup. Prometheus is a powerful open-source solution but requires significant configuration and maintenance, which Datadog manages for you."
-    },
-    {
-      question: "Can I use Datadog without an agent?",
-      answer: "While Datadog relies heavily on agents for collecting metrics, logs, and traces, you can use its API to push custom metrics without an agent. However, this may limit the data you can collect and monitor compared to using the full-featured agents."
-    },
-    {
-      question: "What is Datadog best for?",
-      answer: "Datadog is best for comprehensive observability across cloud infrastructure, application performance monitoring, and real-time log analytics. It excels in environments that require unified monitoring and have the budget for its premium features."
-    },
-    {
-      question: "Is Datadog SaaS only?",
-      answer: "Yes, Datadog is offered as a SaaS solution. This means you do not need to manage the underlying infrastructure, but it also means you rely on Datadog's pricing and availability."
-    },
-    {
-      question: "How do I save money on Datadog?",
-      answer: "To save money on Datadog, consider committed use pricing, reduce log ingestion, manage custom metrics effectively, and limit monitoring to essential hosts and services. Evaluating open-source alternatives like SigNoz can also help manage costs more predictably."
-    },
-    {
-      question: "Are Grafana and Datadog the same?",
-      answer: "No, Grafana and Datadog are not the same. Grafana is an open-source visualization and analytics platform that works with various data sources like Prometheus. Datadog is a comprehensive observability platform that includes metrics, traces, and logs. Grafana is more flexible for visualization, while Datadog is an all-in-one observability tool."
-    }
-  ]}
-/>
-
-## Final Thoughts
-
-Datadog's pricing is scalable and flexible, but it can become costly without proper management. Regular audits, usage monitoring, and a clear understanding of its pricing models can help keep your costs in check. If you're looking for a more cost-effective solution, consider exploring open-source alternatives like SigNoz.
-
-## Key Takeaways
-
-- **Understand Your Needs**: Before choosing Datadog, assess whether its features align with your organization's stage and observability needs.
-- **Monitor Costs Actively**: Regular audits and cost monitoring can help prevent unexpected billing surprises.
-- **Optimize Usage**: Committed pricing, cost control tools, and optimization techniques can help manage Datadog's expenses.
-- **Consider Alternatives**: Open-source options like SigNoz offer similar features with more predictable and lower costs.
-
-### Ready to Make a Change?
-
-Explore how [SigNoz](https://signoz.io/) can help you save on observability costs while providing similar features. 
-
-<DatadogVsSigNoz />
+If you're tired of unpredictable bills and want an observability solution that embraces open standards and offers transparent pricing, you can consider SigNoz.
