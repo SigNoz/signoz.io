@@ -50,11 +50,17 @@ export function GameResults({
 
   function generateShareText() {
     const formattedTime = `${Math.floor(timeTaken / 60)}:${String(timeTaken % 60).padStart(2, '0')}`
-    if (guesses.length === 0) {
-      return `Hey there, I just played today's DevOps Wordle by SigNoz and got a score of ${score}. Can you beat me 😉? Try it out at https://signoz.io/todaysdevopswordle.`
+
+    if (isWon) {
+      if (guesses.length === 0) {
+        return `🎉 Just crushed today's DevOps Wordle by SigNoz and scored ${score} points! Can you beat me? Try it out at https://signoz.io/todaysdevopswordle.`
+      } else {
+        const emojiMatrix = generateEmojiMatrix()
+        return `🎉 Just crushed today's DevOps Wordle by SigNoz! Scored ${score} points in ${formattedTime}. Can you beat me? Here's my game: \n\n${emojiMatrix}\n\nTry it out at https://signoz.io/todaysdevopswordle.`
+      }
     } else {
-      const emojiMatrix = generateEmojiMatrix()
-      return `Hey there, I just played today's DevOps Wordle by SigNoz and got a score of ${score} in ${formattedTime} minutes. Can you beat me 😉? Here's my game: \n\n${emojiMatrix}\n\nTry it out at https://signoz.io/todaysdevopswordle.`
+      // Lost state - focus on challenge
+      return `🤔 Today's DevOps Wordle stumped me! The word was '${targetWord}' - think you can solve it? Challenge yourself at https://signoz.io/todaysdevopswordle and see if you're smarter than me! 😉`
     }
   }
 
@@ -95,13 +101,17 @@ export function GameResults({
         </div>
 
         {/* Primary Copy CTA */}
-        <div className="space-y-3">
-          <p className="text-base font-medium text-gray-300">Share your score with friends!</p>
+        <div className="flex flex-col items-center space-y-3">
+          <p className="text-base font-medium text-gray-300">
+            {isWon
+              ? 'Share your victory with friends!'
+              : `Think your friends can solve '${targetWord}'? Challenge them!`}
+          </p>
           <TrackingButton
             clickType="share"
             clickName="copy_share_primary"
             clickLocation="game_results"
-            clickText={isCopied ? 'Copied!' : 'Copy Score & Results'}
+            clickText={isCopied ? 'Copied!' : isWon ? 'Copy Score & Results' : 'Challenge Friends'}
             className={`w-full max-w-[280px] rounded-lg px-6 py-3 text-base font-medium transition-all duration-300 ${
               isCopied
                 ? 'border-green-500 bg-green-600 text-white'
@@ -125,7 +135,7 @@ export function GameResults({
             ) : (
               <>
                 <FaCopy className="h-4 w-4" />
-                Copy Score & Results
+                {isWon ? 'Copy Score & Results' : 'Challenge Friends'}
               </>
             )}
           </TrackingButton>
@@ -134,7 +144,9 @@ export function GameResults({
 
       {/* Secondary Social Share Options */}
       <div className="space-y-3 text-center">
-        <p className="text-sm text-gray-400">Or share directly on:</p>
+        <p className="text-sm text-gray-400">
+          {isWon ? 'Or share directly on:' : 'Or challenge friends on:'}
+        </p>
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <TrackingButton
             clickType="share"
@@ -151,7 +163,7 @@ export function GameResults({
             title="Share on LinkedIn"
           >
             <FaLinkedin className="h-4 w-4" />
-            Share on LinkedIn
+            {isWon ? 'Share on LinkedIn' : 'Challenge on LinkedIn'}
           </TrackingButton>
 
           <TrackingButton
@@ -168,7 +180,7 @@ export function GameResults({
             title="Share on X"
           >
             <FaTwitter className="h-4 w-4" />
-            Share on X
+            {isWon ? 'Share on X' : 'Challenge on X'}
           </TrackingButton>
         </div>
       </div>
@@ -185,7 +197,7 @@ export function GameResults({
             clickText="~ A new wordle is released daily on X ~"
             className="inline-block text-[#4558c4] transition-colors hover:text-[#5569d7] hover:underline"
           >
-            ~ A new wordle is released daily on X ~
+            ~ Follow us on X for daily wordle updates ~
           </TrackingLink>
         </p>
       </div>
@@ -214,6 +226,19 @@ export function GameResults({
           Read something cool on {targetWord.toLowerCase()} here! →
         </TrackingLink>
       </div>
+
+      {/* Motivational Section for Lost State */}
+      {!isWon && (
+        <div className="text-center">
+          <div className="rounded-lg border border-[#4558c4]/30 bg-[#4558c4]/10 p-4">
+            <p className="m-0 text-sm text-gray-300">
+              <span className="font-medium text-[#4558c4]">Good news!</span> 73% of players who miss
+              their first word perform better the next day. Plus, you just learned a new DevOps
+              concept! 🧠
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
