@@ -11,6 +11,8 @@ keywords: [opentelemetry,nextjs,opentelemetry nextjs,javascript,apm tools,applic
 
 ---
 
+<ArticleSeriesTop seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs" />
+
 Vercel gives you some observability out of the box for your NextJS application: function logs, perf insights, basic metrics. But as your app grows, the cracks start showing.
 
 ## Where Vercel Falls Short
@@ -546,22 +548,22 @@ Let’s go.
 
 Jaeger is great for local debugging—but when you move to production, you need more: metrics, logs, alerting, dashboards. That’s where [SigNoz](https://signoz.io/) comes in.
 
-### 🔍 Why SigNoz Over Jaeger?
+### Why SigNoz Over Jaeger?
 
-| Capability | Jaeger ❌ | SigNoz  |
+| Capability | Jaeger | SigNoz  |
 | --- | --- | --- |
-| Distributed tracing |  |  |
-| Metrics dashboard (PromQL) | ❌ |  |
-| Log aggregation + correlation | ❌ |  |
-| Real-time alerting | ❌ |  |
-| Long-term storage | ❌ |  |
-| Custom dashboards / KPIs | ❌ |  |
+| Distributed tracing | ✅ | ✅ |
+| Metrics dashboard | ❌ | ✅ |
+| Log aggregation + correlation | ❌ | ✅ |
+| Real-time alerting | ❌  | ✅ |
+| Long-term storage | ❌ | ✅ |
+| Custom dashboards / KPIs | ❌ | ✅ |
 
 You get everything Jaeger does, plus actual production monitoring.
 
 ## Updating the Collector to Send Data to SigNoz
 
-We'll update your existing `otel-collector` setup to export traces and metrics to SigNoz Cloud—while keeping Jaeger for local use.
+We'll update your existing `otel-collector` setup to export traces and metrics to SigNoz Cloud - while keeping Jaeger for local use.
 
 ### Step 1: Add SigNoz Config
 
@@ -595,7 +597,6 @@ service:
       exporters: [debug, prometheus, otlp/signoz]
 ```
 
----
 
 ### Step 3: Update `docker-compose.yaml`
 
@@ -607,7 +608,7 @@ environment:
   - SIGNOZ_INGESTION_KEY=${SIGNOZ_INGESTION_KEY}
 ```
 
----
+
 
 ### Step 4: Restart Collector
 
@@ -735,9 +736,9 @@ Same goes for your database queries: SigNoz shows frequency, duration, and highl
 
 
 
-### Next: Visualizing + Building Dashboards in SigNoz
+## Next: Visualizing + Building Dashboards in SigNoz
 
-Now that data is flowing, let’s explore how to actually use SigNoz to:
+In the upcoming articles, we'll explore how to actually use SigNoz to:
 
 - Find slow endpoints
 - Track API performance
@@ -745,3 +746,5 @@ Now that data is flowing, let’s explore how to actually use SigNoz to:
 - Create dashboards for your team
 
 Let’s observe!
+
+<ArticleSeriesBottom seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs" />
