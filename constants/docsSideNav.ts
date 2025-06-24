@@ -758,7 +758,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: 'View Entry Point Spans in Key Operations Table',
+            label: 'Entry Point Spans',
             route: '/docs/userguide/entry_point_spans_service_overview',
           },
           {
