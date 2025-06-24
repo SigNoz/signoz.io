@@ -85,7 +85,7 @@ This is the most flexible and production-friendly setup. Instead of sending tele
 
 ### Architecture:
 
-<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-CleanShot_2025-06-20_at_15.17.002x.webp" alt="" caption="" />
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-CleanShot_2025-06-20_at_15.17.002x.webp" alt="OpenTelemetry Collector architecture diagram showing data flow from Next.js app through collector to multiple observability backends" caption="Collector-based architecture: Your Next.js app sends telemetry to the OpenTelemetry Collector, which processes and routes data to multiple backends like SigNoz and Prometheus" />
 
 ### Why use a Collector?
 
@@ -168,7 +168,7 @@ With this approach, your app sends telemetry data straight to your observability
 
 ### Architecture
 
-<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-CleanShot_2025-06-20_at_15.18.262x.webp" alt="" caption="" />
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-CleanShot_2025-06-20_at_15.18.262x.webp" alt="Direct exporter architecture diagram showing Next.js app sending telemetry data directly to SigNoz without intermediate processing" caption="Direct exporter approach: Your Next.js app sends telemetry data straight to SigNoz without any intermediate processing or collector" />
 
 ### Pros:
 
@@ -254,7 +254,9 @@ Track if any of your key endpoints cross the 2s P99 threshold — a common user 
 
 **SigNoz UI Configuration:**
 
-<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-image.webp" alt="" caption="" />- **Metric**: `signoz_latency_bucket`
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-image.webp" alt="SigNoz alert configuration interface showing setup for P99 latency alerts with metric selection and threshold settings" caption="Configure P99 latency alerts in SigNoz: Set up alerts on signoz_latency_bucket metric with P99 aggregation and 2000ms threshold" />
+
+- **Metric**: `signoz_latency_bucket`
 - **Aggregation**: P99
 - **Filter**: `service.name = nextjs-observability-demo`
 - **Group By**: `operation`
@@ -280,13 +282,15 @@ curl http://localhost:3000/api/heavy-database-query
 
 ```
 
-<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-image%201.webp" alt="" caption="" />Check:
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-image%201.webp" alt="SigNoz firing alerts dashboard showing active alerts with severity levels and notification status" caption="Monitor active alerts in SigNoz: View firing alerts with their severity, status, and notification delivery confirmation" />
+
+Check:
 
 - SigNoz → Alerts → **Firing Alerts**
 - Notification channels (Slack, email, PagerDuty)
 - Auto-resolve when things calm down
 
-<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-image%202.webp" alt="" caption="" />
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-production-image%202.webp" alt="Email notification for alert" caption="Email notification for alert" />
 
 ## Maintaining Alert Hygiene
 
