@@ -118,11 +118,11 @@ export function GameResults({
 
       <div className="mb-10 text-center">
         <p className="text-[15px] leading-[1.6] text-gray-400">
-          Today's word was '{targetWord}' which is a K8s object that sets hard limits on the resources that can be consumed within a specific namespace. This helps control 
-          the total resource consumption and restricts how much CPU, memory, and other resources a namespace can request or consume.
+          Today's word was '{targetWord}' which is a command that allows you to apply small, precise 
+          updates to live Kubernetes resources—such as changing an image or updating labels—without replacing their entire YAML
         </p>
         <TrackingLink
-          href="https://www.perfectscale.io/blog/kubernetes-resource-quotas-limit-ranges"
+          href="https://komodor.com/learn/kubectl-patch-changing-kubernetes-objects-in-place"
           target="_blank"
           clickType="external_link"
           clickName="blog_post_link"
