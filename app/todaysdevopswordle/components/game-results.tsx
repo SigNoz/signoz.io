@@ -2,9 +2,9 @@
 
 import { FaLink, FaTrophy } from 'react-icons/fa6'
 import { FaSadTear } from 'react-icons/fa'
-import { FaLinkedin, FaTwitter, FaCopy } from 'react-icons/fa'
+import { FaLinkedin, FaTwitter, FaCopy, FaShare } from 'react-icons/fa'
 import { Orbitron, Lexend } from 'next/font/google'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import TrackingButton from '../../../components/TrackingButton'
 import TrackingLink from '../../../components/TrackingLink'
 
@@ -27,6 +27,16 @@ export function GameResults({
   guesses,
 }: GameResultsProps) {
   const [isCopied, setIsCopied] = useState(false)
+  const [supportsNativeShare, setSupportsNativeShare] = useState(false)
+
+  // Only check for Web Share API support (not device type)
+  useEffect(() => {
+    const checkShareSupport = () => {
+      setSupportsNativeShare(typeof navigator.share !== 'undefined')
+    }
+
+    checkShareSupport()
+  }, [])
 
   function generateEmojiMatrix() {
     return guesses
@@ -75,6 +85,38 @@ export function GameResults({
     }
   }
 
+  const handleNativeShare = async () => {
+    const shareText = generateShareText()
+    const shareData = {
+      title: 'DevOps Wordle by SigNoz',
+      text: shareText,
+      url: 'https://signoz.io/todaysdevopswordle',
+    }
+
+    try {
+      if (navigator.share && supportsNativeShare) {
+        await navigator.share(shareData)
+      } else {
+        // Fallback to clipboard copy
+        await navigator.clipboard.writeText(shareText)
+        setIsCopied(true)
+        setTimeout(() => setIsCopied(false), 3000)
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Failed to share:', err)
+        // Fallback to clipboard copy on error
+        try {
+          await navigator.clipboard.writeText(shareText)
+          setIsCopied(true)
+          setTimeout(() => setIsCopied(false), 3000)
+        } catch (clipboardErr) {
+          console.error('Failed to copy to clipboard:', clipboardErr)
+        }
+      }
+    }
+  }
+
   return (
     <div
       className={`flex flex-col items-center justify-center gap-6 rounded-lg border-2 bg-black/30 p-8 backdrop-blur-md ${isWon ? 'neon-box-border border-[#233457]' : 'neon-box-red border-[#cc3939]'} relative mx-auto mb-12 mt-9 w-full max-w-[600px] ${lexend.className}`}
@@ -100,19 +142,40 @@ export function GameResults({
           <span className={`ml-2 text-sm ${lexend.className}`}>pts</span>
         </div>
 
-        {/* Primary Copy CTA */}
+        {/* Primary Share CTA - Mobile vs Desktop via CSS */}
         <div className="flex flex-col items-center space-y-3">
           <p className="text-base font-medium text-gray-300">
             {isWon
               ? 'Share your victory with friends!'
               : `Think your friends can solve '${targetWord}'? Challenge them!`}
           </p>
+
+          {/* Mobile Native Share Button - Hidden on desktop via CSS */}
+          {supportsNativeShare && (
+            <TrackingButton
+              clickType="share"
+              clickName="native_share_mobile"
+              clickLocation="game_results"
+              clickText={isWon ? 'Share Results' : 'Challenge Friends'}
+              className={`block w-full max-w-[280px] rounded-lg px-6 py-3 text-base font-medium transition-all duration-300 md:hidden ${
+                isWon
+                  ? 'neon-box-blue border-[#4558c4] bg-[#4558c4] text-white hover:bg-[#3a4aa3]'
+                  : 'neon-box-red border-[#FF4C4C] bg-[#FF4C4C] text-white hover:bg-[#e63946]'
+              } flex items-center justify-center gap-2 border-2 shadow-lg hover:scale-105`}
+              onClick={handleNativeShare}
+            >
+              <FaShare className="h-4 w-4" />
+              {isWon ? 'Share Results' : 'Challenge Friends'}
+            </TrackingButton>
+          )}
+
+          {/* Desktop Copy Button - Hidden on mobile via CSS */}
           <TrackingButton
             clickType="share"
             clickName="copy_share_primary"
             clickLocation="game_results"
             clickText={isCopied ? 'Copied!' : isWon ? 'Copy Score & Results' : 'Challenge Friends'}
-            className={`w-full max-w-[280px] rounded-lg px-6 py-3 text-base font-medium transition-all duration-300 ${
+            className={`${supportsNativeShare ? 'hidden md:flex' : 'flex'} w-full max-w-[280px] rounded-lg px-6 py-3 text-base font-medium transition-all duration-300 ${
               isCopied
                 ? 'border-green-500 bg-green-600 text-white'
                 : isWon
@@ -142,8 +205,8 @@ export function GameResults({
         </div>
       </div>
 
-      {/* Secondary Social Share Options */}
-      <div className="space-y-3 text-center">
+      {/* Secondary Social Share Options - Hidden on mobile via CSS */}
+      <div className="hidden space-y-3 text-center md:block">
         <p className="text-sm text-gray-400">
           {isWon ? 'Or share directly on:' : 'Or challenge friends on:'}
         </p>
