@@ -758,6 +758,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'View Entry Point Spans in Key Operations Table',
+            route: '/docs/userguide/entry_point_service_overview',
+          },
+          {
+            type: 'doc',
             label: 'APM Dashboards/Alerts',
             route: '/docs/userguide/custom-apm-dashboards-alerts',
           },
