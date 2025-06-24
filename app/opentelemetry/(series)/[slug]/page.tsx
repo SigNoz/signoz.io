@@ -1,6 +1,6 @@
 import React from 'react'
 import articleSeriesJson from '@/constants/articleSeries.json'
-import type { SeriesData, ArticleDetail } from '@/types/series'
+import type { SeriesData, ArticleDetail } from '../../../../types/series'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Image from 'next/image'
