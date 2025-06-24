@@ -112,7 +112,7 @@ export default function DevopsWordle() {
         >
           <div className="flex items-center">
             <p
-              className={`text-sm tracking-wide sm:text-base ${orbitron.className} neon-text pt-3 sm:pt-0`}
+              className={`text-sm tracking-wide sm:text-base ${orbitron.className} neon-text m-0 pt-3 sm:pt-0`}
             >
               Devops Wordle
             </p>
@@ -120,10 +120,11 @@ export default function DevopsWordle() {
           <div className="flex items-center">
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="flex items-center  justify-center px-0 text-[#FF4C4C] transition-colors hover:text-[#ff6666]"
+              className="flex items-center justify-center gap-2 px-0 text-[#FF4C4C] transition-colors hover:text-[#ff6666]"
               aria-label="Open menu"
             >
-              <HiOutlineQuestionMarkCircle className="neon-question h-4 w-4 sm:h-20 sm:w-8" />
+              <HiOutlineQuestionMarkCircle className="neon-question h-4 w-4 sm:h-6 sm:w-6" />
+              <span className={`hidden text-sm sm:inline ${lexend.className}`}>See Hint</span>
             </button>
           </div>
         </nav>
@@ -133,7 +134,7 @@ export default function DevopsWordle() {
             <div className="mt-4 w-full sm:mt-4">
               {gameState !== GameStatus.NOT_STARTED && (
                 <WordleGame
-                  targetWord="QUOTA"
+                  targetWord="PATCH"
                   elapsedTime={elapsedTime}
                   gameStatus={gameState}
                   onGameWon={handleGameWon}
