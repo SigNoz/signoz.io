@@ -1,0 +1,100 @@
+---
+
+title: Introducing ZTB - Defining Zero Trust for Bring Your Own Cloud (BYOC)
+slug: zero-trust-bring-your-own-cloud
+date: 2025-06-24
+tags: [product]
+authors: [pavan]
+description: Just like the Zero Trust Network (ZTN) became a standard way to reimagine network security, we believe BYOC needs a clear, opinionated model rooted in Zero Trust principles. We’re calling this, ZTB — Zero Trust BYOC.
+keywords: [zero trust, bring your own cloud, BYOC, security, cloud-native architecture]
+
+---
+
+Isn’t the "Bring Your Own Cloud" (BYOC) model the latest hot topic in the evolution of cloud-native architecture, especially for companies offering cloud-hosted platforms that must be deployed in the customer’s cloud for privacy, control, or compliance reasons?
+
+Over the past few weeks, we have been rigorously researching and discussing how to build a secure BYOC model. And it hasn’t been easy since the journey was filled with nuanced architectural decisions from handling identity propagation to isolating customer infrastructure. Somewhere in the middle of these technical trenches, a recurring question kept bothering us:
+
+> **Is there a guideline for what a secure BYOC should be like?**
+> 
+
+This question led us to research how different companies approached BYOC, not just technically, but also how they talk about security. As we started digging into best practices for BYOC setups, we began to see a curious pattern. A pattern that we are much aware of in the field of Security, called as Zero-Trust. 
+
+Various companies follow the guidelines of Zero Trust loosely in their BYOC offerings. We mapped these against the core principles of Zero Trust security itself. And finally, we started seeing the gap — **no one** had a concrete, actionable definition of what a **Zero Trust BYOC (ZTB)/Secure BYOC** model is.
+
+## So We Decided to Define what Zero Trust BYOC is
+
+Just like the Zero Trust Network (ZTN) became a standard way to reimagine network security, we believe BYOC needs a clear, opinionated model rooted in Zero Trust principles. We’re calling this: **ZTB** — *Zero Trust BYOC*.
+
+## What Does Zero Trust Mean?
+
+Before jumping ahead to our definition for **ZTB** — *Zero Trust BYOC. Let’s talk about Zero Trust*
+
+Zero Trust is more than a buzzword — it’s a mindset shift in how we approach access, trust boundaries, and security guarantees. Originally coined to counteract the failures of perimeter-based security, the **Zero Trust Security Model** follows a simple premise:
+
+> Never trust, always verify.
+> 
+
+In traditional systems, if a service is on the network, it’s trusted. In a Zero Trust model:
+
+- **Every interaction is authenticated and authorised.**
+- **No implicit trust is granted based on location (e.g., being on the same VPC).**
+- **Security policies are identity-aware and context-sensitive.**
+- **Data sovereignty and access control boundaries are always enforced.**
+
+In the networking world, this led to **Zero Trust Networks (ZTNs)** where east-west traffic is authenticated and encrypted, identities are workload-bound, and policies are centrally enforced, not implied by IPs or firewalls.
+
+Now, we're bringing that same rigour and discipline to **Bring Your Own Cloud (BYOC)** architectures.
+
+## What Makes a BYOC Model Zero Trust?
+
+If Zero Trust means no implicit trust between networked entities, and enforcement based on strong identity and verification, then a **Zero Trust BYOC (ZTB)** model must enforce the same principles *across all layers* of the deployment: networking, identity, access, audit, and data control.
+
+We believe the following principles must be present for a BYOC deployment to qualify as “Zero Trust”:
+
+### Principle 1: Data Plane Isolation
+
+The customer’s data and compute **MUST** stay entirely within their cloud account. No customer data leaves the customer's cloud environment. Optionally, Metadata or telemetry (anonymised or synthetic) can be shared with the vendor’s control plane with explicit opt-in.
+
+**WHY**:
+
+Following this preserves **data sovereignty** and makes compliance with GDPR, HIPAA, and financial regulations easier. Minimises the blast radius in case of a control plane compromise. Reduces vendor liability and builds customer trust.
+
+### Principle 2: Pull-Based Control Plane Communication
+
+The customer environment **MUST** initiate any communication with the vendor — never the other way around. Vendor control plane **SHOULD NEVER** initiate inbound connections to the customer’s environment.
+
+**WHY**:
+
+Following this prevents vendor-initiated access to customer environments and aligns with Zero Trust Network principles, where **access is granted, not assumed**. This also simplifies network boundary enforcement (e.g., no need to open ingress rules).
+
+### Principle 3: Component-Level Zero Trust
+
+No component within the BYOC deployment implicitly trusts another just because it’s on the same network or cluster. All internal services **MUST** authenticate and authorise each other, using signed identities (e.g. JWTs, IAM roles).
+
+**WHY**:
+
+This blocks lateral movement in case of compromise and follows the Zero Trust principle, where no components trust each other. Enforces strong access boundaries even within a single customer deployment.
+
+### Principle 4: Least Privilege Access
+
+Every system, user, and automation **MUST** have only the minimal access required, for only as long as needed. IAM roles **MUST** be scoped, the token **SHOULD BE** time-limited, and RBAC policies **MUST** be enforced in Kubernetes.
+
+**WHY**:
+
+This reduces exposure from credential leaks or misuse. Complies with common frameworks like SOC 2 and ISO 27001.
+
+### Principle 5: Encryption Everywhere
+
+All communication (inbound, outbound) **MUST** be encrypted using strong standards. We **MUST** use TLS 1.2 or higher for all communication paths. Best practice is to enforce this over internal communication also.
+
+**WHY**:
+
+Following this tenet protects data in transit, enables compliance with financial and healthcare regulations and helps enforce trust boundaries with third-party integrations.
+
+## Why This Matters
+
+We believe ZTB isn’t just about hardening infrastructure — it’s about **trust, transparency, and repeatable security guarantees** in a world where your product runs inside someone else’s cloud.
+
+By creating a structured framework, we hope to help others build in this space, skip the trial-and-error phase we went through, and build secure-by-design from day one. What do you think? Are these principles enough?
+
+What would you add to it? You can leave your thoughts at this [GitHub discussion](https://github.com/SigNoz/signoz/discussions/8354).
