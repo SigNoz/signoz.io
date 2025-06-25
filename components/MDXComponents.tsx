@@ -46,6 +46,8 @@ import IntegrationsListicle from './Integrations/IntegrationsListicle'
 import HostingDecision from './shared/HostingDecision'
 import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
 import K8sInstallationListicle from './Setup/K8sInstallationListicle'
+import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
+import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
 
 export const components: MDXComponents = {
   Image,
@@ -94,5 +96,7 @@ export const components: MDXComponents = {
   IntegrationsListicle,
   HostingDecision,
   SelfHostInstallationListicle,
-  K8sInstallationListicle
+  K8sInstallationListicle,
+  ArticleSeriesBottom,
+  ArticleSeriesTop,
 }
