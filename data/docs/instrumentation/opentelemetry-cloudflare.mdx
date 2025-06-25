@@ -1,0 +1,158 @@
+---
+date: 2025-06-23
+id: opentelemetry-cloudflare
+title: Cloudflare Workers OpenTelemetry Instrumentation
+description: Instrument Cloudflare Workers with OpenTelemetry and send traces to SigNoz
+tags: [opentelemetry, cloudflare, instrumentation]
+hide_table_of_contents: true
+---
+
+This document explains how to instrument Cloudflare Workers with OpenTelemetry and send traces to SigNoz.
+
+## Prerequisites
+
+You will need the following in place before moving on to the next step:
+- A Cloudflare account
+- [Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/), the CLI tool for Cloudflare.
+
+## Send traces to SigNoz
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+**Step 1: Install the SDK**
+
+Install `@microlabs/otel-cf-workers` in your [project](https://developers.cloudflare.com/workers/get-started/guide/#1-create-a-new-worker-project).
+
+```bash
+npm i @microlabs/otel-cf-workers
+```
+
+<Admonition type="info">
+[@microlabs/otel-cf-workers](https://www.npmjs.com/package/@microlabs/otel-cf-workers) is a third party OpenTelemetry compatible library 
+for instrumenting and exporting traces from Cloudflare Workers. 
+</Admonition>
+
+**Step 2: Add Node.js Compatibility Flag**
+
+OpenTelemetry requires the Node.js compatibility flag to be enabled at the top level of your `wrangler.toml`.
+
+```yaml:wrangler.toml
+compatibility_flags = [ "nodejs_compat" ]
+```
+
+**Step 3: Configure tracer in Cloudflare Workers project**
+
+Navigate to the wrangler project directory, and add the following code to your `src/index.ts` file.
+
+```javascript:index.ts
+import { instrument, ResolveConfigFn } from '@microlabs/otel-cf-workers'
+
+const handler = {
+    async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+        // your cloudflare worker code
+    },
+}
+
+const config: ResolveConfigFn = (env: Env, _trigger) => {
+    return {
+        exporter: {
+            url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+            headers: { 'signoz-access-token': '<your-ingestion-key>' },
+        },
+        service: { name: '<service-name>' },
+    }
+}
+
+export default instrument(handler, config)
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Replace `<service-name>` with the name of the service associated with this trace
+
+**Step 4: Deploy the project**
+
+Deploy the project to Cloudflare Worker.
+
+```bash
+npm run deploy
+```
+
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
+
+**Step 1: Install the SDK**
+
+Install `@microlabs/otel-cf-workers` in your [project](https://developers.cloudflare.com/workers/get-started/guide/#1-create-a-new-worker-project).
+
+```bash
+npm i @microlabs/otel-cf-workers
+```
+
+<Admonition type="info">
+[@microlabs/otel-cf-workers](https://www.npmjs.com/package/@microlabs/otel-cf-workers) is a third party OpenTelemetry compatible library 
+for instrumenting and exporting traces from Cloudflare Workers. 
+</Admonition>
+
+**Step 2: Add Node.js Compatibility Flag**
+
+OpenTelemetry requires the Node.js compatibility flag to be enabled at the top level of your `wrangler.toml`.
+
+```yaml:wrangler.toml
+compatibility_flags = [ "nodejs_compat" ]
+```
+
+**Step 3: Configure tracer in Cloudflare Workers project**
+
+Navigate to the wrangler project directory, and add the following code to your `src/index.ts` file.
+
+```javascript:index.ts
+import { instrument, ResolveConfigFn } from '@microlabs/otel-cf-workers'
+
+const handler = {
+    async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+        // your cloudflare worker code
+    },
+}
+
+const config: ResolveConfigFn = (env: Env, _trigger) => {
+    return {
+        exporter: {
+            url: 'http://localhost:4318/v1/traces'
+        },
+        service: { name: '<service-name>' },
+    }
+}
+
+export default instrument(handler, config)
+```
+
+- Replace `<service-name>` with the name of the service associated with this trace
+
+**Step 4: Deploy the project**
+
+Deploy the project to Cloudflare Worker.
+
+```bash
+npm run deploy
+```
+
+</TabItem>
+</Tabs>
+
+## Visualize the traces in SigNoz
+
+- Traces can be viewed under the `Traces` tab in the SigNoz UI.
+
+<Figure src="/img/docs/instrumentation/cloudflare/TracesList.webp" alt="Cloudflare Traces in Traces View" caption="Cloudflare Traces in Traces View" />
+
+- You can click on a particular `TraceID` in the `Traces` view to get the detailed view of the Cloudflare Worker as shown in the image below.
+
+<Figure src="/img/docs/instrumentation/cloudflare/TraceID.webp" alt="Sample Cloudflare Trace" caption="Sample Cloudflare Trace" />
+
+## Send logs to SigNoz
+
+In order to push logs from Cloudflare Worker, you need the Enterprise plan. For sending Cloudflare Worker logs to SigNoz, you can 
+use the cloudflare opentelemetry receiver. Refer [this page](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/cloudflarereceiver) 
+for detailed instructions.

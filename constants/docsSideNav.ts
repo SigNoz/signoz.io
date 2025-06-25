@@ -702,6 +702,11 @@ const docsSideNav = [
             label: 'WordPress',
           },
           {
+            type: 'doc',
+            route: '/docs/instrumentation/opentelemetry-cloudflare',
+            label: 'Cloudflare Workers',
+          },
+          {
             type: 'category',
             isExpanded: false,
             label: 'Manual Instrumentation',
