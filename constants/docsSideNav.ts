@@ -262,6 +262,11 @@ const docsSideNav = [
             // slug: '/docs/operate/migration/migration',
             // },
             items: [
+               {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.88',
+                label: 'Upgrade to v0.88',
+              },
               {
                 type: 'doc',
                 route: '/docs/operate/migration/upgrade-0.76',
