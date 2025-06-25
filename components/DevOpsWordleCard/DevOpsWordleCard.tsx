@@ -59,7 +59,7 @@ const DevOpsWordleCard: React.FC<DevOpsWordleCardProps> = ({ className = '' }) =
         clickLocation="Blog Right Sidebar"
         className="absolute -bottom-[1.4rem] left-1/2 w-[70%] -translate-x-1/2 transform"
       >
-        <div className="flex items-center justify-center rounded-lg bg-[#4558c4] px-6 py-3 text-sm font-semibold tracking-wide text-gray-200 transition-all duration-300 hover:bg-[#3a4aa3] hover:shadow-[0_0_10px_rgba(69,88,196,0.5)]">
+        <div className="flex items-center justify-center rounded-lg bg-[#4558c4] py-3 pl-8 pr-6 text-sm font-semibold tracking-wide text-gray-200 transition-all duration-300 hover:bg-[#3a4aa3] hover:shadow-[0_0_10px_rgba(69,88,196,0.5)]">
           <span>PLAY NOW</span>
           <ArrowRight
             size={16}
