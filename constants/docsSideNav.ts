@@ -759,7 +759,7 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Entry Point Spans',
-            route: '/docs/trace-management/guides/entry-point-spans-service-overview',
+            route: '/docs/traces-management/guides/entry-point-spans-service-overview',
           },
           {
             type: 'doc',
