@@ -9,6 +9,7 @@ import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import BlogLayout from '@/layouts/BlogLayout'
+import GuidesLayout from '@/layouts/GuidesLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
@@ -25,6 +26,7 @@ const layouts = {
   PostBanner,
   OpenTelemetryLayout,
   BlogLayout,
+  GuidesLayout,
 }
 
 export const dynamicParams = false
@@ -111,7 +113,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   if (slug.includes('opentelemetry')) {
     layoutName = 'OpenTelemetryLayout'
   } else {
-    layoutName = 'BlogLayout'
+    layoutName = 'GuidesLayout'
   }
 
   // @ts-ignore

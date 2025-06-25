@@ -6,11 +6,11 @@ import { HiLightBulb } from 'react-icons/hi2'
 import { IoHeart } from 'react-icons/io5'
 import { Orbitron, Lexend } from 'next/font/google'
 import { GameStatus } from '../types'
+import { getTodaysHint } from '../lib/game-data'
 import TrackingButton from '../../../components/TrackingButton'
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['400', '500'] })
 const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] })
-const HINT = 'The silent craft that shapes your vessel from lines of code.'
 
 interface HowToPlayDrawerProps {
   isOpen: boolean
@@ -27,6 +27,7 @@ export function HowToPlayDrawer({
   gameState,
   elapsedTime = 0,
 }: HowToPlayDrawerProps) {
+  const todaysHint = getTodaysHint()
   const minutes = Math.floor(elapsedTime / 60)
   const seconds = elapsedTime % 60
 
@@ -98,7 +99,7 @@ export function HowToPlayDrawer({
 
               <div className="neon-box-border hint-box-attention relative rounded-lg border border-[#233457] bg-[#1B224B]/30 p-6">
                 <p className="m-0 text-center text-base text-gray-400 sm:text-lg">
-                  Today's hint: {HINT}
+                  Today's hint: {todaysHint}
                 </p>
                 <div className="absolute -top-8 left-1/2 -translate-x-1/2 transform ">
                   <HiLightBulb className="neon-bulb bulb-illuminate h-10 w-10 text-[#4558c4]" />
