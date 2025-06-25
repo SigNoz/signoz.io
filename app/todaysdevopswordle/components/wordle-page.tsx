@@ -6,6 +6,7 @@ import { Lexend, Orbitron } from 'next/font/google'
 import { WordleGame } from './wordle-game'
 import { HowToPlayDrawer } from './how-to-play-drawer'
 import { initializeGameState, setGameWon, setGameLost, getGameState } from '../lib/cookie-utils'
+import { getTodaysWord } from '../lib/game-data'
 import { GameStatus } from '../types'
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2'
 import { IoHeart } from 'react-icons/io5'
@@ -21,6 +22,8 @@ export default function DevopsWordle() {
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null)
   const [isNavbarVisible, setIsNavbarVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+
+  const todaysWord = getTodaysWord()
 
   useEffect(() => {
     // Check existing game state
@@ -134,7 +137,7 @@ export default function DevopsWordle() {
             <div className="mt-4 w-full sm:mt-4">
               {gameState !== GameStatus.NOT_STARTED && (
                 <WordleGame
-                  targetWord="PATCH"
+                  targetWord={todaysWord}
                   elapsedTime={elapsedTime}
                   gameStatus={gameState}
                   onGameWon={handleGameWon}

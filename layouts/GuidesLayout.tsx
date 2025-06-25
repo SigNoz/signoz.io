@@ -12,6 +12,7 @@ import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
 import TrackingLink from '@/components/TrackingLink'
 import { ArrowRight, ExternalLink } from 'lucide-react'
+import DevOpsWordleCard from '@/components/DevOpsWordleCard'
 import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 
@@ -101,25 +102,8 @@ export default function GuidesLayout({
 
           {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
           <div className="post-toc hidden lg:fixed lg:right-0 lg:top-[120px] lg:flex lg:h-[calc(100vh-140px)] lg:w-64 lg:flex-col lg:border-l lg:border-signoz_ink-300 lg:pl-8">
-            {/* SigNoz Docs Card */}
-            <TrackingLink
-              href="/docs/cloud/"
-              target="_blank"
-              clickType="Card Click"
-              clickName="Blog Sidebar Docs Card"
-              clickText="Set Up Observability with OTel and SigNoz"
-              clickLocation="Blog Right Sidebar"
-              className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
-            >
-              <h3 className="text-sm font-medium text-white">Observability with OTel and SigNoz</h3>
-              <div className="flex items-center gap-1 text-[11px] text-gray-400 transition-colors group-hover:text-white">
-                <span>Explore docs</span>
-                <ArrowRight
-                  size={12}
-                  className="transition-transform group-hover:translate-x-0.5"
-                />
-              </div>
-            </TrackingLink>
+            {/* DevOps Wordle Card */}
+            <DevOpsWordleCard className="mb-6" />
 
             {/* TOC with internal scroll */}
             <div ref={tocContainerRef} className="mb-4 h-[calc(100%-180px)] overflow-y-auto">
