@@ -68,6 +68,64 @@ max_over_time(foo_bar_total{env=~"prod|stag"}[1h] offset 30m) / ignoring(instanc
 max_over_time({"foo.bar.total",env=~"prod|stag"}[1h] offset 30m) / ignoring ("instance") group_left () sum without ("pod") (rate({"other.metric"}[5m]))
 ```
 
+### Example 4: Metrics and attributes without dot in their name
+
+For queries which don't have metrics and attributes containing dot in the name, any below format will work, but still we urge to use the ```New format``` for consistency.
+
+```promql
+# Old format
+sum by (foo_attr) (
+  rate(foo_bar_total{env=~"prod|stage"}[1h] offset 30m)
+)
+
+# New format
+sum by ("foo_attr") (
+    rate({"foo_bar_total", env =~"prod|stage"}[1h] offset 30m)
+)
+
+# both format will work
+```
+
+### Example 5: Examples by each metric type
+```promql
+
+#COUNTER
+
+# Old format
+rate(http_requests_total{job="api",status!~"5.."}[5m])
+
+# New format
+rate({"http_requests_total", job="api", status!~"5.."})[5m])
+
+#GAUGE
+
+# Old format
+avg_over_time(kube_pod_container_resource_requests_cpu_cores{namespace="prod"}[10m])
+
+# New format
+avg_over_time({"kube_pod_container_resource_requests_cpu_cores",namespace="prod"}[10m])
+
+#Histogram
+
+# Old format
+histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="api"}[5m])) by (le))
+
+# New format
+histogram_quantile(0.95, sum by (le) (rate({"http_request_duration_seconds.bucket",job="api"}[5m])))
+
+#Summary
+# Old format
+sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m]))
+
+# New format
+sum(rate({"http_request_duration_seconds.sum"}[5m])) / sum(rate({"http_request_duration_seconds.count"}[5m]))
+
+```
+
+For Histogram metrics we will be adding .min, .max, .count, .bucket, .sum suffices instead of previous ```_``` suffices.
+Same goes for Summary metrics we will be adding .count, .quantile, .sum suffices.
+
+
 ## Migration Support
 
 ### For Self-Hosted Users
