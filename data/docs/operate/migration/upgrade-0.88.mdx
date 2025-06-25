@@ -13,6 +13,7 @@ We are in the process of metrics migration, the following doc will help you migr
 ## Background
 
 As previously communicated, we have transitioning from running both the old and new exporters simultaneously to running only the new exporter.
+
 Further Details about this migration can be seen [here](https://signoz.io/guides/metrics-migration/)
 
 ## Migration
@@ -33,39 +34,38 @@ Github - [Migration Script](https://github.com/SigNoz/signoz-db-migrations/tree/
 - The migration process uses various environment variables to configure database connections, performance settings, and migration behavior. Understanding these variables is crucial for successful migration.
 
 ### Environment Variables
-ClickHouse Connection Variables
+
+#### ClickHouse Connection Variables
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `CH_ADDR` | ClickHouse server address and port | `localhostl:9001` | Yes |
+| `CH_ADDR` | ClickHouse server address and port | `localhost:9001` | Yes |
 | `CH_DATABASE` | ClickHouse database name for metrics | `default` | Yes |
 | `CH_USER` | ClickHouse username for authentication | `default` | Yes |
 | `CH_PASS` | ClickHouse password for authentication | `""` (empty) | Yes |
 
-
-ClickHouse Performance & Connection Pool Variables
+#### ClickHouse Performance & Connection Pool Variables
 
 | Variable | Description | What we used / Default |
-|----------|-------------|---------|
+|----------|-------------|----------------------|
 | `CH_MAX_OPEN_CONNS` | Maximum number of open database connections | `10` (metadata), `32` (data), `5` (default) |
 | `CH_MAX_IDLE_CONNS` | Maximum number of idle connections in pool | `8`, `2` (default) |
 | `CH_CONN_MAX_LIFETIME` | Maximum lifetime of a connection | `30m`, `10m` (default) |
 | `CH_DIAL_TIMEOUT` | Connection timeout duration | `60s`, `5s` (default) |
 | `CH_MAX_MEMORY_USAGE` | Maximum memory usage per query (bytes) | `8388608000` (8GB), `1048576000` (default 1GB) |
-| `CH_MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY` | Memory threshold for external GROUP BY operations | `524288000` (500MB),  `104857600` (default 100MB)|
+| `CH_MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY` | Memory threshold for external GROUP BY operations | `524288000` (500MB), `104857600` (default 100MB) |
 | `CH_MAX_BYTES_BEFORE_EXTERNAL_SORT` | Memory threshold for external sorting | `524288000` (500MB), `104857600` (default 100MB) |
 | `CH_MAX_EXECUTION_TIME` | Maximum query execution time (seconds) | `300`, `90` (default) |
-| `CH_MAX_THREADS` | Maximum threads for query processing | `50`, `10`(default) |
+| `CH_MAX_THREADS` | Maximum threads for query processing | `50`, `10` (default) |
 
-Migration-Specific Variables
+#### Migration-Specific Variables
 
 | Variable | Description | Default | Usage |
 |----------|-------------|---------|-------|
 | `MIGRATE_WORKERS` | Number of parallel migration workers | `12` | Data migration performance |
 | `MIGRATE_MAX_OPEN_CONNS` | Maximum connections for migration process | `32` | Migration-specific connection limit |
 
-
-Metrics & Attributes Mapping Variables
+#### Metrics & Attributes Mapping Variables
 
 These variables handle mappings for metrics and attributes that may have changed names during the migration, and their dot correspondent metrics and attribute name is not present in the DB.
 
@@ -162,13 +162,14 @@ kubectl apply -f data-migration-job.yaml
 ```
 
 ```bash
- # 1) List Jobs (verify signoz-data-migration-job exists and its status)
+# 1) List Jobs (verify signoz-data-migration-job exists and its status)
 kubectl get jobs -n <your-namespace>
 
 # 2) List Pods created by that Job
 kubectl get pods -l job-name=signoz-data-migration-job -n <your-namespace> -o wide
 ```
-To Verify the migration is successful, you can check the logs of the `migration` container:
+
+To verify the migration is successful, you can check the logs of the `migration` container:
 
 ```bash
 kubectl logs job/signoz-data-migration-job -c migration -n <your-namespace>
@@ -188,12 +189,11 @@ Add the following init container to your SigNoz deployment manifest:
       - name: migration
         image: signoz/migrate:v0.70.5
         imagePullPolicy: IfNotPresent
-
         env:
           - name: SQL_DB_PATH
             value: /var/lib/signoz/signoz.db
           - name: CH_ADDR
-            value: "your-clickhouse-service":9000 # Replace with your ClickHouse service
+            value: "your-clickhouse-service:9000" # Replace with your ClickHouse service
           - name: CH_DATABASE
             value: signoz_metrics
           - name: CH_USER
@@ -216,12 +216,9 @@ Add the following init container to your SigNoz deployment manifest:
           - name: NOT_FOUND_ATTR_MAP
             value: |-
               http_scheme=http.scheme,
-
         args:
           - migrate-meta
-
         resources: {}   # add limits/requests as needed
-
         volumeMounts:
           - name: signoz-db
             mountPath: /var/lib/signoz
@@ -236,38 +233,41 @@ kubectl get pod -n <your-namespace> -o wide
 ```
 
 To verify the migration is successful, you can check the logs of the `migration` init container:
+
 ```bash
 kubectl logs <pod-name> -c migration -n <your-namespace>
 ✅ updated x dashboards in signoz.db
 ✅ updated y rules in /var/lib/signoz/signoz.db
 ```
 
-### Step 3: Need to enable new metrics
-You also need to pass environment variable ```DOT_METRICS_ENABLED``` to ```true``` while running the SigNoz container, to allow the platform to use dot metrics.
+### Step 3: Enable New Metrics
+
+You also need to pass environment variable `DOT_METRICS_ENABLED` to `true` while running the SigNoz container, to allow the platform to use dot metrics.
 
 ## Docker Standalone Users
 
 If you're running SigNoz using Docker, follow these steps:
+
 1. Update your Docker Compose file to include the migration configuration
 2. Run the migration commands using the provided Docker image
 3. Verify the migration by checking your dashboards and alerts after completion
 
 ### Step 1: Migrate Historical Data (For High Retention Users)
+
 This job runs alongside your SigNoz container and connects with ClickHouse to perform insert operations for migrating older data, (only for those users who have high retention periods)
 
-Add the following to your `docker-compose.yml` file, Kindly make sure that your Clickhouse conttainer is running and accessible.
+Add the following to your `docker-compose.yml` file, Kindly make sure that your Clickhouse container is running and accessible.
 
 ```yaml
   migration-job:
     !!merge <<: *db-depend
     image: signoz/migrate:v0.70.5
-    # Equivalent to the Job’s args
     command: >
       migrate-data
       --workers=${MIGRATE_WORKERS:-12}
       --max-open-conns=${MIGRATE_MAX_OPEN_CONNS:-32}
     environment:
-      # Point to the ClickHouse service defined in SigNoz’s compose file
+      # Point to the ClickHouse service defined in SigNoz's compose file
       CH_ADDR: signoz-clickhouse:9000
       CH_DATABASE: signoz_metrics
       CH_USER: default
@@ -306,15 +306,14 @@ docker-compose up -d migration-job
 Check the logs to ensure the migration is running smoothly:
 
 ```bash
-docker-compose logs -f migrate-job
-
-
+docker-compose logs -f migration-job
 ```
 
 ### Step 2: Migrate Alerts and Dashboards
+
 For alerts and dashboards migration, you need to run the migration script against your SQLite database. This can be done using the same Docker image.
 
-Add the following service in your docker compose setup or run the container seprately 
+Add the following service in your docker compose setup or run the container separately:
 
 ```yaml
   migrate-signoz:
@@ -339,7 +338,7 @@ Add the following service in your docker compose setup or run the container sepr
       NOT_FOUND_ATTR_MAP: "http_scheme=http.scheme,"
     volumes:
       - sqlite:/var/lib/signoz
-
+```
 
 To make sure that migration runs before the main SigNoz container, you can use the `depends_on` directive in your `docker-compose.yml`:
 
@@ -350,27 +349,140 @@ To make sure that migration runs before the main SigNoz container, you can use t
 ```
 
 For checking whether the migration is successful or not, you can check the logs of the `migrate-signoz` container:
+
 ```bash
 docker logs -f migrate-signoz
 ✅ updated x dashboards in signoz.db
 ✅ updated y rules in /var/lib/signoz/signoz.db
 ```
 
-###Step 3: Need to enable new metrics
+### Step 3: Enable New Metrics
 
-You also need to pass environment variable ```DOT_METRICS_ENABLED``` to ```true```, to allow the platform to use dot metrics.
+You also need to pass environment variable `DOT_METRICS_ENABLED` to `true`, to allow the platform to use dot metrics.
+
 ```yaml
   signoz:
     environment:
       DOT_METRICS_ENABLED: "true"
 ```
 
-
 ## Docker Swarm
 
 *(Steps are identical to Docker Standalone but executed with `docker stack` commands. Use the [official upgrade guide](/docs/operate/docker-swarm#upgrade-signoz-cluster) and substitute the environment flag and migration script as above.)*
 
----
+### Step 1: Migrate Historical Data (For High Retention Users)
+
+You can run the migration job in your Docker Swarm setup by creating a service with the migration image. Use the same environment variables as mentioned above.
+
+Below service will run as a job and will not restart after completion.
+
+```bash
+docker service create \
+  --name signoz_migration_job \
+  --mode replicated-job --replicas 1 \
+  --restart-condition none \
+  --network signoz-net \
+  --mount type=volume,src=sqlite,dst=/var/lib/signoz \
+  \
+  --env CH_ADDR=signoz_clickhouse:9000 \
+  --env CH_DATABASE=signoz_metrics \
+  --env CH_USER=default \
+  --env CH_PASS= \
+  \
+  --env CH_MAX_OPEN_CONNS=32 \
+  --env CH_MAX_MEMORY_USAGE=8388608000 \
+  --env CH_MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY=524288000 \
+  --env CH_MAX_BYTES_BEFORE_EXTERNAL_SORT=524288000 \
+  --env CH_DIAL_TIMEOUT=60s \
+  --env CH_CONN_MAX_LIFETIME=30m \
+  --env CH_MAX_IDLE_CONNS=8 \
+  --env CH_MAX_EXECUTION_TIME=300 \
+  --env CH_MAX_THREADS=50 \
+  \
+  --env MIGRATE_WORKERS=12 \
+  --env MIGRATE_MAX_OPEN_CONNS=32 \
+  \
+  --env NOT_FOUND_METRICS_MAP=rpc_server_responses_per_rpc_bucket=rpc.server.responses_per_rpc.bucket \
+  --env NOT_FOUND_ATTR_MAP=http_scheme=http.scheme,net_peer_name=net.peer.name,net_peer_port=net.peer.port,net_protocol_name=net.protocol.name,net_protocol_version=net.protocol.version,rpc_grpc_status_code=rpc.grpc.status_code,rpc_method=rpc.method,rpc_service=rpc.service,rpc_system=rpc.system \
+  \
+  signoz/migrate:v0.70.5 \
+  migrate-data --workers 12 --max-open-conns 32
+```
+
+After the service is created, you can check the status of the migration job:
+
+```bash
+docker service ls
+```
+
+To check the logs of the migration job, you can use:
+
+```bash
+docker service logs signoz_migration_job -f
+
+signoz_migration_job    | {"level":"info","ts":1750878083.9140384,"caller":"migrate/main.go:659","msg":"query args","start":1750867200000,"end":1750869262833}
+signoz_migration_job   | {"level":"info","ts":1750878084.1492937,"caller":"migrate/main.go:728","msg":"migration success for windows start: 1750867200000, and end: 1750869262833"}
+signoz_migration_job  | 2025/06/25 19:01:24 Data migration completed [1750867200000…1750869262833]
+```
+
+### Step 2: Migrate Alerts and Dashboards
+
+For alerts and dashboards migration, you can create another service in your Docker Swarm setup using the migration image. Use the same environment variables as mentioned above.
+
+```bash
+docker service create \
+  --name "signoz_meta-job" \
+  --mode replicated-job --replicas 1 \
+  --restart-condition none \
+  --network "signoz-net" \
+  --mount type=volume,src=signoz-sqlite,dst=/var/lib/signoz/ \
+  \
+  -e SQL_DB_PATH=/var/lib/signoz/signoz.db \
+  -e CH_ADDR=signoz_clickhouse:9000 \
+  -e CH_DATABASE=signoz_metrics \
+  -e CH_USER=default \
+  -e CH_PASS="" \
+  -e CH_MAX_MEMORY_USAGE="8388608000" \
+  -e CH_MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY="4194304000" \
+  -e CH_MAX_BYTES_BEFORE_EXTERNAL_SORT="4194304000" \
+  -e CH_MAX_OPEN_CONNS="10" \
+  -e SKIP_METRICS_MAP="dd_internal_stats_payload=true" \
+  -e NOT_FOUND_METRICS_MAP="rpc_server_responses_per_rpc_bucket=rpc.server.responses_per_rpc.bucket" \
+  -e NOT_FOUND_ATTR_MAP="http_scheme=http.scheme," \
+  \
+  signoz/migrate:v0.70.5 \
+  migrate-meta
+```
+
+After the service is created, you can check the status of the migration job:
+
+```bash
+docker service ls
+```
+
+To check the logs of the migration job, you can use:
+
+```bash
+docker service logs signoz_meta-job -f
+signoz_meta-job  | ✅ updated 3 dashboards in signoz.db
+signoz_meta-job  | ✅ updated 0 rules in /var/lib/signoz/signoz.db
+```
+
+### Step 3: Enable New Metrics
+
+You also need to pass environment variable `DOT_METRICS_ENABLED` to `true`, to allow the platform to use dot metrics.
+
+```yaml
+  signoz:
+    environment:
+      DOT_METRICS_ENABLED: "true"
+```
+
+Apply the updated stack configuration:
+
+```bash
+docker stack deploy -c docker-compose.yml signoz
+```
 
 ## In Case of Migration Failure
 
@@ -388,17 +500,15 @@ Once migration is complete:
 2. Update any external integrations that might reference the old metrics format
 3. Consider optimizing your retention policies based on the new exporter's capabilities
 
-
 ## FAQ
 
 - **Connection errors**: Verify your ClickHouse connection parameters
 - **Permission issues**: Ensure the Docker container has access to your `signoz.db` file
 - **Data inconsistencies**: Run the migration script again if you notice missing data
 
-
 ---
 
 ## Next Steps
 
-* [Release notes 0.88.0](/docs/release-notes/v0.88.0)
+* [Release notes 0.88.0](/docs/release-notes/v0.88.0)
 * [Operate SigNoz on Kubernetes](/docs/operate/kubernetes)
