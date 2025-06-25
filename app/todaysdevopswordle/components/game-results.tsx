@@ -274,11 +274,11 @@ export function GameResults({
       <div className="space-y-3 text-center">
         <p className="text-[15px] leading-[1.6] text-gray-400">
           Today's word was '<span className="font-medium text-[#4558c4]">{targetWord}</span>' which
-          is a command that allows you to apply small, precise updates to live Kubernetes
-          resources—such as changing an image or updating labels—without replacing their entire YAML
+          is a command that reads a Dockerfile and creates an image by executing each instruction, 
+          packaging the application and its dependencies into layered, reusable artifacts.
         </p>
         <TrackingLink
-          href="https://komodor.com/learn/kubectl-patch-changing-kubernetes-objects-in-place"
+          href="https://www.cherryservers.com/blog/docker-build-command"
           target="_blank"
           clickType="external_link"
           clickName="blog_post_link"
