@@ -4,7 +4,9 @@ import BlogPostCard from '../Shared/BlogPostCard'
 import SearchInput from '../Shared/Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
-import { Frown } from 'lucide-react'
+import { Frown, BookOpen, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
+import articleSeriesData from '../../../constants/articleSeries.json'
 
 interface OpenTelemetryPageHeaderProps {
   onSearch: (e) => void
@@ -28,6 +30,44 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
   )
 }
 
+const FeaturedSeries = () => {
+  // Get the NextJS series from the articleSeries.json
+  const nextjsSeries = articleSeriesData['opentelemetry-nextjs']
+
+  if (!nextjsSeries) return null
+
+  return (
+    <div className="mb-8">
+      <Link href={nextjsSeries.seriesOverviewHref}>
+        <div className="flex cursor-pointer flex-col">
+          <div className="mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-all hover:bg-signoz_ink-300 dark:border-signoz_ink-500 dark:bg-signoz_ink-400 dark:hover:bg-signoz_ink-300">
+            <div className="content">
+              <div className="text-base font-medium leading-6 text-neutral-700 dark:text-neutral-100">
+                {nextjsSeries.name}
+              </div>
+
+              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">
+                {nextjsSeries.description}
+              </p>
+            </div>
+
+            <div className="mt-6 flex w-full flex-col items-end justify-between gap-5 py-px text-sm leading-5 lg:flex-row">
+              <div className="flex items-center gap-3 text-sm">
+                <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                  View Complete Series
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 whitespace-nowrap font-mono text-stone-500 dark:text-stone-300">
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Link>
+    </div>
+  )
+}
+
 export default function OpenTelemetry() {
   const posts = allCoreContent(sortPosts(allOpentelemetries))
   const primaryFeaturedBlogs = posts.slice(0, 2)
@@ -45,6 +85,9 @@ export default function OpenTelemetry() {
   return (
     <div className="comparisons">
       <OpenTelemetryPageHeader onSearch={handleSearch} />
+
+      {/* Featured Series Section */}
+      <FeaturedSeries />
 
       {searchValue && searchValue.length == 0 && (
         <div className="mt-5 w-full max-md:max-w-full">

@@ -1,0 +1,912 @@
+---
+
+title: Structured Logging in NextJS with OpenTelemetry
+slug: opentelemetry-nextjs-logging
+date: 2025-06-23
+tags: [OpenTelemetry, NextJS, Logging, SigNoz, JavaScript]
+authors: [yuvraj]
+description: Implement structured logging in your Next.js app using OpenTelemetry with full trace correlation and SigNoz integration. Covers server and browser logging, log exporters, and client/server context propagation.
+image: /img/blog/2024/12/opentelemetry-nextjs-cover.webp
+keywords: [nextjs logging, structured logs, opentelemetry nextjs, logs with traceId, sigznoz, javascript logging, frontend backend logging, logs correlation, browser logs, server logs]
+
+---
+
+<ArticleSeriesTop seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-logging" />
+
+Traces tell you **what** happened and **when**. Logs tell you **why**. When something breaks, logs are often your first clue—and if they’re correlated with traces, they can cut debugging time down from hours to minutes.
+
+In this section, we’ll wire up end-to-end structured logging across both server and browser environments in your Next.js app, complete with trace correlation and SigNoz integration.
+
+### Why You Need More Than `console.log`
+
+Traditional logging is fine for local development but production needs more:
+
+- Structured, searchable logs
+- Logs tied to specific user actions or trace spans
+- Server + browser visibility
+- Centralized analysis and alerting
+
+With OpenTelemetry + SigNoz, you can:
+
+- See errors and logs in one place
+- Correlate logs with spans (`traceId`, `spanId`)
+- Analyze structured metadata (userId, URL, duration, etc.)
+- Monitor logs from both the client and server
+
+
+## Server-Side Logging with Trace Context
+
+### Step 1: Install Required Packages
+
+```bash
+npm install @opentelemetry/api-logs @opentelemetry/sdk-logs @opentelemetry/exporter-logs-otlp-http pino
+```
+
+**Dependency Breakdown:**
+- **`@opentelemetry/api-logs`**: Core logging API
+- **`@opentelemetry/sdk-logs`**: SDK for log processing and export
+- **`@opentelemetry/exporter-logs-otlp-http`**: OTLP HTTP exporter for logs
+- **`pino`**: High-performance structured logging library
+
+### Step 2: Create the Logs Exporter
+
+This sends structured logs to the OpenTelemetry collector:
+
+```jsx
+// lib/logs-exporter.ts
+
+import { logs } from "@opentelemetry/api-logs";
+import {
+  LoggerProvider,
+  BatchLogRecordProcessor,
+} from "@opentelemetry/sdk-logs";
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
+import { Resource } from "@opentelemetry/resources";
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
+} from "@opentelemetry/semantic-conventions";
+import type { LogEntry } from "./logger";
+
+let isInitialized = false;
+let loggerProvider: LoggerProvider | null = null;
+
+export function initializeLogsExporter() {
+  if (isInitialized || typeof window !== "undefined") {
+    return; // Only initialize on server side
+  }
+
+  try {
+    // Create resource with service information
+    const resource = new Resource({
+      [ATTR_SERVICE_NAME]: "nextjs-observability-demo",
+      [ATTR_SERVICE_VERSION]: "1.0.0",
+    });
+
+    // Create OTLP exporter
+    const logExporter = new OTLPLogExporter({
+      url: "http://localhost:4318/v1/logs",
+      headers: {},
+    });
+
+    // Create logger provider
+    loggerProvider = new LoggerProvider({
+      resource: resource as any,
+    });
+
+    // Add batch processor
+    loggerProvider.addLogRecordProcessor(
+      new BatchLogRecordProcessor(logExporter, {
+        maxExportBatchSize: 10,
+        scheduledDelayMillis: 5000, // Export every 5 seconds
+        exportTimeoutMillis: 30000,
+        maxQueueSize: 100,
+      })
+    );
+
+    // Set global logger provider
+    logs.setGlobalLoggerProvider(loggerProvider);
+    isInitialized = true;
+    console.log(" OpenTelemetry logs exporter initialized");
+  } catch (error) {
+    console.error("❌ Failed to initialize logs exporter:", error);
+  }
+}
+
+export function exportLogEntry(entry: LogEntry) {
+  if (!isInitialized || !loggerProvider || typeof window !== "undefined") {
+    return;
+  }
+
+  try {
+    const logger = loggerProvider.getLogger("nextjs-observability-demo");
+
+    // Build attributes object
+    const attributes: Record<string, any> = {
+      ...entry.context,
+      "log.level": entry.level,
+      "service.name": "nextjs-observability-demo",
+    };
+
+    // Add error details if present
+    if (entry.error) {
+      attributes["error.name"] = entry.error.name;
+      attributes["error.message"] = entry.error.message;
+      attributes["error.stack"] = entry.error.stack;
+    }
+
+    // Convert our log entry to OpenTelemetry log record
+    const logRecord = {
+      timestamp: Date.now(),
+      observedTimestamp: Date.now(),
+      severityNumber: getSeverityNumber(entry.level),
+      severityText: entry.level.toUpperCase(),
+      body: entry.message,
+      attributes,
+    };
+
+    logger.emit(logRecord);
+  } catch (error) {
+    console.error("Failed to export log entry:", error);
+  }
+}
+
+function getSeverityNumber(level: string): number {
+  switch (level) {
+    case "debug":
+      return 5; // DEBUG
+    case "info":
+      return 9; // INFO
+    case "warn":
+      return 13; // WARN
+    case "error":
+      return 17; // ERROR
+    default:
+      return 9; // Default to INFO
+  }
+}
+
+export function shutdownLogsExporter(): Promise<void> {
+  if (loggerProvider) {
+    return loggerProvider.shutdown();
+  }
+  return Promise.resolve();
+}
+
+```
+
+### Step 3: Unified Logger
+
+This is your standard logging API across server and client:
+
+```jsx
+// lib/logger.ts
+
+import { trace } from "@opentelemetry/api";
+import { exportLogEntry } from "./logs-exporter";
+
+export interface LogContext {
+  traceId?: string;
+  spanId?: string;
+  userId?: string;
+  requestId?: string;
+  sessionId?: string;
+  [key: string]: any;
+}
+
+export interface LogEntry {
+  timestamp: string;
+  level: "debug" | "info" | "warn" | "error";
+  message: string;
+  context?: LogContext;
+  error?: Error;
+}
+
+class Logger {
+  private getTraceContext(): { traceId?: string; spanId?: string } {
+    try {
+      const span = trace.getActiveSpan();
+      if (span) {
+        const spanContext = span.spanContext();
+        return {
+          traceId: spanContext.traceId,
+          spanId: spanContext.spanId,
+        };
+      }
+    } catch (error) {
+      // Ignore trace context errors
+    }
+    return {};
+  }
+
+  private log(
+    level: LogEntry["level"],
+    message: string,
+    context?: LogContext,
+    error?: Error
+  ) {
+    const traceContext = this.getTraceContext();
+    const entry: LogEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      context: {
+        ...traceContext,
+        ...context,
+      },
+      error,
+    };
+
+    // Always log to console
+    const logMethod =
+      level === "error"
+        ? console.error
+        : level === "warn"
+        ? console.warn
+        : level === "debug"
+        ? console.debug
+        : console.log;
+
+    if (error) {
+      logMethod(`[${level.toUpperCase()}] ${message}`, entry.context, error);
+    } else {
+      logMethod(`[${level.toUpperCase()}] ${message}`, entry.context);
+    }
+
+    // Export to OpenTelemetry collector (server-side only)
+    if (typeof window === "undefined") {
+      try {
+        exportLogEntry(entry);
+      } catch (exportError) {
+        console.error("Failed to export log to OTel:", exportError);
+      }
+    }
+
+    return entry;
+  }
+
+  debug(message: string, context?: LogContext) {
+    return this.log("debug", message, context);
+  }
+
+  info(message: string, context?: LogContext) {
+    return this.log("info", message, context);
+  }
+
+  warn(message: string, context?: LogContext) {
+    return this.log("warn", message, context);
+  }
+
+  error(message: string, error?: Error, context?: LogContext) {
+    return this.log("error", message, context, error);
+  }
+
+  // Convenience methods for common patterns
+
+  request(
+    method: string,
+    url: string,
+    statusCode: number,
+    duration: number,
+    context?: LogContext
+  ) {
+    return this.info(`${method} ${url} ${statusCode}`, {
+      ...context,
+      httpMethod: method,
+      httpUrl: url,
+      httpStatusCode: statusCode,
+      duration,
+      type: "request",
+    });
+  }
+
+  externalCall(
+    service: string,
+    method: string,
+    url: string,
+    duration: number,
+    success: boolean,
+    context?: LogContext
+  ) {
+    const level = success ? "info" : "error";
+    return this.log(level, `External call to ${service}: ${method} ${url}`, {
+      ...context,
+      externalService: service,
+      httpMethod: method,
+      httpUrl: url,
+      duration,
+      success,
+      type: "external_call",
+    });
+  }
+
+  performance(operation: string, duration: number, context?: LogContext) {
+    const level = duration > 1000 ? "warn" : "info";
+    return this.log(level, `Performance: ${operation} took ${duration}ms`, {
+      ...context,
+      operation,
+      duration,
+      type: "performance",
+    });
+  }
+
+  business(event: string, context?: LogContext) {
+    return this.info(`Business event: ${event}`, {
+      ...context,
+      event,
+      type: "business",
+    });
+  }
+
+  security(event: string, context?: LogContext) {
+    return this.warn(`Security event: ${event}`, {
+      ...context,
+      event,
+      type: "security",
+    });
+  }
+}
+
+export const logger = new Logger();
+
+// Convenience functions for quick logging
+export const log = {
+  debug: (message: string, context?: LogContext) =>
+    logger.debug(message, context),
+  info: (message: string, context?: LogContext) =>
+    logger.info(message, context),
+  warn: (message: string, context?: LogContext) =>
+    logger.warn(message, context),
+  error: (message: string, error?: Error, context?: LogContext) =>
+    logger.error(message, error, context),
+};
+
+```
+
+- Logs include `traceId`, `spanId`, `timestamp`
+- Supports levels: `debug`, `info`, `warn`, `error`
+- Auto-exports to collector (on server only)
+
+### Step 4: High-Performance Pino Logger (Optional)
+
+Use `pino` for faster logs in production:
+
+```jsx
+// lib/pino-logger.ts
+
+import pino from "pino";
+import { trace } from "@opentelemetry/api";
+import type { LogContext } from "./logger";
+
+// Pino configuration for different environments
+const createPinoConfig = (environment: string = "development") => {
+  const baseConfig = {
+    name: "nextjs-observability-demo",
+    level: environment === "production" ? "info" : "debug",
+    timestamp: pino.stdTimeFunctions.isoTime,
+    formatters: {
+      level: (label: string) => ({ level: label }),
+    },
+    mixin: () => {
+      // Automatically inject trace context into every log
+      const span = trace.getActiveSpan();
+      const spanContext = span?.spanContext();
+      return {
+        traceId: spanContext?.traceId,
+        spanId: spanContext?.spanId,
+        environment,
+      };
+    },
+  };
+  return baseConfig;
+};
+
+// Create Pino logger instance
+export const pinoLogger = pino(createPinoConfig(process.env.NODE_ENV));
+
+// Enhanced Pino logger with additional context methods
+export class PinoLogger {
+  private logger: pino.Logger;
+
+  constructor(logger: pino.Logger = pinoLogger) {
+    this.logger = logger;
+  }
+
+  private enrichContext(context: LogContext = {}): LogContext {
+    const span = trace.getActiveSpan();
+    const spanContext = span?.spanContext();
+    return {
+      traceId: spanContext?.traceId,
+      spanId: spanContext?.spanId,
+      timestamp: new Date().toISOString(),
+      ...context,
+    };
+  }
+
+  debug(message: string, context?: LogContext) {
+    this.logger.debug(this.enrichContext(context), message);
+  }
+
+  info(message: string, context?: LogContext) {
+    this.logger.info(this.enrichContext(context), message);
+  }
+
+  warn(message: string, context?: LogContext) {
+    this.logger.warn(this.enrichContext(context), message);
+  }
+
+  error(message: string, error?: Error, context?: LogContext) {
+    const enrichedContext = this.enrichContext(context);
+    if (error) {
+      enrichedContext.error = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      };
+    }
+    this.logger.error(enrichedContext, message);
+  }
+
+  // Specialized logging methods
+
+  logRequest(req: any, context?: LogContext) {
+    this.info("HTTP Request", {
+      ...context,
+      method: req.method,
+      url: req.url,
+      userAgent: req.headers?.["user-agent"],
+      ip: req.headers?.["x-forwarded-for"] || req.connection?.remoteAddress,
+    });
+  }
+
+  logDbOperation(
+    operation: string,
+    table: string,
+    duration: number,
+    context?: LogContext
+  ) {
+    this.info("Database Operation", {
+      ...context,
+      operation,
+      table,
+      duration: `${duration}ms`,
+    });
+  }
+
+  logExternalCall(
+    url: string,
+    method: string,
+    statusCode: number,
+    duration: number,
+    context?: LogContext
+  ) {
+    this.info("External API Call", {
+      ...context,
+      url,
+      method,
+      statusCode,
+      duration: `${duration}ms`,
+    });
+  }
+}
+
+export const serverLogger = new PinoLogger(pinoLogger);
+
+```
+
+
+## Client-Side Logging with Auto-Export
+
+### Step 5: Create Browser Logger
+
+```jsx
+// lib/browser-logger.ts
+"use client";
+
+import { trace } from "@opentelemetry/api";
+import type { LogContext } from "./logger";
+
+export interface BrowserLogEntry {
+  level: "debug" | "info" | "warn" | "error";
+  message: string;
+  context?: LogContext;
+  timestamp: string;
+  url?: string;
+  userAgent?: string;
+  error?: {
+    name: string;
+    message: string;
+    stack?: string;
+  };
+}
+
+class BrowserLogger {
+  private logs: BrowserLogEntry[] = [];
+  private maxLogs = 1000;
+  private flushInterval = 10000; // 10 seconds
+  private collectorUrl = "/api/logs";
+
+  constructor() {
+    if (typeof window !== "undefined") {
+      this.setupGlobalErrorHandlers();
+      this.startPeriodicFlush();
+    }
+  }
+
+  private enrichContext(context: LogContext = {}): LogContext {
+    const span = trace.getActiveSpan();
+    const spanContext = span?.spanContext();
+
+    return {
+      traceId: spanContext?.traceId || "no-trace",
+      spanId: spanContext?.spanId || "no-span",
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      sessionId: this.getSessionId(),
+      ...context,
+    };
+  }
+
+  private getSessionId(): string {
+    let sessionId = sessionStorage.getItem("session-id");
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      sessionStorage.setItem("session-id", sessionId);
+    }
+    return sessionId;
+  }
+
+  private createLogEntry(
+    level: BrowserLogEntry["level"],
+    message: string,
+    context?: LogContext,
+    error?: Error
+  ): BrowserLogEntry {
+    const entry: BrowserLogEntry = {
+      level,
+      message,
+      context: this.enrichContext(context),
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+    };
+
+    if (error) {
+      entry.error = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      };
+    }
+
+    return entry;
+  }
+
+  debug(message: string, context?: LogContext) {
+    const entry = this.createLogEntry("debug", message, context);
+    this.addLog(entry);
+    console.debug(`[BROWSER DEBUG] ${message}`, entry.context);
+  }
+
+  info(message: string, context?: LogContext) {
+    const entry = this.createLogEntry("info", message, context);
+    this.addLog(entry);
+    console.info(`[BROWSER INFO] ${message}`, entry.context);
+  }
+
+  warn(message: string, context?: LogContext) {
+    const entry = this.createLogEntry("warn", message, context);
+    this.addLog(entry);
+    console.warn(`[BROWSER WARN] ${message}`, entry.context);
+  }
+
+  error(message: string, error?: Error, context?: LogContext) {
+    const entry = this.createLogEntry("error", message, context, error);
+    this.addLog(entry);
+    console.error(`[BROWSER ERROR] ${message}`, entry.context, error);
+  }
+
+  // Specialized logging methods
+
+  logNavigation(from: string, to: string) {
+    this.info("Navigation", {
+      event: "navigation",
+      from,
+      to,
+      timing: performance.now(),
+    });
+  }
+
+  logUserInteraction(action: string, element?: string, context?: LogContext) {
+    this.info("User Interaction", {
+      ...context,
+      event: "user_interaction",
+      action,
+      element,
+      timing: performance.now(),
+    });
+  }
+
+  logApiCall(
+    url: string,
+    method: string,
+    status: number,
+    duration: number,
+    context?: LogContext
+  ) {
+    const level = status >= 400 ? "error" : status >= 300 ? "warn" : "info";
+    this[level](`API Call: ${method} ${url}`, {
+      ...context,
+      event: "api_call",
+      url,
+      method,
+      status,
+      duration,
+    });
+  }
+
+  private addLog(entry: BrowserLogEntry) {
+    this.logs.push(entry);
+    // Keep only the most recent logs
+    if (this.logs.length > this.maxLogs) {
+      this.logs = this.logs.slice(-this.maxLogs);
+    }
+  }
+
+  private setupGlobalErrorHandlers() {
+    // Unhandled JavaScript errors
+    window.addEventListener("error", (event) => {
+      this.error("Unhandled Error", event.error, {
+        event: "unhandled_error",
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+      });
+    });
+
+    // Unhandled promise rejections
+    window.addEventListener("unhandledrejection", (event) => {
+      this.error("Unhandled Promise Rejection", event.reason, {
+        event: "unhandled_rejection",
+        reason: event.reason?.toString(),
+      });
+    });
+  }
+
+  private startPeriodicFlush() {
+    setInterval(() => {
+      this.flush();
+    }, this.flushInterval);
+
+    // Flush on page unload
+    window.addEventListener("beforeunload", () => {
+      this.flush();
+    });
+  }
+
+  async flush() {
+    if (this.logs.length === 0) return;
+
+    const logsToSend = [...this.logs];
+    this.logs = [];
+
+    try {
+      const response = await fetch(this.collectorUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(logsToSend),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to send logs to server:", response.statusText);
+        // Re-add logs if send failed
+        this.logs.unshift(...logsToSend);
+      }
+    } catch (error) {
+      console.error("Error sending logs:", error);
+      // Re-add logs if send failed
+      this.logs.unshift(...logsToSend);
+    }
+  }
+
+  getLogs(): BrowserLogEntry[] {
+    return [...this.logs];
+  }
+
+  clearLogs() {
+    this.logs = [];
+  }
+}
+
+export const browserLogger = new BrowserLogger();
+
+// Convenience exports
+export const browserLog = {
+  debug: (message: string, context?: LogContext) =>
+    browserLogger.debug(message, context),
+  info: (message: string, context?: LogContext) =>
+    browserLogger.info(message, context),
+  warn: (message: string, context?: LogContext) =>
+    browserLogger.warn(message, context),
+  error: (message: string, error?: Error, context?: LogContext) =>
+    browserLogger.error(message, error, context),
+  navigation: (from: string, to: string) =>
+    browserLogger.logNavigation(from, to),
+  userInteraction: (
+    action: string,
+    element?: string,
+    context?: LogContext
+  ) => browserLogger.logUserInteraction(action, element, context),
+  apiCall: (
+    url: string,
+    method: string,
+    status: number,
+    duration: number,
+    context?: LogContext
+  ) => browserLogger.logApiCall(url, method, status, duration, context),
+  flush: () => browserLogger.flush(),
+  getLogs: () => browserLogger.getLogs(),
+  clearLogs: () => browserLogger.clearLogs(),
+};
+j
+```
+
+- Buffers logs in memory
+- Adds browser metadata (URL, userAgent, sessionId)
+- Automatically flushes logs to server every 10s
+
+### Step 6: API Route to Receive Logs
+
+```jsx
+// app/api/logs/route.ts
+
+import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
+import { initializeLogsExporter } from "@/lib/logs-exporter";
+
+// Ensure logs exporter is initialized for API routes
+initializeLogsExporter();
+
+export async function POST(request: NextRequest) {
+  try {
+    const logs = await request.json();
+
+    if (!Array.isArray(logs)) {
+      return NextResponse.json(
+        { error: "Invalid logs format" },
+        { status: 400 }
+      );
+    }
+
+    console.log(`🔄 Processing ${logs.length} browser logs...`);
+
+    // Process each log entry from the browser
+    for (const log of logs) {
+      const { level, message, context, error } = log;
+
+      // Add browser-specific context
+      const enrichedContext = {
+        ...context,
+        source: "browser",
+        userAgent: request.headers.get("user-agent"),
+        referer: request.headers.get("referer"),
+      };
+
+      // Forward to server logger (which also exports to OTel)
+      switch (level) {
+        case "debug":
+          logger.debug(message, enrichedContext);
+          break;
+        case "info":
+          logger.info(message, enrichedContext);
+          break;
+        case "warn":
+          logger.warn(message, enrichedContext);
+          break;
+        case "error":
+          const errorObj = error ? new Error(error.message) : undefined;
+          if (errorObj && error.stack) {
+            errorObj.stack = error.stack;
+          }
+          logger.error(message, errorObj, enrichedContext);
+          break;
+        default:
+          logger.info(message, enrichedContext);
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      processed: logs.length,
+    });
+
+  } catch (error) {
+    console.error("❌ Failed to process browser logs:", error);
+    logger.error("Failed to process browser logs", error as Error);
+    return NextResponse.json(
+      { error: "Failed to process logs" },
+      { status: 500 }
+    );
+  }
+}
+
+```
+
+This route receives browser logs and sends them to the collector with trace context.
+
+
+## Instrumentation Hook
+
+### Step 7: Add to `instrumentation.ts`
+
+```jsx
+import { registerOTel } from "@vercel/otel";
+import { initializeLogsExporter } from "./lib/logs-exporter";
+
+export function register() {
+  registerOTel({
+    serviceName: "nextjs-observability-demo",
+    instrumentationConfig: {
+      fetch: {
+        // Propagate context to all external URLs to enable proper tracing
+        propagateContextUrls: [
+          /jsonplaceholder\.typicode\.com/,
+          /httpbin\.org/,
+          /api\.openweathermap\.org/,
+          // Add more external domains as needed
+        ],
+        // Don't ignore any URLs - we want to trace all external calls
+        ignoreUrls: [],
+        // Enable resource naming for better span identification
+        resourceNameTemplate: "{http.method} {http.host}{http.target}",
+      },
+    },
+  });
+
+  // Initialize logs exporter for OpenTelemetry
+  initializeLogsExporter();
+}
+
+```
+
+
+
+## Logs Demo Page
+
+### Step 8: Create `logs-demo/page.tsx`
+
+Create a page that lets you trigger logs from browser and server:
+
+- Simulate API calls, slow requests, errors
+- Generate and view structured logs
+- Verify export to collector and SigNoz
+
+
+
+## View Logs in SigNoz
+
+### Step 9: Explore Your Logs
+
+- Go to SigNoz → Logs
+- Filter by source: `source="browser"` or `source="server"`
+    
+    <Figure src="/img/blog/2025/06/opentelemetry-nextjs-logging-image.webp" alt="SigNoz logs interface showing structured logs with trace correlation and filtering options" caption="Filter logs by source (browser/server) and view structured log entries with trace context in SigNoz" />
+    
+- Click any log to view trace metadata
+    
+    <Figure src="/img/blog/2025/06/opentelemetry-nextjs-logging-image%201.webp" alt="Navigate between logs and traces seamlessly in SigNoz" caption="Navigate between logs and traces seamlessly in SigNoz" />
+    
+- Correlate with full request trace via `traceId`
+    
+    <Figure src="/img/blog/2025/06/opentelemetry-nextjs-logging-image%202.webp" alt="SigNoz trace details view showing the correlation between logs and distributed traces" caption="Click 'Inspect in Trace' to jump from logs to the full distributed trace view with all spans and timing information" />
+    
+The real power of working with logs and traces in SigNoz comes from correlation - click "Inspect in Trace" or the trace ID to jump directly to the corresponding trace when checking a log or "Go to related logs" from any trace details page.
+
+
+## Next: Production Deployment and Scaling
+
+With instrumentation, metrics, and logging in place, you're ready for production. In the next article, we'll cover deploying your instrumented Next.js app, choosing between collector vs direct exporter setups, implementing smart sampling strategies, and setting up production-grade alerting.
+
+<ArticleSeriesBottom seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-logging" />

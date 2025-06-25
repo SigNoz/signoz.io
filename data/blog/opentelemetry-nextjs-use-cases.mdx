@@ -1,0 +1,382 @@
+---
+
+title: NextJS OpenTelemetry Use Cases - Monitoring 404s, External APIs, Exceptions & More
+slug: opentelemetry-nextjs-use-cases
+date: 2025-06-23
+tags: [OpenTelemetry, NextJS, Observability, SigNoz, JavaScript]
+authors: [yuvraj]
+description: Explore powerful real-world observability patterns in your Next.js application using OpenTelemetry and SigNoz—from tracking 404s to monitoring third-party APIs, capturing exceptions, analyzing cache hit/miss, and more.
+image: /img/blog/2024/12/opentelemetry-nextjs-cover.webp
+keywords: [nextjs observability, 404 monitoring, exception tracing, external api monitoring, opentelemetry nextjs, sigznoz, tracing, metrics, logs, apm, devops]
+
+---
+
+<ArticleSeriesTop seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-use-cases" />
+
+
+Let’s talk about one of the most powerful features of SigNoz enabled via OpenTelemetry: **Query Builder**.
+
+Whether you’re tracking 404s, debugging API latency, or monitoring business metrics from your NextJS application, the Query Builder lets you slice your telemetry data—traces, metrics, logs—without learning a new query language.
+
+Let’s walk through a practical example: monitoring 404 errors in production.
+
+### Tracking 404 Errors by Route
+
+404s are often ignored—until broken links start affecting SEO or users drop off at checkout. SigNoz makes it easy to proactively monitor and surface route-level 404 issues.
+
+### Step-by-Step: Setup 404 Monitoring
+
+### 1. Open Traces → Explorer
+
+In the SigNoz UI, head to **Traces > Explorer**.
+
+### 2. Apply Filters
+
+- `service.name = nextjs-observability-demo`
+- `http.status_code = 404`
+
+Set your time range to “Last 1 day” or any relevant window.
+
+You’ll now see a breakdown of which routes are returning 404s and how often.
+
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-use-cases-image.webp" alt="SigNoz Traces Explorer showing 404 error filtering with service name and HTTP status code filters applied" caption="Filter and analyze 404 errors in SigNoz: Use the Traces Explorer to identify which routes are returning 404s and track their frequency over time" />
+
+
+### What You Can Uncover
+
+- `/auth/missing-profile` – broken login flow?
+- `/api/v1/deprecated-endpoint` – old mobile app still hitting deprecated APIs?
+- `/static/dead-banner.webp` – CDN issue or asset removed?
+
+You can also switch to the **Time Series** view to see trends—are 404s spiking after a deploy?
+
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-use-cases-CleanShot_2025-06-20_at_12.16.062x.webp" alt="SigNoz time series chart displaying 404 error trends over time with spike detection capabilities" caption="Monitor 404 error trends: Switch to time series view in SigNoz to detect spikes in 404 errors after deployments or identify patterns in broken links" />
+
+
+
+### Save and Visualize
+
+Need to query the same thing again? You’ve got options:
+
+1.  **Save the View**
+    
+    Give it a name like `404 Error Monitor`, save it for reuse.
+    
+2.  **Add to Dashboard**
+    
+    Choose the visual that fits:
+    
+    - **List** – See raw 404 traces
+    - **Time Series** – Trend of 404s per hour
+    - **Table** – Routes with highest 404s
+    
+    <Figure src="/img/blog/2025/06/opentelemetry-nextjs-use-cases-image%201.webp" alt="SigNoz dashboard creation interface showing query builder with visualization options for 404 monitoring" caption="Build custom 404 monitoring dashboards: Use SigNoz Query Builder to create reusable views with list, time series, or table visualizations for tracking 404 errors" />
+    
+
+404s aren’t just noise. They can mean a broken user journeys or missed conversions when a page fails silently.
+
+## Monitoring Third-Party APIs in SigNoz
+
+Modern apps are built on top of other people's APIs. Payments, weather data, analytics, social logins - chances are your Next.js app talks to at least a handful of external services.
+
+And when one of those APIs slows down, fails, or changes behavior, your app takes the hit.
+
+That’s where SigNoz’s **External API Monitoring** comes in. It gives you visibility into how those dependencies perform, without needing custom code or wrappers.
+
+### A Sample Setup
+
+To show this in action, let’s take a basic example where a Next.js API route calls a few external services:
+
+```jsx
+// app/api/external/route.ts
+
+export async function GET(request: NextRequest) {
+  const results = await Promise.allSettled([
+    fetch('https://jsonplaceholder.typicode.com/posts/1'),
+    fetch('https://httpbin.org/json'),
+    fetch('https://httpbin.org/delay/2'), // Simulates latency
+    fetch('https://api.openweathermap.org/data/2.5/weather?q=London'),
+  ]);
+
+  return NextResponse.json({ success: true, results });
+}
+```
+
+This endpoint hits multiple APIs—including one that’s intentionally slow, and another that returns a 401 (since we’re skipping the API key).
+
+Let’s wire this up so SigNoz can track and visualize every call.
+
+### Configuring `instrumentation.ts` for External API Monitoring
+
+Add the following config to your `instrumentation.ts`:
+
+```
+import { registerOTel } from '@vercel/otel';
+
+export function register() {
+  registerOTel({
+    serviceName: 'nextjs-observability-demo',
+    instrumentationConfig: {
+      fetch: {
+        propagateContextUrls: [
+          /jsonplaceholder\.typicode\.com/,
+          /httpbin\.org/,
+          /api\.openweathermap\.org/,
+        ],
+        ignoreUrls: [],
+        resourceNameTemplate: '{http.method} {http.host}{http.target}',
+      },
+    },
+  });
+}
+
+```
+
+What this does:
+
+- **`propagateContextUrls`** ensures context is passed with the fetch call, so traces remain connected.
+- **`ignoreUrls: []`** means **everything** gets traced.
+- **`resourceNameTemplate`** makes spans readable in dashboards.
+- Behind the scenes, Vercel’s OpenTelemetry wrapper adds the right span metadata (`http.url`, `net.peer.name`, etc.), which SigNoz needs to automatically recognize these calls.
+
+### Where to See the Magic
+
+Once this is in place and you start making requests, go to the **“External API”** tab in SigNoz. You’ll see:
+
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-use-cases-image%202.webp" alt="SigNoz’s External API Dashboard" caption="SigNoz’s External API Dashboard" />
+
+### External API Overview
+
+- Every external domain your app touches
+- Avg latency, error rates, call volumes
+- Last seen timestamps
+
+### Per-Service Metrics
+
+- Call breakdowns by HTTP status codes
+- Rate and latency over time
+- Error spike trends
+
+### Endpoint-Level Insights
+
+- `/json` on `httpbin.org`
+- `/weather` on `openweathermap.org`
+- Full visibility down to the path level
+
+### Don’t See Your APIs?
+
+If nothing shows up in the dashboard, check:
+
+- You’re hitting the external service in a real request
+- You restarted the app after editing `instrumentation.ts`
+- You’re using `@vercel/otel` with `fetch` instrumentation enabled
+- The domains are included in `propagateContextUrls`
+
+Still nothing? Open the SigNoz **Traces** explorer and check if spans are being created. That’s your debugging starting point.
+
+### Why This Matters
+
+Third-party APIs are a hidden bottleneck in many apps. You can’t control them—but you **can** track them:
+
+- Spot external slowdowns before they become user-facing
+- Understand which pages or flows depend on which APIs
+- Catch breaking changes early (like status code changes or timeouts)
+- Build alerts for degradation in external service reliability
+
+And you can do it without adding custom wrappers, proxies, or more tooling. It’s just part of your OpenTelemetry flow—with SigNoz doing the visualization heavy lifting.
+
+## Exception Monitoring for NextJS with OpenTelemetry
+
+Exceptions are where the real debugging begins. Your logs might tell you something crashed, but tracing **why** it crashed—and how it impacted the rest of the system—is where SigNoz shines.
+
+By default, OpenTelemetry can auto-capture some exceptions in your Next.js app. But if you want full context, clean groupings, and proper error analysis, you’ll want to take control and manually record exceptions into your spans.
+
+### Why Record Exceptions Manually?
+
+Good observability is about **context**. Manual exception recording lets you:
+
+- Attach custom attributes like user ID, error category, or failed operation
+- Control how errors are grouped (validation vs. auth vs. DB errors)
+- Link stack traces to actual traces (no jumping between systems)
+- Make sure failed spans are marked as such—so you’re not staring at 200 OKs that actually blew up halfway
+
+### Example: Creating Failing Endpoints
+
+Let’s wire up some fake endpoints to simulate common exceptions in a Next.js API route:
+
+```tsx
+// app/api/errors/route.ts
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+
+export async function GET(request: NextRequest) {
+  const type = new URL(request.url).searchParams.get('type') || 'generic';
+  const span = trace.getActiveSpan();
+
+  try {
+    switch (type) {
+      case 'validation':
+        throw new Error('Invalid user input: email format is incorrect');
+      case 'database':
+        throw new Error('Database connection failed: timeout');
+      case 'network':
+        throw new Error('External API call failed: 503 Service Unavailable');
+      default:
+        throw new Error('Something went wrong');
+    }
+  } catch (err) {
+    if (span) {
+      span.recordException(err);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
+    }
+
+    return new Response(
+      JSON.stringify({ error: err.message, type }),
+      { status: 500 }
+    );
+  }
+}
+```
+
+What this does:
+
+- Records the exception inside the current span
+- Marks the span as an error with a human-readable message
+- Returns a friendly JSON response for the frontend (or test script)
+
+
+### See it in Action
+
+Let’s hammer the endpoint a few times with different error types:
+
+```bash
+curl http://localhost:3000/api/errors?type=validation
+curl http://localhost:3000/api/errors?type=database
+curl http://localhost:3000/api/errors?type=network
+
+```
+
+Or you can automate it.
+
+### Where This Shows Up in SigNoz
+
+Once OpenTelemetry records the exceptions, SigNoz groups them in the **Exceptions** tab:
+
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-use-cases-image%203.webp" alt="SigNoz Exceptions tab showing grouped exceptions by service, type, and message" caption="Monitor exceptions in SigNoz: Group and analyze errors by service, type, and message to identify recurring issues and root causes" />
+
+You’ll see:
+
+- Groupings by service (`nextjs-observability-demo`)
+- Exception types (Error, TypeError, etc.)
+- Message groupings for recurring issues
+- Frequency, first seen, last seen
+
+Click into any error, and you get:
+
+<Figure src="/img/blog/2025/06/opentelemetry-nextjs-use-cases-image%204.webp" alt="SigNoz exception details view showing full stack trace, span metadata, and trace ID" caption="Inspect exceptions in SigNoz: Click into any exception to see the full stack trace, span metadata, and trace ID to pinpoint the root cause" />
+- Full stack trace
+- Span metadata (e.g., which database call or API route it happened in)
+- Trace ID to pivot into the full request flow
+
+## Other Common Use Cases
+
+Beyond 404s, third-party APIs, and exceptions, there’s a lot more you can monitor with OpenTelemetry in Next.js. Here’s a quick hit list of useful observability patterns you can add with minimal effort.
+
+### Database Query Monitoring
+
+Track slow queries, failures, or just see what your app is hammering the most.
+
+```
+const span = trace.getActiveSpan();
+span?.setAttributes({
+  'db.system': 'postgresql',
+  'db.statement': 'SELECT * FROM users WHERE id = $1',
+  'db.execution_time': queryDuration,
+});
+```
+
+**What to monitor:**
+
+- Query durations (especially P95/P99)
+- Connection pool usage
+- Query failure patterns
+- Slow queries by route or function
+
+
+### Referrer + User Journey Tracing
+
+Set custom attributes in your spans to see where users come from and how they move through the app:
+
+```
+span?.setAttributes({
+  'user.referrer': request.headers.referer,
+  'user.agent': request.headers['user-agent'],
+  'page.route': '/product/[id]',
+  'user.source': 'organic',
+});
+```
+
+**Use cases:**
+
+- Funnel drop-off analysis
+- Attribution (search vs. social vs. direct)
+- Detect dead-end pages
+- Campaign effectiveness
+
+### Background Job Monitoring
+
+Even async work should leave traces.
+
+```
+const span = tracer.startSpan('emailQueue.process');
+span.setAttributes({
+  'job.type': 'email',
+  'job.queue_depth': queue.length,
+});
+await processEmails();
+span.end();
+```
+
+**Useful for:**
+
+- Failed job tracking
+- Queue spikes and backlog detection
+- Job retries and runtime anomalies
+
+### Cache Hit/Miss Analysis
+
+Caches help, but only if they’re hitting.
+
+```
+const span = trace.getActiveSpan();
+span?.setAttributes({
+  'cache.type': 'redis',
+  'cache.key': key,
+  'cache.hit': !!cached,
+});
+```
+
+**What this tells you:**
+
+- Hit ratio by endpoint or operation
+- TTL expiration patterns
+- Cache vs. DB response time deltas
+
+### Strategy TL;DR
+
+You don’t need a new tool for each metric. Stick to this:
+
+1. Start a span where logic matters
+2. Tag it with helpful context
+3. Visualize it in SigNoz with dashboards or queries
+4. Add alerts where failure hurts
+
+These are just a few ideas to spark implementation. The key takeaway?
+
+**If it matters to your app, wrap it in a span.**
+
+## Next: Tracking Web Vitals & Widget Performance in Next.js with OpenTelemetry
+
+In the upcoming articles, we'll explore how to actually use SigNoz to track web vitals and widget performance in Next.js.
+
+
+<ArticleSeriesBottom seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-use-cases" />
