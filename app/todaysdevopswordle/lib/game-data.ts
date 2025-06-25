@@ -6,8 +6,8 @@ export interface WordleGameData {
 
 // Current game data - update this daily
 const CURRENT_GAME_DATA: WordleGameData = {
-  word: 'PATCH',
-  hint: 'Alters the present without starting from scratch.',
+  word: 'BUILD',
+  hint: 'The silent craft that shapes your vessel from lines of code.',
   date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
 }
 
