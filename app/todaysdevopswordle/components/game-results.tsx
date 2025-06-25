@@ -276,6 +276,7 @@ export function GameResults({
           Today's word was '<span className="font-medium text-[#4558c4]">{targetWord}</span>' which
           is a command that reads a Dockerfile and creates an image by executing each instruction, 
           packaging the application and its dependencies into layered, reusable artifacts.
+        </p>
         <TrackingLink
           href="https://www.cherryservers.com/blog/docker-build-command"
           target="_blank"
