@@ -758,6 +758,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Entry Point Spans',
+            route: '/docs/traces-management/guides/entry-point-spans-service-overview',
+          },
+          {
+            type: 'doc',
             label: 'APM Dashboards/Alerts',
             route: '/docs/userguide/custom-apm-dashboards-alerts',
           },
