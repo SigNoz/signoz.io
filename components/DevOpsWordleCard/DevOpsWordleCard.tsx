@@ -41,7 +41,7 @@ const DevOpsWordleCard: React.FC<DevOpsWordleCardProps> = ({ className = '' }) =
           <div className="mb-1 text-sm font-semibold text-yellow-400 transition-colors group-hover:text-yellow-300">
             Today's Hint:
           </div>
-          <p className="m-0 text-sm leading-relaxed text-gray-300 transition-colors group-hover:text-gray-200">
+          <p className="m-0 text-sm leading-tight text-gray-300 transition-colors group-hover:text-gray-200">
             {todaysHint}
           </p>
         </div>
