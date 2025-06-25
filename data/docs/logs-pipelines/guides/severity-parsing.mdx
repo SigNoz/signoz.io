@@ -1,0 +1,307 @@
+---
+date: 2024-12-15
+id: severity-parsing
+title: Parse Log Severity Levels with Pipelines
+---
+
+## Overview
+
+In many logging setups, severity information is embedded within JSON structures in the log body. You might have severity fields like `severity_text` and `severity_number` that you want to extract and map to the standard OpenTelemetry severity fields to enable proper log level filtering and alerting.
+
+## Example Log
+
+Throughout this guide, we'll reference the following example raw log entry:
+
+```json
+{"message":"applying telemetry collection strategy for region","otel":{"trace_id":"000000000000000018c51935df0b93b9","span_id":"18c51935df0b93b9","severity_text":"info","severity_number":"4"}}
+```
+
+- The `body` field contains a JSON string with fields like `message` and `otel.severity_text`.
+- The severity information is nested within the `otel` object in the JSON body.
+- We need to extract this severity information to enable proper log level categorization.
+
+## Desired Outcome
+
+By the end of this guide, we want to:
+- Parse the JSON string in `body` into structured fields under `attributes`.
+- Extract the severity information from the nested `otel` object.
+- Map the severity values to standard OpenTelemetry severity fields.
+
+Here's how the log should look after we apply our pipeline transformations:
+
+```json
+{
+  "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "INFO",
+  "severity_number": 9,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
+
+## Steps to Parse JSON and Extract Severity
+
+We'll use three processors in SigNoz Logs Pipeline to transform the example log into the desired format:
+
+1. **JSON Parser** – Convert the JSON in `body` into structured fields under `attributes`.
+2. **Move Processor** – Move the `message` field from the parsed JSON into `body`.
+3. **Severity Parser** – Extract and map severity information from the nested `otel` object.
+
+Let's walk through each step in detail.
+
+## Step 1: JSON Parser – Convert JSON in `body` to Structured Attributes
+
+Our first step is to parse the raw JSON string residing in the `body` field so we can work with its fields directly (e.g., `message`, `otel.severity_text`) under `attributes`.
+
+### Before Parsing
+
+```json
+{"message":"applying telemetry collection strategy for region","otel":{"trace_id":"000000000000000018c51935df0b93b9","span_id":"18c51935df0b93b9","severity_text":"info","severity_number":"4"}}
+```
+
+### Processor Configuration
+
+- **Type**: JSON Parser
+- **Name**: ParseBodyJson
+- **Parse From**: `body`
+- **Parse To**: `attributes.parsed_body`
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/logs-pipelines/severity-guide-step1.webp" alt="Converting to Structured Attributes"/>
+<figcaption><i>Converting to Structured Attributes</i></figcaption>
+</figure>
+
+### After Parsing
+
+```json
+{
+  "body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"trace_id\":\"000000000000000018c51935df0b93b9\",\"span_id\":\"18c51935df0b93b9\",\"severity_text\":\"info\",\"severity_number\":\"4\"}}",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
+
+**Key Observations:**
+- Fields like `message` and `otel.severity_text` are now accessible in `attributes.parsed_body`.
+- The original `body` field still holds the raw JSON string.
+
+## Step 2: Move Processor – Extract the Message Field to `body`
+
+Now that `message` is available at `attributes.parsed_body.message`, we can move it to the top-level `body` to clearly indicate that this is the main log message.
+This is an optional step and you can skip it if you want.
+
+### Before Moving Message
+
+```json
+{
+  "body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"trace_id\":\"000000000000000018c51935df0b93b9\",\"span_id\":\"18c51935df0b93b9\",\"severity_text\":\"info\",\"severity_number\":\"4\"}}",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"message\":\"applying telemetry collection strategy for region\",\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
+
+### Processor Configuration
+
+- **Type**: Move
+- **Name**: MoveMessageToBody
+- **From**: `attributes.parsed_body.message`
+- **To**: `body`
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/logs-pipelines/severity-guide-step2.webp" alt="Converting to Structured Attributes"/>
+<figcaption><i>Extract Message field to Body</i></figcaption>
+</figure>
+
+### After Moving Message
+
+```json
+{
+  "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
+
+**Key Observations:**
+- The main log message is now in `body`.
+- `attributes.parsed_body.message` has been removed because Move transfers data rather than copying.
+
+## Step 3: Severity Parser – Extract and Map Severity Information
+
+Now we'll use the Severity Parser to extract the severity information from the nested `otel` object and map it to standard OpenTelemetry severity fields.
+
+### Before Parsing Severity
+
+```json
+{
+  "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
+
+### Processor Configuration
+
+- **Type**: Severity Parser
+- **Name**: ParseSeverityFromOtel
+- **Parse Severity Value From**: `attributes.parsed_body.otel.severity_text`
+- **Values for level INFO**: `info, information`
+- **Values for level DEBUG**: `debug`
+- **Values for level WARN**: `warn, warning`
+- **Values for level ERROR**: `error, err`
+- **Values for level FATAL**: `fatal, critical`
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/logs-pipelines/severity-guide-step3.webp" alt="Converting to Structured Attributes"/>
+<figcaption><i>Extract and Map Severity</i></figcaption>
+</figure>
+
+### After Parsing Severity
+
+```json
+{
+  "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "INFO",
+  "severity_number": 9,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
+
+**Key Observations:**
+- `severity_text` is now set to "INFO" at the top level.
+- `severity_number` is automatically set to 9 (the OpenTelemetry numeric value for INFO level).
+- The original severity fields remain in the nested structure.
+
+## Step 4 (Optional): Move and Clean Up – Organize Final Structure
+
+Finally, let's move the trace information to a cleaner location and remove the temporary `parsed_body` structure.
+
+### Before cleanup
+
+```json
+{
+  "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "parsed_body": "{\"otel\":{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "INFO",
+  "severity_number": 9,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
+
+### Move Trace Information
+
+**Processor Configuration:**
+- **Type**: Move
+- **Name**: MoveOtelFields
+- **From**: `attributes.parsed_body.otel`
+- **To**: `attributes.otel`
+
+### Remove parsed_body attribute
+
+**Processor Configuration:**
+- **Type**: Remove
+- **Name**: RemoveParsedBody
+- **From**: `attributes.parsed_body`
+
+### After cleanup
+
+```json
+{
+  "body": "applying telemetry collection strategy for region",
+  "id": "0h1FsDchlAnA8giHLlSkdd4UNnz",
+  "timestamp": 1750417406945,
+  "attributes": {
+    "log.file.name": "app.log",
+    "otel": "{\"severity_number\":\"4\",\"severity_text\":\"info\",\"span_id\":\"18c51935df0b93b9\",\"trace_id\":\"000000000000000018c51935df0b93b9\"}"
+  },
+  "resources": {},
+  "scope": {},
+  "severity_text": "INFO",
+  "severity_number": 9,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
+
+## Final Outcome
+
+After applying these three processors in sequence, your log now has:
+- The main log message clearly displayed in `body`.
+- Properly mapped severity levels at the top level for filtering and alerting.
+- Trace information preserved in `attributes.otel`.
+
+With these steps, you've successfully extracted severity information from nested JSON structures and mapped it to standard OpenTelemetry severity fields, enabling proper log level categorization and filtering in SigNoz.
+
