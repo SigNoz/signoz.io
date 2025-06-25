@@ -1,0 +1,296 @@
+# Metrics Migration Guide for OSS Users
+
+## Overview
+
+We are in the process of metrics migration, the following doc will help you migrate to a new metrics exporter. This guide will help you migrate your existing alerts and dashboards to the new system.
+
+## Background
+
+As previously communicated, we have transitioning from running both the old and new exporters simultaneously to running only the new exporter.
+Further Details about this migration can be seen [here](https://signoz.io/guides/metrics-migration/)
+
+## Migration Script
+
+We provide a comprehensive migration script that will help you:
+- Migrate all existing alerts and dashboards
+- Backfill historical data for high retention users
+- Ensure seamless transition to the new metrics system
+
+Github - [Migration Script](https://github.com/SigNoz/signoz-db-migrations/tree/main/migration-0.70)
+
+## Migration Steps
+
+### Pre-Requisite
+
+1.) Take the backup of your SQLite DB.
+2.) Take the count of total metrics, samples, and fingerprints, for checking the counts post migration.
+3.) The migration process uses various environment variables to configure database connections, performance settings, and migration behavior. Understanding these variables is crucial for successful migration.
+
+ClickHouse Connection Variables
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `CH_ADDR` | ClickHouse server address and port | `localhostl:9001` | Yes |
+| `CH_DATABASE` | ClickHouse database name for metrics | `default` | Yes |
+| `CH_USER` | ClickHouse username for authentication | `default` | Yes |
+| `CH_PASS` | ClickHouse password for authentication | `""` (empty) | Yes |
+
+
+ClickHouse Performance & Connection Pool Variables
+
+| Variable | Description | What we used / Default |
+|----------|-------------|---------|---------|
+| `CH_MAX_OPEN_CONNS` | Maximum number of open database connections | `10` (metadata), `32` (data), `5` (default) |
+| `CH_MAX_IDLE_CONNS` | Maximum number of idle connections in pool | `8`, `2` (default) |
+| `CH_CONN_MAX_LIFETIME` | Maximum lifetime of a connection | `30m`, `10m` (default) |
+| `CH_DIAL_TIMEOUT` | Connection timeout duration | `60s`, `5s` (default) |
+| `CH_MAX_MEMORY_USAGE` | Maximum memory usage per query (bytes) | `8388608000` (8GB), `1048576000` (default 1GB) |
+| `CH_MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY` | Memory threshold for external GROUP BY operations | `524288000` (500MB),  `104857600` (default 100MB)|
+| `CH_MAX_BYTES_BEFORE_EXTERNAL_SORT` | Memory threshold for external sorting | `524288000` (500MB), `104857600` (default 100MB) |
+| `CH_MAX_EXECUTION_TIME` | Maximum query execution time (seconds) | `300`, `90` (default) |
+| `CH_MAX_THREADS` | Maximum threads for query processing | `50`, `10`(default) |
+
+Migration-Specific Variables
+
+| Variable | Description | Default | Usage |
+|----------|-------------|---------|-------|
+| `MIGRATE_WORKERS` | Number of parallel migration workers | `12` | Data migration performance |
+| `MIGRATE_MAX_OPEN_CONNS` | Maximum connections for migration process | `32` | Migration-specific connection limit |
+
+
+Metrics & Attributes Mapping Variables
+
+These variables handle mappings for metrics and attributes that may have changed names during the migration, and their dot correspondent metrics and attribute name is not present in the DB.
+
+| Variable | Description | Example Value |
+|----------|-------------|---------------|
+| `NOT_FOUND_METRICS_MAP` | Maps old metric names to new ones, it would be passed as string in this manner 'key1=value1,key2=value2' | `rpc_server_responses_per_rpc_bucket=rpc.server.responses_per_rpc.bucket` |
+| `NOT_FOUND_ATTR_MAP` | Maps old attribute names to new ones, it would be passed as string in this manner 'key1=value1,key2=value2' | `http_scheme=http.scheme,net_peer_name=net.peer.name` |
+| `NOT_FOUND_ATTR_MAP` | skip invalid metrics, it would be passed as string in this manner 'metricName1=true,metricName2=true' | `http_scheme=http.scheme,net_peer_name=net.peer.name` |
+
+### 1. Docker Users
+
+
+#### Step 3: Need to enable new metrics
+
+You also need to pass environment variable ```DOT_METRICS_ENABLED``` to ```true```, to allow the platform to use dot metrics.
+
+### 2. Kubernetes (K8s) Users
+
+If you're using Helm charts for deployment, follow these steps:
+
+1. **Update your values.yaml** to include the migration configuration
+2. **Run the migration commands** using the same Docker approach but ensure your ClickHouse connection parameters match your Helm deployment
+3. **Verify the migration** by checking your dashboards and alerts after completion
+
+#### Step 1: Migrate Historical Data (For High Retention Users)
+
+This job runs alongside your SigNoz pods and connects with ClickHouse to perform insert operations for migrating older data, (only for those users who have high retention periods)
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: signoz-data-migration-job
+  namespace: your-namespace  # Replace with your namespace
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+      - name: migration
+        image: signoz/migrate:v0.70.5
+        imagePullPolicy: IfNotPresent
+        args: ["migrate-data", "--workers=$(MIGRATE_WORKERS)", "--max-open-conns=$(MIGRATE_MAX_OPEN_CONNS)"]
+        env:
+        - name: CH_ADDR
+          value: "your-clickhouse-service:9000"  # Replace with your ClickHouse service
+        - name: CH_DATABASE
+          value: "signoz_metrics"
+        - name: CH_USER
+          value: "admin"  # Replace with your ClickHouse user
+        - name: CH_PASS
+          value: "your-password"  # Replace with your ClickHouse password
+        - name: CH_MAX_OPEN_CONNS
+          value: "32"
+        - name: CH_MAX_MEMORY_USAGE
+          value: "8388608000"
+        - name: CH_MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY
+          value: "524288000"
+        - name: CH_MAX_BYTES_BEFORE_EXTERNAL_SORT
+          value: "524288000"
+        - name: CH_DIAL_TIMEOUT
+          value: "60s"
+        - name: CH_CONN_MAX_LIFETIME
+          value: "30m"
+        - name: CH_MAX_IDLE_CONNS
+          value: "8"
+        - name: CH_MAX_EXECUTION_TIME
+          value: "300"
+        - name: CH_MAX_THREADS
+          value: "50"
+        - name: MIGRATE_WORKERS
+          value: "12"
+        - name: MIGRATE_MAX_OPEN_CONNS
+          value: "32"
+        - name: NOT_FOUND_METRICS_MAP
+          value: "rpc_server_responses_per_rpc_bucket=rpc.server.responses_per_rpc.bucket"
+        - name: NOT_FOUND_ATTR_MAP
+          value: "http_scheme=http.scheme,net_peer_name=net.peer.name,net_peer_port=net.peer.port,net_protocol_name=net.protocol.name,net_protocol_version=net.protocol.version,rpc_grpc_status_code=rpc.grpc.status_code,rpc_method=rpc.method,rpc_service=rpc.service,rpc_system=rpc.system"
+        resources:
+          requests:
+            memory: 116000Mi
+            cpu: 29500m
+      restartPolicy: Never
+      tolerations:
+      - effect: NoSchedule
+        key: signoz.cloud/workload
+        operator: Equal
+        value: store
+      - effect: NoSchedule
+        key: signoz.cloud/deployment.tier
+        operator: Equal
+        value: premium
+```
+
+Apply the data migration job:
+
+```bash
+kubectl apply -f data-migration-job.yaml
+```
+
+```bash
+ # 1) List Jobs (verify signoz-data-migration-job exists and its status)
+kubectl get jobs -n <your-namespace>
+
+# 2) List Pods created by that Job
+kubectl get pods -l job-name=signoz-data-migration-job -n <your-namespace> -o wide
+
+# 3) View logs from the Job’s container named “migration”
+kubectl logs job/signoz-data-migration-job -c migration -n <your-namespace>
+
+#    …or stream them in real time:
+kubectl logs -f job/signoz-data-migration-job -c migration -n <your-namespace>
+
+# 4) If the Pod has completed and you need previous‐run logs:
+kubectl logs job/signoz-data-migration-job -c migration -n <your-namespace> --previous
+
+# 5) Watch Job events (helpful if it’s stuck in back-off or failing retries):
+kubectl describe job signoz-data-migration-job -n <your-namespace>
+
+# 6) Tail cluster events for the namespace to catch scheduling or OOM issues:
+kubectl get events -n <your-namespace> --sort-by=.lastTimestamp
+```
+
+
+#### Step 2: Migrate Alerts and Dashboards Using Init Container
+
+For alerts and dashboards migration, you need to add an init container to your SigNoz deployment. This init container will run before the main SigNoz container starts and execute the necessary queries on the SQLite database to migrate alerts and dashboards.
+
+Add the following init container to your SigNoz deployment manifest:
+
+```yaml
+  initContainers:
+    - name: migration
+      image: signoz/migrate:v0.70.5
+      imagePullPolicy: IfNotPresent
+
+      env:
+        - name: SQL_DB_PATH
+          value: /var/lib/signoz/signoz.db
+        - name: CH_ADDR
+          value: exkw-9ut7-eu-clickhouse:9000
+        - name: CH_DATABASE
+          value: signoz_metrics
+        - name: CH_USER
+          value: admin
+        - name: CH_PASS
+          value: "27ff0399-0d3a-4bd8-919d-17c2181e6fb9"
+        - name: CH_MAX_OPEN_CONNS
+          value: "10"
+        - name: SKIP_METRICS_MAP
+          value: "dd_internal_stats_payload=true"
+        - name: CH_MAX_MEMORY_USAGE
+          value: "8388608000"                        # 8 GB
+        - name: CH_MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY
+          value: "4194304000"                        # 4 GB
+        - name: CH_MAX_BYTES_BEFORE_EXTERNAL_SORT
+          value: "4194304000"                        # 4 GB
+        - name: NOT_FOUND_METRICS_MAP
+          value: |-
+            rpc_server_responses_per_rpc_bucket=rpc.server.responses_per_rpc.bucket
+        - name: NOT_FOUND_ATTR_MAP
+          value: |-
+            http_scheme=http.scheme,
+
+      args:
+        - migrate-meta
+
+      resources: {}   # add limits/requests as needed
+
+      volumeMounts:
+        - name: signoz-db
+          mountPath: /var/lib/signoz
+```
+
+```bash
+# 1) List all Deployments in the Signoz namespace
+kubectl get deploy -n <your-namespace>
+
+# 2) List Pods (init containers show up as Init:<x>/<y> until they finish)
+kubectl get pod -n <your-namespace> -o wide
+
+# 3) View logs from the *init container* named `migration`
+kubectl logs <pod-name> -c migration -n <your-namespace>
+
+#    …or follow them in real time
+kubectl logs -f <pod-name> -c migration -n <your-namespace>
+
+#    If the init container has already finished, add --previous
+kubectl logs <pod-name> -c migration --previous -n <your-namespace>
+```
+#### Step 3: Need to enable new metrics
+
+You also need to pass environment variable ```DOT_METRICS_ENABLED``` to ```true``` while running the SigNoz container, to allow the platform to use dot metrics.
+
+## Important Notes
+
+### High Retention Users
+
+If you have metrics retention configured for a longer duration and weren't able to run both exporters for the same period, you first need to migrate and backfill the previous data only then you can go ahead with alerts and dashboards migration. This ensures continuity in your monitoring and alerting.
+
+### Verification Steps
+
+After running the migration:
+
+1. **Check your dashboards** - Verify that all widgets are displaying data correctly
+2. **Validate alerts** - Ensure all alert rules are functioning as expected
+3. **Monitor for gaps** - Look for any data gaps in your metrics timeline
+
+## Troubleshooting
+
+### Common Issues
+
+- **Connection errors**: Verify your ClickHouse connection parameters
+- **Permission issues**: Ensure the Docker container has access to your `signoz.db` file
+- **Data inconsistencies**: Run the migration script again if you notice missing data
+
+### Getting Help
+
+If you encounter issues during migration:
+
+- Check the [SigNoz Documentation](https://signoz.io/docs/)
+- Visit our [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- Join our [Community Slack](https://signoz.io/slack) for real-time support
+
+## Next Steps
+
+Once migration is complete:
+
+1. Monitor your system for a few days to ensure stability
+2. Update any external integrations that might reference the old metrics format
+3. Consider optimizing your retention policies based on the new exporter's capabilities
+
+---
+
+**Note**: This migration is a one-time process. Once completed successfully, your system will be fully transitioned to the new metrics exporter.
