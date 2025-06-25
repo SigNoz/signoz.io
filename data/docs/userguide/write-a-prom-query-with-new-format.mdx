@@ -113,14 +113,14 @@ avg_over_time({"kube_pod_container_resource_requests_cpu_cores",namespace="prod"
 #Histogram
 
 # Old format
-histogram_quantile(0.95, sum(rate(http_request_duration_seconds.bucket{job="api"}[5m])) by (le))
+histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="api"}[5m])) by (le))
 
 # New format
 histogram_quantile(0.95, sum by (le) (rate({"http_request_duration_seconds.bucket",job="api"}[5m])))
 
 #Summary
 # Old format
-sum(rate(http_request_duration_seconds.sum[5m])) / sum(rate(http_request_duration_seconds.count[5m]))
+sum(rate(http_request_duration_seconds_sum[5m])) / sum(rate(http_request_duration_seconds_count[5m]))
 
 # New format
 sum(rate({"http_request_duration_seconds.sum"}[5m])) / sum(rate({"http_request_duration_seconds.count"}[5m]))
