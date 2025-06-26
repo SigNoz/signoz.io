@@ -262,11 +262,6 @@ const docsSideNav = [
             // slug: '/docs/operate/migration/migration',
             // },
             items: [
-               {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.88',
-                label: 'Upgrade to v0.88',
-              },
               {
                 type: 'doc',
                 route: '/docs/operate/migration/upgrade-0.76',
@@ -354,6 +349,7 @@ const docsSideNav = [
               },
             ],
           },
+
           {
             type: 'category',
             isExpanded: false,
@@ -460,7 +456,11 @@ const docsSideNav = [
               },
             ],
           },
-
+          {
+            type: 'doc',
+            route: '/docs/manage/administrator-guide/dot-metrics-migration',
+            label: 'Dot Metrics Migration',
+          },
           {
             type: 'doc',
             route: '/docs/tutorial/opentelemetry-operator-usage',
