@@ -6,7 +6,9 @@ title: Dot Metrics Migration Guide
 
 ## Overview
 
-SigNoz is migrating from the legacy underscore exporter to the new dot-metrics exporter. This guide will help you migrate your existing alerts and dashboards to the new system.
+SigNoz is migrating from normalized, underscore-based metric names (e.g., system_memory_usage) to unnormalized naming conventions (e.g., system.memory.usage). This change aligns with the OpenTelemetry semantic conventions and enables better namespacing, and cross-signal compatibility.
+
+This guide will help you migrate your existing alerts and dashboards from normalized (_) metrics to unnormalized (.) metrics.
 
 For more details about this migration, see [this guide](https://signoz.io/guides/metrics-migration/).
 
@@ -17,8 +19,6 @@ For more details about this migration, see [this guide](https://signoz.io/guides
 </Admonition>
 
 ## Migration 
-
-### Migration Script
 
 A comprehensive migration script is provided to help you:
 - Migrate all existing alerts and dashboards
@@ -79,18 +79,13 @@ These variables handle mappings for metrics and attributes that may have changed
 
 ## Kubernetes
 
-This section explains migrating to dot-metrics in a Kubernetes environment using Helm charts. It covers steps for migrating historical data, alerts, and dashboards, enabling dot metrics, and cleaning up migration jobs.
+This section explains migrating to dot-metrics in a Kubernetes environment. It covers steps for migrating historical data, alerts, and dashboards, enabling dot metrics, and cleaning up migration jobs.
 
 <Admonition type="info">
 - **ClickHouse Requirement:** Make sure your ClickHouse service is running and accessible before starting the migration.
 - **Cleanup Requirement:** After migration, remove the migration init container from your SigNoz deployment manifest to prevent it from running again.
 </Admonition>
 
-If you are deploying with Helm charts:
-
-1. **Update your `values.yaml`** to include the migration configuration.
-2. **Execute the migration commands** using the Docker method, ensuring your ClickHouse connection details match your Helm deployment.
-3. **Check the migration** by inspecting your dashboards and alerts once it's finished.
 
 ### Step 1: Migrate Historical Data (For High Retention Users)
 
@@ -328,9 +323,10 @@ docker-compose logs -f migration-job
 
 ### Step 2: Migrate Alerts and Dashboards
 
-To migrate alerts and dashboards, run the migration script against your SQLite database using the same Docker image. If running separately, stop the SigNoz container first, as the script modifies the SQLite database.
+To migrate alerts and dashboards, run the migration script against your SQLite database using the same Docker image. 
+Add the following service in your docker compose setup or run the container separately 
 
-Add the following service in your docker compose setup or run the container separately ( if running separately make sure to bring down the signoz container first, as it will modify the SQLite database):
+**NOTE:** If running the container separately than compose setup make sure to bring down the signoz container first, as it will modify the SQLite database):
 
 ```yaml
   migrate-signoz:
@@ -458,7 +454,9 @@ signoz_migration_job  | 2025/06/25 19:01:24 Data migration completed [1750867200
 
 ### Step 2: Migrate Alerts and Dashboards
 
-To migrate alerts and dashboards, create another service in your Docker Swarm setup using the migration image. Stop the existing SigNoz service before running this migration job, as it modifies the SQLite database. Bring it back up after migration is complete.
+To migrate alerts and dashboards, create another service in your Docker Swarm setup using the migration image. 
+
+Stop the existing SigNoz service before running this migration job, as it modifies the SQLite database. Bring it back up after migration is complete.
 
 ```bash
 # Keep the original count of repliacs for signoz service
@@ -560,7 +558,7 @@ Check the otel-collector configuration file to verify that you have both of the 
 - `clickhousemetricswrite`
 - `signozclickhousemetrics` 
 
-If not then you can enable it by following configuration:
+If not then add the folllowing configuration to enable it:
 ```yaml
 processors:
   signozspanmetrics/delta:
@@ -588,8 +586,11 @@ sudo journalctl -u signoz-otel-collector.service -f
 
 ### Step 1: Migrate Historical Data (For High Retention Users)
 
-Ensure ClickHouse is installed and running on your system. Run the migration command to backfill historical data:
+This step will run a script which runs a migration job to migrate historical data for users with long retention periods.
 
+Ensure your ClickHouse service is running and accessible before starting the migration.
+
+Add this script to a file named `migrate-script.sh`:
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -659,7 +660,9 @@ On successful completion, you should see a message indicating that the migration
 
 ### Step 2: Migrate Alerts and Dashboards
 
-Stop the SigNoz service before running the migration script, as it modifies the SQLite database. Ensure you have the correct user access to the SQLite database.
+This step will run a migration job to update alerts and dashboards for the new dot metrics format.
+
+Stop the SigNoz service before running the migration script, as it modifies the SQLite database. 
 
 ```bash
 # Stop the SigNoz service if it's running
@@ -673,7 +676,7 @@ Follow these steps to run the scripts as the `signoz` user:
 sudo -u signoz -s -- bash
 ```
 
-Run the migration script to update alerts and dashboards:
+Add this script to a file named `migrate-script.sh`:
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -714,7 +717,7 @@ echo "✅ Migration complete!"
 
 ```
 
-Run the migration script to backfill historical data:
+Run the migration script to update alerts and dashboards:
 ```bash
 chmod +x migrate-script.sh
 # Make sure you have the migrate binary in the same directory as this script
