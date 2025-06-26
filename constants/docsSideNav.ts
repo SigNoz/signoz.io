@@ -764,7 +764,7 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Calculated Fields in Spans',
-            route: '/docs/userguide/derived-fields-spans',
+            route: '/docs/traces-management/guides/derived-fields-spans',
           },
           {
             type: 'doc',
