@@ -245,13 +245,31 @@ kubectl logs <pod-name> -c migration -n <your-namespace>
 ✅ updated y rules in /var/lib/signoz/signoz.db
 ```
 
-### Step 3: Enable New Metrics
-
-Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz container to enable dot metrics.
-
-### Step 4: Clean Up Migration Jobs
+### Step 3: Clean Up Migration Jobs
 
 After migration, remove the init container from your SigNoz deployment manifest to prevent it from running again.
+
+### Step 4: Upgrade and Enable New Metrics
+
+To enable dot metrics, update your SigNoz Helm chart values to set the environment variable `DOT_METRICS_ENABLED` to `true` in your Helm values.
+
+Update your `values.yaml`:
+```yaml
+signoz:
+   additionalEnvs:
+   - name: DOT_METRICS_ENABLED
+     value: true
+```
+
+Apply the changes:
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update signoz
+helm upgrade --install my-release signoz/signoz --namespace platform --values my-values.yaml
+```
+
+> For more details on the SigNoz upgrades on Kubernetes, please refer to the [Operate SigNoz on Kubernetes guide](/docs/operate/kubernetes).
+
 
 ## Docker Standalone
 
@@ -372,22 +390,19 @@ docker logs -f migrate-signoz
 ✅ updated y rules in /var/lib/signoz/signoz.db
 ```
 
-### Step 3: Enable New Metrics
+### Step 3: Clean Up Migration Jobs
+After migration, remove the migration jobs from your Docker setup to prevent them from running again. You can do this by stopping and removing the migration containers:
 
-Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz container to enable dot metrics.
+### Step 4: Upgrade and Enable New Metrics
+Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz container to enable dot metrics
 
 ```yaml
   signoz:
     environment:
       DOT_METRICS_ENABLED: "true"
 ```
-Apply the updated stack configuration:
+Apply the changes by incoporating the above environment variable while following the standard [upgrade procedure](/docs/operate/docker-standalone#upgrade-signoz-cluster)
 
-```bash
-docker-compose up -d signoz
-```
-### Step 4: Clean Up Migration Jobs
-After migration, remove the migration jobs from your Docker setup to prevent them from running again. You can do this by stopping and removing the migration containers:
 
 ## Docker Swarm
 
@@ -515,8 +530,16 @@ After the migration is complete, you can bring back your SigNoz service with the
 ```bash
 docker service scale "${SIGNOZ_SERVICE}=${orig_replicas}"
 ```
+### Step 3: Clean Up Migration Jobs
 
-### Step 3: Enable New Metrics
+After migration, remove the migration jobs from your Docker Swarm setup to prevent them from running again.
+
+```bash
+docker service rm signoz_migration_job
+docker service rm signoz_meta-job
+```
+
+### Step 4: Upgrade and Enable New Metrics
 
 Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz container to enable dot metrics.
 
@@ -526,20 +549,8 @@ Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz cont
       DOT_METRICS_ENABLED: "true"
 ```
 
-Apply the updated stack configuration:
+Apply the changes while following the standard [upgrade procedure](/docs/operate/docker-swarm#upgrade-signoz-cluster). 
 
-```bash
-docker stack deploy -c docker-compose.yml signoz
-```
-
-### Step 4: Clean Up Migration Jobs
-
-After migration, remove the migration jobs from your Docker Swarm setup to prevent them from running again.
-
-```bash
-docker service rm signoz_migration_job
-docker service rm signoz_meta-job
-```
 
 ## Linux (Binary Installation)
 
@@ -744,19 +755,34 @@ Bring back the SigNoz service after migration is complete:
 sudo systemctl start signoz.service
 ```
 
-### Step 3: Enable New Metrics
+### Step 3: Upgrade and Enable New Metrics
 
-Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz configuration to enable dot metrics.
+1. Get and extract the latest release of SigNoz:
+
+```bash
+curl -L https://github.com/SigNoz/signoz/releases/latest/download/signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz.tar.gz
+tar -xzf signoz.tar.gz
+```
+2. Stop the running SigNoz Service
+```bash
+sudo systemctl stop signoz.service
+```
+2. Update the binary at the service path
+```bash
+sudo cp -r signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz
+```
+3. Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz configuration to enable dot metrics.
 
 ```bash
 vim /opt/signoz/conf/systemd.env
 # Add the following line to enable dot metrics
 DOT_METRICS_ENABLED=true
 ```
-reload the signoz service to apply the changes:
+
+4. Restart the signoz service to apply the changes:
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl restart signoz.service
+sudo systemctl start signoz.service
 ```
 
 ## Troubleshooting

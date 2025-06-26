@@ -462,11 +462,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/manage/administrator-guide/dot-metrics-migration',
-            label: 'Dot Metrics Migration',
-          },
-          {
-            type: 'doc',
             route: '/docs/tutorial/opentelemetry-operator-usage',
             label: 'OpenTelemetry Operator Usage',
           },
