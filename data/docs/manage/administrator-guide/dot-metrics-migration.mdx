@@ -414,7 +414,7 @@ docker service create \
   --env CH_ADDR=signoz_clickhouse:9000 \
   --env CH_DATABASE=signoz_metrics \
   --env CH_USER=default \
-  --env CH_PASS= \
+  --env CH_PASS= "" \
   \
   --env CH_MAX_OPEN_CONNS=32 \
   --env CH_MAX_MEMORY_USAGE=8388608000 \
@@ -668,13 +668,6 @@ Stop the SigNoz service before running the migration script, as it modifies the 
 # Stop the SigNoz service if it's running
 sudo systemctl stop signoz.service
 ```
-Please ensure that you have the right user access to the SQLite database, if you have followed the default installation, the database file is located at `/var/lib/signoz/signoz.db` with `signoz` user having access to it.
-
-Follow these steps to run the scripts as the `signoz` user:
-```bash
-# Switch to the signoz user
-sudo -u signoz -s -- bash
-```
 
 Add this script to a file named `migrate-script.sh`:
 ```bash
@@ -715,6 +708,14 @@ fi
 
 echo "✅ Migration complete!"
 
+```
+
+Please ensure that you have the right user access to the SQLite database, if you have followed the default installation, the database file is located at `/var/lib/signoz/signoz.db` with `signoz` user having access to it.
+
+Follow these steps to run the scripts as the `signoz` user:
+```bash
+# Switch to the signoz user
+sudo -u signoz -s -- bash
 ```
 
 Run the migration script to update alerts and dashboards:
