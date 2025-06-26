@@ -4,18 +4,16 @@ id: dot-metrics-migration
 title: Dot Metrics Migration Guide
 ---
 
-SigNoz is migrating from the legacy underscore exporter to the new dot-metrics exporter. This guide will help you migrate your existing alerts and dashboards to the new system.
-
 ## Overview
 
-SigNoz is transitioning from running both the old and new exporters simultaneously to running only the new dot-metrics exporter.
+SigNoz is migrating from the legacy underscore exporter to the new dot-metrics exporter. This guide will help you migrate your existing alerts and dashboards to the new system.
 
 For more details about this migration, see [this guide](https://signoz.io/guides/metrics-migration/).
 
 <Admonition type="info">
-- This migration is a one-time process. Once completed successfully, your system will be fully transitioned to the new metrics exporter.
-- The migration scripts are idempotent, so you do not need to worry about running them multiple times.
-- After completing the migration, remove any configuration changes made for the migration, according to your deployment type.
+- This migration is a one-time process. Once it is successfully completed, your system will be fully transitioned to the new metrics exporter.
+- The migration scripts are idempotent, so there is no need to worry about running them multiple times.
+- After completing the migration, remove any configuration changes made for it, based on your deployment type.
 </Admonition>
 
 ## Migration 
@@ -25,15 +23,15 @@ For more details about this migration, see [this guide](https://signoz.io/guides
 A comprehensive migration script is provided to help you:
 - Migrate all existing alerts and dashboards
 - Backfill historical data for high-retention users
-- Ensure a seamless transition to the new metrics system
+- Ensure a smooth transition to the new metrics system
 
 GitHub: [Migration Script](https://github.com/SigNoz/signoz-db-migrations/tree/main/migration-0.70)
 
 ### Prerequisites
 
 - Back up your SQLite database.
-- Record the count of total metrics, samples, and fingerprints to verify after migration.
-- Review the environment variables used for configuring database connections, performance settings, and migration behavior. Understanding these variables is crucial for a successful migration.
+- Record the total number of metrics, samples, and fingerprints to verify after migration.
+- Review the environment variables used for configuring database connections, performance settings, and migration behaviour. Understanding these variables is essential for a successful migration.
 
 ### Environment Variables
 
@@ -81,22 +79,22 @@ These variables handle mappings for metrics and attributes that may have changed
 
 ## Kubernetes
 
-This section covers migrating to dot-metrics in a Kubernetes environment using Helm charts. It includes steps for migrating historical data, alerts, and dashboards, enabling dot metrics, and cleaning up migration jobs.
+This section explains migrating to dot-metrics in a Kubernetes environment using Helm charts. It covers steps for migrating historical data, alerts, and dashboards, enabling dot metrics, and cleaning up migration jobs.
 
 <Admonition type="info">
-- **ClickHouse Requirement:** Ensure your ClickHouse service is running and accessible before starting the migration.
+- **ClickHouse Requirement:** Make sure your ClickHouse service is running and accessible before starting the migration.
 - **Cleanup Requirement:** After migration, remove the migration init container from your SigNoz deployment manifest to prevent it from running again.
 </Admonition>
 
-If you are using Helm charts for deployment:
+If you are deploying with Helm charts:
 
 1. **Update your `values.yaml`** to include the migration configuration.
-2. **Run the migration commands** using the Docker approach, ensuring your ClickHouse connection parameters match your Helm deployment.
-3. **Verify the migration** by checking your dashboards and alerts after completion.
+2. **Execute the migration commands** using the Docker method, ensuring your ClickHouse connection details match your Helm deployment.
+3. **Check the migration** by inspecting your dashboards and alerts once it's finished.
 
 ### Step 1: Migrate Historical Data (For High Retention Users)
 
-This job runs alongside your SigNoz pods and connects to ClickHouse to perform insert operations for migrating older data (for users with high retention periods).
+This job operates alongside your SigNoz pods and connects to ClickHouse to perform insert operations for migrating older data (for users with long retention periods).
 
 ```yaml
 apiVersion: batch/v1
@@ -189,7 +187,7 @@ kubectl logs job/signoz-data-migration-job -c migration -n <your-namespace>
 
 ### Step 2: Migrate Alerts and Dashboards
 
-To migrate alerts and dashboards, add an init container to your SigNoz deployment. This init container runs before the main SigNoz container and executes the necessary queries on the SQLite database.
+To migrate alerts and dashboards, add an init container to your SigNoz deployment. This init container runs before the main SigNoz container and performs the necessary queries on the SQLite database.
 
 Add the following init container to your SigNoz deployment manifest:
 
