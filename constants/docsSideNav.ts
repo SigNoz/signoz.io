@@ -763,6 +763,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Calculated Fields in Spans',
+            route: '/docs/traces-management/guides/derived-fields-spans',
+          },
+          {
+            type: 'doc',
             label: 'Entry Point Spans',
             route: '/docs/traces-management/guides/entry-point-spans-service-overview',
           },
