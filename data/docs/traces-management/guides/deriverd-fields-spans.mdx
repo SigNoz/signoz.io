@@ -125,11 +125,6 @@ A boolean indicating whether the span represents an error.
 
 A boolean indicating whether the span represents a remote call.
 
-**Derivation Logic:**
-- Typically derived from span kind and other contextual information.
-- Client spans (Kind = 3) are generally considered remote.
-- This field is derived from span metadata, not from attributes.
-
 ## Span Kind Reference
 
 The span kind affects how certain fields are populated:
@@ -138,23 +133,13 @@ The span kind affects how certain fields are populated:
 
 ## Semantic Convention Evolution
 
-This implementation supports both legacy OpenTelemetry semantic conventions and current conventions. When both are present, the system uses the first matching attribute found during iteration.
+We support both legacy OpenTelemetry semantic conventions and current conventions. When both are present, the system uses the first matching attribute found during iteration.
 
 **Examples of convention changes:**
 - `http.url` → `url.full`
 - `http.method` → `http.request.method`
 - `db.name` → `db.namespace`
 - `db.operation` → `db.operation.name`
-
-## Usage Notes
-
-1. **Backward Compatibility**: The system maintains support for deprecated field names (camelCase versions) alongside the current snake_case versions.
-
-2. **Type Handling**: Status codes are normalized to strings regardless of their original type (string or integer).
-
-3. **Client Span Detection**: Several fields have special behavior for client spans (Kind = 3), particularly for external HTTP calls.
-
-4. **Priority Order**: When multiple attributes could populate the same field, the first matching attribute encountered during iteration is used.
 
 ## Example
 
