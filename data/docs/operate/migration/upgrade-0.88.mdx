@@ -4,15 +4,14 @@ id: upgrade-0.88
 title: Upgrade to v0.88.0 from earlier versions of SigNoz
 ---
 
-We are in the process of metrics migration, the following doc will help you migrate to a new metrics exporter. This guide will help you migrate your existing alerts and dashboards to the new system.
-
+SigNoz is migrating from the legacy underscore exporter to the new dot-metrics exporter. This guide will help you migrate your existing alerts and dashboards to the new system.
 <Admonition type="info">
 **Note**: This migration is a one-time process. Once completed successfully, your system will be fully transitioned to the new metrics exporter.
 </Admonition>
 
 ## Background
 
-As previously communicated, we have transitioning from running both the old and new exporters simultaneously to running only the new exporter.
+As previously communicated, SigNoz is moving from running both the old and new exporters simultaneously to running only the new exporter.
 
 Further Details about this migration can be seen [here](https://signoz.io/guides/metrics-migration/)
 
@@ -73,7 +72,7 @@ These variables handle mappings for metrics and attributes that may have changed
 |----------|-------------|---------------|
 | `NOT_FOUND_METRICS_MAP` | Maps old metric names to new ones, it would be passed as string in this manner 'key1=value1,key2=value2' | `rpc_server_responses_per_rpc_bucket=rpc.server.responses_per_rpc.bucket` |
 | `NOT_FOUND_ATTR_MAP` | Maps old attribute names to new ones, it would be passed as string in this manner 'key1=value1,key2=value2' | `http_scheme=http.scheme,net_peer_name=net.peer.name` |
-| `NOT_FOUND_ATTR_MAP` | skip invalid metrics, it would be passed as string in this manner 'metricName1=true,metricName2=true' | `http_scheme=http.scheme,net_peer_name=net.peer.name` |
+| `SKIP_METRICS_MAP` | skip invalid metrics, it would be passed as string in this manner 'metricName1=true,metricName2=true' | `http_scheme=http.scheme,net_peer_name=net.peer.name` |
 
 
 
@@ -484,7 +483,138 @@ Apply the updated stack configuration:
 docker stack deploy -c docker-compose.yml signoz
 ```
 
-## In Case of Migration Failure
+## Linux Users
+If you're running SigNoz on a Linux server without Docker or Kubernetes, you can follow these steps:
+1. **Download the migration binary** from the [migration repository](https://github.com/SigNoz/signoz-migration).
+2. **Run the migration binary** from the command line, passing the necessary environment variables and command-line arguments according to your setup.
+
+### Step 1: Migrate Historical Data (For High Retention Users)
+Run the migration command to backfill historical data:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+trap 'echo "❌ Migration failed at line $LINENO."; exit 1' ERR
+
+
+# 1) Export ClickHouse settings
+export CH_ADDR="localhst:9000"
+export CH_DATABASE="signoz_metrics"
+export CH_USER="default"
+export CH_PASS="password"
+
+# 2) Export ClickHouse tuning knobs (optional—use what you need)
+export CH_MAX_OPEN_CONNS="32"
+export CH_MAX_MEMORY_USAGE="8388608000"
+export CH_MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY="524288000"
+export CH_MAX_BYTES_BEFORE_EXTERNAL_SORT="524288000"
+export CH_DIAL_TIMEOUT="60s"
+export CH_CONN_MAX_LIFETIME="30m"
+export CH_MAX_IDLE_CONNS="8"
+export CH_MAX_EXECUTION_TIME="300"
+export CH_MAX_THREADS="50"
+
+export MIGRATE_WORKERS="12"
+export MIGRATE_MAX_OPEN_CONNS="32"
+
+export NOT_FOUND_METRICS_MAP="rpc_server_responses_per_rpc_bucket=rpc.server.responses_per_rpc.bucket"
+export NOT_FOUND_ATTR_MAP="http_scheme=http.scheme,net_peer_name=net.peer.name,net_peer_port=net.peer.port,net_protocol_name=net.protocol.name,net_protocol_version=net.protocol.version,rpc_grpc_status_code=rpc.grpc.status_code,rpc_method=rpc.method,rpc_service=rpc.service,rpc_system=rpc.system"
+export SKIP_METRICS_MAP="http_scheme=http.scheme,net_peer_name=net.peer.name"
+# 3) Point to your local SQLite file (for metadata)
+export SQL_DB_PATH="/var/lib/signoz/signoz.db"
+
+# 4) Run metadata migration first (dashboards, users, etc.)
+# echo ">> Migrating metadata (sqlite)…"
+# migrate-linux migrate-meta
+
+# 5) Then run the data migration (ClickHouse)
+echo ">> Migrating metrics data (ClickHouse)…"
+migrate_output=$(./migrate-linux migrate-data \
+  --workers "${MIGRATE_WORKERS}" \
+  --max-open-conns "${MIGRATE_MAX_OPEN_CONNS}" \
+  2>&1)
+
+
+# Print what the tool said
+echo "$migrate_output"
+
+# If any line contains `"level":"error"`, abort
+if grep -q '"level":"error"' <<<"$migrate_output"; then
+  echo "❌ Migration failed: errors detected in migrate-data output."
+  exit 1
+fi
+
+echo "✅ Migration complete!"
+
+```
+If you encounter issues, ensure that your ClickHouse server is running and accessible, and that the environment variables are correctly set.
+
+On successful completion, you should see a message indicating that the migration was successful:
+```
+✅ Migration complete!
+```
+
+### Step 2: Migrate Alerts and Dashboards
+Run the migration command to update alerts and dashboards:
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+trap 'echo "❌ Migration failed at line $LINENO."; exit 1' ERR
+
+# 1) Export ClickHouse settings
+export CH_ADDR="localhost:9000"
+export CH_DATABASE="signoz_metrics"
+export CH_USER="default"
+export CH_PASS="password"
+
+# 2) Export ClickHouse tuning knobs (optional—use what you need)
+export CH_MAX_OPEN_CONNS="32"
+export CH_MAX_MEMORY_USAGE="8388608000"
+export CH_MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY="4194304000"
+export CH_MAX_BYTES_BEFORE_EXTERNAL_SORT="524288000"
+
+
+export NOT_FOUND_METRICS_MAP="rpc_server_responses_per_rpc_bucket=rpc.server.responses_per_rpc.bucket"
+export NOT_FOUND_ATTR_MAP="http_scheme=http.scheme,"
+export SKIP_METRICS_MAP="dd_internal_stats_payload=true"
+# 3) Point to your local SQLite file (for metadata)
+export SQL_DB_PATH="/var/lib/signoz/signoz.d"
+
+# 4) Run metadata migration first (dashboards, users, etc.)
+echo ">> Migrating metadata (sqlite)…"
+migrate_output=$(./migrate-linux migrate-meta \
+  2>&1)
+echo "$migrate_output"
+
+# If any line contains `"level":"error"`, abort
+if grep -q '"level":"error"' <<<"$migrate_output"; then
+  echo "❌ Migration failed: errors detected in migrate-meta output."
+  exit 1
+fi
+
+echo "✅ Migration complete!"
+
+```
+
+If you encounter issues, ensure that your SQLite database file is accessible and that the environment variables are correctly set.
+
+On successful completion, you should see a message indicating that the migration was successful:
+```
+>> Migrating metadata (sqlite)…
+✅ updated 0 dashboards in signoz.db
+✅ updated 0 rules in /var/lib/signoz/signoz.db
+✅ Migration complete!
+```
+### Step 3: Enable New Metrics
+To enable the new dot metrics, you need to set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz configuration. This can be done by adding the following line to your SigNoz configuration file or environment variables:
+```bash
+vim /opt/signoz/conf/systemd.env
+# Add the following line to enable dot metrics
+DOT_METRICS_ENABLED=true
+```
+
+## Migration Failure
 
 If you encounter issues during migration:
 
