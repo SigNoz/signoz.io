@@ -349,7 +349,6 @@ const docsSideNav = [
               },
             ],
           },
-
           {
             type: 'category',
             isExpanded: false,
