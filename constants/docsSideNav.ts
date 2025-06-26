@@ -835,6 +835,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/trace-funnels/overview',
+            label: 'Trace Funnels',
+          },
+          {
+            type: 'doc',
             route: '/docs/traces-management/guides/apm-metrics',
             label: 'APM Metrics',
           },
@@ -1729,6 +1734,25 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/external-api-monitoring/setup',
+        label: 'Setup',
+      },
+    ],
+  },
+  {
+    label: 'Trace Funnels',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/trace-funnels/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/trace-funnels/setup',
         label: 'Setup',
       },
     ],
