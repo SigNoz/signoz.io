@@ -7,6 +7,7 @@ import { Orbitron, Lexend } from 'next/font/google'
 import { useState, useEffect } from 'react'
 import TrackingButton from '../../../components/TrackingButton'
 import TrackingLink from '../../../components/TrackingLink'
+import { getCurrentGameData } from '../lib/game-data'
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['400', '500'] })
 const lexend = Lexend({ subsets: ['latin'], weight: ['300', '400'] })
@@ -273,12 +274,10 @@ export function GameResults({
       {/* Word Information */}
       <div className="space-y-3 text-center">
         <p className="text-[15px] leading-[1.6] text-gray-400">
-          Today's word was '<span className="font-medium text-[#4558c4]">{targetWord}</span>' which
-          is a command that reads a Dockerfile and creates an image by executing each instruction, 
-          packaging the application and its dependencies into layered, reusable artifacts.
+          {getCurrentGameData().info}
         </p>
         <TrackingLink
-          href="https://www.cherryservers.com/blog/docker-build-command"
+          href={getCurrentGameData().link}
           target="_blank"
           clickType="external_link"
           clickName="blog_post_link"
