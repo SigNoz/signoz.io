@@ -2,13 +2,10 @@
 date: 2024-06-06
 title: Monitor HTTP Endpoints
 id: monitor-http-endpoints
+hide_table_of_contents: true
 ---
 
 With SigNoz, you can monitor the health of HTTP endpoints and set up alerts in case of HTTP endpoint failure status codes. This guide covers everything from basic setup to creating dashboards and configuring alerts.
-
-## Prerequisites
-
-Before you begin, ensure you have OpenTelemetry Collector installed. If you haven't installed it yet, follow the [OpenTelemetry Binary Usage guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
 <Tabs>
 
@@ -16,24 +13,28 @@ Before you begin, ensure you have OpenTelemetry Collector installed. If you have
 
 ## Basic Setup
 
-### Step 1: Configure the HTTP Check Receiver
+### Step 1: Install OpenTelemetry Collector
+
+Install and set up the OpenTelemetry Collector by following the [OpenTelemetry Binary Usage guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+
+### Step 2: Configure the HTTP Check Receiver
 
 Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your OpenTelemetry Collector configuration:
 
-```yaml {2-6}
+```yaml {2-14}
 receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
   httpcheck:
     targets:
       - endpoint: http://example.com
         method: GET
     collection_interval: 10s
-```
 
-### Step 2: Configure the OTLP Exporter
-
-Set up the collector OTLP exporter to send data to SigNoz Cloud:
-
-```yaml {2-8}
 exporters:
   otlp:
     endpoint: "ingest.{region}.signoz.cloud:443"
@@ -53,20 +54,23 @@ Depending on your SigNoz cloud region, use the appropriate ingest endpoint:
 
 ### Step 3: Configure the Service Pipeline
 
-Modify the pipeline to include the httpcheck receiver:
+Configure the service pipeline to include the httpcheck receiver:
 
 ```yaml {4}
 service:
-    ....
     metrics:
       receivers: [otlp, httpcheck]
       processors: [batch]
       exporters: [otlp]
 ```
 
-### Step 4: Restart the Collector
+### Step 4: Start the Collector
 
-Restart the OpenTelemetry Collector container/process to apply the new configuration and start collecting HTTP endpoint metrics.
+Start the OpenTelemetry Collector to begin collecting HTTP endpoint metrics:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
 
 </TabItem>
 
@@ -74,12 +78,22 @@ Restart the OpenTelemetry Collector container/process to apply the new configura
 
 ## Basic Setup
 
-### Step 1: Configure the HTTP Check Receiver
+### Step 1: Install OpenTelemetry Collector
+
+Install and set up the OpenTelemetry Collector by following the [OpenTelemetry Binary Usage guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+
+### Step 2: Configure the HTTP Check Receiver
 
 Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your OpenTelemetry Collector configuration:
 
-```yaml {2-6}
+```yaml {2-12}
 receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
   httpcheck:
     targets:
       - endpoint: http://example.com
@@ -87,22 +101,25 @@ receivers:
     collection_interval: 10s
 ```
 
-### Step 2: Configure the Service Pipeline
+### Step 3: Configure the Service Pipeline
 
-Modify the pipeline to include the httpcheck receiver:
+Configure the service pipeline to include the httpcheck receiver:
 
 ```yaml {4}
 service:
-    ....
     metrics:
       receivers: [otlp, httpcheck]
       processors: [batch]
       exporters: [clickhousemetricswrite]
 ```
 
-### Step 3: Restart the Collector
+### Step 4: Start the Collector
 
-Restart the OpenTelemetry Collector container/process to apply the new configuration and start collecting HTTP endpoint metrics.
+Start the OpenTelemetry Collector to begin collecting HTTP endpoint metrics:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
 
 </TabItem>
 </Tabs>
@@ -117,10 +134,6 @@ The receiver creates a metric named `httpcheck_status` with value 1 if the check
 
 You can configure multiple `targets` for the httpcheck receiver to monitor several endpoints simultaneously:
 
-<Tabs>
-
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-
 ```yaml {3-8}
 receivers:
   httpcheck:
@@ -131,24 +144,6 @@ receivers:
         method: GET
     collection_interval: 10s
 ```
-
-</TabItem>
-
-<TabItem value='self-host' label='Self-Host'>
-
-```yaml {3-8}
-receivers:
-  httpcheck:
-    targets:
-      - endpoint: http://example.com
-        method: GET
-      - endpoint: http://my-app.com
-        method: GET
-    collection_interval: 10s
-```
-
-</TabItem>
-</Tabs>
 
 ## Multiple Collection Intervals
 
@@ -175,7 +170,6 @@ receivers:
     collection_interval: 300s
 
 service:
-  ....
   metrics:
     receivers: [otlp, httpcheck/rapid, httpcheck/frequent, httpcheck/low]
     processors: [batch]
@@ -193,14 +187,37 @@ Once the collector is running and sending data to SigNoz, you can create dashboa
 1. Navigate to your SigNoz account
 2. Go to the **Dashboard** tab
 3. Click on **New Dashboard** button
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/monitor-http-endpoints/create-new-dashboard.webp" alt="Creating a new dashboard in SigNoz"/>
+    <figcaption><i>Creating a new dashboard in SigNoz</i></figcaption>
+</figure>
+
 4. Choose **Time Series** chart type for HTTP endpoint monitoring
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/monitor-http-endpoints/time-series-chart.webp" alt="Selecting Time Series chart type"/>
+    <figcaption><i>Selecting Time Series chart type for HTTP monitoring</i></figcaption>
+</figure>
 
 ### Step 2: Configure the Query
 
 1. In the **Query Builder** tab, enter "http" in the metric search
 2. You should see `httpcheck_status` and other HTTP-related metrics
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/monitor-http-endpoints/query-builder-metrics.webp" alt="HTTP metrics in Query Builder"/>
+    <figcaption><i>HTTP metrics available in Query Builder</i></figcaption>
+</figure>
+
 3. Select `httpcheck_status` as your metric
 4. Add a **WHERE** clause: `http_status_class = 2xx` to monitor successful responses
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/monitor-http-endpoints/configure-query.webp" alt="Configuring httpcheck_status query"/>
+    <figcaption><i>Configuring httpcheck_status query with WHERE clause</i></figcaption>
+</figure>
+
 5. You can also filter by specific endpoints using the `http_url` attribute
 
 ### Step 3: Visualize Endpoint Health
@@ -209,6 +226,11 @@ The resulting chart will show:
 - Value of 1 when endpoints are healthy (returning 2xx status codes)
 - Value of 0 when endpoints are down or returning error codes
 - Different lines for each monitored endpoint
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/monitor-http-endpoints/endpoint-health-chart.webp" alt="HTTP endpoint health visualization"/>
+    <figcaption><i>HTTP endpoint health visualization showing status over time</i></figcaption>
+</figure>
 
 ## Available Metrics
 
@@ -239,12 +261,23 @@ You can create alerts to get notified when endpoints go down:
 
 1. In your dashboard panel showing HTTP endpoint health, click the dropdown menu
 2. Select **Create Alerts**
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/monitor-http-endpoints/create-alert-dropdown.webp" alt="Creating alert from dashboard panel"/>
+    <figcaption><i>Creating alert from dashboard panel dropdown</i></figcaption>
+</figure>
+
 3. This will take you to the alerts configuration page
 
 ### Step 2: Configure Alert Conditions
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/monitor-http-endpoints/alert-configuration.webp" alt="Alert configuration page"/>
+    <figcaption><i>Alert configuration page with conditions setup</i></figcaption>
+</figure>
+
+Example alert configuration:
 ```yaml
-# Example alert configuration
 Query: httpcheck_status{http_status_class="2xx"}
 Condition: IS BELOW 1
 Duration: 2m
