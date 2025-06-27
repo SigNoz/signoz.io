@@ -1532,7 +1532,7 @@ const docsSideNav = [
       {
         type: 'doc',
         label: 'Swift UI',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftUi',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
       },
       {
         type: 'doc',
