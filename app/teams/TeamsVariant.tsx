@@ -7,8 +7,8 @@ import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import TrackingLink from '@/components/TrackingLink'
-import { Tooltip } from '@nextui-org/react'
 import { Toast } from 'app/todaysdevopswordle/components/toast'
+import { FaGithub, FaGoogle } from 'react-icons/fa'
 
 interface ErrorsProps {
   fullName?: string
@@ -436,6 +436,61 @@ const SignupFormIsolated: React.FC<{
         Experience SigNoz with 30-day free trial. No credit card required.
       </p>
 
+      <div className="mb-10">
+        <div className="space-y-2">
+          <label className="mb-1 block text-sm font-medium" htmlFor="dataRegion">
+            Data region
+          </label>
+
+          <div className="grid grid-cols-3 gap-3">
+            {regions.map((region) => (
+              <button
+                type="button"
+                key={region.id}
+                className={`flex items-center justify-center gap-2 rounded-md border border-solid p-2.5 text-sm
+            ${
+              region.id === formState.dataRegion
+                ? 'border-signoz_robin-500/60 bg-signoz_robin-500/10 text-signoz_robin-500'
+                : 'border-signoz_slate-400 bg-signoz_ink-300 hover:border-signoz_slate-300'
+            }`}
+                onClick={() => handleRegionChange(region.id)}
+              >
+                <Image
+                  loading="lazy"
+                  src={region.iconURL}
+                  alt={`${region.name} flag`}
+                  width={20}
+                  height={20}
+                />
+                {region.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="my-6 text-center text-sm text-signoz_vanilla-100/70">Sign up with</div>
+        <div className="mt-6 flex justify-center space-x-4">
+          <button
+            type="button"
+            className="flex items-center justify-center gap-2 rounded-md border border-signoz_slate-400 bg-signoz_ink-300 px-4 py-2.5 text-sm text-stone-300 hover:border-signoz_slate-300"
+            onClick={() => handleSocialSubmit('github')}
+          >
+            <FaGithub />
+            GitHub
+          </button>
+          <button
+            type="button"
+            className="flex items-center justify-center gap-2 rounded-md border border-signoz_slate-400 bg-signoz_ink-300 px-4 py-2.5 text-sm text-stone-300 hover:border-signoz_slate-300"
+            onClick={() => handleSocialSubmit('google')}
+          >
+            <FaGoogle />
+            Google
+          </button>
+        </div>
+
+        <div className="my-6 border-t border-signoz_slate-400"></div>
+      </div>
+
       <form className="space-y-7">
         <div className="mb-4 space-y-1">
           <label htmlFor="workEmail" className="mb-1 block text-sm font-medium">
@@ -528,48 +583,6 @@ const SignupFormIsolated: React.FC<{
             <div className="text-xs text-red-400">{errors.termsOfService}</div>
           )}
         </div>
-
-        <button
-          disabled={isSubmitting}
-          onClick={(event) => {
-            event.preventDefault()
-            handleSocialSubmit('github')
-          }}
-          className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-        >
-          {isSubmitting ? (
-            <div className="flex items-center gap-2 text-sm">
-              Signup with Github
-              <Loader2 size={16} className="animate-spin" />{' '}
-            </div>
-          ) : (
-            <span className="flex items-center gap-1.5 text-sm">
-              Signup with Github
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          )}
-        </button>
-        <button
-          disabled={isSubmitting}
-          onClick={(event) => {
-            event.preventDefault()
-            handleSocialSubmit('google')
-          }}
-          className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-        >
-          {isSubmitting ? (
-            <div className="flex items-center gap-2 text-sm">
-              Signup with Google
-              <Loader2 size={16} className="animate-spin" />{' '}
-            </div>
-          ) : (
-            <span className="flex items-center gap-1.5 text-sm">
-              Signup with Google
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          )}
-        </button>
-
         <button
           disabled={isSubmitting}
           onClick={handleSubmit}
@@ -843,7 +856,7 @@ const TeamsVariant: React.FC = () => {
       />
       <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row">
         {/* Left section - Sign up form */}
-        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+20vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+20vh)]">
+        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px)]">
           <div className="w-full">
             {!isSubmitting && submitFailed ? (
               <ErrorState />
