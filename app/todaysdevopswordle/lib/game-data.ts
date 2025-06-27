@@ -8,10 +8,10 @@ export interface WordleGameData {
 
 // Current game data - update this daily
 const CURRENT_GAME_DATA: WordleGameData = {
-  word: 'QUERY',
-  hint: "I draw answers from your telemetry’s vault. I'm your friend and not your enemy.",
-  info: "Todays word is 'QUERY' which points to the concept of querying telemetry data—searching logs, metrics, and traces for hidden insights—without stating it outright. In the observability world, a query is exactly that: a request you’d run to explore vast telemetry datasets or logs in platforms",
-  link: 'https://docs.chronosphere.io/investigate/querying',
+  word: 'FLUSH',
+  hint: "Forces out what's been waiting quietly in line.",
+  info: "Today's word is 'FLUSH' which in observability and logging refers to the act of forcefully sending buffered data, such as logs or metrics—from local memory to its intended destination to ensure nothing is left unsent",
+  link: 'https://launchdarkly.com/docs/sdk/features/flush',
   date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
 }
 
