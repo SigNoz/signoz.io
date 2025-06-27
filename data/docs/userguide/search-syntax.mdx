@@ -1,0 +1,385 @@
+---
+date: 2025-06-27
+id: search-syntax
+title: Search Syntax
+description: Learn how to use SigNoz search syntax.
+---
+
+This comprehensive guide explains how to use search clause and filter your telemetry data including logs, traces, and metrics.
+
+## Table of Contents
+- [Quick Start](#quick-start)
+- [Basic Concepts](#basic-concepts)
+- [Query Structure](#query-structure)
+- [Operators](#operators)
+- [Field Context](#field-context)
+- [Data Types](#data-types)
+- [Functions](#functions)
+- [Full-Text Search](#full-text-search)
+- [Advanced Examples](#advanced-examples)
+- [Common Pitfalls](#common-pitfalls)
+
+## Quick Start
+
+The most basic queries look like this:
+
+```
+service.name = "payment-service"
+```
+
+You can combine multiple conditions:
+
+```
+service.name = "payment-service" AND http.status_code >= 400
+```
+
+For full-text search, simply type what you're looking for:
+
+```
+"error connecting to database"
+```
+
+## Basic Concepts
+
+### Fields and Values
+
+A query consists of fields (what you're searching in) and values (what you're searching for):
+
+- **Field**: The attribute or property name (e.g., `service.name`, `http.status_code`)
+- **Value**: What you're comparing against (e.g., `"payment-service"`, `200`)
+
+### Query Structure
+
+Queries follow this general pattern:
+
+```
+field operator value
+```
+
+Multiple conditions can be combined with boolean operators:
+
+```
+condition1 AND condition2 OR condition3
+```
+
+## Operators
+
+### Comparison Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `=` or `==` | Equals | `status = "success"` |
+| `!=` or `<>` | Not equals | `status != "failed"` |
+| `<` | Less than | `duration < 1000` |
+| `<=` | Less than or equal | `duration <= 1000` |
+| `>` | Greater than | `response_time > 500` |
+| `>=` | Greater than or equal | `response_time >= 500` |
+
+### String Matching Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `LIKE` | Case-sensitive pattern matching | `message LIKE "%error%"` |
+| `NOT LIKE` | Negated LIKE | `message NOT LIKE "%debug%"` |
+| `ILIKE` | Case-insensitive pattern matching | `message ILIKE "%ERROR%"` |
+| `NOT ILIKE` | Negated ILIKE | `message NOT ILIKE "%DEBUG%"` |
+
+**Pattern matching wildcards:**
+- `%` matches any sequence of characters
+- `_` matches a single character
+
+### Range and Set Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `BETWEEN` | Value within range | `latency BETWEEN 100 AND 500` |
+| `NOT BETWEEN` | Value outside range | `latency NOT BETWEEN 100 AND 500` |
+| `IN` | Value in set | `region IN ("us-east", "us-west")` |
+| `NOT IN` | Value not in set | `region NOT IN ("eu-west", "eu-east")` |
+
+### Advanced Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `EXISTS` | Field exists | `custom.field EXISTS` |
+| `NOT EXISTS` | Field doesn't exist | `error.details NOT EXISTS` |
+| `CONTAINS` | Contains substring | `message CONTAINS "timeout"` |
+| `NOT CONTAINS` | Doesn't contain | `message NOT CONTAINS "success"` |
+| `REGEXP` | Regular expression match (RE2 syntax) | `email REGEXP "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"` |
+| `NOT REGEXP` | Doesn't match regex (RE2 syntax) | `path NOT REGEXP "^/api/v1"` |
+
+### Boolean Operators
+
+- `AND`: Both conditions must be true
+- `OR`: At least one condition must be true
+- `NOT`: Negates the condition
+
+**Operator Precedence** (highest to lowest):
+1. Parentheses `()`
+2. `NOT`
+3. `AND`
+4. `OR`
+
+## Field Context
+
+Fields can have explicit contexts to specify where to look for the data. This is crucial because telemetry data comes from multiple sources, and the same field name can exist in different contexts with different meanings or data types.
+
+### Why Field Context Matters
+
+Consider a field like `status_code` - different teams use the same field names for different purposes, or when a field has different data types in different contexts (e.g., `status_code` might be a string in one context but a number in another).
+
+Without explicit context, searching for `status_code` will search across ALL these contexts, which may:
+- Return unexpected results from different contexts
+- Impact query performance
+- Make debugging harder when the same key has different data types in different contexts
+
+### How Context Resolution Works
+
+1. **With explicit context**: `resource.service.name = "payment"` searches ONLY in resource attributes
+2. **Without context**: `status_code = 200` searches across ALL contexts where this field exists
+
+### Resource Context
+Attributes about the source of telemetry:
+```
+resource.service.name = "api-gateway"
+resource.k8s.namespace.name = "production"
+```
+
+### Scope Context
+Instrumentation library attributes:
+```
+scope.name = "io.opentelemetry.redis"
+scope.version = "1.0.0"
+```
+
+### Signal-Specific Contexts
+
+**For Spans:**
+
+Let's take an example of `name`. This usually refers to the span name. However, if there is also an span attribute with same field name `name`, then any search without explicit context searches on both span name and attribute. To explicitly search on span name, you can refine the search as `span.name = "GET /users"` or for attribute search as `attribute.name = "GET /users"`
+
+**For Logs:**
+
+The following example show how to explicitly provide context
+
+```
+log.severity_text = "ERROR"  (same as severity_text = "ERROR")
+log.body CONTAINS "failed to connect" (same as body CONTAINS "failed to connect")
+```
+
+### Attribute Context
+
+Attributes of the Log/Metric/Span item.
+
+```
+attribute.http.status_code = 200
+attribute.user_name != "anon"
+```
+
+### Best Practices for Field Context
+
+1. **Always use explicit context when you know there is a conflicting key (of course, unless you want to search across ALL)** - This ensures accurate results (and relatively better performance)
+2. **Use implicit search when exploring** - If you're not sure where a field exists, omit the context
+3. **Be aware of data type conflicts** - The same field name might have different types in different contexts
+
+## Data Types
+
+You can explicitly specify data types using the `:type` syntax:
+
+```
+user.age:int64 > 18
+price:float64 >= 99.99
+is_active:bool = true
+```
+
+Supported data types:
+- `string`
+- `number`
+- `bool`
+- `[]string`, `[]int64`, `[]float64`, `[]bool` (arrays)
+
+## Functions
+
+Use functions to query array fields (currently supported for json body searches):
+
+### HAS Function
+Checks if an array contains a specific value:
+```
+has(user_ids, 123)
+has(tags, "production")
+```
+
+### HASANY Function
+Checks if an array contains any of the specified values:
+```
+hasAny(regions, ["us-east", "us-west"])
+hasAny(status_codes, [500, 502, 503])
+```
+
+### HASALL Function
+Checks if an array contains all specified values:
+```
+hasAll(features, ["auth", "payment", "notification"])
+```
+
+## Full-Text Search
+
+For searching text content without specifying fields:
+
+### Quoted Text
+Use quotes for exact phrase matching:
+```
+"failed to connect to database"
+```
+
+### Unquoted Text
+Without quotes, each word is searched separately:
+```
+error database connection
+```
+
+This searches for logs containing "error" AND "database" AND "connection" (not necessarily together).
+
+### Regex
+
+You can use any valid re2 regex as the full text search. The following returns logs records that contain email in log body.
+```
+"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+```
+
+### Combining Full-Text with Field Searches
+```
+"payment failed" AND service.name = "payment-service"
+```
+
+### Important: When to Use Quotes
+
+Always use quotes when:
+1. Searching for exact phrases
+2. Your search term contains special characters or operators
+3. You want to search for operator keywords as text
+
+Examples where quotes are necessary:
+```
+
+# Wrong - AND will be treated as boolean operator
+searching for AND operator
+
+# Correct - searches for the phrase including "AND"
+"searching for AND operator"
+```
+
+### Regular Expression (REGEXP)
+
+The `REGEXP` operator uses RE2 syntax for pattern matching. RE2 is a fast, safe regular expression library that guarantees linear time execution. Common patterns:
+
+- `.` - Any single character
+- `*` - Zero or more of the preceding element
+- `+` - One or more of the preceding element
+- `?` - Zero or one of the preceding element
+- `[abc]` - Any character in the set
+- `[^abc]` - Any character not in the set
+- `\d` - Any digit
+- `\w` - Any word character (letter, digit, underscore)
+- `\s` - Any whitespace character
+
+Examples:
+```
+# Match email addresses
+email REGEXP "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+
+# Match IP addresses
+ip_address REGEXP "^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
+
+# Match URLs starting with https
+url REGEXP "^https://"
+
+# Match phone numbers (various formats)
+phone REGEXP "^\+?1?\d{3}[-.]?\d{3}[-.]?\d{4}$"
+```
+
+Note: RE2 does not support lookahead/lookbehind assertions or backreferences.
+
+## Advanced Examples
+
+### Complex Boolean Logic
+Use parentheses to control evaluation order:
+```
+(service.name = "auth" OR service.name = "user") AND status_code >= 400
+```
+
+### Nested Conditions
+```
+region = "us-east" AND (
+  (status = "error" AND retry_count > 3) OR
+  (status = "timeout" AND duration > 5000)
+)
+```
+
+### Working with JSON Fields
+For nested JSON attributes, use dot notation:
+```
+payload.user.address.city = "New York"
+response.data.items[].price > 100
+```
+
+### Time-Based Queries with Other Conditions
+```
+log.severity_text = "ERROR" AND 
+resource.service.name IN ("payment", "checkout") AND
+http.request.duration > 1000
+```
+
+### Searching Across Multiple Fields
+```
+(span.http.method = "POST" OR span.http.method = "PUT") AND
+span.http.status_code BETWEEN 200 AND 299 AND
+span.http.url LIKE "%/api/v2/%"
+```
+
+## Common Pitfalls
+
+### 1. Forgetting Quotes for String Values
+**Not recommended:** `status = active`  
+**Correct:** `status = "active"`
+
+### 2. Missing Wildcards in LIKE
+**Wrong:** `message LIKE "error"` (exact match only)  
+**Correct:** `message LIKE "%error%"` (contains "error")
+
+### 3. Incorrect Array Syntax
+**Wrong:** `region IN "us-east", "us-west"`  
+**Correct:** `region IN ("us-east", "us-west")`
+
+### 4. Ambiguous Precedence
+**Wrong:** `a = 1 OR b = 2 AND c = 3`  
+**Correct:** `a = 1 OR (b = 2 AND c = 3)`
+
+### 5. Case Sensitivity
+Remember that `LIKE` is case-sensitive. Use `ILIKE` for case-insensitive matching:
+```
+# Only matches "Error" exactly
+message LIKE "%Error%"
+
+# Matches "error", "ERROR", "Error", etc.
+message ILIKE "%error%"
+```
+
+### 6. Special Characters in Search
+If searching for special characters or operators as text, always use quotes:
+```
+# Searching for the literal text "NOT"
+message CONTAINS "NOT"
+
+# Searching for text with operators
+"response != 200"
+```
+
+## Best Practices
+
+1. **Start Simple**: Begin with basic field comparisons and add complexity as needed
+2. **Use Field Context**: Be explicit about context (resource., span., etc.) to avoid ambiguity
+3. **Test Incrementally**: Build complex queries step by step, testing each addition
+4. **Leverage Autocomplete**: Use the UI's autocomplete feature to discover available fields
+5. **Quote String Values**: Always quote string values to avoid parsing ambiguities
+6. **Parenthesize Complex Logic**: Use parentheses liberally to make intent clear
