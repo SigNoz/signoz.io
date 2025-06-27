@@ -120,6 +120,127 @@ condition1 AND condition2 OR condition3
 3. `AND`
 4. `OR`
 
+## Full-Text Search
+
+Note: full-text search is only supported for logs currently.
+
+### Quoted Text
+Use quotes for exact phrase matching:
+```
+"failed to connect to database"
+```
+
+### Unquoted Text
+Without quotes, each word is searched separately:
+```
+error database connection
+```
+
+This searches for logs containing "error" AND "database" AND "connection" (not necessarily together).
+
+### Regex
+
+You can use any valid [re2 syntax](https://github.com/google/re2/wiki/syntax) as the full text search.
+
+#### Examples
+
+```
+"^\[SnapshotGenerator id=\d+\] Creating new KRaft snapshot file snapshot \d+-\d+ because .+ \d+ bytes\.$"
+```
+
+Matches the following log records with body
+
+```
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109202-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109163-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109124-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001108539-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001108305-0000000001 because we have replayed at least 2800 bytes.
+```
+
+Matches logs records that contain email in log body
+
+```
+"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+```
+
+### Combining Full-Text with Field Searches
+```
+"payment failed" AND service.name = "payment-service"
+```
+
+## Functions
+
+Use functions to query array fields (currently supported for json body searches):
+
+### HAS Function
+Checks if an array contains a specific value:
+```
+has(user_ids, 123)
+has(tags, "production")
+```
+
+### HASANY Function
+Checks if an array contains any of the specified values:
+```
+hasAny(regions, ["us-east", "us-west"])
+hasAny(status_codes, [500, 502, 503])
+```
+
+### HASALL Function
+Checks if an array contains all specified values:
+```
+hasAll(features, ["auth", "payment", "notification"])
+```
+
+### Important: When to Use Quotes
+
+Always use quotes when:
+1. Searching for exact phrases
+2. Your search term contains special characters or operators
+3. You want to search for operator keywords as text
+
+Examples where quotes are necessary:
+```
+
+# Wrong - AND will be treated as boolean operator
+searching for AND operator
+
+# Correct - searches for the phrase including "AND"
+"searching for AND operator"
+```
+
+### Regular Expression (REGEXP)
+
+The `REGEXP` operator uses RE2 syntax for pattern matching. RE2 is a fast, safe regular expression library that guarantees linear time execution. Common patterns:
+
+- `.` - Any single character
+- `*` - Zero or more of the preceding element
+- `+` - One or more of the preceding element
+- `?` - Zero or one of the preceding element
+- `[abc]` - Any character in the set
+- `[^abc]` - Any character not in the set
+- `\d` - Any digit
+- `\w` - Any word character (letter, digit, underscore)
+- `\s` - Any whitespace character
+
+Examples:
+```
+# Match email addresses
+email REGEXP "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+
+# Match IP addresses
+ip_address REGEXP "^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
+
+# Match URLs starting with https
+url REGEXP "^https://"
+
+# Match phone numbers (various formats)
+phone REGEXP "^\+?1?\d{3}[-.]?\d{3}[-.]?\d{4}$"
+```
+
+Note: RE2 does not support lookahead/lookbehind assertions or backreferences.
+
 ## Field Context
 
 Fields can have explicit contexts to specify where to look for the data. This is crucial because telemetry data comes from multiple sources, and the same field name can exist in different contexts with different meanings or data types.
@@ -178,127 +299,25 @@ attribute.user_name != "anon"
 
 ### Best Practices for Field Context
 
-1. **Always use explicit context when you know there is a conflicting key (of course, unless you want to search across ALL)** - This ensures accurate results (and relatively better performance)
+1. **Always use explicit context when you know there is a conflicting key (Unless, of course, you want to search across ALL)** - This ensures accurate results (and relatively better performance)
 2. **Use implicit search when exploring** - If you're not sure where a field exists, omit the context
 3. **Be aware of data type conflicts** - The same field name might have different types in different contexts
 
 ## Data Types
 
-You can explicitly specify data types using the `:type` syntax:
+When field values could be interpreted as different types, you can explicitly specify data types using the `:type` syntax:
 
 ```
-user.age:int64 > 18
+user.age:float64 > 18
 price:float64 >= 99.99
 is_active:bool = true
 ```
 
 Supported data types:
 - `string`
-- `number`
+- `float64`
 - `bool`
 - `[]string`, `[]int64`, `[]float64`, `[]bool` (arrays)
-
-## Functions
-
-Use functions to query array fields (currently supported for json body searches):
-
-### HAS Function
-Checks if an array contains a specific value:
-```
-has(user_ids, 123)
-has(tags, "production")
-```
-
-### HASANY Function
-Checks if an array contains any of the specified values:
-```
-hasAny(regions, ["us-east", "us-west"])
-hasAny(status_codes, [500, 502, 503])
-```
-
-### HASALL Function
-Checks if an array contains all specified values:
-```
-hasAll(features, ["auth", "payment", "notification"])
-```
-
-## Full-Text Search
-
-For searching text content without specifying fields:
-
-### Quoted Text
-Use quotes for exact phrase matching:
-```
-"failed to connect to database"
-```
-
-### Unquoted Text
-Without quotes, each word is searched separately:
-```
-error database connection
-```
-
-This searches for logs containing "error" AND "database" AND "connection" (not necessarily together).
-
-### Regex
-
-You can use any valid re2 regex as the full text search. The following returns logs records that contain email in log body.
-```
-"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-```
-
-### Combining Full-Text with Field Searches
-```
-"payment failed" AND service.name = "payment-service"
-```
-
-### Important: When to Use Quotes
-
-Always use quotes when:
-1. Searching for exact phrases
-2. Your search term contains special characters or operators
-3. You want to search for operator keywords as text
-
-Examples where quotes are necessary:
-```
-
-# Wrong - AND will be treated as boolean operator
-searching for AND operator
-
-# Correct - searches for the phrase including "AND"
-"searching for AND operator"
-```
-
-### Regular Expression (REGEXP)
-
-The `REGEXP` operator uses RE2 syntax for pattern matching. RE2 is a fast, safe regular expression library that guarantees linear time execution. Common patterns:
-
-- `.` - Any single character
-- `*` - Zero or more of the preceding element
-- `+` - One or more of the preceding element
-- `?` - Zero or one of the preceding element
-- `[abc]` - Any character in the set
-- `[^abc]` - Any character not in the set
-- `\d` - Any digit
-- `\w` - Any word character (letter, digit, underscore)
-- `\s` - Any whitespace character
-
-Examples:
-```
-# Match email addresses
-email REGEXP "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-
-# Match IP addresses
-ip_address REGEXP "^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
-
-# Match URLs starting with https
-url REGEXP "^https://"
-
-# Match phone numbers (various formats)
-phone REGEXP "^\+?1?\d{3}[-.]?\d{3}[-.]?\d{4}$"
-```
-
-Note: RE2 does not support lookahead/lookbehind assertions or backreferences.
 
 ## Advanced Examples
 
@@ -316,14 +335,7 @@ region = "us-east" AND (
 )
 ```
 
-### Working with JSON Fields
-For nested JSON attributes, use dot notation:
-```
-payload.user.address.city = "New York"
-response.data.items[].price > 100
-```
-
-### Time-Based Queries with Other Conditions
+### Duration-Based Queries with Other Conditions
 ```
 log.severity_text = "ERROR" AND 
 resource.service.name IN ("payment", "checkout") AND
@@ -338,6 +350,8 @@ span.http.url LIKE "%/api/v2/%"
 ```
 
 ## Common Pitfalls
+
+Avoid these common mistakes when writing queries. Each example shows the incorrect approach followed by the correct syntax.
 
 ### 1. Forgetting Quotes for String Values
 **Not recommended:** `status = active`  
@@ -371,9 +385,463 @@ If searching for special characters or operators as text, always use quotes:
 # Searching for the literal text "NOT"
 message CONTAINS "NOT"
 
+# Searching for logs with text [debug]
+
+"[debug]"
+
 # Searching for text with operators
 "response != 200"
 ```
+
+## Troubleshooting
+
+This section helps you resolve common errors when writing search queries.
+
+### Syntax Errors
+
+#### "found syntax errors while parsing the filter expression"
+
+This error occurs when the query parser cannot understand your query syntax. Common causes:
+
+**1. Missing quotes around special characters**
+```
+# Wrong - brackets cause parsing error
+message = [error]
+
+# Correct - use quotes for special characters
+message = "[error]"
+```
+
+**2. Unmatched parentheses or quotes**
+```
+# Wrong - missing closing parenthesis
+(service = "api" AND status = "error"
+
+# Correct
+(service = "api" AND status = "error")
+```
+
+**3. Invalid operator usage**
+```
+# Wrong - invalid operator combination
+field NOT = "value"
+
+# Correct - use proper NOT syntax
+field != "value"
+# OR
+NOT field = "value"
+```
+
+### Expression Parsing Errors
+
+#### "full text search is not supported"
+
+This error appears when using full-text search syntax on signals that don't support it (currently only logs support full-text search).
+
+```
+# Wrong - using full-text search on traces/metrics
+"database connection failed"  # when querying traces
+
+# Correct - use field-based search for non-log signals
+message CONTAINS "database connection failed"
+```
+
+#### "key `<fieldname>` not found"
+
+The specified field doesn't exist in your telemetry data. Common causes:
+
+**1. Typo in field name**
+```
+# Wrong
+sevice.name = "api"  # typo: sevice instead of service
+
+# Correct
+service.name = "api"
+```
+
+**3. Incorrect JSON body field syntax**
+```
+# Wrong - missing body prefix for JSON search
+status = "error"
+
+# Correct - use body prefix for JSON fields
+body.status = "error"
+```
+
+#### "key `<fieldname>` is ambiguous"
+
+This warning (not an error) indicates the same field name exists in multiple contexts. The query will search across all contexts, which may impact performance.
+
+```
+# Warning - ambiguous field
+status_code = 200
+# Could match: span.status_code, attribute.status_code, etc.
+
+# Better - be explicit
+attribute.http.status_code = 200
+```
+
+#### "missing key for body json search"
+
+When searching JSON body fields, you must specify the key after `body.`
+
+```
+# Wrong - incomplete body search
+body. = "error"
+
+# Correct - specify the JSON key
+body.error_message = "timeout"
+```
+
+### Function-Related Errors
+
+#### "unknown function `<name>`"
+
+Only specific functions are supported. Check for typos:
+
+```
+# Wrong - typo in function name
+hasany(tags, ["prod", "staging"])
+
+# Correct - proper case
+hasAny(tags, ["prod", "staging"])
+```
+
+Supported functions:
+- `has()` - check if array contains a value
+- `hasAny()` - check if array contains any of the values
+- `hasAll()` - check if array contains all values
+
+#### "function expects key and value parameters"
+
+Array functions require at least two parameters:
+
+```
+# Wrong - missing parameters
+has(tags)
+
+# Correct - provide field and value
+has(tags, "production")
+```
+
+#### "function supports only body JSON search"
+
+Currently, array functions only work with JSON body fields:
+
+```
+# Wrong - using function on non-body field
+has(attribute.tags, "prod")
+
+# Correct - use with body fields
+has(body.tags, "prod")
+```
+
+### Value Type Errors
+
+#### "unsupported value type"
+
+Ensure values are one of the supported types:
+
+```
+# Supported value types:
+"text value"      # String (quoted)
+123               # Number
+true              # Boolean
+["a", "b", "c"]   # Array (for IN clauses and functions)
+```
+
+#### "failed to parse number"
+
+Number parsing failed. Check for invalid formats:
+
+```
+# Wrong
+field = 123.456.789  # Invalid number format
+
+# Correct
+field = 123.456
+```
+
+### Common Patterns and Solutions
+
+**1. Searching for operator keywords as text**
+```
+# Wrong - AND interpreted as operator
+searching for AND operator
+
+# Correct - use quotes
+"searching for AND operator"
+```
+
+**2. Complex conditions with wrong precedence**
+```
+# Wrong - unclear precedence
+a = 1 OR b = 2 AND c = 3
+
+# Correct - use parentheses
+a = 1 OR (b = 2 AND c = 3)
+```
+
+**3. Variable not found**
+When using dashboard variables:
+```
+# If variable $service_name isn't defined
+service = $service_name  # Error
+
+# Define the variable or use a literal value
+service = "api-gateway"
+```
+
+### Getting Help
+
+If you encounter an error not listed here:
+1. Check the search query syntax
+2. Verify field names exist in your data
+3. Try simplifying the query to isolate the issue
+4. Check for typos and proper quotation
+5. Ensure you're using the correct operators for your data type
+
+If the issue still persists, reach out to support.
+
+
+## Search syntax grammar
+
+<details>
+  <summary>Show search syntax grammar</summary>
+
+  ```
+  grammar FilterQuery;
+
+  /*
+  * Parser Rules
+  */
+
+  query
+      : expression
+      EOF
+      ;
+
+  // Expression with standard boolean precedence:
+  //    - parentheses > NOT > AND > OR
+  //    - consecutive expressions with no AND/OR => implicit AND
+  expression
+      : orExpression
+      ;
+
+  // OR expressions
+  orExpression
+      : andExpression ( OR andExpression )*
+      ;
+
+  // AND expressions + optional chaining with implicit AND if no OR is present
+  andExpression
+      : unaryExpression ( AND unaryExpression | unaryExpression )*
+      ;
+
+  // A unary expression handles optional NOT
+  unaryExpression
+      : NOT? primary
+      ;
+
+  // Primary constructs: grouped expressions, a comparison (key op value),
+  // a function call, or a full-text string
+  primary
+      : LPAREN orExpression RPAREN
+      | comparison
+      | functionCall
+      | fullText
+      | key
+      | value
+      ;
+
+  /*
+  * Comparison-like filters
+  *
+  * Includes all operators: =, !=, <>, <, <=, >, >=, [NOT] LIKE, [NOT] ILIKE,
+  * [NOT] BETWEEN, [NOT] IN, [NOT] EXISTS, [NOT] REGEXP, [NOT] CONTAINS, etc.
+  */
+  comparison
+      : key EQUALS value
+      | key (NOT_EQUALS | NEQ) value
+      | key LT value
+      | key LE value
+      | key GT value
+      | key GE value
+
+      | key (LIKE | ILIKE) value
+      | key (NOT_LIKE | NOT_ILIKE) value
+
+      | key BETWEEN value AND value
+      | key NOT BETWEEN value AND value
+
+      | key inClause
+      | key notInClause
+
+      | key EXISTS
+      | key NOT EXISTS
+
+      | key REGEXP value
+      | key NOT REGEXP value
+
+      | key CONTAINS value
+      | key NOT CONTAINS value
+      ;
+
+  // in(...) or in[...] 
+  inClause
+      : IN LPAREN valueList RPAREN
+      | IN LBRACK valueList RBRACK
+      | IN value
+      ;
+
+  notInClause
+      : NOT IN LPAREN valueList RPAREN
+      | NOT IN LBRACK valueList RBRACK
+      | NOT IN value
+      ;
+
+  // List of values for in(...) or in[...]
+  valueList
+      : value ( COMMA value )*
+      ;
+
+  // Full-text search: a standalone quoted string is allowed as a "primary"
+  // e.g. `"Waiting for response" http.status_code=200`
+  fullText
+      : QUOTED_TEXT
+      | FREETEXT
+      ;
+
+  /*
+  * Function calls like:
+  *    has(payload.user_ids, 123)
+  *    hasAny(payload.user_ids, [123, 456])
+  *    ...
+  */
+  functionCall
+      : (HAS | HASANY | HASALL) LPAREN functionParamList RPAREN
+      ;
+
+  // Function parameters can be keys, single scalar values, or arrays
+  functionParamList
+      : functionParam ( COMMA functionParam )*
+      ;
+
+  functionParam
+      : key
+      | value
+      | array
+      ;
+
+  // An array: [ item1, item2, item3 ]
+  array
+      : LBRACK valueList RBRACK
+      ;
+
+  /*
+  * A 'value' can be a string literal (double or single-quoted),
+  //  a numeric literal, boolean, or a "bare" token as needed.
+  */
+  value
+      : QUOTED_TEXT
+      | NUMBER
+      | BOOL
+      | KEY
+      ;
+
+  /*
+  * A key can include letters, digits, underscores, dots, brackets
+  * E.g. service.name, query_log.query_duration_ms, proto.user_objects[].name
+  */
+  key
+      : KEY
+      ;
+
+
+  /*
+  * Lexer Rules
+  */
+
+  // Common punctuation / symbols
+  LPAREN : '(' ;
+  RPAREN : ')' ;
+  LBRACK : '[' ;
+  RBRACK : ']' ;
+  COMMA  : ','  ;
+
+  EQUALS      : '=' | '==' ;
+  NOT_EQUALS  : '!=' ;
+  NEQ         : '<>' ;       // alternate not-equals operator
+  LT          : '<'  ;
+  LE          : '<=' ;
+  GT          : '>'  ;
+  GE          : '>='  ;
+
+  // Operators that are made of multiple keywords
+  LIKE        : [Ll][Ii][Kk][Ee] ;
+  NOT_LIKE    : [Nn][Oo][Tt] [ \t]+ [Ll][Ii][Kk][Ee] ;
+  ILIKE       : [Ii][Ll][Ii][Kk][Ee] ;
+  NOT_ILIKE   : [Nn][Oo][Tt] [ \t]+ [Ii][Ll][Ii][Kk][Ee] ;
+  BETWEEN     : [Bb][Ee][Tt][Ww][Ee][Ee][Nn] ;
+  EXISTS      : [Ee][Xx][Ii][Ss][Tt][Ss]? ;
+  REGEXP      : [Rr][Ee][Gg][Ee][Xx][Pp] ;
+  CONTAINS    : [Cc][Oo][Nn][Tt][Aa][Ii][Nn][Ss]? ;
+  IN          : [Ii][Nn] ;
+
+  // Boolean logic
+  NOT         : [Nn][Oo][Tt] ;
+  AND         : [Aa][Nn][Dd] ;
+  OR          : [Oo][Rr] ;
+
+  // For easy referencing in function calls
+  HAS         : [Hh][Aa][Ss] ;
+  HASANY      : [Hh][Aa][Ss][Aa][Nn][Yy] ;
+  HASALL      : [Hh][Aa][Ss][Aa][Ll][Ll] ;
+
+  // Potential boolean constants
+  BOOL
+      : [Tt][Rr][Uu][Ee]
+      | [Ff][Aa][Ll][Ss][Ee]
+      ;
+
+  fragment SIGN : [+-] ;
+
+  // Numbers: optional sign, then digits, optional fractional part,
+  // optional scientific notation (handy for future use)
+  NUMBER
+      : SIGN? DIGIT+ ('.' DIGIT*)? ([eE] SIGN? DIGIT+)?    //  -10.25  42  +3.14  6.02e23
+      | SIGN? '.' DIGIT+ ([eE] SIGN? DIGIT+)?              //  -.75    .5    -.5e-3
+      ;
+
+  // Double/single-quoted text, capturing full text search strings, values, etc.
+  QUOTED_TEXT
+      :  (   '"' ( ~["\\] | '\\' . )* '"'     // double-quoted
+          |   '\'' ( ~['\\] | '\\' . )* '\'' // single-quoted
+          )
+      ;
+
+  fragment SEGMENT      : [a-zA-Z$] [a-zA-Z0-9$_:\-]* ;
+  fragment EMPTY_BRACKS : '[' ']' ;
+  fragment OLD_JSON_BRACKS: '[' '*' ']';
+
+  KEY
+      : SEGMENT ( '.' SEGMENT | EMPTY_BRACKS | OLD_JSON_BRACKS)*
+      ;
+
+  // Ignore whitespace
+  WS
+      : [ \t\r\n]+ -> skip
+      ;
+
+  // Digits used by NUMBER
+  fragment DIGIT
+      : [0-9]
+      ;
+
+  FREETEXT : (~[ \t\r\n=()'"<>!,[\]])+ ;
+  ```
+
+</details>
 
 ## Best Practices
 
