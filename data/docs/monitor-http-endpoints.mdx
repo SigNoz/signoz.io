@@ -6,62 +6,122 @@ id: monitor-http-endpoints
 
 With SigNoz, you can monitor the health of HTTP endpoints and set up alerts in case of HTTP endpoint failure status codes. This guide covers everything from basic setup to creating dashboards and configuring alerts.
 
+## Prerequisites
+
+Before you begin, ensure you have OpenTelemetry Collector installed. If you haven't installed it yet, follow the [OpenTelemetry Binary Usage guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+
 <Tabs>
 
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
 ## Basic Setup
 
-* Add the httpcheck receiver to the config and set up the collector OTLP exporter to send data to SigNoz Cloud.
+### Step 1: Configure the HTTP Check Receiver
 
-    ```yaml {2-6,9-14}
-    receivers:
-      httpcheck:
-        targets:
-          - endpoint: http://example.com
-            method: GET
-        collection_interval: 10s
-    ...
-    exporters:
-      otlp:
-        endpoint: "ingest.{region}.signoz.cloud:443"
-        tls:
-          insecure: false
-        headers:
-          "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
-    ...
-    ```
+Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your OpenTelemetry Collector configuration:
 
-    Depending on the choice of your region for the SigNoz cloud, the ingest endpoint will vary according to this table.
+```yaml {2-6}
+receivers:
+  httpcheck:
+    targets:
+      - endpoint: http://example.com
+        method: GET
+    collection_interval: 10s
+```
 
-    | Region | Endpoint |
-    | --- | --- |
-    | US |  ingest.us.signoz.cloud:443 |
-    | IN |  ingest.in.signoz.cloud:443 |
-    | EU | ingest.eu.signoz.cloud:443 |
+### Step 2: Configure the OTLP Exporter
 
-    The HTTP Check Receiver can be used for synthetic checks against HTTP endpoints. This receiver will make a request to the specified endpoint using the configured method. This scraper generates a metric labelled for each HTTP response status class with a value of 1 if the status code matches the class.
+Set up the collector OTLP exporter to send data to SigNoz Cloud:
 
-* Next, we will modify the pipeline to include the receiver we have enabled above.
+```yaml {2-8}
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
+```
 
-      ```yaml {4}
-      service:
-          ....
-          metrics:
-            receivers: [otlp, httpcheck]
-            processors: [batch]
-            exporters: [otlp]
-      ```
+Depending on your SigNoz cloud region, use the appropriate ingest endpoint:
 
-* We can restart the otel collector container/process so that new changes are applied and see the metrics generated for synthetic checks.
+| Region | Endpoint |
+| --- | --- |
+| US |  ingest.us.signoz.cloud:443 |
+| IN |  ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
 
-* This receiver creates a metric name `httpcheck_status` with value 1 if the check resulted in status_code matching the status_class, otherwise 0. For more info on the additional metrics and attributes available, please read the documentation [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md).
+### Step 3: Configure the Service Pipeline
+
+Modify the pipeline to include the httpcheck receiver:
+
+```yaml {4}
+service:
+    ....
+    metrics:
+      receivers: [otlp, httpcheck]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+### Step 4: Restart the Collector
+
+Restart the OpenTelemetry Collector container/process to apply the new configuration and start collecting HTTP endpoint metrics.
+
+</TabItem>
+
+<TabItem value='self-host' label='Self-Host'>
+
+## Basic Setup
+
+### Step 1: Configure the HTTP Check Receiver
+
+Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your OpenTelemetry Collector configuration:
+
+```yaml {2-6}
+receivers:
+  httpcheck:
+    targets:
+      - endpoint: http://example.com
+        method: GET
+    collection_interval: 10s
+```
+
+### Step 2: Configure the Service Pipeline
+
+Modify the pipeline to include the httpcheck receiver:
+
+```yaml {4}
+service:
+    ....
+    metrics:
+      receivers: [otlp, httpcheck]
+      processors: [batch]
+      exporters: [clickhousemetricswrite]
+```
+
+### Step 3: Restart the Collector
+
+Restart the OpenTelemetry Collector container/process to apply the new configuration and start collecting HTTP endpoint metrics.
+
+</TabItem>
+</Tabs>
+
+## Understanding HTTP Check Metrics
+
+The HTTP Check Receiver performs synthetic checks against HTTP endpoints by making requests to specified endpoints using the configured method. It generates metrics labeled for each HTTP response status class.
+
+The receiver creates a metric named `httpcheck_status` with value 1 if the check resulted in status_code matching the status_class, otherwise 0.
 
 ## Monitoring Multiple Endpoints
 
-You can configure `targets` for the httpcheck receiver to monitor the health of one or more endpoints. Following is the sample config that monitors two endpoints.
+You can configure multiple `targets` for the httpcheck receiver to monitor several endpoints simultaneously:
 
-```yaml {2-8,11-16,21,23}
+<Tabs>
+
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```yaml {3-8}
 receivers:
   httpcheck:
     targets:
@@ -70,26 +130,29 @@ receivers:
       - endpoint: http://my-app.com
         method: GET
     collection_interval: 10s
-...
-exporters:
-  otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
-...
-  service:
-      ....
-      metrics:
-        receivers: [otlp, httpcheck]
-        processors: [batch]
-        exporters: [otlp]
 ```
+
+</TabItem>
+
+<TabItem value='self-host' label='Self-Host'>
+
+```yaml {3-8}
+receivers:
+  httpcheck:
+    targets:
+      - endpoint: http://example.com
+        method: GET
+      - endpoint: http://my-app.com
+        method: GET
+    collection_interval: 10s
+```
+
+</TabItem>
+</Tabs>
 
 ## Multiple Collection Intervals
 
-If you need different collection intervals for different endpoints, you can create multiple httpcheck receiver instances. Each instance can have its own collection interval and targets.
+If you need different collection intervals for different endpoints, create multiple httpcheck receiver instances. Each instance can have its own collection interval and targets:
 
 ```yaml {2-18}
 receivers:
@@ -116,7 +179,7 @@ service:
   metrics:
     receivers: [otlp, httpcheck/rapid, httpcheck/frequent, httpcheck/low]
     processors: [batch]
-    exporters: [otlp]
+    exporters: [otlp] # or [clickhousemetricswrite] for self-host
 ```
 
 **Note:** The receiver name format is `httpcheck` for the base receiver and `httpcheck/{name}` for additional instances. Using `httpchecklow` (without the slash) would return an error.
@@ -127,7 +190,7 @@ Once the collector is running and sending data to SigNoz, you can create dashboa
 
 ### Step 1: Create a New Dashboard
 
-1. Navigate to your SigNoz Cloud account
+1. Navigate to your SigNoz account
 2. Go to the **Dashboard** tab
 3. Click on **New Dashboard** button
 4. Choose **Time Series** chart type for HTTP endpoint monitoring
@@ -147,7 +210,7 @@ The resulting chart will show:
 - Value of 0 when endpoints are down or returning error codes
 - Different lines for each monitored endpoint
 
-### Available Metrics
+## Available Metrics
 
 The HTTP Check receiver provides several metrics:
 
@@ -157,7 +220,7 @@ The HTTP Check receiver provides several metrics:
 | `httpcheck.duration` | Duration of the HTTP request in milliseconds | Gauge |
 | `httpcheck.error` | Number of errors during HTTP checks | Sum |
 
-### Available Attributes
+## Available Attributes
 
 Key attributes for filtering and grouping:
 
@@ -225,100 +288,6 @@ For comprehensive monitoring, create separate panels for:
 2. **Response Time**: `httpcheck_duration`
 3. **Error Rate**: `rate(httpcheck_error[5m])`
 
-</TabItem>
-
-<TabItem value='self-host' label='Self-Host'>
-
-## Basic Setup
-
-* Add the httpcheck receiver to the config file
-  ```yaml {2-10}
-  receivers:
-    httpcheck:
-      targets:
-        - endpoint: http://example.com
-          method: GET
-      collection_interval: 10s
-  ```
-  The HTTP Check Receiver can be used for synthetic checks against HTTP endpoints. This receiver will make a request to the specified endpoint using the configured method. This scraper generates a metric labelled for each HTTP response status class with a value of 1 if the status code matches the class.
-
-* Next, we will modify the pipeline to include the receiver we have enabled above.
-    ```yaml {4}
-    service:
-        ....
-        metrics:
-          receivers: [otlp, httpcheck]
-          processors: [batch]
-          exporters: [clickhousemetricswrite]
-    ```
-
-* We can restart the otel collector container/process so that new changes are applied and see the metrics generated for synthetic checks.
-
-* This receiver creates a metric name `httpcheck_status` with value 1 if the check resulted in status_code matching the status_class, otherwise 0. For more info on the additional metrics and attributes available, please read the documentation [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md).
-
-## Monitoring Multiple Endpoints
-
-You can configure `targets` for the httpcheck receiver to monitor the health of multiple endpoints. Following is the sample config that monitors two endpoints.
-
-```yaml {2-8}
-receivers:
-  httpcheck:
-    targets:
-      - endpoint: http://example.com
-        method: GET
-      - endpoint: http://my-app.com
-        method: GET
-    collection_interval: 10s
-...
-  ...
-
-  service:
-      ....
-      metrics:
-        receivers: [otlp, httpcheck]
-        processors: [batch]
-        exporters: [clickhousemetricswrite]
-```
-
-## Multiple Collection Intervals
-
-If you need different collection intervals for different endpoints, you can create multiple httpcheck receiver instances:
-
-```yaml {2-18}
-receivers:
-  httpcheck/rapid:
-    targets:
-      - endpoint: http://critical-service.com
-        method: GET
-    collection_interval: 30s
-  
-  httpcheck/frequent:
-    targets:
-      - endpoint: http://important-service.com
-        method: GET
-    collection_interval: 60s
-  
-  httpcheck/low:
-    targets:
-      - endpoint: http://background-service.com
-        method: GET
-    collection_interval: 300s
-
-service:
-  ....
-  metrics:
-    receivers: [otlp, httpcheck/rapid, httpcheck/frequent, httpcheck/low]
-    processors: [batch]
-    exporters: [clickhousemetricswrite]
-```
-
-## Creating Dashboards and Alerts
-
-The dashboard and alert creation process is the same as described in the SigNoz Cloud section above. Use the same metrics (`httpcheck_status`, `httpcheck_duration`, `httpcheck_error`) and attributes to create comprehensive monitoring dashboards.
-
-</TabItem>
-</Tabs>
-
 ## Best Practices
 
 1. **Set appropriate collection intervals**: Balance between timely detection and resource usage
@@ -338,11 +307,4 @@ The dashboard and alert creation process is the same as described in the SigNoz 
 
 ## Additional Resources
 
-For more detailed information about HTTP endpoint monitoring with OpenTelemetry and advanced dashboard creation, see our comprehensive guide: [Health Check Monitoring with OpenTelemetry](https://signoz.io/blog/health-check-monitoring-with-opentelemetry/).
-
-This guide includes:
-- Detailed setup instructions with sample applications
-- Advanced dashboard creation techniques
-- Complex alert configurations
-- Performance optimization tips
-- Integration with other monitoring tools
+For a more detailed guide about HTTP endpoint monitoring with OpenTelemetry, refer to our comprehensive blog post: [Health Check Monitoring with OpenTelemetry](https://signoz.io/blog/health-check-monitoring-with-opentelemetry/).
