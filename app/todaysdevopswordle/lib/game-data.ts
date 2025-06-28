@@ -8,10 +8,10 @@ export interface WordleGameData {
 
 // Current game data - update this daily
 const CURRENT_GAME_DATA: WordleGameData = {
-  word: 'FLUSH',
-  hint: "Forces out what's been waiting quietly in line.",
-  info: "Today's word is 'FLUSH' which in observability and logging refers to the act of forcefully sending buffered data, such as logs or metrics—from local memory to its intended destination to ensure nothing is left unsent",
-  link: 'https://launchdarkly.com/docs/sdk/features/flush',
+  word: 'LINKS',
+  hint: "Once-used ties between containers, now mostly phased out.",
+  info: "Todays word is 'LINKS'. Docker’s --link flag allowed containers to share environment variables and /etc/hosts entries to enable communication, but this feature is now considered legacy and may be removed in future releases.",
+  link: 'https://www.ameyalokare.com/docker/2017/09/14/docker-migrating-legacy-links.html',
   date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
 }
 
