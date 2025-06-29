@@ -666,6 +666,7 @@ const TeamsVariant: React.FC = () => {
               // These become Segment traits
               email: payload.email,
               dataRegion: payload.region.name,
+              method: 'email_signup',
             },
           })
 
@@ -750,6 +751,7 @@ const TeamsVariant: React.FC = () => {
               // These become Segment traits
               email: responseData.data.email,
               dataRegion: payload.region.name,
+              method: 'social_signup',
             },
           })
 
