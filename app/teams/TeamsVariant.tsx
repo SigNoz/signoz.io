@@ -7,7 +7,6 @@ import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import TrackingLink from '@/components/TrackingLink'
-import { Toast } from 'app/todaysdevopswordle/components/toast'
 import { FaGithub, FaGoogle } from 'react-icons/fa'
 
 interface ErrorsProps {
@@ -689,11 +688,11 @@ const TeamsVariant: React.FC = () => {
           router.push('/verify-email')
         } else {
           // To do, handle other errors apart from invalid email
-          if (response.status === 400) {
-            setErrors({
-              workEmail: 'Please enter a valid work email.',
-            })
-          }
+          const errorData = await response.json()
+          setErrors({
+            apiError: errorData.error,
+          })
+          handleError()
         }
       } catch (error) {
         handleError()
@@ -804,7 +803,7 @@ const TeamsVariant: React.FC = () => {
 
       <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row">
         {/* Left section - Sign up form */}
-        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px)]">
+        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+10vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+10vh)]">
           <div className="w-full">
             {(!isSubmitting && submitFailed) || ssoError ? (
               <ErrorState error={errors.apiError || ''} />
