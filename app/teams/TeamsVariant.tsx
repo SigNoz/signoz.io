@@ -750,7 +750,7 @@ const TeamsVariant: React.FC = () => {
             attributes: {
               // These become Segment traits
               email: responseData.data.email,
-              dataRegion: payload.region.name,
+              dataRegion: data_region,
               method: 'social_signup',
             },
           })
