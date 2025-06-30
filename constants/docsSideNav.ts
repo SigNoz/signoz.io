@@ -1979,109 +1979,109 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/migration/migrate-to-signoz-cloud',
-        label: 'From SigNoz OSS to Cloud',
-      },
-    ],
-  },
-  {
-    label: 'Migrate From LGTM Stack',
-    className: 'new-doc',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/migration/migrate-from-grafana',
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/metrics',
-        label: 'Migrating Metrics',
+        label: 'From Self-Hosted to Cloud',
       },
       {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/traces',
-        label: 'Migrating Traces',
+        label: 'From LGTM Stack',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-grafana',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
       },
       {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/logs',
-        label: 'Migrating Logs',
+        label: 'From ELK Stack',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-elk',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
       },
       {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/dashboards',
-        label: 'Migrating Dashboards',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/alerts',
-        label: 'Migrating Alerts',
-      },
-    ],
-  },
-  {
-    label: 'Migrate From ELK Stack',
-    className: 'new-doc',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/migration/migrate-from-elk',
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-elk/metrics',
-        label: 'Migrating Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-elk/traces',
-        label: 'Migrating Traces',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-elk/logs',
-        label: 'Migrating Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-elk/dashboards',
-        label: 'Migrating Dashboards',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-elk/alerts',
-        label: 'Migrating Alerts',
-      },
-    ],
-  },
-  {
-    label: 'Migrate From New Relic',
-    className: 'new-doc',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/migration/migrate-from-newrelic',
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/metrics',
-        label: 'Migrating Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/traces',
-        label: 'Migrating Traces',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/logs',
-        label: 'Migrating Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/dashboards',
-        label: 'Migrating Dashboards',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/alerts',
-        label: 'Migrating Alerts',
+        label: 'From New Relic',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-newrelic',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
       },
     ],
   },
