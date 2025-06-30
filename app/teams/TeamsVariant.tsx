@@ -474,19 +474,25 @@ const SignupFormIsolated: React.FC<{
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
-              className="flex items-center justify-center gap-2 rounded-md border border-gray-600 bg-gray-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
-              onClick={() => handleSocialSubmit('github')}
+              className="flex items-center justify-center gap-3 rounded-md border border-blue-600 bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              onClick={() => handleSocialSubmit('google')}
             >
-              <FaGithub className="h-4 w-4" />
-              GitHub
+              <Image
+                src="/img/icons/google-logo.svg"
+                alt="Google logo"
+                width={20}
+                height={20}
+                className="h-5 w-5"
+              />
+              Google
             </button>
             <button
               type="button"
-              className="flex items-center justify-center gap-2 rounded-md border border-blue-600 bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-              onClick={() => handleSocialSubmit('google')}
+              className="flex items-center justify-center gap-3 rounded-md border border-signoz_slate-400 bg-signoz_ink-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-signoz_ink-400"
+              onClick={() => handleSocialSubmit('github')}
             >
-              <FaGoogle className="h-4 w-4" />
-              Google
+              <FaGithub className="h-5 w-5" />
+              GitHub
             </button>
           </div>
         </div>
@@ -575,6 +581,18 @@ const SignupFormIsolated: React.FC<{
           {errors?.termsOfService && (
             <div className="text-xs text-red-400">{errors.termsOfService}</div>
           )}
+        </div>
+
+        <div className="text-center">
+          <p className="text-sm text-signoz_vanilla-100/70">
+            Already have an account?{' '}
+            <a
+              href="https://signoz.io/login/"
+              className="font-medium text-signoz_robin-500 hover:underline"
+            >
+              Sign in
+            </a>
+          </p>
         </div>
       </form>
     </div>
