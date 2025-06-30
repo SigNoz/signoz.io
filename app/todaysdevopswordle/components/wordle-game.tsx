@@ -267,7 +267,12 @@ export function WordleGame({
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <Toast message={toastMessage} isVisible={showToast} onClose={() => setShowToast(false)} />
+      <Toast
+        message={toastMessage}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+        time={800}
+      />
       <div className="flex w-full max-w-[450px] justify-center pt-10 sm:pt-0">
         <WordleHeader
           currentAttempts={gameState.guesses.length}
