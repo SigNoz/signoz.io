@@ -430,15 +430,17 @@ const SignupFormIsolated: React.FC<{
 
   return (
     <div className="mx-auto w-full max-w-md">
-      <h1 className="mb-1 text-2xl font-medium text-white">Get started with SigNoz</h1>
-      <p className="mb-10 text-sm text-signoz_vanilla-100/70">
-        Experience SigNoz with 30-day free trial. No credit card required.
-      </p>
+      <div className="mb-8">
+        <h1 className="mb-2 text-2xl font-medium text-white">Get started</h1>
+        <p className="text-sm text-signoz_vanilla-100/70">
+          Experience SigNoz with 30-day free trial. No credit card required.
+        </p>
+      </div>
 
-      <div className="mb-10">
-        <div className="space-y-2">
-          <label className="mb-1 block text-sm font-medium" htmlFor="dataRegion">
-            Data region
+      <div className="mb-8 space-y-6">
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-signoz_vanilla-100" htmlFor="dataRegion">
+            Data region{' '}
           </label>
 
           <div className="grid grid-cols-3 gap-3">
@@ -446,7 +448,7 @@ const SignupFormIsolated: React.FC<{
               <button
                 type="button"
                 key={region.id}
-                className={`flex items-center justify-center gap-2 rounded-md border border-solid p-2.5 text-sm
+                className={`flex items-center justify-center gap-2 rounded-md border border-solid p-2.5 text-sm transition-colors
             ${
               region.id === formState.dataRegion
                 ? 'border-signoz_robin-500/60 bg-signoz_robin-500/10 text-signoz_robin-500'
@@ -467,33 +469,39 @@ const SignupFormIsolated: React.FC<{
           </div>
         </div>
 
-        <div className="my-6 text-center text-sm text-signoz_vanilla-100/70">Sign up with</div>
-        <div className="mt-6 flex justify-center space-x-4">
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 rounded-md border border-signoz_slate-400 bg-signoz_robin-500 px-4 py-2.5 text-sm hover:border-signoz_slate-300"
-            onClick={() => handleSocialSubmit('github')}
-          >
-            <FaGithub />
-            GitHub
-          </button>
-          <button
-            type="button"
-            className="flex items-center justify-center gap-2 rounded-md border border-signoz_slate-400 bg-signoz_robin-500 px-4 py-2.5 text-sm hover:border-signoz_slate-300"
-            onClick={() => handleSocialSubmit('google')}
-          >
-            <FaGoogle />
-            Google
-          </button>
+        <div className="space-y-4">
+          <div className="text-center text-sm text-signoz_vanilla-100/70">Sign up with</div>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              className="flex items-center justify-center gap-2 rounded-md border border-gray-600 bg-gray-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+              onClick={() => handleSocialSubmit('github')}
+            >
+              <FaGithub className="h-4 w-4" />
+              GitHub
+            </button>
+            <button
+              type="button"
+              className="flex items-center justify-center gap-2 rounded-md border border-blue-600 bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              onClick={() => handleSocialSubmit('google')}
+            >
+              <FaGoogle className="h-4 w-4" />
+              Google
+            </button>
+          </div>
         </div>
 
-        <div className="my-6 border-t border-signoz_slate-400"></div>
+        <div className="flex items-center">
+          <div className="flex-1 border-t border-signoz_slate-400"></div>
+          <span className="px-4 text-sm text-signoz_vanilla-100/50">Or use email</span>
+          <div className="flex-1 border-t border-signoz_slate-400"></div>
+        </div>
       </div>
 
-      <form className="space-y-7">
-        <div className="mb-4 space-y-1">
-          <label htmlFor="workEmail" className="mb-1 block text-sm font-medium">
-            Work Email
+      <form className="space-y-6">
+        <div className="space-y-2">
+          <label htmlFor="workEmail" className="block text-sm font-medium text-signoz_vanilla-100">
+            Email
           </label>
           <input
             type="email"
@@ -501,27 +509,48 @@ const SignupFormIsolated: React.FC<{
             disabled={isSubmitting}
             name="workEmail"
             value={formState.workEmail}
-            autoComplete="off"
+            autoComplete="email"
             onChange={handleInputChange}
             placeholder="E.g. bart@simpsonmail.com"
-            className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-300 px-3 py-2.5 text-sm text-stone-300"
+            className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-300 px-4 py-3 text-sm text-signoz_vanilla-100 placeholder-signoz_vanilla-100/50 focus:border-signoz_robin-500 focus:outline-none focus:ring-1 focus:ring-signoz_robin-500"
             ref={emailInputRef}
           />
-
           {errors?.workEmail && <div className="mt-1 text-xs text-red-400">{errors.workEmail}</div>}
         </div>
 
-        <div className="mt-6 space-y-2">
-          <div className="flex items-center gap-2">
+        <button
+          disabled={isSubmitting}
+          onClick={handleSubmit}
+          type="submit"
+          className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500 py-3 font-medium transition-colors hover:bg-signoz_robin-600 ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+        >
+          {isSubmitting ? (
+            <div className="flex items-center gap-2 text-sm">
+              Starting your free 30-day trial
+              <Loader2 size={16} className="animate-spin" />
+            </div>
+          ) : (
+            <span className="flex items-center gap-1.5 text-sm">
+              Start Your Free Trial
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          )}
+        </button>
+
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
             <input
               type="checkbox"
               id="termsOfServiceAccepted"
               name="termsOfServiceAccepted"
               checked={formState.termsOfServiceAccepted}
               onChange={handleInputChange}
-              className="mt-0.5 h-4 w-4 rounded border border-gray-500 bg-transparent accent-signoz_robin-500"
+              className="mt-1 h-4 w-4 rounded border border-signoz_slate-400 bg-signoz_ink-300 accent-signoz_robin-500"
             />
-            <label htmlFor="termsOfServiceAccepted" className="text-xs text-stone-300">
+            <label
+              htmlFor="termsOfServiceAccepted"
+              className="text-xs leading-relaxed text-signoz_vanilla-100/70"
+            >
               I agree to the{' '}
               <a
                 href="https://signoz.io/terms-of-service/"
@@ -547,23 +576,6 @@ const SignupFormIsolated: React.FC<{
             <div className="text-xs text-red-400">{errors.termsOfService}</div>
           )}
         </div>
-        <button
-          disabled={isSubmitting}
-          onClick={handleSubmit}
-          className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-        >
-          {isSubmitting ? (
-            <div className="flex items-center gap-2 text-sm">
-              Starting your free 30-day trial
-              <Loader2 size={16} className="animate-spin" />{' '}
-            </div>
-          ) : (
-            <span className="flex items-center gap-1.5 text-sm">
-              Start Your Free Trial
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          )}
-        </button>
       </form>
     </div>
   )
