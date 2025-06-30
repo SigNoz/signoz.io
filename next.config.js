@@ -469,6 +469,31 @@ module.exports = () => {
           destination: '/blog/what-is-opentelemetry/',
           permanent: true,
         },
+        {
+          source: '/migration/migrate-to-signoz-cloud/',
+          destination: '/migration/migrate-from-signoz-self-host-to-signoz-cloud/',
+          permanent: true,
+        },
+        {
+          source: '/migration/migrate-from-datadog/',
+          destination: '/migration/migrate-from-datadog-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/migration/migrate-from-grafana/',
+          destination: '/migration/migrate-from-grafana-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/migration/migrate-from-elk/',
+          destination: '/migration/migrate-from-elk-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/migration/migrate-from-newrelic/',
+          destination: '/migration/migrate-from-datadog-to-newrelic/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {

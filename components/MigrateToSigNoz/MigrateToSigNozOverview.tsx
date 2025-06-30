@@ -1,0 +1,76 @@
+import React from 'react'
+import {
+  SiKubernetes,
+  SiGrafana,
+  SiElastic,
+  SiDatadog,
+  SiNewrelic,
+} from 'react-icons/si'
+import IconCardGrid from '../Card/IconCardGrid'
+
+interface IconCardData {
+  name: string
+  href: string
+  icon: React.ReactNode
+  clickName: string
+}
+
+const MigrateVendorsData: IconCardData[] = [
+  {
+    name: 'Kubernetes',
+    href: '/docs/userguide/collect_kubernetes_pod_logs',
+    icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
+    clickName: 'Kubernetes Logs Link',
+  },
+  {
+    name: 'Migrate from Datadog',
+    href: '/docs/migration/migrate-from-datadog/',
+    icon: <SiDatadog className="h-7 w-7 text-purple-500" />,
+    clickName: 'Migrate from Datadog',
+  },
+  {
+    name: 'Migrate from New Relic',
+    href: '/docs/migration/migrate-from-newrelic/',
+    icon: <SiNewrelic className="h-7 w-7 text-green-500" />,
+    clickName: 'Migrate from New Relic',
+  },
+  {
+    name: 'Migrate from Grafana',
+    href: '/docs/migration/migrate-from-grafana/',
+    icon: <SiGrafana className="h-7 w-7 text-orange-500" />,
+    clickName: 'Migrate from Grafana',
+  },
+  {
+    name: 'Migrate from ELK',
+    href: '/docs/migration/migrate-from-elk/',
+    icon: <SiElastic className="h-7 w-7 text-pink-600" />,
+    clickName: 'Migrate from ELK',
+  },
+  {
+    name: 'Migrate from Self-Hosted SigNoz',
+    href: '/docs/migration/migrate-from-signoz/',
+    icon: (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+        src="/svgs/icons/signoz.svg"
+        alt="SigNoz"
+        className="h-7 w-7 object-contain"
+        />
+    ),
+    clickName: 'Migrate from Self-Hosted SigNoz',
+    }
+
+]
+
+export default function MigrateToSigNoz() {
+  return (
+    <IconCardGrid
+      cards={MigrateVendorsData}
+      sectionName="Vendors Migrate Section"
+      viewAllHref="/docs/migration/"          
+      viewAllText="View all migration guides"
+      gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+    />
+  )
+}
+

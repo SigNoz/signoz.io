@@ -1961,7 +1961,6 @@ const docsSideNav = [
     label: 'Migrate to SigNoz',
     type: 'category',
     isExpanded: false,
-    route: '/docs/migration/migrate-from-datadog',
     items: [
       {
         label: 'From Datadog',
