@@ -738,7 +738,7 @@ const TeamsVariant: React.FC = () => {
 
           const data_region = localStorage.getItem('region')
           setSubmitSuccess(true)
-          handleGTMCustomEventTrigger({ ...responseData, region: data_region })
+          handleGTMCustomEventTrigger({ ...responseData?.data, region: data_region })
 
           // Set user ID in local storage *before* logging events
           localStorage.setItem('app_user_id', responseData.data.email)
