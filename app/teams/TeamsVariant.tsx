@@ -7,13 +7,14 @@ import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import TrackingLink from '@/components/TrackingLink'
-import { Tooltip } from '@nextui-org/react'
+import { FaGithub, FaGoogle } from 'react-icons/fa'
 
 interface ErrorsProps {
   fullName?: string
   workEmail?: string
   companyName?: string
   termsOfService?: string
+  apiError?: string
 }
 
 interface FormState {
@@ -93,13 +94,13 @@ export const VariantNavbar = () => {
 }
 
 // Error state component
-const ErrorState: React.FC = () => {
+const ErrorState: React.FC<{ error: string }> = ({ error }) => {
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="mb-6 rounded-md border border-signoz_slate-500 bg-signoz_ink-400/30 p-4">
         <div className="text-sm">
-          We're sorry, it looks like something didn't go as planned. Please reach out to us for
-          assistance.
+          {error ||
+            "We're sorry, it looks like something didn't go as planned. Please reach out to us for assistance."}
         </div>
       </div>
 
@@ -324,17 +325,17 @@ const regions = [
 // Completely isolated signup form component with its own state management
 const SignupFormIsolated: React.FC<{
   onSignup: (payload: any) => Promise<void>
+  onSocialSignup: (payload: any) => Promise<void>
   isSubmitting: boolean
   errors: ErrorsProps
   logEvent: (event: any) => void
-}> = ({ onSignup, isSubmitting, errors, logEvent }) => {
+}> = ({ onSignup, onSocialSignup, isSubmitting, errors, logEvent }) => {
   const [formState, setFormState] = useState({
     workEmail: '',
     dataRegion: 'us',
     termsOfServiceAccepted: true,
   })
   const emailInputRef = useRef<HTMLInputElement>(null)
-
   const searchParams = useSearchParams()
   const workEmailFromParams = searchParams.get('q')
 
@@ -397,12 +398,97 @@ const SignupFormIsolated: React.FC<{
     [formState, onSignup, logEvent]
   )
 
+  const handleSocialSubmit = useCallback(
+    (connector: string) => {
+      // Log click event for debugging
+      logEvent({
+        eventType: 'track',
+        eventName: 'Website Click',
+        attributes: {
+          clickType: 'Button Click',
+          clickName: 'Social Sign Up Button Click',
+          clickLocation: 'Teams Form',
+          clickText: 'Start Your Free Trial',
+          connector: connector,
+          dataRegion: formState.dataRegion,
+        },
+      })
+
+      onSocialSignup({
+        region: {
+          name: formState.dataRegion,
+        },
+        preferences: {
+          terms_of_service_accepted: formState.termsOfServiceAccepted,
+          opted_email_updates: true,
+        },
+        connector: connector,
+      })
+    },
+    [logEvent, formState.dataRegion, formState.termsOfServiceAccepted, onSocialSignup]
+  )
+
   return (
     <div className="mx-auto w-full max-w-md">
       <h1 className="mb-1 text-2xl font-medium text-white">Get started with SigNoz</h1>
       <p className="mb-10 text-sm text-signoz_vanilla-100/70">
         Experience SigNoz with 30-day free trial. No credit card required.
       </p>
+
+      <div className="mb-10">
+        <div className="space-y-2">
+          <label className="mb-1 block text-sm font-medium" htmlFor="dataRegion">
+            Data region
+          </label>
+
+          <div className="grid grid-cols-3 gap-3">
+            {regions.map((region) => (
+              <button
+                type="button"
+                key={region.id}
+                className={`flex items-center justify-center gap-2 rounded-md border border-solid p-2.5 text-sm
+            ${
+              region.id === formState.dataRegion
+                ? 'border-signoz_robin-500/60 bg-signoz_robin-500/10 text-signoz_robin-500'
+                : 'border-signoz_slate-400 bg-signoz_ink-300 hover:border-signoz_slate-300'
+            }`}
+                onClick={() => handleRegionChange(region.id)}
+              >
+                <Image
+                  loading="lazy"
+                  src={region.iconURL}
+                  alt={`${region.name} flag`}
+                  width={20}
+                  height={20}
+                />
+                {region.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="my-6 text-center text-sm text-signoz_vanilla-100/70">Sign up with</div>
+        <div className="mt-6 flex justify-center space-x-4">
+          <button
+            type="button"
+            className="flex items-center justify-center gap-2 rounded-md border border-signoz_slate-400 bg-signoz_robin-500 px-4 py-2.5 text-sm hover:border-signoz_slate-300"
+            onClick={() => handleSocialSubmit('github')}
+          >
+            <FaGithub />
+            GitHub
+          </button>
+          <button
+            type="button"
+            className="flex items-center justify-center gap-2 rounded-md border border-signoz_slate-400 bg-signoz_robin-500 px-4 py-2.5 text-sm hover:border-signoz_slate-300"
+            onClick={() => handleSocialSubmit('google')}
+          >
+            <FaGoogle />
+            Google
+          </button>
+        </div>
+
+        <div className="my-6 border-t border-signoz_slate-400"></div>
+      </div>
 
       <form className="space-y-7">
         <div className="mb-4 space-y-1">
@@ -423,41 +509,6 @@ const SignupFormIsolated: React.FC<{
           />
 
           {errors?.workEmail && <div className="mt-1 text-xs text-red-400">{errors.workEmail}</div>}
-        </div>
-
-        <div className="space-y-2">
-          <label className="mb-1 block text-sm font-medium" htmlFor="dataRegion">
-            Data region
-          </label>
-
-          <div className="grid grid-cols-3 gap-3">
-            {regions.map((region) => (
-              <button
-                type="button"
-                key={region.id}
-                className={`flex items-center justify-center gap-2 rounded-md border border-solid p-2.5 text-sm
-                  ${
-                    region.id === formState.dataRegion
-                      ? 'border-signoz_robin-500/60 bg-signoz_robin-500/10 text-signoz_robin-500'
-                      : 'border-signoz_slate-400 bg-signoz_ink-300 hover:border-signoz_slate-300'
-                  }`}
-                onClick={() => handleRegionChange(region.id)}
-              >
-                <Image
-                  loading="lazy"
-                  src={region.iconURL}
-                  alt={`${region.name} flag`}
-                  className="h-5 w-5"
-                  width={20}
-                  height={20}
-                />
-                <span>{region.name}</span>
-              </button>
-            ))}
-          </div>
-          <p className="mt-1 text-xs text-signoz_vanilla-100/60">
-            Your data will be stored in the selected region
-          </p>
         </div>
 
         <div className="mt-6 space-y-2">
@@ -496,7 +547,6 @@ const SignupFormIsolated: React.FC<{
             <div className="text-xs text-red-400">{errors.termsOfService}</div>
           )}
         </div>
-
         <button
           disabled={isSubmitting}
           onClick={handleSubmit}
@@ -523,10 +573,13 @@ const SignupFormIsolated: React.FC<{
 const TeamsVariant: React.FC = () => {
   const [errors, setErrors] = useState<ErrorsProps>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [_, setSubmitSuccess] = useState(false)
   const [submitFailed, setSubmitFailed] = useState(false)
   const router = useRouter()
   const logEvent = useLogEvent()
+  const searchParams = useSearchParams()
+  const authCode = searchParams.get('code')
+  const ssoError = searchParams.get('has_sso_error')
 
   const isValidEmail = (email) => {
     // Basic email validation regex
@@ -534,24 +587,25 @@ const TeamsVariant: React.FC = () => {
     return emailRegex.test(email)
   }
 
-  function isValidCompanyEmail(email) {
-    // Regular expression pattern to match valid company email domains
-    var companyEmailPattern =
-      /@(?!gmail|yahoo|hotmail|outlook|live|icloud)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-
-    // Check if the email matches the email format and the company email pattern
-    return isValidEmail(email) && companyEmailPattern.test(email)
-  }
-
   const validatePayload = useCallback((payload) => {
     let newErrors = {}
 
     if (!payload.email.trim()) {
       newErrors['workEmail'] = 'Work email is required'
-    } else if (!isValidCompanyEmail(payload.email)) {
+    } else if (!isValidEmail(payload.email)) {
       newErrors['workEmail'] = 'Please enter a valid company email'
     }
 
+    if (!payload.preferences.terms_of_service_accepted) {
+      newErrors['termsOfService'] = 'You must accept the Terms of Service to continue'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }, [])
+
+  const validateSocialSignupPayload = useCallback((payload) => {
+    let newErrors = {}
     if (!payload.preferences.terms_of_service_accepted) {
       newErrors['termsOfService'] = 'You must accept the Terms of Service to continue'
     }
@@ -575,13 +629,8 @@ const TeamsVariant: React.FC = () => {
         ...payload,
       })
     }
-
-    // Get previously stored email (if any)
-    const previousEmail = localStorage.getItem('prevSignupEmail')
-    const currentEmail = payload.email
-
     // Store current email for future comparison
-    localStorage.setItem('prevSignupEmail', currentEmail)
+    localStorage.setItem('prevSignupEmail', payload.email)
   }, [])
 
   const handleSignUp = useCallback(
@@ -617,6 +666,7 @@ const TeamsVariant: React.FC = () => {
               // These become Segment traits
               email: payload.email,
               dataRegion: payload.region.name,
+              method: 'email_signup',
             },
           })
 
@@ -639,11 +689,11 @@ const TeamsVariant: React.FC = () => {
           router.push('/verify-email')
         } else {
           // To do, handle other errors apart from invalid email
-          if (response.status === 400) {
-            setErrors({
-              workEmail: 'Please enter a valid work email.',
-            })
-          }
+          const errorData = await response.json()
+          setErrors({
+            apiError: errorData.error,
+          })
+          handleError()
         }
       } catch (error) {
         handleError()
@@ -654,19 +704,116 @@ const TeamsVariant: React.FC = () => {
     [handleError, handleGTMCustomEventTrigger, logEvent, router, validatePayload]
   )
 
+  const handleSocialSignup = useCallback(
+    async (payload) => {
+      setSubmitFailed(false)
+      if (!validateSocialSignupPayload(payload)) {
+        return
+      }
+      setIsSubmitting(true)
+      localStorage.setItem('region', payload.region.name)
+      window.location.href = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/connectors/${payload.connector}/url`
+    },
+    [validateSocialSignupPayload]
+  )
+
+  const handleSocialSignupCallback = useCallback(
+    async (payload) => {
+      setSubmitFailed(false)
+      setIsSubmitting(true)
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/connectors/me/users`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          }
+        )
+
+        if (response.ok) {
+          const responseData = await response.json()
+
+          const data_region = localStorage.getItem('region')
+          setSubmitSuccess(true)
+          handleGTMCustomEventTrigger({ ...responseData?.data, region: data_region })
+
+          // Set user ID in local storage *before* logging events
+          localStorage.setItem('app_user_id', responseData.data.email)
+
+          // --- Segment Identify Call ---
+          logEvent({
+            eventType: 'identify',
+            eventName: 'User Signed Up', // Optional: Add an event name for clarity
+            attributes: {
+              // These become Segment traits
+              email: responseData.data.email,
+              dataRegion: data_region,
+              method: 'social_signup',
+            },
+          })
+
+          // --- Segment Group Call ---
+          const domain = responseData.data.email.split('@')[1] || 'unknown_domain'
+          logEvent({
+            eventType: 'group',
+            eventName: 'User Associated with Company', // Optional: Add an event name
+            groupId: domain,
+            attributes: {
+              // These become Group traits
+              domain: domain,
+            },
+          })
+          // --- End Segment Calls ---
+
+          router.push(
+            `/users?email=${encodeURIComponent(responseData.data.email)}&code=${responseData.data.code}&region=${data_region}`
+          )
+        } else {
+          const errorData = await response.json()
+          setErrors({
+            apiError: errorData.error,
+          })
+          handleError()
+        }
+      } catch (error) {
+        console.error(error)
+        handleError()
+      } finally {
+        setIsSubmitting(false)
+      }
+    },
+    [handleError, handleGTMCustomEventTrigger, logEvent, router]
+  )
+
+  useEffect(() => {
+    if (authCode) {
+      handleSocialSignupCallback({ code: authCode })
+    }
+  }, [authCode, handleSocialSignupCallback])
+
+  useEffect(() => {
+    if (ssoError) {
+      handleError()
+    }
+  }, [handleError, ssoError])
+
   return (
     <div className="variant-teams-container bg-signoz_ink-600 flex flex-col">
       <VariantNavbar />
 
       <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row">
         {/* Left section - Sign up form */}
-        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+20vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+20vh)]">
+        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+10vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+10vh)]">
           <div className="w-full">
-            {!isSubmitting && submitFailed ? (
-              <ErrorState />
+            {(!isSubmitting && submitFailed) || ssoError ? (
+              <ErrorState error={errors.apiError || ''} />
             ) : (
               <SignupFormIsolated
                 onSignup={handleSignUp}
+                onSocialSignup={handleSocialSignup}
                 isSubmitting={isSubmitting}
                 errors={errors}
                 logEvent={logEvent}
