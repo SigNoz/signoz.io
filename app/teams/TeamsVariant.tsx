@@ -779,6 +779,7 @@ const TeamsVariant: React.FC = () => {
           handleError()
         }
       } catch (error) {
+        console.error(error)
         handleError()
       } finally {
         setIsSubmitting(false)
