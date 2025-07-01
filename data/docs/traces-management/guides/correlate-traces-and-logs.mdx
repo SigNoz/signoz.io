@@ -11,6 +11,8 @@ When you navigate from traces to logs and see "No logs found for this trace," it
 
 If you're using OpenTelemetry SDKs for instrumentation, they automatically inject trace context (trace_id and span_id) into your logs. Simply enable the logging instrumentation for your language and your existing logs will include trace correlation.
 
+Auto-instrumentation is available for these languages - [Java, .NET, Python, Go, Node.js, and PHP](https://signoz.io/docs/instrumentation/) and we should hyperlink to this doc for auto-instrumenting your application.
+
 This is the recommended approach as it requires minimal configuration and provides consistent trace context across all your logs.
 
 ## Manual Correlation for File-based and Kubernetes Logs
@@ -20,7 +22,7 @@ If your logs contain trace information but it's not in the standard OpenTelemetr
 This applies when:
 - Your application logs to files that are read by log collectors
 - You're using Kubernetes and logs are collected by agents like FluentBit or FluentD
-- Your logs contain trace IDs in the message body or custom attributes
+- Your logs contain trace IDs and span IDs in the message body or custom attributes
 
 ### Setting Up Log Pipelines
 
@@ -41,7 +43,7 @@ After setting up log-trace correlation:
 1. Generate some traffic in your application
 2. Go to the **Traces** section in SigNoz
 3. Click on a trace to view its details
-4. Click **"View Logs"** - you should now see correlated logs
+4. Click **"Go to related logs"** button which will take you to the related logs
 5. In the **Logs** section, you should see `trace_id` and `span_id` fields populated
 
 ## Best Practices
@@ -50,5 +52,3 @@ After setting up log-trace correlation:
 - **Use structured logging** (JSON format) for easier parsing
 - **Include relevant context** like user IDs, request IDs, and other identifiers in your logs
 - **Ensure consistent trace propagation** across all services in your application
-
-Need help? Join the [SigNoz Slack community](https://signoz.io/slack) for support.
