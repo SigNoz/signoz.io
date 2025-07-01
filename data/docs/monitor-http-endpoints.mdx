@@ -7,7 +7,7 @@ hide_table_of_contents: true
 
 With SigNoz, you can monitor the health of HTTP endpoints and set up alerts in case of HTTP endpoint failure status codes. This guide covers everything from basic setup to creating dashboards and configuring alerts.
 
-<Tabs>
+<Tabs entityName="plans">
 
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
@@ -15,13 +15,13 @@ With SigNoz, you can monitor the health of HTTP endpoints and set up alerts in c
 
 ### Step 1: Install OpenTelemetry Collector
 
-Install and set up the OpenTelemetry Collector by following the [OpenTelemetry Binary Usage guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+Install and set up the OpenTelemetry Collector by following the [documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
 ### Step 2: Configure the HTTP Check Receiver
 
 Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your OpenTelemetry Collector configuration:
 
-```yaml {2-14}
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -31,7 +31,7 @@ receivers:
         endpoint: 0.0.0.0:4318
   httpcheck:
     targets:
-      - endpoint: http://example.com
+      - endpoint: http://example.com //replace with the endpoint you want to monitor
         method: GET
     collection_interval: 10s
 
@@ -51,7 +51,7 @@ exporters:
 
 Configure the service pipeline to include the httpcheck receiver:
 
-```yaml {4}
+```yaml:config.yaml
 service:
     metrics:
       receivers: [otlp, httpcheck]
@@ -81,7 +81,7 @@ Install and set up the OpenTelemetry Collector by following the [OpenTelemetry B
 
 Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your OpenTelemetry Collector configuration:
 
-```yaml {2-12}
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -100,7 +100,7 @@ receivers:
 
 Configure the service pipeline to include the httpcheck receiver:
 
-```yaml {4}
+```yaml:config.yaml
 service:
     metrics:
       receivers: [otlp, httpcheck]
@@ -129,7 +129,7 @@ The receiver creates a metric named `httpcheck_status` with value 1 if the check
 
 You can configure multiple `targets` for the httpcheck receiver to monitor several endpoints simultaneously:
 
-```yaml {3-8}
+```yaml
 receivers:
   httpcheck:
     targets:
@@ -144,7 +144,7 @@ receivers:
 
 If you need different collection intervals for different endpoints, create multiple httpcheck receiver instances. Each instance can have its own collection interval and targets:
 
-```yaml {2-18}
+```yaml
 receivers:
   httpcheck/rapid:
     targets:
@@ -182,13 +182,7 @@ Once the collector is running and sending data to SigNoz, you can create dashboa
 1. Navigate to your SigNoz account
 2. Go to the **Dashboard** tab
 3. Click on **New Dashboard** button
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/monitor-http-endpoints/create-new-dashboard.webp" alt="Creating a new dashboard in SigNoz"/>
-    <figcaption><i>Creating a new dashboard in SigNoz</i></figcaption>
-</figure>
-
-4. Choose **Time Series** chart type for HTTP endpoint monitoring
+4. Choose **New Panel** and select **Time Series** chart type for HTTP endpoint monitoring
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/monitor-http-endpoints/time-series-chart.webp" alt="Selecting Time Series chart type"/>
@@ -198,22 +192,22 @@ Once the collector is running and sending data to SigNoz, you can create dashboa
 ### Step 2: Configure the Query
 
 1. In the **Query Builder** tab, enter "http" in the metric search
-2. You should see `httpcheck_status` and other HTTP-related metrics
+2. You should see `httpcheck.status` and other HTTP-related metrics
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/monitor-http-endpoints/query-builder-metrics.webp" alt="HTTP metrics in Query Builder"/>
     <figcaption><i>HTTP metrics available in Query Builder</i></figcaption>
 </figure>
 
-3. Select `httpcheck_status` as your metric
-4. Add a **WHERE** clause: `http_status_class = 2xx` to monitor successful responses
+3. Select `httpcheck.status` as your metric
+4. Add a **WHERE** clause: `http.status_class = 2xx` to monitor successful responses
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/monitor-http-endpoints/configure-query.webp" alt="Configuring httpcheck_status query"/>
     <figcaption><i>Configuring httpcheck_status query with WHERE clause</i></figcaption>
 </figure>
 
-5. You can also filter by specific endpoints using the `http_url` attribute
+5. You can also Average By specific endpoints using the `http.url` attribute
 
 ### Step 3: Visualize Endpoint Health
 
