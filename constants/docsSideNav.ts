@@ -458,6 +458,12 @@ const docsSideNav = [
                 label: 'Alertmanager',
                 route: '/docs/manage/administrator-guide/configuration/alertmanager',
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/jwt-secret',
+                label: 'JWT Secret',
+                isExpanded: false,
+              },
             ],
           },
           {
