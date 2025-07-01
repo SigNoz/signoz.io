@@ -33,6 +33,13 @@ type CardProps = {
 
 const cardDetails = [
   {
+    logo: '/img/case_study/logos/shaped-logo.svg',
+    title: 'YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop Observability',
+    name: 'Karl Lyons',
+    position: 'Site Reliability Engineer, Shaped',
+    href: '/case-study/shaped/',
+  },
+  {
     logo: '/img/case_study/brainfish-icon.svg',
     title: 'How Brainfish leveraged SigNoz for effective Kubernetes monitoring & Logs management',
     name: 'Charlie Shen',
