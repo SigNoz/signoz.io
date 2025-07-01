@@ -37,20 +37,15 @@ receivers:
 
 exporters:
   otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
+    endpoint: "ingest.<region>.signoz.cloud:443"
     tls:
       insecure: false
     headers:
-      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
+      "signoz-ingestion-key": "<your-ingestion-key>"
 ```
 
-Depending on your SigNoz cloud region, use the appropriate ingest endpoint:
-
-| Region | Endpoint |
-| --- | --- |
-| US |  ingest.us.signoz.cloud:443 |
-| IN |  ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3: Configure the Service Pipeline
 
@@ -253,6 +248,8 @@ Key attributes for filtering and grouping:
 | `http.method` | HTTP request method | `GET`, `POST`, `PUT` |
 | `http.status_class` | HTTP response status class | `2xx`, `4xx`, `5xx` |
 
+For more details about the metrics and their related attributes, refer to the [HTTP Check Receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md).
+
 ## Setting Up Alerts
 
 You can create alerts to get notified when endpoints go down:
@@ -284,50 +281,6 @@ Duration: 2m
 ```
 
 This alert will trigger when any endpoint stops returning successful responses (2xx status codes) for more than 2 minutes.
-
-### Step 3: Advanced Alert Examples
-
-**Alert for specific endpoint:**
-```
-Query: httpcheck_status{http_url="http://critical-service.com",http_status_class="2xx"}
-Condition: IS BELOW 1
-Duration: 1m
-```
-
-**Alert for response time:**
-```
-Query: httpcheck_duration
-Condition: IS ABOVE 5000
-Duration: 5m
-```
-
-**Alert for error rate:**
-```
-Query: rate(httpcheck_error[5m])
-Condition: IS ABOVE 0.1
-Duration: 2m
-```
-
-## Understanding the Metrics in SigNoz
-
-When you query `httpcheck_status` with different status classes:
-
-- `http_status_class = 2xx`: Shows 1 for successful responses, 0 for failures
-- `http_status_class = 4xx`: Shows 1 for client errors (404, 403, etc.)
-- `http_status_class = 5xx`: Shows 1 for server errors (500, 502, etc.)
-
-For comprehensive monitoring, create separate panels for:
-1. **Overall Health**: `httpcheck_status{http_status_class="2xx"}`
-2. **Response Time**: `httpcheck_duration`
-3. **Error Rate**: `rate(httpcheck_error[5m])`
-
-## Best Practices
-
-1. **Set appropriate collection intervals**: Balance between timely detection and resource usage
-2. **Monitor multiple status classes**: Track both success (2xx) and error responses (4xx, 5xx)
-3. **Use meaningful endpoint names**: Include service names in URLs for easier identification
-4. **Set up graduated alerts**: Different urgency levels for different types of failures
-5. **Monitor response times**: Set alerts for degraded performance, not just complete failures
 
 ## Troubleshooting
 
