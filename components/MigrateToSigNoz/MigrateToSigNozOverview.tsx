@@ -23,12 +23,6 @@ const MigrateVendorsData: IconCardData[] = [
     clickName: 'Migrate from Datadog',
   },
   {
-    name: 'Migrate from New Relic',
-    href: '/docs/migration/migrate-from-newrelic/',
-    icon: <SiNewrelic className="h-7 w-7 text-green-500" />,
-    clickName: 'Migrate from New Relic',
-  },
-  {
     name: 'Migrate from Grafana',
     href: '/docs/migration/migrate-from-grafana/',
     icon: <SiGrafana className="h-7 w-7 text-orange-500" />,
@@ -39,6 +33,12 @@ const MigrateVendorsData: IconCardData[] = [
     href: '/docs/migration/migrate-from-elk/',
     icon: <SiElastic className="h-7 w-7 text-pink-600" />,
     clickName: 'Migrate from ELK',
+  },
+  {
+    name: 'Migrate from New Relic',
+    href: '/docs/migration/migrate-from-newrelic/',
+    icon: <SiNewrelic className="h-7 w-7 text-green-500" />,
+    clickName: 'Migrate from New Relic',
   },
   {
     name: 'Migrate from Self-Hosted SigNoz',

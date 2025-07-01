@@ -1977,7 +1977,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'From LGTM Stack',
+        label: 'From Grafana Stack',
         className: 'new-doc',
         type: 'category',
         isExpanded: false,
