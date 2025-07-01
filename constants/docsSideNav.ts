@@ -858,6 +858,11 @@ const docsSideNav = [
             route: '/docs/traces-management/guides/drop-spans',
             label: 'Control Traces Volume',
           },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/correlate-traces-and-logs',
+            label: 'Correlate Traces and Logs',
+          },
         ],
       },
       {
