@@ -18,7 +18,7 @@ interface IconCardData {
 const MigrateVendorsData: IconCardData[] = [
   {
     name: 'Migrate from Datadog',
-    href: '/docs/migration/migrate-from-datadog-to/',
+    href: '/docs/migration/migrate-from-datadog/',
     icon: <SiDatadog className="h-7 w-7 text-purple-500" />,
     clickName: 'Migrate from Datadog',
   },
@@ -42,7 +42,7 @@ const MigrateVendorsData: IconCardData[] = [
   },
   {
     name: 'Migrate from Self-Hosted SigNoz',
-    href: '/docs/migration/migrate-from-signoz/',
+    href: '/docs/migration/migrate-to-signoz-cloud/',
     icon: (
         // eslint-disable-next-line @next/next/no-img-element
         <img
