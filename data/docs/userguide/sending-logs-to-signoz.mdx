@@ -1,0 +1,399 @@
+---
+date: 2025-07-01
+title: Sending Logs to SigNoz
+id: sending-logs-to-signoz
+description: Comprehensive guide for setting up log collection and sending logs to SigNoz from different environments including Kubernetes, VMs, and applications.
+---
+
+If you're seeing "No logs found for this trace," it might be because you're not sending logs to SigNoz at all. This guide will help you set up log collection for your applications.
+
+## Overview
+
+SigNoz natively supports OpenTelemetry for collecting logs. There are multiple ways to send logs to SigNoz depending on your environment and setup:
+
+1. **Direct from Application**: Using OpenTelemetry SDK
+2. **Via Log Files**: Using OpenTelemetry Collector to read log files
+3. **Via Logging Agents**: Using existing tools like FluentBit, FluentD, or Logstash
+
+## Method 1: Direct from Application (OpenTelemetry SDK)
+
+This is the simplest method that automatically includes trace correlation.
+
+### Python Applications
+
+```python
+# Install dependencies
+# pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
+
+import logging
+from opentelemetry import logs
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+from opentelemetry.sdk.logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk.logs.export import BatchLogRecordProcessor
+
+# Configure OpenTelemetry logging
+logs.set_logger_provider(LoggerProvider())
+logger_provider = logs.get_logger_provider()
+
+# Configure OTLP exporter
+otlp_exporter = OTLPLogExporter(
+    endpoint="your-signoz-endpoint:4317",  # Replace with your SigNoz endpoint
+    insecure=True  # Set to False for production with TLS
+)
+
+# Add batch processor
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(otlp_exporter)
+)
+
+# Set up Python logging handler
+handler = LoggingHandler(logger_provider=logger_provider)
+logging.getLogger().addHandler(handler)
+logging.getLogger().setLevel(logging.INFO)
+
+# Now your logs will be sent to SigNoz
+logger = logging.getLogger(__name__)
+logger.info("Application started")
+logger.error("Something went wrong", extra={"user_id": "123"})
+```
+
+### Java Applications
+
+```xml
+<!-- Add to your pom.xml -->
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-api</artifactId>
+    <version>1.32.0</version>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-exporter-otlp</artifactId>
+    <version>1.32.0</version>
+</dependency>
+```
+
+```java
+// Configure OpenTelemetry logging
+OpenTelemetry openTelemetry = OpenTelemetrySDK.builder()
+    .setLoggerProvider(
+        SdkLoggerProvider.builder()
+            .addLogRecordProcessor(BatchLogRecordProcessor.builder(
+                OtlpGrpcLogRecordExporter.builder()
+                    .setEndpoint("http://your-signoz-endpoint:4317")
+                    .build())
+                .build())
+            .build())
+    .build();
+
+// Use with your existing logging framework (Logback, Log4j2)
+Logger logger = LoggerFactory.getLogger(MyClass.class);
+logger.info("Application started");
+```
+
+### Node.js Applications
+
+```javascript
+// npm install @opentelemetry/api @opentelemetry/sdk-logs @opentelemetry/exporter-logs-otlp-http
+
+const { logs } = require('@opentelemetry/api');
+const { LoggerProvider, SimpleLogRecordProcessor } = require('@opentelemetry/sdk-logs');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
+
+// Configure OpenTelemetry logging
+const loggerProvider = new LoggerProvider();
+loggerProvider.addLogRecordProcessor(
+  new SimpleLogRecordProcessor(
+    new OTLPLogExporter({
+      url: 'http://your-signoz-endpoint:4318/v1/logs',
+    })
+  )
+);
+logs.setGlobalLoggerProvider(loggerProvider);
+
+// Use with your existing logging library
+const winston = require('winston');
+const logger = winston.createLogger({
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.Console(),
+    // Add custom transport for OpenTelemetry if needed
+  ],
+});
+
+logger.info('Application started');
+```
+
+## Method 2: Via Log Files (OpenTelemetry Collector)
+
+If your application writes logs to files, you can use the OpenTelemetry Collector to read and forward them.
+
+### Configuration for File-based Logs
+
+Create an `otel-collector-config.yaml` file:
+
+```yaml
+receivers:
+  filelog:
+    include: 
+      - /var/log/your-app/*.log
+      - /var/log/your-app/**/*.log
+    exclude:
+      - /var/log/your-app/debug/*.log
+    operators:
+      # Parse JSON logs
+      - type: json_parser
+        parse_from: attributes.body
+        if: 'body matches "^\\{"'
+      
+      # Parse text logs with regex
+      - type: regex_parser
+        regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] (?P<message>.*)'
+        parse_from: attributes.body
+        timestamp:
+          parse_from: attributes.timestamp
+          layout: '2006-01-02 15:04:05'
+      
+      # Extract trace information if present
+      - type: regex_parser
+        regex: 'traceId=(?P<trace_id>[a-f0-9]{32})'
+        parse_from: attributes.message
+        if: 'attributes.message != nil'
+      
+      # Move extracted trace_id to proper field
+      - type: trace_parser
+        trace_id:
+          parse_from: attributes.trace_id
+        if: 'attributes.trace_id != nil'
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+  
+  memory_limiter:
+    limit_mib: 256
+
+exporters:
+  # For SigNoz Cloud
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "YOUR_SIGNOZ_INGESTION_KEY"
+  
+  # For Self-hosted SigNoz
+  # otlp:
+  #   endpoint: "http://your-signoz-endpoint:4317"
+  #   tls:
+  #     insecure: true
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [memory_limiter, batch]
+      exporters: [otlp]
+  
+  telemetry:
+    logs:
+      level: "info"
+```
+
+### Running the Collector
+
+```bash
+# Download OpenTelemetry Collector
+curl -L -O https://github.com/open-telemetry/opentelemetry-collector-releases/releases/latest/download/otelcol-contrib_linux_amd64.tar.gz
+tar -xzf otelcol-contrib_linux_amd64.tar.gz
+
+# Run the collector
+./otelcol-contrib --config-file=otel-collector-config.yaml
+```
+
+## Method 3: Via Logging Agents
+
+If you're already using FluentBit, FluentD, or Logstash, you can configure them to forward logs to SigNoz.
+
+### FluentBit Configuration
+
+```ini
+[SERVICE]
+    Flush         1
+    Log_Level     info
+
+[INPUT]
+    Name              tail
+    Path              /var/log/your-app/*.log
+    Parser            json
+    Tag               app.logs
+
+[OUTPUT]
+    Name              forward
+    Match             app.logs
+    Host              your-otel-collector-host
+    Port              24224
+```
+
+### FluentD Configuration
+
+```ruby
+<source>
+  @type tail
+  path /var/log/your-app/*.log
+  pos_file /var/log/fluent/your-app.log.pos
+  tag app.logs
+  format json
+</source>
+
+<match app.logs>
+  @type forward
+  <server>
+    host your-otel-collector-host
+    port 24224
+  </server>
+</match>
+```
+
+## Method 4: Kubernetes Deployment
+
+For applications running in Kubernetes, deploy the OpenTelemetry Collector as a DaemonSet:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+data:
+  config.yaml: |
+    receivers:
+      filelog:
+        include:
+          - /var/log/pods/*/*/*.log
+        exclude:
+          - /var/log/pods/kube-system_*/*/*.log
+        operators:
+          - type: json_parser
+            parse_from: attributes.body
+            if: 'body matches "^\\{"'
+    
+    processors:
+      batch:
+      k8sattributes:
+        filter:
+          node_from_env_var: KUBE_NODE_NAME
+    
+    exporters:
+      otlp:
+        endpoint: "your-signoz-endpoint:4317"
+        tls:
+          insecure: true
+    
+    service:
+      pipelines:
+        logs:
+          receivers: [filelog]
+          processors: [k8sattributes, batch]
+          exporters: [otlp]
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: otel-collector
+spec:
+  selector:
+    matchLabels:
+      name: otel-collector
+  template:
+    metadata:
+      labels:
+        name: otel-collector
+    spec:
+      containers:
+      - name: otel-collector
+        image: otel/opentelemetry-collector-contrib:latest
+        args:
+          - "--config=/etc/otel-collector-config/config.yaml"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/otel-collector-config
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+        env:
+        - name: KUBE_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+      volumes:
+      - name: config
+        configMap:
+          name: otel-collector-config
+      - name: varlog
+        hostPath:
+          path: /var/log
+```
+
+## Verification
+
+After setting up log collection:
+
+1. Generate some application activity
+2. Wait 1-2 minutes for logs to be processed
+3. Go to **Logs** section in SigNoz UI
+4. You should see your application logs appearing
+5. Check that logs contain proper service name and other attributes
+
+## Configuration for SigNoz Cloud
+
+For SigNoz Cloud, use these endpoints based on your region:
+
+| Region | Endpoint |
+|--------|----------|
+| US | `ingest.us.signoz.cloud:443` |
+| IN | `ingest.in.signoz.cloud:443` |
+| EU | `ingest.eu.signoz.cloud:443` |
+
+Example configuration:
+
+```yaml
+exporters:
+  otlp:
+    endpoint: "ingest.us.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "YOUR_SIGNOZ_INGESTION_KEY"
+```
+
+## Common Issues and Solutions
+
+### Issue: Logs not appearing in SigNoz
+**Solutions**:
+- Check collector logs for errors
+- Verify network connectivity to SigNoz endpoint
+- Ensure log file permissions allow reading
+- Check if log format matches parser configuration
+
+### Issue: Large number of logs causing performance issues
+**Solutions**:
+- Add sampling configuration
+- Use batch processor with appropriate settings
+- Set up log retention policies
+- Filter out unnecessary debug logs
+
+### Issue: Missing log attributes
+**Solutions**:
+- Review log parsing configuration
+- Add resource detection processor
+- Configure attribute extraction operators
+
+## Next Steps
+
+- [Set up trace correlation](./how-to-link-logs-and-traces) to connect your logs with traces
+- [Configure log pipelines](https://signoz.io/docs/logs-pipelines/) for advanced log processing
+- [Set up alerting](https://signoz.io/docs/userguide/alerts-management/) on your logs
+
+Need help? Join the [SigNoz Slack community](https://signoz.io/slack) for support.
