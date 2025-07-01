@@ -470,28 +470,28 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/migration/migrate-to-signoz-cloud/',
-          destination: '/migration/migrate-from-signoz-self-host-to-signoz-cloud/',
+          source: '/docs/migration/migrate-to-signoz-cloud/',
+          destination: '/docs/migration/migrate-from-signoz-self-host-to-signoz-cloud/',
           permanent: true,
         },
         {
-          source: '/migration/migrate-from-datadog/',
-          destination: '/migration/migrate-from-datadog-to-signoz/',
+          source: '/docs/migration/migrate-from-datadog/',
+          destination: '/docs/migration/migrate-from-datadog-to-signoz/',
           permanent: true,
         },
         {
-          source: '/migration/migrate-from-grafana/',
-          destination: '/migration/migrate-from-grafana-to-signoz/',
+          source: '/docs/migration/migrate-from-grafana/',
+          destination: '/docs/migration/migrate-from-grafana-to-signoz/',
           permanent: true,
         },
         {
-          source: '/migration/migrate-from-elk/',
-          destination: '/migration/migrate-from-elk-to-signoz/',
+          source: '/docs/migration/migrate-from-elk/',
+          destination: '/docs/migration/migrate-from-elk-to-signoz/',
           permanent: true,
         },
         {
-          source: '/migration/migrate-from-newrelic/',
-          destination: '/migration/migrate-from-datadog-to-newrelic/',
+          source: '/docs/migration/migrate-from-newrelic/',
+          destination: '/docs/migration/migrate-from-newrelic-to-signoz/',
           permanent: true,
         },
       ]

@@ -62,7 +62,7 @@ export default function MigrateToSigNoz() {
       cards={MigrateVendorsData}
       sectionName="Vendors Migrate Section"
       viewAllText="View all migration guides"
-      gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+      gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4"
     />
   )
 }
