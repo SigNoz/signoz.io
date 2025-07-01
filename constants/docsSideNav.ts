@@ -1967,7 +1967,7 @@ const docsSideNav = [
         label: 'From Datadog',
         type: 'category',
         isExpanded: false,
-        route: '/docs/migration/migrate-from-datadog',
+        route: '/docs/migration/migrate-from-datadog-to-signoz',
         items: [
           {
             type: 'doc',
@@ -1977,16 +1977,11 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/migration/migrate-to-signoz-cloud',
-        label: 'From Self-Hosted to Cloud',
-      },
-      {
         label: 'From LGTM Stack',
         className: 'new-doc',
         type: 'category',
         isExpanded: false,
-        route: '/docs/migration/migrate-from-grafana',
+        route: '/docs/migration/migrate-from-grafana-to-signoz',
         items: [
           {
             type: 'doc',
@@ -2020,7 +2015,7 @@ const docsSideNav = [
         className: 'new-doc',
         type: 'category',
         isExpanded: false,
-        route: '/docs/migration/migrate-from-elk',
+        route: '/docs/migration/migrate-from-elk-to-signoz',
         items: [
           {
             type: 'doc',
@@ -2054,7 +2049,7 @@ const docsSideNav = [
         className: 'new-doc',
         type: 'category',
         isExpanded: false,
-        route: '/docs/migration/migrate-from-newrelic',
+        route: '/docs/migration/migrate-from-datadog-to-newrelic',
         items: [
           {
             type: 'doc',
@@ -2082,6 +2077,11 @@ const docsSideNav = [
             label: 'Migrating Alerts',
           },
         ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-signoz-self-host-to-signoz-cloud',
+        label: 'From Self-Hosted to Cloud',
       },
     ],
   },

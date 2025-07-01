@@ -17,14 +17,8 @@ interface IconCardData {
 
 const MigrateVendorsData: IconCardData[] = [
   {
-    name: 'Kubernetes',
-    href: '/docs/userguide/collect_kubernetes_pod_logs',
-    icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
-    clickName: 'Kubernetes Logs Link',
-  },
-  {
     name: 'Migrate from Datadog',
-    href: '/docs/migration/migrate-from-datadog/',
+    href: '/docs/migration/migrate-from-datadog-to/',
     icon: <SiDatadog className="h-7 w-7 text-purple-500" />,
     clickName: 'Migrate from Datadog',
   },
@@ -67,7 +61,6 @@ export default function MigrateToSigNoz() {
     <IconCardGrid
       cards={MigrateVendorsData}
       sectionName="Vendors Migrate Section"
-      viewAllHref="/docs/migration/"          
       viewAllText="View all migration guides"
       gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
     />
