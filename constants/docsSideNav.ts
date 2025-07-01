@@ -264,6 +264,11 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.88',
+                label: 'Upgrade to v0.88',
+              },
+              {
+                type: 'doc',
                 route: '/docs/operate/migration/upgrade-0.76',
                 label: 'Upgrade to v0.76',
               },
@@ -455,7 +460,6 @@ const docsSideNav = [
               },
             ],
           },
-
           {
             type: 'doc',
             route: '/docs/tutorial/opentelemetry-operator-usage',
