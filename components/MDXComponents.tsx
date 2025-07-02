@@ -48,6 +48,7 @@ import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
 import K8sInstallationListicle from './Setup/K8sInstallationListicle'
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
+import MigrateToSigNoz from './MigrateToSigNoz/MigrateToSigNozOverview'
 
 export const components: MDXComponents = {
   Image,
@@ -99,4 +100,5 @@ export const components: MDXComponents = {
   K8sInstallationListicle,
   ArticleSeriesBottom,
   ArticleSeriesTop,
+  MigrateToSigNoz,
 }
