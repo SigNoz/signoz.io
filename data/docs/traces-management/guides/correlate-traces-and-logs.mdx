@@ -1,0 +1,59 @@
+---
+date: 2025-07-01
+title: Correlate Traces and Logs
+id: correlate-traces-and-logs
+description: Learn how to establish correlation between logs and traces in SigNoz to enable seamless navigation from traces to logs and vice versa.
+---
+
+When you navigate from traces to logs and see "No logs found for this trace," it means your logs and traces are not properly correlated. This guide will help you establish the connection.
+
+## Automatic Correlation with OpenTelemetry SDK
+
+If you're using OpenTelemetry SDKs for instrumentation, they automatically inject trace context (trace_id and span_id) into your logs. Simply enable the logging instrumentation for your language and your existing logs will include trace correlation.
+
+Auto-instrumentation is available for these languages - Java, .NET, Python, Go, Node.js, and PHP. Check out our [instrumentation documentation](https://signoz.io/docs/instrumentation/) for auto-instrumenting your application.
+
+This is the recommended approach as it requires minimal configuration and provides consistent trace context across all your logs.
+
+## Manual Correlation for File-based and Kubernetes Logs
+
+If your logs contain trace information but it's not in the standard OpenTelemetry format, you need to use SigNoz log pipelines to extract it.
+
+This applies when:
+- Your application logs to files that are read by log collectors
+- You're using Kubernetes and logs are collected by agents like FluentBit or FluentD
+- Your logs contain trace IDs and span IDs in the message body or custom attributes
+
+### Setting Up Log Pipelines
+
+Follow our detailed guide on parsing trace information from logs:
+
+**[Parse Trace Information for your Logs](https://signoz.io/docs/logs-pipelines/guides/trace/)**
+
+This guide shows you how to:
+1. Create a log pipeline in SigNoz
+2. Use the Trace Parser processor to extract trace_id and span_id
+3. Configure regex or JSON parsers if needed
+4. Test and deploy your pipeline
+
+## Verification
+
+After setting up log-trace correlation:
+
+1. Generate some traffic in your application
+2. Go to the **Traces** section in SigNoz
+3. Click on a trace to view its details
+4. Click **"Go to related logs"** button which will take you to the related logs
+5. In the **Logs** section, you should see `trace_id` and `span_id` fields populated
+
+<figure data-zoomable align='center'>
+<img src="/img/docs/traces-management/correlate-traces-with-logs.gif" alt="Related logs of a trace in Logs Explorer"/>
+<figcaption><i>Related logs of a trace in Logs Explorer</i></figcaption>
+</figure>
+
+## Best Practices
+
+- **Use OpenTelemetry SDKs** when possible for automatic correlation
+- **Use structured logging** (JSON format) for easier parsing
+- **Include relevant context** like user IDs, request IDs, and other identifiers in your logs
+- **Ensure consistent trace propagation** across all services in your application
