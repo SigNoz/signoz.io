@@ -72,6 +72,8 @@ export const EXPERIMENTS = {
       VARIANT: 'without-self-host-tab',
     },
     flagName: 'cloud-first-pricing-page',
+    concluded: true,
+    defaultVariant: 'without-self-host-tab',
   },
   CHATBASE_BUBBLE: {
     id: 'chatbase-bubble-experiment',

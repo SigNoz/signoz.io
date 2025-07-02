@@ -160,6 +160,11 @@ export default function Enterprise() {
                   <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
                   Custom retention for your data
                 </p>
+
+                <p className="text-md flex flex-row items-center gap-2 font-normal">
+                  <CircleArrowRight size={24} className="fill-signoz_robin-500" color="black" />{' '}
+                  Includes monthly ingestion usage till $4000
+                </p>
               </div>
 
               <div className="relative mt-9 flex w-full items-center justify-center gap-2">

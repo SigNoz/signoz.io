@@ -1,5 +1,5 @@
 import React from 'react'
-import { CheckCircle, ArrowRight } from 'lucide-react'
+import { CheckCircle, ArrowRight, Info } from 'lucide-react'
 import Link from 'next/link'
 import Button from 'components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
@@ -46,7 +46,17 @@ export default function EnterpriseCard() {
         <ul className="mb-3 space-y-3">
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">A dedicated environment on SigNoz cloud</span>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-signoz_vanilla-400">
+                  A dedicated environment on SigNoz cloud
+                </span>
+              </div>
+              <span className="ml-3 mt-1 flex items-center gap-2 text-sm italic text-signoz_vanilla-400">
+                <Info className="text-signoz_vanilla-500" size={14} />
+                Includes monthly ingestion usage till $4000
+              </span>
+            </div>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
