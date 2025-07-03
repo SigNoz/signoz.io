@@ -1,0 +1,217 @@
+---
+date: 2025-01-03
+id: kubernetes-node-metrics-detailed
+title: Kubernetes Node Metrics - Detailed Dashboard
+description: Monitor comprehensive Kubernetes node metrics including CPU, memory, filesystem, and network performance across your cluster nodes.
+---
+
+# Kubernetes Node Metrics - Detailed Dashboard
+
+This dashboard provides detailed monitoring of Kubernetes node-level metrics, offering comprehensive visibility into CPU usage, memory utilization, filesystem usage, and network I/O performance across all nodes in your cluster.
+
+## Dashboard Preview
+
+![Kubernetes Node Metrics Dashboard](/img/docs/dashboards/kubernetes-node-metrics-detailed.png)
+
+## What This Dashboard Monitors
+
+This dashboard tracks essential Kubernetes node metrics to help you:
+
+- **Monitor Resource Utilization**: Track CPU and memory usage across cluster nodes
+- **Filesystem Management**: Monitor disk usage, available space, and capacity planning
+- **Network Performance**: Observe network I/O, errors, and interface-level metrics
+- **Resource Allocation**: View allocatable resources and current utilization
+- **Capacity Planning**: Identify nodes approaching resource limits
+
+## Metrics Included
+
+### CPU Metrics
+- **Node CPU Usage**: Real-time CPU utilization percentage for each node
+- **CPU Allocatable**: Total CPU cores available for pod scheduling
+- **CPU Usage Trends**: Historical CPU usage patterns for capacity planning
+
+### Memory Metrics
+- **Memory Usage**: Current memory consumption per node
+- **Memory Available**: Available memory for new workloads
+- **Memory Working Set**: Memory actively being used by processes
+- **Memory RSS**: Resident set size memory usage
+- **Memory Allocatable**: Total memory available for pod allocation
+
+### Filesystem Metrics
+- **Filesystem Usage**: Current disk space consumption
+- **Filesystem Available**: Available disk space for new data
+- **Filesystem Capacity**: Total disk capacity per node
+- **Filesystem Usage Trends**: Historical storage utilization
+
+### Network Metrics
+- **Network I/O**: Ingress and egress network traffic per interface
+- **Network Errors**: Network error rates by interface and direction
+- **Interface Performance**: Per-interface network utilization
+
+## Dashboard Variables
+
+This dashboard includes pre-configured variables for filtering:
+
+- **k8s_cluster_name**: Filter by Kubernetes cluster name
+- **k8s_node_name**: Filter by specific node names (supports multi-select)
+
+## Prerequisites
+
+To use this dashboard effectively, ensure you have:
+
+1. **Kubernetes Cluster**: A running Kubernetes cluster with nodes to monitor
+2. **SigNoz Agent**: The SigNoz agent deployed as a DaemonSet on your cluster
+3. **Kubelet Metrics**: Kubelet metrics receiver configured to collect node-level metrics
+4. **RBAC Permissions**: Proper service account permissions for metrics collection
+
+### OpenTelemetry Collector Configuration
+
+Your OpenTelemetry collector should include the following receivers:
+
+```yaml
+receivers:
+  kubeletstats:
+    collection_interval: 60s
+    auth_type: "serviceAccount"
+    endpoint: "${K8S_NODE_NAME}:10250"
+    insecure_skip_verify: true
+  
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      memory: {}
+      disk: {}
+      filesystem: {}
+      network: {}
+```
+
+## Installation Instructions
+
+### 1. Download Dashboard JSON
+
+<div className="flex gap-4 my-6">
+  <button 
+    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+    onClick={() => {
+      const dashboardJson = {
+        // Dashboard JSON content would be here
+        "title": "Kubernetes Node Metrics - Detailed",
+        "description": "Monitor comprehensive Kubernetes node metrics including CPU, memory, filesystem, and network performance",
+        "tags": ["node", "k8s", "kubelet"]
+        // ... full JSON content
+      };
+      const blob = new Blob([JSON.stringify(dashboardJson, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'kubernetes-node-metrics-detailed.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }}
+  >
+    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    Download JSON
+  </button>
+  
+  <button 
+    className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+    onClick={() => {
+      navigator.clipboard.writeText(JSON.stringify({
+        "title": "Kubernetes Node Metrics - Detailed",
+        "description": "Monitor comprehensive Kubernetes node metrics",
+        "tags": ["node", "k8s", "kubelet"]
+      }, null, 2));
+    }}
+  >
+    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+    Copy JSON
+  </button>
+</div>
+
+### 2. Import to SigNoz
+
+1. Navigate to **Dashboards** in your SigNoz instance
+2. Click **New Dashboard** 
+3. Click the **Import** button
+4. Paste the JSON content or upload the downloaded file
+5. Configure the variables to match your cluster setup
+6. Save the dashboard
+
+### 3. Configure Variables
+
+After importing, configure the dashboard variables:
+
+- **k8s_cluster_name**: Set to your cluster name or leave as default
+- **k8s_node_name**: Select specific nodes or use "All" to monitor entire cluster
+
+## Data Sources
+
+This dashboard works with metrics collected from:
+
+- **Kubelet Stats Receiver**: Node-level metrics from Kubernetes kubelet
+- **Host Metrics Receiver**: System-level metrics from node hosts
+- **Kubernetes Cluster Receiver**: Cluster-level metadata and status
+
+## Troubleshooting
+
+### Common Issues
+
+**No Data Showing**
+- Verify the OpenTelemetry collector is running on all nodes
+- Check that kubelet metrics are being scraped successfully
+- Ensure proper RBAC permissions for the collector service account
+
+**Missing Node Metrics**
+- Confirm the kubelet stats receiver is configured correctly
+- Verify the node name variable matches your actual node names
+- Check collector logs for any authentication or permission errors
+
+**Incomplete Filesystem Data**
+- Ensure the host metrics receiver includes filesystem scrapers
+- Verify filesystem paths are accessible to the collector
+- Check for any mount point access permissions
+
+### Verification
+
+To verify metrics are flowing correctly, check the SigNoz metrics explorer for:
+- `k8s_node_cpu_usage`
+- `k8s_node_memory_usage`
+- `k8s_node_filesystem_usage`
+- `k8s_node_network_io`
+
+## Related Dashboards
+
+- [Kubernetes Cluster Overview](/docs/dashboards/dashboard-templates/kubernetes-cluster-overview)
+- [Kubernetes Pod Metrics - Detailed](/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed)
+- [Host Metrics Dashboard](/docs/dashboards/dashboard-templates/host-metrics)
+
+## Dashboard Metadata
+
+- **Created**: January 2025
+- **Version**: v1.0
+- **Data Source**: OpenTelemetry (OTLP)
+- **Update Frequency**: Real-time (60s intervals)
+- **Retention**: Based on your SigNoz configuration
+
+---
+
+<div className="bg-blue-50 border border-blue-200 rounded-lg p-4 my-6">
+  <div className="flex items-start">
+    <svg className="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <div>
+      <h4 className="text-blue-900 font-medium">Need Help?</h4>
+      <p className="text-blue-800 text-sm mt-1">
+        If you need assistance with this dashboard template, visit our 
+        <a href="https://signoz.io/slack" className="underline ml-1">community Slack</a> or 
+        <a href="https://github.com/SigNoz/signoz/issues" className="underline ml-1">create an issue</a> on GitHub.
+      </p>
+    </div>
+  </div>
+</div>
