@@ -4,13 +4,68 @@ id: telemetry
 title: Telemetry
 ---
 
-We collect telemetry data during the installation process to identify errors. 
+SigNoz reports the **non-sensitive**, **non-personally identifiable information (PII)** that helps us understand how the community uses SigNoz — such as which versions you’re on, which features matter, and where we should focus on improvements and fixes. It’s the best signal we have for prioritising bug fixes, documentation, and new capabilities.
 
-In addition we ask you to send us regular usage telemetry during the setup process to understand which part of the product is being used. This would help us provide better user experience and improve on the product. Read on to understand more.
+We keep this information minimal and do not record any sensitive user traffic, queries, or payloads. The only data we collect is listed below - nothing more, nothing less.
+
+The information is collected by `statsreporter` and it is **enabled by default**, controlled by the following configuration in the [SigNoz Configuration](https://github.com/SigNoz/signoz/blob/5102cf2b7bd43434465f8b1a48c47c722acc37d1/conf/example.yaml):
+```yaml
+##################### StatsReporter #####################
+statsreporter:
+  # Whether to enable stats reporter. This is used to provide valuable insights to the SigNoz team. It does not collect any sensitive/PII data.
+  enabled: true
+  # The interval at which the stats are collected.
+  interval: 6h
+  collect:
+    # Whether to collect identities and traits (emails).
+    identities: true
+```
+
+When the stats reporter is enabled, SigNoz collects the following information at an interval specified in the configuration:
+- Details regarding the **environment** where SigNoz operates
+    - The deployment platform, such as GCP, etc., where SigNoz is deployed
+    - The operating system, such as `Linux`, etc.
+    - The system architecture, such as `AMD`, etc.
+- Information regarding the **SigNoz cluster and version**
+    - The build version of SigNoz, such as `v0.88.0`, etc.
+    - The git branch used for the build, such as `main`, etc.
+    - The build variant of SigNoz, such as `Community Edition` or `Enterprise`
+    - The deployment method used for installation, such as `Docker`, `Kubernetes`, etc. 
+- Details about the scope at which SigNoz is operating:
+    - The number of dashboards, panels, saved views, alerts, and users
+    - The volume of logs, traces, and metrics ingested
+    - Note: **SigNoz does not collect the actual queries or user requests**
+- When the `identities` is enabled in the statsreporter configuration, we collect the identities and traits (emails).
+
+<Admonition type="info">
+The SigNoz team continually reviews this aggregated telemetry and promises to notify the community in advance of any changes, including additions or removals, to the data we collect.
+</Admonition>
 
 
+### Disable the statistic reporting
 
+<Admonition type="info">
+If possible, we kindly ask you to keep the usage reporting feature enabled, as it helps us better understand how the open source community operates SigNoz.
 
+In case you want to opt-out, we request you to disable the `identites` which will disable collecting any trais or identities and will sends inforamtion about only the Environment, Scale and Version related information.
+You can set the following configuration for this:
+```yaml
+statsreporter:
+  enabled: true
+  collect:
+    identites: false
+```
+</Admonition>
+Please keep the usage reporting feature enabled if possible, as it helps us learn more about how the open source community uses SigNoz. To entirely disable statistics collection, you can turn off the statsreporter by adjusting the configuration.
+```yaml
+statsreporter:
+  enabled: false
+```
+
+<details> 
+<summary>**Version less than or equal to 0.87.0**</summary>
+
+The Following  Telemetry Collection has been removed in the versions greater than 0.87.0. Please check the [Github Issue](https://github.com/SigNoz/signoz/issues/7976) for more Information
 ### Docker Installation
 During the installation process, we collect stats of which installations were successful, which were unsuccessful and need our help. This is used to analyze the
 
@@ -106,3 +161,5 @@ Set below env variable in query-service in docker-compose.yaml or helm chart and
 ```
 TELEMETRY_ENABLED=false
 ```
+
+</details>

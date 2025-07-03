@@ -468,6 +468,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/telemetry',
+            label: 'Telemetry',
+          },
+          {
+            type: 'doc',
             route: '/docs/tutorial/opentelemetry-operator-usage',
             label: 'OpenTelemetry Operator Usage',
           },
@@ -2695,18 +2700,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/faqs/installation',
         label: 'Installation - FAQs',
-      },
-    ],
-  },
-  {
-    label: 'Others',
-    type: 'category',
-    isExpanded: false,
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/telemetry',
-        label: 'Telemetry',
       },
     ],
   },
