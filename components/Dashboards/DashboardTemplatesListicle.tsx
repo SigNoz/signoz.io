@@ -12,20 +12,12 @@ import {
   SiRabbitmq,
   SiApachekafka,
   SiDocker,
-  SiAmazonaws,
-  SiGooglecloud,
-  SiMicrosoftazure,
-  SiGrafana,
-  SiPrometheus,
-  SiElasticsearch,
-  SiLogstash,
-  SiKibana,
 } from 'react-icons/si'
-import { Monitor, Database, Server, MessageSquare, Cloud, Activity } from 'lucide-react'
+import { Monitor, Database, Server, MessageSquare, Activity } from 'lucide-react'
 import IconCardGrid from '../Card/IconCardGrid'
 
 interface DashboardTemplatesListicleProps {
-  category?: 'infrastructure' | 'kubernetes' | 'databases' | 'webservers' | 'messaging' | 'cloud' | 'all'
+  category?: 'infrastructure' | 'kubernetes' | 'databases' | 'webservers' | 'messaging' | 'all'
 }
 
 export default function DashboardTemplatesListicle({
@@ -39,7 +31,6 @@ export default function DashboardTemplatesListicle({
     { id: 'databases', label: 'Databases' },
     { id: 'webservers', label: 'Web Servers' },
     { id: 'messaging', label: 'Messaging' },
-    { id: 'cloud', label: 'Cloud' },
   ]
 
   // State to track the active section
@@ -219,37 +210,6 @@ export default function DashboardTemplatesListicle({
     </div>
   )
 
-  // Cloud templates
-  const renderCloudSection = () => (
-    <div className="mb-10">
-      <h2 className="mb-4 text-2xl font-semibold">Cloud Platforms</h2>
-      <IconCardGrid
-        cards={[
-          {
-            name: 'AWS CloudWatch',
-            href: '/docs/dashboards/dashboard-templates/aws-cloudwatch',
-            icon: <SiAmazonaws className="h-7 w-7 text-orange-500" />,
-            clickName: 'AWS CloudWatch Dashboard Template',
-          },
-          {
-            name: 'Google Cloud Monitoring',
-            href: '/docs/dashboards/dashboard-templates/gcp-monitoring',
-            icon: <SiGooglecloud className="h-7 w-7 text-blue-500" />,
-            clickName: 'Google Cloud Monitoring Dashboard Template',
-          },
-          {
-            name: 'Azure Monitor',
-            href: '/docs/dashboards/dashboard-templates/azure-monitor',
-            icon: <SiMicrosoftazure className="h-7 w-7 text-blue-600" />,
-            clickName: 'Azure Monitor Dashboard Template',
-          },
-        ]}
-        sectionName="Cloud Templates"
-        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
-      />
-    </div>
-  )
-
   // Render sections based on the active section or category prop
   return (
     <div>
@@ -261,7 +221,6 @@ export default function DashboardTemplatesListicle({
       {(activeSection === 'all' || activeSection === 'databases') && renderDatabasesSection()}
       {(activeSection === 'all' || activeSection === 'webservers') && renderWebServersSection()}
       {(activeSection === 'all' || activeSection === 'messaging') && renderMessagingSection()}
-      {(activeSection === 'all' || activeSection === 'cloud') && renderCloudSection()}
     </div>
   )
 }
