@@ -13,15 +13,75 @@ interface FeaturesShowcaseClientProps {
 
 const TechIcon = ({ icon, name }: { icon: React.ReactNode; name: string }) => (
   <div
-    className="group relative flex h-10 w-10 items-center justify-center rounded-lg border border-signoz_slate-400/30 bg-signoz_ink-300/30"
+    className="hover:border-signoz_accent-300/30 group relative flex h-8 w-8 items-center justify-center rounded-md border border-signoz_slate-400/20 bg-signoz_ink-300/20 transition-all"
     title={name}
   >
-    {icon}
+    <div className="text-xs">{icon}</div>
     <div className="absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 transform rounded bg-signoz_ink-200 px-2 py-1 text-xs text-signoz_vanilla-100 group-hover:block">
       {name}
     </div>
   </div>
 )
+
+const getFeatureCTA = (featureId: string) => {
+  const featureCtaMap: Record<string, { text: string; href: string }> = {
+    'logs-management': {
+      text: 'Start with Logs Management in SigNoz - Free',
+      href: '/teams/',
+    },
+    'apm-traces': {
+      text: 'Start APM Monitoring in SigNoz - Free',
+      href: '/teams/',
+    },
+    'metrics-monitoring': {
+      text: 'Start Metrics Monitoring in SigNoz - Free',
+      href: '/teams/',
+    },
+    'alerts-notifications': {
+      text: 'Set Up Alerts in SigNoz - Free',
+      href: '/teams/',
+    },
+    'exceptions-monitoring': {
+      text: 'Monitor Exceptions in SigNoz - Free',
+      href: '/teams/',
+    },
+    'aws-monitoring': {
+      text: 'Monitor AWS with SigNoz - Free',
+      href: '/teams/',
+    },
+    'kubernetes-monitoring': {
+      text: 'Monitor Kubernetes with SigNoz - Free',
+      href: '/teams/',
+    },
+    'gcp-monitoring': {
+      text: 'Monitor GCP with SigNoz - Free',
+      href: '/teams/',
+    },
+    'azure-monitoring': {
+      text: 'Monitor Azure with SigNoz - Free',
+      href: '/teams/',
+    },
+    'custom-dashboards': {
+      text: 'Create Custom Dashboards in SigNoz - Free',
+      href: '/teams/',
+    },
+    'data-retention': {
+      text: 'Explore Data Retention in SigNoz - Free',
+      href: '/teams/',
+    },
+    'sso-saml': {
+      text: 'Set Up SSO/SAML in SigNoz - Free',
+      href: '/teams/',
+    },
+  }
+
+  return (
+    featureCtaMap[featureId] || {
+      text: 'Get Started with SigNoz - Free',
+      href: '/teams/',
+    }
+  )
+}
 
 export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
   featuresByCategory,
@@ -39,104 +99,105 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
 
   const handleCategoryClick = (category: string) => {
     setActiveCategory(category)
-    // Set the first feature of the category as active
     const firstFeature = featuresByCategory[category]?.[0]
     if (firstFeature) {
       setActiveTab(firstFeature.id)
     }
   }
 
-  // Get features for the active category
   const activeCategoryFeatures = featuresByCategory[activeCategory] || []
 
   return (
-    <div className="space-y-8">
-      {/* Category Tabs at Top */}
-      <div className="flex flex-wrap justify-center gap-2">
-        {Object.entries(FEATURE_CATEGORIES).map(([category, categoryInfo]) => (
-          <button
-            key={category}
-            onClick={() => handleCategoryClick(category)}
-            className={`rounded-lg border px-6 py-3 text-sm font-medium transition-all duration-200 ${
-              activeCategory === category
-                ? 'border-signoz_accent-300 bg-signoz_accent-300/10 text-signoz_accent-300'
-                : 'hover:border-signoz_accent-300/50 hover:bg-signoz_accent-300/5 border-signoz_slate-400/30 bg-signoz_ink-300/30 text-signoz_vanilla-100'
-            }`}
-            aria-pressed={activeCategory === category}
-          >
-            <div className="font-semibold">{categoryInfo.label}</div>
-            <div className="text-xs opacity-80">{categoryInfo.description}</div>
-          </button>
-        ))}
+    <div className="space-y-6">
+      {/* Category Tabs with CTA */}
+      <div className="flex items-center justify-between">
+        <div className="inline-flex rounded-lg border border-signoz_slate-400/20 bg-signoz_ink-300/20 p-1">
+          {Object.entries(FEATURE_CATEGORIES).map(([category, categoryInfo]) => (
+            <button
+              key={category}
+              onClick={() => handleCategoryClick(category)}
+              className={`rounded-md px-4 py-2 text-sm font-medium transition-all ${
+                activeCategory === category
+                  ? 'bg-signoz_sienna-100 text-gray-700'
+                  : 'text-signoz_vanilla-300 hover:text-signoz_vanilla-100'
+              }`}
+            >
+              {categoryInfo.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Dynamic CTA based on active feature */}
+        <TrackingLink
+          href={getFeatureCTA(activeFeature.id).href}
+          clickType="Feature CTA"
+          clickName={`${activeFeature.title} CTA`}
+          clickLocation="Features Showcase Header"
+          clickText={getFeatureCTA(activeFeature.id).text}
+          className="bg-signoz_accent-300/10 text-signoz_accent-300 hover:bg-signoz_accent-300/20 flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+        >
+          {getFeatureCTA(activeFeature.id).text}
+          <ArrowUpRight className="h-3 w-3" />
+        </TrackingLink>
       </div>
 
-      {/* Features Layout */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Feature Items Sidebar */}
-        <div className="lg:col-span-4">
-          <div className="sticky top-24">
-            <div className="mb-4">
-              <h3 className="text-signoz_accent-300 text-lg font-semibold">
-                {FEATURE_CATEGORIES[activeCategory as keyof typeof FEATURE_CATEGORIES].label}
-              </h3>
-              <p className="text-sm text-signoz_vanilla-400">
-                {FEATURE_CATEGORIES[activeCategory as keyof typeof FEATURE_CATEGORIES].description}
-              </p>
-            </div>
-            <div className="space-y-2">
-              {activeCategoryFeatures.map((feature) => (
-                <button
-                  key={feature.id}
-                  onClick={() => handleTabClick(feature.id)}
-                  className={`w-full rounded-lg border px-4 py-3 text-left transition-all duration-200 ${
-                    activeTab === feature.id
-                      ? 'border-signoz_accent-300 bg-signoz_accent-300/10 text-signoz_accent-300'
-                      : 'hover:border-signoz_accent-300/50 hover:bg-signoz_accent-300/5 border-signoz_slate-400/30 bg-signoz_ink-300/30 text-signoz_vanilla-100'
-                  }`}
-                  aria-pressed={activeTab === feature.id}
-                >
-                  <div className="font-medium">{feature.title}</div>
-                </button>
-              ))}
-            </div>
+      {/* Two Column Layout - 20/80 */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+        {/* Left Sidebar - 20% (1 col) */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-24 space-y-2">
+            {activeCategoryFeatures.map((feature) => (
+              <button
+                key={feature.id}
+                onClick={() => handleTabClick(feature.id)}
+                className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-all ${
+                  activeTab === feature.id
+                    ? 'bg-signoz_accent-300/20 text-signoz_accent-300 ring-signoz_accent-300/30 ring-1'
+                    : 'text-signoz_vanilla-300 hover:bg-signoz_ink-300/30 hover:text-signoz_vanilla-100'
+                }`}
+              >
+                {feature.title}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Content Area */}
-        <div className="lg:col-span-8">
-          <div className="rounded-lg border border-signoz_slate-400/30 bg-signoz_ink-300/30 p-6">
-            {/* Video Showcase */}
-            <div className="mb-6">
-              <VideoPlayer
-                thumbnailSrc={activeFeature.thumbnail}
-                videoSrc={activeFeature.videoSrc}
-                title={activeFeature.title}
-                className="w-full"
-              />
+        {/* Right Content - 80% (4 cols) */}
+        <div className="lg:col-span-4">
+          {/* Large Video Showcase */}
+          <div className="mb-6 overflow-hidden rounded-xl border border-signoz_slate-400/20 bg-gradient-to-br from-signoz_ink-300/30 to-signoz_ink-400/30">
+            <VideoPlayer
+              thumbnailSrc={activeFeature.thumbnail}
+              videoSrc={activeFeature.videoSrc}
+              title={activeFeature.title}
+              className="aspect-video w-full"
+            />
+          </div>
+
+          {/* Tech Icons & CTA */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {activeFeature.techIcons.slice(0, 6).map((tech, index) => (
+                <TechIcon key={index} icon={tech.icon} name={tech.name} />
+              ))}
+              {activeFeature.techIcons.length > 6 && (
+                <span className="text-xs text-signoz_vanilla-400">
+                  +{activeFeature.techIcons.length - 6} more
+                </span>
+              )}
             </div>
 
-            {/* Technology Icons and CTA */}
-            <div className="mb-4">
-              <h3 className="mb-3 text-lg font-semibold text-signoz_vanilla-100">
-                Supported Technologies
-              </h3>
-              <div className="flex flex-wrap items-center gap-3">
-                {activeFeature.techIcons.map((tech, index) => (
-                  <TechIcon key={index} icon={tech.icon} name={tech.name} />
-                ))}
-                <TrackingLink
-                  href={activeFeature.ctaLink.href}
-                  clickType="Primary CTA"
-                  clickName={`${activeFeature.title} CTA Link`}
-                  clickLocation="Features Showcase"
-                  clickText={activeFeature.ctaLink.text}
-                  className="hover:text-signoz_accent-200 ml-2 flex items-center gap-1 text-sm font-medium text-gray-300 transition-colors"
-                >
-                  {activeFeature.ctaLink.text}
-                  <ArrowUpRight className="h-3 w-3" />
-                </TrackingLink>
-              </div>
-            </div>
+            <TrackingLink
+              href={activeFeature.ctaLink.href}
+              clickType="Primary CTA"
+              clickName={`${activeFeature.title} CTA Link`}
+              clickLocation="Features Showcase"
+              clickText={activeFeature.ctaLink.text}
+              className="bg-signoz_accent-300/10 text-signoz_accent-300 hover:bg-signoz_accent-300/20 flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+            >
+              {activeFeature.ctaLink.text}
+              <ArrowUpRight className="h-3 w-3" />
+            </TrackingLink>
           </div>
         </div>
       </div>
