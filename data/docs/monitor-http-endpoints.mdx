@@ -1,11 +1,12 @@
 ---
-date: 2024-06-06
+date: 2025-07-01
 title: Monitor HTTP Endpoints
 id: monitor-http-endpoints
 hide_table_of_contents: true
 ---
 
-With SigNoz, you can monitor the health of HTTP endpoints and set up alerts in case of HTTP endpoint failure status codes. This guide covers everything from basic setup to creating dashboards and configuring alerts.
+With SigNoz, you can set up lightweight synthetic monitoring to track the health of your HTTP endpoints
+This document walks you through every step, from initial setup to creating dashboards and configuring alerts on your HTTP endpoints.
 
 <Tabs entityName="plans">
 
@@ -73,13 +74,9 @@ Start the OpenTelemetry Collector to begin collecting HTTP endpoint metrics:
 
 ## Basic Setup
 
-### Step 1: Install OpenTelemetry Collector
+### Step 1: Configure the HTTP Check Receiver
 
-Install and set up the OpenTelemetry Collector by following the [OpenTelemetry Binary Usage guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
-
-### Step 2: Configure the HTTP Check Receiver
-
-Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your OpenTelemetry Collector configuration:
+Add the [httpcheck receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md) to your Collector configuration:
 
 ```yaml:config.yaml
 receivers:
@@ -96,9 +93,9 @@ receivers:
     collection_interval: 10s
 ```
 
-### Step 3: Configure the Service Pipeline
+### Step 2: Configure the Service Pipeline
 
-Configure the service pipeline to include the httpcheck receiver:
+Configure the service pipeline to include the `httpcheck` receiver:
 
 ```yaml:config.yaml
 service:
@@ -108,20 +105,16 @@ service:
       exporters: [clickhousemetricswrite]
 ```
 
-### Step 4: Start the Collector
+### Step 3: Restart the Collector
 
-Start the OpenTelemetry Collector to begin collecting HTTP endpoint metrics:
-
-```bash
-./otelcol-contrib --config ./config.yaml
-```
+Restart the OpenTelemetry Collector to begin collecting HTTP endpoint metrics.
 
 </TabItem>
 </Tabs>
 
 ## Understanding HTTP Check Metrics
 
-The HTTP Check Receiver performs synthetic checks against HTTP endpoints by making requests to specified endpoints using the configured method. It generates metrics labeled for each HTTP response status class.
+The HTTP Check Receiver performs synthetic checks - a form of synthetic monitoring, against HTTP endpoints by making requests to specified endpoints using the configured method. It generates metrics labeled for each HTTP response status class.
 
 The receiver creates a metric named `httpcheck_status` with value 1 if the check resulted in status_code matching the status_class, otherwise 0.
 
@@ -168,7 +161,7 @@ service:
   metrics:
     receivers: [otlp, httpcheck/rapid, httpcheck/frequent, httpcheck/low]
     processors: [batch]
-    exporters: [otlp] # or [clickhousemetricswrite] for self-host
+    exporters: [otlp]
 ```
 
 **Note:** The receiver name format is `httpcheck` for the base receiver and `httpcheck/{name}` for additional instances. Using `httpchecklow` (without the slash) would return an error.
@@ -269,12 +262,16 @@ You can create alerts to get notified when endpoints go down:
 
 Example alert configuration:
 ```yaml
-Query: httpcheck_status{http_status_class="2xx"}
-Condition: IS BELOW 1
-Duration: 5m
+Metrics: httpcheck.status         
+WHERE: http.status_class = 2xx 
+Avg By: http.url
+
+
+condition: below the threshold at least once during the last 5 mins
+threshold: 1   
 ```
 
-This alert will trigger when any endpoint stops returning successful responses (2xx status codes) for more than 2 minutes.
+The alert fires when any monitored endpoint fails to return even a single 2xx (success) response during a 5 minute window.
 
 ## Troubleshooting
 
