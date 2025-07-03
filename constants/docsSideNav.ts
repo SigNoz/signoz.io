@@ -469,7 +469,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/telemetry',
-            label: 'Telemetry',
+            label: 'Statistics Reporting',
           },
           {
             type: 'doc',

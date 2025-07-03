@@ -1,14 +1,14 @@
 ---
 date: 2024-06-06
 id: telemetry
-title: Telemetry
+title: Statistics Reporting
 ---
 
-SigNoz reports the **non-sensitive**, **non-personally identifiable information (PII)** that helps us understand how the community uses SigNoz - such as which versions you’re on, which features matter, and where we should focus on improvements and fixes. It’s the best signal we have for prioritising bug fixes, documentation, and new capabilities.
+SigNoz reports the **non-sensitive** information that helps us understand how the community uses SigNoz - such as which versions you’re on, which features matter, and where we should focus on improvements and fixes. It’s the best signal we have for prioritising bug fixes, documentation, and new capabilities.
 
 We keep this information minimal and do not record any sensitive user traffic, queries, or payloads. The only data we collect is listed below - nothing more, nothing less.
 
-The information is collected by `statsreporter` and it is **enabled by default**, controlled by the following configuration in the [SigNoz Configuration](https://github.com/SigNoz/signoz/blob/5102cf2b7bd43434465f8b1a48c47c722acc37d1/conf/example.yaml):
+The information is collected by `statsreporter` and is **enabled by default**, managed by the following configuration in the [SigNoz Configuration](https://github.com/SigNoz/signoz/blob/5102cf2b7bd43434465f8b1a48c47c722acc37d1/conf/example.yaml):
 ```yaml
 ##################### StatsReporter #####################
 statsreporter:
@@ -22,7 +22,7 @@ statsreporter:
 ```
 
 When the stats reporter is enabled, SigNoz collects the following information at an interval specified in the configuration:
-- Details regarding the **environment** where SigNoz operates
+- Details regarding the **environment** where SigNoz is running
     - The deployment platform, such as GCP, etc., where SigNoz is deployed
     - The operating system, such as `Linux`, etc.
     - The system architecture, such as `AMD`, etc.
@@ -31,7 +31,7 @@ When the stats reporter is enabled, SigNoz collects the following information at
     - The git branch used for the build, such as `main`, etc.
     - The build variant of SigNoz, such as `Community Edition` or `Enterprise`
     - The deployment method used for installation, such as `Docker`, `Kubernetes`, etc. 
-- Details about the scope at which SigNoz is operating:
+- Details about the scope at which SigNoz is running:
     - The number of dashboards, panels, saved views, alerts, and users
     - The volume of logs, traces, and metrics ingested
     - **SigNoz does not collect the actual queries or user requests**
@@ -47,7 +47,7 @@ The SigNoz team continually reviews this aggregated telemetry and promises to no
 <Admonition type="info">
 If possible, we kindly ask you to keep the usage reporting feature enabled, as it helps us better understand how the open source community runs SigNoz.
 
-In case you want to opt out, we request you to disable the `identities`, which will stop collecting any traits or identities and will only send information about the Environment, Scale, and Version. You can set the following configuration for this:
+In case you want to opt out, we request you to disable the `identities`, which will stop collecting traits or personally identifiable information (PII) and will only send information about the Environment, Scale, and Version anonymously. You can set the following configuration for this:
 ```yaml
 statsreporter:
   enabled: true
@@ -65,7 +65,7 @@ statsreporter:
 <summary>**Version less than or equal to 0.87.0**</summary>
 
 The Following  Telemetry Collection has been removed in the versions greater than 0.87.0. Please check the [Github Issue](https://github.com/SigNoz/signoz/issues/7976) for more Information
-### Docker Installation
+#### Docker Installation
 During the installation process, we collect stats of which installations were successful, which were unsuccessful and need our help. This is used to analyze the
 
 - Installation Started
@@ -94,7 +94,7 @@ Sample Event
 
 
 
-### SigNoz Server
+#### SigNoz Server
 
 The SigNoz backend server sends a keep-alive ping every 6 hours to indicate that it is still running without any errors. We also send some metrics around usage like number of spans and timeseries to understand the scale at which signoz is being deployed and hence helps us to proactively run benchmarks on similar scale and fix any performance issues that users might be facing.
 
@@ -125,7 +125,7 @@ Sample event
 
 
 
-### SigNoz UI 
+#### SigNoz UI 
 
 You can anonymise the following data during the set up process.
 
