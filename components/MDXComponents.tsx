@@ -45,10 +45,6 @@ import LogsInstrumentationListicle from './Logs/LogsInstrumentationListicle'
 import IntegrationsListicle from './Integrations/IntegrationsListicle'
 import HostingDecision from './shared/HostingDecision'
 import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
-import K8sInstallationListicle from './Setup/K8sInstallationListicle'
-import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
-import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
-import MigrateToSigNoz from './MigrateToSigNoz/MigrateToSigNozOverview'
 import DashboardTemplatesListicle from './Dashboards/DashboardTemplatesListicle'
 
 export const components: MDXComponents = {
@@ -98,9 +94,5 @@ export const components: MDXComponents = {
   IntegrationsListicle,
   HostingDecision,
   SelfHostInstallationListicle,
-  K8sInstallationListicle,
-  ArticleSeriesBottom,
-  ArticleSeriesTop,
-  MigrateToSigNoz,
   DashboardTemplatesListicle,
 }
