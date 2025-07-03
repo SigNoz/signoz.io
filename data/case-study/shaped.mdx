@@ -1,0 +1,103 @@
+---
+
+title: YC-backed Shaped AI Swapped a Siloed Toolset for SigNoz, achieving One-Stop Observability
+slug: shaped
+image: /img/case_study/shaped-cover.webp
+authors: [ankit_anand]
+
+---
+
+<head>
+<link rel="canonical" href="https://signoz.io/case-study/shaped/"/>
+<meta property="og:image" content="https://signoz.io/img/case_study/shaped-cover.webp"/>
+<meta name="twitter:image" content="https://signoz.io/img/case_study/shaped-cover.webp"/>
+</head>
+
+<div class="avatar">
+<a
+class="avatar__photo-link avatar__photo avatar__photo--lg"
+href="https://www.linkedin.com/in/ankit-anand-686a53a1/">
+<img
+alt="Ankit Profile"
+src="/img/users/ankit-anand.webp" />
+</a>
+<div class="avatar__intro">
+<div class="avatar__name">Ankit Anand</div>
+<small class="avatar__subtitle">
+Maintainer, SigNoz
+</small>
+</div>
+</div>
+
+## About Shaped: Powering AI-native Recommendations & Personalization
+
+Backed by Y Combinator, [Shaped](https://www.shaped.ai/) empowers companies to build production-ready ranking and recommendation models in minutes. Customers use Shaped’s powerful APIs to create personalized feed experiences for their users. The platform runs on a modern tech stack, hosted on AWS and orchestrated with Kubernetes (EKS).
+
+For a high-growth, Series A-funded startup like Shaped, both engineering efficiency and cost management are paramount.  For observability, the team found themselves grappling with a fragmented observability stack that hindered their troubleshooting efforts.
+
+We sat down with [Karl Lyons](https://www.linkedin.com/in/karllyons/), a senior site reliability engineer at Shaped, to understand how the engineering team at Shaped is leveraging SigNoz for observability.
+
+## The Challenge: The Pain of a Scattered, Inefficient Toolset
+
+When Karl joined Shaped, the company was relying on native AWS services for observability, using CloudWatch for logs and AWS X-Ray for traces. Seeking a more powerful solution for tracing, the team decided to adopt Honeycomb.
+
+However, this move inadvertently created a new kind of fragmentation. While Honeycomb was adept at handling traces, logs remained in CloudWatch. This meant the engineering team was now operating in a siloed environment, forced to jump between different platforms to correlate issues. The inefficiency of this setup quickly became a major bottleneck.
+
+> One of the biggest pain points was that Honeycomb was really good for traces, but nothing else. If we're trying to troubleshoot a problem, we need to switch between two different websites or providers. It was just kind of annoying to have to switch back and forth between the two when you wanted to look at logs and look at traces.
+
+-Karl Lyons, Senior SRE, Shaped AI
+
+<YouTube id="Um5TqSDAmTo" mute={false} />
+
+On top of the context-switching, the team found CloudWatch to be particularly challenging. "I really hate it for search logs," Karl notes, describing the user experience as "very painful." More alarming was the unpredictable pricing model for queries.
+
+> You don't know what you will get charged. For a developer while troubleshooting, it's quite something to think about. If you're querying something and it shoots up the bill... that's actually quite scary.
+
+-Karl Lyons, Senior SRE, Shaped AI
+
+As a seasoned SRE with experience at major tech firms like N26, Karl was no stranger to observability tools. He had seen the power of platforms like Datadog but was also acutely aware of their "insanely expensive" price tags.
+
+Shaped needed a solution that could act as a one-stop observability solution, and also be reliable in terms of cost.
+
+## The Solution - Finding a Unified, OpenTelemetry-Native Platform, SigNoz
+
+Karl’s search led him to SigNoz. Several factors immediately stood out, making it the ideal choice for Shaped.
+
+1. **One-stop observability:** The primary driver was the promise of a truly unified platform. The ability to have logs, metrics, and traces in one place was the direct solution to their biggest challenge.
+2. **OpenTelemetry Native:** Shaped was already using an OpenTelemetry Collector to send data to their various tools. As SigNoz is built on top of OpenTelemetry, migration was just changing some exporter configurations.
+3. **Shared Roots (YC & ClickHouse):** As a fellow YC-backed company, there was an immediate sense of alignment and the benefit of a YC discount. Furthermore, Shaped was already using ClickHouse internally, so they were familiar with the performant database powering SigNoz.
+4. **Cost-Effectiveness:** "Looking after costs is a big part of what I do," Karl states. SigNoz presented a powerful feature set at a price point that was more economical than their previous combination of CloudWatch and Honeycomb.
+
+The migration process itself was a testament to the power of open standards like OpenTelemetry.
+
+> It was honestly, it was super straightforward because you just need to update the exporter configuration. It's like three lines of code or something, basically. It was super quick... as soon as we updated the configuration, data would go straight in.
+
+-Karl Lyons, Senior SRE, Shaped AI
+
+Within a matter of days, Shaped had fully transitioned its observability pipeline to SigNoz Cloud without any disruption.
+
+## The Impact - Faster Troubleshooting and a More Empowered Team
+
+Today, SigNoz is the nerve center for Shaped’s engineering team. It's the default destination for monitoring, debugging, and performance optimization.
+
+> Every single time we have an issue, SigNoz is always the first place to check. Straight away.
+
+-Karl Lyons, Senior SRE, Shaped AI
+
+<YouTube id="p4-dJkDtUbw" mute={false} />
+
+The on-call workflow has been transformed. When an alert fires, the team’s first action is to open a SigNoz dashboard and troubleshoot.
+
+> I can see my success rate, I can see which model the error is coming from. So I can quickly gauge, you know, is this an isolated incident? Is it only happening to this pod or this service? Or is it like more widespread? As soon as I open the dashboard, I can easily tell that.
+
+-Karl Lyons, Senior SRE, Shaped AI
+
+The team relies on custom dashboards to monitor their critical inference services, tracking request rates, error percentages, latency, and resource utilization (CPU, memory) all in one view. They also leverage all three signals—logs, metrics, and traces—to get a complete picture of both their real-time inference workloads and their asynchronous model training jobs.
+
+Features like the correlation between traces and logs have proven "super useful," allowing engineers to seamlessly pivot between different telemetry types during an investigation. They also actively use SigNoz for performance tuning.
+
+> We definitely use SigNoz to optimize latency. We have to track it over time. As soon as we make a change, we also make great use of the attributes so we can see the difference between whatever image tag we use or commit hash and then compare that after the fact.
+
+-Karl Lyons, Senior SRE, Shaped AI
+
+From a fragmented, costly, and frustrating setup, Shaped has moved to a state of observability clarity. With SigNoz, the entire engineering team is now equipped with a unified, one-stop, and cost-effective observability tool that has become an indispensable part of their daily workflows.

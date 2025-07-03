@@ -39,7 +39,7 @@ const linearToLog = (value: number, minLog: number, maxLog: number) => {
   const minValue = Math.log(MIN_LOG_VALUE)
   const maxValue = Math.log(maxLog)
   const scale = (maxValue - minValue) / (maxLog - MIN_LOG_VALUE)
-  return Math.floor(Math.exp(minValue + scale * (value - MIN_LOG_VALUE)))
+  return Math.round(Math.exp(minValue + scale * (value - MIN_LOG_VALUE)))
 }
 
 // Transform logarithmic value back to linear scale for slider
@@ -48,7 +48,7 @@ const logToLinear = (value: number, minLog: number, maxLog: number) => {
   const minValue = Math.log(MIN_LOG_VALUE)
   const maxValue = Math.log(maxLog)
   const scale = (maxLog - MIN_LOG_VALUE) / (maxValue - minValue)
-  return Math.floor(MIN_LOG_VALUE + scale * (Math.log(value) - minValue))
+  return Math.round(MIN_LOG_VALUE + scale * (Math.log(value) - minValue))
 }
 
 const PricingCalculator: React.FC = () => {
@@ -319,7 +319,8 @@ const PricingCalculator: React.FC = () => {
     maxLabel: string,
     formatFunc: (val: number) => string,
     thumbColor: string,
-    ariaLabel: string
+    ariaLabel: string,
+    inputValue: string
   ) => (
     <Slider
       size="sm"
@@ -328,7 +329,7 @@ const PricingCalculator: React.FC = () => {
       minValue={MIN_VALUE}
       showTooltip={true}
       tooltipProps={{
-        content: value === 0 ? '0' : formatFunc(linearToLog(value, MIN_LOG_VALUE, MAX_VALUE)),
+        content: value === 0 ? '0' : formatFunc(Number(inputValue)),
       }}
       color={color}
       marks={[
@@ -344,9 +345,7 @@ const PricingCalculator: React.FC = () => {
         <div
           {...props}
           className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-          aria-valuetext={
-            value === 0 ? '0' : formatFunc(linearToLog(value, MIN_LOG_VALUE, MAX_VALUE))
-          }
+          aria-valuetext={value === 0 ? '0' : formatFunc(Number(inputValue))}
         >
           <span
             className={`block h-5 w-5 rounded-full bg-${thumbColor} transition-transform group-data-[dragging=true]:scale-80`}
@@ -635,7 +634,8 @@ const PricingCalculator: React.FC = () => {
                     '100TB',
                     formatBytes,
                     'signoz_robin-500',
-                    'Adjust traces ingestion volume'
+                    'Adjust traces ingestion volume',
+                    inputTracesValue
                   )}
                 </div>
               </div>
@@ -707,7 +707,8 @@ const PricingCalculator: React.FC = () => {
                     '100TB',
                     formatBytes,
                     'signoz_sakura-500',
-                    'Adjust logs ingestion volume'
+                    'Adjust logs ingestion volume',
+                    inputLogsValue
                   )}
                 </div>
               </div>
@@ -779,7 +780,8 @@ const PricingCalculator: React.FC = () => {
                     '100B',
                     formatMetrics,
                     'signoz_amber-500',
-                    'Adjust metrics ingestion volume'
+                    'Adjust metrics ingestion volume',
+                    inputMetricsValue
                   )}
                 </div>
               </div>
@@ -867,7 +869,8 @@ const PricingCalculator: React.FC = () => {
               '100TB',
               formatBytes,
               'signoz_robin-500',
-              'Adjust traces ingestion volume'
+              'Adjust traces ingestion volume',
+              inputTracesValue
             )}
           </div>
           <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
@@ -919,7 +922,8 @@ const PricingCalculator: React.FC = () => {
               '100TB',
               formatBytes,
               'signoz_sakura-500',
-              'Adjust logs ingestion volume'
+              'Adjust logs ingestion volume',
+              inputLogsValue
             )}
           </div>
           <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
@@ -971,7 +975,8 @@ const PricingCalculator: React.FC = () => {
               '100B',
               formatMetrics,
               'signoz_amber-500',
-              'Adjust metrics ingestion volume'
+              'Adjust metrics ingestion volume',
+              inputMetricsValue
             )}
           </div>
           <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">

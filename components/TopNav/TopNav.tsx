@@ -189,8 +189,10 @@ export default function TopNav() {
 
   const loginRoute = '/login/'
   const signupRoute = '/teams/'
+  const wordleRoute = '/todaysdevopswordle/'
   const isLoginRoute = pathname === loginRoute
   const isSignupRoute = pathname === signupRoute
+  const isWordleRoute = pathname === wordleRoute
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
   const delay = 500
 
@@ -222,7 +224,7 @@ export default function TopNav() {
   }, [pathname])
 
   // Hide TopNav on teams page or if source is onboarding
-  if (isSignupRoute || source === ONBOARDING_SOURCE) {
+  if (isSignupRoute|| isWordleRoute || source === ONBOARDING_SOURCE) {
     return null
   }
 
@@ -258,8 +260,6 @@ export default function TopNav() {
 
   return (
     <div className="fixed left-0 right-0 z-30">
-      <Banner />
-
       <header
         className={`header-bg mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8`}
       >

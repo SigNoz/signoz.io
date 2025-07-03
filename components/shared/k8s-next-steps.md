@@ -1,0 +1,2 @@
+- [Kubernetes Infra Monitoring](https://signoz.io/docs/userguide/k8s-metrics/)
+- [Use OpenTelemetry Operator for automatic instrumentation](https://signoz.io/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection)

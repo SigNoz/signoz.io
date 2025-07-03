@@ -82,6 +82,12 @@ function Footer() {
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                  <Link href="/todaysdevopswordle/" target="_blank">
+                    DevOps Wordle
+                  </Link>
+                  <ArrowUpRight size={16} />
+                </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
                   <Link href="https://newsletter.signoz.io/" target="_blank">
                     Newsletter
                   </Link>

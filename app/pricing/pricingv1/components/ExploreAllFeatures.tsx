@@ -395,7 +395,7 @@ const ALL_FEATURES_DATA = {
         },
         {
           feature: 'Alert as Code',
-          inCommunity: <CrossSolid />,
+          inCommunity: <CheckSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },
@@ -411,9 +411,15 @@ const ALL_FEATURES_DATA = {
       section: 'Pre-built Integrations & Dashboards',
       features: [
         {
+          feature: 'Single Click AWS Integrations',
+          inCommunity: <CrossSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
           feature:
-            'Infrastructure & database dashboards (Kubernetes, Docker, PostgreSQL, MongoDB, Redis, MySQL)',
-          inCommunity: <CheckSolid />,
+            'Pre-built integrations & dashboards (AWS ElastiCache Redis, AWS RDS MySQL/PostgreSQL, ClickHouse, MongoDB, NGINX, PostgreSQL, Redis)',
+          inCommunity: <CrossSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },
@@ -421,12 +427,6 @@ const ALL_FEATURES_DATA = {
           feature:
             'Application performance & web service dashboards (APM, NGINX, Apache, RabbitMQ, LLM)',
           inCommunity: <CheckSolid />,
-          inTeams: <CheckSolid />,
-          inEnterprise: <CheckSolid />,
-        },
-        {
-          feature: 'Single Click AWS Integrations',
-          inCommunity: <CrossSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },

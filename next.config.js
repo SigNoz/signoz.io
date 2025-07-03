@@ -7,11 +7,11 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
-  connect-src *;
+  connect-src * https://api.reo.dev;
   font-src * 'self';
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
@@ -82,6 +82,10 @@ module.exports = () => {
         {
           protocol: 'https',
           hostname: 'avatars.githubusercontent.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'storage.googleapis.com',
         },
       ],
     },
@@ -350,6 +354,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/laravel/',
+          destination: '/docs/instrumentation/opentelemetry-laravel/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/python/',
           destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
@@ -453,6 +462,36 @@ module.exports = () => {
         {
           source: '/docs/operate/query-service/user-invitation-smtp/',
           destination: '/docs/manage/administrator-guide/configuration/smtp-email-invitations/',
+          permanent: true,
+        },
+        {
+          source: '/guides/what-is-opentelemetry/',
+          destination: '/blog/what-is-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-to-signoz-cloud/',
+          destination: '/docs/migration/migrate-from-signoz-self-host-to-signoz-cloud/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-datadog/',
+          destination: '/docs/migration/migrate-from-datadog-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-grafana/',
+          destination: '/docs/migration/migrate-from-grafana-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-elk/',
+          destination: '/docs/migration/migrate-from-elk-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-newrelic/',
+          destination: '/docs/migration/migrate-from-newrelic-to-signoz/',
           permanent: true,
         },
       ]

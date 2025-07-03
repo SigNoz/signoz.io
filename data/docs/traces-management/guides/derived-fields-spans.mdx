@@ -1,0 +1,158 @@
+---
+date: 2025-06-26
+id: derived-fields-spans
+title: Calculated Fields in Spans
+---
+
+This document describes how calculated fields are derived from OpenTelemetry span attributes during trace processing. These fields provide convenient access to commonly used telemetry data without requiring direct attribute queries.
+
+## Overview
+
+Calculated fields are automatically populated based on the presence of specific OpenTelemetry semantic convention attributes in spans. The system examines each span's attributes and extracts relevant information according to the rules described below.
+
+## Field Derivation Rules
+
+### response_status_code
+
+The HTTP or RPC response status code, extracted from various status code attributes.
+
+**Source Attributes:**
+- `http.status_code` - HTTP status code (legacy)
+- `http.response.status_code` - HTTP response status code (current semantic convention)
+- `rpc.grpc.status_code` - gRPC status code
+- `rpc.jsonrpc.error_code` - JSON-RPC error code
+
+**Processing Logic:**
+- For HTTP and gRPC status codes: Accepts both string and integer values. If provided as a string, attempts to parse it as an integer.
+- For JSON-RPC: Stores the error code as-is.
+- Final value is always stored as a string.
+
+### http_url
+
+The full HTTP URL of the request.
+
+**Source Attributes:**
+- `http.url` - Full HTTP URL (legacy)
+- `url.full` - Full URL (current semantic convention)
+
+**Processing Logic:**
+- Stores the complete URL as provided in the attribute.
+- Populated for all span kinds.
+
+### external_http_url
+
+The hostname portion of the HTTP URL, specifically for client spans (Kind = 3).
+
+**Source Attributes:**
+- `http.url` - Full HTTP URL (legacy)
+- `url.full` - Full URL (current semantic convention)
+
+**Processing Logic:**
+- Only populated for client spans (Kind = 3).
+- Attempts to parse the URL and extract just the hostname.
+- If URL parsing fails, stores the original value.
+
+### http_method
+
+The HTTP request method.
+
+**Source Attributes:**
+- `http.method` - HTTP method (legacy)
+- `http.request.method` - HTTP request method (current semantic convention)
+
+**Processing Logic:**
+- Stores the HTTP method as provided (e.g., GET, POST, PUT).
+- Populated for all span kinds.
+
+### external_http_method
+
+The HTTP request method, specifically for client spans (Kind = 3).
+
+**Source Attributes:**
+- `http.method` - HTTP method (legacy)
+- `http.request.method` - HTTP request method (current semantic convention)
+
+**Processing Logic:**
+- Only populated for client spans (Kind = 3).
+- Stores the same value as `http_method` for client spans.
+
+### http_host
+
+The HTTP host or server address.
+
+**Source Attributes:**
+- `http.host` - HTTP host (legacy)
+- `server.address` - Server address
+- `client.address` - Client address
+- `http.request.header.host` - Host header from HTTP request
+
+**Processing Logic:**
+- Uses the first available value from the listed attributes.
+- Stores the host/address as provided.
+
+### db_name
+
+The database name or namespace.
+
+**Source Attributes:**
+- `db.name` - Database name (legacy)
+- `db.namespace` - Database namespace (current semantic convention)
+
+**Processing Logic:**
+- Stores the database name or namespace as provided.
+
+### db_operation
+
+The database operation being performed.
+
+**Source Attributes:**
+- `db.operation` - Database operation (legacy)
+- `db.operation.name` - Database operation name (current semantic convention)
+
+**Processing Logic:**
+- Stores the database operation as provided (e.g., SELECT, INSERT, UPDATE).
+
+### has_error
+
+A boolean indicating whether the span represents an error.
+
+**Derivation Logic:**
+- Set to `true` if the span's status code indicates an error (typically status code 2).
+- Set to `false` otherwise.
+- This field is derived from the span's status, not from attributes.
+
+### is_remote
+
+A boolean indicating whether the span represents a remote call.
+
+## Span Kind Reference
+
+The span kind affects how certain fields are populated:
+- **Kind 3 (Client)**: Indicates outbound remote calls. Special handling for `external_http_url` and `external_http_method`.
+- **Other Kinds**: Standard processing applies.
+
+## Semantic Convention Evolution
+
+We support both legacy OpenTelemetry semantic conventions and current conventions. When both are present, the system uses the first matching attribute found during iteration.
+
+**Examples of convention changes:**
+- `http.url` → `url.full`
+- `http.method` → `http.request.method`
+- `db.name` → `db.namespace`
+- `db.operation` → `db.operation.name`
+
+## Example
+
+For a client span (Kind = 3) with the following attributes:
+```
+http.method: "GET"
+url.full: "https://api.example.com/users/123"
+http.response.status_code: 200
+```
+
+The calculated fields would be:
+- `http_method`: "GET"
+- `external_http_method`: "GET"
+- `http_url`: "https://api.example.com/users/123"
+- `external_http_url`: "api.example.com"
+- `response_status_code`: "200"
