@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import { Header } from '@/components/index-header'
 import BuildForDevelopers from '@/components/build-for-developers'
-import { SigNozFeatures } from '@/components/index-features'
+import { FeaturesShowcase } from '@/components/features-showcase'
 import SigNozStats from '@/components/signoz-stats'
 import { Testimonials } from '@/components/testimonials'
 import { TrustedByTeams } from '@/components/trusted-by'
@@ -46,7 +46,8 @@ export default async function Page() {
         <main className="landing-section relative z-[1]">
           <Header />
           <TrustedByTeams page="homepage" />
-          <SigNozFeatures />
+          {/* <SigNozFeatures /> */}
+          <FeaturesShowcase />
           <BuildForDevelopers />
           <WhyOpenTelemetry />
           <WhySelectSignoz />
