@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
-import { Play, Pause } from 'lucide-react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { Play, Pause, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 
 interface VideoPlayerProps {
@@ -19,9 +19,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [showThumbnail, setShowThumbnail] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [progress, setProgress] = useState(0)
+  const [isInViewport, setIsInViewport] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  const handlePlayClick = () => {
+  const handlePlayClick = useCallback(() => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause()
@@ -32,7 +36,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         setShowThumbnail(false)
       }
     }
-  }
+  }, [isPlaying])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -41,9 +45,76 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   }
 
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const video = videoRef.current
+    if (!video || !video.duration) return
+
+    const progressBar = e.currentTarget
+    const rect = progressBar.getBoundingClientRect()
+    const clickX = e.clientX - rect.left
+    const percentage = (clickX / rect.width) * 100
+    const newTime = (percentage / 100) * video.duration
+
+    video.currentTime = newTime
+    setProgress(percentage)
+  }
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const updateProgress = () => {
+      if (video.duration) {
+        setProgress((video.currentTime / video.duration) * 100)
+      }
+    }
+
+    video.addEventListener('timeupdate', updateProgress)
+    video.addEventListener('loadeddata', () => setIsLoading(false))
+    video.addEventListener('waiting', () => setIsLoading(true))
+    video.addEventListener('playing', () => setIsLoading(false))
+
+    return () => {
+      video.removeEventListener('timeupdate', updateProgress)
+      video.removeEventListener('loadeddata', () => setIsLoading(false))
+      video.removeEventListener('waiting', () => setIsLoading(true))
+      video.removeEventListener('playing', () => setIsLoading(false))
+    }
+  }, [videoSrc])
+
+  // Viewport detection
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInViewport(entry.isIntersecting)
+      },
+      { threshold: 0.5 } // Video needs to be at least 50% visible
+    )
+
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
+  // Spacebar control (only when in viewport)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && isInViewport) {
+        e.preventDefault()
+        handlePlayClick()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyPress)
+    return () => document.removeEventListener('keydown', handleKeyPress)
+  }, [handlePlayClick, isInViewport])
+
   return (
     <div
-      className={`hover:border-signoz_accent-300/50 group relative overflow-hidden rounded-lg border border-signoz_slate-400/30 bg-signoz_ink-300/30 transition-all duration-300 ${className}`}
+      ref={containerRef}
+      className={`hover:border-signoz_accent-300/50 group relative overflow-hidden rounded-lg  bg-signoz_ink-300/30 transition-all duration-300 ${className}`}
     >
       <div className="relative aspect-video w-full">
         {/* Thumbnail Image */}
@@ -98,6 +169,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           Your browser does not support the video tag.
         </video>
 
+        {/* Loading Indicator */}
+        {isLoading && !showThumbnail && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+            <div className="rounded-lg bg-signoz_ink-300/80 p-4 backdrop-blur-sm">
+              <Loader2 className="h-8 w-8 animate-spin text-signoz_vanilla-100" />
+            </div>
+          </div>
+        )}
+
         {/* Video Controls Overlay (when video is playing) */}
         {!showThumbnail && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-300 hover:bg-black/20 hover:opacity-100">
@@ -114,6 +194,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             </button>
           </div>
         )}
+
+        {/* Progress Bar */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-1 cursor-pointer bg-signoz_slate-400/20 transition-all duration-200 hover:h-2"
+          onClick={handleProgressClick}
+          title="Click to seek"
+        >
+          <div
+            className="h-full bg-gradient-to-r from-signoz_robin-500 to-signoz_sakura-500 transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
     </div>
   )

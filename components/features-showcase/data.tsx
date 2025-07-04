@@ -49,6 +49,7 @@ import {
 export interface TechIcon {
   icon: React.ReactNode
   name: string
+  href?: string
 }
 
 export interface FeatureShowcase {
@@ -63,6 +64,10 @@ export interface FeatureShowcase {
     href: string
   }
   category: 'core' | 'cloud' | 'advanced'
+  badge?: {
+    text: string
+    type: 'popular' | 'new' | 'enterprise'
+  }
 }
 
 export const FEATURE_CATEGORIES = {
@@ -89,14 +94,14 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
     videoSrc: '/showcases/logs/signoz-logs.mp4',
     techIcons: [
-      { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript' },
-      { icon: <SiPython className="h-5 w-5 text-blue-500" />, name: 'Python' },
-      { icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />, name: 'Java' },
-      { icon: <SiGo className="h-5 w-5 text-cyan-500" />, name: 'Go' },
-      { icon: <SiDotnet className="h-5 w-5 text-purple-500" />, name: '.NET' },
-      { icon: <SiPhp className="h-5 w-5 text-purple-600" />, name: 'PHP' },
-      { icon: <SiRuby className="h-5 w-5 text-red-500" />, name: 'Ruby' },
-      { icon: <SiRust className="h-5 w-5 text-orange-600" />, name: 'Rust' },
+      { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript', href: '/docs/instrumentation/javascript/' },
+      { icon: <SiPython className="h-5 w-5 text-blue-500" />, name: 'Python', href: '/docs/instrumentation/python/' },
+      { icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />, name: 'Java', href: '/docs/instrumentation/java/' },
+      { icon: <SiGo className="h-5 w-5 text-cyan-500" />, name: 'Go', href: '/docs/instrumentation/go/' },
+      { icon: <SiDotnet className="h-5 w-5 text-purple-500" />, name: '.NET', href: '/docs/instrumentation/dotnet/' },
+      { icon: <SiPhp className="h-5 w-5 text-purple-600" />, name: 'PHP', href: '/docs/instrumentation/php/' },
+      { icon: <SiRuby className="h-5 w-5 text-red-500" />, name: 'Ruby', href: '/docs/instrumentation/ruby/' },
+      { icon: <SiRust className="h-5 w-5 text-orange-600" />, name: 'Rust', href: '/docs/instrumentation/rust/' },
     ],
     ctaLink: {
       text: 'See all languages',
@@ -111,13 +116,13 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
     videoSrc: '/showcases/logs/signoz-logs.mp4',
     techIcons: [
-      { icon: <Search className="h-5 w-5 text-blue-500" />, name: 'Log Search' },
-      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'Kubernetes' },
-      { icon: <SiDocker className="h-5 w-5 text-blue-400" />, name: 'Docker' },
-      { icon: <SiNodedotjs className="h-5 w-5 text-green-500" />, name: 'Node.js' },
-      { icon: <SiPython className="h-5 w-5 text-blue-500" />, name: 'Python' },
-      { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript' },
-      { icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />, name: 'Java' },
+      { icon: <Search className="h-5 w-5 text-blue-500" />, name: 'Log Search', href: '/docs/logs-management/send-logs-to-signoz/' },
+      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'Kubernetes', href: '/docs/install/kubernetes/' },
+      { icon: <SiDocker className="h-5 w-5 text-blue-400" />, name: 'Docker', href: '/docs/install/docker/' },
+      { icon: <SiNodedotjs className="h-5 w-5 text-green-500" />, name: 'Node.js', href: '/docs/instrumentation/javascript/' },
+      { icon: <SiPython className="h-5 w-5 text-blue-500" />, name: 'Python', href: '/docs/instrumentation/python/' },
+      { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript', href: '/docs/instrumentation/javascript/' },
+      { icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />, name: 'Java', href: '/docs/instrumentation/java/' },
       { icon: <Database className="h-5 w-5 text-purple-500" />, name: 'Log Storage' },
     ],
     ctaLink: {
@@ -346,6 +351,10 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/llm-monitoring/overview/',
     },
     category: 'advanced',
+    badge: {
+      text: 'New',
+      type: 'new',
+    },
   },
   {
     id: 'correlation',

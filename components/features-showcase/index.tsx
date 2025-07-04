@@ -26,11 +26,11 @@ export const FeaturesShowcase: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col gap-6 pb-12">
           <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
-            <div className="text-[32px] font-medium leading-[3.25rem] text-signoz_sienna-100">
+            <h2 className="text-gradient text-[32px] font-semibold leading-[3.25rem] md:text-[40px]">
               Complete Observability for Every Use Case
-            </div>
-            <p className="mt-4 text-base text-signoz_vanilla-400">
-              Explore our comprehensive features designed for modern observability needs
+            </h2>
+            <p className="mt-4 text-lg text-signoz_vanilla-100">
+              From logs to traces to metrics - everything you need in one platform
             </p>
           </div>
         </div>
