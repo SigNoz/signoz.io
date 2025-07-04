@@ -2065,6 +2065,45 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'From Honeycomb',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-honeycomb-to-signoz',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/collector',
+            label: 'Setting up collector',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
+      },
+      {
         label: 'From New Relic',
         className: 'new-doc',
         type: 'category',

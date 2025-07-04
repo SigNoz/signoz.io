@@ -1,0 +1,241 @@
+---
+date: 2025-07-03
+id: collector
+title: Setting up collector to send metrics to Signoz
+description: Document describing how to setup a collector
+-----
+
+This document guides you through replacing Honeycomb's data collection tools (like [HTP](https://docs.honeycomb.io/send-data/telemetry-pipeline/) or [Refinery](https://docs.honeycomb.io/manage-data-volume/sample/honeycomb-refinery)) with the industry-standard **[OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)**. The goal is to send your application's telemetry data (traces, metrics, logs) to SigNoz instead of Honeycomb.
+
+The process involves four main stages:
+
+1. **Audit:** Documenting your current Honeycomb data collection and sampling rules.
+2. **Translate & Configure:** Creating a new configuration file (`config.yaml`) for the OpenTelemetry Collector that replicates your old setup but sends data to SigNoz.
+3. **Deploy & Validate:** Safely launching the new collector, running it alongside Honeycomb temporarily to ensure everything works.
+4. **Finalize:** Switching fully to SigNoz and decommissioning the old pipeline.
+
+This migration gives you a more flexible, vendor-neutral, and cost-effective observability pipeline.
+
+## Introduction: Why Migrate Your Pipeline?
+
+Migrating from Honeycomb to SigNoz starts with changing where your data is sent. The core of this migration is standardizing your data collection on the open-source **OpenTelemetry Collector**.
+
+While Honeycomb offers powerful tools, some are proprietary (part of the Honeycomb ecosystem). By moving to the OpenTelemetry Collector, you gain:
+
+- **Vendor Neutrality:** You are no longer locked into a specific vendor's tools. You can send data to any backend that supports OpenTelemetry.
+- **Full Control & Transparency:** Your entire configuration is managed in a single `config.yaml` file, which you can version control (e.g., with Git) and review.
+- **A Unified Standard:** OpenTelemetry is the emerging industry standard for observability, backed by a vast community.
+
+## Prerequisites
+
+Before you begin, please ensure you have the following ready. This will make the process much smoother.
+
+- **Access & Permissions:**
+      * Administrator access to your **[Honeycomb Account](https://ui.honeycomb.io/login)**.
+      * Administrator access to your **[SigNoz Account](https://signoz.io/docs/cloud/overview/%23creating-a-signoz-cloud-account)** (Cloud or self-hosted).
+      * Access to the infrastructure (e.g., Kubernetes, Docker, VMs) where your new OpenTelemetry Collector will run.
+- **Required Information & Tools:**
+      * Your **SigNoz Ingestion Key** and **Region-specific Endpoint**. You can find this in your SigNoz Cloud account under **Settings → Ingestion Settings**.
+      * A code editor for editing YAML files (e.g., [VS Code](https://code.visualstudio.com/)).
+- **Basic Knowledge:**
+      * A basic understanding of [YAML syntax](https://yaml.org/) is highly recommended.
+      * Familiarity with your application's architecture and where it emits telemetry data.
+
+## 🗺️ The Migration Playbook
+
+This playbook provides a structured, step-by-step approach to the migration.
+
+### Step 1: Audit Your Current Honeycomb Pipeline
+
+You cannot build the new pipeline without a blueprint of the old one.
+
+#### 1.1. Identify Your Ingestion Method
+
+Determine which Honeycomb tool you are using:
+
+- **[Honeycomb Telemetry Pipeline (HTP)](https://www.honeycomb.io/telemetry-pipeline):** A UI-driven pipeline manager.
+- **[Honeycomb Refinery](https://docs.honeycomb.io/manage-data-volume/sample/honeycomb-refinery/):** A self-hosted service used for advanced data sampling.
+- **A standard [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/):** If you already use this, your job is much easier\!
+
+#### 1.2. Document Your Configuration
+
+Log into your Honeycomb account and carefully record your settings.
+
+- **If using the HTP Manager UI:**
+
+      * Navigate to your Pipeline Manager.
+      * **Sources:** List all active data sources (e.g., Filelog, Prometheus, Host Metrics).
+      * **Processors:** Document all rules (e.g., Parse JSON, Add Fields, Filter by Field).
+
+- **If using Refinery:**
+
+      - Locate your Refinery configuration file.
+      - Document your **Dynamic Sampling** keys (e.g., `http.status_code`, `user.id`).
+      - List all **Rules-Based Sampling** logic (e.g., keep 100% of traces with errors).
+      - Record any **Throughput/Deterministic Sampling** rates.
+      - For reference, see [Honeycomb's Refinery Documentation](https://docs.honeycomb.io/manage-data-volume/refinery/).
+
+### Step 2: Map Honeycomb Components to OTel Equivalents
+
+Translate your documented Honeycomb components into their standard OpenTelemetry Collector equivalents.
+
+| Honeycomb Component      | OpenTelemetry Collector Equivalent                                                                                | Migration Insight                                                                                                                                              |
+| :----------------------- | :---------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTP Sources              | **[Receivers](https://opentelemetry.io/docs/collector/configuration/%23receivers)** | The OTel Collector has a huge library of receivers. HTP's "Host Metrics" maps to the `hostmetrics` receiver.                                                    |
+| HTP Processors           | **[Processors](https://opentelemetry.io/docs/collector/configuration/%23processors)** | UI-based logic like "Filter by Field" maps to OTel processors like the `filter` processor, configured in YAML.                                             |
+| Honeycomb Refinery       | **[`tail_sampling` Processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor)** | Refinery's sampling logic can be replicated using the powerful `tail_sampling` processor. You define policies to sample traces based on status, latency, etc. |
+
+### Step 3: Configure the OpenTelemetry Collector for SigNoz
+
+This is where you build your new `config.yaml` file.
+
+#### 3.1. Define Receivers
+
+Configure the `receivers` section based on your audit. For example, to collect host metrics and scrape a Prometheus endpoint:
+
+```yaml
+# config.yaml
+
+receivers:
+  # See docs: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+      network:
+
+  # See docs: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'my-application'
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['localhost:8080']
+```
+
+#### 3.2. Define Processors (Including Sampling)
+
+Configure the `processors` section. Always include the `batch` processor for performance.
+
+Here is a **more advanced `tail_sampling` configuration** that replicates a common Refinery setup:
+
+```yaml
+processors:
+  # The batch processor improves performance by grouping telemetry data.
+  # See docs: https://opentelemetry.io/docs/collector/configuration/#batch
+  batch:
+
+  # The tail_sampling processor makes sampling decisions after all spans for a trace have arrived.
+  # See docs: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor
+  tail_sampling:
+    decision_wait: 10s # How long to wait for all spans in a trace.
+    num_traces: 50000  # Max number of traces to hold in memory.
+    policies:
+      # Policy 1: ALWAYS keep traces with an error status.
+      - name: errors-policy
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+
+      # Policy 2: ALWAYS keep traces that are slower than 2 seconds.
+      - name: slow-traces-policy
+        type: latency
+        latency:
+          threshold_ms: 2000
+
+      # Policy 3: For all other traces, keep a random 20% sample.
+      - name: probabilistic-policy
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 20
+```
+
+#### 3.3. Configure the Exporter (The Critical Change)
+
+In the `exporters` section, remove the Honeycomb configuration and add the one for SigNoz.
+
+**For SigNoz Cloud:**
+
+```yaml
+exporters:
+  otlphttp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443" # <-- REPLACE <region> with your SigNoz region
+    headers:
+      "signoz-ingestion-key": "<YOUR_SIGNOZ_INGESTION_KEY>" # <-- REPLACE with your key
+```
+
+**For Self-Hosted SigNoz:**
+
+```yaml
+exporters:
+  otlp: # Use otlp (gRPC) for better performance in self-hosted environments
+    endpoint: "otel-collector.signoz.svc.cluster.local:4317" # <-- REPLACE with your SigNoz collector address
+    tls:
+      insecure: true # See security warning below
+```
+
+> **⚠️ Security Warning**
+> The self-hosted example uses `tls: {insecure: true}` for simplicity. This is **NOT suitable for production** as it sends data unencrypted. In a production environment, you must configure TLS by setting `insecure: false` and providing certificate details.
+> **Learn more:** [OTel Collector Exporter TLS Settings](https://opentelemetry.io/docs/collector/configuration/%23tls-configuration).
+
+#### 3.4. Enable the Pipeline
+
+Finally, in the `service` section, connect your components. The order of processors matters.
+
+```yaml
+service:
+  pipelines:
+    traces:
+      receivers: [otlp] # Add all trace receivers here
+      processors: [batch, tail_sampling] # Add processors in order
+      exporters: [otlphttp] # Point to your SigNoz exporter
+    metrics:
+      receivers: [hostmetrics, prometheus]
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+### Step 4: Deploy and Validate 
+
+#### 4.1. Deploy Gradually
+
+**Do not deploy to production first.** A safe strategy is **dual-shipping**:
+
+1. Add both the Honeycomb and SigNoz exporters to your `config.yaml`.
+2. Deploy this new collector to a staging or non-production environment.
+3. For a limited time, data will flow to **both** platforms. This allows you to validate the new pipeline without interrupting existing monitoring.
+
+#### 4.2. Validate in SigNoz
+
+Log in to your SigNoz instance to confirm that telemetry is being received as expected. Use the **Metrics Explorer** and **Traces Explorer** to get an immediate overview of all ingested data without needing to build dashboards first.
+
+-----
+
+## Post-Migration: Next Steps
+
+Your data is flowing to SigNoz. What now?
+
+1. **Re-create Dashboards:** Systematically rebuild your most important monitoring dashboards in SigNoz.
+2. **Configure Alerts:** Translate your Honeycomb triggers into [SigNoz's alerting rules](https://signoz.io/docs/userguide/alerts/). Start with your most critical P0/P1 alerts.
+3. **Team Training:** Onboard your team to the SigNoz UI.
+4. **Decommission Honeycomb:** After a period of stability (e.g., 1-2 weeks), you can safely remove the Honeycomb exporter from your OTel Collector configuration and begin the process of offboarding from Honeycomb.
+
+## Troubleshooting / Common Pitfalls
+
+| Problem                           | How to Fix                                                                                                                                                             |
+| :-------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Data Not Appearing in SigNoz** | 1. Check OTel Collector logs for connection errors. \<br\> 2. Double-check your SigNoz endpoint and ingestion key for typos. \<br\> 3. Ensure firewalls allow outbound traffic on port 443. |
+| **YAML is Invalid** | Use a [YAML Linter](https://onlineyamllint.com/) to check for syntax errors. The most common error is incorrect indentation.                                                 |
+| **High CPU/Memory on Collector** | `tail_sampling` can be memory-intensive. Ensure you set appropriate [resource limits and requests](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for the collector in your deployment configuration. |
+| **Mismatched Data vs. Honeycomb** | If data looks different, carefully review your processor configurations. A small logic difference in a `filter` or `transform` processor can have a big impact.           |
+
+## Next Steps
+- next steps
+  - Configure the Metrics
+  - Configure the Logs
+  - Configure the Traces
+  - Configure the Dashboards
+  - Configure Alerts
