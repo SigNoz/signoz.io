@@ -2464,9 +2464,21 @@ const docsSideNav = [
     ],
   },
   {
-    route: '/docs/community/llm-monitoring',
+    type: 'category',
+    isExpanded: false,
     label: 'LLM Monitoring',
-    type: 'doc',
+    items: [
+      {
+        route: '/docs/llm/opentelemetry-openai-monitoring',
+        label: 'OpenAI Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/community/llm-monitoring',
+        label: 'LLM Monitoring',
+        type: 'doc',
+      },
+    ],
   },
   {
     label: 'Community',
