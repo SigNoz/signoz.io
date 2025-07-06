@@ -1,6 +1,288 @@
 ---
 date: 2025-07-03
-id: alerts
+id: migrate-from-honeycomb-alerts
 title: Setting up alerts to send metrics to Signoz
 description: Document describing how to setup alerts
------
+---
+
+
+## Pre-Migration: Alert Inventory
+
+### 1. Document Existing Honeycomb Alerts
+Create a comprehensive inventory of your current alerts:
+
+```csv
+Alert Name,Trigger Condition,Threshold,Time Window,Notification Channel,Escalation Policy
+High Error Rate,COUNT() WHERE status_code >= 500,> 10,5 minutes,Slack #alerts,PagerDuty after 15min
+Response Time,P95(duration_ms) WHERE route != /health,> 2000ms,10 minutes,Email team-leads,Manager escalation
+Database Errors,COUNT() WHERE service.name = db AND error = true,> 5,2 minutes,PagerDuty,Immediate
+```
+
+### 2. Analyze Alert Patterns
+- **Event-based alerts**: Most Honeycomb alerts use event aggregation
+- **High-cardinality queries**: Complex WHERE clauses with multiple dimensions
+- **Custom thresholds**: Business logic embedded in queries
+
+## Alert Type Mapping
+
+### Honeycomb → SigNoz Translation Matrix
+
+| Honeycomb Pattern | SigNoz Equivalent | Type |
+|-------------------|-------------------|------|
+| `COUNT() WHERE status_code >= 500` | `rate(http_requests_total{status_code=~"5.."}[5m])` | Metric Alert |
+| `P95(duration_ms) WHERE service = "api"` | `histogram_quantile(0.95, http_request_duration_seconds{service="api"})` | Metric Alert |
+| `COUNT() WHERE error = true` | `rate(error_logs_total[5m])` | Logs Alert |
+| `EXISTS(trace.span_id) WHERE service = "payment"` | Trace-based alert using span metrics | Trace Alert |
+
+## Migration Steps
+
+### Step 1: Set Up Notification Channels
+
+Configure your notification channels in SigNoz first:
+
+**Slack Integration:**
+```yaml
+# Add to SigNoz alerting configuration
+receivers:
+  - name: 'slack-alerts'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts'
+        title: 'SigNoz Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+```
+
+**PagerDuty Integration:**
+```yaml
+receivers:
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
+        description: 'Critical alert from SigNoz'
+```
+
+📖 **Reference**: [SigNoz Notification Channels Documentation](https://signoz.io/docs/userguide/alerts-management/#notification-channels)
+
+### Step 2: Create Metric-Based Alerts
+
+**Example 1: HTTP Error Rate Alert**
+```yaml
+# Honeycomb: COUNT() WHERE status_code >= 500 > 10 in 5 minutes
+# SigNoz equivalent:
+groups:
+  - name: http_errors
+    rules:
+      - alert: HighHTTPErrorRate
+        expr: rate(http_requests_total{status_code=~"5.."}[5m]) > 10
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "High HTTP error rate detected"
+          description: "Error rate is {{ $value }} requests per second"
+```
+
+**Example 2: Response Time Alert**
+```yaml
+# Honeycomb: P95(duration_ms) WHERE service = "api" > 2000
+# SigNoz equivalent:
+- alert: HighResponseTime
+  expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service="api"}[5m])) > 2
+  for: 10m
+  labels:
+    severity: warning
+  annotations:
+    summary: "High response time on API service"
+    description: "95th percentile response time is {{ $value }}s"
+```
+
+### Step 3: Create Log-Based Alerts
+
+For alerts based on log patterns:
+
+```yaml
+# Honeycomb: COUNT() WHERE level = "ERROR" AND service = "payment" > 5
+# SigNoz logs alert:
+- alert: PaymentServiceErrors
+  expr: rate(logs_total{level="ERROR", service="payment"}[5m]) > 5
+  for: 2m
+  labels:
+    severity: critical
+  annotations:
+    summary: "High error rate in payment service"
+    description: "{{ $value }} errors per second in payment service"
+```
+
+📖 **Reference**: [SigNoz Logs-Based Alerts](https://signoz.io/docs/userguide/logs/#logs-based-alerts)
+
+### Step 4: Create Trace-Based Alerts
+
+For service availability and performance:
+
+```yaml
+# Alert on service latency from traces
+- alert: ServiceLatencyHigh
+  expr: histogram_quantile(0.99, rate(signoz_latency_bucket{service_name="user-service"}[5m])) > 1000
+  for: 5m
+  labels:
+    severity: warning
+  annotations:
+    summary: "High latency in user service"
+    description: "99th percentile latency is {{ $value }}ms"
+```
+
+### Step 5: Set Up Alert Routing
+
+Configure routing rules to send alerts to appropriate channels:
+
+```yaml
+route:
+  group_by: ['alertname', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default'
+  routes:
+    - match:
+        severity: critical
+      receiver: 'pagerduty-critical'
+    - match:
+        severity: warning
+      receiver: 'slack-alerts'
+    - match:
+        team: database
+      receiver: 'dba-team'
+```
+
+## Alert Configuration Best Practices
+
+### 1. Threshold Tuning
+- **Start conservative**: Begin with higher thresholds to avoid alert fatigue
+- **Use historical data**: Analyze SigNoz metrics to set appropriate baselines
+- **Implement gradual rollout**: Test alerts in non-production first
+
+### 2. Alert Naming Convention
+```yaml
+# Use consistent naming
+- alert: [Service][Metric][Condition]
+  # Examples:
+  # - APIHighErrorRate
+  # - DatabaseConnectionPoolExhausted
+  # - PaymentServiceHighLatency
+```
+
+### 3. Meaningful Annotations
+```yaml
+annotations:
+  summary: "Brief description of the issue"
+  description: "Detailed context with metric value: {{ $value }}"
+  runbook_url: "https://wiki.company.com/runbooks/{{ $labels.alertname }}"
+  dashboard_url: "https://signoz.company.com/dashboard/{{ $labels.service }}"
+```
+
+## Migration Validation
+
+### 1. Parallel Running
+Run both Honeycomb and SigNoz alerts simultaneously:
+- Monitor alert frequency comparison
+- Validate alert timing and accuracy
+- Check for missing or duplicate alerts
+
+### 2. Test Scenarios
+Create test scenarios to validate alerts:
+```bash
+# Generate test errors
+curl -X POST https://your-api.com/test-error-endpoint
+
+# Monitor both platforms for alert triggers
+# Compare alert timing and content
+```
+
+### 3. Alert Effectiveness Metrics
+Track these metrics during migration:
+- **Alert volume**: Number of alerts per day
+- **False positive rate**: Alerts without actionable issues
+- **Mean time to detection (MTTD)**: Time to alert on real issues
+- **Mean time to resolution (MTTR)**: Time from alert to resolution
+
+## Common Migration Challenges
+
+### 1. High-Cardinality Queries
+**Problem**: Honeycomb queries with many dimensions
+```sql
+-- Honeycomb
+COUNT() WHERE status_code >= 500 AND user_id EXISTS AND route != "/health"
+```
+
+**Solution**: Use metric labels efficiently in SigNoz
+```yaml
+# Break into multiple targeted alerts
+- alert: HighErrorRateExcludingHealth
+  expr: rate(http_requests_total{status_code=~"5..", route!="/health"}[5m]) > 10
+```
+
+### 2. Event-Based Logic
+**Problem**: Complex business logic in Honeycomb events
+**Solution**: 
+- Pre-aggregate in application code
+- Use SigNoz's computed metrics
+- Create custom metrics for complex business logic
+
+### 3. Dynamic Thresholds
+**Problem**: Honeycomb's dynamic sampling and thresholds
+**Solution**: Use SigNoz's alert templates with variables
+```yaml
+- alert: DynamicErrorRate
+  expr: rate(http_requests_total{status_code=~"5.."}[5m]) > on() group_left() (avg_over_time(http_requests_total[1h]) * 0.05)
+```
+
+## Testing and Validation Checklist
+
+- [ ] All critical alerts migrated and tested
+- [ ] Notification channels configured and tested
+- [ ] Alert routing rules validated
+- [ ] Runbook URLs updated
+- [ ] Team training completed
+- [ ] Escalation policies configured
+- [ ] Alert suppression rules set up
+- [ ] Dashboard links added to alerts
+- [ ] Historical data comparison completed
+- [ ] Performance impact assessed
+
+## Post-Migration Optimization
+
+### 1. Alert Tuning
+- Monitor alert frequency for first 2 weeks
+- Adjust thresholds based on false positive rates
+- Implement alert suppression during maintenance windows
+
+### 2. Advanced Features
+- **Alert dependencies**: Prevent cascade alerts
+- **Silence rules**: Temporary alert suppression
+- **Alert grouping**: Reduce noise during incidents
+
+📖 **Reference**: [SigNoz Advanced Alerting Features](https://signoz.io/docs/userguide/alerts-management/#advanced-alerting-features)
+
+## Rollback Plan
+
+Keep Honeycomb alerts active during migration:
+1. **Maintain parallel systems** for 2-4 weeks
+2. **Document rollback procedure**
+3. **Test rollback in staging environment**
+4. **Assign rollback decision maker**
+
+## Resources
+
+- [SigNoz Alerts Documentation](https://signoz.io/docs/userguide/alerts-management/)
+- [PromQL Query Language](https://prometheus.io/docs/prometheus/latest/querying/basics/)
+- [SigNoz Community Slack](https://signoz.io/slack)
+- [Alert Rule Examples Repository](https://github.com/SigNoz/signoz/tree/develop/examples/alerts)
+
+## Success Metrics
+
+Track these KPIs post-migration:
+- **Alert accuracy**: Reduced false positives
+- **Coverage**: All critical paths monitored
+- **Response time**: Faster incident detection
+- **Team satisfaction**: Improved debugging experience

@@ -1,6 +1,82 @@
 ---
 date: 2025-07-03
-id: dashboard
+id: migrate-from-honeycomb-dashboards
 title: Setting up dashboard on SigNoz
 description: Document describing how to setup a dashboard
------
+---
+
+### **Core Platform Differences**
+
+| Aspect | Honeycomb | SigNoz |
+| :--- | :--- | :--- |
+| **Data Philosophy** | Visualizations are built from raw, high-cardinality structured events. | Dashboards are primarily powered by pre-aggregated metrics (time-series data). |
+| **Querying** | Uses its own query language to aggregate event data on the fly. | Utilizes **ClickHouse Query Language (ClickQL)** for metrics and logs, and supports PromQL-style querying for metrics. |
+| **Visualizations** | Known for unique visualizations like `BubbleUp` for anomaly detection. | Offers a panel-based dashboard experience with standard charts like time series, bar charts, and tables. |
+| **Interactivity**| Strong focus on interactive, slice-and-dice data exploration. | Provides interactivity through dashboard variables for dynamic filtering. |
+
+### **Query Language Translation**
+
+Migrating dashboards requires translating Honeycomb's event-based queries into queries against metrics in SigNoz. This often involves using PromQL-like syntax on metrics generated from your telemetry data.
+
+| Use Case | Honeycomb Query | SigNoz Query (PromQL-style) |
+| :--- | :--- | :--- |
+| **Request Rate** | `COUNT()` | `sum(rate(signoz_calls_total[5m]))` |
+| **Error Rate** | `COUNT() WHERE status_code >= 500` | `sum(rate(signoz_calls_total{http_status_code=~"5.*"}[5m]))` |
+| **P95 Latency** | `P95(duration_ms)` | `histogram_quantile(0.95, sum(rate(signoz_latency_bucket[5m])) by (le))` |
+
+**Learn More:** [Querying in SigNoz using PromQL](https://signoz.io/docs/userguide/promql-in-signoz/)
+
+### **Dashboard Migration Strategy**
+
+A direct, one-to-one migration is often not possible due to platform differences. The recommended approach is to recreate dashboards by focusing on the underlying monitoring goals.
+
+#### **Step 1: Identify Key Performance Indicators (KPIs)**
+
+Review your Honeycomb dashboards and identify the essential KPIs you are monitoring (e.g., error rates, latency percentiles, request throughput).
+
+#### **Step 2: Build Panels in SigNoz**
+
+For each KPI, create a new panel on a SigNoz dashboard.
+
+  * **Request Rate:** Use a 'Time Series' or 'Stat' panel with a query like `sum(rate(signoz_calls_total{service_name="$service"}[5m]))`.
+  * **Error Rate (%):** Use a 'Time Series' or 'Stat' panel with a query like `sum(rate(signoz_calls_total{http_status_code=~"5.*"}[5m])) / sum(rate(signoz_calls_total[5m])) * 100`.
+  * **Latency:** Use a 'Time Series' panel to plot multiple percentiles.
+      * `histogram_quantile(0.99, sum(rate(signoz_latency_bucket[5m])) by (le, service_name))`
+      * `histogram_quantile(0.95, sum(rate(signoz_latency_bucket[5m])) by (le, service_name))`
+
+**Learn More:** [Creating Dashboards in SigNoz](https://signoz.io/docs/userguide/create-dashboard/)
+
+#### **Step 3: Implement Interactivity with Variables**
+
+Recreate Honeycomb's "slice-and-dice" capability by using dashboard variables. This allows users to filter the entire dashboard by dimensions like service name, region, or deployment environment.
+
+A common variable would be `service_name`, which you can define using the query: `label_values(signoz_calls_total, service_name)`.
+
+**Learn More:** [Using Dashboard Variables in SigNoz](https://signoz.io/docs/userguide/dashboard-variables/)
+
+#### **Step 4: Replicate "BubbleUp" with Drill-Down Links**
+
+While SigNoz doesn't have a direct "BubbleUp" equivalent, you can achieve a similar workflow:
+
+1.  **High-Level Dashboard:** Create a dashboard showing key service metrics.
+2.  **Drill-Down Links:** Configure panels to link to more detailed dashboards or to the Traces/Logs pages, passing along the relevant context (like service name and time range) as parameters.
+
+**Learn More:** [Configuring Data Links in Panels](https://signoz.io/docs/userguide/create-dashboard/%23data-links)
+
+### **Alerting Integration**
+
+Create alert rules directly from your dashboard panels.
+
+1.  Click the bell icon on a panel.
+2.  Define the alert conditions and thresholds based on your query.
+3.  Configure notification channels (e.g., Slack, PagerDuty).
+
+**Learn More:** [Creating Alerts from Dashboard Panels](https://signoz.io/docs/userguide/alerts-from-panel/)
+
+### **Migration Best Practices**
+
+  * **Focus on Intent:** Don't try to replicate Honeycomb's UI. Instead, focus on recreating the *monitoring capabilities* your team relies on.
+  * **Leverage Templates:** SigNoz comes with pre-built dashboard templates for common applications (e.g., Application Overview). Use these as a starting point.
+  * **Use Metrics for Dashboards:** Power your dashboards with metrics data, as it is optimized for fast querying over long time ranges.
+  * **Organize with Tags:** Use dashboard tags to organize your dashboards by team, service, or environment for easy discovery.
+  * **Train Your Team:** Familiarize your team with the new interface and the powerful correlation between metrics, traces, and logs that SigNoz provides.

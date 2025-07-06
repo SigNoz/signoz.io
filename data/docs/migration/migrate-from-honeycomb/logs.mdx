@@ -1,6 +1,165 @@
 ---
 date: 2025-07-03
-id: logs
+id: migrate-from-honeycomb-logs
 title: Setting up logs on SigNoz
 description: Document describing how to setup a logs
 -----
+
+## **Key Architectural Differences**
+
+| Aspect | Honeycomb | SigNoz |
+| :--- | :--- | :--- |
+| **Data Model** | Treats logs as structured, schema-free events. | Utilizes the OpenTelemetry (OTel) log model, linking logs with traces and metrics. |
+| **Collection** | Primarily uses Honeycomb's proprietary agents and SDKs (Beelines). | Employs the vendor-agnostic OpenTelemetry Collector for flexible data collection. |
+| **Correlation** | Correlates data based on event fields. | Offers automatic, out-of-the-box correlation between traces and logs. |
+| **Querying** | Uses its own query language on raw log events. | Enables querying of logs alongside traces and metrics for deeper insights. |
+
+-----
+
+## **Migration Strategies**
+
+You can migrate your logs to SigNoz using several methods. The recommended approach is to use the OpenTelemetry Collector, as it provides a robust and flexible pipeline for processing and forwarding your logs.
+
+### **1. Use the OpenTelemetry Collector**
+
+The OpenTelemetry Collector is the most versatile way to send logs to SigNoz. You can configure it to tail log files, receive data from various sources, process it, and export it to SigNoz.
+
+Here’s a basic configuration for tailing log files:
+
+```yaml
+# otel-collector-config.yaml
+receivers:
+  filelog:
+    include: ["/var/log/app/*.log"]
+    # Add operators to parse and structure your logs
+    operators:
+      - type: json_parser
+        parse_from: body
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "hot-otlp.qa.signoz.io:4317" # Replace with your SigNoz endpoint
+    tls:
+      insecure: true # Use insecure for local testing; configure TLS in production
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+**Learn More:** [Collecting Logs from Files with OpenTelemetry](https://www.google.com/search?q=https://signoz.io/docs/userguide/collecting-logs-from-files/)
+
+### **2. Instrument Your Application**
+
+You can also send logs directly from your application code using OpenTelemetry SDKs. This is especially powerful for enriching logs with application-specific context and ensuring strong correlation with traces.
+
+**Python Example:**
+
+```python
+import logging
+from opentelemetry.sdk.logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk.logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.grpc.logs_exporter import OTLPLogExporter
+from opentelemetry import logs
+
+# Initialize the LoggerProvider
+logger_provider = LoggerProvider()
+logs.set_logger_provider(logger_provider)
+
+# Configure the OTLP exporter
+exporter = OTLPLogExporter(endpoint="hot-otlp.qa.signoz.io:4317", insecure=True)
+logger_provider.add_log_record_processor(BatchLogRecordProcessor(exporter))
+
+# Attach the OTel handler to the root logger
+handler = LoggingHandler(logger_provider=logger_provider)
+logging.getLogger().addHandler(handler)
+logging.getLogger().setLevel(logging.INFO)
+
+# Log as usual
+logging.info("This is an informational message.")
+```
+
+**Learn More:** [Python Logs and Traces Correlation](https://signoz.io/docs/instrumentation/python/%23logs-and-traces-correlation)
+
+**Node.js Example with Winston:**
+
+```javascript
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
+const { BatchLogRecordProcessor } = require('@opentelemetry/sdk-logs');
+
+// Configure the OTLP Log Exporter
+const logExporter = new OTLPLogExporter({
+  url: 'http://<SigNoz-IP>:4318/v1/logs', // Use HTTP for this exporter
+});
+
+const logRecordProcessor = new BatchLogRecordProcessor(logExporter);
+
+const sdk = new NodeSDK({
+  // Other OTel configuration...
+});
+
+sdk.addLogRecordProcessor(logRecordProcessor);
+sdk.start();
+
+// Your application logs will now be sent to SigNoz
+const winston = require('winston');
+const logger = winston.createLogger({
+  transports: [
+    new winston.transports.Console(),
+  ],
+});
+
+logger.info("User logged in successfully.");
+```
+
+**Learn More:** [Node.js Logs Instrumentation](https://signoz.io/docs/instrumentation/nodejs/%23logs-instrumentation)
+
+-----
+
+## **Advanced Migration Considerations**
+
+  * **Structured Logging:** Transition from Honeycomb's event-based logging to structured logs in SigNoz. This involves creating a consistent and meaningful set of attributes for your logs.
+      * **Best Practices:** [Structured Logging with OpenTelemetry](https://signoz.io/docs/userguide/structured-logging/)
+  * **Trace-Log Correlation:** One of the biggest advantages of SigNoz is its ability to automatically correlate logs and traces. Ensure your OpenTelemetry instrumentation is correctly configured to see traces and their corresponding logs in a single view.
+      * **Learn More:** [SigNoz Traces to Logs Correlation](https://signoz.io/docs/userguide/traces-to-logs-correlation/)
+  * **Dual-Writing:** To minimize risk during the migration, you can implement a dual-write strategy. In this approach, your application sends logs to both Honeycomb and SigNoz simultaneously. Once you've validated the SigNoz setup, you can decommission the Honeycomb integration.
+  * **High-Cardinality Data:** Both Honeycomb and SigNoz handle high-cardinality data well. In SigNoz, these fields are stored as attributes, which are indexed and searchable.
+
+-----
+
+## **Migration Checklist**
+
+**Pre-Migration:**
+
+  * [ ] Analyze your current Honeycomb log queries to identify critical data.
+  * [ ] Define a structured logging schema for your applications.
+  * [ ] Set up and configure the OpenTelemetry Collector.
+
+**During Migration:**
+
+  * [ ] Instrument your applications with OpenTelemetry SDKs.
+  * [ ] (Optional) Implement a dual-write strategy to send logs to both platforms.
+  * [ ] Verify that logs are being received and correctly parsed in SigNoz.
+  * [ ] Confirm that trace-log correlation is working as expected.
+
+**Post-Migration:**
+
+  * [ ] Recreate your dashboards and alerts in SigNoz.
+  * [ ] Train your team on using the SigNoz query builder and log exploration features.
+  * [ ] Decommission your Honeycomb log collection.
+
+
+## Resources
+
+- [SigNoz Logs Documentation](https://signoz.io/docs/userguide/logs/)
+- [OpenTelemetry Logs Complete Guide](https://signoz.io/blog/opentelemetry-logs/)
+- [Collecting Logs from Files](https://signoz.io/docs/userguide/collect_logs_from_file/)
+- [Trace-Log Correlation](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/)
+- [Structured Logging Best Practices](https://signoz.io/blog/structured-logs/)

@@ -1,6 +1,237 @@
 ---
 date: 2025-07-03
-id: traces
+id: migrate-from-honeycomb-traces
 title: Setting up traces on SigNoz
 description: Document describing how to setup traces
------
+---
+
+## Data Model Comparison
+
+### Honeycomb: Event-Centric Model
+- **Structure**: Traces as collections of events with arbitrary key-value pairs
+- **Schema**: Flexible - any attribute can be added to any event
+- **Focus**: Optimized for high-cardinality analysis
+- **Relationships**: Parent-child via `trace_id` and `parent_id`
+
+### SigNoz: Span-Centric Model
+- **Structure**: Spans are fundamental building blocks of distributed tracing following OpenTelemetry specification
+- **Schema**: Standardized OpenTelemetry semantic conventions
+- **Focus**: Hierarchical span relationships with span context
+- **Relationships**: SpanContext carries key identifying details (trace ID, span ID, trace flags) across process boundaries
+
+## Trace Structure Examples
+
+### Honeycomb Event Format
+```json
+{
+  "trace.trace_id": "abc123",
+  "trace.span_id": "def456", 
+  "trace.parent_id": "ghi789",
+  "service.name": "api-service",
+  "http.method": "GET",
+  "http.url": "/api/users",
+  "duration_ms": 45,
+  "http.status_code": 200
+}
+```
+
+### SigNoz Span Format
+```json
+{
+  "traceId": "abc123",
+  "spanId": "def456",
+  "parentSpanId": "ghi789",
+  "operationName": "HTTP GET /api/users",
+  "startTime": "2024-01-01T12:00:00Z",
+  "duration": 45000000,
+  "tags": {
+    "http.method": "GET",
+    "http.url": "/api/users",
+    "http.status_code": 200
+  },
+  "process": {
+    "serviceName": "api-service"
+  }
+}
+```
+
+## Visualization Differences
+
+### Honeycomb Visualizations
+- **Bubble Charts**: Anomaly detection with outlier highlighting
+- **Heatmaps**: Latency distribution patterns
+- **BubbleUp**: Automatic anomaly detection
+- **Histograms**: Performance distribution analysis
+
+### SigNoz Visualizations
+- **Flame Graph**: Hierarchical representation showing nested span relationships
+- **Waterfall Chart**: Timeline view illustrating sequence and duration of spans
+- **Service Map**: Visual representation of service interactions and calls
+- **Trace Timeline**: Gantt chart visualization of trace execution
+
+## Migration Strategies
+
+### 1. Attribute Mapping
+
+| Honeycomb Field | SigNoz Field | Notes |
+|:---------------|:-------------|:------|
+| `trace.trace_id` | `traceId` | Direct mapping |
+| `trace.span_id` | `spanId` | Direct mapping |
+| `trace.parent_id` | `parentSpanId` | Direct mapping |
+| `service.name` | `process.serviceName` | Moved to process level |
+| `duration_ms` | `duration` | Convert to nanoseconds |
+
+### 2. Query Pattern Translation
+
+#### Error Rate Analysis
+```yaml
+# Honeycomb
+COUNT() WHERE http.status_code >= 500 / COUNT() * 100
+
+# SigNoz
+Filter: http.status_code >= 500
+Metric: Error rate percentage
+```
+
+#### Latency Percentiles
+```yaml
+# Honeycomb
+P95(duration_ms) WHERE service.name = 'api-service'
+
+# SigNoz
+Service: api-service
+Aggregation: P95 latency
+```
+
+### 3. Instrumentation Updates
+
+#### Python Example
+```python
+# Honeycomb
+import beeline
+beeline.add_field("user.id", "user123")
+beeline.add_field("business.tier", "premium")
+
+# SigNoz (OpenTelemetry)
+from opentelemetry import trace
+span = trace.get_current_span()
+span.set_attribute("user.id", "user123")
+span.set_attribute("business.tier", "premium")
+```
+
+## Key Feature Mappings
+
+### Honeycomb Features → SigNoz Equivalents
+
+| Honeycomb Feature | SigNoz Equivalent | Migration Notes |
+|:-----------------|:------------------|:----------------|
+| **BubbleUp** | Manual trace filtering | Use [trace filters](https://signoz.io/docs/userguide/traces/) to identify outliers |
+| **Heatmaps** | Latency percentile charts | Use service overview dashboards |
+| **Slice and Dice** | Trace explorer filters | Filter and inspect traces for detailed insights |
+| **Markers** | Dashboard annotations | Add deployment markers to dashboards |
+
+### Advanced Analysis
+
+#### Honeycomb Dynamic Queries
+```sql
+-- Complex grouping and filtering
+COUNT() WHERE service.name = 'api' 
+AND http.status_code >= 400 
+GROUP BY user.tier, http.endpoint
+```
+
+#### SigNoz Approach
+```yaml
+# Use trace explorer with multiple filters
+Filters:
+  - service.name = 'api'
+  - http.status_code >= 400
+Group by: user.tier, http.route
+```
+
+## Migration Validation Steps
+
+### Data Validation
+- [ ] **Trace Completeness**: Verify all spans are captured
+- [ ] **Timing Accuracy**: Compare duration and sequence in waterfall charts
+- [ ] **Service Dependencies**: Validate service interactions in service map
+- [ ] **Error Traces**: Ensure error spans are properly identified
+
+### Query Validation
+- [ ] **Latency Percentiles**: Compare P95/P99 values
+- [ ] **Error Rates**: Validate error percentage calculations
+- [ ] **Throughput**: Verify request count accuracy
+- [ ] **Service Performance**: Check service-level metrics
+
+## Common Migration Challenges
+
+### 1. High-Cardinality Analysis
+**Challenge**: Honeycomb's strength in arbitrary attribute combinations  
+**Solution**: Use SigNoz's trace filtering and attribute-based grouping
+
+### 2. BubbleUp Replacement
+**Challenge**: No automatic anomaly detection  
+**Solution**: Create custom dashboards with outlier detection using percentile comparisons
+
+### 3. Flexible Schema
+**Challenge**: Honeycomb's arbitrary field addition  
+**Solution**: Use OpenTelemetry's structured attributes with semantic conventions
+
+### 4. Team Workflow Changes
+**Challenge**: Different debugging approaches  
+**Solution**: Train team on flame graphs for identifying performance bottlenecks
+
+## Best Practices
+
+### 1. Instrumentation Strategy
+- Follow [OpenTelemetry semantic conventions](https://signoz.io/docs/instrumentation/overview/)
+- Use structured attribute naming
+- Implement consistent service naming
+
+### 2. Dashboard Migration
+- Start with service overview dashboards
+- Utilize synchronized flame graph and waterfall views
+- Create custom panels for business metrics
+
+### 3. Alerting Migration
+- Convert Honeycomb triggers to SigNoz alerts
+- Focus on error rate and latency SLIs
+- Set up trace-log correlation for debugging
+
+## Performance Optimization
+
+### SigNoz Advantages
+- **ClickHouse backend**: Optimized for analytical queries
+- **Columnar storage**: Fast aggregations and filtering
+- **Out-of-the-box dashboards**: P99 latency and error-rate dashboards
+
+### Optimization Tips
+- Configure appropriate sampling rates
+- Use trace retention policies effectively
+- Optimize dashboard queries for performance
+
+## Post-Migration Checklist
+
+### Immediate Actions
+- [ ] Verify trace ingestion in SigNoz
+- [ ] Recreate critical dashboards
+- [ ] Set up essential alerts
+- [ ] Train team on new interface
+
+### Long-term Optimization
+- [ ] Leverage service maps for dependency analysis
+- [ ] Implement trace sampling strategies
+- [ ] Set up automated SLO monitoring
+- [ ] Create runbooks for common debugging scenarios
+
+## Resources
+
+- [SigNoz Traces Documentation](https://signoz.io/docs/userguide/traces/)
+- [OpenTelemetry Spans Guide](https://signoz.io/blog/opentelemetry-spans/)
+- [Flame Graphs Tutorial](https://signoz.io/blog/flamegraphs/)
+- [Service Map Guide](https://signoz.io/docs/userguide/service-map/)
+- [Trace-Log Correlation](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/)
+
+---
+
+*Migration success depends on understanding the shift from Honeycomb's event-centric model to SigNoz's structured span-centric approach. Focus on leveraging SigNoz's flame graphs and service maps for enhanced debugging capabilities.*

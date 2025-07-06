@@ -1,0 +1,239 @@
+---
+date: 2025-05-06
+id: migrate-from-honeycomb-metrics
+title: Migrate metrics from Honeycomb to SigNoz
+description: A comprehensive guide for translating alerting mechanisms and configurations from Honeycomb to SigNoz.
+---
+# Honeycomb to SigNoz Metrics Migration Guide
+
+A concise guide for migrating metrics from Honeycomb to SigNoz, focusing on architectural differences and practical implementation.
+
+## Platform Architecture Overview
+
+### Honeycomb
+- **Event-based**: Metrics as structured events with arbitrary fields
+- **Query-time aggregation**: Metrics computed from raw events during queries
+- **High-cardinality native**: Unlimited dimensional data support
+- **Schema flexibility**: Varying event structures
+
+### SigNoz
+- **OpenTelemetry native**: SigNoz is native to OpenTelemetry with metrics in a single application
+- **ClickHouse storage**: Time-series storage with compression
+- **Pre-aggregation**: Metrics aggregated at ingestion time
+- **Structured schema**: OpenTelemetry semantic conventions
+
+## Key Differences
+
+| Aspect | Honeycomb | SigNoz |
+|--------|-----------|--------|
+| **Data Model** | Events with arbitrary fields | OpenTelemetry metrics with labels |
+| **Storage** | Column-oriented events | ClickHouse time-series |
+| **Cardinality** | Unlimited | High-cardinality with aggregations supported |
+| **Query Language** | Honeycomb query syntax | PromQL + SQL |
+| **Aggregation** | Query-time | Ingestion-time |
+
+## Migration Implementation
+
+### 1. OpenTelemetry Metrics Setup
+
+**Reference**: [SigNoz OpenTelemetry Metrics Guide](https://signoz.io/blog/introduction-to-opentelemetry-metrics/)
+
+```python
+from opentelemetry import metrics
+from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+
+# Configure OTLP exporter
+exporter = OTLPMetricExporter(
+    endpoint="http://signoz-otel-collector:4317",
+    insecure=True
+)
+
+# Set up meter provider
+meter_provider = MeterProvider(
+    metric_readers=[
+        PeriodicExportingMetricReader(
+            exporter=exporter,
+            export_interval_millis=5000
+        )
+    ]
+)
+metrics.set_meter_provider(meter_provider)
+
+# Create meter
+meter = metrics.get_meter("my-service")
+```
+
+### 2. Metric Type Conversion
+
+#### Counters
+```python
+# Before (Honeycomb)
+beeline.add_context({"event_type": "request", "status": "success"})
+
+# After (SigNoz)
+request_counter = meter.create_counter(
+    name="http_requests_total",
+    description="Total HTTP requests"
+)
+request_counter.add(1, {"status": "success"})
+```
+
+#### Histograms
+```python
+# Before (Honeycomb)
+beeline.add_context({"response_time_ms": 150})
+
+# After (SigNoz)
+response_time = meter.create_histogram(
+    name="http_request_duration_ms",
+    description="HTTP request duration"
+)
+response_time.record(150, {"endpoint": "/api/users"})
+```
+
+#### Gauges
+```python
+# Before (Honeycomb)
+beeline.add_context({"active_connections": 42})
+
+# After (SigNoz)
+connections_gauge = meter.create_up_down_counter(
+    name="active_connections",
+    description="Active connection count"
+)
+connections_gauge.add(1)  # increment
+```
+
+### 3. Cardinality Management
+
+**Important**: While SigNoz supports high-cardinality data, follow these practices:
+
+```python
+# Good: Low-cardinality labels
+labels = {
+    "service.name": "api-service",
+    "http.method": "POST",
+    "http.status_code": "200",
+    "region": "us-west-2"
+}
+
+# Avoid: High-cardinality in labels
+# Don't use user_id, session_id, request_id as labels
+
+# Use exemplars for high-cardinality data
+exemplar = {
+    "trace_id": trace_id,
+    "span_id": span_id,
+    "user_id": user_id
+}
+```
+
+### 4. Dual-Write Pattern for Migration
+
+```python
+class MetricsMigrator:
+    def __init__(self):
+        self.honeycomb_enabled = True
+        self.signoz_enabled = True
+        
+        if self.signoz_enabled:
+            self.meter = metrics.get_meter("migration-service")
+            self.request_counter = self.meter.create_counter("requests_total")
+            self.response_time = self.meter.create_histogram("response_time_ms")
+    
+    def record_request(self, method, status_code, duration_ms, **context):
+        # Honeycomb event
+        if self.honeycomb_enabled:
+            beeline.add_context({
+                "http.method": method,
+                "http.status_code": status_code,
+                "duration_ms": duration_ms,
+                **context
+            })
+        
+        # SigNoz metrics
+        if self.signoz_enabled:
+            labels = {
+                "http.method": method,
+                "http.status_code": str(status_code),
+                "service.name": context.get("service.name", "unknown")
+            }
+            self.request_counter.add(1, labels)
+            self.response_time.record(duration_ms, labels)
+```
+
+## Query Migration Examples
+
+### Error Rate Calculation
+```python
+# Honeycomb Query
+# COUNT() WHERE status_code >= 400 / COUNT() * 100
+
+# SigNoz PromQL
+# (rate(http_requests_total{status_code=~"4.."}[5m]) / rate(http_requests_total[5m])) * 100
+```
+
+### Percentile Queries
+```python
+# Honeycomb Query
+# P95(response_time_ms) WHERE service.name = "api-service"
+
+# SigNoz PromQL
+# histogram_quantile(0.95, rate(http_request_duration_ms_bucket{service_name="api-service"}[5m]))
+```
+
+## Migration Checklist
+
+### Pre-Migration
+- [ ] Audit existing Honeycomb metrics usage
+- [ ] Map events to OpenTelemetry metric types
+- [ ] Design label schema (avoid high-cardinality)
+- [ ] Set up SigNoz instance with adequate storage
+
+### During Migration
+- [ ] Configure OpenTelemetry metrics pipeline
+- [ ] Implement dual-write pattern
+- [ ] Validate data consistency between platforms
+- [ ] Monitor ClickHouse storage usage
+- [ ] Convert dashboards and alerts
+
+### Post-Migration
+- [ ] Verify query performance
+- [ ] Optimize retention policies
+- [ ] Train team on PromQL
+- [ ] Sunset Honeycomb integration
+
+## Common Pitfalls
+
+1. **Cardinality Explosion**: Avoid using unique identifiers as labels
+2. **Missing Data**: Verify OTLP collector configuration and sampling rates
+3. **Query Performance**: Use appropriate time ranges and optimize PromQL
+4. **Storage Growth**: Monitor ClickHouse storage consumption
+
+## Best Practices
+
+1. **Start Small**: Migrate one service at a time
+2. **Validate Early**: Compare query results between platforms
+3. **Monitor Resources**: ClickHouse setup uses significantly less memory
+4. **Use Exemplars**: Store high-cardinality data as exemplars, not labels
+5. **Leverage Correlation**: Enable correlation between metrics, traces, and logs
+
+## Resources
+
+- [SigNoz OpenTelemetry Metrics Introduction](https://signoz.io/blog/introduction-to-opentelemetry-metrics/)
+- [SigNoz Documentation](https://signoz.io/docs/)
+- [OpenTelemetry Metrics Specification](https://opentelemetry.io/docs/specs/otel/metrics/)
+- [ClickHouse Integration Guide](https://signoz.io/docs/integrations/clickhouse/)
+
+## Conclusion
+
+Migration from Honeycomb to SigNoz requires understanding the shift from event-based to time-series metrics. Key success factors:
+
+1. **Architectural Understanding**: Event-based vs time-series approach
+2. **Cardinality Management**: Balance richness with performance
+3. **Gradual Migration**: Use dual-write pattern for validation
+4. **Team Training**: Adapt to OpenTelemetry standards and PromQL
+
+The migration provides benefits of standardization, better performance, and unified observability while requiring careful planning around data model differences.
