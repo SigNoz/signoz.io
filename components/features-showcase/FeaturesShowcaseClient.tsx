@@ -5,6 +5,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { FEATURES_SHOWCASE, type FeatureShowcase } from './data'
 import { VideoPlayer } from './VideoPlayer'
 import TrackingLink from '../TrackingLink'
+import TrackingButton from '../TrackingButton'
 import Button, { BUTTON_TYPES } from '../Button/Button'
 
 interface FeaturesShowcaseClientProps {
@@ -33,9 +34,13 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
       <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-signoz_slate-400/20 mb-8 overflow-x-auto">
         <div className="flex min-w-max gap-2 pb-2">
           {allFeatures.map((feature) => (
-            <button
+            <TrackingButton
               key={feature.id}
               onClick={() => handleTabClick(feature.id)}
+              clickType="Feature Tab"
+              clickName={feature.title}
+              clickLocation="Features Showcase"
+              clickText={feature.title}
               className={`flex-shrink-0 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-all ${
                 activeTab === feature.id
                   ? 'bg-signoz_sienna-100 text-gray-800'
@@ -43,7 +48,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
               }`}
             >
               {feature.title}
-            </button>
+            </TrackingButton>
           ))}
         </div>
       </div>
