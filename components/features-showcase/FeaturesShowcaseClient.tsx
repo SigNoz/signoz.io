@@ -90,7 +90,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
         </div>
 
         {/* All CTAs - Bottom Left of entire component */}
-        <div className="absolute bottom-4 left-4 flex items-center gap-3">
+        <div className="absolute bottom-8 left-6 flex items-center gap-3">
           {/* Tech Icons */}
           {activeFeature.techIcons.slice(0, 5).map((tech, index) => {
             const iconElement = (
