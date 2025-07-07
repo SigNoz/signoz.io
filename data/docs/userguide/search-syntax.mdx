@@ -108,6 +108,100 @@ condition1 AND condition2 OR condition3
 | `REGEXP` | Regular expression match (RE2 syntax) | `email REGEXP "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"` |
 | `NOT REGEXP` | Doesn't match regex (RE2 syntax) | `path NOT REGEXP "^/api/v1"` |
 
+
+### Operators and Field Existence
+
+This section describes how operators handle missing fields. Not all records contain every field. Understanding how operators behave with missing fields is crucial for accurate queries.
+
+#### Positive Operators (Automatically Check Field Exists)
+
+These operators **only match logs where the field exists**:
+
+| Operator | Behavior | Example |
+|----------|----------|---------|
+| `=`, `==` | Field must exist AND equal value | `service.name = "api"` |
+| `>`, `>=`, `<`, `<=` | Field must exist AND meet condition | `response_time > 500` |
+| `LIKE`, `ILIKE` | Field must exist AND match pattern | `message LIKE "%error%"` |
+| `BETWEEN` | Field must exist AND be in range | `latency BETWEEN 100 AND 500` |
+| `IN` | Field must exist AND be in set | `region IN ("us-east", "us-west")` |
+| `CONTAINS` | Field must exist AND contain text | `body CONTAINS "timeout"` |
+| `REGEXP` | Field must exist AND match regex | `email REGEXP ".*@company.com"` |
+
+**Example:**
+```
+response_time > 500
+```
+Matches: Logs with response_time field AND value > 500  
+Skips: Logs without response_time field
+
+#### Negative Operators (Do NOT Check Field Exists)
+
+These operators match **all logs except those with the specified value** (including logs missing the field):
+
+| Operator | Behavior | Example |
+|----------|----------|---------|
+| `!=`, `<>` | Match if field doesn't exist OR value differs | `status != "error"` |
+| `NOT LIKE`, `NOT ILIKE` | Match if field doesn't exist OR pattern doesn't match | `message NOT LIKE "%debug%"` |
+| `NOT BETWEEN` | Match if field doesn't exist OR value outside range | `latency NOT BETWEEN 100 AND 500` |
+| `NOT IN` | Match if field doesn't exist OR value not in set | `region NOT IN ("eu-west")` |
+| `NOT CONTAINS` | Match if field doesn't exist OR doesn't contain text | `body NOT CONTAINS "success"` |
+| `NOT REGEXP` | Match if field doesn't exist OR doesn't match regex | `path NOT REGEXP "^/api"` |
+
+**Example:**
+```
+service.name != "redis"
+```
+Matches: 
+- Logs where service.name = "api", "auth", etc.
+- Logs that don't have a service.name field at all
+
+Skips: Only logs where service.name = "redis"
+
+### Common Scenarios
+
+#### Scenario 1: Find All Non-Redis Services
+**Wrong approach:**
+```
+service.name != "redis"
+```
+This includes logs without any service name!
+
+**Correct approach:**
+```
+service.name EXISTS AND service.name != "redis"
+```
+This only includes logs that have a service name (and it's not "redis")
+
+#### Scenario 2: Find Logs Without Errors
+**Ambiguous:**
+```
+error_level != "ERROR"
+```
+This includes logs that don't even have an error_level field!
+
+**Clear intent - exclude ERROR level only:**
+```
+error_level EXISTS AND error_level != "ERROR"
+```
+
+**Clear intent - find logs explicitly marked as non-error:**
+```
+error_level IN ("INFO", "WARN", "DEBUG")
+```
+
+#### Scenario 3: Find Failed Requests
+**Good:**
+```
+status_code >= 400
+```
+Only matches logs that have a status_code field with error values
+
+**Be careful with:**
+```
+status_code NOT BETWEEN 200 AND 399
+```
+This would include logs without any status_code field!
+
 ### Boolean Operators
 
 - `AND`: Both conditions must be true

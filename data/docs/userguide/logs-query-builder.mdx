@@ -1,0 +1,706 @@
+# Logs Query Builder Documentation
+
+The Logs Query Builder provides a structured interface for constructing queries to analyze your log data. This guide covers each component of the query builder interface with practical examples.
+
+## Overview
+
+The query builder consists of several key sections:
+
+1. Filter Expression (WHERE clause)
+2. Aggregation Functions
+3. Aggregation Interval
+4. Group By
+5. Having Clause
+6. Order By
+7. Limit
+
+## Sample Dataset (5 minutes of logs)
+
+We will use the following dataset throught this doc to show examples.
+
+| timestamp | service.name | status_code | response_time_ms | user_id | severity_text | bytes_sent | endpoint | body |
+|-----------|---------|-------------|------------------|---------|-------------|------------|----------|------|
+| 14:00:12 | auth | 200 | 45 | user_123 | INFO | 1024 | /login | User user_123 successfully authenticated from IP 192.168.1.45 |
+| 14:00:23 | auth | 401 | 12 | user_456 | ERROR | 512 | /login | Authentication failed for user_456: invalid credentials |
+| 14:00:34 | api | 200 | 230 | user_123 | INFO | 4096 | /products | Retrieved 25 products for category: electronics |
+| 14:00:45 | api | 500 | 890 | user_789 | ERROR | 256 | /checkout | Internal server error: database connection timeout while processing payment |
+| 14:00:56 | cdn | 200 | 15 | user_123 | INFO | 8192 | /images | Served image product_thumb_42.jpg from cache |
+| 14:01:07 | api | 200 | 340 | user_456 | INFO | 2048 | /products | Product search completed with 12 results for query: laptop |
+| 14:01:18 | auth | 200 | 67 | user_111 | INFO | 1024 | /login | Login successful for user_111 using SSO provider: google |
+| 14:01:29 | api | 503 | 1200 | user_222 | ERROR | 128 | /payment | Service unavailable: payment gateway connection refused |
+| 14:01:40 | cdn | 304 | 8 | user_789 | INFO | 0 | /assets | Not modified: style.css already cached by client |
+| 14:01:51 | api | 200 | 156 | user_333 | INFO | 3072 | /search | Search query "wireless headphones" returned 34 results |
+| 14:02:02 | auth | 403 | 23 | user_444 | ERROR | 512 | /admin | Access denied: user_444 lacks admin privileges |
+| 14:02:13 | api | 200 | 445 | user_123 | INFO | 4096 | /products | Fetched product details for SKU: PROD-789-XL |
+| 14:02:24 | cdn | 200 | 12 | user_555 | INFO | 16384 | /videos | Streaming video chunk 1/50 for tutorial_intro.mp4 |
+| 14:02:35 | api | 429 | 5 | user_666 | ERROR | 256 | /api/rate | Rate limit exceeded: 105 requests in 60 seconds |
+| 14:02:46 | auth | 200 | 89 | user_777 | INFO | 1024 | /logout | User user_777 logged out, session terminated |
+| 14:02:57 | api | 200 | 267 | user_888 | INFO | 2048 | /users | User profile updated: email changed to new@example.com |
+| 14:03:08 | cdn | 404 | 3 | user_999 | ERROR | 256 | /missing | File not found: legacy/old_banner.gif |
+| 14:03:19 | api | 200 | 178 | user_123 | INFO | 3072 | /profile | Retrieved user profile with 5 recent orders |
+| 14:03:30 | auth | 200 | 56 | user_111 | INFO | 1024 | /refresh | JWT token refreshed, expires in 3600 seconds |
+| 14:03:41 | api | 502 | 2100 | user_222 | ERROR | 128 | /external | Bad gateway: upstream server timeout connecting to inventory service |
+| 14:03:52 | cdn | 200 | 18 | user_333 | INFO | 32768 | /download | File download completed: report_2024_q4.pdf |
+| 14:04:03 | api | 200 | 299 | user_444 | INFO | 4096 | /cart | Added item PROD-456 to cart, total items: 3 |
+| 14:04:14 | auth | 200 | 78 | user_555 | INFO | 1024 | /login | Multi-factor authentication completed successfully |
+| 14:04:25 | api | 200 | 412 | user_666 | INFO | 2048 | /orders | Order #ORD-12345 created with 2 items, total: $156.78 |
+| 14:04:36 | cdn | 200 | 22 | user_777 | INFO | 8192 | /static | Served bundle.js with gzip compression |
+| 14:04:47 | api | 408 | 5000 | user_888 | ERROR | 0 | /timeout | Request timeout: operation exceeded 5 second limit |
+| 14:04:58 | auth | 200 | 91 | user_999 | INFO | 1024 | /profile | Profile view: user settings page accessed |
+| 14:05:09 | api | 200 | 234 | user_123 | INFO | 3072 | /search | Advanced search with filters: price < 100, rating > 4 |
+| 14:05:20 | cdn | 200 | 14 | user_111 | INFO | 16384 | /media | Video thumbnail generated for upload_2024_1128.mov |
+| 14:05:31 | api | 200 | 189 | user_222 | INFO | 2048 | /products | Browsing products in category: home-and-garden, page 2 |
+
+# Filter Expression
+
+The filter expression allows you to specify conditions to filter your log data. This acts as the WHERE clause in your query.
+
+## Basic Comparisons
+
+```
+service.name = "api"                    # Exact match (15 logs)
+status_code != 200                      # Not equal (9 logs)
+response_time_ms > 1000                 # Greater than (3 logs)
+response_time_ms BETWEEN 100 AND 500    # Range (10 logs)
+```
+
+## String Matching
+
+```
+body LIKE "%timeout%"      # Case-sensitive pattern (3 logs)
+body ILIKE "%error%"       # Case-insensitive (8 logs)
+endpoint NOT LIKE "/api%"  # Exclude pattern (29 logs)
+```
+
+## Multiple Values
+
+```
+service.name IN ("api", "auth")         # Match any value (23 logs)
+status_code NOT IN (200, 304)           # Exclude values (8 logs)
+```
+
+## Combining Conditions
+
+```
+# AND - both conditions must be true
+service.name = "api" AND status_code >= 400    # API errors (5 logs)
+
+# OR - at least one condition must be true  
+status_code = 401 OR status_code = 403         # Auth failures (2 logs)
+
+# Complex - use parentheses for grouping
+(service.name = "api" OR service.name = "cdn") AND severity_text = "ERROR"
+```
+
+## Advanced Operators
+
+```
+bytes_sent EXISTS                       # Field exists
+body CONTAINS "payment"                 # Contains substring (2 logs)
+endpoint REGEXP "^/products.*"          # Regex pattern (4 logs)
+```
+
+## Full-Text Search
+
+```
+"database connection timeout"           # Exact phrase (1 log)
+payment gateway                         # All words (AND logic)
+```
+
+Learn more about the search syntax [here](/docs/userguide/search-syntax)
+
+## 2. Aggregation operators
+
+The aggregations input allows you to perform calculations on your filtered data.
+
+### Available Operators
+
+#### Basic Aggregations
+
+- **count()** - Count the number of log entries
+- **count_distinct(field1, [field2, field3])** - Count unique values (or value groups)
+- **sum(field)** - Sum numeric values
+- **avg(field)** - Calculate average
+- **min(field)** - Find minimum value
+- **max(field)** - Find maximum value
+
+#### Percentiles
+
+- **p05(field)** - 5th percentile
+- **p10(field)** - 10th percentile
+- **p20(field)** - 20th percentile
+- **p25(field)** - 25th percentile
+- **p50(field)** - 50th percentile (median)
+- **p90(field)** - 90th percentile
+- **p95(field)** - 95th percentile
+- **p99(field)** - 99th percentile
+
+#### Rate
+
+- **rate()** - Calculate rate per time interval
+- **rate_sum(field)** - Sum rate per interval
+- **rate_avg(field)** - Average rate per interval
+- **rate_min(field)** - Min rate per interval
+- **rate_max(field)** - Max rate per interval
+
+### Examples
+
+## Basic Aggregations
+
+### count() - Count the number of log entries
+```
+Query: count()
+Result: 30
+```
+*Counts all 30 log entries in the dataset*
+
+### count() with filter
+```
+Filter: status_code >= 400
+Query: count()
+Result: 8
+```
+*Counts only error responses (401, 403, 404, 408, 429, 500, 502, 503)*
+
+### count_distinct(field) - Count unique values
+```
+Query: count_distinct(user_id)
+Result: 12
+```
+*12 unique users (user_123, user_456, user_789, user_111, user_222, user_333, user_444, user_555, user_666, user_777, user_888, user_999)*
+
+### count_distinct with multiple fields
+```
+Query: count_distinct(service.name, status_code)
+Result: 11
+```
+*Unique combinations: (auth,200), (auth,401), (auth,403), (api,200), (api,408), (api,429), (api,500), (api,502), (api,503), (cdn,200), (cdn,304), (cdn,404)*
+
+### sum(field) - Sum numeric values
+```
+Query: sum(bytes_sent)
+Result: 113,920 bytes
+```
+*Total bytes sent across all requests*
+
+### avg(field) - Calculate average
+```
+Query: avg(response_time_ms)
+Result: 452.7 ms
+```
+*Average response time across all requests: 13,581 / 30 = 452.7*
+
+### min(field) / max(field) - Find minimum/maximum values
+```
+Query: min(response_time_ms)
+Result: 3 ms
+
+Query: max(response_time_ms)
+Result: 5000 ms
+```
+
+## Percentile Functions
+
+### p50(field) - 50th percentile (median)
+```
+Query: p50(response_time_ms)
+Result: 156 ms
+```
+*Half of the requests completed in 156ms or less*
+
+### p90(field) - 90th percentile
+```
+Query: p90(response_time_ms)
+Result: 1200 ms
+```
+*90% of requests completed in 1200ms or less*
+
+### p95(field) - 95th percentile
+```
+Query: p95(response_time_ms)
+Result: 2100 ms
+```
+*95% of requests completed in 2100ms or less*
+
+### p99(field) - 99th percentile
+```
+Query: p99(response_time_ms)
+Result: 5000 ms
+```
+*99% of requests completed in 5000ms or less*
+
+## Rate Functions
+
+### rate() - Calculate rate per time interval
+```
+Query: rate()
+Result: 0.1 requests/second
+```
+*30 requests over 300 seconds = 0.1 requests/second*
+
+### rate() with filter - Error rate
+```
+Filter: status_code >= 400
+Query: rate()
+Result: 0.0267 errors/second
+```
+*8 errors over 300 seconds = 0.0267 errors/second*
+
+### rate_sum(field) - Sum rate per interval
+```
+Query: rate_sum(bytes_sent)
+Result: 379.73 bytes/second
+```
+*113,920 bytes over 300 seconds = 379.73 bytes/second*
+
+### rate_avg(field) - Average rate per interval
+```
+Filter: service.name = "api"
+Query: rate_avg(response_time_ms)
+Result: 596.1 ms average response time
+```
+*Average response time for API service: 8,941ms / 15 requests = 596.1ms*
+
+## Practical Use Cases with Group By
+
+### Service Performance Analysis
+```
+Aggregation: avg(response_time_ms)
+Group By: service.name
+Results:
+- api: 596.1 ms (8,941ms / 15 requests)
+- auth: 58.9 ms (471ms / 8 requests)
+- cdn: 14.1 ms (99ms / 7 requests)
+```
+
+### Error Distribution
+```
+Filter: status_code >= 400
+Aggregation: count()
+Group By: service.name, status_code
+Results:
+- api: 500 (1), 502 (1), 503 (1), 408 (1), 429 (1)
+- auth: 401 (1), 403 (1)
+- cdn: 404 (1)
+```
+
+### Top Users by Traffic
+```
+Aggregation: sum(bytes_sent)
+Group By: user_id
+Order By: sum(bytes_sent) DESC
+Limit: 5
+Results:
+1. user_333: 35,840 bytes (3,072 + 32,768)
+2. user_111: 34,432 bytes (1,024 + 16,384 + 16,384)  
+3. user_777: 17,216 bytes (1,024 + 8,192)
+4. user_555: 17,408 bytes (16,384 + 1,024)
+5. user_123: 15,360 bytes (1,024 + 4,096 + 8,192 + 4,096 + 3,072)
+```
+
+### Service Reliability (Success Rate)
+```
+Filter: status_code < 400
+Aggregation: count()
+Group By: service.name
+Having: count() > 0
+Results:
+- cdn: 6/7 = 85.7% successful (304 is not an error)
+- auth: 6/8 = 75.0% successful
+- api: 10/15 = 66.7% successful
+```
+
+## 3. Aggregation Interval
+
+The aggregation interval determines how your data points are grouped into time buckets for visualization and analysis.
+
+### How It Works
+
+**Auto-calculation (Default)**
+- When you don't specify an interval, the system automatically calculates an optimal value
+- The auto-calculation aims to display **300 data points** per time series for optimal visual clarity
+- This default behavior works well for most use cases
+
+**Custom Intervals**
+- You can override the automatic calculation by specifying your own interval
+- Format: `every [number] [seconds]` (e.g., `every 60 Seconds`, `every 300 Seconds`)
+
+### System Limits
+
+To ensure performance and readability:
+- **Maximum data points**: 1,500 per time series
+- If your custom interval would exceed these limits, it's automatically adjusted to stay within bounds
+
+### Interval Calculation Rules
+
+- Minimum interval: 5 seconds
+- Intervals are rounded to the nearest multiple of 5
+
+### Examples
+
+**15-minute time range:**
+- Auto-calculated: ~3 seconds (to show 300 points)
+- Minimum allowed: 5 seconds
+
+**24-hour time range:**
+- Auto-calculated: ~5 minutes (to show 300 points)
+- With custom `every 1 Minute`: Will show 1,440 points (within the 1,500 limit)
+
+**7-day time range:**
+- Auto-calculated: ~35 minutes (to show 300 points)
+- With custom `every 5 Minutes`: Would generate 2,016 points, automatically adjusted to ~7 minutes
+
+
+### Examples using above dataset with 15-Second aggregation interval
+
+#### count() - Count log entries per interval
+| Time Bucket | Count | Details |
+|-------------|-------|---------|
+| 14:00:00-14:00:15 | 2 | 2 auth requests |
+| 14:00:15-14:00:30 | 1 | 1 api request |
+| 14:00:30-14:00:45 | 1 | 1 api request |
+| 14:00:45-14:01:00 | 1 | 1 cdn request |
+| 14:01:00-14:01:15 | 1 | 1 api request |
+| 14:01:15-14:01:30 | 2 | 1 auth, 1 api |
+| 14:01:30-14:01:45 | 1 | 1 cdn request |
+| 14:01:45-14:02:00 | 1 | 1 api request |
+| 14:02:00-14:02:15 | 2 | 1 auth, 1 api |
+| 14:02:15-14:02:30 | 1 | 1 cdn request |
+| 14:02:30-14:02:45 | 1 | 1 api request |
+| 14:02:45-14:03:00 | 2 | 1 auth, 1 api |
+| 14:03:00-14:03:15 | 1 | 1 cdn request |
+| 14:03:15-14:03:30 | 1 | 1 api request |
+| 14:03:30-14:03:45 | 2 | 1 auth, 1 api |
+| 14:03:45-14:04:00 | 1 | 1 cdn request |
+| 14:04:00-14:04:15 | 2 | 1 api, 1 auth |
+| 14:04:15-14:04:30 | 1 | 1 api request |
+| 14:04:30-14:04:45 | 1 | 1 cdn request |
+| 14:04:45-14:05:00 | 2 | 1 api, 1 auth |
+| 14:05:00-14:05:15 | 1 | 1 api request |
+| 14:05:15-14:05:30 | 1 | 1 cdn request |
+| 14:05:30-14:05:45 | 1 | 1 api request |
+
+#### sum(bytes_sent) - Total bytes transferred per interval
+| Time Bucket | Total Bytes | Breakdown |
+|-------------|-------------|-----------|
+| 14:00:00-14:00:15 | 1,536 | 1024 + 512 |
+| 14:00:15-14:00:30 | 4,096 | 4096 |
+| 14:00:30-14:00:45 | 256 | 256 |
+| 14:00:45-14:01:00 | 8,192 | 8192 |
+| 14:01:00-14:01:15 | 2,048 | 2048 |
+| 14:01:15-14:01:30 | 1,152 | 1024 + 128 |
+| 14:01:30-14:01:45 | 0 | 0 (304 response) |
+| 14:01:45-14:02:00 | 3,072 | 3072 |
+| 14:02:00-14:02:15 | 4,608 | 512 + 4096 |
+| 14:02:15-14:02:30 | 16,384 | 16384 |
+| 14:02:30-14:02:45 | 256 | 256 |
+| 14:02:45-14:03:00 | 3,072 | 1024 + 2048 |
+| 14:03:00-14:03:15 | 256 | 256 |
+| 14:03:15-14:03:30 | 3,072 | 3072 |
+| 14:03:30-14:03:45 | 1,152 | 1024 + 128 |
+| 14:03:45-14:04:00 | 32,768 | 32768 |
+| 14:04:00-14:04:15 | 5,120 | 4096 + 1024 |
+| 14:04:15-14:04:30 | 2,048 | 2048 |
+| 14:04:30-14:04:45 | 8,192 | 8192 |
+| 14:04:45-14:05:00 | 1,024 | 0 + 1024 |
+| 14:05:00-14:05:15 | 3,072 | 3072 |
+| 14:05:15-14:05:30 | 16,384 | 16384 |
+| 14:05:30-14:05:45 | 2,048 | 2048 |
+
+### Percentiles
+
+#### p50(response_time_ms) - Median response time per interval
+| Time Bucket | P50 (Median) | Note |
+|-------------|--------------|------|
+| 14:00:00-14:00:15 | 28.5 ms | Median of 2 values |
+| 14:00:15-14:00:30 | 230.0 ms | Single value |
+| 14:00:30-14:00:45 | 890.0 ms | Single value |
+| 14:00:45-14:01:00 | 15.0 ms | Single value |
+| 14:01:15-14:01:30 | 633.5 ms | Median of 2 values |
+| 14:02:00-14:02:15 | 234.0 ms | Median of 2 values |
+| 14:02:45-14:03:00 | 178.0 ms | Median of 2 values |
+| 14:03:30-14:03:45 | 1078.0 ms | Median of 2 values |
+| 14:04:00-14:04:15 | 188.5 ms | Median of 2 values |
+| 14:04:45-14:05:00 | 2545.5 ms | Median of 2 values |
+| ... | ... | Single values for others |
+
+#### p95(response_time_ms) - 95th percentile per interval
+| Time Bucket | P95 | Note |
+|-------------|-----|------|
+| 14:00:00-14:00:15 | 45 ms | 95th of 2 values |
+| 14:00:15-14:00:30 | 230 ms | Single value |
+| 14:01:15-14:01:30 | 1200 ms | 95th of 2 values |
+| 14:04:45-14:05:00 | 5000 ms | 95th of 2 values |
+| ... | ... | Same as value for single-entry buckets |
+
+### Rate Functions
+
+#### rate() - Requests per second per interval
+| Time Bucket | Rate (req/s) | Calculation |
+|-------------|--------------|-------------|
+| 14:00:00-14:00:15 | 0.133 | 2 / 15 |
+| 14:00:15-14:00:30 | 0.067 | 1 / 15 |
+| 14:00:30-14:00:45 | 0.067 | 1 / 15 |
+| 14:00:45-14:01:00 | 0.067 | 1 / 15 |
+| 14:01:00-14:01:15 | 0.067 | 1 / 15 |
+| 14:01:15-14:01:30 | 0.133 | 2 / 15 |
+| 14:01:30-14:01:45 | 0.067 | 1 / 15 |
+| 14:01:45-14:02:00 | 0.067 | 1 / 15 |
+| 14:02:00-14:02:15 | 0.133 | 2 / 15 |
+| 14:02:15-14:02:30 | 0.067 | 1 / 15 |
+| 14:02:30-14:02:45 | 0.067 | 1 / 15 |
+| 14:02:45-14:03:00 | 0.133 | 2 / 15 |
+| 14:03:00-14:03:15 | 0.067 | 1 / 15 |
+| 14:03:15-14:03:30 | 0.067 | 1 / 15 |
+| 14:03:30-14:03:45 | 0.133 | 2 / 15 |
+| 14:03:45-14:04:00 | 0.067 | 1 / 15 |
+| 14:04:00-14:04:15 | 0.133 | 2 / 15 |
+| 14:04:15-14:04:30 | 0.067 | 1 / 15 |
+| 14:04:30-14:04:45 | 0.067 | 1 / 15 |
+| 14:04:45-14:05:00 | 0.133 | 2 / 15 |
+| 14:05:00-14:05:15 | 0.067 | 1 / 15 |
+| 14:05:15-14:05:30 | 0.067 | 1 / 15 |
+| 14:05:30-14:05:45 | 0.067 | 1 / 15 |
+
+#### rate_sum(bytes_sent) - Bytes per second per interval
+
+| Time Bucket | Rate (bytes/s) | Calculation |
+|-------------|-----------------|-------------|
+| 14:00:00-14:00:15 | 102.4 | 1,536 / 15 |
+| 14:00:15-14:00:30 | 273.1 | 4,096 / 15 |
+| 14:00:30-14:00:45 | 17.1 | 256 / 15 |
+| 14:00:45-14:01:00 | 546.1 | 8,192 / 15 |
+| 14:01:00-14:01:15 | 136.5 | 2,048 / 15 |
+| 14:01:15-14:01:30 | 76.8 | 1,152 / 15 |
+| 14:01:30-14:01:45 | 0.0 | 0 / 15 |
+| 14:01:45-14:02:00 | 204.8 | 3,072 / 15 |
+| 14:02:00-14:02:15 | 307.2 | 4,608 / 15 |
+| 14:02:15-14:02:30 | 1092.3 | 16,384 / 15 |
+| 14:02:30-14:02:45 | 17.1 | 256 / 15 |
+| 14:02:45-14:03:00 | 204.8 | 3,072 / 15 |
+| 14:03:00-14:03:15 | 17.1 | 256 / 15 |
+| 14:03:15-14:03:30 | 204.8 | 3,072 / 15 |
+| 14:03:30-14:03:45 | 76.8 | 1,152 / 15 |
+| 14:03:45-14:04:00 | 2184.5 | 32,768 / 15 |
+| 14:04:00-14:04:15 | 341.3 | 5,120 / 15 |
+| 14:04:15-14:04:30 | 136.5 | 2,048 / 15 |
+| 14:04:30-14:04:45 | 546.1 | 8,192 / 15 |
+| 14:04:45-14:05:00 | 68.3 | 1,024 / 15 |
+| 14:05:00-14:05:15 | 204.8 | 3,072 / 15 |
+| 14:05:15-14:05:30 | 1092.3 | 16,384 / 15 |
+| 14:05:30-14:05:45 | 136.5 | 2,048 / 15 |
+
+## 4. Group By
+
+Group By allows you to segment your aggregated data by one or more fields.
+
+### Syntax
+Click the Group By field and select fields from the dropdown or type field names.
+
+### Examples
+
+**Group errors by service:**
+```
+Group By: service
+```
+
+**Group by multiple fields:**
+```
+Group By: service, environment
+```
+
+**Group by nested fields:**
+```
+Group By: resource.k8s.pod.name
+```
+
+### Common Group By Patterns
+
+**Service and status code:**
+```
+Filter: response_time > 1000
+Aggregation: count()
+Group By: service, status_code
+```
+
+**Environment and region:**
+```
+Filter: level = "ERROR"
+Aggregation: count()
+Group By: environment, region
+```
+
+## 5. Having Clause
+
+The Having clause filters the results after aggregation and grouping. It's used to filter based on aggregated values.
+
+### Syntax
+```
+Type Having query like count() > 10 ...
+```
+
+### Examples
+
+**Show only groups with more than 100 errors:**
+```
+Having: count() > 100
+```
+
+**Filter by average response time:**
+```
+Having: avg(response_time) > 2000
+```
+
+**Multiple conditions:**
+```
+Having: count() > 50 AND p95(duration) > 5000
+```
+
+**Complex expressions:**
+```
+Having: sum(bytes_sent) / count() > 1000000  # Average bytes per request > 1MB
+```
+
+### Common Patterns
+
+**High error rate services:**
+```
+Filter: status = "error"
+Aggregation: count()
+Group By: service
+Having: count() > 1000
+```
+
+**Slow services by percentile:**
+```
+Aggregation: p99(response_time)
+Group By: service
+Having: p99(response_time) > 3000
+```
+
+## 6. Order By
+
+Order By sorts the results based on fields or aggregated values.
+
+### Syntax
+Select fields from dropdown and choose sort direction (ASC/DESC).
+
+### Examples
+
+**Sort by count descending:**
+```
+Order By: count() DESC
+```
+
+**Sort by average response time:**
+```
+Order By: avg(response_time) DESC
+```
+
+**Multiple sort criteria:**
+```
+Order By: service ASC, count() DESC
+```
+
+## 7. Limit
+
+Limit restricts the number of results returned.
+
+### Syntax
+```
+Enter limit
+```
+
+### Examples
+
+**Top 10 results:**
+```
+Limit: 10
+```
+
+**Top 100 error sources:**
+```
+Filter: level = "ERROR"
+Group By: source
+Order By: count() DESC
+Limit: 100
+```
+
+## 8. Legend Format
+
+Legend format controls how series are labeled in visualizations.
+
+### Syntax
+```
+Write legend format
+```
+
+### Variables
+- `{{field_name}}` - Replaced with the field value
+- `{{__result}}` - Replaced with the aggregation result
+
+### Examples
+
+**Simple format:**
+```
+{{service}}
+```
+
+**Descriptive format:**
+```
+Service: {{service}} - Env: {{environment}}
+```
+
+**With aggregation info:**
+```
+{{service}} ({{__result}} errors)
+```
+
+## Complete Query Examples
+
+### Example 1: Top 5 Error-Producing Services
+```
+Filter: level = "ERROR"
+Aggregation: count()
+Time Interval: every 5 Minutes
+Group By: service
+Having: count() > 0
+Order By: count() DESC
+Limit: 5
+Legend Format: {{service}} - Errors
+```
+
+### Example 2: Slow API Endpoints
+```
+Filter: http.method = "GET" AND http.route EXISTS
+Aggregation: p95(duration)
+Time Interval: every 1 Minutes
+Group By: http.route
+Having: p95(duration) > 1000
+Order By: p95(duration) DESC
+Limit: 10
+Legend Format: {{http.route}} (95th: {{__result}}ms)
+```
+
+### Example 3: Error Rate by Region
+```
+Filter: status_code >= 500
+Aggregation: rate()
+Time Interval: every 30 Seconds
+Group By: region, service
+Having: rate() > 0.1
+Order By: rate() DESC
+Legend Format: {{region}}/{{service}}
+```
+
+### Example 4: Resource Usage Analysis
+```
+Filter: metric_type = "memory_usage"
+Aggregation: avg(value)
+Time Interval: every 5 Minutes
+Group By: pod_name, container_name
+Having: avg(value) > 1073741824  # 1GB in bytes
+Order By: avg(value) DESC
+Limit: 20
+Legend Format: {{pod_name}}/{{container_name}}
+```
