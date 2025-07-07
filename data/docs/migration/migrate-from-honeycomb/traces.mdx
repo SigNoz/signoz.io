@@ -7,16 +7,16 @@ description: Document describing how to setup traces
 
 ## Data Model Comparison
 
-### Honeycomb: Event-Centric Model
+### Honeycomb: [Event-Centric Model](https://docs.honeycomb.io/investigate/analyze/explore-traces/)
 - **Structure**: Traces as collections of events with arbitrary key-value pairs
 - **Schema**: Flexible - any attribute can be added to any event
 - **Focus**: Optimized for high-cardinality analysis
 - **Relationships**: Parent-child via `trace_id` and `parent_id`
 
-### SigNoz: Span-Centric Model
+### SigNoz: [Span-Centric Model](https://signoz.io/blog/distributed-tracing-span/)
 - **Structure**: Spans are fundamental building blocks of distributed tracing following OpenTelemetry specification
 - **Schema**: Standardized OpenTelemetry semantic conventions
-- **Focus**: Hierarchical span relationships with span context
+- **Focus**: Hierarchical span relationships with [span context](https://signoz.io/blog/opentelemetry-context-propagation/)
 - **Relationships**: SpanContext carries key identifying details (trace ID, span ID, trace flags) across process boundaries
 
 ## Trace Structure Examples
@@ -58,16 +58,14 @@ description: Document describing how to setup traces
 ## Visualization Differences
 
 ### Honeycomb Visualizations
-- **Bubble Charts**: Anomaly detection with outlier highlighting
-- **Heatmaps**: Latency distribution patterns
-- **BubbleUp**: Automatic anomaly detection
-- **Histograms**: Performance distribution analysis
+- **[Bubble Charts](https://docs.honeycomb.io/investigate/analyze/detect-anomalies/)**: Anomaly detection with outlier highlighting
+- **[Heatmaps](https://docs.honeycomb.io/investigate/analyze/visualize-events/)**: Latency distribution patterns
+- **[BubbleUp](https://www.honeycomb.io/bubbleup)**: Automatic anomaly detection
 
 ### SigNoz Visualizations
-- **Flame Graph**: Hierarchical representation showing nested span relationships
-- **Waterfall Chart**: Timeline view illustrating sequence and duration of spans
-- **Service Map**: Visual representation of service interactions and calls
-- **Trace Timeline**: Gantt chart visualization of trace execution
+- **[Flame Graph](https://signoz.io/blog/flamegraphs/)**: Hierarchical representation showing nested span relationships
+- **[Service Map](https://signoz.io/docs/userguide/service-map/)**: Visual representation of service interactions and calls
+- **[Trace Timeline](https://signoz.io/docs/userguide/span-details/)**: Gantt chart visualization of trace execution
 
 ## Migration Strategies
 
@@ -126,7 +124,7 @@ span.set_attribute("business.tier", "premium")
 | Honeycomb Feature | SigNoz Equivalent | Migration Notes |
 |:-----------------|:------------------|:----------------|
 | **BubbleUp** | Manual trace filtering | Use [trace filters](https://signoz.io/docs/userguide/traces/) to identify outliers |
-| **Heatmaps** | Latency percentile charts | Use service overview dashboards |
+| **Heatmaps** | Latency percentile charts | Use service overview [dashboards](https://github.com/SigNoz/dashboards) |
 | **Slice and Dice** | Trace explorer filters | Filter and inspect traces for detailed insights |
 | **Markers** | Dashboard annotations | Add deployment markers to dashboards |
 
@@ -152,16 +150,16 @@ Group by: user.tier, http.route
 ## Migration Validation Steps
 
 ### Data Validation
-- [ ] **Trace Completeness**: Verify all spans are captured
-- [ ] **Timing Accuracy**: Compare duration and sequence in waterfall charts
-- [ ] **Service Dependencies**: Validate service interactions in service map
-- [ ] **Error Traces**: Ensure error spans are properly identified
+- **Trace Completeness**: Verify all spans are captured
+- **Timing Accuracy**: Compare duration and sequence in waterfall charts
+- **Service Dependencies**: Validate service interactions in service map
+- **Error Traces**: Ensure error spans are properly identified
 
 ### Query Validation
-- [ ] **Latency Percentiles**: Compare P95/P99 values
-- [ ] **Error Rates**: Validate error percentage calculations
-- [ ] **Throughput**: Verify request count accuracy
-- [ ] **Service Performance**: Check service-level metrics
+- **Latency Percentiles**: Compare P95/P99 values
+- **Error Rates**: Validate error percentage calculations
+- **Throughput**: Verify request count accuracy
+- **Service Performance**: Check service-level metrics
 
 ## Common Migration Challenges
 
@@ -213,16 +211,16 @@ Group by: user.tier, http.route
 ## Post-Migration Checklist
 
 ### Immediate Actions
-- [ ] Verify trace ingestion in SigNoz
-- [ ] Recreate critical dashboards
-- [ ] Set up essential alerts
-- [ ] Train team on new interface
+- Verify trace ingestion in SigNoz
+- Recreate critical dashboards
+- Set up essential alerts
+- Train team on new interface
 
 ### Long-term Optimization
-- [ ] Leverage service maps for dependency analysis
-- [ ] Implement trace sampling strategies
-- [ ] Set up automated SLO monitoring
-- [ ] Create runbooks for common debugging scenarios
+- Leverage service maps for dependency analysis
+- Implement trace sampling strategies
+- Set up automated SLO monitoring
+- Create runbooks for common debugging scenarios
 
 ## Resources
 
