@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, Suspense } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { FEATURES_SHOWCASE, type FeatureShowcase } from './data'
+import { getIcon } from './icons'
 import { VideoPlayer } from './VideoPlayer'
+import { ErrorBoundary } from './ErrorBoundary'
 import TrackingLink from '../TrackingLink'
 import TrackingButton from '../TrackingButton'
 import Button, { BUTTON_TYPES } from '../Button/Button'
@@ -58,15 +60,17 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
         {/* Left: Video (60% - 7 cols) */}
         <div className="border-r border-signoz_slate-400/10 md:col-span-7">
           <div className="h-full w-full">
-            <VideoPlayer
-              key={activeFeature.id}
-              thumbnailSrc={activeFeature.thumbnail}
-              videoSrc={activeFeature.videoSrc}
-              imageSrc={activeFeature.imageSrc}
-              title={activeFeature.title}
-              className="aspect-video w-full"
-              mediaType={activeFeature.mediaType}
-            />
+            <ErrorBoundary>
+              <VideoPlayer
+                thumbnailSrc={activeFeature.thumbnail}
+                videoSrc={activeFeature.videoSrc}
+                imageSrc={activeFeature.imageSrc}
+                title={activeFeature.title}
+                className="aspect-video w-full"
+                mediaType={activeFeature.mediaType}
+                isActive={activeTab === activeFeature.id}
+              />
+            </ErrorBoundary>
           </div>
         </div>
 
@@ -100,9 +104,17 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
         <div className="absolute bottom-8 left-6 flex items-center gap-3">
           {/* Tech Icons */}
           {activeFeature.techIcons.slice(0, 5).map((tech, index) => {
+            const icon = tech.iconKey ? (
+              <Suspense fallback={
+                <div className="h-5 w-5 animate-pulse rounded bg-signoz_slate-400/20" />
+              }>
+                {getIcon(tech.iconKey)}
+              </Suspense>
+            ) : tech.icon
+            
             const iconElement = (
               <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 transition-all hover:scale-105 hover:bg-signoz_ink-300/40">
-                {tech.icon}
+                {icon}
               </div>
             )
 

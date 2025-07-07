@@ -11,6 +11,7 @@ interface VideoPlayerProps {
   title: string
   className?: string
   mediaType: 'video' | 'image'
+  isActive?: boolean
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -20,10 +21,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   title,
   className = '',
   mediaType,
+  isActive = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [showThumbnail, setShowThumbnail] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [showThumbnail, setShowThumbnail] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasLoadedVideo, setHasLoadedVideo] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isInViewport, setIsInViewport] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -63,19 +66,25 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setProgress(percentage)
   }
 
+  // Lazy load video when active
+  useEffect(() => {
+    if (isActive && mediaType === 'video' && !hasLoadedVideo) {
+      setHasLoadedVideo(true)
+    }
+  }, [isActive, mediaType, hasLoadedVideo])
+
   useEffect(() => {
     if (mediaType === 'image') {
-      setIsLoading(false)
       return
     }
 
     const video = videoRef.current
-    if (!video) return
+    if (!video || !hasLoadedVideo) return
 
     // Reset state when video source changes
-    setIsLoading(true)
     setProgress(0)
     setIsPlaying(false)
+    setShowThumbnail(true)
 
     const updateProgress = () => {
       if (video.duration) {
@@ -85,13 +94,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
     const handleLoadedData = () => {
       setIsLoading(false)
-      setIsPlaying(true)
+      // Only autoplay if this is the active video
+      if (isActive) {
+        video.play().catch(() => {
+          // Failed to autoplay, show play button
+          setShowThumbnail(true)
+        })
+      }
     }
 
     const handleWaiting = () => setIsLoading(true)
     const handlePlaying = () => {
       setIsLoading(false)
       setIsPlaying(true)
+      setShowThumbnail(false)
     }
 
     video.addEventListener('timeupdate', updateProgress)
@@ -99,8 +115,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     video.addEventListener('waiting', handleWaiting)
     video.addEventListener('playing', handlePlaying)
 
-    // Force video to load new source
-    video.load()
+    // Only load if we should load the video
+    if (hasLoadedVideo) {
+      setIsLoading(true)
+      video.load()
+    }
 
     return () => {
       video.removeEventListener('timeupdate', updateProgress)
@@ -108,7 +127,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       video.removeEventListener('waiting', handleWaiting)
       video.removeEventListener('playing', handlePlaying)
     }
-  }, [videoSrc, mediaType])
+  }, [videoSrc, mediaType, hasLoadedVideo, isActive])
 
   // Viewport detection
   useEffect(() => {
@@ -152,8 +171,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             alt={`${title} showcase`}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 768px) 100vw, 60vw"
             priority={false}
+            loading="lazy"
           />
           {/* Hover Effect */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -177,8 +197,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               alt={`${title} showcase thumbnail`}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              sizes="(max-width: 768px) 100vw, 60vw"
               priority={false}
+              loading="lazy"
             />
 
             {/* Play Button Overlay */}
@@ -200,20 +221,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           </div>
         )}
 
-        {/* Video Element */}
-        {videoSrc && (
+        {/* Video Element - Only render if we should load it */}
+        {videoSrc && hasLoadedVideo && (
           <video
             ref={videoRef}
             className="h-full w-full object-cover"
-            autoPlay
             muted
             loop
             playsInline
-            preload="metadata"
-            onLoadedData={() => {
-              setIsPlaying(true)
-              setShowThumbnail(false)
-            }}
+            preload="none"
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
             aria-label={`${title} showcase video`}
@@ -224,7 +240,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         )}
 
         {/* Loading Indicator */}
-        {isLoading && !showThumbnail && mediaType === 'video' && (
+        {isLoading && hasLoadedVideo && mediaType === 'video' && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
             <div className="rounded-lg bg-signoz_ink-300/80 p-4 backdrop-blur-sm">
               <Loader2 className="h-8 w-8 animate-spin text-signoz_vanilla-100" />

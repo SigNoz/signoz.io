@@ -1,74 +1,9 @@
 import React from 'react'
-import {
-  SiJavascript,
-  SiPython,
-  SiGo,
-  SiKubernetes,
-  SiDocker,
-  SiPrometheus,
-  SiNodedotjs,
-  SiRust,
-  SiDotnet,
-  SiPhp,
-  SiRuby,
-  SiAmazon,
-  SiGooglecloud,
-  SiRedis,
-  SiPostgresql,
-  SiMongodb,
-  SiMysql,
-  SiElasticsearch,
-  SiApachekafka,
-  SiNginx,
-  SiApache,
-  SiRabbitmq,
-  SiAmazonwebservices,
-  SiReact,
-  SiAndroid,
-  SiFluentd,
-  SiHeroku,
-  SiVercel,
-  SiApachetomcat,
-  SiTypescript,
-  SiClickhouse,
-  SiTemporal,
-} from 'react-icons/si'
-import {
-  LucideServer,
-  Database,
-  Cloud,
-  Workflow,
-  BarChart3,
-  AlertTriangle,
-  Bug,
-  Activity,
-  Globe,
-  Shield,
-  Zap,
-  TrendingUp,
-  Layers,
-  Search,
-  Monitor,
-  Brain,
-  GitBranch,
-  Smartphone,
-  Link,
-  MessageSquare,
-  Server,
-  FileText,
-  LucideBoxes,
-  CloudCog,
-  DatabaseZap,
-  BrainCircuit,
-  MonitorSmartphone,
-} from 'lucide-react'
-import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
-import { FaAws, FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
-import { LuLogIn } from 'react-icons/lu'
-import { BsCloudFill } from 'react-icons/bs'
+import { type TechIconKey } from './icons'
 
 export interface TechIcon {
-  icon: React.ReactNode
+  iconKey?: TechIconKey
+  icon?: React.ReactNode
   name: string
   href?: string
 }
@@ -118,31 +53,31 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     title: 'APM',
     description:
       'Monitor & troubleshoot your application performance with comprehensive APM capabilities.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
+    thumbnail: '/showcases/apm/signoz-apm-thumbnail.webp',
     videoSrc: '/showcases/apm/signoz-apm.webm',
     techIcons: [
       {
-        icon: <SiJavascript className="h-5 w-5 text-yellow-500" />,
+        iconKey: 'javascript',
         name: 'JavaScript',
         href: '/docs/instrumentation/javascript/',
       },
       {
-        icon: <SiPython className="h-5 w-5 text-blue-500" />,
+        iconKey: 'python',
         name: 'Python',
         href: '/docs/instrumentation/python/',
       },
       {
-        icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
+        iconKey: 'java',
         name: 'Java',
         href: '/docs/instrumentation/java/',
       },
       {
-        icon: <SiGo className="h-5 w-5 text-cyan-500" />,
+        iconKey: 'go',
         name: 'Go',
         href: '/docs/instrumentation/golang/',
       },
       {
-        icon: <SiDotnet className="h-5 w-5 text-purple-500" />,
+        iconKey: 'dotnet',
         name: '.NET',
         href: '/docs/instrumentation/dotnet/',
       },
@@ -162,32 +97,32 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     videoSrc: '/showcases/logs/signoz-logs.webm',
     techIcons: [
       {
-        icon: <SiKubernetes className="h-5 w-5 text-blue-600" />,
+        iconKey: 'kubernetes',
         name: 'Kubernetes',
         href: '/docs/userguide/collect_kubernetes_pod_logs/',
       },
       {
-        icon: <SiDocker className="h-5 w-5 text-blue-400" />,
+        iconKey: 'docker',
         name: 'Docker',
         href: '/docs/userguide/collect_docker_logs/',
       },
       {
-        icon: <SiJavascript className="h-5 w-5 text-yellow-500" />,
+        iconKey: 'javascript',
         name: 'JavaScript',
         href: '/docs/logs-management/send-logs/nodejs-pino-logs/',
       },
       {
-        icon: <SiPython className="h-5 w-5 text-blue-500" />,
+        iconKey: 'python',
         name: 'Python',
         href: '/docs/userguide/python-logs-auto-instrumentation/',
       },
       {
-        icon: <FaFileAlt className="h-5 w-5 text-orange-500" />,
+        iconKey: 'logFiles',
         name: 'Log Files',
         href: '/docs/userguide/collect_logs_from_file/',
       },
       {
-        icon: <SiAmazonwebservices className="h-5 w-5 text-orange-400" />,
+        iconKey: 'aws',
         name: 'Cloudwatch',
         href: '/docs/userguide/send-cloudwatch-logs-to-signoz/',
       },
@@ -207,17 +142,17 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     videoSrc: '/showcases/infrastructure/signoz-infrastructure.webm',
     techIcons: [
       {
-        icon: <Server className="h-5 w-5 text-orange-500" />,
+        iconKey: 'hostMonitoring',
         name: 'Host Monitoring',
         href: '/docs/userguide/hostmetrics/',
       },
       {
-        icon: <SiKubernetes className="h-5 w-5 text-blue-600" />,
+        iconKey: 'kubernetes',
         name: 'Kubernetes',
         href: '/docs/userguide/k8s-metrics/',
       },
       {
-        icon: <SiDocker className="h-5 w-5 text-blue-400" />,
+        iconKey: 'docker',
         name: 'Docker',
         href: '/docs/metrics-management/docker-container-metrics/',
       },
@@ -237,27 +172,27 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     videoSrc: '/showcases/traces/signoz-traces.webm',
     techIcons: [
       {
-        icon: <SiJavascript className="h-5 w-5 text-yellow-500" />,
+        iconKey: 'javascript',
         name: 'JavaScript',
         href: '/docs/instrumentation/javascript/',
       },
       {
-        icon: <SiPython className="h-5 w-5 text-blue-500" />,
+        iconKey: 'python',
         name: 'Python',
         href: '/docs/instrumentation/python/',
       },
       {
-        icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
+        iconKey: 'java',
         name: 'Java',
         href: '/docs/instrumentation/java/',
       },
       {
-        icon: <SiGo className="h-5 w-5 text-cyan-500" />,
+        iconKey: 'go',
         name: 'Go',
         href: '/docs/instrumentation/golang/',
       },
       {
-        icon: <SiDotnet className="h-5 w-5 text-purple-500" />,
+        iconKey: 'dotnet',
         name: '.NET',
         href: '/docs/instrumentation/dotnet/',
       },
@@ -276,17 +211,17 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     imageSrc: '/showcases/metrics/signoz-metrics.webp',
     techIcons: [
       {
-        icon: <SiPrometheus className="h-5 w-5 text-orange-500" />,
+        iconKey: 'prometheus',
         name: 'Prometheus',
         href: '/docs/userguide/send-metrics-cloud/#enable-a-prometheus-receiver',
       },
       {
-        icon: <SiNodedotjs className="h-5 w-5 text-green-500" />,
+        iconKey: 'nodejs',
         name: 'NodeJS',
         href: '/opentelemetry/custom-metrics-nodejs/',
       },
       {
-        icon: <SiPython className="h-5 w-5 text-blue-500" />,
+        iconKey: 'python',
         name: 'Python',
         href: '/opentelemetry/python-custom-metrics/',
       },
@@ -472,32 +407,32 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     imageSrc: '/showcases/integrations/signoz-integrations.webp',
     techIcons: [
       {
-        icon: <SiPostgresql className="h-5 w-5 text-blue-600" />,
+        iconKey: 'postgresql',
         name: 'PostgreSQL',
         href: '/docs/integrations/postgresql/',
       },
       {
-        icon: <SiRedis className="h-5 w-5 text-red-500" />,
+        iconKey: 'redis',
         name: 'Redis',
         href: '/docs/integrations/redis/',
       },
       {
-        icon: <SiMongodb className="h-5 w-5 text-green-600" />,
+        iconKey: 'mongodb',
         name: 'MongoDB',
         href: '/docs/integrations/mongodb/',
       },
       {
-        icon: <SiApachekafka className="h-5 w-5 text-white" />,
+        iconKey: 'kafka',
         name: 'Apache Kafka',
         href: '/docs/messaging-queues/kafka/',
       },
       {
-        icon: <SiNginx className="h-5 w-5 text-green-600" />,
+        iconKey: 'nginx',
         name: 'Nginx',
         href: '/docs/integrations/nginx/',
       },
       {
-        icon: <SiTemporal className="h-5 w-5 text-purple-500" />,
+        iconKey: 'temporal',
         name: 'Temporal',
         href: '/docs/integrations/temporal-cloud-metrics/',
       },
