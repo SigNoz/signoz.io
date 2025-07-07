@@ -5,6 +5,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { FEATURES_SHOWCASE, type FeatureShowcase } from './data'
 import { VideoPlayer } from './VideoPlayer'
 import TrackingLink from '../TrackingLink'
+import Button, { BUTTON_TYPES } from '../Button/Button'
 
 interface FeaturesShowcaseClientProps {
   featuresByCategory: Record<string, FeatureShowcase[]>
@@ -81,10 +82,11 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
               clickName={`${activeFeature.title} Get Started`}
               clickLocation="Features Showcase"
               clickText="Get Started - Free"
-              className="group inline-flex items-center gap-1.5 rounded-lg bg-signoz_robin-500 px-4 py-2.5 text-sm font-medium text-white transition-all hover:scale-105 hover:bg-signoz_robin-600"
             >
-              <span>Get Started - Free</span>
-              <ArrowUpRight className="h-4 w-4 transition duration-300 ease-in-out group-hover:translate-x-[2px] group-hover:translate-y-[-2px]" />
+              <Button type={BUTTON_TYPES.PRIMARY} className="group hover:scale-105">
+                <span>Get Started - Free</span>
+                <ArrowUpRight className="h-4 w-4 transition duration-300 ease-in-out group-hover:translate-x-[2px] group-hover:translate-y-[-2px]" />
+              </Button>
             </TrackingLink>
           </div>
         </div>
