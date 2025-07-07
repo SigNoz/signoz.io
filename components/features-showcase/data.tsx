@@ -22,6 +22,16 @@ import {
   SiNginx,
   SiApache,
   SiRabbitmq,
+  SiAmazonwebservices,
+  SiReact,
+  SiAndroid,
+  SiFluentd,
+  SiHeroku,
+  SiVercel,
+  SiApachetomcat,
+  SiTypescript,
+  SiClickhouse,
+  SiTemporal,
 } from 'react-icons/si'
 import {
   LucideServer,
@@ -44,7 +54,18 @@ import {
   Smartphone,
   Link,
   MessageSquare,
+  Server,
+  FileText,
+  LucideBoxes,
+  CloudCog,
+  DatabaseZap,
+  BrainCircuit,
+  MonitorSmartphone,
 } from 'lucide-react'
+import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
+import { FaAws, FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
+import { LuLogIn } from 'react-icons/lu'
+import { BsCloudFill } from 'react-icons/bs'
 
 export interface TechIcon {
   icon: React.ReactNode
@@ -64,6 +85,10 @@ export interface FeatureShowcase {
     text: string
     href: string
   }
+  additionalCTAs?: {
+    text: string
+    href: string
+  }[]
   category: 'core' | 'cloud' | 'advanced'
   badge?: {
     text: string
@@ -114,27 +139,12 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       {
         icon: <SiGo className="h-5 w-5 text-cyan-500" />,
         name: 'Go',
-        href: '/docs/instrumentation/go/',
+        href: '/docs/instrumentation/golang/',
       },
       {
         icon: <SiDotnet className="h-5 w-5 text-purple-500" />,
         name: '.NET',
         href: '/docs/instrumentation/dotnet/',
-      },
-      {
-        icon: <SiPhp className="h-5 w-5 text-purple-600" />,
-        name: 'PHP',
-        href: '/docs/instrumentation/php/',
-      },
-      {
-        icon: <SiRuby className="h-5 w-5 text-red-500" />,
-        name: 'Ruby',
-        href: '/docs/instrumentation/ruby/',
-      },
-      {
-        icon: <SiRust className="h-5 w-5 text-orange-600" />,
-        name: 'Rust',
-        href: '/docs/instrumentation/rust/',
       },
     ],
     ctaLink: {
@@ -152,41 +162,35 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     videoSrc: '/showcases/logs/signoz-logs.webm',
     techIcons: [
       {
-        icon: <Search className="h-5 w-5 text-blue-500" />,
-        name: 'Log Search',
-        href: '/docs/logs-management/send-logs-to-signoz/',
-      },
-      {
         icon: <SiKubernetes className="h-5 w-5 text-blue-600" />,
         name: 'Kubernetes',
-        href: '/docs/install/kubernetes/',
+        href: '/docs/userguide/collect_kubernetes_pod_logs/',
       },
       {
         icon: <SiDocker className="h-5 w-5 text-blue-400" />,
         name: 'Docker',
-        href: '/docs/install/docker/',
-      },
-      {
-        icon: <SiNodedotjs className="h-5 w-5 text-green-500" />,
-        name: 'Node.js',
-        href: '/docs/instrumentation/javascript/',
-      },
-      {
-        icon: <SiPython className="h-5 w-5 text-blue-500" />,
-        name: 'Python',
-        href: '/docs/instrumentation/python/',
+        href: '/docs/userguide/collect_docker_logs/',
       },
       {
         icon: <SiJavascript className="h-5 w-5 text-yellow-500" />,
         name: 'JavaScript',
-        href: '/docs/instrumentation/javascript/',
+        href: '/docs/logs-management/send-logs/nodejs-pino-logs/',
       },
       {
-        icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
-        name: 'Java',
-        href: '/docs/instrumentation/java/',
+        icon: <SiPython className="h-5 w-5 text-blue-500" />,
+        name: 'Python',
+        href: '/docs/userguide/python-logs-auto-instrumentation/',
       },
-      { icon: <Database className="h-5 w-5 text-purple-500" />, name: 'Log Storage' },
+      {
+        icon: <FaFileAlt className="h-5 w-5 text-orange-500" />,
+        name: 'Log Files',
+        href: '/docs/userguide/collect_logs_from_file/',
+      },
+      {
+        icon: <SiAmazonwebservices className="h-5 w-5 text-orange-400" />,
+        name: 'Cloudwatch',
+        href: '/docs/userguide/send-cloudwatch-logs-to-signoz/',
+      },
     ],
     ctaLink: {
       text: 'See all log sources',
@@ -202,16 +206,25 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       'Monitor hosts, containers, and orchestration platforms with infrastructure monitoring.',
     videoSrc: '/showcases/infrastructure/signoz-infrastructure.webm',
     techIcons: [
-      { icon: <LucideServer className="h-5 w-5 text-signoz_robin-500" />, name: 'Infrastructure' },
-      { icon: <SiDocker className="h-5 w-5 text-blue-400" />, name: 'Docker' },
-      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'Kubernetes' },
-      { icon: <SiPrometheus className="h-5 w-5 text-orange-500" />, name: 'Prometheus' },
-      { icon: <Activity className="h-5 w-5 text-green-500" />, name: 'Host Metrics' },
-      { icon: <BarChart3 className="h-5 w-5 text-blue-500" />, name: 'System Metrics' },
+      {
+        icon: <Server className="h-5 w-5 text-orange-500" />,
+        name: 'Host Monitoring',
+        href: '/docs/userguide/hostmetrics/',
+      },
+      {
+        icon: <SiKubernetes className="h-5 w-5 text-blue-600" />,
+        name: 'Kubernetes',
+        href: '/docs/userguide/k8s-metrics/',
+      },
+      {
+        icon: <SiDocker className="h-5 w-5 text-blue-400" />,
+        name: 'Docker',
+        href: '/docs/metrics-management/docker-container-metrics/',
+      },
     ],
     ctaLink: {
-      text: 'See infrastructure docs',
-      href: '/docs/infrastructure-monitoring/overview/',
+      text: 'Read Infrastructure Docs',
+      href: '/docs/userguide/hostmetrics/',
     },
     category: 'core',
     mediaType: 'video',
@@ -223,16 +236,35 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       'Track user requests across services to identify bottlenecks with distributed tracing.',
     videoSrc: '/showcases/traces/signoz-traces.webm',
     techIcons: [
-      { icon: <Activity className="h-5 w-5 text-blue-500" />, name: 'Request Tracing' },
-      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'Kubernetes' },
-      { icon: <SiDocker className="h-5 w-5 text-blue-400" />, name: 'Docker' },
-      { icon: <Globe className="h-5 w-5 text-green-500" />, name: 'Microservices' },
-      { icon: <Workflow className="h-5 w-5 text-purple-500" />, name: 'Service Mesh' },
-      { icon: <Monitor className="h-5 w-5 text-orange-500" />, name: 'Distributed Systems' },
+      {
+        icon: <SiJavascript className="h-5 w-5 text-yellow-500" />,
+        name: 'JavaScript',
+        href: '/docs/instrumentation/javascript/',
+      },
+      {
+        icon: <SiPython className="h-5 w-5 text-blue-500" />,
+        name: 'Python',
+        href: '/docs/instrumentation/python/',
+      },
+      {
+        icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
+        name: 'Java',
+        href: '/docs/instrumentation/java/',
+      },
+      {
+        icon: <SiGo className="h-5 w-5 text-cyan-500" />,
+        name: 'Go',
+        href: '/docs/instrumentation/golang/',
+      },
+      {
+        icon: <SiDotnet className="h-5 w-5 text-purple-500" />,
+        name: '.NET',
+        href: '/docs/instrumentation/dotnet/',
+      },
     ],
     ctaLink: {
-      text: 'See all tracing features',
-      href: '/docs/distributed-tracing/overview/',
+      text: 'See all languages',
+      href: '/docs/instrumentation/',
     },
     category: 'core',
     mediaType: 'video',
@@ -243,15 +275,25 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     description: 'Custom metrics and configurable dashboards to fit any monitoring use case.',
     imageSrc: '/showcases/metrics/signoz-metrics.webp',
     techIcons: [
-      { icon: <BarChart3 className="h-5 w-5 text-blue-500" />, name: 'Custom Metrics' },
-      { icon: <TrendingUp className="h-5 w-5 text-green-500" />, name: 'Analytics' },
-      { icon: <SiPrometheus className="h-5 w-5 text-orange-500" />, name: 'Prometheus' },
-      { icon: <Database className="h-5 w-5 text-purple-500" />, name: 'Time Series' },
-      { icon: <Activity className="h-5 w-5 text-cyan-500" />, name: 'Real-time' },
+      {
+        icon: <SiPrometheus className="h-5 w-5 text-orange-500" />,
+        name: 'Prometheus',
+        href: '/docs/userguide/send-metrics-cloud/#enable-a-prometheus-receiver',
+      },
+      {
+        icon: <SiNodedotjs className="h-5 w-5 text-green-500" />,
+        name: 'NodeJS',
+        href: '/opentelemetry/custom-metrics-nodejs/',
+      },
+      {
+        icon: <SiPython className="h-5 w-5 text-blue-500" />,
+        name: 'Python',
+        href: '/opentelemetry/python-custom-metrics/',
+      },
     ],
     ctaLink: {
-      text: 'See all metrics features',
-      href: '/docs/metrics-management/overview/',
+      text: 'Send metrics doc',
+      href: '/docs/userguide/send-metrics-cloud/',
     },
     category: 'core',
     mediaType: 'image',
@@ -261,17 +303,21 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     title: 'Dashboards',
     description: 'Create powerful, customizable dashboards to visualize your observability data.',
     videoSrc: '/showcases/dashboards/signoz-dashboards.webm',
-    techIcons: [
-      { icon: <BarChart3 className="h-5 w-5 text-blue-500" />, name: 'Custom Dashboards' },
-      { icon: <TrendingUp className="h-5 w-5 text-green-500" />, name: 'Data Visualization' },
-      { icon: <Monitor className="h-5 w-5 text-purple-500" />, name: 'Real-time Charts' },
-      { icon: <Activity className="h-5 w-5 text-orange-500" />, name: 'Live Monitoring' },
-      { icon: <Database className="h-5 w-5 text-cyan-500" />, name: 'Query Builder' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all dashboard features',
-      href: '/docs/dashboards/overview/',
+      text: 'View Dashboards Doc',
+      href: '/docs/userguide/manage-dashboards/',
     },
+    additionalCTAs: [
+      {
+        text: 'Explore Dashboards',
+        href: '/metrics-and-dashboards/',
+      },
+      {
+        text: 'Explore Templates',
+        href: '/dashboards/',
+      },
+    ],
     category: 'core',
     mediaType: 'video',
   },
@@ -281,19 +327,17 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     description:
       'Record exceptions automatically with stack trace & linked span data for faster debugging.',
     videoSrc: '/showcases/exceptions/signoz-exceptions.webm',
-    techIcons: [
-      { icon: <Bug className="h-5 w-5 text-red-500" />, name: 'Error Tracking' },
-      { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript' },
-      { icon: <SiPython className="h-5 w-5 text-blue-500" />, name: 'Python' },
-      { icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />, name: 'Java' },
-      { icon: <SiGo className="h-5 w-5 text-cyan-500" />, name: 'Go' },
-      { icon: <SiDotnet className="h-5 w-5 text-purple-500" />, name: '.NET' },
-      { icon: <Layers className="h-5 w-5 text-orange-500" />, name: 'Stack Traces' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all exception features',
-      href: '/docs/exceptions-monitoring/overview/',
+      text: 'View Exceptions Doc',
+      href: '/docs/userguide/exceptions/',
     },
+    additionalCTAs: [
+      {
+        text: 'Explore exceptions',
+        href: '/exceptions-monitoring/',
+      },
+    ],
     category: 'core',
     mediaType: 'video',
   },
@@ -303,17 +347,17 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     description:
       'Get actionable alerts in your preferred notification channel with smart alerting.',
     videoSrc: '/showcases/alerts/signoz-alerts.webm',
-    techIcons: [
-      { icon: <AlertTriangle className="h-5 w-5 text-yellow-500" />, name: 'Alert Rules' },
-      { icon: <Zap className="h-5 w-5 text-orange-500" />, name: 'Notifications' },
-      { icon: <Activity className="h-5 w-5 text-green-500" />, name: 'Monitoring' },
-      { icon: <Globe className="h-5 w-5 text-blue-500" />, name: 'Webhooks' },
-      { icon: <Database className="h-5 w-5 text-purple-500" />, name: 'Alert History' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all alert features',
-      href: '/docs/alerts-management/overview/',
+      text: 'View Alerts Doc',
+      href: '/docs/userguide/alerts-management/',
     },
+    additionalCTAs: [
+      {
+        text: 'Explore alerts',
+        href: '/alerts-management/',
+      },
+    ],
     category: 'core',
     mediaType: 'video',
   },
@@ -322,22 +366,21 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     title: 'Cloud Monitoring',
     description: 'Monitor AWS, GCP, and Azure services with native cloud provider integrations.',
     videoSrc: '/showcases/cloud-monitoring/signoz-cloud-monitoring.webm',
-    techIcons: [
-      { icon: <SiAmazon className="h-5 w-5 text-orange-500" />, name: 'AWS' },
-      { icon: <SiGooglecloud className="h-5 w-5 text-blue-400" />, name: 'Google Cloud' },
-      {
-        icon: <img src="/img/icons/azure-icon.svg" width={20} height={20} alt="Azure" />,
-        name: 'Azure',
-      },
-      { icon: <Cloud className="h-5 w-5 text-blue-400" />, name: 'Cloud Services' },
-      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'Kubernetes' },
-      { icon: <Database className="h-5 w-5 text-green-500" />, name: 'Managed Services' },
-      { icon: <LucideServer className="h-5 w-5 text-purple-500" />, name: 'Serverless' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all cloud integrations',
-      href: '/docs/integrations/',
+      text: 'View AWS Docs',
+      href: '/docs/ec2-monitoring/',
     },
+    additionalCTAs: [
+      {
+        text: 'View GCP Docs',
+        href: '/docs/gcp-monitoring/',
+      },
+      {
+        text: 'View Azure Docs',
+        href: '/docs/azure-monitoring/',
+      },
+    ],
     category: 'cloud',
     mediaType: 'video',
   },
@@ -346,17 +389,17 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     title: 'Frontend & Mobile Monitoring',
     description: 'Monitor frontend applications and mobile apps with real user monitoring.',
     imageSrc: '/showcases/frontend/signoz-frontend.webp',
-    techIcons: [
-      { icon: <Globe className="h-5 w-5 text-blue-500" />, name: 'Web Apps' },
-      { icon: <Smartphone className="h-5 w-5 text-green-500" />, name: 'Mobile Apps' },
-      { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript' },
-      { icon: <Activity className="h-5 w-5 text-purple-500" />, name: 'Real User Monitoring' },
-      { icon: <Monitor className="h-5 w-5 text-orange-500" />, name: 'Performance' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all frontend features',
-      href: '/docs/frontend-monitoring/overview/',
+      text: 'View Frontend Monitoring Doc',
+      href: '/docs/frontend-monitoring/opentelemetry-web-vitals/',
     },
+    additionalCTAs: [
+      {
+        text: 'View Mobile Monitoring Doc',
+        href: '/docs/frontend-and-mobile-monitoring/',
+      },
+    ],
     category: 'advanced',
     mediaType: 'image',
   },
@@ -366,17 +409,17 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     description:
       'Monitor Large Language Models and AI applications with specialized LLM observability.',
     videoSrc: '/showcases/llm/signoz-llm.webm',
-    techIcons: [
-      { icon: <Brain className="h-5 w-5 text-purple-500" />, name: 'LLM Models' },
-      { icon: <Activity className="h-5 w-5 text-blue-500" />, name: 'AI Observability' },
-      { icon: <BarChart3 className="h-5 w-5 text-green-500" />, name: 'Model Metrics' },
-      { icon: <Database className="h-5 w-5 text-orange-500" />, name: 'Token Usage' },
-      { icon: <Monitor className="h-5 w-5 text-cyan-500" />, name: 'Performance' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all LLM features',
-      href: '/docs/llm-monitoring/overview/',
+      text: 'View OpenAI Doc',
+      href: '/docs/llm/opentelemetry-openai-monitoring/',
     },
+    additionalCTAs: [
+      {
+        text: 'View All Docs',
+        href: '/docs/community/llm-monitoring/',
+      },
+    ],
     category: 'advanced',
     badge: {
       text: 'New',
@@ -389,16 +432,10 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     title: 'Correlation',
     description: 'Correlate metrics, logs, and traces to get complete observability insights.',
     videoSrc: '/showcases/correlation/signoz-correlation.webm',
-    techIcons: [
-      { icon: <Link className="h-5 w-5 text-blue-500" />, name: 'Data Correlation' },
-      { icon: <Activity className="h-5 w-5 text-green-500" />, name: 'Trace to Logs' },
-      { icon: <BarChart3 className="h-5 w-5 text-purple-500" />, name: 'Metrics Linking' },
-      { icon: <Search className="h-5 w-5 text-orange-500" />, name: 'Cross-Signal' },
-      { icon: <Workflow className="h-5 w-5 text-cyan-500" />, name: 'Flow Analysis' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all correlation features',
-      href: '/docs/correlation/overview/',
+      text: 'View Correlation Doc',
+      href: '/docs/traces-management/guides/correlate-traces-and-logs/',
     },
     category: 'advanced',
     mediaType: 'video',
@@ -409,17 +446,21 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     description:
       'Monitor your CI/CD pipelines and deployment processes with specialized observability.',
     imageSrc: '/showcases/cicd/signoz-cicd.webp',
-    techIcons: [
-      { icon: <GitBranch className="h-5 w-5 text-blue-500" />, name: 'CI/CD Pipelines' },
-      { icon: <Activity className="h-5 w-5 text-green-500" />, name: 'Deployment Tracking' },
-      { icon: <Monitor className="h-5 w-5 text-purple-500" />, name: 'Build Monitoring' },
-      { icon: <BarChart3 className="h-5 w-5 text-orange-500" />, name: 'Pipeline Metrics' },
-      { icon: <AlertTriangle className="h-5 w-5 text-red-500" />, name: 'Failure Detection' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all CI/CD features',
-      href: '/docs/cicd-observability/overview/',
+      text: 'GitHub Doc',
+      href: '/docs/cicd/github/github-metrics/',
     },
+    additionalCTAs: [
+      {
+        text: 'Jenkins Doc',
+        href: '/docs/cicd/jenkins/agent-node-monitoring/',
+      },
+      {
+        text: 'ArgoCD',
+        href: '/docs/cicd/argocd/argocd-metrics/',
+      },
+    ],
     category: 'advanced',
     mediaType: 'image',
   },
@@ -427,16 +468,39 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     id: 'integrations',
     title: 'Integrations',
     description:
-      'Connect with 100+ integrations including databases, message queues, and third-party services.',
+      'Connect with out of the box integrations including databases, message queues, and third-party services.',
     imageSrc: '/showcases/integrations/signoz-integrations.webp',
     techIcons: [
-      { icon: <SiPostgresql className="h-5 w-5 text-blue-600" />, name: 'PostgreSQL' },
-      { icon: <SiRedis className="h-5 w-5 text-red-500" />, name: 'Redis' },
-      { icon: <SiMongodb className="h-5 w-5 text-green-600" />, name: 'MongoDB' },
-      { icon: <SiApachekafka className="h-5 w-5 text-black" />, name: 'Apache Kafka' },
-      { icon: <SiNginx className="h-5 w-5 text-green-600" />, name: 'Nginx' },
-      { icon: <Database className="h-5 w-5 text-purple-500" />, name: 'Databases' },
-      { icon: <Globe className="h-5 w-5 text-blue-500" />, name: 'APIs' },
+      {
+        icon: <SiPostgresql className="h-5 w-5 text-blue-600" />,
+        name: 'PostgreSQL',
+        href: '/docs/integrations/postgresql/',
+      },
+      {
+        icon: <SiRedis className="h-5 w-5 text-red-500" />,
+        name: 'Redis',
+        href: '/docs/integrations/redis/',
+      },
+      {
+        icon: <SiMongodb className="h-5 w-5 text-green-600" />,
+        name: 'MongoDB',
+        href: '/docs/integrations/mongodb/',
+      },
+      {
+        icon: <SiApachekafka className="h-5 w-5 text-white" />,
+        name: 'Apache Kafka',
+        href: '/docs/messaging-queues/kafka/',
+      },
+      {
+        icon: <SiNginx className="h-5 w-5 text-green-600" />,
+        name: 'Nginx',
+        href: '/docs/integrations/nginx/',
+      },
+      {
+        icon: <SiTemporal className="h-5 w-5 text-purple-500" />,
+        name: 'Temporal',
+        href: '/docs/integrations/temporal-cloud-metrics/',
+      },
     ],
     ctaLink: {
       text: 'See all integrations',
@@ -450,16 +514,10 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     title: 'External APIs',
     description: 'Monitor external API calls, dependencies, and third-party service performance.',
     videoSrc: '/showcases/external-apis/signoz-external-apis.webm',
-    techIcons: [
-      { icon: <Globe className="h-5 w-5 text-blue-500" />, name: 'External APIs' },
-      { icon: <Link className="h-5 w-5 text-green-500" />, name: 'Dependencies' },
-      { icon: <Activity className="h-5 w-5 text-purple-500" />, name: 'API Monitoring' },
-      { icon: <BarChart3 className="h-5 w-5 text-orange-500" />, name: 'Performance' },
-      { icon: <AlertTriangle className="h-5 w-5 text-red-500" />, name: 'Error Tracking' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all API features',
-      href: '/docs/api-monitoring/overview/',
+      text: 'View External API Doc',
+      href: '/docs/external-api-monitoring/overview/',
     },
     category: 'advanced',
     mediaType: 'video',
@@ -469,15 +527,9 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     title: 'Messaging Queues',
     description: 'Monitor message queues, event streams, and asynchronous communication patterns.',
     videoSrc: '/showcases/messaging-queues/signoz-messaging-queues.webm',
-    techIcons: [
-      { icon: <SiApachekafka className="h-5 w-5 text-black" />, name: 'Apache Kafka' },
-      { icon: <SiRabbitmq className="h-5 w-5 text-orange-600" />, name: 'RabbitMQ' },
-      { icon: <SiRedis className="h-5 w-5 text-red-500" />, name: 'Redis Streams' },
-      { icon: <MessageSquare className="h-5 w-5 text-blue-500" />, name: 'Message Queues' },
-      { icon: <Workflow className="h-5 w-5 text-purple-600" />, name: 'Event Streaming' },
-    ],
+    techIcons: [],
     ctaLink: {
-      text: 'See all messaging features',
+      text: 'View Messaging Queues Doc',
       href: '/docs/messaging-queues/overview/',
     },
     category: 'advanced',

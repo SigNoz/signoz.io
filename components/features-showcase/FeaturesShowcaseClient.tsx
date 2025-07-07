@@ -89,9 +89,10 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
           </div>
         </div>
 
-        {/* Tech Icons - Bottom Left of entire component */}
+        {/* All CTAs - Bottom Left of entire component */}
         <div className="absolute bottom-4 left-4 flex items-center gap-3">
-          {activeFeature.techIcons.slice(0, 4).map((tech, index) => {
+          {/* Tech Icons */}
+          {activeFeature.techIcons.slice(0, 5).map((tech, index) => {
             const iconElement = (
               <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 transition-all hover:scale-105 hover:bg-signoz_ink-300/40">
                 {tech.icon}
@@ -100,7 +101,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
 
             return tech.href ? (
               <TrackingLink
-                key={index}
+                key={`tech-${index}`}
                 href={tech.href}
                 clickType="Tech Icon"
                 clickName={tech.name}
@@ -112,16 +113,18 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
                 {iconElement}
               </TrackingLink>
             ) : (
-              <div key={index} title={tech.name}>
+              <div key={`tech-${index}`} title={tech.name}>
                 {iconElement}
               </div>
             )
           })}
-          {activeFeature.techIcons.length > 4 && (
+
+          {/* Primary CTA as icon if no tech icons or if we have space */}
+          {(activeFeature.techIcons.length === 0 || activeFeature.techIcons.length < 5) && (
             <TrackingLink
               href={activeFeature.ctaLink.href}
-              clickType="See All Docs"
-              clickName={`${activeFeature.title} See All`}
+              clickType="Primary CTA Icon"
+              clickName={`${activeFeature.title} ${activeFeature.ctaLink.text}`}
               clickLocation="Features Showcase"
               clickText={activeFeature.ctaLink.text}
               className="group flex items-center gap-2 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-3 py-2 transition-all hover:bg-signoz_ink-300/40"
@@ -129,6 +132,45 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
             >
               <span className="whitespace-nowrap text-xs text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300">
                 {activeFeature.ctaLink.text}
+              </span>
+              <ArrowUpRight className="h-3 w-3 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300" />
+            </TrackingLink>
+          )}
+
+          {/* Additional CTAs as icons */}
+          {activeFeature.additionalCTAs
+            ?.slice(0, 5 - activeFeature.techIcons.length - 1)
+            .map((cta, index) => (
+              <TrackingLink
+                key={`additional-${index}`}
+                href={cta.href}
+                clickType="Additional CTA Icon"
+                clickName={`${activeFeature.title} ${cta.text}`}
+                clickLocation="Features Showcase"
+                clickText={cta.text}
+                className="group flex items-center gap-2 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-3 py-2 transition-all hover:bg-signoz_ink-300/40"
+                title={cta.text}
+              >
+                <span className="whitespace-nowrap text-xs text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300">
+                  {cta.text}
+                </span>
+                <ArrowUpRight className="h-3 w-3 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300" />
+              </TrackingLink>
+            ))}
+
+          {/* Show "See All" if we have more than 5 total items */}
+          {activeFeature.techIcons.length + 1 + (activeFeature.additionalCTAs?.length || 0) > 5 && (
+            <TrackingLink
+              href={activeFeature.ctaLink.href}
+              clickType="See All Docs"
+              clickName={`${activeFeature.title} See All`}
+              clickLocation="Features Showcase"
+              clickText="See All"
+              className="group flex items-center gap-2 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-3 py-2 transition-all hover:bg-signoz_ink-300/40"
+              title="See all options"
+            >
+              <span className="whitespace-nowrap text-xs text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300">
+                See All
               </span>
               <ArrowUpRight className="h-3 w-3 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300" />
             </TrackingLink>
