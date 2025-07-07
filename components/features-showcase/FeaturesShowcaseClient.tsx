@@ -37,7 +37,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
               onClick={() => handleTabClick(feature.id)}
               className={`flex-shrink-0 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-all ${
                 activeTab === feature.id
-                  ? 'bg-signoz_robin-500 text-white'
+                  ? 'bg-signoz_sienna-100 text-gray-800'
                   : 'bg-signoz_ink-300/20 text-signoz_vanilla-300 hover:bg-signoz_ink-300/40 hover:text-signoz_vanilla-100'
               }`}
             >
