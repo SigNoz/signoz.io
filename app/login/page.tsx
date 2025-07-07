@@ -19,7 +19,7 @@ interface Tenant {
 
 enum TenantState {
   HEALTHY = 'HEALTHY',
-  TERMINATED = 'TERMINATED',
+  DELETED = 'DELETED',
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL
@@ -272,7 +272,7 @@ export default function Login() {
                             >
                               <div className="flex items-center justify-between text-sm font-normal text-signoz_vanilla-400">
                                 {tenant.name}.{tenant.region.dns}
-                                {tenant.state !== TenantState.TERMINATED && (
+                                {tenant.state !== TenantState.DELETED && (
                                   <a
                                     href={`https://${tenant.name}.${tenant.region.dns}/login`}
                                     target="_blank"
@@ -284,7 +284,7 @@ export default function Login() {
                               </div>
 
                               <span className=" flex items-center text-xs text-signoz_vanilla-400">
-                                {tenant.state !== TenantState.TERMINATED ? (
+                                {tenant.state !== TenantState.DELETED ? (
                                   <>
                                     <Dot color="#25E192" className="-ml-2 mr-1" /> Active
                                   </>
