@@ -56,8 +56,9 @@ export interface FeatureShowcase {
   id: string
   title: string
   description: string
-  thumbnail: string
-  videoSrc: string
+  thumbnail?: string
+  videoSrc?: string
+  imageSrc?: string
   techIcons: TechIcon[]
   ctaLink: {
     text: string
@@ -68,6 +69,7 @@ export interface FeatureShowcase {
     text: string
     type: 'popular' | 'new' | 'enterprise'
   }
+  mediaType: 'video' | 'image'
 }
 
 export const FEATURE_CATEGORIES = {
@@ -92,37 +94,98 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     description:
       'Monitor & troubleshoot your application performance with comprehensive APM capabilities.',
     thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/apm/signoz-apm.webm',
     techIcons: [
-      { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript', href: '/docs/instrumentation/javascript/' },
-      { icon: <SiPython className="h-5 w-5 text-blue-500" />, name: 'Python', href: '/docs/instrumentation/python/' },
-      { icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />, name: 'Java', href: '/docs/instrumentation/java/' },
-      { icon: <SiGo className="h-5 w-5 text-cyan-500" />, name: 'Go', href: '/docs/instrumentation/go/' },
-      { icon: <SiDotnet className="h-5 w-5 text-purple-500" />, name: '.NET', href: '/docs/instrumentation/dotnet/' },
-      { icon: <SiPhp className="h-5 w-5 text-purple-600" />, name: 'PHP', href: '/docs/instrumentation/php/' },
-      { icon: <SiRuby className="h-5 w-5 text-red-500" />, name: 'Ruby', href: '/docs/instrumentation/ruby/' },
-      { icon: <SiRust className="h-5 w-5 text-orange-600" />, name: 'Rust', href: '/docs/instrumentation/rust/' },
+      {
+        icon: <SiJavascript className="h-5 w-5 text-yellow-500" />,
+        name: 'JavaScript',
+        href: '/docs/instrumentation/javascript/',
+      },
+      {
+        icon: <SiPython className="h-5 w-5 text-blue-500" />,
+        name: 'Python',
+        href: '/docs/instrumentation/python/',
+      },
+      {
+        icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
+        name: 'Java',
+        href: '/docs/instrumentation/java/',
+      },
+      {
+        icon: <SiGo className="h-5 w-5 text-cyan-500" />,
+        name: 'Go',
+        href: '/docs/instrumentation/go/',
+      },
+      {
+        icon: <SiDotnet className="h-5 w-5 text-purple-500" />,
+        name: '.NET',
+        href: '/docs/instrumentation/dotnet/',
+      },
+      {
+        icon: <SiPhp className="h-5 w-5 text-purple-600" />,
+        name: 'PHP',
+        href: '/docs/instrumentation/php/',
+      },
+      {
+        icon: <SiRuby className="h-5 w-5 text-red-500" />,
+        name: 'Ruby',
+        href: '/docs/instrumentation/ruby/',
+      },
+      {
+        icon: <SiRust className="h-5 w-5 text-orange-600" />,
+        name: 'Rust',
+        href: '/docs/instrumentation/rust/',
+      },
     ],
     ctaLink: {
       text: 'See all languages',
       href: '/docs/instrumentation/',
     },
     category: 'core',
+    mediaType: 'video',
   },
   {
-    id: 'log-management',
+    id: 'logs',
     title: 'Log Management',
     description: 'Ingest, search, and analyze your logs at any scale with powerful log management.',
     thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/logs/signoz-logs.webm',
     techIcons: [
-      { icon: <Search className="h-5 w-5 text-blue-500" />, name: 'Log Search', href: '/docs/logs-management/send-logs-to-signoz/' },
-      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'Kubernetes', href: '/docs/install/kubernetes/' },
-      { icon: <SiDocker className="h-5 w-5 text-blue-400" />, name: 'Docker', href: '/docs/install/docker/' },
-      { icon: <SiNodedotjs className="h-5 w-5 text-green-500" />, name: 'Node.js', href: '/docs/instrumentation/javascript/' },
-      { icon: <SiPython className="h-5 w-5 text-blue-500" />, name: 'Python', href: '/docs/instrumentation/python/' },
-      { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript', href: '/docs/instrumentation/javascript/' },
-      { icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />, name: 'Java', href: '/docs/instrumentation/java/' },
+      {
+        icon: <Search className="h-5 w-5 text-blue-500" />,
+        name: 'Log Search',
+        href: '/docs/logs-management/send-logs-to-signoz/',
+      },
+      {
+        icon: <SiKubernetes className="h-5 w-5 text-blue-600" />,
+        name: 'Kubernetes',
+        href: '/docs/install/kubernetes/',
+      },
+      {
+        icon: <SiDocker className="h-5 w-5 text-blue-400" />,
+        name: 'Docker',
+        href: '/docs/install/docker/',
+      },
+      {
+        icon: <SiNodedotjs className="h-5 w-5 text-green-500" />,
+        name: 'Node.js',
+        href: '/docs/instrumentation/javascript/',
+      },
+      {
+        icon: <SiPython className="h-5 w-5 text-blue-500" />,
+        name: 'Python',
+        href: '/docs/instrumentation/python/',
+      },
+      {
+        icon: <SiJavascript className="h-5 w-5 text-yellow-500" />,
+        name: 'JavaScript',
+        href: '/docs/instrumentation/javascript/',
+      },
+      {
+        icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
+        name: 'Java',
+        href: '/docs/instrumentation/java/',
+      },
       { icon: <Database className="h-5 w-5 text-purple-500" />, name: 'Log Storage' },
     ],
     ctaLink: {
@@ -130,14 +193,14 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/logs-management/send-logs-to-signoz/',
     },
     category: 'core',
+    mediaType: 'video',
   },
   {
     id: 'infrastructure',
     title: 'Infrastructure',
     description:
       'Monitor hosts, containers, and orchestration platforms with infrastructure monitoring.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/infrastructure/signoz-infrastructure.webm',
     techIcons: [
       { icon: <LucideServer className="h-5 w-5 text-signoz_robin-500" />, name: 'Infrastructure' },
       { icon: <SiDocker className="h-5 w-5 text-blue-400" />, name: 'Docker' },
@@ -151,14 +214,14 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/infrastructure-monitoring/overview/',
     },
     category: 'core',
+    mediaType: 'video',
   },
   {
-    id: 'tracing',
+    id: 'traces',
     title: 'Tracing',
     description:
       'Track user requests across services to identify bottlenecks with distributed tracing.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/traces/signoz-traces.webm',
     techIcons: [
       { icon: <Activity className="h-5 w-5 text-blue-500" />, name: 'Request Tracing' },
       { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'Kubernetes' },
@@ -172,13 +235,13 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/distributed-tracing/overview/',
     },
     category: 'core',
+    mediaType: 'video',
   },
   {
     id: 'metrics',
     title: 'Metrics',
     description: 'Custom metrics and configurable dashboards to fit any monitoring use case.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    imageSrc: '/showcases/metrics/signoz-metrics.webp',
     techIcons: [
       { icon: <BarChart3 className="h-5 w-5 text-blue-500" />, name: 'Custom Metrics' },
       { icon: <TrendingUp className="h-5 w-5 text-green-500" />, name: 'Analytics' },
@@ -191,13 +254,13 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/metrics-management/overview/',
     },
     category: 'core',
+    mediaType: 'image',
   },
   {
     id: 'dashboards',
     title: 'Dashboards',
     description: 'Create powerful, customizable dashboards to visualize your observability data.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/dashboards/signoz-dashboards.webm',
     techIcons: [
       { icon: <BarChart3 className="h-5 w-5 text-blue-500" />, name: 'Custom Dashboards' },
       { icon: <TrendingUp className="h-5 w-5 text-green-500" />, name: 'Data Visualization' },
@@ -210,14 +273,14 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/dashboards/overview/',
     },
     category: 'core',
+    mediaType: 'video',
   },
   {
     id: 'exceptions',
     title: 'Exceptions',
     description:
       'Record exceptions automatically with stack trace & linked span data for faster debugging.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/exceptions/signoz-exceptions.webm',
     techIcons: [
       { icon: <Bug className="h-5 w-5 text-red-500" />, name: 'Error Tracking' },
       { icon: <SiJavascript className="h-5 w-5 text-yellow-500" />, name: 'JavaScript' },
@@ -232,14 +295,14 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/exceptions-monitoring/overview/',
     },
     category: 'core',
+    mediaType: 'video',
   },
   {
     id: 'alerts',
     title: 'Alerts',
     description:
       'Get actionable alerts in your preferred notification channel with smart alerting.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/alerts/signoz-alerts.webm',
     techIcons: [
       { icon: <AlertTriangle className="h-5 w-5 text-yellow-500" />, name: 'Alert Rules' },
       { icon: <Zap className="h-5 w-5 text-orange-500" />, name: 'Notifications' },
@@ -252,73 +315,37 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/alerts-management/overview/',
     },
     category: 'core',
+    mediaType: 'video',
   },
   {
-    id: 'aws',
-    title: 'AWS',
-    description: 'Monitor AWS services and infrastructure with native AWS integrations.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    id: 'cloud-monitoring',
+    title: 'Cloud Monitoring',
+    description: 'Monitor AWS, GCP, and Azure services with native cloud provider integrations.',
+    videoSrc: '/showcases/cloud-monitoring/signoz-cloud-monitoring.webm',
     techIcons: [
       { icon: <SiAmazon className="h-5 w-5 text-orange-500" />, name: 'AWS' },
-      { icon: <Cloud className="h-5 w-5 text-blue-400" />, name: 'EC2' },
-      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'EKS' },
-      { icon: <Database className="h-5 w-5 text-green-500" />, name: 'RDS' },
-      { icon: <LucideServer className="h-5 w-5 text-purple-500" />, name: 'Lambda' },
-    ],
-    ctaLink: {
-      text: 'See all AWS integrations',
-      href: '/docs/integrations/aws/',
-    },
-    category: 'cloud',
-  },
-  {
-    id: 'azure',
-    title: 'Azure',
-    description: 'Comprehensive monitoring for Azure services and resources.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
-    techIcons: [
+      { icon: <SiGooglecloud className="h-5 w-5 text-blue-400" />, name: 'Google Cloud' },
       {
         icon: <img src="/img/icons/azure-icon.svg" width={20} height={20} alt="Azure" />,
         name: 'Azure',
       },
-      { icon: <Cloud className="h-5 w-5 text-blue-400" />, name: 'Virtual Machines' },
-      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'AKS' },
-      { icon: <Database className="h-5 w-5 text-green-500" />, name: 'SQL Database' },
-      { icon: <LucideServer className="h-5 w-5 text-purple-500" />, name: 'Functions' },
+      { icon: <Cloud className="h-5 w-5 text-blue-400" />, name: 'Cloud Services' },
+      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'Kubernetes' },
+      { icon: <Database className="h-5 w-5 text-green-500" />, name: 'Managed Services' },
+      { icon: <LucideServer className="h-5 w-5 text-purple-500" />, name: 'Serverless' },
     ],
     ctaLink: {
-      text: 'See all Azure integrations',
-      href: '/docs/integrations/azure/',
+      text: 'See all cloud integrations',
+      href: '/docs/integrations/',
     },
     category: 'cloud',
+    mediaType: 'video',
   },
   {
-    id: 'gcp',
-    title: 'GCP',
-    description: 'Monitor Google Cloud Platform services with built-in GCP integrations.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
-    techIcons: [
-      { icon: <SiGooglecloud className="h-5 w-5 text-blue-400" />, name: 'Google Cloud' },
-      { icon: <SiKubernetes className="h-5 w-5 text-blue-600" />, name: 'GKE' },
-      { icon: <Cloud className="h-5 w-5 text-green-400" />, name: 'Compute Engine' },
-      { icon: <Database className="h-5 w-5 text-orange-500" />, name: 'Cloud SQL' },
-      { icon: <LucideServer className="h-5 w-5 text-purple-500" />, name: 'Cloud Functions' },
-    ],
-    ctaLink: {
-      text: 'See all GCP integrations',
-      href: '/docs/integrations/gcp/',
-    },
-    category: 'cloud',
-  },
-  {
-    id: 'frontend-mobile',
+    id: 'frontend',
     title: 'Frontend & Mobile Monitoring',
     description: 'Monitor frontend applications and mobile apps with real user monitoring.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    imageSrc: '/showcases/frontend/signoz-frontend.webp',
     techIcons: [
       { icon: <Globe className="h-5 w-5 text-blue-500" />, name: 'Web Apps' },
       { icon: <Smartphone className="h-5 w-5 text-green-500" />, name: 'Mobile Apps' },
@@ -331,14 +358,14 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/frontend-monitoring/overview/',
     },
     category: 'advanced',
+    mediaType: 'image',
   },
   {
     id: 'llm-monitoring',
     title: 'LLM Monitoring',
     description:
       'Monitor Large Language Models and AI applications with specialized LLM observability.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/llm/signoz-llm.webm',
     techIcons: [
       { icon: <Brain className="h-5 w-5 text-purple-500" />, name: 'LLM Models' },
       { icon: <Activity className="h-5 w-5 text-blue-500" />, name: 'AI Observability' },
@@ -355,13 +382,13 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       text: 'New',
       type: 'new',
     },
+    mediaType: 'video',
   },
   {
     id: 'correlation',
     title: 'Correlation',
     description: 'Correlate metrics, logs, and traces to get complete observability insights.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/correlation/signoz-correlation.webm',
     techIcons: [
       { icon: <Link className="h-5 w-5 text-blue-500" />, name: 'Data Correlation' },
       { icon: <Activity className="h-5 w-5 text-green-500" />, name: 'Trace to Logs' },
@@ -374,14 +401,14 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/correlation/overview/',
     },
     category: 'advanced',
+    mediaType: 'video',
   },
   {
     id: 'cicd-observability',
     title: 'CI/CD Observability',
     description:
       'Monitor your CI/CD pipelines and deployment processes with specialized observability.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    imageSrc: '/showcases/cicd/signoz-cicd.webp',
     techIcons: [
       { icon: <GitBranch className="h-5 w-5 text-blue-500" />, name: 'CI/CD Pipelines' },
       { icon: <Activity className="h-5 w-5 text-green-500" />, name: 'Deployment Tracking' },
@@ -394,14 +421,14 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/cicd-observability/overview/',
     },
     category: 'advanced',
+    mediaType: 'image',
   },
   {
     id: 'integrations',
     title: 'Integrations',
     description:
       'Connect with 100+ integrations including databases, message queues, and third-party services.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    imageSrc: '/showcases/integrations/signoz-integrations.webp',
     techIcons: [
       { icon: <SiPostgresql className="h-5 w-5 text-blue-600" />, name: 'PostgreSQL' },
       { icon: <SiRedis className="h-5 w-5 text-red-500" />, name: 'Redis' },
@@ -416,13 +443,13 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/integrations/integrations-list/',
     },
     category: 'advanced',
+    mediaType: 'image',
   },
   {
     id: 'external-apis',
     title: 'External APIs',
     description: 'Monitor external API calls, dependencies, and third-party service performance.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/external-apis/signoz-external-apis.webm',
     techIcons: [
       { icon: <Globe className="h-5 w-5 text-blue-500" />, name: 'External APIs' },
       { icon: <Link className="h-5 w-5 text-green-500" />, name: 'Dependencies' },
@@ -435,13 +462,13 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/api-monitoring/overview/',
     },
     category: 'advanced',
+    mediaType: 'video',
   },
   {
     id: 'messaging-queues',
     title: 'Messaging Queues',
     description: 'Monitor message queues, event streams, and asynchronous communication patterns.',
-    thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
-    videoSrc: '/showcases/logs/signoz-logs.mp4',
+    videoSrc: '/showcases/messaging-queues/signoz-messaging-queues.webm',
     techIcons: [
       { icon: <SiApachekafka className="h-5 w-5 text-black" />, name: 'Apache Kafka' },
       { icon: <SiRabbitmq className="h-5 w-5 text-orange-600" />, name: 'RabbitMQ' },
@@ -454,5 +481,6 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
       href: '/docs/messaging-queues/overview/',
     },
     category: 'advanced',
+    mediaType: 'video',
   },
 ]

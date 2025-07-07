@@ -53,10 +53,13 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
         <div className="border-r border-signoz_slate-400/10 md:col-span-7">
           <div className="h-full w-full">
             <VideoPlayer
+              key={activeFeature.id}
               thumbnailSrc={activeFeature.thumbnail}
               videoSrc={activeFeature.videoSrc}
+              imageSrc={activeFeature.imageSrc}
               title={activeFeature.title}
               className="aspect-video w-full"
+              mediaType={activeFeature.mediaType}
             />
           </div>
         </div>

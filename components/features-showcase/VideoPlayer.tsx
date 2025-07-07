@@ -5,17 +5,21 @@ import { Play, Pause, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 
 interface VideoPlayerProps {
-  thumbnailSrc: string
-  videoSrc: string
+  thumbnailSrc?: string
+  videoSrc?: string
+  imageSrc?: string
   title: string
   className?: string
+  mediaType: 'video' | 'image'
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   thumbnailSrc,
   videoSrc,
+  imageSrc,
   title,
   className = '',
+  mediaType,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [showThumbnail, setShowThumbnail] = useState(false)
@@ -26,7 +30,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handlePlayClick = useCallback(() => {
-    if (videoRef.current) {
+    if (videoRef.current && mediaType === 'video') {
       if (isPlaying) {
         videoRef.current.pause()
         setIsPlaying(false)
@@ -36,7 +40,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         setShowThumbnail(false)
       }
     }
-  }, [isPlaying])
+  }, [isPlaying, mediaType])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -47,7 +51,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const video = videoRef.current
-    if (!video || !video.duration) return
+    if (!video || !video.duration || mediaType !== 'video') return
 
     const progressBar = e.currentTarget
     const rect = progressBar.getBoundingClientRect()
@@ -60,8 +64,18 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }
 
   useEffect(() => {
+    if (mediaType === 'image') {
+      setIsLoading(false)
+      return
+    }
+
     const video = videoRef.current
     if (!video) return
+
+    // Reset state when video source changes
+    setIsLoading(true)
+    setProgress(0)
+    setIsPlaying(false)
 
     const updateProgress = () => {
       if (video.duration) {
@@ -69,18 +83,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       }
     }
 
+    const handleLoadedData = () => {
+      setIsLoading(false)
+      setIsPlaying(true)
+    }
+
+    const handleWaiting = () => setIsLoading(true)
+    const handlePlaying = () => {
+      setIsLoading(false)
+      setIsPlaying(true)
+    }
+
     video.addEventListener('timeupdate', updateProgress)
-    video.addEventListener('loadeddata', () => setIsLoading(false))
-    video.addEventListener('waiting', () => setIsLoading(true))
-    video.addEventListener('playing', () => setIsLoading(false))
+    video.addEventListener('loadeddata', handleLoadedData)
+    video.addEventListener('waiting', handleWaiting)
+    video.addEventListener('playing', handlePlaying)
+
+    // Force video to load new source
+    video.load()
 
     return () => {
       video.removeEventListener('timeupdate', updateProgress)
-      video.removeEventListener('loadeddata', () => setIsLoading(false))
-      video.removeEventListener('waiting', () => setIsLoading(true))
-      video.removeEventListener('playing', () => setIsLoading(false))
+      video.removeEventListener('loadeddata', handleLoadedData)
+      video.removeEventListener('waiting', handleWaiting)
+      video.removeEventListener('playing', handlePlaying)
     }
-  }, [videoSrc])
+  }, [videoSrc, mediaType])
 
   // Viewport detection
   useEffect(() => {
@@ -98,10 +126,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     return () => observer.disconnect()
   }, [])
 
-  // Spacebar control (only when in viewport)
+  // Spacebar control (only when in viewport and for videos)
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && isInViewport) {
+      if (e.code === 'Space' && isInViewport && mediaType === 'video') {
         e.preventDefault()
         handlePlayClick()
       }
@@ -109,8 +137,32 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
     document.addEventListener('keydown', handleKeyPress)
     return () => document.removeEventListener('keydown', handleKeyPress)
-  }, [handlePlayClick, isInViewport])
+  }, [handlePlayClick, isInViewport, mediaType])
 
+  // Render image-only showcase
+  if (mediaType === 'image' && imageSrc) {
+    return (
+      <div
+        ref={containerRef}
+        className={`hover:border-signoz_accent-300/50 group relative overflow-hidden rounded-lg bg-signoz_ink-300/30 transition-all duration-300 ${className}`}
+      >
+        <div className="relative aspect-video w-full">
+          <Image
+            src={imageSrc}
+            alt={`${title} showcase`}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={false}
+          />
+          {/* Hover Effect */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        </div>
+      </div>
+    )
+  }
+
+  // Render video showcase
   return (
     <div
       ref={containerRef}
@@ -118,7 +170,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     >
       <div className="relative aspect-video w-full">
         {/* Thumbnail Image */}
-        {showThumbnail && (
+        {showThumbnail && thumbnailSrc && (
           <div className="absolute inset-0 z-10">
             <Image
               src={thumbnailSrc}
@@ -149,28 +201,30 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         )}
 
         {/* Video Element */}
-        <video
-          ref={videoRef}
-          className="h-full w-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          onLoadedData={() => {
-            setIsPlaying(true)
-            setShowThumbnail(false)
-          }}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          aria-label={`${title} showcase video`}
-        >
-          <source src={videoSrc} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        {videoSrc && (
+          <video
+            ref={videoRef}
+            className="h-full w-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            onLoadedData={() => {
+              setIsPlaying(true)
+              setShowThumbnail(false)
+            }}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            aria-label={`${title} showcase video`}
+          >
+            <source src={videoSrc} type="video/webm" />
+            Your browser does not support the video tag.
+          </video>
+        )}
 
         {/* Loading Indicator */}
-        {isLoading && !showThumbnail && (
+        {isLoading && !showThumbnail && mediaType === 'video' && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
             <div className="rounded-lg bg-signoz_ink-300/80 p-4 backdrop-blur-sm">
               <Loader2 className="h-8 w-8 animate-spin text-signoz_vanilla-100" />
@@ -179,7 +233,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         )}
 
         {/* Video Controls Overlay (when video is playing) */}
-        {!showThumbnail && (
+        {!showThumbnail && mediaType === 'video' && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-300 hover:bg-black/20 hover:opacity-100">
             <button
               onClick={handlePlayClick}
@@ -195,17 +249,19 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           </div>
         )}
 
-        {/* Progress Bar */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-1 cursor-pointer bg-signoz_slate-400/20 transition-all duration-200 hover:h-2"
-          onClick={handleProgressClick}
-          title="Click to seek"
-        >
+        {/* Progress Bar (only for videos) */}
+        {mediaType === 'video' && (
           <div
-            className="h-full bg-gradient-to-r from-signoz_robin-500 to-signoz_sakura-500 transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+            className="absolute bottom-0 left-0 right-0 h-1 cursor-pointer bg-signoz_slate-400/20 transition-all duration-200 hover:h-2"
+            onClick={handleProgressClick}
+            title="Click to seek"
+          >
+            <div
+              className="h-full bg-gradient-to-r from-signoz_robin-500 to-signoz_sakura-500 transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
       </div>
     </div>
   )
