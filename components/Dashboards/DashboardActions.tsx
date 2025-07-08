@@ -69,33 +69,41 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
   }
 
   return (
-    <div className={`flex gap-3 my-6 ${className}`}>
-      <button 
-        className="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        onClick={handleDownload}
-        disabled={isDownloading}
-      >
-        <Download className="w-3.5 h-3.5 mr-1.5" />
-        {isDownloading ? 'Downloading...' : 'Download JSON'}
-      </button>
+    <div className={`flex flex-col items-center ${className}`}>
+      <div className="flex gap-3 my-6">
+        <button 
+          className="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          onClick={handleDownload}
+          disabled={isDownloading}
+        >
+          <Download className="w-3.5 h-3.5 mr-1.5" />
+          {isDownloading ? 'Downloading...' : 'Download JSON'}
+        </button>
+        
+        <button 
+          className="inline-flex items-center px-3 py-1.5 text-sm bg-gray-100 border border-gray-300 text-gray-800 rounded-md hover:bg-gray-200 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          onClick={handleCopy}
+          disabled={isCopying}
+        >
+          {copied ? (
+            <>
+              <CheckCircle className="w-3.5 h-3.5 mr-1.5 text-green-600" />
+              <span className="text-green-600">Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-3.5 h-3.5 mr-1.5" />
+              {isCopying ? 'Copying...' : 'Copy JSON'}
+            </>
+          )}
+        </button>
+      </div>
       
-      <button 
-        className="inline-flex items-center px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        onClick={handleCopy}
-        disabled={isCopying}
-      >
-        {copied ? (
-          <>
-            <CheckCircle className="w-3.5 h-3.5 mr-1.5 text-green-600" />
-            <span className="text-green-600">Copied!</span>
-          </>
-        ) : (
-          <>
-            <Copy className="w-3.5 h-3.5 mr-1.5" />
-            {isCopying ? 'Copying...' : 'Copy JSON'}
-          </>
-        )}
-      </button>
+      <div className="text-sm text-gray-600 mt-2">
+        <p className="text-center">
+          <span className="font-bold italic">Dashboards → + New dashboard → Import JSON</span>
+        </p>
+      </div>
     </div>
   )
 }
