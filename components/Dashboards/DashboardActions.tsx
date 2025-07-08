@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from 'react'
 import { Download, Copy, CheckCircle } from 'lucide-react'
 
