@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Monitor, SiKubernetes } from 'react-icons/si'
+import { SiKubernetes } from 'react-icons/si'
 import { Server } from 'lucide-react'
 import IconCardGrid from '../Card/IconCardGrid'
 
