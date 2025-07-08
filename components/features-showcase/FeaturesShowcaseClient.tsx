@@ -33,8 +33,9 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
   return (
     <div className="relative">
       {/* Horizontal Scrollable Feature List */}
-      <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-signoz_slate-400/20 mb-8 overflow-x-auto">
-        <div className="flex min-w-max gap-2 pb-2">
+      <div className="relative mb-4 sm:mb-6 md:mb-8">
+        <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-signoz_slate-400/20 overflow-x-auto">
+          <div className="flex min-w-max gap-1 pb-2 sm:gap-2">
           {allFeatures.map((feature) => (
             <TrackingButton
               key={feature.id}
@@ -43,7 +44,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
               clickName={feature.title}
               clickLocation="Features Showcase"
               clickText={feature.title}
-              className={`flex-shrink-0 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-all ${
+              className={`flex-shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:py-2 sm:text-sm ${
                 activeTab === feature.id
                   ? 'bg-signoz_sienna-100 text-gray-800'
                   : 'bg-signoz_ink-300/20 text-signoz_vanilla-300 hover:bg-signoz_ink-300/40 hover:text-signoz_vanilla-100'
@@ -52,13 +53,16 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
               {feature.title}
             </TrackingButton>
           ))}
+          </div>
         </div>
+        {/* Scroll indicator gradient */}
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-20 bg-gradient-to-l from-signoz_ink-500 via-signoz_ink-500/50 to-transparent" />
       </div>
 
-      {/* 60-40 Split Layout */}
-      <div className="relative grid grid-cols-1 gap-0 overflow-hidden rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/10 md:grid-cols-12">
-        {/* Left: Video (60% - 7 cols) */}
-        <div className="border-r border-signoz_slate-400/10 md:col-span-7">
+      {/* Responsive Layout - Stack on mobile, split on tablet/desktop */}
+      <div className="relative flex flex-col overflow-hidden rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/10 md:grid md:grid-cols-12 md:gap-0">
+        {/* Video/Image Section */}
+        <div className="border-b border-signoz_slate-400/10 md:order-1 md:col-span-7 md:border-b-0 md:border-r">
           <div className="h-full w-full">
             <ErrorBoundary>
               <VideoPlayer
@@ -66,7 +70,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
                 videoSrc={activeFeature.videoSrc}
                 imageSrc={activeFeature.imageSrc}
                 title={activeFeature.title}
-                className="aspect-video w-full"
+                className="aspect-video w-full object-cover"
                 mediaType={activeFeature.mediaType}
                 isActive={activeTab === activeFeature.id}
               />
@@ -74,17 +78,114 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
           </div>
         </div>
 
-        {/* Right: Content (40% - 5 cols) */}
-        <div className="flex min-h-[32rem] flex-col justify-between px-6 py-8 md:col-span-5">
+        {/* Content Section */}
+        <div className="flex min-h-[20rem] flex-col px-4 py-6 sm:min-h-[24rem] sm:px-6 sm:py-8 md:order-2 md:col-span-5 md:min-h-[32rem] md:justify-between">
           {/* Main Content - Aligned to top */}
           <div>
-            <p className="text-2xl font-[600] font-medium leading-snug text-signoz_vanilla-400 sm:text-3xl sm:leading-snug">
+            <p className="text-xl font-[600] font-medium leading-snug text-signoz_vanilla-400 sm:text-2xl sm:leading-snug md:text-2xl lg:text-3xl">
               {activeFeature.description}
             </p>
           </div>
 
-          {/* Primary CTA - Bottom Right */}
-          <div className="flex justify-end">
+          {/* Mobile-only: Tech Icons above CTA */}
+          <div className="mt-6 flex flex-col gap-6 md:hidden">
+            {/* Tech Icons for mobile */}
+            <div className="flex flex-wrap items-center justify-start gap-2">
+              {activeFeature.techIcons.slice(0, 5).map((tech, index) => {
+                const icon = tech.iconKey ? (
+                  <Suspense
+                    fallback={<div className="h-5 w-5 animate-pulse rounded bg-signoz_slate-400/20" />}
+                  >
+                    {getIcon(tech.iconKey)}
+                  </Suspense>
+                ) : (
+                  tech.icon
+                )
+
+                const iconElement = (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 transition-all hover:scale-105 hover:bg-signoz_ink-300/40">
+                    {icon}
+                  </div>
+                )
+
+                return tech.href ? (
+                  <TrackingLink
+                    key={`tech-${index}`}
+                    href={tech.href}
+                    clickType="Tech Icon"
+                    clickName={tech.name}
+                    clickLocation="Features Showcase"
+                    clickText={tech.name}
+                    className="block"
+                    title={`${tech.name} documentation`}
+                  >
+                    {iconElement}
+                  </TrackingLink>
+                ) : (
+                  <div key={`tech-${index}`} title={tech.name}>
+                    {iconElement}
+                  </div>
+                )
+              })}
+
+              {/* Additional CTAs for mobile */}
+              {(activeFeature.techIcons.length === 0 || activeFeature.techIcons.length < 5) && (
+                <TrackingLink
+                  href={activeFeature.ctaLink.href}
+                  clickType="Primary CTA Icon"
+                  clickName={`${activeFeature.title} ${activeFeature.ctaLink.text}`}
+                  clickLocation="Features Showcase"
+                  clickText={activeFeature.ctaLink.text}
+                  className="group flex items-center gap-1 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-2 py-1.5 text-xs transition-all hover:bg-signoz_ink-300/40"
+                  title={activeFeature.ctaLink.text}
+                >
+                  <span className="whitespace-nowrap text-[10px] text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300">
+                    {activeFeature.ctaLink.text}
+                  </span>
+                  <ArrowUpRight className="h-2.5 w-2.5 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300" />
+                </TrackingLink>
+              )}
+
+              {activeFeature.additionalCTAs
+                ?.slice(0, 5 - activeFeature.techIcons.length - 1)
+                .map((cta, index) => (
+                  <TrackingLink
+                    key={`additional-${index}`}
+                    href={cta.href}
+                    clickType="Additional CTA Icon"
+                    clickName={`${activeFeature.title} ${cta.text}`}
+                    clickLocation="Features Showcase"
+                    clickText={cta.text}
+                    className="group flex items-center gap-1 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-2 py-1.5 text-xs transition-all hover:bg-signoz_ink-300/40"
+                    title={cta.text}
+                  >
+                    <span className="whitespace-nowrap text-[10px] text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300">
+                      {cta.text}
+                    </span>
+                    <ArrowUpRight className="h-2.5 w-2.5 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300" />
+                  </TrackingLink>
+                ))}
+            </div>
+
+            {/* Primary CTA for mobile */}
+            <div className="flex justify-start">
+              <TrackingLink
+                href="/teams/"
+                clickType="Get Started CTA"
+                clickName={`${activeFeature.title} Get Started`}
+                clickLocation="Features Showcase"
+                clickText="Get Started - Free"
+              >
+                <Button type={BUTTON_TYPES.PRIMARY} className="group w-full hover:scale-105 sm:w-auto">
+                  <span>Get Started - Free</span>
+                  <ArrowUpRight className="h-3 w-3 transition duration-300 ease-in-out group-hover:translate-x-[2px] group-hover:translate-y-[-2px] sm:h-4 sm:w-4" />
+                </Button>
+              </TrackingLink>
+            </div>
+          </div>
+
+          {/* Desktop-only: Primary CTA - Bottom Right */}
+          <div className="mt-8 hidden md:flex md:justify-end">
             <TrackingLink
               href="/teams/"
               clickType="Get Started CTA"
@@ -100,8 +201,8 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
           </div>
         </div>
 
-        {/* All CTAs - Bottom Left of entire component */}
-        <div className="absolute bottom-8 left-6 flex items-center gap-3">
+        {/* Tech Icons & CTAs - Desktop only (hidden on mobile) */}
+        <div className="hidden md:absolute md:bottom-8 md:left-6 md:flex md:items-center md:gap-3">
           {/* Tech Icons */}
           {activeFeature.techIcons.slice(0, 5).map((tech, index) => {
             const icon = tech.iconKey ? (
@@ -115,7 +216,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
             )
 
             const iconElement = (
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 transition-all hover:scale-105 hover:bg-signoz_ink-300/40">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 transition-all hover:scale-105 hover:bg-signoz_ink-300/40 sm:h-12 sm:w-12">
                 {icon}
               </div>
             )
@@ -148,13 +249,13 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
               clickName={`${activeFeature.title} ${activeFeature.ctaLink.text}`}
               clickLocation="Features Showcase"
               clickText={activeFeature.ctaLink.text}
-              className="group flex items-center gap-2 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-3 py-2 transition-all hover:bg-signoz_ink-300/40"
+              className="group flex items-center gap-1 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-2 py-1.5 text-xs transition-all hover:bg-signoz_ink-300/40 sm:gap-2 sm:px-3 sm:py-2 sm:text-sm"
               title={activeFeature.ctaLink.text}
             >
-              <span className="whitespace-nowrap text-xs text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300">
+              <span className="whitespace-nowrap text-[10px] text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300 sm:text-xs">
                 {activeFeature.ctaLink.text}
               </span>
-              <ArrowUpRight className="h-3 w-3 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300" />
+              <ArrowUpRight className="h-2.5 w-2.5 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300 sm:h-3 sm:w-3" />
             </TrackingLink>
           )}
 
@@ -169,13 +270,13 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
                 clickName={`${activeFeature.title} ${cta.text}`}
                 clickLocation="Features Showcase"
                 clickText={cta.text}
-                className="group flex items-center gap-2 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-3 py-2 transition-all hover:bg-signoz_ink-300/40"
+                className="group flex items-center gap-1 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-2 py-1.5 text-xs transition-all hover:bg-signoz_ink-300/40 sm:gap-2 sm:px-3 sm:py-2 sm:text-sm"
                 title={cta.text}
               >
-                <span className="whitespace-nowrap text-xs text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300">
+                <span className="whitespace-nowrap text-[10px] text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300 sm:text-xs">
                   {cta.text}
                 </span>
-                <ArrowUpRight className="h-3 w-3 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300" />
+                <ArrowUpRight className="h-2.5 w-2.5 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300 sm:h-3 sm:w-3" />
               </TrackingLink>
             ))}
 
@@ -187,13 +288,13 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
               clickName={`${activeFeature.title} See All`}
               clickLocation="Features Showcase"
               clickText={activeFeature.ctaLink.text}
-              className="group flex items-center gap-2 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-3 py-2 transition-all hover:bg-signoz_ink-300/40"
+              className="group flex items-center gap-1 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-2 py-1.5 text-xs transition-all hover:bg-signoz_ink-300/40 sm:gap-2 sm:px-3 sm:py-2 sm:text-sm"
               title="See all options"
             >
-              <span className="whitespace-nowrap text-xs text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300">
+              <span className="whitespace-nowrap text-[10px] text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300 sm:text-xs">
                 {activeFeature.ctaLink.text}
               </span>
-              <ArrowUpRight className="h-3 w-3 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300" />
+              <ArrowUpRight className="h-2.5 w-2.5 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300 sm:h-3 sm:w-3" />
             </TrackingLink>
           )}
         </div>
