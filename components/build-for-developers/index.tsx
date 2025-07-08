@@ -1,7 +1,6 @@
 import React from 'react'
 import Heading from '../../components/ui/Heading'
 import Card from '../Card/card'
-import Divider from '@/components/ui/Divider'
 
 const BuildForDevelopers = () => {
   const REASONS = [
