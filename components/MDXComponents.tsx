@@ -1,50 +1,53 @@
-import { type MDXComponents } from 'mdx/types'
-
-import 'katex/dist/katex.min.css'
-
-// Chart components
-import {
-  AreaChart,
-  BarChart,
-  LineChart,
-} from '@/components/shared/Charts/Charts'
-
+import TOCInline from 'pliny/ui/TOCInline'
+import Pre from 'pliny/ui/Pre'
+import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'
+import type { MDXComponents } from 'mdx/types'
+import Image from './Image'
+import CustomLink from './Link'
+import TableWrapper from './TableWrapper'
+import YouTube from './VideoPlayer/VideoPlayer'
+import GetStartedSigNoz from './GetStartedSigNoz/GetStartedSigNoz'
+import Admonition from './Admonition/Admonition'
+import SignUps from './SignUps/SignUps'
+import LogsPerf from './LogsPerf/LogsPerf'
+import VersionPin from './NodeVersionPin/NodeVersionPin'
+import VersionPinNestJs from './NestVersionPin/NestVersionPin'
+import Tabs from './Tabs'
+import TabItem from './TabItem'
+import DocCard from './DocCard'
+import DocCardContainer from './DocCardContainer'
+import NextCarousel from './Carousel/Carousel'
+import Figure from './Figure/Figure'
+import PricingCTA from './PricingCTA'
+import PageFeedback from './PageFeedback/PageFeedback'
+import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlayground'
+import VerticalTabs from './VerticalTabs/VerticalTabs'
+import FAQAccordion from './FAQAccordion/FAQAccordion'
+import Button from './Button/Button'
+import DatadogPricingCalculator from './DatadogPricingCalculator/DatadogPricingCalculator'
+import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz'
+import GrafanaVsSigNoz from './GrafanaVsSigNoz/GrafanaVsSigNoz'
+import NewRelicVsSigNoz from './NewRelicVsSigNoz/NewRelicVsSigNoz'
+import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
+import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
+import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
+import InterlinkCard from './InterlinkCard/InterlinkCard'
+import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
+import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
+import ImageCTA from './ImageCTA/ImageCTA'
+import TrackingLink from './TrackingLink'
+import APMQuickStartOverview from './APM/APMQuickStartOverview'
+import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
+import MDXButton from './MDXButton/MDXButton'
+import IconCardGrid from './Card/IconCardGrid'
+import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
+import LogsInstrumentationListicle from './Logs/LogsInstrumentationListicle'
+import IntegrationsListicle from './Integrations/IntegrationsListicle'
+import HostingDecision from './shared/HostingDecision'
+import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
+import K8sInstallationListicle from './Setup/K8sInstallationListicle'
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
-import Admonition from './Admonition/Admonition'
-import CardContainer from './Card/CardContainer'
-import ProductRoadmap from './ProductRoadmap/ProductRoadmap'
-import DocCardContainer from './Card/DocCardContainer'
-import CtaContainer from './Cta/CtaContainer'
-import DatadogMigration from './DatadogMigration/DatadogMigration'
-import SubMenu from './DropDown/SubMenu'
-import FeatureDiagram from './FeatureDiagram/FeatureDiagram'
-import Figure from './Figure/Figure'
-import GetStartedSigNoz from './GetStartedSigNoz/GetStartedSigNoz'
-import IconCardGrid from './Card/IconCardGrid'
-import Image from './shared/Image/Image'
-import InlineCode from './InlineCode/InlineCode'
-import InstallationInstructions from './GetStartedSigNoz/InstallationInstructions'
-import LogsPerformanceTest from './LogsPerformanceTest/LogsPerformanceTest'
-import { Pre } from './Pre/Pre'
-import ZoomableImage from './shared/ZoomableImage/ZoomableImage'
-import LoomVideo from './LoomVideo/LoomVideo'
-import SigNozDashboard from './SigNozDashboard/SigNozDashboard'
-import TabItem from './Tabs/TabItem'
-import Tabs from './Tabs/Tabs'
-import TOCInline from './TOCInline/TOCInline'
-import Tweet from './Tweet/Tweet'
-import YouTube from './YouTube/YouTube'
-import LiteYoutubeEmbed from './LiteYoutubeEmbed/LiteYoutubeEmbed'
-import IntegrationsDropdown from './IntegrationsDropdown/IntegrationsDropdown'
-import IntegrationsListicle from './IntegrationsListicle/IntegrationsListicle'
-import OSAndCloudListicle from './Onboarding/OSAndCloudListicle'
-import FrameworksListicle from './Onboarding/FrameworksListicle'
-import LanguageListicle from './Onboarding/LanguageListicle'
-import DatabaseListicle from './Onboarding/DatabaseListicle'
-import InfraMetricsListicle from './Onboarding/InfraMetricsListicle'
-import MessagingQueuesListicle from './Onboarding/MessagingQueuesListicle'
-import K8sInstallationListicle from './Setup/K8sInstallationListicle'
 import MigrateToSigNoz from './MigrateToSigNoz/MigrateToSigNozOverview'
 import DashboardTemplatesListicle from './Dashboards/DashboardTemplatesListicle'
 import DashboardActions from './Dashboards/DashboardActions'
@@ -54,41 +57,51 @@ import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsLis
 
 export const components: MDXComponents = {
   Image,
+  TOCInline,
+  a: CustomLink,
+  pre: Pre,
+  table: TableWrapper,
+  BlogNewsletterForm,
   YouTube,
-  LiteYoutubeEmbed,
-  AreaChart,
-  BarChart,
-  LineChart,
-  Tweet,
-  LoomVideo,
-  SigNozDashboard,
-  LogsPerformanceTest,
-  FeatureDiagram,
-  Figure,
-  ZoomableImage,
+  GetStartedSigNoz,
   Admonition,
+  SignUps,
+  LogsPerf,
+  VersionPin,
+  VersionPinNestJs,
   Tabs,
   TabItem,
-  InlineCode,
-  pre: Pre,
-  TOCInline,
-  ProductRoadmap,
-  GetStartedSigNoz,
-  DatadogMigration,
-  InstallationInstructions,
-  SubMenu,
-  IconCardGrid,
-  IntegrationsDropdown,
-  IntegrationsListicle,
-  CardContainer,
+  DocCard,
   DocCardContainer,
-  CtaContainer,
-  OSAndCloudListicle,
-  FrameworksListicle,
-  LanguageListicle,
-  DatabaseListicle,
-  InfraMetricsListicle,
-  MessagingQueuesListicle,
+  NextCarousel,
+  Figure,
+  PricingCTA,
+  PageFeedback,
+  CustomMetricPlayground,
+  VerticalTabs,
+  FAQAccordion,
+  Button,
+  DatadogPricingCalculator,
+  DatadogVsSigNoz,
+  GrafanaVsSigNoz,
+  NewRelicVsSigNoz,
+  DatadogAlternativesFinder,
+  KeyPointCallout,
+  GetStartedOpenTelemetryButton,
+  InterlinkCard,
+  InArticleVideoShowcaseModal,
+  GetStartedInfrastructureMonitoring,
+  ImageCTA,
+  TrackingLink,
+  APMQuickStartOverview,
+  APMInstrumentationListicle,
+  MDXButton,
+  IconCardGrid,
+  LogsQuickStartOverview,
+  LogsInstrumentationListicle,
+  IntegrationsListicle,
+  HostingDecision,
+  SelfHostInstallationListicle,
   K8sInstallationListicle,
   ArticleSeriesBottom,
   ArticleSeriesTop,
