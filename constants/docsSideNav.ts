@@ -1389,7 +1389,7 @@ const docsSideNav = [
             ]
           },
                     {
-            label: 'APM',
+            label: 'Hostmetrics',
             type: 'category',
             isExpanded: false,
             route: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
