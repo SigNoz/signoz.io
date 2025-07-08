@@ -48,7 +48,6 @@ interface IconCardData {
 }
 
 const DashboardTemplatesData: IconCardData[] = [
-  // Infrastructure & Host Metrics
   {
     name: 'Apache Web Server',
     href: 'https://github.com/SigNoz/dashboards/tree/main/apache-web-server',
@@ -57,49 +56,49 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'APM',
-    href: '/docs/dashboards/dashboard-templates/apm',
+    href: '/docs/dashboards/dashboard-templates/apm-dashboards',
     icon: <Activity className="h-7 w-7 text-blue-500" />,
     clickName: 'APM Dashboard Template',
   },
   {
     name: 'ArgoCD',
-    href: '/docs/dashboards/dashboard-templates/argocd',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/argocd',
     icon: <GitBranch className="h-7 w-7 text-orange-500" />,
     clickName: 'ArgoCD Dashboard Template',
   },
   {
     name: 'AWS ElastiCache Redis',
-    href: '/docs/dashboards/dashboard-templates/aws-elasticache-redis',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/aws-elasticache/redis',
     icon: <Cloud className="h-7 w-7 text-orange-600" />,
     clickName: 'AWS ElastiCache Redis Dashboard Template',
   },
   {
     name: 'AWS RDS',
-    href: '/docs/dashboards/dashboard-templates/aws-rds',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/aws-rds',
     icon: <Database className="h-7 w-7 text-blue-600" />,
     clickName: 'AWS RDS Dashboard Template',
   },
   {
     name: 'AWS SQS Prometheus',
-    href: '/docs/dashboards/dashboard-templates/aws-sqs-prometheus',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/aws-sqs-prometheus',
     icon: <MessageSquare className="h-7 w-7 text-purple-600" />,
     clickName: 'AWS SQS Prometheus Dashboard Template',
   },
   {
     name: 'CI/CD',
-    href: '/docs/dashboards/dashboard-templates/cicd',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/cicd',
     icon: <Settings className="h-7 w-7 text-green-600" />,
     clickName: 'CI/CD Dashboard Template',
   },
   {
     name: 'ClickHouse',
-    href: '/docs/dashboards/dashboard-templates/clickhouse',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/clickhouse',
     icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
     clickName: 'ClickHouse Dashboard Template',
   },
   {
     name: 'Container Metrics Docker',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/container-metrics',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/container-metrics/docker',
     icon: <SiDocker className="h-7 w-7 text-blue-400" />,
     clickName: 'Container Metrics Docker Dashboard Template',
   },
@@ -123,13 +122,13 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'GCP Compute Engine',
-    href: '/docs/dashboards/dashboard-templates/gcp-compute-engine',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/gcp/compute-engine',
     icon: <Cloud className="h-7 w-7 text-blue-500" />,
     clickName: 'GCP Compute Engine Dashboard Template',
   },
   {
     name: 'Hadoop',
-    href: '/docs/dashboards/dashboard-templates/hadoop',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/hadoop',
     icon: <Server className="h-7 w-7 text-yellow-600" />,
     clickName: 'Hadoop Dashboard Template',
   },
@@ -141,7 +140,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'Host Metrics',
-    href: '/docs/dashboards/dashboard-templates/hostmetrics',
+    href: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
     icon: <Monitor className="h-7 w-7 text-blue-500" />,
     clickName: 'Host Metrics Dashboard Template',
   },
@@ -164,8 +163,8 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'JVM Dashboard Template',
   },
   {
-    name: 'K8s Infra Metrics',
-    href: '/docs/dashboards/dashboard-templates/k8s-infra-metrics',
+    name: 'Kubernetes',
+    href: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
     icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
     clickName: 'K8s Infra Metrics Dashboard Template',
   },
@@ -243,7 +242,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'Snowflake',
-    href: '/docs/dashboards/dashboard-templates/snowflake',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
   },

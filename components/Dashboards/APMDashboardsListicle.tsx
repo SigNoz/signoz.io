@@ -20,13 +20,13 @@ const APMDashboardsData: IconCardData[] = [
   },
   {
     name: 'Database Calls Monitoring',
-    href: '#dummy-db-calls',
+    href: 'https://github.com/SigNoz/dashboards/blob/main/apm/db-calls-monitoring.json',
     icon: <Database className="h-7 w-7 text-purple-600" />,
     clickName: 'Database Calls Monitoring Dashboard Template',
   },
   {
     name: 'HTTP API Monitoring',
-    href: '#dummy-http-api',
+    href: 'https://github.com/SigNoz/dashboards/blob/main/apm/http-api-monitoring.json',
     icon: <Globe className="h-7 w-7 text-green-600" />,
     clickName: 'HTTP API Monitoring Dashboard Template',
   },
