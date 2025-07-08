@@ -22,9 +22,9 @@ Amazon ECS is a fully managed container orchestration service that makes it easy
 - **Troubleshooting**: Quickly identify and resolve issues with container deployments
 - **Capacity Planning**: Understand usage patterns to plan future capacity needs
 
-## What You'll Monitor
+## What You'll Monitor & Data Collected
 
-This integration collects key ECS metrics and logs, providing visibility into:
+This integration collects comprehensive ECS metrics and logs, providing visibility into:
 
 ### Core ECS Metrics
 - **CPU Utilization**: Monitor CPU usage at cluster, service, and task levels
@@ -45,67 +45,47 @@ When AWS Container Insights is enabled for your ECS resources, this integration 
 - **ECS agent logs**: Infrastructure-level logging
 - **Service event logs**: ECS service lifecycle events
 
-## Prerequisites
+### Collected Data Details
 
-Before setting up the ECS integration, ensure you have:
+<details>
+<summary>📊 Metrics List</summary>
 
-1. **AWS Account Access**: Administrative access to your AWS account
-2. **ECS Resources**: Active ECS clusters, services, and tasks to monitor
-3. **SigNoz Account**: Access to SigNoz (Cloud or Self-hosted)
-4. **IAM Permissions**: Ability to create IAM roles and CloudFormation stacks
+| Metric Name | Unit | Type | Description |
+|-------------|------|------|-------------|
+| aws_ECS_CPUUtilization_count | Percent | Gauge | Number of CPU utilization data points |
+| aws_ECS_CPUUtilization_max | Percent | Gauge | Maximum CPU utilization |
+| aws_ECS_CPUUtilization_min | Percent | Gauge | Minimum CPU utilization |
+| aws_ECS_CPUUtilization_sum | Percent | Gauge | Sum of CPU utilization values |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_count | None | Gauge | Container CPU reservation count |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_max | None | Gauge | Maximum container CPU reserved |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_min | None | Gauge | Minimum container CPU reserved |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_count | Percent | Gauge | Container CPU utilization count |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_max | Percent | Gauge | Maximum container CPU utilization |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_min | Percent | Gauge | Minimum container CPU utilization |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_count | None | Gauge | Container CPU utilized count |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_max | None | Gauge | Maximum container CPU utilized |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_min | None | Gauge | Minimum container CPU utilized |
 
-## Getting Started
+**Container Insights Metrics** (available when Container Insights is enabled):
+- Enhanced CPU and memory metrics at container level
+- Network performance metrics
+- Storage I/O metrics
+- Task and service level aggregations
 
-### Step 1: Access the Integration
+</details>
 
-1. Navigate to the **Integrations** tab in your SigNoz dashboard
-2. Search for "ECS" or browse the AWS services section
-3. Click on the **AWS ECS** integration tile
+<details>
+<summary>📋 Logs List</summary>
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/aws-ecs/ecs-services-integration.webp" alt="ECS in Services Integration list"/>
-    <figcaption><i>Select ECS from Services for Integration</i></figcaption>
-</figure>
+| Name | Path | Type | Description |
+|------|------|------|-------------|
+| Timestamp | timestamp | timestamp | Log entry timestamp |
+| Log Body | body | string | Complete log message content |
+| Account ID | resources.cloud.account.id | string | AWS account identifier |
+| Log Group Name | resources.aws.cloudwatch.log_group_name | string | CloudWatch log group name |
+| Log Stream Name | resources.aws.cloudwatch.log_stream_name | string | CloudWatch log stream name |
 
-### Step 2: Configure the Integration
-
-1. **Select AWS Region**: Choose the region where your integration agent will be installed
-2. **Choose Regions to Monitor**: Select one or more AWS regions containing your ECS resources
-3. **Configure Collection Options**:
-   - **Metric Collection**: Enable to collect ECS CloudWatch metrics (recommended)
-   - **Log Collection**: Enable to collect ECS container and service logs
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/aws-ecs/ecs-configure-integration.webp" alt="Configure ECS Integration settings"/>
-    <figcaption><i>Configure ECS Integration Settings</i></figcaption>
-</figure>
-
-### Step 3: Deploy the Integration Agent
-
-1. **Launch CloudFormation Stack**: Click the "Launch Stack" button to open AWS CloudFormation
-2. **Review Parameters**: The stack template comes pre-filled with your SigNoz account details
-3. **Acknowledge Permissions**: Review and acknowledge the IAM permissions required
-4. **Create Stack**: Deploy the CloudFormation stack
-
-The CloudFormation stack will automatically create:
-- IAM roles with appropriate permissions
-- CloudWatch Metric Streams for ECS metrics
-- Log Groups and Log Streams for ECS logs
-- Kinesis Data Firehose delivery streams
-- Lambda functions for log processing (if needed)
-
-### Step 4: Verify Data Collection
-
-Once the CloudFormation stack deployment is complete:
-
-1. **Check Integration Status**: The integration status should change to "Connected"
-2. **View Collected Data**: Navigate to the "Data Collected" tab to see available metrics and logs
-3. **Access Dashboard**: Go to the Dashboards section to view your ECS monitoring dashboard
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/integrations/aws-ecs/ecs-data-collected.webp" alt="ECS Data Collected view showing metrics and logs"/>
-    <figcaption><i>Data Collected tab showing ECS metrics and logs</i></figcaption>
-</figure>
+</details>
 
 ## Monitoring Dashboards
 
@@ -139,114 +119,6 @@ For enhanced monitoring with Container Insights enabled:
 - **Network I/O**: Network receive and transmit metrics  
 - **Storage I/O**: Storage read and write operations
 
-## Data Collected
-
-### Logs
-
-The following log types are collected from your ECS environment:
-
-| Name | Path | Type | Description |
-|------|------|------|-------------|
-| Timestamp | timestamp | timestamp | Log entry timestamp |
-| Log Body | body | string | Complete log message content |
-| Account ID | resources.cloud.account.id | string | AWS account identifier |
-| Log Group Name | resources.aws.cloudwatch.log_group_name | string | CloudWatch log group name |
-| Log Stream Name | resources.aws.cloudwatch.log_stream_name | string | CloudWatch log stream name |
-
-### Metrics
-
-Key ECS metrics monitored by this integration:
-
-| Metric Name | Unit | Type | Description |
-|-------------|------|------|-------------|
-| aws_ECS_CPUUtilization_count | Percent | Gauge | Number of CPU utilization data points |
-| aws_ECS_CPUUtilization_max | Percent | Gauge | Maximum CPU utilization |
-| aws_ECS_CPUUtilization_min | Percent | Gauge | Minimum CPU utilization |
-| aws_ECS_CPUUtilization_sum | Percent | Gauge | Sum of CPU utilization values |
-| aws_ECS_ContainerInsights_ContainerCpuReserved_count | None | Gauge | Container CPU reservation count |
-| aws_ECS_ContainerInsights_ContainerCpuReserved_max | None | Gauge | Maximum container CPU reserved |
-| aws_ECS_ContainerInsights_ContainerCpuReserved_min | None | Gauge | Minimum container CPU reserved |
-| aws_ECS_ContainerInsights_ContainerCpuUtilization_count | Percent | Gauge | Container CPU utilization count |
-| aws_ECS_ContainerInsights_ContainerCpuUtilization_max | Percent | Gauge | Maximum container CPU utilization |
-| aws_ECS_ContainerInsights_ContainerCpuUtilization_min | Percent | Gauge | Minimum container CPU utilization |
-| aws_ECS_ContainerInsights_ContainerCpuUtilized_count | None | Gauge | Container CPU utilized count |
-| aws_ECS_ContainerInsights_ContainerCpuUtilized_max | None | Gauge | Maximum container CPU utilized |
-| aws_ECS_ContainerInsights_ContainerCpuUtilized_min | None | Gauge | Minimum container CPU utilized |
-
-**Container Insights Metrics** (available when Container Insights is enabled):
-- Enhanced CPU and memory metrics at container level
-- Network performance metrics
-- Storage I/O metrics
-- Task and service level aggregations
-
-## Best Practices
-
-### 1. Enable Container Insights
-For comprehensive monitoring, enable AWS Container Insights on your ECS clusters:
-```bash
-aws ecs put-account-setting --name "containerInsights" --value "enabled"
-```
-
-### 2. Resource Tagging
-Tag your ECS resources consistently for better filtering and organization in dashboards:
-```json
-{
-  "Environment": "production",
-  "Service": "web-app",
-  "Team": "backend"
-}
-```
-
-### 3. Log Management
-- Configure appropriate log retention policies to manage costs
-- Use structured logging in your applications for better parsing
-- Consider using log aggregation at the service level
-
-### 4. Alerting Setup
-Set up alerts for critical metrics:
-- High CPU/memory utilization (>80%)
-- Failed task deployments
-- Service unhealthy status
-- Container restart frequency
-
-## Troubleshooting
-
-### Integration Not Connecting
-- Verify CloudFormation stack deployed successfully
-- Check IAM permissions are correctly configured
-- Ensure selected regions have ECS resources
-
-### Missing Metrics
-- Confirm ECS services are actively running
-- Verify Container Insights is enabled for enhanced metrics
-- Check CloudWatch Metric Streams are functioning
-
-### No Log Data
-- Ensure ECS tasks are configured to send logs to CloudWatch
-- Verify log group names match the integration configuration
-- Check Firehose delivery stream status
-
-## Expanding Your Monitoring
-
-### Add More Regions
-To monitor ECS resources in additional regions:
-1. Open the ECS integration settings
-2. Select additional regions to monitor
-3. The integration agent will automatically configure monitoring for new regions
-
-### Monitor Additional Services
-This integration template can be adapted for other AWS services by:
-- Updating the CloudWatch namespaces
-- Modifying metric and log collection patterns
-- Customizing dashboard visualizations
-
-## Related Resources
-
-- [AWS ECS Documentation](https://docs.aws.amazon.com/ecs/)
-- [Container Insights for ECS](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights.html)
-- [SigNoz AWS Integrations Overview](/docs/integrations/aws/one-click-aws-integrations/)
-- [ECS Best Practices](https://docs.aws.amazon.com/AmazonECS/latest/bestpracticesguide/intro.html)
-
 ---
 
-**Next Steps**: Once your ECS integration is set up, consider exploring other AWS integrations like [AWS Lambda](/docs/integrations/aws/lambda/) or [AWS RDS](/docs/integrations/aws-rds-mysql/) to get comprehensive visibility across your AWS infrastructure.
+Ready to explore more integrations? [Browse all available integrations](/integrations)
