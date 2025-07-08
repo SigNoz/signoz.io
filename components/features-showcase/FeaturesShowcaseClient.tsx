@@ -105,13 +105,15 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
           {/* Tech Icons */}
           {activeFeature.techIcons.slice(0, 5).map((tech, index) => {
             const icon = tech.iconKey ? (
-              <Suspense fallback={
-                <div className="h-5 w-5 animate-pulse rounded bg-signoz_slate-400/20" />
-              }>
+              <Suspense
+                fallback={<div className="h-5 w-5 animate-pulse rounded bg-signoz_slate-400/20" />}
+              >
                 {getIcon(tech.iconKey)}
               </Suspense>
-            ) : tech.icon
-            
+            ) : (
+              tech.icon
+            )
+
             const iconElement = (
               <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 transition-all hover:scale-105 hover:bg-signoz_ink-300/40">
                 {icon}
@@ -184,12 +186,12 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
               clickType="See All Docs"
               clickName={`${activeFeature.title} See All`}
               clickLocation="Features Showcase"
-              clickText="See All"
+              clickText={activeFeature.ctaLink.text}
               className="group flex items-center gap-2 rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 px-3 py-2 transition-all hover:bg-signoz_ink-300/40"
               title="See all options"
             >
               <span className="whitespace-nowrap text-xs text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300">
-                See All
+                {activeFeature.ctaLink.text}
               </span>
               <ArrowUpRight className="h-3 w-3 text-signoz_vanilla-400 group-hover:text-signoz_vanilla-300" />
             </TrackingLink>

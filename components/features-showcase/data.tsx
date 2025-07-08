@@ -52,7 +52,7 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     id: 'apm',
     title: 'APM',
     description:
-      'Monitor & troubleshoot your application performance with comprehensive APM capabilities.',
+      'Pinpoint performance bottlenecks across your entire application stack in seconds with Out of the box APM.',
     thumbnail: '/showcases/apm/signoz-apm-thumbnail.webp',
     videoSrc: '/showcases/apm/signoz-apm.webm',
     techIcons: [
@@ -92,7 +92,8 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
   {
     id: 'logs',
     title: 'Log Management',
-    description: 'Ingest, search, and analyze your logs at any scale with powerful log management.',
+    description:
+      'Ingest, search, and analyze your logs at any scale with 13x faster aggregation queries than ELK.',
     thumbnail: '/showcases/logs/signoz-logs-thumbnail.webp',
     videoSrc: '/showcases/logs/signoz-logs.webm',
     techIcons: [
@@ -138,7 +139,7 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     id: 'infrastructure',
     title: 'Infrastructure',
     description:
-      'Monitor hosts, containers, and orchestration platforms with infrastructure monitoring.',
+      'Track every host, pod, and container with correlated metrics, traces, and logs - unified dashboard ready in 5 minutes.',
     videoSrc: '/showcases/infrastructure/signoz-infrastructure.webm',
     techIcons: [
       {
@@ -168,7 +169,7 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     id: 'traces',
     title: 'Tracing',
     description:
-      'Track user requests across services to identify bottlenecks with distributed tracing.',
+      'Navigate upto million-span traces with intelligent search, flamegraphs, and waterfall views - performance debugging at any scale.',
     videoSrc: '/showcases/traces/signoz-traces.webm',
     techIcons: [
       {
@@ -207,7 +208,8 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
   {
     id: 'metrics',
     title: 'Metrics',
-    description: 'Custom metrics and configurable dashboards to fit any monitoring use case.',
+    description:
+      'Monitor everything with 100+ OpenTelemetry receivers - from RabbitMQ to custom applications in minutes',
     imageSrc: '/showcases/metrics/signoz-metrics.webp',
     techIcons: [
       {
@@ -236,7 +238,8 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
   {
     id: 'dashboards',
     title: 'Dashboards',
-    description: 'Create powerful, customizable dashboards to visualize your observability data.',
+    description:
+      'Start monitoring instantly with pre-built dashboards for MySQL, Redis, Kubernetes, and 40+ other technologies - or create custom ones in minutes.',
     videoSrc: '/showcases/dashboards/signoz-dashboards.webm',
     techIcons: [],
     ctaLink: {
@@ -260,7 +263,7 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     id: 'exceptions',
     title: 'Exceptions',
     description:
-      'Record exceptions automatically with stack trace & linked span data for faster debugging.',
+      'Debug faster with automatic exception capture, detailed stack traces, and direct links to the exact trace where errors occurred.',
     videoSrc: '/showcases/exceptions/signoz-exceptions.webm',
     techIcons: [],
     ctaLink: {
@@ -280,7 +283,7 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     id: 'alerts',
     title: 'Alerts',
     description:
-      'Get actionable alerts in your preferred notification channel with smart alerting.',
+      'Create alerts on any telemetry data in just 3 steps with notifications to Slack, PagerDuty, Opsgenie, Email, MS Teams, and more via webhooks',
     videoSrc: '/showcases/alerts/signoz-alerts.webm',
     techIcons: [],
     ctaLink: {
@@ -299,7 +302,8 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
   {
     id: 'cloud-monitoring',
     title: 'Cloud Monitoring',
-    description: 'Monitor AWS, GCP, and Azure services with native cloud provider integrations.',
+    description:
+      'Monitor your entire cloud infrastructure with one-click AWS integrations, auto-discovery, and OTel native support for GCP and Azure services.',
     videoSrc: '/showcases/cloud-monitoring/signoz-cloud-monitoring.webm',
     techIcons: [],
     ctaLink: {
@@ -322,7 +326,8 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
   {
     id: 'frontend',
     title: 'Frontend & Mobile Monitoring',
-    description: 'Monitor frontend applications and mobile apps with real user monitoring.',
+    description:
+      'Track Core Web Vitals (LCP, CLS, INP) and mobile app performance with OpenTelemetry-powered monitoring across web, iOS, and Android platforms.',
     imageSrc: '/showcases/frontend/signoz-frontend.webp',
     techIcons: [],
     ctaLink: {
@@ -342,7 +347,7 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     id: 'llm-monitoring',
     title: 'LLM Monitoring',
     description:
-      'Monitor Large Language Models and AI applications with specialized LLM observability.',
+      'Debug LLM failures in production with full trace visibility from prompt to response - track costs, latency, and token usage across OpenAI, Anthropic, and custom models.',
     videoSrc: '/showcases/llm/signoz-llm.webm',
     techIcons: [],
     ctaLink: {
@@ -365,7 +370,8 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
   {
     id: 'correlation',
     title: 'Correlation',
-    description: 'Correlate metrics, logs, and traces to get complete observability insights.',
+    description:
+      'Never lose context when debugging - automatic correlation links every trace to its logs, showing the complete story of what went wrong.',
     videoSrc: '/showcases/correlation/signoz-correlation.webm',
     techIcons: [],
     ctaLink: {
@@ -379,7 +385,7 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     id: 'cicd-observability',
     title: 'CI/CD Observability',
     description:
-      'Monitor your CI/CD pipelines and deployment processes with specialized observability.',
+      'Debug flaky CI/CD pipelines faster with distributed tracing - OpenTelemetry captures every workflow run, job, and step with timing and dependency analysis.',
     imageSrc: '/showcases/cicd/signoz-cicd.webp',
     techIcons: [],
     ctaLink: {
@@ -403,7 +409,7 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     id: 'integrations',
     title: 'Integrations',
     description:
-      'Connect with out of the box integrations including databases, message queues, and third-party services.',
+      'Get instant observability for databases, cloud services, and infrastructure with out-of-the-box integrations - PostgreSQL, MongoDB, Redis, AWS, and more.',
     imageSrc: '/showcases/integrations/signoz-integrations.webp',
     techIcons: [
       {
@@ -447,7 +453,8 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
   {
     id: 'external-apis',
     title: 'External APIs',
-    description: 'Monitor external API calls, dependencies, and third-party service performance.',
+    description:
+      'Monitor Stripe, SendGrid, or any other third-party services and identify which are causing errors and slowdowns with correlated traces and logs.',
     videoSrc: '/showcases/external-apis/signoz-external-apis.webm',
     techIcons: [],
     ctaLink: {
@@ -460,7 +467,8 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
   {
     id: 'messaging-queues',
     title: 'Messaging Queues',
-    description: 'Monitor message queues, event streams, and asynchronous communication patterns.',
+    description:
+      'Monitor Kafka producers, consumers, and Celery workers with OpenTelemetry correlation - see the complete message flow from publishing to processing.',
     videoSrc: '/showcases/messaging-queues/signoz-messaging-queues.webm',
     techIcons: [],
     ctaLink: {
