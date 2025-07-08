@@ -50,6 +50,7 @@ import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
 import MigrateToSigNoz from './MigrateToSigNoz/MigrateToSigNozOverview'
 import DashboardTemplatesListicle from './Dashboards/DashboardTemplatesListicle'
+import DashboardActions from './Dashboards/DashboardActions'
 
 export const components: MDXComponents = {
   Image,
@@ -103,4 +104,5 @@ export const components: MDXComponents = {
   ArticleSeriesTop,
   MigrateToSigNoz,
   DashboardTemplatesListicle,
+  DashboardActions,
 }
