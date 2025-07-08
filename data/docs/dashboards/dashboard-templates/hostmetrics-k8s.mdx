@@ -14,8 +14,6 @@ This dashboard provides comprehensive monitoring of host-level system metrics fo
     <figcaption><i>Host Metrics K8s Dashboard</i></figcaption>
 </figure>
 
-![Host Metrics K8s Dashboard](/img/docs/dashboards/dashboard-templates/hostmetrics-k8s.webp)
-
 <div className="flex justify-center">
   <DashboardActions 
     dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/hostmetrics/hostmetrics-k8s.json"
@@ -35,75 +33,49 @@ This dashboard tracks essential host system metrics to help you:
 
 ## Metrics Included
 
-### Overview Metrics
-- **CPU Used**: Current CPU utilization percentage across all cores
+### Overview Section
+- **CPU Used**: Current CPU utilization value
 - **Allocatable CPU**: Total CPU resources available for allocation
 - **Memory Used**: Current memory consumption in GiB
 - **Allocatable Memory**: Total memory available for allocation in GiB
 
-### CPU Metrics
-- **CPU Usage**: Real-time CPU utilization trends over time
-- **CPU Load Average**: System load averages (1min, 5min, 15min)
-- **CPU Usage by Core**: Per-core CPU utilization breakdown
-- **CPU Wait Time**: Time spent waiting for I/O operations
+### Resources Section
+- **CPU Usage Chart**: Real-time CPU utilization breakdown by type (user, idle, system, softirq, wait, steal, interrupt, irq, nice)
+- **Memory Usage Chart**: Memory consumption breakdown by type (used, free, cached, slab_reclaimable, buffered, slab_unreclaimable)
+- **CPU Usage by Namespace**: CPU utilization per Kubernetes namespace
+- **Memory Usage by Namespace**: Memory consumption per Kubernetes namespace
+- **CPU Usage by Pod**: CPU utilization per individual pod
+- **Memory Usage by Pod**: Memory consumption per individual pod
 
-### Memory Metrics
-- **Memory Usage**: Current memory consumption trends
-- **Memory Available**: Available memory for new processes
-- **Memory Buffers/Cache**: System buffers and cached memory
-- **Memory Swap Usage**: Swap space utilization
-- **Memory Utilization by Type**: Breakdown of memory usage types
+### System Section
+- **System Load Average**: System load averages over 1min, 5min, and 15min intervals
 
-### Disk Metrics
-- **Disk I/O Operations**: Read and write IOPS (Input/Output Operations Per Second)
-- **Disk Throughput**: Data transfer rates in MB/s for read and write operations
-- **Disk Usage**: Storage space consumption across mounted filesystems
-- **Disk Queue Depth**: Average number of pending I/O operations
-- **Disk Latency**: Read and write operation latencies
+### Network Section
+- **Network Usage (Bytes)**: Network traffic in bytes for transmit and receive operations
+- **Network Usage (Packet/s)**: Network traffic in packets per second
+- **Network Errors**: Network error rates and failed transmissions
+- **Network Drops**: Dropped network packets
+- **Network Connections**: Active network connections by TCP state (TIME_WAIT, ESTABLISHED, LISTEN, etc.)
 
-### Network Metrics
-- **Network I/O**: Incoming and outgoing network traffic
-- **Network Packet Rates**: Packets transmitted and received per second
-- **Network Interface Utilization**: Bandwidth usage per network interface
-- **Network Errors**: Error rates and dropped packets
-- **Network Connections**: Active network connections and states
+### Disk Section
+- **System Disk I/O (Bytes Transferred)**: Data transfer rates for read and write operations
+- **System Disk Operations/s**: Disk operations per second for various devices
+- **Disk Operations Time**: Time taken for disk operations
+- **Queue Size**: Disk I/O queue size
 
-### Filesystem Metrics
-- **Filesystem Usage**: Disk space utilization by mount point
-- **Filesystem Available**: Available disk space for each filesystem
-- **Filesystem Capacity**: Total capacity of mounted filesystems
-- **Inode Usage**: File system inode utilization
-- **Filesystem Read/Write Operations**: File system level I/O metrics
+### Filesystem Section
+- **File System Usage Table**: Tabular view showing device, mountpoint, state, and filesystem type
+- **File System Inode Usage Table**: Inode utilization showing device, mountpoint, state, and type
 
 ## Dashboard Variables
 
 This dashboard includes pre-configured variables for filtering:
 
 - **k8s.cluster.name**: Filter by Kubernetes cluster name
-- **k8s.node.name**: Filter by specific node names (supports multi-select)
-- **host.name**: Filter by hostname
-- **service.name**: Filter by service name
-
-## Use Cases
-
-### Capacity Planning
-- Monitor resource utilization trends to plan for scaling
-- Identify nodes approaching resource limits
-- Analyze historical usage patterns for better resource allocation
-
-### Performance Troubleshooting
-- Identify CPU, memory, or I/O bottlenecks
-- Correlate application performance issues with host metrics
-- Monitor system health during high load periods
-
-### Infrastructure Monitoring
-- Track overall cluster health at the host level
-- Monitor filesystem usage to prevent disk space issues
-- Observe network performance and identify connectivity problems
+- **k8s.node.name**: Filter by specific node names
 
 ## Related Dashboards
 
 - [Kubernetes Node Metrics - Detailed](/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed)
 - [Kubernetes Pod Metrics - Detailed](/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed)
-- [Host Metrics Dashboard](/docs/dashboards/dashboard-templates/hostmetrics)
 - [Container Metrics Docker](/docs/dashboards/dashboard-templates/container-metrics-docker)
