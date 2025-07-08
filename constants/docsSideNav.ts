@@ -1591,6 +1591,12 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/integrations/aws/ecs',
+            className: 'new-doc',
+            label: 'ECS',
+          },
+          {
+            type: 'doc',
             route: '/docs/integrations/aws/s3-sync',
             className: 'new-doc',
             label: 'S3 Sync',
