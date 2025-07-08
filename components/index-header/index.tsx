@@ -6,8 +6,12 @@ import TrackingLink from '@/components/TrackingLink'
 import Link from 'next/link'
 import { VideoModalPlayer } from './VideoModalPlayer'
 
+interface HeaderProps {
+  hideVideo?: boolean
+}
+
 // Server component with single CTA
-export async function Header() {
+export async function Header({ hideVideo = false }: HeaderProps) {
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
@@ -48,14 +52,16 @@ export async function Header() {
           </Button>
         </TrackingLink>
       </div>
-      <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed">
-        <div className="w-100 mx-[-28px]">
-          <VideoModalPlayer
-            thumbnailSrc="/img/landing/landing_thumbnail.webp"
-            videoId="944340217"
-          />
+      {!hideVideo && (
+        <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed">
+          <div className="w-100 mx-[-28px]">
+            <VideoModalPlayer
+              thumbnailSrc="/img/landing/landing_thumbnail.webp"
+              videoId="944340217"
+            />
+          </div>
         </div>
-      </div>
+      )}
     </header>
   )
 }

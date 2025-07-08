@@ -83,5 +83,13 @@ export const EXPERIMENTS = {
     },
     flagName: 'chatbase-bubble-experiment',
   },
+  HOMEPAGE_FEATURE_SECTION: {
+    id: 'homepage-feature-section-experiment',
+    variants: {
+      CONTROL: 'old-signoz-features',
+      VARIANT: 'new-features-showcase',
+    },
+    flagName: 'homepage-feature-section-experiment',
+  },
   // Add more experiments here as needed
 } as const
