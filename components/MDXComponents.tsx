@@ -45,12 +45,12 @@ import DatabaseListicle from './Onboarding/DatabaseListicle'
 import InfraMetricsListicle from './Onboarding/InfraMetricsListicle'
 import MessagingQueuesListicle from './Onboarding/MessagingQueuesListicle'
 import K8sInstallationListicle from './Setup/K8sInstallationListicle'
-import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
-import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
 import MigrateToSigNoz from './MigrateToSigNoz/MigrateToSigNozOverview'
 import DashboardTemplatesListicle from './Dashboards/DashboardTemplatesListicle'
 import DashboardActions from './Dashboards/DashboardActions'
 import KubernetesDashboardsListicle from './Dashboards/KubernetesDashboardsListicle'
+import APMDashboardsListicle from './Dashboards/APMDashboardsListicle'
+import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsListicle'
 
 export const components: MDXComponents = {
   Image,
@@ -96,4 +96,6 @@ export const components: MDXComponents = {
   DashboardTemplatesListicle,
   DashboardActions,
   KubernetesDashboardsListicle,
+  APMDashboardsListicle,
+  HostMetricsDashboardsListicle,
 }
