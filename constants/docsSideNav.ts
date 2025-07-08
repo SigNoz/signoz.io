@@ -1351,6 +1351,44 @@ const docsSideNav = [
         route: '/docs/userguide/manage-variables',
         label: 'Manage Variables',
       },
+      {
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/dashboards/dashboard-templates/overview',
+        label: 'Out of Box Dashboards',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
+            label: 'Kubernetes Pod Metrics (Detailed)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
+            label: 'Kubernetes Node Metrics (Detailed)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/apm-metrics',
+            label: 'APM Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/key-operations',
+            label: 'Key Operations',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+            label: 'Hostmetrics (K8s)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
+            label: 'SigNoz Ingestion Analysis',
+          },
+        ],
+      },
     ],
   },
   {
