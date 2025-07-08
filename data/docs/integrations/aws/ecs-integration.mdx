@@ -13,8 +13,6 @@ This integration enables seamless monitoring of your AWS ECS (Elastic Container 
     <figcaption><i>Monitor Elastic Container Service with SigNoz</i></figcaption>
 </figure>
 
-## Overview
-
 Amazon ECS is a fully managed container orchestration service that makes it easy to deploy, manage, and scale containerized applications. Monitoring ECS is crucial for:
 
 - **Performance Optimization**: Track resource utilization across clusters and services
@@ -48,33 +46,6 @@ When AWS Container Insights is enabled for your ECS resources, this integration 
 ### Collected Data Details
 
 <details>
-<summary>📊 Metrics List</summary>
-
-| Metric Name | Unit | Type | Description |
-|-------------|------|------|-------------|
-| aws_ECS_CPUUtilization_count | Percent | Gauge | Number of CPU utilization data points |
-| aws_ECS_CPUUtilization_max | Percent | Gauge | Maximum CPU utilization |
-| aws_ECS_CPUUtilization_min | Percent | Gauge | Minimum CPU utilization |
-| aws_ECS_CPUUtilization_sum | Percent | Gauge | Sum of CPU utilization values |
-| aws_ECS_ContainerInsights_ContainerCpuReserved_count | None | Gauge | Container CPU reservation count |
-| aws_ECS_ContainerInsights_ContainerCpuReserved_max | None | Gauge | Maximum container CPU reserved |
-| aws_ECS_ContainerInsights_ContainerCpuReserved_min | None | Gauge | Minimum container CPU reserved |
-| aws_ECS_ContainerInsights_ContainerCpuUtilization_count | Percent | Gauge | Container CPU utilization count |
-| aws_ECS_ContainerInsights_ContainerCpuUtilization_max | Percent | Gauge | Maximum container CPU utilization |
-| aws_ECS_ContainerInsights_ContainerCpuUtilization_min | Percent | Gauge | Minimum container CPU utilization |
-| aws_ECS_ContainerInsights_ContainerCpuUtilized_count | None | Gauge | Container CPU utilized count |
-| aws_ECS_ContainerInsights_ContainerCpuUtilized_max | None | Gauge | Maximum container CPU utilized |
-| aws_ECS_ContainerInsights_ContainerCpuUtilized_min | None | Gauge | Minimum container CPU utilized |
-
-**Container Insights Metrics** (available when Container Insights is enabled):
-- Enhanced CPU and memory metrics at container level
-- Network performance metrics
-- Storage I/O metrics
-- Task and service level aggregations
-
-</details>
-
-<details>
 <summary>📋 Logs List</summary>
 
 | Name | Path | Type | Description |
@@ -84,10 +55,71 @@ When AWS Container Insights is enabled for your ECS resources, this integration 
 | Account ID | resources.cloud.account.id | string | AWS account identifier |
 | Log Group Name | resources.aws.cloudwatch.log_group_name | string | CloudWatch log group name |
 | Log Stream Name | resources.aws.cloudwatch.log_stream_name | string | CloudWatch log stream name |
+| Container Name | container.name | string | Name of the ECS container |
+| Task ARN | ecs.task.arn | string | Amazon Resource Name of the ECS task |
+| Cluster Name | ecs.cluster.name | string | Name of the ECS cluster |
+
+**Log Types Collected:**
+- **Container Logs**: Application logs from your ECS tasks and containers
+- **ECS Agent Logs**: Infrastructure-level logging from ECS container agent
+- **Service Event Logs**: ECS service lifecycle and deployment events
 
 </details>
 
-## Monitoring Dashboards
+<details>
+<summary>📊 Metrics List (132 metrics available)</summary>
+
+| Metric Name | Unit | Type | Description |
+|-------------|------|------|-------------|
+| aws_ECS_CPUUtilization_count | Percent | Gauge | Number of CPU utilization data points |
+| aws_ECS_CPUUtilization_max | Percent | Gauge | Maximum CPU utilization |
+| aws_ECS_CPUUtilization_min | Percent | Gauge | Minimum CPU utilization |
+| aws_ECS_CPUUtilization_sum | Percent | Gauge | Sum of CPU utilization values |
+| aws_ECS_MemoryUtilization_count | Percent | Gauge | Number of memory utilization data points |
+| aws_ECS_MemoryUtilization_max | Percent | Gauge | Maximum memory utilization |
+| aws_ECS_MemoryUtilization_min | Percent | Gauge | Minimum memory utilization |
+| aws_ECS_MemoryUtilization_sum | Percent | Gauge | Sum of memory utilization values |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_count | None | Gauge | Container CPU reservation count |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_max | None | Gauge | Maximum container CPU reserved |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_min | None | Gauge | Minimum container CPU reserved |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_count | Percent | Gauge | Container CPU utilization count |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_max | Percent | Gauge | Maximum container CPU utilization |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_min | Percent | Gauge | Minimum container CPU utilization |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_count | None | Gauge | Container CPU utilized count |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_max | None | Gauge | Maximum container CPU utilized |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_min | None | Gauge | Minimum container CPU utilized |
+| aws_ECS_ContainerInsights_ContainerMemoryReserved_count | Bytes | Gauge | Container memory reservation count |
+| aws_ECS_ContainerInsights_ContainerMemoryReserved_max | Bytes | Gauge | Maximum container memory reserved |
+| aws_ECS_ContainerInsights_ContainerMemoryReserved_min | Bytes | Gauge | Minimum container memory reserved |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilization_count | Percent | Gauge | Container memory utilization count |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilization_max | Percent | Gauge | Maximum container memory utilization |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilization_min | Percent | Gauge | Minimum container memory utilization |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilized_count | Bytes | Gauge | Container memory utilized count |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilized_max | Bytes | Gauge | Maximum container memory utilized |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilized_min | Bytes | Gauge | Minimum container memory utilized |
+| aws_ECS_ContainerInsights_NetworkRxBytes_count | Bytes | Gauge | Network bytes received count |
+| aws_ECS_ContainerInsights_NetworkRxBytes_max | Bytes | Gauge | Maximum network bytes received |
+| aws_ECS_ContainerInsights_NetworkRxBytes_min | Bytes | Gauge | Minimum network bytes received |
+| aws_ECS_ContainerInsights_NetworkTxBytes_count | Bytes | Gauge | Network bytes transmitted count |
+| aws_ECS_ContainerInsights_NetworkTxBytes_max | Bytes | Gauge | Maximum network bytes transmitted |
+| aws_ECS_ContainerInsights_NetworkTxBytes_min | Bytes | Gauge | Minimum network bytes transmitted |
+
+**Note**: This table shows a subset of the 132 available metrics. The complete list includes additional metrics for:
+- **Service-level metrics**: Service CPU and memory utilization, running task count, pending task count
+- **Task-level metrics**: Task CPU and memory reservations, utilizations, and limits
+- **Network metrics**: Network packet counts, network errors, network interface statistics
+- **Storage metrics**: Storage read/write operations, storage utilization
+- **Container Insights enhanced metrics**: Container restart counts, exit codes, and detailed resource metrics
+
+**Container Insights Metrics** (available when Container Insights is enabled):
+- Enhanced CPU and memory metrics at container level
+- Network performance metrics with detailed packet analysis
+- Storage I/O metrics with read/write latency
+- Task and service level aggregations with historical trends
+
+</details>
+
+## Dashboards
 
 ### AWS ECS Overview Dashboard
 
@@ -101,8 +133,6 @@ The integration provides a comprehensive overview dashboard with key ECS metrics
 **Key visualizations include:**
 - **Memory Utilization**: Maximum and minimum memory usage trends
 - **CPU Utilization**: Maximum and minimum CPU usage trends
-- **Resource trends**: Time-series graphs showing resource usage over time
-- **Cluster and service filtering**: Filter metrics by specific clusters and services
 
 ### ECS Container Insights Dashboard
 
@@ -113,9 +143,11 @@ For enhanced monitoring with Container Insights enabled:
     <figcaption><i>ECS Container Insights Dashboard</i></figcaption>
 </figure>
 
-**Additional metrics include:**
+**Key visualizations include:**
 - **CPU Usage and Reserved**: Real-time CPU metrics
 - **Memory Usage and Reserved**: Memory allocation and utilization
+- **CPU Utilization**: Service and task-level CPU performance metrics
+- **Memory Utilization**: Container memory consumption patterns
 - **Network I/O**: Network receive and transmit metrics  
 - **Storage I/O**: Storage read and write operations
 
