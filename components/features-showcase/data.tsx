@@ -47,7 +47,8 @@ export const FEATURE_CATEGORIES = {
   },
 } as const
 
-export const FEATURES_SHOWCASE: FeatureShowcase[] = [
+// Core features loaded immediately for better performance
+export const CORE_FEATURES: FeatureShowcase[] = [
   {
     id: 'apm',
     title: 'APM',
@@ -298,7 +299,11 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     ],
     category: 'core',
     mediaType: 'video',
-  },
+  }
+]
+
+// Additional features loaded on demand
+export const EXTENDED_FEATURES: FeatureShowcase[] = [
   {
     id: 'cloud-monitoring',
     title: 'Cloud Monitoring',
@@ -477,5 +482,11 @@ export const FEATURES_SHOWCASE: FeatureShowcase[] = [
     },
     category: 'advanced',
     mediaType: 'video',
-  },
+  }
+]
+
+// Combined features for backward compatibility
+export const FEATURES_SHOWCASE: FeatureShowcase[] = [
+  ...CORE_FEATURES,
+  ...EXTENDED_FEATURES
 ]

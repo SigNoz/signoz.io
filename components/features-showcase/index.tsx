@@ -1,11 +1,14 @@
 import React from 'react'
-import { FEATURES_SHOWCASE, FEATURE_CATEGORIES, type FeatureShowcase } from './data'
+import { CORE_FEATURES, EXTENDED_FEATURES, FEATURE_CATEGORIES, type FeatureShowcase } from './data'
 import { FeaturesShowcaseClient } from './FeaturesShowcaseClient'
 
 // Server component for better performance - following index-header pattern
 export const FeaturesShowcase: React.FC = () => {
+  // Start with core features for better performance
+  const allFeatures = [...CORE_FEATURES, ...EXTENDED_FEATURES]
+  
   // Group features by category for better organization
-  const featuresByCategory = FEATURES_SHOWCASE.reduce(
+  const featuresByCategory = allFeatures.reduce(
     (acc, feature) => {
       if (!acc[feature.category]) {
         acc[feature.category] = []
@@ -18,7 +21,7 @@ export const FeaturesShowcase: React.FC = () => {
 
   // Default to first feature (APM) for server-side rendering
   const defaultFeature =
-    FEATURES_SHOWCASE.find((feature) => feature.id === 'apm') || FEATURES_SHOWCASE[0]
+    CORE_FEATURES.find((feature) => feature.id === 'apm') || CORE_FEATURES[0]
 
   return (
     <section className="mx-auto mt-10 w-full border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] sm:mt-16 md:mt-20 md:w-[90vw] lg:w-[80vw]">
@@ -36,6 +39,8 @@ export const FeaturesShowcase: React.FC = () => {
         <FeaturesShowcaseClient
           featuresByCategory={featuresByCategory}
           defaultFeature={defaultFeature}
+          coreFeatures={CORE_FEATURES}
+          extendedFeatures={EXTENDED_FEATURES}
         />
       </div>
     </section>

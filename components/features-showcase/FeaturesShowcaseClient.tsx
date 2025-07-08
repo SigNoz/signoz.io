@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, Suspense } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ArrowUpRight } from 'lucide-react'
-import { FEATURES_SHOWCASE, type FeatureShowcase } from './data'
+import { type FeatureShowcase } from './data'
 import { getIcon } from './icons'
 import { VideoPlayer } from './VideoPlayer'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -13,22 +13,67 @@ import Button, { BUTTON_TYPES } from '../Button/Button'
 interface FeaturesShowcaseClientProps {
   featuresByCategory: Record<string, FeatureShowcase[]>
   defaultFeature: FeatureShowcase
+  coreFeatures: FeatureShowcase[]
+  extendedFeatures: FeatureShowcase[]
 }
 
 export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
   defaultFeature,
+  coreFeatures,
+  extendedFeatures,
 }) => {
   const [activeTab, setActiveTab] = useState<string>(defaultFeature.id)
+  const [loadedFeatures, setLoadedFeatures] = useState<FeatureShowcase[]>(coreFeatures)
+  const [hasLoadedExtended, setHasLoadedExtended] = useState(false)
 
   const activeFeature =
-    FEATURES_SHOWCASE.find((feature) => feature.id === activeTab) || defaultFeature
+    loadedFeatures.find((feature) => feature.id === activeTab) || defaultFeature
 
   const handleTabClick = (featureId: string) => {
     setActiveTab(featureId)
+    
+    // Load extended features if not already loaded and trying to access them
+    if (!hasLoadedExtended && extendedFeatures.some(f => f.id === featureId)) {
+      setLoadedFeatures(prev => [...prev, ...extendedFeatures])
+      setHasLoadedExtended(true)
+    }
   }
 
+  // Load extended features when component is in viewport for better initial performance
+  useEffect(() => {
+    if (!hasLoadedExtended) {
+      // Load immediately when user scrolls or interacts, or after initial render
+      const loadExtended = () => {
+        setLoadedFeatures(prev => [...prev, ...extendedFeatures])
+        setHasLoadedExtended(true)
+      }
+
+      // Load on any user interaction or after idle time
+      const events = ['scroll', 'mousemove', 'keydown', 'touchstart']
+      const handleUserActivity = () => {
+        loadExtended()
+        events.forEach(event => document.removeEventListener(event, handleUserActivity))
+      }
+
+      // Add event listeners for user activity
+      events.forEach(event => document.addEventListener(event, handleUserActivity, { passive: true }))
+
+      // Fallback: load after idle time using requestIdleCallback
+      const idleCallback = requestIdleCallback ? requestIdleCallback(loadExtended) : setTimeout(loadExtended, 500)
+
+      return () => {
+        events.forEach(event => document.removeEventListener(event, handleUserActivity))
+        if (requestIdleCallback && typeof idleCallback === 'number') {
+          cancelIdleCallback(idleCallback)
+        } else if (typeof idleCallback === 'number') {
+          clearTimeout(idleCallback)
+        }
+      }
+    }
+  }, [hasLoadedExtended, extendedFeatures])
+
   // Get all features for horizontal scroll
-  const allFeatures = FEATURES_SHOWCASE
+  const allFeatures = loadedFeatures
 
   return (
     <div className="relative">
@@ -36,23 +81,31 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
       <div className="relative mb-4 sm:mb-6 md:mb-8">
         <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-signoz_slate-400/20 overflow-x-auto">
           <div className="flex min-w-max gap-1 pb-2 sm:gap-2">
-          {allFeatures.map((feature) => (
-            <TrackingButton
-              key={feature.id}
-              onClick={() => handleTabClick(feature.id)}
-              clickType="Feature Tab"
-              clickName={feature.title}
-              clickLocation="Features Showcase"
-              clickText={feature.title}
-              className={`flex-shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:py-2 sm:text-sm ${
-                activeTab === feature.id
-                  ? 'bg-signoz_sienna-100 text-gray-800'
-                  : 'bg-signoz_ink-300/20 text-signoz_vanilla-300 hover:bg-signoz_ink-300/40 hover:text-signoz_vanilla-100'
-              }`}
-            >
-              {feature.title}
-            </TrackingButton>
-          ))}
+          {allFeatures.map((feature) => {
+            // Show loading state for features not yet loaded
+            const isLoading = !hasLoadedExtended && !coreFeatures.some(f => f.id === feature.id)
+            
+            return (
+              <TrackingButton
+                key={feature.id}
+                onClick={() => handleTabClick(feature.id)}
+                clickType="Feature Tab"
+                clickName={feature.title}
+                clickLocation="Features Showcase"
+                clickText={feature.title}
+                disabled={isLoading}
+                className={`flex-shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:py-2 sm:text-sm ${
+                  activeTab === feature.id
+                    ? 'bg-signoz_sienna-100 text-gray-800'
+                    : isLoading
+                    ? 'bg-signoz_ink-300/10 text-signoz_vanilla-400 cursor-not-allowed opacity-50'
+                    : 'bg-signoz_ink-300/20 text-signoz_vanilla-300 hover:bg-signoz_ink-300/40 hover:text-signoz_vanilla-100'
+                }`}
+              >
+                {feature.title}
+              </TrackingButton>
+            )
+          })}
           </div>
         </div>
         {/* Scroll indicator gradient */}
@@ -92,15 +145,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
             {/* Tech Icons for mobile */}
             <div className="flex flex-wrap items-center justify-start gap-2">
               {activeFeature.techIcons.slice(0, 5).map((tech, index) => {
-                const icon = tech.iconKey ? (
-                  <Suspense
-                    fallback={<div className="h-5 w-5 animate-pulse rounded bg-signoz_slate-400/20" />}
-                  >
-                    {getIcon(tech.iconKey)}
-                  </Suspense>
-                ) : (
-                  tech.icon
-                )
+                const icon = tech.iconKey ? getIcon(tech.iconKey) : tech.icon
 
                 const iconElement = (
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 transition-all hover:scale-105 hover:bg-signoz_ink-300/40">
@@ -205,15 +250,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
         <div className="hidden md:absolute md:bottom-8 md:left-6 md:flex md:items-center md:gap-3">
           {/* Tech Icons */}
           {activeFeature.techIcons.slice(0, 5).map((tech, index) => {
-            const icon = tech.iconKey ? (
-              <Suspense
-                fallback={<div className="h-5 w-5 animate-pulse rounded bg-signoz_slate-400/20" />}
-              >
-                {getIcon(tech.iconKey)}
-              </Suspense>
-            ) : (
-              tech.icon
-            )
+            const icon = tech.iconKey ? getIcon(tech.iconKey) : tech.icon
 
             const iconElement = (
               <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-signoz_slate-400/10 bg-signoz_ink-300/20 transition-all hover:scale-105 hover:bg-signoz_ink-300/40 sm:h-12 sm:w-12">

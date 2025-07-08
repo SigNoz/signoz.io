@@ -27,6 +27,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [showThumbnail, setShowThumbnail] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [hasLoadedVideo, setHasLoadedVideo] = useState(false)
+  const [shouldPreload, setShouldPreload] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isInViewport, setIsInViewport] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -66,12 +67,23 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setProgress(percentage)
   }
 
-  // Lazy load video when active
+  // Preload when in viewport
   useEffect(() => {
-    if (isActive && mediaType === 'video' && !hasLoadedVideo) {
-      setHasLoadedVideo(true)
+    if (isInViewport && !shouldPreload) {
+      setShouldPreload(true)
     }
-  }, [isActive, mediaType, hasLoadedVideo])
+  }, [isInViewport, shouldPreload])
+
+  // Lazy load video when active and should preload
+  useEffect(() => {
+    if (isActive && shouldPreload && mediaType === 'video' && !hasLoadedVideo) {
+      // Add a small delay to prevent loading during rapid scrolling
+      const timer = setTimeout(() => {
+        setHasLoadedVideo(true)
+      }, 100) // Reduced delay for better UX
+      return () => clearTimeout(timer)
+    }
+  }, [isActive, shouldPreload, mediaType, hasLoadedVideo])
 
   useEffect(() => {
     if (mediaType === 'image') {
@@ -138,7 +150,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       ([entry]) => {
         setIsInViewport(entry.isIntersecting)
       },
-      { threshold: 0.5 } // Video needs to be at least 50% visible
+      { 
+        threshold: 0.1, // Start loading when 10% visible
+        rootMargin: '50px' // Preload slightly before entering viewport
+      }
     )
 
     observer.observe(container)
@@ -174,6 +189,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             sizes="(max-width: 768px) 100vw, 60vw"
             priority={false}
             loading="lazy"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
           />
           {/* Hover Effect */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -229,7 +246,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             muted
             loop
             playsInline
-            preload="none"
+            preload={shouldPreload ? "metadata" : "none"}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
             aria-label={`${title} showcase video`}
