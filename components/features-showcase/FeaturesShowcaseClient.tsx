@@ -26,15 +26,14 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
   const [loadedFeatures, setLoadedFeatures] = useState<FeatureShowcase[]>(coreFeatures)
   const [hasLoadedExtended, setHasLoadedExtended] = useState(false)
 
-  const activeFeature =
-    loadedFeatures.find((feature) => feature.id === activeTab) || defaultFeature
+  const activeFeature = loadedFeatures.find((feature) => feature.id === activeTab) || defaultFeature
 
   const handleTabClick = (featureId: string) => {
     setActiveTab(featureId)
-    
+
     // Load extended features if not already loaded and trying to access them
-    if (!hasLoadedExtended && extendedFeatures.some(f => f.id === featureId)) {
-      setLoadedFeatures(prev => [...prev, ...extendedFeatures])
+    if (!hasLoadedExtended && extendedFeatures.some((f) => f.id === featureId)) {
+      setLoadedFeatures((prev) => [...prev, ...extendedFeatures])
       setHasLoadedExtended(true)
     }
   }
@@ -44,7 +43,7 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
     if (!hasLoadedExtended) {
       // Load immediately when user scrolls or interacts, or after initial render
       const loadExtended = () => {
-        setLoadedFeatures(prev => [...prev, ...extendedFeatures])
+        setLoadedFeatures((prev) => [...prev, ...extendedFeatures])
         setHasLoadedExtended(true)
       }
 
@@ -52,18 +51,23 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
       const events = ['scroll', 'mousemove', 'keydown', 'touchstart']
       const handleUserActivity = () => {
         loadExtended()
-        events.forEach(event => document.removeEventListener(event, handleUserActivity))
+        events.forEach((event) => document.removeEventListener(event, handleUserActivity))
       }
 
       // Add event listeners for user activity
-      events.forEach(event => document.addEventListener(event, handleUserActivity, { passive: true }))
+      events.forEach((event) =>
+        document.addEventListener(event, handleUserActivity, { passive: true })
+      )
 
       // Fallback: load after idle time using requestIdleCallback
-      const idleCallback = requestIdleCallback ? requestIdleCallback(loadExtended) : setTimeout(loadExtended, 500)
+      const useIdleCallback = !!requestIdleCallback
+      const idleCallback = useIdleCallback
+        ? requestIdleCallback(loadExtended)
+        : setTimeout(loadExtended, 500)
 
       return () => {
-        events.forEach(event => document.removeEventListener(event, handleUserActivity))
-        if (requestIdleCallback && typeof idleCallback === 'number') {
+        events.forEach((event) => document.removeEventListener(event, handleUserActivity))
+        if (useIdleCallback && typeof idleCallback === 'number') {
           cancelIdleCallback(idleCallback)
         } else if (typeof idleCallback === 'number') {
           clearTimeout(idleCallback)
@@ -81,31 +85,31 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
       <div className="relative mb-4 sm:mb-6 md:mb-8">
         <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-signoz_slate-400/20 overflow-x-auto">
           <div className="flex min-w-max gap-1 pb-2 sm:gap-2">
-          {allFeatures.map((feature) => {
-            // Show loading state for features not yet loaded
-            const isLoading = !hasLoadedExtended && !coreFeatures.some(f => f.id === feature.id)
-            
-            return (
-              <TrackingButton
-                key={feature.id}
-                onClick={() => handleTabClick(feature.id)}
-                clickType="Feature Tab"
-                clickName={feature.title}
-                clickLocation="Features Showcase"
-                clickText={feature.title}
-                disabled={isLoading}
-                className={`flex-shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:py-2 sm:text-sm ${
-                  activeTab === feature.id
-                    ? 'bg-signoz_sienna-100 text-gray-800'
-                    : isLoading
-                    ? 'bg-signoz_ink-300/10 text-signoz_vanilla-400 cursor-not-allowed opacity-50'
-                    : 'bg-signoz_ink-300/20 text-signoz_vanilla-300 hover:bg-signoz_ink-300/40 hover:text-signoz_vanilla-100'
-                }`}
-              >
-                {feature.title}
-              </TrackingButton>
-            )
-          })}
+            {allFeatures.map((feature) => {
+              // Show loading state for features not yet loaded
+              const isLoading = !hasLoadedExtended && !coreFeatures.some((f) => f.id === feature.id)
+
+              return (
+                <TrackingButton
+                  key={feature.id}
+                  onClick={() => handleTabClick(feature.id)}
+                  clickType="Feature Tab"
+                  clickName={feature.title}
+                  clickLocation="Features Showcase"
+                  clickText={feature.title}
+                  disabled={isLoading}
+                  className={`flex-shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:py-2 sm:text-sm ${
+                    activeTab === feature.id
+                      ? 'bg-signoz_sienna-100 text-gray-800'
+                      : isLoading
+                        ? 'cursor-not-allowed bg-signoz_ink-300/10 text-signoz_vanilla-400 opacity-50'
+                        : 'bg-signoz_ink-300/20 text-signoz_vanilla-300 hover:bg-signoz_ink-300/40 hover:text-signoz_vanilla-100'
+                  }`}
+                >
+                  {feature.title}
+                </TrackingButton>
+              )
+            })}
           </div>
         </div>
         {/* Scroll indicator gradient */}
@@ -221,7 +225,10 @@ export const FeaturesShowcaseClient: React.FC<FeaturesShowcaseClientProps> = ({
                 clickLocation="Features Showcase"
                 clickText="Get Started - Free"
               >
-                <Button type={BUTTON_TYPES.PRIMARY} className="group w-full hover:scale-105 sm:w-auto">
+                <Button
+                  type={BUTTON_TYPES.PRIMARY}
+                  className="group w-full hover:scale-105 sm:w-auto"
+                >
                   <span>Get Started - Free</span>
                   <ArrowUpRight className="h-3 w-3 transition duration-300 ease-in-out group-hover:translate-x-[2px] group-hover:translate-y-[-2px] sm:h-4 sm:w-4" />
                 </Button>
