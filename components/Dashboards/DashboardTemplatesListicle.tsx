@@ -12,8 +12,6 @@ import {
   SiDocker,
   SiJenkins,
   SiSnowflake,
-  SiCouchdb,
-  SiHadoop,
   SiClickhouse,
 } from 'react-icons/si'
 import { 
@@ -32,7 +30,6 @@ import {
   Shield,
   HardDrive,
   Cpu,
-  Memory,
   Network,
   Container,
   Brain,
@@ -109,7 +106,7 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'CouchDB',
     href: '/docs/dashboards/dashboard-templates/couchdb',
-    icon: <SiCouchdb className="h-7 w-7 text-red-500" />,
+    icon: <Database className="h-7 w-7 text-red-500" />,
     clickName: 'CouchDB Dashboard Template',
   },
   {
@@ -133,7 +130,7 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Hadoop',
     href: '/docs/dashboards/dashboard-templates/hadoop',
-    icon: <SiHadoop className="h-7 w-7 text-yellow-600" />,
+    icon: <Server className="h-7 w-7 text-yellow-600" />,
     clickName: 'Hadoop Dashboard Template',
   },
   {
@@ -163,7 +160,7 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'JVM',
     href: '/docs/dashboards/dashboard-templates/jvm',
-    icon: <Memory className="h-7 w-7 text-orange-600" />,
+    icon: <Cpu className="h-7 w-7 text-orange-600" />,
     clickName: 'JVM Dashboard Template',
   },
   {
