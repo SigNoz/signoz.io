@@ -517,21 +517,21 @@ Here's a use-case-based guide for Datadog vs New Relic:
 
 Both platforms are excellent, but they cater to slightly different priorities. Datadog excels in depth and power across infrastructure, security, and customization, while New Relic offers a more unified experience with faster time-to-value, especially for application-centric teams.
 
-## Issues with existing monitoring vendors
+## Issues with Datadog and New Relic
 
-DataDog and New Relic are great monitoring tools and provide a gamut of monitoring products that any organization can use. But these enterprise monitoring tools can have the following issues:
+Datadog and New Relic are, of course, popular monitoring tools used by a lot of users worldwide. But they come with their own issues. Here are some issues that users encounter with Datadog and New Relic.
 
-- Crazy node-based pricing
-  Node-based pricing doesn't make sense in today's micro-services architecture. Any node which is live for more than 8hrs in a month is charged. So, unsuitable for spiky workloads
+**Complex billing practices**
 
-- Very costly
-  These tools are very costly if you want to do things like sending custom metrics.
+Datadog is particularly famous for its [complex and unpredictable billing practices](https://signoz.io/blog/datadog-pricing/). Host-based pricing, charging separately for custom metrics and charging for both log ingestion and indexing are some of the common challenges with Datadog’s pricing. 
 
-- Cloud-only
-  Hence, not suitable for companies that have concerns with sending data outside their infra
+New Relic charges for user seats, which doesn't make sense for a tool that any developer in the team can need based on what needs troubleshooting.
 
-- Closed product roadmap
-  For any small feature, you are dependent on their roadmap. We think this is an unnecessary restriction for a product which developers use. A product used by developers should be extendible
+**Cloud Only**
+Both New Relic and Datadog are cloud-only products. That means that to use them, you need to send data outside your infrastructure. If you have strict compliance or data privacy issues, you cannot use these products.
+
+**Closed product roadmap**
+For any small feature, you are dependent on their roadmap. We think this is an unnecessary restriction for a product which developers use. A product used by developers should be extendible
 
 ### What the Community is Saying about New Relic vs DataDog
 
@@ -548,31 +548,39 @@ Reddit users have shared their experiences with Datadog and New Relic, highlight
 
 The other alternative can be going for an open-source solution. But the problem with most open-source products is that they are resource-intensive to set up, maintain and scale up. That's where [SigNoz](https://signoz.io/) comes into the picture. [SigNoz](https://signoz.io/) is a full-stack open-source APM platform with easy configuration and scalable architecture.
 
-## An alternative to DataDog and New Relic - SigNoz
+## Introducing SigNoz - an alternative to Datadog and New Relic
 
-[SigNoz](https://signoz.io/) is a full-stack open-source application performance monitoring and observability tool which can be used in place of DataDog and New Relic. SigNoz is built to give SaaS like user experience combined with the perks of open-source software. Developer tools should be developer first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
+SigNoz is a strong alternative to Datadog and New Relic. It can be used as a drop-in replacement for Datadog and New Relic, providing similar features like APM, distributed tracing, and log management in one tool. SigNoz is built on top of [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) and leverages OTel data to its full potential. If you're tired of complex and unpredictable billing practices, or if you want to use OpenTelemetry, then SigNoz is the right choice. Here are some top reasons to choose SigNoz over Datadog or New Relic.
 
-Key architecture features:
+### OpenTelemetry Native - No vendor lock-in in your code
 
-- **Logs, Metrics, and traces under a single dashboard**<br></br>
-  SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
+SigNoz is built from the ground up to be OpenTelemetry native. This means we fully leverage OTel's semantic conventions, providing deeper, out-of-the-box insights. Unlike Datadog, **we don't charge you extra for "custom metrics" when you're using OpenTelemetry**. This fundamental difference means you can embrace open standards without the fear of a massive bill.
 
-- **Native OpenTelemetry support**<br></br>
-  SigNoz is built to support <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> natively, which is quietly becoming the world standard to generate and manage telemetry data.
+We've also recently launched features that double down on our OTel-native approach, including:
 
-<figure data-zoomable align="center">
-  <img
-    className="box-shadowed-image"
-    alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
-    src="/img/architecture-signoz-clickhouse.svg"
-  />
-  <figcaption>
-    <i>
-      Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code
-      instrumentatiion
-    </i>
-  </figcaption>
-</figure>
+- [Trace Funnels](https://signoz.io/blog/tracing-funnels-observability-distributed-systems/): Intelligently sample and analyze traces to focus on what's important.
+- [External API Monitoring](https://signoz.io/docs/application-monitoring/api-monitoring/): Gain visibility into the performance of third-party APIs your application depends on.
+- [Out-of-the-box Messaging Queue Monitoring](https://signoz.io/blog/opentelemetry-powered-kafka-celery-monitoring/): Effortlessly monitor popular queuing systems.
+
+### Flexible Hosting Options for Every Stage of Growth
+
+We believe you shouldn't be locked into a single deployment model. SigNoz offers a range of options to meet your needs as you scale:
+
+- [SigNoz Cloud](https://signoz.io/docs/cloud/): A fully-managed, scalable solution for teams that want to focus on their core business without the overhead of managing an observability platform.
+- [SigNoz Enterprise](https://signoz.io/enterprise/): For organizations with strict data residency or privacy requirements, we offer a self-hosted enterprise edition (bring-your-own-cloud or on-premise) with dedicated support and advanced security features.
+- [SigNoz Community](https://signoz.io/docs/install/self-host/): A self-hosted, open-source version that's perfect for getting started and for teams with the capability to manage their own infrastructure.
+
+### Simple, Transparent, Usage-Based Pricing
+
+Our [pricing model](https://signoz.io/pricing/) is designed to be straightforward and predictable. We primarily charge based on the volume of data you send us. It’s as simple as \$0.3 per GB of ingested logs, \$0.3 per GB of ingested traces, and \$0.1 per mil samples.
+
+There are no "weird" pricing levers like per-host charges that force you to alter your architecture, or charges based on user seats which can limit your team’s ability to set up robust observability practices. Our pricing plan is a simple, scalable model that grows with you.
+
+With SigNoz, you get:
+
+- **No surprise bills:** Our pricing is easy to understand and forecast.
+- **Cost-effective at scale:** As your data volume grows, our pricing remains competitive.
+- **Freedom to architect your systems as you see fit:** We don't penalize you for using modern, dynamic infrastructure.
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
@@ -623,25 +631,16 @@ The logs tab in SigNoz has advanced features like a log query builder, search ac
   </figcaption>
 </figure>
 
-- **No user-based & host-based pricing**<br></br>
-  You can add as many team members as you like when using the SigNoz cloud service. There is no charge for user seats in SigNoz. There is also no host-based pricing. You only pay for the amount of data you send.
-
-- **No special pricing for custom metrics**<br></br>
-  Custom metrics are important for getting application-specific insights. You understand your business best, so only you will be able to decide what things need to be monitored. Sending [custom metrics in Datadog](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz) can get really expensive, and there are many horror stories about unpredictable billing in Datadog.
-
-Some of the things SigNoz can help you track:
-
-- Out-of-the-box charts for application metrics like p90, p99, latency, error rates, request rates, etc.
-- Distributed tracing to get end-to-end visibility of your services
-- Monitor any metrics important to you, build dashboards for specific use-cases
-- Logs Management equipped with a powerful search and filter query builder
-- Exceptions monitoring to track exceptions in your application
-- Easy to set alerts with DIY query builder
-- Native support for OpenTelemetry native
-
 ## Getting Started with SigNoz
 
-<GetStartedSigNoz />
+As discussed earlier, you can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features. 
+
+Those who have data privacy concerns and can’t send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+Hope we answered all your questions regarding choosing SigNoz as the Datadog alternative. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+
 
 ## FAQs
 
