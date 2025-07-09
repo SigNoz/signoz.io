@@ -998,11 +998,6 @@ const docsSideNav = [
                 route: '/docs/logs-management/send-logs/nodejs-winston-logs',
                 label: 'Winston Node.js logs',
               },
-              {
-                type: 'doc',
-                route: '/docs/logs-management/send-logs/collect-systemd-logs',
-                label: 'SystemD logs',
-              },
             ],
           },
           {
@@ -1053,6 +1048,11 @@ const docsSideNav = [
             route: '/docs/logs-management/send-logs/windows-events-log',
             label: 'Windows Event logs',
             // className: 'new-doc',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/collect-systemd-logs',
+            label: 'SystemD logs',
           },
         ],
       },
