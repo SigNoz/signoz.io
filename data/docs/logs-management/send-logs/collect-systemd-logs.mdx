@@ -1,7 +1,7 @@
 ---
 date: 2025-06-25
 title: Collecting SystemD Logs (JournalD) 
-id: collect_systemd_logs
+id: collect-systemd-logs
 hide_table_of_contents: true
 ---
 
@@ -12,9 +12,8 @@ This documentation provides detailed instructions on configuring the OpenTelemet
 ## Prerequisites
 
 Before proceeding, ensure that:
-- SystemD and JournalD are installed and running on your system
-- The `journalctl` binary is available in the `$PATH`
-- You have sufficient permissions to access the journal
+- Linux-based operating system
+- `journalctl` binary is available in the `$PATH`
 
 ## Sample SystemD Logs
 
@@ -154,6 +153,17 @@ service:
 Note: Running the collector as root (`user: "0:0"`) is required to access journal files. In production, consider creating a dedicated user with journal access permissions.
 </Admonition>
 
+<Admonition type="info">
+You can also include the below configuration options for JournalD receiver:
+
+**Configuration Options:**
+- `start_at: end` - Only collect new logs after the collector starts
+- `start_at: beginning` - Include historical logs from the journal
+- `units` - Filter logs from specific SystemD services
+- `priority` - Filter by log level (debug, info, notice, warning, err, crit, alert, emerg)
+- `matches` - Advanced filtering using journalctl match syntax
+</Admonition>
+
 #### Step 3: Restart OTel Collector
 
 Restart the collector for the changes to take effect:
@@ -172,7 +182,7 @@ You should now be able to see the SystemD logs on SigNoz.
 The SystemD logs will be visible in the `Logs` tab of SigNoz.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/userguide/systemd-logs-signoz.webp" alt="SystemD logs visible in SigNoz"/>
+    <img src="/img/docs/logs-management/send-logs/systemd-logs-signoz.webp" alt="SystemD logs visible in SigNoz"/>
     <figcaption><i>SystemD journal logs in SigNoz Logs Explorer</i></figcaption>
 </figure>
 

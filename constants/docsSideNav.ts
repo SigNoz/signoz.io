@@ -954,11 +954,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/userguide/collect_systemd_logs',
-            label: 'SystemD logs',
-          },
-          {
-            type: 'doc',
             route: '/docs/logs-management/send-logs/logrus-to-signoz',
             label: 'Logrus',
           },
@@ -1002,6 +997,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-winston-logs',
                 label: 'Winston Node.js logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/collect-systemd-logs',
+                label: 'SystemD logs',
               },
             ],
           },
