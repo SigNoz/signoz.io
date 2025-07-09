@@ -266,6 +266,9 @@ signoz:
    - name: DOT_METRICS_ENABLED
      value: true
 ```
+<Admonition type="info">
+After upgrading, make sure to complete the step [Remove Old Exporter and Use Only Dot-Metrics Exporter](#remove-old-exporter-and-use-only-dot-metrics-exporter) as old exporter is no longer supported in releases after v0.88.
+</Admonition>
 
 Apply the changes:
 ```bash
@@ -275,6 +278,7 @@ helm upgrade --install my-release signoz/signoz --namespace platform --values my
 ```
 
 > For more details on the SigNoz upgrades on Kubernetes, please refer to the [Operate SigNoz on Kubernetes guide](/docs/operate/kubernetes).
+
 
 
 ## Docker Standalone
@@ -407,6 +411,10 @@ Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz cont
     environment:
       DOT_METRICS_ENABLED: "true"
 ```
+<Admonition type="info">
+After upgrading, make sure to complete the step [Remove Old Exporter and Use Only Dot-Metrics Exporter](#remove-old-exporter-and-use-only-dot-metrics-exporter) as old exporter is no longer supported in releases after v0.88.
+</Admonition>
+
 Apply the changes by incoporating the above environment variable while following the standard [upgrade procedure](/docs/operate/docker-standalone#upgrade-signoz-cluster)
 
 
@@ -554,6 +562,9 @@ Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz cont
     environment:
       DOT_METRICS_ENABLED: "true"
 ```
+<Admonition type="info">
+After upgrading, make sure to complete the step [Remove Old Exporter and Use Only Dot-Metrics Exporter](#remove-old-exporter-and-use-only-dot-metrics-exporter) as old exporter is no longer supported in releases after v0.88.
+</Admonition>
 
 Apply the changes while following the standard [upgrade procedure](/docs/operate/docker-swarm#upgrade-signoz-cluster). 
 
@@ -785,6 +796,10 @@ vim /opt/signoz/conf/systemd.env
 DOT_METRICS_ENABLED=true
 ```
 
+<Admonition type="info">
+After upgrading, make sure to complete the step [Remove Old Exporter and Use Only Dot-Metrics Exporter](#remove-old-exporter-and-use-only-dot-metrics-exporter) as old exporter is no longer supported in releases after v0.88.
+</Admonition>
+
 4. Restart the signoz service to apply the changes:
 ```bash
 sudo systemctl daemon-reload
@@ -807,6 +822,27 @@ After completing the migration:
 3. Update any SigNoz API key if the dot metrics exporter requires a new key.
 4. Consider optimizing your retention policies based on the new exporter's capabilities.
 
+## Remove Old Exporter and Use Only Dot-Metrics Exporter
+Starting with release v0.88, make sure to remove the `clickhousemetricswrite` exporter from your otel-collector configuration and use only the dot-metrics exporter `signozclickhousemetrics`.
+
+Below is the configuration section where "clickhousemetricswrite" should be removed:
+```diff
+processors:
+  signozspanmetrics/delta:
+-    metrics_exporters: clickhousemetricswrite, signozclickhousemetrics
++    metrics_exporters: signozclickhousemetrics
+exporter:
+-  clickhousemetricswrite:
+-      endpoint: tcp://localhost:9000/signoz_metrics?password=password
+-      timeout: 15s
+-      resource_to_telemetry_conversion:
+-        enabled: true
+-      disable_v2: true
+pipeline:
+  metrics:
+-    exporters: [clickhousemetricswrite, signozclickhousemetrics]
++    exporters: [signozclickhousemetrics]
+```
 ## FAQ
 
 - **Connection errors**: Verify your ClickHouse connection parameters.
