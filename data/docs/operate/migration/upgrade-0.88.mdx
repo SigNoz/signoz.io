@@ -267,7 +267,7 @@ signoz:
      value: true
 ```
 <Admonition type="info">
-After upgrading, make sure to complete the step [Remove Deprecated Exporter and Use Only Dot-Metrics Exporter](#remove-deprecated-exporter-and-use-only-dot-metrics-exporter) as old exporter is no longer supported in releases after v0.88.
+After upgrading, make sure to complete the step [Remove Deprecated Exporter and Use Only Dot-Metrics Exporter](#post-migration-steps) as old exporter is no longer supported in releases after v0.88.
 </Admonition>
 
 Apply the changes:
@@ -412,7 +412,7 @@ Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz cont
       DOT_METRICS_ENABLED: "true"
 ```
 <Admonition type="info">
-After upgrading, make sure to complete the step [Remove Deprecated Exporter and Use Only Dot-Metrics Exporter](#remove-deprecated-exporter-and-use-only-dot-metrics-exporter) as old exporter is no longer supported in releases after v0.88.
+After upgrading, make sure to complete the step [Remove Deprecated Exporter and Use Only Dot-Metrics Exporter](#post-migration-steps) as old exporter is no longer supported in releases after v0.88.
 </Admonition>
 
 Apply the changes by incoporating the above environment variable while following the standard [upgrade procedure](/docs/operate/docker-standalone#upgrade-signoz-cluster)
@@ -563,7 +563,7 @@ Set the environment variable `DOT_METRICS_ENABLED` to `true` in your SigNoz cont
       DOT_METRICS_ENABLED: "true"
 ```
 <Admonition type="info">
-After upgrading, make sure to complete the step [Remove Deprecated Exporter and Use Only Dot-Metrics Exporter](#remove-deprecated-exporter-and-use-only-dot-metrics-exporter) as old exporter is no longer supported in releases after v0.88.
+After upgrading, make sure to complete the step [Remove Deprecated Exporter and Use Only Dot-Metrics Exporter](#post-migration-steps) as the old exporter is no longer supported in releases after v0.88.
 </Admonition>
 
 Apply the changes while following the standard [upgrade procedure](/docs/operate/docker-swarm#upgrade-signoz-cluster). 
@@ -797,7 +797,7 @@ DOT_METRICS_ENABLED=true
 ```
 
 <Admonition type="info">
-After upgrading, make sure to complete the step [Remove Deprecated Exporter and Use Only Dot-Metrics Exporter](#remove-deprecated-exporter-and-use-only-dot-metrics-exporter) as old exporter is no longer supported in releases after v0.88.
+After upgrading, make sure to complete the step [Remove Deprecated Exporter and Use Only Dot-Metrics Exporter](#post-migration-steps) as old exporter is no longer supported in releases after v0.88.
 </Admonition>
 
 4. Restart the signoz service to apply the changes:
@@ -821,12 +821,7 @@ After completing the migration:
 2. Update any external integrations that reference the old metrics format.
 3. Update any SigNoz API key if the dot metrics exporter requires a new key.
 4. Consider optimizing your retention policies based on the new exporter's capabilities.
-
-## Remove Deprecated Exporter and Use Only Dot-Metrics Exporter
-
-Starting with release v0.88, you must remove the legacy `clickhousemetricswrite` exporter from your otel-collector configuration and use only the dot-metrics exporter `signozclickhousemetrics`.
-
-Below is the configuration section where you should remove all references to "clickhousemetricswrite":
+5. Starting with release v0.88, you should remove the deprecated `clickhousemetricswrite` exporter from the `otel-collector` configuration and use only the `dot-metrics` exporter `signozclickhousemetrics`. 
 ```diff
 processors:
   signozspanmetrics/delta:
