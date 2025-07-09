@@ -32,22 +32,23 @@ You can check the SystemD logs using the following command:
 ```bash
 sudo journalctl -n 10
 ```
+## Setup
 
 <Tabs entityName="plans">
 
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-#### Step 1: Install OpenTelemetry Collector Contrib
+### Step 1: Install OpenTelemetry Collector Contrib
 
 The [JournalD receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md) is available in the OpenTelemetry Collector Contrib distribution.
 
-Follow this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector, but make sure to install the **contrib** version instead of the standard version.
+Follow this [documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
 
-#### Step 2: Configure JournalD Receiver
+### Step 2: Configure JournalD Receiver
 
 Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `journald` receiver:
 
-```yaml
+```yaml:config.yaml
 receivers:
   journald:
     directory: /var/log/journal
@@ -72,7 +73,7 @@ exporters:
 service:
   pipelines:
     logs:
-      receivers: [otlp, journald]
+      receivers: [otlp, journald]        #Add the journald receiver to pipelines
       processors: [batch]
       exporters: [otlp]
 ```
@@ -89,9 +90,11 @@ You can also include the below configuration options for JournalD receiver:
 - `units` - Filter logs from specific SystemD services
 - `priority` - Filter by log level (debug, info, notice, warning, err, crit, alert, emerg)
 - `matches` - Advanced filtering using journalctl match syntax
+
+More options available [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md)
 </Admonition>
 
-#### Step 3: Start the OTel Collector
+### Step 3: Start the OTel Collector
 
 Start the OpenTelemetry Collector using the above `config.yaml` file:
 
@@ -102,11 +105,11 @@ Start the OpenTelemetry Collector using the above `config.yaml` file:
 
 <TabItem value='self-host' label='Self-Host'>
 
-#### Step 1: Install SigNoz
+### Step 1: Install SigNoz
 
-Follow [this guide](https://signoz.io/docs/install/docker/) to install self-hosted SigNoz.
+Follow this [documentation](https://signoz.io/docs/install/docker/) to install self-hosted SigNoz.
 
-#### Step 2: Configure JournalD Receiver
+### Step 2: Configure JournalD Receiver
 
 Update `otel-collector-config.yaml` with the following configuration:
 
@@ -144,7 +147,7 @@ exporters:
 service:
   pipelines:
     logs:
-      receivers: [otlp, journald]
+      receivers: [otlp, journald]           #Add the journald receiver to pipelines
       processors: [batch]
       exporters: [clickhouselogsexporter]
 ```
@@ -152,6 +155,7 @@ service:
 <Admonition type="warning">
 Note: Running the collector as root (`user: "0:0"`) is required to access journal files. In production, consider creating a dedicated user with journal access permissions.
 </Admonition>
+
 
 <Admonition type="info">
 You can also include the below configuration options for JournalD receiver:
@@ -162,9 +166,11 @@ You can also include the below configuration options for JournalD receiver:
 - `units` - Filter logs from specific SystemD services
 - `priority` - Filter by log level (debug, info, notice, warning, err, crit, alert, emerg)
 - `matches` - Advanced filtering using journalctl match syntax
+
+More options available [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md)
 </Admonition>
 
-#### Step 3: Restart OTel Collector
+### Step 3: Restart OTel Collector
 
 Restart the collector for the changes to take effect:
 ```bash
@@ -185,6 +191,19 @@ The SystemD logs will be visible in the `Logs` tab of SigNoz.
     <img src="/img/docs/logs-management/send-logs/systemd-logs-signoz.webp" alt="SystemD logs visible in SigNoz"/>
     <figcaption><i>SystemD journal logs in SigNoz Logs Explorer</i></figcaption>
 </figure>
+
+### Understanding SystemD Log Fields
+
+SystemD logs include rich metadata. Common fields include:
+
+- `MESSAGE` - The actual log message
+- `_SYSTEMD_UNIT` - SystemD unit that generated the log
+- `PRIORITY` - Log priority (0-7, where 0 is emergency, 7 is debug)
+- `_PID` - Process ID
+- `_HOSTNAME` - System hostname
+- `_TIMESTAMP` - Timestamp when the log was generated
+- `SYSLOG_IDENTIFIER` - Program name
+- `_COMM` - Command name
 
 ## Advanced Configuration
 
@@ -220,19 +239,6 @@ receivers:
       - "_TRANSPORT=kernel"
       - "PRIORITY=6"
 ```
-
-### Understanding SystemD Log Fields
-
-SystemD logs include rich metadata. Common fields include:
-
-- `MESSAGE` - The actual log message
-- `_SYSTEMD_UNIT` - SystemD unit that generated the log
-- `PRIORITY` - Log priority (0-7, where 0 is emergency, 7 is debug)
-- `_PID` - Process ID
-- `_HOSTNAME` - System hostname
-- `_TIMESTAMP` - Timestamp when the log was generated
-- `SYSLOG_IDENTIFIER` - Program name
-- `_COMM` - Command name
 
 ## Troubleshooting
 
