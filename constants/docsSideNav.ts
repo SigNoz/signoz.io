@@ -1049,6 +1049,11 @@ const docsSideNav = [
             label: 'Windows Event logs',
             // className: 'new-doc',
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/collect-systemd-logs',
+            label: 'SystemD logs',
+          },
         ],
       },
       {
