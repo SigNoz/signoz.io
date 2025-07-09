@@ -29,8 +29,8 @@ For additional background and details on the rationale behind this migration, re
 - SigNoz version `>=0.73.0`. Follow the relevant upgrade guides to reach the required version.
 <Admonition type="warning">
 Before starting the migration, make sure that your `signoz-otel-collector` setup meets the following requirements:
-    - Version is greater or equal to `v0.111.29`
-    - Both `clickhousemetricswrite` and `signozclickhousemetrics` exporters are enabled ([dual exporter setup](#step-0-enable-dual-exporter)) during your retention period for metrics
+  - Version is greater or equal to `v0.111.29`
+  - Both `clickhousemetricswrite` and `signozclickhousemetrics` exporters are enabled ([dual exporter setup](#step-0-enable-dual-exporter)) for your metrics retention period.
 </Admonition>
 ## Migration
 
@@ -821,7 +821,7 @@ After completing the migration:
 2. Update any external integrations that reference the old metrics format.
 3. Update any SigNoz API key if the dot metrics exporter requires a new key.
 4. Consider optimizing your retention policies based on the new exporter's capabilities.
-5. Starting with release v0.88, you should remove the deprecated exporter `clickhousemetricswrite` from the `otel-collector` configuration and use only the dot-metrics exporter `signozclickhousemetrics`. 
+5. Starting with release v0.88, you should remove the deprecated exporter `clickhousemetricswrite` from the `otel-collector` configuration and use only the dot-metrics exporter `signozclickhousemetrics`, **However, if you still need access to older metrics data, do not remove the deprecated exporter until your metrics retention period.**
 ```diff
 processors:
   signozspanmetrics/delta:
