@@ -954,6 +954,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/userguide/collect_systemd_logs',
+            label: 'SystemD logs',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-management/send-logs/logrus-to-signoz',
             label: 'Logrus',
           },
