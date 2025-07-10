@@ -153,7 +153,7 @@ module.exports = () => {
         },
         {
           source: '/careers/',
-          destination: 'https://www.ycombinator.com/companies/signoz/jobs/',
+          destination: 'https://jobs.ashbyhq.com/SigNoz',
           basePath: false,
           permanent: true,
         },
