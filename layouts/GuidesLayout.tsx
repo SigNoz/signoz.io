@@ -12,7 +12,6 @@ import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
 import TrackingLink from '@/components/TrackingLink'
 import { ArrowRight, ExternalLink } from 'lucide-react'
-import DevOpsWordleCard from '@/components/DevOpsWordleCard'
 import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 
@@ -102,9 +101,6 @@ export default function GuidesLayout({
 
           {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
           <div className="post-toc hidden lg:fixed lg:right-0 lg:top-[120px] lg:flex lg:h-[calc(100vh-140px)] lg:w-64 lg:flex-col lg:border-l lg:border-signoz_ink-300 lg:pl-8">
-            {/* DevOps Wordle Card */}
-            <DevOpsWordleCard className="mb-6" />
-
             {/* TOC with internal scroll */}
             <div ref={tocContainerRef} className="mb-4 h-[calc(100%-180px)] overflow-y-auto">
               <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-400">
