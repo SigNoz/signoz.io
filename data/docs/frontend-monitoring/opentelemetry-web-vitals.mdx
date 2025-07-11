@@ -123,16 +123,18 @@ This ensures that the captured web vitals are correctly recorded and sent to Sig
     import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
 
     const meter = metrics.getMeter('web-vitals');
-    const lcp = meter.createHistogram('lcp');
+    const lcp = meter.createObservableGauge('lcp');
     const cls = meter.createObservableGauge('cls');
-    const inp = meter.createHistogram('inp');
-    const ttfb = meter.createHistogram('ttfb');
-    const fcp = meter.createHistogram('fcp');
+    const inp = meter.createObservableGauge('inp');
+    const ttfb = meter.createObservableGauge('ttfb');
+    const fcp = meter.createObservableGauge('fcp');
 
     function sendToAnalytics(metric) {
       switch (metric.name) {
         case 'LCP': {
-          lcp.record(metric.value);
+          lcp.addCallback((result) => {
+            result.observe(metric.value);
+          });
           break;
         }
         case 'CLS': {
@@ -142,15 +144,21 @@ This ensures that the captured web vitals are correctly recorded and sent to Sig
           break;
         }
         case 'INP': {
-          inp.record(metric.value);
+          inp.addCallback((result) => {
+            result.observe(metric.value);
+          });
           break;
         }
         case 'TTFB': {
-          ttfb.record(metric.value);
+          ttfb.addCallback((result) => {
+            result.observe(metric.value);
+          });
           break;
         }
         case 'FCP': {
-          fcp.record(metric.value);
+          fcp.addCallback((result) => {
+            result.observe(metric.value);
+          });
           break;
         }
         default: {
@@ -172,34 +180,42 @@ This ensures that the captured web vitals are correctly recorded and sent to Sig
   import { onCLS, onFCP, onFID, onLCP, onTTFB } from 'web-vitals';
 
   const meter = metrics.getMeter('web-vitals');
-  const lcp = meter.createHistogram('lcp');
+  const lcp = meter.createObservableGauge('lcp');
   const cls = meter.createObservableGauge('cls');
-  const fid = meter.createHistogram('fid');
-  const ttfb = meter.createHistogram('ttfb');
-  const fcp = meter.createHistogram('fcp');
+  const fid = meter.createObservableGauge('fid');
+  const ttfb = meter.createObservableGauge('ttfb');
+  const fcp = meter.createObservableGauge('fcp');
 
   function sendToAnalytics(metric) {
     switch (metric.name) {
       case 'LCP': {
-        lcp.record(metric.value);
+        lcp.addCallback((result) => {
+          result.observe(metric.value);
+        });
         break;
       }
       case 'CLS': {
         cls.addCallback((result) => {
           result.observe(metric.value);
-        })
+        });
         break;
       }
       case 'FID': {
-        fid.record(metric.value);
+        fid.addCallback((result) => {
+          result.observe(metric.value);
+        });
         break;
       }
       case 'TTFB': {
-        ttfb.record(metric.value);
+        ttfb.addCallback((result) => {
+          result.observe(metric.value);
+        });
         break;
       }
       case 'FCP': {
-        fcp.record(metric.value);
+        fcp.addCallback((result) => {
+          result.observe(metric.value);
+        });
         break;
       }
       default: {
