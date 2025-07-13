@@ -1,0 +1,104 @@
+---
+date: 2025-01-03
+id: db-calls-monitoring
+title: DB Calls Monitoring Dashboard
+description: Monitor comprehensive database operations including transaction rates, top DB statements, error rates, and slowest database calls for performance optimization.
+---
+
+This dashboard provides comprehensive monitoring of database operations and calls, offering detailed visibility into database transaction rates, top database statements, error rates, and slowest database calls. Built on top of available DB attributes from OpenTelemetry.
+
+## Dashboard Preview
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/dashboard-templates/db-calls-monitoring.webp" alt="DB Calls Monitoring Dashboard"/>
+    <figcaption><i>DB Calls Monitoring Dashboard</i></figcaption>
+</figure>
+
+<div className="flex justify-center">
+  <DashboardActions 
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/apm/db-calls-monitoring.json"
+    dashboardName="DB Calls Monitoring"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks essential database metrics to help you:
+
+- **Monitor Database Performance**: Track database transaction rates and response times
+- **Identify Top Database Operations**: Analyze the most frequently executed database statements
+- **Track Database Errors**: Monitor database error rates and identify problematic queries
+- **Optimize Slow Queries**: Identify and analyze the slowest database calls for optimization
+- **Database Health Monitoring**: Keep track of overall database system health and performance
+
+## Metrics Included
+
+### DB Transaction Rate
+- **Chart Type**: Time series graph
+- **Metrics**: Database transaction rate over time (req/s)
+- **Grouping**: By database name (dbName)
+- **Purpose**: Monitor the volume of database transactions to identify traffic patterns and load
+
+### Top DB Statements
+- **Chart Type**: Table view
+- **Columns**:
+  - **dbName**: Database name
+  - **db.statement**: The actual database statement/query
+  - **Total Calls**: Total number of calls for each statement
+  - **Average Duration**: Average execution time in nanoseconds
+  - **Rate**: Requests per second for each statement
+- **Purpose**: Identify the most frequently executed database statements and their performance characteristics
+
+### DB Error Rate
+- **Chart Type**: Time series graph
+- **Metrics**: Database error percentage over time
+- **Calculation**: (Error count / Total count) × 100
+- **Grouping**: By database name (dbName)
+- **Purpose**: Monitor database error trends and identify problematic periods
+
+### Slowest DB Calls
+- **Chart Type**: List view with pagination
+- **Columns**:
+  - **Timestamp**: When the database call occurred
+  - **serviceName**: Service making the database call
+  - **name**: Operation name
+  - **durationNano**: Duration in nanoseconds
+  - **db.statement**: The database statement executed
+  - **dbOperation**: Type of database operation
+- **Sorting**: Ordered by duration (descending) to show slowest calls first
+- **Purpose**: Identify and analyze the slowest database operations for performance optimization
+
+## OpenTelemetry Integration
+
+This dashboard is built on top of available database attributes from OpenTelemetry, following the [OpenTelemetry database semantic conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/db/). The dashboard leverages the following key attributes:
+
+- `dbSystem`: Database management system identifier
+- `dbName`: Database name
+- `db.statement`: Database statement being executed
+- `dbOperation`: Type of database operation
+- `serviceName`: Name of the service making the database call
+- `hasError`: Boolean indicating if the operation resulted in an error
+- `durationNano`: Duration of the database operation in nanoseconds
+
+## Dashboard Variables
+
+This dashboard includes pre-configured variables for filtering:
+
+- **service_name**: Filter by specific service names making database calls (supports single selection)
+
+## Use Cases
+
+This dashboard is particularly useful for:
+
+- **Database Performance Optimization**: Identify slow queries and optimize database performance
+- **Error Monitoring**: Track database errors and investigate root causes
+- **Capacity Planning**: Monitor database load patterns to plan for scaling
+- **Service-Level Monitoring**: Filter by service to understand how different services interact with databases
+- **Query Analysis**: Analyze the most frequently executed queries and their performance impact
+
+## Related Dashboards
+
+- [APM Metrics](/docs/dashboards/dashboard-templates/apm-metrics)
+- [HTTP API Monitoring](/docs/dashboards/dashboard-templates/http-api-monitoring)
+- [SigNoz Ingestion Analysis](/docs/dashboards/dashboard-templates/signoz-ingestion-analysis)
+- [Key Operations](/docs/dashboards/dashboard-templates/key-operations)
