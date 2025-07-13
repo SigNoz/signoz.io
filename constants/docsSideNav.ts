@@ -1391,6 +1391,11 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/apm-metrics',
                 label: 'APM Metrics',
               },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
+                label: 'DB Calls Monitoring',
+              },
             ]
           },
                     {
