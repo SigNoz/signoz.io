@@ -439,10 +439,11 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
     { "name": "ZOO_SERVER_ID",                "value": "1"   },
     { "name": "ZOO_ENABLE_PROMETHEUS_METRICS","value": "yes" },
     { "name": "ZOO_AUTOPURGE_INTERVAL",       "value": "1"   },
-    { "name": "ZOO_PROMETHEUS_METRICS_PORT_NUMBER","value":"9141"}
+    { "name": "ZOO_PROMETHEUS_METRICS_PORT_NUMBER","value":"9141"},
+    {"name": "ZOOKEEPER_ADMIN_SERVER_PORT_NUMBER", "value":"3181"}
   ],
   "healthCheck": {
-    "command": ["CMD-SHELL","curl -s -m 2 http://localhost:8080/commands/ruok | grep error | grep null"],
+    "command": ["CMD-SHELL","curl -s -m 2 http://localhost:3181/commands/ruok | grep error | grep null"],
     "interval": 30,
     "timeout": 5,
     "retries": 3,
@@ -464,7 +465,7 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
 ```json
 {
   "name": "signoz",
-  "image": "signoz/signoz:<VERSION>",
+  "image": "signoz/signoz:latest",
   "cpu": 512,
   "memory": 512,
   "memoryReservation": 256,
@@ -472,13 +473,13 @@ Each section below shows one `containerDefinition` snippet. Replace all `<…>` 
   "portMappings": [
     { "containerPort": 8080, "hostPort": 8080, "protocol": "tcp" }
   ],
-  "command": ["--config=/root/config/prometheus.yml"],
   "environment": [
     { "name": "SIGNOZ_ALERTMANAGER_PROVIDER",       "value": "signoz" },
     { "name": "SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN","value": "tcp://clickhouse:9000" },
     { "name": "SIGNOZ_SQLSTORE_SQLITE_PATH",         "value": "/var/lib/signoz/signoz.db" },
     { "name": "STORAGE",                             "value": "clickhouse" },
     { "name": "TELEMETRY_ENABLED",                   "value": "true" },
+    {"name": "SIGNOZ_PROMETHEUS_ACTIVE__QUERY__TRACKER_ENABLED", "value": "false" },
 
   ],
   "mountPoints": [
