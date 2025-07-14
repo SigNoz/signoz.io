@@ -470,7 +470,9 @@ const SignupFormIsolated: React.FC<{
         </div>
 
         <div className="space-y-4">
-          <div className="text-center text-sm text-signoz_vanilla-100/70">Sign up with</div>
+          <div className="text-center text-sm text-signoz_vanilla-100/70">
+            Sign up with your work account
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -499,7 +501,7 @@ const SignupFormIsolated: React.FC<{
 
         <div className="flex items-center">
           <div className="flex-1 border-t border-signoz_slate-400"></div>
-          <span className="px-4 text-sm text-signoz_vanilla-100/50">Or use email</span>
+          <span className="px-4 text-sm text-signoz_vanilla-100/50">Or use your work email</span>
           <div className="flex-1 border-t border-signoz_slate-400"></div>
         </div>
       </div>
