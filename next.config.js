@@ -494,6 +494,11 @@ module.exports = () => {
           destination: '/docs/migration/migrate-from-newrelic-to-signoz/',
           permanent: true,
         },
+        {
+          source: '/dashboards',
+          destination: '/docs/dashboards/dashboard-templates/overview/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
