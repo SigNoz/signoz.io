@@ -1436,6 +1436,11 @@ const docsSideNav = [
             route: '/docs/dashboards/dashboard-templates/mysql',
             label: 'MySQL',
           },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/cicd',
+            label: 'CICD',
+          },
         ],
       },
     ],

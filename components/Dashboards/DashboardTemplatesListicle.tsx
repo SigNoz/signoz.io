@@ -86,7 +86,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'CI/CD',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/cicd',
+    href: '/docs/dashboards/dashboard-templates/cicd',
     icon: <Settings className="h-7 w-7 text-green-600" />,
     clickName: 'CI/CD Dashboard Template',
   },
@@ -97,10 +97,10 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'ClickHouse Dashboard Template',
   },
   {
-    name: 'Container Metrics Docker',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/container-metrics/docker',
+    name: 'Docker Container Metrics',
+    href: '/docs/dashboards/dashboard-templates/docker-container-metrics',
     icon: <SiDocker className="h-7 w-7 text-blue-400" />,
-    clickName: 'Container Metrics Docker Dashboard Template',
+    clickName: 'Docker Container Metrics Dashboard Template',
   },
   {
     name: 'CouchDB',
@@ -200,7 +200,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'MySQL',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/mysql',
+    href: '/docs/dashboards/dashboard-templates/mysql',
     icon: <SiMysql className="h-7 w-7 text-orange-500" />,
     clickName: 'MySQL Dashboard Template',
   },
