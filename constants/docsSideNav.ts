@@ -1426,6 +1426,11 @@ const docsSideNav = [
             route: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
             label: 'HAProxy',
           },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
+            label: 'Docker Container',
+          },
         ],
       },
     ],
