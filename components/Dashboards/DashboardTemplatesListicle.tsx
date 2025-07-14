@@ -134,7 +134,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'HAProxy',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/haproxy',
+    href: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
     icon: <Shield className="h-7 w-7 text-blue-600" />,
     clickName: 'HAProxy Dashboard Template',
   },

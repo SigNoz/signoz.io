@@ -1421,6 +1421,11 @@ const docsSideNav = [
             route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
             label: 'SigNoz Ingestion Analysis',
           },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
+            label: 'HAProxy',
+          },
         ],
       },
     ],
