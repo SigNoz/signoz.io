@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Activity, Database, Globe } from 'lucide-react'
+import { Activity, Database, Globe, Server } from 'lucide-react'
 import IconCardGrid from '../Card/IconCardGrid'
 
 interface IconCardData {
@@ -23,6 +23,12 @@ const APMDashboardsData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
     icon: <Database className="h-7 w-7 text-purple-600" />,
     clickName: 'Database Calls Monitoring Dashboard Template',
+  },
+  {
+    name: 'HAProxy Monitoring',
+    href: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
+    icon: <Server className="h-7 w-7 text-orange-600" />,
+    clickName: 'HAProxy Monitoring Dashboard Template',
   },
   {
     name: 'HTTP API Monitoring',
