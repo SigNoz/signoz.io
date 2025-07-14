@@ -1431,6 +1431,11 @@ const docsSideNav = [
             route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
             label: 'Docker Container',
           },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/mysql',
+            label: 'MySQL',
+          },
         ],
       },
     ],
