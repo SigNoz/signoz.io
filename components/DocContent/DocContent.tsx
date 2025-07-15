@@ -17,7 +17,6 @@ const DocContent: React.FC<{
   hideTableOfContents: boolean
 }> = ({ title, post, toc, hideTableOfContents }) => {
   const searchParams = useSearchParams()
-  // Prefer last‑modified… fall back to original date
   const rawDate = post?.lastmod || post?.date
   const formattedDate =
     rawDate
