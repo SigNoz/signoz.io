@@ -17,10 +17,11 @@ const DocContent: React.FC<{
   hideTableOfContents: boolean
 }> = ({ title, post, toc, hideTableOfContents }) => {
   const searchParams = useSearchParams()
-  // Format the published date (if provided) once, so we can safely render it
+  // Prefer last‑modified… fall back to original date
+  const rawDate = post?.lastmod || post?.date
   const formattedDate =
-    post?.date
-      ? new Date(post.date).toLocaleDateString('en-US', {
+    rawDate
+      ? new Date(rawDate).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
@@ -32,10 +33,12 @@ const DocContent: React.FC<{
     <>
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
         <h2 className="mt-2 text-3xl">{title}</h2>
-        {formattedDate && (
-          <p className="mt-1 text-sm text-gray-500">{formattedDate}</p>
-        )}
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
+        {formattedDate && (
+          <p className="mt-8 text-sm text-gray-500">
+            Last updated: {formattedDate}
+          </p>
+        )}
         <PageFeedback />
         <DocsPrevNext />
       </div>
