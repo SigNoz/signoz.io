@@ -17,6 +17,15 @@ const DocContent: React.FC<{
   hideTableOfContents: boolean
 }> = ({ title, post, toc, hideTableOfContents }) => {
   const searchParams = useSearchParams()
+  const lastUpdatedDate = post?.lastmod || post?.date
+  const formattedDate =
+    lastUpdatedDate
+      ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      : null
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
   return (
@@ -24,6 +33,11 @@ const DocContent: React.FC<{
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
         <h2 className="mt-2 text-3xl">{title}</h2>
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
+        {formattedDate && (
+          <p className="mt-8 text-sm text-gray-500">
+            Last updated: {formattedDate}
+          </p>
+        )}
         <PageFeedback />
         <DocsPrevNext />
       </div>
