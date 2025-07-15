@@ -838,7 +838,7 @@ const TeamsVariant: React.FC = () => {
 
       <div className="flex h-[calc(100vh-56px)] flex-col lg:flex-row">
         {/* Left section - Sign up form */}
-        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+10vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+10vh)]">
+        <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[calc(56px+5vh)] lg:w-5/12 lg:p-12 lg:pt-[calc(56px+5vh)]">
           <div className="w-full">
             {(!isSubmitting && submitFailed) || ssoError ? (
               <ErrorState error={errors.apiError || ''} />
@@ -853,7 +853,7 @@ const TeamsVariant: React.FC = () => {
             )}
           </div>
 
-          <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block">
+          <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block [@media(max-height:790px)]:lg:hidden">
             <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
               <span>OpenTelemetry Native.</span>
               <span>Unfied Signals.</span>
