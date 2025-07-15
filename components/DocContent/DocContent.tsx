@@ -20,7 +20,7 @@ const DocContent: React.FC<{
   const lastUpdatedDate = post?.lastmod || post?.date
   const formattedDate =
     rawDate
-      ? new Date(rawDate).toLocaleDateString('en-US', {
+      ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
