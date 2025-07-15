@@ -1,34 +1,49 @@
 ---
 date: 2024-08-03
 id: mongodb-atlas
-title: MongoDB Atlas Metrics
+title: MongoDB Atlas Metrics and Logs
 ---
 
 ## Overview
 
-This integration helps you to monitor key MongoDB Atlas metrics, and view them with an out-of-the-box dashboard.
+This documentation explains how to collect MongoDB Atlas metrics and logs using the OpenTelemetry MongoDB Atlas receiver and send them to SigNoz for monitoring and analysis.
+
+The MongoDB Atlas receiver collects telemetry data from MongoDB Atlas via their monitoring and logging APIs, including database performance metrics, operational data, audit logs, and system events.
 
 ## Prerequisites
 
 Before you begin, ensure you have:
 
-1. A MongoDB Atlas account
-2. An OpenTelemetry (OTEL) Collector with access to MongoDB Atlas
-   - [Install the OTEL Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)(v0.88.0 or newer) if not done already 
-   - Ensure you can provide config files and set environment variables for the collector
+1. A MongoDB Atlas account with appropriate access
+2. MongoDB Atlas API keys with required permissions:
+   - **Public Key** and **Private Key** from the "API Keys" tab in MongoDB Atlas Project Access Manager
+   - **Project Read Only** role (minimum) for project events and logs
+   - **Organization Member** role for organization events (if needed)
+3. For audit logs: Audit logging must be enabled in your MongoDB Atlas project
 
 ## Setup
 
-### Step 1: Create the Collector Config File
+### Step 1: Install OpenTelemetry Collector
 
-Create a file named `mongodb-atlas-metrics-collection-config.yaml` with the following content:
+Install the OpenTelemetry Collector if not already installed:
+- [Install the OTEL Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)(v0.88.0 or newer)
+- Ensure you can provide config files and set environment variables for the collector
 
-```yaml:mongodb-atlas-metrics-collection-config.yaml
+### Step 2: Create the Collector Config File
+
+Create a file named `mongodb-atlas-collection-config.yaml` with the following content:
+
+#### For Metrics and Logs Collection:
+
+```yaml:mongodb-atlas-collection-config.yaml
 receivers:
   mongodbatlas:
+    # Authentication
     project_id: ${env:MONGODB_ATLAS_PROJECT_ID}
     public_key: ${env:MONGODB_ATLAS_PUBLIC_KEY}
     private_key: ${env:MONGODB_ATLAS_PRIVATE_KEY}
+    
+    # Metrics configuration
     collection_interval: 5m
     metrics:
       mongodbatlas.database.size:
@@ -76,11 +91,50 @@ receivers:
       mongodbatlas.system.memory.usage.max:
         enabled: true
 
+    # Logs configuration
+    logs:
+      enabled: true
+      projects:
+        - name: "${env:MONGODB_ATLAS_PROJECT_NAME}"
+          # Optional: limit to specific clusters
+          # include_clusters: ["cluster1", "cluster2"]
+          # exclude_clusters: ["test-cluster"]
+          
+          # Audit logs (requires audit logging enabled in Atlas)
+          collect_audit_logs: true
+          
+          # Host logs (mongod, mongos)
+          collect_host_logs: true
+          
+          # Access logs configuration
+          access_logs:
+            poll_interval: 5m
+            page_size: 20000
+            max_pages: 5
+            # Optional: filter by success/failure
+            # filter_type: "success"  # or "failure"
+
+    # Events configuration
+    events:
+      projects:
+        - name: "${env:MONGODB_ATLAS_PROJECT_NAME}"
+      # Optional: organization events
+      # organizations:
+      #   - id: "${env:MONGODB_ATLAS_ORG_ID}"
+      poll_interval: 1m
+      page_size: 100
+      max_pages: 25
+
+    # Storage extension (recommended to prevent duplicate data)
+    storage: file_storage
+
+extensions:
+  file_storage:
+    directory: /tmp/otel_storage
+
 processors:
   # enriches the data with additional host information
-  # see https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#resource-detection-processor
   resourcedetection/system:
-    # add additional detectors if needed
     detectors: ["system"]
 
 exporters:
@@ -99,8 +153,13 @@ exporters:
   #     insecure: true
 
 service:
+  extensions: [file_storage]
   pipelines:
     metrics/mongodb-atlas:
+      receivers: [mongodbatlas]
+      processors: [resourcedetection/system]
+      exporters: [otlp/mongodb-atlas]
+    logs/mongodb-atlas:
       receivers: [mongodbatlas]
       processors: [resourcedetection/system]
       exporters: [otlp/mongodb-atlas]
@@ -108,20 +167,25 @@ service:
 
 All the available MongoDB Atlas receiver configurations can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver/config.go).
 
-### Step 2: Set Environment Variables
+### Step 3: Set Environment Variables
 
 Set the following environment variables:
 
 ```bash
-
-# MongoDB Atlas project ID where the metrics need to be collected
+# MongoDB Atlas project ID where the metrics and logs need to be collected
 export MONGODB_ATLAS_PROJECT_ID="<your-project-id>"
+
+# MongoDB Atlas project name (human-readable name)
+export MONGODB_ATLAS_PROJECT_NAME="<your-project-name>"
 
 # MongoDB Atlas public key for API access
 export MONGODB_ATLAS_PUBLIC_KEY="<your-public-key>"
 
 # MongoDB Atlas private key for API access
 export MONGODB_ATLAS_PRIVATE_KEY="<your-private-key>"
+
+# Optional: MongoDB Atlas organization ID (for organization events)
+export MONGODB_ATLAS_ORG_ID="<your-org-id>"
 
 # region specific SigNoz cloud ingestion endpoint
 export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
@@ -133,16 +197,16 @@ export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-### Step 3: Use the Collector Config File
+### Step 4: Use the Collector Config File
 
 Add the following flag to your collector run command:
 ```bash
---config mongodb-atlas-metrics-collection-config.yaml
+--config mongodb-atlas-collection-config.yaml
 ```
 
 ## MongoDB Atlas Dashboard
 
-You can import the MongoDB Atlas dashboard.
+You can import the MongoDB Atlas dashboard for monitoring your MongoDB Atlas metrics.
 
 Go to Dashboards => New Dashboard => Import JSON
 
@@ -175,6 +239,43 @@ Here are sample screenshots from the dashboard:
     <figcaption><i>MongoDB Atlas Resource Utilization</i></figcaption>
 </figure>
 
+## MongoDB Atlas Logs
+
+MongoDB Atlas logs will be available in SigNoz Logs Explorer. The logs include:
+
+### Audit Logs
+Database audit trail showing user actions, authentication events, and administrative operations.
+
+### Host Logs  
+MongoDB server logs from mongod and mongos processes, including startup messages, connection events, and operational logs.
+
+### Access Logs
+Authentication and authorization events, including successful and failed login attempts.
+
+### Project and Organization Events
+Configuration changes, user management events, and other administrative actions.
+
+Here are sample screenshots from the logs:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/audit-logs.webp" alt="MongoDB Atlas Audit Logs"/>
+    <figcaption><i>MongoDB Atlas Audit Logs in SigNoz</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/host-logs.webp" alt="MongoDB Atlas Host Logs"/>
+    <figcaption><i>MongoDB Atlas Host Logs in SigNoz</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/access-logs.webp" alt="MongoDB Atlas Access Logs"/>
+    <figcaption><i>MongoDB Atlas Access Logs in SigNoz</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/events-logs.webp" alt="MongoDB Atlas Events"/>
+    <figcaption><i>MongoDB Atlas Project Events in SigNoz</i></figcaption>
+</figure>
 
 <details> 
 <summary> Complete list of MongoDB Atlas metrics </summary>
@@ -225,3 +326,20 @@ Here are sample screenshots from the dashboard:
 You can refer [this](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver/documentation.md) page for more details about the MongoDB Atlas metrics.
 
 </details>
+
+## Troubleshooting
+
+### Logs Collection Issues
+
+If you're not seeing logs in SigNoz:
+
+1. **Verify audit logging is enabled** in your MongoDB Atlas project settings
+2. **Check API key permissions** - ensure your API key has at least Project Read Only role
+3. **Review collector logs** for any error messages related to MongoDB Atlas API calls
+4. **Confirm project and cluster names** match exactly with your MongoDB Atlas configuration
+
+### Common Error Messages
+
+- `"Attempted to retrieve audit logs but received 0 logs"` - Usually means audit logging is not enabled in Atlas
+- `"error retrieving project"` - Check that the project name in configuration matches exactly
+- `"insufficient permissions"` - Verify API key has required roles for the requested data type
