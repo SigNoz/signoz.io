@@ -342,7 +342,7 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'Administrator Guides (Self-hosted)',
+        label: 'Administrator Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/manage/administrator-guide',
