@@ -19,7 +19,7 @@ const DocContent: React.FC<{
   const searchParams = useSearchParams()
   const lastUpdatedDate = post?.lastmod || post?.date
   const formattedDate =
-    rawDate
+    lastUpdatedDate
       ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
