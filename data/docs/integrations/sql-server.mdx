@@ -1,0 +1,384 @@
+---
+date: 2024-08-03
+id: sql-server
+title: SQL Server Metrics and Logs
+---
+
+## Overview
+
+This documentation explains how to collect SQL Server metrics and logs using the OpenTelemetry SQL Server receiver and send them to SigNoz for monitoring and analysis.
+
+The SQL Server receiver collects telemetry data from Microsoft SQL Server instances using either Windows Performance Counters or direct database connections, including performance metrics, query statistics, error logs, and system events.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+1. A Microsoft SQL Server instance (any supported version)
+2. For Performance Counters method:
+   - **Windows environment** (Performance Counters are Windows-only)
+   - **Administrator privileges** for complete performance counter access
+3. For Direct Connection method:
+   - **SQL Server authentication credentials** (username/password)
+   - **Network access** to the SQL Server instance
+4. For logs collection:
+   - **Access to SQL Server ERRORLOG files** (typically in `C:\Program Files\Microsoft SQL Server\MSSQL<version>.MSSQLSERVER\MSSQL\Log\ERRORLOG*`)
+   - **File read permissions** for log directories
+
+## Setup
+
+### Step 1: Install OpenTelemetry Collector
+
+Install the OpenTelemetry Collector if not already installed:
+- [Install the OTEL Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)(v0.88.0 or newer)
+- **Important**: Run the collector as **Administrator** on Windows to collect all performance counters
+- Ensure you can provide config files and set environment variables for the collector
+
+### Step 2: Create the Collector Config File
+
+Create a file named `sql-server-collection-config.yaml`. Choose between Performance Counters (Windows only) or Direct Connection method:
+
+#### Option A: Windows Performance Counters Method (Recommended for Windows)
+
+```yaml:sql-server-collection-config.yaml
+receivers:
+  sqlserver:
+    # Performance Counters method (Windows only)
+    collection_interval: 10s
+    
+    # Optional: specify instance name for named instances
+    # instance_name: "MSSQLSERVER"
+    # computer_name: "localhost"
+
+  # Windows Event Log for system events
+  windowseventlog:
+    channel: System
+    max_reads: 100
+    poll_interval: 1s
+
+  # File log receiver for SQL Server error logs
+  filelog:
+    include:
+      - C:\Program Files\Microsoft SQL Server\MSSQL*.MSSQLSERVER\MSSQL\Log\ERRORLOG*
+    operators:
+      - type: regex_parser
+        regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{2}) (?P<spid>\w+)\s+(?P<message>.*)'
+        timestamp:
+          parse_from: attributes.timestamp
+          layout: '2006-01-02 15:04:05.00'
+
+processors:
+  resourcedetection/system:
+    detectors: ["system"]
+
+exporters:
+  # export to SigNoz cloud
+  otlp/sql-server:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+  # export to local collector
+  # otlp/sql-server:
+  #   endpoint: "localhost:4317"
+  #   tls:
+  #     insecure: true
+
+service:
+  pipelines:
+    metrics/sql-server:
+      receivers: [sqlserver]
+      processors: [resourcedetection/system]
+      exporters: [otlp/sql-server]
+    logs/sql-server:
+      receivers: [filelog, windowseventlog]
+      processors: [resourcedetection/system]
+      exporters: [otlp/sql-server]
+```
+
+#### Option B: Direct Database Connection Method (Cross-platform)
+
+```yaml:sql-server-collection-config.yaml
+receivers:
+  sqlserver:
+    # Direct connection method
+    collection_interval: 10s
+    username: ${env:SQL_SERVER_USERNAME}
+    password: ${env:SQL_SERVER_PASSWORD}
+    server: ${env:SQL_SERVER_HOST}
+    port: ${env:SQL_SERVER_PORT}
+    
+    # Enable top query collection
+    top_query_collection:
+      enabled: true
+      lookback_time: 60s
+      max_query_sample_count: 1000
+      top_query_count: 200
+    
+    # Enable query sample collection
+    query_sample_collection:
+      enabled: true
+      max_rows_per_query: 100
+
+  # File log receiver for SQL Server error logs (Windows path)
+  filelog:
+    include:
+      - C:\Program Files\Microsoft SQL Server\MSSQL*.MSSQLSERVER\MSSQL\Log\ERRORLOG*
+      # For Linux installations, use:
+      # - /var/opt/mssql/log/errorlog*
+    operators:
+      - type: regex_parser
+        regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{2}) (?P<spid>\w+)\s+(?P<message>.*)'
+        timestamp:
+          parse_from: attributes.timestamp
+          layout: '2006-01-02 15:04:05.00'
+
+processors:
+  resourcedetection/system:
+    detectors: ["system"]
+
+exporters:
+  # export to SigNoz cloud
+  otlp/sql-server:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+
+  # export to local collector
+  # otlp/sql-server:
+  #   endpoint: "localhost:4317"
+  #   tls:
+  #     insecure: true
+
+service:
+  pipelines:
+    metrics/sql-server:
+      receivers: [sqlserver]
+      processors: [resourcedetection/system]
+      exporters: [otlp/sql-server]
+    logs/sql-server:
+      receivers: [filelog]
+      processors: [resourcedetection/system]
+      exporters: [otlp/sql-server]
+```
+
+All the available SQL Server receiver configurations can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/sqlserverreceiver/README.md).
+
+### Step 3: Set Environment Variables
+
+Set the following environment variables based on your chosen method:
+
+#### For Direct Connection Method:
+```bash
+# SQL Server connection details
+export SQL_SERVER_USERNAME="<your-sql-username>"
+export SQL_SERVER_PASSWORD="<your-sql-password>"
+export SQL_SERVER_HOST="localhost"  # or your SQL Server host
+export SQL_SERVER_PORT="1433"       # default SQL Server port
+
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+#### For Performance Counters Method:
+```bash
+# Only SigNoz configuration needed (no SQL credentials required)
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 4: Use the Collector Config File
+
+Run the collector with administrator privileges:
+
+**Windows (as Administrator):**
+```cmd
+otelcol-contrib.exe --config sql-server-collection-config.yaml
+```
+
+**Linux/Unix:**
+```bash
+sudo ./otelcol-contrib --config sql-server-collection-config.yaml
+```
+
+## SQL Server Dashboard
+
+You can import the SQL Server dashboard for monitoring your SQL Server metrics.
+
+Go to Dashboards => New Dashboard => Import JSON
+
+Download JSON from [link](https://github.com/SigNoz/dashboards/blob/main/sql-server/sql-server-otlp-v1.json).
+
+Here are sample screenshots from the dashboard:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/sql-server/performance-overview.webp" alt="SQL Server Performance Overview"/>
+    <figcaption><i>SQL Server Performance Overview</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/sql-server/database-operations.webp" alt="SQL Server Database Operations"/>
+    <figcaption><i>SQL Server Database Operations</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/sql-server/memory-buffer-metrics.webp" alt="SQL Server Memory and Buffer Metrics"/>
+    <figcaption><i>SQL Server Memory and Buffer Metrics</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/sql-server/lock-transaction-metrics.webp" alt="SQL Server Lock and Transaction Metrics"/>
+    <figcaption><i>SQL Server Lock and Transaction Metrics</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/sql-server/query-performance.webp" alt="SQL Server Query Performance"/>
+    <figcaption><i>SQL Server Query Performance</i></figcaption>
+</figure>
+
+## SQL Server Logs
+
+SQL Server logs will be available in SigNoz Logs Explorer. The logs include:
+
+### Error Logs
+SQL Server ERRORLOG files containing startup messages, shutdown events, error information, and administrative operations.
+
+### Query Logs
+Top performing queries and execution samples captured through the direct connection method, including:
+- Query execution time
+- CPU usage per query  
+- Logical reads and writes
+- Query execution plans
+
+### Performance Logs
+Execution statistics and wait events providing insights into:
+- Wait statistics and bottlenecks
+- Lock information and deadlocks
+- Transaction log activities
+- Memory and buffer pool usage
+
+### Windows System Events
+System-level events related to SQL Server service status, security events, and system errors (Windows only).
+
+Here are sample screenshots from the logs:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/sql-server/error-logs.webp" alt="SQL Server Error Logs"/>
+    <figcaption><i>SQL Server Error Logs in SigNoz</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/sql-server/query-logs.webp" alt="SQL Server Query Logs"/>
+    <figcaption><i>SQL Server Query Performance Logs in SigNoz</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/sql-server/system-events.webp" alt="SQL Server System Events"/>
+    <figcaption><i>SQL Server System Events in SigNoz</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/sql-server/performance-logs.webp" alt="SQL Server Performance Logs"/>
+    <figcaption><i>SQL Server Performance Logs in SigNoz</i></figcaption>
+</figure>
+
+<details> 
+<summary> Complete list of SQL Server metrics </summary>
+
+- **Name**: The name of the metric.
+- **Type**: The type of the metric (e.g., Sum, Gauge).
+- **Unit**: The unit of measurement for the metric.
+- **Description**: A brief description of what the metric represents.
+
+| Name                                          | Type   | Unit        | Description                                                           |
+|-----------------------------------------------|--------|-------------|-----------------------------------------------------------------------|
+| sqlserver.batch.request.rate                 | Gauge  | requests/s  | Number of batch requests received per second                          |
+| sqlserver.user.connection.count              | Gauge  | connections | Number of users connected to the SQL Server                          |
+| sqlserver.lock.wait.rate                     | Gauge  | waits/s     | Number of lock waits per second                                      |
+| sqlserver.lock.wait.time                     | Gauge  | ms          | Average wait time for locks                                          |
+| sqlserver.page.buffer_cache.hit_ratio        | Gauge  | percent     | Buffer cache hit ratio                                               |
+| sqlserver.page.checkpoint.flush.rate         | Gauge  | pages/s     | Number of pages flushed by checkpoint per second                     |
+| sqlserver.page.lazy_write.rate               | Gauge  | pages/s     | Number of pages written by lazy writer per second                    |
+| sqlserver.page.life_expectancy               | Gauge  | seconds     | Expected time for a page to remain in buffer pool                    |
+| sqlserver.page.read.rate                     | Gauge  | pages/s     | Number of pages read from disk per second                            |
+| sqlserver.page.write.rate                    | Gauge  | pages/s     | Number of pages written to disk per second                           |
+| sqlserver.page.split.rate                    | Gauge  | splits/s    | Number of page splits per second                                     |
+| sqlserver.transaction_log.flush.rate         | Gauge  | flushes/s   | Number of transaction log flushes per second                         |
+| sqlserver.transaction_log.flush.data.rate    | Gauge  | bytes/s     | Bytes of transaction log data flushed per second                     |
+| sqlserver.transaction_log.flush.wait.rate    | Gauge  | waits/s     | Number of transaction log flush waits per second                     |
+| sqlserver.transaction_log.growth.count       | Sum    | number      | Number of transaction log file growths                               |
+| sqlserver.transaction_log.shrink.count       | Sum    | number      | Number of transaction log file shrinks                               |
+| sqlserver.transaction_log.usage              | Gauge  | percent     | Percent of transaction log space used                                |
+| sqlserver.database.count                     | Gauge  | number      | Number of databases                                                  |
+| sqlserver.database.transaction.rate          | Gauge  | trans/s     | Number of transactions per second                                    |
+| sqlserver.database.transaction.write.rate    | Gauge  | trans/s     | Number of write transactions per second                              |
+| sqlserver.sql_compilation.rate               | Gauge  | compiles/s  | Number of SQL compilations per second                                |
+| sqlserver.sql_recompilation.rate             | Gauge  | recompiles/s| Number of SQL recompilations per second                              |
+| sqlserver.login.rate                         | Gauge  | logins/s    | Number of logins per second                                          |
+| sqlserver.logout.rate                        | Gauge  | logouts/s   | Number of logouts per second                                         |
+| sqlserver.memory.grant.pending               | Gauge  | number      | Number of processes waiting for memory grant                         |
+| sqlserver.memory.usage                       | Gauge  | bytes       | Total memory in use by SQL Server                                    |
+| sqlserver.tempdb.file.size                   | Gauge  | bytes       | Size of tempdb files                                                 |
+| sqlserver.tempdb.file.used_size              | Gauge  | bytes       | Used size of tempdb files                                           |
+| sqlserver.tempdb.session.usage               | Gauge  | bytes       | Tempdb space used by user sessions                                  |
+| sqlserver.tempdb.object.usage                | Gauge  | bytes       | Tempdb space used by internal objects                               |
+| sqlserver.tempdb.version_store.usage         | Gauge  | bytes       | Tempdb space used by version store                                  |
+| sqlserver.database.io.read.rate              | Gauge  | operations/s| Database read operations per second                                   |
+| sqlserver.database.io.write.rate             | Gauge  | operations/s| Database write operations per second                                  |
+| sqlserver.database.io.read_bytes.rate        | Gauge  | bytes/s     | Database read bytes per second                                       |
+| sqlserver.database.io.write_bytes.rate       | Gauge  | bytes/s     | Database write bytes per second                                      |
+| sqlserver.deadlock.rate                      | Gauge  | deadlocks/s | Number of deadlocks per second                                       |
+| sqlserver.lock.timeout.rate                  | Gauge  | timeouts/s  | Number of lock timeouts per second                                   |
+
+You can refer [this](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/sqlserverreceiver/documentation.md) page for more details about the SQL Server metrics.
+
+</details>
+
+## Troubleshooting
+
+### Performance Counters Issues
+
+If you're not seeing metrics when using Performance Counters method:
+
+1. **Verify Administrator privileges** - The collector must run as Administrator on Windows
+2. **Check SQL Server service status** - Ensure SQL Server service is running
+3. **Instance name configuration** - For named instances, specify both `instance_name` and `computer_name`
+4. **Windows version compatibility** - Performance Counters are only available on Windows
+
+### Direct Connection Issues
+
+If you're having connection problems with Direct Connection method:
+
+1. **Verify SQL Server authentication** - Ensure username/password are correct
+2. **Check network connectivity** - Test connection to SQL Server host and port
+3. **SQL Server configuration** - Verify SQL Server is configured to accept remote connections
+4. **Firewall settings** - Ensure port 1433 (or custom port) is open
+
+### Logs Collection Issues
+
+If you're not seeing logs in SigNoz:
+
+1. **Check file permissions** - Ensure collector has read access to ERRORLOG files
+2. **Verify log file paths** - Adjust paths based on your SQL Server installation
+3. **Windows Event Log access** - Ensure collector has permission to read Windows Event Log
+4. **Log file rotation** - SQL Server may rotate log files, update paths accordingly
+
+### Common Error Messages
+
+- `Failed to scrape performance counters` - Run collector as Administrator
+- `Login failed for user` - Check SQL authentication credentials  
+- `Cannot connect to server` - Verify server name, port, and network connectivity
+- `Access denied reading log file` - Check file permissions for ERRORLOG directory
