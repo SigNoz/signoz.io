@@ -17,7 +17,7 @@ const DocContent: React.FC<{
   hideTableOfContents: boolean
 }> = ({ title, post, toc, hideTableOfContents }) => {
   const searchParams = useSearchParams()
-  const rawDate = post?.lastmod || post?.date
+  const lastUpdatedDate = post?.lastmod || post?.date
   const formattedDate =
     rawDate
       ? new Date(rawDate).toLocaleDateString('en-US', {
