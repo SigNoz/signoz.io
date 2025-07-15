@@ -248,13 +248,6 @@ const docsSideNav = [
         isExpanded: false,
         label: 'Migration Guides',
         route: '/docs/operate/migration',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Migration Guides',
-        // description:
-        // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
-        // slug: '/docs/operate/migration/migration',
-        // },
         items: [
           {
             type: 'doc',
@@ -354,7 +347,6 @@ const docsSideNav = [
         isExpanded: false,
         route: '/docs/manage/administrator-guide',
         items: [
-          ,
           {
             type: 'category',
             isExpanded: false,
