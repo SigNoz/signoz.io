@@ -22,6 +22,7 @@ interface WordleGameProps {
   gameStatus: GameStatus
   onGameWon: (attempts: number) => void
   onGameLost: () => void
+  onBackToOverview?: () => void
 }
 
 const DEFAULT_CONFIG: GameConfig = {
@@ -51,6 +52,7 @@ export function WordleGame({
   onGameWon,
   onGameLost,
   gameStatus,
+  onBackToOverview,
 }: WordleGameProps) {
   const gameConfig = { ...DEFAULT_CONFIG, ...config }
   const pathname = usePathname()
@@ -261,6 +263,7 @@ export function WordleGame({
         timeTaken={elapsedTime}
         targetWord={targetWord}
         guesses={gameState.guesses}
+        onBackToOverview={onBackToOverview}
       />
     )
   }
