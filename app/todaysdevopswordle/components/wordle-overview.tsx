@@ -31,7 +31,7 @@ export function WordleOverview({ onSelectDay }: WordleOverviewProps) {
                 DEVOPS WORDLE
               </h1>
               <p className={`text-gray-400 text-[16px] max-w-2xl mx-auto mb-20 ${lexend.className}`}>
-                Choose a day and learn DevOps terminology with out wordle game!
+                Choose a day and learn DevOps terminology with our wordle game!
               </p>
             </div>
 
