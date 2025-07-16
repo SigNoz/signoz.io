@@ -6,7 +6,7 @@ import { HiLightBulb } from 'react-icons/hi2'
 import { IoHeart } from 'react-icons/io5'
 import { Orbitron, Lexend } from 'next/font/google'
 import { GameStatus } from '../types'
-import { getTodaysHint } from '../lib/game-data'
+import { getGameDataByDay } from '../lib/game-data'
 import TrackingButton from '../../../components/TrackingButton'
 
 const orbitron = Orbitron({ subsets: ['latin'], weight: ['400', '500'] })
@@ -18,6 +18,8 @@ interface HowToPlayDrawerProps {
   onStartGame: () => void
   gameState: GameStatus
   elapsedTime?: number
+  selectedDay?: string | null
+  onBackToOverview?: () => void
 }
 
 export function HowToPlayDrawer({
@@ -26,8 +28,11 @@ export function HowToPlayDrawer({
   onStartGame,
   gameState,
   elapsedTime = 0,
+  selectedDay,
+  onBackToOverview,
 }: HowToPlayDrawerProps) {
-  const todaysHint = getTodaysHint()
+  const gameData = selectedDay ? getGameDataByDay(selectedDay) : null
+  const todaysHint = gameData?.hint || "No hint available"
   const minutes = Math.floor(elapsedTime / 60)
   const seconds = elapsedTime % 60
 
@@ -66,7 +71,7 @@ export function HowToPlayDrawer({
       case GameStatus.LOST:
         return (
           <div className="space-y-3 text-center">
-            <div className={`text-gray-400`}>Come back tomorrow for another game!</div>
+            <div className={`text-gray-400`}>Try another day or come back later!</div>
             <div className="flex justify-center">
               <div
                 onClick={onClose}
@@ -97,14 +102,16 @@ export function HowToPlayDrawer({
                 DEVOPS WORDLE &lt;/&gt;
               </h2>
 
-              <div className="neon-box-border hint-box-attention relative rounded-lg border border-[#233457] bg-[#1B224B]/30 p-6">
-                <p className="m-0 text-center text-base text-gray-400 sm:text-lg">
-                  Today's hint: {todaysHint}
-                </p>
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 transform ">
-                  <HiLightBulb className="neon-bulb bulb-illuminate h-10 w-10 text-[#4558c4]" />
+              {gameData && (
+                <div className="neon-box-border hint-box-attention relative rounded-lg border border-[#233457] bg-[#1B224B]/30 p-6">
+                  <p className="m-0 text-center text-base text-gray-400 sm:text-lg">
+                    {gameData.dayId.replace('day-', 'Day ')} hint: {todaysHint}
+                  </p>
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 transform ">
+                    <HiLightBulb className="neon-bulb bulb-illuminate h-10 w-10 text-[#4558c4]" />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="space-y-6 pb-4">
                 <h3
@@ -153,7 +160,21 @@ export function HowToPlayDrawer({
                 </p>
               </div>
 
-              <div className="relative flex justify-center pt-4">{renderButton()}</div>
+              <div className="relative flex flex-col items-center space-y-4 pt-4">
+                {/* Back to Overview Button - Always visible */}
+                {onBackToOverview && (
+                  <button
+                    onClick={onBackToOverview}
+                    className={`neon-text-blue text-base font-[500] tracking-wider hover:cursor-pointer hover:text-[#5569d7] hover:underline sm:text-lg ${orbitron.className}`}
+                  >
+                    ← Back to Overview
+                  </button>
+                )}
+                
+                {/* Main CTA Button */}
+                {renderButton()}
+              </div>
+              
               <div className="relative z-[1] pt-8 text-center">
                 <p className={`text-[12px] text-gray-400 ${lexend.className}`}>
                   Made with{' '}
