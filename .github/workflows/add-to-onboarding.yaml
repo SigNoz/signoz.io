@@ -58,26 +58,28 @@ jobs:
               `- ${file.status === 'added' ? '➕' : file.status === 'modified' ? '📝' : '❌'} ${file.path}`
             ).join('\n');
             
-            const issueBody = `## Documentation to Add to Onboarding
-            
-PR: ${prTitle} (#${prNumber})
-Author: @${prAuthor}
-PR Link: ${prUrl}
-
-### Documentation Files Changed:
-${filesList}
-
-### Action Required:
-1. Review the documentation changes in the PR
-2. Determine appropriate section in onboarding config
-3. Add relevant keywords for search functionality
-4. Create PR to update \`onboarding-config-with-links.json\` in the main SigNoz repository
-
-### Context:
-This issue was automatically created because the PR was labeled with \`add-to-onboarding\`. The documentation needs to be manually added to the onboarding flow with appropriate categorization and search keywords.
-
----
-**Note**: This is part of the semi-automated onboarding documentation process. Please review during sprint planning.`;
+            const issueBody = [
+              '## Documentation to Add to Onboarding',
+              '',
+              `PR: ${prTitle} (#${prNumber})`,
+              `Author: @${prAuthor}`,
+              `PR Link: ${prUrl}`,
+              '',
+              '### Documentation Files Changed:',
+              filesList,
+              '',
+              '### Action Required:',
+              '1. Review the documentation changes in the PR',
+              '2. Determine appropriate section in onboarding config',
+              '3. Add relevant keywords for search functionality',
+              '4. Create PR to update `onboarding-config-with-links.json` in the main SigNoz repository',
+              '',
+              '### Context:',
+              'This issue was automatically created because the PR was labeled with `add-to-onboarding`. The documentation needs to be manually added to the onboarding flow with appropriate categorization and search keywords.',
+              '',
+              '---',
+              '**Note**: This is part of the semi-automated onboarding documentation process. Please review during sprint planning.'
+            ].join('\n');
 
             // Create the issue
             const { data: issue } = await github.rest.issues.create({
@@ -94,7 +96,7 @@ This issue was automatically created because the PR was labeled with \`add-to-on
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
-              body: `📚 **Onboarding Task Created**\n\nAn issue has been created to add this documentation to the onboarding flow:\n- Issue: SigNoz/growth-pod#${issue.number}\n- Assigned to: @Calm-Rock\n\nThe documentation will be reviewed and added to onboarding.`
+              body: `📚 **Onboarding Task Created**\n\nAn issue has been created to add this documentation to the onboarding flow:\n- Issue: SigNoz/growth-pod#${issue.number}\n- Assigned to: @Calm-Rock\n\nThe documentation will be reviewed and added to onboarding during the next sprint planning.`
             });
             
             console.log(`Created issue #${issue.number} in growth-pod repository`);
