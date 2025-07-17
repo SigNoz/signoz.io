@@ -881,11 +881,6 @@ const docsSideNav = [
         route: '/docs/infrastructure-monitoring/overview',
         label: 'Overview',
       },
-      // {
-      //   type: 'doc',
-      //   route: '/docs/userguide/navigate-user-interface',
-      //   label: 'Navigate the User Interface',
-      // },
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
@@ -896,6 +891,11 @@ const docsSideNav = [
         route: '/docs/userguide/k8s-metrics',
         label: 'Kubernetes Metrics',
       },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/k8s-infra-otel-config',
+        label: 'K8s Infra Chart',
+      }
     ],
   },
   {
@@ -1244,11 +1244,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/metrics-management/configure-custom-buckets',
         label: 'Configure custom buckets for histograms',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/k8s-infra-otel-config',
-        label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
       },
       {
         type: 'doc',

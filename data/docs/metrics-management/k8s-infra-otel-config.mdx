@@ -1,23 +1,25 @@
 ---
-date: 2024-10-28
-title: k8s-infra otelDeployment and otelAgent configuration
+date: 2025-07-18
+title: Kubernetes Infrastructure Monitoring with k8s-infra Helm Chart
 id: k8s-infra-otel-config
 ---
 
-The [k8s-infra chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) runs two kind of otel collectors:
+The [k8s-infra chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) runs two types of OpenTelemetry collectors:
 
-- otelAgent: This collector is deployed as a daemonset and collects metrics/logs from the pods on the node. One agent is deployed per node.
-- otelDeployment: This collector is deployed as a deployment and collects metrics/logs of the cluster. One deployment is deployed per cluster.
+- **otelAgent**: This collector is deployed as a daemonset and collects metrics/logs from the pods on the node. One agent is deployed per node.
+- **otelDeployment**: This collector is deployed as a deployment and collects metrics/logs of the cluster. One deployment is deployed per cluster.
+
+<Figure src="/img/k8s-infra-otel-agent-arch.webp" alt="otel instances in k8s-infra monitoring" caption="k8s-infra chart" />
 
 ## otelDeployment
 
-The `otelDeployment` collector is configured to collect cluster metrics and events by default. There are some use cases where you might want to collect metrics from components other than the ones that are being collected by default. For example, you might want to collect metrics from a redis server or a postgres database. This page describes how to override the default configuration of the `otelDeployment` collector to collect metrics from additional components. The `override-values.yaml` file contains the configurations that you can override.
+The `otelDeployment` collector is configured to collect cluster metrics and events by default. There are use cases where you might want to collect metrics from components other than the ones collected by default. For example, you might want to collect metrics from a Redis server or a PostgreSQL database. This page describes how to override the default configuration of the `otelDeployment` collector to collect metrics from additional components. The `override-values.yaml` file contains the configurations that you can override.
 
-### Example 1: Configuring a redis receiver running inside a namespace "redis-ns" with the name "redis-server" and port 6379
+### Example 1: Configuring a Redis receiver
 
-The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a redis server running inside a namespace "redis-ns" with the name "redis-server" and port 6379.
+The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a Redis server running inside a namespace "redis-ns" with the name "redis-server" and port 6379:
 
-```yaml
+```
 otelDeployment:
   config:
     receivers:
@@ -31,13 +33,16 @@ otelDeployment:
           exporters: []
 ```
 
-### Example 2: Configuring a postgres receiver running inside a namespace "postgres-ns" with the name "postgres-server" and port 5432
+### Example 2: Configuring a PostgreSQL receiver
 
-```yaml
+The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a PostgreSQL server running inside a namespace "postgres-ns" with the name "postgres-server" and port 5432:
+
+```
 otelDeployment:
   config:
-    postgres:
-      endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
+    receivers:
+      postgres:
+        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
     service:
       pipelines:
         metrics/internal:
@@ -46,9 +51,11 @@ otelDeployment:
           exporters: []
 ```
 
-### Example 3: Configuring a redis receiver running inside a namespace "redis-ns" with the name "redis-server" and port 6379 and a postgres receiver running inside a namespace "postgres-ns" with the name "postgres-server" and port 5432
+### Example 3: Configuring multiple receivers
 
-```yaml
+The following configuration shows how to configure both Redis and PostgreSQL receivers:
+
+```
 otelDeployment:
   config:
     receivers:
@@ -64,11 +71,11 @@ otelDeployment:
           exporters: []
 ```
 
-The above examples are simple and show how to configure the `otelDeployment` collector to collect metrics from a single component. However, in a real-world scenario, you might have to configure the receiver with a username and password and other configurations.
+The above examples are simple and show how to configure the `otelDeployment` collector to collect metrics from a single component. However, in a real-world scenario, you might need to configure the receiver with a username and password and other configurations.
 
 ## otelAgent
 
-The `otelAgent` collector is deployed as a daemonset, it results in duplicate metrics if the same component is running on multiple nodes and the metrics are collected from all the nodes. The `otelDeployment` collector solves this problem by collecting metrics from the cluster and not from the individual nodes.
+The `otelAgent` collector is deployed as a daemonset, which results in duplicate metrics if the same component is running on multiple nodes and the metrics are collected from all the nodes. The `otelDeployment` collector solves this problem by collecting metrics from the cluster and not from the individual nodes.
 
 ## Essential Presets
 
@@ -80,6 +87,7 @@ presets:
   otlpExporter:
     enabled: true  # Must be enabled for data to reach SigNoz
 ```
+
 **What it does**: Enables sending telemetry data to SigNoz backend. This is required for SigNoz to receive any data.
 
 ### 2. Host Metrics Collection
@@ -111,6 +119,7 @@ presets:
             - ^docker.*$  # Excludes docker interfaces
             # Add network interfaces to exclude
 ```
+
 **Key points**:
 - Adjust `collectionInterval` based on your monitoring granularity needs
 - Customize device exclusions to reduce noise from irrelevant storage devices
@@ -144,6 +153,7 @@ presets:
       pods: []            # Only collect logs from these pods
       containers: []      # Only collect logs from these containers
 ```
+
 **Best practices**:
 - Use blacklist for excluding noisy system pods
 - Enable whitelist when you need to monitor specific applications only
@@ -167,6 +177,7 @@ presets:
         enabled: true
       # Enable other metrics as needed
 ```
+
 **Important settings**:
 - Set appropriate `collectionInterval` based on cluster size
 - Configure `insecureSkipVerify: false` in production environments
@@ -194,20 +205,23 @@ presets:
           name: k8s.pod.ip
     # This label/annotation extraction rule takes the value of the key from labels/annotations and maps it to the tag_name attribute which will be added to the associated resources
     extractLabels:
-    # example from pod
-    - tag_name: service.name
-      key: app.kubernetes.io/name
-      from: pod
-    # example from node
-    - tag_name: os.type
-      key: beta.kubernetes.io/os
-      from: node
+      # Example from pod
+      - tag_name: service.name
+        key: app.kubernetes.io/name
+        from: pod
+      # Example from node
+      - tag_name: os.type
+        key: beta.kubernetes.io/os
+        from: node
+    
+    # Annotation extraction configuration
     extractAnnotations:
-    # example from node
-    - tag_name: node.ttl
-      key: node.alpha.kubernetes.io/ttl
-      from: node
+      # Example from node
+      - tag_name: node.ttl
+        key: node.alpha.kubernetes.io/ttl
+        from: node
 ```
+
 **Configuration tips**:
 - Enable only required metadata fields to optimize performance
 - Use `passthrough: true` in very large clusters to reduce API load
@@ -233,6 +247,7 @@ presets:
       - memory
       # - storage    # Uncomment if needed
 ```
+
 **When to use**:
 - Enable for cluster health monitoring
 - Useful for capacity planning and resource optimization
@@ -246,6 +261,7 @@ presets:
     authType: serviceAccount
     namespaces: []    # Empty for all namespaces, or specify list
 ```
+
 **Usage scenarios**:
 - Enable for debugging and audit trails
 - Monitor specific namespaces by listing them
@@ -316,9 +332,9 @@ presets:
     enabled: true
 ```
 
-## Expose port for custom receiver
+## Exposing Ports for Custom Receivers
 
-You may want to use a custom receiver to receive metrics. If the receiver listens on a port, you need to expose that port to the host. The following example shows how to expose port 8125 of statsd receiver.
+You may want to use a custom receiver to receive metrics. If the receiver listens on a port, you need to expose that port to the host. The following example shows how to expose port 8125 of statsd receiver:
 
 ```yaml
 ports:
@@ -329,7 +345,6 @@ ports:
     hostPort: 8125
     protocol: UDP
 ```
-
 
 ## Resource Requirements
 
