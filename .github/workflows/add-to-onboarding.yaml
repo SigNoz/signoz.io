@@ -1,102 +1,95 @@
 name: Add to Onboarding
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 on:
-  pull_request:
+  pull_request_target:
     types: [labeled]
 
 jobs:
   create-onboarding-issue:
-    # Only run when the 'add-to-onboarding' label is added
     if: github.event.label.name == 'add-to-onboarding'
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Check if PR modifies docs
+      # ---- Step 1: detect documentation changes ----
+      - name: Check docs in PR
         id: check-docs
         uses: actions/github-script@v7
         with:
           script: |
+            const pr = context.payload.pull_request.number;
+
             const { data: files } = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number
+              repo:  context.repo.repo,
+              pull_number: pr
             });
-            
-            const docsFiles = files.filter(file => 
-              file.filename.startsWith('data/docs/') || 
-              file.filename.startsWith('src/pages/docs/')
+
+            const docsFiles = files.filter(f =>
+              f.filename.startsWith('data/docs/') ||
+              f.filename.startsWith('src/pages/docs/')
             );
-            
+
             if (docsFiles.length === 0) {
-              core.setFailed('No documentation files found in this PR');
+              core.setFailed('no documentation files found in this PR');
               return;
             }
-            
-            // Extract doc titles and paths
-            const docInfo = docsFiles.map(file => ({
-              path: file.filename,
-              status: file.status
-            }));
-            
-            core.setOutput('has_docs', 'true');
-            core.setOutput('doc_files', JSON.stringify(docInfo));
 
-      - name: Create issue in growth-pod
-        if: steps.check-docs.outputs.has_docs == 'true'
+            core.setOutput('run_next', 'true');   // flag for next step
+
+      # ---- Step 2: create the issue and comment ----
+      - name: Create onboarding issue
+        if: steps.check-docs.outputs.run_next == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const prNumber = context.payload.pull_request.number;
-            const prTitle = context.payload.pull_request.title;
-            const prUrl = context.payload.pull_request.html_url;
-            const prAuthor = context.payload.pull_request.user.login;
-            const docFiles = JSON.parse('${{ steps.check-docs.outputs.doc_files }}');
-            
-            // Format the list of documentation files
-            const filesList = docFiles.map(file => 
-              `- ${file.status === 'added' ? '➕' : file.status === 'modified' ? '📝' : '❌'} ${file.path}`
+            const pr = context.payload.pull_request;
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              pull_number: pr.number
+            });
+
+            const docsFiles = files.filter(f =>
+              f.filename.startsWith('data/docs/') ||
+              f.filename.startsWith('src/pages/docs/')
+            );
+
+            const list = docsFiles.map(f =>
+              `- ${f.status === 'added' ? '➕' : f.status === 'modified' ? '📝' : '❌'} ${f.filename}`
             ).join('\n');
-            
-            const issueBody = [
+
+            const body = [
               '## Documentation to Add to Onboarding',
               '',
-              `PR: ${prTitle} (#${prNumber})`,
-              `Author: @${prAuthor}`,
-              `PR Link: ${prUrl}`,
+              `PR: ${pr.title} (#${pr.number})`,
+              `Author: @${pr.user.login}`,
+              `PR Link: ${pr.html_url}`,
               '',
               '### Documentation Files Changed:',
-              filesList,
-              '',
-              '### Action Required:',
-              '1. Review the documentation changes in the PR',
-              '2. Determine appropriate section in onboarding config',
-              '3. Add relevant keywords for search functionality',
-              '4. Create PR to update `onboarding-config-with-links.json` in the main SigNoz repository',
+              list,
               '',
               '### Context:',
-              'This issue was automatically created because the PR was labeled with `add-to-onboarding`. The documentation needs to be manually added to the onboarding flow with appropriate categorization and search keywords.',
-              '',
-              '---',
-              '**Note**: This is part of the semi-automated onboarding documentation process. Please review during sprint planning.'
+              'This issue was auto‑generated because the PR carries the `add-to-onboarding` label. Please include these docs into the onboarding flow during the next sprint.',
             ].join('\n');
 
-            // Create the issue
             const { data: issue } = await github.rest.issues.create({
-              owner: 'SigNoz',
-              repo: 'growth-pod',
-              title: `[Onboarding] Add docs from signoz-web PR #${prNumber}`,
-              body: issueBody,
-              labels: ['documentation', 'onboarding', 'product-pod'],
-              assignees: ['Calm-Rock']
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              title: `[Onboarding] Docs from PR #${pr.number}`,
+              body,
+              labels: ['documentation', 'onboarding'],
+              assignees: ['Calm-Rock']   // remove if the user lacks access
             });
-            
-            // Add comment to the original PR
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: `📚 **Onboarding Task Created**\n\nAn issue has been created to add this documentation to the onboarding flow:\n- Issue: SigNoz/growth-pod#${issue.number}\n- Assigned to: @Calm-Rock\n\nThe documentation will be reviewed and added to onboarding during the next sprint planning.`
+              repo:  context.repo.repo,
+              issue_number: pr.number,
+              body: `📚 Onboarding issue created… see #${issue.number}`
             });
-            
-            console.log(`Created issue #${issue.number} in growth-pod repository`);
