@@ -19,14 +19,14 @@ Let’s get started.
 
 ## Minikube and the OpenTelemetry Demo App
 
-<Admonition type="info" title="🎯">
+<Admonition type="info">
 
 If you already have a Kubernetes setup, jump to the next section to see how to get telemetry data from them directly. 
 If you want to experiment, play around or want to explore in a demo environment, read on.
 
 </Admonition>
 
-For our demo, we’ll deploy the [OpenTelemetry Astronomy Shop **demo application](https://opentelemetry.io/docs/demo/architecture/)** in a minikube cluster**,**  a microservices app instrumented with OpenTelemetry [it generates traces, metrics and logs]. The OTel project provides a [convenient Helm chart for this demo](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-demo).
+For our demo, we’ll deploy the [OpenTelemetry Astronomy Shop demo application](https://opentelemetry.io/docs/demo/architecture/) in a minikube cluster, a microservices app instrumented with OpenTelemetry [it generates traces, metrics and logs]. The OTel project provides a [convenient Helm chart for this demo](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-demo).
 
 <Admonition type="warning">
 
@@ -63,7 +63,7 @@ kubectl create namespace otel-demo
 helm install my-otel-demo open-telemetry/opentelemetry-demo -n otel-demo
 ```
 
-This will spin up various services [frontend, backend, load generator, etc.]. The demo app is pre-instrumented to emit telemetry. By default, it includes its own OTel Collector. However, we want to showcase our *own* collectors as well, monitoring the cluster. Therefore, we will treat the demo app as just another set of workloads; our collectors will scrape and receive telemetry from it, just like any other application.
+This will spin up various services [frontend, backend, load generator, etc]. The demo app is pre-instrumented to emit telemetry. By default, it includes its own OTel Collector. However, we want to showcase our *own* collectors as well, monitoring the cluster. Therefore, we will treat the demo app as just another set of workloads; our collectors will scrape and receive telemetry from it, just like any other application.
 
 <Admonition type="info">
 
@@ -84,13 +84,13 @@ First, we deploy the collector as a DaemonSet. This means an OTel Collector pod 
 
 In OTel terms, the DaemonSet collector will include components like,
 
-1/ an **OTLP receiver [**to get app traces/metrics from local pods],
+1/ an **OTLP receiver** [to get app traces/metrics from local pods],
 
-2/ the **kubelet stats receiver [**for CPU/memory usage of pods and nodes],
+2/ the **kubelet stats receiver** [for CPU/memory usage of pods and nodes],
 
-3/ the **filelog receiver [**for logs from pods on that node], 
+3/ the **filelog receiver** [for logs from pods on that node], 
 
-4/ and a **Kubernetes attributes processor [**to tag all data with k8s metadata]
+4/ and a **Kubernetes attributes processor** [to tag all data with k8s metadata]
 
 The [official Helm chart](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-collector) makes it easy to enable these pieces via presets. Let's prepare a values file for the Helm chart [call it otel-collector-daemonset.yaml **].**
 
@@ -136,7 +136,7 @@ config:
 
 ```
 
-<Admonition type="note" title="❗">
+<Admonition type="note">
 
 **What Are *Presets* in a Helm Chart?**
 
@@ -205,7 +205,7 @@ While `kubectl logs` is a convenient command for inspecting container logs, it h
 
 1. **Ephemeral Nature:** `kubectl logs` retrieves logs from the container runtime on the node. If a pod restarts, moves to another node, or is deleted, its past logs may be lost unless they were streamed to a persistent storage.
 2. **No Centralised View:** You can only view logs for one pod or container at a time. It doesn't provide a consolidated view across multiple pods, deployments, or the entire cluster. Correlating events across different services becomes extremely challenging.
-3. **Limited Search and Filtering:** `kubectl logs` offers basic filtering [e.g., *-since, -tail, f* for follow]. However, it lacks advanced search capabilities, regex matching, or structured query language support that centralised logging systems provide.
+3. **Limited Search and Filtering:** `kubectl logs` offers basic filtering [e.g., *-since, -tail -f* for follow]. However, it lacks advanced search capabilities, regex matching, or structured query language support that centralised logging systems provide.
 4. **Performance Issues on High Volume:** For applications generating a high volume of logs, `kubectl logs -f` can be overwhelming and may even put a strain on the Kubernetes API server.
 5. **No Aggregation or Analytics:** `kubectl logs` is purely for viewing raw log lines. It cannot perform aggregations, generate dashboards, detect anomalies, or provide insights into log patterns.
 6. **Requires Direct Cluster Access:** To use `kubectl logs`, you need direct `kubectl` access to the cluster, which might not be granted to all team members [e.g., developers needing to troubleshoot their application logs]. Centralised systems allow role-based access to log data.
@@ -266,7 +266,6 @@ helm install otel-collector-cluster open-telemetry/opentelemetry-collector \
 This will create a Deployment [named `otel-collector-cluster`]. After a minute, verify the pod is running:
 
 ```bash
-
 kubectl get pods -n otel-demo 
 ```
 
@@ -301,10 +300,10 @@ Enabling `clusterMetrics` adds the **k8s Cluster Receiver** to the metrics pipel
 
 Kubernetes events are objects that provide insights into what is happening inside the cluster. They are generated by the Kubernetes control plane components [like the API server, scheduler, and controller manager] and by nodes [kubelet]. Enabling `kubernetesEvents` adds the **k8s Objects Receiver** focusing on events [it actually watches all objects, but by default filters to events]. This means all Kubernetes events will appear in the collector’s **logs pipeline**. By default, the chart will configure this receiver to only capture events [***not*** every object change] to keep data volume reasonable. 
 
-<Figure title="Some Kubernetes metrics as visualised by SigNoz" alt="Some Kubernetes metrics as visualised by SigNoz" src="/img/blog/2025/07/k8s-metrics.webp" />
+<Figure caption="Some Kubernetes metrics as visualised by SigNoz" alt="Some Kubernetes metrics as visualised by SigNoz" src="/img/blog/2025/07/k8s-metrics.webp" />
 
 
-<Figure title="Infra metrics collected from the minikube cluster visualised in SigNoz" alt="Infra metrics collected from the minikube cluster visualised in SigNoz" src="/img/blog/2025/07/k8s-infra-metrics.gif" />
+<Figure caption="Infra metrics collected from the minikube cluster visualised in SigNoz" alt="Infra metrics collected from the minikube cluster visualised in SigNoz" src="/img/blog/2025/07/k8s-infra-metrics.gif" />
 
 
 ### Why Is Kubernetes Events Monitoring Important?
@@ -324,7 +323,7 @@ By collecting and analysing Kubernetes events through the OTel Collector, you ga
 - OpenTelemetry provides end-to-end observability for Kubernetes, capturing traces, metrics, and logs in a standardised, vendor-neutral format.
 - Minikube provides a lightweight Kubernetes environment for safely experimenting with observability concepts before applying them to production clusters.
 - Deploying collectors in **two modes** ensures full coverage:
-    - DaemonSet for per-node data (logs, kubelet stats, local app telemetry)
-    - Deployment for cluster-wide data (Kubernetes metrics and events)
+    - **DaemonSet** for per-node data [logs, kubelet stats, local app telemetry]
+    - **Deployment** for cluster-wide data [Kubernetes metrics and events]
 - Helm presets like *kubeletMetrics*, *logsCollection*, and *clusterMetrics* make it easy to configure receivers and processors without writing full config blocks manually.
-- Though demoed on Minikube, this **a**rchitecture mirrors real-world production setups and can be extended to any Kubernetes environment with minimal changes.
+- Though demoed on Minikube, this architecture mirrors real-world production setups and can be extended to any Kubernetes environment with minimal changes.
