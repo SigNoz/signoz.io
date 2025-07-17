@@ -9,11 +9,33 @@ id: python-logs-auto-instrumentation
 
 If you are using python auto-instrumentation for instrumenting your python application you can send logs to SigNoz easily with auto-instrumentation.
 
-To enable logs auto-instrumentation just add this environment variable 
+### Prerequisites
+
+Before setting up auto-instrumentation, ensure you have:
+- Python 3.7 or higher
+- OpenTelemetry Python packages installed
+- SigNoz instance running (Cloud or Self-hosted)
+
+### Ideal Way of Sending Logs from Python Applications
+
+The **recommended approach** for sending logs from Python applications is using **OpenTelemetry auto-instrumentation** with the logging bridge. This method provides:
+
+1. **Automatic correlation** with traces and spans
+2. **Structured logging** with proper attributes
+3. **Minimal code changes** required
+4. **Consistent telemetry** across your application
+
+To enable logs auto-instrumentation, add this environment variable:
 
 ```bash
 OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
 ```
+
+This automatically:
+- Intercepts Python logging calls
+- Adds trace context (trace_id, span_id) to logs
+- Sends logs to configured OTLP endpoint
+- Maintains correlation between logs, traces, and metrics
 
 ## Example application 
 Here is a sample python application.
@@ -96,3 +118,167 @@ opentelemetry-instrument --traces_exporter otlp --metrics_exporter otlp --logs_e
 
 </TabItem>
 </Tabs>
+
+## Logs Correlation
+
+One of the key benefits of using OpenTelemetry auto-instrumentation is **automatic logs correlation** with traces and spans. This enables you to:
+
+### Automatic Correlation
+When auto-instrumentation is enabled, OpenTelemetry automatically injects trace context into your logs:
+
+- **trace_id**: Links logs to specific traces
+- **span_id**: Associates logs with specific spans  
+- **trace_flags**: Indicates sampling decisions
+
+### Viewing Correlated Logs
+In the SigNoz UI, you can:
+
+1. **Navigate from traces to logs**: Click on any span to see associated logs
+2. **Filter logs by trace**: Use trace_id to find all logs for a specific request
+3. **Correlate across services**: See logs from different services in the same trace
+
+### Best Practices for Correlation
+
+1. **Use structured logging**: Log in JSON format for better parsing
+   ```python
+   import logging
+   import json
+   
+   logging.basicConfig(
+       format='%(message)s',
+       level=logging.INFO
+   )
+   
+   def log_structured(message, **kwargs):
+       log_data = {"message": message, **kwargs}
+       logging.info(json.dumps(log_data))
+   ```
+
+2. **Add business context**: Include relevant business attributes
+   ```python
+   logging.info("Order processed", extra={
+       "order_id": "12345",
+       "customer_id": "67890",
+       "amount": 99.99
+   })
+   ```
+
+3. **Use appropriate log levels**: Follow standard logging levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+
+For detailed correlation setup, see the [Correlate Traces and Logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) guide.
+
+## Kubernetes Log Collection with Helm Chart
+
+When deploying in Kubernetes, SigNoz can collect logs automatically using the Helm chart. This provides:
+
+### Automatic Log Collection
+The SigNoz Helm chart collects logs **along with metadata** such as:
+- Kubernetes namespace
+- Pod names and labels
+- Container information
+- Node details
+- Deployment metadata
+
+### Helm Chart Configuration
+Add the following to your Helm values:
+
+```yaml
+# Enable log collection
+logs:
+  enabled: true
+  
+# Configure log pipelines
+logsPipelines:
+  enabled: true
+  
+# Add metadata enrichment
+processor:
+  k8sattributes:
+    enabled: true
+    extract:
+      metadata:
+        - k8s.namespace.name
+        - k8s.pod.name
+        - k8s.pod.uid
+        - k8s.deployment.name
+```
+
+### Metadata Parsing
+Most log attributes require parsing with **pipelines** to extract meaningful information:
+
+1. **Create log pipelines** to parse structured data
+2. **Extract attributes** from log bodies
+3. **Enrich logs** with Kubernetes metadata
+4. **Filter and transform** logs as needed
+
+## Pipeline Parsing for Log Attributes
+
+To extract maximum value from your Python logs, use log pipelines to parse attributes:
+
+### JSON Log Parsing
+For JSON-formatted logs, create a pipeline to extract attributes:
+
+```yaml
+# Pipeline configuration example
+processors:
+  - type: json_parser
+    parse_from: attributes.log
+    parse_to: attributes
+    
+  - type: move
+    from: attributes.level
+    to: attributes.severity_text
+    
+  - type: remove
+    field: attributes.log
+```
+
+### Trace Information Parsing
+Extract trace context from logs that don't have automatic correlation:
+
+```yaml
+processors:
+  - type: trace_parser
+    trace_id:
+      parse_from: attributes.trace_id
+    span_id:
+      parse_from: attributes.span_id
+    trace_flags:
+      parse_from: attributes.trace_flags
+```
+
+### Custom Attribute Extraction
+Parse business-specific attributes:
+
+```yaml
+processors:
+  - type: regex_parser
+    regex: 'user_id=(?P<user_id>[^\s]+)'
+    parse_from: attributes.message
+    parse_to: attributes
+```
+
+For detailed pipeline configuration, see the [Log Pipelines Guide](https://signoz.io/docs/logs-pipelines/guides/json/).
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Logs not appearing**: Check OTLP endpoint configuration
+2. **Missing correlation**: Ensure auto-instrumentation is enabled
+3. **Performance issues**: Use asynchronous logging for high-volume applications
+4. **Parsing errors**: Validate log format and pipeline configuration
+
+### Debug Steps
+
+1. **Verify environment variables**: Check all OTEL_* variables are set correctly
+2. **Test local export**: Start with console exporter to verify log generation
+3. **Check SigNoz connectivity**: Ensure network access to OTLP endpoint
+4. **Review pipeline logs**: Check for parsing errors in SigNoz UI
+
+## Next Steps
+
+- [Set up log pipelines](https://signoz.io/docs/logs-pipelines/guides/json/) for advanced parsing
+- [Configure alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) on important log events  
+- [Explore correlation](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) between logs and traces
+- [Optimize performance](https://signoz.io/docs/instrumentation/opentelemetry-python/) for production deployments
