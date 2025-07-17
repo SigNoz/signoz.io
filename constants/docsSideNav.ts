@@ -246,8 +246,8 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'Migration Guides',
-        route: '/docs/operate/migration',
+        label: 'Upgrade Guides',
+        route: '/docs/operate/upgrade',
         items: [
           {
             type: 'doc',
