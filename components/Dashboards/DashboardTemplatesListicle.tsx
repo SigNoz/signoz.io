@@ -158,7 +158,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'JVM',
-    href: '/docs/dashboards/dashboard-templates/jvm',
+    href: '/docs/dashboards/dashboard-templates/jvm-metrics',
     icon: <Cpu className="h-7 w-7 text-orange-600" />,
     clickName: 'JVM Dashboard Template',
   },
