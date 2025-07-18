@@ -188,8 +188,8 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/operate/upgrade/',
-          destination: '/docs/operate/migration/upgrade-0.8.0',
+          source: '/docs/operate/migration',
+          destination: '/docs/operate/upgrade',
           permanent: true,
         },
         {
@@ -498,7 +498,7 @@ module.exports = () => {
           source: '/dashboards',
           destination: '/docs/dashboards/dashboard-templates/overview/',
           permanent: true,
-        },
+        }
       ]
     },
     webpack: (config, options) => {
