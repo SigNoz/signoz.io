@@ -1458,6 +1458,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/nginx',
+            label: 'NGINX',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/postgresql',
             label: 'PostgreSQL',
           },

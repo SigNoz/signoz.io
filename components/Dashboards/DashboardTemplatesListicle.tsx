@@ -206,7 +206,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'Nginx',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/nginx',
+    href: '/docs/dashboards/dashboard-templates/nginx',
     icon: <SiNginx className="h-7 w-7 text-green-500" />,
     clickName: 'Nginx Dashboard Template',
   },
