@@ -1363,6 +1363,67 @@ const docsSideNav = [
         label: 'Out of Box Dashboards',
         items: [
           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/apache-web-server',
+            label: 'Apache Web Server',
+          },
+                    {
+            label: 'APM',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/apm-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/apm-metrics',
+                label: 'APM Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
+                label: 'DB Calls Monitoring',
+              },
+            ]
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/cicd',
+            label: 'CICD',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
+            label: 'Docker Container',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/couchdb',
+            label: 'CouchDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
+            label: 'HAProxy',
+          },
+          {
+            label: 'Hostmetrics',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+                label: 'Hostmetrics (K8s)',
+              },
+            ],
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/jvm-metrics',
+            label: 'JVM',
+          },
+          {
             label: 'Kubernetes',
             type: 'category',
             isExpanded: false,
@@ -1381,55 +1442,14 @@ const docsSideNav = [
             ],
           },
           {
-            label: 'APM',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/apm-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/apm-metrics',
-                label: 'APM Metrics',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
-                label: 'DB Calls Monitoring',
-              },
-            ]
-          },
-                    {
-            label: 'Hostmetrics',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
-                label: 'Hostmetrics (K8s)',
-              },
-            ],
-          },
-          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
-            label: 'SigNoz Ingestion Analysis',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
-            label: 'HAProxy',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
-            label: 'Docker Container',
+            route: '/docs/dashboards/dashboard-templates/memcached',
+            label: 'Memcached',
           },
           {
             type: 'doc',
@@ -1438,8 +1458,18 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/cicd',
-            label: 'CICD',
+            route: '/docs/dashboards/dashboard-templates/postgresql',
+            label: 'PostgreSQL',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/rabbitmq',
+            label: 'RabbitMQ',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
+            label: 'SigNoz Ingestion Analysis',
           },
         ],
       },

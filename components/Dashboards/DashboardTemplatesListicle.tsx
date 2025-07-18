@@ -50,7 +50,7 @@ interface IconCardData {
 const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Apache Web Server',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/apache-web-server',
+    href: '/docs/dashboards/dashboard-templates/apache-web-server',
     icon: <SiApache className="h-7 w-7 text-red-600" />,
     clickName: 'Apache Web Server Dashboard Template',
   },
@@ -104,7 +104,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'CouchDB',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/couchdb',
+    href: '/docs/dashboards/dashboard-templates/couchdb',
     icon: <Database className="h-7 w-7 text-red-500" />,
     clickName: 'CouchDB Dashboard Template',
   },
@@ -158,7 +158,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'JVM',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/jvm',
+    href: '/docs/dashboards/dashboard-templates/jvm',
     icon: <Cpu className="h-7 w-7 text-orange-600" />,
     clickName: 'JVM Dashboard Template',
   },
@@ -188,7 +188,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'Memcached',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/memcached',
+    href: '/docs/dashboards/dashboard-templates/memcached',
     icon: <HardDrive className="h-7 w-7 text-green-600" />,
     clickName: 'Memcached Dashboard Template',
   },
@@ -218,13 +218,13 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'PostgreSQL',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/postgresql',
+    href: '/docs/dashboards/dashboard-templates/postgresql',
     icon: <SiPostgresql className="h-7 w-7 text-blue-600" />,
     clickName: 'PostgreSQL Dashboard Template',
   },
   {
     name: 'RabbitMQ',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/rabbitmq',
+    href: '/docs/dashboards/dashboard-templates/rabbitmq',
     icon: <SiRabbitmq className="h-7 w-7 text-orange-600" />,
     clickName: 'RabbitMQ Dashboard Template',
   },
