@@ -164,7 +164,7 @@ const resourcesDropdownItems = {
     },
     {
       key: 'dashboards',
-      url: '/dashboards/',
+      url: '/docs/dashboards/dashboard-templates/overview/',
       description: 'Explore dashboard templates for your use cases',
       name: 'Dashboard Templates',
     },
