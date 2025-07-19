@@ -76,7 +76,7 @@ function Footer() {
                   <Link href="/changelog">Changelog</Link>
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="/dashboards" target="_blank">
+                  <Link href="/docs/dashboards/dashboard-templates/overview/" target="_blank">
                     Dashboard Templates
                   </Link>
                   <ArrowUpRight size={16} />
