@@ -33,10 +33,10 @@ For a simple filter like `namespace = 'production'`, we were scanning 41,498 out
 To understand our solution, you need to know how ClickHouse (our underlying database) organizes data:
 
 **Granules/Blocks**: ClickHouse groups rows into blocks of 8,192 rows each by default (configurable via `index_granularity`). When you query, it decides which entire blocks to read or skip.
-<Figure src="/img/blog/2025/07/granules-blocks.webp" caption="How ClickHouse organizes table rows into granules of 8,192 rows each, stored in columnar format." />
+<Figure src="/img/blog/2025/07/granules-blocks.webp" caption="How ClickHouse organizes table rows into granules of 8,192 rows each, stored in columnar format. Source: https://clickhouse.com/docs/guides/best-practices/sparse-primary-indexes" />
 
 **Primary Key Index**: This is a "sparse index" - it doesn't index every row, but rather creates index entries for each block. If your primary key helps identify which blocks contain relevant data, ClickHouse can skip irrelevant blocks entirely.
-<Figure src="/img/blog/2025/07/primary-key-index.webp" caption="ClickHouse's sparse primary index with one entry per granule." />
+<Figure src="/img/blog/2025/07/primary-key-index.webp" caption="ClickHouse's sparse primary index with one entry per granule. Source: https://clickhouse.com/docs/guides/best-practices/sparse-primary-indexes" />
 
 **Skip Indexes**: Secondary indexes (like bloom filters) that help skip blocks for non-primary key columns. These work, but not as efficiently as the primary key.
 
