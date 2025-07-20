@@ -105,13 +105,56 @@ Start the OpenTelemetry Collector using the above `config.yaml` file:
 
 <TabItem value='self-host' label='Self-Host'>
 
-### Step 1: Install SigNoz
+#### Step 1: Install SigNoz
 
 Follow this [documentation](https://signoz.io/docs/install/docker/) to install self-hosted SigNoz.
 
-### Step 2: Configure JournalD Receiver
+Note that if you are using the Docker-based installation for SigNoz, you will need to stop the `signoz-otel-collector` container, and run the 
+SigNoz OTel Collector locally. This is because the OTel Collector process will run the JournalD receiver. Journald receiver requires that the 
+`journalctl` binary is present in the $PATH of the agent. This is not feasible within the docker container. And hence, we need to run the 
+OTel Collector on the Linux OS machine from which the SystemD logs need to be collected.
 
-Update `otel-collector-config.yaml` with the following configuration:
+In order to stop the `signoz-otel-collector` container, and start the SigNoz OTel Collector on the Linux machine, we will:
+
+1. First list all the docker containers using the command:
+
+```bash
+docker ps
+```
+
+The output should look similar to the following:
+
+```output
+CONTAINER ID   IMAGE                                        COMMAND                  CREATED          STATUS                    PORTS                                    NAMES
+afd3e434e853   signoz/signoz-otel-collector:0.111.24        "/signoz-collector -…"   47 minutes ago   Up 45 minutes             0.0.0.0:4317-4318->4317-4318/tcp         signoz-otel-collector
+c0b6e58d3d18   signoz/signoz:0.69.0                         "./query-service --c…"   47 minutes ago   Up 46 minutes (healthy)   8080/tcp                                 signoz-signoz
+69431900f6ef   clickhouse/clickhouse-server:24.1.2-alpine   "/entrypoint.sh"         47 minutes ago   Up 47 minutes (healthy)   8123/tcp, 9000/tcp, 9009/tcp             signoz-clickhouse
+8b69f876a3c7   bitnami/zookeeper:3.7.1                      "/opt/bitnami/script…"   47 minutes ago   Up 47 minutes (healthy)   2181/tcp, 2888/tcp, 3888/tcp, 8080/tcp   signoz-zookeeper-1
+```
+
+2. Find the container ID of the `signoz-otel-collector`, in the above example: `afd3e434e853`, and use it in the below command to stop the 
+container:
+
+```bash
+docker stop <container-id>
+```
+
+3. Next, download and extract the latest release of SigNoz Otel Collector:
+
+```bash
+curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
+tar -xzf signoz-otel-collector.tar.gz
+```
+
+4. Navigate to the appropriate directory.
+
+```bash
+cd signoz-otel-collector/bin
+```
+
+#### Step 2: Configure JournalD Receiver
+
+Create `otel-collector-config.yaml` with the following configuration:
 
 ```yaml
 receivers:
@@ -170,11 +213,12 @@ You can also include the below configuration options for JournalD receiver:
 More options available [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md)
 </Admonition>
 
-### Step 3: Restart OTel Collector
+#### Step 3: Start the SigNoz OTel Collector
 
-Restart the collector for the changes to take effect:
+Start the SigNoz OTel collector to start receiving the SystemD logs:
+
 ```bash
-docker-compose restart otel-collector
+./signoz-otel-collector --config otel-collector-config.yaml
 ```
 
 You should now be able to see the SystemD logs on SigNoz.
