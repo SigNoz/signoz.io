@@ -1731,6 +1731,11 @@ const docsSideNav = [
         route: '/docs/integrations/aws-elasticache-redis',
         label: 'AWS Elasticache Redis',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/sql-server',
+        label: 'Microsoft SQL Server',
+      }
     ],
   },
   {
