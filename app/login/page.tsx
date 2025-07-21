@@ -341,10 +341,10 @@ export default function Login() {
       </div>
 
       <div className="absolute bottom-0 m-auto mt-8 flex w-full items-center justify-center">
-        <div className="flex w-[70%] items-center justify-center">
-          <section className="b mb-6 flex min-w-[240px] flex-wrap items-center gap-8 self-stretch rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-2 px-8 max-md:max-w-full">
+        <div className="flex w-[70%] items-center justify-center max-sm:w-[90%]">
+          <section className="b mb-6 grid grid-cols-2 md:flex md:flex-wrap items-center gap-4 self-stretch rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-4 md:p-2 max-md:max-w-full max-md:w-full">
             {trustBadges.map((badge, index) => (
-              <div className="my-auto flex items-center gap-2.5 self-stretch" key={index}>
+              <div className="my-auto flex items-center gap-2.5 self-stretch justify-center md:justify-start" key={index}>
                 {badge.icon && (
                   <img
                     loading="lazy"
@@ -364,7 +364,7 @@ export default function Login() {
                 )}
 
                 {index < trustBadges.length - 1 && (
-                  <Dot size={24} color="#3C4152" className="ml-4" />
+                  <Dot size={24} color="#3C4152" className="ml-4 hidden md:block" />
                 )}
               </div>
             ))}
