@@ -24,7 +24,7 @@ export default function ProductNav() {
   }, [pathname]);
 
   return (
-    <div className="fixed left-0 right-0 z-30 top-[56px]">
+    <div className="fixed left-0 right-0 z-10 top-[56px]">
       <header className="header-bg mx-auto flex h-[56px] items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-400 !backdrop-blur-[20px] md:px-8 lg:px-8 overflow-x-auto overflow-y-hidden">
         <nav className="flex w-full justify-between container items-end" aria-label="Product Navigation">
           <div className="flex items-center gap-x-8 h-[56px]">

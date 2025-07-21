@@ -61,8 +61,8 @@ function Footer() {
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://twitter.com/SigNozHQ" target="_blank">
-                    Twitter
+                  <Link href="https://x.com/SigNozHQ" target="_blank">
+                    X
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
@@ -192,7 +192,7 @@ function Footer() {
                   </Link>
 
                   <Link
-                    href={'https://twitter.com/SigNozHQ'}
+                    href={'https://x.com/SigNozHQ'}
                     target="_blank"
                     aria-label="SigNoz Twitter URL"
                   >

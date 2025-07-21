@@ -6,7 +6,7 @@ const Accordion = ({ topic, subtopics, onLinkClick }) => {
   const [accordionIsOpen, setAccordionIsOpen] = useState(false)
 
   return (
-    <div className="-mx-3 block rounded-lg px-3 text-base font-semibold leading-7 hover:bg-[#18181B]">
+    <div className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-[#18181B]">
       <button
         onClick={() => setAccordionIsOpen(!accordionIsOpen)}
         className="flex w-full items-center gap-1"
