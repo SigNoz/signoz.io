@@ -7,7 +7,7 @@ description: Integrate the SQL Server Receiver to scrape metrics and send logs t
 
 ## Overview
 
-This documentation explains how to collect SQL Server metrics using the OpenTelemetry [SQL Server receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/sqlserverreceiver) and logs using [File Log Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver) and send them to SigNoz for monitoring and analysis.
+This documentation explains how to collect SQL Server metrics and logs using OpenTelemetry and send them to SigNoz for monitoring and analysis.
 
 ## Prerequisites
 
@@ -25,10 +25,9 @@ This documentation explains how to collect SQL Server metrics using the OpenTele
 ### Step 1. Setup OTel Collector
 The OpenTelemetry (OTel) Collector helps collect telemetry data such as logs, traces and metrics from your application.
 Please follow the documentation [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the OpenTelmetry Collector in your VM.
-Make sure to use the latest OTel Collector release. 
 
 ### Step 2. Setup SQL Server Receiver
-Update the `config.yaml` file that you created in `otelcol-contrib` folder while setting up OTel Collector to include the `sqlserver` receiver under the `receivers` section.
+Update the `config.yaml` file that you created in `otelcol-contrib` folder while setting up OTel Collector to include the `sqlserver` [receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/sqlserverreceiver) under the `receivers` section.
 
     ```yaml:/otelcol-contrib/config.yaml
 
@@ -69,11 +68,11 @@ Update the `config.yaml` file that you created in `otelcol-contrib` folder while
 
 - `<ServerName>`: Specifies the address or hostname of the SQL Server instance you want to connect to (e.g., localhost or myserver.database.windows.net)
 - `<UserID>`: Specifies the SQL Server login name used for authentication (e.g., SA or any other configured SQL login)
-- `<Password>`: Specifies the password corresponding to the provided UserID, allowing access to the database.
-- `<DatabaseName>`: Specifies the target SQL Server database that the OpenTelemetry Collector will query for collecting metrics (e.g., master, mydb).
-- `<service-name>`: Specifies the service that emits the metrics, making it easier to identify and filter metrics related to a specific database.
-- `<region>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud.
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<Password>`: Specifies the password corresponding to the provided UserID, allowing access to the database
+- `<DatabaseName>`: Specifies the target SQL Server database that the OpenTelemetry Collector will query for collecting metrics (e.g., master, mydb)
+- `<service-name>`: Specifies the service that emits the metrics, making it easier to identify and filter metrics related to a specific database
+- `<region>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3. Add SQL Server Receiver to pipelines
 In the `config.yaml` file, under the `service` section, locate the `pipelines` block. Within the `metrics` pipeline, add `sqlserver` to the list of receivers.
@@ -90,28 +89,51 @@ In the `config.yaml` file, under the `service` section, locate the `pipelines` b
     ```
 
 ### Step 4. Run the OTel Collector
-Inside `otelcol-contrib` folder, run the `otelcol-contrib` command if you're using Linux based. For Windows based, use `otelcol-contrib.exe`
+Inside `otelcol-contrib` folder, run the `otelcol-contrib` command.
 
-    ```bash
-    ./otelcol-contrib --config config.yaml
-    ```
+    <Tabs>
+    <TabItem value="linux" label="Linux" default>
+      ```bash
+      ./otelcol-contrib --config config.yaml
+      ```
+    </TabItem>  
+    <TabItem value="windows" label="Windows" default>
+      ```powershell
+      .\otelcol-contrib.exe --config=config.yaml
+      ```
+    </TabItem>  
+    </Tabs>
+
+
+## Validate Metrics in SigNoz
+
+<Admonition>
+💡 Not all metrics are scraped from SQL Server when running on Linux. For complete metric collection, including Windows-specific counters, use a Windows-based SQL Server.
+</Admonition>
+
+- You can view the SQL server metrics in the [Metrics Tab](https://signoz.io/docs/metrics-management/metrics-explorer/) of your SigNoz UI.
+
+<Figure src="/img/docs/integrations/microsoft-sql-server/MetricsSQLServer.webp" alt="SQL Server Metrics" caption="Scraped Metrics from SQL Server" />
+
+- To see the complete list of metrics, refer this [link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/sqlserverreceiver/documentation.md).
+
 
 </TabItem>
 
 <TabItem value="logs" label="Logs" default>
 
 <Admonition type="note" title="Limited Log Collection via SQL Server Receiver">
-  If you configure the <code>sqlserver</code> receiver, it will collect logs only related to <strong>expensive queries</strong>. <br />
+  If you configure the <code>sqlserver</code> receiver (see metrics tab for setup steps), it will collect logs only related to <strong>expensive queries</strong>. <br />
   For other types of logs (e.g., error logs, audit logs), use the <code>filelog</code> receiver to tail log files directly from the file system.
 </Admonition>
 
 ### Step 1. Setup OTel Collector
 The OpenTelemetry (OTel) Collector helps collect telemetry data such as logs, traces and metrics from your application.
 Please follow the documentation [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the OpenTelmetry Collector in your VM.
-Make sure to use the latest OTel Collector release. 
 
 ### Step 2. Setup FileLog Receiver
-Update the `config.yaml` file that you created in `otelcol-contrib` folder while setting up OTel Collector to include the `filelog` receiver under the `receivers` section.
+Update the `config.yaml` file that you created in `otelcol-contrib` folder while setting up OTel Collector to include the `filelog` [receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver) under the `receivers` section.
+You can configure this receiver to collect specific types of logs such as audit logs, error logs, or application-specific logs based on your parsing rules.
 
     ```yaml:/otelcol-contrib/config.yaml
 
@@ -165,11 +187,29 @@ In the `config.yaml` file, under the `service` section, locate the `pipelines` b
     ```
 
 ### Step 4. Run the OTel Collector
-Inside `otelcol-contrib` folder, run the `otelcol-contrib` command if you're using Linux based. For Windows based, use `otelcol-contrib.exe`
+Inside `otelcol-contrib` folder, run the `otelcol-contrib` command.
 
-    ```bash
-    ./otelcol-contrib --config config.yaml
-    ```
+    <Tabs>
+    <TabItem value="linux" label="Linux" default>
+        ```bash
+        ./otelcol-contrib --config config.yaml
+        ```
+    </TabItem>  
+    <TabItem value="windows" label="Windows" default>
+        ```powershell
+        .\otelcol-contrib.exe --config=config.yaml
+        ```
+    </TabItem>  
+    </Tabs>
+
+
+## Validate Logs in SigNoz
+
+- You can view the logs in the [Logs Tab](https://signoz.io/docs/product-features/logs-explorer/) of SigNoz UI.
+
+<Figure src="/img/docs/integrations/microsoft-sql-server/LogsSQLServer.webp" alt="SQL Server Logs" caption="Ingested Logs from SQL Server" />
+
+- To see the complete list of logs, refer this [link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/sqlserverreceiver/logs-documentation.md).
 
 </TabItem>
 </Tabs>
@@ -194,23 +234,6 @@ Inside `otelcol-contrib` folder, run the `otelcol-contrib` command if you're usi
 </TabItem>
 </Tabs>
 
-## Validate Metrics in SigNoz
-
-<Admonition>
-💡 Not all metrics are scraped from SQL Server when running on Linux. For complete metric collection, including Windows-specific counters, use a Windows-based SQL Server.
-</Admonition>
-
-- The following default metrics and optional metrics are scraped and can be viewed under the `Metrics` tab in the SigNoz UI.
-
-<Figure src="/img/docs/integrations/microsoft-sql-server/MetricsSQLServer.webp" alt="SQL Server Metrics" caption="Scraped Metrics from SQL Server" />
-
-- Refer this [link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/sqlserverreceiver/documentation.md) for more info on metrics.
 
 
-## Validate Logs in SigNoz
 
-- The following default logs are ingested and can be viewed under the `Logs` tab in the SigNoz UI.
-
-<Figure src="/img/docs/integrations/microsoft-sql-server/LogsSQLServer.webp" alt="SQL Server Logs" caption="Ingested Logs from SQL Server" />
-
-- Refer this [link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/sqlserverreceiver/logs-documentation.md) for more info on metrics.
