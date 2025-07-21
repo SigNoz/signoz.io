@@ -1768,6 +1768,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/mongodb-atlas',
+        label: 'MongoDB Atlas',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/clickhouse',
         label: 'Clickhouse',
       },
