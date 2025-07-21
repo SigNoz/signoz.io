@@ -168,9 +168,9 @@ You can configure this receiver to collect specific types of logs such as audit 
     ```
 
 - `<LogPath>`: Specifies the full absolute path to the SQL Server log file(s) that the OpenTelemetry Collector should monitor and ingest. This path must point to a valid file (e.g., C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Log\ERRORLOG on Windows or /var/opt/mssql/log/errorlog on Linux/Docker)
-- `<service-name>`: Specifies the service that emits the metrics, making it easier to identify and filter metrics related to a specific database.
-- `<region>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud.
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: Specifies the service used for grouping and identifying logs, helping to organize and filter logs from a specific application or component
+- `<region>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3. Add FileLog Receiver to pipelines
 In the `config.yaml` file, under the `service` section, locate the `pipelines` block. Within the `logs` pipeline, add `filelog` to the list of receivers.
@@ -225,6 +225,83 @@ Inside `otelcol-contrib` folder, run the `otelcol-contrib` command.
 </TabItem>
 
 <TabItem value="logs" label="Logs" default>
+
+<Admonition type="note" title="Limited Log Collection via SQL Server Receiver">
+  If you configure the <code>sqlserver</code> receiver (see metrics tab for setup steps), it will collect logs only related to <strong>expensive queries</strong>. <br />
+  For other types of logs (e.g., error logs, audit logs), use the <code>filelog</code> receiver to tail log files directly from the file system.
+</Admonition>
+
+### Step 1. Install SigNoz
+Install `SigNoz` by following this [link](https://signoz.io/docs/install/self-host/).
+
+### Step 2. Update OTel Collector Configuration
+Update the `otel-collector-config.yaml` or `config.yaml` while setting up OTel Collector to include the `filelog` [receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver) under the `receivers` section.
+You can configure this receiver to collect specific types of logs such as audit logs, error logs, or application-specific logs based on your parsing rules.
+
+
+    ```yaml:/deploy/docker/otel-collector-config.yaml
+
+    receivers:
+      filelog:
+        include: ["<LogPath>"]
+        start_at: beginning
+        operators:
+          - type: regex_parser
+            regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\s+(?P<severity>[A-Z]+)\s+(?P<message>.*)'
+            timestamp:
+              parse_from: attributes.timestamp
+              layout: '%Y-%m-%d %H:%M:%S.%L'
+            severity:
+              parse_from: attributes.severity
+
+    processors:
+      resource:
+        attributes:
+          - key: service.name
+            value: <service-name>
+            action: insert
+
+    exporters:
+      clickhouselogsexporter:
+        dsn: tcp://clickhouse:9000/signoz_logs
+        timeout: 10s
+        use_new_schema: true
+      debug:
+        verbosity: detailed
+    ```
+
+- `<LogPath>`: Specifies the full absolute path to the SQL Server log file(s) that the OpenTelemetry Collector should monitor and ingest. This path must point to a valid file (e.g., C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Log\ERRORLOG on Windows or /var/opt/mssql/log/errorlog on Linux/Docker)
+- `<service-name>`: Specifies the service used for grouping and identifying logs, helping to organize and filter logs from a specific application or component
+
+### Step 3. Add FileLog Receiver to pipelines
+In the `otel-collector-config.yaml` or `config.yaml` file, under the `service` section, locate the `pipelines` block. Within the `logs` pipeline, add `filelog` to the list of receivers.
+
+    ```yaml:/deploy/docker/otel-collector-config.yaml
+    ...
+    service:
+      pipelines:
+        logs:
+          receivers: [filelog]
+          processors: [resource]
+          exporters: [clickhouselogsexporter,debug]
+    ...
+    ```
+
+### Step  4. Restart OTel Collector Services
+Restart the `otel-collector` service under `deploy/docker` folder.
+
+    ```bash
+    docker compose -f docker-compose.yaml restart otel-collector
+    ```
+
+## Validate Logs in SigNoz
+
+- You can view the logs in the [Logs Tab](https://signoz.io/docs/product-features/logs-explorer/) of SigNoz UI.
+
+<Figure src="/img/docs/integrations/microsoft-sql-server/LogsSQLServer.webp" alt="SQL Server Logs" caption="Ingested Logs from SQL Server" />
+
+- To see the complete list of logs, refer this [link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/sqlserverreceiver/logs-documentation.md).
+
 
 </TabItem>
 </Tabs>
