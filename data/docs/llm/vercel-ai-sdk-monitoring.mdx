@@ -1,20 +1,24 @@
-# Integrating Vercel AI SDK Telemetry with SigNoz
+---
+date: 2025-07-21
+id: vercel-ai-sdk-monitoring
+title: Integrating Vercel AI SDK Telemetry with SigNoz
+description: Enable telemetry in your Vercel AI application with OpenTelemetry and send traces, logs, and metrics to SigNoz
+---
 
-
-# Overview
+## Overview
 
 This guide walks you through enabling telemetry in the Vercel AI SDK and streaming that data to SigNoz Cloud using OpenTelemetry. By the end of this setup, you'll be able to monitor AI-related function calls like generateText() or generateStream()—including request durations, inputs, outputs, and custom metadata—directly within SigNoz.
 
 Instrumenting your AI workflows with telemetry helps you observe performance, debug latency, and trace AI interactions end-to-end across your Next.js application. This is especially valuable when building production-grade AI features where visibility into model behavior and user interactions is critical.
 
-# Prerequisites
+## Prerequisites
 
 - Next.js app
 - Vercel AI SDK integrated into the app
 - [SigNoz Cloud Account](https://signoz.io/teams/)
 - SigNoz Ingestion Key
 
-# Instrument your Next.js application
+## Instrument your Next.js application
 
 Check out detailed instructions on how to set up OpenTelemetry instrumentation in your Nextjs applications and view your application traces in SigNoz over [here](https://signoz.io/docs/instrumentation/opentelemetry-nextjs/).
 
@@ -81,7 +85,7 @@ npm run dev
 
 In your terminal, you should see output from OpenTelemetry when the application starts, confirming that the instrumentation.ts file was loaded correctly. 
 
-![Terminal output showing OpenTelemetry initialization](../../../public/img/docs/llm/vercel/vercel-run-output.webp)
+![Terminal output showing OpenTelemetry initialization](/img/docs/llm/vercel/vercel-run-output.webp)
 
 To see detailed trace export logs, you can temporarily set the DiagLogLevel to DEBUG in instrumentation.ts:
 
@@ -89,7 +93,7 @@ To see detailed trace export logs, you can temporarily set the DiagLogLevel to D
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 ```
 
-# Enable Telemetry for Vercel AI SDK
+## Enable Telemetry for Vercel AI SDK
 
 The Vercel AI SDK uses [OpenTelemetry](https://opentelemetry.io/) to collect telemetry data. OpenTelemetry is an open-source observability framework designed to provide standardized instrumentation for collecting telemetry data.
 
@@ -110,9 +114,7 @@ const result = await generateText({
 When telemetry is enabled, you can also control whether you want to record the input values and the output values for the function. By default, both are enabled. You can disable them by setting the `recordInputs` and `recordOutputs` options to `false`.
 
 ```jsx
-experimental_telemetry: { isEnabled: true, 
-													recordInputs: false, 
-													recordOutputs: false}
+experimental_telemetry: { isEnabled: true, recordInputs: false, recordOutputs: false}
 ```
 
 Disabling the recording of inputs and outputs can be useful for privacy, data transfer, and performance reasons. You might, for example, want to disable recording inputs if they contain sensitive information.
@@ -156,6 +158,6 @@ Your Vercel AI SDK commands should now automatically emit traces, spans, and eve
 
 Finally, you should be able to view this data in Signoz Cloud under the traces tab:
 
-![Traces View](../../../public/img/docs/llm/vercel/vercel-traces-view.webp)
+![Traces View](/img/docs/llm/vercel/vercel-traces-view.webp)
 
-![Detailed Traces View](../../../public/img/docs/llm/vercel/vercel-traces-detailed-view.webp)
+![Detailed Traces View](/img/docs/llm/vercel/vercel-traces-detailed-view.webp)
