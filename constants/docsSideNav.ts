@@ -1258,6 +1258,12 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        className: 'new-doc',
+        route: '/docs/metrics-management/nginx-metrics',
+        label: 'NGINX metrics',
+      },
+      {
+        type: 'doc',
         route: '/docs/userguide/drop-metrics',
         label: 'Drop Metrics',
       },
@@ -1791,6 +1797,11 @@ const docsSideNav = [
         route: '/docs/integrations/aws-elasticache-redis',
         label: 'AWS Elasticache Redis',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/sql-server',
+        label: 'Microsoft SQL Server',
+      }
     ],
   },
   {

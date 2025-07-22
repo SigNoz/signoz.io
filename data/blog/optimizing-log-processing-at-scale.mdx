@@ -12,6 +12,7 @@ keywords: [logs, sequential, concurrent, performance improvement]
 We optimized log processing pipeline by moving from sequential to concurrent processing at the entry level, achieving 30% higher throughput and better resource utilization without increasing infrastructure costs. 
 <Figure src="/img/blog/2025/07/log-processing-at-scale.webp" alt="Moved from sequential to concurrent processing at the entry level, achieving 30% higher throughput" />
 
+
 When customers start sending millions of logs per minute, you need both horizontal and vertical scaling capabilities. While we can horizontally scale collectors across distributed systems to handle millions of logs, we discovered that our individual collectors weren't effectively utilizing vertical scaling when we added more CPU or memory. The performance didn't improve proportionally.
 
 This is the technical story of how we diagnosed a fundamental sequential processing bottleneck and moved to concurrent processing at the entry level.
@@ -23,6 +24,7 @@ This is the technical story of how we diagnosed a fundamental sequential process
 Our collector was not working better when we were vertically scaling. Any piece of software, if you give it more memory or more CPU, it should start utilizing that. But our collector was not doing that.
 
 Resource utilization challenges became noticeable at **1 million logs per minute**. At this threshold, we would see significant lag that could persist for hours, making logs unqueryable during critical periods.
+
 
 ### Resource Utilization Analysis
 
@@ -121,12 +123,13 @@ This trade-off was acceptable since log storage systems typically don't require 
 
 - **CPU Usage:** 4,352m out of 4,000m allocated (108% utilization)
 - **Memory Usage:** 12.16GiB peak, 6.76GiB average
-- **Processing Rate:** 66k logs/second
+- **Processing Rate:** 66k logs/second peak, 47k logs/second average
 - **Consumer Lag:** 2,650 messages (reduced)
 
 ### 30% Performance Gain
 
 The processing rate increased from 35.7k to 46k logs/second (with peaks up to 66k), representing a **30% improvement** in throughput with the same infrastructure.
+
 
 ### Better Resource Utilization
 
@@ -165,7 +168,8 @@ Relaxing ordering requirements can provide significant performance benefits in d
 
 By moving from sequential to concurrent processing at the entry level, we achieved:
 
-- **30% sustained throughput improvement (35.7k to ~46k average, with 66k peaks)
+
+- **30% sustained throughput improvement** (35.7k to ~46k average, with 66k peaks)
 - **Better resource utilization** (67% to 108% CPU usage)
 - **Eliminated operational adjustments** during traffic spikes
 - **Cost efficiency:** same infrastructure, better performance
