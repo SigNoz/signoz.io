@@ -33,6 +33,8 @@ tags:
     x-displayName: The Dashboards Model
     description: |
       <SchemaDefinition schemaRef="#/components/schemas/Dashboard" />
+  - name: logs_pipeline
+    description: Manage log processing pipelines (create, update, etc)
 x-tagGroups:
   - name: General
     tags:
@@ -318,6 +320,54 @@ paths:
           description: Bad request parameters
         '500':
           description: Internal server error
+  '/api/v1/logs/pipelines':
+    post:
+      tags:
+        - logs_pipeline
+      summary: Create or update log processing pipelines
+      description: Create or update log processing pipelines
+      operationId: createOrUpdateLogsPipeline
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      requestBody:
+        $ref: '#/components/requestBodies/LogsPipeline'
+      responses:
+        '200':
+          description: Pipelines created/updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogsPipelineResponse'
+        '400':
+          description: Invalid input
+  '/api/v1/logs/pipelines/latest':
+    get:
+      tags:
+        - logs_pipeline
+      summary: Get the latest log processing pipeline config
+      description: Returns the latest log processing pipeline configuration
+      operationId: getLatestLogsPipeline
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '200':
+          description: Latest pipeline config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogsPipelineResponse'
+        '400':
+          description: Invalid input
 
 components:
   schemas:
@@ -1402,6 +1452,526 @@ components:
           description: Data for the row
           additionalProperties: true
 
+    LogsPipeline:
+      type: object
+      required:
+        - pipelines
+      properties:
+        pipelines:
+          type: array
+          description: List of log processing pipelines
+          items:
+            $ref: '#/components/schemas/Pipeline'
+
+    JSONParserProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - output
+        - orderId
+        - enabled
+        - name
+        - parse_to
+        - parse_from
+      properties:
+        type:
+          type: string
+          enum: [json_parser]
+        id:
+          type: string
+        output:
+          type: string
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        parse_to:
+          type: string
+        parse_from:
+          type: string
+        enable_flattening:
+          type: boolean
+          description: Whether to enable flattening of nested JSON objects.
+        enable_paths:
+          type: boolean
+          description: Whether to enable path extraction in JSON parsing.
+        path_prefix:
+          type: string
+          description: Prefix to add to all parsed paths.
+        mapping:
+          type: object
+          description: Mapping of fixed keys to arrays of possible field names.
+          properties:
+            environment:
+              type: array
+              items:
+                type: string
+            host:
+              type: array
+              items:
+                type: string
+            message:
+              type: array
+              items:
+                type: string
+            service:
+              type: array
+              items:
+                type: string
+            severity:
+              type: array
+              items:
+                type: string
+            span_id:
+              type: array
+              items:
+                type: string
+            trace_flags:
+              type: array
+              items:
+                type: string
+            trace_id:
+              type: array
+              items:
+                type: string
+          additionalProperties: false
+
+    AddProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - output
+        - orderId
+        - enabled
+        - name
+        - field
+        - value
+      properties:
+        type:
+          type: string
+          enum: [add]
+        id:
+          type: string
+        output:
+          type: string
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        field:
+          type: string
+        value:
+          type: string
+
+    SeverityParserProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - output
+        - orderId
+        - enabled
+        - name
+        - parse_from
+        - mapping
+        - overwrite_text
+      properties:
+        type:
+          type: string
+          enum: [severity_parser]
+        id:
+          type: string
+        output:
+          type: string
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        parse_from:
+          type: string
+        mapping:
+          type: object
+          description: |
+            Maps log input values to standard log levels. Each key (debug, error, fatal, info, trace, warn) is a log level, and the array under each key lists all possible input values that should be mapped to that level in storage. No additional keys are allowed.
+          properties:
+            debug:
+              type: array
+              items:
+                type: string
+            error:
+              type: array
+              items:
+                type: string
+            fatal:
+              type: array
+              items:
+                type: string
+            info:
+              type: array
+              items:
+                type: string
+            trace:
+              type: array
+              items:
+                type: string
+            warn:
+              type: array
+              items:
+                type: string
+          additionalProperties: false
+        overwrite_text:
+          type: boolean
+
+    MoveProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - output
+        - orderId
+        - enabled
+        - name
+        - from
+        - to
+      properties:
+        type:
+          type: string
+          enum: [move]
+        id:
+          type: string
+        output:
+          type: string
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+
+    RemoveProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - output
+        - orderId
+        - enabled
+        - name
+        - field
+      properties:
+        type:
+          type: string
+          enum: [remove]
+        id:
+          type: string
+        output:
+          type: string
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        field:
+          type: string
+
+    CopyProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - output
+        - orderId
+        - enabled
+        - name
+        - from
+        - to
+      properties:
+        type:
+          type: string
+          enum: [copy]
+        id:
+          type: string
+        output:
+          type: string
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+
+    GrokParserProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - output
+        - on_error
+        - orderId
+        - enabled
+        - name
+        - parse_to
+        - pattern
+        - parse_from
+      properties:
+        type:
+          type: string
+          enum: [grok_parser]
+        id:
+          type: string
+        output:
+          type: string
+        on_error:
+          type: string
+          description: Action to take on error (e.g., 'send', 'drop').
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        parse_to:
+          type: string
+        pattern:
+          type: string
+        parse_from:
+          type: string
+
+    RegexParserProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - output
+        - on_error
+        - orderId
+        - enabled
+        - name
+        - parse_to
+        - regex
+        - parse_from
+      properties:
+        type:
+          type: string
+          enum: [regex_parser]
+        id:
+          type: string
+        output:
+          type: string
+        on_error:
+          type: string
+          description: Action to take on error (e.g., 'send', 'drop').
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        parse_to:
+          type: string
+        regex:
+          type: string
+        parse_from:
+          type: string
+
+    TraceParserProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - output
+        - orderId
+        - enabled
+        - name
+      properties:
+        type:
+          type: string
+          enum: [trace_parser]
+        id:
+          type: string
+        output:
+          type: string
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        trace_id:
+          type: object
+          required:
+            - parse_from
+          properties:
+            parse_from:
+              type: string
+        span_id:
+          type: object
+          required:
+            - parse_from
+          properties:
+            parse_from:
+              type: string
+        trace_flags:
+          type: object
+          required:
+            - parse_from
+          properties:
+            parse_from:
+              type: string
+      anyOf:
+        - required: [trace_id]
+        - required: [span_id]
+        - required: [trace_flags]
+
+    TimeParserProcessor:
+      type: object
+      required:
+        - type
+        - id
+        - orderId
+        - enabled
+        - name
+        - parse_from
+        - layout
+        - layout_type
+      properties:
+        type:
+          type: string
+          enum: [time_parser]
+        id:
+          type: string
+        orderId:
+          type: integer
+        enabled:
+          type: boolean
+        name:
+          type: string
+        parse_from:
+          type: string
+        layout_type:
+          type: string
+          description: "Type of layout for parsing time. 'strptime' for strptime format strings, 'epoch' for epoch-based formats."
+          enum: [strptime, epoch]
+        layout:
+          oneOf:
+            - type: string
+              description: "If layout_type is 'strptime', this is a strptime format string."
+            - type: string
+              enum: [s, ms, us, ns, s.ms, s.us, s.ns]
+              description: |
+                If layout_type is 'epoch', layout must be one of:
+                  - s: seconds
+                  - ms: milliseconds
+                  - us: microseconds
+                  - ns: nanoseconds
+                  - s.ms: seconds with milliseconds (e.g., 1680000000.123)
+                  - s.us: seconds with microseconds (e.g., 1680000000.123456)
+                  - s.ns: seconds with nanoseconds (e.g., 1680000000.123456789)
+
+    # Update Pipeline config array
+    Pipeline:
+      type: object
+      required:
+        - name
+        - alias
+        - enabled
+        - orderId
+        - filter
+        - config
+      properties:
+        name:
+          type: string
+        alias:
+          type: string
+        description:
+          type: string
+        enabled:
+          type: boolean
+        orderId:
+          type: integer
+        filter:
+          $ref: '#/components/schemas/Filter'
+        config:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/JSONParserProcessor'
+              - $ref: '#/components/schemas/AddProcessor'
+              - $ref: '#/components/schemas/SeverityParserProcessor'
+              - $ref: '#/components/schemas/MoveProcessor'
+              - $ref: '#/components/schemas/RemoveProcessor'
+              - $ref: '#/components/schemas/CopyProcessor'
+              - $ref: '#/components/schemas/GrokParserProcessor'
+              - $ref: '#/components/schemas/RegexParserProcessor'
+              - $ref: '#/components/schemas/TraceParserProcessor'
+              - $ref: '#/components/schemas/TimeParserProcessor'
+
+    LogsPipelineResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            createdByName:
+              type: string
+            id:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+            createdBy:
+              type: string
+            updatedBy:
+              type: string
+            orgId:
+              type: string
+            version:
+              type: integer
+            elementType:
+              type: string
+            deployStatus:
+              type: string
+            deploySequence:
+              type: integer
+            deployResult:
+              type: string
+            lastHash:
+              type: string
+            config:
+              type: string
+              description: Stringified JSON of the pipeline config
+            pipelines:
+              type: array
+              items:
+                $ref: '#/components/schemas/Pipeline'
+            history:
+              nullable: true
+      required:
+        - status
+        - data
+
   requestBodies:
     Alert:
       content:
@@ -1422,6 +1992,16 @@ components:
                 title: Dashboard
               - $ref: '#/components/schemas/Dashboard'
       description: Dashboard object that needs to be added to the system
+      required: true
+    LogsPipeline:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - description: Logs pipeline object to be added/updated
+                title: LogsPipeline
+              - $ref: '#/components/schemas/LogsPipeline'
+      description: Logs pipeline object to be added/updated
       required: true
   securitySchemes:
     api_key:
