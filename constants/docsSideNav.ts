@@ -889,7 +889,7 @@ const docsSideNav = [
     ],
   },
   {
-    label: "Infrastructure Telemetry",
+    label: "Telemetry Ingestion Deployments",
     type: 'category',
     isExpanded: false,
     items: [
