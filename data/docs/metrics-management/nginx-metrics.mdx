@@ -9,55 +9,32 @@ This document provides an explains how to monitor NGINX metrics using OTel Colle
 ## Pre-requisites
 
 - NGINX with `stub_status` module enabled
-- OpenTelemetry Collector installed on the same host as NGINX (for local monitoring) or with network access to NGINX status endpoint
 
-## Setup OTel Collector
+## Setup
 
-OpenTelemetry Collector is required to collect metrics from NGINX. Please refer to the [OTel Collector tutorial](/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the agent.
+### Step 1: Setup OTel Collector
 
-## Preparing NGINX
+OpenTelemetry Collector is required to collect metrics from NGINX. Please refer to the [](/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) 
+to setup the agent.
+
+### Step 2: Preparing NGINX
 
 For the OpenTelemetry Collector to collect NGINX metrics, you need to enable the `stub_status` module and configure a status endpoint.
+The `stub_status` module in NGINX provides real-time server health metrics like active connections, handled requests, and connection states. Refer to [this doc](https://nginx.org/en/docs/http/ngx_http_stub_status_module.html) for setting up the NGINX stub_status module.
 
-Add the following configuration block to your NGINX configuration file (usually `/etc/nginx/nginx.conf` or in a server block):
 
-```nginx
-server {
-    location /nginx_status {
-        stub_status on;
-        # Optional: Restrict access to localhost only
-        allow 127.0.0.1;
-        deny all;
-    }
-}
-```
+### Step 3: Collecting NGINX metrics
 
-After making the configuration changes:
+You will need to configure the [nginx receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver) for collecting NGINX metrics. The receiver queries the NGINX status endpoint to collect performance metrics.
 
-1. Test the configuration: `sudo nginx -t`
-2. Reload NGINX: `sudo nginx -s reload`
-3. Verify the status endpoint is working: `curl http://localhost/nginx_status`
-
-You should see output similar to:
-```
-Active connections: 2
-server accepts handled requests
- 16630 16630 31070
-Reading: 0 Writing: 1 Waiting: 1
-```
-
-## Collecting NGINX metrics
-
-You will need to configure the [`nginx` OpenTelemetry receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver) for collecting NGINX metrics. The receiver queries the NGINX status endpoint to collect performance metrics.
-
-### Configuring the receiver
+### Step 4: Configuring the receiver
 
 Edit the OTel Collector config file to configure the `nginx` receiver as shown below:
 
-```yaml {2-7}
+```yaml:config.yaml
 receivers:
   nginx:
-    endpoint: "http://localhost/nginx_status"
+    endpoint: "<nginx-status-endpoint>" # Example -> http://localhost:80/nginx_status
     collection_interval: 10s
     initial_delay: 1s
     timeout: 60s
@@ -70,227 +47,39 @@ receivers:
 - `initial_delay`: Delay before starting collection (default: 1s)  
 - `timeout`: Request timeout (default: 10s)
 
-For remote NGINX instances, update the endpoint accordingly:
-```yaml
-nginx:
-  endpoint: "http://remote-nginx-server:80/nginx_status"
-```
+You can find more details about the NGINX receiver configuration in the [receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver).
 
-### Configuring the processor
 
-To enrich the collected metrics with additional metadata like hostname, you can configure the Resource Detection Processor:
-
-```yaml {2-5}
-processors:
-  resourcedetection:
-    detectors: [env, system]
-    timeout: 2s
-    override: false
-```
-
-You can also add custom attributes to identify your NGINX instance:
-
-```yaml {2-7}
-processors:
-  attributes:
-    actions:
-      - key: service.name
-        value: nginx
-        action: insert
-```
-
-### Configuring the pipelines
+### Step 5: Configuring the pipelines
 
 Once the receiver and processor is configured, make sure to also enable them in the `pipelines` section of the OTel Collector config file:
 
-```yaml {3-4}
+```yaml:config.yaml
 service:
   pipelines:
     metrics:
       receivers: [nginx]
       processors: [resourcedetection, attributes]
-```
-
-## Sending NGINX metrics to SigNoz
-
-You will also need to configure `exporters` in the OTel Collector config file to send metrics to SigNoz. The configuration will be different based on whether you are using a SigNoz Cloud account or a Self-Hosted SigNoz instance.
-
-### Configuring the exporter
-
-<Tabs entityName="plans">
-
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-
-```yaml {2-7}
-exporters:
-  otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      signoz-ingestion-key: "{signoz-ingestion-key}"
-```
-
-You would need to replace `{region}` and `{signoz-ingestion-key}` in the above file with the [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) of your SigNoz Cloud environment and [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-</TabItem>
-
-<TabItem value='self-host' label='Self-Host' default>
-
-```yaml {2-5}
-exporters:
-   otlp:
-     endpoint: "{signoz-instance}:4317"
-     tls:
-       insecure: true
-```
-
-You would need to replace `{signoz-instance}` with the IP address or FQDN of the machine hosting SigNoz.
-</TabItem>
-
-</Tabs>
-
-### Updating the pipelines
-
-You will also need to ensure that this exporter is enabled in the `pipelines` section of the OTel Collector config file:
-
-```yaml {5}
-service:
-  pipelines:
-    metrics:
-      receivers: [nginx]
-      exporters: [otlp]
-```
-
-## Complete Configuration Example
-
-Here's a complete OpenTelemetry Collector configuration for NGINX metrics:
-
-```yaml
-receivers:
-  nginx:
-    endpoint: "http://localhost/nginx_status"
-    collection_interval: 10s
-
-processors:
-  resourcedetection:
-    detectors: [env, system]
-    timeout: 2s
-    override: false
-  
-  attributes:
-    actions:
-      - key: service.name
-        value: nginx
-        action: insert
-
-exporters:
-  otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      signoz-ingestion-key: "{signoz-ingestion-key}"
-
-service:
-  pipelines:
-    metrics:
-      receivers: [nginx]
-      processors: [resourcedetection, attributes]
-      exporters: [otlp]
 ```
 
 ## Visualizing NGINX Metrics
 
-Once you have configured OTel Collector to send NGINX metrics to SigNoz, you can start visualizing the metrics in the SigNoz UI.
+Once you have configured OTel Collector to send NGINX metrics to SigNoz, you can start visualizing the metrics in the [metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
 
-You can use the pre-configured dashboard for NGINX metrics or [create your own custom dashboard](/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard). To use the pre-configured dashboard, download the dashboard JSON from [here](https://github.com/SigNoz/dashboards/tree/main/nginx) and import it to SigNoz by clicking Dashboards → New dashboard → Import JSON:
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/metrics/nginx/importing_dashboard.webp" width="80%" alt="Importing a pre-configured NGINX Dashboard"/>
-    <figcaption><i>Importing a pre-configured NGINX Dashboard</i></figcaption>
-</figure>
-
-The pre-defined `NGINX Metrics` dashboard enables you to visualize the following groups of metrics:
-
-- Connection Metrics
-- Request Metrics  
-- Server Status
-
-### Connection Metrics
-
-The dashboard contains panels that show NGINX connection statistics:
-
-**Active Connections** - Shows the current number of active client connections (`nginx_connections_current`):
+You can use the pre-configured [dashboard for NGINX](https://signoz.io/docs/dashboards/dashboard-templates/nginx/) metrics which provides
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/metrics/nginx/active_connections.webp" width="80%" alt="Active Connections"/>
-    <figcaption><i>Active Connections Panel</i></figcaption>
+    <img src="/img/docs/dashboards/dashboard-templates/nginx.webp" width="80%" alt="Out of the Box NGINX Dashboard"/>
+    <figcaption><i>Out of the Box NGINX Dashboard</i></figcaption>
 </figure>
 
-**Connections Accepted** - Shows the total number of accepted client connections (`nginx_connections_accepted`):
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/metrics/nginx/connections_accepted.webp" width="80%" alt="Connections Accepted"/>
-    <figcaption><i>Connections Accepted Panel</i></figcaption>
-</figure>
-
-**Connections Handled** - Shows the total number of handled connections (`nginx_connections_handled`):
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/metrics/nginx/connections_handled.webp" width="80%" alt="Connections Handled"/>
-    <figcaption><i>Connections Handled Panel</i></figcaption>
-</figure>
-
-### Request Metrics
-
-**Total Requests** - Shows the total number of client requests (`nginx_requests`):
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/metrics/nginx/total_requests.webp" width="80%" alt="Total Requests"/>
-    <figcaption><i>Total Requests Panel</i></figcaption>
-</figure>
-
-**Request Rate** - Shows the rate of requests per second (derived from `nginx_requests`):
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/metrics/nginx/request_rate.webp" width="80%" alt="Request Rate"/>
-    <figcaption><i>Request Rate Panel</i></figcaption>
-</figure>
-
-### Server Status
-
-The dashboard also includes panels showing the current status of connections:
-
-**Connection States** - Shows the breakdown of connections by state (Reading, Writing, Waiting):
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/metrics/nginx/connection_states.webp" width="80%" alt="Connection States"/>
-    <figcaption><i>Connection States Panel</i></figcaption>
-</figure>
-
-## NGINX Metrics Reference
-
-The NGINX receiver collects the following metrics:
-
-| Metric Name | Description | Type | Unit |
-|-------------|-------------|------|------|
-| `nginx_requests` | Total number of requests received | Sum | requests |
-| `nginx_connections_accepted` | Total number of accepted client connections | Sum | connections |
-| `nginx_connections_current` | Current number of active client connections | Gauge | connections |
-| `nginx_connections_handled` | Total number of handled connections | Sum | connections |
-
-The receiver also exposes connection state metrics through labels on the `nginx_connections_current` metric:
-
-- **Reading**: Connections where NGINX is reading the request header
-- **Writing**: Connections where NGINX is writing the response back to the client  
-- **Waiting**: Keep-alive connections waiting for the next request
 
 ## Troubleshooting
 
 ### Common Issues
 
 1. **No metrics appearing in SigNoz**
-   - Verify NGINX status endpoint is accessible: `curl http://localhost/nginx_status`
+   - Verify NGINX status endpoint is accessible
    - Check OTel Collector logs for connection errors
    - Ensure firewall allows access to the status endpoint
 
@@ -303,44 +92,3 @@ The receiver also exposes connection state metrics through labels on the `nginx_
    - Verify the status endpoint shows non-zero values
    - Check if NGINX was recently restarted (counters reset)
 
-### Monitoring Multiple NGINX Instances
-
-To monitor multiple NGINX servers, configure multiple receivers with different names:
-
-```yaml
-receivers:
-  nginx/server1:
-    endpoint: "http://nginx-server1/nginx_status"
-    collection_interval: 10s
-  
-  nginx/server2:
-    endpoint: "http://nginx-server2/nginx_status"
-    collection_interval: 10s
-
-processors:
-  attributes/server1:
-    actions:
-      - key: nginx.instance
-        value: server1
-        action: insert
-  
-  attributes/server2:
-    actions:
-      - key: nginx.instance  
-        value: server2
-        action: insert
-
-service:
-  pipelines:
-    metrics/server1:
-      receivers: [nginx/server1]
-      processors: [attributes/server1]
-      exporters: [otlp]
-    
-    metrics/server2:
-      receivers: [nginx/server2]  
-      processors: [attributes/server2]
-      exporters: [otlp]
-```
-
-You can find more details about the NGINX receiver configuration in the [official receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver).
