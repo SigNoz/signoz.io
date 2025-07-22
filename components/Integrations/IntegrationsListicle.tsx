@@ -10,7 +10,7 @@ import {
   SiClickhouse,
   SiGo,
   SiTypescript,
-  SiAmazonwebservices,
+  SiAmazonwebservices
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -112,6 +112,18 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
             href: '/docs/integrations/clickhouse',
             icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
             clickName: 'Clickhouse Integration Link',
+          },
+          {
+            name: 'Microsoft SQL Server',
+            href: '/docs/integrations/sql-server',
+            icon: (
+                <img
+                 src="/svgs/icons/microsoft-sql-server.svg"
+                 alt="Microsoft SQL Server"
+                 className="h-7 w-7 object-contain"
+                />
+            ),
+            clickName: 'Microsoft SQL Server Integration Link',
           },
         ]}
         sectionName="Database Integrations"
