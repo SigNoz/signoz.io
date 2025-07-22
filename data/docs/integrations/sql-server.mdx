@@ -222,6 +222,154 @@ Inside `otelcol-contrib` folder, run the `otelcol-contrib` command.
 <Tabs>
 <TabItem value="metrics" label="Metrics" default>
 
+### Step 1. Install SigNoz
+Install `SigNoz` by following this [link](https://signoz.io/docs/install/self-host/).
+
+<Admonition>
+💡 At the time of writing this guide, the SigNoz OTel Collector does not support the SQL Server Receiver.
+</Admonition>
+
+### Step 2. Add SQL Server OTel Collector Service
+Add the `sqlserver-otel-collector` service under `services` section of `docker-compose.yaml` file.
+
+    ```yaml:/deploy/docker/docker-compose.yaml 
+    ...
+    sqlserver-otel-collector:
+      image: otel/opentelemetry-collector-contrib:0.130.0
+      container_name: sqlserver-otel-collector
+      command: ["--config=/etc/otelcol-collector-config.yaml"]
+      volumes:
+        - ./otel-collector-config-sqlserver.yaml:/etc/otelcol-collector-config.yaml
+      networks:
+        - signoz-net
+    ...
+    ```
+
+### Step 3. Disable Default SigNoz OTel Config Paths
+Comment the following lines under `command` section of `otel-collector` service in `docker-compose.yaml` file.
+
+    ```yaml:/deploy/docker/docker-compose.yaml 
+    ...
+    otel-collector:
+      command:
+        # - --manager-config=/etc/manager-config.yaml
+        # - --copy-path=/var/tmp/collector-config.yaml
+    ...
+    ```
+
+### Step 4. Create SQL Server OTel Collector Configuration
+Create `otel-collector-config-sqlserver.yaml` file and add the following contents.
+
+    ```yaml:/deploy/docker/otel-collector-config-sqlserver.yaml 
+    ...
+    
+    receivers:
+      sqlserver:
+        collection_interval: 60s
+        datasource: "Server=<ServerName>;User Id=<UserID>;Password=<Password>;Database=<DatabaseName>"
+        metrics:
+          sqlserver.cpu.count: 
+            enabled: true
+          sqlserver.database.backup_or_restore.rate:
+            enabled: true
+          sqlserver.database.count:
+            enabled: true
+          sqlserver.database.tempdb.space:
+            enabled: true
+          sqlserver.database.io:
+            enabled: true
+          sqlserver.database.latency:
+            enabled: true
+
+    processors:
+      resource:
+        attributes:
+          - key: service.name
+            value: <service-name>
+            action: insert
+
+    exporters:
+      otlp:
+        endpoint: signoz-otel-collector:4317
+        tls:
+          insecure: true
+      debug:
+        verbosity: detailed 
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [sqlserver]
+          processors: [resource]
+          exporters: [otlp,debug]
+
+    ...
+    ```
+
+- `<ServerName>`: Specifies the address or hostname of the SQL Server instance you want to connect to (e.g., localhost or myserver.database.windows.net)
+- `<UserID>`: Specifies the SQL Server login name used for authentication (e.g., SA or any other configured SQL login)
+- `<Password>`: Specifies the password corresponding to the provided UserID, allowing access to the database
+- `<DatabaseName>`: Specifies the target SQL Server database that the OpenTelemetry Collector will query for collecting metrics (e.g., master, mydb)
+- `<service-name>`: Specifies the service that emits the metrics, making it easier to identify and filter metrics related to a specific database
+
+### Step 5. Update SigNoz OTel Collector Configuration
+Update the existing `otel-collector-config.yaml` file with the following contents.
+
+    ```yaml:/deploy/docker/otel-collector-config.yaml
+    ...
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      resource:
+        attributes:
+          - key: service.name
+            value: <service-name>
+            action: insert
+
+    exporters:
+      signozclickhousemetrics:
+        dsn: tcp://clickhouse:9000/signoz_metrics
+      debug:
+        verbosity: detailed 
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          processors: [resource]
+          exporters: [signozclickhousemetrics,debug]
+    ...
+    ```
+
+- `<service-name>`: Specifies the service that emits the metrics, making it easier to identify and filter metrics related to a specific database
+
+### Step 6. Restart OTel Collector Services
+Restart the `otel-collector` service and `sqlserver-otel-collector` service.
+
+    ```bash
+    docker compose -f docker/docker-compose.yaml restart otel-collector
+    docker compose -f docker/docker-compose.yaml restart sqlserver-otel-collector
+    ```
+
+## Validate Metrics in SigNoz
+
+<Admonition>
+💡 Not all metrics are scraped from SQL Server when running on Linux. For complete metric collection, including Windows-specific counters, use a Windows-based SQL Server.
+</Admonition>
+
+- You can view the SQL server metrics in the [Metrics Tab](https://signoz.io/docs/metrics-management/metrics-explorer/) of your SigNoz UI.
+
+<Figure src="/img/docs/integrations/microsoft-sql-server/MetricsSQLServer.webp" alt="SQL Server Metrics" caption="Scraped Metrics from SQL Server" />
+
+- To see the complete list of metrics, refer this [link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/sqlserverreceiver/documentation.md).
+
+
 </TabItem>
 
 <TabItem value="logs" label="Logs" default>

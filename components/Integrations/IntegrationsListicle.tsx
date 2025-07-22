@@ -10,8 +10,7 @@ import {
   SiClickhouse,
   SiGo,
   SiTypescript,
-  SiAmazonwebservices,
-  SiSqlite
+  SiAmazonwebservices
 } from 'react-icons/si'
 import { BsCloudFill } from 'react-icons/bs'
 import IconCardGrid from '../Card/IconCardGrid'
