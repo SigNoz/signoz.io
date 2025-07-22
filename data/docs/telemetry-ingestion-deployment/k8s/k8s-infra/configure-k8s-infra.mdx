@@ -4,9 +4,98 @@ title: Configure K8s-Infra OtelCollectors
 id: k8s-infra-otel-config
 ---
 
-This guide details how to set up the OpenTelemetry Collector in the SigNoz K8s-infra chart. It covers the configuration of telemetry data collection and methods for gathering data from your Kubernetes cluster.
+This guide explains how to configure the OpenTelemetry Collectors deployed by the SigNoz K8s-Infra Helm chart. You'll learn how to set up telemetry data collection and enable the collection of metrics, logs, and traces from your Kubernetes cluster.
 
-To install K8s-Infra in your Kubernetes cluster, please check out the [k8s-infra Installation guide](/docs/tutorial/kubernetes-infra-metrics)
+To install K8s-Infra in your Kubernetes cluster, please check out the [k8s-infra Installation guide](/docs/telemetry-ingestion-deployment/k8s/k8s-infra/install-k8s-infra)
+
+## Send Data from Instrumented Applications
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/data-flow-2x.webp" alt="Data flow from your application to SigNoz"/>
+    <figcaption>
+      <i>
+        OpenTelemetry instrumented application sends data to OTelAgent Daemon deployed in
+        your k8s infra. The OTelAgent daemon sends the collected data to SigNoz.
+      </i>
+    </figcaption>
+</figure>
+
+<Admonition>
+In case of **GKE Autopilot**, you will not be able to send data to OTelAgent Daemon
+via host port. You will need to use either the SigNoz ingestion endpoint directly
+or OtelAgent service name.
+
+For OtelAgent service name, the endpoint would be something like
+`my-release-k8s-infra-otel-agent.default.svc:4317`. Replace `my-release` with
+your helm release name and `default` with your namespace.
+</Admonition>
+
+To send data from your applications, you must first instrument it with OpenTelemetry.
+You can find instrumentation instructions for your specific language [here][10]. 
+
+Once you're done instrumenting your application, add below to your application manifest
+files for applications to start sending data to the otel-collectors running as DaemonSet.
+
+For example, you can add the below config to your application manifest file.
+
+```YAML
+env:
+  - name: HOST_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.hostIP
+  - name: K8S_POD_IP
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: status.podIP
+  - name: K8S_POD_UID
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.uid
+  - name: OTEL_EXPORTER_OTLP_INSECURE
+    value: "true"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: $(HOST_IP):4317
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: service.name=APPLICATION_NAME,k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
+  ```
+  
+<Admonition>
+  - Replace `APPLICATION_NAME` with your application name that you wish to see in SigNoz.
+  - In cases of some SDKs, you would need to include `http://` or `https://` prefix for `OTEL_EXPORTER_OTLP_ENDPOINT`
+  - You can also include `deployment.environment` as an attribute in `OTEL_RESOURCE_ATTRIBUTES` environment variable.
+    This attribute will take precedence over `global.deploymentEnvironment` configuration of `k8s-infra` chart.
+</Admonition>
+
+### Disable Logs Collection
+
+In case you do not want to collect logs from your Kubernetes cluster, you
+can disable using presets in `k8s-infra` chart.
+
+```yaml
+presets:
+  logsCollection:
+    enabled: false
+```
+
+### Disable Metrics Collection
+
+In case you do not want to collect metrics from your Kubernetes cluster, you
+can disable using presets in `k8s-infra` chart.
+
+```yaml
+presets:
+  hostMetrics:
+    enabled: false
+  kubeletMetrics:
+    enabled: false
+  clusterMetrics:
+    enabled: false
+
+otelDeployment:
+  enabled: false
+```
 
 ## Essential Presets
 SigNoz allows you to use the presets in the k8s-infra Helm chart to easily configure OtelCollector.
@@ -276,7 +365,7 @@ ports:
     protocol: UDP
 ```
 
-## Configuring otelDeployment to collect from additional components 
+## Configuring otelDeployment to collect from additional components
 The otelDeployment collector is configured to collect cluster metrics and events by default. There are some use cases where you might want to collect metrics from components other than the ones that are being collected by default.
 
 This section describes how to override the default configuration of the otelDeployment collector to collect metrics from additional components. The override-values.yaml file contains the configurations that you can override.

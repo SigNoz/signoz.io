@@ -227,16 +227,6 @@ const docsSideNav = [
             type: 'doc',
             label: 'VM',
           },
-          {
-            route: '/docs/tutorial/kubernetes-infra-metrics',
-            type: 'doc',
-            label: 'Kubernetes',
-          },
-          {
-            route: '/docs/infrastructure-monitoring/k8s-infra-architecture',
-            type: 'doc',
-            label: 'K8s-Infra for Infrastructure Monitoring',
-          },
         ],
       },
     ],
@@ -896,12 +886,45 @@ const docsSideNav = [
         route: '/docs/userguide/k8s-metrics',
         label: 'Kubernetes Metrics',
       },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/k8s-infra-otel-config',
-        label: 'K8s Infra Chart',
-      }
     ],
+  },
+  {
+    label: "Infrastructure Telemetry",
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        type: 'category',
+        isExpanded: false,
+        label: "Kubernetes",
+        items: [
+          {
+            type: "category",
+            label: "K8s-Infra",
+            isExpanded: false,
+            items: [
+              {
+                label: "Overview",
+                type: "doc",
+                route: "/docs/telemetry-ingestion-deployment/k8s/k8s-infra/overview"
+              },
+              {
+                label: "Deploying K8s Infra",
+                type: "doc",
+                route: "/docs/telemetry-ingestion-deployment/k8s/k8s-infra/install-k8s-infra"
+              },
+              {
+                label: "Configure K8s-Infra",
+                type: "doc",
+                route: "/docs/telemetry-ingestion-deployment/k8s/k8s-infra/configure-k8s-infra"
+              }
+            ]
+          }
+          
+        ]
+
+      }
+    ]
   },
   {
     label: 'Logs Management',
