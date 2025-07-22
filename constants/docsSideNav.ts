@@ -889,34 +889,34 @@ const docsSideNav = [
     ],
   },
   {
-    label: "Telemetry Ingestion Deployments",
+    label: 'Collection Agents',
     type: 'category',
     isExpanded: false,
     items: [
       {
         type: 'category',
         isExpanded: false,
-        label: "Kubernetes",
+        label: 'Kubernetes',
         items: [
           {
-            type: "category",
-            label: "K8s-Infra",
+            type: 'category',
+            label: 'K8s-Infra',
             isExpanded: false,
             items: [
               {
-                label: "Overview",
-                type: "doc",
-                route: "/docs/telemetry-ingestion-deployment/k8s/k8s-infra/overview"
+                label: 'Overview',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/k8s-infra/overview'
               },
               {
-                label: "Deploying K8s Infra",
-                type: "doc",
-                route: "/docs/telemetry-ingestion-deployment/k8s/k8s-infra/install-k8s-infra"
+                label: 'Deploying K8s Infra',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra'
               },
               {
-                label: "Configure K8s-Infra",
-                type: "doc",
-                route: "/docs/telemetry-ingestion-deployment/k8s/k8s-infra/configure-k8s-infra"
+                label: 'Configure K8s-Infra',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra'
               }
             ]
           }

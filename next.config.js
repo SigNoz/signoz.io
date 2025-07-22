@@ -501,12 +501,12 @@ module.exports = () => {
         },
         {
           source: "/docs/tutorial/kubernetes-infra-metrics/",
-          destination: "/docs/telemetry-ingestion-deployment/k8s/k8s-infra/install-k8s-infra/",
+          destination: "/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/",
           permanent: true
         },
         {
           source: "/docs/metrics-management/k8s-infra-otel-config/",
-          destination: "/docs/telemetry-ingestion-deployment/k8s/k8s-infra/configure-k8s-infra/",
+          destination: "/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra/",
           permanent: true
         },
 
