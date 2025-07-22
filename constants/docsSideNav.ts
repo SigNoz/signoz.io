@@ -232,6 +232,11 @@ const docsSideNav = [
             type: 'doc',
             label: 'Kubernetes',
           },
+          {
+            route: '/docs/infrastructure-monitoring/k8s-infra-architecture',
+            type: 'doc',
+            label: 'K8s-Infra for Infrastructure Monitoring',
+          },
         ],
       },
     ],

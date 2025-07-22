@@ -1,86 +1,15 @@
 ---
 date: 2025-07-18
-title: Kubernetes Infrastructure Monitoring with k8s-infra Helm Chart
+title: Configure K8s-Infra OtelCollectors
 id: k8s-infra-otel-config
 ---
 
-The [k8s-infra chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) runs two types of OpenTelemetry collectors:
+This guide details how to set up the OpenTelemetry Collector in the SigNoz K8s-infra chart. It covers the configuration of telemetry data collection and methods for gathering data from your Kubernetes cluster.
 
-- **otelAgent**: This collector is deployed as a daemonset and collects metrics/logs from the pods on the node. One agent is deployed per node.
-- **otelDeployment**: This collector is deployed as a deployment and collects metrics/logs of the cluster. One deployment is deployed per cluster.
-
-{/* <Figure src="/img/k8s-infra-otel-agent-arch.webp" alt="otel instances in k8s-infra monitoring" caption="k8s-infra chart" /> */}
-> Refer to the [installation guide](/docs/tutorial/kubernetes-infra-metrics/) for detailed steps on setting up the k8s-infra chart in your Kubernetes cluster.
-
-## otelDeployment
-
-The `otelDeployment` collector is configured to collect cluster metrics and events by default. There are use cases where you might want to collect metrics from components other than the ones collected by default. For example, you might want to collect metrics from a Redis server or a PostgreSQL database. This page describes how to override the default configuration of the `otelDeployment` collector to collect metrics from additional components. The `override-values.yaml` file contains the configurations that you can override.
-
-### Example 1: Configuring a Redis receiver
-
-The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a Redis server running inside a namespace "redis-ns" with the name "redis-server" and port 6379:
-
-```
-otelDeployment:
-  config:
-    receivers:
-      redis:
-        endpoint: redis-server.redis-ns.svc.cluster.local:6379
-    service:
-      pipelines:
-        metrics/internal:
-          receivers: [redis]
-          processors: [batch]
-          exporters: []
-```
-
-### Example 2: Configuring a PostgreSQL receiver
-
-The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a PostgreSQL server running inside a namespace "postgres-ns" with the name "postgres-server" and port 5432:
-
-```
-otelDeployment:
-  config:
-    receivers:
-      postgres:
-        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
-    service:
-      pipelines:
-        metrics/internal:
-          receivers: [postgres]
-          processors: [batch]
-          exporters: []
-```
-
-### Example 3: Configuring multiple receivers
-
-The following configuration shows how to configure both Redis and PostgreSQL receivers:
-
-```
-otelDeployment:
-  config:
-    receivers:
-      redis:
-        endpoint: redis-server.redis-ns.svc.cluster.local:6379
-      postgres:
-        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
-    service:
-      pipelines:
-        metrics/internal:
-          receivers: [redis, postgres]
-          processors: [batch]
-          exporters: []
-```
-
-The above examples are simple and show how to configure the `otelDeployment` collector to collect metrics from a single component. However, in a real-world scenario, you might need to configure the receiver with a username and password and other configurations.
-
-## otelAgent
-
-The `otelAgent` collector is deployed as a daemonset, which results in duplicate metrics if the same component is running on multiple nodes and the metrics are collected from all the nodes. The `otelDeployment` collector solves this problem by collecting metrics from the cluster and not from the individual nodes.
+To install K8s-Infra in your Kubernetes cluster, please check out the [k8s-infra Installation guide](/docs/tutorial/kubernetes-infra-metrics)
 
 ## Essential Presets
-
-This guide explains how to configure the OpenTelemetry Collector presets in SigNoz. These presets control what telemetry data you collect and how you collect it from your Kubernetes cluster.
+SigNoz allows you to use the presets in the k8s-infra Helm chart to easily configure OtelCollector.
 
 ### 1. OTLP Exporter
 ```yaml
@@ -347,6 +276,68 @@ ports:
     protocol: UDP
 ```
 
+## Configuring otelDeployment to collect from additional components 
+The otelDeployment collector is configured to collect cluster metrics and events by default. There are some use cases where you might want to collect metrics from components other than the ones that are being collected by default.
+
+This section describes how to override the default configuration of the otelDeployment collector to collect metrics from additional components. The override-values.yaml file contains the configurations that you can override.
+
+#### Example 1: Redis Receiver Configuration
+The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a Redis server running inside a namespace "redis-ns" with the name "redis-server" and port 6379:
+
+```yaml
+otelDeployment:
+  config:
+    receivers:
+      redis:
+        endpoint: redis-server.redis-ns.svc.cluster.local:6379
+    service:
+      pipelines:
+        metrics/internal:
+          receivers: [redis]
+          processors: [batch]
+          exporters: []
+```
+
+#### Example 2: Configuring a PostgreSQL receiver
+
+The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a PostgreSQL server running inside a namespace "postgres-ns" with the name "postgres-server" and port 5432:
+
+```yaml
+otelDeployment:
+  config:
+    receivers:
+      postgres:
+        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
+    service:
+      pipelines:
+        metrics/internal:
+          receivers: [postgres]
+          processors: [batch]
+          exporters: []
+```
+
+#### Example 3: Configuring multiple receivers
+
+The following configuration shows how to configure both Redis and PostgreSQL receivers:
+
+```yaml
+otelDeployment:
+  config:
+    receivers:
+      redis:
+        endpoint: redis-server.redis-ns.svc.cluster.local:6379
+      postgres:
+        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
+    service:
+      pipelines:
+        metrics/internal:
+          receivers: [redis, postgres]
+          processors: [batch]
+          exporters: []
+```
+
+The above examples are simple and show how to configure the `otelDeployment` collector to collect metrics from a single component. However, in a real-world scenario, you might need to configure the receiver with a username and password and other configurations.
+
 ## Resource Requirements
 
 Recommended resource allocations based on preset combinations:
@@ -358,6 +349,3 @@ Recommended resource allocations based on preset combinations:
 | Full | 500m | 1Gi | 1000m | 2Gi |
 
 Adjust these values based on your cluster size and monitoring requirements.
-
-## Next Steps
-- [K8s Infra Collector Configuration docs](/docs/metrics-management/k8s-infra-otel-config)
