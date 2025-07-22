@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { SparklesIcon } from '@heroicons/react/24/outline'
 import ChatModal from './ChatModal'
 import useSearchShortcut from '@/hooks/useSearchShortcut'
@@ -12,7 +12,7 @@ interface SearchBarProps {
   clickLocation?: string // Location where the SearchBar is used for tracking
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({
+const SearchBarContent: React.FC<SearchBarProps> = ({
   placeholder = 'Ask anything about SigNoz...',
   className = '',
   rotationInterval = 2000,
@@ -95,6 +95,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       <ChatModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
+  )
+}
+
+const SearchBar: React.FC<SearchBarProps> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <SearchBarContent {...props} />
+    </Suspense>
   )
 }
 

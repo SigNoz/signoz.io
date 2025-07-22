@@ -91,9 +91,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
-        <Suspense fallback={null}>
-          <PageViewTracker />
-        </Suspense>
+
+        <PageViewTracker />
+
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"
@@ -107,17 +107,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <ThemeProviders>
           <GrowthBookProvider>
-            <Suspense>
-              <SectionContainer>
-                <div className="relative flex h-screen flex-col justify-between ">
-                  <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+            <SectionContainer>
+              <div className="relative flex h-screen flex-col justify-between">
+                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                  {/* Wrap navigation in Suspense to avoid useSearchParams SSR bailouts */}
+                  <Suspense fallback={null}>
                     <TopNav />
+                  </Suspense>
+                  {/* Wrap main content in Suspense with a proper loading UI */}
+                  <Suspense fallback={null}>
                     <main className="mb-auto mt-[48px]">{children}</main>
-                  </SearchProvider>
+                  </Suspense>
+                </SearchProvider>
+                {/* Footer suspended to avoid useSearchParams during SSG */}
+                <Suspense fallback={null}>
                   <MainFooter />
-                </div>
-              </SectionContainer>
-            </Suspense>
+                </Suspense>
+              </div>
+            </SectionContainer>
           </GrowthBookProvider>
         </ThemeProviders>
       </body>

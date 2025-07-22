@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
-const Tabs = ({ children, entityName }) => {
+const TabsContent = ({ children, entityName }) => {
   const searchParams = useSearchParams()
 
   const environment = searchParams.get(QUERY_PARAMS.ENVIRONMENT)
@@ -62,4 +62,10 @@ const Tabs = ({ children, entityName }) => {
   )
 }
 
-export default Tabs
+export default function Tabs(props) {
+  return (
+    <Suspense fallback={null}>
+      <TabsContent {...props} />
+    </Suspense>
+  )
+}

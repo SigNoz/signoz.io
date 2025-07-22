@@ -1,6 +1,6 @@
 'use client'
 
-import React, { ReactNode, useRef, useState, useEffect } from 'react'
+import React, { ReactNode, useRef, useState, useEffect, Suspense } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
@@ -35,7 +35,7 @@ export interface TocItemProps {
   value: string
 }
 
-export default function GuidesLayout({
+function GuidesLayoutContent({
   content,
   authorDetails,
   authors,
@@ -63,7 +63,7 @@ export default function GuidesLayout({
       },
       {
         // This creates a trigger zone near the top of the viewport
-        rootMargin: '-10% -20% -80% -20%',
+        rootMargin: '-10% -20% -80% -20%', // rootMargin: '-10% -20% -80% -80%' for some reason
         threshold: 0,
       }
     )
@@ -171,5 +171,13 @@ export default function GuidesLayout({
       </SectionContainer>
       <ProgressBar target={mainRef} />
     </main>
+  )
+}
+
+export default function GuidesLayout(props: LayoutProps) {
+  return (
+    <Suspense fallback={null}>
+      <GuidesLayoutContent {...props} />
+    </Suspense>
   )
 }

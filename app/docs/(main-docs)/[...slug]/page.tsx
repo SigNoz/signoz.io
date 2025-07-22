@@ -2,13 +2,14 @@ import 'css/prism.css'
 
 import { coreContent } from 'pliny/utils/contentlayer'
 import { allDocs } from 'contentlayer/generated'
-import type { Doc } from 'contentlayer/generated'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
+import { Suspense } from 'react'
 
 export const dynamicParams = false
+export const dynamic = 'error'
 
 export async function generateMetadata({
   params,
@@ -44,10 +45,10 @@ export const generateStaticParams = async () => {
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
-  const post = allDocs.find((p) => p.slug === slug) as Doc
+  const post = allDocs.find((p) => p.slug === slug)
 
   if (!post) {
-    notFound()
+    return notFound()
   }
 
   const mainContent = coreContent(post)
@@ -56,12 +57,14 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   return (
     <div className="doc">
-      <DocContent
-        title={title}
-        post={post}
-        toc={toc}
-        hideTableOfContents={hide_table_of_contents || false}
-      />
+      <Suspense fallback={null}>
+        <DocContent
+          title={title}
+          post={post}
+          toc={toc}
+          hideTableOfContents={hide_table_of_contents || false}
+        />
+      </Suspense>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import PageFeedback from '../PageFeedback/PageFeedback'
@@ -10,7 +10,7 @@ import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 
-const DocContent: React.FC<{
+const DocContentInner: React.FC<{
   title: string
   post: any
   toc: any
@@ -50,6 +50,19 @@ const DocContent: React.FC<{
         />
       )}
     </>
+  )
+}
+
+const DocContent: React.FC<{
+  title: string
+  post: any
+  toc: any
+  hideTableOfContents: boolean
+}> = (props) => {
+  return (
+    <Suspense fallback={null}>
+      <DocContentInner {...props} />
+    </Suspense>
   )
 }
 
