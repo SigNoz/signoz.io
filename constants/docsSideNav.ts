@@ -1185,6 +1185,11 @@ const docsSideNav = [
             route: '/docs/userguide/parse-multiline-logs',
             label: 'Parse Multiline Logs',
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/set-resource-attributes-for-logs',
+            label: 'Set Resource Attributes',
+          },
         ],
       },
       {
