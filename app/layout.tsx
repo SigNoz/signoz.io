@@ -110,16 +110,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SectionContainer>
               <div className="relative flex h-screen flex-col justify-between">
                 <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                  {/* Wrap navigation in Suspense to avoid useSearchParams SSR bailouts */}
                   <Suspense fallback={null}>
                     <TopNav />
                   </Suspense>
-                  {/* Wrap main content in Suspense with a proper loading UI */}
                   <Suspense fallback={null}>
                     <main className="mb-auto mt-[48px]">{children}</main>
                   </Suspense>
                 </SearchProvider>
-                {/* Footer suspended to avoid useSearchParams during SSG */}
                 <Suspense fallback={null}>
                   <MainFooter />
                 </Suspense>

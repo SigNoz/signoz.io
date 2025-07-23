@@ -9,20 +9,8 @@ import Link from 'next/link'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 
-function DocsPrevNextContent() {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
-
-  if (source === ONBOARDING_SOURCE) {
-    return null
-  }
-
+const DocsPrevNextStaticContent = ({ pathname }: { pathname: string }) => {
   const { prev, next } = getPrevAndNextRoutes(docsSideNav, pathname)
-
-  if (!prev && !next) {
-    return null
-  }
 
   return (
     <div className="docs-prev-next-nav mt-16 flex items-center justify-between">
@@ -57,9 +45,23 @@ function DocsPrevNextContent() {
   )
 }
 
+function DocsPrevNextContent() {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+
+  if (source === ONBOARDING_SOURCE) {
+    return null
+  }
+
+  return (
+    <DocsPrevNextStaticContent pathname={pathname} />
+  )
+}
+
 export default function DocsPrevNext() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<DocsPrevNextStaticContent pathname={''} />}>
       <DocsPrevNextContent />
     </Suspense>
   )
