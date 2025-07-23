@@ -2761,6 +2761,11 @@ const docsSideNav = [
         label: 'LLM Monitoring',
         type: 'doc',
       },
+      {
+        route: '/docs/llm/vercel-ai-sdk-monitoring',
+        label: 'Vercel AI SDK Monitoring',
+        type: 'doc',
+      },
     ],
   },
   {
