@@ -10,11 +10,8 @@ keywords: [kubectl logs, kubernetes pod logs, kubernetes troubleshooting, kubect
 
 When debugging containerized applications in Kubernetes, `kubectl logs` serves as your primary command-line tool for accessing container logs directly. Understanding how to effectively retrieve, filter, and analyze logs becomes essential for maintaining application health and resolving issues quickly, especially in multi-container environments where correlation across services can make or break your troubleshooting efforts.
 
-![Cover Image](/img/blog/2023/03/kubectl_logs_cover.webp)
-
 This guide covers kubectl logs from basic usage through advanced troubleshooting scenarios, including real-world examples for single-container pods, complex multi-container environments, and integration with centralized logging solutions.
 
-[![Get Started - Free CTA](/img/blog/2024/01/kubectl-logs-try-signoz-cloud.webp)](https://signoz.io/teams/)
 
 ## Understanding Kubernetes Logging Architecture
 
@@ -23,6 +20,10 @@ Kubernetes implements a distributed logging architecture where each node manages
 The kubelet handles log rotation (default: 10MB size limit, 5 rotated files per container), lifecycle management, and API exposure. kubectl logs interfaces with the kubelet's API to retrieve these stored logs, supporting both historical access and real-time streaming.
 
 This node-centric approach provides immediate access without external tooling, making it invaluable for rapid debugging. However, it has limitations in large-scale deployments: logs are stored only on individual nodes, making cross-cluster analysis challenging, and pods that restart frequently may lose historical log data during transitions.
+
+### How does kubectl logs work?
+
+When you run `kubectl` logs, the client talks to the API server, which authenticates/authorizes and then proxies the request to the kubelet on the node where your pod runs; the kubelet reads the container’s stdout/stderr files and streams them back through the API server to you
 
 ## Essential kubectl logs Commands
 
@@ -293,21 +294,21 @@ kubectl logs api-pod | grep "trace_id: abc123"
 
 ## Get Started with SigNoz for Enhanced Kubernetes Monitoring
 
-While kubectl logs provides essential debugging capabilities, comprehensive Kubernetes monitoring requires integrated observability solutions combining logs, metrics, and distributed tracing. SigNoz offers comprehensive Kubernetes infrastructure monitoring built on OpenTelemetry, providing full-stack observability designed specifically for Kubernetes environments.
+While kubectl logs provides essential debugging capabilities, comprehensive Kubernetes monitoring requires integrated observability solutions combining logs, metrics, and distributed tracing. 
 
-SigNoz combines application performance data with infrastructure metrics, logs, and traces in a unified view. The platform integrates deeply with OpenTelemetry standards, natively supporting OpenTelemetry data without proprietary agents or complex transformations. This ensures seamless correlation of metrics, traces, and logs from Kubernetes infrastructure and applications.
+SigNoz offers comprehensive Kubernetes infrastructure monitoring built on OpenTelemetry, providing full-stack observability designed specifically for Kubernetes environments.
 
-Key features that complement kubectl logs workflows include distributed tracing capabilities to identify root causes within clusters, advanced centralized log management that aggregates and analyzes logs from all services and pods, and telemetry data collection from key Kubernetes components like nodes, pods, containers, and services. SigNoz follows OpenTelemetry semantic conventions like `host.name`, `k8s.node.name`, and `k8s.pod.name` to ensure consistent naming across telemetry signals.
+<Figure src="/img/blog/2025/07/kubectl-logs-k8s-signoz.webp" alt="Kubernetes Infrastructure Monitoring in SigNoz" caption="Kubernetes Infrastructure Monitoring in SigNoz" />
 
-The platform enables creation of custom dashboards that combine metrics, traces, and logs in one place, giving teams comprehensive visibility into cluster performance. You can start debugging with kubectl logs and seamlessly transition to comprehensive analysis in SigNoz without context switching, leveraging unified telemetry data for faster root cause analysis.
+Key features that complement kubectl logs workflows include distributed tracing capabilities to identify root causes within clusters, advanced centralized log management that aggregates and analyzes logs from all services and pods, and telemetry data collection from key Kubernetes components like nodes, pods, containers, and services. 
+
+SigNoz follows OpenTelemetry semantic conventions like `host.name`, `k8s.node.name`, and `k8s.pod.name` to ensure consistent naming across telemetry signals.
 
 You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
 
 Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
 
 Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
-
-Hope we answered all your questions regarding kubectl logs. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
 
 ## Best Practices for Production Environments
 
