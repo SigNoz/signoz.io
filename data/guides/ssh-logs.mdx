@@ -3,12 +3,12 @@ title: "SSH Logs: Complete Guide to Security Monitoring and Analysis in 2025"
 slug: "ssh-logs"
 date: "2025-07-23"
 tags: [ssh, logs, security, monitoring, linux, authentication, syslog, journalctl, fail2ban]
-authors: [original author name]
+authors: [nilesh_sinha]
 description: "Master SSH log monitoring with this comprehensive guide covering log locations, analysis techniques, security threat detection, and modern tools for effective SSH access management."
 keywords: [ssh logs, sshd logs, ssh log monitoring, ssh security, authentication logs, brute force detection, journalctl ssh, ssh log analysis, linux security monitoring]
 ---
 
-SSH logs are critical for detecting unauthorized access attempts and maintaining system security. As a developer advocate who's spent countless hours investigating security incidents, I've seen how proper SSH log monitoring can mean the difference between catching a breach early and discovering it weeks later.
+SSH logs are critical for detecting unauthorized access attempts and maintaining system security. If you're managing servers, you know how proper SSH log monitoring can mean the difference between catching a breach early and discovering it weeks later.
 
 Whether you're managing a handful of servers or hundreds, this guide will help you master SSH log analysis, from basic log locations to advanced threat detection strategies.
 
@@ -192,7 +192,7 @@ grep -E "(Accepted|sudo)" /var/log/auth.log | grep -A5 -B5 "sudo"
 
 ## Automated Protection with Fail2ban
 
-Fail2ban automatically blocks malicious IPs:
+Fail2ban is an intrusion prevention tool that monitors log files and automatically bans IP addresses showing suspicious activity like repeated failed login attempts. It works by scanning SSH logs in real-time and temporarily blocking IPs that exceed defined failure thresholds.
 
 ### Installation and Setup
 
@@ -347,6 +347,10 @@ service:
 
 ## SSH Security Hardening
 
+Effective SSH log monitoring is only part of a comprehensive security strategy. Beyond analyzing authentication events, you must proactively secure your SSH service itself to reduce the attack surface and minimize the volume of suspicious activities that appear in your logs.
+
+The following hardening measures work hand-in-hand with log monitoring - while robust logging helps you detect threats, proper configuration prevents many attacks from succeeding in the first place. This layered approach significantly reduces both security risks and the noise in your authentication logs.
+
 ### Essential Configuration
 
 ```bash
@@ -405,7 +409,23 @@ iptables -A INPUT -p tcp --dport 2222 -m recent --name ssh --rcheck --seconds 60
 
 ## Get Started with SigNoz
 
-SigNoz offers unified observability for SSH logs with advanced security monitoring capabilities. The platform provides real-time log analysis, intelligent alerting, and correlation with system metrics - perfect for modern infrastructure security.
+SigNoz provides real-time log analysis, intelligent alerting, and correlation with system metrics - perfect for modern infrastructure security.
+
+
+<figure data-zoomable align='center'>
+    <video 
+        className="box-shadowed-image" 
+        src="/img/docs/logs-management/signoz-log-management-overview.mp4" 
+        controls={false}
+        width="100%" 
+        autoPlay 
+        muted 
+        loop
+    >
+        Your browser does not support the video tag.
+    </video>
+    <figcaption><i>SigNoz Logs Management Overview</i></figcaption>
+</figure>
 
 Key SSH monitoring features:
 - **Centralized collection** from multiple servers with efficient storage
