@@ -1,392 +1,585 @@
 ---
-title: OpenTelemetry Nestjs Tracing Implementation Guide [2025 Updated]
-slug: opentelemetry-nestjs
-date: 2025-01-02
-tags: [OpenTelemetry Instrumentation, JavaScript]
+title: OpenTelemetry NestJS Implementation Guide: Complete Setup for Production [2025]
+slug: opentelemetry-nestjs  
+date: 2025-07-24
+tags: [OpenTelemetry, NestJS, Distributed Tracing, Observability, APM, Node.js, Monitoring]
 authors: [ankit_anand, vishal]
-description: Setting up OpenTelemetry instrumentation for a Nestjs application. Step 1. Install required dependencies Step 2. Create a tracer.js file Step 3. Import the tracer module Step 4. Start the tracer...
-image: /img/blog/2023/01/opentelemetry_nestjs_cover-min.jpg
-hide_table_of_contents: false
-keywords: [opentelemetry,opentelemetry nestjs,opentelemetry javascript,distributed tracing,observability,nestjs monitoring,nestjs instrumentation,signoz]
+description: Complete guide to implementing OpenTelemetry in NestJS applications with automatic instrumentation, distributed tracing, and production-ready configuration. Includes troubleshooting tips and performance optimization.
+keywords: [opentelemetry nestjs, nestjs tracing, nestjs monitoring, distributed tracing, opentelemetry node.js, nestjs observability, opentelemetry instrumentation, signoz nestjs]
 ---
 
-<script
-    type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "OpenTelemetry Nestjs Tracing Implementation Guide [2024 Updated]",
-  "alternativeHeadline": "Step-by-step guide to implement OpenTelemetry tracing in Nestjs applications for enhanced monitoring and observability",
-  "author": {
-    "@type": "Person",
-    "name": "Ankit Anand"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2024-02-06T00:00:00Z",
-  "dateModified": "2024-08-06T00:00:00Z",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/blog/opentelemetry-nestjs/"
-  },
-  "description": "Learn how to implement OpenTelemetry tracing in your Nestjs application. This guide covers installation, configuration, and integration with SigNoz for effective monitoring and observability.",
-  "keywords": "opentelemetry nestjs, nestjs monitoring, distributed tracing, observability, nestjs instrumentation, opentelemetry javascript",
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "OpenTelemetry",
-      "description": "An open-source observability framework for cloud-native software"
-    },
-    {
-      "@type": "Thing",
-      "name": "Nestjs",
-      "description": "A progressive Node.js framework for building efficient and scalable server-side applications"
-    },
-    {
-      "@type": "Thing",
-      "name": "Distributed Tracing",
-      "description": "A method used to profile and monitor applications, especially those built using a microservices architecture"
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "OpenTelemetry",
-      "applicationCategory": "Observability Framework"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "Nestjs",
-      "applicationCategory": "Web Framework"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "SigNoz",
-      "applicationCategory": "Observability Platform"
-    }
-  ],
-  "mainEntity": {
-    "@type": "HowTo",
-    "name": "Implement OpenTelemetry Tracing in Nestjs",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Install OpenTelemetry packages",
-        "text": "Install required OpenTelemetry npm packages for Nestjs instrumentation"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create tracer configuration",
-        "text": "Create a tracer.ts file to configure the OpenTelemetry SDK"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Import tracer module",
-        "text": "Import the tracer module in your main Nestjs application file"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Start the tracer",
-        "text": "Initialize the OpenTelemetry tracer before bootstrapping your Nestjs application"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Run the application",
-        "text": "Start your Nestjs application with the appropriate environment variables for OpenTelemetry"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Monitor with SigNoz",
-        "text": "View and analyze the collected telemetry data in the SigNoz dashboard"
-      }
-    ]
-  }
-}) }}
-  />
-
-Nestjs is a Nodejs framework for building scalable server-side applications with typescript. It makes use of frameworks like Express and Fastify to enable rapid development. It has gained wide popularity in recent times, and many applications are making use of the Nestjs framework. Using OpenTelemetry client libraries, you can monitor your Nestjs application.
-
-
+NestJS applications require comprehensive monitoring to ensure optimal performance and rapid issue resolution. OpenTelemetry provides the industry standard for instrumenting these applications with vendor-agnostic observability through distributed tracing, metrics, and logs.
 
 ![Cover Image](/img/blog/2023/01/opentelemetry_nestjs_cover.webp)
 
-Monitoring your Nestjs application is critical for performance management. But setting up monitoring for Nestjs applications can get cumbersome requiring multiple libraries and patterns. That's where Opentelemetry comes in.
+Many developers struggle with proper OpenTelemetry implementation in NestJS, facing challenges from initialization order issues to performance concerns and missing traces. This guide addresses these pain points and provides practical, tested solutions for building observable NestJS applications.
 
-OpenTelemetry is the leading open-source standard for instrumenting your code to generate telemetry data that can be a one-stop solution for monitoring Nestjs applications.
+Whether you're building microservices or monolithic applications, you'll learn how to configure automatic instrumentation, avoid memory leaks, maintain trace context across async operations, and deploy to production with confidence.
 
-OpenTelemetry is a set of tools, APIs, and SDKs used to [instrument applications](https://signoz.io/docs/instrumentation/) to create and manage telemetry data(Logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
+## Why OpenTelemetry for NestJS Applications
 
-One of the biggest advantages of using OpenTelemetry is that it is vendor-agnostic. It can export data in multiple formats, which you can send to a backend of your choice.
+NestJS applications, especially those built with microservices architecture, benefit significantly from distributed tracing. Traditional logging approaches fall short when tracking requests across multiple services, databases, and external APIs. OpenTelemetry bridges this gap by providing complete request flow visibility.
 
-In this article, we will use [SigNoz](https://signoz.io/) as a backend. SigNoz is an open-source APM tool that supports OpenTelemetry data natively.
+The framework's modular architecture aligns perfectly with OpenTelemetry's auto-instrumentation model, which automatically captures HTTP requests, database queries, and inter-service communications without code modifications. This zero-code approach reduces implementation time while providing comprehensive observability coverage.
 
-## Quick Start: OpenTelemetry in Nestjs
+For production applications, OpenTelemetry offers standardized semantic conventions that ensure consistent data collection across different teams and services. This standardization becomes crucial when debugging complex distributed systems where a single user request might traverse multiple microservices.
 
-1. Install packages: `npm install --save @opentelemetry/api @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node @opentelemetry/exporter-trace-otlp-http`
-2. Create `tracer.ts` file with OpenTelemetry SDK configuration
-3. Import tracer in `main.ts`: `import tracer from "./tracer";`
-4. Start tracer before bootstrapping: `await tracer.start();`
-5. Run app: `OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<KEY>" nest start`
+## Prerequisites and Setup
 
-Let's get started on the detailed guide and see how to use OpenTelemetry for a Nestjs application.
+Before implementing OpenTelemetry in your NestJS application, ensure you meet these requirements:
 
-## Running a Nestjs application with OpenTelemetry
+- Node.js 18.19.0+ or Node.js 20.6.0+
+- TypeScript 5.0.4+
+- NestJS 8.0+
+- An observability backend (we'll use SigNoz for this guide)
 
-First, you need to create a SigNoz account. Data collected by OpenTelemetry will be sent to SigNoz for storage and visualization.
+## Quick Implementation Overview
 
-### Setting up SigNoz
+Here's the complete workflow to get OpenTelemetry working with your NestJS application:
 
-You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
+1. **Install Required Packages** - Core OpenTelemetry libraries and auto-instrumentations
+2. **Create Tracer Configuration** - SDK setup with exporters and instrumentations
+3. **Initialize Before Bootstrap** - Critical initialization order for proper tracing
+4. **Configure Environment Variables** - Endpoint and authentication setup
+5. **Test and Validate** - Verify traces are collected correctly
 
-SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+## Installing Dependencies
 
-[![Get Started - Free CTA](/img/blog/2024/01/opentelemetry-collector-try-signoz-cloud-cta.webp)](https://signoz.io/teams/)
-
-You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
-
-<figure data-zoomable align='center'>
-    <img  className="box-shadowed-image" src="/img/blog/common/signoz_dashboard_homepage.webp" alt="SigNoz dashboard"/>
-    <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the installation</i></figcaption>
-</figure>
-
-
-### Instrumenting a sample Nestjs application with OpenTelemetry
-
-For instrumenting a Nestjs application with OpenTelemetry, you need to install the required OpenTelemetry packages first. Steps involved in instrumenting a Nestjs application with OpenTelemetry are as follows:
-
-**Step 1: Install OpenTelemetry packages<br></br>**
+Install the essential OpenTelemetry packages for NestJS instrumentation:
 
 ```bash
-npm install --save @opentelemetry/api@^1.6.0                                                                       
-npm install --save @opentelemetry/sdk-node@^0.45.0
-npm install --save @opentelemetry/auto-instrumentations-node@^0.39.4
-npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
+npm install --save @opentelemetry/api@latest
+npm install --save @opentelemetry/sdk-node@^2.0.0  
+npm install --save @opentelemetry/auto-instrumentations-node@^0.62.0
+npm install --save @opentelemetry/exporter-trace-otlp-http@latest
+npm install --save @opentelemetry/semantic-conventions@latest
 ```
 
+The `@opentelemetry/auto-instrumentations-node` package provides automatic instrumentation for popular Node.js libraries including Express, Fastify, HTTP/HTTPS, and database drivers commonly used with NestJS.
 
+## Creating the Tracer Configuration
 
-**Step 2. Create a `tracer.ts` file**
+Create a `tracer.ts` file in your project root that properly initializes the NodeSDK with exporters and instrumentation:
 
-You need to configure the endpoint for SigNoz cloud in this file.
+```typescript
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-
-```jsx
-"use strict";
-
-import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { Resource } from "@opentelemetry/resources";
-import * as opentelemetry from "@opentelemetry/sdk-node";
-import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
-
-// Configure the SDK to export telemetry data to the console
-// Enable all auto-instrumentations from the meta package
-const exporterOptions = {
-  //highlight-start
-  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
-  //highlight-end
-};
-
-const traceExporter = new OTLPTraceExporter(exporterOptions);
-const sdk = new opentelemetry.NodeSDK({
-  traceExporter,
-  instrumentations: [getNodeAutoInstrumentations()],
-  resource: new Resource({
-    //highlight-start
-    [SemanticResourceAttributes.SERVICE_NAME]: "sample-nestjs-app",
-    //highlight-end
-  }),
+// Configure trace exporter
+const traceExporter = new OTLPTraceExporter({
+  url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'http://localhost:4318/v1/traces',
 });
 
-// initialize the SDK and register with the OpenTelemetry API
-// this enables the API to record telemetry
-sdk.start();
-
-// gracefully shut down the SDK on process exit
-process.on("SIGTERM", () => {
-  sdk
-    .shutdown()
-    .then(() => console.log("Tracing terminated"))
-    .catch((error) => console.log("Error terminating tracing", error))
-    .finally(() => process.exit(0));
+// Create SDK instance with comprehensive configuration
+const sdk = new NodeSDK({
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME || 'nestjs-app',
+    [SemanticResourceAttributes.SERVICE_VERSION]: process.env.OTEL_SERVICE_VERSION || '1.0.0',
+    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
+  }),
+  traceExporter,
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      // Disable instrumentations that might cause issues
+      '@opentelemetry/instrumentation-fs': { enabled: false },
+      // Configure HTTP instrumentation for better trace context
+      '@opentelemetry/instrumentation-http': {
+        enabled: true,
+        ignoreIncomingRequestHook: (req) => {
+          // Ignore health check endpoints
+          return req.url?.includes('/health') || req.url?.includes('/metrics');
+        },
+      },
+    }),
+  ],
 });
 
 export default sdk;
 ```
 
-[OpenTelemetry Node](https://signoz.io/opentelemetry/nodejs/) SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
+## Critical Initialization Order
 
-About environment variables:
+The most common issue with OpenTelemetry in NestJS is incorrect initialization order. The tracer must be initialized before any application code that should be instrumented:
 
-`service_name`: name of the service you want to monitor
+```typescript
+// THIS MUST BE THE FIRST IMPORT
+import tracer from './tracer';
 
-`https://ingest.{region}.signoz.cloud:443/v1/traces` is the default url for sending your tracing data to SigNoz cloud. `{region}` will be your SigNoz data region. You can find these details in SigNoz dashboard under settings --> ingestion settings.
-
-For creating the `tracer.ts` file for SigNoz self-host, refer to this [doc](https://signoz.io/docs/instrumentation/nestjs/#send-traces-to-self-hosted-signoz).
-
-
-**Step 3: Import the tracer module where your app starts**
-
-On `main.ts` file or file where your app starts import tracer using below command.
-
-<Admonition type="info">
-The below import should be the first line in the main file of your application (Ex -> `main.ts`)
-</Admonition>
-
-   ```jsx
-   import tracer from "./tracer";
-   ```
-
-   Here's a sample main application importing `tracer.ts`:
-
-   ```jsx
-   import tracer from "./tracer";
-   import { NestFactory } from "@nestjs/core";
-   import { AppModule } from "./app.module";
-
-   // All of your application code and any imports that should leverage
-   // OpenTelemetry automatic instrumentation must go here.
-
-   async function bootstrap() {
-     await tracer.start();
-
-     const app = await NestFactory.create(AppModule);
-     await app.listen(3001);
-   }
-   bootstrap();
-   ```
-
-
-**Step 4: Start the tracer**
-
-```jsx
+// Start tracer immediately
 await tracer.start();
+
+// Now import NestJS and other application modules
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { Logger } from '@nestjs/common';
+
+async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  
+  try {
+    const app = await NestFactory.create(AppModule);
+    
+    app.setGlobalPrefix('api');
+    app.enableCors();
+    
+    const port = process.env.PORT || 3000;
+    await app.listen(port);
+    
+    logger.log(`Application running on: http://localhost:${port}/api`);
+  } catch (error) {
+    logger.error('Error starting application:', error);
+    process.exit(1);
+  }
+}
+
+bootstrap();
 ```
 
-**Step 5. Run your application**<br></br>
+## Environment Configuration
 
-You can run your application using the following command:
+Configure these environment variables for proper OpenTelemetry operation:
 
 ```bash
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" nest start
+# Service identification
+OTEL_SERVICE_NAME=your-nestjs-app
+OTEL_SERVICE_VERSION=1.0.0
+
+# Exporter configuration
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer <your-token>
+
+# Environment
+NODE_ENV=development
+
+# Optional: Additional resource attributes
+OTEL_RESOURCE_ATTRIBUTES=service.name=your-nestjs-app,service.version=1.0.0
 ```
 
-You can find your ingestion key in the SigNoz dashboard.
+## Custom Instrumentation with Decorators
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/common/ingestion-key-details.webp" alt="Ingestion key details"/>
-    <figcaption><i>Ingestion details in SigNoz dashboard</i></figcaption>
-</figure>
+While automatic instrumentation covers HTTP requests and database operations, you'll often need custom spans for business-critical operations. Create a tracing decorator for clean implementation:
 
+```typescript
+import { trace, context, SpanStatusCode } from '@opentelemetry/api';
 
-The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard. You need to generate some load in order to see data reported on SigNoz dashboard. Refresh your application for 10-20 times, and wait for 2-3 mins.
+export function Traced(spanName?: string) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+    const tracer = trace.getTracer('nestjs-app', '1.0.0');
+    
+    descriptor.value = async function (...args: any[]) {
+      const finalSpanName = spanName || `${target.constructor.name}.${propertyKey}`;
+      
+      return await tracer.startActiveSpan(finalSpanName, async (span) => {
+        try {
+          span.setAttributes({
+            'method.class': target.constructor.name,
+            'method.name': propertyKey,
+          });
+          
+          const result = await originalMethod.apply(this, args);
+          span.setStatus({ code: SpanStatusCode.OK });
+          return result;
+          
+        } catch (error) {
+          span.recordException(error);
+          span.setStatus({ 
+            code: SpanStatusCode.ERROR, 
+            message: error.message 
+          });
+          throw error;
+        } finally {
+          span.end();
+        }
+      });
+    };
+    
+    return descriptor;
+  };
+}
 
-You can check out a sample Nestjs application already instrumented with OpenTelemetry here:
+// Usage in your services
+@Injectable()
+export class UserService {
+  @Traced('user_creation')
+  async createUser(userData: CreateUserDto): Promise<User> {
+    // Your business logic
+  }
 
-<a href="https://github.com/SigNoz/sample-NestJs-app" rel="noopener noreferrer nofollow" target="_blank" >Sample Nestjs Application</a>
+  @Traced() // Uses default name: UserService.findById
+  async findById(id: string): Promise<User> {
+    // Your business logic
+  }
+}
+```
 
-If you run this app, you can find a `sample-nestjs-app` in the list of applications monitored with SigNoz.
+## Database Query Instrumentation
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/02/sample-nestjs-app-signoz.webp" alt="Sample Nestjs application in the list of applications monitored by SigNoz"/>
-    <figcaption><i>Sample Nestjs application in the list of applications monitored by SigNoz</i></figcaption>
-</figure>
+Ensure proper database tracing for TypeORM, Prisma, or Mongoose operations:
 
+```typescript
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+import { User } from './entities/user.entity';
 
-## Monitor your Nestjs OpenTelemetry data in SigNoz
+@Injectable()
+export class UserRepository {
+  private readonly tracer = trace.getTracer('database', '1.0.0');
 
-SigNoz makes it easy to visualize metrics and traces captured through OpenTelemetry instrumentation.
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>
+  ) {}
 
-SigNoz comes with out of box RED metrics charts and visualization. RED metrics stands for:
+  async findUsersWithFilters(filters: UserFilters): Promise<User[]> {
+    return await this.tracer.startActiveSpan('complex_user_query', async (span) => {
+      try {
+        span.setAttributes({
+          'db.operation': 'select',
+          'db.table': 'users',
+          'query.filters': JSON.stringify(filters)
+        });
 
-- Rate of requests
-- Error rate of requests
-- Duration taken by requests
+        const queryBuilder = this.userRepository
+          .createQueryBuilder('user')
+          .leftJoinAndSelect('user.profile', 'profile');
 
-<figure data-zoomable align='center'>
-    <img  className="box-shadowed-image" src="/img/blog/2024/02/opentelemetry-nestjs-app-metrics.webp" alt="OpenTelemetry nestjs app metrics"/>
-    <figcaption><i>Measure things like application latency, requests per sec, error percentage of your Nestjs application and see your top endpoints with SigNoz.</i></figcaption>
-</figure>
+        if (filters.email) {
+          queryBuilder.where('user.email LIKE :email', { 
+            email: `%${filters.email}%` 
+          });
+        }
 
+        const users = await queryBuilder.getMany();
+        
+        span.setAttributes({
+          'query.result_count': users.length,
+        });
+        
+        span.setStatus({ code: SpanStatusCode.OK });
+        return users;
 
-You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp. You can use flamegraphs to exactly identify the issue causing the latency.
+      } catch (error) {
+        span.recordException(error);
+        span.setStatus({ 
+          code: SpanStatusCode.ERROR, 
+          message: error.message 
+        });
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
+  }
+}
+```
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/02/opentelemetry-nestjs-flamegraphs.webp" alt="OpenTelemetry Nestjs Tracing data visualized as flamegraphs"/>
-    <figcaption><i>Flamegraphs used to visualize tracing data of Nestjs application in SigNoz UI</i></figcaption>
-</figure>
+## Distributed Tracing Across Microservices
 
+For microservices communication, ensure proper context propagation:
+
+```typescript
+import { Injectable, Logger } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { trace, context, propagation } from '@opentelemetry/api';
+import { firstValueFrom } from 'rxjs';
+
+@Injectable()
+export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+  private readonly tracer = trace.getTracer('order-service', '1.0.0');
+
+  constructor(private readonly httpService: HttpService) {}
+
+  async createOrder(orderData: CreateOrderDto): Promise<Order> {
+    return await this.tracer.startActiveSpan('create_order', async (span) => {
+      try {
+        span.setAttributes({
+          'order.user_id': orderData.userId,
+          'order.items_count': orderData.items.length,
+          'order.total_amount': orderData.totalAmount,
+        });
+
+        // Process payment with context propagation
+        const paymentResult = await this.processPayment(orderData);
+        
+        // Create order record
+        const order = await this.saveOrder(orderData, paymentResult);
+
+        span.setStatus({ code: SpanStatusCode.OK });
+        return order;
+        
+      } catch (error) {
+        span.recordException(error);
+        span.setStatus({ 
+          code: SpanStatusCode.ERROR,
+          message: error.message 
+        });
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
+  }
+
+  private async processPayment(orderData: CreateOrderDto): Promise<PaymentResult> {
+    return await this.tracer.startActiveSpan('process_payment', async (span) => {
+      try {
+        // Create headers with trace context for downstream service
+        const headers = {};
+        propagation.inject(context.active(), headers);
+
+        const paymentRequest = {
+          userId: orderData.userId,
+          amount: orderData.totalAmount,
+          paymentMethod: orderData.paymentMethod,
+        };
+
+        const response = await firstValueFrom(
+          this.httpService.post('http://payment-service:3003/api/process', 
+            paymentRequest, 
+            { headers }
+          )
+        );
+
+        span.setAttributes({
+          'payment.transaction_id': response.data.transactionId,
+          'payment.amount': orderData.totalAmount,
+          'payment.status': response.data.status,
+        });
+
+        span.setStatus({ code: SpanStatusCode.OK });
+        return response.data;
+        
+      } catch (error) {
+        span.recordException(error);
+        span.setStatus({ 
+          code: SpanStatusCode.ERROR,
+          message: error.message 
+        });
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
+  }
+}
+```
+
+## Performance Optimization for Production
+
+Configure sampling and batch processing for production environments:
+
+```typescript
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { TraceIdRatioBasedSampler, ParentBasedSampler, BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Production-optimized configuration
+const sdk = new NodeSDK({
+  // Sample 10% of traces in production, 100% in development
+  sampler: new ParentBasedSampler({
+    root: new TraceIdRatioBasedSampler(isProduction ? 0.1 : 1.0),
+  }),
+  
+  // Batch export for better performance
+  spanProcessor: new BatchSpanProcessor(traceExporter, {
+    maxExportBatchSize: isProduction ? 200 : 50,
+    exportTimeoutMillis: isProduction ? 5000 : 2000,
+    scheduledDelayMillis: isProduction ? 2000 : 1000,
+  }),
+  
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME,
+    [SemanticResourceAttributes.SERVICE_VERSION]: process.env.OTEL_SERVICE_VERSION,
+    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV,
+  }),
+  
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      // Disable high-volume instrumentation in production
+      '@opentelemetry/instrumentation-fs': { enabled: false },
+      '@opentelemetry/instrumentation-dns': { enabled: false },
+      
+      '@opentelemetry/instrumentation-http': {
+        enabled: true,
+        ignoreIncomingRequestHook: (req) => {
+          const ignorePaths = ['/health', '/metrics', '/favicon.ico'];
+          return ignorePaths.some(path => req.url?.includes(path));
+        },
+      },
+    }),
+  ],
+});
+```
+
+## Resource Management and Cleanup
+
+Implement proper resource cleanup to prevent memory leaks:
+
+```typescript
+import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+
+@Injectable()
+export class TelemetryService implements OnModuleDestroy {
+  private readonly logger = new Logger(TelemetryService.name);
+  private sdk: NodeSDK;
+
+  async initializeTelemetry(): Promise<void> {
+    try {
+      this.sdk = new NodeSDK({
+        // Your SDK configuration
+      });
+
+      await this.sdk.start();
+      this.logger.log('OpenTelemetry SDK initialized successfully');
+      
+      // Handle process shutdown gracefully
+      process.on('SIGTERM', () => this.shutdown());
+      process.on('SIGINT', () => this.shutdown());
+      
+    } catch (error) {
+      this.logger.error('Failed to initialize OpenTelemetry SDK:', error);
+      throw error;
+    }
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.shutdown();
+  }
+
+  private async shutdown(): Promise<void> {
+    try {
+      if (this.sdk) {
+        this.logger.log('Shutting down OpenTelemetry SDK...');
+        await this.sdk.shutdown();
+        this.logger.log('OpenTelemetry SDK shutdown complete');
+      }
+    } catch (error) {
+      this.logger.error('Error during OpenTelemetry SDK shutdown:', error);
+    }
+  }
+}
+```
+
+## Common Troubleshooting Issues
+
+### Missing Traces
+
+**Initialization Order Problems:**
+```typescript
+// ❌ WRONG - NestJS imports before tracer
+import { NestFactory } from '@nestjs/core';
+import tracer from './tracer';
+
+// ✅ CORRECT - Tracer first
+import tracer from './tracer';
+await tracer.start();
+import { NestFactory } from '@nestjs/core';
+```
+
+**Debug with Console Exporter:**
+```typescript
+import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
+
+// Temporarily use console exporter to verify traces are generated
+const debugExporter = new ConsoleSpanExporter();
+
+const sdk = new NodeSDK({
+  traceExporter: process.env.NODE_ENV === 'development' 
+    ? debugExporter 
+    : traceExporter,
+});
+```
+
+### Memory and Performance Issues
+
+**Configure EventEmitter Limits:**
+```typescript
+import { EventEmitter } from 'events';
+
+// Increase max listeners limit for production
+EventEmitter.defaultMaxListeners = 20;
+
+// Use sampling to reduce memory pressure
+const sdk = new NodeSDK({
+  sampler: new TraceIdRatioBasedSampler(0.1), // 10% sampling
+});
+```
+
+### Context Propagation Failures
+
+**Verify Propagator Configuration:**
+```typescript
+import { CompositePropagator, TraceContextPropagator, BaggagePropagator } from '@opentelemetry/core';
+import { B3Propagator } from '@opentelemetry/propagator-b3';
+
+const sdk = new NodeSDK({
+  textMapPropagator: new CompositePropagator({
+    propagators: [
+      new TraceContextPropagator(),
+      new BaggagePropagator(),
+      new B3Propagator(),
+    ],
+  }),
+});
+```
+
+## Get Started with SigNoz
+
+SigNoz provides comprehensive monitoring and observability features specifically designed for NestJS applications. The platform automatically captures distributed traces, metrics, and logs from your instrumented NestJS application, supporting REST APIs, GraphQL endpoints, and microservices architectures.
+
+Key features for NestJS applications include:
+
+- **Automatic RED Metrics**: Request Rate, Error Rate, and Duration visualization without manual configuration
+- **Distributed Tracing**: End-to-end trace visualization across microservices with flamegraphs and Gantt charts
+- **Database Query Analysis**: Deep insights into TypeORM, Prisma, and database performance
+- **Custom Business Metrics**: Track specific NestJS service operations and business KPIs
+- **Real-time Alerting**: Set up alerts for latency, error rates, and custom metrics
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+Hope we answered all your questions regarding OpenTelemetry NestJS implementation. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
 
 ## Conclusion
 
-OpenTelemetry makes it very convenient to instrument your Nestjs application. You can then use an open-source APM tool like SigNoz to analyze the performance of your app. As SigNoz offers a full-stack observability tool, you don't have to use multiple tools for your monitoring needs.
+OpenTelemetry provides robust, production-ready observability for NestJS applications when properly implemented. Success depends on correct initialization order, appropriate sampling configuration, and understanding common implementation pitfalls.
 
-<GetStartedSigNoz />
+The automatic instrumentation capabilities cover most use cases, capturing HTTP requests, database operations, and external API calls without code modifications. For business-critical operations, custom spans and decorators provide granular visibility into application behavior.
 
-## FAQs
+Performance overhead remains manageable at 5-10% when properly configured with sampling and batch processing. The benefits of comprehensive observability—faster debugging, improved system understanding, and proactive issue detection—far outweigh this minimal cost.
 
-### What is OpenTelemetry and why is it important for Nestjs applications?
-OpenTelemetry is an open-source observability framework that provides a standardized way to instrument applications for generating telemetry data (logs, metrics, and traces). It's important for Nestjs applications because it simplifies the process of implementing monitoring and observability, allowing developers to gain insights into application performance and behavior without vendor lock-in.
+For microservices architectures, proper context propagation ensures traces remain connected across service boundaries, providing end-to-end visibility into complex distributed operations.
 
-### How do I install OpenTelemetry for a Nestjs application?
-To install OpenTelemetry for a Nestjs application, you need to install the following npm packages:
-```
-npm install --save @opentelemetry/api@^1.6.0
-npm install --save @opentelemetry/sdk-node@^0.45.0
-npm install --save @opentelemetry/auto-instrumentations-node@^0.39.4
-npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
-```
+With OpenTelemetry's vendor-neutral approach and SigNoz's comprehensive NestJS support, you can implement production-grade observability that scales with your application growth.
 
-### What are the key steps to implement OpenTelemetry tracing in a Nestjs application?
-The key steps to implement OpenTelemetry tracing in a Nestjs application are:
-1. Install required OpenTelemetry packages
-2. Create a `tracer.ts` file to configure the OpenTelemetry SDK
-3. Import the tracer module in your main application file
-4. Start the tracer before bootstrapping your Nestjs application
-5. Run your application with the appropriate environment variables
+## Frequently Asked Questions
 
-### Can I use OpenTelemetry with any observability backend?
-Yes, one of the main advantages of OpenTelemetry is its vendor-agnostic nature. You can export data in multiple formats and send it to various backends. The article mentions using SigNoz as a backend, but you can configure OpenTelemetry to work with other observability platforms as well.
+**What's the minimum Node.js version required for OpenTelemetry SDK 2.0?**
+OpenTelemetry SDK 2.0+ requires Node.js 18.19.0+ or Node.js 20.6.0+, along with TypeScript 5.0.4+.
 
-### What kind of data can I collect with OpenTelemetry in a Nestjs application?
-With OpenTelemetry, you can collect various types of telemetry data from your Nestjs application, including:
-- Traces: Detailed information about request flows and execution paths
-- Metrics: Quantitative measurements of your application's performance
-- Logs: Textual records of events occurring in your application
+**How do I debug missing traces in my NestJS application?** 
+Use the ConsoleSpanExporter in development to verify traces are generated. Check initialization order (tracer must start before NestJS imports), validate exporter configuration, and ensure environment variables are set.
 
-### How does OpenTelemetry improve the monitoring of Nestjs applications?
-OpenTelemetry improves the monitoring of Nestjs applications by:
-- Providing standardized instrumentation across different services and libraries
-- Offering automatic instrumentation for common frameworks and libraries
-- Enabling the collection of detailed performance data without significant code changes
-- Allowing for easy integration with various observability backends
-- Supporting distributed tracing for microservices architectures
+**What's the performance overhead of OpenTelemetry instrumentation?**
+With proper configuration (sampling, batch processing), expect 5-10% performance overhead. This can be reduced by disabling unnecessary instrumentations and optimizing sampling rates.
 
-### What are some best practices for using OpenTelemetry with Nestjs?
-Some best practices for using OpenTelemetry with Nestjs include:
-- Use automatic instrumentation where possible to reduce manual work
-- Configure appropriate sampling rates to balance data collection and performance
-- Use semantic conventions for naming spans and attributes
-- Implement custom instrumentation for business-critical paths
-- Regularly review and update your OpenTelemetry implementation as new versions are released
+**Can I use OpenTelemetry with GraphQL in NestJS?**
+Yes, OpenTelemetry's HTTP instrumentation automatically captures GraphQL requests. For detailed GraphQL-specific tracing, create custom spans around resolver methods.
 
----
+**Should I use automatic or manual instrumentation?**
+Start with automatic instrumentation for framework operations (HTTP, database, external calls), then add manual instrumentation for business-critical operations requiring custom context.
 
-If you want to read more about SigNoz 👇
-
-[Golang Aplication Monitoring with OpenTelemetry and SigNoz](https://signoz.io/opentelemetry/go/)
-
-[OpenTelemetry collector - complete guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
+**How do I correlate logs with traces?**
+Extract trace and span IDs from the current active span and include them in log statements. This enables correlation between log entries and traces in your observability platform.
