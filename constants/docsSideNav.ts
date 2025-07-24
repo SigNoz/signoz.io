@@ -216,19 +216,6 @@ const docsSideNav = [
           },
         ],
       },
-
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Install OTel collector',
-        items: [
-          {
-            route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
-            type: 'doc',
-            label: 'VM',
-          },
-        ],
-      },
     ],
   },
 
@@ -923,7 +910,26 @@ const docsSideNav = [
           
         ]
 
-      }
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'VM',
+        items: [
+          {
+            type: "category",
+            label: "OpenTelemetry Binary",
+            isExpanded: false,
+            items: [
+              {
+                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+                type: 'doc',
+                label: 'Overview',
+              },
+            ]
+          },
+        ],
+      },
     ]
   },
   {
