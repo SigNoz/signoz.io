@@ -1,8 +1,8 @@
 ---
 title: "How to Find and Read Crontab Logs - Complete Guide for System Administrators"
 slug: "crontab-logs"
-date: "2025-07-23"
-tags: [crontab, cron logs, system administration, linux logging, scheduling, monitoring]
+date: "2025-07-21"
+tags: [crontab, cron logs, linux logging, monitoring]
 authors: [simran_kumari]
 description: "Complete guide to finding, reading, and monitoring crontab logs across different Linux distributions. Learn log locations, debugging techniques, and best practices for cron job management."
 keywords: [crontab logs, cron logs, cronjob, linux logs, system logs, cron debugging, scheduled tasks, log monitoring]
@@ -220,14 +220,19 @@ env -i HOME=/home/user PATH=/usr/bin:/bin /path/to/script.sh > /tmp/test.log 2>&
 ### Enable Debug Logging
 
 **For systemd-based systems:**
-```bash
-# Increase cron logging verbosity
-systemctl edit cron
-# Add in the override file:
-# [Service]
-# Environment="CRON_DEBUG=1"
+Debug logging on systemd-based systems is typically handled through the system logger configuration and journal settings. You can increase verbosity by:
 
-systemctl daemon-reload && systemctl restart cron
+```bash
+# Check the actual cron service name (varies by distribution)
+systemctl status cron crond cronie 2>/dev/null | grep -E "(cron|crond|cronie).service"
+
+# View detailed cron logs through journalctl
+journalctl -u cron -f  # Use 'crond' or 'cronie' if that's your service name
+
+# For more verbose system logging, configure rsyslog
+# Edit /etc/rsyslog.conf or /etc/rsyslog.d/50-default.conf
+# Ensure cron logging is enabled:
+# cron.*    /var/log/cron.log
 ```
 
 **For traditional cron (RHEL/CentOS):**
