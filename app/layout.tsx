@@ -92,7 +92,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
 
-        <PageViewTracker />
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
 
         <noscript>
           <iframe
@@ -107,21 +109,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <ThemeProviders>
           <GrowthBookProvider>
-            <SectionContainer>
-              <div className="relative flex h-screen flex-col justify-between">
-                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+            <Suspense>
+              <SectionContainer>
+                <div className="relative flex h-screen flex-col justify-between">
+                  <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                    <Suspense fallback={null}>
+                      <TopNav />
+                    </Suspense>
+                    <Suspense fallback={null}>
+                      <main className="mb-auto mt-[48px]">{children}</main>
+                    </Suspense>
+                  </SearchProvider>
                   <Suspense fallback={null}>
-                    <TopNav />
+                    <MainFooter />
                   </Suspense>
-                  <Suspense fallback={null}>
-                    <main className="mb-auto mt-[48px]">{children}</main>
-                  </Suspense>
-                </SearchProvider>
-                <Suspense fallback={null}>
-                  <MainFooter />
-                </Suspense>
-              </div>
-            </SectionContainer>
+                </div>
+              </SectionContainer>
+            </Suspense>
           </GrowthBookProvider>
         </ThemeProviders>
       </body>
