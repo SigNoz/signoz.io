@@ -216,24 +216,6 @@ const docsSideNav = [
           },
         ],
       },
-
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Install OTel collector',
-        items: [
-          {
-            route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
-            type: 'doc',
-            label: 'VM',
-          },
-          {
-            route: '/docs/tutorial/kubernetes-infra-metrics',
-            type: 'doc',
-            label: 'Kubernetes',
-          },
-        ],
-      },
     ],
   },
 
@@ -508,7 +490,63 @@ const docsSideNav = [
       },
     ],
   },
+  {
+    label: 'Collection Agents',
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Kubernetes',
+        items: [
+          {
+            type: 'category',
+            label: 'K8s-Infra',
+            isExpanded: false,
+            items: [
+              {
+                label: 'Overview',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/k8s-infra/overview'
+              },
+              {
+                label: 'Install K8s Infra',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra'
+              },
+              {
+                label: 'Configure K8s Infra',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra'
+              }
+            ]
+          }
+          
+        ]
 
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'VM',
+        items: [
+          {
+            type: "category",
+            label: "OpenTelemetry Binary",
+            isExpanded: false,
+            items: [
+              {
+                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+                type: 'doc',
+                label: 'Overview',
+              },
+            ]
+          },
+        ],
+      },
+    ]
+  },
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
@@ -881,11 +919,6 @@ const docsSideNav = [
         route: '/docs/infrastructure-monitoring/overview',
         label: 'Overview',
       },
-      // {
-      //   type: 'doc',
-      //   route: '/docs/userguide/navigate-user-interface',
-      //   label: 'Navigate the User Interface',
-      // },
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
@@ -1244,11 +1277,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/metrics-management/configure-custom-buckets',
         label: 'Configure custom buckets for histograms',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/k8s-infra-otel-config',
-        label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
       },
       {
         type: 'doc',
