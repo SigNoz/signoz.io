@@ -516,7 +516,7 @@ const docsSideNav = [
                 route: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra'
               },
               {
-                label: 'Configure K8s-Infra',
+                label: 'Configure K8s Infra',
                 type: 'doc',
                 route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra'
               }
