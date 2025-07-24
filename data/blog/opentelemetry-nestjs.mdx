@@ -1,8 +1,8 @@
 ---
-title: OpenTelemetry NestJS Implementation Guide: Complete Setup for Production [2025]
+title: "OpenTelemetry NestJS Implementation Guide: Complete Setup for Production [2025]"
 slug: opentelemetry-nestjs  
 date: 2025-07-24
-tags: [OpenTelemetry, NestJS, Distributed Tracing, Observability, APM, Node.js, Monitoring]
+tags: [OpenTelemetry, NestJS, Distributed Tracing, Observability]
 authors: [ankit_anand, vishal]
 description: Complete guide to implementing OpenTelemetry in NestJS applications with automatic instrumentation, distributed tracing, and production-ready configuration. Includes troubleshooting tips and performance optimization.
 keywords: [opentelemetry nestjs, nestjs tracing, nestjs monitoring, distributed tracing, opentelemetry node.js, nestjs observability, opentelemetry instrumentation, signoz nestjs]
@@ -10,7 +10,6 @@ keywords: [opentelemetry nestjs, nestjs tracing, nestjs monitoring, distributed 
 
 NestJS applications require comprehensive monitoring to ensure optimal performance and rapid issue resolution. OpenTelemetry provides the industry standard for instrumenting these applications with vendor-agnostic observability through distributed tracing, metrics, and logs.
 
-![Cover Image](/img/blog/2023/01/opentelemetry_nestjs_cover.webp)
 
 Many developers struggle with proper OpenTelemetry implementation in NestJS, facing challenges from initialization order issues to performance concerns and missing traces. This guide addresses these pain points and provides practical, tested solutions for building observable NestJS applications.
 
@@ -30,8 +29,10 @@ Before implementing OpenTelemetry in your NestJS application, ensure you meet th
 
 - Node.js 18.19.0+ or Node.js 20.6.0+
 - TypeScript 5.0.4+
-- NestJS 8.0+
-- An observability backend (we'll use SigNoz for this guide)
+- NestJS 4.0+ (8.0+ recommended for better compatibility)
+- An observability backend (we'll use [SigNoz](https://signoz.io/teams/) for this guide)
+
+> If you're using NestJS 11+, ensure you're running Node.js 20+, as it's a requirement for compatibility.
 
 ## Quick Implementation Overview
 
@@ -49,7 +50,7 @@ Install the essential OpenTelemetry packages for NestJS instrumentation:
 
 ```bash
 npm install --save @opentelemetry/api@latest
-npm install --save @opentelemetry/sdk-node@^2.0.0  
+npm install --save @opentelemetry/sdk-node@latest
 npm install --save @opentelemetry/auto-instrumentations-node@^0.62.0
 npm install --save @opentelemetry/exporter-trace-otlp-http@latest
 npm install --save @opentelemetry/semantic-conventions@latest
@@ -567,7 +568,7 @@ With OpenTelemetry's vendor-neutral approach and SigNoz's comprehensive NestJS s
 ## Frequently Asked Questions
 
 **What's the minimum Node.js version required for OpenTelemetry SDK 2.0?**
-OpenTelemetry SDK 2.0+ requires Node.js 18.19.0+ or Node.js 20.6.0+, along with TypeScript 5.0.4+.
+OpenTelemetry’s Node.js SDK requires Node.js 18.19.0+ or 20.6.0+. Additionally, if you are using NestJS 11+, you must use Node.js 20 or higher.
 
 **How do I debug missing traces in my NestJS application?** 
 Use the ConsoleSpanExporter in development to verify traces are generated. Check initialization order (tracer must start before NestJS imports), validate exporter configuration, and ensure environment variables are set.
