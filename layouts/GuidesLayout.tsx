@@ -63,7 +63,7 @@ function GuidesLayoutContent({
       },
       {
         // This creates a trigger zone near the top of the viewport
-        rootMargin: '-10% -20% -80% -20%', // rootMargin: '-10% -20% -80% -80%' for some reason
+        rootMargin: '-10% -20% -80% -20%',
         threshold: 0,
       }
     )
