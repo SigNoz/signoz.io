@@ -15,7 +15,7 @@ const Button = ({
     isButton:
       'inline-block border-none outline-none px-4 py-1 text-white rounded-md font-heading text-md font-medium hover:text-white no-underline text-center',
     filled: 'primary-gradient',
-    outlined: 'border-gradient bg-[#1b1b1d]',
+    outlined: 'border-gradient bg-signoz_ink-500',
     inline: 'text-indigo-500 underline',
   }
   const linkProps = {
