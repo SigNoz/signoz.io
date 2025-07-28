@@ -20,9 +20,10 @@ const ChangelogTitle: React.FC<ChangelogTitleProps> = ({ title, link }) => {
     }
   }, [])
 
-  const handleCopy = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleCopy = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
     e.preventDefault()
+    await navigator.clipboard.writeText(`https://signoz.io${link}`)
     if (isCopied) {
       return
     }
