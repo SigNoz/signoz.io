@@ -5,13 +5,11 @@ id: overview
 hide_table_of_contents: false
 ---
 
-# Overview
-
-**Trace Funnels** provides visibility into the step-by-step progression of requests (spans) through your distributed system. By defining up to three sequential spans within the same trace, you can measure conversion rates between critical operations and identify performance bottlenecks at each transition.
+Trace Funnels provides visibility into the step-by-step progression of requests (spans) through your distributed system. By defining up to three sequential spans within the same trace, you can measure conversion rates between critical operations and identify performance bottlenecks at each transition.
 
 Unlike traditional monitoring that shows only aggregate metrics, Trace Funnels correlates span data with your internal services and traces, helping you identify the root cause of issues faster by tracking how requests flow through your system.
 
-# When to Use & Key Benefits
+## When to Use & Key Benefits
 
 Trace Funnels can deliver specific benefits in these common scenarios:
 
@@ -19,7 +17,7 @@ Trace Funnels can deliver specific benefits in these common scenarios:
 - **When investigating user journeys:** Determine if users are dropping off at specific points in your application flow using step-by-step conversion tracking.
 - **For proactive monitoring:** Keep an eye on critical business flows with comprehensive performance insights that track conversion rates and error patterns across your system.
 
-# How It Works
+## How It Works
 
 Trace Funnels leverages OpenTelemetry [semantic conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/) to automatically detect and analyze sequential spans from your instrumented services. The feature works by using the span attributes mentioned below:
 
@@ -31,9 +29,9 @@ Trace Funnels leverages OpenTelemetry [semantic conventions](https://opentelemet
 
 These attributes are used to automatically correlate spans within the same trace, identify sequential operations, and calculate conversion rates between steps.
 
-# Feature Walkthrough
+## Feature Walkthrough
 
-## Funnels Overview
+### Funnels Overview
 
 The Trace Funnels landing page displays all existing funnels and provides a comprehensive view of your request flows.
 
@@ -56,7 +54,7 @@ You can:
 - Use the search bar at the top to find specific funnels
 - Click "Create Funnel" to define a new funnel
 
-## Creating a New Funnel
+### Creating a New Funnel
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/trace-funnels/create_a_new_funnel.gif" alt="Creating a new funnel"/>
@@ -70,17 +68,17 @@ To create a new funnel:
 3. Define up to three **Funnel Steps** (see next section)
 4. Click **Save** to start monitoring
 
-## Defining Funnel Steps
+### Defining Funnel Steps
 
 Each funnel can have up to three sequential steps. For every step, you need to specify:
 
-### Service Name
+#### Service Name
 Select the instrumented service that emits your span from the dropdown.
 
-### Span Name
+#### Span Name
 Choose the specific span operation (e.g., `HTTP GET /orders`, `ProcessOrder`).
 
-### Where Clause (Optional)
+#### Where Clause (Optional)
 Further filter spans by attributes (e.g., `http.status_code = 200`, `error = false`).
 
 <figure data-zoomable align='center'>
@@ -88,11 +86,11 @@ Further filter spans by attributes (e.g., `http.status_code = 200`, `error = fal
     <figcaption><i>Defining Funnel Steps</i></figcaption>
 </figure>
 
-## Funnel Analysis
+### Funnel Analysis
 
 Once your funnel is created, you can analyze the step-by-step progression:
 
-### Step-by-Step Conversion
+#### Step-by-Step Conversion
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/trace-funnels/funnel_example.gif" alt="Step-by-step conversion analysis"/>
@@ -106,7 +104,7 @@ The funnel analysis shows:
 - **Successful Completions** for each step
 - **Average Duration** for each step
 
-### Transition Analysis
+#### Transition Analysis
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/trace-funnels/step_transition_drill_down.png" alt="Transition analysis between steps"/>
@@ -120,7 +118,7 @@ For each transition (Step 1 → Step 2, Step 2 → Step 3), you can see:
 - **Error Information** if any errors occurred
 - **Click to View Trace** for detailed investigation
 
-### Performance Metrics
+#### Performance Metrics
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/trace-funnels/example_otel_demo_100_percent.png" alt="Performance metrics over time"/>
@@ -134,7 +132,7 @@ The performance view displays:
 - **Error Rate** for each step
 - **Request Volume** over time
 
-## Adding Spans from Trace Explorer
+### Adding Spans from Trace Explorer
 
 You can create or modify a funnel directly while inspecting a trace:
 
@@ -168,7 +166,7 @@ You can create or modify a funnel directly while inspecting a trace:
     <figcaption><i>Update Existing Step</i></figcaption>
 </figure>
 
-## Funnel Example
+### Funnel Example
 
 Here's a practical example of monitoring an e-commerce application with three critical spans:
 
@@ -185,29 +183,29 @@ This funnel reveals that:
 
 The overall conversion rate would be: 100% × 85% × 95% = 80.75%
 
-# Best Practices
+## Best Practices
 
-## Keep Funnels Focused
+### Keep Funnels Focused
 - Limit to three essential steps to maintain clarity
 - Focus on critical business flows that directly impact user experience
 - Avoid creating funnels for every possible path through your system
 
-## Use Where Clauses Sparingly
+### Use Where Clauses Sparingly
 - Only filter when necessary to reduce computation time
 - Use specific attributes that clearly define the step (e.g., `http.method = "GET"`)
 - Avoid overly complex filtering that might exclude valid requests
 
-## Review Transitions Regularly
+### Review Transitions Regularly
 - Set a cadence (e.g., weekly) to analyze slow or error-prone transitions
 - Monitor conversion rate trends to identify degradation early
 - Investigate traces with the slowest transitions to understand bottlenecks
 
-## Naming Conventions
+### Naming Conventions
 - Use descriptive funnel names that clearly indicate the business flow
 - Choose span names that are specific and meaningful
 - Consider including the business context in funnel names (e.g., "User Registration Flow")
 
-# Related Resources
+## Related Resources
 
 - [Trace Explorer Documentation](/docs/userguide/traces)
 - [Span Details Documentation](/docs/userguide/span-details)
