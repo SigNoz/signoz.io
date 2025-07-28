@@ -1929,6 +1929,25 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Trace Funnels',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/trace-funnels/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/trace-funnels/setup',
+        label: 'Setup',
+      },
+    ],
+  },
+  {
     label: 'CICD Monitoring',
     type: 'category',
     className: 'new-doc',
