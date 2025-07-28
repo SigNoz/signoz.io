@@ -84,15 +84,20 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
       <h1 className={`text-3xl font-semibold text-signoz_vanilla-100 ${Styles['header-title']}`}>
         Changelog
       </h1>
-      <div className={`${Styles['subscribe-cta-container']} flex items-center gap-4`}>
-        <button className="text-base text-signoz_robin-400" onClick={handleSubscribeClick}>
+      <div
+        className={`${Styles['subscribe-cta-container']} flex flex-wrap items-center gap-x-4 gap-y-2`}
+      >
+        <button
+          className="text-base text-signoz_robin-400 hover:text-signoz_robin-200"
+          onClick={handleSubscribeClick}
+        >
           Subscribe for updates
         </button>
         <span className="block h-1 w-1 rounded-full bg-signoz_slate-200"></span>
         <Link
           href="https://www.linkedin.com/company/signozio"
           target="_blank"
-          className="text-base text-signoz_vanilla-400"
+          className="text-base text-signoz_vanilla-400 hover:text-signoz_vanilla-100"
         >
           Follow us on LinkedIn
         </Link>
@@ -102,7 +107,7 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
           {Object.values(DeploymentType).map((type) => (
             <button
               key={type}
-              className={`flex items-center gap-1.5 rounded-full border border-signoz_slate-400  py-1 pl-3 pr-2 text-xs text-signoz_vanilla-100 ${
+              className={`flex items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 py-1 pl-3 pr-2 text-xs text-signoz_vanilla-100 transition-colors hover:bg-signoz_ink-300 active:bg-signoz_slate-400 ${
                 currentDeploymentType === type ? 'bg-signoz_slate-400' : ''
               }`}
               onClick={() => handleDeploymentTypeChange(type)}
@@ -110,7 +115,9 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
               <span
                 className={`block h-1.5 w-1.5 flex-shrink-0 rounded-full ${DeploymentTypeColors[type]} ${type === DeploymentType.OSS_ONLY ? 'bg-signoz_sienna-500' : ''}`}
               ></span>
-              <span className="uppercase">{DeploymentTypeLabels[type]}</span>
+              <span className="font-medium uppercase tracking-wide">
+                {DeploymentTypeLabels[type]}
+              </span>
             </button>
           ))}
         </div>
