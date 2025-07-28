@@ -28,7 +28,7 @@ const Changelog = async ({ searchParams }: ChangelogProps) => {
         <div className="bg-dot-pattern masked-dots absolute top-0 h-screen w-full" />
         <div className="z-10 flex w-full flex-col gap-7 py-16">
           <ChangelogHeader />
-          <div className="flex max-w-4xl flex-col">
+          <div className="flex max-w-4xl flex-col md:pl-4">
             {changelogsResponse &&
               changelogsResponse.changelogs.map((entry) => (
                 <ChangelogRenderer key={entry.id} changelog={entry} />
