@@ -835,11 +835,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/trace-funnels/overview',
-            label: 'Trace Funnels',
-          },
-          {
-            type: 'doc',
             route: '/docs/traces-management/guides/apm-metrics',
             label: 'APM Metrics',
           },
