@@ -216,24 +216,6 @@ const docsSideNav = [
           },
         ],
       },
-
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Install OTel collector',
-        items: [
-          {
-            route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
-            type: 'doc',
-            label: 'VM',
-          },
-          {
-            route: '/docs/tutorial/kubernetes-infra-metrics',
-            type: 'doc',
-            label: 'Kubernetes',
-          },
-        ],
-      },
     ],
   },
 
@@ -244,111 +226,109 @@ const docsSideNav = [
     route: '/docs/manage/overview',
     items: [
       {
-        label: 'Administrator Guides (Self-hosted)',
+        type: 'category',
+        isExpanded: false,
+        label: 'Upgrade Guides',
+        route: '/docs/operate/upgrade',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.88',
+            label: 'Upgrade to v0.88',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.76',
+            label: 'Upgrade to v0.76',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.70',
+            label: 'Upgrade to v0.70',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.64',
+            label: 'Upgrade to v0.64',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.55',
+            label: 'Upgrade to v0.55',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.51',
+            label: 'Upgrade to v0.51',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.49',
+            label: 'Upgrade to v0.49',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.45',
+            label: 'Upgrade to v0.45',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.38',
+            label: 'Upgrade to v0.38',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.36',
+            label: 'Upgrade to v0.36',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.27',
+            label: 'Upgrade to v0.27',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.23',
+            label: 'Upgrade to v0.23',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.19',
+            label: 'Upgrade to v0.19',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.12',
+            label: 'Upgrade to v0.12',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.10',
+            label: 'Upgrade to v0.10',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.9',
+            label: 'Upgrade to v0.9',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.8.1',
+            label: 'Upgrade to v0.8.1',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.8.0',
+            label: 'Upgrade to v0.8.0',
+          },
+        ],
+      },
+      {
+        label: 'Administrator Guides',
         type: 'category',
         isExpanded: false,
         route: '/docs/manage/administrator-guide',
         items: [
-          {
-            type: 'category',
-            isExpanded: false,
-            label: 'Migration Guides',
-            route: '/docs/operate/migration',
-            // link: {
-            // type: 'generated-index',
-            // title: 'Migration Guides',
-            // description:
-            // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
-            // slug: '/docs/operate/migration/migration',
-            // },
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.76',
-                label: 'Upgrade to v0.76',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.70',
-                label: 'Upgrade to v0.70',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.64',
-                label: 'Upgrade to v0.64',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.55',
-                label: 'Upgrade to v0.55',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.51',
-                label: 'Upgrade to v0.51',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.49',
-                label: 'Upgrade to v0.49',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.45',
-                label: 'Upgrade to v0.45',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.38',
-                label: 'Upgrade to v0.38',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.36',
-                label: 'Upgrade to v0.36',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.27',
-                label: 'Upgrade to v0.27',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.23',
-                label: 'Upgrade to v0.23',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.19',
-                label: 'Upgrade to v0.19',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.12',
-                label: 'Upgrade to v0.12',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.10',
-                label: 'Upgrade to v0.10',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.9',
-                label: 'Upgrade to v0.9',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.8.1',
-                label: 'Upgrade to v0.8.1',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/migration/upgrade-0.8.0',
-                label: 'Upgrade to v0.8.0',
-              },
-            ],
-          },
           {
             type: 'category',
             isExpanded: false,
@@ -453,9 +433,19 @@ const docsSideNav = [
                 label: 'Alertmanager',
                 route: '/docs/manage/administrator-guide/configuration/alertmanager',
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/jwt-secret',
+                label: 'JWT Secret',
+                isExpanded: false,
+              },
             ],
           },
-
+          {
+            type: 'doc',
+            route: '/docs/telemetry',
+            label: 'Statistics Reporting',
+          },
           {
             type: 'doc',
             route: '/docs/tutorial/opentelemetry-operator-usage',
@@ -500,7 +490,63 @@ const docsSideNav = [
       },
     ],
   },
+  {
+    label: 'Collection Agents',
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Kubernetes',
+        items: [
+          {
+            type: 'category',
+            label: 'K8s-Infra',
+            isExpanded: false,
+            items: [
+              {
+                label: 'Overview',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/k8s-infra/overview'
+              },
+              {
+                label: 'Install K8s Infra',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra'
+              },
+              {
+                label: 'Configure K8s Infra',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra'
+              }
+            ]
+          }
+          
+        ]
 
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'VM',
+        items: [
+          {
+            type: "category",
+            label: "OpenTelemetry Binary",
+            isExpanded: false,
+            items: [
+              {
+                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+                type: 'doc',
+                label: 'Overview',
+              },
+            ]
+          },
+        ],
+      },
+    ]
+  },
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
@@ -848,6 +894,11 @@ const docsSideNav = [
             route: '/docs/traces-management/guides/drop-spans',
             label: 'Control Traces Volume',
           },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/correlate-traces-and-logs',
+            label: 'Correlate Traces and Logs',
+          },
         ],
       },
       {
@@ -868,11 +919,6 @@ const docsSideNav = [
         route: '/docs/infrastructure-monitoring/overview',
         label: 'Overview',
       },
-      // {
-      //   type: 'doc',
-      //   route: '/docs/userguide/navigate-user-interface',
-      //   label: 'Navigate the User Interface',
-      // },
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
@@ -1028,6 +1074,11 @@ const docsSideNav = [
             route: '/docs/logs-management/send-logs/windows-events-log',
             label: 'Windows Event logs',
             // className: 'new-doc',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/collect-systemd-logs',
+            label: 'SystemD logs',
           },
         ],
       },
@@ -1229,14 +1280,15 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/metrics-management/k8s-infra-otel-config',
-        label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
+        className: 'new-doc',
+        route: '/docs/metrics-management/docker-container-metrics',
+        label: 'Docker container metrics',
       },
       {
         type: 'doc',
         className: 'new-doc',
-        route: '/docs/metrics-management/docker-container-metrics',
-        label: 'Docker container metrics',
+        route: '/docs/metrics-management/nginx-metrics',
+        label: 'NGINX metrics',
       },
       {
         type: 'doc',
@@ -1330,6 +1382,128 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/userguide/manage-variables',
         label: 'Manage Variables',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/dashboards/dashboard-templates/overview',
+        label: 'Out of Box Dashboards',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/apache-web-server',
+            label: 'Apache Web Server',
+          },
+                    {
+            label: 'APM',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/apm-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/apm-metrics',
+                label: 'APM Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
+                label: 'DB Calls Monitoring',
+              },
+            ]
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/cicd',
+            label: 'CICD',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
+            label: 'Docker Container',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/couchdb',
+            label: 'CouchDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
+            label: 'HAProxy',
+          },
+          {
+            label: 'Hostmetrics',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/hostmetrics-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/hostmetrics-k8s',
+                label: 'Hostmetrics (K8s)',
+              },
+            ],
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/jvm-metrics',
+            label: 'JVM',
+          },
+          {
+            label: 'Kubernetes',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/kubernetes-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
+                label: 'Kubernetes Pod Metrics (Detailed)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
+                label: 'Kubernetes Node Metrics (Detailed)',
+              },
+            ],
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/key-operations',
+            label: 'Key Operations',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/memcached',
+            label: 'Memcached',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/mysql',
+            label: 'MySQL',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/nginx',
+            label: 'NGINX',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/postgresql',
+            label: 'PostgreSQL',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/rabbitmq',
+            label: 'RabbitMQ',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
+            label: 'SigNoz Ingestion Analysis',
+          },
+        ],
       },
     ],
   },
@@ -1537,7 +1711,7 @@ const docsSideNav = [
       {
         type: 'doc',
         label: 'Swift UI',
-        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftUi',
+        route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
       },
       {
         type: 'doc',
@@ -1573,6 +1747,12 @@ const docsSideNav = [
             route: '/docs/integrations/aws/one-click-aws-integrations',
             className: 'new-doc',
             label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/ecs',
+            className: 'new-doc',
+            label: 'ECS',
           },
           {
             type: 'doc',
@@ -1627,6 +1807,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/integrations/mongodb-atlas',
+        label: 'MongoDB Atlas',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/clickhouse',
         label: 'Clickhouse',
       },
@@ -1650,6 +1835,11 @@ const docsSideNav = [
         route: '/docs/integrations/aws-elasticache-redis',
         label: 'AWS Elasticache Redis',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/sql-server',
+        label: 'Microsoft SQL Server',
+      }
     ],
   },
   {
@@ -1739,6 +1929,25 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/external-api-monitoring/setup',
+        label: 'Setup',
+      },
+    ],
+  },
+  {
+    label: 'Trace Funnels',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/trace-funnels/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/trace-funnels/setup',
         label: 'Setup',
       },
     ],
@@ -1966,13 +2175,13 @@ const docsSideNav = [
     label: 'Migrate to SigNoz',
     type: 'category',
     isExpanded: false,
-    route: '/docs/migration/migrate-from-datadog',
+    route: '/docs/migration/migrate-to-signoz',
     items: [
       {
         label: 'From Datadog',
         type: 'category',
         isExpanded: false,
-        route: '/docs/migration/migrate-from-datadog',
+        route: '/docs/migration/migrate-from-datadog-to-signoz',
         items: [
           {
             type: 'doc',
@@ -1982,111 +2191,111 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/migration/migrate-to-signoz-cloud',
-        label: 'From SigNoz OSS to Cloud',
-      },
-    ],
-  },
-  {
-    label: 'Migrate From LGTM Stack',
-    className: 'new-doc',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/migration/migrate-from-grafana',
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/metrics',
-        label: 'Migrating Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/traces',
-        label: 'Migrating Traces',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/logs',
-        label: 'Migrating Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/dashboards',
-        label: 'Migrating Dashboards',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-grafana/alerts',
-        label: 'Migrating Alerts',
-      },
-    ],
-  },
-  {
-    label: 'Migrate From ELK Stack',
-    className: 'new-doc',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/migration/migrate-from-elk',
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-elk/metrics',
-        label: 'Migrating Metrics',
+        label: 'From Grafana Stack',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-grafana-to-signoz',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-grafana/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
       },
       {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-elk/traces',
-        label: 'Migrating Traces',
+        label: 'From ELK Stack',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-elk-to-signoz',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-elk/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
+      },
+      {
+        label: 'From New Relic',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-datadog-to-newrelic',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-newrelic/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
       },
       {
         type: 'doc',
-        route: '/docs/migration/migrate-from-elk/logs',
-        label: 'Migrating Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-elk/dashboards',
-        label: 'Migrating Dashboards',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-elk/alerts',
-        label: 'Migrating Alerts',
-      },
-    ],
-  },
-  {
-    label: 'Migrate From New Relic',
-    className: 'new-doc',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/migration/migrate-from-newrelic',
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/metrics',
-        label: 'Migrating Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/traces',
-        label: 'Migrating Traces',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/logs',
-        label: 'Migrating Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/dashboards',
-        label: 'Migrating Dashboards',
-      },
-      {
-        type: 'doc',
-        route: '/docs/migration/migrate-from-newrelic/alerts',
-        label: 'Migrating Alerts',
+        route: '/docs/migration/migrate-from-signoz-self-host-to-signoz-cloud',
+        label: 'From Self-Hosted to Cloud',
       },
     ],
   },
@@ -2221,6 +2430,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/azure-monitoring/db-metrics',
         label: 'SQL Database Metrics',
+      },
+      {
+        type: 'doc',
+        route: '/docs/azure-monitoring/mysql-flexible-server',
+        label: 'MySQL Flexible Server',
       },
       {
         type: 'category',
@@ -2585,9 +2799,26 @@ const docsSideNav = [
     ],
   },
   {
-    route: '/docs/community/llm-monitoring',
+    type: 'category',
+    isExpanded: false,
     label: 'LLM Monitoring',
-    type: 'doc',
+    items: [
+      {
+        route: '/docs/llm/opentelemetry-openai-monitoring',
+        label: 'OpenAI Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/community/llm-monitoring',
+        label: 'LLM Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/llm/vercel-ai-sdk-monitoring',
+        label: 'Vercel AI SDK Monitoring',
+        type: 'doc',
+      },
+    ],
   },
   {
     label: 'Community',
@@ -2685,18 +2916,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/faqs/installation',
         label: 'Installation - FAQs',
-      },
-    ],
-  },
-  {
-    label: 'Others',
-    type: 'category',
-    isExpanded: false,
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/telemetry',
-        label: 'Telemetry',
       },
     ],
   },

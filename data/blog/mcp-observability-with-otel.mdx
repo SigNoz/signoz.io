@@ -1,0 +1,166 @@
+---
+title: MCP Observability with OpenTelemetry
+slug: mcp-observability-with-otel
+date: 2025-07-02
+tags: [OpenTelemetry]
+authors: [elizabeth_mathew]
+description: Learn how to monitor MCP server-client systems with OpenTelemetry. This guide covers the importance of observability, common failure modes, and a step-by-step implementation to ensure your MCP server-client systems are fully instrumented.
+image: /img/blog/2025/07/mcp-cover.webp
+keywords: [mcp, observability, OpenTelemetry, mcp observability,model context protocol, instrumentation, metrics, traces, logs]
+---
+
+
+2025 has truly been the year of Agentic AI, with MCP (Model Context Protocol) emerging as one of its flashy and most talked-about innovations. While many products have seamlessly integrated MCP servers into their systems, these servers are increasingly being labelled as *black boxes,* opaque components that handle critical tasks but offer little visibility into what's happening under the hood.
+
+We prompt an agent, a tool gets invoked, and a response is generated. But what really happens in between? And when something breaks, how do we trace the failure and debug it effectively?
+
+In this blog, we'll explore why observability is crucial for MCP server-client systems, what kind of telemetry you can capture, and how to instrument your stack to bring these black boxes into the light.
+
+## Why is Observability important in an MCP server-client system?
+
+MCP-based architectures enable AI agents to dynamically invoke external tool servers as part of their reasoning loop. While this flexibility is powerful, it introduces significant complexity in tracking the flow of data, monitoring system performance, and diagnosing failures especially in distributed environments.
+
+**In smaller systems**, with a single agent and a small number of tool servers, developers might rely on basic logging or manual inspection. However, even in these setups:
+
+- Latency spikes in tool responses (e.g. an external API slowing down) can degrade agent performance.
+- Silent failures can occur where a tool invocation does not return valid data, but no clear error is raised.
+- Debugging why an agent selected a particular tool or why a tool produced unexpected output is time-consuming without structured telemetry.
+
+**In production-grade systems**, where MCP agents orchestrate calls to multiple tools [sometimes chaining or parallelising requests across services], observability becomes critical:
+
+- **End-to-end visibility** ensures that every tool invocation, downstream call, and response can be traced through the system, from agent prompt to final output.
+- **Cross-service traceability** is vital for isolating failures across service boundaries for example, determining whether a tool server's failure stemmed from its own logic, an upstream agent issue, or a downstream API it depends on.
+- **Performance metrics** provide quantifiable indicators like request throughput, error rates, and p95/p99 latencies for tool calls essential for meeting SLAs and diagnosing performance regressions.
+- **Capacity and scaling insights** help identify hot spots [e.g. one tool server handling disproportionate load] and guide resource allocation or autoscaling strategies.
+
+Consider a scenario where an agent calls a tool server that queries an external API expected to return 1000 records. Without observability:
+
+- You can't easily see whether latency arose in the agent logic, the tool server, or the external API.
+- Partial failures [e.g. API returned only 5xx records, or timed out] might go unnoticed until they cause downstream errors.
+- You have no clear view of whether this issue is isolated or affecting all similar requests.
+
+In short, observability transforms MCP systems from opaque black boxes into measurable, debuggable, and optimisable components. Without it, diagnosing issues in distributed, agentic pipelines becomes a nightmare.
+
+## Why OpenTelemetry?
+
+MCP systems are designed for openness and interoperability; they allow AI agents to invoke tools across diverse servers, languages, and environments. OpenTelemetry is a natural fit for observing these systems because it shares the same design philosophy.
+
+*vendor-neutral. standard-based. and language-agnostic.*
+
+Let's look at some more solid points,
+
+### Context Propagation
+
+MCP server-client communication spans multiple services and often crosses network boundaries. OTel excels at context propagation, using open standards like the [W3C Trace Context](https://www.w3.org/TR/trace-context/) to link requests across services. For example, when an agent initiates a tool call, OTel automatically injects trace headers into that request. The tool server picks up that context and continues the trace, allowing you to visualize the *entire request journey* from agent prompt through tool execution to downstream API calls. This is essential for root cause analysis and performance debugging in distributed MCP pipelines, where visibility across boundaries is critical.
+
+### Multi-Language Support
+
+MCP architectures are rarely single-language. You might have an agent written in Python orchestrating tools served by Node.js, or vice versa. OpenTelemetry provides mature SDKs for all major languages  including JavaScript/TypeScript, Python, Go, and Java all implementing the same specification. This means:
+
+- You can instrument every MCP component in its native language without gaps in visibility.
+- Spans started in one language [e.g. a Python agent] connect seamlessly to spans in another [e.g. a TypeScript tool server].
+- Traces form a coherent, end-to-end view across the polyglot system.
+
+This multi-language, spec-compliant design aligns perfectly with MCP's goal of decoupled, language-agnostic tool integration.
+
+### Open Standards First
+
+Just as MCP emphasizes *open, standard-based communication* between agents and tools, OpenTelemetry emphasizes *open, standard-based telemetry*. OTel emits telemetry data in the **OpenTelemetry Protocol (OTLP)**, a vendor-neutral, open format supported by a wide range of backends. You can start by exporting data locally for debugging, and later switch to a full observability backend  without changing your instrumentation code. This flexibility means your telemetry, like your MCP tool calls, stays free of vendor lock-in.
+
+In short, OpenTelemetry stays true to the principles that MCP is built on; openness, interoperability, and language-agnostic design making it the ideal observability framework for MCP server-client systems.
+
+Let's look at what all telemetry data can be collected when instrumenting your MCP server-tool-client systems with Otel.
+
+## What can be observed with OTel in an MCP server-client system?
+
+Instrumenting your MCP server-client architecture with OpenTelemetry enables collection of precise telemetry data that helps you monitor performance, debug issues, and guide scaling decisions. Here's what you can concretely collect:
+
+### Performance Metrics
+
+OpenTelemetry's metrics API lets you record numerical measurements that quantify system behavior. In the context of an MCP server, we can record the following,
+
+- **Tool invocation duration**
+    
+    Example metric: `tool_invocation_duration_ms` [histogram]
+    
+    Tracks the latency of each tool execution, allowing you to compute p50/p95/p99 latencies.
+    
+    *e.g.*: `fetch_tool p95 = 480ms`, `database_query_tool p99 = 1100ms`
+    
+- **Tool invocation count**
+    
+    Example metric: `tool_invocation_total` [counter]
+    
+    Tracks how often each tool is called — useful for identifying hotspots.
+    
+    *e.g.*: `fetch_tool = 12000 calls/min`, `summarize_tool = 3000 calls/min`
+    
+- **Error rates per tool**
+    
+    Example metric: `tool_invocation_errors_total` [counter with error_type label]
+    
+    Counts failed invocations and categorizes errors.
+    
+    *e.g.*: `fetch_tool timeout errors = 50/min`, `db_tool connection errors = 5/min`
+    
+- **Total tokens processed**
+    
+    Example custom metric: `tool_token_usage_total` [counter]
+    
+    Records the number of input/output tokens handled by the tool, useful for cost tracking and optimization.
+    
+    *e.g.*: `fetch_tool output_tokens = 50M/day`
+    
+- **System resource metrics** [collected via OTel/ system receivers]
+    - `cpu_utilization_percent`, `memory_usage_bytes`
+    - Useful for capacity planning and detecting resource exhaustion.
+    
+    <Figure src="/img/blog/2025/07/signoz-metrics.webp" alt="Set of metrics collected by OTel in an MCP system visualised in SigNoz" caption="Set of metrics collected by OTel in an MCP system visualised in SigNoz" />
+    
+
+### Distributed Tracing
+
+Every tool invocation and its internal steps can be captured as spans, showing how long each part of the process takes and where failures occur. Example trace structure is shown below,
+
+```
+
+[TraceID: abc123]
+└──> Span: Agent prompt handling (Claude Agent)
+    └──> Span: FetchTool invocation (MCP server)
+        └──> Span: External API GET /data (3rd party API)
+
+```
+
+Each span can include:
+
+- **Attributes**:
+    - `tool.name: fetch_tool`
+    - `tool.input_size: 1000` [records, tokens, etc.]
+    - `tool.output_size: 980`
+    - `http.status_code: 200`
+    - `error.type: timeout`
+- **Events**:
+    - `exception` with stack trace if a tool fails internally.
+    - `external_api_retry` event if the tool attempts to recover from downstream failure.
+
+<Figure src="/img/blog/2025/07/signoz-tracing.webp" alt="Distributed tracing for an MCP server-tool-client system as visualised by SigNoz" caption="Distributed tracing for an MCP server-tool-client system as visualised by SigNoz" />
+
+
+The next section explains how we can instrument our systems to collect the above mentioned telemetry data.
+
+## MCP + Otel,  But How?
+
+Implementing OpenTelemetry for MCP server-client systems is straightforward. The process is similar to instrumenting any modern distributed service. You initialize the SDK, configure exporters, and apply automatic or manual instrumentation depending on your needs.
+
+For a detailed step-by-step guide on instrumenting your systems with OpenTelemetry, refer to [this comprehensive guide](https://signoz.io/docs/instrumentation/).
+
+While OpenTelemetry's auto-instrumentation can give you broad coverage with minimal setup, we recommend manual instrumentation for MCP pipelines where fine-grained visibility is critical. 
+
+Check out this video tutorial where we walk through how to manually instrument an MCP system for deep observability using OTel.
+<YouTube id="Y0sTVeIra2E" mute={false} />
+
+## Conclusion
+
+Instrumenting your MCP systems with **OpenTelemetry** allows you to embrace open standards and build observability into your stack without being tied to any proprietary solution. By pairing OpenTelemetry with a one-stop observability platform like SigNoz, you get complete ownership of your telemetry data, full transparency into your system's behavior, and the flexibility to adapt your observability pipeline as your architecture evolves!
+
+Now that's the cherry on top of your agentic AI pipeline 🍒.

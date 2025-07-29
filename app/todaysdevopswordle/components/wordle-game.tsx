@@ -22,6 +22,7 @@ interface WordleGameProps {
   gameStatus: GameStatus
   onGameWon: (attempts: number) => void
   onGameLost: () => void
+  onBackToOverview?: () => void
 }
 
 const DEFAULT_CONFIG: GameConfig = {
@@ -51,6 +52,7 @@ export function WordleGame({
   onGameWon,
   onGameLost,
   gameStatus,
+  onBackToOverview,
 }: WordleGameProps) {
   const gameConfig = { ...DEFAULT_CONFIG, ...config }
   const pathname = usePathname()
@@ -261,13 +263,19 @@ export function WordleGame({
         timeTaken={elapsedTime}
         targetWord={targetWord}
         guesses={gameState.guesses}
+        onBackToOverview={onBackToOverview}
       />
     )
   }
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <Toast message={toastMessage} isVisible={showToast} onClose={() => setShowToast(false)} />
+      <Toast
+        message={toastMessage}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+        time={800}
+      />
       <div className="flex w-full max-w-[450px] justify-center pt-10 sm:pt-0">
         <WordleHeader
           currentAttempts={gameState.guesses.length}

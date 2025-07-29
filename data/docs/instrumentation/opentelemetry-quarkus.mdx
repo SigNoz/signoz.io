@@ -38,7 +38,7 @@ quarkus extension add opentelemetry
 <TabItem value="Gradle" label="Gradle">
 ```bash
 # Using gradle, add the following to your build.gradle file
-implementation 'io.quarkus:quarkus-opentelemetry:3.17.2'
+implementation 'io.quarkus:quarkus-opentelemetry'
 ```
 </TabItem>
 </Tabs>
@@ -53,29 +53,11 @@ quarkus.application.version=1.0.0
 # Ingestion key for authentication (only if using SigNoz Cloud)
 quarkus.otel.exporter.otlp.headers=${OTEL_EXPORTER_OTLP_HEADERS:}
 
-# Enable OpenTelemetry SDK
-quarkus.otel.sdk.disabled=false
-
-# Enable tracing
-quarkus.otel.traces.enabled=true
-
-# Set sampler to always collect traces based on parent context
-quarkus.otel.traces.sampler=parentbased_always_on
-
-# Sampling rate argument (1.0 means 100% sampling)
-quarkus.otel.traces.sampler.arg=1.0
-
-# Use OTLP exporter for sending trace data
-quarkus.otel.traces.exporter=otlp
-
 # OTLP exporter endpoint (base URL for telemetry data)
 quarkus.otel.exporter.otlp.endpoint=${OTEL_EXPORTER_OTLP_ENDPOINT}
 
 # Specific endpoint for exporting trace data
 quarkus.otel.exporter.otlp.traces.endpoint=${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces
-
-# Protocol used by OTLP exporter (HTTP with Protobuf encoding)
-quarkus.otel.exporter.otlp.protocol=http/protobuf
 
 # Additional resource attributes for telemetry data
 quarkus.otel.resource.attributes=${OTEL_RESOURCE_ATTRIBUTES}
@@ -525,11 +507,11 @@ Based on your application environment, you can choose the setup below to instrum
 <TabItem value="vm" label="VM" default>
 
 1. Set the `OTEL_RESOURCE_ATTRIBUTES` environment variable to the name of your application
-2. Update the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable with `https://<URL of SigNoz Backend>:4318`
+2. Update the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable with `https://<URL of SigNoz Backend>:4317`
 
 ```bash
 export OTEL_RESOURCE_ATTRIBUTES=service.name=<app-name>
-export OTEL_EXPORTER_OTLP_ENDPOINT=https://<URL of SigNoz Backend>:4318
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://<URL of SigNoz Backend>:4317
 ```
 
 3. Build and run your application:
@@ -565,7 +547,7 @@ If you have installed SigNoz on your localhost and your Java JAR is saved at `/U
 
 ```bash
 export OTEL_RESOURCE_ATTRIBUTES=service.name=quarkus-app
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 java -jar /Users/john/Downloads/quarkus-app.jar
 ```
 
@@ -573,11 +555,11 @@ java -jar /Users/john/Downloads/quarkus-app.jar
 <TabItem value="k8s" label="Kubernetes">
 
 1. Set the `OTEL_RESOURCE_ATTRIBUTES` environment variable to the name of your application
-2. Update the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable with `https://<URL of SigNoz Backend>:4318`
+2. Update the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable with `https://<URL of SigNoz Backend>:4317`
 
 ```bash
 export OTEL_RESOURCE_ATTRIBUTES=service.name=<app-name>
-export OTEL_EXPORTER_OTLP_ENDPOINT=https://<URL of SigNoz Backend>:4318
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://<URL of SigNoz Backend>:4317
 ```
 
 3. Build your application:
@@ -649,7 +631,7 @@ spec:
         - name: OTEL_RESOURCE_ATTRIBUTES
           value: "service.name=<app_name>"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "https://<URL of SigNoz Backend>:4318" # This is the endpoint of the machine where SigNoz is installed.
+          value: "https://<URL of SigNoz Backend>:4317" # This is the endpoint of the machine where SigNoz is installed.
 ---
 apiVersion: v1
 kind: Service
@@ -686,7 +668,7 @@ You can verify the deployment by running `kubectl get pods` and checking the sta
 
 ```cmd
 setx OTEL_RESOURCE_ATTRIBUTES "service.name=<app_name>"
-setx OTEL_EXPORTER_OTLP_ENDPOINT "https://<URL of SigNoz Backend>:4318"
+setx OTEL_EXPORTER_OTLP_ENDPOINT "https://<URL of SigNoz Backend>:4317"
 ```
 
 - `<app_name>` is the name for your application
@@ -720,7 +702,7 @@ java -jar build/libs/quarkus-app.jar
 </Tabs>
 
 <Admonition>
-💡 Remember to allow incoming requests to port 4318 of the machine where SigNoz backend is hosted.
+💡 Remember to allow incoming requests to port 4317 of the machine where SigNoz backend is hosted.
 </Admonition>
 </TabItem>
 </Tabs>
@@ -772,6 +754,6 @@ If traces are not appearing:
   2024-12-15 12:17:50,343 SEVERE [io.ope.exp.int.htt.HttpExporter] (OkHttp http://localhost:4318/...) Failed to export spans. The request could not be executed. Full error message: Failed to connect to localhost/[0:0:0:0:0:0:0:1]:4318: java.net.ConnectException: Failed to connect to localhost/[0:0:0:0:0:0:0:1]:4318
   ```
   - If using SigNoz Cloud, check if the ingestion key and endpoint are correct.
-  - If using self-hosted SigNoz, check if the endpoint is correct and if you have allowed incoming requests to the port 4318 of the machine where SigNoz backend is hosted.
+  - If using self-hosted SigNoz, check if the endpoint is correct and if you have allowed incoming requests to the port 4317 of the machine where SigNoz backend is hosted.
 
 <InstrumentationFAQ />

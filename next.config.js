@@ -7,11 +7,11 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
-  connect-src *;
+  connect-src * https://api.reo.dev;
   font-src * 'self';
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
@@ -153,7 +153,7 @@ module.exports = () => {
         },
         {
           source: '/careers/',
-          destination: 'https://www.ycombinator.com/companies/signoz/jobs/',
+          destination: 'https://jobs.ashbyhq.com/SigNoz',
           basePath: false,
           permanent: true,
         },
@@ -188,8 +188,8 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/operate/upgrade/',
-          destination: '/docs/operate/migration/upgrade-0.8.0',
+          source: '/docs/operate/migration',
+          destination: '/docs/operate/upgrade',
           permanent: true,
         },
         {
@@ -469,6 +469,47 @@ module.exports = () => {
           destination: '/blog/what-is-opentelemetry/',
           permanent: true,
         },
+        {
+          source: '/docs/migration/migrate-to-signoz-cloud/',
+          destination: '/docs/migration/migrate-from-signoz-self-host-to-signoz-cloud/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-datadog/',
+          destination: '/docs/migration/migrate-from-datadog-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-grafana/',
+          destination: '/docs/migration/migrate-from-grafana-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-elk/',
+          destination: '/docs/migration/migrate-from-elk-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-newrelic/',
+          destination: '/docs/migration/migrate-from-newrelic-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/dashboards',
+          destination: '/docs/dashboards/dashboard-templates/overview/',
+          permanent: true,
+        },
+        {
+          source: "/docs/tutorial/kubernetes-infra-metrics/",
+          destination: "/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/",
+          permanent: true
+        },
+        {
+          source: "/docs/metrics-management/k8s-infra-otel-config/",
+          destination: "/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra/",
+          permanent: true
+        },
+
       ]
     },
     webpack: (config, options) => {

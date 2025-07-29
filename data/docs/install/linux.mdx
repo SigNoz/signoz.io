@@ -217,6 +217,7 @@ SIGNOZ_JWT_SECRET=secret
 SIGNOZ_ALERTMANAGER_PROVIDER=signoz
 SIGNOZ_TELEMETRYSTORE_PROVIDER=clickhouse
 SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://localhost:9000?password=password
+DOT_METRICS_ENABLED=true
 EOF'
 ```
 
@@ -334,7 +335,7 @@ processors:
     send_batch_size: 50000
     timeout: 1s
   signozspanmetrics/delta:
-    metrics_exporter: clickhousemetricswrite
+    metrics_exporter: signozclickhousemetrics 
     latency_histogram_buckets: [100us, 1ms, 2ms, 6ms, 10ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 1400ms, 2000ms, 5s, 10s, 20s, 40s, 60s]
     dimensions_cache_size: 100000
     dimensions:
@@ -355,11 +356,9 @@ exporters:
   clickhousetraces:
     datasource: tcp://localhost:9000/signoz_traces?password=password
     use_new_schema: true
-  clickhousemetricswrite:
-    endpoint: tcp://localhost:9000/signoz_metrics?password=password
-    timeout: 15s
-    resource_to_telemetry_conversion:
-      enabled: true
+  signozclickhousemetrics:
+    dsn: tcp://localhost:9000/signoz_metrics?password=password
+    timeout: 45s
   clickhouselogsexporter:
     dsn: tcp://localhost:9000/signoz_logs?password=password
     timeout: 10s
@@ -374,8 +373,6 @@ service:
   telemetry:
     logs:
       encoding: json
-    metrics:
-      address: 0.0.0.0:8888
   extensions: [health_check, zpages, pprof]
   pipelines:
     traces:
@@ -385,7 +382,7 @@ service:
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [clickhousemetricswrite, metadataexporter]
+      exporters: [metadataexporter, signozclickhousemetrics]
     logs:
       receivers: [otlp, httplogreceiver/heroku, httplogreceiver/json]
       processors: [batch]
