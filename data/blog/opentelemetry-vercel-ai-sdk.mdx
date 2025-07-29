@@ -1,7 +1,7 @@
 ---
 title: Observing Vercel AI SDK with OpenTelemetry + SigNoz
 slug: opentelemetry-vercel-ai-sdk
-date: 2025-07-25
+date: 2025-07-28
 tags: [OpenTelemetry, Vercel AI SDK, SigNoz]
 authors: [goutham_karthi]
 description: With the Vercel AI SDK, SigNoz simplifies the process of capturing telemetry data, enabling seamless visualization and analysis of application performance metrics.
@@ -9,6 +9,10 @@ keywords: [monitor, observe, opentelemetry, Vercel, AI, integrations, SigNoz]
 ---
 
 LLM-powered apps are growing fast, and frameworks like the Vercel AI SDK make it easy to build them. But with AI comes complexity. Latency issues, unpredictable outputs, and opaque failures can impact user experience. That’s why monitoring is essential. By using OpenTelemetry for standard instrumentation and SigNoz for observability, you can track performance, detect errors, and gain insights into your AI app’s behavior with minimal setup.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/08/signoz-vercel-blog.webp" />
+</figure>
 
 ## What is the Vercel AI SDK? Why Monitoring Matters
 
@@ -313,8 +317,8 @@ Instead of a black box, you get a detailed, hierarchical trace that breaks down 
 
 | Span / Event Name | What It Measures | Key Attributes for Debugging |
 | --- | --- | --- |
-| **`ai.streamText`** (Span) | The full, end-to-end duration of the entire `streamText` call from your application's perspective. | `ai.prompt`: The initial prompt you sent. <br> `ai.response.text`: The final, complete text generated. <br> `ai.response.finishReason`: Why the stream ended (e.g., `stop`, `length`). |
-| ↳ **`ai.streamText.doStream`** (Span) | The specific duration of the call to the underlying LLM provider (e.g., OpenAI, Anthropic). | `ai.prompt.messages`: The exact message payload sent to the provider. <br> `ai.response.msToFirstChunk`: Time To First Token (TTFT) in milliseconds. <br> `ai.response.avgCompletionTokensPerSecond`: The generation speed. |
+| **`ai.streamText`** (Span) | The full, end-to-end duration of the entire `streamText` call from your application's perspective. | `ai.prompt`: The initial prompt you sent. <br /> `ai.response.text`: The final, complete text generated. <br /> `ai.response.finishReason`: Why the stream ended (e.g., `stop`, `length`). |
+| ↳ **`ai.streamText.doStream`** (Span) | The specific duration of the call to the underlying LLM provider (e.g., OpenAI, Anthropic). | `ai.prompt.messages`: The exact message payload sent to the provider. <br /> `ai.response.msToFirstChunk`: Time To First Token (TTFT) in milliseconds. <br /> `ai.response.avgCompletionTokensPerSecond`: The generation speed. |
 | **`ai.stream.firstChunk`** (Event) | An event marking the exact moment the *first* piece of data is received from the LLM stream. | `ai.response.msToFirstChunk`: Pinpoints your TTFT on the trace timeline. |
 | **`ai.stream.finish`** (Event) | An event that marks when the final part of the LLM stream is received. | N/A |
 
