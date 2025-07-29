@@ -10,7 +10,7 @@ import { cn } from 'app/lib/utils'
 // -----------------------------------------------------------------------------
 // Inspired by shadcn/ui default button implementation with custom SigNoz palette
 export const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ring-offset-background',
+  'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ring-offset-background',
   {
     variants: {
       variant: {
@@ -19,6 +19,7 @@ export const buttonVariants = cva(
         outline:
           'border border-signoz_robin-500 bg-transparent text-signoz_robin-500 hover:bg-signoz_robin-500/10',
         secondary: 'bg-signoz_ink-400 button-background text-signoz_vanilla-300 hover:bg-signoz_ink-300', // TODO: the bg color doesn't match any variable in tailwind, check design guidelines
+        tertiary: 'bg-signoz_vanilla-200 text-signoz_ink-200 hover:bg-signoz_vanilla-300',
         ghost: 'bg-transparent hover:bg-signoz_ink-400',
         link: 'text-signoz_robin-500',
       },
