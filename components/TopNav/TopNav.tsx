@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Dialog } from '@headlessui/react'
+import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -20,6 +20,7 @@ import { QUERY_PARAMS } from '@/constants/queryParams'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
+import Button from '../ui/Button'
 
 enum TABS {
   BLOG = 'blog-tab',
@@ -303,7 +304,8 @@ export default function TopNav() {
                   >
                     <PopoverTrigger>
                       <Button
-                        className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 "
+                        variant={"ghost"}
+                        className='hover:bg-transparent hover:text-signoz_robin-500 text-sm font-extralight'
                         onMouseEnter={() => setIsOpen(true)}
                       >
                         <div className="flex items-center">
@@ -452,7 +454,8 @@ export default function TopNav() {
                   >
                     <PopoverTrigger>
                       <Button
-                        className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 "
+                        variant={"ghost"}
+                        className='hover:bg-transparent hover:text-signoz_robin-500 text-sm font-extralight'
                         onMouseEnter={() => setIsOpenResources(true)}
                       >
                         <div className="flex items-center">
@@ -568,9 +571,15 @@ export default function TopNav() {
           </div>
           <div className="flex justify-end lg:hidden">
             {!mobileMenuOpen && <SearchButton />}
-            <button
+            {/* <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            > */}
+            <Button
+              variant={"ghost"}
+              isButton={true}
+              className='hover:bg-transparent'
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <span className="sr-only">Open main menu</span>
@@ -579,7 +588,7 @@ export default function TopNav() {
               ) : (
                 <Bars3Icon className="h-6 w-6" aria-hidden="true" />
               )}
-            </button>
+            </Button>
           </div>
 
           <div className="hidden items-center gap-3 lg:flex lg:flex-1 lg:justify-end">
@@ -607,7 +616,12 @@ export default function TopNav() {
                   clickText="Get Started - Free"
                   clickLocation="Top Navbar"
                 >
-                  <Button id="btn-get-started-website-navbar" className="flex-center">
+                  <Button isButton={true}
+                    rounded={"full"}
+                    id="btn-get-started-website-navbar"
+                    className="flex-center"
+                    variant={"default"}
+                  >
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Button>
@@ -747,12 +761,13 @@ export default function TopNav() {
                           clickType="Primary CTA"
                           clickName="Sign Up Button"
                           clickText="Get Started - Free"
-                          className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                          className="block rounded-lg py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200 hover:bg-transparent"
                           clickLocation="Mobile Menu"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          <Button
-                            className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                          <Button isButton={true}
+                            rounded={"default"}
+                            variant={"default"}
                             id="btn-get-started-website-navbar"
                           >
                             Get Started - Free

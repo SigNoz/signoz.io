@@ -1,6 +1,7 @@
 import React from 'react';
-import { UpgradePath, DeploymentType } from '../types/upgrade';
+import { UpgradePath } from '../types/upgrade';
 import { formatDate } from '../utils/upgradeUtils';
+import { Button } from '@/components/ui/Button';
 
 interface SummaryPanelProps {
   currentStep: UpgradePath;
@@ -93,19 +94,14 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
         {/* Completion Button */}
         <div className="pt-4 border-t border-primary-600">
-          <button id="btn-get-started-website-navbar"
+          <Button id="btn-get-started-website-navbar"
             onClick={onMarkComplete}
             disabled={isCompleted}
-            className={`
-              'start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white transition-colors'
-              ${isCompleted
-                ? 'bg-signoz_forest-500/10 text-signoz_forest-500 cursor-not-allowed'
-                : 'bg-signoz_robin-500 text-white hover:bg-signoz_robin-600'
-              }
-            `}
+            rounded="full"
+            className={`start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white transition-colors ${isCompleted ? 'bg-signoz_forest-500/10 text-signoz_forest-500 cursor-not-allowed' : 'bg-signoz_robin-500 text-white hover:bg-signoz_robin-600'}`}
           >
             {isCompleted ? 'Step Completed' : 'Mark as Complete'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

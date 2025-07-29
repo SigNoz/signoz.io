@@ -18,6 +18,7 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
+import Button from '@/components/ui/Button'
 
 const defaultLayout = 'PostLayout'
 const layouts = {
@@ -131,12 +132,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       />
 
       <div className="container mx-auto">
-        <Link href={`/resource-center/guides/`}>
-          <button className="ml-3.5 mt-10 flex items-center">
+        <Button isButton={true} variant={"ghost"} href={`/resource-center/guides/`} className="ml-3.5 mt-10 hover:bg-transparent">
+          <span className="flex items-center">
             <SidebarIcons.ArrowLeft />
             <span className="pl-1.5 text-sm">Back to Guides</span>
-          </button>
-        </Link>
+          </span>
+        </Button>
       </div>
 
       <Layout

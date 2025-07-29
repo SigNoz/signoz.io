@@ -1,5 +1,7 @@
 import React from 'react';
 import { DeploymentType } from '../types/upgrade';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 interface VersionSelectorProps {
   availableVersions: string[];
@@ -21,8 +23,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
   error
 }) => {
   return (
-    <div className='relative w-full p-4'>
-    <div className='absolute inset-0 rounded-2xl bg-gradient-to-r from-signoz_robin-500/20 to-signoz_cherry-500/20 blur-xl' />
+    <Card glow className='relative w-full p-4'>
     <div className="w-full pricing-card relative flex h-full flex-col rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 px-6 py-8 transition-all duration-300">
 
       <h2 className="text-xl font-semibold text-white mb-4">
@@ -73,16 +74,17 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
         </div>
       )}
 
-      <button
+      <Button
         onClick={onCalculatePath}
         disabled={!currentVersion || !targetVersion}
+        rounded="full"
         className='start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white'
         // className="w-full md:w-auto bg-signoz_robin-500 text-white px-6 py-2 rounded-md hover:bg-signoz_robin-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         Calculate Upgrade Path
-      </button>
+      </Button>
     </div>
-    </div>
+    </Card>
   );
 };
 

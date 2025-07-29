@@ -2,6 +2,7 @@
 import React from 'react';
 import { UpgradePath } from '../types/upgrade';
 import { formatDate } from '../utils/upgradeUtils';
+import { Button } from '@/components/ui/Button';
 
 interface TabNavigationProps {
   upgradePath: UpgradePath[];
@@ -27,16 +28,10 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
       <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
         {upgradePath.map((step, index) => (
           <React.Fragment key={step.version}>
-            <button id="btn-get-started-website-navbar"
+            <Button id="btn-get-started-website-navbar"
               onClick={() => onStepChange(index)}
-              className={`
-                flex-shrink-0 px-4 py-3 rounded-lg border-2 text-sm font-medium
-                transition-all duration-200 min-w-0 relative
-                ${currentStep === index
-                  ? 'border-signoz_robin-500 bg-signoz_robin-500/10 text-signoz_robin-500'
-                  : 'border-primary-600 bg-signoz_slate-400 text-gray-300 hover:border-signoz_robin-400 hover:bg-signoz_slate-300'
-                }
-              `}
+              rounded="default"
+              className={`flex-shrink-0 px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all duration-200 min-w-0 relative ${currentStep === index ? 'border-signoz_robin-500 bg-signoz_robin-500/10 text-signoz_robin-500' : 'border-primary-600 bg-signoz_slate-400 text-gray-300 hover:border-signoz_robin-400 hover:bg-signoz_slate-300'}`}
             >
               <div className="flex items-center gap-2">
                 {step.isCompleted && (
@@ -53,7 +48,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
                   </div>
                 </div>
               </div>
-            </button>
+            </Button>
             
             {index < upgradePath.length - 1 && (
               <div className="flex-shrink-0 flex items-center px-2">
