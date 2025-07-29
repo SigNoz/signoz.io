@@ -24,19 +24,19 @@ This comprehensive guide explains how to use search clause and filter your telem
 The most basic queries look like this:
 
 ```
-service.name = "payment-service"
+service.name = 'payment-service'
 ```
 
 You can combine multiple conditions:
 
 ```
-service.name = "payment-service" AND http.status_code >= 400
+service.name = 'payment-service' AND http.status_code >= 400
 ```
 
 For full-text search, simply type what you're looking for:
 
 ```
-"error connecting to database"
+'error connecting to database'
 ```
 
 ## Basic Concepts
@@ -46,7 +46,7 @@ For full-text search, simply type what you're looking for:
 A query consists of fields (what you're searching in) and values (what you're searching for):
 
 - **Field**: The attribute or property name (e.g., `service.name`, `http.status_code`)
-- **Value**: What you're comparing against (e.g., `"payment-service"`, `200`)
+- **Value**: What you're comparing against (e.g., `'payment-service'`, `200`)
 
 ### Query Structure
 
@@ -68,8 +68,8 @@ condition1 AND condition2 OR condition3
 
 | Operator | Description | Example |
 |----------|-------------|---------|
-| `=` or `==` | Equals | `status = "success"` |
-| `!=` or `<>` | Not equals | `status != "failed"` |
+| `=` or `==` | Equals | `status = 'success'` |
+| `!=` or `<>` | Not equals | `status != 'failed'` |
 | `<` | Less than | `duration < 1000` |
 | `<=` | Less than or equal | `duration <= 1000` |
 | `>` | Greater than | `response_time > 500` |
@@ -79,10 +79,10 @@ condition1 AND condition2 OR condition3
 
 | Operator | Description | Example |
 |----------|-------------|---------|
-| `LIKE` | Case-sensitive pattern matching | `message LIKE "%error%"` |
-| `NOT LIKE` | Negated LIKE | `message NOT LIKE "%debug%"` |
-| `ILIKE` | Case-insensitive pattern matching | `message ILIKE "%ERROR%"` |
-| `NOT ILIKE` | Negated ILIKE | `message NOT ILIKE "%DEBUG%"` |
+| `LIKE` | Case-sensitive pattern matching | `message LIKE '%error%'` |
+| `NOT LIKE` | Negated LIKE | `message NOT LIKE '%debug%'` |
+| `ILIKE` | Case-insensitive pattern matching | `message ILIKE '%ERROR%'` |
+| `NOT ILIKE` | Negated ILIKE | `message NOT ILIKE '%DEBUG%'` |
 
 **Pattern matching wildcards:**
 - `%` matches any sequence of characters
@@ -94,8 +94,8 @@ condition1 AND condition2 OR condition3
 |----------|-------------|---------|
 | `BETWEEN` | Value within range | `latency BETWEEN 100 AND 500` |
 | `NOT BETWEEN` | Value outside range | `latency NOT BETWEEN 100 AND 500` |
-| `IN` | Value in set | `region IN ("us-east", "us-west")` |
-| `NOT IN` | Value not in set | `region NOT IN ("eu-west", "eu-east")` |
+| `IN` | Value in set | `region IN ('us-east', 'us-west')` |
+| `NOT IN` | Value not in set | `region NOT IN ('eu-west', 'eu-east')` |
 
 ### Advanced Operators
 
@@ -103,10 +103,10 @@ condition1 AND condition2 OR condition3
 |----------|-------------|---------|
 | `EXISTS` | Field exists | `custom.field EXISTS` |
 | `NOT EXISTS` | Field doesn't exist | `error.details NOT EXISTS` |
-| `CONTAINS` | Contains substring | `message CONTAINS "timeout"` |
-| `NOT CONTAINS` | Doesn't contain | `message NOT CONTAINS "success"` |
-| `REGEXP` | Regular expression match (RE2 syntax) | `email REGEXP "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"` |
-| `NOT REGEXP` | Doesn't match regex (RE2 syntax) | `path NOT REGEXP "^/api/v1"` |
+| `CONTAINS` | Contains substring | `message CONTAINS 'timeout'` |
+| `NOT CONTAINS` | Doesn't contain | `message NOT CONTAINS 'success'` |
+| `REGEXP` | Regular expression match (RE2 syntax) | `email REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'` |
+| `NOT REGEXP` | Doesn't match regex (RE2 syntax) | `path NOT REGEXP '^/api/v1'` |
 
 
 ### Operators and Field Existence
@@ -119,13 +119,13 @@ These operators **only match logs where the field exists**:
 
 | Operator | Behavior | Example |
 |----------|----------|---------|
-| `=`, `==` | Field must exist AND equal value | `service.name = "api"` |
+| `=`, `==` | Field must exist AND equal value | `service.name = 'api'` |
 | `>`, `>=`, `<`, `<=` | Field must exist AND meet condition | `response_time > 500` |
-| `LIKE`, `ILIKE` | Field must exist AND match pattern | `message LIKE "%error%"` |
+| `LIKE`, `ILIKE` | Field must exist AND match pattern | `message LIKE '%error%'` |
 | `BETWEEN` | Field must exist AND be in range | `latency BETWEEN 100 AND 500` |
-| `IN` | Field must exist AND be in set | `region IN ("us-east", "us-west")` |
-| `CONTAINS` | Field must exist AND contain text | `body CONTAINS "timeout"` |
-| `REGEXP` | Field must exist AND match regex | `email REGEXP ".*@company.com"` |
+| `IN` | Field must exist AND be in set | `region IN ('us-east', 'us-west')` |
+| `CONTAINS` | Field must exist AND contain text | `body CONTAINS 'timeout'` |
+| `REGEXP` | Field must exist AND match regex | `email REGEXP '.*@company.com'` |
 
 **Example:**
 ```
@@ -140,53 +140,53 @@ These operators match **all logs except those with the specified value** (includ
 
 | Operator | Behavior | Example |
 |----------|----------|---------|
-| `!=`, `<>` | Match if field doesn't exist OR value differs | `status != "error"` |
-| `NOT LIKE`, `NOT ILIKE` | Match if field doesn't exist OR pattern doesn't match | `message NOT LIKE "%debug%"` |
+| `!=`, `<>` | Match if field doesn't exist OR value differs | `status != 'error'` |
+| `NOT LIKE`, `NOT ILIKE` | Match if field doesn't exist OR pattern doesn't match | `message NOT LIKE '%debug%'` |
 | `NOT BETWEEN` | Match if field doesn't exist OR value outside range | `latency NOT BETWEEN 100 AND 500` |
-| `NOT IN` | Match if field doesn't exist OR value not in set | `region NOT IN ("eu-west")` |
-| `NOT CONTAINS` | Match if field doesn't exist OR doesn't contain text | `body NOT CONTAINS "success"` |
-| `NOT REGEXP` | Match if field doesn't exist OR doesn't match regex | `path NOT REGEXP "^/api"` |
+| `NOT IN` | Match if field doesn't exist OR value not in set | `region NOT IN ('eu-west')` |
+| `NOT CONTAINS` | Match if field doesn't exist OR doesn't contain text | `body NOT CONTAINS 'success'` |
+| `NOT REGEXP` | Match if field doesn't exist OR doesn't match regex | `path NOT REGEXP '^/api'` |
 
 **Example:**
 ```
-service.name != "redis"
+service.name != 'redis'
 ```
 Matches: 
-- Logs where service.name = "api", "auth", etc.
+- Logs where service.name = 'api', 'auth', etc.
 - Logs that don't have a service.name field at all
 
-Skips: Only logs where service.name = "redis"
+Skips: Only logs where service.name = 'redis'
 
 ### Common Scenarios
 
 #### Scenario 1: Find All Non-Redis Services
 **Wrong approach:**
 ```
-service.name != "redis"
+service.name != 'redis'
 ```
 This includes logs without any service name!
 
 **Correct approach:**
 ```
-service.name EXISTS AND service.name != "redis"
+service.name EXISTS AND service.name != 'redis'
 ```
-This only includes logs that have a service name (and it's not "redis")
+This only includes logs that have a service name (and it's not 'redis')
 
 #### Scenario 2: Find Logs Without Errors
 **Ambiguous:**
 ```
-error_level != "ERROR"
+severity_text != 'ERROR'
 ```
-This includes logs that don't even have an error_level field!
+This includes logs that don't even have an severity_text field!
 
 **Clear intent - exclude ERROR level only:**
 ```
-error_level EXISTS AND error_level != "ERROR"
+severity_text EXISTS AND severity_text != 'ERROR'
 ```
 
 **Clear intent - find logs explicitly marked as non-error:**
 ```
-error_level IN ("INFO", "WARN", "DEBUG")
+severity_text IN ('INFO', 'WARN', 'DEBUG')
 ```
 
 #### Scenario 3: Find Failed Requests
@@ -221,7 +221,7 @@ Note: full-text search is only supported for logs currently.
 ### Quoted Text
 Use quotes for exact phrase matching:
 ```
-"failed to connect to database"
+'failed to connect to database'
 ```
 
 ### Unquoted Text
@@ -230,7 +230,7 @@ Without quotes, each word is searched separately:
 error database connection
 ```
 
-This searches for logs containing "error" AND "database" AND "connection" (not necessarily together).
+This searches for logs containing 'error' AND 'database' AND 'connection' (not necessarily together).
 
 ### Regex
 
@@ -239,7 +239,7 @@ You can use any valid [re2 syntax](https://github.com/google/re2/wiki/syntax) as
 #### Examples
 
 ```
-"^\[SnapshotGenerator id=\d+\] Creating new KRaft snapshot file snapshot \d+-\d+ because .+ \d+ bytes\.$"
+'^\[SnapshotGenerator id=\d+\] Creating new KRaft snapshot file snapshot \d+-\d+ because .+ \d+ bytes\.$'
 ```
 
 Matches the following log records with body
@@ -255,12 +255,12 @@ Matches the following log records with body
 Matches logs records that contain email in log body
 
 ```
-"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 ```
 
 ### Combining Full-Text with Field Searches
 ```
-"payment failed" AND service.name = "payment-service"
+'payment failed' AND service.name = 'payment-service'
 ```
 
 ## Functions
@@ -271,20 +271,20 @@ Use functions to query array fields (currently supported for json body searches)
 Checks if an array contains a specific value:
 ```
 has(user_ids, 123)
-has(tags, "production")
+has(tags, 'production')
 ```
 
 ### HASANY Function
 Checks if an array contains any of the specified values:
 ```
-hasAny(regions, ["us-east", "us-west"])
+hasAny(regions, ['us-east', 'us-west'])
 hasAny(status_codes, [500, 502, 503])
 ```
 
 ### HASALL Function
 Checks if an array contains all specified values:
 ```
-hasAll(features, ["auth", "payment", "notification"])
+hasAll(features, ['auth', 'payment', 'notification'])
 ```
 
 ### Important: When to Use Quotes
@@ -300,8 +300,8 @@ Examples where quotes are necessary:
 # Wrong - AND will be treated as boolean operator
 searching for AND operator
 
-# Correct - searches for the phrase including "AND"
-"searching for AND operator"
+# Correct - searches for the phrase including 'AND'
+'searching for AND operator'
 ```
 
 ### Regular Expression (REGEXP)
@@ -321,16 +321,16 @@ The `REGEXP` operator uses RE2 syntax for pattern matching. RE2 is a fast, safe 
 Examples:
 ```
 # Match email addresses
-email REGEXP "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+email REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 
 # Match IP addresses
-ip_address REGEXP "^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
+ip_address REGEXP '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
 
 # Match URLs starting with https
-url REGEXP "^https://"
+url REGEXP '^https://'
 
 # Match phone numbers (various formats)
-phone REGEXP "^\+?1?\d{3}[-.]?\d{3}[-.]?\d{4}$"
+phone REGEXP '^\+?1?\d{3}[-.]?\d{3}[-.]?\d{4}$'
 ```
 
 Note: RE2 does not support lookahead/lookbehind assertions or backreferences.
@@ -350,36 +350,36 @@ Without explicit context, searching for `status_code` will search across ALL the
 
 ### How Context Resolution Works
 
-1. **With explicit context**: `resource.service.name = "payment"` searches ONLY in resource attributes
+1. **With explicit context**: `resource.service.name = 'payment'` searches ONLY in resource attributes
 2. **Without context**: `status_code = 200` searches across ALL contexts where this field exists
 
 ### Resource Context
 Attributes about the source of telemetry:
 ```
-resource.service.name = "api-gateway"
-resource.k8s.namespace.name = "production"
+resource.service.name = 'api-gateway'
+resource.k8s.namespace.name = 'production'
 ```
 
 ### Scope Context
 Instrumentation library attributes:
 ```
-scope.name = "io.opentelemetry.redis"
-scope.version = "1.0.0"
+scope.name = 'io.opentelemetry.redis'
+scope.version = '1.0.0'
 ```
 
 ### Signal-Specific Contexts
 
 **For Spans:**
 
-Let's take an example of `name`. This usually refers to the span name. However, if there is also an span attribute with same field name `name`, then any search without explicit context searches on both span name and attribute. To explicitly search on span name, you can refine the search as `span.name = "GET /users"` or for attribute search as `attribute.name = "GET /users"`
+Let's take an example of `name`. This usually refers to the span name. However, if there is also an span attribute with same field name `name`, then any search without explicit context searches on both span name and attribute. To explicitly search on span name, you can refine the search as `span.name = 'GET /users'` or for attribute search as `attribute.name = 'GET /users'`
 
 **For Logs:**
 
 The following example show how to explicitly provide context
 
 ```
-log.severity_text = "ERROR"  (same as severity_text = "ERROR")
-log.body CONTAINS "failed to connect" (same as body CONTAINS "failed to connect")
+log.severity_text = 'ERROR'  (same as severity_text = 'ERROR')
+log.body CONTAINS 'failed to connect' (same as body CONTAINS 'failed to connect')
 ```
 
 ### Attribute Context
@@ -388,7 +388,7 @@ Attributes of the Log/Metric/Span item.
 
 ```
 attribute.http.status_code = 200
-attribute.user_name != "anon"
+attribute.user_name != 'anon'
 ```
 
 ### Best Practices for Field Context
@@ -418,29 +418,29 @@ Supported data types:
 ### Complex Boolean Logic
 Use parentheses to control evaluation order:
 ```
-(service.name = "auth" OR service.name = "user") AND status_code >= 400
+(service.name = 'auth' OR service.name = 'user') AND status_code >= 400
 ```
 
 ### Nested Conditions
 ```
-region = "us-east" AND (
-  (status = "error" AND retry_count > 3) OR
-  (status = "timeout" AND duration > 5000)
+region = 'us-east' AND (
+  (status = 'error' AND retry_count > 3) OR
+  (status = 'timeout' AND duration > 5000)
 )
 ```
 
 ### Duration-Based Queries with Other Conditions
 ```
-log.severity_text = "ERROR" AND 
-resource.service.name IN ("payment", "checkout") AND
+log.severity_text = 'ERROR' AND 
+resource.service.name IN ('payment', 'checkout') AND
 http.request.duration > 1000
 ```
 
 ### Searching Across Multiple Fields
 ```
-(span.http.method = "POST" OR span.http.method = "PUT") AND
+(span.http.method = 'POST' OR span.http.method = 'PUT') AND
 span.http.status_code BETWEEN 200 AND 299 AND
-span.http.url LIKE "%/api/v2/%"
+span.http.url LIKE '%/api/v2/%'
 ```
 
 ## Common Pitfalls
@@ -449,15 +449,15 @@ Avoid these common mistakes when writing queries. Each example shows the incorre
 
 ### 1. Forgetting Quotes for String Values
 **Not recommended:** `status = active`  
-**Correct:** `status = "active"`
+**Correct:** `status = 'active'`
 
 ### 2. Missing Wildcards in LIKE
-**Wrong:** `message LIKE "error"` (exact match only)  
-**Correct:** `message LIKE "%error%"` (contains "error")
+**Wrong:** `message LIKE 'error'` (exact match only)  
+**Correct:** `message LIKE '%error%'` (contains 'error')
 
 ### 3. Incorrect Array Syntax
-**Wrong:** `region IN "us-east", "us-west"`  
-**Correct:** `region IN ("us-east", "us-west")`
+**Wrong:** `region IN 'us-east', 'us-west'`  
+**Correct:** `region IN ('us-east', 'us-west')`
 
 ### 4. Ambiguous Precedence
 **Wrong:** `a = 1 OR b = 2 AND c = 3`  
@@ -466,25 +466,25 @@ Avoid these common mistakes when writing queries. Each example shows the incorre
 ### 5. Case Sensitivity
 Remember that `LIKE` is case-sensitive. Use `ILIKE` for case-insensitive matching:
 ```
-# Only matches "Error" exactly
-message LIKE "%Error%"
+# Only matches 'Error' exactly
+message LIKE '%Error%'
 
-# Matches "error", "ERROR", "Error", etc.
-message ILIKE "%error%"
+# Matches 'error', 'ERROR', 'Error', etc.
+message ILIKE '%error%'
 ```
 
 ### 6. Special Characters in Search
 If searching for special characters or operators as text, always use quotes:
 ```
-# Searching for the literal text "NOT"
-message CONTAINS "NOT"
+# Searching for the literal text 'NOT'
+message CONTAINS 'NOT'
 
 # Searching for logs with text [debug]
 
-"[debug]"
+'[debug]'
 
 # Searching for text with operators
-"response != 200"
+'response != 200'
 ```
 
 ## Troubleshooting
@@ -493,7 +493,7 @@ This section helps you resolve common errors when writing search queries.
 
 ### Syntax Errors
 
-#### "found syntax errors while parsing the filter expression"
+#### 'found syntax errors while parsing the filter expression'
 
 This error occurs when the query parser cannot understand your query syntax. Common causes:
 
@@ -503,66 +503,66 @@ This error occurs when the query parser cannot understand your query syntax. Com
 message = [error]
 
 # Correct - use quotes for special characters
-message = "[error]"
+message = '[error]'
 ```
 
 **2. Unmatched parentheses or quotes**
 ```
 # Wrong - missing closing parenthesis
-(service = "api" AND status = "error"
+(service = 'api' AND status = 'error'
 
 # Correct
-(service = "api" AND status = "error")
+(service = 'api' AND status = 'error')
 ```
 
 **3. Invalid operator usage**
 ```
 # Wrong - invalid operator combination
-field NOT = "value"
+field NOT = 'value'
 
 # Correct - use proper NOT syntax
-field != "value"
+field != 'value'
 # OR
-NOT field = "value"
+NOT field = 'value'
 ```
 
 ### Expression Parsing Errors
 
-#### "full text search is not supported"
+#### 'full text search is not supported'
 
 This error appears when using full-text search syntax on signals that don't support it (currently only logs support full-text search).
 
 ```
 # Wrong - using full-text search on traces/metrics
-"database connection failed"  # when querying traces
+'database connection failed'  # when querying traces
 
 # Correct - use field-based search for non-log signals
-message CONTAINS "database connection failed"
+message CONTAINS 'database connection failed'
 ```
 
-#### "key `<fieldname>` not found"
+#### 'key `<fieldname>` not found'
 
 The specified field doesn't exist in your telemetry data. Common causes:
 
 **1. Typo in field name**
 ```
 # Wrong
-sevice.name = "api"  # typo: sevice instead of service
+sevice.name = 'api'  # typo: sevice instead of service
 
 # Correct
-service.name = "api"
+service.name = 'api'
 ```
 
 **3. Incorrect JSON body field syntax**
 ```
 # Wrong - missing body prefix for JSON search
-status = "error"
+status = 'error'
 
 # Correct - use body prefix for JSON fields
-body.status = "error"
+body.status = 'error'
 ```
 
-#### "key `<fieldname>` is ambiguous"
+#### 'key `<fieldname>` is ambiguous'
 
 This warning (not an error) indicates the same field name exists in multiple contexts. The query will search across all contexts, which may impact performance.
 
@@ -575,30 +575,30 @@ status_code = 200
 attribute.http.status_code = 200
 ```
 
-#### "missing key for body json search"
+#### 'missing key for body json search'
 
 When searching JSON body fields, you must specify the key after `body.`
 
 ```
 # Wrong - incomplete body search
-body. = "error"
+body. = 'error'
 
 # Correct - specify the JSON key
-body.error_message = "timeout"
+body.error_message = 'timeout'
 ```
 
 ### Function-Related Errors
 
-#### "unknown function `<name>`"
+#### 'unknown function `<name>`'
 
 Only specific functions are supported. Check for typos:
 
 ```
 # Wrong - typo in function name
-hasany(tags, ["prod", "staging"])
+hasany(tags, ['prod', 'staging'])
 
 # Correct - proper case
-hasAny(tags, ["prod", "staging"])
+hasAny(tags, ['prod', 'staging'])
 ```
 
 Supported functions:
@@ -606,7 +606,7 @@ Supported functions:
 - `hasAny()` - check if array contains any of the values
 - `hasAll()` - check if array contains all values
 
-#### "function expects key and value parameters"
+#### 'function expects key and value parameters'
 
 Array functions require at least two parameters:
 
@@ -615,36 +615,36 @@ Array functions require at least two parameters:
 has(tags)
 
 # Correct - provide field and value
-has(tags, "production")
+has(tags, 'production')
 ```
 
-#### "function supports only body JSON search"
+#### 'function supports only body JSON search'
 
 Currently, array functions only work with JSON body fields:
 
 ```
 # Wrong - using function on non-body field
-has(attribute.tags, "prod")
+has(attribute.tags, 'prod')
 
 # Correct - use with body fields
-has(body.tags, "prod")
+has(body.tags, 'prod')
 ```
 
 ### Value Type Errors
 
-#### "unsupported value type"
+#### 'unsupported value type'
 
 Ensure values are one of the supported types:
 
 ```
 # Supported value types:
-"text value"      # String (quoted)
+'text value'      # String (quoted)
 123               # Number
 true              # Boolean
-["a", "b", "c"]   # Array (for IN clauses and functions)
+['a', 'b', 'c']   # Array (for IN clauses and functions)
 ```
 
-#### "failed to parse number"
+#### 'failed to parse number'
 
 Number parsing failed. Check for invalid formats:
 
@@ -664,7 +664,7 @@ field = 123.456
 searching for AND operator
 
 # Correct - use quotes
-"searching for AND operator"
+'searching for AND operator'
 ```
 
 **2. Complex conditions with wrong precedence**
@@ -683,7 +683,7 @@ When using dashboard variables:
 service = $service_name  # Error
 
 # Define the variable or use a literal value
-service = "api-gateway"
+service = 'api-gateway'
 ```
 
 ### Getting Help
@@ -799,8 +799,8 @@ If the issue still persists, reach out to support.
       : value ( COMMA value )*
       ;
 
-  // Full-text search: a standalone quoted string is allowed as a "primary"
-  // e.g. `"Waiting for response" http.status_code=200`
+  // Full-text search: a standalone quoted string is allowed as a 'primary'
+  // e.g. `'Waiting for response' http.status_code=200`
   fullText
       : QUOTED_TEXT
       | FREETEXT
@@ -834,7 +834,7 @@ If the issue still persists, reach out to support.
 
   /*
   * A 'value' can be a string literal (double or single-quoted),
-  //  a numeric literal, boolean, or a "bare" token as needed.
+  //  a numeric literal, boolean, or a 'bare' token as needed.
   */
   value
       : QUOTED_TEXT
@@ -909,7 +909,7 @@ If the issue still persists, reach out to support.
 
   // Double/single-quoted text, capturing full text search strings, values, etc.
   QUOTED_TEXT
-      :  (   '"' ( ~["\\] | '\\' . )* '"'     // double-quoted
+      :  (   ''' ( ~['\\] | '\\' . )* '''     // double-quoted
           |   '\'' ( ~['\\] | '\\' . )* '\'' // single-quoted
           )
       ;
@@ -932,7 +932,7 @@ If the issue still persists, reach out to support.
       : [0-9]
       ;
 
-  FREETEXT : (~[ \t\r\n=()'"<>!,[\]])+ ;
+  FREETEXT : (~[ \t\r\n=()''<>!,[\]])+ ;
   ```
 
 </details>
