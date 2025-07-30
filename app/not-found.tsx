@@ -14,7 +14,7 @@ export default function NotFound() {
         </p>
         <p className="mb-8">But don't worry, you can find plenty of other things on our homepage.</p>
         <Button
-          href="/"
+          to="/"
           variant={"default"}
           rounded={"default"}
         >

@@ -132,7 +132,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       />
 
       <div className="container mx-auto">
-        <Button isButton={true} variant={"ghost"} href={`/resource-center/guides/`} className="ml-3.5 mt-10 hover:bg-transparent">
+        <Button variant={"ghost"} to={`/resource-center/guides/`} className="ml-3.5 mt-10 hover:bg-transparent">
           <span className="flex items-center">
             <SidebarIcons.ArrowLeft />
             <span className="pl-1.5 text-sm">Back to Guides</span>

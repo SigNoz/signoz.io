@@ -305,6 +305,7 @@ export default function TopNav() {
                     <PopoverTrigger>
                       <Button
                         variant={"ghost"}
+                        isButton={true}
                         className='hover:bg-transparent hover:text-signoz_robin-500 text-sm font-extralight'
                         onMouseEnter={() => setIsOpen(true)}
                       >
@@ -455,6 +456,7 @@ export default function TopNav() {
                     <PopoverTrigger>
                       <Button
                         variant={"ghost"}
+                        isButton={true}
                         className='hover:bg-transparent hover:text-signoz_robin-500 text-sm font-extralight'
                         onMouseEnter={() => setIsOpenResources(true)}
                       >
@@ -571,11 +573,6 @@ export default function TopNav() {
           </div>
           <div className="flex justify-end lg:hidden">
             {!mobileMenuOpen && <SearchButton />}
-            {/* <button
-              type="button"
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            > */}
             <Button
               variant={"ghost"}
               isButton={true}

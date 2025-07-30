@@ -162,14 +162,14 @@ const Header = () => {
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <Button variant='default' rounded='full' href="/teams/" id="btn-get-started-homepage-hero">
+        <Button variant='default' rounded='full' to="/teams/" id="btn-get-started-homepage-hero">
           <span className="flex-center">
             Get Started - Free
             <ArrowRight size={14} />
           </span>
         </Button>
 
-        <Button variant='secondary' rounded='full' href="/docs/introduction/" id="btn-read-documentation-homepage-hero">
+        <Button variant='secondary' rounded='full' to="/docs/introduction/" id="btn-read-documentation-homepage-hero">
           <span className="flex-center">
             <BookOpen size={14} />
             Read Documentation
@@ -242,7 +242,7 @@ const TrustedByTeams = ({ page }) => {
             <Button
               variant='secondary'
               rounded='full'
-              href="/case-study/"
+              to="/case-study/"
               id={customerStoriesId}
               // className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
@@ -442,7 +442,7 @@ const UsageBasedPricing = () => {
               We’re here for you.
             </p>
             <UsageList />
-            <Button variant='default' rounded='full' href="/pricing/" id="btn-get-started-homepage-hero" className="mt-5">
+            <Button variant='default' rounded='full' to="/pricing/" id="btn-get-started-homepage-hero" className="mt-5">
               <span className="flex-center">
                 Check Pricing
                 <ArrowRight size={14} />
@@ -559,7 +559,7 @@ const GetStarted = ({ page }) => {
                 </p>
                 <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
                   <Button 
-                    href="/teams/" 
+                    to="/teams/" 
                     variant={"default"}
                     rounded={"full"}
                     id={getStartedId}
@@ -571,7 +571,7 @@ const GetStarted = ({ page }) => {
                   </Button>
 
                   <Button 
-                    href="/docs/introduction/"
+                    to="/docs/introduction/"
                     variant={"secondary"}
                     rounded={"full"}
                     id={readDocumentationId}

@@ -91,7 +91,7 @@ const Header = () => {
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <Button href="/teams/" variant={"default"} rounded={"full"} id="btn-get-started-homepage-hero">
+        <Button to="/teams/" variant={"default"} rounded={"full"} id="btn-get-started-homepage-hero">
           <span className="flex-center">
             Get Started - Free
             <ArrowRight size={14} />
@@ -99,7 +99,7 @@ const Header = () => {
         </Button>
 
         {/* <Button type={Button.TYPES.SECONDARY} id="btn-read-documentation-homepage-hero"> */}
-        <Button variant="secondary" href="/docs/introduction/" rounded={"full"} id="btn-read-documentation-homepage-hero">
+        <Button variant="secondary" to="/docs/introduction/" rounded={"full"} id="btn-read-documentation-homepage-hero">
           <span className="flex-center">
             <BookOpen size={14} />
             Read Documentation
@@ -174,7 +174,7 @@ const TrustedByTeams = ({ page }) => {
               // className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
               variant={"secondary"}
               rounded={"full"}
-              href="/case-study/"
+              to="/case-study/"
             >
               <span className="flex-center z-[1] mx-2">
                 Read customer stories <ArrowRight size={14} />
@@ -342,7 +342,7 @@ const UsageBasedPricing = () => {
               We’re here for you.
             </p>
             <UsageList />
-            <Button href="/pricing/" variant={"default"} rounded={"full"} id="btn-get-started-homepage-hero" className="mt-5">
+            <Button to="/pricing/" variant={"default"} rounded={"full"} id="btn-get-started-homepage-hero" className="mt-5">
               <span className="flex-center">
                 Check Pricing
                 <ArrowRight size={14} />
@@ -437,7 +437,7 @@ const GetStarted = ({ page }) => {
                   Get started with <br /> SigNoz Cloud today
                 </p>
                 <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                  <Button href="/teams/" variant={"default"} rounded={"full"} id={getStartedId}>
+                  <Button to="/teams/" variant={"default"} rounded={"full"} id={getStartedId}>
                     <span className="flex-center">
                       Get Started - Free
                       <ArrowRight size={14} />
@@ -445,7 +445,7 @@ const GetStarted = ({ page }) => {
                   </Button>
 
                   {/* <Button type={Button.TYPES.SECONDARY} id={readDocumentationId}> */}
-                  <Button href="/docs/introduction/" variant="secondary" rounded={"full"} id={readDocumentationId}>
+                  <Button to="/docs/introduction/" variant="secondary" rounded={"full"} id={readDocumentationId}>
                     <span className="flex-center">
                       <BookOpen size={14} />
                       Read Documentation
