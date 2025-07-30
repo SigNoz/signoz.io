@@ -27,7 +27,7 @@ These logs are essential for maintaining web server health, troubleshooting issu
 
 ### Understanding Access Log Formats
 
-NGINX offers several predefined log formats, with **combined** being the most commonly used:
+NGINX offers several predefined log formats, with **combined** being the most commonly used. The combined log format is a standard format that includes essential client request details, making it ideal for most web applications and analysis tools:
 
 ```nginx
 log_format combined '$remote_addr - $remote_user [$time_local] '
@@ -44,6 +44,11 @@ This format captures the following variables:
 - **$http_referer**: Referrer URL
 - **$http_user_agent**: Browser/client information
 
+An example log entry using the combined format looks like this:
+```
+192.168.1.10 - - [30/Jul/2025:15:57:19 +0000] "GET /index.html HTTP/1.1" 200 1024 "http://example.com/start" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+```
+
 ### Custom Log Formats for Specific Use Cases
 
 Create tailored log formats to capture the data most relevant to your needs.
@@ -55,7 +60,10 @@ log_format performance '$remote_addr - $remote_user [$time_local] '
                        '"$request_time" "$upstream_response_time"';
 ```
 
-This configuration adds request timing metrics to help identify slow requests and upstream performance issues.
+This configuration adds request timing metrics to help identify slow requests and upstream performance issues. An example log entry shows:
+```
+192.168.1.10 - - [30/Jul/2025:15:57:19 +0000] "GET /api/users HTTP/1.1" 200 2048 "0.125" "0.098"
+```
 
 #### JSON Format for Structured Logging
 ```nginx
