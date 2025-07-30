@@ -206,8 +206,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: "Deploying to ECS",
-            route: '/docs/install/ecs'
+            label: 'Deploying to ECS',
+            route: '/docs/install/ecs',
           },
           {
             type: 'doc',
@@ -508,23 +508,21 @@ const docsSideNav = [
               {
                 label: 'Overview',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/k8s-infra/overview'
+                route: '/docs/collection-agents/k8s/k8s-infra/overview',
               },
               {
                 label: 'Install K8s Infra',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra'
+                route: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra',
               },
               {
                 label: 'Configure K8s Infra',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra'
-              }
-            ]
-          }
-          
-        ]
-
+                route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'category',
@@ -532,8 +530,8 @@ const docsSideNav = [
         label: 'VM',
         items: [
           {
-            type: "category",
-            label: "OpenTelemetry Binary",
+            type: 'category',
+            label: 'OpenTelemetry Binary',
             isExpanded: false,
             items: [
               {
@@ -541,11 +539,11 @@ const docsSideNav = [
                 type: 'doc',
                 label: 'Overview',
               },
-            ]
+            ],
           },
         ],
       },
-    ]
+    ],
   },
   {
     label: 'APM & Distributed Tracing',
@@ -1394,7 +1392,7 @@ const docsSideNav = [
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
           },
-                    {
+          {
             label: 'APM',
             type: 'category',
             isExpanded: false,
@@ -1410,7 +1408,7 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
                 label: 'DB Calls Monitoring',
               },
-            ]
+            ],
           },
           {
             type: 'doc',
@@ -1834,7 +1832,7 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/sql-server',
         label: 'Microsoft SQL Server',
-      }
+      },
     ],
   },
   {
@@ -2258,7 +2256,7 @@ const docsSideNav = [
         className: 'new-doc',
         type: 'category',
         isExpanded: false,
-        route: '/docs/migration/migrate-from-datadog-to-newrelic',
+        route: '/docs/migration/migrate-from-newrelic-to-signoz',
         items: [
           {
             type: 'doc',
