@@ -95,7 +95,7 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
           )}
 
           {/* Completion Button */}
-          <div className="pt-4 border-t border-primary-600">
+          <div className="pt-4 border-t-2 border-dashed border-signoz_slate-200/50">
             <Button
               isButton={true}
               onClick={onMarkComplete}
