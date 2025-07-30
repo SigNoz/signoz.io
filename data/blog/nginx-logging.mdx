@@ -1,0 +1,575 @@
+---
+title: "Complete NGINX Logging Guide 2025: Configuration, Formats, and Best Practices"
+slug: "nginx-logging"
+date: "2025-07-30"
+tags: [nginx, logging, log-management, observability]
+authors: [selva]
+description: "Master NGINX logging with this comprehensive guide covering access logs, error logs, custom formats, log rotation, structured logging, and integration with modern observability tools like SigNoz."
+keywords: [nginx logging, nginx logs, nginx access logs, nginx error logs, log management, structured logging, log rotation, json logs, nginx configuration, centralized logging]
+---
+
+NGINX logging forms the foundation of effective web server monitoring, debugging, and security analysis. Whether you're running a single server or orchestrating hundreds of containers, proper logging configuration determines your ability to troubleshoot issues, monitor performance, and maintain security.
+
+This guide covers everything from basic log setup to advanced structured logging, performance optimization, and integration with modern observability platforms. You'll learn to implement production-ready NGINX logging that scales with your infrastructure.
+
+## Understanding NGINX Log Types
+
+NGINX generates two primary log types that serve different monitoring purposes:
+
+**Access Logs** track every client request, capturing details like IP addresses, response codes, request times, and user agents. These logs help you understand traffic patterns, identify slow requests, and detect security threats.
+
+**Error Logs** record server-side issues, configuration problems, and application errors. They help diagnose why requests fail and identify underlying infrastructure problems.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/12/nginx_access_log_example.webp" alt="NGINX access log example showing request details"/>
+    <figcaption><i>NGINX access log example showing request details</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/12/nginx_error_log_example.webp" alt="NGINX error log example showing server issues"/>
+    <figcaption><i>NGINX error log example showing server issues</i></figcaption>
+</figure>
+
+## Basic NGINX Logging Configuration
+
+### Access Log Configuration
+
+The `access_log` directive controls how NGINX records client requests. By default, NGINX logs to `/var/log/nginx/access.log` using the `combined` format:
+
+```nginx
+http {
+    access_log /var/log/nginx/access.log combined;
+}
+```
+
+This default configuration logs every request using a predefined format that includes client IP, timestamp, request details, response status, and bytes sent.
+
+Customize the log location and format per server block:
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+    access_log /var/log/nginx/example.com.access.log combined;
+}
+```
+
+### Error Log Configuration
+
+Error logs capture server issues with configurable severity levels:
+
+```nginx
+http {
+    error_log /var/log/nginx/error.log warn;
+}
+```
+
+Available error log levels (from most to least verbose):
+- `debug` - Detailed debugging information
+- `info` - General operational messages  
+- `notice` - Normal but significant events
+- `warn` - Warning conditions
+- `error` - Error conditions (default)
+- `crit` - Critical conditions
+- `alert` - Immediate action required
+- `emerg` - System unusable
+
+## Custom Log Format Configuration
+
+### Creating Custom Log Formats
+
+Custom log formats let you capture exactly the data you need. Define formats in the `http` context using the `log_format` directive:
+
+```nginx
+http {
+    log_format custom '$remote_addr - $remote_user [$time_local] '
+                     '"$request" $status $body_bytes_sent '
+                     '"$http_referer" "$http_user_agent" '
+                     'rt=$request_time uct="$upstream_connect_time" '
+                     'uht="$upstream_header_time" urt="$upstream_response_time"';
+    
+    access_log /var/log/nginx/access.log custom;
+}
+```
+
+This custom format includes upstream timing metrics that aren't in the default format, helping you identify backend performance bottlenecks.
+
+### Structured Logging with JSON
+
+JSON formatting simplifies log parsing and integration with modern monitoring tools:
+
+```nginx
+http {
+    log_format json_combined escape=json
+    '{'
+        '"time_local":"$time_local",'
+        '"remote_addr":"$remote_addr",'
+        '"remote_user":"$remote_user",'
+        '"request":"$request",'
+        '"status": "$status",'
+        '"body_bytes_sent":"$body_bytes_sent",'
+        '"request_time":"$request_time",'
+        '"http_referrer":"$http_referer",'
+        '"http_user_agent":"$http_user_agent",'
+        '"upstream_addr":"$upstream_addr",'
+        '"upstream_response_time":"$upstream_response_time",'
+        '"upstream_status":"$upstream_status"'
+    '}';
+    
+    access_log /var/log/nginx/access.log json_combined;
+}
+```
+
+The `escape=json` parameter ensures proper JSON formatting by escaping special characters, preventing log injection attacks.
+
+### Essential NGINX Variables for Logging
+
+Common variables for comprehensive logging:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `$remote_addr` | Client IP address | `192.168.1.100` |
+| `$status` | HTTP response status | `200`, `404`, `500` |
+| `$request_time` | Request processing time | `0.123` |
+| `$upstream_response_time` | Backend response time | `0.089` |
+| `$body_bytes_sent` | Response size in bytes | `1234` |
+| `$http_user_agent` | Client user agent | `Mozilla/5.0...` |
+| `$request_method` | HTTP method | `GET`, `POST` |
+| `$request_uri` | Full request URI | `/api/users?id=123` |
+
+## Performance Optimization Strategies
+
+### Conditional Logging
+
+Reduce log volume by filtering out unnecessary entries:
+
+```nginx
+# Log only errors and slow requests
+map $status $log_condition {
+    ~^[23] 0;  # Don't log 2xx/3xx responses
+    default 1; # Log everything else
+}
+
+map $request_time $slow_request {
+    ~^0\.[0-4] 0;  # Don't log requests under 0.5s
+    default 1;     # Log slow requests
+}
+
+# Combine conditions using OR logic
+map "$log_condition:$slow_request" $should_log {
+    ~1 1;      # Log if either condition is met
+    default 0;
+}
+
+access_log /var/log/nginx/access.log combined if=$should_log;
+```
+
+This configuration dramatically reduces log volume by excluding successful fast requests while capturing all errors and performance issues.
+
+### Log Buffering
+
+Buffer log writes to improve performance under heavy load:
+
+```nginx
+access_log /var/log/nginx/access.log combined buffer=16k flush=5s;
+```
+
+This buffers up to 16KB of log data and flushes every 5 seconds, reducing I/O operations. For high-traffic servers, this can significantly improve performance.
+
+### Optimizing Log Performance
+
+For maximum performance on high-traffic servers:
+
+```nginx
+http {
+    # Use buffered logging with periodic flushes
+    access_log /var/log/nginx/access.log combined 
+               buffer=32k flush=10s gzip=5;
+    
+    # Reduce error log verbosity in production
+    error_log /var/log/nginx/error.log error;
+}
+```
+
+The `gzip=5` parameter compresses logs in memory before writing, further reducing I/O overhead.
+
+## Log Rotation and Management
+
+### Automated Log Rotation with Logrotate
+
+Create `/etc/logrotate.d/nginx` for automated log rotation:
+
+```bash
+/var/log/nginx/*.log {
+    daily
+    rotate 30
+    compress
+    delaycompress
+    missingok
+    notifempty
+    sharedscripts
+    postrotate
+        # Send USR1 signal to reopen log files
+        /bin/kill -USR1 $(cat /run/nginx.pid 2>/dev/null) 2>/dev/null || true
+    endscript
+}
+```
+
+This configuration rotates logs daily, keeps 30 days of history, and compresses old files to save disk space.
+
+### Manual Log Rotation
+
+For immediate rotation without waiting for the scheduled time:
+
+```bash
+# Rotate logs manually
+sudo logrotate -f /etc/logrotate.d/nginx
+
+# Verify rotation worked
+ls -la /var/log/nginx/
+
+# Check NGINX reopened log files
+sudo nginx -t && echo "Configuration valid"
+```
+
+### Container Log Management
+
+For containerized NGINX deployments, log to stdout/stderr:
+
+```nginx
+error_log /dev/stderr warn;
+access_log /dev/stdout combined;
+```
+
+This allows container orchestration platforms like Kubernetes or Docker Swarm to handle log collection and rotation automatically.
+
+## Security and Privacy Considerations
+
+### Protecting Sensitive Information
+
+Avoid logging sensitive data by excluding certain fields:
+
+```nginx
+# Don't log authorization headers or query parameters with tokens
+log_format secure '$remote_addr - $remote_user [$time_local] '
+                  '"$request_method $uri HTTP/$server_protocol" '
+                  '$status $body_bytes_sent "$http_referer" $request_time';
+```
+
+This format excludes query parameters and headers that might contain API keys or tokens.
+
+### Log File Permissions
+
+Secure log files with proper permissions:
+
+```bash
+# Set restrictive permissions
+sudo chmod 640 /var/log/nginx/*.log
+sudo chown root:adm /var/log/nginx/*.log
+
+# Verify permissions
+ls -la /var/log/nginx/
+```
+
+Only root and the `adm` group can read the logs, preventing unauthorized access.
+
+### Preventing Log Injection Attacks
+
+Always use the `escape=json` parameter when logging user input:
+
+```nginx
+log_format safe_json escape=json
+'{'
+    '"remote_addr":"$remote_addr",'
+    '"request":"$request",'
+    '"user_agent":"$http_user_agent",'
+    '"status":"$status"'
+'}';
+```
+
+This prevents malicious users from injecting fake log entries or breaking log parsing.
+
+## Troubleshooting Common Issues
+
+### Logs Not Generating
+
+When logs aren't being created, check these common issues:
+
+```bash
+# Verify NGINX is running
+sudo systemctl status nginx
+
+# Test configuration syntax
+sudo nginx -t
+
+# Check log directory permissions
+ls -la /var/log/nginx/
+
+# Verify logging isn't disabled
+grep -r "access_log off" /etc/nginx/
+```
+
+### Large Log Files Causing Disk Issues
+
+Monitor disk usage and implement proper rotation:
+
+```bash
+# Check current log sizes
+du -sh /var/log/nginx/*.log
+
+# Compress large log files immediately
+sudo gzip /var/log/nginx/access.log.1
+
+# Force log rotation if needed
+sudo logrotate -f /etc/logrotate.d/nginx
+```
+
+### Container Log Access Issues
+
+For Docker containers, access logs using:
+
+```bash
+# View recent container logs
+docker logs nginx-container
+
+# Follow logs in real-time
+docker logs -f nginx-container
+
+# Mount log directory for external access
+docker run -v /host/logs:/var/log/nginx nginx:latest
+```
+
+## Log Analysis and Monitoring
+
+### Real-time Log Analysis
+
+Monitor logs in real-time for immediate issue detection:
+
+```bash
+# Monitor for server errors (5xx responses)
+tail -f /var/log/nginx/access.log | grep " 5[0-9][0-9] "
+
+# Watch for slow requests (over 2 seconds)
+tail -f /var/log/nginx/access.log | awk '$NF > 2.0'
+
+# Monitor error logs for critical issues
+tail -f /var/log/nginx/error.log | grep -i error
+```
+
+### Analyzing Log Patterns
+
+Common analysis tasks for troubleshooting:
+
+```bash
+# Top IP addresses (potential DDoS or high traffic sources)
+awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -nr | head -10
+
+# Most requested URLs
+awk '{print $7}' /var/log/nginx/access.log | sort | uniq -c | sort -nr | head -10
+
+# Response status distribution
+awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -nr
+
+# Calculate average response time
+awk '{sum+=$NF; count++} END {print "Average response time:", sum/count "s"}' /var/log/nginx/access.log
+```
+
+### Automated Monitoring Script
+
+Create a monitoring script for proactive alerting:
+
+```bash
+#!/bin/bash
+# nginx-monitor.sh - Monitor NGINX logs for issues
+
+LOG_FILE="/var/log/nginx/access.log"
+ERROR_THRESHOLD=10
+TIME_WINDOW=5  # minutes
+
+# Count 5xx errors in the last 5 minutes
+RECENT_ERRORS=$(tail -n 1000 "$LOG_FILE" | awk -v threshold=$(date -d "${TIME_WINDOW} minutes ago" +%s) '
+{
+    # Parse timestamp from NGINX combined log format
+    split($4, time_parts, "[/:]")
+    if (length(time_parts) >= 6) {
+        log_time = mktime(time_parts[3] " " time_parts[2] " " time_parts[1] " " time_parts[4] " " time_parts[5] " " time_parts[6])
+        if (log_time > threshold && $9 >= 500 && $9 < 600) count++
+    }
+}
+END {print count+0}
+')
+
+if [ "$RECENT_ERRORS" -gt "$ERROR_THRESHOLD" ]; then
+    echo "Alert: High error rate detected - $RECENT_ERRORS errors in last $TIME_WINDOW minutes"
+    # Add your alerting mechanism here (email, Slack, PagerDuty, etc.)
+fi
+```
+
+## Advanced Configuration Examples
+
+### Multi-Environment Logging
+
+Production-ready configuration with environment-specific logging:
+
+```nginx
+http {
+    # Development - verbose logging with all details
+    log_format debug_format '$remote_addr - $remote_user [$time_local] '
+                           '"$request" $status $body_bytes_sent '
+                           '"$http_referer" "$http_user_agent" '
+                           'rt=$request_time uct="$upstream_connect_time" '
+                           'uht="$upstream_header_time" urt="$upstream_response_time" '
+                           'cs=$upstream_cache_status';
+
+    # Production - optimized JSON format
+    log_format production_json escape=json
+    '{'
+        '"timestamp":"$time_iso8601",'
+        '"client_ip":"$remote_addr",'
+        '"method":"$request_method",'
+        '"uri":"$request_uri",'
+        '"status":$status,'
+        '"bytes_sent":$bytes_sent,'
+        '"request_time":$request_time,'
+        '"upstream_addr":"$upstream_addr",'
+        '"upstream_time":"$upstream_response_time"'
+    '}';
+
+    # Environment-specific configuration
+    map $server_name $log_format_name {
+        ~*dev debug_format;
+        default production_json;
+    }
+    
+    access_log /var/log/nginx/access.log $log_format_name buffer=16k flush=5s;
+    error_log /var/log/nginx/error.log warn;
+}
+```
+
+### Load Balancer Logging
+
+Enhanced logging for load balancer scenarios:
+
+```nginx
+upstream backend {
+    server backend1.example.com;
+    server backend2.example.com;
+}
+
+log_format loadbalancer escape=json
+'{'
+    '"timestamp":"$time_iso8601",'
+    '"client_ip":"$remote_addr",'
+    '"x_forwarded_for":"$http_x_forwarded_for",'
+    '"request":"$request",'
+    '"status":$status,'
+    '"upstream_addr":"$upstream_addr",'
+    '"upstream_status":"$upstream_status",'
+    '"upstream_response_time":"$upstream_response_time",'
+    '"request_time":$request_time,'
+    '"bytes_sent":$body_bytes_sent,'
+    '"cache_status":"$upstream_cache_status"'
+'}';
+
+server {
+    listen 80;
+    server_name api.example.com;
+    
+    access_log /var/log/nginx/loadbalancer.access.log loadbalancer;
+    
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+This configuration captures critical load balancing metrics including upstream server selection and response times.
+
+## Centralized Logging Integration
+
+### Syslog Integration
+
+Forward logs to a centralized syslog server:
+
+```nginx
+error_log syslog:server=logserver.example.com:514,facility=local0,tag=nginx,severity=error;
+access_log syslog:server=logserver.example.com:514,facility=local1,tag=nginx combined;
+```
+
+### Log Shipper Configuration
+
+Example Filebeat configuration for shipping to Elasticsearch:
+
+```yaml
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/access.log
+  fields:
+    service: nginx
+    log_type: access
+  json.keys_under_root: true
+  json.add_error_key: true
+
+- type: log
+  enabled: true
+  paths:
+    - /var/log/nginx/error.log
+  fields:
+    service: nginx
+    log_type: error
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "nginx-logs-%{+yyyy.MM.dd}"
+
+processors:
+- add_host_metadata:
+    when.not.contains.tags: forwarded
+```
+
+## Get Started with SigNoz
+
+Modern applications require more than scattered log files across servers. SigNoz provides a unified observability platform that centralizes your NGINX logs alongside metrics and distributed traces.
+
+Key benefits of using SigNoz for NGINX logging:
+
+- **Centralized log collection** from multiple NGINX servers using OpenTelemetry collectors
+- **High-performance log queries** powered by ClickHouse, optimized for log analytics
+- **Correlation capabilities** that connect logs with application metrics and traces for faster troubleshooting
+- **Advanced filtering and search** with structured query capabilities across all your log data
+- **Real-time log tailing** for immediate issue detection and debugging
+- **Custom dashboards** to visualize NGINX performance patterns and trends
+
+SigNoz automatically parses your JSON-formatted NGINX logs and provides powerful querying capabilities. You can set up alerts based on error rates, response times, or custom log patterns to proactively monitor your infrastructure.
+
+The OpenTelemetry collector configuration for NGINX logs is straightforward - it can tail your log files directly and handle the structured JSON format without complex parsing rules.
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+## Key Takeaways
+
+Effective NGINX logging requires a strategic approach that balances comprehensiveness with performance:
+
+- **Use structured JSON logging** to simplify parsing and enable advanced analytics
+- **Implement conditional logging** to control volume without losing critical information
+- **Configure proper log rotation** to prevent disk space issues and maintain historical data
+- **Apply security best practices** to protect sensitive information and prevent log injection
+- **Integrate with centralized logging platforms** for scalable monitoring and alerting
+- **Monitor logs actively** with automated analysis and real-time alerting
+
+Remember that logging is one component of comprehensive observability. Combining logs with metrics and distributed tracing provides complete visibility into your application performance and user experience.
+
+Proper NGINX logging configuration scales from development through production, providing the insights needed to maintain reliable, high-performance web services.
+
+Hope we answered all your questions regarding NGINX logging. If you have more questions, feel free to join and ask on our [slack community](https://signoz.io/slack/).
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz — get open source, OpenTelemetry, and devtool-building stories straight to your inbox.
