@@ -1836,6 +1836,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/frontend-monitoring/sending-logs',
+        label: 'Sending Logs',
+      },
+      {
+        type: 'doc',
         label: 'Swift UI',
         route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
       },
