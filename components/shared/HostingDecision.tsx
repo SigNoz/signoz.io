@@ -23,7 +23,7 @@ const HostingBanner = () => {
           >
             <Button type={Button.TYPES.SECONDARY} className="!h-8 !px-3 !py-1">
               Compare Self Host vs Cloud{' '}
-              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Button>
           </TrackingLink>
 
