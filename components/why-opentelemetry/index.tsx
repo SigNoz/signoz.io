@@ -1,7 +1,4 @@
 import React from 'react'
-import styles from './styles.module.css'
-import Heading from '../../components/ui/Heading'
-import SubHeading from '../../components/ui/SubHeading'
 import Card from '../Card/card'
 import { BookOpen, ArrowRight } from 'lucide-react'
 import { ArrowRightSolid } from '@/components/homepage-icons/icons'

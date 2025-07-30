@@ -10,7 +10,7 @@ import CountdownTimer from '@/components/Timer'
 import { Linkedin } from '@/components/social-icons/SolidIcons'
 import Youtube from '@/components/VideoPlayer/VideoPlayer'
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
-import Card from "@/components/ui/Card"
+import { Card } from "@/components/ui/Card"
 
 const MainSection: React.FC = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()

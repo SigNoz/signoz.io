@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button"
 // import Button from '../../../../components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
 import TrackingButton from '../../../../components/TrackingButton'
-import Card from '@/components/ui/Card'
+import { Card } from '@/components/ui/Card'
 
 const DraftingCompass = ({ isActive }: { isActive: boolean }) => {
   return (

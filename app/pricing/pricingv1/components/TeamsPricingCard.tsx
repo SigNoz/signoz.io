@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Button from 'components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
 import { Tooltip } from '@nextui-org/react'
-import Card from '@/components/ui/Card'
+import { Card } from '@/components/ui/Card'
 
 export default function TeamsPricingCard() {
   return (

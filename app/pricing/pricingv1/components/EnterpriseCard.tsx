@@ -29,7 +29,7 @@ export default function EnterpriseCard() {
             clickType="Secondary CTA"
             clickName="Enterprise Contact Button"
             clickText="Contact Us"
-            clickLocation="Enterprise Pricing Card Top"
+            clickLocation="Enterprise Pricing Card Bottom"
           >
             <Button
               type={Button.TYPES.SECONDARY}
@@ -115,7 +115,7 @@ export default function EnterpriseCard() {
               clickType="Secondary CTA"
               clickName="Enterprise Contact Button"
               clickText="Contact Us"
-              clickLocation="Enterprise Pricing Card Bottom"
+              clickLocation="Enterprise Pricing Card Top"
             >
               <Button
                 type={Button.TYPES.SECONDARY}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UpgradePath } from '../types/upgrade';
 import DocRenderer from './DocRender';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 
 interface DocumentationPanelProps {
   currentStep: UpgradePath;
