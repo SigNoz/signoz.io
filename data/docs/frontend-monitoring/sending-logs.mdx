@@ -1,0 +1,248 @@
+---
+date: 2024-08-02
+title: Sending Logs from your frontend application
+id: web-vitals
+---
+
+This documentation provides a step-by-step guide for sending logs from your frontend application using SigNoz and OpenTelemetry.
+
+## Overview
+
+SigNoz natively supports OpenTelemetry for collecting logs, so you can lift-and-shift existing log libraries or build new pipelines, all with the same unified model as your traces and metrics.
+
+Logs can be collected on the client side at meaningful points to capture various events, state changes, errors and warnings.
+
+## Prerequisites
+
+- [SigNoz Cloud](https://signoz.io/teams/) account
+- A web application from where you want to send logs
+
+## Setup
+
+### Step 1: Setup OTel Collector
+
+Install the OpenTelemetry Collector binary using [these instructions](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/). The Collector acts as an agent that receives, processes, and exports telemetry data. It is required to collect data from your application, including logs.
+
+### Step 2: Install dependencies
+
+<Tabs groupId="logs-dependencies">
+  <TabItem value="npm" label="Npm">
+    ```sh
+    npm i \
+      @opentelemetry/resources \
+      @opentelemetry/sdk-logs \
+      @opentelemetry/exporter-logs-otlp-http \
+      @opentelemetry/api-logs
+    ```
+  </TabItem>
+  <TabItem value="yarn" label="Yarn" default>
+    ```sh
+    yarn add \
+      @opentelemetry/resources \
+      @opentelemetry/sdk-logs \
+      @opentelemetry/exporter-logs-otlp-http \
+      @opentelemetry/api-logs
+    ```
+  </TabItem>
+</Tabs>
+
+### Step 3: Create an instrumentation file
+
+The `instrument.ts` file is required to setup the `LoggerProvider` which is used to create custom logs within your application and export them to your collector.
+
+```ts
+import {
+  LoggerProvider,
+  SimpleLogRecordProcessor,
+} from '@opentelemetry/sdk-logs';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { logs } from '@opentelemetry/api-logs';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+
+const loggerProvider = new LoggerProvider({
+  resource: resourceFromAttributes({
+    'service.name': '<<SERVICE_NAME>>',
+  }),
+  processors: [
+    new SimpleLogRecordProcessor(
+      new OTLPLogExporter({ url: '<<SIGNOZ_COLLECTOR_URL>>/v1/logs' })
+    ),
+  ],
+});
+
+logs.setGlobalLoggerProvider(loggerProvider);
+```
+
+### Step 4: Importing the instrumentation file
+
+Import the instrumentation file at the top level of your application.
+
+```ts
+import './instrument';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.tsx';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+```
+
+### Step 5: Create utility functions for Logging
+
+The `utils.ts` file will contain our utility functions for recording various kinds of logs (`info`, `warning`, `error`).
+
+```ts
+import {
+  logs,
+  SeverityNumber,
+  type AnyValueMap,
+} from '@opentelemetry/api-logs';
+
+const logger = logs.getLogger('frontend-logger');
+
+export function logInfo(body: string, attrs: AnyValueMap = {}) {
+  logger.emit({
+    body,
+    severityNumber: SeverityNumber.INFO,
+    severityText: 'INFO',
+    attributes: attrs,
+  });
+}
+
+export function logWarn(body: string, attrs: AnyValueMap = {}) {
+  logger.emit({
+    body,
+    severityNumber: SeverityNumber.WARN,
+    severityText: 'WARN',
+    attributes: attrs,
+  });
+}
+
+export function logError(body: string, attrs: AnyValueMap = {}) {
+  logger.emit({
+    body,
+    severityNumber: SeverityNumber.ERROR,
+    severityText: 'ERROR',
+    attributes: attrs,
+  });
+}
+```
+
+### Step 6: Setting up Logs within your Application
+
+Add logs at meaningful points in your application.
+
+```ts
+function authenticate() {
+  try {
+    const response = await fetch('/api/authenticate');
+    const data = await response.json();
+    logInfo('User authenticated', { data });
+    return data;
+  } catch (error) {
+    logError('Failed to authenticate', { error: error.message });
+  }
+}
+```
+
+### Step 7: Viewing Captured Logs in SigNoz
+
+The captured logs can then be viewed in the Logs Explorer.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/guides/2025/frontend-monitoring/sending-logs/1.webp"
+    alt="Core Web Vitals Monitoring in SigNoz"
+  />
+  <figcaption>
+    <i>SigNoz Logs Explorer</i>
+  </figcaption>
+</figure>
+
+### Attaching additional identifiers to your Logs
+
+You can enrich logs with additional metadata like browser type, user ID etc. to enable real user monitoring (RUM)-like insights.
+
+To do so, you need to write a custom implementation on top of `LogRecordProcessor` which will intercept all your exported logs and attach additional attributes to them.
+
+```ts
+import type { LogRecordProcessor, SdkLogRecord } from '@opentelemetry/sdk-logs';
+import { UAParser } from 'ua-parser-js';
+
+function getBrowserInfo() {
+  // You can add your custom browser tracking logic here as well.
+  // This example uses the ua-parser-js package.
+  const parser = new UAParser();
+  const result = parser.getResult();
+  return {
+    browserName: result.browser.name,
+    browserVersion: result.browser.version,
+    userAgent: result.ua,
+  };
+}
+
+function getUserId() {
+  // You can add your custom user ID tracking logic here as well.
+  // This example uses localStorage.
+  const userId = localStorage.getItem('userId');
+  return {
+    userId,
+  };
+}
+
+function getAdditionalAttributes() {
+  return {
+    ...getBrowserInfo(),
+    ...getUserId(),
+  };
+}
+
+export class CustomAttributesProcessor implements LogRecordProcessor {
+  onEmit(logRecord: SdkLogRecord) {
+    const additionalAttrs = getAdditionalAttributes();
+    logRecord.setAttributes(additionalAttrs);
+  }
+
+  shutdown(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  forceFlush(): Promise<void> {
+    return Promise.resolve();
+  }
+}
+```
+
+Update your `instrument.ts` to include this processor before the default one.
+
+```ts
+const loggerProvider = new LoggerProvider({
+  resource: resourceFromAttributes({
+    'service.name': '<<SERVICE_NAME>>',
+  }),
+  processors: [
+    new CustomAttributesProcessor(),
+    new SimpleLogRecordProcessor(
+      new OTLPLogExporter({ url: '<<SIGNOZ_COLLECTOR_URL>>/v1/logs' })
+    ),
+  ],
+});
+```
+
+Now every log exported will include these additional contextual attributes.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/guides/2025/frontend-monitoring/sending-logs/2.webp"
+    alt="Core Web Vitals Monitoring in SigNoz"
+  />
+  <figcaption>
+    <i>SigNoz Logs Explorer</i>
+  </figcaption>
+</figure>
