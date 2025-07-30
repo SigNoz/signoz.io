@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 // import Button from '@/components/Button/Button'
 import Button from "@/components/ui/Button"
@@ -40,37 +39,6 @@ const PlatformCard = ({ title, description }) => {
   )
 }
 
-const FeatureList = () => {
-  const features = [
-    {
-      title: 'Host Monitoring',
-      description: 'Monitor any hosts such as VM, physical machines, containers, etc.',
-    },
-    {
-      title: 'Build dashboards for application metrics',
-      description: 'You can create customized dashboards for your application metrics',
-    },
-    {
-      title: 'Kubernetes Infrastructure Monitoring',
-      description:
-        'Query logs for specific conditions and add them to dashboards for continuous monitoring.',
-    },
-    {
-      title: 'Share log lines',
-      description:
-        'Improved collaboration with your teammates while debugging by sharing specific log lines.',
-    },
-  ]
-
-  return (
-    <div className="flex w-full flex-col gap-4">
-      {features.map((feature, index) => (
-        <PlatformCard key={index} title={feature.title} description={feature.description} />
-      ))}
-    </div>
-  )
-}
-
 const UsageList = () => {
   const Usage = [
     {
@@ -98,35 +66,6 @@ const UsageList = () => {
   return (
     <div className="flex w-full flex-col gap-4">
       {Usage.map((feature, index) => (
-        <PlatformCard key={index} title={feature.title} description={feature.description} />
-      ))}
-    </div>
-  )
-}
-
-const DocsList = () => {
-  const Docs = [
-    {
-      title: 'Node.js instrumentation',
-      description: 'Instrument your Node.js application and monitor with SigNoz',
-    },
-    {
-      title: 'Python instrumentation',
-      description: 'Instrument your Python application and monitor with SigNoz',
-    },
-    {
-      title: 'Java instrumentation',
-      description: 'Instrument your Java application and monitor with SigNoz',
-    },
-    {
-      title: 'Get started with SigNoz APM',
-      description: 'Instrument your Java application and monitor with SigNoz',
-    },
-  ]
-
-  return (
-    <div className="flex w-full flex-col gap-4">
-      {Docs.map((feature, index) => (
         <PlatformCard key={index} title={feature.title} description={feature.description} />
       ))}
     </div>
@@ -382,26 +321,6 @@ const SigNozFeatures = () => {
   )
 }
 
-const SigNozUsage = () => {
-  return (
-    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-      <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            Use SigNoz
-            <br /> Metrics & Dashboards for...
-          </p>
-        </div>
-        <div className="flex-[2_2_0%]">
-          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
-            <FeatureList />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 const UsageBasedPricing = () => {
   return (
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
@@ -429,25 +348,6 @@ const UsageBasedPricing = () => {
                 <ArrowRight size={14} />
               </span>
             </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const ExploreDocs = () => {
-  return (
-    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-      <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            Explore Docs
-          </p>
-        </div>
-        <div className="flex-[2_2_0%]">
-          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
-            <DocsList />
           </div>
         </div>
       </div>

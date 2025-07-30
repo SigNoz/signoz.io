@@ -9,6 +9,8 @@ import TabNavigation from './TabNavigation';
 import SummaryPanel from './SummaryPanel';
 import DocumentationPanel from './DocumentationPanel';
 import SectionContainer from '@/components/SectionContainer';
+import { Card } from '@/components/ui/Card';
+import Link from 'next/link';
 
 const UpgradePathTool: React.FC = () => {
   const [state, setState] = useState<UpgradePathState>({
@@ -140,66 +142,68 @@ const UpgradePathTool: React.FC = () => {
 
             {/* General Information */}
             {isPathGenerated && (
-              <div className="w-full rounded-lg bg-signoz_ink-500 border border-signoz_slate-100 p-6">
-                <h3 className="text-lg font-semibold mb-4 text-signoz_vanilla-100">
-                  Important Information
-                </h3>
+              <Card variant={"amber"} className='w-full'>
+                <div className='p-6'>
+                  <h3 className="text-lg font-semibold mb-4 text-signoz_vanilla-100">
+                    Important Information
+                  </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-medium mb-2 text-signoz_vanilla-100">Pre-Upgrade Checklist</h4>
-                    <ul className="space-y-1 text-sm text-signoz_vanilla-400">
-                      {upgradeSchema.general.checklist.preUpgrade.map((item, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="mt-1">•</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-medium mb-2 text-signoz_vanilla-100">Pre-Upgrade Checklist</h4>
+                      <ul className="space-y-1 text-sm text-signoz_vanilla-400">
+                        {upgradeSchema.general.checklist.preUpgrade.map((item, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="mt-1">•</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   
-                  <div>
-                    <h4 className="font-medium mb-2 text-signoz_vanilla-100">Post-Upgrade Checklist</h4>
-                    <ul className="space-y-1 text-sm text-signoz_vanilla-400">
-                      {upgradeSchema.general.checklist.postUpgrade.map((item, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="mt-1">•</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                {upgradeSchema.general.commonWarnings.length > 0 && (
-                  <div className="mt-6">
-                    <h4 className="font-medium mb-2 text-signoz_vanilla-100">Common Warnings</h4>
-                    <div className="space-y-2">
-                      {upgradeSchema.general.commonWarnings.map((warning, index) => (
-                        <div key={index} className="p-3 bg-signoz_amber-400/10 border border-signoz_amber-400/20 rounded-lg">
-                          <h5 className="font-medium text-signoz_amber-400 mb-1">{warning.title}</h5>
-                          <span className="text-sm text-signoz_vanilla-400">{warning.details}</span>
-                        </div>
-                      ))}
+                    <div>
+                      <h4 className="font-medium mb-2 text-signoz_vanilla-100">Post-Upgrade Checklist</h4>
+                      <ul className="space-y-1 text-sm text-signoz_vanilla-400">
+                        {upgradeSchema.general.checklist.postUpgrade.map((item, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="mt-1">•</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
-                )}
 
-                <div className="mt-6 pt-4 border-t border-signoz_slate-100">
-                  <span className="text-sm text-signoz_vanilla-400">
-                    Need help? Check out our{' '}
-                    <a
-                      href={upgradeSchema.general.troubleshootingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-signoz_robin-500 hover:text-signoz_robin-400 rounded-lg"
-                    >
-                      troubleshooting guide
-                    </a>
-                    .
-                  </span>
+                  {upgradeSchema.general.commonWarnings.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="font-medium mb-2 text-signoz_vanilla-100">Common Warnings</h4>
+                      <div className="space-y-2">
+                        {upgradeSchema.general.commonWarnings.map((warning, index) => (
+                          <div key={index} className="p-3 bg-signoz_amber-400/10 border border-signoz_amber-400/20 rounded-lg">
+                            <h5 className="font-medium text-signoz_amber-400 mb-1">{warning.title}</h5>
+                            <span className="text-sm text-signoz_vanilla-400">{warning.details}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-6 pt-4 border-t border-signoz_slate-100">
+                    <span className="text-sm text-signoz_vanilla-400">
+                      Need help? Check out our{' '}
+                      <Link
+                        href={upgradeSchema.general.troubleshootingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-signoz_robin-500 hover:text-signoz_robin-400 rounded-lg"
+                      >
+                        troubleshooting guide
+                      </Link>
+                      .
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </Card>
             )}
 
             {/* Progress Tracker */}
@@ -220,7 +224,7 @@ const UpgradePathTool: React.FC = () => {
             {isPathGenerated && currentStepData && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Summary Panel */}
-                <SummaryPanel className="w-full col-span-1"
+                <SummaryPanel className="w-full max-lg:col-span-2 col-span-1"
                   currentStep={currentStepData}
                   targetVersion={state.targetVersion}
                   onMarkComplete={handleMarkComplete}

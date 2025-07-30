@@ -53,7 +53,7 @@ export default function ContactUsLayout() {
           </div>
 
           {/* Right column: contact form */}
-          <div className="rounded-xl border border-signoz_slate-400 bg-[rgb(244_242_250)] p-6 shadow-xl backdrop-blur-sm">
+          <div className="rounded-xl border border-signoz_slate-400 bg-[rgb(244_242_250)] p-6 shadow-xl backdrop-blur-sm"> {/* TODO: colour not present in design guidelines, see if can be changed */}
             <ContactForm portalId={contactUsData.PORTAL_ID} formId={contactUsData.FORM_ID} />
           </div>
         </div>

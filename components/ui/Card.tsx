@@ -1,45 +1,44 @@
-import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "app/lib/utils"
 
-import { cn } from 'app/lib/utils'
-
-// -----------------------------------------------------------------------------
-// Variants
-// -----------------------------------------------------------------------------
-export const cardVariants = cva('relative overflow-hidden rounded-2xl', {
+export const cardVariants = cva("relative", {
   variants: {
     variant: {
-      default: 'border border-signoz_slate-400 bg-signoz_ink-400',
-      gradient: 'border border-signoz_robin-500/30 bg-signoz_ink-400',
+      default: "",
+      gradient: "shadow-[-4px_0_20px_rgba(78,116,248,0.3),5px_0_20px_rgba(229,72,77,0.2)]",
+      amber: "shadow-[0_0_40px_rgba(255,205,86,0.3),0_0_80px_rgba(213,170,69,0.2)]",
+      primary: "shadow-[0_0_40px_rgba(78,116,248,0.3),0_0_80px_rgba(63,94,204,0.2)]",
+      cherry: "shadow-[0_0_40px_rgba(229,72,77,0.3),0_0_80px_rgba(184,58,62,0.2)]",
+      aqua: "shadow-[0_0_20px_rgba(78,116,248,0.2)]",
+      sakura: "shadow-[0_0_40px_rgba(242,71,105,0.3),0_0_80px_rgba(197,57,85,0.2)]",
+      forest: "shadow-[0_0_40px_rgba(37,225,146,0.3),0_0_80px_rgba(30,180,117,0.2)]",
     },
   },
   defaultVariants: {
-    variant: 'default',
+    variant: "default",
   },
-})
-
-const glowClass =
-  'absolute inset-0 rounded-2xl bg-gradient-to-r from-signoz_robin-500/20 to-signoz_cherry-500/20 blur-xl'
-
-export interface CardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardVariants> {
-  /** Adds the standard SigNoz glow gradient behind the card */
-  glow?: boolean
+})  
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof cardVariants> {
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, glow = false, children, ...props }, ref) => {
+  ({ className, variant, children, ...props }, ref) => {
     return (
-      <div className={cn('relative', className)} ref={ref} {...props}>
-        {glow && <div className={glowClass} />}
-        <div className={cn(cardVariants({ variant }))}>{children}</div>
+      <div
+        className={cn('bg-signoz_ink-400', cardVariants({ variant }), className)}
+        ref={ref}
+        {...props}
+      >
+        <div className="relative rounded-md border-2 border-dashed border-signoz_slate-200/50 h-full">
+          {children}
+        </div>
       </div>
     )
   },
 )
-Card.displayName = 'Card'
+
+Card.displayName = "Card"
 
 export { Card }
-
-export default Card 
+export default Card
