@@ -211,6 +211,12 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            isExpanded: false,
+            label: 'Deploying from Marketplaces',
+            route: '/docs/install/marketplaces',
+          },
+          {
+            type: 'doc',
             label: 'Troubleshooting',
             route: '/docs/install/troubleshooting',
           },
