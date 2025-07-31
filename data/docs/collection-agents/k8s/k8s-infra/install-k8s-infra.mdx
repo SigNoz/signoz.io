@@ -152,6 +152,44 @@ you have to provide the address to send data from the above receivers.
     ```
 
   </TabItem>
+  <TabItem value="k8s-windows" label="Kubernetes with Windows Hosts">
+
+    For Kubernetes clusters with Windows hosts, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: aws
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+    otelInsecure: false
+    signozApiKey: <SIGNOZ_INGESTION_KEY>
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - eks
+          - system
+      hostMetrics:
+        # Root path configuration is only required for Linux environments.
+        # On Windows, this must be set to empty string to prevent installation failures.
+        root_path: ""
+    otelAgent:
+      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
+      image:
+        tag: 0.123.0-windows-2022-amd64
+    otelDeployment:
+      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
+      image:
+        tag: 0.123.0-windows-2022-amd64
+    ```
+
+  </TabItem>
 </Tabs>
 
 Depending on the choice of your region for SigNoz cloud, the ingestion endpoint will vary according to this table.
@@ -269,6 +307,43 @@ Depending on the choice of your region for SigNoz cloud, the ingestion endpoint 
         detectors:
           - gcp
           - system
+    ```
+
+  </TabItem>
+  <TabItem value="k8s-windows" label="Kubernetes with Windows Hosts">
+
+    For Kubernetes clusters with Windows hosts, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: aks
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: <IP-or-Endpoint-of-SigNoz-OtelCollector>:4317
+    otelInsecure: true
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - azure
+          - system
+      hostMetrics:
+        # Root path configuration is only required for Linux environments.
+        # On Windows, this must be set to empty string to prevent installation failures.
+        root_path: ""
+    otelAgent:
+      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
+      image:
+        tag: 0.123.0-windows-2022-amd64
+    otelDeployment:
+      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
+      image:
+        tag: 0.123.0-windows-2022-amd64
     ```
 
   </TabItem>
