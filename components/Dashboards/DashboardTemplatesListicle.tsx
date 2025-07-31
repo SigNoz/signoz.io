@@ -50,7 +50,7 @@ interface IconCardData {
 const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Apache Web Server',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/apache-web-server',
+    href: '/docs/dashboards/dashboard-templates/apache-web-server',
     icon: <SiApache className="h-7 w-7 text-red-600" />,
     clickName: 'Apache Web Server Dashboard Template',
   },
@@ -86,7 +86,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'CI/CD',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/cicd',
+    href: '/docs/dashboards/dashboard-templates/cicd',
     icon: <Settings className="h-7 w-7 text-green-600" />,
     clickName: 'CI/CD Dashboard Template',
   },
@@ -97,14 +97,14 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'ClickHouse Dashboard Template',
   },
   {
-    name: 'Container Metrics Docker',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/container-metrics/docker',
+    name: 'Docker Container Metrics',
+    href: '/docs/dashboards/dashboard-templates/docker-container-metrics',
     icon: <SiDocker className="h-7 w-7 text-blue-400" />,
-    clickName: 'Container Metrics Docker Dashboard Template',
+    clickName: 'Docker Container Metrics Dashboard Template',
   },
   {
     name: 'CouchDB',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/couchdb',
+    href: '/docs/dashboards/dashboard-templates/couchdb',
     icon: <Database className="h-7 w-7 text-red-500" />,
     clickName: 'CouchDB Dashboard Template',
   },
@@ -134,7 +134,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'HAProxy',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/haproxy',
+    href: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
     icon: <Shield className="h-7 w-7 text-blue-600" />,
     clickName: 'HAProxy Dashboard Template',
   },
@@ -158,7 +158,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'JVM',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/jvm',
+    href: '/docs/dashboards/dashboard-templates/jvm-metrics',
     icon: <Cpu className="h-7 w-7 text-orange-600" />,
     clickName: 'JVM Dashboard Template',
   },
@@ -188,7 +188,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'Memcached',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/memcached',
+    href: '/docs/dashboards/dashboard-templates/memcached',
     icon: <HardDrive className="h-7 w-7 text-green-600" />,
     clickName: 'Memcached Dashboard Template',
   },
@@ -200,13 +200,13 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'MySQL',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/mysql',
+    href: '/docs/dashboards/dashboard-templates/mysql',
     icon: <SiMysql className="h-7 w-7 text-orange-500" />,
     clickName: 'MySQL Dashboard Template',
   },
   {
     name: 'Nginx',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/nginx',
+    href: '/docs/dashboards/dashboard-templates/nginx',
     icon: <SiNginx className="h-7 w-7 text-green-500" />,
     clickName: 'Nginx Dashboard Template',
   },
@@ -218,13 +218,13 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'PostgreSQL',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/postgresql',
+    href: '/docs/dashboards/dashboard-templates/postgresql',
     icon: <SiPostgresql className="h-7 w-7 text-blue-600" />,
     clickName: 'PostgreSQL Dashboard Template',
   },
   {
     name: 'RabbitMQ',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/rabbitmq',
+    href: '/docs/dashboards/dashboard-templates/rabbitmq',
     icon: <SiRabbitmq className="h-7 w-7 text-orange-600" />,
     clickName: 'RabbitMQ Dashboard Template',
   },
