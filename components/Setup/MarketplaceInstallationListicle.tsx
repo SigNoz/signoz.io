@@ -13,8 +13,8 @@ export default function SelfHostInstallationListicle() {
 
   // --- Cards for One-Click Install ---
   const oneClickCards = [
-    { name: 'Railway', href: 'https://elest.io/open-source/signoz', icon: railwayIcon, clickName: 'Deploy to Railway' },
-    { name: 'Elestio', href: 'https://railway.com/deploy/signoz', icon: elestioIcon, clickName: 'Deploy to Elestio' },
+    { name: 'Railway', href: 'https://railway.com/deploy/signoz', icon: railwayIcon, clickName: 'Deploy to Railway' },
+    { name: 'Elestio', href: 'https://elest.io/open-source/signoz', icon: elestioIcon, clickName: 'Deploy to Elestio' },
   ]
 
   return (
