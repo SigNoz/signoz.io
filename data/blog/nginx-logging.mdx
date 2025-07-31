@@ -170,13 +170,13 @@ error_log /var/log/nginx/critical.log crit;
 error_log /var/log/nginx/debug.log debug;
 ```
 
-Using multiple log files helps separate routine warnings from critical issues requiring immediate attention, making it easier to prioritize your response to different types of problems.
+Using multiple log files helps separate routine warnings from critical issues requiring immediate attention. Note that a message will go to all logs with a severity level equal to or less severe than the message’s level (e.g., a `crit` message will also be logged to `error.log` and `debug.log`).
 
 #### Syslog Integration
 For centralized log management, you can send error logs directly to a syslog server:
 
 ```nginx
-error_log syslog:server=192.168.1.100:514,facility=local7,tag=nginx,severity=error;
+error_log syslog:server=192.168.1.100:514,facility=local7,tag=nginx error;
 ```
 
 This sends error logs directly to a remote syslog server for centralized log management, which is particularly valuable in distributed environments.
@@ -213,10 +213,10 @@ This format includes timing metrics for understanding where delays occur in your
 For high-traffic environments, logging every single request can create performance bottlenecks and storage challenges. Log sampling allows you to maintain statistical relevance while reducing overhead:
 
 ```nginx
-# Sample 10% of requests based on request ID
-map $request_id $sample_log {
-    default 0;
-    ~.$ 1;  # Log every 10th request
+# Sample 10% of requests based on a hash of the request ID
+split_clients $request_id $sample_log {
+            10% 1;
+            *   0;
 }
 
 access_log /var/log/nginx/sampled.log combined if=$sample_log;
