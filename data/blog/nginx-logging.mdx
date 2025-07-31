@@ -120,10 +120,7 @@ This approach filters out successful responses while logging errors and redirect
 - Logging only error responses (4xx/5xx)
 - Excluding bot traffic or specific user agents
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_access_log_example.webp" alt="Nginx Access log example"/>
-    <figcaption><i>Example of NGINX access logs showing request details</i></figcaption>
-</figure>
+<Figure src="/img/blog/2022/12/nginx_access_log_example.webp" alt="Nginx Access log example" caption="Example of NGINX access logs showing request details" alt="Nginx Access log example"/>
 
 ## NGINX Error Logs: Severity Levels and Configuration
 
@@ -181,10 +178,7 @@ error_log syslog:server=192.168.1.100:514,facility=local7,tag=nginx error;
 
 This sends error logs directly to a remote syslog server for centralized log management, which is particularly valuable in distributed environments.
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_error_log_example.webp" alt="Nginx Error log example"/>
-    <figcaption><i>Example of NGINX error logs showing different severity levels</i></figcaption>
-</figure>
+<Figure src="/img/blog/2022/12/nginx_error_log_example.webp" alt="Nginx Error log example" caption="Example of NGINX error logs showing different severity levels" alt="Nginx Error log example"/>
 
 ## Advanced Logging Configuration
 
@@ -328,147 +322,21 @@ For GDPR compliance, consider implementing comprehensive privacy protection meas
 - Providing mechanisms for data deletion requests
 - Securing log transmission and storage with encryption
 
-## Integration with OpenTelemetry and Modern Observability
+## Integration with OpenTelemetry and SigNoz for Advanced Observability
 
-Modern observability requires integration with standardized telemetry collection frameworks. NGINX logs can be seamlessly integrated with OpenTelemetry-based systems to provide comprehensive monitoring capabilities.
+Modern observability requires integrating logs with metrics and traces for a complete view of system performance. [SigNoz](https://signoz.io/) is a one-stop observability platform that provides comprehensive log management capabilities built on OpenTelemetry standards. By correlating logs with metrics and traces in a single platform, SigNoz offers unified observability for your NGINX servers.
 
-### OpenTelemetry Collector Configuration
+For a detailed, step-by-step guide on configuring NGINX with SigNoz, you can follow the [official documentation](https://signoz.io/docs/integrations/nginx/). 
 
-To collect NGINX logs using the OpenTelemetry Collector, you'll need to configure the collector to read your log files and parse them appropriately. Here's a comprehensive configuration:
+<Figure src="/img/docs/integrations/nginx/nginx-integration-data-collected.webp" alt="NGINX and SigNoz integration" caption="NGINX and SigNoz integration" alt="NGINX and SigNoz integration"/>
 
-```yaml
-# otel-collector-config.yaml
-receivers:
-  filelog:
-    include: ["/var/log/nginx/access.log", "/var/log/nginx/error.log"]
-    start_at: beginning
-    operators:
-      - type: json_parser
-        if: 'body matches "^\\{"'
-        timestamp:
-          parse_from: attributes.timestamp
-          layout: '%Y-%m-%dT%H:%M:%S%z'
-      - type: regex_parser
-        if: 'body matches "^[0-9]"'
-        regex: '^(?P<remote_addr>\S+) - (?P<remote_user>\S+) \[(?P<time_local>[^\]]+)\] "(?P<request>[^"]*)" (?P<status>\d+) (?P<body_bytes_sent>\d+)'
+### Get Started with SigNoz
 
-processors:
-  batch:
-  resource:
-    attributes:
-    - key: service.name
-      value: "nginx"
-      action: upsert
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
 
-exporters:
-  otlp:
-    endpoint: "http://signoz-otel-collector:4317"
-    tls:
-      insecure: true
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
 
-service:
-  pipelines:
-    logs:
-      receivers: [filelog]
-      processors: [resource, batch]
-      exporters: [otlp]
-```
-
-This configuration collects both access and error logs, parsing JSON and traditional formats automatically while adding service metadata for better organization in your observability platform.
-
-### Sending NGINX Logs to Syslog
-
-For environments that prefer syslog-based log collection, NGINX can send logs directly to centralized syslog servers:
-
-```nginx
-error_log syslog:server=syslog.example.com:514,facility=local7,tag=nginx,severity=error;
-access_log syslog:server=syslog.example.com:514,facility=local7,tag=nginx,severity=info;
-```
-
-This approach provides immediate log forwarding without requiring additional collection agents, though it may have limitations in terms of format flexibility and buffering capabilities.
-
-## Log Analysis with SigNoz
-
-SigNoz is an open-source observability platform that provides comprehensive log management capabilities built on OpenTelemetry standards. Unlike traditional logging solutions, SigNoz offers unified observability by correlating logs with metrics and traces in a single platform.
-
-### Key Features for NGINX Log Analysis
-
-SigNoz offers several advantages for NGINX log analysis that make it particularly well-suited for modern infrastructure monitoring:
-
-- **OpenTelemetry Native Support**: Seamlessly collect logs using the OpenTelemetry Collector with two collection methods - file/stdout logs via filelog receiver or direct collection with minimal code changes
-- **High-Performance Storage**: Uses ClickHouse columnar database for efficient log storage and fast queries with aggregations (count, sum, average) without complex query languages
-- **Advanced Log Query Builder**: Powerful interface supporting search across multiple fields, structured and JSON views, and filtering capabilities
-- **Real-time Log Streaming**: Live tail functionality for immediate troubleshooting and monitoring
-- **Correlation with Traces and Metrics**: Adding traceId and spanId to logs enriches correlation with application metrics and traces for complete observability
-
-### Setting Up NGINX Log Collection with SigNoz
-
-The first step is configuring NGINX to output structured JSON logs optimized for SigNoz analytics:
-
-```nginx
-log_format signoz_json escape=json
-'{
-    "source": "nginx",
-    "timestamp": "$time_iso8601",
-    "remote_addr": "$remote_addr",
-    "request": "$request",
-    "status": "$status",
-    "body_bytes_sent": "$body_bytes_sent",
-    "request_time": "$request_time",
-    "user_agent": "$http_user_agent"
-}';
-
-access_log /var/log/nginx/access.log signoz_json;
-```
-
-Next, configure the OpenTelemetry Collector to forward these logs to SigNoz:
-
-```yaml
-# otel-collector-config.yaml
-receivers:
-  filelog:
-    include: ["/var/log/nginx/access.log"]
-    start_at: beginning
-    operators:
-      - type: json_parser
-        timestamp:
-          parse_from: attributes.timestamp
-          layout: '%Y-%m-%dT%H:%M:%S%z'
-      - type: move
-        from: attributes.source
-        to: resource["service.name"]
-
-processors:
-  batch:
-
-exporters:
-  otlp:
-    endpoint: "http://signoz-otel-collector:4317"
-    tls:
-      insecure: true
-
-service:
-  pipelines:
-    logs:
-      receivers: [filelog]
-      processors: [batch]
-      exporters: [otlp]
-```
-
-### Analyzing NGINX Logs in SigNoz
-
-Once configured, you can leverage SigNoz's powerful features for comprehensive log analysis:
-
-1. **Real-time Log Search**: Query logs using the intuitive search interface with support for complex filtering
-2. **Field-based Filtering**: Filter by status codes, IP addresses, response times, and custom fields
-3. **Time-series Analysis**: Visualize log patterns over time to identify trends
-4. **Alert Configuration**: Set up alerts for specific error conditions or performance thresholds
-5. **Cost-effective Storage**: Forward logs to S3 or Google Cloud storage while keeping them queryable in ClickHouse format
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_logs_signoz.webp" alt="Nginx logs sent to SigNoz"/>
-    <figcaption><i>NGINX logs analyzed in SigNoz dashboard</i></figcaption>
-</figure>
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
 
 ## Troubleshooting Common NGINX Logging Issues
 
@@ -581,15 +449,6 @@ chown nginx:adm /var/log/nginx/*.log
 
 **Regular Log Auditing**: Implement automated log analysis to detect unusual patterns or potential security threats. This might include unusual request patterns, suspicious user agents, or unexpected geographic distributions of requests.
 
-## Get Started with SigNoz
-
-SigNoz offers comprehensive log management capabilities specifically designed for NGINX and other web servers. With its OpenTelemetry-native architecture, advanced query capabilities, and unified observability approach, SigNoz provides everything you need for effective log analysis. The platform supports both file/stdout log collection via OpenTelemetry filelog receiver and system log collection using syslog receivers, making it easy to integrate with existing NGINX configurations.
-
-You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
-
-Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
-
-Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
 
 ## Conclusion
 
