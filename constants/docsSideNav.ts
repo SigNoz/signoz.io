@@ -1527,6 +1527,36 @@ const docsSideNav = [
         label: 'Search Syntax',
       },
       {
+        type: 'doc',
+        route: '/docs/userguide/operators-reference',
+        label: 'Operators Reference',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/full-text-search',
+        label: 'Full-Text Search Guide',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/functions-reference',
+        label: 'Functions Reference',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/field-context-data-types',
+        label: 'Field Context & Data Types',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/search-troubleshooting',
+        label: 'Troubleshooting Guide',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/search-advanced-examples',
+        label: 'Advanced Examples',
+      },
+      {
         type: 'category',
         isExpanded: false,
         // route: '',
