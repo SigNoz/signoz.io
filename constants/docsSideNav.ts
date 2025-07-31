@@ -1623,6 +1623,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/frontend-monitoring/sending-traces',
+        label: 'Sending Traces',
+      },
+      {
+        type: 'doc',
         label: 'Swift UI',
         route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
       },
