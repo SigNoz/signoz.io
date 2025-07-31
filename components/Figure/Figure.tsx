@@ -18,8 +18,10 @@ export default function Figure({ src, alt, caption, link, sourceText }: FigurePr
     <Zoom>
       <figure>
         <img src={src} alt={alt} />
-        <figcaption>
-          <i>{caption} {link && <a href={link} target="_blank" rel="noopener noreferrer"> Source: {sourceText} </a>}</i>
+          <figcaption>
+              <i>{caption} {link && sourceText && (
+                <> Source: <a href={link} target="_blank" rel="noopener noreferrer">{sourceText}</a></>
+              )}</i>
         </figcaption>
       </figure>
     </Zoom>
