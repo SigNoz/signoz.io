@@ -19,9 +19,8 @@ export default function SelfHostInstallationListicle() {
 
   return (
     <div>
-      <h2 className="mb-4 text-2xl font-semibold">One-Click Install</h2>
       <IconCardGrid
-        sectionName="One Click Install"
+        sectionName="all"
         gridCols="grid-cols-2 sm:grid-cols-3"
         cards={oneClickCards}
       />

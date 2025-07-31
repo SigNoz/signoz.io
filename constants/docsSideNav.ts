@@ -212,7 +212,7 @@ const docsSideNav = [
           {
             type: 'doc',
             isExpanded: false,
-            label: 'Marketplace & One-Click',
+            label: 'Deploying from Marketplace',
             route: '/docs/install/marketplace-one-click',
           },
           {
