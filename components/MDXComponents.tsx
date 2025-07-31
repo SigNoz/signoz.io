@@ -46,6 +46,8 @@ import IntegrationsListicle from './Integrations/IntegrationsListicle'
 import HostingDecision from './shared/HostingDecision'
 import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
 import K8sInstallationListicle from './Setup/K8sInstallationListicle'
+import MarketplaceInstallationListicle from './Setup/MarketplaceInstallationListicle'
+
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
 import MigrateToSigNoz from './MigrateToSigNoz/MigrateToSigNozOverview'
@@ -111,4 +113,5 @@ export const components: MDXComponents = {
   KubernetesDashboardsListicle,
   APMDashboardsListicle,
   HostMetricsDashboardsListicle,
+  MarketplaceInstallationListicle,
 }

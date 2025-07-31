@@ -211,6 +211,12 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            isExpanded: false,
+            label: 'Marketplace & One-Click',
+            route: '/docs/install/marketplace-one-click',
+          },
+          {
+            type: 'doc',
             label: 'Troubleshooting',
             route: '/docs/install/troubleshooting',
           },
