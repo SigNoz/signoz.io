@@ -1,0 +1,204 @@
+---
+date: 2025-07-31
+id: search-troubleshooting
+title: Troubleshooting Guide
+description: Common errors and solutions for SigNoz search queries.
+---
+
+This section helps you resolve common errors when writing search queries.
+
+## Syntax Errors
+
+### 'found syntax errors while parsing the filter expression'
+
+This error occurs when the query parser cannot understand your query syntax. Common causes:
+
+**1. Missing quotes around special characters**
+```
+# Wrong - brackets cause parsing error
+message = [error]
+
+# Correct - use quotes for special characters
+message = '[error]'
+```
+
+**2. Unmatched parentheses or quotes**
+```
+# Wrong - missing closing parenthesis
+(service = 'api' AND status = 'error'
+
+# Correct
+(service = 'api' AND status = 'error')
+```
+
+**3. Invalid operator usage**
+```
+# Wrong - invalid operator combination
+field NOT = 'value'
+
+# Correct - use proper NOT syntax
+field != 'value'
+# OR
+NOT field = 'value'
+```
+
+## Expression Parsing Errors
+
+### 'full text search is not supported'
+
+This error appears when using full-text search syntax on signals that don't support it (currently only logs support full-text search).
+
+```
+# Wrong - using full-text search on traces/metrics
+'database connection failed'  # when querying traces
+
+# Correct - use field-based search for non-log signals
+message CONTAINS 'database connection failed'
+```
+
+### 'key `<fieldname>` not found'
+
+The specified field doesn't exist in your telemetry data. Common causes:
+
+**1. Typo in field name**
+```
+# Wrong
+sevice.name = 'api'  # typo: sevice instead of service
+
+# Correct
+service.name = 'api'
+```
+
+**2. Incorrect JSON body field syntax**
+```
+# Wrong - missing body prefix for JSON search
+status = 'error'
+
+# Correct - use body prefix for JSON fields
+body.status = 'error'
+```
+
+### 'key `<fieldname>` is ambiguous'
+
+This indicates the same field name exists in multiple contexts (i.e resource attribute and attribute of span/log). Please use explicit context by prefixing `resource.` or `attribute.` to the key.
+
+```
+# Warning - ambiguous field
+status_code = 200
+# Could match: span.status_code, attribute.status_code, etc.
+
+# Better - be explicit
+attribute.http.status_code = 200
+```
+
+### 'missing key for body json search'
+
+When searching JSON body fields, you must specify the key after `body.`
+
+```
+# Wrong - incomplete body search
+body. = 'error'
+
+# Correct - specify the JSON key
+body.error_message = 'timeout'
+```
+
+## Function-Related Errors
+
+### 'unknown function `<name>`'
+
+Only specific functions are supported. Check for typos:
+
+Supported functions:
+- `has()` - check if array contains a value
+
+### 'function expects key and value parameters'
+
+Array functions require at least two parameters:
+
+```
+# Wrong - missing parameters
+has(body.tags)
+
+# Correct - provide field and value
+has(body.tags, 'production')
+```
+
+### 'function supports only body JSON search'
+
+Currently, array functions only work with JSON body fields:
+
+```
+# Wrong - using function on non-body field
+has(attribute.tags, 'prod')
+
+# Correct - use with body fields
+has(body.tags, 'prod')
+```
+
+## Value Type Errors
+
+### 'unsupported value type'
+
+Ensure values are one of the supported types:
+
+```
+# Supported value types:
+'text value'      # String (quoted)
+123               # Number
+true              # Boolean
+['a', 'b', 'c']   # Array (for IN clauses and functions)
+```
+
+### 'failed to parse number'
+
+Number parsing failed. Check for invalid formats:
+
+```
+# Wrong
+field = 123.456.789  # Invalid number format
+
+# Correct
+field = 123.456
+```
+
+## Common Patterns and Solutions
+
+### 1. Searching for operator keywords as text
+```
+# Wrong - AND interpreted as operator
+searching for AND operator
+
+# Correct - use quotes
+'searching for AND operator'
+```
+
+### 2. Complex conditions with wrong precedence
+```
+# Wrong - unclear precedence
+a = 1 OR b = 2 AND c = 3
+
+# Correct - use parentheses
+a = 1 OR (b = 2 AND c = 3)
+```
+
+### 3. Variable not found
+When using dashboard variables:
+```
+# If variable $service_name isn't defined
+service = $service_name  # Error
+
+# Define the variable or use a literal value
+service = 'api-gateway'
+```
+
+## Getting Help
+
+If you encounter an error not listed here:
+1. Check the search query syntax
+2. Verify field names exist in your data
+3. Try simplifying the query to isolate the issue
+4. Check for typos and proper quotation
+5. Ensure you're using the correct operators for your data type
+
+If the issue still persists, reach out to support.

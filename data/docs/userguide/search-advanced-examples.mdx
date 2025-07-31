@@ -1,0 +1,156 @@
+---
+date: 2025-07-31
+id: advanced-examples
+title: Advanced Examples
+description: Complex query patterns and real-world use cases for SigNoz search.
+---
+
+This guide provides advanced examples of search queries for complex use cases.
+
+## Complex Boolean Logic
+
+Use parentheses to control evaluation order:
+```
+(service.name = 'auth' OR service.name = 'user') AND status_code >= 400
+```
+
+This finds errors from either the auth or user service.
+
+## Nested Conditions
+
+Group related conditions for complex logic:
+```
+region = 'us-east' AND (
+  (status = 'error' AND retry_count > 3) OR
+  (status = 'timeout' AND response_time_ms > 5000)
+)
+```
+
+This finds issues in us-east that are either:
+- Errors with more than 3 retries, OR
+- Timeouts taking longer than 5 seconds
+
+## Multi-Service Error Analysis
+
+Find errors across multiple services with specific conditions:
+```
+severity_text = 'ERROR' AND 
+service.name IN ('payment', 'checkout') AND
+http.request.duration > 1000
+```
+
+## API Endpoint Analysis
+
+Analyze specific API endpoints:
+```
+(http.method = 'POST' OR http.method = 'PUT') AND
+http.status_code BETWEEN 200 AND 299 AND
+http.url LIKE '%/api/v2/%'
+```
+
+## Production Incident Investigation
+
+Complex query for investigating production issues:
+```
+deployment.environment = 'production' AND
+severity_text IN ('ERROR', 'FATAL') AND
+(
+  (error.type = 'DatabaseError' AND body CONTAINS 'connection') OR
+  (error.type = 'TimeoutError' AND response_time_ms > 30000) OR
+  (http.status_code >= 500 AND http.url LIKE '%/critical/%')
+)
+```
+
+## User Experience Monitoring
+
+Track slow requests affecting specific users:
+```
+user.tier = 'premium' AND
+service.name = 'api-gateway' AND
+(
+  (http.method = 'GET' AND response_time_ms > 2000) OR
+  (http.method = 'POST' AND response_time_ms > 5000)
+) AND
+k8s.namespace.name = 'production'
+```
+
+## Security Event Detection
+
+Identify potential security issues:
+```
+(
+  (body CONTAINS 'authentication failed' AND client.ip NOT LIKE '10.%') OR
+  (http.status_code = 403 AND request_count > 10) OR
+  (body REGEXP '(sql injection|xss|csrf)' AND severity_text = 'WARNING')
+)
+```
+
+## Performance Degradation Pattern
+
+Find performance degradation patterns:
+```
+service.name = 'database-service' AND
+(
+  (
+    query.type = 'SELECT' AND 
+    execution_time_ms > 1000 AND
+    table_name IN ('users', 'orders', 'payments')
+  ) OR
+  (
+    query.type IN ('INSERT', 'UPDATE') AND
+    execution_time_ms > 500 AND
+    affected_rows > 1000
+  )
+) AND
+deployment.environment = 'production'
+```
+
+## Kubernetes Pod Issues
+
+Investigate pod-specific issues:
+```
+k8s.pod.name LIKE 'payment-service-%' AND
+k8s.namespace.name = 'production' AND
+(
+  (severity_text = 'ERROR' AND body CONTAINS 'OOMKilled') OR
+  (restart_count > 5) OR
+  (body CONTAINS 'CrashLoopBackOff')
+)
+```
+
+## Cross-Service Transaction Tracing
+
+Find related logs across services for a transaction:
+```
+(
+  trace_id = '123e4567-e89b-12d3-a456-426614174000' OR
+  correlation_id = 'ORDER-2024-001'
+) AND
+service.name IN ('order-service', 'payment-service', 'inventory-service')
+```
+
+## Feature Flag Analysis
+
+Analyze logs related to feature flags:
+```
+has(body.feature_flags, 'new-checkout-flow') AND
+(
+  (
+    conversion.success = true AND 
+    response_time_ms < 3000
+  ) OR
+  (
+    severity_text = 'ERROR' AND 
+    body CONTAINS 'feature flag evaluation failed'
+  )
+) AND
+deployment.environment = 'production'
+```
+
+## Best Practices for Complex Queries
+
+1. **Use parentheses liberally** - Make operator precedence explicit
+2. **Start broad, then narrow** - Begin with service/environment filters
+3. **Test incrementally** - Build complex queries step by step
+4. **Filter on indexed fields first** - Use fields like service.name for better performance
+5. **Use time ranges in the UI** - Set appropriate time windows using the time picker
