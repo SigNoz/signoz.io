@@ -10,15 +10,16 @@ interface FigureProps {
   alt: string
   caption: string
   link?: string
+  sourceText?: string
 }
 
-export default function Figure({ src, alt, caption, link }: FigureProps) {
+export default function Figure({ src, alt, caption, link, sourceText }: FigureProps) {
   return (
     <Zoom>
       <figure>
         <img src={src} alt={alt} />
         <figcaption>
-          <i>{caption} {link && <a href={link} target="_blank" rel="noopener noreferrer"> Source: {link}</a>}</i>
+          <i>{caption} {link && <a href={link} target="_blank" rel="noopener noreferrer"> Source: {sourceText} </a>}</i>
         </figcaption>
       </figure>
     </Zoom>
