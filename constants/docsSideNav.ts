@@ -1522,6 +1522,11 @@ const docsSideNav = [
         label: 'Query Builder',
       },
       {
+        type: 'doc',
+        route: '/docs/userguide/search-syntax',
+        label: 'Search Syntax',
+      },
+      {
         type: 'category',
         isExpanded: false,
         // route: '',
