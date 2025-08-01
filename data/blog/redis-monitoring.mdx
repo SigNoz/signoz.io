@@ -27,15 +27,19 @@ Since Redis typically sits in the critical path of application requests, perform
 
 ## Essential Redis Metrics
 
-Understanding which metrics to monitor forms the foundation of effective Redis observability. Let's explore the key categories:
+Understanding which metrics to monitor forms the foundation of effective Redis observability. These metrics fall into several key categories: performance metrics that measure response times and throughput, memory metrics that track resource utilization, activity metrics that show client behavior, persistence metrics for data durability, and error metrics that capture potential problems.
 
 ### Performance Metrics
 
 **Latency** measures the time between when Redis receives a command and responds. Redis typically delivers sub-millisecond latency, making even small increases significant for user experience.
 
-**Operations per second (ops/sec)** indicates Redis throughput. The `instantaneous_ops_per_sec` metric helps diagnose causes of high latency—if throughput remains constant while latency increases, the issue isn't computationally intensive commands but rather network or infrastructure problems.
+**Operations per second (ops/sec)** indicates Redis throughput. The `instantaneous_ops_per_sec` metric helps diagnose causes of high latency. If throughput remains constant while latency increases, the issue isn't computationally intensive commands but rather network or infrastructure problems.
 
 **Cache hit ratio** calculates successful key lookups as `keyspace_hits / (keyspace_hits + keyspace_misses)`. A healthy ratio typically exceeds 90% for caching workloads. Low hit rates suggest clients are requesting evicted or non-existent keys.
+
+<Figure src="/img/blog/2022/07/redis_info_stats_keyspace.webp" alt="Redis Cache Hit Ratio" caption="The Redis INFO command showing keyspace hits and misses" />
+
+**CPU usage** tracks the computational load on your Redis instance. Redis is primarily single-threaded, making CPU usage a critical indicator of server load. High CPU utilization may result from inefficient commands, high throughput, or background operations like snapshots. Monitor both Redis-specific CPU usage and overall system CPU to distinguish Redis load from other processes.
 
 ### Memory Metrics
 
@@ -46,6 +50,8 @@ Memory management is arguably the most critical aspect of Redis monitoring since
 **Memory fragmentation ratio** is calculated as `used_memory_rss / used_memory`, where `used_memory_rss` is the physical memory occupied by the Redis process. A healthy ratio ranges from 1.0 to 1.1. Values below 1.0 indicate Redis is using swap memory (critical issue), while values above 1.5 suggest excessive fragmentation requiring a server restart.
 
 **Evicted keys** occur when Redis reaches its memory limit and must remove keys according to the configured eviction policy. High eviction rates indicate insufficient memory or inefficient data retention policies.
+
+**maxmemory configuration** sets an upper bound on RAM usage to prevent Redis from consuming all available system memory. This critical setting enables eviction policies and helps balance caching efficiency with system stability. Monitor memory usage against your maxmemory threshold to avoid out-of-memory conditions.
 
 **Blocked clients** shows clients waiting on blocking operations like BLPOP, BRPOP, or BRPOPLPUSH. Consistently high numbers suggest queue bottlenecks or slow consumers.
 
@@ -58,6 +64,8 @@ Memory management is arguably the most critical aspect of Redis monitoring since
 **Master last IO seconds ago** measures time since the last interaction between primary and replica instances. Extended periods without communication risk serving stale data and can trigger expensive full synchronization operations.
 
 **Keyspace size** tracks the total number of keys. For cache workloads, this helps identify when you're hitting memory limits and need to adjust eviction policies or add capacity.
+
+<Figure src="/img/blog/2022/07/redis_info_keyspace.webp" alt="Redis INFO keyspace" caption="The keyspace section of the Redis INFO command showing key statistics" />
 
 ### Persistence Metrics
 
@@ -75,7 +83,7 @@ Memory management is arguably the most critical aspect of Redis monitoring since
 
 ## Redis Monitoring Tools Overview
 
-The Redis monitoring landscape offers various solutions, each with distinct trade-offs:
+The Redis monitoring landscape provides various solutions, each with different strengths and limitations:
 
 ### Built-in Redis Tools
 
@@ -112,17 +120,19 @@ LATENCY DOCTOR
 
 ### Open Source Solutions
 
-**RedisInsight** serves as the official GUI tool, providing real-time monitoring and performance analysis. While excellent for development, it lacks robust alerting needed for production.
+**RedisInsight** serves as the official GUI tool, providing real-time monitoring and performance analysis. While suitable for development, it lacks robust alerting needed for production.
 
-**Prometheus + Grafana** represents the most popular open-source stack. The Redis Exporter collects metrics, Prometheus stores time-series data, and Grafana provides visualization and alerting.
+**Prometheus + Grafana** represents a widely-used open-source stack. The Redis Exporter collects metrics, Prometheus stores time-series data, and Grafana provides visualization and alerting.
 
 Benefits include complete infrastructure control and extensive customization options. However, setup and maintenance require significant effort.
+
+**SigNoz** offers a modern approach to Redis monitoring through its OpenTelemetry-native observability platform, which we'll explore in detail in the next section.
 
 ### Enterprise Solutions
 
 **Redis Enterprise** provides built-in monitoring through its management console with real-time visualization, automated alerting, and cluster management.
 
-Commercial platforms like Datadog and New Relic offer Redis monitoring as part of broader observability solutions with automated setup and intelligent alerting.
+Commercial platforms like Datadog and New Relic offer Redis monitoring as part of broader observability solutions with automated setup and intelligent alerting. However, these solutions come with higher costs, vendor lock-in concerns, and potential data privacy considerations when sending telemetry data to external providers.
 
 ## Monitoring Redis with SigNoz
 
@@ -139,26 +149,18 @@ SigNoz's Redis integration collects comprehensive metrics and logs through OpenT
 
 ### Setup Process
 
-Setting up Redis monitoring in SigNoz involves three main steps:
+Setting up Redis monitoring in SigNoz involves configuring the OpenTelemetry Collector with Redis-specific receivers and processors. The integration supports both metrics and logs collection from Redis instances.
 
-1. **Configure environment variables** for your Redis log location and SigNoz endpoints:
+For detailed setup instructions, refer to the [SigNoz Redis integration documentation](https://signoz.io/docs/integrations/redis/).
 
-```bash
-export REDIS_LOG_FILE=/var/log/redis/redis-server.log
-export OTLP_DESTINATION_ENDPOINT="ingest.{REGION}.signoz.cloud:443"
-export SIGNOZ_INGESTION_KEY="your-signoz-ingestion-key"
-```
-
-2. **Deploy an OpenTelemetry Collector** with Redis-specific configuration using the provided YAML config file.
-
-3. **Access the pre-built Redis dashboard** through the SigNoz interface to start monitoring immediately.
+The setup process includes:
+1. Configuring the OpenTelemetry Collector with Redis receiver
+2. Setting up log collection from Redis server logs
+3. Accessing pre-built dashboards for immediate monitoring
 
 What sets SigNoz apart is its ability to trace Redis operations within distributed transactions, making it easier to identify performance bottlenecks and understand Redis impact on overall application performance.
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/07/redis_dashboard_signoz.webp" alt="Redis monitoring dashboard in SigNoz"/>
-    <figcaption><i>Redis monitoring dashboard in SigNoz</i></figcaption>
-</figure>
+<Figure src="https://github.com/user-attachments/assets/0590c87d-2024-425e-b925-07ef18e077da" alt="Redis monitoring dashboard in SigNoz" caption="Redis monitoring dashboard in SigNoz showing comprehensive metrics and performance data" />
 
 ## Setting Up Effective Monitoring
 
@@ -174,10 +176,7 @@ Before setting alerts, establish performance baselines during normal operations.
 
 **Connection monitoring**: Track client connections and set alerts for sudden spikes or rejections. Monitor replication lag based on your consistency requirements.
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/07/memory_fragmentation_ratio.webp" alt="Memory fragmentation ratio monitored using SigNoz"/>
-    <figcaption><i>Memory fragmentation ratio monitored using SigNoz</i></figcaption>
-</figure>
+<Figure src="/img/blog/2022/07/memory_fragmentation_ratio.webp" alt="Memory fragmentation ratio monitored using SigNoz" caption="Memory fragmentation ratio monitored using SigNoz" />
 
 ## Troubleshooting Common Issues
 
@@ -209,9 +208,7 @@ High latency often indicates inefficient commands or resource contention:
 3. Check for background operations (SAVE, BGSAVE)
 4. Monitor system-level resources
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/07/redis_cli_latency.webp" alt="Latency monitoring using Redis CLI"/>
-</figure>
+<Figure src="/img/blog/2022/07/redis_cli_latency.webp" alt="Latency monitoring using Redis CLI" caption="Latency monitoring using Redis CLI showing response time analysis" />
 
 ## Best Practices
 
