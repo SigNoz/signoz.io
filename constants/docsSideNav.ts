@@ -2857,6 +2857,11 @@ const docsSideNav = [
         label: 'Vercel AI SDK Monitoring',
         type: 'doc',
       },
+      {
+        route: '/docs/llm/llamaindex-monitoring',
+        label: 'LlamaIndex Monitoring',
+        type: 'doc',
+      },
     ],
   },
   {
