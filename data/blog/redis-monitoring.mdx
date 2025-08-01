@@ -12,8 +12,6 @@ Redis monitoring is critical for maintaining performance in applications. Whethe
 
 This guide walks you through everything needed to monitor Redis effectively, from essential metrics to alerting strategies and tool comparisons.
 
-![Cover Image](/img/blog/2022/07/redis_monitoring_cover.webp)
-
 ## What is Redis and Why Monitor It?
 
 Redis (Remote Dictionary Server) is an in-memory data structure store that serves multiple roles in modern applications:
@@ -27,7 +25,14 @@ Since Redis typically sits in the critical path of application requests, perform
 
 ## Essential Redis Metrics
 
-Understanding which metrics to monitor forms the foundation of effective Redis observability. These metrics fall into several key categories: performance metrics that measure response times and throughput, memory metrics that track resource utilization, activity metrics that show client behavior, persistence metrics for data durability, and error metrics that capture potential problems.
+Understanding which metrics to monitor forms the foundation of effective Redis observability. 
+
+These metrics fall into several key categories: 
+1. **Performance metrics** that measure response times and throughput
+2. **Memory metrics** that track resource utilization
+3. **Activity metrics** that show client behavior
+4. **Persistence metrics** for data durability
+5. **Error metrics** that capture potential problems
 
 ### Performance Metrics
 
@@ -47,39 +52,39 @@ Memory management is arguably the most critical aspect of Redis monitoring since
 
 **used_memory** represents total bytes allocated by Redis for storing data. When this exceeds available system memory, the operating system begins swapping to disk, drastically reducing performance.
 
-**Memory fragmentation ratio** is calculated as `used_memory_rss / used_memory`, where `used_memory_rss` is the physical memory occupied by the Redis process. A healthy ratio ranges from 1.0 to 1.1. Values below 1.0 indicate Redis is using swap memory (critical issue), while values above 1.5 suggest excessive fragmentation requiring a server restart.
+**Memory fragmentation ratio** is calculated as `used_memory_rss / used_memory`, where `used_memory_rss` is the physical memory occupied by the Redis process. A healthy ratio is generally between 1.0 and 1.4. Values below 1.0 indicate Redis is using swap memory (a critical issue), while values consistently above 1.5 suggest excessive fragmentation. Instead of a server restart, consider enabling **active defragmentation** (available in Redis 4.0+), which resolves fragmentation without downtime.
 
-**Evicted keys** occur when Redis reaches its memory limit and must remove keys according to the configured eviction policy. High eviction rates indicate insufficient memory or inefficient data retention policies.
+**evicted_keys** occur when Redis reaches its memory limit and must remove keys according to the configured eviction policy. High eviction rates indicate insufficient memory or inefficient data retention policies.
 
 **maxmemory configuration** sets an upper bound on RAM usage to prevent Redis from consuming all available system memory. This critical setting enables eviction policies and helps balance caching efficiency with system stability. Monitor memory usage against your maxmemory threshold to avoid out-of-memory conditions.
 
-**Blocked clients** shows clients waiting on blocking operations like BLPOP, BRPOP, or BRPOPLPUSH. Consistently high numbers suggest queue bottlenecks or slow consumers.
+**blocked_clients** shows clients waiting on blocking operations like BLPOP, BRPOP, or BRPOPLPUSH. Consistently high numbers suggest queue bottlenecks or slow consumers.
 
 ### Activity Metrics
 
-**Connected clients** tracks active client connections. Because access to Redis is typically mediated by applications, sudden changes outside normal ranges indicate upstream connection issues or potential capacity problems.
+**connected_clients** tracks active client connections. Because access to Redis is typically mediated by applications, sudden changes outside normal ranges indicate upstream connection issues or potential capacity problems.
 
-**Connected replicas** (formerly slaves) is crucial when using Redis replication. Unexpected changes in replica count could indicate host failures or replica instance problems.
+**connected_replicas** (formerly slaves) is crucial when using Redis replication. Unexpected changes in replica count could indicate host failures or replica instance problems.
 
-**Master last IO seconds ago** measures time since the last interaction between primary and replica instances. Extended periods without communication risk serving stale data and can trigger expensive full synchronization operations.
+**master_last_io_seconds_ago** measures time since the last interaction between primary and replica instances. Extended periods without communication risk serving stale data and can trigger expensive full synchronization operations.
 
-**Keyspace size** tracks the total number of keys. For cache workloads, this helps identify when you're hitting memory limits and need to adjust eviction policies or add capacity.
+**keyspace_size** tracks the total number of keys. For cache workloads, this helps identify when you're hitting memory limits and need to adjust eviction policies or add capacity.
 
 <Figure src="/img/blog/2022/07/redis_info_keyspace.webp" alt="Redis INFO keyspace" caption="The keyspace section of the Redis INFO command showing key statistics" />
 
 ### Persistence Metrics
 
-**RDB last save time** shows the Unix timestamp of the last successful dump to disk. Long intervals between saves increase potential data loss during failures.
+**rdb_last_save_time** shows the Unix timestamp of the last successful dump to disk. Long intervals between saves increase potential data loss during failures.
 
-**RDB changes since last save** indicates data volatility. Even with long save intervals, few changes mean minimal data loss risk.
+**rdb_changes_since_last_save** indicates data volatility. Even with long save intervals, few changes mean minimal data loss risk.
 
 ### Error Metrics
 
-**Rejected connections** occur when Redis reaches the `maxclients` limit. Any non-zero value indicates capacity issues requiring attention.
+**rejected_connections** occur when Redis reaches the `maxclients` limit. Any non-zero value indicates capacity issues requiring attention.
 
-**Keyspace misses** increments when clients look up non-existent keys. For non-cache workloads, this should remain near zero. High values suggest application bugs or inefficient query patterns.
+**keyspace_misses** increments when clients look up non-existent keys. For non-cache workloads, this should remain near zero. High values suggest application bugs or inefficient query patterns.
 
-**Master link down since seconds** appears when primary-replica connections fail. This metric should remain at zero to avoid serving stale data.
+**master_link_down_since_seconds** appears when primary-replica connections fail. This metric should remain at zero to avoid serving stale data.
 
 ## Redis Monitoring Tools Overview
 
@@ -162,6 +167,16 @@ What sets SigNoz apart is its ability to trace Redis operations within distribut
 
 <Figure src="https://github.com/user-attachments/assets/0590c87d-2024-425e-b925-07ef18e077da" alt="Redis monitoring dashboard in SigNoz" caption="Redis monitoring dashboard in SigNoz showing comprehensive metrics and performance data" />
 
+### Get Started with SigNoz
+
+SigNoz provides comprehensive Redis monitoring through its OpenTelemetry-native platform. The integration offers distributed tracing capabilities that show Redis operations within complete application transactions, plus pre-built dashboards for immediate visibility into your Redis performance.
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features. 
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
 ## Setting Up Effective Monitoring
 
 ### Establishing Baselines
@@ -224,15 +239,6 @@ Set meaningful alert thresholds that balance sensitivity with noise reduction. S
 
 Correlate Redis metrics with application performance indicators. Understanding how Redis performance impacts user experience enables better optimization prioritization.
 
-## Get Started with SigNoz
-
-SigNoz provides comprehensive Redis monitoring through its OpenTelemetry-native platform. The integration offers distributed tracing capabilities that show Redis operations within complete application transactions, plus pre-built dashboards for immediate visibility into your Redis performance.
-
-You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features. 
-
-Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
-
-Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
 
 Hope we answered all your questions regarding Redis monitoring. If you have more questions, feel free to join and ask on our [slack community](https://signoz.io/slack/).
 
