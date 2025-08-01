@@ -51,6 +51,9 @@ Memory management is arguably the most critical aspect of Redis monitoring, as a
 
 - **used_memory**: This represents the total bytes allocated by Redis for data. If this exceeds available system memory, the OS will start swapping to disk, which will severely degrade performance.
 - **Memory fragmentation ratio**: Calculated as `used_memory_rss / used_memory`, this metric indicates how efficiently memory is being used. A healthy ratio is generally between 1.0 and 1.4. A value below 1.0 is a critical issue, as it means Redis is using swap memory. If the ratio is consistently above 1.5, it suggests excessive fragmentation. Instead of restarting the server, consider enabling **active defragmentation** (available in Redis 4.0+), which can resolve fragmentation without downtime.
+
+<Figure src="/img/blog/2025/08/redis-monitoing-fragmentation.webp" alt="Redis memory fragmentation illustration" caption="Redis memory fragmentation illustration" />
+
 - **evicted_keys**: This metric counts the number of keys that have been removed because Redis has reached its memory limit. A high number of evicted keys may indicate that you need to allocate more memory or review your data retention policies.
 - **maxmemory configuration**: This setting puts a cap on Redis's RAM usage, preventing it from consuming all available system memory. It's a critical setting for managing eviction policies and maintaining system stability.
 - **blocked_clients**: This shows the number of clients waiting on blocking operations. A consistently high number can point to bottlenecks in your queues or slow consumers.
@@ -125,6 +128,8 @@ Benefits include complete infrastructure control and extensive customization opt
 ## Monitoring Redis with SigNoz
 
 SigNoz offers a modern approach to Redis monitoring through its OpenTelemetry-native observability platform. Unlike traditional monitoring tools, SigNoz provides full-stack visibility by correlating Redis metrics with application traces and logs.
+
+<Figure src="/img/blog/2025/08/redis-monitoring-signoz.webp" alt="Redis monitoring with SigNoz" caption="Redis monitoring with SigNoz" />
 
 ### Key Features
 
