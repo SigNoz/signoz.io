@@ -1,45 +1,43 @@
 ---
-title: Docker Collection Agent - Install
+title: OpenTelemetry Collector for Docker - Install
 id: install
-description: Step-by-step guide to install and configure the Docker Collection Agent for comprehensive Docker observability
+description: Step-by-step guide to install and configure OpenTelemetry Collector for comprehensive Docker observability
 ---
 
-# Docker Collection Agent - Install
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# OpenTelemetry Collector for Docker - Install
 
 ## Prerequisites
 
-Before installing the Docker Collection Agent, ensure you have:
+Before installing the OpenTelemetry Collector, ensure you have:
 
-- **Docker Engine 20.10+** installed and running
-- **Docker Compose** (optional, for compose-based installation)
-- **SigNoz Cloud account** with ingestion key
-- **Administrative access** to the Docker host
-- **Network connectivity** to SigNoz Cloud endpoints
+- Docker Engine 20.10+ installed and running
+- SigNoz Cloud account with ingestion key
+- Administrative access to the Docker host
+- Network connectivity to SigNoz Cloud endpoints
 
 ## Get SigNoz Credentials
 
-1. **Login to SigNoz Cloud** at [https://signoz.io](https://signoz.io)
-2. **Navigate to Settings** → **Ingestion Keys**
-3. **Copy your ingestion key** and **region** (e.g., `us`, `eu`, `in`)
+1. Login to SigNoz Cloud at [https://signoz.io](https://signoz.io)
+2. Navigate to Settings → Ingestion Keys
+3. Copy your ingestion key and region (e.g., `us`, `eu`, `in`)
 
 You'll need these values for the configuration.
 
 ---
 
-## Installation Methods
+## Installation
 
-### Method 1: Docker Run (Recommended)
-
-This is the quickest way to get started with the collection agent.
-
-#### Step 1: Create Configuration Directory
+### Step 1: Create Configuration Directory
 
 ```bash
-mkdir -p ~/signoz-docker-agent
-cd ~/signoz-docker-agent
+mkdir -p ~/opentelemetry-collector
+cd ~/opentelemetry-collector
 ```
 
-#### Step 2: Create Agent Configuration
+### Step 2: Create Collector Configuration
 
 Create `otel-config.yaml`:
 
@@ -107,10 +105,6 @@ exporters:
     headers:
       signoz-ingestion-key: "<YOUR_INGESTION_KEY>"
 
-  # Debug output (optional)
-  logging:
-    loglevel: info
-
 service:
   extensions: []
   pipelines:
@@ -128,7 +122,7 @@ service:
       exporters: [otlp]
 ```
 
-#### Step 3: Replace Configuration Values
+### Step 3: Replace Configuration Values
 
 Update the configuration with your SigNoz credentials:
 
@@ -138,11 +132,13 @@ sed -i 's/<YOUR_REGION>/us/g' otel-config.yaml
 sed -i 's/<YOUR_INGESTION_KEY>/your-actual-key-here/g' otel-config.yaml
 ```
 
-#### Step 4: Run the Collection Agent
+### Step 4: Run the OpenTelemetry Collector
 
-**For Linux/Windows:**
+<Tabs>
+<TabItem value="linux" label="Linux" default>
+
 ```bash
-docker run --name signoz-docker-agent \
+docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
   --user 0:0 \
@@ -160,9 +156,11 @@ docker run --name signoz-docker-agent \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
 
-**For macOS (Docker Desktop):**
+</TabItem>
+<TabItem value="macos" label="macOS">
+
 ```bash
-docker run --name signoz-docker-agent \
+docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
   --user 0:0 \
@@ -175,85 +173,43 @@ docker run --name signoz-docker-agent \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
 
-### Method 2: Docker Compose
-
-For more complex setups or when you want to manage the agent alongside your applications.
-
-#### Step 1: Create Docker Compose File
-
-Create `docker-compose.yml`:
-
-```yaml
-version: '3.8'
-
-services:
-  signoz-docker-agent:
-    image: otel/opentelemetry-collector-contrib:0.130.1
-    container_name: signoz-docker-agent
-    restart: unless-stopped
-    user: "0:0"
-    privileged: true  # Required on macOS
-    pid: host
-    network_mode: host
-    volumes:
-      # Docker logs and socket
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      # Host filesystem (for metrics)
-      - /proc:/hostfs/proc:ro
-      - /sys:/hostfs/sys:ro  
-      - /:/hostfs:ro
-      # Agent configuration
-      - ./otel-config.yaml:/etc/otelcol-contrib/config.yaml
-    environment:
-      - HOST_PROC=/hostfs/proc
-      - HOST_SYS=/hostfs/sys
-      - HOST_ROOT=/hostfs
-    command: ["--config=/etc/otelcol-contrib/config.yaml"]
-```
-
-#### Step 2: Deploy the Agent
+</TabItem>
+<TabItem value="windows" label="Windows">
 
 ```bash
-docker-compose up -d
-```
-
-### Method 3: Docker Swarm
-
-For Docker Swarm deployments across multiple nodes.
-
-#### Step 1: Create Swarm Service
-
-```bash
-docker service create \
-  --name signoz-docker-agent \
-  --mode global \
+docker run --name opentelemetry-collector \
+  --restart unless-stopped \
+  --detach \
   --user 0:0 \
-  --mount type=bind,source=/var/lib/docker/containers,target=/var/lib/docker/containers,readonly \
-  --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly \
-  --mount type=bind,source=/proc,target=/hostfs/proc,readonly \
-  --mount type=bind,source=/sys,target=/hostfs/sys,readonly \
-  --mount type=bind,source=/,target=/hostfs,readonly \
-  --mount type=bind,source=$(pwd)/otel-config.yaml,target=/etc/otelcol-contrib/config.yaml,readonly \
-  --env HOST_PROC=/hostfs/proc \
-  --env HOST_SYS=/hostfs/sys \
-  --env HOST_ROOT=/hostfs \
+  --pid host \
   --network host \
+  -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /proc:/hostfs/proc:ro \
+  -v /sys:/hostfs/sys:ro \
+  -v /:/hostfs:ro \
+  -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
+  -e HOST_PROC=/hostfs/proc \
+  -e HOST_SYS=/hostfs/sys \
+  -e HOST_ROOT=/hostfs \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
+
+</TabItem>
+</Tabs>
 
 ---
 
 ## Verification
 
-### Step 1: Check Agent Status
+### Step 1: Check Collector Status
 
 ```bash
 # Check if container is running
-docker ps | grep signoz-docker-agent
+docker ps | grep opentelemetry-collector
 
-# Check agent logs
-docker logs signoz-docker-agent
+# Check collector logs
+docker logs opentelemetry-collector
 ```
 
 Expected output:
@@ -272,159 +228,9 @@ docker run --rm alpine sh -c 'for i in $(seq 1 10); do echo "Test log entry $i";
 
 ### Step 3: Verify in SigNoz
 
-1. **Open SigNoz Cloud** in your browser
-2. **Navigate to Logs** section
-3. **Filter by service.name** = `otelcol-contrib`
-4. **Look for test log entries** from the Alpine container
+1. Open SigNoz Cloud in your browser
+2. Navigate to Logs section
+3. Filter by service.name = `otelcol-contrib`
+4. Look for test log entries from the Alpine container
 
 You should see logs appearing within 30-60 seconds.
-
----
-
-## Post-Installation Configuration
-
-### Resource Limits
-
-Set memory and CPU limits to prevent resource exhaustion:
-
-```bash
-docker update --memory=1g --cpus=1.0 signoz-docker-agent
-```
-
-### Log Rotation
-
-Configure Docker daemon log rotation in `/etc/docker/daemon.json`:
-
-```json
-{
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "10m",
-    "max-file": "3"
-  }
-}
-```
-
-Restart Docker daemon:
-```bash
-sudo systemctl restart docker
-```
-
-### Firewall Configuration
-
-If you have a firewall enabled, allow the OTLP ports:
-
-```bash
-# Allow OTLP gRPC (4317) and HTTP (4318)
-sudo ufw allow 4317
-sudo ufw allow 4318
-```
-
----
-
-## Upgrade
-
-### Upgrade Agent Version
-
-```bash
-# Stop current agent
-docker stop signoz-docker-agent
-docker rm signoz-docker-agent
-
-# Pull latest image
-docker pull otel/opentelemetry-collector-contrib:latest
-
-# Run with new image (use same command as installation)
-docker run --name signoz-docker-agent \
-  # ... same parameters as installation
-  otel/opentelemetry-collector-contrib:latest
-```
-
-### Configuration Updates
-
-```bash
-# Update config file
-nano otel-config.yaml
-
-# Restart agent to apply changes
-docker restart signoz-docker-agent
-```
-
----
-
-## Uninstall
-
-### Remove Agent Container
-
-```bash
-# Stop and remove container
-docker stop signoz-docker-agent
-docker rm signoz-docker-agent
-
-# Remove configuration (optional)
-rm -rf ~/signoz-docker-agent
-```
-
-### Docker Compose Cleanup
-
-```bash
-# Stop and remove services
-docker-compose down
-
-# Remove volumes (optional)
-docker-compose down -v
-```
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| **Permission denied accessing logs** | Insufficient file permissions | Use `--user 0:0` and check Docker log directory permissions |
-| **Agent not starting** | Invalid configuration | Check `docker logs signoz-docker-agent` for syntax errors |
-| **No data in SigNoz** | Wrong credentials or endpoint | Verify ingestion key and region in configuration |
-| **High resource usage** | No resource limits set | Add memory limits and optimize collection intervals |
-
-### Debug Commands
-
-```bash
-# Check agent status
-docker inspect signoz-docker-agent
-
-# View detailed logs
-docker logs signoz-docker-agent --follow
-
-# Test configuration syntax
-docker run --rm -v "$(pwd)/otel-config.yaml":/config.yaml \
-  otel/opentelemetry-collector-contrib:0.130.1 \
-  --config=/config.yaml --dry-run
-
-# Check file permissions
-ls -la /var/lib/docker/containers/
-```
-
-### Get Help
-
-If you encounter issues:
-
-1. **Check the logs** first using `docker logs signoz-docker-agent`
-2. **Verify configuration** syntax and credentials
-3. **Join SigNoz Community** [Slack](https://signoz.io/slack) for support
-4. **Create an issue** on [GitHub](https://github.com/SigNoz/signoz) if needed
-
----
-
-## Next Steps
-
-✅ **Agent Installed Successfully!**
-
-Now you can:
-
-1. **[📋 Configure Log Collection](../docker-logs/)** - Set up advanced log parsing and filtering
-2. **[📊 Configure Metrics Collection](../docker-metrics/)** - Monitor container and host metrics
-3. **[🔍 Set up Application Tracing](../docker-traces/)** - Enable distributed tracing
-4. **[⚙️ Advanced Configuration](./configuration)** - Customize the agent for your needs
-5. **[📊 Create Dashboards](https://signoz.io/docs/dashboards/)** - Build monitoring dashboards in SigNoz
