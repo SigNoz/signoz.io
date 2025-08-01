@@ -1,2 +1,2 @@
-- [Kubernetes Infra Monitoring](https://signoz.io/docs/userguide/k8s-metrics/)
+- [Collect Telemetry from your K8s Clusters](https://signoz.io/docs/collection-agents/k8s/k8s-infra/overview/)
 - [Use OpenTelemetry Operator for automatic instrumentation](https://signoz.io/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection)
