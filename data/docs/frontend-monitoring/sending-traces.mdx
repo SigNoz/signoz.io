@@ -14,7 +14,7 @@ Client side traces help you understand how user actions trigger requests, how lo
 
 ## Prerequisites
 
-- [SigNoz Cloud](https://signoz.io/teams/) account
+- [SigNoz Cloud](https://signoz.io/teams/) or self-hosted account
 - A web application from where you want to send traces
 
 ## Setup
@@ -60,44 +60,91 @@ Install the OpenTelemetry Collector binary using [these instructions](https://si
 
 The `instrument.ts` file is required to setup the `OTLPTraceExporter` and `WebTracerProvider` which are used to capture traces within your application and export them to your collector.
 
-```ts
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { resourceFromAttributes } from '@opentelemetry/resources';
+<Tabs groupId="traces-instrumentation">
+  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
+    ```ts
+    import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
+    import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+    import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+    import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
+    import { registerInstrumentations } from '@opentelemetry/instrumentation';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
 
-const exporter = new OTLPTraceExporter({
-  url: '<<SIGNOZ_COLLECTOR_URL>>/v1/traces',
-});
+    const exporter = new OTLPTraceExporter({
+      url: '<<SIGNOZ_COLLECTOR_URL>>/v1/traces',
+    });
 
-const provider = new WebTracerProvider({
-  resource: resourceFromAttributes({
-    'service.name': '<<SERVICE_NAME>>',
-  }),
-  spanProcessors: [new BatchSpanProcessor(exporter)],
-});
+    const provider = new WebTracerProvider({
+      resource: resourceFromAttributes({
+        'service.name': '<<SERVICE_NAME>>',
+      }),
+      spanProcessors: [new BatchSpanProcessor(exporter)],
+    });
 
-provider.register();
+    provider.register();
 
-registerInstrumentations({
-  instrumentations: [
-    new FetchInstrumentation({
-      // Selects which backend servers are allowed to receive trace headers for linking traces across services.
-      // Using /.*/ acts as a wildcard. For safer usage in production, replace with specific domains:
-      // e.g. propagateTraceHeaderCorsUrls: [/api\.example\.com/, /my-backend\.internal/]
-      propagateTraceHeaderCorsUrls: /.*/,
-    }),
-    new UserInteractionInstrumentation({
-      eventNames: ['click', 'input', 'submit'],
-    }),
-    new XMLHttpRequestInstrumentation({
-      propagateTraceHeaderCorsUrls: /.*/,
-    }),
-  ],
-});
-```
+    registerInstrumentations({
+      instrumentations: [
+        new FetchInstrumentation({
+          // Selects which backend servers are allowed to receive trace headers for linking traces across services.
+          // Using /.*/ acts as a wildcard. For safer usage in production, replace with specific domains:
+          // e.g. propagateTraceHeaderCorsUrls: [/api\.example\.com/, /my-backend\.internal/]
+          propagateTraceHeaderCorsUrls: /.*/,
+        }),
+        new UserInteractionInstrumentation({
+          eventNames: ['click', 'input', 'submit'],
+        }),
+        new XMLHttpRequestInstrumentation({
+          propagateTraceHeaderCorsUrls: /.*/,
+        }),
+      ],
+    });
+    ```
+  </TabItem>
+  <TabItem value="cloud" label="SigNoz Cloud" default>
+    ```ts
+    import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
+    import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+    import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+    import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
+    import { registerInstrumentations } from '@opentelemetry/instrumentation';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
+
+    const exporter = new OTLPTraceExporter({
+      url: `https://ingest.<<INGESTION_REGION>>.signoz.cloud:443/v1/traces`,
+      headers: {
+        'signoz-ingestion-key': <<INGESTION_KEY>>,
+      },
+    });
+
+    const provider = new WebTracerProvider({
+      resource: resourceFromAttributes({
+        'service.name': '<<SERVICE_NAME>>',
+      }),
+      spanProcessors: [new BatchSpanProcessor(exporter)],
+    });
+
+    provider.register();
+
+    registerInstrumentations({
+      instrumentations: [
+        new FetchInstrumentation({
+          // Selects which backend servers are allowed to receive trace headers for linking traces across services.
+          // Using /.*/ acts as a wildcard. For safer usage in production, replace with specific domains:
+          // e.g. propagateTraceHeaderCorsUrls: [/api\.example\.com/, /my-backend\.internal/]
+          propagateTraceHeaderCorsUrls: /.*/,
+        }),
+        new UserInteractionInstrumentation({
+          eventNames: ['click', 'input', 'submit'],
+        }),
+        new XMLHttpRequestInstrumentation({
+          propagateTraceHeaderCorsUrls: /.*/,
+        }),
+      ],
+    });
+    ```
+  </TabItem>
+</Tabs>
 
 Going through each of the 3 instrumentations set up:
 
