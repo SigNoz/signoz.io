@@ -211,6 +211,12 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            isExpanded: false,
+            label: 'Deploying from Marketplaces',
+            route: '/docs/install/marketplaces',
+          },
+          {
+            type: 'doc',
             label: 'Troubleshooting',
             route: '/docs/install/troubleshooting',
           },
@@ -320,6 +326,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.8.0',
             label: 'Upgrade to v0.8.0',
+          },
+            {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-standard',
+            label: 'Upgrade Standard',
           },
         ],
       },
@@ -1525,6 +1536,36 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/userguide/search-syntax',
         label: 'Search Syntax',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/operators-reference',
+        label: 'Operators Reference',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/full-text-search',
+        label: 'Full-Text Search Guide',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/functions-reference',
+        label: 'Functions Reference',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/field-context-data-types',
+        label: 'Field Context & Data Types',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/search-troubleshooting',
+        label: 'Troubleshooting Guide',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/search-advanced-examples',
+        label: 'Advanced Examples',
       },
       {
         type: 'category',
