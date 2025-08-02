@@ -14,7 +14,7 @@ Logs can be collected on the client side at meaningful points to capture various
 
 ## Prerequisites
 
-- [SigNoz Cloud](https://signoz.io/teams/) account
+- [SigNoz Cloud](https://signoz.io/teams/) or self-hosted account
 - A web application from where you want to send logs
 
 ## Setup
@@ -50,28 +50,59 @@ Install the OpenTelemetry Collector binary using [these instructions](https://si
 
 The `instrument.ts` file is required to setup the `LoggerProvider` which is used to create custom logs within your application and export them to your collector.
 
-```ts
-import {
-  LoggerProvider,
-  SimpleLogRecordProcessor,
-} from '@opentelemetry/sdk-logs';
-import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import { logs } from '@opentelemetry/api-logs';
-import { resourceFromAttributes } from '@opentelemetry/resources';
+<Tabs groupId="logs-instrumentation">
+  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
+    ```ts
+      import {
+        LoggerProvider,
+        SimpleLogRecordProcessor,
+      } from '@opentelemetry/sdk-logs';
+      import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+      import { logs } from '@opentelemetry/api-logs';
+      import { resourceFromAttributes } from '@opentelemetry/resources';
 
-const loggerProvider = new LoggerProvider({
-  resource: resourceFromAttributes({
-    'service.name': '<<SERVICE_NAME>>',
-  }),
-  processors: [
-    new SimpleLogRecordProcessor(
-      new OTLPLogExporter({ url: '<<SIGNOZ_COLLECTOR_URL>>/v1/logs' })
-    ),
-  ],
-});
+      const loggerProvider = new LoggerProvider({
+        resource: resourceFromAttributes({
+          'service.name': '<<SERVICE_NAME>>',
+        }),
+        processors: [
+          new SimpleLogRecordProcessor(
+            new OTLPLogExporter({ url: '<<SIGNOZ_COLLECTOR_URL>>/v1/logs' })
+          ),
+        ],
+      });
 
-logs.setGlobalLoggerProvider(loggerProvider);
-```
+      logs.setGlobalLoggerProvider(loggerProvider);
+    ```
+  </TabItem>
+  <TabItem value="cloud" label="SigNoz Cloud">
+    ```ts
+      import {
+        LoggerProvider,
+        SimpleLogRecordProcessor,
+      } from '@opentelemetry/sdk-logs';
+      import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+      import { logs } from '@opentelemetry/api-logs';
+      import { resourceFromAttributes } from '@opentelemetry/resources';
+
+      const loggerProvider = new LoggerProvider({
+        resource: resourceFromAttributes({
+          'service.name': '<<SERVICE_NAME>>',
+        }),
+        processors: [
+          new OTLPLogExporter({
+            url: `https://ingest.<<INGESTION_REGION>>.signoz.cloud:443/v1/logs`,
+            headers: {
+              'signoz-ingestion-key': <<INGESTION_KEY>>,
+            },
+          })
+        ],
+      });
+
+      logs.setGlobalLoggerProvider(loggerProvider);
+    ```
+  </TabItem>
+</Tabs>
 
 ### Step 4: Importing the instrumentation file
 
