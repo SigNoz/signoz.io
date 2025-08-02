@@ -1529,6 +1529,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/userguide/query-builder-v5',
+        label: 'Query Builder (new)',
+      },
+      {
+        type: 'doc',
         route: '/docs/userguide/search-syntax',
         label: 'Search Syntax',
       },

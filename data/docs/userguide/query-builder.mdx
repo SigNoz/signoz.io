@@ -1,363 +1,309 @@
 ---
-date: 2025-08-01
+date: 2024-06-06
 id: query-builder
 title: Query Builder
 description: Learn how to use SigNoz Query Builder to filter, aggregate, and visualize data. Simplify complex queries and gain actionable insights with advanced features.
----
 
-## Overview
-
-The Query Builder is SigNoz's structured query interface that combines the power of expression-based querying with intelligent auto-completion. Whether you're troubleshooting production issues, analyzing performance trends, or creating custom dashboards, the Query Builder gives you the flexibility to write sophisticated search expressions, aggregations, and filtering logic while providing contextual suggestions.
-
-**What you'll learn:**
-- How to filter data with precision using multiple criteria
-- Advanced aggregation techniques for meaningful insights  
-- Performance optimization tips for large datasets
 
 ---
 
-## Quick Start
+## Introduction
 
-### Your First Query
+Query Builder in SigNoz simplifies the process of filtering, aggregating, and visualizing data, making complex queries accessible to all users. This documentation will walk you through features of the Query Builder, showing you how to create detailed queries, visualize results, and understand your data better. 
 
-Let's start with a practical example. Suppose you want to find all error spans from your recommendationservice service in the last 6 hours:
+## Logs and Traces Query Builder
 
-1. **Navigate** to Traces → Explorer
-2. **Write filter expression**: `service.name = 'recommendationservice' AND has_error = true`
-3. **Set time range**: Last 6 hours
-4. **Run query** to see results instantly
+## Filtering 
+
+The Query Builder in SigNoz allows users to apply filtering based on various attributes of logs or traces.
+
+{/* <!-- <figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/qb_filtering.gif" alt="A gif explaining the Filtering feature in SigNoz Query Builder"/>
+    <figcaption><i>Filtering feature of SigNoz Query Builder</i></figcaption>
+</figure>
+ --> */}
+
+
+### Using the Filtering Feature
+
+- **Access**: Navigate to the Query Builder.
+- **Open Filter Options**: Click on the Search Filter field to open a dropdown list of available attributes.
+- **Select Attributes**: Choose the attribute you want to filter by (e.g., `service.name`, `level`, `status`). Start typing to filter the list.
+- **Apply Operators**: Choose the operator (e.g., `=`, `!=`, `IN`, `NOT_IN`) for the selected attribute.
+- **Input Values**: Input the value(s) you want to filter by.
+- **Combine Filters**: You can add multiple filters by repeating the above steps. Multiple filters are combined with `AND`.
+- **View Results**: Click the Stage & Run Query Button to display the logs or traces that match the applied filters.
+
+### Example
+
+Suppose you want to filter logs from a specific service with a particular severity level. You can achieve this using the following filters:
+- selecting the service name. `service.name = demo-app` 
+- selecting the severity text, `severity_text = DEBUG`
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/query-builder-filtering-spans.gif" alt="A gif explaining the Filtering feature in SigNoz Query Builder"/>
+    <img src="/img/docs/product-features/query-builder/query-builder-filtering.gif" alt="A gif explaining the Filtering feature in SigNoz Query Builder"/>
     <figcaption><i>Example showing the filtering feature of SigNoz Query Builder</i></figcaption>
 </figure>
 
-Notice how you can write logical expressions directly, with auto-completion helping you discover available attributes and operators as you type. This basic pattern—filter, refine, visualize—forms the foundation of all Query Builder operations.
 
----
 
-## Filtering:
+## Aggregation and Grouping 
 
-Filtering is your first line of defense against data overload. The Query Builder supports sophisticated filtering that goes beyond simple equality checks. Learn more about search syntax [here](/docs/userguide/search-syntax)
+The Query Builder's Aggregation and Grouping feature enables you to combine data points and categorize them for complex insights.
 
----
+### Aggregation
 
-## Aggregation & Grouping: Extracting Insights
 
-Transform raw data into actionable insights using SigNoz's comprehensive aggregation functions.
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/aggregation.gif" alt="A gif explaining the Aggregation feature in SigNoz Query Builder"/>
+    <figcaption><i>Aggregation feature of SigNoz Query Builder</i></figcaption>
+</figure>
 
-### Core Aggregation Functions
 
-#### Statistical Functions
-- **Count**: Total occurrences `count()`
-- **Count Distinct**: Unique values `count_distinct(user_id, product_id)`
-- **Sum**: Numerical totals `sum(bytes_sent)`
-- **Average**: Mean values `avg(response_time_ms)`
-- **Min/Max**: Range boundaries `min(latency)`, `max(latency)`
+Aggregation allows you to perform calculations on a set of values to return a single value. With the Query Builder, you can:
 
-#### Advanced Functions
-- **Percentiles**: Distribution analysis `p50(response_time_ms)`, `p95(response_time_ms)`, `p99(response_time_ms)`
-- **Rate**: Total occurrences per time unit `rate()` 
-- **Rate Sum**: Change in totals `rate_sum(requests)`
-- **Rate Average**: Change in averages `rate_avg(bytes_sent)`
+- **Count**: Count the number of times a particular event occurs.
+- **Count Distinct**: Count unique occurrences of a specified attribute.
+- **Sum**: Calculate the total for a numerical attribute.
+- **Avg**: Find the average value of a numerical attribute.
+- **Max/Min**: Determine the maximum or minimum value of a numerical attribute in an aggregation interval.
+- **Percentiles (P05, P10, P90, etc.)**: Understand the distribution of your data with percentile calculations.
+- **Rate**: Measure the frequency of occurrence within a given time frame. It is often expressed as a ratio, where the numerator represents the number of occurrences, and the denominator represents the length of the time period.
+- **Rate Sum**: The rate of change in the sum of the selected attribute over the specified rate period.
+- **Rate Avg**: The rate of change in the average of the selected attribute over the specified rate period.
+- **Rate Min/Max**: The rate of change in the minimum or maximum value of the selected attribute over the specified rate period.
 
 ### Grouping
 
-Grouping transforms aggregations from single values into comparative datasets:
-
-### Real-World Examples: Cart Service Analytics
-
-#### Example 1: Product Popularity Analysis
-- **Goal**: Identify which products are being added to carts most frequently
-- **Insight**: Top 5 most popular products being added to shopping carts
-
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/most-frequently-added-products.gif" alt="A gif explaining the count aggregation feature in SigNoz Query Builder"/>
-    <figcaption><i>Example showing the count aggregation feature of SigNoz Query Builder</i></figcaption>
+    <img src="/img/docs/product-features/query-builder/group_by.gif" alt="A gif explaining the Group by feature in SigNoz Query Builder"/>
+    <figcaption><i>Group by feature of SigNoz Query Builder</i></figcaption>
 </figure>
 
 
-#### Example 2: User Shopping Behavior
-- **Goal**: Analyze quantity patterns per user to identify bulk buyers
-- **Insight**: Users adding large quantities (potential bulk buyers or businesses)
+Grouping allows you to segment your data based on chosen attributes, facilitating comparative analysis across different categories of the selected attributes:
+
+- You can group data by attributes like `service.name` or `method` to analyze patterns per service or HTTP method.
+- When combined with aggregation, grouping enables you to, for example, find the average response time per service or count errors per endpoint.
+
+### Using Aggregation and Grouping Together
+
+- Select an aggregation function from the dropdown, such as `Avg`.
+- Then, choose an attribute to apply it to, like `response_time`.
+- To group the data, you would then specify an attribute in the `Group by` field.
+- After running the query, you'll see the average response times for each group, allowing you to identify areas that may need optimization.
+
+### Example
+
+ To analyze the average response time of services within a system, we can do so in the following way:
+
+- In the aggregation dropdown, select `Avg`.
+- For the attribute to aggregate, choose `durationNano`.
+- To see the average duration for each of the service, enter `serviceName` in the `Group by` field.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/bulk-quantity-buyers.gif" alt="A gif explaining the sum aggregation feature in SigNoz Query Builder"/>
-    <figcaption><i>Example showing the sum aggregation feature of SigNoz Query Builder</i></figcaption>
+    <img src="/img/docs/product-features/query-builder/query-builder-groupby-aggregation.gif" alt="A gif explaining the how to use Group by and Aggregation features together in SigNoz Query Builder"/>
+    <figcaption><i>Example combining Group By and Aggregation features </i></figcaption>
 </figure>
 
-#### Example 3: Cart Activity Timeline
-- **Goal**: Track cart additions over time to understand shopping patterns
-- **Insight**: Shopping patterns throughout the day
+
+## Result Manipulation 
+
+Result Manipulation is a set of features in the Query Builder that enables you to refine your query. The features include:
+
+### Order By
+Order your query results based on a specified attribute in either ascending or descending order. This can help in identifying the highest or lowest values in your data, such as the most frequently occurring errors.
+
+### Aggregate Every
+Define the interval over which to aggregate data. For example, you can aggregate count data in 60-second intervals to get a per-minute count of events.
+
+### Limit
+Set a limit on the number of results returned. This is useful when you only want to see the top N results, such as the top 10 most visited endpoints.
+
+### Having
+Apply conditions to filter the results further based on aggregate value.
+
+### Legend Format
+Customize the legend in your query's visual output to give more clarity, by formatting how grouped data will be labeled in your charts or graphs. We use the double
+curly braces - `{{}}` format to show the attribute. 
+
+For example, if you have grouped by `serviceName` attribute then you can write `{{serviceName}}` in your legend. You can also add text along with the attribute like `{{serviceName}}` - This is a service** will show be shown as `sampleService - This is a service name`.
+
+
+### Example
+
+Suppose you want to find the top 2 endpoints with an average response time greater than 500 ms. The query is configured as follows:
+
+- **Group by**: `serviceName`
+- **Aggregate**: `Avg` on `durationNano`
+- **HAVING**: `AVG(durationNano) >= 500000000` to filter for endpoints with average response times exceeding 500 ms
+- **Order by**: `avg(durationNano) desc` to list services with the highest response times first
+- **Limit**: `2` to focus on the top 2 services with the longest response times
+- **Legend Format**: `{{serviceName}}` to display the service name in the visualization legend
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/cart-additions-over-one-day.gif" alt="A gif explaining the count aggregation feature in SigNoz Query Builder"/>
-    <figcaption><i>Example showing the count aggregation feature of SigNoz Query Builder</i></figcaption>
+    <img src="/img/docs/product-features/query-builder/query-builder-result-manipulation.gif" alt="A gif explaining some more features  in SigNoz Query Builder"/>
+    <figcaption><i>An example showcasing Order by, Limit, HAVING and Legend Format features of SigNoz Query Builder</i></figcaption>
 </figure>
 
-#### Example 4: Average Quantity per Product
-- **Goal**: Understand typical purchase quantities for different products
-- **Insight**: Products typically bought in larger quantities vs. single items
+
+## Multiple Queries and Functions 
+
+The SigNoz Query Builder allows you to run multiple queries simultaneously and perform functions on them. This feature facilitates analysis of complex data, such as comparing data or calculating ratios.
+
+### Multiple Queries
+Create and run multiple independent queries within the same view. Each query can have its own set of filters, aggregations, and groupings. This is particularly useful for analyzing different dimensions of your data in parallel.
+
+### Functions on Queries
+Apply mathematical functions to the results of your queries. This allows you to derive new insights by performing operations like addition, subtraction, multiplication, division, or more complex functions on your data.
+
+###   List of supported functions
+
+- exp
+- log
+- ln
+- exp2
+- log2
+- exp10
+- log10
+- sqrt
+- cbrt
+- erf
+- erfc
+- lgamma
+- tgamma
+- sin
+- cos
+- tan
+- asin
+- acos
+- atan
+- degrees
+- radians
+- now
+
+### Example
+
+Suppose you want to determine the percentage of logs that contains errors relative to the total log count. You can achieve this using Multiple queries and a function as follows:
+
+- **Query A**: Filters logs to count the instances where the `body` contains the word `error`.
+- **Query B**: Represents a baseline count of all logs.
+- **function `F1`** A*100/B
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/per-product-avg-quantity.gif" alt="A gif explaining the avg aggregation feature in SigNoz Query Builder"/>
-    <figcaption><i>Example showing the avg aggregation feature of SigNoz Query Builder</i></figcaption>
+    <img src="/img/docs/product-features/query-builder/query-builder-multiple-queries.gif" alt="A gif explaining multiple queries and functions features in SigNoz Query Builder"/>
+    <figcaption><i>Multiple Queries and Functions features of SigNoz Query Builder</i></figcaption>
 </figure>
 
-#### How Grouping Handles Missing Values
 
-When you group data and some records don't have the grouping key:
-- These records get grouped under an "empty" value
-- Your results will show groups with blank/empty labels
 
-**Example:** Grouping users by `department`:
-- Users with no department → grouped as "" (empty)
-- Users with department → grouped normally ("Sales", "Marketing", etc.)
 
-**To exclude empty groups:**
-Add `key EXISTS` to your search:
-```
-department EXISTS AND [rest of your query]
-```
+{/* <!-- After executing these queries and the function, the Query Builder will generate visualizations like histograms or time series charts for each query and the computed function `F1`, providing a comparative analysis of the request methods. --> */}
 
-**Important:** We don't automatically exclude empty groups because sometimes you want to see them (e.g., finding users without departments).
+{/* <!-- 
+## Histogram and Time Series Visualizations 
 
----
+SigNoz's Query Builder offers powerful visualization options for your data. The Histogram and Time Series visualizations transform numerical and time-based data into graphical representations, making trends and patterns readily apparent.
 
-## Result Manipulation: Refining Your Analysis
+### Histogram Visualization
+A histogram is a bar chart that represents the distribution of numerical data. Each bar groups numbers into ranges, showing the number of occurrences of data points within each range.
 
-Fine-tune your query results with result manipulation options that help you focus on what matters most.
+- Useful for understanding the frequency distribution of data points.
+- Ideal for identifying common values or ranges with high concentrations of data.
 
-### Sorting & Limiting
+### Time Series Visualization
+The time series chart plots data points over time, allowing you to observe changes and trends related to temporal factors.
 
-**Order By**: Control result ordering
-- Ascending: `avg(response_time) asc`
-- Descending: `count() desc`
-- Multiple: `sum(quantity) desc, userId asc`
+- Provides insights into data patterns over specified time intervals.
+- Enables you to track the progression or decline of metrics, such as system performance.
+
+### Example
+
+When analyzing the number of user sign-ups over a day, you might:
+
+- Configure the Query Builder to count the `user_sign_up` events.
+- Use the Histogram view to see the distribution of sign-ups across different times of the day.
+- Use the Time Series view to observe how sign-up rates trend over each hour. --> */}
+
+
+## Metrics Query Builder
+
+SigNoz's Metrics Query Builder has all the features mentioned above like filtering, aggregation, Order by, Multiple Queries etc. but it also has some additional functionalities which can enable users to delve deeper into metrics analysis with ease.
+
+## Spatial and Temporal Aggregations
+
+Efficiently aggregate metrics data across time and various dimensions to gain comprehensive insights into your system's performance.
+
+### Temporal Aggregation
+
+Temporal aggregation simplifies metric analysis by consolidating data points over specific time periods. It's essential for managing data from applications that transmit metrics at regular intervals, helping to reduce the volume of data points into a more interpretable format. This aggregation is particularly crucial when dealing with long-term data visualization, where displaying each data point is neither practical nor informative due to limited screen space.
+
+### Spatial Aggregation
+
+Modern applications will have many time series across dimensions such as container names, service names, etc.
+
+While temporal aggregations are meant for reducing data points across a single time axis, spatial aggregation refers to the technique of merging metric data across various dimensions or labels, such as container names, service names, or geographical regions.
+
+### Example 
+
+If you select a counter metric called `signoz_calls_total`, you can apply temporal aggregations like `Rate` and `Increase` on it. Similarly, you can apply spatial aggregations across many dimensions, such as `service_name`, `operation`, `deployment_environment`, etc.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/show-order-by.gif" alt="A gif explaining the order by feature in SigNoz Query Builder"/>
-    <figcaption><i>Example showing the order by feature of SigNoz Query Builder</i></figcaption>
+<img className="box-shadowed-image" src="/img/docs/product-features/query-builder/temporal-spatial-aggregations.webp" alt="Spatial & temporal aggregations in the metrics query builder of SigNoz"/>
+<figcaption><i>How to apply temporal and spatial aggregations in metrics query builder of SigNoz</i></figcaption>
 </figure>
 
-**Limit**: Focus on top results
-- Top performers: `LIMIT 10`
-- Combined with ordering for "Top N" analysis
 
-#### How Limit Works for Time Series
+## Functions for Extended Data Analysis
 
-When you apply a `limit` to a time series query with `group by` fields, the limit determines which groups (series) are included in the results:
+To extend the data analysis capabilities of the Metrics Query Builder, you can use four different categories of functions.
 
-1. **Without limit or limit = 0**: All groups matching your filter are included
-2. **With limit > 0**: Only the top N groups are included based on your ordering
+### Function Types:
 
-#### Behind the Scenes
+- **Exclusion Functions:** These allow users to exclude data points based on certain conditions, such as values falling outside a specified range. This helps in focusing on the most relevant data. For example, `Cut Off Min` excludes data below a threshold, while `Cut Off Max` ignores values above a certain point.
 
-When a limit is specified with group by:
+- **Arithmetic Functions:** Users can perform mathematical operations on data points, enabling the customization of metric calculations to suit specific analysis needs. For example, functions like `Absolute` can return the absolute value of data points, and logarithmic functions such as `Log2` or `Log10` can transform data to a log scale for better comparison of wide-ranging numbers.
 
-1. First, a query runs to identify the top N groups based on:
-   - Your aggregation (e.g., `count()`, `sum(duration)`)
-   - Your ordering (e.g., `order by count() desc`)
-   - The entire time range
+- **Smoothing Functions:** To deal with volatile data, smoothing functions can be applied, such as moving averages, which help in identifying underlying trends by reducing noise. For example, functions like EWMA 3/5/7 (Exponentially Weighted Moving Average) can smooth data fluctuations over 3, 5, or 7 periods.
 
-2. Then, the time series query runs but only includes data for those top N groups
-
-#### Example
-
-```
-Query: count() by service.name
-Time Range: Last 24 hours
-Limit: 5
-Order: count() desc
-
-Result: Time series data for only the 5 services with the highest total count over 24 hours
-```
-
-#### Important Notes
-
-- The limit applies to the number of series (groups), not individual data points
-- The "top N" selection is based on the aggregate value across the entire time range, not per time bucket
-- Without group by, limit has no effect on time series queries
-- Each group selected will have data points for all time intervals in your query range
-
-### Conditional Filtering with Having
-
-Use `Having` clause to filter aggregated results:
-
-```
-Aggregation: count()
-Group By: endpoint
-Having: count() > 1000 AND count() < 5000
-Result: Only endpoints with more than 1000 requests and less then 5000 requests
-```
-
-**Common Having Patterns**:
-- High-traffic endpoints: `count() > 10000`
-- Slow operations: `avg(duration) > 500`
-- Error-prone services: `sum(errors) > 10`
-
-**Combining Multiple Conditions**:
-
-Use parentheses with AND/OR operators to create complex conditions:
-
-```
-Having: (count() > 1000) AND (count() < 5000)
-```
-
-Note: Always use parentheses when combining conditions to ensure correct evaluation order, especially when mixing AND and OR operators.
-
-### Time Aggregation Windows
-
-When querying time series data (traces, logs, or metrics), the system automatically manages the step interval (also known as aggregation interval) to ensure optimal performance and visualization. The step interval determines how data points are aggregated over time.
-
-#### Automatic Step Interval Assignment
-
-If you don't specify a step interval in your query, the system automatically calculates an optimal value based on:
-- The time range of your query (end time - start time)
-- The type of data you're querying (traces/logs vs metrics)
-- A target of approximately 300 data points for optimal visualization
-
-#### Step Interval Limits
-
-To prevent performance issues and ensure responsive queries, the system enforces a maximum of 1,500 data points per series. If your specified step interval would result in more than 1,500 points, it will be automatically adjusted upward. The behavior is different by telemetry data type
-
-#### Traces and Logs
-
-**Minimum step interval:** 5 seconds
-
-**Calculation rules:**
-- For automatic assignment: `(time_range / 300) rounded down to nearest 5 seconds`
-- For limit enforcement: `(time_range / 1500) rounded down to nearest 5 seconds`
-- The step interval is always a multiple of 5 seconds
-
-**Examples:**
-- 1 hour query → 12 second steps (300 points) → rounded down 10 second steps
-- 24 hour query → 288 second steps (~5 minute steps, 300 points)
-- If you set 1 second steps for a 1 hour query (3,600 points), it adjusts to 2.4 seconds → 5 seconds
-
-#### Metrics
-
-**Minimum step interval:** 60 seconds
-
-Note: The 60-second minimum for metrics is being updated. Soon, you'll be able to set step intervals matching your collection interval, as long as the query stays within the 1,500 point limit. Follow progress on [issue #7248](https://github.com/SigNoz/signoz/issues/7248)
-
-**Calculation rules:**
-- Base calculation same as traces/logs but with additional adjustments:
-  - For time ranges < 1 day: Multiple of 60 seconds
-  - For time ranges 1-7 days: Multiple of 5 minutes (300 seconds)
-  - For time ranges > 7 days: Multiple of 30 minutes (1,800 seconds)
-
-**Examples:**
-- 6 hour query → 72 seconds → 60 seconds (360 points)
-- 3 day query → 864 seconds → 900 seconds (15 minutes, 288 points)
-- 2 week query → 4,032 seconds → 3,600 seconds (1 hour, 336 points)
-
-#### Best Practices
-
-1. **Let the system choose:** For most use cases, don't specify a step interval. The automatic calculation provides a good balance between detail and performance.
-
-2. **Adjusting for more detail:** If you need more granular data:
-   - Reduce your time range
-   - Or specify a smaller step interval (keeping in mind the 1,500 point limit)
-
-#### Impact on Your Queries
-
-- **Filters:** Applied regardless of step interval
-- **Group By:** Each group counts toward the series limit
-- **Aggregations:** Applied within each step interval window
-
-#### Troubleshooting
-
-**"My specified step interval was ignored"**
-- Check if it would exceed 1,500 points
-- Ensure it meets the minimum requirements (5s for traces/logs, 60s for metrics)
-
-**"I need more than 1,500 data points"**
-- Leave a comment [here](https://github.com/SigNoz/signoz/issues/7248) explaining your use case.
-
-### Legend Formatting
-
-Create meaningful chart labels using template variables:
-
-**Basic Format**: `{{service.name}}`
-
-**Descriptive Format**: `Service: {{service.name}} - Avg: {{avg(duration)}}ms`
-
----
-
-## Multi-Query Analysis: Advanced Comparisons
-
-Combine multiple queries to perform sophisticated analysis that single queries cannot achieve.
-
-### Use Cases for Multiple Queries
-
-**Error Rate Calculation**
-- Query A: Count of error requests
-- Query B: Count of all requests
-- Formula: `(A/B) * 100` (error percentage)
+- **Time Shift Functions:** These functions enable comparisons of data across different time periods, useful for analyzing trends, changes, or anomalies over time. For example, using the `Time Shift` function for shifting a series by a fixed amount of seconds to compare current data with past data. The input for this function is a time shift value in seconds. For example, `Time Shift 3600` will shift the series by 1 hour.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/error-rate-percentage.gif" alt="A gif explaining the Formula feature in SigNoz Query Builder"/>
-    <figcaption><i>Example showing the Formula feature feature of SigNoz Query Builder</i></figcaption>
+<img className="box-shadowed-image" src="/img/docs/product-features/query-builder/support-for-functions.webp" alt="Functions in metrics query builder"/>
+<figcaption><i>Functions in metrics query builder will help extend data analysis capabilities on metrics</i></figcaption>
 </figure>
 
-**SLA Monitoring**
-- Query A: Requests under 200ms
-- Query B: Total requests
-- Formula: `(A/B) * 100` (SLA compliance percentage)
+
+### Chain Functions:
+
+Combine two or more functions, like applying a logarithmic scale after setting a minimum cutoff, to tailor your metrics.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/sla-monitoring-with-duration.gif" alt="A gif explaining the Formula feature in SigNoz Query Builder"/>
-    <figcaption><i>Example showing the Formula feature feature of SigNoz Query Builder</i></figcaption>
+<img className="box-shadowed-image" width='80%' src="/img/docs/product-features/query-builder/chain-two-functions.webp" alt="Chained functions"/>
+<figcaption><i>Chain two functions to get your required metrics</i></figcaption>
 </figure>
 
-### Available Mathematical Functions in Formula
 
-- **Basic Operations**: `+`, `-`, `*`, `/`
-- **Logarithmic**: `log`, `ln`, `log2`, `log10`
-- **Exponential**: `exp`, `exp2`, `exp10`
-- **Trigonometric**: `sin`, `cos`, `tan`, `asin`, `acos`, `atan`
-- **Statistical**: `sqrt`, `cbrt`
-- **Utility**: `now`, `degrees`, `radians`
+### Example
 
-### Multi-Query Best Practices
+This example uses the `Time Shift` function to compare total calls for frontend service in an interval of 1hr.
 
-1. **Align time ranges**: Ensure all queries use the same time window
-2. **Consistent grouping**: Use identical `Group By` clauses for meaningful comparisons
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" width='80%' src="/img/docs/product-features/query-builder/time-shift.webp" alt="Time Shift function"/>
+<figcaption><i>Use the time shift function to compare data across different time periods</i></figcaption>
+</figure>
 
----
 
-## Troubleshooting & Performance
+You can plot charts for the same service an hour apart.
 
-### Common Query Issues
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/product-features/query-builder/plot-time-shift-charts.webp" alt="Compare performance of services"/>
+<figcaption><i>Check the performance of frontend service an hour apart with the help of time shift function</i></figcaption>
+</figure>
 
-**Query Performance Problems**
-- **Symptom**: Slow query execution
-- **Potential Solutions**: 
-  - Check time range selection
-  - Use resource attributes in WHERE clauses
-  - Reduce GROUP BY cardinality
-  - Increase aggregation intervals
 
-**No Results Returned**
-- **Check**: Filter syntax and attribute names
-- **Verify**: Time range includes expected data
-- **Confirm**: Service/attribute existence in the time period
+Users can use the time shift function for very practical use cases, like comparing performance metrics before and after a deployment.
 
-**Unexpected Results**
-- **Review**: Filter combinations (AND vs OR logic)
-- **Validate**: Aggregation functions match your intent
-- **Check**: Group By attributes for proper categorization
-
-### Performance Optimization
-
-**Query**
-1. **Filter early**: Apply restrictive filters first
-2. **Limit scope**: Use specific time ranges
-3. **Resource attribute awareness**: Leverage resource attributes to speed up queries
-4. **Aggregation efficiency**: Choose appropriate time windows
-
-**Dashboard Performance**
-1. **Adjust refresh frequency**: Balance freshness with performance
-2. **Optimize time ranges**: Avoid unnecessarily wide windows  
-3. **Limit concurrent queries**: Stagger dashboard loads
+To know more details about the Metrics Query Builder, you can checkout these resources from the first SigNoz Launch Week:
+- Article: [Feature in Spotlight: Metrics & Query Builder [Day 2]](https://signoz.io/newsroom/launch-week-1-day-2/)
+- Video : [SigNoz Launch Week - Day 2 - Metrics & Query Builder Improvements](https://www.youtube.com/watch?v=fl-z1YoSB_w&t=1s)
