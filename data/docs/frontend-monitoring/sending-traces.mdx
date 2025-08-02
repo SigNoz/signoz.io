@@ -23,6 +23,22 @@ Client side traces help you understand how user actions trigger requests, how lo
 
 Install the OpenTelemetry Collector binary using [these instructions](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/). The Collector acts as an agent that receives, processes, and exports telemetry data. It is required to collect data from your application, including traces.
 
+You would also need to update the collector config to whitelist the frontend domain.
+
+```sh
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - <<YOUR_FRONTEND_URL>>
+          allowed_headers: ['*']
+```
+
 ### Step 2: Install dependencies
 
 <Tabs groupId="traces-dependencies">
