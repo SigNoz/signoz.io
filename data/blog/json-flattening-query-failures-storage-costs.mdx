@@ -1,0 +1,273 @@
+---
+title: "JSON Flattening: Fix Query Failures and Cut Storage Costs in SigNoz"
+slug: json-flattening-query-failures-storage-costs
+date: 2025-07-25
+tags: [Product]
+authors: [anushka_karmakar]
+description: JSON flattening fixes dot notation query failures in nested logs and reduces storage costs by eliminating data duplication. Learn how to implement extract-and-remove patterns to cut storage costs in half while speeding up queries.
+keywords: [json flattening,nested json queries,log processing,storage optimization,signoz,clickhouse,data duplication,extract remove pattern]
+---
+You have nested JSON in your logs. When you query `body.event.type = "user_action"`, it fails. 
+
+Here's why and how to fix it.
+
+## The Query That Should Work But Doesn't
+
+Here's a log entry that breaks queries:
+
+```json
+{
+  "body": {
+    "message": "API request processed",
+    "event.type": "user_action",
+    "kubernetes.pod.name": "api-server-123",
+    "user": {
+      "session": {
+        "id": "sess_abc123"
+      }
+    }
+  }
+}
+```
+
+Now try these queries:
+
+- `body.event.type = "user_action"` ❌ **Fails**
+- `body.kubernetes.pod.name = "api-server-123"` ❌ **Fails**
+- `body.user.session.id = "sess_abc123"` ✅ **Works**
+
+Why do the first two fail?
+
+When you query `body.event.type`, the system looks for nested structure: `body → event → type`. But your data has a flat key `"event.type"`. No nested `event` object exists, so the query fails.
+
+This dot notation ambiguity breaks log exploration workflows and forces users to remember which fields are "really nested" versus which ones just "look nested."
+
+## Building JSON Flattening to Solve the Ambiguity
+
+JSON flattening fixes this. It transforms nested structures into flat, dot-notated keys:
+
+```json
+// Before flattening
+{
+  "user": {
+    "profile": {
+      "settings": {
+        "theme": "dark"
+      }
+    }
+  }
+}
+
+// After flattening
+{
+  "user.profile.settings.theme": "dark"
+}
+
+```
+
+Now `body.user.profile.settings.theme = "dark"` always works.
+
+### How It Works in Practice
+
+Enable JSON flattening in your JSON Parser processor with these options:
+
+- **Enable Flattening**: Transform nested objects into dot-notation keys
+- **Enable Paths**: Keep full path hierarchy `user.profile.settings.theme` vs. leaf names only `theme`
+- **Path Prefix**: Add prefixes to avoid naming conflicts
+- **Enable Mapping**: Automatically map common fields to standard attributes
+
+Flatten specific data (Kubernetes metadata, app config, user sessions) while keeping other log parts unchanged. Flattening happens at ingestion time, so queries stay fast.
+
+## The Hidden Problem: Transformation Anti-Patterns
+
+While building JSON flattening, we analyzed common log transformation patterns.
+
+### The Data Duplication Pattern
+
+Here's a common transformation pattern we observed:
+
+```json
+{
+  "body": {
+    "user": "alice",
+    "action": "login",
+    "session": {
+      "id": "sess_123",
+      "duration": 1847
+    },
+    "metadata": {
+      "timestamp": "2024-01-15T10:30:00Z",
+      "ip": "192.168.1.100"
+    }
+  },
+  "attributes": {
+    "user": "alice",
+    "action": "login",
+    "session.id": "sess_123",
+    "session.duration": 1847,
+    "metadata.timestamp": "2024-01-15T10:30:00Z",
+    "metadata.ip": "192.168.1.100"
+  }
+}
+
+```
+
+Every piece of data exists twice: in `body` and `attributes`. You're storing duplicate data.
+
+### Why This Happens
+
+JSON Parser extracts data from `body` to `attributes` but doesn't remove the original. You extract for querying but forget to clean up, leaving duplicates.
+
+**This causes:**
+• 2x storage costs
+• Slower queries from redundant data
+• Larger indexes
+• Poor compression
+
+## The Extract and Remove Pattern
+
+Solution: extract data, then remove duplicates.
+
+**Step 1: Extract** - Parse JSON and move queryable fields to attributes
+**Step 2: Remove** - Clean up the extracted data from the original body
+
+Here's how it should look:
+
+```json
+// After proper extract and remove
+{
+  "body": "User login processed successfully",  // Clean, minimal body
+  "attributes": {
+    "user": "alice",
+    "action": "login",
+    "session.id": "sess_123",
+    "session.duration": 1847,
+    "ip": "192.168.1.100"
+  }
+}
+```
+
+### Implementation in SigNoz
+
+Use built-in [remove](https://signoz.io/docs/logs-pipelines/guides/json/#step-3-add-processors-for-parsing-desired-fields-into-log-attributes) operations to clean up after extraction:
+
+```yaml
+processors:
+  - json_parser:
+      from: body
+      to: attributes
+      enable_flattening: true
+  - remove:
+      fields:
+        - body.user
+        - body.action
+        - body.session
+        - body.metadata
+```
+
+Result: `body` keeps context, `attributes` has queryable data.
+
+### What to extract & what to keep
+
+**Extract for querying:**
+
+- User identifiers (`user_id`, `session_id`, `request_id`)
+- Status indicators (`http.status_code`, `error.type`)
+- Performance metrics (`duration`, `response_time`)
+- Business dimensions (`product`, `feature`, `region`)
+
+**Keep in body for context:**
+
+- Stack traces and error details
+- Full request/response payloads
+- Debugging information
+- Large text fields
+
+**Always remove after extracting:**
+
+- Don't duplicate data
+- Use remove operations
+- Body = context, attributes = queries
+
+## Field Naming and Organization
+
+Use consistent naming patterns as they make queries predictable:
+
+```json
+// Good: Consistent, hierarchical naming
+{
+  "attributes": {
+    "http.method": "POST",
+    "http.status_code": 200,
+    "http.url": "/api/users",
+    "http.response_time_ms": 45,
+    "user.id": "user_123",
+    "user.role": "admin"
+  }
+}
+
+// Avoid: Inconsistent naming patterns
+{
+  "attributes": {
+    "httpMethod": "POST",          // Different convention
+    "status": 200,                 // Missing namespace
+    "request_url": "/api/users",   // Mixed convention
+    "responseTime": 45,            // No units
+    "userId": "user_123"           // Different pattern
+  }
+}
+```
+
+## ClickHouse Optimization Tips
+
+- Keep consistent data types for same fields
+- Avoid high-cardinality fields (millions of unique values)
+- Use similar attribute sets for similar log entries
+
+## Storage Impact Analysis
+
+We analyzed the storage impact of different transformation patterns:
+
+**Proper transformation** (extract + remove):
+
+- **Storage**: Baseline
+- **Query performance**: Optimal
+- **Index size**: Minimal
+
+**Data duplication** (extract only):
+
+- **Storage**: 2x cost increase
+- **Query performance**: 50% slower due to redundant data processing
+- **Index size**: 2x larger
+
+**No transformation** (raw logs only):
+
+- **Storage**: Baseline but poor queryability
+- **Query performance**: Very slow without indexed attributes
+- **Index size**: Minimal but ineffective
+
+The difference between proper transformation and data duplication can literally double your storage bill.
+
+## Performance Impact
+
+- CPU: Less than 5% increase in processing time
+- Memory: Proportional to nesting depth (typically less than 10MB)
+- Throughput: No measurable impact on log ingestion rates
+
+## Implementation Guidelines
+
+When implementing JSON flattening and data transformation:
+
+1. **Start with selective flattening** - Target specific paths like `kubernetes.*` or `application.*`
+2. **Always use remove operations** - Clean up extracted data to prevent duplication
+3. **Establish naming conventions** - Use consistent patterns like `service.field` or `namespace.field`
+4. **Monitor storage impact** - Track attribute counts and storage usage after transformation changes
+5. **Test query patterns** - Ensure flattened fields work with your common queries
+
+## Conclusion
+
+JSON flattening fixes dot notation query failures. The bigger win is using extract-and-remove patterns to cut storage costs and speed up queries.
+
+---
+
+*JSON flattening is available now in SigNoz. Check out our [changelog](https://signoz.io/changelog/2025-07-16-json-flattening-in-log-pipelines-xnotzqne6hvxwu5o13kb0phi/) for details and join our [community](https://signoz.io/slack) to discuss log transformation strategies.*

@@ -147,7 +147,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-35r3be4oh-~4ociQZPFeQJ2COfKvDPLQ',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3am701p9u-qEO6jxUapH4Vnnptot_RGA',
           basePath: false,
           permanent: true,
         },
@@ -498,7 +498,18 @@ module.exports = () => {
           source: '/dashboards',
           destination: '/docs/dashboards/dashboard-templates/overview/',
           permanent: true,
-        }
+        },
+        {
+          source: "/docs/tutorial/kubernetes-infra-metrics/",
+          destination: "/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/",
+          permanent: true
+        },
+        {
+          source: "/docs/metrics-management/k8s-infra-otel-config/",
+          destination: "/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra/",
+          permanent: true
+        },
+
       ]
     },
     webpack: (config, options) => {
