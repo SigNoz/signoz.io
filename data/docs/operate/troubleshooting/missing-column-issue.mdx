@@ -1,0 +1,26 @@
+---
+date: 2025-08-04
+id: missing_column_issue
+title: Missing Columns Issue
+description: Instructions to resolve missing columns issue in distributed ClickHouse
+---
+
+## Missing Columns Issue
+
+In case you are using signoz version `0.27` or newer and in the past you ran the migration `0.27` 
+You may face missing columns issue if you are using distributed clickhouse with multiple shards.
+
+To solve this issue, exec into all the shards and follow the steps below:
+
+```sql
+show create table signoz_logs.distributed_logs
+```
+
+If in one shard the name of a column is `host_name` and 
+in other shard the name is `attribute_string_host_name` then run the following command
+
+```sql
+alter table signoz_logs.distributed_logs on cluster cluster rename column if exists host_name to attribute_string_host_name
+```
+
+Run the above command for all the column names which were not migrated.
