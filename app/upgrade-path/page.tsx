@@ -1,10 +1,9 @@
 'use client'
 import UpgradePathTool from './components/UpgradePathTool';
 
-function App({ params }: { params: { slug: string[] } }) {
+function UpgradePathToolPage() {
   return (
     <>
-    {/* <header className="relative !mx-auto !w-[100vw] md:!w-[80vw]"> */}
     <header className="relative !mx-auto">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
@@ -16,4 +15,4 @@ function App({ params }: { params: { slug: string[] } }) {
   )
 }
 
-export default App;
+export default UpgradePathToolPage;

@@ -115,12 +115,12 @@ const UpgradePathTool: React.FC = () => {
 
   return (
     <SectionContainer>
-      <div className="py-8">
+      <div className="py-8 w-full">
         <div className="relative">
           <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-8">
+          <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-8">
             <div className="text-center">
-              <h1 className="text-4xl font-bold mb-2 text-gradient">
+              <h1 className="font-bold mb-2 text-gradient">
                 SigNoz Upgrade Path Tool
               </h1>
               <span className="text-signoz_vanilla-400">
@@ -222,16 +222,16 @@ const UpgradePathTool: React.FC = () => {
 
             {/* Main Content Panels */}
             {isPathGenerated && currentStepData && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Summary Panel */}
-                <SummaryPanel className="w-full max-lg:col-span-2 col-span-1"
+                <SummaryPanel className="max-h-screen overflow-auto w-full max-lg:col-span-2 col-span-1"
                   currentStep={currentStepData}
                   targetVersion={state.targetVersion}
                   onMarkComplete={handleMarkComplete}
                 />
 
                 {/* Documentation Panel */}
-                <DocumentationPanel version={currentStepData?.version} className="w-full col-span-2" currentStep={currentStepData} docUrl={currentStepData.releaseInfo.guideUrl} />
+                <DocumentationPanel version={currentStepData?.version} className="max-h-screen w-full col-span-2" currentStep={currentStepData} docUrl={currentStepData.releaseInfo.guideUrl} />
               </div>
             )}
           </div>

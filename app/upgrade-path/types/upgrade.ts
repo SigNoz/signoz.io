@@ -9,6 +9,11 @@ export interface UpgradeDeprecation {
   timeline?: string;
 }
 
+export interface PatchRelease {
+  label: string;
+  href: string;
+}
+
 export interface ReleaseInfo {
   isMandatoryStop: boolean;
   nextMandatoryStop: string | null;
@@ -17,6 +22,7 @@ export interface ReleaseInfo {
   instructions: string[];
   deprecations: UpgradeDeprecation[];
   warnings: UpgradeWarning[];
+  patchRelease?: PatchRelease;
 }
 
 export interface UpgradeSchema {

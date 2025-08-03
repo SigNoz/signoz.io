@@ -10,7 +10,7 @@ interface ProgressTrackerProps {
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ upgradePath }) => {
   const { completed, total, percentage } = calculateProgress(upgradePath);
 
-  if (upgradePath.length === 0) {
+  if (!upgradePath || upgradePath?.length === 0) {
     return null;
   }
 

@@ -63,8 +63,8 @@ export function calculateProgress(upgradePath: UpgradePath[]): {
   total: number;
   percentage: number;
 } {
-  const total = upgradePath.length;
-  const completed = upgradePath.filter(step => step.isCompleted).length;
+  const total = upgradePath?.length ?? 0;
+  const completed = upgradePath?.filter(step => step.isCompleted).length ?? 0;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   
   return { completed, total, percentage };

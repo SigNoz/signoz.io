@@ -20,7 +20,7 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
   return (
     <Card className={`w-full ${className}`}>
-      <div className={`p-6`}>
+      <div className={`p-6 relative h-full overflow-auto`}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-white">
             {version} - Summary
@@ -39,18 +39,32 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
           {/* Version Info */}
           <div className="p-3 bg-signoz_slate-400 rounded-lg flex flex-col">
             <span className="text-sm text-gray-300">
-              <span className="font-medium text-white">Release Date:</span> {formatDate(releaseInfo.releaseDate)}
+              <span className="font-medium text-white">Release Date:</span> {formatDate(releaseInfo?.releaseDate)}
             </span>
             <span className="text-sm text-gray-300">
-              <span className="font-medium text-white">Mandatory Stop:</span> {releaseInfo.isMandatoryStop ? 'Yes' : 'No'}
+              <span className="font-medium text-white">Mandatory Stop:</span> {releaseInfo?.isMandatoryStop ? 'Yes' : 'No'}
             </span>
+            {releaseInfo?.patchRelease && (
+              <span className="text-sm text-gray-300 mt-1">
+                <span className="font-medium text-white">Patch Release:</span>{' '}
+                <Button
+                  variant={'outline'}
+                  to={releaseInfo?.patchRelease?.href ?? ""}
+                  target="_blank"
+                  size={null}
+                  className="px-2"
+                >
+                  {releaseInfo?.patchRelease?.label ?? ""}
+                </Button>
+              </span>
+            )}
           </div>
 
           {/* Instructions */}
           <div>
             <h4 className="font-medium text-white mb-2">Instructions</h4>
             <ul className="space-y-1">
-              {releaseInfo.instructions.map((instruction, index) => (
+              {releaseInfo?.instructions?.map((instruction, index) => (
                 <li key={index} className="text-sm text-gray-300 flex items-start gap-2">
                   <span className="text-signoz_robin-500 mt-1">•</span>
                   {instruction}
@@ -60,14 +74,14 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
           </div>
 
           {/* Warnings */}
-          {releaseInfo.warnings.length > 0 && (
+          {releaseInfo?.warnings?.length > 0 && (
             <div>
               <h4 className="font-medium text-white mb-2">Warnings</h4>
               <div className="space-y-2">
-                {releaseInfo.warnings.map((warning, index) => (
+                {releaseInfo?.warnings?.map((warning, index) => (
                   <div key={index} className="p-3 bg-signoz_cherry-400/10 border border-signoz_cherry-400/20 rounded-lg">
-                    <h5 className="font-medium text-signoz_cherry-400 mb-1">{warning.title}</h5>
-                    <span className="text-sm text-gray-300">{warning.details}</span>
+                    <h5 className="font-medium text-signoz_cherry-400 mb-1">{warning?.title}</h5>
+                    <span className="text-sm text-gray-300">{warning?.details}</span>
                   </div>
                 ))}
               </div>
@@ -75,17 +89,17 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
           )}
 
           {/* Deprecations */}
-          {releaseInfo.deprecations.length > 0 && (
+          {releaseInfo?.deprecations?.length > 0 && (
             <div>
               <h4 className="font-medium text-white mb-2">Deprecations</h4>
               <div className="space-y-2">
-                {releaseInfo.deprecations.map((deprecation, index) => (
+                {releaseInfo?.deprecations?.map((deprecation, index) => (
                   <div key={index} className="p-3 bg-signoz_amber-400/10 border border-signoz_amber-400/20 rounded-lg">
-                    <h5 className="font-medium text-signoz_amber-400 mb-1">{deprecation.title}</h5>
-                    <span className="text-sm text-gray-300">{deprecation.details}</span>
-                    {deprecation.timeline && (
+                    <h5 className="font-medium text-signoz_amber-400 mb-1">{deprecation?.title}</h5>
+                    <span className="text-sm text-gray-300">{deprecation?.details}</span>
+                    {deprecation?.timeline && (
                       <span className="text-xs text-gray-400 mt-1">
-                        Timeline: {deprecation.timeline}
+                        Timeline: {deprecation?.timeline}
                       </span>
                     )}
                   </div>
