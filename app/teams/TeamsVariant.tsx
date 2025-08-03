@@ -448,11 +448,11 @@ const SignupFormIsolated: React.FC<{
               <button
                 type="button"
                 key={region.id}
-                className={`flex items-center justify-center gap-2 rounded-md border border-solid p-2.5 text-sm transition-colors
+                className={`flex items-center justify-center gap-2 rounded-md border-2 border-solid p-2.5 text-sm transition-all duration-200
             ${
               region.id === formState.dataRegion
-                ? 'border-signoz_robin-500/60 bg-signoz_robin-500/10 text-signoz_robin-500'
-                : 'border-signoz_slate-400 bg-signoz_ink-300 hover:border-signoz_slate-300'
+                ? 'border-signoz_robin-500 bg-signoz_robin-500/20 text-signoz_robin-400 shadow-lg shadow-signoz_robin-500/25 ring-2 ring-signoz_robin-500/30'
+                : 'border-signoz_slate-400 bg-signoz_ink-300 text-signoz_vanilla-100/70 hover:border-signoz_slate-300 hover:bg-signoz_ink-200'
             }`}
                 onClick={() => handleRegionChange(region.id)}
               >
