@@ -9,7 +9,7 @@ const DocRenderer = ({docUrl, setHasError}: {docUrl: string, setHasError: (hasEr
           .replace(/^\/+/, '')}`
       )
     
-      const post = allDocs.find((p) => p.slug === slug) as Doc
+      const post = allDocs?.find((p) => p?.slug === slug) as Doc
     
       if (!post) {
         setHasError(true);

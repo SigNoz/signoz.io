@@ -22,7 +22,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ upgradePath }) => {
             Upgrade Progress
           </h3>
           <span className="text-sm text-gray-300">
-            Step {completed} of {total} completed
+            Step {completed ?? "-"} of {total ?? "-"} completed
           </span>
         </div>
         
@@ -34,7 +34,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ upgradePath }) => {
         </div>
         
         <div className="flex justify-between text-sm text-gray-300">
-          <span>{percentage}% Complete</span>
+          <span>{percentage ?? "-"} % Complete</span>
           <span>{total - completed} steps remaining</span>
         </div>
       </div>

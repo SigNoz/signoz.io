@@ -16,10 +16,10 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ version, classN
   const [hasError, setHasError] = useState(false);
 
   return (
-    <Card className={`${className}`}>
-      <div className={`p-6`}>
+    <Card className={`h-full ${className}`}>
+      <div className="flex flex-col h-full p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">
+          <h3 className="text-lg font-semibold text-white m-0">
             {version} - Full Documentation
           </h3>
           <Link
@@ -35,28 +35,26 @@ const DocumentationPanel: React.FC<DocumentationPanelProps> = ({ version, classN
           </Link>
         </div>
 
-        <Card className="relative h-full max-h-[80vh] min-h-[20vh] overflow-auto"> 
-          <div className='p-2 max-h-[80vh] min-h-[20vh] h-full overflow-auto prose prose-slate max-w-none dark:prose-invert'>
-          <DocRenderer docUrl={docUrl} setHasError={setHasError} />
-
-          {hasError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-signoz_slate-400">
-              <div className="text-center">
-                <div className="mb-3">
-                  <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto" />
+        <Card className="relative flex-1 min-h-[20vh] overflow-auto"> 
+          <div className='relative flex flex-col h-full p-2 prose prose-slate max-w-none dark:prose-invert relative flex-1 min-h-[20vh] overflow-auto'>
+            {hasError ? 
+              <div className="absolute inset-0 flex items-center justify-center bg-signoz_slate-400">
+                <div className="text-center">
+                  <div className="mb-3">
+                    <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto" />
+                  </div>
+                  <span className="text-gray-300 mb-2">Unable to load documentation</span>
+                  <br />
+                  <Link
+                    href={docUrl}
+                    target="_blank"
+                    className="text-signoz_robin-500 hover:text-signoz_robin-400 text-sm"
+                  >
+                    View in new tab instead
+                  </Link>
                 </div>
-                <span className="text-gray-300 mb-2">Unable to load documentation</span>
-                <br />
-                <Link
-                  href={docUrl}
-                  target="_blank"
-                  className="text-signoz_robin-500 hover:text-signoz_robin-400 text-sm"
-                >
-                  View in new tab instead
-                </Link>
-              </div>
-            </div>
-          )}
+              </div> : 
+              <DocRenderer docUrl={docUrl} setHasError={setHasError} />}
           </div>      
         </Card>
 

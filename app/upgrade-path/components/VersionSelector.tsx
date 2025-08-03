@@ -1,5 +1,4 @@
 import React from 'react';
-import { DeploymentType } from '../types/upgrade';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
@@ -40,7 +39,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
               className="w-full px-3 py-2 bg-signoz_slate-400 border border-primary-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-signoz_robin-500 focus:border-signoz_robin-500"
             >
               <option value="" className="bg-signoz_slate-400 text-white">Select current version</option>
-              {availableVersions.map(version => (
+              {availableVersions?.map(version => (
                 <option key={version} value={version} className="bg-signoz_slate-400 text-white">
                   {version}
                 </option>
@@ -58,7 +57,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
               className="w-full px-3 py-2 bg-signoz_slate-400 border border-primary-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-signoz_robin-500 focus:border-signoz_robin-500"
             >
               <option value="" className="bg-signoz_slate-400 text-white">Select target version</option>
-              {availableVersions.map(version => (
+              {availableVersions?.map(version => (
                 <option key={version} value={version} className="bg-signoz_slate-400 text-white">
                   {version}
                 </option>

@@ -111,7 +111,7 @@ const UpgradePathTool: React.FC = () => {
     setIsPathGenerated(false);
   };
 
-  const currentStepData = state.upgradePath[state.currentStep];
+  const currentStepData = state.upgradePath?.[state.currentStep];
 
   return (
     <SectionContainer>
@@ -152,7 +152,7 @@ const UpgradePathTool: React.FC = () => {
                     <div>
                       <h4 className="font-medium mb-2 text-signoz_vanilla-100">Pre-Upgrade Checklist</h4>
                       <ul className="space-y-1 text-sm text-signoz_vanilla-400">
-                        {upgradeSchema.general.checklist.preUpgrade.map((item, index) => (
+                        {upgradeSchema?.general?.checklist?.preUpgrade?.map((item, index) => (
                           <li key={index} className="flex items-start gap-2">
                             <span className="mt-1">•</span>
                             {item}
@@ -164,7 +164,7 @@ const UpgradePathTool: React.FC = () => {
                     <div>
                       <h4 className="font-medium mb-2 text-signoz_vanilla-100">Post-Upgrade Checklist</h4>
                       <ul className="space-y-1 text-sm text-signoz_vanilla-400">
-                        {upgradeSchema.general.checklist.postUpgrade.map((item, index) => (
+                        {upgradeSchema?.general?.checklist?.postUpgrade?.map((item, index) => (
                           <li key={index} className="flex items-start gap-2">
                             <span className="mt-1">•</span>
                             {item}
@@ -174,14 +174,14 @@ const UpgradePathTool: React.FC = () => {
                     </div>
                   </div>
 
-                  {upgradeSchema.general.commonWarnings.length > 0 && (
+                  {upgradeSchema?.general?.commonWarnings?.length > 0 && (
                     <div className="mt-6">
                       <h4 className="font-medium mb-2 text-signoz_vanilla-100">Common Warnings</h4>
                       <div className="space-y-2">
-                        {upgradeSchema.general.commonWarnings.map((warning, index) => (
+                        {upgradeSchema?.general?.commonWarnings?.map((warning, index) => (
                           <div key={index} className="p-3 bg-signoz_amber-400/10 border border-signoz_amber-400/20 rounded-lg">
-                            <h5 className="font-medium text-signoz_amber-400 mb-1">{warning.title}</h5>
-                            <span className="text-sm text-signoz_vanilla-400">{warning.details}</span>
+                            <h5 className="font-medium text-signoz_amber-400 mb-1">{warning?.title ?? ""}</h5>
+                            <span className="text-sm text-signoz_vanilla-400">{warning?.details ?? ""}</span>
                           </div>
                         ))}
                       </div>
@@ -192,7 +192,7 @@ const UpgradePathTool: React.FC = () => {
                     <span className="text-sm text-signoz_vanilla-400">
                       Need help? Check out our{' '}
                       <Link
-                        href={upgradeSchema.general.troubleshootingUrl}
+                        href={upgradeSchema?.general?.troubleshootingUrl ?? ""}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-signoz_robin-500 hover:text-signoz_robin-400 rounded-lg"
@@ -231,7 +231,7 @@ const UpgradePathTool: React.FC = () => {
                 />
 
                 {/* Documentation Panel */}
-                <DocumentationPanel version={currentStepData?.version} className="max-h-screen w-full col-span-2" currentStep={currentStepData} docUrl={currentStepData.releaseInfo.guideUrl} />
+                <DocumentationPanel version={currentStepData?.version} className="max-h-screen w-full col-span-2" currentStep={currentStepData} docUrl={currentStepData?.releaseInfo?.guideUrl ?? ""} />
               </div>
             )}
           </div>
