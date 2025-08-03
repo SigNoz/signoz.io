@@ -206,8 +206,14 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: "Deploying to ECS",
-            route: '/docs/install/ecs'
+            label: 'Deploying to ECS',
+            route: '/docs/install/ecs',
+          },
+          {
+            type: 'doc',
+            isExpanded: false,
+            label: 'Deploying from Marketplaces',
+            route: '/docs/install/marketplaces',
           },
           {
             type: 'doc',
@@ -320,6 +326,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.8.0',
             label: 'Upgrade to v0.8.0',
+          },
+            {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-standard',
+            label: 'Upgrade Standard',
           },
         ],
       },
@@ -508,23 +519,21 @@ const docsSideNav = [
               {
                 label: 'Overview',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/k8s-infra/overview'
+                route: '/docs/collection-agents/k8s/k8s-infra/overview',
               },
               {
                 label: 'Install K8s Infra',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra'
+                route: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra',
               },
               {
                 label: 'Configure K8s Infra',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra'
-              }
-            ]
-          }
-          
-        ]
-
+                route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'category',
@@ -532,8 +541,8 @@ const docsSideNav = [
         label: 'VM',
         items: [
           {
-            type: "category",
-            label: "OpenTelemetry Binary",
+            type: 'category',
+            label: 'OpenTelemetry Binary',
             isExpanded: false,
             items: [
               {
@@ -541,11 +550,11 @@ const docsSideNav = [
                 type: 'doc',
                 label: 'Overview',
               },
-            ]
+            ],
           },
         ],
       },
-    ]
+    ],
   },
   {
     label: 'APM & Distributed Tracing',
@@ -1394,7 +1403,7 @@ const docsSideNav = [
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
           },
-                    {
+          {
             label: 'APM',
             type: 'category',
             isExpanded: false,
@@ -1410,7 +1419,7 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
                 label: 'DB Calls Monitoring',
               },
-            ]
+            ],
           },
           {
             type: 'doc',
@@ -1522,6 +1531,46 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/userguide/query-builder',
         label: 'Query Builder',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/query-builder-v5',
+        label: 'Query Builder (new)',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/search-syntax',
+        label: 'Search Syntax',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/operators-reference',
+        label: 'Operators Reference',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/full-text-search',
+        label: 'Full-Text Search Guide',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/functions-reference',
+        label: 'Functions Reference',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/field-context-data-types',
+        label: 'Field Context & Data Types',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/search-troubleshooting',
+        label: 'Troubleshooting Guide',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/search-advanced-examples',
+        label: 'Advanced Examples',
       },
       {
         type: 'category',
@@ -1834,7 +1883,7 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/sql-server',
         label: 'Microsoft SQL Server',
-      }
+      },
     ],
   },
   {
@@ -1924,6 +1973,25 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/external-api-monitoring/setup',
+        label: 'Setup',
+      },
+    ],
+  },
+  {
+    label: 'Trace Funnels',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/trace-funnels/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/trace-funnels/setup',
         label: 'Setup',
       },
     ],
@@ -2239,7 +2307,7 @@ const docsSideNav = [
         className: 'new-doc',
         type: 'category',
         isExpanded: false,
-        route: '/docs/migration/migrate-from-datadog-to-newrelic',
+        route: '/docs/migration/migrate-from-newrelic-to-signoz',
         items: [
           {
             type: 'doc',
