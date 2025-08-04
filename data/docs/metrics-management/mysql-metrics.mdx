@@ -1,0 +1,260 @@
+---
+date: 2025-08-04
+title: MySQL metrics
+id: mysql-metrics
+---
+
+This document explains how to monitor MySQL database metrics using OpenTelemetry Collector and SigNoz.
+
+## Pre-requisites
+
+- MySQL database server running and accessible
+- OpenTelemetry Collector installed on the same host or with network access to MySQL
+- Valid MySQL user credentials with appropriate privileges
+
+## Setup
+
+### Step 1: Setup OTel Collector
+
+OpenTelemetry Collector is required to collect metrics from MySQL. Please refer to the [OpenTelemetry binary usage guide](/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the agent.
+
+### Step 2: Preparing MySQL Database
+
+For this tutorial, you can use an existing MySQL installation or set up a local MySQL instance using Docker. If you don't have MySQL installed, you can quickly set it up using Docker Compose:
+
+Create a `docker-compose.yaml` file:
+
+```yaml:docker-compose.yaml
+version: "3.3"
+services:
+  mysqldb:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: "myoteldb"
+      MYSQL_ROOT_PASSWORD: "password123"
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - my-db:/var/lib/mysql
+volumes:
+  my-db:
+```
+
+Then run:
+
+```bash
+docker-compose up -d
+```
+
+### Step 3: Collecting MySQL metrics
+
+You will need to configure the [MySQL receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mysqlreceiver/README.md) for collecting MySQL metrics. The receiver connects to your MySQL database and collects various performance metrics.
+
+### Step 4: Configuring the receiver
+
+Edit the OTel Collector config file to configure the `mysql` receiver as shown below:
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: localhost:4317
+      http:
+        endpoint: localhost:4318
+  mysql:
+    endpoint: localhost:3306
+    username: <your-root-username>
+    password: <your-root-password>
+    collection_interval: 10s
+    initial_delay: 10s
+
+processors:
+  resource/env:
+    attributes:
+      - key: deployment.environment
+        value: staging
+        action: upsert
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443" # replace {region} with your region
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "{signoz-token}" # Obtain from SigNoz Cloud settings
+  debug:
+    verbosity: detailed
+
+service:
+  telemetry:
+    metrics:
+      address: localhost:8888
+  pipelines:
+    metrics:
+      receivers: [otlp, mysql]
+      processors: [resource/env, batch]
+      exporters: [otlp]
+```
+
+**Configuration parameters:**
+
+- `endpoint`: MySQL server endpoint (required)
+- `username`: MySQL username (required)
+- `password`: MySQL password (required)
+- `collection_interval`: How often to collect metrics (default: 1m)
+- `initial_delay`: Delay before starting collection (default: 1s)
+
+For Docker-based setup, use `username: root` and `password: password123`.
+
+You can find more details about the MySQL receiver configuration in the [receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mysqlreceiver/README.md).
+
+### Step 5: Monitoring multiple MySQL instances
+
+You can monitor multiple MySQL databases by adding multiple receivers:
+
+```yaml:config.yaml
+receivers:
+  mysql:
+    endpoint: localhost:3306
+    username: root
+    password: password123
+    collection_interval: 10s
+    initial_delay: 10s
+  mysql/production:
+    endpoint: prod-mysql-server:3306
+    username: monitor_user
+    password: secure_password
+    collection_interval: 10s
+    initial_delay: 10s
+
+service:
+  pipelines:
+    metrics:
+      receivers: [mysql, mysql/production]
+      processors: [resource/env, batch]
+      exporters: [otlp]
+```
+
+### Step 6: Running the collector
+
+Run the OpenTelemetry Collector with your configuration:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+For background execution:
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+You should start seeing metrics in SigNoz within 30 seconds.
+
+## Visualizing MySQL Metrics
+
+Once you have configured OTel Collector to send MySQL metrics to SigNoz, you can start visualizing the metrics in the [metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+
+You can create custom dashboards and panels to monitor various MySQL metrics. Learn how to create dashboards in SigNoz [here](https://signoz.io/docs/userguide/manage-dashboards-and-panels/).
+
+Key metrics you can monitor include:
+
+- **Connection metrics**: Track active connections, connection attempts, and connection errors
+- **Query performance**: Monitor query execution times, slow queries, and query counts
+- **Buffer pool metrics**: Track InnoDB buffer pool usage and efficiency
+- **Lock metrics**: Monitor table locks and row locks
+- **Replication metrics**: Track replica lag and replication status
+
+You can also set up [alerts](https://signoz.io/docs/userguide/alerts-management/) on critical metrics like database uptime, connection failures, or slow query counts.
+
+For quick setup, you can load the pre-built [MySQL dashboard JSON](https://github.com/SigNoz/dashboards/tree/main/mysql) in SigNoz.
+
+## MySQL Metrics Reference
+
+The MySQL receiver collects the following metrics:
+
+| Metric | Description | Attributes | Type |
+|--------|-------------|------------|------|
+| mysql.buffer_pool.data_pages | Number of data pages for an InnoDB buffer pool | status | Sum |
+| mysql.buffer_pool.limit | Configured size of the InnoDB buffer pool | none | Sum |
+| mysql.buffer_pool.operations | Number of operations on the InnoDB buffer pool | operation | Sum |
+| mysql.buffer_pool.pages | Sum of pages in the InnoDB buffer pool | kind | Sum |
+| mysql.buffer_pool.usage | Number of bytes in the InnoDB buffer pool | status | Sum |
+| mysql.commands | Total number of executions for each type of command | command | Sum |
+| mysql.connection.count | Total connection attempts (successful and failed) | none | Sum |
+| mysql.connection.errors | Errors occurred during connections | error | Sum |
+| mysql.handlers | Number of requests to various MySQL handlers | kind | Sum |
+| mysql.locks | Total MySQL locks | kind | Sum |
+| mysql.operations | Total operations including fsync, reads and writes | operation | Sum |
+| mysql.query.count | Number of statements executed by the server | none | Sum |
+| mysql.query.slow.count | Number of slow queries | none | Sum |
+| mysql.threads | Current state of MySQL threads | kind | Sum |
+| mysql.uptime | Number of seconds since the server has been up | none | Sum |
+
+*Note: Some metrics are specific to MySQL Enterprise edition and may not be available in all installations.*
+
+## Troubleshooting
+
+### Common Issues
+
+1. **No metrics appearing in SigNoz**
+   - Verify MySQL server is running and accessible
+   - Check MySQL credentials and user permissions
+   - Verify OTel Collector logs for connection errors
+   - Ensure MySQL is accepting connections on the specified port
+
+2. **Authentication errors**
+   - Verify MySQL username and password are correct
+   - Check if the MySQL user has appropriate privileges
+   - Ensure the user can connect from the OTel Collector host
+
+3. **Connection timeout errors**
+   - Check network connectivity between OTel Collector and MySQL
+   - Verify firewall rules allow connections on MySQL port (default 3306)
+   - Increase timeout value in receiver configuration if needed
+
+4. **Missing specific metrics**
+   - Some metrics are only available in MySQL Enterprise edition
+   - Verify MySQL version compatibility with the receiver
+   - Check if specific features (like performance schema) are enabled
+
+5. **High memory usage**
+   - Adjust `collection_interval` to reduce collection frequency
+   - Configure batch processor with appropriate `send_batch_size`
+   - Monitor OTel Collector resource usage
+
+### Debug Mode
+
+Enable debug logging in the OTel Collector to troubleshoot issues:
+
+```yaml:config.yaml
+exporters:
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [mysql]
+      processors: [batch]
+      exporters: [otlp, debug]
+```
+
+View logs:
+
+```bash
+tail -f -n 50 otelcol-output.log
+```
+
+Stop the collector:
+
+```bash
+kill "$(< otel-pid)"
+```
