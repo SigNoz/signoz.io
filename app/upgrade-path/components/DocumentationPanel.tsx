@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { UpgradePath } from '../types/upgrade';
 import DocRenderer from './DocRender';

@@ -243,7 +243,7 @@ function FooterContent() {
 
 function Footer() {
   return (
-    <Suspense fallback={<FooterStaticContent />}>
+    <Suspense fallback={<div className='hidden'><FooterStaticContent /></div>}>
       <FooterContent />
     </Suspense>
   )

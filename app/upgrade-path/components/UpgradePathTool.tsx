@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { UpgradePathState, DeploymentType, UpgradePath } from '../types/upgrade';
+import { UpgradePathState } from '../types/upgrade';
 import upgradeSchema from '@/constants/upgradeSchema.json';
 import { calculateUpgradePath, getAvailableVersions } from '../utils/upgradeUtils';
 import { storeUpgradeProgress, getUpgradeProgress, clearExpiredUpgrades } from '../utils/localStorageUtils';

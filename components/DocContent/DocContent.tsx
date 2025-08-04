@@ -13,7 +13,7 @@ import { ONBOARDING_SOURCE } from '@/constants/globals'
 const StaticDocContent = ({ title, post, toc, hideTableOfContents, formattedDate }: { title: string, post: any, toc: any, hideTableOfContents: boolean, formattedDate: string | null }) => {
   return (
     <>
-      <div className="doc-content">
+      <div className="doc-content hidden">
         <h2 className="mt-2 text-3xl">{title}</h2>
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
         {formattedDate && (
@@ -86,7 +86,7 @@ const DocContent: React.FC<{
       : null
 
   return (
-    <Suspense fallback={<><StaticDocContent {...props} formattedDate={formattedDate} /></>}>
+    <Suspense fallback={<div className='hidden'><StaticDocContent {...props} formattedDate={formattedDate} /></div>}>
       <DocContentInner {...props} formattedDate={formattedDate} />
     </Suspense>
   )

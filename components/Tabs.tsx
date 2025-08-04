@@ -75,7 +75,7 @@ export default function Tabs(props) {
   const initialActiveTab = firstValidChild ? (firstValidChild.props as any).value : null
   
   return (
-    <Suspense fallback={<TabsStaticContent hideSelfHostTab={false} childrenArray={childrenArray} selectedTab={initialActiveTab} setActiveTab={() => {}} isValidElement={isValidElement} />}>
+    <Suspense fallback={<div className='hidden'><TabsStaticContent hideSelfHostTab={false} childrenArray={childrenArray} selectedTab={initialActiveTab} setActiveTab={() => {}} isValidElement={isValidElement} /></div>}>
       <TabsContent {...props} initialActiveTab={initialActiveTab} />
     </Suspense>
   )

@@ -5,7 +5,7 @@ import AuthButtons from './AuthButtons'
 
 export default function TopNavStaticContent() {
   return (
-    <div>
+    <div className='hidden'>
       <ProductPopoverContent />
       <ResourcesPopoverContent />
       <AuthButtons />

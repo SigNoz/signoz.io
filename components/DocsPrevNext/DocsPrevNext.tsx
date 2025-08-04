@@ -61,7 +61,7 @@ function DocsPrevNextContent() {
 
 export default function DocsPrevNext() {
   return (
-    <Suspense fallback={<DocsPrevNextStaticContent pathname={''} />}>
+    <Suspense fallback={<div className='hidden'><DocsPrevNextStaticContent pathname={''} /></div>}>
       <DocsPrevNextContent />
     </Suspense>
   )
