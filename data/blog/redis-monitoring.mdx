@@ -41,9 +41,16 @@ Performance metrics are the first place you'll look to understand how well Redis
 - **Latency**: This measures the time between a command being received and a response being sent. Since Redis typically operates with sub-millisecond latency, even small increases can be significant.
 - **Operations per second (ops/sec)**: The `instantaneous_ops_per_sec` metric gives you a view of Redis's throughput. If you see latency increasing while throughput remains constant, the issue may not be with Redis commands but with network or infrastructure problems.
 - **Cache hit ratio**: Calculated as `keyspace_hits / (keyspace_hits + keyspace_misses)`, this metric is crucial for caching workloads. A healthy ratio is typically above 90%. A low hit rate suggests that clients are frequently requesting keys that have been evicted or never existed.
+
+    The Redis INFO command gives you the total number of keyspace_hits and keyspace_misses.
+    ```bash
+    redis-cli INFO stats
+    ```
+
+    <Figure src="/img/blog/2022/07/redis_info_stats_keyspace.webp" alt="Redis Cache Hit Ratio" caption="The Redis INFO command showing keyspace hits and misses" />
+
 - **CPU usage**: As Redis is primarily single-threaded, CPU usage is a critical indicator of server load. High CPU can result from inefficient commands, high throughput, or background operations. It's important to monitor both Redis-specific and system-wide CPU usage to isolate the cause.
 
-<Figure src="/img/blog/2022/07/redis_info_stats_keyspace.webp" alt="Redis Cache Hit Ratio" caption="The Redis INFO command showing keyspace hits and misses" />
 
 ### Memory Metrics
 
@@ -51,9 +58,6 @@ Memory management is arguably the most critical aspect of Redis monitoring, as a
 
 - **used_memory**: This represents the total bytes allocated by Redis for data. If this exceeds available system memory, the OS will start swapping to disk, which will severely degrade performance.
 - **Memory fragmentation ratio**: Calculated as `used_memory_rss / used_memory`, this metric indicates how efficiently memory is being used. A healthy ratio is generally between 1.0 and 1.4. A value below 1.0 is a critical issue, as it means Redis is using swap memory. If the ratio is consistently above 1.5, it suggests excessive fragmentation. Instead of restarting the server, consider enabling **active defragmentation** (available in Redis 4.0+), which can resolve fragmentation without downtime.
-
-<Figure src="/img/blog/2025/08/redis-monitoing-fragmentation.webp" alt="Redis memory fragmentation illustration" caption="Redis memory fragmentation illustration" />
-
 - **evicted_keys**: This metric counts the number of keys that have been removed because Redis has reached its memory limit. A high number of evicted keys may indicate that you need to allocate more memory or review your data retention policies.
 - **maxmemory configuration**: This setting puts a cap on Redis's RAM usage, preventing it from consuming all available system memory. It's a critical setting for managing eviction policies and maintaining system stability.
 - **blocked_clients**: This shows the number of clients waiting on blocking operations. A consistently high number can point to bottlenecks in your queues or slow consumers.
@@ -83,6 +87,69 @@ Finally, error metrics are direct indicators of problems that require your atten
 - **rejected_connections**: If Redis reaches its `maxclients` limit, it will start rejecting connections. Any non-zero value for this metric indicates a capacity issue.
 - **keyspace_misses**: This metric increments when clients request non-existent keys. While some misses are expected in caching scenarios, a high number in other workloads can point to application bugs or inefficient queries.
 - **master_link_down_since_seconds**: This metric appears when the connection between a primary and replica fails. To avoid serving stale data, this value should always be zero.
+
+
+## How to Setup Effective Redis Monitoring?
+
+### Establishing Baselines
+
+Before you can set up effective alerts, you need to establish a performance baseline. Document the typical latency, memory usage, and throughput for your workload during normal operations. This will give you a reference point for identifying anomalies.
+
+### Key Monitoring Configurations
+
+- **Memory monitoring**: Set alerts for when memory usage exceeds 80% for caching workloads or 90% if Redis is your primary database. Keep a close eye on fragmentation ratios and eviction rates.
+- **Performance tracking**: Alert on any significant increase in latency above your baseline. For a Redis instance that typically responds in under 1ms, an alert at 5-10ms can provide an early warning.
+- **Connection monitoring**: Track client connections and set alerts for sudden spikes or rejections. Monitor replication lag based on your consistency requirements.
+
+<Figure src="/img/blog/2022/07/memory_fragmentation_ratio.webp" alt="Memory fragmentation ratio monitored using SigNoz" caption="Memory fragmentation ratio monitored using SigNoz" />
+
+## Troubleshooting Common Issues in Redis Monitoring
+
+### High Memory Usage
+
+When Redis approaches its memory limit, performance can degrade quickly. This is often caused by inefficient data structures, missing TTL settings on keys, or simply not allocating enough memory.
+
+**Diagnostic steps**:
+1. Analyze memory usage with `INFO memory`.
+2. Identify large keys using `MEMORY USAGE keyname` or the `--bigkeys` option.
+3. Review your eviction policies and TTL settings.
+4. Consider optimizing your data structures.
+
+### Replication Lag
+
+Replication lag can lead to data inconsistency and impact the reliability of your failover process.
+
+**Investigation steps**:
+1. Monitor the `master_last_io_seconds_ago` metric.
+2. Check the network connectivity between your primary and replica instances.
+3. Analyze the load and resource utilization on the primary instance.
+4. Review your replication buffer configurations.
+
+### Latency Spikes
+
+High latency is often a sign of inefficient commands or resource contention.
+
+**Troubleshooting steps**:
+1. Use the `SLOWLOG` to identify problematic commands.
+2. Analyze command patterns for inefficiencies.
+3. Check for background operations like `SAVE` or `BGSAVE` that may be consuming resources.
+4. Monitor system-level resources to rule out broader issues.
+
+<Figure src="/img/blog/2022/07/redis_cli_latency.webp" alt="Latency monitoring using Redis CLI" caption="Latency monitoring using Redis CLI showing response time analysis" />
+
+## Best Practices for Redis Monitoring
+
+### Monitoring Strategy
+
+Develop a monitoring strategy that is aligned with your specific Redis use case. If you are using Redis as a cache, you will want to prioritize hit rates and eviction patterns. If it's your primary database, you'll be more focused on durability and consistency metrics.
+
+### Alerting Configuration
+
+Set meaningful alert thresholds that are sensitive enough to catch issues early but not so sensitive that they generate excessive noise. Start with conservative thresholds and adjust them based on your operational experience.
+
+### Integration Approach
+
+Correlate your Redis metrics with application performance indicators. Understanding how Redis performance impacts the end-user experience will help you prioritize your optimization efforts more effectively.
 
 ## Redis Monitoring Tools Overview
 
@@ -129,7 +196,6 @@ Benefits include complete infrastructure control and extensive customization opt
 
 SigNoz offers a modern approach to Redis monitoring through its OpenTelemetry-native observability platform. Unlike traditional monitoring tools, SigNoz provides full-stack visibility by correlating Redis metrics with application traces and logs.
 
-<Figure src="/img/blog/2025/08/redis-monitoring-signoz.webp" alt="Redis monitoring with SigNoz" caption="Redis monitoring with SigNoz" />
 
 ### Key Features
 
@@ -162,67 +228,5 @@ SigNoz provides comprehensive Redis monitoring through its OpenTelemetry-native 
 You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features. 
 
 Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
-
-## Setting Up Effective Monitoring
-
-### Establishing Baselines
-
-Before you can set up effective alerts, you need to establish a performance baseline. Document the typical latency, memory usage, and throughput for your workload during normal operations. This will give you a reference point for identifying anomalies.
-
-### Key Monitoring Configurations
-
-- **Memory monitoring**: Set alerts for when memory usage exceeds 80% for caching workloads or 90% if Redis is your primary database. Keep a close eye on fragmentation ratios and eviction rates.
-- **Performance tracking**: Alert on any significant increase in latency above your baseline. For a Redis instance that typically responds in under 1ms, an alert at 5-10ms can provide an early warning.
-- **Connection monitoring**: Track client connections and set alerts for sudden spikes or rejections. Monitor replication lag based on your consistency requirements.
-
-<Figure src="/img/blog/2022/07/memory_fragmentation_ratio.webp" alt="Memory fragmentation ratio monitored using SigNoz" caption="Memory fragmentation ratio monitored using SigNoz" />
-
-## Troubleshooting Common Issues
-
-### High Memory Usage
-
-When Redis approaches its memory limit, performance can degrade quickly. This is often caused by inefficient data structures, missing TTL settings on keys, or simply not allocating enough memory.
-
-**Diagnostic steps**:
-1. Analyze memory usage with `INFO memory`.
-2. Identify large keys using `MEMORY USAGE keyname` or the `--bigkeys` option.
-3. Review your eviction policies and TTL settings.
-4. Consider optimizing your data structures.
-
-### Replication Lag
-
-Replication lag can lead to data inconsistency and impact the reliability of your failover process.
-
-**Investigation steps**:
-1. Monitor the `master_last_io_seconds_ago` metric.
-2. Check the network connectivity between your primary and replica instances.
-3. Analyze the load and resource utilization on the primary instance.
-4. Review your replication buffer configurations.
-
-### Latency Spikes
-
-High latency is often a sign of inefficient commands or resource contention.
-
-**Troubleshooting steps**:
-1. Use the `SLOWLOG` to identify problematic commands.
-2. Analyze command patterns for inefficiencies.
-3. Check for background operations like `SAVE` or `BGSAVE` that may be consuming resources.
-4. Monitor system-level resources to rule out broader issues.
-
-<Figure src="/img/blog/2022/07/redis_cli_latency.webp" alt="Latency monitoring using Redis CLI" caption="Latency monitoring using Redis CLI showing response time analysis" />
-
-## Best Practices
-
-### Monitoring Strategy
-
-Develop a monitoring strategy that is aligned with your specific Redis use case. If you are using Redis as a cache, you will want to prioritize hit rates and eviction patterns. If it's your primary database, you'll be more focused on durability and consistency metrics.
-
-### Alerting Configuration
-
-Set meaningful alert thresholds that are sensitive enough to catch issues early but not so sensitive that they generate excessive noise. Start with conservative thresholds and adjust them based on your operational experience.
-
-### Integration Approach
-
-Correlate your Redis metrics with application performance indicators. Understanding how Redis performance impacts the end-user experience will help you prioritize your optimization efforts more effectively.
 
 Hope this guide has been helpful. If you have more questions, feel free to join our [Slack community](https://signoz.io/slack/). You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for more insights on observability, open source, and OpenTelemetry.
