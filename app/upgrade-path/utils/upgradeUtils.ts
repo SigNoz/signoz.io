@@ -45,7 +45,7 @@ export function calculateUpgradePath(
 
 export function getAvailableVersions(schema: UpgradeSchema): string[] {
   return Object.keys(schema.releases).sort((a, b) => {
-    return a.localeCompare(b, undefined, { numeric: true });
+    return b.localeCompare(a, undefined, { numeric: true });
   });
 }
 
