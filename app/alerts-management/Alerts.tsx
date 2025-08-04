@@ -97,7 +97,6 @@ const Header = () => {
           </span>
         </Button>
 
-        {/* <Button type={Button.TYPES.SECONDARY} id="btn-read-documentation-homepage-hero"> */}
         <Button variant="secondary" to="/docs/introduction/" rounded={"full"} id="btn-read-documentation-homepage-hero">
           <span className="flex-center">
             <BookOpen size={14} />
@@ -399,7 +398,6 @@ const SigNozStats = () => {
                 </span>
               </Button>
               <Button isButton
-                // type={Button.TYPES.SECONDARY}
                 variant="secondary"
                 rounded={"full"}
                 className="text-xs sm:text-sm"
@@ -442,7 +440,6 @@ const GetStarted = ({ page }) => {
                     </span>
                   </Button>
 
-                  {/* <Button type={Button.TYPES.SECONDARY} id={readDocumentationId}> */}
                   <Button to="/docs/introduction/" variant="secondary" rounded={"full"} id={readDocumentationId}>
                     <span className="flex-center">
                       <BookOpen size={14} />
