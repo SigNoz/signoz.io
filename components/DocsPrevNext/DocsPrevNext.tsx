@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useSearchParams } from 'next/navigation'
-import React from 'react'
+import React, { Suspense } from 'react'
 import docsSideNav from '@/constants/docsSideNav'
 import { getPrevAndNextRoutes } from '../../utils/common'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
@@ -9,16 +9,9 @@ import Link from 'next/link'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 
-export default function DocsPrevNext() {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
-
-  if (source === ONBOARDING_SOURCE) {
-    return null
-  }
-
+const DocsPrevNextStaticContent = ({ pathname }: { pathname: string }) => {
   const { prev, next } = getPrevAndNextRoutes(docsSideNav, pathname)
+
   return (
     <div className="docs-prev-next-nav mt-16 flex items-center justify-between">
       {prev && prev?.route && (
@@ -49,5 +42,27 @@ export default function DocsPrevNext() {
         </Link>
       )}
     </div>
+  )
+}
+
+function DocsPrevNextContent() {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+
+  if (source === ONBOARDING_SOURCE) {
+    return null
+  }
+
+  return (
+    <DocsPrevNextStaticContent pathname={pathname} />
+  )
+}
+
+export default function DocsPrevNext() {
+  return (
+    <Suspense fallback={<DocsPrevNextStaticContent pathname={''} />}>
+      <DocsPrevNextContent />
+    </Suspense>
   )
 }

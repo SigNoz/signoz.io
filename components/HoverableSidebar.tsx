@@ -1,11 +1,11 @@
 'use client'
 
 import '../css/doc.css'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
 import { Menu, X } from 'lucide-react'
 
-const HoverableSidebar: React.FC = () => {
+function HoverableSidebarContent() {
   const [isOpen, setIsOpen] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
 
@@ -76,6 +76,14 @@ const HoverableSidebar: React.FC = () => {
         </div>
       </div>
     </div>
+  )
+}
+
+const HoverableSidebar: React.FC = () => {
+  return (
+    <Suspense fallback={null}>
+      <HoverableSidebarContent />
+    </Suspense>
   )
 }
 
