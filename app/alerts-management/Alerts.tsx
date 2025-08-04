@@ -170,7 +170,6 @@ const TrustedByTeams = ({ page }) => {
           <div className="flex flex-col items-center text-center">
             <Button
               id={customerStoriesId}
-              // className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
               variant={"secondary"}
               rounded={"full"}
               to="/case-study/"

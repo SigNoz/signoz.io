@@ -243,7 +243,6 @@ const TrustedByTeams = ({ page }) => {
               rounded='full'
               to="/case-study/"
               id={customerStoriesId}
-              // className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
               <span className="flex-center z-[1] mx-2">
                 Read customer stories <ArrowRight size={14} />
