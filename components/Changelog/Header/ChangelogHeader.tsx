@@ -191,7 +191,7 @@ function ChangelogHeaderContent({ showFilters = true }: Props) {
 
 export default function ChangelogHeader(props: Props) {
   return (
-    <Suspense fallback={<div className='hidden'>Loading...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <ChangelogHeaderContent {...props} />
     </Suspense>
   )

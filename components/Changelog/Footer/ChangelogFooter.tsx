@@ -55,7 +55,7 @@ function ChangelogFooterContent({ pagination }: Props) {
 
 export default function ChangelogFooter(props: Props) {
   return (
-    <Suspense fallback={<div className='hidden'>Loading...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <ChangelogFooterContent {...props} />
     </Suspense>
   )

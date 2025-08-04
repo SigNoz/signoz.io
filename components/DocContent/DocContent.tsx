@@ -86,7 +86,7 @@ const DocContent: React.FC<{
       : null
 
   return (
-    <Suspense fallback={<div className='hidden'><StaticDocContent {...props} formattedDate={formattedDate} /></div>}>
+    <Suspense fallback={<StaticDocContent {...props} formattedDate={formattedDate} />}>
       <DocContentInner {...props} formattedDate={formattedDate} />
     </Suspense>
   )

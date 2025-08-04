@@ -6,7 +6,7 @@ import TopNavContent from './TopNavContent'
 
 export default function TopNav() {
   return (
-    <Suspense fallback={<TopNavStaticContent />}>
+    <Suspense fallback={null}>
       <TopNavContent />
     </Suspense>
   )
