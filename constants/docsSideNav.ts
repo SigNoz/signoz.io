@@ -1288,16 +1288,29 @@ const docsSideNav = [
         label: 'Configure custom buckets for histograms',
       },
       {
-        type: 'doc',
-        className: 'new-doc',
-        route: '/docs/metrics-management/docker-container-metrics',
-        label: 'Docker container metrics',
-      },
-      {
-        type: 'doc',
-        className: 'new-doc',
-        route: '/docs/metrics-management/nginx-metrics',
-        label: 'NGINX metrics',
+      label: 'Send Metrics',
+      type: 'category',
+      isExpanded: false,
+      items: [
+          {
+            type: 'doc',
+            className: 'new-doc',
+            route: '/docs/metrics-management/docker-container-metrics',
+            label: 'Docker container metrics',
+          },
+          {
+            type: 'doc',
+            className: 'new-doc',
+            route: '/docs/metrics-management/nginx-metrics',
+            label: 'NGINX metrics',
+          },
+          {
+            type: 'doc',
+            className: 'new-doc',
+            route: '/docs/metrics-management/mysql-metrics',
+            label: 'MySQL metrics',
+          },
+        ]
       },
       {
         type: 'doc',
