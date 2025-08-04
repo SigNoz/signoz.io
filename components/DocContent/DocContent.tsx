@@ -13,7 +13,7 @@ import { ONBOARDING_SOURCE } from '@/constants/globals'
 const StaticDocContent = ({ title, post, toc, hideTableOfContents, formattedDate }: { title: string, post: any, toc: any, hideTableOfContents: boolean, formattedDate: string | null }) => {
   return (
     <>
-      <div className="doc-content hidden">
+      <div className="doc-content">
         <h2 className="mt-2 text-3xl">{title}</h2>
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
         {formattedDate && (
