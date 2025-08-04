@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "1.5",
+  "pathHead": "v0.20.0",
+  "general": {
+    "upgradeSummary": [
+      "This tool provides the mandatory sequential path to upgrade your instance safely.",
+      "Each version listed is a mandatory stop with specific instructions. Do not skip any steps.",
+      "Before you begin, please review the checklists and common warnings below."
+    ],
+    "checklist": {
+      "preUpgrade": [
+        "Backup your database and configuration files.",
+        "Review changelogs for all versions in your upgrade path.",
+        "Schedule the upgrade during a low-traffic period."
+      ],
+      "postUpgrade": [
+        "Verify all services have restarted successfully.",
+        "Clear your browser cache to see the latest UI changes.",
+        "Monitor system performance and error logs."
+      ]
+    },
+    "commonWarnings": [
+      {
+        "title": "Potential Downtime",
+        "details": "The upgrade process requires restarting services, which will result in a brief period of downtime."
+      }
+    ],
+    "troubleshootingUrl": "https://signoz.io/docs/install/troubleshooting/"
+  },
+  "releases": {
+    "v0.88.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": null,
+      "releaseDate": "2025-05-10",
+      "patchRelease": {
+        "label": "v0.88.1",
+        "href": "https://github.com/SigNoz/signoz/releases/tag/v0.88.1"
+      },
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.88",
+      "instructions": [
+        "This migration is a one-time process. Once it is successfully completed, your system will be fully transitioned to the new metrics exporter.",
+        "The migration scripts are idempotent, so there is no need to worry about running them multiple times.",
+        "After completing the migration, remove any configuration changes made for it, based on your deployment type."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+        "title": "signoz-otel-collector version",
+        "details": "Version is greater or equal to v0.111.29"
+        },
+        {
+          "title": "Dual Exporter Setup",
+          "details": "Both Exporters clickhousemetricswrite and signozclickhousemetrics exporters are enabled  for your metrics retention period."
+        }
+      ]
+    },
+  "v0.77.0": {
+    "isMandatoryStop": false,
+    "nextMandatoryStop": "v0.88.0",
+    "releaseDate": "2024-05-10",
+    "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-standard",
+    "instructions": [
+      "This is not a breaking change release. No special actions are needed."
+    ],
+    "deprecations": [],
+    "warnings": []
+  },
+  "v0.76.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "",
+      "releaseDate": "2025-01-29",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.76",
+      "patchRelease":{
+        "href": "https://github.com/SigNoz/signoz/releases/tag/v0.76.2",
+        "label": "0.76.2"
+      },
+      "instructions": [
+        "This is a major upgrade consolidating `query-service`, `frontend`, and `alertmanager` into a single `signoz` binary. Careful migration is required.",
+        "The frontend port has changed from `3301` to `8080`. Update your reverse proxy or ingress configurations accordingly.",
+        "For Kubernetes, backup the SQLite database, replace the `queryService` key with `signoz` in `my-values.yaml`, and configure the migration `initContainer` as per the guide.",
+        "For Docker Standalone & Swarm, you must be on version `v0.70.0` before upgrading to `v0.76.0`.",
+        "After a successful upgrade, the migration container in Kubernetes should be disabled, and old unused volumes can be deleted.",
+        "If you see an 'Oops! Something went wrong' screen, try logging out and back in, or clearing your browser's local storage."
+      ],
+      "deprecations": [
+        {
+          "title": "Service Consolidation",
+          "details": "The separate `query-service`, `frontend`, and `alertmanager` services/containers are deprecated and have been replaced by a single `signoz` binary."
+        },
+        {
+          "title": "Helm Chart Configuration",
+          "details": "In Kubernetes `my-values.yaml`, the top-level key `queryService` is deprecated and must be replaced with `signoz`."
+        },
+        {
+          "title": "Frontend Port",
+          "details": "The default frontend port `3301` is deprecated. The new service runs on port `8080`."
+        },
+        {
+          "title": "Old Volumes",
+          "details": "The PersistentVolumeClaims for `query-service` and `alertmanager` (Kubernetes) and the `signoz-alertmanager` volume (Docker) are no longer used and can be deleted after migration."
+        }
+      ],
+      "warnings": [
+        {
+          "title": "Database Backup Required (Kubernetes)",
+          "details": "Before starting the upgrade on Kubernetes, you must backup your SQLite database (`signoz.db`) to prevent data loss."
+        },
+        {
+          "title": "Version Prerequisite (Docker/Swarm)",
+          "details": "Users on Docker Standalone or Docker Swarm must first be on version `v0.70.0` before attempting to upgrade to `v0.76.0`."
+        },
+        {
+          "title": "Alertmanager Email Configuration",
+          "details": "If you are using Alertmanager to send emails, you will need to re-apply your configuration after upgrading. Refer to the documentation for details."
+        }
+      ]
+    }
+  }
+}

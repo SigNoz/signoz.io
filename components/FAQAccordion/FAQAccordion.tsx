@@ -1,5 +1,8 @@
 'use client'
 
+// TODO: there are 2 FAQAccordion components, another in app/startups/components/FAQAccordion.tsx
+// TODO: check which can be reused and remove the other
+
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'

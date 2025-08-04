@@ -1,7 +1,4 @@
 import React from 'react'
-import styles from './styles.module.css'
-import Heading from '../../components/ui/Heading'
-import SubHeading from '../../components/ui/SubHeading'
 import Card from '../Card/card'
 import { BookOpen, ArrowRight } from 'lucide-react'
 import { ArrowRightSolid } from '@/components/homepage-icons/icons'
@@ -51,18 +48,16 @@ export const WhyOpenTelemetry = () => {
               <br className="hidden lg:inline" />
               Kubernetes being more active.
             </p>
-            <button>
-              <TrackingLink 
-                href="/why-opentelemetry"
-                clickType="Secondary CTA"
-                clickName="Why OpenTelemetry Link"
-                clickText="Learn why OpenTelemetry is the future"
-                clickLocation="Why OpenTelemetry Section"
-                className="h-10 px-4 py-2 mt-3 mb-3 rounded-full text-[10px] sm:text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_20px_0_rgba(242,71,105,0.20)]"
-              >
-                <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5"/>Learn why OpenTelemetry is the future<ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              </TrackingLink>
-            </button>
+            <TrackingLink 
+              href="/why-opentelemetry"
+              clickType="Secondary CTA"
+              clickName="Why OpenTelemetry Link"
+              clickText="Learn why OpenTelemetry is the future"
+              clickLocation="Why OpenTelemetry Section"
+              className="h-10 px-4 py-2 mt-3 mb-3 rounded-full text-[10px] sm:text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_20px_0_rgba(242,71,105,0.20)]"
+            >
+              <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5"/>Learn why OpenTelemetry is the future<ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            </TrackingLink>
           </div>
         </div>
       </section>

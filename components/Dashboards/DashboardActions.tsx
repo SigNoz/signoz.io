@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { Download, Copy, CheckCircle } from 'lucide-react'
+import Button from '../ui/Button'
 
 interface DashboardActionsProps {
   dashboardJsonUrl: string
@@ -71,17 +72,21 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <div className="flex gap-3 my-6">
-        <button 
-          className="inline-flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        <Button
+          variant="default"
+          rounded='default'
+          isButton={true}
           onClick={handleDownload}
           disabled={isDownloading}
         >
           <Download className="w-3.5 h-3.5 mr-1.5" />
           {isDownloading ? 'Downloading...' : 'Download JSON'}
-        </button>
+        </Button>
         
-        <button 
-          className="inline-flex items-center px-3 py-1.5 text-sm bg-gray-100 border border-gray-300 text-gray-800 rounded-md hover:bg-gray-200 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+        <Button 
+          variant={"tertiary"} 
+          rounded={"default"} 
+          isButton={true}
           onClick={handleCopy}
           disabled={isCopying}
         >
@@ -96,7 +101,7 @@ const DashboardActions: React.FC<DashboardActionsProps> = ({
               {isCopying ? 'Copying...' : 'Copy JSON'}
             </>
           )}
-        </button>
+        </Button>
       </div>
       
       <div className="text-sm text-gray-600 mt-2">

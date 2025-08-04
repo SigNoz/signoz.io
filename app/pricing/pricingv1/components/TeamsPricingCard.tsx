@@ -4,11 +4,12 @@ import Image from 'next/image'
 import Button from 'components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
 import { Tooltip } from '@nextui-org/react'
+import { Card } from '@/components/ui/Card'
 
 export default function TeamsPricingCard() {
   return (
-    <div className="pricing-card relative flex h-full flex-col rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 bg-opacity-5 px-6 py-8 shadow-[0_0_20px_rgba(78,116,248,0.2)] transition-all duration-300">
-      <div className="flex flex-grow flex-col">
+    <Card variant={"aqua"}>
+      <div className="flex flex-grow flex-col m-6">
         <div className="mb-4 flex flex-col md:flex-row md:justify-between">
           <div className="w-full md:w-[60%]">
             <h3 className="pinkish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl">
@@ -246,6 +247,6 @@ export default function TeamsPricingCard() {
           </TrackingLink>
         </div>
       </div>
-    </div>
+    </Card>
   )
 }
