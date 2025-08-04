@@ -5,6 +5,38 @@ import Blogs from './blog/Blogs'
 import ComparisonsListing from './comparisons/Comparisons'
 import Guides from './guides/Guides'
 import OpenTelemetry from './opentelemetry/OpenTelemetry'
+import Button from '@/components/ui/Button'
+
+const tabs = [
+  {
+    id: 'blog-tab',
+    label: 'Blog',
+    target: '#blog',
+    controls: 'blog',
+    component: Blogs
+  },
+  {
+    id: 'comparisons-tab',
+    label: 'Comparisons',
+    target: '#comparisons',
+    controls: 'comparisons',
+    component: ComparisonsListing
+  },
+  {
+    id: 'guides-tab',
+    label: 'Guides',
+    target: '#guides',
+    controls: 'guides',
+    component: Guides
+  },
+  {
+    id: 'openTelemetry-tab',
+    label: 'OpenTelemetry',
+    target: '#openTelemetry',
+    controls: 'openTelemetry',
+    component: OpenTelemetry
+  }
+]
 
 export default function ResourceCenter() {
   const [activeTab, setActiveTab] = useState('blog-tab')
@@ -18,74 +50,35 @@ export default function ResourceCenter() {
           data-tabs-toggle="#default-tab-content"
           role="tablist"
         >
-          <li className="me-2" role="presentation">
-            <button
-              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'blog-tab' ? 'border-b-2 border-signoz_indigo-500 text-indigo-500' : ''}`}
-              id="blog-tab"
-              data-tabs-target="#blog"
-              type="button"
-              role="tab"
-              aria-controls="blog"
-              aria-selected="false"
-              onClick={() => setActiveTab(`blog-tab`)}
+          {tabs.map((tab, index) => (
+            <li 
+              key={tab.id}
+              className={index < tabs.length - 1 ? "me-2" : ""} 
+              role="presentation"
             >
-              Blog
-            </button>
-          </li>
-          <li className="me-2" role="presentation">
-            <button
-              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'comparisons-tab' ? 'border-b-2 border-signoz_indigo-500 text-indigo-500' : ''}`}
-              id="comparisons-tab"
-              data-tabs-target="#comparisons"
-              type="button"
-              role="tab"
-              aria-controls="comparisons"
-              aria-selected="false"
-              onClick={() => setActiveTab(`comparisons-tab`)}
-            >
-              Comparisons
-            </button>
-          </li>
-
-          <li className="me-2" role="presentation">
-            <button
-              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'guides-tab' ? 'border-b-2 border-signoz_indigo-500 text-indigo-500' : ''}`}
-              id="guides-tab"
-              data-tabs-target="#guides"
-              type="button"
-              role="tab"
-              aria-controls="guides"
-              aria-selected="false"
-              onClick={() => setActiveTab(`guides-tab`)}
-            >
-              Guides
-            </button>
-          </li>
-          <li role="presentation">
-            <button
-              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'openTelemetry-tab' ? 'border-b-2 border-signoz_indigo-500 text-indigo-500' : ''}`}
-              id="openTelemetry-tab"
-              data-tabs-target="#openTelemetry"
-              type="button"
-              role="tab"
-              aria-controls="openTelemetry"
-              aria-selected="false"
-              onClick={() => setActiveTab(`openTelemetry-tab`)}
-            >
-              OpenTelemetry
-            </button>
-          </li>
+              <Button
+                isButton={true}
+                variant={"secondary"}
+                className={`bg-transparent hover:bg-transparent rounded-none ${activeTab === tab.id ? 'border-b-2 border-signoz_indigo-500 text-indigo-500' : ''}`}
+                id={tab.id}
+                data-tabs-target={tab.target}
+                type="button"
+                role="tab"
+                aria-controls={tab.controls}
+                aria-selected="false"
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </Button>
+            </li>
+          ))}
         </ul>
       </div>
 
       <div className="tab-content pt-6">
-        {activeTab === 'blog-tab' && <Blogs />}
-
-        {activeTab === 'comparisons-tab' && <ComparisonsListing />}
-
-        {activeTab === 'guides-tab' && <Guides />}
-
-        {activeTab === 'openTelemetry-tab' && <OpenTelemetry />}
+        {tabs.map(tab => (
+          activeTab === tab.id && <tab.component key={tab.id} />
+        ))}
       </div>
 
       <div id="default-tab-content">

@@ -5,7 +5,6 @@ import Blogs from '../blog/Blogs'
 import Comparisons from '../comparisons/Comparisons'
 import Guides from '../guides/Guides'
 import OpenTelemetry from './OpenTelemetry'
-import Tabs from '../Shared/Tabs'
 
 export default function OpenTelemetryClient() {
   const [activeTab, setActiveTab] = useState('openTelemetry-tab')

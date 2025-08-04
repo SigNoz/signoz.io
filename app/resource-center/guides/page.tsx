@@ -5,7 +5,6 @@ import Blogs from '../blog/Blogs'
 import Comparisons from '../comparisons/Comparisons'
 import Guides from './Guides'
 import OpenTelemetry from '../opentelemetry/OpenTelemetry'
-import Tabs from '../Shared/Tabs'
 
 export default function GuidesHome() {
   const [activeTab, setActiveTab] = useState('guides-tab')

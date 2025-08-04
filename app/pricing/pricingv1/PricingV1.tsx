@@ -1,4 +1,5 @@
 import React from 'react'
+import { Card } from '@/components/ui/Card'
 import Heading from '../../../components/ui/Heading'
 import PricingFeatures from './components/PricingFeatures'
 import TeamsPricingCard from './components/TeamsPricingCard'
@@ -40,11 +41,8 @@ export default function PricingV1Page() {
           </div>
 
           {/* Enhanced Pricing calculator section */}
-          <div className="relative mx-auto mb-20 mt-20 w-full lg:max-w-6xl">
-            {/* Glow effect */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-signoz_robin-500/20 to-signoz_cherry-500/20 blur-xl" />
-
-            <div className="relative rounded-xl border-[0.5px] border-signoz_robin-500/30 bg-signoz_ink-400 p-8 md:p-12">
+          <Card variant="gradient">
+            <div className="p-8 md:p-12">
               <div className="mb-8 text-center">
                 <div className="mb-4 inline-flex items-center rounded-full border border-signoz_robin-500/30 bg-signoz_robin-500/20 px-4 py-2 text-sm font-medium text-signoz_robin-300">
                   🧮 Pricing Calculator
@@ -58,7 +56,7 @@ export default function PricingV1Page() {
               </div>
               <PricingCalculator />
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Feature comparison section */}

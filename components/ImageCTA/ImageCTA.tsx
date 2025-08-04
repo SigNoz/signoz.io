@@ -25,7 +25,7 @@ const ImageCTA: React.FC<ImageCTAProps> = ({
   return (
     <div className={`${className} relative group`}>
       <div className="transition-transform duration-300 hover:scale-[1.02]">
-        <div className="rounded-lg border border-gray-800 bg-gray-900/50 px-2 py-0 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+        <div className="rounded-lg border border-gray-800 bg-gray-900/50 px-2 py-0">
           <Figure
             src={src}
             alt={alt}

@@ -545,7 +545,7 @@ const SigNozVsNewRelicV2 = () => {
                     alt="Enhance observability of messaging queues with OTel powered correlated trace and metrics"
                     width={800}
                     height={400}
-                    className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                    className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2  transition-transform duration-300 hover:scale-[1.02]"
                   />
                   <figcaption className="text-sm text-gray-400">
                     Enhance observability of messaging queues with OTel powered correlated trace and
@@ -655,7 +655,7 @@ const SigNozVsNewRelicV2 = () => {
                   alt="Application instrumented by OpenTelemetry are segregated from those instrumented with NR agents"
                   width={800}
                   height={400}
-                  className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                  className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2  transition-transform duration-300 hover:scale-[1.02]"
                 />
                 <figcaption className="text-sm text-gray-400">
                   Application instrumented by OpenTelemetry are segregated from those instrumented
@@ -1661,7 +1661,7 @@ const SigNozVsNewRelicV2 = () => {
               alt="User seat billing can constitute a significant portion of your total bill with New Relic."
               width={800}
               height={400}
-              className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+              className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2  transition-transform duration-300 hover:scale-[1.02]"
             />
             <figcaption className="text-sm text-gray-400">
               User seat billing can constitute a significant portion of your total bill with New
