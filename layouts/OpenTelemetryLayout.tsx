@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useRef, useState, useEffect } from 'react'
+import React, { ReactNode, useRef, useState, useEffect, Suspense } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
@@ -34,7 +34,7 @@ export interface TocItemProps {
   value: string
 }
 
-export default function OpenTelemetryLayout({
+function OpenTelemetryLayoutContent({
   content,
   authorDetails,
   authors,
@@ -190,5 +190,13 @@ export default function OpenTelemetryLayout({
       </SectionContainer>
       <ProgressBar target={mainRef} />
     </main>
+  )
+}
+
+export default function OpenTelemetryLayout(props: LayoutProps) {
+  return (
+    <Suspense fallback={null}>
+      <OpenTelemetryLayoutContent {...props} />
+    </Suspense>
   )
 }
