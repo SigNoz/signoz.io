@@ -11,6 +11,9 @@ import { CaseStudy } from '../../../.contentlayer/generated'
 import React from 'react'
 import CaseStudyLayout from '../../../layouts/CaseStudyLayout'
 
+export const dynamicParams = false
+export const dynamic = 'error'
+
 export async function generateMetadata({
   params,
 }: {
@@ -18,6 +21,10 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allCaseStudies.find((p) => p.slug === slug)
+
+  if (!post) {
+    notFound()
+  }
 
   return {
     title: post?.title,

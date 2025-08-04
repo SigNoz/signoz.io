@@ -1,9 +1,11 @@
 'use client'
-import { useEffect, useState } from 'react'
-import Styles from './styles.module.css'
-import { Modal, ModalContent, ModalBody, useDisclosure, ModalHeader } from '@nextui-org/react'
-import { DeploymentType, DeploymentTypeColors, DeploymentTypeLabels } from '@/utils/strapi'
+
+import React, { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useDisclosure } from '@nextui-org/react'
+import { DeploymentType, DeploymentTypeColors, DeploymentTypeLabels } from '@/utils/strapi'
+import Styles from './styles.module.css'
+import { Modal, ModalContent, ModalBody, ModalHeader } from '@nextui-org/react'
 import { Check, Loader2 } from 'lucide-react'
 import { saveChangelogSubscription } from '@/utils/strapi'
 import Link from 'next/link'
@@ -16,7 +18,7 @@ interface Props {
   showFilters?: boolean
 }
 
-const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
+function ChangelogHeaderContent({ showFilters = true }: Props) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
   const router = useRouter()
   const emailRegex = new RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
@@ -187,4 +189,10 @@ const ChangelogHeader: React.FC<Props> = ({ showFilters = true }) => {
   )
 }
 
-export default ChangelogHeader
+export default function ChangelogHeader(props: Props) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ChangelogHeaderContent {...props} />
+    </Suspense>
+  )
+}

@@ -9,6 +9,10 @@ import NewsroomLayout from '@/layouts/NewsroomLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import React from 'react'
+import { notFound } from 'next/navigation'
+
+export const dynamicParams = false
+export const dynamic = 'error'
 
 export async function generateMetadata({
   params,
@@ -17,6 +21,10 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allNewsrooms.find((p) => p.slug === slug)
+
+  if (!post) {
+    return notFound()
+  }
 
   return {
     title: post?.title,

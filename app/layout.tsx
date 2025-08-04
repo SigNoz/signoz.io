@@ -91,9 +91,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
+
         <Suspense fallback={null}>
           <PageViewTracker />
         </Suspense>
+
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"
@@ -109,12 +111,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <GrowthBookProvider>
             <Suspense>
               <SectionContainer>
-                <div className="relative flex h-screen flex-col justify-between ">
+                <div className="relative flex h-screen flex-col justify-between">
                   <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                    <TopNav />
-                    <main className="mb-auto mt-[48px]">{children}</main>
+                    <Suspense fallback={null}>
+                      <TopNav />
+                    </Suspense>
+                    <Suspense fallback={null}>
+                      <main className="mb-auto mt-[48px]">{children}</main>
+                    </Suspense>
                   </SearchProvider>
-                  <MainFooter />
+                  <Suspense fallback={null}>
+                    <MainFooter />
+                  </Suspense>
                 </div>
               </SectionContainer>
             </Suspense>
