@@ -6,7 +6,6 @@ import { Slider, Tooltip } from '@nextui-org/react'
 import { ArrowUpRight, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import Button from "@/components/ui/Button"
-// import Button from '../../../../components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
 import TrackingButton from '../../../../components/TrackingButton'
 import { Card } from '@/components/ui/Card'

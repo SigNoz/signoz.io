@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { ArrowRight, BookOpen } from 'lucide-react'
-// import Button from '@/components/Button/Button'
 import Button from "@/components/ui/Button"
 import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
