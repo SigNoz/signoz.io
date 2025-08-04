@@ -142,7 +142,7 @@ const UpgradePathTool: React.FC = () => {
 
             {/* General Information */}
             {isPathGenerated && (
-              <Card variant={"amber"} className='w-full'>
+              <Card className='w-full'>
                 <div className='p-6'>
                   <h3 className="text-lg font-semibold mb-4 text-signoz_vanilla-100">
                     Important Information

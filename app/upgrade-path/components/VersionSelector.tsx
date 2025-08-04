@@ -23,7 +23,7 @@ const VersionSelector: React.FC<VersionSelectorProps> = ({
   error
 }) => {
   return (
-    <Card variant={"gradient"} className='w-full'>
+    <Card className='w-full'>
       <div className='p-6'>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
