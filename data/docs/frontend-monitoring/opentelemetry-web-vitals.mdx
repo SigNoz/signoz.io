@@ -88,7 +88,7 @@ The `instrument.ts` file is required to setup the `OTLPTraceExporter` and `WebTr
     import CustomSpanProcessor from './custom_span_processor';
 
     const exporter = new OTLPTraceExporter({
-      url: `${import.meta.env.VITE_OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`,
+      url: `<<SIGNOZ_COLLECTOR_URL>>/v1/traces`,
     });
 
     const provider = new WebTracerProvider({
@@ -212,7 +212,22 @@ onCLS(metric => {
 });
 ```
 
-### Step 6: Setup Dashboard and alerts
+### Step 6: Viewing captured Web Vitals
+
+The captured web vitals can be viewed in the Traces Explorer. Each `web-vital` trace contains the 5 web vitals as child spans.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/guides/frontend-monitoring/web-vitals/3.webp"
+    alt="Web Vitals"
+  />
+  <figcaption>
+    <i>Web Vitals</i>
+  </figcaption>
+</figure>
+
+### Step 7: Setup Dashboard and alerts
 You can create a [custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard) and [set alerts](https://signoz.io/docs/setup-alerts-notification/)
 to monitor your core web-vitals and be notified about anything critical.
 
@@ -298,7 +313,7 @@ Now every span exported will include these additional contextual attributes.
 <figure data-zoomable align="center">
   <img
     className="box-shadowed-image"
-    src="/img/guides/2025/frontend-monitoring/web-vitals/1.webp"
+    src="/img/guides/frontend-monitoring/web-vitals/1.webp"
     alt="Web Vitals with custom attributes"
   />
   <figcaption>
@@ -309,7 +324,7 @@ Now every span exported will include these additional contextual attributes.
 <figure data-zoomable align="center">
   <img
     className="box-shadowed-image"
-    src="/img/guides/2025/frontend-monitoring/web-vitals/2.webp"
+    src="/img/guides/frontend-monitoring/web-vitals/2.webp"
     alt="Web Vitals with custom attributes"
   />
   <figcaption>
