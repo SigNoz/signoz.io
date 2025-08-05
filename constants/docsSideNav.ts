@@ -1535,6 +1535,11 @@ const docsSideNav = [
             route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
             label: 'SigNoz Ingestion Analysis',
           },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard',
+            label: 'Vercel AI SDK',
+          },
         ],
       },
     ],
