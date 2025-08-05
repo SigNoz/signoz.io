@@ -1,6 +1,6 @@
 'use client'
 
-import React, { ReactNode, useRef, useState, useEffect, Suspense } from 'react'
+import { ReactNode, useRef, useState, useEffect } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
@@ -35,7 +35,7 @@ export interface TocItemProps {
   value: string
 }
 
-function BlogLayoutContent({
+export default function BlogLayout({
   content,
   authorDetails,
   authors,
@@ -193,13 +193,5 @@ function BlogLayoutContent({
       </SectionContainer>
       <ProgressBar target={mainRef} />
     </main>
-  )
-}
-
-export default function BlogLayout(props: LayoutProps) {
-  return (
-    <Suspense fallback={null}>
-      <BlogLayoutContent {...props} />
-    </Suspense>
   )
 }

@@ -1,15 +1,10 @@
 'use client'
-
-import React, { useState, useEffect, Suspense } from 'react'
 import Pagination from '@signozhq/pagination'
+import { useState, useEffect } from 'react'
 import type { TPagination } from '@/utils/strapi'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 
-interface Props {
-  pagination: TPagination
-}
-
-function ChangelogFooterContent({ pagination }: Props) {
+const ChangelogFooter: React.FC<{ pagination: TPagination }> = ({ pagination }) => {
   const { page } = useParams()
   const [currentPage, setCurrentPage] = useState(page ? parseInt(page as string, 10) : 1)
   const router = useRouter()
@@ -53,10 +48,4 @@ function ChangelogFooterContent({ pagination }: Props) {
   )
 }
 
-export default function ChangelogFooter(props: Props) {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ChangelogFooterContent {...props} />
-    </Suspense>
-  )
-}
+export default ChangelogFooter

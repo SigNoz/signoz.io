@@ -8,7 +8,6 @@ import { genPageMetadata } from 'app/seo'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-export const dynamic = 'error'
 export const dynamicParams = false
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {

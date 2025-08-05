@@ -1,27 +1,17 @@
-'use client'
-
-import React, { useEffect, useState } from 'react'
+import React from 'react'
+import { cookies } from 'next/headers'
 import GrowthBookClientProvider from '@/components/GrowthBookClientProvider'
-import { getOrCreateAnonymousId } from '@/utils/userUtils'
 
-export function GrowthBookProvider({ children }: { children: React.ReactNode }) {
-  const [anonId, setAnonId] = useState<string | undefined>(undefined)
+export async function GrowthBookProvider({ children }: { children: React.ReactNode }) {
+  // Read the anonymous ID from the cookie (populated by middleware)
+  const cookieStore = cookies()
+  const anonymousId: string = cookieStore.get('gb_anonymous_id')?.value || 'unknown'
 
-  // Obtain (or create) anonymous id on the client
-  useEffect(() => {
-    const id = getOrCreateAnonymousId() || 'unknown'
-    setAnonId(id)
-  }, [])
-
-  // Until we have an anonymous id just render children (avoids mismatch)
-  if (!anonId) {
-    return <>{children}</>
-  }
-
+  // Prepare the data to pass to the client component
   const growthBookData = {
-    apiHost: process.env.NEXT_PUBLIC_GROWTHBOOK_API_HOST,
-    clientKey: process.env.NEXT_PUBLIC_GROWTHBOOK_CLIENT_KEY,
-    anonymousId: anonId,
+    apiHost: process.env.GROWTHBOOK_API_HOST || process.env.NEXT_PUBLIC_GROWTHBOOK_API_HOST,
+    clientKey: process.env.GROWTHBOOK_CLIENT_KEY || process.env.NEXT_PUBLIC_GROWTHBOOK_CLIENT_KEY,
+    anonymousId,
   }
 
   return <GrowthBookClientProvider data={growthBookData}>{children}</GrowthBookClientProvider>

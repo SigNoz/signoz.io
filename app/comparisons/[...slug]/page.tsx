@@ -28,7 +28,6 @@ const layouts = {
 }
 
 export const dynamicParams = false
-export const dynamic = 'error'
 
 export async function generateMetadata({
   params,
@@ -44,7 +43,7 @@ export async function generateMetadata({
     return coreContent(authorResults as Authors)
   })
   if (!post) {
-    return notFound()
+    return
   }
 
   const publishedAt = new Date(post.date).toISOString()

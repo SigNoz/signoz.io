@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Suspense, useState } from 'react'
+import React, { useState } from 'react'
 import styles from './PageFeedback.module.css'
 import { useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '../../constants/queryParams'
@@ -10,7 +10,7 @@ interface AdditionalDetails {
   [key: string]: string
 }
 
-const PageFeedbackContent: React.FC = () => {
+const PageFeedback: React.FC = () => {
   const [helpful, setHelpful] = useState<boolean | null>(null)
   const [needsImprovement, setNeedsImprovement] = useState<string>('')
   const [positiveFeedback, setPositiveFeedback] = useState<string>('')
@@ -32,7 +32,7 @@ const PageFeedbackContent: React.FC = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    // e.preventDefault()
+    e.preventDefault()
 
     const data = {
       helpful,
@@ -180,14 +180,6 @@ const PageFeedbackContent: React.FC = () => {
         </form>
       )}
     </div>
-  )
-}
-
-const PageFeedback: React.FC = () => {
-  return (
-    <Suspense fallback={null}>
-      <PageFeedbackContent />
-    </Suspense>
   )
 }
 

@@ -9,9 +9,19 @@ import { usePathname } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '../constants/globals'
 import { QUERY_PARAMS } from '../constants/queryParams'
-import { Suspense } from 'react'
 
-function FooterStaticContent() {
+function Footer() {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  const isLoginRoute = pathname === '/login/'
+  const isTeamsRoute = pathname === '/teams/'
+  const isOnboardingRoute = source === ONBOARDING_SOURCE
+
+  if (isLoginRoute || isTeamsRoute || isOnboardingRoute) {
+    return null
+  }
+
   return (
     <div className="z-[10] flex flex-col justify-center border-t border-solid border-gray-900 bg-signoz_ink-500 bg-opacity-70 backdrop-blur-md">
       <div className="flex w-full items-center justify-center bg-opacity-70 px-16 py-14 max-md:max-w-full max-md:px-5">
@@ -221,31 +231,6 @@ function FooterStaticContent() {
         </div>
       </div>
     </div>
-  )
-}
-
-function FooterContent() {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
-  const isLoginRoute = pathname === '/login/'
-  const isTeamsRoute = pathname === '/teams/'
-  const isOnboardingRoute = source === ONBOARDING_SOURCE
-
-  if (isLoginRoute || isTeamsRoute || isOnboardingRoute) {
-    return null
-  }
-
-  return (
-    <FooterStaticContent />
-  )
-}
-
-function Footer() {
-  return (
-    <Suspense fallback={<FooterStaticContent />}>
-      <FooterContent />
-    </Suspense>
   )
 }
 

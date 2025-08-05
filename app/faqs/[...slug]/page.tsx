@@ -12,9 +12,6 @@ import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import Button from '@/components/ui/Button'
 
-export const dynamicParams = false
-export const dynamic = 'error'
-
 export async function generateMetadata({
   params,
 }: {
@@ -28,7 +25,7 @@ export async function generateMetadata({
     return coreContent(authorResults as Authors)
   })
   if (!post) {
-    return notFound()
+    return
   }
 
   const publishedAt = new Date(post.date).toISOString()
