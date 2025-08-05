@@ -228,6 +228,93 @@ One of the cool feature of SigNoz charts is that you can create thresholds in th
 <figcaption><i>Thresholds provide a visual cue about your application's performance </i></figcaption>
 </figure>
 
+### Attaching additional identifiers to your Web Vitals
 
+You can enrich web vitals with additional metadata like browser type, user ID, page URL etc. to enable real user monitoring (RUM)-like insights.
 
+To do so, you need to write a custom implementation of `SpanProcessor` which will intercept all your exported spans and attach additional attributes to them.
 
+```ts
+import { SpanProcessor } from '@opentelemetry/sdk-trace-node';
+import { UAParser } from 'ua-parser-js';
+
+export const CONSTANTS = {
+  USER_ID: 'user.id',
+  BROWSER_NAME: 'browser.name',
+  BROWSER_VERSION: 'browser.version',
+};
+
+function getBrowserInfo() {
+  // You can add your custom browser tracking logic here as well.
+  // This example uses the ua-parser-js package.
+  const parser = new UAParser();
+  const result = parser.getResult();
+  return {
+    browserName: result.browser.name || '',
+    browserVersion: result.browser.version || '',
+    userAgent: result.ua || '',
+  };
+}
+
+function getUserId() {
+  // You can add your custom user ID tracking logic here as well.
+  // This example uses localStorage.
+  const userId = localStorage.getItem('userId');
+  return {
+    userId: userId || '',
+  };
+}
+
+const CustomSpanProcessor: SpanProcessor = {
+  onStart: span => {
+    const userData = getUserId();
+    const browserInfo = getBrowserInfo();
+
+    span.setAttribute(CONSTANTS.USER_ID, userData.userId);
+    span.setAttribute(CONSTANTS.BROWSER_NAME, browserInfo.browserName);
+    span.setAttribute(CONSTANTS.BROWSER_VERSION, browserInfo.browserVersion);
+  },
+  onEnd: () => Promise.resolve(),
+  forceFlush: () => Promise.resolve(),
+  shutdown: () => Promise.resolve(),
+};
+
+export default CustomSpanProcessor;
+```
+
+Update your `instrument.ts` file to include this processor.
+
+```ts
+const provider = new WebTracerProvider({
+  resource: resourceFromAttributes({
+    'service.name': 'text-generator',
+  }),
+  spanProcessors: [new BatchSpanProcessor(exporter), CustomSpanProcessor],
+});
+```
+
+Now every span exported will include these additional contextual attributes.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/guides/2025/frontend-monitoring/web-vitals/1.webp"
+    alt="Web Vitals with custom attributes"
+  />
+  <figcaption>
+    <i>Web Vitals with custom attributes</i>
+  </figcaption>
+</figure>
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/guides/2025/frontend-monitoring/web-vitals/2.webp"
+    alt="Web Vitals with custom attributes"
+  />
+  <figcaption>
+    <i>Web Vitals with custom attributes</i>
+  </figcaption>
+</figure>
+
+You can find and try the demo application [here](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/web-vitals)
