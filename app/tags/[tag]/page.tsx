@@ -13,6 +13,16 @@ export const dynamicParams = false
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURI(params.tag)
+
+  const filteredPosts = allCoreContent(
+    sortPosts(allBlogs.filter((post) => post.tags && post.tags.map((t) => slug(t)).includes(tag)))
+  )
+
+  // Return 404 for empty tag pages
+  if (filteredPosts.length === 0) {
+    notFound() // Next.js function to return 404
+  }
+
   return genPageMetadata({
     title: tag,
     description: `${siteMetadata.title} ${tag} tagged content`,
