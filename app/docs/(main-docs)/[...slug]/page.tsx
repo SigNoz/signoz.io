@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 
 export const dynamicParams = false
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
