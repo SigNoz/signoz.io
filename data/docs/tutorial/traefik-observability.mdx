@@ -31,17 +31,17 @@ For metrics, we will have to set the following CLI flags in Traefik:
 
 - `--metrics.otlp=true`
 - `--metrics.otlp.grpc=true`
-- `--metrics.otlp.address=ingest.{region}.signoz.cloud:443`
-- `--metrics.otlp.insecure=false`
-- `--metrics.otlp.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`
+- `--metrics.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443`
+- `--metrics.otlp.grpc.insecure=false`
+- `--metrics.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`
 
 For traces, we will have to set the following CLI flags in Traefik:
 
 - `--tracing.otlp=true`
 - `--tracing.otlp.grpc=true`
-- `--tracing.otlp.address=ingest.{region}.signoz.cloud:443`
-- `--tracing.otlp.insecure=false`
-- `--tracing.otlp.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`
+- `--tracing.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443`
+- `--tracing.otlp.grpc.insecure=false`
+- `--tracing.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`
 
 We will take an example `docker-compose.yaml` with a simple `hello-app` running behind Traefik.
 
@@ -61,14 +61,14 @@ services:
       - --providers.docker
       - --metrics.otlp=true
       - --metrics.otlp.grpc=true
-      - --metrics.otlp.insecure=false
-      - --metrics.otlp.address=ingest.{region}.signoz.cloud:443
-      - --metrics.otlp.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY
+      - --metrics.otlp.grpc.insecure=false
+      - --metrics.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443
+      - --metrics.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY
       - --tracing.otlp=true
       - --tracing.otlp.grpc=true
-      - --tracing.otlp.insecure=false
-      - --tracing.otlp.address=ingest.{region}.signoz.cloud:443
-      - --tracing.otlp.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY
+      - --tracing.otlp.grpc.insecure=false
+      - --tracing.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443
+      - --tracing.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY
     ports:
       - "80:80"
       - "8080:8080"
@@ -107,15 +107,15 @@ For metrics, we will have to set the following CLI flags in Traefik:
 
 - `--metrics.otlp=true`
 - `--metrics.otlp.grpc=true`
-- `--metrics.otlp.address=<SigNoz OtelCollector IP>:4317`
-- `--metrics.otlp.insecure=true`
+- `--metrics.otlp.grpc.endpoint=<SigNoz OtelCollector IP>:4317`
+- `--metrics.otlp.grpc.insecure=true`
 
 For traces, we will have to set the following CLI flags in Traefik:
 
 - `--tracing.otlp=true`
 - `--tracing.otlp.grpc=true`
-- `--tracing.otlp.address=<SigNoz OtelCollector IP>:4317`
-- `--tracing.otlp.insecure=true`
+- `--tracing.otlp.grpc.endpoint=<SigNoz OtelCollector IP>:4317`
+- `--tracing.otlp.grpc.insecure=true`
 
 <Admonition>
 Replace `<SigNoz OtelCollector IP>` with the IP address or hostname of the host running SigNoz OtelCollector.
@@ -137,12 +137,12 @@ services:
       - --providers.docker
       - --metrics.otlp=true
       - --metrics.otlp.grpc=true
-      - --metrics.otlp.insecure=true
-      - --metrics.otlp.address=signoz:4317
+      - --metrics.otlp.grpc.insecure=true
+      - --metrics.otlp.grpc.endpoint=signoz:4317
       - --tracing.otlp=true
       - --tracing.otlp.grpc=true
-      - --tracing.otlp.insecure=true
-      - --tracing.otlp.address=signoz:4317
+      - --tracing.otlp.grpc.insecure=true
+      - --tracing.otlp.grpc.endpoint=signoz:4317
     ports:
       - "80:80"
       - "8080:8080"
