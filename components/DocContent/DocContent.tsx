@@ -52,5 +52,5 @@ const DocContent: React.FC<{
     </>
   )
 }
- 
+
 export default DocContent

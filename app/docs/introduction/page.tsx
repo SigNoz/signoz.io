@@ -17,10 +17,25 @@ import { EXPERIMENTS } from '@/constants/experiments'
 import { ExperimentTracker } from '@/components/ExperimentTracker'
 import HoverableSidebar from '@/components/HoverableSidebar'
 
+export const dynamic = 'force-static'
+
 export const metadata: Metadata = {
   title: 'Introduction to SigNoz - Open Source Observability Platform',
   description:
     'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.',
+}
+
+const HeaderWrapper = async () => {
+  // Check if the chatbase bubble experiment is enabled
+  const isChatbaseBubbleVariant = await evaluateFeatureFlag(
+    EXPERIMENTS.CHATBASE_BUBBLE?.flagName || 'chatbase-bubble-experiment'
+  )
+
+  return (
+    <Suspense fallback={<Header showSearchBar={true} />}>
+      <Header showSearchBar={isChatbaseBubbleVariant} />
+    </Suspense>
+  )
 }
 
 const ChatbaseWrapper = async () => {
@@ -37,7 +52,6 @@ const ChatbaseWrapper = async () => {
 
   return (
     <>
-    <Header showSearchBar={isChatbaseBubbleVariant} />
     {isChatbaseBubbleVariant ? (
       <ExperimentTracker experimentId={experimentId} variantId={variantId}>
         <Chatbase />
@@ -54,6 +68,7 @@ export default async function DocsIntroductionPage() {
   return (
     <>
       <HoverableSidebar />
+      <HeaderWrapper />
       <SendData />
       <Monitor />
       <Integrations />
@@ -64,7 +79,7 @@ export default async function DocsIntroductionPage() {
       <AdditionalResources />
       <InstallLocallySection />
       <QuickStartCloud />
-      <Suspense fallback={<Header showSearchBar={true} />}>
+      <Suspense>
         <ChatbaseWrapper />
       </Suspense>
     </>
