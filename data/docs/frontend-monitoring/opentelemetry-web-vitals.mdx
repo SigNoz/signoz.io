@@ -8,69 +8,133 @@ id: web-vitals
 This documentation provides a step-by-step guide to setting up web vitals monitoring using SigNoz and OpenTelemetry.
 
 ## Overview
+
 Web vitals are essential metrics to measure the user experience on your website. SigNoz allows you to monitor these vitals seamlessly using OpenTelemetry. The key web vitals are:
 - Largest Contentful Paint (LCP)
-- First Input Delay (FID) / Interaction to Next Paint (INP)
+- Interaction to Next Paint (INP)
 - Cumulative Layout Shift (CLS)
 - Time to First Byte (TTFB)
 - Total Blocking Time (TBT)
 
 ## Prerequisites
-- [SigNoz Cloud](https://signoz.io/teams/) account
-- A web application where you want to monitor web vitals
+
+- [SigNoz Cloud](https://signoz.io/teams/) or self-hosted account
+- A web application from where you want to send traces
 
 ## Setup
 
 ### Step 1: Setup OTel Collector
 Install Otel collector binary using [these instructions](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
-### Step 2: Install dependencies
+You would also need to update the collector config to whitelist the frontend domain.
 
 ```sh
-npm install web-vitals
-npm install @opentelemetry/api
-npm install @opentelemetry/sdk-trace-web
-npm install @opentelemetry/auto-instrumentations-web
-npm install @opentelemetry/exporter-trace-otlp-http
-npm install @opentelemetry/exporter-metrics-otlp-http
-npm install @opentelemetry/sdk-metrics
-npm install @opentelemetry/resources
-npm install @opentelemetry/semantic-conventions
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - <<YOUR_FRONTEND_URL>>
+          allowed_headers: ['*']
 ```
+
+### Step 2: Install dependencies
+
+<Tabs groupId="traces-dependencies">
+  <TabItem value="npm" label="Npm">
+    ```sh
+      npm install web-vitals
+      npm install @opentelemetry/api
+      npm install @opentelemetry/sdk-trace-web
+      npm install @opentelemetry/instrumentation
+      npm install @opentelemetry/exporter-trace-otlp-http
+      npm install @opentelemetry/context-zone
+      npm install @opentelemetry/resources
+      npm install ua-parser-js
+    ```
+  </TabItem>
+  <TabItem value="yarn" label="Yarn" default>
+    ```sh
+      yarn add web-vitals
+      yarn add @opentelemetry/api
+      yarn add @opentelemetry/sdk-trace-web
+      yarn add @opentelemetry/instrumentation
+      yarn add @opentelemetry/exporter-trace-otlp-http
+      yarn add @opentelemetry/context-zone
+      yarn add @opentelemetry/resources
+      yarn add ua-parser-js
+    ```
+  </TabItem>
+</Tabs>
 
 ### Step 3: Create an instrumentation file
 
-This file (e.g., `instrument.ts`) is needed to setup the `MeterProvider` which is used to create custom metrics.
+The `instrument.ts` file is required to setup the `OTLPTraceExporter` and `WebTracerProvider` which are used to capture web vitals as traces within your application and export them to your collector.
 
-```ts
-import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
-import { resourceFromAttributes } from '@opentelemetry/resources';
-import { metrics } from '@opentelemetry/api';
+<Tabs groupId="traces-instrumentation">
+  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
+    ```ts
+    import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+    import {
+      WebTracerProvider,
+      BatchSpanProcessor,
+    } from '@opentelemetry/sdk-trace-web';
+    import { ZoneContextManager } from '@opentelemetry/context-zone';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
+    import CustomSpanProcessor from './custom_span_processor';
 
-// Define your resource, e.g., service name, environment.
-const resource = resourceFromAttributes({
-'service.name': 'yourServiceName',
-});
+    const exporter = new OTLPTraceExporter({
+      url: `${import.meta.env.VITE_OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`,
+    });
 
-// Create a metric reader with OTLP exporter configured to send metrics to a local collector.
-const metricReader = new PeriodicExportingMetricReader({
-exporter: new OTLPMetricExporter({
-    url: 'http://127.0.0.1:4318/v1/metrics',
-}),
-exportIntervalMillis: 10000, // Export metrics every 10 seconds.
-});
+    const provider = new WebTracerProvider({
+      resource: resourceFromAttributes({
+        'service.name': 'web-vitals-demo-app-testing-2',
+      }),
+      spanProcessors: [new BatchSpanProcessor(exporter), CustomSpanProcessor],
+    });
 
-// Initialize a MeterProvider with the above configurations.
-const myServiceMeterProvider = new MeterProvider({
-resource,
-readers: [metricReader],
-});
+    provider.register({
+      contextManager: new ZoneContextManager(),
+    });
+    ```
+  </TabItem>
+  <TabItem value="cloud" label="SigNoz Cloud" default>
+    ```ts
+    import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+    import {
+      WebTracerProvider,
+      BatchSpanProcessor,
+    } from '@opentelemetry/sdk-trace-web';
+    import { ZoneContextManager } from '@opentelemetry/context-zone';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
+    import CustomSpanProcessor from './custom_span_processor';
 
-// Set the initialized MeterProvider as global to enable metric collection across the app.
-metrics.setGlobalMeterProvider(myServiceMeterProvider);
+    const exporter = new OTLPTraceExporter({
+      url: `https://ingest.<<INGESTION_REGION>>.signoz.cloud:443/v1/traces`,
+      headers: {
+        'signoz-ingestion-key': <<INGESTION_KEY>>,
+      },
+    });
 
-```
+    const provider = new WebTracerProvider({
+      resource: resourceFromAttributes({
+        'service.name': 'web-vitals-demo-app-testing-2',
+      }),
+      spanProcessors: [new BatchSpanProcessor(exporter), CustomSpanProcessor],
+    });
+
+    provider.register({
+      contextManager: new ZoneContextManager(),
+    });
+    ```
+  </TabItem>
+</Tabs>
+
 ### Step 4: Capture Web Vitals
 Use the web-vitals library to capture key performance metrics like CLS, FID, LCP, TTFB, and FCP. 
 These metrics are captured through callback functions that you define.
