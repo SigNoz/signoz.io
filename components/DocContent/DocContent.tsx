@@ -53,4 +53,4 @@ const DocContent: React.FC<{
   )
 }
  
-export default DocContent;
+export default DocContent
