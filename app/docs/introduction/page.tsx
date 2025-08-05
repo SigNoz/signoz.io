@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import Header from './Header'
 import SendData from './SendData'
 import Monitor from './Monitor'
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.',
 }
 
-export default async function DocsIntroductionPage() {
+const ChatbaseWrapper = async () => {
   // Check if the chatbase bubble experiment is enabled
   const isChatbaseBubbleVariant = await evaluateFeatureFlag(
     EXPERIMENTS.CHATBASE_BUBBLE?.flagName || 'chatbase-bubble-experiment'
@@ -37,8 +37,23 @@ export default async function DocsIntroductionPage() {
 
   return (
     <>
+    <Header showSearchBar={isChatbaseBubbleVariant} />
+    {isChatbaseBubbleVariant ? (
+      <ExperimentTracker experimentId={experimentId} variantId={variantId}>
+        <Chatbase />
+      </ExperimentTracker>
+    ) : (
+      <ExperimentTracker experimentId={experimentId} variantId={controlId}>
+        <></>
+      </ExperimentTracker>
+    )}</>
+  )
+}
+
+export default async function DocsIntroductionPage() {
+  return (
+    <>
       <HoverableSidebar />
-      <Header showSearchBar={isChatbaseBubbleVariant} />
       <SendData />
       <Monitor />
       <Integrations />
@@ -49,16 +64,9 @@ export default async function DocsIntroductionPage() {
       <AdditionalResources />
       <InstallLocallySection />
       <QuickStartCloud />
-
-      {isChatbaseBubbleVariant ? (
-        <ExperimentTracker experimentId={experimentId} variantId={variantId}>
-          <Chatbase />
-        </ExperimentTracker>
-      ) : (
-        <ExperimentTracker experimentId={experimentId} variantId={controlId}>
-          <></>
-        </ExperimentTracker>
-      )}
+      <Suspense fallback={<Header showSearchBar={true} />}>
+        <ChatbaseWrapper />
+      </Suspense>
     </>
   )
 }
