@@ -1,20 +1,20 @@
 import 'css/prism.css'
 
-import { coreContent, allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import { components } from '@/components/MDXComponents'
+import { MDXLayoutRenderer } from 'pliny/mdx-components'
+import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { allBlogs, allAuthors } from 'contentlayer/generated'
 import type { Authors, Blog } from 'contentlayer/generated'
-import { Metadata } from 'next'
-import siteMetadata from '@/data/siteMetadata'
-import { notFound } from 'next/navigation'
-import { Suspense } from 'react'
-import PageFeedback from '../../../components/PageFeedback/PageFeedback'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { components } from '@/components/MDXComponents'
 import PostSimple from '@/layouts/PostSimple'
 import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import BlogLayout from '@/layouts/BlogLayout'
+import { Metadata } from 'next'
+import siteMetadata from '@/data/siteMetadata'
+import { notFound } from 'next/navigation'
+import React from 'react'
+import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 
 const defaultLayout = 'PostLayout'
 const layouts = {
@@ -26,7 +26,6 @@ const layouts = {
 }
 
 export const dynamicParams = false
-export const dynamic = 'error'
 
 export async function generateMetadata({
   params,
@@ -35,19 +34,17 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allBlogs.find((p) => p.slug === slug)
-
-  // !post check here so it runs before anything else
-  if (!post) {
-    notFound()
-  }
-
-  const publishedAt = new Date(post.date).toISOString()
-  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
-  const authorList = post.authors || ['default']
+  const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
   })
+  if (!post) {
+    return
+  }
+
+  const publishedAt = new Date(post.date).toISOString()
+  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
   const authors = authorDetails.map((author) => author.name)
   let imageList = [siteMetadata.socialBanner]
   if (post.image) {
@@ -131,9 +128,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         authors={post?.authors}
         toc={post.toc}
       >
-        <Suspense fallback={null}>
-          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
-        </Suspense>
+        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
         <PageFeedback />
       </Layout>
     </>

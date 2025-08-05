@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
@@ -602,7 +602,7 @@ const SignupFormIsolated: React.FC<{
 }
 
 // TeamsVariant component with its own state management
-function TeamsVariantContent() {
+const TeamsVariant: React.FC = () => {
   const [errors, setErrors] = useState<ErrorsProps>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [_, setSubmitSuccess] = useState(false)
@@ -873,10 +873,4 @@ function TeamsVariantContent() {
   )
 }
 
-export default function TeamsVariant() {
-  return (
-    <Suspense fallback={null}>
-      <TeamsVariantContent />
-    </Suspense>
-  )
-}
+export default TeamsVariant

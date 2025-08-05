@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, Suspense } from 'react'
+import React, { useEffect } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
 interface ChatModalProps {
@@ -7,7 +7,7 @@ interface ChatModalProps {
   onClose: () => void
 }
 
-const ChatModalContent: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
+const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
   // Handle escape key press
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -70,14 +70,6 @@ const ChatModalContent: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
         </div>
       </div>
     </div>
-  )
-}
-
-const ChatModal: React.FC<ChatModalProps> = (props) => {
-  return (
-    <Suspense fallback={null}>
-      <ChatModalContent {...props} />
-    </Suspense>
   )
 }
 
