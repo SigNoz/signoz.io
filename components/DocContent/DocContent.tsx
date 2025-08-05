@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import PageFeedback from '../PageFeedback/PageFeedback'
@@ -10,7 +10,42 @@ import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 
-const DocContent: React.FC<{
+const DocContentStatic = ({ post, title, toc, hideTableOfContents }: { post: any, title: string, toc: any, hideTableOfContents: boolean }) => {
+  const lastUpdatedDate = post?.lastmod || post?.date
+  const formattedDate =
+    lastUpdatedDate
+      ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      : null
+  return (
+    <>
+      <div className={`doc-content`}>
+        <h2 className="mt-2 text-3xl">{title}</h2>
+        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
+        {formattedDate && (
+          <p className="mt-8 text-sm text-gray-500">
+            Last updated: {formattedDate}
+          </p>
+        )}
+        <PageFeedback />
+        <DocsPrevNext />
+      </div>
+
+      {!hideTableOfContents && (
+        <TableOfContents
+          toc={toc}
+          hideTableOfContents={hideTableOfContents}
+          source={''}
+        />
+      )}
+    </>
+  )
+}
+
+const DocContentInner: React.FC<{
   title: string
   post: any
   toc: any
@@ -53,4 +88,10 @@ const DocContent: React.FC<{
   )
 }
 
-export default DocContent
+export default function DocContent({ title, post, toc, hideTableOfContents }: { title: string, post: any, toc: any, hideTableOfContents: boolean }) {
+  return (
+    <Suspense fallback={<DocContentStatic post={post} title={title} toc={toc} hideTableOfContents={hideTableOfContents} />}>
+      <DocContentInner title={title} post={post} toc={toc} hideTableOfContents={hideTableOfContents} />
+    </Suspense>
+  )
+}
