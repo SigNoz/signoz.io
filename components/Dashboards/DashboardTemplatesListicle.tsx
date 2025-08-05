@@ -13,6 +13,7 @@ import {
   SiJenkins,
   SiSnowflake,
   SiClickhouse,
+  SiVercel,
 } from 'react-icons/si'
 import { 
   Monitor, 
@@ -251,6 +252,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/temporal.io',
     icon: <Clock className="h-7 w-7 text-blue-600" />,
     clickName: 'Temporal.io Dashboard Template',
+  },
+  {
+    name: 'Vercel AI SDK',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/vercel-ai-sdk',
+    icon: <SiVercel className="h-7 w-7 text-black-600" />,
+    clickName: 'Vercel AI SDK Dashboard Template',
   },
 ]
 
