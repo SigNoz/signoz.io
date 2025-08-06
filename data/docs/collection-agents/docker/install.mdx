@@ -88,7 +88,7 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8888
+      level: basic
   extensions: [health_check, zpages]
   pipelines:
     metrics:
@@ -167,7 +167,7 @@ exporters:
 service:
   telemetry:
     metrics:
-      address: 0.0.0.0:8888
+      level: basic
   extensions: [health_check, zpages]
   pipelines:
     metrics:
@@ -200,6 +200,13 @@ service:
 **What this does:** Starts the OpenTelemetry Collector as a Docker container with the specified configuration.
 **Why needed:** Launches the collector service to begin receiving and forwarding telemetry data to SigNoz.
 
+If you have an existing container, remove it first:
+```bash
+# Stop and remove existing container (if any)
+docker stop opentelemetry-collector 2>/dev/null || true
+docker rm opentelemetry-collector 2>/dev/null || true
+```
+
 <Tabs>
 <TabItem value="linux" label="Linux" default>
 
@@ -207,7 +214,7 @@ service:
 docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
-  -p 4317:4317 -p 4318:4318 -p 8888:8888 \
+  -p 4317:4317 -p 4318:4318 \
   -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
@@ -219,7 +226,7 @@ docker run --name opentelemetry-collector \
 docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
-  -p 4317:4317 -p 4318:4318 -p 8888:8888 \
+  -p 4317:4317 -p 4318:4318 \
   -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
@@ -231,7 +238,7 @@ docker run --name opentelemetry-collector \
 docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
-  -p 4317:4317 -p 4318:4318 -p 8888:8888 \
+  -p 4317:4317 -p 4318:4318 \
   -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
@@ -259,4 +266,34 @@ Expected output:
 Everything is ready. Begin running and processing data.
 ```
 
-The OpenTelemetry Collector is now running and ready to receive telemetry data on ports 4317 (gRPC) and 4318 (HTTP). Additional monitoring is available on port 8888 for health checks and metrics.
+## Troubleshooting
+
+### Container Name Already in Use
+
+If you get an error about the container name already being in use:
+
+```bash
+# Check existing containers
+docker ps -a | grep opentelemetry-collector
+
+# Stop and remove the existing container
+docker stop opentelemetry-collector
+docker rm opentelemetry-collector
+
+# Then re-run the installation command
+```
+
+### Configuration Errors
+
+If the collector fails to start, check the logs:
+
+```bash
+docker logs opentelemetry-collector
+```
+
+Common issues:
+- Invalid YAML syntax in config file
+- Missing or incorrect SigNoz credentials
+- Port conflicts with other services
+
+The OpenTelemetry Collector is now running and ready to receive telemetry data on ports 4317 (gRPC) and 4318 (HTTP).
