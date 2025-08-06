@@ -46,7 +46,7 @@ The key insight: performance bugs are just as critical as functional bugs. They 
 Modern applications face unique challenges:
 - **Distributed complexity**: One slow method can cascade delays across 20 microservices
 - **Cloud costs**: Inefficient code directly translates to higher AWS/GCP bills
-- **User expectations**: Response times over 100ms lose customers
+- **User expectations**: Response times over 100ms feel noticeable; each 100ms delay can reduce e-commerce conversions by ~1%
 - **Scale challenges**: Code that works for 100 users might fail at 10,000
 
 The JVM can't fix bad algorithms or architectural problems. Only profiling reveals where your code actually struggles under real load.
@@ -60,7 +60,7 @@ The Java ecosystem has dozens of profiling tools, but most teams use the same ha
 These ship with Java and cost nothing. Start here before buying anything else.
 
 **Java Flight Recorder (JFR)**  
-Built into the JVM since Java 11. Runs in production with \<2% overhead. Records everything: CPU, memory, threads, I/O.
+Free and open-source in OpenJDK since Java 11 (previously commercial in Oracle JDK 7+). Runs in production with \<2% overhead. Records everything: CPU, memory, threads, I/O.
 
 ```bash
 # Start recording on running app
@@ -87,7 +87,7 @@ These work anywhere Java runs. No setup needed.
 **VisualVM**  
 Still the easiest way to profile local applications. Connect, click profile, see results. Great for development, struggles with remote production apps.
 
-<Figure src="/img/guides/2024/09/java-application-profiling-Analyze_JVM_Memory_using_JVisual_VM___Memory_Leak___Heap__Thread_Dump___Profiling___Java_Techie_6-15_screenshot.webp" alt="Profiling in Visual VM" caption="Profiling in Visual VM" />
+<Figure src="/img/guides/2024/09/java-application-profiling-Analyze_JVM_Memory_using_JVisual_VM___Memory_Leak___Heap__Thread_Dump___Profiling___Java_Techie_6-15_screenshot.webp" alt="Profiling in VisualVM" caption="Profiling in VisualVM" />
 
 Best for: Finding memory leaks during development, CPU hotspot analysis, thread deadlock detection.
 
@@ -169,7 +169,7 @@ java -XX:+PrintCompilation MyApp | grep "made not entrant"
 ```
 
 **Sampling vs. Instrumentation**
-- Sampling: Takes snapshots every 10ms. Misses short methods but low overhead.
+- Sampling: Takes snapshots periodically (configurable, often 10-20ms). Misses short methods but low overhead.
 - Instrumentation: Tracks every call. Accurate but can 10x execution time.
 
 Production = always sampling. Development debugging = instrumentation okay.
@@ -317,7 +317,7 @@ Only pool objects that are:
 # Most apps: G1GC is fine
 java -XX:+UseG1GC -XX:MaxGCPauseMillis=200 MyApp
 
-# Need <10ms pauses? ZGC (but uses more memory)
+# Need <10ms pauses? ZGC (trades memory overhead for low latency)
 java -XX:+UseZGC MyApp
 
 # Batch processing? ParallelGC for throughput
@@ -514,7 +514,7 @@ env:
   value: "-XX:MaxRAMPercentage=75.0"  # Use 75% of container memory
 ```
 
-Without MaxRAMPercentage, JVM might try to use more memory than allowed and get OOMKilled.
+Since JDK 10, the JVM is container-aware and automatically detects cgroup limits. MaxRAMPercentage gives you explicit control over heap sizing within those limits.
 
 ## Continuous Profiling in Production
 
