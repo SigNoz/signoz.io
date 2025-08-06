@@ -9,13 +9,13 @@ keywords: [java profiling, performance optimization, memory analysis, CPU profil
 ---
 
 
-Java applications slow down for countless reasons:memory leaks, inefficient algorithms, database bottlenecks, thread contention. The frustrating part? These issues often stay hidden until production traffic hits and users start complaining. Even experienced developers can spend days hunting performance problems without the right approach.
+Java applications slow down for countless reasons: memory leaks, inefficient algorithms, database bottlenecks, thread contention. The frustrating part? These issues often stay hidden until production traffic hits and users start complaining. Even experienced developers can spend days hunting performance problems without the right approach.
 
 Profiling changes that. Instead of guessing where problems might be, profiling shows exactly what's happening inside your running application. This guide covers the practical aspects of Java profiling: which tools actually work, how to interpret the data without drowning in details, and what fixes make real differences in production.
 
 ## What is Java Application Profiling?
 
-Profiling means measuring what your Java application actually does when it runs,not what the code suggests it should do. While debugging fixes broken functionality, profiling fixes working code that's just too slow, uses too much memory, or randomly freezes under load.
+Profiling means measuring what your Java application actually does when it runs, not what the code suggests it should do. While debugging fixes broken functionality, profiling fixes working code that's just too slow, uses too much memory, or randomly freezes under load.
 
 ### How Profiling Differs from Infrastructure Monitoring and Tracing
 
@@ -112,23 +112,6 @@ When you have a 10GB heap dump and need to find the leak, MAT finds it. Automati
 - Support when things go wrong
 
 Worth it? For teams doing serious performance work, yes. For occasional profiling, stick with free tools.
-
-## Setting Up Your Profiling Environment
-
-**Quick setup for development:**
-```bash
-# Allow profiler attachment
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 YourApp
-```
-
-**IDE profilers** work great for local development. IntelliJ's profiler is surprisingly good now. Eclipse integrates with VisualVM. But remember: local profiling rarely matches production behavior.
-
-**Production profiling rules:**
-- Always use sampling mode (never instrumentation)
-- Start with 5-minute sessions during normal load
-- Keep overhead under 3%
-- Save profiles immediately,they're huge and fill disks
-- Test on staging first (seriously)
 
 ## The Four Pillars of Java Application Profiling
 
@@ -543,81 +526,6 @@ if (errorRate.rate() > 0.05) {  // 5% errors
 
 Capture detailed data only when needed, keeping overhead low normally.
 
-## SigNoz: Application Performance Monitoring for Java
-
-While SigNoz doesn't provide traditional profiling capabilities like CPU flame graphs or heap dumps, it excels at application performance monitoring (APM) that complements profiling tools. Think of it as the layer that tells you when and where to profile.
-
-### How SigNoz Complements Java Profiling
-
-**Performance Monitoring**: SigNoz tracks p50/p95/p99 latencies, error rates, and throughput. When these metrics spike, you know it's time to break out the profiler.
-
-**Distributed Tracing**: See exactly which service and endpoint is slow across your entire system. This narrows down where to focus your profiling efforts.
-
-**Database Query Insights**: Automatically captures slow queries with full SQL and execution time. Often, you won't even need to profile,the slow query is right there.
-
-**Root Cause Analysis**: Correlate metrics, traces, and logs in one place. When users report issues, quickly identify if it's a code problem (needs profiling) or infrastructure issue.
-
-**Zero-code Setup**: OpenTelemetry auto-instrumentation for Spring Boot, JDBC, Redis, Kafka, and more. No code changes required.
-
-### Getting Started with SigNoz
-
-**30-second setup:**
-```bash
-# Download agent
-wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
-
-# Configure (for SigNoz Cloud)
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=YOUR_KEY"
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.YOUR_REGION.signoz.cloud:443"
-
-# Run with agent
-java -javaagent:opentelemetry-javaagent.jar -jar app.jar
-```
-
-That's it. Spring Boot, JDBC, Redis, Kafka,all automatically instrumented.
-
-**Adding custom traces:**
-```java
-@Autowired Tracer tracer;
-
-public Order processOrder(String orderId) {
-    Span span = tracer.spanBuilder("process-order")
-        .setAttribute("order.id", orderId)
-        .startSpan();
-    
-    try (var scope = span.makeCurrent()) {
-        return orderService.process(orderId);
-    } finally {
-        span.end();
-    }
-}
-```
-
-Now you'll see "process-order" spans in SigNoz with order IDs for filtering.
-
-### Using SigNoz with Profiling Tools
-
-**Typical workflow:**
-1. SigNoz alerts you to performance degradation (p99 latency spike)
-2. Use distributed tracing to identify the slow service and endpoint
-3. Check if it's a database query issue (often visible in SigNoz)
-4. If not, use profiling tools on that specific service to dig deeper
-5. After fixing, monitor the improvement in SigNoz
-
-**What SigNoz shows:**
-- Service-level performance metrics and trends
-- Request flow across microservices with timing
-- Database query performance without profiling overhead
-- Infrastructure metrics correlated with application performance
-- Real user impact of performance issues
-
-**Best practice**: Use SigNoz for continuous monitoring and alerting, then profile specific services when SigNoz identifies performance anomalies. This targeted approach is more efficient than continuous profiling everywhere.
-
-**Deployment options:**
-- [SigNoz Cloud](https://signoz.io/teams/): 30-day free trial, no credit card
-- [Self-hosted](https://signoz.io/docs/install/): Run on your infrastructure
-- [Enterprise](https://signoz.io/contact-us/): BYOC and support options
-
 ## Best Practices for Java Profiling
 
 ### Make Profiling Part of Development
@@ -714,6 +622,50 @@ jcmd <pid> GC.heap_dump -gz /tmp/heap.hprof.gz
 java -jar mat.jar -application org.eclipse.mat.api.parse heap.hprof \
      org.eclipse.mat.api:suspects > leak-suspects.txt
 ```
+
+## SigNoz: Application Performance Monitoring for Java
+
+While SigNoz doesn't provide traditional profiling capabilities like CPU flame graphs or heap dumps, it excels at application performance monitoring, tracing, and logging that complements profiling tools. Think of it as the layer that tells you when and where to profile.
+
+### How SigNoz Complements Java Profiling
+
+**Performance Monitoring**: SigNoz tracks p50/p95/p99 latencies, error rates, and throughput. When these metrics spike, you know it's time to break out the profiler.
+
+**Distributed Tracing**: See exactly which service and endpoint is slow across your entire system. This narrows down where to focus your profiling efforts.
+
+**Database Query Insights**: Automatically captures slow queries with full SQL and execution time. Often, you won't even need to profile,the slow query is right there.
+
+**Root Cause Analysis**: Correlate metrics, traces, and logs in one place. When users report issues, quickly identify if it's a code problem (needs profiling) or infrastructure issue.
+
+**Zero-code Setup**: OpenTelemetry auto-instrumentation for Spring Boot, JDBC, Redis, Kafka, and more. No code changes required.
+
+### Using SigNoz with Profiling Tools
+
+**Typical workflow:**
+1. SigNoz alerts you to performance degradation (p99 latency spike)
+2. Use distributed tracing to identify the slow service and endpoint
+3. Check if it's a database query issue (often visible in SigNoz)
+4. If not, use profiling tools on that specific service to dig deeper
+5. After fixing, monitor the improvement in SigNoz
+
+**What SigNoz shows:**
+- Service-level performance metrics and trends
+- Request flow across microservices with timing
+- Database query performance without profiling overhead
+- Infrastructure metrics correlated with application performance
+- Real user impact of performance issues
+
+**Best practice**: Use SigNoz for continuous monitoring and alerting, then profile specific services when SigNoz identifies performance anomalies. This targeted approach is more efficient than continuous profiling everywhere.
+
+### Getting Started with SigNoz
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+
 
 ## Key Takeaways
 
