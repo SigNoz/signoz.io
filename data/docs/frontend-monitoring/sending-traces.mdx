@@ -6,8 +6,6 @@ id: sending-traces-frontend
 
 This documentation provides a step-by-step guide for sending traces from your frontend application using SigNoz and OpenTelemetry.
 
-## Overview
-
 SigNoz natively supports OpenTelemetry for collecting traces, so you can instrument your frontend applications with minimal setup and get deep visibility into user interactions and network activity.
 
 Client side traces help you understand how user actions trigger requests, how long they take, and where latency is introduced, whether in the browser, network, or backend. This gives you a complete picture of user journeys and performance across your stack.
@@ -40,6 +38,26 @@ receivers:
 ```
 
 ### Step 2: Install dependencies
+
+Please install the following dependencies.
+
+- **`@opentelemetry/sdk-trace-base`**: Contains the core tracing SDK implementation including `BatchSpanProcessor` and base classes. This provides the foundation for creating and processing trace spans.
+
+- **`@opentelemetry/sdk-trace-web`**: Provides the `WebTracerProvider` specifically designed for browser environments. This is essential for web applications as it handles browser-specific tracing requirements.
+
+- **`@opentelemetry/exporter-trace-otlp-http`**: Implements the OTLP (OpenTelemetry Protocol) HTTP exporter that sends your traces to the SigNoz collector. This handles the actual transmission of trace data over HTTP.
+
+- **`@opentelemetry/instrumentation`**: Provides the `registerInstrumentations` function that allows you to register multiple instrumentations at once. This is the main API for setting up automatic instrumentation.
+
+- **`@opentelemetry/instrumentation-fetch`**: Automatically instruments `fetch()` API calls to capture spans for network requests. This is crucial for tracking HTTP requests from your frontend to backend services.
+
+- **`@opentelemetry/instrumentation-xml-http-request`**: Instruments legacy XMLHttpRequest calls for older code or libraries that don't use `fetch`. This ensures all network requests are captured regardless of the HTTP client used.
+
+- **`@opentelemetry/context-zone`**: Provides context propagation for browser environments using Zone.js. This is essential for maintaining trace context across async operations and ensuring proper distributed tracing.
+
+- **`@opentelemetry/resources`**: Provides resource attributes that identify your service (like service name, version, etc.). This helps distinguish traces from different services in your SigNoz dashboard.
+
+- **`@opentelemetry/instrumentation-user-interaction`**: Automatically instruments user interactions like clicks, inputs, and form submissions. This helps correlate user actions with resulting operations and provides insights into user behavior.
 
 <Tabs groupId="traces-dependencies">
   <TabItem value="npm" label="Npm">
@@ -74,7 +92,7 @@ receivers:
 
 ### Step 3: Create an instrumentation file
 
-The `instrument.ts` file is required to setup the `OTLPTraceExporter` and `WebTracerProvider` which are used to capture traces within your application and export them to your collector.
+The instrumentation file is required to setup the `OTLPTraceExporter` and `WebTracerProvider` which are used to capture traces within your application and export them to your collector.
 
 <Tabs groupId="traces-instrumentation">
   <TabItem value="self-hosted" label="SigNoz Self-Hosted">
@@ -181,7 +199,7 @@ import './instrument';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
-import App from './App.tsx';
+import App from './App';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -241,7 +259,7 @@ app.post('/api/generate-text', (req, res) => {
 
 ### Step 7: Viewing Captured Traces in SigNoz
 
-The captured traces can then be viewed in the Traces Explorer.
+The captured traces can then be viewed in the [Traces Explorer](https://signoz.io/docs/product-features/trace-explorer/).
 
 <figure data-zoomable align="center">
   <img
@@ -271,55 +289,109 @@ You can enrich traces with additional metadata like browser type, user ID etc. t
 
 To do so, you need to write a custom implementation of `SpanProcessor` which will intercept all your exported spans and attach additional attributes to them.
 
-```ts
-import { SpanProcessor } from '@opentelemetry/sdk-trace-node';
-import { UAParser } from 'ua-parser-js';
+<Tabs groupId="traces-processor">
+  <TabItem value="ts" label="TypeScript">
+    ```ts
+    import { SpanProcessor } from '@opentelemetry/sdk-trace-node';
+    import { UAParser } from 'ua-parser-js';
 
-export const CONSTANTS = {
-  USER_ID: 'user.id',
-  BROWSER_NAME: 'browser.name',
-  BROWSER_VERSION: 'browser.version',
-};
+    export const CONSTANTS = {
+      USER_ID: 'user.id',
+      BROWSER_NAME: 'browser.name',
+      BROWSER_VERSION: 'browser.version',
+    };
 
-function getBrowserInfo() {
-  // You can add your custom browser tracking logic here as well.
-  // This example uses the ua-parser-js package.
-  const parser = new UAParser();
-  const result = parser.getResult();
-  return {
-    browserName: result.browser.name || '',
-    browserVersion: result.browser.version || '',
-    userAgent: result.ua || '',
-  };
-}
+    function getBrowserInfo() {
+      // You can add your custom browser tracking logic here as well.
+      // This example uses the ua-parser-js package.
+      const parser = new UAParser();
+      const result = parser.getResult();
+      return {
+        browserName: result.browser.name || '',
+        browserVersion: result.browser.version || '',
+        userAgent: result.ua || '',
+      };
+    }
 
-function getUserId() {
-  // You can add your custom user ID tracking logic here as well.
-  // This example uses localStorage.
-  const userId = localStorage.getItem('userId');
-  return {
-    userId: userId || '',
-  };
-}
+    function getUserId() {
+      // You can add your custom user ID tracking logic here as well.
+      // This example uses localStorage.
+      const userId = localStorage.getItem('userId');
+      return {
+        userId: userId || '',
+      };
+    }
 
-const CustomSpanProcessor: SpanProcessor = {
-  onStart: span => {
-    const userData = getUserId();
-    const browserInfo = getBrowserInfo();
+    const CustomSpanProcessor: SpanProcessor = {
+      onStart: span => {
+        const userData = getUserId();
+        const browserInfo = getBrowserInfo();
 
-    span.setAttribute(CONSTANTS.USER_ID, userData.userId);
-    span.setAttribute(CONSTANTS.BROWSER_NAME, browserInfo.browserName);
-    span.setAttribute(CONSTANTS.BROWSER_VERSION, browserInfo.browserVersion);
-  },
-  onEnd: () => Promise.resolve(),
-  forceFlush: () => Promise.resolve(),
-  shutdown: () => Promise.resolve(),
-};
+        span.setAttribute(CONSTANTS.USER_ID, userData.userId);
+        span.setAttribute(CONSTANTS.BROWSER_NAME, browserInfo.browserName);
+        span.setAttribute(CONSTANTS.BROWSER_VERSION, browserInfo.browserVersion);
+      },
+      onEnd: () => Promise.resolve(),
+      forceFlush: () => Promise.resolve(),
+      shutdown: () => Promise.resolve(),
+    };
 
-export default CustomSpanProcessor;
-```
+    export default CustomSpanProcessor;
+    ```
+  </TabItem>
+  <TabItem value="js" label="JavaScript" default>
+    ```js
+    import { UAParser } from 'ua-parser-js';
 
-Update your `instrument.ts` file to include this processor.
+    export const CONSTANTS = {
+      USER_ID: 'user.id',
+      BROWSER_NAME: 'browser.name',
+      BROWSER_VERSION: 'browser.version',
+      LOCATION_CITY: 'location.city',
+      LOCATION_COUNTRY: 'location.country',
+    };
+
+    function getBrowserInfo() {
+      // You can add your custom browser tracking logic here as well.
+      // This example uses the ua-parser-js package.
+      const parser = new UAParser();
+      const result = parser.getResult();
+      return {
+        browserName: result.browser.name || '',
+        browserVersion: result.browser.version || '',
+        userAgent: result.ua || '',
+      };
+    }
+
+    function getUserId() {
+      // You can add your custom user ID tracking logic here as well.
+      // This example uses localStorage.
+      const userId = localStorage.getItem('userId');
+      return {
+        userId: userId || '',
+      };
+    }
+
+    const CustomSpanProcessor = {
+      onStart: span => {
+        const userData = getUserId();
+        const browserInfo = getBrowserInfo();
+
+        span.setAttribute(CONSTANTS.USER_ID, userData.userId);
+        span.setAttribute(CONSTANTS.BROWSER_NAME, browserInfo.browserName);
+        span.setAttribute(CONSTANTS.BROWSER_VERSION, browserInfo.browserVersion);
+      },
+      onEnd: () => Promise.resolve(),
+      forceFlush: () => Promise.resolve(),
+      shutdown: () => Promise.resolve(),
+    };
+
+    export default CustomSpanProcessor;
+    ```
+  </TabItem>
+</Tabs>
+
+Update your instrumentation file to include this processor.
 
 ```ts
 const provider = new WebTracerProvider({
