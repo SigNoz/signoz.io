@@ -17,12 +17,18 @@ Before installing the OpenTelemetry Collector, ensure you have:
 
 ### Step 1: Create Configuration Directory
 
+**What this does:** Creates a dedicated directory to store the OpenTelemetry Collector configuration file.
+**Why needed:** Keeps configuration organized and provides a consistent location for the collector to reference.
+
 ```bash
 mkdir -p ~/opentelemetry-collector
 cd ~/opentelemetry-collector
 ```
 
 ### Step 2: Create Collector Configuration
+
+**What this does:** Defines how the OpenTelemetry Collector receives, processes, and exports telemetry data.
+**Why needed:** The collector requires configuration to know where to send data and how to handle it.
 
 Create `otel-config.yaml` based on your SigNoz deployment:
 
@@ -147,6 +153,9 @@ service:
 
 ### Step 3: Run the OpenTelemetry Collector
 
+**What this does:** Starts the OpenTelemetry Collector as a Docker container with the specified configuration.
+**Why needed:** Launches the collector service to begin receiving and forwarding telemetry data to SigNoz.
+
 <Tabs>
 <TabItem value="linux" label="Linux" default>
 
@@ -190,6 +199,9 @@ docker run --name opentelemetry-collector \
 
 ### Step 1: Check Collector Status
 
+**What this does:** Verifies that the OpenTelemetry Collector container is running properly and ready to receive data.
+**Why needed:** Confirms the installation was successful and the collector is operational.
+
 ```bash
 # Check if container is running
 docker ps | grep opentelemetry-collector
@@ -201,18 +213,6 @@ docker logs opentelemetry-collector
 Expected output:
 ```
 Everything is ready. Begin running and processing data.
-```
-
-### Step 2: Test OTLP Endpoint
-
-Test that the collector is accepting data on the OTLP endpoints:
-
-```bash
-# Test gRPC endpoint (port 4317)
-curl -v http://localhost:4317
-
-# Test HTTP endpoint (port 4318)
-curl -v http://localhost:4318/v1/traces
 ```
 
 The OpenTelemetry Collector is now running and ready to receive telemetry data on ports 4317 (gRPC) and 4318 (HTTP).
