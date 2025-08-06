@@ -9,13 +9,13 @@ keywords: [java profiling, performance optimization, memory analysis, CPU profil
 ---
 
 
-Java applications slow down for countless reasons—memory leaks, inefficient algorithms, database bottlenecks, thread contention. The frustrating part? These issues often stay hidden until production traffic hits and users start complaining. Even experienced developers can spend days hunting performance problems without the right approach.
+Java applications slow down for countless reasons:memory leaks, inefficient algorithms, database bottlenecks, thread contention. The frustrating part? These issues often stay hidden until production traffic hits and users start complaining. Even experienced developers can spend days hunting performance problems without the right approach.
 
 Profiling changes that. Instead of guessing where problems might be, profiling shows exactly what's happening inside your running application. This guide covers the practical aspects of Java profiling: which tools actually work, how to interpret the data without drowning in details, and what fixes make real differences in production.
 
 ## What is Java Application Profiling?
 
-Profiling means measuring what your Java application actually does when it runs—not what the code suggests it should do. While debugging fixes broken functionality, profiling fixes working code that's just too slow, uses too much memory, or randomly freezes under load.
+Profiling means measuring what your Java application actually does when it runs,not what the code suggests it should do. While debugging fixes broken functionality, profiling fixes working code that's just too slow, uses too much memory, or randomly freezes under load.
 
 ### How Profiling Differs from Infrastructure Monitoring and Tracing
 
@@ -25,7 +25,7 @@ Profiling means measuring what your Java application actually does when it runs�
 
 **APM tools** alert when response times spike. **Profiling** reveals it's because someone added a synchronous remote call inside a loop.
 
-Think of it this way: monitoring and tracing show symptoms at the system level, while profiling diagnoses the root cause at the code level. You need both—monitoring to know when something's wrong, profiling to fix it.
+Think of it this way: monitoring and tracing show symptoms at the system level, while profiling diagnoses the root cause at the code level. You need both,monitoring to know when something's wrong, profiling to fix it.
 
 ### Common Performance Problems
 
@@ -127,7 +127,7 @@ java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 YourApp
 - Always use sampling mode (never instrumentation)
 - Start with 5-minute sessions during normal load
 - Keep overhead under 3%
-- Save profiles immediately—they're huge and fill disks
+- Save profiles immediately,they're huge and fill disks
 - Test on staging first (seriously)
 
 ## The Four Pillars of Java Application Profiling
@@ -142,7 +142,7 @@ Common discoveries:
 - Logging statements doing expensive string concatenation even when disabled
 - Database drivers spinning on connection pool locks
 
-Real example: An e-commerce site's recommendation engine ate 80% CPU. Profiling showed a sort() called inside nested loops—O(n³) complexity hidden in clean-looking code. Adding a cache dropped CPU to 20%.
+Real example: An e-commerce site's recommendation engine ate 80% CPU. Profiling showed a sort() called inside nested loops: O(n³) complexity hidden in clean-looking code. Adding a cache dropped CPU to 20%.
 
 #### Reading CPU Profiles
 
@@ -150,7 +150,7 @@ Real example: An e-commerce site's recommendation engine ate 80% CPU. Profiling 
 
 <Figure src="/img/guides/2024/09/java-application-profiling-image.webp" alt="Flame Graph to view CPU consumption for different methods" caption="Flame Graph to view CPU consumption for different methods" />
 
-In this flame graph, `Structure.read()` burns 14,443 µs across 419 calls. That's 34µs per call—not terrible individually, but those calls add up.
+In this flame graph, `Structure.read()` burns 14,443 µs across 419 calls. That's 34µs per call,not terrible individually, but those calls add up.
 
 **What to look for:**
 - Wide bars at any level (time sinks)
@@ -553,7 +553,7 @@ While SigNoz doesn't provide traditional profiling capabilities like CPU flame g
 
 **Distributed Tracing**: See exactly which service and endpoint is slow across your entire system. This narrows down where to focus your profiling efforts.
 
-**Database Query Insights**: Automatically captures slow queries with full SQL and execution time. Often, you won't even need to profile—the slow query is right there.
+**Database Query Insights**: Automatically captures slow queries with full SQL and execution time. Often, you won't even need to profile,the slow query is right there.
 
 **Root Cause Analysis**: Correlate metrics, traces, and logs in one place. When users report issues, quickly identify if it's a code problem (needs profiling) or infrastructure issue.
 
@@ -574,7 +574,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.YOUR_REGION.signoz.cloud:443"
 java -javaagent:opentelemetry-javaagent.jar -jar app.jar
 ```
 
-That's it. Spring Boot, JDBC, Redis, Kafka—all automatically instrumented.
+That's it. Spring Boot, JDBC, Redis, Kafka,all automatically instrumented.
 
 **Adding custom traces:**
 ```java
@@ -733,7 +733,7 @@ java -jar mat.jar -application org.eclipse.mat.api.parse heap.hprof \
 
 ### What's the difference between sampling and instrumentation profiling?
 
-Sampling takes snapshots of your app every few milliseconds—like taking photos of a race. Low overhead (1-3%) but might miss short-lived methods. Instrumentation tracks every method call—like recording video of the entire race. Accurate but adds 10-50% overhead. Use sampling in production, instrumentation for debugging.
+Sampling takes snapshots of your app every few milliseconds,like taking photos of a race. Low overhead (1-3%) but might miss short-lived methods. Instrumentation tracks every method call,like recording video of the entire race. Accurate but adds 10-50% overhead. Use sampling in production, instrumentation for debugging.
 
 ### How often should I profile my Java application?
 
