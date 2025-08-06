@@ -27,7 +27,10 @@ cd ~/opentelemetry-collector
 
 ### Step 2: Create Collector Configuration
 
-Create `otel-config.yaml`:
+Create `otel-config.yaml` based on your SigNoz deployment:
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
 
 ```yaml
 receivers:
@@ -56,9 +59,13 @@ processors:
     spike_limit_mib: 128
 
 exporters:
-  # Debug output
-  logging:
-    loglevel: info
+  # Send to SigNoz Cloud
+  otlp:
+    endpoint: "ingest.<YOUR_REGION>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: "<YOUR_INGESTION_KEY>"
 
 service:
   extensions: []
@@ -66,16 +73,80 @@ service:
     logs:
       receivers: [otlp]
       processors: [memory_limiter, resourcedetection, batch]
-      exporters: [logging]
+      exporters: [otlp]
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, resourcedetection, batch]
-      exporters: [logging]
+      exporters: [otlp]
     traces:
       receivers: [otlp]
       processors: [memory_limiter, resourcedetection, batch]
-      exporters: [logging]
+      exporters: [otlp]
 ```
+
+**Configuration Steps:**
+1. Replace `<YOUR_REGION>` with your SigNoz Cloud region (e.g., `us`, `eu`, `in`)
+2. Replace `<YOUR_INGESTION_KEY>` with your actual ingestion key from SigNoz Cloud
+
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+
+```yaml
+receivers:
+  # Receive application traces and metrics
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Batch data for efficiency
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+  # Add resource information
+  resourcedetection:
+    detectors: [env, system, docker]
+    timeout: 5s
+
+  # Prevent memory overuse
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+
+exporters:
+  # Send to Self-Hosted SigNoz
+  otlp:
+    endpoint: "http://<SIGNOZ_HOST>:4317"
+    tls:
+      insecure: true
+
+service:
+  extensions: []
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, batch]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, batch]
+      exporters: [otlp]
+```
+
+**Configuration Steps:**
+1. Replace `<SIGNOZ_HOST>` with your SigNoz instance hostname or IP address
+2. Update the port if your SigNoz installation uses a different OTLP port
+
+</TabItem>
+</Tabs>
 
 ### Step 3: Run the OpenTelemetry Collector
 
