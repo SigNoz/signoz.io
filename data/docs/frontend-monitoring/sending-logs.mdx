@@ -6,8 +6,6 @@ id: sending-logs-frontend
 
 This documentation provides a step-by-step guide for sending logs from your frontend application using SigNoz and OpenTelemetry.
 
-## Overview
-
 SigNoz natively supports OpenTelemetry for collecting logs, so you can lift-and-shift existing log libraries or build new pipelines, all with the same unified model as your traces and metrics.
 
 Logs can be collected on the client side at meaningful points to capture various events, state changes, errors and warnings.
@@ -41,6 +39,14 @@ receivers:
 
 ### Step 2: Install dependencies
 
+- **`@opentelemetry/resources`**: Provides resource attributes that identify your service (like service name, version, etc.). This helps distinguish logs from different services in your SigNoz dashboard.
+
+- **`@opentelemetry/sdk-logs`**: Contains the core logging SDK implementation including `LoggerProvider` and `SimpleLogRecordProcessor`. This is the foundation for creating and processing log records in your application.
+
+- **`@opentelemetry/exporter-logs-otlp-http`**: Implements the OTLP (OpenTelemetry Protocol) HTTP exporter that sends your logs to the SigNoz collector. This handles the actual transmission of log data over HTTP.
+
+- **`@opentelemetry/api-logs`**: Provides the logging API interface (`logs` object) that your application code uses to create log records. This is the main API you'll interact with when adding logging statements to your code.
+
 <Tabs groupId="logs-dependencies">
   <TabItem value="npm" label="Npm">
     ```sh
@@ -64,7 +70,7 @@ receivers:
 
 ### Step 3: Create an instrumentation file
 
-The `instrument.ts` file is required to setup the `LoggerProvider` which is used to create custom logs within your application and export them to your collector.
+The instrumentation file is required to setup the `LoggerProvider` which is used to create custom logs within your application and export them to your collector.
 
 <Tabs groupId="logs-instrumentation">
   <TabItem value="self-hosted" label="SigNoz Self-Hosted">
@@ -129,7 +135,7 @@ import './instrument';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
-import App from './App.tsx';
+import App from './App';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -142,63 +148,104 @@ createRoot(document.getElementById('root')!).render(
 
 The `utils.ts` file will contain our utility functions for recording various kinds of logs (`info`, `warning`, `error`).
 
-```ts
-import {
-  logs,
-  SeverityNumber,
-  type AnyValueMap,
-} from '@opentelemetry/api-logs';
+<Tabs groupId="logs-utilities">
+  <TabItem value="ts" label="TypeScript">
+    ```ts
+    import {
+      logs,
+      SeverityNumber,
+      type AnyValueMap,
+    } from '@opentelemetry/api-logs';
 
-const logger = logs.getLogger('frontend-logger');
+    const logger = logs.getLogger('frontend-logger');
 
-export function logInfo(body: string, attrs: AnyValueMap = {}) {
-  logger.emit({
-    body,
-    severityNumber: SeverityNumber.INFO,
-    severityText: 'INFO',
-    attributes: attrs,
-  });
-}
+    export function logInfo(body: string, attrs: AnyValueMap = {}) {
+      logger.emit({
+        body,
+        severityNumber: SeverityNumber.INFO,
+        severityText: 'INFO',
+        attributes: attrs,
+      });
+    }
 
-export function logWarn(body: string, attrs: AnyValueMap = {}) {
-  logger.emit({
-    body,
-    severityNumber: SeverityNumber.WARN,
-    severityText: 'WARN',
-    attributes: attrs,
-  });
-}
+    export function logWarn(body: string, attrs: AnyValueMap = {}) {
+      logger.emit({
+        body,
+        severityNumber: SeverityNumber.WARN,
+        severityText: 'WARN',
+        attributes: attrs,
+      });
+    }
 
-export function logError(body: string, attrs: AnyValueMap = {}) {
-  logger.emit({
-    body,
-    severityNumber: SeverityNumber.ERROR,
-    severityText: 'ERROR',
-    attributes: attrs,
-  });
-}
-```
+    export function logError(body: string, attrs: AnyValueMap = {}) {
+      logger.emit({
+        body,
+        severityNumber: SeverityNumber.ERROR,
+        severityText: 'ERROR',
+        attributes: attrs,
+      });
+    }
+    ```
+  </TabItem>
+  <TabItem value="js" label="JavaScript" default>
+    ```js
+    import {
+      logs,
+      SeverityNumber,
+    } from '@opentelemetry/api-logs';
+
+    const logger = logs.getLogger('frontend-logger');
+
+    export function logInfo(body, attrs = {}) {
+      logger.emit({
+        body,
+        severityNumber: SeverityNumber.INFO,
+        severityText: 'INFO',
+        attributes: attrs,
+      });
+    }
+
+    export function logWarn(body, attrs = {}) {
+      logger.emit({
+        body,
+        severityNumber: SeverityNumber.WARN,
+        severityText: 'WARN',
+        attributes: attrs,
+      });
+    }
+
+    export function logError(body, attrs = {}) {
+      logger.emit({
+        body,
+        severityNumber: SeverityNumber.ERROR,
+        severityText: 'ERROR',
+        attributes: attrs,
+      });
+    }
+    ```
+  </TabItem>
+</Tabs>
 
 ### Step 6: Setting up Logs within your Application
 
 Add logs at meaningful points in your application.
 
 ```ts
-function authenticate() {
+function onNextClick() {
   try {
-    const response = await fetch('/api/authenticate');
+    const response = await fetch('/api/data');
     const data = await response.json();
-    logInfo('User authenticated', { data });
+    logInfo('Next button clicked!', { data });
     return data;
   } catch (error) {
-    logError('Failed to authenticate', { error: error.message });
+    logError('Failed to fetch data', { error: error.message });
   }
 }
 ```
 
 ### Step 7: Viewing Captured Logs in SigNoz
 
-The captured logs can then be viewed in the Logs Explorer.
+The captured logs can then be viewed in the [Logs Explorer](https://signoz.io/docs/userguide/logs/).
 
 <figure data-zoomable align="center">
   <img
@@ -217,53 +264,107 @@ You can enrich logs with additional metadata like browser type, user ID etc. to 
 
 To do so, you need to write a custom implementation on top of `LogRecordProcessor` which will intercept all your exported logs and attach additional attributes to them.
 
-```ts
-import type { LogRecordProcessor, SdkLogRecord } from '@opentelemetry/sdk-logs';
-import { UAParser } from 'ua-parser-js';
+<Tabs groupId="logs-processor">
+  <TabItem value="ts" label="TypeScript">
+    ```ts
+    import type { LogRecordProcessor, SdkLogRecord } from '@opentelemetry/sdk-logs';
+    import { UAParser } from 'ua-parser-js';
 
-function getBrowserInfo() {
-  // You can add your custom browser tracking logic here as well.
-  // This example uses the ua-parser-js package.
-  const parser = new UAParser();
-  const result = parser.getResult();
-  return {
-    browserName: result.browser.name,
-    browserVersion: result.browser.version,
-    userAgent: result.ua,
-  };
-}
+    function getBrowserInfo() {
+      // You can add your custom browser tracking logic here as well.
+      // This example uses the ua-parser-js package.
+      const parser = new UAParser();
+      const result = parser.getResult();
+      return {
+        browserName: result.browser.name,
+        browserVersion: result.browser.version,
+        userAgent: result.ua,
+      };
+    }
 
-function getUserId() {
-  // You can add your custom user ID tracking logic here as well.
-  // This example uses localStorage.
-  const userId = localStorage.getItem('userId');
-  return {
-    userId,
-  };
-}
+    function getUserId() {
+      // You can add your custom user ID tracking logic here as well.
+      // This example uses localStorage.
+      const userId = localStorage.getItem('userId');
+      return {
+        userId,
+      };
+    }
 
-function getAdditionalAttributes() {
-  return {
-    ...getBrowserInfo(),
-    ...getUserId(),
-  };
-}
+    function getAdditionalAttributes() {
+      return {
+        ...getBrowserInfo(),
+        ...getUserId(),
+      };
+    }
 
-export class CustomAttributesProcessor implements LogRecordProcessor {
-  onEmit(logRecord: SdkLogRecord) {
-    const additionalAttrs = getAdditionalAttributes();
-    logRecord.setAttributes(additionalAttrs);
-  }
+    export class CustomAttributesProcessor implements LogRecordProcessor {
+      onEmit(logRecord: SdkLogRecord) {
+        const additionalAttrs = getAdditionalAttributes();
+        logRecord.setAttributes(additionalAttrs);
+      }
 
-  shutdown(): Promise<void> {
-    return Promise.resolve();
-  }
+      shutdown(): Promise<void> {
+        return Promise.resolve();
+      }
 
-  forceFlush(): Promise<void> {
-    return Promise.resolve();
-  }
-}
-```
+      forceFlush(): Promise<void> {
+        return Promise.resolve();
+      }
+    }
+    ```
+  </TabItem>
+  <TabItem value="js" label="JavaScript" default>
+    ```js
+    import { UAParser } from 'ua-parser-js';
+
+    function getBrowserInfo() {
+      // You can add your custom browser tracking logic here as well.
+      // This example uses the ua-parser-js package.
+      const parser = new UAParser();
+      const result = parser.getResult();
+      return {
+        browserName: result.browser.name,
+        browserVersion: result.browser.version,
+        userAgent: result.ua,
+      };
+    }
+
+    function getUserId() {
+      // You can add your custom user ID tracking logic here as well.
+      // This example uses localStorage.
+      const userId = localStorage.getItem('userId');
+      return {
+        userId,
+      };
+    }
+
+    function getAdditionalAttributes() {
+      return {
+        ...getBrowserInfo(),
+        ...getUserId(),
+      };
+    }
+
+    export class CustomAttributesProcessor {
+      onEmit(logRecord) {
+        const additionalAttrs = getAdditionalAttributes();
+        logRecord.setAttributes(additionalAttrs);
+      }
+
+      shutdown() {
+        return Promise.resolve();
+      }
+
+      forceFlush() {
+        return Promise.resolve();
+      }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+
 
 Update your `instrument.ts` to include this processor before the default one.
 
