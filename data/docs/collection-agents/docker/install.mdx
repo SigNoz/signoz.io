@@ -37,53 +37,75 @@ Create `otel-config.yaml` based on your SigNoz deployment:
 
 ```yaml
 receivers:
-  # Receive application traces and metrics
   otlp:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
 
 processors:
-  # Batch data for efficiency
   batch:
-    timeout: 1s
-    send_batch_size: 1024
-
-  # Add resource information
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
   resourcedetection:
-    detectors: [env, system, docker]
-    timeout: 5s
+    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    timeout: 2s
+    system:
+      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
 
-  # Prevent memory overuse
-  memory_limiter:
-    limit_mib: 512
-    spike_limit_mib: 128
+extensions:
+  health_check: {}
+  zpages: {}
 
 exporters:
-  # Send to SigNoz Cloud
   otlp:
     endpoint: "ingest.<YOUR_REGION>.signoz.cloud:443"
     tls:
       insecure: false
     headers:
-      signoz-ingestion-key: "<YOUR_INGESTION_KEY>"
+      "signoz-ingestion-key": "<YOUR_INGESTION_KEY>"
+  debug:
+    verbosity: normal
 
 service:
-  extensions: []
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
   pipelines:
-    logs:
-      receivers: [otlp]
-      processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlp]
     metrics:
       receivers: [otlp]
-      processors: [memory_limiter, resourcedetection, batch]
+      processors: [batch]
+      exporters: [otlp]
+    metrics/internal:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
       exporters: [otlp]
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, resourcedetection, batch]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
       exporters: [otlp]
 ```
 
@@ -96,51 +118,73 @@ service:
 
 ```yaml
 receivers:
-  # Receive application traces and metrics
   otlp:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
 
 processors:
-  # Batch data for efficiency
   batch:
-    timeout: 1s
-    send_batch_size: 1024
-
-  # Add resource information
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
   resourcedetection:
-    detectors: [env, system, docker]
-    timeout: 5s
+    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    timeout: 2s
+    system:
+      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
 
-  # Prevent memory overuse
-  memory_limiter:
-    limit_mib: 512
-    spike_limit_mib: 128
+extensions:
+  health_check: {}
+  zpages: {}
 
 exporters:
-  # Send to Self-Hosted SigNoz
   otlp:
     endpoint: "http://<SIGNOZ_HOST>:4317"
     tls:
       insecure: true
+  debug:
+    verbosity: normal
 
 service:
-  extensions: []
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
   pipelines:
-    logs:
-      receivers: [otlp]
-      processors: [memory_limiter, resourcedetection, batch]
-      exporters: [otlp]
     metrics:
       receivers: [otlp]
-      processors: [memory_limiter, resourcedetection, batch]
+      processors: [batch]
+      exporters: [otlp]
+    metrics/internal:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
       exporters: [otlp]
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, resourcedetection, batch]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
       exporters: [otlp]
 ```
 
@@ -163,7 +207,7 @@ service:
 docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
-  -p 4317:4317 -p 4318:4318 \
+  -p 4317:4317 -p 4318:4318 -p 8888:8888 \
   -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
@@ -175,7 +219,7 @@ docker run --name opentelemetry-collector \
 docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
-  -p 4317:4317 -p 4318:4318 \
+  -p 4317:4317 -p 4318:4318 -p 8888:8888 \
   -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
@@ -187,7 +231,7 @@ docker run --name opentelemetry-collector \
 docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
-  -p 4317:4317 -p 4318:4318 \
+  -p 4317:4317 -p 4318:4318 -p 8888:8888 \
   -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
@@ -215,4 +259,4 @@ Expected output:
 Everything is ready. Begin running and processing data.
 ```
 
-The OpenTelemetry Collector is now running and ready to receive telemetry data on ports 4317 (gRPC) and 4318 (HTTP).
+The OpenTelemetry Collector is now running and ready to receive telemetry data on ports 4317 (gRPC) and 4318 (HTTP). Additional monitoring is available on port 8888 for health checks and metrics.
