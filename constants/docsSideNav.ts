@@ -1755,6 +1755,11 @@ const docsSideNav = [
         route: '/docs/alerts-management/terraform-provider-signoz',
         label: 'Terraform Provider',
       },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/apdex-alerts',
+        label: 'Apdex Alerts',
+      },
     ],
   },
   {
