@@ -46,73 +46,9 @@ With applications running in dynamic cloud environments where resources can be s
 ### Rising Infrastructure Costs
 Cloud infrastructure costs continue to increase. Efficient applications require fewer resources, directly translating to lower operational expenses. Profiling helps identify optimization opportunities that can significantly reduce your cloud bills.
 
-## The Four Pillars of Java Application Profiling
-
-Understanding the four main dimensions of profiling is essential for comprehensive performance analysis:
-
-### 1. CPU Profiling: Finding Processing Bottlenecks
-
-CPU profiling identifies methods and code paths that consume excessive processing power. This is typically your starting point when applications feel sluggish or when CPU usage is consistently high.
-
-**What CPU profiling reveals:**
-- Methods with the longest execution times
-- Frequently called methods that accumulate significant CPU time
-- Inefficient algorithms or loops
-- Hotspots where optimization can have the most impact
-
-**Real-world example**: An e-commerce recommendation engine was consuming 80% of CPU time on a simple sorting algorithm. CPU profiling revealed that the algorithm was being called thousands of times per request. By implementing caching and optimizing the sort logic, the team reduced CPU usage by 60%.
-
-### 2. Memory Profiling: Optimizing Heap Usage
-
-Memory profiling tracks object allocation, heap usage patterns, and garbage collection behavior. This is crucial for preventing OutOfMemoryError exceptions and optimizing garbage collection performance.
-
-**What memory profiling reveals:**
-- Objects consuming the most heap space
-- Memory leak candidates (objects that should be garbage collected but aren't)
-- Allocation hotspots where many objects are created
-- Garbage collection frequency and impact
-
-**Common memory issues discovered through profiling:**
-- Collections that grow indefinitely without cleanup
-- Static collections holding references to objects
-- Event listeners not being properly removed
-- Database connections not being closed properly
-
-### 3. Thread Profiling: Resolving Concurrency Issues
-
-Thread profiling analyzes concurrent execution patterns, helping identify synchronization problems, deadlocks, and thread contention issues that can severely impact performance.
-
-**What thread profiling reveals:**
-- Threads waiting for locks (contention)
-- Deadlock situations between multiple threads
-- Thread pool usage and efficiency
-- Synchronization bottlenecks
-
-**Critical thread issues to watch for:**
-- Multiple threads competing for the same resources
-- Threads blocked waiting for database connections
-- Inefficient thread pool configurations
-- Race conditions in multi-threaded environments
-
-### 4. I/O Profiling: Optimizing External Operations
-
-I/O profiling monitors operations involving databases, file systems, network calls, and other external resources. These operations are often the biggest performance bottlenecks in enterprise applications.
-
-**What I/O profiling reveals:**
-- Slow database queries and connection issues
-- Excessive network calls or large data transfers
-- File system operations causing delays
-- API calls with high latency
-
-**Common I/O optimization opportunities:**
-- Implementing connection pooling for database access
-- Caching frequently accessed data
-- Batching multiple database operations
-- Optimizing query performance and indexing
-
 ## Essential Java Profiling Tools for 2025
 
-The Java profiling landscape offers tools ranging from built-in JVM utilities to sophisticated commercial solutions. Here's a comprehensive breakdown:
+Java offers a rich ecosystem of profiling tools, from built-in JVM utilities to sophisticated commercial solutions. Let's start with the tools you need to know, then we'll dive into how to use them effectively.
 
 ### Built-in JVM Tools: Your First Line of Defense
 
@@ -155,6 +91,8 @@ Open-source tools provide powerful capabilities without licensing costs, making 
 
 **VisualVM: Comprehensive Visual Profiling**
 VisualVM offers an intuitive graphical interface for profiling Java applications with features including CPU profiling, memory analysis, and thread monitoring.
+
+<Figure src="/img/guides/2024/09/java-application-profiling-Analyze_JVM_Memory_using_JVisual_VM___Memory_Leak___Heap__Thread_Dump___Profiling___Java_Techie_6-15_screenshot.webp" alt="Profiling in Visual VM" caption="Profiling in Visual VM" />
 
 Key features:
 - Real-time monitoring and profiling
@@ -223,22 +161,38 @@ When profiling in production environments, follow these guidelines:
 - Implement profiling safeguards to automatically disable if overhead exceeds thresholds
 - Store profiling data securely and limit access
 
-## CPU Profiling: Mastering Performance Optimization
+## The Four Pillars of Java Application Profiling
 
-CPU profiling is often your first step in performance optimization. Here's a systematic approach to CPU analysis:
+Now that you understand the tools available, let's dive deep into the four main dimensions of profiling. Understanding these pillars is essential for comprehensive performance analysis—they form the foundation of effective profiling strategy.
 
-### Identifying CPU Hotspots
+### 1. CPU Profiling: Finding Processing Bottlenecks
+
+CPU profiling identifies methods and code paths that consume excessive processing power. This is typically your starting point when applications feel sluggish or when CPU usage is consistently high.
+
+**What CPU profiling reveals:**
+- Methods with the longest execution times
+- Frequently called methods that accumulate significant CPU time
+- Inefficient algorithms or loops
+- Hotspots where optimization can have the most impact
+
+**Real-world example**: An e-commerce recommendation engine was consuming 80% of CPU time on a simple sorting algorithm. CPU profiling revealed that the algorithm was being called thousands of times per request. By implementing caching and optimizing the sort logic, the team reduced CPU usage by 60%.
+
+#### Identifying CPU Hotspots
 
 CPU profiling reveals which methods consume the most processing time. Modern profilers present this information through various visualizations:
 
 **Flame Graphs**: Hierarchical visualization showing method call stacks and their CPU consumption. The width of each method represents the time spent.
+
+<Figure src="/img/guides/2024/09/java-application-profiling-image.webp" alt="Flame Graph to view CPU consumption for different methods" caption="Flame Graph to view CPU consumption for different methods" />
 
 **Call Trees**: Detailed breakdown of method invocations showing:
 - Self-time: Time spent in the method itself
 - Total time: Time spent including called methods
 - Call count: Number of times the method was invoked
 
-### Advanced CPU Profiling Techniques
+The flame graph above illustrates a real profiling session where `org.gjt.jclasslib.structures.Structure.read()` consumes significant CPU time (14,443 µs). You can see the number of calls (419) and the percentage of self and total time spent in this method.
+
+#### Advanced CPU Profiling Techniques
 
 **Understanding JIT Compilation Impact**
 
@@ -258,7 +212,7 @@ Hot methods (frequently executed) receive JIT optimization, while cold methods r
 
 Choose sampling for production environments and instrumentation for detailed development analysis.
 
-### Practical CPU Optimization Strategies
+#### Practical CPU Optimization Strategies
 
 **Algorithm Optimization**
 Identify inefficient algorithms through profiling:
@@ -294,11 +248,23 @@ public Result expensiveCalculation(String input) {
 
 This caching pattern prevents redundant calculations for the same inputs, which profiling often reveals as performance bottlenecks.
 
-## Memory Profiling: Preventing Leaks and Optimizing Allocation
+### 2. Memory Profiling: Optimizing Heap Usage
 
-Memory-related issues are among the most challenging problems in Java applications. Effective memory profiling helps identify leaks, optimize allocation patterns, and tune garbage collection.
+Memory profiling tracks object allocation, heap usage patterns, and garbage collection behavior. This is crucial for preventing OutOfMemoryError exceptions and optimizing garbage collection performance.
 
-### Understanding Java Memory Management
+**What memory profiling reveals:**
+- Objects consuming the most heap space
+- Memory leak candidates (objects that should be garbage collected but aren't)
+- Allocation hotspots where many objects are created
+- Garbage collection frequency and impact
+
+**Common memory issues discovered through profiling:**
+- Collections that grow indefinitely without cleanup
+- Static collections holding references to objects
+- Event listeners not being properly removed
+- Database connections not being closed properly
+
+#### Understanding Java Memory Management
 
 Java applications use different memory regions:
 
@@ -306,7 +272,7 @@ Java applications use different memory regions:
 **Non-Heap Memory**: Method area, code cache, and direct memory
 **Stack Memory**: Method call frames and local variables
 
-### Detecting Memory Leaks
+#### Detecting Memory Leaks
 
 Memory leaks in Java occur when objects that should be garbage collected are held by unexpected references. Common patterns include:
 
@@ -334,7 +300,7 @@ button.addActionListener(this); // 'this' holds reference
 
 Event listeners often hold references to their parent objects, preventing garbage collection even when the parent is no longer needed.
 
-### Memory Profiling Techniques
+#### Memory Profiling Techniques
 
 **Heap Dump Analysis**
 Generate heap dumps during suspected memory issues:
@@ -352,7 +318,11 @@ These commands help capture the state of memory when issues occur, allowing offl
 **Analyzing Object Retention**
 Use tools like Eclipse MAT to analyze object retention. A classic memory leak pattern shows memory usage increasing stepwise with each garbage collection event, but the baseline continues to rise.
 
-### Advanced Memory Analysis
+<Figure src="/img/guides/2024/09/java-application-profiling-8c2f5751-1092-49a3-929e-ca8a64d68cfa.webp" alt="Graph demonstrating memory leak" caption="Graph demonstrating memory leak" />
+
+The graph above demonstrates a memory leak where memory usage gradually increases (like stairs) due to objects remaining in memory and not being collected as garbage. Despite periodic GC events (represented by the dips), the baseline keeps rising, indicating objects are still being held in memory.
+
+#### Advanced Memory Analysis
 
 **Allocation Hot Spot Detection**
 Identify methods creating excessive objects:
@@ -402,7 +372,7 @@ public class DatabaseConnectionPool {
 
 This connection pool pattern reuses expensive objects, reducing garbage collection pressure and improving performance.
 
-### Garbage Collection Tuning
+#### Garbage Collection Tuning
 
 Understanding and optimizing garbage collection is crucial for memory performance:
 
@@ -422,11 +392,23 @@ java -XX:+UseParallelGC MyApplication
 
 Each GC algorithm optimizes for different use cases. G1GC balances throughput and latency, ZGC minimizes pause times, and Parallel GC maximizes throughput.
 
-## Thread Profiling and Concurrency Analysis
+### 3. Thread Profiling: Resolving Concurrency Issues
 
-Thread-related issues can severely impact application performance, especially in multi-threaded environments. Thread profiling helps identify concurrency bottlenecks and synchronization problems.
+Thread profiling analyzes concurrent execution patterns, helping identify synchronization problems, deadlocks, and thread contention issues that can severely impact performance.
 
-### Common Threading Issues
+**What thread profiling reveals:**
+- Threads waiting for locks (contention)
+- Deadlock situations between multiple threads
+- Thread pool usage and efficiency
+- Synchronization bottlenecks
+
+**Critical thread issues to watch for:**
+- Multiple threads competing for the same resources
+- Threads blocked waiting for database connections
+- Inefficient thread pool configurations
+- Race conditions in multi-threaded environments
+
+#### Common Threading Issues
 
 **Thread Contention**
 Multiple threads competing for the same resources:
@@ -477,7 +459,7 @@ public void method2() {
 
 This code can deadlock when two threads call these methods simultaneously. Always acquire locks in the same order to prevent deadlocks.
 
-### Thread Profiling Tools and Techniques
+#### Thread Profiling Tools and Techniques
 
 **Thread Dump Analysis**
 Capture and analyze thread states:
@@ -493,6 +475,10 @@ jstack <pid> > thread_dump.txt
 ```
 
 Thread dumps reveal the state of all threads at a specific moment, helping identify contention and deadlock issues.
+
+<Figure src="/img/guides/2024/09/java-application-profiling-5db1b7de-3dd6-4e08-b8ca-0f50cc482968.webp" alt="Analyzing threads for BLOCKED or WAITING state." caption="Analyzing threads for BLOCKED or WAITING state." />
+
+In VisualVM, you can identify nested synchronization issues by analyzing thread dumps and looking for threads stuck in the "BLOCKED" state (shown in yellow), often due to multiple synchronized blocks or methods competing for the same lock.
 
 **Thread Pool Optimization**
 Analyze thread pool efficiency and configure appropriately:
@@ -511,11 +497,23 @@ ThreadPoolExecutor executor = new ThreadPoolExecutor(
 
 Proper thread pool configuration balances resource usage with performance, preventing thread starvation and excessive context switching.
 
-## I/O Profiling and Database Performance Analysis
+### 4. I/O Profiling: Optimizing External Operations
 
-I/O operations are frequently the primary performance bottleneck in enterprise Java applications. Effective I/O profiling identifies slow database queries, network latency issues, and file system performance problems.
+I/O profiling monitors operations involving databases, file systems, network calls, and other external resources. These operations are often the biggest performance bottlenecks in enterprise applications.
 
-### Database Profiling Techniques
+**What I/O profiling reveals:**
+- Slow database queries and connection issues
+- Excessive network calls or large data transfers
+- File system operations causing delays
+- API calls with high latency
+
+**Common I/O optimization opportunities:**
+- Implementing connection pooling for database access
+- Caching frequently accessed data
+- Batching multiple database operations
+- Optimizing query performance and indexing
+
+#### Database Profiling Techniques
 
 **SQL Query Performance Analysis**
 Profile database interactions to identify slow queries:
@@ -563,7 +561,7 @@ config.setMetricRegistry(metricRegistry);
 
 Connection pool metrics reveal usage patterns and help optimize pool size for your application's needs.
 
-### File System and Network I/O Optimization
+#### File System and Network I/O Optimization
 
 **Efficient File Operations**
 Optimize file reading and writing operations:
