@@ -239,6 +239,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-standard',
+            label: 'Upgrade Standard',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.88',
             label: 'Upgrade to v0.88',
           },
@@ -331,11 +336,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.8.0',
             label: 'Upgrade to v0.8.0',
-          },
-            {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-standard',
-            label: 'Upgrade Standard',
           },
         ],
       },
@@ -556,6 +556,18 @@ const docsSideNav = [
                 label: 'Overview',
               },
             ],
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Docker',
+        items: [
+          {
+            route: '/docs/collection-agents/docker/install',
+            type: 'doc',
+            label: 'Overview',
           },
         ],
       },
@@ -916,10 +928,18 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/instrumentation/troubleshoot-instrumentation',
+        type: 'category',
+        route: '/docs/traces-management/troubleshooting/troubleshooting',
         label: 'Troubleshooting',
-      },
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/traces-management/troubleshooting/faqs',
+            label: 'General FAQs',
+	        },
+	      ],
+	    },
     ],
   },
   {
@@ -1246,9 +1266,17 @@ const docsSideNav = [
         className: 'new-doc',
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/logs_troubleshooting',
+        type: 'category',
+        isExpanded: false,
         label: 'Troubleshooting',
+        route: '/docs/logs-management/troubleshooting/troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/troubleshooting/faqs',
+            label: 'General FAQs',
+          }
+        ]
       },
       // {
       //   type: 'doc',
@@ -1346,6 +1374,19 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/collecting-ecs-sidecar-infra',
             label: 'ECS Infra Sidecar',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        route: '/docs/metrics-management/troubleshooting/troubleshooting',
+        label: 'Troubleshooting',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/metrics-management/troubleshooting/faqs',
+            label: 'General FAQs',
           },
         ],
       },
@@ -1539,6 +1580,19 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard',
             label: 'Vercel AI SDK',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        route: '/docs/dashboards/troubleshooting/troubleshooting',
+        label: 'Troubleshooting',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/troubleshooting/faqs',
+            label: 'General FAQs',
           },
         ],
       },
@@ -2101,6 +2155,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/ingestion/signoz-cloud/keys',
             label: 'Keys',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting',
+            label: 'Troubleshooting',
           },
         ],
       },
@@ -2915,53 +2974,6 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Troubleshooting',
-    type: 'category',
-    isExpanded: false,
-    // route: '/docs/faqs',
-    // link: {
-    // type: 'generated-index',
-    // title: 'Frequently Asked Questions',
-    // description:
-    // 'Find the most commonly questions about SigNoz Installation, Instrumentation, Features, Troubleshooting, and Contributing here:',
-    // slug: '/docs/faqs/faq',
-    // },
-    items: [
-      {
-        label: 'SigNoz Cloud',
-        type: 'category',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/troubleshooting/signoz-cloud/general-troubleshooting',
-            label: 'General Troubleshooting',
-          },
-          {
-            type: 'doc',
-            route: '/docs/troubleshooting/signoz-cloud/traces-troubleshooting',
-            label: 'Traces Troubleshooting',
-          },
-          {
-            type: 'doc',
-            route: '/docs/troubleshooting/signoz-cloud/logs-troubleshooting',
-            label: 'Logs Troubleshooting',
-          },
-          {
-            type: 'doc',
-            route: '/docs/troubleshooting/signoz-cloud/metrics-troubleshooting',
-            label: 'Metrics Troubleshooting',
-          },
-          {
-            type: 'doc',
-            route: '/docs/troubleshooting/signoz-cloud/ingestion-troubleshooting',
-            label: 'Ingestion Troubleshooting',
-          },
-        ],
-      },
-    ],
-  },
-  {
     label: 'FAQ',
     type: 'category',
     isExpanded: false,
@@ -2974,6 +2986,11 @@ const docsSideNav = [
     // slug: '/docs/faqs/faq',
     // },
     items: [
+      {
+        type: 'doc',
+        route: '/docs/faqs/general',
+        label: 'General - FAQs',
+      },
       {
         type: 'doc',
         route: '/docs/faqs/product',
