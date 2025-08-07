@@ -1,7 +1,5 @@
 import {
-  HouseIcon,
   CheckCircleIcon,
-  Loader2,
   ArrowRight,
   Link2,
   AtSignIcon,
