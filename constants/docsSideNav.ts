@@ -911,10 +911,18 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/instrumentation/troubleshoot-instrumentation',
+        type: 'category',
+        route: '/docs/traces-management/troubleshooting/troubleshooting',
         label: 'Troubleshooting',
-      },
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/traces-management/troubleshooting/faqs',
+            label: 'General FAQs',
+	        },
+	      ],
+	    },
     ],
   },
   {
@@ -2107,6 +2115,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/ingestion/signoz-cloud/keys',
             label: 'Keys',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting',
+            label: 'Troubleshooting',
           },
         ],
       },
