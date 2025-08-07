@@ -61,6 +61,7 @@ export const BOT_USER_AGENT_PATTERNS = [
   /llama/i,
   /palm/i,
   /gemini/i,
+  /grok/i,
 
   // AI Data Scrapers (Specific bots from Dark Visitors)
   /gptbot/i, // OpenAI's official crawler
