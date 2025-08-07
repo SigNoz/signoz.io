@@ -31,38 +31,3 @@ We rely on the semantic conventions provided by OpenTelemetry. Every unique `se
 ### My services are not showing up in the Service Map section (but present in the services and traces tab), what should I do?
 
 You might need to zoom out a bit to see your service. Also, if you’re getting started the service map shows services from the sample hotrod application. Since your services are not connected to the hotrod application, it will appear isolated.
-
-### I am trying to change the retention period of Traces but the process gets stuck everytime.
-
-The process to change the retention period is resource-intensive, especially if you have a large amount of data ingested. The TTL (Time-to-Live) status table in the SigNoz SQLite database may be stuck, preventing the retention period change from completing.
-
-If process is stuck then you clear TTL table to try again.
-
-1. You can connect to SQLite DB and clear TTL status table to allow updating retention setting. If you are using docker follow below steps:
-
-- Connect to query-service
-```bash
-docker exec -it query-service sh
-```
-
-2. Run the following commands:
-- Install sqlite
-```bash
-apk update
-apk add sqlite
-```
-
-- Open sqlite with signoz.db
-```bash
-sqlite3 /var/lib/signoz/signoz.db
-```
-
-- (sqlite shell) check existing ttl status
-```bash
-select * from ttl_status;
-```
-
-- Delete all rows of ttl_status
-```bash
-DELETE FROM ttl_status;
-```

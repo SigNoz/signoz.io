@@ -243,34 +243,6 @@ const docsSideNav = [
             label: 'Upgrade Standard',
           },
           {
-            type: 'category',
-            route: '/docs/operate/troubleshooting/troubleshooting',
-            label: 'Troubleshooting',
-            isExpanded: false,
-            items: [
-{
-                type: 'doc',
-                route: '/docs/operate/troubleshooting/faqs',
-                label: 'General FAQs',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/troubleshooting/dirty-migration',
-                label: 'Schema Migrator - Dirty database version',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/troubleshooting/missing-column-issue',
-                label: 'Missing Columns Issue',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/troubleshooting/k8s-log-attribute-filtering-fix',
-                label: 'Fix K8s Log Attribute Filtering After Upgrade',
-              },
-            ],
-          },
-          {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.88',
             label: 'Upgrade to v0.88',
