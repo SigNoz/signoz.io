@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { waitUntil } from '@vercel/functions'
 import { v4 as uuidv4 } from 'uuid'
 import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
 
@@ -40,24 +41,26 @@ export function middleware(req: NextRequest) {
 
   // Log bot requests
   if (isBot) {
-    // Fire and forget - don't await to avoid blocking the request
-    logEventServerSide({
-      eventName: 'Bot Page Request',
-      eventType: 'track',
-      attributes: {
-        pageLocation: pathname,
-        custom_user_agent: userAgent,
-        custom_bot_type: botType,
-        custom_os: getOSFromUserAgent(userAgent),
-        custom_referrer: referer,
-        custom_ip: ip,
-        custom_source: 'server',
-        custom_is_bot: true,
-        custom_request_method: req.method,
-        custom_has_javascript: false, // Bots typically don't execute JS
-      },
-      anonymousId,
-    }).catch(() => {}) // Silently ignore errors
+    // Use waitUntil to ensure logging completes before function termination
+    waitUntil(
+      logEventServerSide({
+        eventName: 'Bot Page Request',
+        eventType: 'track',
+        attributes: {
+          pageLocation: pathname,
+          custom_user_agent: userAgent,
+          custom_bot_type: botType,
+          custom_os: getOSFromUserAgent(userAgent),
+          custom_referrer: referer,
+          custom_ip: ip,
+          custom_source: 'server',
+          custom_is_bot: true,
+          custom_request_method: req.method,
+          custom_has_javascript: false, 
+        },
+        anonymousId,
+      })
+    )
   }
 
   // Prepare response
