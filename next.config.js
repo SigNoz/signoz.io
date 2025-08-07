@@ -509,7 +509,36 @@ module.exports = () => {
           destination: "/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra/",
           permanent: true
         },
-
+        {
+          source: "/docs/troubleshooting/signoz-cloud/logs-troubleshooting/",
+          destination: "/docs/logs-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/logs_troubleshooting/",
+          destination: "/docs/logs-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/troubleshooting/signoz-cloud/traces-troubleshooting/",
+          destination: "/docs/traces-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/troubleshooting/signoz-cloud/metrics-troubleshooting/",
+          destination: "/docs/metrics-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/troubleshooting/signoz-cloud/general-troubleshooting/",
+          destination: "/docs/faqs/general/",
+          permanent: true
+        },
+        {
+          source: "/docs/instrumentation/troubleshoot-instrumentation/",
+          destination: "/docs/traces-management/troubleshooting/",
+          permanent: true
+        },
       ]
     },
     webpack: (config, options) => {
