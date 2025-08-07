@@ -4,8 +4,6 @@ id: install
 description: Step-by-step guide to install OpenTelemetry Collector for Docker environments
 ---
 
-# OpenTelemetry Collector for Docker - Install
-
 ## Prerequisites
 
 Before installing the OpenTelemetry Collector, ensure you have:
@@ -28,12 +26,12 @@ cd ~/opentelemetry-collector
 
 Defines how the OpenTelemetry Collector receives, processes, and exports telemetry data to SigNoz.
 
-Create `otel-config.yaml` based on your SigNoz deployment:
+Create `otel-config.yaml`:
 
 <Tabs>
 <TabItem value="cloud" label="SigNoz Cloud" default>
 
-```yaml
+```yaml:otel-config.yaml
 receivers:
   otlp:
     protocols:
@@ -108,8 +106,8 @@ service:
 ```
 
 **Configuration Steps:**
-1. Replace `<YOUR_REGION>` with your SigNoz Cloud region (e.g., `us`, `eu`, `in`)
-2. Replace `<YOUR_INGESTION_KEY>` with your actual ingestion key from SigNoz Cloud
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 </TabItem>
 <TabItem value="self-hosted" label="Self-Hosted SigNoz">
@@ -187,8 +185,7 @@ service:
 ```
 
 **Configuration Steps:**
-1. Replace `<SIGNOZ_HOST>` with your SigNoz instance hostname or IP address
-2. Update the port if your SigNoz installation uses a different OTLP port
+- Replace `<SIGNOZ_HOST>` with your SigNoz instance hostname or IP address
 
 </TabItem>
 </Tabs>
@@ -197,9 +194,6 @@ service:
 
 Starts the OpenTelemetry Collector as a Docker container to begin receiving and forwarding telemetry data to SigNoz.
 
-<Tabs>
-<TabItem value="linux" label="Linux" default>
-
 ```bash
 docker run --name opentelemetry-collector \
   --restart unless-stopped \
@@ -208,45 +202,20 @@ docker run --name opentelemetry-collector \
   -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
-
-</TabItem>
-<TabItem value="macos" label="macOS">
-
-```bash
-docker run --name opentelemetry-collector \
-  --restart unless-stopped \
-  --detach \
-  -p 4317:4317 -p 4318:4318 \
-  -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
-  otel/opentelemetry-collector-contrib:0.130.1
-```
-
-</TabItem>
-<TabItem value="windows" label="Windows">
-
-```bash
-docker run --name opentelemetry-collector \
-  --restart unless-stopped \
-  --detach \
-  -p 4317:4317 -p 4318:4318 \
-  -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
-  otel/opentelemetry-collector-contrib:0.130.1
-```
-
-</TabItem>
-</Tabs>
 
 ## Verification
 
-### Step 1: Check Collector Status
+### Check Collector Status
 
 Verifies that the OpenTelemetry Collector container is running and operational.
 
+Check if container is running
 ```bash
-# Check if container is running
 docker ps | grep opentelemetry-collector
+```
 
-# Check collector logs
+Check collector logs
+```bash
 docker logs opentelemetry-collector
 ```
 
