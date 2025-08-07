@@ -554,6 +554,18 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Docker',
+        items: [
+          {
+            route: '/docs/collection-agents/docker/install',
+            type: 'doc',
+            label: 'Overview',
+          },
+        ],
+      },
     ],
   },
   {
