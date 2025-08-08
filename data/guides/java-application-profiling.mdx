@@ -1,11 +1,11 @@
 ---
 
-title: "Complete Guide to Java Application Profiling: Tools, Techniques & Best Practices 2025"
+title: "The Developer's Guide to Java Profiling [Tools & Best Practices Included]"
 slug: "java-application-profiling"
-date: "2025-08-06"
+date: "2025-08-08"
 tags: [Performance Monitoring, Java]
 authors: [niyati_thakkar]
-description: "Master Java application profiling with our comprehensive guide covering 15+ tools, performance optimization techniques, memory analysis, and best practices for 2025."
+description: "Master Java application profiling with our comprehensive guide covering 15+ tools, performance optimization techniques, memory analysis, and best practices for 2025. Learn how to identify and fix performance bottlenecks in your Java applications."
 keywords: [java profiling, performance optimization, memory analysis, CPU profiling, profiling tools, java performance monitoring, memory leak detection, thread profiling, application performance, java debugging]
 
 ---
@@ -54,26 +54,26 @@ Before exploring external profilers, it’s wise to start with the tools that co
 
 * **Java Flight Recorder (JFR)** – Now included for free in OpenJDK (since Java 11). It runs with very low overhead (often less than 2%) even in production. JFR can record CPU samples, memory allocations, garbage collection events, thread states, and more.
 
-For example, you can start a flight recording on a running application with:
+    For example, you can start a flight recording on a running application with:
 
-  ```bash
-  # Start recording on a running Java application for 60 seconds
-  java -XX:+FlightRecorder -XX:StartFlightRecording=duration=60s,filename=myapp.jfr MyApplication
+    ```bash
+    # Start recording on a running Java application for 60 seconds
+    java -XX:+FlightRecorder -XX:StartFlightRecording=duration=60s,filename=myapp.jfr MyApplication
 
-  # Alternatively, attach to an already running process by PID
-  jcmd <pid> JFR.start duration=60s filename=recording.jfr
-  ```
+    # Alternatively, attach to an already running process by PID
+    jcmd <pid> JFR.start duration=60s filename=recording.jfr
+    ```
 
 * **JDK command-line tools** – The JDK provides several command-line utilities that can be invaluable for quick profiling and troubleshooting:
 
 
-  ```bash
-  jconsole                # GUI to monitor JVM performance
-  jmap -histo <pid>       # Prints heap object usage histogram
-  jstack <pid>            # Dumps all thread stacks (find deadlocks)
-  jcmd <pid> GC.heap_info # Heap usage summary
-  ```
-These tools work anywhere you have a JVM running and require no setup. For instance, if you suspect a memory leak, jmap -histo can immediately show which object classes are occupying the most heap space. If your application seems hung, jstack can show if threads are stuck waiting on locks. Because they’re on-demand, you can use them in production as a first line of investigation with very low risk.
+    ```bash
+    jconsole                # GUI to monitor JVM performance
+    jmap -histo <pid>       # Prints heap object usage histogram
+    jstack <pid>            # Dumps all thread stacks (find deadlocks)
+    jcmd <pid> GC.heap_info # Heap usage summary
+    ```
+    These tools work anywhere you have a JVM running and require no setup. For instance, if you suspect a memory leak, jmap -histo can immediately show which object classes are occupying the most heap space. If your application seems hung, jstack can show if threads are stuck waiting on locks. Because they’re on-demand, you can use them in production as a first line of investigation with very low risk.
 
 ### Open-Source Profilers
 
