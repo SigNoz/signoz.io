@@ -567,7 +567,7 @@ const docsSideNav = [
           {
             route: '/docs/collection-agents/docker/install',
             type: 'doc',
-            label: 'Overview',
+            label: 'Install',
           },
         ],
       },
