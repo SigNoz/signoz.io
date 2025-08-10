@@ -4,7 +4,6 @@ title: Web Vitals Monitoring
 id: web-vitals
 ---
 
-
 This documentation provides a step-by-step guide to setting up web vitals monitoring using SigNoz and OpenTelemetry.
 
 ## Overview
@@ -16,320 +15,41 @@ Web vitals are essential metrics to measure the user experience on your website.
 - Time to First Byte (TTFB)
 - Total Blocking Time (TBT)
 
-## Prerequisites
+## Metrics vs Traces: Choosing the Right Approach
 
-- [SigNoz Cloud](https://signoz.io/teams/) or self-hosted account
-- A web application from where you want to send traces
+Web vitals can be exported as either **metrics** or **traces** in OpenTelemetry, and the choice depends on your specific use case:
 
-## Setup
+### Exporting as Histogram Metrics
+**Best for larger scale deployments where sampling might be required:**
+- Provides aggregated statistical data (percentiles, histograms)
+- More efficient for high-volume applications
+- Better for trend analysis and alerting
+- Easier to implement sampling strategies
+- Ideal when you need to monitor overall performance trends across your user base
 
-### Step 1: Setup OTel Collector
-Install Otel collector binary using [these instructions](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+### Exporting as Traces
+**Best for simple, straightforward cases:**
+- Provides detailed, individual performance data for each page load
+- Better for debugging specific user issues
+- Easier to correlate with other trace data
+- More suitable for development and debugging scenarios
+- Ideal when you need granular visibility into individual user experiences
+- Enables easy addition of custom attributes for RUM (Real User Monitoring) features like browser information, user ID, device type, and other contextual data
 
-You would also need to update the collector config to whitelist the frontend domain.
+Choose the approach that aligns with your monitoring goals and infrastructure requirements. For production environments with high traffic, histogram metrics are often the better choice, while traces provide more detailed insights for development and troubleshooting scenarios.
 
-```sh
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-        cors:
-          allowed_origins:
-            - <<YOUR_FRONTEND_URL>>
-          allowed_headers: ['*']
-```
+<DocCardContainer>
 
-### Step 2: Install dependencies
+<DocCard
+    title="📄️ Sending Web Vitals Metrics"
+    description="Monitor your application's web vitals with metrics using SigNoz"
+    href="/docs/frontend-monitoring/web-vitals-with-metrics"
+/>
 
-<Tabs groupId="web-vitals-dependencies">
-  <TabItem value="npm" label="Npm">
-    ```sh
-      npm install web-vitals
-      npm install @opentelemetry/api
-      npm install @opentelemetry/sdk-trace-web
-      npm install @opentelemetry/instrumentation
-      npm install @opentelemetry/exporter-trace-otlp-http
-      npm install @opentelemetry/context-zone
-      npm install @opentelemetry/resources
-      npm install ua-parser-js
-    ```
-  </TabItem>
-  <TabItem value="yarn" label="Yarn" default>
-    ```sh
-      yarn add web-vitals
-      yarn add @opentelemetry/api
-      yarn add @opentelemetry/sdk-trace-web
-      yarn add @opentelemetry/instrumentation
-      yarn add @opentelemetry/exporter-trace-otlp-http
-      yarn add @opentelemetry/context-zone
-      yarn add @opentelemetry/resources
-      yarn add ua-parser-js
-    ```
-  </TabItem>
-</Tabs>
+<DocCard
+    title="📄️ Sending Web Vitals Traces"
+    description="Monitor your application's web vitals with traces using SigNoz"
+    href="/docs/frontend-monitoring/web-vitals-with-traces"
+/>
 
-### Step 3: Create an instrumentation file
-
-The `instrument.ts` file is required to setup the `OTLPTraceExporter` and `WebTracerProvider` which are used to capture web vitals as traces within your application and export them to your collector.
-
-<Tabs groupId="web-vitals-instrumentation">
-  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
-    ```ts
-    import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-    import {
-      WebTracerProvider,
-      BatchSpanProcessor,
-    } from '@opentelemetry/sdk-trace-web';
-    import { ZoneContextManager } from '@opentelemetry/context-zone';
-    import { resourceFromAttributes } from '@opentelemetry/resources';
-    import CustomSpanProcessor from './custom_span_processor';
-
-    const exporter = new OTLPTraceExporter({
-      url: `<<SIGNOZ_COLLECTOR_URL>>/v1/traces`,
-    });
-
-    const provider = new WebTracerProvider({
-      resource: resourceFromAttributes({
-        'service.name': 'web-vitals-demo-app-testing-2',
-      }),
-      spanProcessors: [new BatchSpanProcessor(exporter), CustomSpanProcessor],
-    });
-
-    provider.register({
-      contextManager: new ZoneContextManager(),
-    });
-    ```
-  </TabItem>
-  <TabItem value="cloud" label="SigNoz Cloud" default>
-    ```ts
-    import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-    import {
-      WebTracerProvider,
-      BatchSpanProcessor,
-    } from '@opentelemetry/sdk-trace-web';
-    import { ZoneContextManager } from '@opentelemetry/context-zone';
-    import { resourceFromAttributes } from '@opentelemetry/resources';
-    import CustomSpanProcessor from './custom_span_processor';
-
-    const exporter = new OTLPTraceExporter({
-      url: `https://ingest.<<INGESTION_REGION>>.signoz.cloud:443/v1/traces`,
-      headers: {
-        'signoz-ingestion-key': <<INGESTION_KEY>>,
-      },
-    });
-
-    const provider = new WebTracerProvider({
-      resource: resourceFromAttributes({
-        'service.name': 'web-vitals-demo-app-testing-2',
-      }),
-      spanProcessors: [new BatchSpanProcessor(exporter), CustomSpanProcessor],
-    });
-
-    provider.register({
-      contextManager: new ZoneContextManager(),
-    });
-    ```
-  </TabItem>
-</Tabs>
-
-### Step 4: Capture and export Web Vitals
-Use the `web-vitals` library to capture key performance metrics like CLS, FID, LCP, TTFB, and FCP. 
-These are captured through callback functions that you define and exported as traces.
-
-```ts
-import { onFCP, onINP, onTTFB, onLCP, onCLS, type Metric } from 'web-vitals';
-import { trace, context, type Context } from '@opentelemetry/api';
-import { hrTime } from '@opentelemetry/core';
-
-const webVitalsTracer = trace.getTracer('web-vitals-instrumentation');
-
-let webVitalsContext: Context | null = null;
-let isContextCreated = false;
-
-function createWebVitalsContext() {
-  if (!isContextCreated) {
-    const parentSpan = webVitalsTracer.startSpan('web-vitals');
-    webVitalsContext = trace.setSpan(context.active(), parentSpan);
-    parentSpan.end();
-    isContextCreated = true;
-  }
-  return webVitalsContext;
-}
-
-function createWebVitalsSpan(metric: Metric) {
-  const ctx = createWebVitalsContext();
-  if (!ctx) {
-    console.warn('Web vitals context not available for:', metric.name);
-    return;
-  }
-
-  const now = hrTime();
-  const webVitalsSpan = webVitalsTracer.startSpan(
-    metric.name,
-    { startTime: now },
-    ctx
-  );
-
-  webVitalsSpan.setAttributes({
-    'web_vital.name': metric.name,
-    'web_vital.id': metric.id,
-    'web_vital.navigationType': metric.navigationType,
-    'web_vital.delta': metric.delta,
-    'web_vital.rating': metric.rating,
-    'web_vital.value': metric.value,
-    'page.url': window.location.href,
-    'page.title': document.title,
-    timestamp: Date.now(),
-  });
-
-  webVitalsSpan.end();
-  return webVitalsSpan;
-}
-
-createWebVitalsContext();
-
-onFCP(metric => {
-  createWebVitalsSpan(metric);
-});
-
-onINP(metric => {
-  createWebVitalsSpan(metric);
-});
-
-onTTFB(metric => {
-  createWebVitalsSpan(metric);
-});
-
-onLCP(metric => {
-  createWebVitalsSpan(metric);
-});
-
-onCLS(metric => {
-  createWebVitalsSpan(metric);
-});
-```
-
-### Step 6: Viewing captured Web Vitals
-
-The captured web vitals can be viewed in the Traces Explorer. Each `web-vital` trace contains the 5 web vitals as child spans.
-
-<figure data-zoomable align="center">
-  <img
-    className="box-shadowed-image"
-    src="/img/guides/frontend-monitoring/web-vitals/3.webp"
-    alt="Web Vitals"
-  />
-  <figcaption>
-    <i>Web Vitals</i>
-  </figcaption>
-</figure>
-
-### Step 7: Setup Dashboard and alerts
-You can create a [custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard) and [set alerts](https://signoz.io/docs/setup-alerts-notification/)
-to monitor your core web-vitals and be notified about anything critical.
-
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/events/launch-week-1/web-vitals.webp" alt="Core Web Vitals Monitoring in SigNoz"/>
-<figcaption><i>Core Web Vitals Monitoring in SigNoz </i></figcaption>
-</figure>
-
-One of the cool feature of SigNoz charts is that you can create thresholds in the chart with different color coding. For example, in the below graph there are three thresholds for `good`, `needs improvement`, and `critical` level.
-
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/events/launch-week-1/thresholds-chart.webp" alt="Thresholds in SigNoz"/>
-<figcaption><i>Thresholds provide a visual cue about your application's performance </i></figcaption>
-</figure>
-
-### Attaching additional identifiers to your Web Vitals
-
-You can enrich web vitals with additional metadata like browser type, user ID, page URL etc. to enable real user monitoring (RUM)-like insights.
-
-To do so, you need to write a custom implementation of `SpanProcessor` which will intercept all your exported spans and attach additional attributes to them.
-
-```ts
-import { SpanProcessor } from '@opentelemetry/sdk-trace-node';
-import { UAParser } from 'ua-parser-js';
-
-export const CONSTANTS = {
-  USER_ID: 'user.id',
-  BROWSER_NAME: 'browser.name',
-  BROWSER_VERSION: 'browser.version',
-};
-
-function getBrowserInfo() {
-  // You can add your custom browser tracking logic here as well.
-  // This example uses the ua-parser-js package.
-  const parser = new UAParser();
-  const result = parser.getResult();
-  return {
-    browserName: result.browser.name || '',
-    browserVersion: result.browser.version || '',
-    userAgent: result.ua || '',
-  };
-}
-
-function getUserId() {
-  // You can add your custom user ID tracking logic here as well.
-  // This example uses localStorage.
-  const userId = localStorage.getItem('userId');
-  return {
-    userId: userId || '',
-  };
-}
-
-const CustomSpanProcessor: SpanProcessor = {
-  onStart: span => {
-    const userData = getUserId();
-    const browserInfo = getBrowserInfo();
-
-    span.setAttribute(CONSTANTS.USER_ID, userData.userId);
-    span.setAttribute(CONSTANTS.BROWSER_NAME, browserInfo.browserName);
-    span.setAttribute(CONSTANTS.BROWSER_VERSION, browserInfo.browserVersion);
-  },
-  onEnd: () => Promise.resolve(),
-  forceFlush: () => Promise.resolve(),
-  shutdown: () => Promise.resolve(),
-};
-
-export default CustomSpanProcessor;
-```
-
-Update your `instrument.ts` file to include this processor.
-
-```ts
-const provider = new WebTracerProvider({
-  resource: resourceFromAttributes({
-    'service.name': 'text-generator',
-  }),
-  spanProcessors: [new BatchSpanProcessor(exporter), CustomSpanProcessor],
-});
-```
-
-Now every span exported will include these additional contextual attributes.
-
-<figure data-zoomable align="center">
-  <img
-    className="box-shadowed-image"
-    src="/img/guides/frontend-monitoring/web-vitals/1.webp"
-    alt="Web Vitals with custom attributes"
-  />
-  <figcaption>
-    <i>Web Vitals with custom attributes</i>
-  </figcaption>
-</figure>
-
-<figure data-zoomable align="center">
-  <img
-    className="box-shadowed-image"
-    src="/img/guides/frontend-monitoring/web-vitals/2.webp"
-    alt="Web Vitals with custom attributes"
-  />
-  <figcaption>
-    <i>Web Vitals with custom attributes</i>
-  </figcaption>
-</figure>
-
-You can find and try the demo application [here](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/web-vitals) and also use our [custom dashboards](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/dashboard-templates).
+</DocCardContainer>
