@@ -1,36 +1,56 @@
-import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
-
-const REVALIDATE_SECRET = process.env.REVALIDATE_SECRET
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export async function POST(request: NextRequest) {
   try {
-    const requestData = await request.json()
-    const { tag, secret } = requestData
+    const body = await request.json()
+    const { path, tag, secret } = body
 
-    // Check for secret if configured
-    if (REVALIDATE_SECRET && secret !== REVALIDATE_SECRET) {
-      return NextResponse.json({ message: 'Invalid revalidation token' }, { status: 401 })
+    if (secret !== process.env.REVALIDATION_SECRET) {
+      return NextResponse.json({ message: 'Invalid secret' }, { status: 401 })
     }
 
-    // Verify tag is provided
-    if (!tag) {
-      return NextResponse.json({ message: 'Missing tag parameter' }, { status: 400 })
+    const timestamp = new Date().toISOString()
+
+    if (path) {
+      // Revalidate specific path
+      revalidatePath(path)
+      console.log(`[ISR] Revalidated path: ${path} at ${timestamp}`)
+      return NextResponse.json({ 
+        message: `Path ${path} revalidated successfully`,
+        timestamp,
+        type: 'path'
+      })
     }
 
-    // Revalidate the tag
-    revalidateTag(tag)
+    if (tag) {
+      // Revalidate by tag
+      revalidateTag(tag)
+      console.log(`[ISR] Revalidated tag: ${tag} at ${timestamp}`)
+      return NextResponse.json({ 
+        message: `Tag ${tag} revalidated successfully`,
+        timestamp,
+        type: 'tag'
+      })
+    }
 
-    return NextResponse.json({
-      revalidated: true,
-      message: `Tag "${tag}" revalidated successfully`,
-      timestamp: Date.now(),
-    })
+    return NextResponse.json({ message: 'No path, tag, or type provided' }, { status: 400 })
   } catch (error) {
-    console.error('Revalidation error:', error)
+    console.error('[ISR] Revalidation error:', error)
     return NextResponse.json(
-      { message: 'Error processing revalidation request', error: String(error) },
+      { message: 'Error revalidating', error: error.message },
       { status: 500 }
     )
   }
+}
+
+// to check revalidation status
+export async function GET() {
+  return NextResponse.json({
+    message: 'ISR Revalidation API is active',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      POST: 'Trigger revalidation with { path, tag, secret }'
+    }
+  })
 }
