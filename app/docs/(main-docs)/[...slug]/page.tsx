@@ -10,6 +10,7 @@ import DocContent from '@/components/DocContent/DocContent'
 
 export const dynamicParams = false
 export const revalidate = 0.5 * 60 * 60 // 30 minutes
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
