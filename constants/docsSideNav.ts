@@ -1822,33 +1822,64 @@ const docsSideNav = [
     label: 'Frontend Monitoring',
     type: 'category',
     isExpanded: false,
-    route: '/docs/frontend-monitoring',
+    route: '/docs/frontend-monitoring/overview',
     items: [
       {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/overview',
-        label: 'Overview',
+        type: 'category',
+        isExpanded: false,
+        label: 'Behavioral Monitoring',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/sending-logs',
+            label: 'Sending Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/sending-traces',
+            label: 'Sending Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/sending-metrics',
+            label: 'Sending Metrics',
+          },
+        ]
       },
       {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/sending-logs',
-        label: 'Sending Logs',
+        type: 'category',
+        isExpanded: false,
+        label: 'Performance Monitoring',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
+            label: 'Web Vitals',
+          },
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/document-load',
+            label: 'Document Load',
+          },
+        ]
       },
       {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/sending-traces',
-        label: 'Sending Traces',
-      },
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
-        label: 'Web Vitals',
-      },
-      {
-        type: 'doc',
-        route: '/docs/frontend-monitoring/document-load',
-        label: 'Document Load',
-      },
+        type: 'category',
+        isExpanded: false,
+        label: 'Error Monitoring',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/sending-error-logs',
+            label: 'Sending Error Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/capturing-javascript-errors-exceptions-and-console-errors',
+            label: 'Capturing JavaScript Errors, Exceptions and Console Errors',
+          },
+        ]
+      }
     ],
   },
   {
