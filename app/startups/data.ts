@@ -103,13 +103,13 @@ export const featureItems = [
 
 // Testimonials Data
 export const testimonials = [
-  {
-    quote:
-      "SigNoz is easy, simple, and affordable. It's made me very happy. I'm very happy with SigNoz. Now I'm about to go on vacation for a week, and I'm going to sleep beautifully because I know that if something's wrong, I'm going to get paged about it.",
-    name: 'Shiv Ansal',
-    title: 'Co-founder & CTO, Bands',
-    logo: '/img/case_study/logos/bands-logo.png',
-  },
+  // {
+  //   quote:
+  //     "SigNoz is easy, simple, and affordable. It's made me very happy. I'm very happy with SigNoz. Now I'm about to go on vacation for a week, and I'm going to sleep beautifully because I know that if something's wrong, I'm going to get paged about it.",
+  //   name: 'Shiv Ansal',
+  //   title: 'Co-founder & CTO, Bands',
+  //   logo: '/img/case_study/logos/bands-logo.png',
+  // },
   {
     quote:
       'The experience with SigNoz has been great. The open-source nature and OpenTelemetry support make it a perfect fit for our growing fintech infrastructure.',

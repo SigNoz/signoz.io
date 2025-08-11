@@ -61,13 +61,6 @@ const cardDetails = [
     href: '/case-study/cedana/',
   },
   {
-    logo: '/img/case_study/logos/bands-logo.png',
-    title: 'How Bands Monitors 50+ Integrations for Thousands of Musicians Using SigNoz',
-    name: 'Shiv Ansal',
-    position: 'Co-founder & CTO, Bands',
-    href: '/case-study/bands/',
-  },
-  {
     logo: '/img/case_study/mailmodo-logo-white.svg',
     title:
       'How Mailmodo streamlined monitoring of 200GB+ daily logs from 200+ microservices with SigNoz',
