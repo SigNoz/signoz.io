@@ -2254,7 +2254,7 @@ const SigNozVsDatadogV2 = () => {
             </div>
           </div>
 
-          <div className="mt-12">
+          {/* <div className="mt-12">
             <p className="mb-4 text-[1.1rem] italic text-gray-300">
               Listen to Shiv Ansal, CTO at Bands, explaining why he chose SigNoz over Datadog for
               his startup, Bands.
@@ -2277,7 +2277,7 @@ const SigNozVsDatadogV2 = () => {
                 Get Started with SigNoz for Free →
               </Link>
             </div>
-          </div>
+          </div> */}
         </section>
         {/* Section End */}
 
