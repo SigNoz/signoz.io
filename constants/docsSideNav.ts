@@ -1839,11 +1839,6 @@ const docsSideNav = [
             route: '/docs/frontend-monitoring/sending-traces',
             label: 'Sending Traces',
           },
-          {
-            type: 'doc',
-            route: '/docs/frontend-monitoring/sending-metrics',
-            label: 'Sending Metrics',
-          },
         ]
       },
       {
@@ -1851,6 +1846,11 @@ const docsSideNav = [
         isExpanded: false,
         label: 'Performance Monitoring',
         items: [
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/sending-metrics',
+            label: 'Sending Metrics',
+          },
           {
             type: 'doc',
             route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
