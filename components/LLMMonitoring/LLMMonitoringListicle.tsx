@@ -3,7 +3,6 @@ import IconCardGrid from '../Card/IconCardGrid'
 import {
   SiOpenai,
   SiVercel,
-  SiOllama,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -29,7 +28,7 @@ const LLMMonitoringData: IconCardData[] = [
   {
     name: 'LlamaIndex',
     href: '/docs/llm/llamaindex-monitoring',
-    icon: <SiOllama className="h-7 w-7 text-purple" />,
+    icon: <img src="/svgs/icons/LLMMonitoring/llamaindex-icon.svg" alt="LlamaIndex Icon" className="h-7 w-7" />,
     clickName: 'LlamaIndex Monitoring',
   },
 ]
