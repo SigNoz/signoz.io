@@ -12,9 +12,7 @@ export default function robots(): MetadataRoute.Robots {
       rules: {
         userAgent: '*',
         disallow: '/',
-      },
-      sitemap: `${currentUrl}/sitemap.xml`,
-      host: currentUrl,
+      }
     }
   }
   
