@@ -62,7 +62,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'ArgoCD',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/argocd',
+    href: '/docs/dashboards/dashboard-templates/argocd-dashboard',
     icon: <GitBranch className="h-7 w-7 text-orange-500" />,
     clickName: 'ArgoCD Dashboard Template',
   },
