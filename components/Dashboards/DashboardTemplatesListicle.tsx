@@ -116,7 +116,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'Flask Monitoring',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/flask-monitoring',
+    href: '/docs/dashboards/dashboard-templates/flask-monitoring',
     icon: <Globe className="h-7 w-7 text-black" />,
     clickName: 'Flask Monitoring Dashboard Template',
   },
