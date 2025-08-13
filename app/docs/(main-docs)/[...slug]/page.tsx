@@ -9,6 +9,8 @@ import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 
 export const dynamicParams = false
+export const revalidate = 0.5 * 60 * 60 // 30 minutes
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
@@ -62,6 +64,23 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         toc={toc}
         hideTableOfContents={hide_table_of_contents || false}
       />
+      {/* TODO: remove this, debug info */}
+      {
+        <div className="cache-debug" style={{ 
+          position: 'fixed', 
+          bottom: '10px', 
+          right: '10px', 
+          background: 'rgba(0,0,0,0.8)', 
+          color: 'white', 
+          padding: '10px',
+          fontSize: '12px',
+          borderRadius: '4px'
+        }}>
+          <div>export revalidate: {revalidate}</div>
+          <div>Slug: {slug}</div>
+          <div>Generated: {new Date().toISOString()}</div>
+        </div>
+      }
     </div>
   )
 }

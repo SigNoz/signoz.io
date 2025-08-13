@@ -6,7 +6,7 @@ const siteMetadata = {
   description:
     'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
   language: 'en-us',
-  theme: 'dark', // system, dark or light
+  theme: 'dark',
   siteUrl: 'https://signoz.io',
   siteRepo: 'https://github.com/signoz/',
   siteLogo: '/img/logo.svg',
