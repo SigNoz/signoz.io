@@ -45,7 +45,7 @@ const DocContent: React.FC<{
               rel="noopener noreferrer"
               className="text-gray-500 dark:text-gray-400"
             >
-              Edit this page
+              Edit
             </a>
           )}
         </div>
