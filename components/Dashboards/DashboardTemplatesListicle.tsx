@@ -92,7 +92,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'ClickHouse',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/clickhouse',
+    href: '/docs/dashboards/dashboard-templates/clickhouse-monitoring',
     icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
     clickName: 'ClickHouse Dashboard Template',
   },
