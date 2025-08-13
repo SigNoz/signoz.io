@@ -1,0 +1,233 @@
+---
+date: 2025-08-13
+id: nodejs-pino-instrumentation
+title: Auto-instrumenting Node.js Applications with Pino Logger
+description: Automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library
+hide_table_of_contents: true
+---
+
+This guide shows you how to automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library. This setup provides automatic correlation between your application traces and logs in SigNoz, giving you **automatic trace generation** for HTTP requests, Express routes, and other common libraries, **structured logs** with trace correlation automatically injected, **unified observability** with traces and logs correlated in SigNoz, and **production-ready configuration** with batch processing for optimal performance.
+
+## Prerequisites
+
+- Existing Node.js application using [Pino](https://getpino.io/) for logging
+
+## Step 1: Install Required Packages
+
+Install the OpenTelemetry packages needed for auto-instrumentation:
+
+```bash
+npm i @opentelemetry/sdk-node \
+      @opentelemetry/auto-instrumentations-node \
+      @opentelemetry/instrumentation-pino \
+      @opentelemetry/exporter-trace-otlp-http \
+      @opentelemetry/exporter-logs-otlp-http
+```
+
+### Package Breakdown
+
+- **`@opentelemetry/sdk-node`** - Core OpenTelemetry SDK for Node.js runtime
+- **`@opentelemetry/auto-instrumentations-node`** - Automatic instrumentation for popular libraries (HTTP, Express, etc.)
+- **`@opentelemetry/instrumentation-pino`** - Specific instrumentation for Pino logging library
+- **`@opentelemetry/exporter-trace-otlp-http`** - OTLP HTTP exporter for traces
+- **`@opentelemetry/exporter-logs-otlp-http`** - OTLP HTTP exporter for logs
+
+## Step 2: Create OpenTelemetry Configuration
+
+Create an OpenTelemetry configuration file at your project root:
+
+<details>
+<summary><strong>JavaScript (otel.js)</strong></summary>
+
+```javascript
+// otel.js
+'use strict';
+const { NodeSDK, tracing, logs } = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { PinoInstrumentation } = require('@opentelemetry/instrumentation-pino');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
+
+// Use batch processors for production-friendly behavior
+const spanProcessor = new tracing.BatchSpanProcessor(new OTLPTraceExporter());
+const logRecordProcessor = new logs.BatchLogRecordProcessor(new OTLPLogExporter());
+
+// Build and start the SDK before your app loads Pino
+const sdk = new NodeSDK({
+  spanProcessor,
+  logRecordProcessor,
+  instrumentations: [
+    getNodeAutoInstrumentations(), // Creates spans for HTTP, Express, and more
+    new PinoInstrumentation({
+      // Optional: customize injected keys
+      // logKeys: { traceId: 'trace_id', spanId: 'span_id', traceFlags: 'trace_flags' }
+    }),
+  ],
+});
+
+sdk.start();
+
+// Optional graceful shutdown
+process.on('SIGTERM', () => {
+  sdk.shutdown().finally(() => process.exit(0));
+});
+```
+</details>
+
+<details>
+<summary><strong>TypeScript (otel.ts)</strong></summary>
+
+```typescript
+// otel.ts
+import { NodeSDK, tracing, logs } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+
+// Use batch processors for production-friendly behavior
+const spanProcessor = new tracing.BatchSpanProcessor(new OTLPTraceExporter());
+const logRecordProcessor = new logs.BatchLogRecordProcessor(new OTLPLogExporter());
+
+// Build and start the SDK before your app loads Pino
+const sdk = new NodeSDK({
+  spanProcessor,
+  logRecordProcessor,
+  instrumentations: [
+    getNodeAutoInstrumentations(), // Creates spans for HTTP, Express, and more
+    new PinoInstrumentation({
+      // Optional: customize injected keys
+      // logKeys: { traceId: 'trace_id', spanId: 'span_id', traceFlags: 'trace_flags' }
+    }),
+  ],
+});
+
+sdk.start();
+
+// Optional graceful shutdown
+process.on('SIGTERM', () => {
+  sdk.shutdown().finally(() => process.exit(0));
+});
+```
+</details>
+
+### Configuration Notes
+
+- **Batch processors** are used for production efficiency, batching spans and logs before export
+- **Auto-instrumentations** automatically create spans for HTTP requests, Express routes, and other common libraries
+- **Pino instrumentation** injects trace context into your logs and forwards log records to the OpenTelemetry Logs SDK
+- The SDK must be started **before** your application imports Pino
+
+## Step 3: Run with Preload
+
+Use the `-r` flag to preload the OpenTelemetry configuration before your application starts:
+
+**For JavaScript:**
+```bash
+node -r ./otel.js app.js
+```
+
+**For TypeScript:**
+```bash
+node -r ./otel.ts app.ts
+```
+
+The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Pino.
+
+## Configuration
+
+### Environment Variables
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+Set the following environment variables for SigNoz Cloud:
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=YOUR_INGESTION_KEY"
+```
+
+Replace `{region}` with your SigNoz Cloud region:
+- **US**: `ingest.us.signoz.cloud`
+- **India**: `ingest.in.signoz.cloud`  
+- **Europe**: `ingest.eu.signoz.cloud`
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
+Point to your OpenTelemetry collector's OTLP HTTP receiver:
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://<collector-host>:4318/v1/traces"
+export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="http://<collector-host>:4318/v1/logs"
+```
+
+</TabItem>
+</Tabs>
+
+### Running Your Application
+
+Start your application with OpenTelemetry instrumentation:
+
+**For JavaScript:**
+```bash
+node -r ./otel.js app.js
+```
+
+**For TypeScript:**
+```bash
+node -r ./otel.ts app.ts
+```
+
+## Verification
+
+After starting your application:
+
+1. **Make some requests** to your application endpoints
+2. **Check SigNoz** for incoming traces and logs
+3. **Verify correlation** - your logs should contain trace IDs and be correlated with spans
+
+### What to Look For
+
+- **Traces** appearing in the SigNoz Traces tab
+- **Logs** appearing in the SigNoz Logs tab
+- **Trace correlation** - logs should contain `traceId` and `spanId` fields
+- **Service mapping** showing your service in the dependency graph
+
+## Troubleshooting
+
+### Common Issues
+
+**No traces appearing:**
+- Ensure the preload script (`-r ./otel.js`) is used
+- Check that environment variables are set correctly
+- Verify network connectivity to SigNoz
+
+**No logs appearing:**
+- Confirm Pino is being used for logging in your application
+- Check that the Pino instrumentation is properly configured
+- Verify the OTLP logs endpoint is correct
+
+**Missing trace correlation:**
+- Ensure OpenTelemetry is loaded before Pino is imported
+- Check that the Pino instrumentation is enabled
+- Verify spans are being created (check traces first)
+
+### Debug Mode
+
+Enable debug logging to troubleshoot issues:
+
+**For JavaScript:**
+```bash
+export OTEL_LOG_LEVEL=debug
+node -r ./otel.js app.js
+```
+
+**For TypeScript:**
+```bash
+export OTEL_LOG_LEVEL=debug
+node -r ./otel.ts app.ts
+```
