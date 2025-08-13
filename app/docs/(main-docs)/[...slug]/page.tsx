@@ -57,11 +57,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   return (
     <div className="doc">
       <DocContent
-        title={title}
-        post={post}
-        toc={toc}
-        hideTableOfContents={hide_table_of_contents || false}
-      />
+  title={title}
+  post={post}
+  toc={toc}
+  hideTableOfContents={hide_table_of_contents || false}
+  editLink={`https://github.com/SigNoz/signoz-web/edit/main/data/docs/${slug}.mdx`}
+/>
     </div>
   )
 }
