@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.5",
-  "pathHead": "v0.91.0",
+  "pathHead": "v0.92.0",
   "general": {
     "upgradeSummary": [
       "This tool provides the mandatory sequential path to upgrade your instance safely.",
@@ -28,9 +28,36 @@
     "troubleshootingUrl": "https://signoz.io/docs/user-guide/troubleshooting/"
   },
   "releases": {
+    "v0.92.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": null,
+      "releaseDate": "2025-08-13",
+      "patchRelease": {
+        "label": "v0.92.1",
+        "href": "https://github.com/SigNoz/signoz/releases/tag/v0.92.1"
+      },
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.92",
+      "instructions": [
+        "This release introduces the new Query Builder v5, migrates the CLI to a Cobra-based structure, and supports ClickHouse 25.5.6",
+        "An automatic migration is in place for dashboards, alerts, and saved views, so no manual updates are needed for them.",
+        "For Linux Binary installations, you must update the systemd service file to use the new `server` subcommand (e.g., `signoz server`)."
+      ],
+      "deprecations": [
+        {
+          "title": "Legacy CLI Arguments",
+          "details": "Extra or unknown command line arguments are now ignored. Future work will move all flags to be config-driven via a configuration file."
+        }
+      ],
+      "warnings": [
+        {
+          "title": "Cobra CLI Migration",
+          "details": "SigNoz now uses a Cobra command structure. To run the server, you must use the `signoz server` command. Please update your `launch.json` args and any execution scripts accordingly."
+        }
+      ]
+    },
     "v0.91.0": {
       "isMandatoryStop": false,
-      "nextMandatoryStop": null,
+      "nextMandatoryStop": "v0.92.0",
       "releaseDate": "2025-07-24",
       "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-standard",
       "instructions": [
