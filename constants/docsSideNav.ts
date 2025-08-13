@@ -1816,6 +1816,42 @@ const docsSideNav = [
         route: '/docs/alerts-management/terraform-provider-signoz',
         label: 'Terraform Provider',
       },
+      {
+        type: 'category',
+        route: '/docs/alerts-management/troubleshooting/troubleshooting',
+        label: 'Troubleshooting',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/troubleshooting/faqs',
+            label: 'General FAQs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
+            label: 'Alerts Firing Without Visible Threshold Breach',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        route: '/docs/alerts-management/user-guides/user-guides',
+        label: 'User Guides',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/understanding-alert-evaluation-patterns',
+            label: 'Understanding Alert Evaluation Patterns',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
+            label: 'Time Aggregation Best Practices',
+          }
+        ],
+      }
     ],
   },
   {
