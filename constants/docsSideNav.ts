@@ -2182,7 +2182,7 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: 'api-reference/',
+            route: '/api-reference/',
             label: 'OpenAPI Spec',
           },
         ],
