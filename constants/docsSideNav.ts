@@ -2171,6 +2171,25 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'SigNoz API',
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        label: 'API',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: 'api-reference/',
+            label: 'OpenAPI Spec',
+          },
+        ],
+      },
+    ],
+  },
+  {
     label: 'Tutorials',
     type: 'category',
     isExpanded: false,
