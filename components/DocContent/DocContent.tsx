@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { Edit3 } from 'lucide-react'
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import PageFeedback from '../PageFeedback/PageFeedback'
@@ -34,18 +35,19 @@ const DocContent: React.FC<{
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
         <h2 className="mt-2 text-3xl">{title}</h2>
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
-        <div className="flex justify-between items-center mt-8 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex justify-between items-center mt-8 text-sm">
           {formattedDate && (
-            <p>Last updated: {formattedDate}</p>
+            <p className="text-gray-500 dark:text-gray-400">Last updated: {formattedDate}</p>
           )}
           {editLink && (
             <a
               href={editLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-500 dark:text-gray-400"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 hover:shadow-sm transition-all duration-200"
             >
-              Edit
+              <Edit3 size={16} />
+              Edit on GitHub
             </a>
           )}
         </div>
