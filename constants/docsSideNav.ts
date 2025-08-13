@@ -571,6 +571,35 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        type: 'category',
+        label: 'ECS',
+        isExpanded: false,
+        items: [
+         {
+          type: "category",
+          label: "EC2",
+          isExpanded: false,
+          items: [
+            {
+              type: 'doc',
+              label: "Overview",
+              route: "/docs/collection-agents/ecs/ec2/overview"
+            },
+            {
+              type: 'doc',
+              label: 'Install',
+              route: "/docs/collection-agents/ecs/ec2/install"
+            },
+            {
+              type : 'doc',
+              label: "Configure",
+              route: "/docs/collection-agents/ecs/ec2/configure"
+            }
+          ]
+         }
+        ],
+      },
     ],
   },
   {
@@ -1359,23 +1388,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/metrics-management/query-range-api',
         label: 'Query Range API',
-      },
-      {
-        type: 'category',
-        label: 'Guides',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/userguide/collecting-ecs-logs-and-metrics',
-            label: 'ECS Infra Metrics & Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/collecting-ecs-sidecar-infra',
-            label: 'ECS Infra Sidecar',
-          },
-        ],
       },
       {
         type: 'category',

@@ -1,0 +1,154 @@
+---
+date: 2025-08-13
+id: overview
+title: ECS EC2 Collection Agent - Configure
+description: View metrics and logs for your ECS infrastructure
+---
+import DSTemplateIntro from '@/components/shared/ecs-infra/daemon/template-intro.md'
+import DSTemplateEC2 from '@/components/shared/ecs-infra/daemon/template-ec2.md'
+import DSTemplateExternal from '@/components/shared/ecs-infra/daemon/template-external.md'
+import DSConfigIntro from '@/components/shared/ecs-infra/daemon/config-intro.md'
+import DSConfigCloud from '@/components/shared/ecs-infra/daemon/config-cloud.md'
+import DSConfigOss from '@/components/shared/ecs-infra/daemon/config-oss.md'
+import DSSetUpVerify from '@/components/shared/ecs-infra/daemon/set-up-verify.mdx'
+import DSSendDataIntro from '@/components/shared/ecs-infra/daemon/send-data-intro.mdx'
+import DSSendDataEc2 from '@/components/shared/ecs-infra/daemon/send-data-ec2.md'
+import DSSendDataExternal from '@/components/shared/ecs-infra/daemon/send-data-external.md'
+import DSSendDataEnd from '@/components/shared/ecs-infra/daemon/send-data-end.md'
+
+This guide covers configuring your daemon service after installation, verifying data flow, and setting up application data collection.
+
+## Prerequisites
+
+Before configuring, ensure you have:
+- Completed the [installation steps](./install.md)
+- Daemon service running on your ECS cluster
+- Access to SigNoz Cloud or self-hosted instance
+
+## Verify Data Collection
+
+### Step 1: Check SigNoz Data Reception
+
+Log into your SigNoz instance and verify that infrastructure data is being received:
+
+**For SigNoz Cloud:**
+1. Go to your SigNoz Cloud dashboard
+2. Navigate to **Infrastructure > Metrics**
+3. Look for metrics from your ECS cluster nodes
+
+**For Self-Hosted SigNoz:**
+1. Access your SigNoz instance
+2. Check the metrics section for infrastructure data
+3. Verify logs are appearing in the logs section
+
+### Step 2: Import Infrastructure Dashboards
+
+To better visualize your ECS infrastructure data, import pre-built dashboards:
+
+**Available Dashboards:**
+- [instance-metrics.json](https://github.com/SigNoz/dashboards/blob/main/ecs-infra-metrics/instance-metrics.json) - ECS-specific infrastructure metrics
+- [hostmetrics.json](https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics.json) - General host metrics
+
+**Import Steps:**
+1. Download the dashboard JSON files
+2. In SigNoz, go to **Dashboards** section
+3. Click **Import Dashboard**
+4. Upload the JSON file or paste the content
+5. Save the dashboard
+
+**Expected Dashboard Data:**
+- CPU utilization per ECS instance
+- Memory usage and availability  
+- Network I/O statistics
+- Disk usage and I/O metrics
+- Container-level resource consumption
+
+## Send Data from Applications
+
+<DSSendDataIntro name="Cloud" />
+
+<Tabs groupId="launch-type">
+<TabItem value="ec2" label="EC2" default>
+<DSSendDataEc2 />
+</TabItem>
+<TabItem value="external" label="External">
+<DSSendDataExternal />
+</TabItem>
+</Tabs>
+
+<DSSendDataEnd name="Cloud" />
+
+</TabItem>
+
+<TabItem value='self-host' label='Self-Host'>
+
+### Prerequisites
+
+- An ECS cluster running with at least one task definition
+- Running SigNoz instance - [Install SigNoz](/docs/install)
+- ECS cluster must be either of launch type **EC2** or **External**
+
+<Admonition>
+If you want to collect metrics and other data for Fargate launch type, checkout [this documentation](https://signoz.io/docs/userguide/collecting-ecs-sidecar-infra/).
+</Admonition>
+
+
+<Tabs groupId="launch-type">
+<TabItem value="ec2" label="EC2" default>
+
+## Setting up Daemon Service
+
+<DSTemplateIntro name='self-host' />
+
+<DSTemplateEC2 />
+</TabItem>
+
+<TabItem value="external" label="External">
+
+## Setting up Daemon Service
+
+<DSTemplateIntro name='self-host' />
+
+<DSTemplateExternal />
+</TabItem>
+</Tabs>
+
+<DSConfigIntro />
+<DSConfigOss />
+<DSSetUpVerify name="OSS" />
+
+
+## Send Data from Applications
+
+<DSSendDataIntro name="OSS" />
+
+<Tabs groupId="launch-type">
+<TabItem value="ec2" label="EC2" default>
+<DSSendDataEc2 />
+</TabItem>
+<TabItem value="external" label="External">
+<DSSendDataExternal />
+</TabItem>
+</Tabs>
+
+<DSSendDataEnd name="OSS" />
+
+</TabItem>
+</Tabs>
+
+
+## Next Steps
+
+With configuration complete, you can:
+
+1. **Create Custom Dashboards**: Build dashboards specific to your use cases
+2. **Set Up Alerts**: Configure alerting rules for infrastructure metrics
+3. **Optimize Performance**: Fine-tune collection settings based on data volume
+4. **Scale Monitoring**: Extend to additional ECS clusters or environments
+
+## Support and Resources
+
+- **SigNoz Documentation**: [https://signoz.io/docs/](https://signoz.io/docs/)
+- **OpenTelemetry Collector**: [https://opentelemetry.io/docs/collector/](https://opentelemetry.io/docs/collector/)
+- **AWS ECS Documentation**: [https://docs.aws.amazon.com/ecs/](https://docs.aws.amazon.com/ecs/)
+- **Community Support**: [SigNoz Slack Community](https://signoz.io/slack)

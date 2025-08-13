@@ -1,0 +1,774 @@
+---
+date: 2025-08-13
+id: overview
+title: ECS EC2 Collection Agent - Install
+description: View metrics and logs for your ECS infrastructure
+---
+This guide walks you through installing the daemon service to collect metrics and logs from your ECS infrastructure.
+
+## Prerequisites Check
+
+Before starting, verify you have:
+- ECS cluster with **EC2** or **External** launch type
+- AWS CLI configured with appropriate permissions  
+- SigNoz Cloud account or self-hosted SigNoz instance
+- Access to AWS Parameter Store and CloudFormation
+
+## Installation Steps
+
+### Step 1: Daemon Service Template
+
+The CloudFormation template defines the infrastructure needed for the daemon service, including container specifications, IAM roles, and network settings.
+<Tabs groupId="launch-type">
+<TabItem value="ec2" label="EC2" default>
+```yaml
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ClusterName:
+    Type: String
+    Description: Enter the name of your ECS cluster from which you want to collect metrics
+  CreateIAMRoles:
+    Type: String
+    Default: 'False'
+    AllowedValues:
+      - 'True'
+      - 'False'
+    Description: Whether to create default IAM roles
+    ConstraintDescription: must specify True or False.
+  TaskRoleArn:
+    Type: String
+    Default: Default
+    Description: Enter the role arn you want to use as the ecs task role
+  ExecutionRoleArn:
+    Type: String
+    Default: Default
+    Description: Enter the role arn you want to use as the ecs execution role
+  command:
+    Type: String
+    Description: Using the right command to choose the config file you want to config your signoz-collector
+    Default: Default
+  SigNozConfigPath:
+    Type: String
+    Description: Enter the name of your SigNoz config file to fetch from SSM Parameter Store
+    Default: Default
+Conditions:
+  CreateRoles: !Equals
+    - !Ref CreateIAMRoles
+    - 'True'
+  DefaultTaskRole: !Equals
+    - !Ref TaskRoleArn
+    - Default
+  DefaultExecutionRole: !Equals
+    - !Ref ExecutionRoleArn
+    - Default
+Resources:
+  ECSTaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: ecs-otel-daemon-service
+      TaskRoleArn: !If
+        - CreateRoles
+        - !GetAtt
+          - ECSTaskRole
+          - Arn
+        - !If
+          - DefaultTaskRole
+          - !Sub 'arn:aws:iam::${AWS::AccountId}:role/OtelECSTaskRole'
+          - !Ref TaskRoleArn
+      ExecutionRoleArn: !If
+        - CreateRoles
+        - !GetAtt
+          - ECSExecutionRole
+          - Arn
+        - !If
+          - DefaultExecutionRole
+          - !Sub 'arn:aws:iam::${AWS::AccountId}:role/OtelECSExecutionRole'
+          - !Ref ExecutionRoleArn
+      NetworkMode: host
+      ContainerDefinitions:
+        - Name: signoz-collector
+          Image: 'signoz/signoz-otel-collector:0.88.8'
+          User: root
+          MountPoints:
+            - ReadOnly: true
+              ContainerPath: /rootfs/proc
+              SourceVolume: proc
+            - ReadOnly: true
+              ContainerPath: /rootfs/dev
+              SourceVolume: dev
+            - ReadOnly: true
+              ContainerPath: /sys/fs/cgroup
+              SourceVolume: al2_cgroup
+            - ReadOnly: true
+              ContainerPath: /cgroup
+              SourceVolume: al1_cgroup
+            - ReadOnly: true
+              ContainerPath: /rootfs/sys/fs/cgroup
+              SourceVolume: al2_cgroup
+            - ReadOnly: true
+              ContainerPath: /rootfs/cgroup
+              SourceVolume: al1_cgroup
+          PortMappings:
+            - ContainerPort: 2255
+              HostPort: 2255
+              Protocol: tcp
+            - ContainerPort: 4317
+              HostPort: 4317
+              Protocol: tcp
+            - ContainerPort: 4318
+              HostPort: 4318
+              Protocol: tcp
+          Command: [ !Ref command ]
+          Secrets:
+            - Name: SIGNOZ_CONFIG_CONTENT
+              ValueFrom: !Ref SigNozConfigPath
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - wget -qO- http://localhost:13133/ || exit 1
+            Interval: 5
+            Retries: 2
+            Timeout: 3
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-create-group: 'True'
+              awslogs-group: /ecs/daemon-signoz-collector
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: ecs
+        - Image: gliderlabs/logspout:v3.2.14
+          Name: signoz-logspout
+          MountPoints:
+            - ReadOnly: true
+              ContainerPath: /etc/host_hostname
+              SourceVolume: host_hostname
+            - ContainerPath: /var/run/docker.sock
+              SourceVolume: docker_sock
+          Command:
+            - 'syslog+tcp://localhost:2255'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-create-group: 'True'
+              awslogs-group: /ecs/daemon-signoz-logspout
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: ecs
+      RequiresCompatibilities:
+        - EC2
+      Volumes:
+        - Name: proc
+          Host:
+            SourcePath: /proc
+        - Name: dev
+          Host:
+            SourcePath: /dev
+        - Name: al1_cgroup
+          Host:
+            SourcePath: /cgroup
+        - Name: al2_cgroup
+          Host:
+            SourcePath: /sys/fs/cgroup
+        - Name: host_hostname
+          Host:
+            SourcePath: /etc/hostname
+        - Name: docker_sock
+          Host:
+            SourcePath: /var/run/docker.sock
+      Cpu: '1000'
+      Memory: '1024'
+  ECSDaemonService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      TaskDefinition: !Ref ECSTaskDefinition
+      Cluster: !Ref ClusterName
+      LaunchType: EC2
+      SchedulingStrategy: DAEMON
+      ServiceName: otel-daemon-service
+  ECSTaskRole:
+    Type: 'AWS::IAM::Role'
+    Condition: CreateRoles
+    Properties:
+      Description: Allows ECS tasks to call AWS services on your behalf.
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
+      RoleName: OtelECSTaskRole
+  ECSExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Condition: CreateRoles
+    Properties:
+      Description: >-
+        Allows ECS container agent makes calls to the Amazon ECS API on your
+        behalf.
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
+        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+        - 'arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess'
+      RoleName: OtelECSExecutionRole
+```
+</TabItem>
+
+<TabItem value="external" label="External">
+
+```yaml
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ClusterName:
+    Type: String
+    Description: Enter the name of your ECS cluster from which you want to collect metrics
+  CreateIAMRoles:
+    Type: String
+    Default: 'False'
+    AllowedValues:
+      - 'True'
+      - 'False'
+    Description: Whether to create default IAM roles
+    ConstraintDescription: must specify True or False.
+  TaskRoleArn:
+    Type: String
+    Default: Default
+    Description: Enter the role arn you want to use as the ecs task role
+  ExecutionRoleArn:
+    Type: String
+    Default: Default
+    Description: Enter the role arn you want to use as the ecs execution role
+  command:
+    Type: String
+    Description: Using the right command to choose the config file you want to config your signoz-collector
+    Default: Default
+  SigNozConfigPath:
+    Type: String
+    Description: Enter the name of your SigNoz config file to fetch from SSM Parameter Store
+    Default: Default
+Conditions:
+  CreateRoles: !Equals
+    - !Ref CreateIAMRoles
+    - 'True'
+  DefaultTaskRole: !Equals
+    - !Ref TaskRoleArn
+    - Default
+  DefaultExecutionRole: !Equals
+    - !Ref ExecutionRoleArn
+    - Default
+Resources:
+  ECSTaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: ecs-otel-daemon-service
+      TaskRoleArn: !If
+        - CreateRoles
+        - !GetAtt
+          - ECSTaskRole
+          - Arn
+        - !If
+          - DefaultTaskRole
+          - !Sub 'arn:aws:iam::${AWS::AccountId}:role/OtelECSTaskRole'
+          - !Ref TaskRoleArn
+      ExecutionRoleArn: !If
+        - CreateRoles
+        - !GetAtt
+          - ECSExecutionRole
+          - Arn
+        - !If
+          - DefaultExecutionRole
+          - !Sub 'arn:aws:iam::${AWS::AccountId}:role/OtelECSExecutionRole'
+          - !Ref ExecutionRoleArn
+      NetworkMode: host
+      ContainerDefinitions:
+        - Name: signoz-collector
+          Image: 'signoz/signoz-otel-collector:0.88.8'
+          User: root
+          MountPoints:
+            - ReadOnly: true
+              ContainerPath: /rootfs/proc
+              SourceVolume: proc
+            - ReadOnly: true
+              ContainerPath: /rootfs/dev
+              SourceVolume: dev
+            - ReadOnly: true
+              ContainerPath: /sys/fs/cgroup
+              SourceVolume: al2_cgroup
+            - ReadOnly: true
+              ContainerPath: /cgroup
+              SourceVolume: al1_cgroup
+            - ReadOnly: true
+              ContainerPath: /rootfs/sys/fs/cgroup
+              SourceVolume: al2_cgroup
+            - ReadOnly: true
+              ContainerPath: /rootfs/cgroup
+              SourceVolume: al1_cgroup
+          PortMappings:
+            - ContainerPort: 2255
+              HostPort: 2255
+              Protocol: tcp
+            - ContainerPort: 4317
+              HostPort: 4317
+              Protocol: tcp
+            - ContainerPort: 4318
+              HostPort: 4318
+              Protocol: tcp
+          Command: [ !Ref command ]
+          Secrets:
+            - Name: SIGNOZ_CONFIG_CONTENT
+              ValueFrom: !Ref SigNozConfigPath
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - wget -qO- http://localhost:13133/ || exit 1
+            Interval: 5
+            Retries: 2
+            Timeout: 3
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-create-group: 'True'
+              awslogs-group: /ecs/daemon-signoz-collector
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: ecs
+        - Image: gliderlabs/logspout:v3.2.14
+          Name: signoz-logspout
+          MountPoints:
+            - ReadOnly: true
+              ContainerPath: /etc/host_hostname
+              SourceVolume: host_hostname
+            - ContainerPath: /var/run/docker.sock
+              SourceVolume: docker_sock
+          Command:
+            - 'syslog+tcp://localhost:2255'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-create-group: 'True'
+              awslogs-group: /ecs/daemon-signoz-logspout
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: ecs
+      RequiresCompatibilities:
+        - EXTERNAL
+      Volumes:
+        - Name: proc
+          Host:
+            SourcePath: /proc
+        - Name: dev
+          Host:
+            SourcePath: /dev
+        - Name: al1_cgroup
+          Host:
+            SourcePath: /cgroup
+        - Name: al2_cgroup
+          Host:
+            SourcePath: /sys/fs/cgroup
+        - Name: host_hostname
+          Host:
+            SourcePath: /etc/hostname
+        - Name: docker_sock
+          Host:
+            SourcePath: /var/run/docker.sock
+      Cpu: '1000'
+      Memory: '1024'
+  ECSDaemonService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      TaskDefinition: !Ref ECSTaskDefinition
+      Cluster: !Ref ClusterName
+      LaunchType: EXTERNAL
+      SchedulingStrategy: DAEMON
+      ServiceName: otel-daemon-service
+  ECSTaskRole:
+    Type: 'AWS::IAM::Role'
+    Condition: CreateRoles
+    Properties:
+      Description: Allows ECS tasks to call AWS services on your behalf.
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
+      RoleName: OtelECSTaskRole
+  ECSExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Condition: CreateRoles
+    Properties:
+      Description: >-
+        Allows ECS container agent makes calls to the Amazon ECS API on your
+        behalf.
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy'
+        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+        - 'arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess'
+      RoleName: OtelECSExecutionRole
+```
+</TabItem>
+</Tabs>
+### Step 2: Create OpenTelemetry Collector Configuration
+
+The OpenTelemetry Collector configuration defines what data to collect and where to send it.
+
+#### 2a. OtelCollector Configuration Template
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+1. Copy the following Collector template to `otelcol-daemon.yaml` file
+2. Replace `SIGNOZ_INGESTION_KEY` with your [SigNoz Cloud ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+3. Replace `{region}` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+
+```yaml
+extensions:
+  health_check:
+
+receivers:
+  awscontainerinsightreceiver:
+    collection_interval: 30s
+    container_orchestrator: ecs
+  hostmetrics:
+    root_path: /rootfs
+    collection_interval: 30s
+    scrapers:
+      cpu: {}
+      load: {}
+      memory: {}
+      disk: {}
+      filesystem: {}
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  tcplog:
+    listen_address: "0.0.0.0:2255"
+    operators:
+      - type: regex_parser
+        regex: '^<([0-9]+)>[0-9]+ (?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?Z) (?P<instance_name>\S+) ecs-(?P<task_family>\S+)-(?P<task_revision>[0-9]+)-(?P<container_name>\S+)-(?P<container_id_unique>[0-9a-f]+) [0-9]+ - -( (?P<body>.*))?'
+        timestamp:
+          parse_from: attributes.timestamp
+          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+      - type: move
+        from: attributes["body"]
+        to: body
+      - type: remove
+        field: attributes.timestamp
+        # please remove names from below if you want to collect logs from them
+      - type: filter
+        id: signoz_logs_filter
+        expr: 'attributes.container_name matches "^signoz-(collector|logspout)"'
+
+processors:
+  batch:
+    timeout: 10s
+  batch/aws:
+    timeout: 60s
+  resource/aws:
+    attributes:
+      - key: Timestamp
+        action: delete
+  resourcedetection:
+    detectors:
+      - env
+      - ec2
+      - ecs
+      - system
+    timeout: 2s
+    override: false
+
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-access-token: "<SIGNOZ_INGESTION_KEY>"
+  logging:
+    verbosity: normal
+
+service:
+  pipelines:
+    metrics/aws:
+      receivers: [awscontainerinsightreceiver]
+      processors: [resource/aws, batch/aws]
+      exporters: [otlp]
+    metrics/host:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+    logs/tcplog:
+      receivers: [tcplog]
+      processors: [batch]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp, logging]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp, logging]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp, logging]
+  extensions: [health_check]
+```
+</TabItem>
+
+<TabItem value="self-host" label="Self Host" default>
+1. Copy the following Collector Template to `otelcol-daemon.yaml` file  
+2. Replace the endpoint URLs with your SigNoz instance endpoints
+3. Update any authentication settings as needed
+
+```yaml
+extensions:
+  health_check:
+
+receivers:
+  awscontainerinsightreceiver:
+    collection_interval: 30s
+    container_orchestrator: ecs
+  hostmetrics:
+    root_path: /rootfs
+    collection_interval: 30s
+    scrapers:
+      cpu: {}
+      load: {}
+      memory: {}
+      disk: {}
+      filesystem: {}
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  tcplog:
+    listen_address: "0.0.0.0:2255"
+    operators:
+      - type: regex_parser
+        regex: '^<([0-9]+)>[0-9]+ (?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?Z) (?P<instance_name>\S+) ecs-(?P<task_family>\S+)-(?P<task_revision>[0-9]+)-(?P<container_name>\S+)-(?P<container_id_unique>[0-9a-f]+) [0-9]+ - -( (?P<body>.*))?'
+        timestamp:
+          parse_from: attributes.timestamp
+          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+      - type: move
+        from: attributes["body"]
+        to: body
+      - type: remove
+        field: attributes.timestamp
+        # please remove names from below if you want to collect logs from them
+      - type: filter
+        id: signoz_logs_filter
+        expr: 'attributes.container_name matches "^signoz-(collector|logspout)"'
+
+processors:
+  batch:
+    timeout: 10s
+  batch/aws:
+    timeout: 60s
+  resource/aws:
+    attributes:
+      - key: Timestamp
+        action: delete
+  resourcedetection:
+    detectors:
+      - env
+      - ec2
+      - ecs
+      - system
+    timeout: 2s
+    override: false
+
+exporters:
+  otlp:
+    endpoint: "<SIGNOZ_SELF_HOST_ENDPOINT>"
+    tls:
+      insecure: false
+  logging:
+    verbosity: normal
+
+service:
+  pipelines:
+    metrics/aws:
+      receivers: [awscontainerinsightreceiver]
+      processors: [resource/aws, batch/aws]
+      exporters: [otlp]
+    metrics/host:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+    logs/tcplog:
+      receivers: [tcplog]
+      processors: [batch]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp, logging]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp, logging]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp, logging]
+  extensions: [health_check]
+```
+</TabItem>
+</Tabs>
+#### 2b. Store Configuration in AWS Parameter Store
+
+1. Navigate to **AWS Systems Manager > Parameter Store** in the AWS Console
+2. Click **Create parameter**
+3. Set parameter name: `/ecs/signoz/otelcol-daemon.yaml`
+4. Choose type: **String**
+5. Copy the entire contents of your updated `otelcol-daemon.yaml` file
+6. Paste the content into the **Value** field
+7. Click **Create parameter**
+
+### Step 3: Set Environment Variables
+
+Configure the necessary environment variables for the CloudFormation deployment:
+
+```bash
+export CLUSTER_NAME=<YOUR-ECS-CLUSTER-NAME>
+export REGION=<YOUR-ECS-REGION>  
+export COMMAND=--config=env:SIGNOZ_CONFIG_CONTENT
+export SIGNOZ_CONFIG_PATH=/ecs/signoz/otelcol-daemon.yaml
+```
+
+**Replace the placeholders:**
+- `<YOUR-ECS-CLUSTER-NAME>`: Name of your ECS cluster (e.g., `my-production-cluster`)
+- `<YOUR-ECS-REGION>`: AWS region where your cluster runs (e.g., `us-east-1`)
+
+### Step 4: Deploy the Daemon Service
+
+Create the CloudFormation stack that will deploy your daemon service:
+
+```bash
+aws cloudformation create-stack \
+    --stack-name AOCECS-daemon-${CLUSTER_NAME}-${REGION} \
+    --template-body file://daemon-template.yaml \
+    --parameters ParameterKey=ClusterName,ParameterValue=${CLUSTER_NAME} \
+                 ParameterKey=CreateIAMRoles,ParameterValue=True \
+                 ParameterKey=command,ParameterValue=${COMMAND} \
+                 ParameterKey=SigNozConfigPath,ParameterValue=${SIGNOZ_CONFIG_PATH} \
+    --capabilities CAPABILITY_NAMED_IAM \
+    --region ${REGION}
+```
+
+### Step 5: Verify Installation
+
+Check that the daemon service deployed successfully:
+
+```bash
+# Check CloudFormation stack status
+aws cloudformation describe-stacks \
+    --stack-name AOCECS-daemon-${CLUSTER_NAME}-${REGION} \
+    --region ${REGION} \
+    --query 'Stacks[0].StackStatus'
+
+# List running tasks to see the daemon service
+aws ecs list-tasks \
+    --cluster ${CLUSTER_NAME} \
+    --region ${REGION}
+```
+
+**Expected outputs:**
+- Stack status should be `CREATE_COMPLETE`
+- You should see task ARNs for the daemon service containers
+
+### Step 6: Check Service Health
+
+Verify the daemon service containers are running properly:
+
+```bash
+# Get detailed information about running tasks
+aws ecs describe-tasks \
+    --cluster ${CLUSTER_NAME} \
+    --tasks $(aws ecs list-tasks --cluster ${CLUSTER_NAME} --query 'taskArns[0]' --output text) \
+    --region ${REGION}
+```
+
+Look for:
+- **Task Status**: Should be `RUNNING`
+- **Health Status**: Should be `HEALTHY` 
+- **Container Status**: All containers should be `RUNNING`
+
+## Troubleshooting Installation
+
+### Common Issues
+
+**Stack Creation Failed:**
+- Check IAM permissions for CloudFormation, ECS, and Parameter Store
+- Verify the cluster name and region are correct
+- Ensure the Parameter Store parameter exists and has correct content
+
+**Tasks Not Starting:**
+- Check ECS cluster has available capacity
+- Verify the container image can be pulled
+- Review CloudWatch logs for the failed tasks
+
+**Parameter Store Access Issues:**
+- Ensure the IAM role has `ssm:GetParameter` permissions
+- Verify the parameter name matches exactly: `/ecs/signoz/otelcol-daemon.yaml`
+- Check the parameter is in the same region as your ECS cluster
+
+### Checking Logs
+
+View logs from the daemon service containers:
+
+```bash
+# Get log group name (usually includes the cluster name)
+aws logs describe-log-groups --log-group-name-prefix="/ecs"
+
+# View recent logs
+aws logs describe-log-streams \
+    --log-group-name "/ecs/signoz-daemon" \
+    --order-by LastEventTime \
+    --descending
+```
+
+## Next Steps
+
+Once installation is complete:
+
+1. **[Configure the service](./configure.md)** to customize data collection
+2. **Verify data flow** to your SigNoz instance  
+3. **Set up dashboards** to visualize your ECS infrastructure metrics
+
+## Clean Up (If Needed)
+
+To remove the daemon service installation:
+
+```bash
+aws cloudformation delete-stack \
+    --stack-name AOCECS-daemon-${CLUSTER_NAME}-${REGION} \
+    --region ${REGION}
+```
+
+This will remove all resources created by the CloudFormation template, including the ECS service, task definition, and IAM roles.
