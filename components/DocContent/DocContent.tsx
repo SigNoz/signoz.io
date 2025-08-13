@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Edit } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import PageFeedback from '../PageFeedback/PageFeedback'
@@ -40,15 +41,14 @@ const DocContent: React.FC<{
             <p className="text-gray-500 dark:text-gray-400">Last updated: {formattedDate}</p>
           )}
           {editLink && (
-            <a
+            <Button
               href={editLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 hover:shadow-sm transition-all duration-200 no-underline"
+              variant='outline'
+              className="gap-2 no-underline"
             >
               <Edit size={16} />
               Edit on GitHub
-            </a>
+            </Button>
           )}
         </div>
         <PageFeedback />
