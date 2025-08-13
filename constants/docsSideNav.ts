@@ -1608,11 +1608,6 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/overview',
-        label: 'Overview',
-      },
-      {
-        type: 'doc',
         route: '/docs/frontend-monitoring/sending-logs',
         label: 'Sending Logs',
       },
