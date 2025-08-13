@@ -68,7 +68,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'AWS ElastiCache Redis',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/aws-elasticache/redis',
+    href: '/docs/dashboards/dashboard-templates/aws-elasticache-redis',
     icon: <Cloud className="h-7 w-7 text-orange-600" />,
     clickName: 'AWS ElastiCache Redis Dashboard Template',
   },
