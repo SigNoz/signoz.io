@@ -1,318 +1,232 @@
 ---
 date: 2024-12-07
-title: Send logs from Node.js Pino without requiring Otel collectors to SigNoz Cloud and Self-hosted
+title: Auto-instrumenting Node.js Applications with Pino Logger
 id: nodejs-pino-logs
+description: Automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library
 ---
 
-## Overview
+This guide shows you how to automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library. This setup provides automatic correlation between your application traces and logs in SigNoz, giving you **automatic trace generation** for HTTP requests, Express routes, and other common libraries, **structured logs** with trace correlation automatically injected, **unified observability** with traces and logs correlated in SigNoz, and **production-ready configuration** with batch processing for optimal performance.
 
-This document explains how to configure Pino to stream Node.js application logs directly to your SigNoz dashboard.
+## Prerequisites
+
+- Existing Node.js application using [Pino](https://getpino.io/) for logging
+
+## Step 1: Install Required Packages
+
+Install the OpenTelemetry packages needed for auto-instrumentation:
+
+```bash
+npm i @opentelemetry/sdk-node \
+      @opentelemetry/auto-instrumentations-node \
+      @opentelemetry/instrumentation-pino \
+      @opentelemetry/exporter-trace-otlp-http \
+      @opentelemetry/exporter-logs-otlp-http
+```
+
+### Package Breakdown
+
+- **`@opentelemetry/sdk-node`** - Core OpenTelemetry SDK for Node.js runtime
+- **`@opentelemetry/auto-instrumentations-node`** - Automatic instrumentation for popular libraries (HTTP, Express, etc.)
+- **`@opentelemetry/instrumentation-pino`** - Specific instrumentation for Pino logging library
+- **`@opentelemetry/exporter-trace-otlp-http`** - OTLP HTTP exporter for traces
+- **`@opentelemetry/exporter-logs-otlp-http`** - OTLP HTTP exporter for logs
+
+## Step 2: Create OpenTelemetry Configuration
+
+Create an OpenTelemetry configuration file at your project root:
+
+<details>
+<summary><strong>JavaScript (otel.js)</strong></summary>
+
+```javascript
+// otel.js
+'use strict';
+const { NodeSDK, tracing, logs } = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { PinoInstrumentation } = require('@opentelemetry/instrumentation-pino');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
+
+// Use batch processors for production-friendly behavior
+const spanProcessor = new tracing.BatchSpanProcessor(new OTLPTraceExporter());
+const logRecordProcessor = new logs.BatchLogRecordProcessor(new OTLPLogExporter());
+
+// Build and start the SDK before your app loads Pino
+const sdk = new NodeSDK({
+  spanProcessor,
+  logRecordProcessor,
+  instrumentations: [
+    getNodeAutoInstrumentations(), // Creates spans for HTTP, Express, and more
+    new PinoInstrumentation({
+      // Optional: customize injected keys
+      // logKeys: { traceId: 'trace_id', spanId: 'span_id', traceFlags: 'trace_flags' }
+    }),
+  ],
+});
+
+sdk.start();
+
+// Optional graceful shutdown
+process.on('SIGTERM', () => {
+  sdk.shutdown().finally(() => process.exit(0));
+});
+```
+</details>
+
+<details>
+<summary><strong>TypeScript (otel.ts)</strong></summary>
+
+```typescript
+// otel.ts
+import { NodeSDK, tracing, logs } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+
+// Use batch processors for production-friendly behavior
+const spanProcessor = new tracing.BatchSpanProcessor(new OTLPTraceExporter());
+const logRecordProcessor = new logs.BatchLogRecordProcessor(new OTLPLogExporter());
+
+// Build and start the SDK before your app loads Pino
+const sdk = new NodeSDK({
+  spanProcessor,
+  logRecordProcessor,
+  instrumentations: [
+    getNodeAutoInstrumentations(), // Creates spans for HTTP, Express, and more
+    new PinoInstrumentation({
+      // Optional: customize injected keys
+      // logKeys: { traceId: 'trace_id', spanId: 'span_id', traceFlags: 'trace_flags' }
+    }),
+  ],
+});
+
+sdk.start();
+
+// Optional graceful shutdown
+process.on('SIGTERM', () => {
+  sdk.shutdown().finally(() => process.exit(0));
+});
+```
+</details>
+
+### Configuration Notes
+
+- **Batch processors** are used for production efficiency, batching spans and logs before export
+- **Auto-instrumentations** automatically create spans for HTTP requests, Express routes, and other common libraries
+- **Pino instrumentation** injects trace context into your logs and forwards log records to the OpenTelemetry Logs SDK
+- The SDK must be started **before** your application imports Pino
+
+## Step 3: Run with Preload
+
+Use the `-r` flag to preload the OpenTelemetry configuration before your application starts:
+
+**For JavaScript:**
+```bash
+node -r ./otel.js app.js
+```
+
+**For TypeScript:**
+```bash
+node -r ./otel.ts app.ts
+```
+
+The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Pino.
+
+## Configuration
+
+### Environment Variables
+
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-### Step 1. Install the necessary packages:
+Set the following environment variables for SigNoz Cloud:
 
 ```bash
-npm i pino-opentelemetry-transport
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=YOUR_INGESTION_KEY"
 ```
 
-### Step 2. Configure Pino Logger
-Create a logger configuration file (e.g., logger.js) in the root or a suitable directory (such as utils or config) of your application. This file will define a reusable logger setup for logging important information, errors, and debug details across your application. You can then import this file wherever logging is needed to maintain consistency and reduce redundancy.
-<Tabs>
-<TabItem value="js" label="JavaScript">
-```jsx
-const pino = require('pino');
+Replace `{region}` with your SigNoz Cloud region:
+- **US**: `ingest.us.signoz.cloud`
+- **India**: `ingest.in.signoz.cloud`  
+- **Europe**: `ingest.eu.signoz.cloud`
 
-const transport = pino.transport({
-  target: 'pino-opentelemetry-transport'
-});
-
-const logger = pino(transport);
-
-logger.info('Hello, World! from pino');
-```
 </TabItem>
-<TabItem value="ts" label="TypeScript">
-```ts
-import pino from 'pino';
+<TabItem value="self-host" label="Self-Host">
 
-const transport = pino.transport({
-  target: 'pino-opentelemetry-transport'
-});
+Point to your OpenTelemetry collector's OTLP HTTP receiver:
 
-const logger = pino(transport);
-
-logger.info('Hello, World! from pino');
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://<collector-host>:4318/v1/traces"
+export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="http://<collector-host>:4318/v1/logs"
 ```
+
 </TabItem>
 </Tabs>
 
-### Step 2. Run Your Application
+### Running Your Application
 
-Execute your application with OpenTelemetry Environment variables:
+Start your application with OpenTelemetry instrumentation:
 
-```Bash
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/logs OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>,service.version=1.2.3" node app.js
-```
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
-## Usage Examples
-The below examples show how to log messages with different severity levels and include structured metadata that can be used for filtering and analysis in SigNoz.
-
-### Basic Logging
-
-```jsx
-logger.info('Hello, World! from pino');
-```
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/info-logs.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Severity Level: INFO
-</i>
-</figcaption>
-</figure>
-```jsx
-logger.warn('High memory usage detected');
-```
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/warn-logs.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Severity Level: WARN
-</i>
-</figcaption>
-</figure>
-```jsx
-logger.error('Failed to process request');
-```
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/error-logs.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Severity Level: ERROR
-</i>
-</figcaption>
-</figure>
-```jsx
-logger.error({
-    msg: 'Error occurred',
-    error: error.message,
-    stack: error.stack
-});
-```
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/error-log-details.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Severity Level: ERROR
-</i>
-</figcaption>
-</figure>
-
-## Output
-
-After successful implementation, your logs will appear in your SigNoz Logs section where you can:
-
-- Monitor logs in [real-time](https://signoz.io/docs/product-features/logs-explorer/#live-view)
-- [Filter logs](https://signoz.io/docs/userguide/logs_query_builder/) by level and custom attributes
-- Search through log contents
-- Create [alerts based on log](https://signoz.io/docs/alerts-management/log-based-alerts/) patterns
-- Visualize log trends and patterns
-
-
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/nodejs-pino-logs.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Node.js Pino Logs in SigNoz
-</i>
-</figcaption>
-</figure>
-
-
-## Troubleshooting
-If logs are not appearing in SigNoz:
-
-1. Verify your Ingestion Keys and endpoint URL
-2. Ensure the transport is properly configured
-3. Review SigNoz Logs Section filters
-4. Check Pino log level settings
-
-## Additional Resources
-
-- [Pino OpenTelemetry Transport](https://github.com/pinojs/pino-opentelemetry-transport)
-
-</TabItem>
-<TabItem value='self-host' label="Self-Host">
-
-
-
-
-### Step 1. Install the necessary packages:
-
+**For JavaScript:**
 ```bash
-npm i pino-opentelemetry-transport
+node -r ./otel.js app.js
 ```
 
-### Step 2. Configure Pino Logger
-Add the following code to your application:
-<Tabs>
-<TabItem value="js" label="JavaScript">
-```jsx
-const pino = require('pino');
-
-const transport = pino.transport({
-  target: 'pino-opentelemetry-transport'
-});
-
-const logger = pino(transport);
-
-logger.info('Hello, World! from pino');
-```
-</TabItem>
-<TabItem value="ts" label="TypeScript">
-```ts
-import pino from 'pino';
-
-const transport = pino.transport({
-  target: 'pino-opentelemetry-transport'
-});
-
-const logger = pino(transport);
-
-logger.info('Hello, World! from pino');
-```
-</TabItem>
-</Tabs>
-
-### Step 2. Run Your Application
-
-Execute your application with OpenTelemetry Environment variables:
-
-```Bash
-OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4317/v1/logs OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>,service.version=1.2.3" node app.js
-```
-- Replace `<service_name>` with name of your service
-## Usage Examples
-The below examples show how to log messages with different severity levels and include structured metadata that can be used for filtering and analysis in SigNoz.
-
-### Basic Logging
-
-```jsx
-logger.info('Hello, World! from pino');
-```
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/info-logs.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Severity Level: INFO
-</i>
-</figcaption>
-</figure>
-```jsx
-logger.warn('High memory usage detected');
+**For TypeScript:**
+```bash
+node -r ./otel.ts app.ts
 ```
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/warn-logs.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Severity Level: WARN
-</i>
-</figcaption>
-</figure>
+## Verification
 
+After starting your application:
 
-```jsx
-logger.error('Failed to process request');
-```
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/error-logs.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Severity Level: ERROR
-</i>
-</figcaption>
-</figure>
+1. **Make some requests** to your application endpoints
+2. **Check SigNoz** for incoming traces and logs
+3. **Verify correlation** - your logs should contain trace IDs and be correlated with spans
 
-```jsx
-logger.error({
-    msg: 'Error occurred',
-    error: error.message,
-    stack: error.stack
-});
-```
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/error-log-details.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Severity Level: ERROR
-</i>
-</figcaption>
-</figure>
-## Output
+### What to Look For
 
-After successful implementation, your logs will appear in your SigNoz Logs Section where you can:
-
-- Monitor logs in [real-time](https://signoz.io/docs/product-features/logs-explorer/#live-view)
-- [Filter logs](https://signoz.io/docs/userguide/logs_query_builder/) by level and custom attributes
-- [Search](https://signoz.io/docs/product-features/logs-explorer/#search) through log contents
--  Create [alerts based on log](https://signoz.io/docs/alerts-management/log-based-alerts/) patterns
-- Visualize log trends and patterns
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/logs-management/send-logs/nodejs-pino-logs-self-hosted.webp"
-        alt="Node.js Pino Logs"
-    />
-<figcaption>
-<i>
-Node.js Pino Logs in SigNoz
-</i>
-</figcaption>
-</figure>
+- **Traces** appearing in the SigNoz Traces tab
+- **Logs** appearing in the SigNoz Logs tab
+- **Trace correlation** - logs should contain `traceId` and `spanId` fields
+- **Service mapping** showing your service in the dependency graph
 
 ## Troubleshooting
 
-If logs are not appearing in SigNoz:
+### Common Issues
 
-1. Verify endpoint URL
-2. Ensure the transport is properly configured
-3. Review SigNoz Logs Section filters
-4. Check Pino log level settings
+**No traces appearing:**
+- Ensure the preload script (`-r ./otel.js`) is used
+- Check that environment variables are set correctly
+- Verify network connectivity to SigNoz
 
-## Additional Resources
+**No logs appearing:**
+- Confirm Pino is being used for logging in your application
+- Check that the Pino instrumentation is properly configured
+- Verify the OTLP logs endpoint is correct
 
-- [Pino OpenTelemetry Transport](https://github.com/pinojs/pino-opentelemetry-transport)
-</TabItem>
-</Tabs>
+**Missing trace correlation:**
+- Ensure OpenTelemetry is loaded before Pino is imported
+- Check that the Pino instrumentation is enabled
+- Verify spans are being created (check traces first)
+
+### Debug Mode
+
+Enable debug logging to troubleshoot issues:
+
+**For JavaScript:**
+```bash
+export OTEL_LOG_LEVEL=debug
+node -r ./otel.js app.js
+```
+
+**For TypeScript:**
+```bash
+export OTEL_LOG_LEVEL=debug
+node -r ./otel.ts app.ts
+```
