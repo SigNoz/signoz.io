@@ -15,7 +15,8 @@ const DocContent: React.FC<{
   post: any
   toc: any
   hideTableOfContents: boolean
-}> = ({ title, post, toc, hideTableOfContents }) => {
+  editLink?: string
+}> = ({ title, post, toc, hideTableOfContents, editLink }) => {
   const searchParams = useSearchParams()
   const lastUpdatedDate = post?.lastmod || post?.date
   const formattedDate =
@@ -36,6 +37,19 @@ const DocContent: React.FC<{
         {formattedDate && (
           <p className="mt-8 text-sm text-gray-500">
             Last updated: {formattedDate}
+            {editLink && (
+              <>
+                {' '}
+                <a
+                  href={editLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                >
+                  (Edit this page)
+                </a>
+              </>
+            )}
           </p>
         )}
         <PageFeedback />
