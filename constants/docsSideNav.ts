@@ -2178,7 +2178,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/metrics-management/query-range-api',
-        label: 'Query Range API',
+        label: 'Metrics Query API',
       },
     ],
   },
