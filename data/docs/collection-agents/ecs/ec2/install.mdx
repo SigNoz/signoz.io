@@ -87,8 +87,8 @@ Resources:
       NetworkMode: host
       ContainerDefinitions:
         - Name: signoz-collector
-          Image: 'signoz/signoz-otel-collector:0.88.8'
-          User: root
+          Image: 'otel/opentelemetry-collector-contrib:0.109.0'
+          User: 0
           MountPoints:
             - ReadOnly: true
               ContainerPath: /rootfs/proc
@@ -108,6 +108,15 @@ Resources:
             - ReadOnly: true
               ContainerPath: /rootfs/cgroup
               SourceVolume: al1_cgroup
+            - ReadOnly: true
+              ContainerPath: /rootfs/boot/efi
+              SourceVolume: boot
+            - ReadOnly: true
+              ContainerPath: /var/lib/docker/containers/
+              SourceVolume: docker-logs
+            - ReadOnly: true
+              ContainerPath: /var/run/docker.sock
+              SourceVolume: docker-sock
           PortMappings:
             - ContainerPort: 2255
               HostPort: 2255
@@ -118,7 +127,7 @@ Resources:
             - ContainerPort: 4318
               HostPort: 4318
               Protocol: tcp
-          Command: [ !Ref command ]
+          Command: !Split [ " ", !Ref command ]
           Secrets:
             - Name: SIGNOZ_CONFIG_CONTENT
               ValueFrom: !Ref SigNozConfigPath
@@ -136,23 +145,6 @@ Resources:
               awslogs-group: /ecs/daemon-signoz-collector
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
-        - Image: gliderlabs/logspout:v3.2.14
-          Name: signoz-logspout
-          MountPoints:
-            - ReadOnly: true
-              ContainerPath: /etc/host_hostname
-              SourceVolume: host_hostname
-            - ContainerPath: /var/run/docker.sock
-              SourceVolume: docker_sock
-          Command:
-            - 'syslog+tcp://localhost:2255'
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-create-group: 'True'
-              awslogs-group: /ecs/daemon-signoz-logspout
-              awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: ecs
       RequiresCompatibilities:
         - EC2
       Volumes:
@@ -168,10 +160,13 @@ Resources:
         - Name: al2_cgroup
           Host:
             SourcePath: /sys/fs/cgroup
-        - Name: host_hostname
+        - Name: boot
           Host:
-            SourcePath: /etc/hostname
-        - Name: docker_sock
+            SourcePath: /boot/efi
+        - Name: docker-logs
+          Host:
+            SourcePath: /var/lib/docker/containers/
+        - Name: docker-sock
           Host:
             SourcePath: /var/run/docker.sock
       Cpu: '1000'
@@ -291,8 +286,8 @@ Resources:
       NetworkMode: host
       ContainerDefinitions:
         - Name: signoz-collector
-          Image: 'signoz/signoz-otel-collector:0.88.8'
-          User: root
+          Image: 'otel/opentelemetry-collector-contrib:0.109.0'
+          User: 0
           MountPoints:
             - ReadOnly: true
               ContainerPath: /rootfs/proc
@@ -312,6 +307,15 @@ Resources:
             - ReadOnly: true
               ContainerPath: /rootfs/cgroup
               SourceVolume: al1_cgroup
+            - ReadOnly: true
+              ContainerPath: /rootfs/boot/efi
+              SourceVolume: boot
+            - ReadOnly: true
+              ContainerPath: /var/lib/docker/containers/
+              SourceVolume: docker-logs
+            - ReadOnly: true
+              ContainerPath: /var/run/docker.sock
+              SourceVolume: docker-sock
           PortMappings:
             - ContainerPort: 2255
               HostPort: 2255
@@ -322,7 +326,7 @@ Resources:
             - ContainerPort: 4318
               HostPort: 4318
               Protocol: tcp
-          Command: [ !Ref command ]
+          Command: !Split [ " ", !Ref command ] # <-- This line is updated for correctness
           Secrets:
             - Name: SIGNOZ_CONFIG_CONTENT
               ValueFrom: !Ref SigNozConfigPath
@@ -340,25 +344,8 @@ Resources:
               awslogs-group: /ecs/daemon-signoz-collector
               awslogs-region: !Ref 'AWS::Region'
               awslogs-stream-prefix: ecs
-        - Image: gliderlabs/logspout:v3.2.14
-          Name: signoz-logspout
-          MountPoints:
-            - ReadOnly: true
-              ContainerPath: /etc/host_hostname
-              SourceVolume: host_hostname
-            - ContainerPath: /var/run/docker.sock
-              SourceVolume: docker_sock
-          Command:
-            - 'syslog+tcp://localhost:2255'
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-create-group: 'True'
-              awslogs-group: /ecs/daemon-signoz-logspout
-              awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: ecs
       RequiresCompatibilities:
-        - EXTERNAL
+        - EC2
       Volumes:
         - Name: proc
           Host:
@@ -372,10 +359,13 @@ Resources:
         - Name: al2_cgroup
           Host:
             SourcePath: /sys/fs/cgroup
-        - Name: host_hostname
+        - Name: boot
           Host:
-            SourcePath: /etc/hostname
-        - Name: docker_sock
+            SourcePath: /boot/efi
+        - Name: docker-logs
+          Host:
+            SourcePath: /var/lib/docker/containers/
+        - Name: docker-sock
           Host:
             SourcePath: /var/run/docker.sock
       Cpu: '1000'
@@ -442,63 +432,65 @@ The OpenTelemetry Collector configuration defines what data to collect and where
 ```yaml
 extensions:
   health_check:
+    endpoint: 0.0.0.0:13133
 
 receivers:
-  awscontainerinsightreceiver:
-    collection_interval: 30s
-    container_orchestrator: ecs
-  hostmetrics:
-    root_path: /rootfs
-    collection_interval: 30s
-    scrapers:
-      cpu: {}
-      load: {}
-      memory: {}
-      disk: {}
-      filesystem: {}
+  # Standard OTLP receiver for traces, metrics, and logs from instrumented applications
   otlp:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-  tcplog:
-    listen_address: "0.0.0.0:2255"
-    operators:
-      - type: regex_parser
-        regex: '^<([0-9]+)>[0-9]+ (?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?Z) (?P<instance_name>\S+) ecs-(?P<task_family>\S+)-(?P<task_revision>[0-9]+)-(?P<container_name>\S+)-(?P<container_id_unique>[0-9a-f]+) [0-9]+ - -( (?P<body>.*))?'
-        timestamp:
-          parse_from: attributes.timestamp
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-      - type: move
-        from: attributes["body"]
-        to: body
-      - type: remove
-        field: attributes.timestamp
-        # please remove names from below if you want to collect logs from them
-      - type: filter
-        id: signoz_logs_filter
-        expr: 'attributes.container_name matches "^signoz-(collector|logspout)"'
 
+  # Collects detailed ECS container metrics from the ECS Task Metadata Endpoint.
+  awsecscontainermetrics:
+    collection_interval: 20s
+
+  # Collects host-level metrics from the underlying EC2 instance.
+  hostmetrics:
+    collection_interval: 30s
+    root_path: /rootfs
+    scrapers:
+      cpu:
+      disk:
+      load:
+      memory:
+      network:
+      filesystem:
+        metrics:
+          system.filesystem.usage:
+            enabled: true
+        exclude_mount_points:
+          match_type: regexp
+          mount_points:
+            - /rootfs/boot/*
+
+  # Auto-discovers and tails container logs directly from the Docker json-log files on the host.
+  filelog:
+    include: [/var/lib/docker/containers/*/*-json.log]
+    start_at: end
+    include_file_name: false
+    include_file_path: true
+    operators:
+    - id: container-parser
+      type: container
+      
 processors:
-  batch:
-    timeout: 10s
-  batch/aws:
-    timeout: 60s
-  resource/aws:
-    attributes:
-      - key: Timestamp
-        action: delete
+  # Detects resource attributes from the environment (EC2, ECS, etc.)
+  # This is the replacement for the k8sattributes processor.
   resourcedetection:
-    detectors:
-      - env
-      - ec2
-      - ecs
-      - system
-    timeout: 2s
+    detectors: [env, ecs, ec2]
     override: false
 
+  # Batches telemetry to optimize network traffic.
+  batch:
+    timeout: 10s
+    send_batch_size: 1000
+
 exporters:
+  # Exports telemetry to your backend (e.g., SigNoz)
+  # Uses environment variables for portability, which you'll set in your ECS task definition.
   otlp:
     endpoint: "ingest.{region}.signoz.cloud:443"
     tls:
@@ -506,35 +498,25 @@ exporters:
     headers:
       signoz-access-token: "<SIGNOZ_INGESTION_KEY>"
   logging:
-    verbosity: normal
+    verbosity: basic
 
 service:
+  extensions: [health_check]
   pipelines:
-    metrics/aws:
-      receivers: [awscontainerinsightreceiver]
-      processors: [resource/aws, batch/aws]
-      exporters: [otlp]
-    metrics/host:
-      receivers: [hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    logs/tcplog:
-      receivers: [tcplog]
-      processors: [batch]
-      exporters: [otlp]
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp, logging]
+      exporters: [otlp]
+
     metrics:
-      receivers: [otlp]
-      processors: [batch]
+      receivers: [otlp, hostmetrics, awsecscontainermetrics]
+      processors: [resourcedetection, batch]
       exporters: [otlp, logging]
+
     logs:
-      receivers: [otlp]
-      processors: [batch]
+      receivers: [otlp, filelog]
+      processors: [resourcedetection, batch]
       exporters: [otlp, logging]
-  extensions: [health_check]
 ```
 </TabItem>
 
@@ -546,97 +528,92 @@ service:
 ```yaml
 extensions:
   health_check:
+    endpoint: 0.0.0.0:13133
 
 receivers:
-  awscontainerinsightreceiver:
-    collection_interval: 30s
-    container_orchestrator: ecs
-  hostmetrics:
-    root_path: /rootfs
-    collection_interval: 30s
-    scrapers:
-      cpu: {}
-      load: {}
-      memory: {}
-      disk: {}
-      filesystem: {}
+  # Standard OTLP receiver for traces, metrics, and logs from instrumented applications
   otlp:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-  tcplog:
-    listen_address: "0.0.0.0:2255"
-    operators:
-      - type: regex_parser
-        regex: '^<([0-9]+)>[0-9]+ (?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?Z) (?P<instance_name>\S+) ecs-(?P<task_family>\S+)-(?P<task_revision>[0-9]+)-(?P<container_name>\S+)-(?P<container_id_unique>[0-9a-f]+) [0-9]+ - -( (?P<body>.*))?'
-        timestamp:
-          parse_from: attributes.timestamp
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-      - type: move
-        from: attributes["body"]
-        to: body
-      - type: remove
-        field: attributes.timestamp
-        # please remove names from below if you want to collect logs from them
-      - type: filter
-        id: signoz_logs_filter
-        expr: 'attributes.container_name matches "^signoz-(collector|logspout)"'
 
+  # Collects detailed ECS container metrics from the ECS Task Metadata Endpoint.
+  awsecscontainermetrics:
+    collection_interval: 20s
+
+  # Collects host-level metrics from the underlying EC2 instance.
+  hostmetrics:
+    collection_interval: 30s
+    root_path: /rootfs
+    scrapers:
+      cpu:
+      disk:
+      load:
+      memory:
+      network:
+      filesystem:
+        metrics:
+          system.filesystem.usage:
+            enabled: true
+        exclude_mount_points:
+          match_type: regexp
+          mount_points:
+            - /rootfs/boot/*
+
+  # Auto-discovers and tails container logs directly from the Docker json-log files on the host.
+  filelog:
+    include: [/var/lib/docker/containers/*/*-json.log]
+    start_at: end
+    include_file_name: false
+    include_file_path: true
+    operators:
+    - id: container-parser
+      type: container
+      
 processors:
-  batch:
-    timeout: 10s
-  batch/aws:
-    timeout: 60s
-  resource/aws:
-    attributes:
-      - key: Timestamp
-        action: delete
+  # Detects resource attributes from the environment (EC2, ECS, etc.)
+  # This is the replacement for the k8sattributes processor.
   resourcedetection:
-    detectors:
-      - env
-      - ec2
-      - ecs
-      - system
-    timeout: 2s
+    detectors: [env, ecs, ec2]
     override: false
 
+  # Batches telemetry to optimize network traffic.
+  batch:
+    timeout: 10s
+    send_batch_size: 1000
+
 exporters:
+  # Exports telemetry to your backend (e.g., SigNoz)
+  # Uses environment variables for portability, which you'll set in your ECS task definition.
   otlp:
     endpoint: "<SIGNOZ_SELF_HOST_ENDPOINT>"
     tls:
-      insecure: false
+      insecure: true # Set to false in production if your endpoint has a valid TLS certificate
+
+  # Useful for debugging; prints telemetry to the collector's logs.
+  # Can be disabled by removing it from the pipelines below.
   logging:
-    verbosity: normal
+    verbosity: basic
 
 service:
+  extensions: [health_check]
   pipelines:
-    metrics/aws:
-      receivers: [awscontainerinsightreceiver]
-      processors: [resource/aws, batch/aws]
-      exporters: [otlp]
-    metrics/host:
-      receivers: [hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    logs/tcplog:
-      receivers: [tcplog]
-      processors: [batch]
-      exporters: [otlp]
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp, logging]
+      exporters: [otlp]
+
     metrics:
-      receivers: [otlp]
-      processors: [batch]
+      receivers: [otlp, hostmetrics, awsecscontainermetrics]
+      processors: [resourcedetection, batch]
       exporters: [otlp, logging]
+
     logs:
-      receivers: [otlp]
-      processors: [batch]
+      receivers: [otlp, filelog]
+      processors: [resourcedetection, batch]
       exporters: [otlp, logging]
-  extensions: [health_check]
 ```
 </TabItem>
 </Tabs>
@@ -753,14 +730,6 @@ aws logs describe-log-streams \
     --descending
 ```
 
-## Next Steps
-
-Once installation is complete:
-
-1. **[Configure the service](./configure.md)** to customize data collection
-2. **Verify data flow** to your SigNoz instance  
-3. **Set up dashboards** to visualize your ECS infrastructure metrics
-
 ## Clean Up (If Needed)
 
 To remove the daemon service installation:
@@ -772,3 +741,18 @@ aws cloudformation delete-stack \
 ```
 
 This will remove all resources created by the CloudFormation template, including the ECS service, task definition, and IAM roles.
+
+## Next Steps
+
+Once installation is complete:
+
+1. **[Configure the service](/docs/collection-agents/ecs/ec2/configure/)** to customize data collection
+2. **Verify data flow** to your SigNoz instance  
+3. **Set up dashboards** to visualize your ECS infrastructure metrics
+
+## Support and Resources
+
+- [SigNoz Documentation](https://signoz.io/docs/)
+- [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
+- [AWS ECS Documentation](https://docs.aws.amazon.com/ecs/)
+- [SigNoz Slack Community](https://signoz.io/slack)

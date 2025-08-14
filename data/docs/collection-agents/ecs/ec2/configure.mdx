@@ -4,24 +4,14 @@ id: overview
 title: ECS EC2 Collection Agent - Configure
 description: View metrics and logs for your ECS infrastructure
 ---
-import DSTemplateIntro from '@/components/shared/ecs-infra/daemon/template-intro.md'
-import DSTemplateEC2 from '@/components/shared/ecs-infra/daemon/template-ec2.md'
-import DSTemplateExternal from '@/components/shared/ecs-infra/daemon/template-external.md'
-import DSConfigIntro from '@/components/shared/ecs-infra/daemon/config-intro.md'
-import DSConfigCloud from '@/components/shared/ecs-infra/daemon/config-cloud.md'
-import DSConfigOss from '@/components/shared/ecs-infra/daemon/config-oss.md'
-import DSSetUpVerify from '@/components/shared/ecs-infra/daemon/set-up-verify.mdx'
-import DSSendDataIntro from '@/components/shared/ecs-infra/daemon/send-data-intro.mdx'
-import DSSendDataEc2 from '@/components/shared/ecs-infra/daemon/send-data-ec2.md'
-import DSSendDataExternal from '@/components/shared/ecs-infra/daemon/send-data-external.md'
-import DSSendDataEnd from '@/components/shared/ecs-infra/daemon/send-data-end.md'
+
 
 This guide covers configuring your daemon service after installation, verifying data flow, and setting up application data collection.
 
 ## Prerequisites
 
 Before configuring, ensure you have:
-- Completed the [installation steps](./install.md)
+- Completed the [installation steps](/docs/collection-agents/ecs/ec2/install.md)
 - Daemon service running on your ECS cluster
 - Access to SigNoz Cloud or self-hosted instance
 
@@ -65,76 +55,198 @@ To better visualize your ECS infrastructure data, import pre-built dashboards:
 
 ## Send Data from Applications
 
-<DSSendDataIntro name="Cloud" />
+<div>
+In this section, we will see how to send data from applications deployed in ECS to
+SigNoz Cloud using Daemon Service we created in the previous section.
+</div>
+<br/>
 
-<Tabs groupId="launch-type">
-<TabItem value="ec2" label="EC2" default>
-<DSSendDataEc2 />
-</TabItem>
-<TabItem value="external" label="External">
-<DSSendDataExternal />
-</TabItem>
-</Tabs>
+### Step 1: Add OpenTelemetry Instrumentation to your Application
 
-<DSSendDataEnd name="Cloud" />
-
-</TabItem>
-
-<TabItem value='self-host' label='Self-Host'>
-
-### Prerequisites
-
-- An ECS cluster running with at least one task definition
-- Running SigNoz instance - [Install SigNoz](/docs/install)
-- ECS cluster must be either of launch type **EC2** or **External**
+To add OpenTelemetry instrumentation to your application, you can follow the
+docs [here](https://signoz.io/docs/instrumentation/).
 
 <Admonition>
-If you want to collect metrics and other data for Fargate launch type, checkout [this documentation](https://signoz.io/docs/userguide/collecting-ecs-sidecar-infra/).
+This step include adding the [OpenTelemetry SDK](https://opentelemetry.io/docs/instrumentation/)
+as well as the initialization code to your application codebase and rebuilding the application
+container image.
 </Admonition>
 
+### Step 2: Add Entrypoint to your Application Container
+
+We need to add an entrypoint to the application container to set the
+`OTEL_EXPORTER_OTLP_ENDPOINT` environment variable to the endpoint of the
+daemon service. Such that the application container can send data to the
+daemon container running in the same host.
 
 <Tabs groupId="launch-type">
 <TabItem value="ec2" label="EC2" default>
+**Method 1: Updating entrypoint in task definition**
 
-## Setting up Daemon Service
+We need to obtain the endpoint or IP address of the instance on which the task
+is running. We can do this by querying the metadata service of the instance.
+For EC2, the metadata service is available at `169.254.169.254`.
 
-<DSTemplateIntro name='self-host' />
+The `entryPoint` will look like:
 
-<DSTemplateEC2 />
-</TabItem>
+```
+{
+       
+      "entryPoint": [
+        "sh",
+        "-c",
+        "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl http://169.254.169.254/latest/meta-data/local-ipv4):4317\"; <Application Startup Commands>"
+      ],
+			"command": [],
+			
+}
+```
 
-<TabItem value="external" label="External">
-
-## Setting up Daemon Service
-
-<DSTemplateIntro name='self-host' />
-
-<DSTemplateExternal />
-</TabItem>
-</Tabs>
-
-<DSConfigIntro />
-<DSConfigOss />
-<DSSetUpVerify name="OSS" />
-
-
-## Send Data from Applications
-
-<DSSendDataIntro name="OSS" />
-
-<Tabs groupId="launch-type">
-<TabItem value="ec2" label="EC2" default>
-<DSSendDataEc2 />
+- Replace `<Application Startup Commands>` with the commands to start your application.
 </TabItem>
 <TabItem value="external" label="External">
-<DSSendDataExternal />
+**Method 1: Updating entrypoint in task definition**
+
+We need to obtain the endpoint or IP address of the instance on which the task
+is running. This can be done by multiple ways depending on the network mode and cloud provider.
+
+The `entryPoint` will look like the following based on your network mode and cloud provider:
+
+- Using default networking mode i.e. **Bridge**:
+    
+    ```json
+    {
+           
+          "entryPoint": [
+            "sh",
+            "-c",
+            "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://172.17.0.1:4317\"; <Application Startup Commands>"
+          ],
+    			"command": [],
+    			
+    }
+    ```
+    
+- Using **Bridge** mode with custom docker network
+    
+    If you are using custom docker networking, you would have to use `ExtraHosts` in your task definition. 
+    
+    ```json
+    {
+        
+        "extraHosts": [
+          {
+            "hostname": "signoz-collector",
+            "ipAddress": "host-gateway"
+          }
+          
+        ]
+    }
+    ```
+    
+    And the `entryPoint` will look like:
+    
+    ```json
+    {
+           
+          "entryPoint": [
+            "sh",
+            "-c",
+            "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://signoz-collector:4317\"; <Application Startup Commands>"
+          ],
+    			"command": [],
+    			
+    }
+    ```
+    
+- If network mode is not **Bridge**, and AWS EC2 instance:
+    
+    ```json
+    {
+           
+          "entryPoint": [
+            "sh",
+            "-c",
+            "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl http://169.254.169.254/latest/meta-data/local-ipv4):4317\"; <Application Startup Commands>"
+          ],
+    			"command": [],
+    			
+    }
+    ```
+    
+- If network mode is not **Bridge**, and GCP instance:
+    
+    ```json
+    {
+           
+          "entryPoint": [
+            "sh",
+            "-c",
+    				'export OTEL_EXPORTER_OTLP_ENDPOINT="http://$(curl "http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/ip?recursive=true&alt=text" -H "Metadata-Flavor: Google"):4317"; <Application Startup Commands>'
+          ],
+    			"command": [],
+    			
+    }
+    ```
+
+**NOTES:**
+- Replace `<Application Startup Commands>` with the commands to start your application.
+- For more information about the metadata server, refer https://www.baeldung.com/linux/cloud-ip-meaning
 </TabItem>
 </Tabs>
 
-<DSSendDataEnd name="OSS" />
+### Step 3: Add Service Name of your Application
 
-</TabItem>
-</Tabs>
+To add the service name of your application, you need to set the
+`OTEL_RESOURCE_ATTRIBUTES` environment variable of the application container
+to `service.name=<your-service-name>`.
+
+In your task definition, you can add the following lines.
+
+```yaml
+
+    ContainerDefinitions:
+        - Name: <your-container-name>
+          
+          Environment:
+            - Name: OTEL_RESOURCE_ATTRIBUTES
+              Value: service.name=<your-service-name>
+          
+
+```
+
+In case of JSON task definition, you can add the following lines.
+
+```json
+
+    "containerDefinitions": [
+        {
+            "name": "<your-container-name>",
+            
+            "environment": [
+                {
+                    "name": "OTEL_RESOURCE_ATTRIBUTES",
+                    "value": "service.name=<your-service-name>"
+                }
+            ],
+            
+        }
+    ],
+
+
+```
+
+### Step 4: Rebuild and Deploy Application Container
+
+After following previous step, you need to rebuild the application container and deploy it to ECS cluster.
+
+### Step 5: Verify Data in SigNoz
+
+<div>
+You will need to generate some traffic to your application. After which you can go to the
+SigNoz Cloud Services page and you should see your application in the services list.
+</div>
+<br/>
 
 
 ## Next Steps
@@ -148,7 +260,7 @@ With configuration complete, you can:
 
 ## Support and Resources
 
-- **SigNoz Documentation**: [https://signoz.io/docs/](https://signoz.io/docs/)
-- **OpenTelemetry Collector**: [https://opentelemetry.io/docs/collector/](https://opentelemetry.io/docs/collector/)
-- **AWS ECS Documentation**: [https://docs.aws.amazon.com/ecs/](https://docs.aws.amazon.com/ecs/)
-- **Community Support**: [SigNoz Slack Community](https://signoz.io/slack)
+- [SigNoz Documentation](https://signoz.io/docs/)
+- [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
+- [AWS ECS Documentation](https://docs.aws.amazon.com/ecs/)
+- [SigNoz Slack Community](https://signoz.io/slack)
