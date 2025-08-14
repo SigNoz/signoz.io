@@ -879,34 +879,6 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'Trace API',
-        // route: '',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/traces-management/trace-api/overview',
-            label: 'Overview',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/trace-api/payload-model',
-            label: 'Payload Model',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/trace-api/search-traces',
-            label: 'Search Traces',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/trace-api/aggregate-traces',
-            label: 'Aggregate Traces',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
         label: 'Tutorials',
         // route: '',
         items: [
@@ -1206,39 +1178,6 @@ const docsSideNav = [
       },
       {
         type: 'category',
-        isExpanded: false,
-        label: 'Logs API',
-        // route: '',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/overview',
-            label: 'Overview',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/payload-model',
-            label: 'Payload Model',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/search-logs',
-            label: 'Search Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/aggregate-logs',
-            label: 'Aggregate Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/logs-url-for-explorer-page',
-            label: 'Logs URL for Explorer',
-          },
-        ],
-      },
-      {
-        type: 'category',
         label: 'User Guide',
         isExpanded: false,
         items: [
@@ -1359,11 +1298,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/userguide/drop-metrics',
         label: 'Drop Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/query-range-api',
-        label: 'Query Range API',
       },
       {
         type: 'category',
@@ -2167,6 +2101,84 @@ const docsSideNav = [
             label: 'Troubleshooting',
           },
         ],
+      },
+    ],
+  },
+  {
+    label: 'SigNoz APIs',
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        type: 'doc',
+        route: '/api-reference/',
+        label: 'API Reference',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Trace API',
+        // route: '',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/traces-management/trace-api/overview',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/trace-api/payload-model',
+            label: 'Payload Model',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/trace-api/search-traces',
+            label: 'Search Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/trace-api/aggregate-traces',
+            label: 'Aggregate Traces',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Logs API',
+        // route: '',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/overview',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/payload-model',
+            label: 'Payload Model',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/search-logs',
+            label: 'Search Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/aggregate-logs',
+            label: 'Aggregate Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/logs-url-for-explorer-page',
+            label: 'Logs URL for Explorer',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/query-range-api',
+        label: 'Metrics Query API',
       },
     ],
   },
