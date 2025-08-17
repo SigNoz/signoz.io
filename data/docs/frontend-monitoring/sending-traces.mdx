@@ -1,10 +1,10 @@
 ---
-date: 2025-07-30
+date: 2025-08-17
 title: Sending Traces from your frontend application
 id: sending-traces-frontend
 ---
 
-This documentation provides a step-by-step guide for sending traces from your frontend application using SigNoz and OpenTelemetry.
+This documentation provides steps for sending traces from your frontend application to SigNoz.  
 
 SigNoz natively supports OpenTelemetry for collecting traces, so you can instrument your frontend applications with minimal setup and get deep visibility into user interactions and network activity.
 
@@ -21,7 +21,7 @@ Client side traces help you understand how user actions trigger requests, how lo
 
 Install the OpenTelemetry Collector binary using [these instructions](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/). The Collector acts as an agent that receives, processes, and exports telemetry data. It is required to collect data from your application, including traces.
 
-You would also need to update the collector config to whitelist the frontend domain.
+You would also need to update the collector config to whitelist the frontend domain. This is required to allow Cross-Origin Resource Sharing (CORS) requests from your frontend application to the OpenTelemetry collector.
 
 ```sh
 receivers:
@@ -39,25 +39,7 @@ receivers:
 
 ### Step 2: Install dependencies
 
-Please install the following dependencies.
-
-- **`@opentelemetry/sdk-trace-base`**: Contains the core tracing SDK implementation including `BatchSpanProcessor` and base classes. This provides the foundation for creating and processing trace spans.
-
-- **`@opentelemetry/sdk-trace-web`**: Provides the `WebTracerProvider` specifically designed for browser environments. This is essential for web applications as it handles browser-specific tracing requirements.
-
-- **`@opentelemetry/exporter-trace-otlp-http`**: Implements the OTLP (OpenTelemetry Protocol) HTTP exporter that sends your traces to the SigNoz collector. This handles the actual transmission of trace data over HTTP.
-
-- **`@opentelemetry/instrumentation`**: Provides the `registerInstrumentations` function that allows you to register multiple instrumentations at once. This is the main API for setting up automatic instrumentation.
-
-- **`@opentelemetry/instrumentation-fetch`**: Automatically instruments `fetch()` API calls to capture spans for network requests. This is crucial for tracking HTTP requests from your frontend to backend services.
-
-- **`@opentelemetry/instrumentation-xml-http-request`**: Instruments legacy XMLHttpRequest calls for older code or libraries that don't use `fetch`. This ensures all network requests are captured regardless of the HTTP client used.
-
-- **`@opentelemetry/context-zone`**: Provides context propagation for browser environments using Zone.js. This is essential for maintaining trace context across async operations and ensuring proper distributed tracing.
-
-- **`@opentelemetry/resources`**: Provides resource attributes that identify your service (like service name, version, etc.). This helps distinguish traces from different services in your SigNoz dashboard.
-
-- **`@opentelemetry/instrumentation-user-interaction`**: Automatically instruments user interactions like clicks, inputs, and form submissions. This helps correlate user actions with resulting operations and provides insights into user behavior.
+Install the following dependencies.
 
 <Tabs groupId="traces-dependencies">
   <TabItem value="npm" label="Npm">
@@ -90,51 +72,32 @@ Please install the following dependencies.
   </TabItem>
 </Tabs>
 
+<details>
+<summary> Read more about the dependencies </summary>
+- **`@opentelemetry/sdk-trace-base`**: Contains the core tracing SDK implementation including `BatchSpanProcessor` and base classes. This provides the foundation for creating and processing trace spans.
+
+- **`@opentelemetry/sdk-trace-web`**: Provides the `WebTracerProvider` specifically designed for browser environments. This is essential for web applications as it handles browser-specific tracing requirements.
+
+- **`@opentelemetry/exporter-trace-otlp-http`**: Implements the OTLP (OpenTelemetry Protocol) HTTP exporter that sends your traces to the SigNoz collector. This handles the actual transmission of trace data over HTTP.
+
+- **`@opentelemetry/instrumentation`**: Provides the `registerInstrumentations` function that allows you to register multiple instrumentations at once. This is the main API for setting up automatic instrumentation.
+
+- **`@opentelemetry/instrumentation-fetch`**: Automatically instruments `fetch()` API calls to capture spans for network requests. This is crucial for tracking HTTP requests from your frontend to backend services.
+
+- **`@opentelemetry/instrumentation-xml-http-request`**: Instruments legacy XMLHttpRequest calls for older code or libraries that don't use `fetch`. This ensures all network requests are captured regardless of the HTTP client used.
+
+- **`@opentelemetry/context-zone`**: Provides context propagation for browser environments using Zone.js. This is essential for maintaining trace context across async operations and ensuring proper distributed tracing.
+
+- **`@opentelemetry/resources`**: Provides resource attributes that identify your service (like service name, version, etc.). This helps distinguish traces from different services in your SigNoz dashboard.
+
+- **`@opentelemetry/instrumentation-user-interaction`**: Automatically instruments user interactions like clicks, inputs, and form submissions. This helps correlate user actions with resulting operations and provides insights into user behavior.
+</details>
+
 ### Step 3: Create an instrumentation file
 
 The instrumentation file is required to setup the `OTLPTraceExporter` and `WebTracerProvider` which are used to capture traces within your application and export them to your collector.
 
-<Tabs groupId="traces-instrumentation">
-  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
-    ```ts
-    import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-    import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-    import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-    import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
-    import { registerInstrumentations } from '@opentelemetry/instrumentation';
-    import { resourceFromAttributes } from '@opentelemetry/resources';
-
-    const exporter = new OTLPTraceExporter({
-      url: '<<SIGNOZ_COLLECTOR_URL>>/v1/traces',
-    });
-
-    const provider = new WebTracerProvider({
-      resource: resourceFromAttributes({
-        'service.name': '<<SERVICE_NAME>>',
-      }),
-      spanProcessors: [new BatchSpanProcessor(exporter)],
-    });
-
-    provider.register();
-
-    registerInstrumentations({
-      instrumentations: [
-        new FetchInstrumentation({
-          // Selects which backend servers are allowed to receive trace headers for linking traces across services.
-          // Using /.*/ acts as a wildcard. For safer usage in production, replace with specific domains:
-          // e.g. propagateTraceHeaderCorsUrls: [/api\.example\.com/, /my-backend\.internal/]
-          propagateTraceHeaderCorsUrls: /.*/,
-        }),
-        new UserInteractionInstrumentation({
-          eventNames: ['click', 'input', 'submit'],
-        }),
-        new XMLHttpRequestInstrumentation({
-          propagateTraceHeaderCorsUrls: /.*/,
-        }),
-      ],
-    });
-    ```
-  </TabItem>
+<Tabs entityName="plans">
   <TabItem value="cloud" label="SigNoz Cloud" default>
     ```ts
     import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
@@ -177,6 +140,53 @@ The instrumentation file is required to setup the `OTLPTraceExporter` and `WebTr
       ],
     });
     ```
+
+    - Set the `<<INGESTION_REGION>>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - Replace `<<INGESTION_KEY>>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+    - `<<SERVICE_NAME>>` is the name of your service
+  </TabItem>
+  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
+    ```ts
+    import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
+    import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+    import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+    import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
+    import { registerInstrumentations } from '@opentelemetry/instrumentation';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
+
+    const exporter = new OTLPTraceExporter({
+      url: '<<SIGNOZ_COLLECTOR_URL>>/v1/traces',
+    });
+
+    const provider = new WebTracerProvider({
+      resource: resourceFromAttributes({
+        'service.name': '<<SERVICE_NAME>>',
+      }),
+      spanProcessors: [new BatchSpanProcessor(exporter)],
+    });
+
+    provider.register();
+
+    registerInstrumentations({
+      instrumentations: [
+        new FetchInstrumentation({
+          // Selects which backend servers are allowed to receive trace headers for linking traces across services.
+          // Using /.*/ acts as a wildcard. For safer usage in production, replace with specific domains:
+          // e.g. propagateTraceHeaderCorsUrls: [/api\.example\.com/, /my-backend\.internal/]
+          propagateTraceHeaderCorsUrls: /.*/,
+        }),
+        new UserInteractionInstrumentation({
+          eventNames: ['click', 'input', 'submit'],
+        }),
+        new XMLHttpRequestInstrumentation({
+          propagateTraceHeaderCorsUrls: /.*/,
+        }),
+      ],
+    });
+    ```
+
+    - `<<SERVICE_NAME>>` is the name of your service
+    - `<<SIGNOZ_COLLECTOR_URL>>` is the url where your collector is running
   </TabItem>
 </Tabs>
 
@@ -192,7 +202,7 @@ Going through each of the 3 instrumentations set up:
 
 ### Step 4: Importing the instrumentation file
 
-Import the instrumentation file at the top level of your application.
+Import the instrumentation file at the top level of your application. This ensures that the OpenTelemetry instrumentation is initialized before any other code runs, allowing it to capture logs from the very beginning of your application's execution.
 
 ```ts
 import './instrument';
@@ -210,8 +220,8 @@ createRoot(document.getElementById('root')!).render(
 
 ### Step 5: Linking frontend traces with backend
 
-Please follow the guide [here](https://signoz.io/docs/instrumentation/overview/) to setup traces in your backend applications.
-Your frontend traces should automatically get linked with them.
+To link your frontend and backend traces, you need to instrument your backend to send traces. Check out this [document](https://signoz.io/docs/instrumentation/overview/) to instrument your backend. 
+Once done, your frontend traces should automatically get linked with your backend traces.  
 
 For the purpose of this guide, we have setup a simple Node.js API with instrumentation.
 
@@ -235,36 +245,23 @@ sdk.start();
 ```
 
 ```ts
-app.post('/api/generate-text', (req, res) => {
+app.post('<<api-endpoint>>', (req, res) => {
   try {
-    const { length } = req.body;
-    if (typeof length !== 'number' || length <= 0 || length > 10000) {
-      return res.status(400).json({
-        error: 'Invalid length. Please provide a number between 1 and 10000.',
-      });
-    }
-    const generatedText = generateLoremIpsum(length);
-    res.json({
-      text: generatedText,
-      length: generatedText.length,
-      requestedLength: length,
-    });
+    // Your api logic
   } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-    });
+    // Your error handling logic
   }
 });
 ```
 
-### Step 7: Viewing Captured Traces in SigNoz
+### Step 6: Viewing Captured Traces in SigNoz
 
 The captured traces can then be viewed in the [Traces Explorer](https://signoz.io/docs/product-features/trace-explorer/).
 
 <figure data-zoomable align="center">
   <img
     className="box-shadowed-image"
-    src="/img/guides/2025/frontend-monitoring/sending-traces/2.webp"
+    src="/img/guides/2025/frontend-monitoring/sending-traces/viewing-traces-explorer.webp"
     alt="Viewing Network Calls"
   />
   <figcaption>
@@ -275,7 +272,7 @@ The captured traces can then be viewed in the [Traces Explorer](https://signoz.i
 <figure data-zoomable align="center">
   <img
     className="box-shadowed-image"
-    src="/img/guides/2025/frontend-monitoring/sending-traces/1.webp"
+    src="/img/guides/2025/frontend-monitoring/sending-traces/viewing-trace-details.webp"
     alt="Viewing Distributed Traces linking frontend and backend"
   />
   <figcaption>
@@ -283,7 +280,7 @@ The captured traces can then be viewed in the [Traces Explorer](https://signoz.i
   </figcaption>
 </figure>
 
-### Attaching additional identifiers to your Traces
+## Attaching additional identifiers to your Traces
 
 You can enrich traces with additional metadata like browser type, user ID etc. to enable real user monitoring (RUM)-like insights.
 
@@ -407,7 +404,7 @@ Now every span exported will include these additional contextual attributes.
 <figure data-zoomable align="center">
   <img
     className="box-shadowed-image"
-    src="/img/guides/2025/frontend-monitoring/sending-traces/3.webp"
+    src="/img/guides/2025/frontend-monitoring/sending-traces/traces-with-custom-attributes.webp"
     alt="Distributed Tracing"
   />
   <figcaption>
@@ -420,40 +417,20 @@ Now every span exported will include these additional contextual attributes.
 If you need to create custom spans for capture activity, you can do so from any handler function in your code like this.
 
 ```ts
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  const span = tracer.startSpan('generate_text_click');
-
+function eventHandler() {
+  const span = tracer.startSpan('<<span-name>>');
   try {
     await context.with(trace.setSpan(context.active(), span), async () => {
-      const response = await fetch('/api/generate-text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ length }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate text');
-      }
-
-      const data: GenerateTextResponse = await response.json();
-      setGeneratedText(data.text);
-      setStats({
-        length: data.length,
-        requestedLength: data.requestedLength,
-      });
+      // Your data fetching logic
     });
   } catch (err) {
-    setError(
-      err instanceof Error ? err.message : 'An unexpected error occurred'
-    );
+    // Your error fetching log
   } finally {
+    // Close the span
     span.end();
-    setIsLoading(false);
   }
 };
 ```
+## Demo Application  
 
-You can find and try the demo application [here](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/sending-traces)
+Check out this [full-stack application](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/sending-traces) that demonstrates sending traces from both frontend and backend to SigNoz. 
