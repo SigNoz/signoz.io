@@ -31,7 +31,88 @@ to apply filters and operations on your logs to define conditions which triggers
 
 ## Step 2: Define Alert Conditions
 
-<AlertCondition />
+In this step, you define the specific conditions for triggering the alert, as well as the frequency of checking those conditions.
+The condition configuration of an alert in SigNoz consists of 5 core parts:
+
+### Query
+    
+   An alert can consist of multiple queries and formulas. But only 1 of them can be put into consideration while determining the alert condition.
+    
+   You can define one or more queries or formulas to fetch the data you want to evaluate. However, only one of them can be used as the trigger for the alert condition.
+    
+   For example:
+    
+   - `A` = Total request count
+   - `B` = Total error count
+   - `C` = `B / A` (Error rate)
+    
+   You can use query `C` as the evaluation target to trigger alerts based on error rate.
+    
+### Condition
+    
+   This defines the logical condition to check against the selected query’s value.
+    
+   | Operator | Description | Example Usage |
+   | --- | --- | --- |
+   | `Above` | Triggers if the value is greater than | CPU usage `Above 90` (%) |
+   | `Below` | Triggers if the value is less than | Apdex score `Below 0.8` |
+   | `Equal to` | Triggers if the value is exactly equal | Request count `Equal to 0` |
+   | `Not equal to` | Triggers if the value is not equal | Instance status `Not Equal to 1` |
+
+### Match Type
+    
+   Specifies how the condition must hold over the evaluation window. This allows for flexible evaluation logic.
+    
+   | Match Type | Description | Example Use Case |
+   | --- | --- | --- |
+   | `at least once` | Trigger if condition matches even once in the window | Detect spikes or brief failures |
+   | `all the times` | Trigger only if condition matches at all points in the window | Ensure stable violations before alerting |
+   | `on average` | Evaluate the **average** value in the window | Average latency `Above 500ms` |
+   | `in total` | Evaluate the total sum over the window | Total errors `Above 100` |
+   | `last` | Only the last data point is evaluated | Used when only latest status matters |
+
+### Evaluation Window (For)
+    
+   Specifies how long the condition must be true before the alert is triggered.
+    
+   e.g. `For 5 minutes` = The condition must remain true continuously for 5 minutes before the alert is triggered.
+    
+   This helps reduce false positives due to short-lived spikes.
+    
+### Threshold
+    
+   This is the value you are comparing the query result against.
+    
+   e.g. If you choose `Condition = Above` and set `Threshold = 500`, the alert will fire when the query result exceeds 500.
+    
+### Threshold Unit
+    
+   Specifies the unit of the threshold, such as:
+    
+   - ms (milliseconds) for latency
+   - % for CPU usage
+   - Count for request totals
+    
+   Helps interpret the threshold in the correct context and also for correct scaling while comparing 2 values.
+    
+### Advanced Options
+
+In addition, there are 3 more advanced options:
+
+### Alert Frequency
+   - How frequently SigNoz evaluates the alert condition.
+   - Default is `1 min`
+   - e.g. If set to `1 min` the alert will run once every minute.
+
+### Notification for missing data points
+   - Triggers an alert if **no data is received** for the configured time period.
+   - Useful for services where consistent data is expected.
+   - E.g. If set to `5 minutes`, and no metric data is received during that period, the alert will fire.
+
+### Minimum Data Points in Result Group
+   - Ensures the alert condition is evaluated only when there's enough data for statistical significance.
+   - Helps avoid false alerts due to missing or sparse data points.
+   - E.g. If set to `3`, the query must return at least 3 data points in the evaluation window for the alert to be considered.
 
 ## Step 3: Alert Configuration
 In this step, you set the alert's metadata, including severity, name, and description:
