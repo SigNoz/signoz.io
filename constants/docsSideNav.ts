@@ -1396,6 +1396,11 @@ const docsSideNav = [
         label: 'Manage Variables',
       },
       {
+        type: 'doc',
+        route: '/docs/dashboards/add-a-pre-built-dashboard',
+        label: 'Add a Pre-built Dashboard',
+      },
+      {
         type: 'category',
         isExpanded: false,
         route: '/docs/dashboards/dashboard-templates/overview',
