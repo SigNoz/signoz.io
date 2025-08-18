@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import { ChangelogByIdApiResponse } from 'utils/strapi'
 
 export const dynamicParams = false
+export const dynamic = 'force-static'
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const changelogId = params.slug.split('-').pop()

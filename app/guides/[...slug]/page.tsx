@@ -31,6 +31,7 @@ const layouts = {
 }
 
 export const dynamicParams = false
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
@@ -39,14 +40,16 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allGuides.find((p) => p.slug === slug)
+
+  if (!post) {
+    return notFound()
+  }
+
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
   })
-  if (!post) {
-    return
-  }
 
   const publishedAt = new Date(post.date).toISOString()
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()

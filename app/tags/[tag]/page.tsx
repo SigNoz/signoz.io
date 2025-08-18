@@ -9,6 +9,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 export const dynamicParams = false
+export const dynamic = 'force-static'
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURI(params.tag)
