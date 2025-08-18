@@ -1397,8 +1397,8 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/dashboards/add-a-pre-built-dashboard',
-        label: 'Add a Pre-built Dashboard',
+        route: '/docs/dashboards/import-a-pre-built-dashboard',
+        label: 'Import Pre-built Dashboard',
       },
       {
         type: 'category',
