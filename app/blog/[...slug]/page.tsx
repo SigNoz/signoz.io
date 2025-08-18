@@ -10,6 +10,7 @@ import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import BlogLayout from '@/layouts/BlogLayout'
+import NewsroomLayout from '@/layouts/NewsroomLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
@@ -23,6 +24,7 @@ const layouts = {
   PostBanner,
   OpenTelemetryLayout,
   BlogLayout,
+  NewsroomLayout,
 }
 
 export const dynamicParams = false
@@ -108,9 +110,10 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
-  // Choose layout based on slug or post layout
   let layoutName = post.layout || defaultLayout
-  if (slug.includes('opentelemetry')) {
+  if (post.is_newsroom) {
+    layoutName = 'NewsroomLayout'
+  } else if (slug.includes('opentelemetry')) {
     layoutName = 'OpenTelemetryLayout'
   } else {
     layoutName = 'BlogLayout'
