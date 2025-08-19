@@ -20,9 +20,7 @@ npm i @opentelemetry/sdk-node \
       @opentelemetry/auto-instrumentations-node \
       @opentelemetry/instrumentation-pino \
       @opentelemetry/exporter-trace-otlp-http \
-      @opentelemetry/exporter-logs-otlp-http \
-      @opentelemetry/resources \
-      @opentelemetry/semantic-conventions
+      @opentelemetry/exporter-logs-otlp-http
 ```
 
 ### Package Breakdown
@@ -32,8 +30,6 @@ npm i @opentelemetry/sdk-node \
 - **`@opentelemetry/instrumentation-pino`** - Specific instrumentation for Pino logging library
 - **`@opentelemetry/exporter-trace-otlp-http`** - OTLP HTTP exporter for traces
 - **`@opentelemetry/exporter-logs-otlp-http`** - OTLP HTTP exporter for logs
-- **`@opentelemetry/resources`** - Resource management for service identification
-- **`@opentelemetry/semantic-conventions`** - Standard attribute names and values
 
 ## Step 2: Create OpenTelemetry Configuration
 
@@ -45,89 +41,34 @@ Create an OpenTelemetry configuration file at your project root:
 ```javascript
 // otel.js
 'use strict';
-
-const process = require('process');
 const { NodeSDK, tracing, logs } = require('@opentelemetry/sdk-node');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
 const { PinoInstrumentation } = require('@opentelemetry/instrumentation-pino');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
 const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
-const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-
-// Load environment variables with validation
-const serviceName = process.env.OTEL_SERVICE_NAME || 'nodejs-pino-app';
-const signozToken = process.env.SIGNOZ_ACCESS_TOKEN;
-const signozRegion = process.env.SIGNOZ_REGION; // us, in, eu
-const collectorEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-
-// Determine endpoints based on environment
-let traceEndpoint, logEndpoint, headers = {};
-
-if (signozToken && signozRegion) {
-  // SigNoz Cloud configuration
-  traceEndpoint = `https://ingest.${signozRegion}.signoz.cloud:443/v1/traces`;
-  logEndpoint = `https://ingest.${signozRegion}.signoz.cloud:443/v1/logs`;
-  headers = {
-    'signoz-access-token': signozToken
-  };
-  console.log(`🔧 Configuring for SigNoz Cloud (${signozRegion} region)`);
-} else if (collectorEndpoint) {
-  // Self-hosted configuration
-  traceEndpoint = `${collectorEndpoint}/v1/traces`;
-  logEndpoint = `${collectorEndpoint}/v1/logs`;
-  console.log(`🔧 Configuring for self-hosted SigNoz: ${collectorEndpoint}`);
-} else {
-  console.error('❌ Missing configuration! Set either:');
-  console.error('   - SIGNOZ_ACCESS_TOKEN + SIGNOZ_REGION (for SigNoz Cloud)');
-  console.error('   - OTEL_EXPORTER_OTLP_ENDPOINT (for self-hosted)');
-  process.exit(1);
-}
-
-// Configure exporters
-const traceExporter = new OTLPTraceExporter({
-  url: traceEndpoint,
-  headers
-});
-
-const logExporter = new OTLPLogExporter({
-  url: logEndpoint,
-  headers
-});
 
 // Use batch processors for production-friendly behavior
-const spanProcessor = new tracing.BatchSpanProcessor(traceExporter);
-const logRecordProcessor = new logs.BatchLogRecordProcessor(logExporter);
+const spanProcessor = new tracing.BatchSpanProcessor(new OTLPTraceExporter());
+const logRecordProcessor = new logs.BatchLogRecordProcessor(new OTLPLogExporter());
 
-// Build and start the SDK
+// Build and start the SDK before your app loads Pino
 const sdk = new NodeSDK({
   spanProcessor,
   logRecordProcessor,
   instrumentations: [
-    getNodeAutoInstrumentations(),
+    getNodeAutoInstrumentations(), // Creates spans for HTTP, Express, and more
     new PinoInstrumentation({
       // Optional: customize injected keys
       // logKeys: { traceId: 'trace_id', spanId: 'span_id', traceFlags: 'trace_flags' }
     }),
   ],
-  resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-    [SemanticResourceAttributes.SERVICE_VERSION]: process.env.SERVICE_VERSION || '1.0.0',
-  }),
 });
 
-// Start the SDK
 sdk.start();
-console.log(`✅ OpenTelemetry started for service: ${serviceName}`);
 
-// Graceful shutdown
+// Optional graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('🔄 Shutting down OpenTelemetry...');
-  sdk
-    .shutdown()
-    .then(() => console.log('✅ OpenTelemetry terminated'))
-    .catch((error) => console.log('❌ Error terminating OpenTelemetry:', error))
-    .finally(() => process.exit(0));
+  sdk.shutdown().finally(() => process.exit(0));
 });
 ```
 
@@ -141,82 +82,29 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-
-// Load environment variables with validation
-const serviceName = process.env.OTEL_SERVICE_NAME || 'nodejs-pino-app';
-const signozToken = process.env.SIGNOZ_ACCESS_TOKEN;
-const signozRegion = process.env.SIGNOZ_REGION; // us, in, eu
-const collectorEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-
-// Determine endpoints based on environment
-let traceEndpoint: string, logEndpoint: string, headers: Record<string, string> = {};
-
-if (signozToken && signozRegion) {
-  // SigNoz Cloud configuration
-  traceEndpoint = `https://ingest.${signozRegion}.signoz.cloud:443/v1/traces`;
-  logEndpoint = `https://ingest.${signozRegion}.signoz.cloud:443/v1/logs`;
-  headers = {
-    'signoz-access-token': signozToken
-  };
-  console.log(`🔧 Configuring for SigNoz Cloud (${signozRegion} region)`);
-} else if (collectorEndpoint) {
-  // Self-hosted configuration
-  traceEndpoint = `${collectorEndpoint}/v1/traces`;
-  logEndpoint = `${collectorEndpoint}/v1/logs`;
-  console.log(`🔧 Configuring for self-hosted SigNoz: ${collectorEndpoint}`);
-} else {
-  console.error('❌ Missing configuration! Set either:');
-  console.error('   - SIGNOZ_ACCESS_TOKEN + SIGNOZ_REGION (for SigNoz Cloud)');
-  console.error('   - OTEL_EXPORTER_OTLP_ENDPOINT (for self-hosted)');
-  process.exit(1);
-}
-
-// Configure exporters
-const traceExporter = new OTLPTraceExporter({
-  url: traceEndpoint,
-  headers
-});
-
-const logExporter = new OTLPLogExporter({
-  url: logEndpoint,
-  headers
-});
 
 // Use batch processors for production-friendly behavior
-const spanProcessor = new tracing.BatchSpanProcessor(traceExporter);
-const logRecordProcessor = new logs.BatchLogRecordProcessor(logExporter);
+const spanProcessor = new tracing.BatchSpanProcessor(new OTLPTraceExporter());
+const logRecordProcessor = new logs.BatchLogRecordProcessor(new OTLPLogExporter());
 
-// Build and start the SDK
+// Build and start the SDK before your app loads Pino
 const sdk = new NodeSDK({
   spanProcessor,
   logRecordProcessor,
   instrumentations: [
-    getNodeAutoInstrumentations(),
+    getNodeAutoInstrumentations(), // Creates spans for HTTP, Express, and more
     new PinoInstrumentation({
       // Optional: customize injected keys
       // logKeys: { traceId: 'trace_id', spanId: 'span_id', traceFlags: 'trace_flags' }
     }),
   ],
-  resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-    [SemanticResourceAttributes.SERVICE_VERSION]: process.env.SERVICE_VERSION || '1.0.0',
-  }),
 });
 
-// Start the SDK
 sdk.start();
-console.log(`✅ OpenTelemetry started for service: ${serviceName}`);
 
-// Graceful shutdown
+// Optional graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('🔄 Shutting down OpenTelemetry...');
-  sdk
-    .shutdown()
-    .then(() => console.log('✅ OpenTelemetry terminated'))
-    .catch((error) => console.log('❌ Error terminating OpenTelemetry:', error))
-    .finally(() => process.exit(0));
+  sdk.shutdown().finally(() => process.exit(0));
 });
 ```
 
@@ -225,56 +113,12 @@ process.on('SIGTERM', () => {
 
 ### Configuration Notes
 
-- **Environment variables** are loaded and validated at startup
-- **Automatic detection** between SigNoz Cloud and self-hosted setups
-- **Explicit endpoints** for better debugging and transparency  
-- **Error handling** with clear messages for missing configuration
-- **Batch processors** for production efficiency
-- **Service identification** using semantic conventions
+- **Batch processors** are used for production efficiency, batching spans and logs before export
+- **Auto-instrumentations** automatically create spans for HTTP requests, Express routes, and other common libraries
+- **Pino instrumentation** injects trace context into your logs and forwards log records to the OpenTelemetry Logs SDK
+- The SDK must be started **before** your application imports Pino
 
-## Step 3: Set Environment Variables
-
-Configure the required environment variables for your setup:
-
-<Tabs>
-<TabItem value="signoz-cloud" label="SigNoz Cloud">
-
-```bash
-# Required for SigNoz Cloud
-export OTEL_SERVICE_NAME="your-service-name"
-export SIGNOZ_ACCESS_TOKEN="your-ingestion-key"
-export SIGNOZ_REGION="us"  # or "in" for India, "eu" for Europe
-
-# Optional
-export SERVICE_VERSION="1.0.0"
-```
-
-**Region Options:**
-- **US**: `us` → `ingest.us.signoz.cloud`
-- **India**: `in` → `ingest.in.signoz.cloud`  
-- **Europe**: `eu` → `ingest.eu.signoz.cloud`
-
-</TabItem>
-<TabItem value="self-host" label="Self-Host">
-
-```bash
-# Required for Self-hosted
-export OTEL_SERVICE_NAME="your-service-name"
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
-
-# Optional
-export SERVICE_VERSION="1.0.0"
-```
-
-**Common Self-hosted Endpoints:**
-- **Local**: `http://localhost:4318`
-- **Docker**: `http://signoz-otel-collector:4318`
-- **Kubernetes**: `http://signoz-k8s-infra-otel-agent:4318`
-
-</TabItem>
-</Tabs>
-
-## Step 4: Run with Preload
+## Step 3: Run with Preload
 
 Use the `-r` flag to preload the OpenTelemetry configuration before your application starts:
 
@@ -297,16 +141,64 @@ node -r ./otel.ts app.ts
 
 The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Pino.
 
-## Verification
+## Configuration
 
-After starting your application, you should see console output like:
+### Environment Variables
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+Set the following environment variables for SigNoz Cloud:
 
 ```bash
-🔧 Configuring for SigNoz Cloud (us region)
-✅ OpenTelemetry started for service: your-service-name
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=YOUR_INGESTION_KEY"
 ```
 
-Then:
+Replace `{region}` with your SigNoz Cloud region:
+- **US**: `ingest.us.signoz.cloud`
+- **India**: `ingest.in.signoz.cloud`  
+- **Europe**: `ingest.eu.signoz.cloud`
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
+Point to your OpenTelemetry collector's OTLP HTTP receiver:
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://<collector-host>:4318/v1/traces"
+export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="http://<collector-host>:4318/v1/logs"
+```
+
+</TabItem>
+</Tabs>
+
+### Running Your Application
+
+Start your application with OpenTelemetry instrumentation:
+
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
+```bash
+node -r ./otel.js app.js
+```
+
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
+```bash
+node -r ./otel.ts app.ts
+```
+
+</TabItem>
+</Tabs>
+
+## Verification
+
+After starting your application:
 
 1. **Make some requests** to your application endpoints
 2. **Check SigNoz** for incoming traces and logs
@@ -323,23 +215,18 @@ Then:
 
 ### Common Issues
 
-**Configuration errors at startup:**
-- Check the console output for clear error messages
-- Ensure all required environment variables are set
-- Verify endpoints are reachable
-
 **No traces appearing:**
-- Check console for "OpenTelemetry started" message
-- Verify environment variables are correctly set
-- Test network connectivity to your endpoint
+- Ensure the preload script (`-r ./otel.js`) is used
+- Check that environment variables are set correctly
+- Verify network connectivity to SigNoz
 
 **No logs appearing:**
 - Confirm Pino is being used for logging in your application
-- Check that the Pino instrumentation is working
-- Verify the logs endpoint in console output
+- Check that the Pino instrumentation is properly configured
+- Verify the OTLP logs endpoint is correct
 
 **Missing trace correlation:**
-- Ensure OpenTelemetry is loaded before Pino is imported (using `-r` flag)
+- Ensure OpenTelemetry is loaded before Pino is imported
 - Check that the Pino instrumentation is enabled
 - Verify spans are being created (check traces first)
 
@@ -365,14 +252,3 @@ node -r ./otel.ts app.ts
 
 </TabItem>
 </Tabs>
-
-### Environment Variable Reference
-
-| Variable | Purpose | Required |
-|----------|---------|----------|
-| `OTEL_SERVICE_NAME` | Service name in SigNoz | ✅ |
-| `SIGNOZ_ACCESS_TOKEN` | SigNoz Cloud access token | ✅ (Cloud only) |
-| `SIGNOZ_REGION` | SigNoz Cloud region (us/in/eu) | ✅ (Cloud only) |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | Self-hosted collector endpoint | ✅ (Self-host only) |
-| `SERVICE_VERSION` | Service version | ❌ |
-| `OTEL_LOG_LEVEL` | Debug logging level | ❌ |
