@@ -36,19 +36,19 @@ const MainSection: React.FC = () => {
             <div className="mt-10 flex max-w-full flex-col">
               <div className="mt-10 flex flex-col justify-between gap-6 sm:flex-row">
                 <div className="max-w-full px-6 font-mono text-xl text-signoz_vanilla-400 max-md:max-w-full">
-                  {`// May 12 ⎯ 16`}
+                  {`// Sep 08 ⎯ 12`}
                 </div>
                 <div className="flex flex-row items-center gap-4 px-6">
                   <div className="inline-block h-3 w-3 rounded-sm bg-signoz_forest-500" />
                   <div className="pr-2 font-mono text-lg uppercase text-signoz_vanilla-400 max-md:max-w-full sm:text-xl">
-                    ONLINE — WORLDWIDE, May 12, 9AM PT
+                    ONLINE — WORLDWIDE, Sep 08, 9AM PT
                   </div>
                 </div>
               </div>
               <div className="mt-8 max-w-full border-b-2 border-dashed border-signoz_slate-200/50 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
                 Launch Week{' '}
                 <span className="launch-week-counter rounded bg-signoz_cherry-500  text-signoz_vanilla-100">
-                  4
+                  5
                 </span>
               </div>
             </div>
@@ -74,7 +74,7 @@ const MainSection: React.FC = () => {
             </a>
           </div>
 
-          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
+          {/* <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Monday ⎯ May 12</div>
               <div className="flex flex-col gap-2">
@@ -360,15 +360,15 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-          </div>
+          </div> */}
 
-          {/* Timer  */}
+          {/* Timer */}
           {[
-            // 'Monday ⎯ May 12',
-            // 'Tuesday ⎯ May 13',
-            // 'Wednesday ⎯ May 14',
-            //'Thursday ⎯ May 15',
-            //'Friday ⎯ May 16',
+             'Monday ⎯ Sep 08',
+             'Tuesday ⎯ Sep 09',
+             'Wednesday ⎯ Sep 10',
+            'Thursday ⎯ Sep 11',
+            'Friday ⎯ Sep 12',
           ].map((day, index) => (
             <div
               key={index}
@@ -378,7 +378,7 @@ const MainSection: React.FC = () => {
                 {day}
               </div>
               <div className="flex w-[68%] justify-end sm:justify-start">
-                <CountdownTimer eventDate={`2025-05-${16 + index} 21:30:00`} />
+                <CountdownTimer eventDate={`2025-09-${8 + index} 21:30:00`} />
               </div>
             </div>
           ))}
