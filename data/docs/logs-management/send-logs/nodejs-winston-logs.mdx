@@ -168,7 +168,74 @@ process.on('SIGTERM', () => {
 - **LoggerProvider** must be set up globally for Winston log forwarding to work
 - The SDK must be started **before** your application imports Winston
 
-## Step 3: Configure and Run Your Application
+## Step 3: Create Winston Logger Configuration
+
+Create a Winston logger configuration file that your application will use:
+
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
+```javascript
+// logger.js
+'use strict';
+
+const winston = require('winston');
+
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  // simple format to keep output readable in terminal
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(info => {
+      const { timestamp, level, message, ...meta } = info;
+      const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
+      return `${timestamp} ${level}: ${message}${metaStr}`;
+    })
+  ),
+  transports: [new winston.transports.Console()],
+  defaultMeta: { service: 'winston-express-demo' } // adds to every line
+});
+
+module.exports = logger;
+```
+
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
+```typescript
+// logger.ts
+import winston from 'winston';
+
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  // simple format to keep output readable in terminal
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(info => {
+      const { timestamp, level, message, ...meta } = info;
+      const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
+      return `${timestamp} ${level}: ${message}${metaStr}`;
+    })
+  ),
+  transports: [new winston.transports.Console()],
+  defaultMeta: { service: 'winston-express-demo' } // adds to every line
+});
+
+export default logger;
+```
+
+</TabItem>
+</Tabs>
+
+### Logger Configuration Notes
+
+- **Level**: Controls which log levels are output (debug, info, warn, error)
+- **Format**: Defines how log messages are formatted for readability
+- **Transports**: Specifies where logs are sent (console, file, etc.)
+- **DefaultMeta**: Adds metadata to every log entry
+- **OpenTelemetry Integration**: The Winston instrumentation automatically injects trace context and forwards logs
+
+## Step 4: Configure and Run Your Application
 
 ### Set Environment Variables
 
@@ -235,6 +302,55 @@ node -r ./otel.ts app.ts
 </Tabs>
 
 The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Winston.
+
+### Using the Logger in Your Application
+
+Import and use the logger in your application code:
+
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
+```javascript
+const logger = require('./logger');
+
+// Example usage in your application
+app.get('/', (req, res) => {
+  logger.info('Handling request to root endpoint');
+  res.json({ message: 'Hello World' });
+});
+
+app.get('/error', (req, res) => {
+  logger.error('Simulated error occurred', { 
+    userId: 123, 
+    endpoint: '/error' 
+  });
+  res.status(500).json({ error: 'Something went wrong' });
+});
+```
+
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
+```typescript
+import logger from './logger';
+
+// Example usage in your application
+app.get('/', (req, res) => {
+  logger.info('Handling request to root endpoint');
+  res.json({ message: 'Hello World' });
+});
+
+app.get('/error', (req, res) => {
+  logger.error('Simulated error occurred', { 
+    userId: 123, 
+    endpoint: '/error' 
+  });
+  res.status(500).json({ error: 'Something went wrong' });
+});
+```
+
+</TabItem>
+</Tabs>
 
 ## Verification
 
