@@ -5,15 +5,36 @@ title: Send Zerolog Logs to SigNoz
 description: Learn how to send Zerolog logs with trace correlation to SigNoz for unified observability.
 ---
 
-Zerolog is a high-performance, zero-allocation JSON logger for Go. This document explains how to collect log data from [Zerolog](https://github.com/rs/zerolog) with 
-proper trace correlation and visualize it in SigNoz.
+Zerolog is a high-performance, zero-allocation JSON logger for Go. This document explains how to collect log data from [Zerolog](https://github.com/rs/zerolog) and enable proper trace correlation and visualize it in SigNoz.
 
 ## Prerequisites
 
-- A Golang application [instrumented](https://signoz.io/docs/instrumentation/opentelemetry-golang/) to send traces to SigNoz
 - Application logs that are recorded to a log file
+- A Golang application [instrumented](https://signoz.io/docs/instrumentation/opentelemetry-golang/) to send traces to SigNoz (if you want trace correlation)
 
 ## Setup
+
+### Send logs to SigNoz
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+For application running in a VM, follow this [document](https://signoz.io/docs/userguide/collect_logs_from_file/) to get zerolog logs from your log file to SigNoz.
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes" default>
+For application running in a Kubernetes, follow this [document](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) to get zerolog logs from your Kubernetes pods to SigNoz.
+</TabItem>
+
+<TabItem value="docker" label="Docker" default>
+For application running in a Docker container, follow this [document](https://signoz.io/docs/userguide/collect_docker_logs/) to get zerolog logs from your Docker containers to SigNoz.
+</TabItem>
+</Tabs>
+
+Once you have done the setup, you should see your logs in [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/).
+
+## Correlate logs with traces
+
+You can correlate your zerolog logs with your application traces to enable better observability and debugging.
 
 We will be creating certain packages to correlate logs with traces by automatically injecting trace and span IDs into your log entries. Here's how the package structure will look:
 
@@ -96,7 +117,8 @@ func GetGlobalLogger() *zerolog.Logger {
 
 ### Step 2: Create middleware for web frameworks
 
-This middleware intercepts HTTP requests to extract trace context and creates trace-aware loggers for each request. We're using Gin as the reference framework - if you're using a different framework, you can modify the code accordingly.
+This middleware intercepts HTTP requests to extract trace context and creates trace-aware loggers for each request. We're using Gin as the reference framework, if 
+you're using a different framework, you can modify the code according to [this document](https://signoz.io/docs/instrumentation/opentelemetry-golang/#request-routers).
 
 **pkg/middleware/logging.go**
 
@@ -339,10 +361,6 @@ func main() {
 - The `<module-name>` is the name of the module that you have defined in your `go.mod` file.
 - The `<service-name>` should be replaced with your actual service name (e.g., "user-service", "payment-api", etc.).
 
-### Step 6: Send logs to SigNoz
-
-To send your zerolog logs from your log file to SigNoz, follow this [document](https://signoz.io/docs/userguide/collect_logs_from_file/).
-
 ## Visualise correlated logs and traces
 
 Once you have your logs and traces showing up in SigNoz, you can use [logs pipeline](https://signoz.io/docs/logs-pipelines/introduction/) to extract the
@@ -451,4 +469,4 @@ Checkout this [guide](https://signoz.io/docs/logs-pipelines/guides/trace/) for m
 
 ## Demo repository
 
-For a complete working example, checkout [this repository](https://github.com/nityanandagohain/otel-zerolog-example).
+For a complete working example of an application with correlated zerolog logs and application traces, checkout [this repository](https://github.com/nityanandagohain/otel-zerolog-example).
