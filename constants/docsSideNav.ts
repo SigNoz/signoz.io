@@ -2999,6 +2999,11 @@ const docsSideNav = [
         label: 'LlamaIndex Monitoring',
         type: 'doc',
       },
+      {
+        route: '/docs/llm/langchain-monitoring',
+        label: 'LangChain Monitoring',
+        type: 'doc',
+      },
     ],
   },
   {
