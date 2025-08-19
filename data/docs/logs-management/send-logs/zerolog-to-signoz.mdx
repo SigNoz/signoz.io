@@ -231,6 +231,8 @@ func InitTracer(serviceName string) func() {
 }
 ```
 
+- `OTEL_EXPORTER_OTLP_ENDPOINT` is the endpoint where the collector is running, by default it's taken as `localhost:4317` in the above code.
+
 ### Step 4: Create logger context helper
 
 This utility function retrieves the trace-aware logger from the request context, making it easy to access correlated logging throughout your application. It falls back to the global logger if no trace context is available.
@@ -263,71 +265,69 @@ func Logger(c *gin.Context) *zerolog.Logger {
 
 ### Step 5: Using the trace aware logger in your application
 
-```go:main.Go
+This code demonstrates how to wire everything together by initializing the logger with both console and file output, setting up OpenTelemetry tracing, and configuring Gin with the necessary middleware for trace correlation.
+
+**main.go**
+
+```go:main.go
+package main
+
 import (
-   // Add these as imports
+	"os"
+	"time"
+
 	"<module-name>/pkg/context"
 	"<module-name>/pkg/logger"
 	"<module-name>/pkg/middleware"
 	"<module-name>/pkg/tracing"
-    ...
+
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
-```
 
-The `<module-name>` is the name of the module that you have defined in your `go.mod` file.
-
-Utilise the trace-aware logger in your application:
-
-```go:main.go
 func main() {
-	// Initialize logger
-	// Configure console writer with color
 	consoleWriter := zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		TimeFormat: time.RFC3339,
 	}
 
-	// Configure file writer
 	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log := zerolog.New(consoleWriter).With().Timestamp().Logger()
 		log.Fatal().Err(err).Msg("Failed to open log file")
 	}
 
-	// Create multi-level writer
 	multi := zerolog.MultiLevelWriter(consoleWriter, file)
 
-	// Initialize logger with multi-level writer
 	logger.InitWithWriter(multi)
 	log := logger.GetGlobalLogger()
 
-	// Initialize tracer
-	cleanup := tracing.InitTracer("gin-zerolog-app")
+	cleanup := tracing.InitTracer("<service-name>")
 	defer cleanup()
 
-	// Create Gin router
 	r := gin.New()
 
-	// Add middlewares
 	r.Use(gin.Recovery())
-	r.Use(otelgin.Middleware("gin-zerolog-app")) // OpenTelemetry middleware
-	r.Use(middleware.LoggingMiddleware())        // Custom logging middleware
+	r.Use(otelgin.Middleware("<service-name>"))
+	r.Use(middleware.LoggingMiddleware())
 
-	// // Add routes 
-	// r.GET("/ping", func(c *gin.Context) {
-	// 	context.Logger(c).Info().Msg("hello")
-	// 	c.JSON(200, gin.H{
-	// 		"message": "pong",
-	// 	})
-	// })
+	r.GET("/ping", func(c *gin.Context) {
+		context.Logger(c).Info().Msg("hello")
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 
-	// // Start server
-	// log.Info().Msg("Starting server on :8080")
-	// if err := r.Run(":8080"); err != nil {
-	// 	log.Fatal().Err(err).Msg("Failed to start server")
-	// }
+	log.Info().Msg("Starting server on :8080")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal().Err(err).Msg("Failed to start server")
+	}
 }
 ```
+
+- The `<module-name>` is the name of the module that you have defined in your `go.mod` file.
+- The `<service-name>` should be replaced with your actual service name (e.g., "user-service", "payment-api", etc.).
 
 ### Step 6: Send logs to SigNoz
 
