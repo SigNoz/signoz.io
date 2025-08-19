@@ -5,7 +5,7 @@ id: nodejs-pino-logs
 description: Automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library
 ---
 
-This guide shows you how to automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library. This setup provides automatic correlation between your application traces and logs in SigNoz, giving you **automatic trace generation** for HTTP requests, Express routes, and other common libraries, **structured logs** with trace correlation automatically injected, **unified observability** with traces and logs correlated in SigNoz, and **production-ready configuration** with batch processing for optimal performance.
+This document shows you how to automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library. This setup provides automatic correlation between your application traces and logs in SigNoz with production-ready configuration.
 
 ## Prerequisites
 
@@ -35,8 +35,8 @@ npm i @opentelemetry/sdk-node \
 
 Create an OpenTelemetry configuration file at your project root:
 
-<details>
-<summary><strong>JavaScript (otel.js)</strong></summary>
+<Tabs>
+<TabItem value="js" label="JavaScript">
 
 ```javascript
 // otel.js
@@ -71,10 +71,9 @@ process.on('SIGTERM', () => {
   sdk.shutdown().finally(() => process.exit(0));
 });
 ```
-</details>
 
-<details>
-<summary><strong>TypeScript (otel.ts)</strong></summary>
+</TabItem>
+<TabItem value="ts" label="TypeScript">
 
 ```typescript
 // otel.ts
@@ -108,7 +107,9 @@ process.on('SIGTERM', () => {
   sdk.shutdown().finally(() => process.exit(0));
 });
 ```
-</details>
+
+</TabItem>
+</Tabs>
 
 ### Configuration Notes
 
@@ -121,15 +122,22 @@ process.on('SIGTERM', () => {
 
 Use the `-r` flag to preload the OpenTelemetry configuration before your application starts:
 
-**For JavaScript:**
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
 ```bash
 node -r ./otel.js app.js
 ```
 
-**For TypeScript:**
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
 ```bash
 node -r ./otel.ts app.ts
 ```
+
+</TabItem>
+</Tabs>
 
 The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Pino.
 
@@ -171,15 +179,22 @@ export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="http://<collector-host>:4318/v1/logs"
 
 Start your application with OpenTelemetry instrumentation:
 
-**For JavaScript:**
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
 ```bash
 node -r ./otel.js app.js
 ```
 
-**For TypeScript:**
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
 ```bash
 node -r ./otel.ts app.ts
 ```
+
+</TabItem>
+</Tabs>
 
 ## Verification
 
@@ -219,14 +234,21 @@ After starting your application:
 
 Enable debug logging to troubleshoot issues:
 
-**For JavaScript:**
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
 ```bash
 export OTEL_LOG_LEVEL=debug
 node -r ./otel.js app.js
 ```
 
-**For TypeScript:**
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
 ```bash
 export OTEL_LOG_LEVEL=debug
 node -r ./otel.ts app.ts
 ```
+
+</TabItem>
+</Tabs>
