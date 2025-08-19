@@ -139,12 +139,7 @@ Resources:
             Retries: 2
             Timeout: 3
           LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-create-group: 'True'
-              awslogs-group: /ecs/daemon-signoz-collector
-              awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: ecs
+            LogDriver: json-file
       RequiresCompatibilities:
         - EC2
       Volumes:
@@ -338,12 +333,7 @@ Resources:
             Retries: 2
             Timeout: 3
           LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-create-group: 'True'
-              awslogs-group: /ecs/daemon-signoz-collector
-              awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: ecs
+            LogDriver: json-file
       RequiresCompatibilities:
         - EC2
       Volumes:
@@ -715,20 +705,6 @@ Look for:
 - Verify the parameter name matches exactly: `/ecs/signoz/otelcol-daemon.yaml`
 - Check the parameter is in the same region as your ECS cluster
 
-### Checking Logs
-
-View logs from the daemon service containers:
-
-```bash
-# Get log group name (usually includes the cluster name)
-aws logs describe-log-groups --log-group-name-prefix="/ecs"
-
-# View recent logs
-aws logs describe-log-streams \
-    --log-group-name "/ecs/signoz-daemon" \
-    --order-by LastEventTime \
-    --descending
-```
 
 ## Clean Up (If Needed)
 
@@ -744,15 +720,5 @@ This will remove all resources created by the CloudFormation template, including
 
 ## Next Steps
 
-Once installation is complete:
-
-1. **[Configure the service](/docs/collection-agents/ecs/ec2/configure/)** to customize data collection
-2. **Verify data flow** to your SigNoz instance  
-3. **Set up dashboards** to visualize your ECS infrastructure metrics
-
-## Support and Resources
-
-- [SigNoz Documentation](https://signoz.io/docs/)
-- [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
-- [AWS ECS Documentation](https://docs.aws.amazon.com/ecs/)
-- [SigNoz Slack Community](https://signoz.io/slack)
+- [Configure the Daemon Service Collection Agent](/docs/collection-agents/ecs/ec2/configure/)
+- [Learn more about Collection from EC2](/docs/collection-agents/ecs/ec2/overview)

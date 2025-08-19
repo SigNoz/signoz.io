@@ -5,7 +5,6 @@ title: ECS EC2 Collection Agent - Configure
 description: View metrics and logs for your ECS infrastructure
 ---
 
-
 This guide covers configuring your daemon service after installation, verifying data flow, and setting up application data collection.
 
 ## Prerequisites
@@ -17,41 +16,14 @@ Before configuring, ensure you have:
 
 ## Verify Data Collection
 
-### Step 1: Check SigNoz Data Reception
+Log into your SigNoz instance and check that ECS infrastructure metrics and logs are being received.
 
-Log into your SigNoz instance and verify that infrastructure data is being received:
+To visualize ECS data, import pre-built dashboards:
 
-**For SigNoz Cloud:**
-1. Go to your SigNoz Cloud dashboard
-2. Navigate to **Infrastructure > Metrics**
-3. Look for metrics from your ECS cluster nodes
+- [instance-metrics.json](https://github.com/SigNoz/dashboards/blob/main/ecs-infra-metrics/instance-metrics.json)
+- [hostmetrics.json](https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics.json)
 
-**For Self-Hosted SigNoz:**
-1. Access your SigNoz instance
-2. Check the metrics section for infrastructure data
-3. Verify logs are appearing in the logs section
-
-### Step 2: Import Infrastructure Dashboards
-
-To better visualize your ECS infrastructure data, import pre-built dashboards:
-
-**Available Dashboards:**
-- [instance-metrics.json](https://github.com/SigNoz/dashboards/blob/main/ecs-infra-metrics/instance-metrics.json) - ECS-specific infrastructure metrics
-- [hostmetrics.json](https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics.json) - General host metrics
-
-**Import Steps:**
-1. Download the dashboard JSON files
-2. In SigNoz, go to **Dashboards** section
-3. Click **Import Dashboard**
-4. Upload the JSON file or paste the content
-5. Save the dashboard
-
-**Expected Dashboard Data:**
-- CPU utilization per ECS instance
-- Memory usage and availability  
-- Network I/O statistics
-- Disk usage and I/O metrics
-- Container-level resource consumption
+Import these in the **Dashboards** section of SigNoz.
 
 ## Send Data from Applications
 
@@ -195,7 +167,7 @@ The `entryPoint` will look like the following based on your network mode and clo
 </TabItem>
 </Tabs>
 
-### Step 3: Add Service Name of your Application
+### 3. Add Service Name of your Application
 
 To add the service name of your application, you need to set the
 `OTEL_RESOURCE_ATTRIBUTES` environment variable of the application container
@@ -235,32 +207,3 @@ In case of JSON task definition, you can add the following lines.
 
 
 ```
-
-### Step 4: Rebuild and Deploy Application Container
-
-After following previous step, you need to rebuild the application container and deploy it to ECS cluster.
-
-### Step 5: Verify Data in SigNoz
-
-<div>
-You will need to generate some traffic to your application. After which you can go to the
-SigNoz Cloud Services page and you should see your application in the services list.
-</div>
-<br/>
-
-
-## Next Steps
-
-With configuration complete, you can:
-
-1. **Create Custom Dashboards**: Build dashboards specific to your use cases
-2. **Set Up Alerts**: Configure alerting rules for infrastructure metrics
-3. **Optimize Performance**: Fine-tune collection settings based on data volume
-4. **Scale Monitoring**: Extend to additional ECS clusters or environments
-
-## Support and Resources
-
-- [SigNoz Documentation](https://signoz.io/docs/)
-- [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
-- [AWS ECS Documentation](https://docs.aws.amazon.com/ecs/)
-- [SigNoz Slack Community](https://signoz.io/slack)

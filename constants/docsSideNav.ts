@@ -597,6 +597,28 @@ const docsSideNav = [
               route: "/docs/collection-agents/ecs/ec2/configure"
             }
           ]
+         },
+         {
+          type: "category",
+          label: "Serverless",
+          isExpanded: false,
+          items: [
+            {
+              type: 'doc',
+              label: "Overview",
+              route: "/docs/collection-agents/ecs/sidecar/overview"
+            },
+            {
+              type: 'doc',
+              label: 'Install',
+              route: "/docs/collection-agents/ecs/sidecar/install"
+            },
+            {
+              type : 'doc',
+              label: "Configure",
+              route: "/docs/collection-agents/ecs/sidecar/configure"
+            }
+          ]
          }
         ],
       },
