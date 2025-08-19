@@ -5,7 +5,7 @@ id: nodejs-pino-logs
 description: Automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library
 ---
 
-This document shows you how to automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library. This setup provides automatic correlation between your application traces and logs in SigNoz with production-ready configuration.
+This document shows you how to send logs from your Node.js application using the Pino logging library to SigNoz. The setup automatically correlates your logs with traces when available, providing unified observability in SigNoz.
 
 ## Prerequisites
 
@@ -125,50 +125,61 @@ process.on('SIGTERM', () => {
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-Set the following environment variables for SigNoz Cloud:
-
 ```bash
-export OTEL_SERVICE_NAME=your-service-name
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=YOUR_INGESTION_KEY"
+export OTEL_SERVICE_NAME=<service_name>
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ```
 
-Replace `{region}` with your SigNoz Cloud region:
-- **US**: `ingest.us.signoz.cloud`
-- **India**: `ingest.in.signoz.cloud`  
-- **Europe**: `ingest.eu.signoz.cloud`
+* Set the `<region>` to match your SigNoz Cloud **region**
+* Replace `<your-ingestion-key>` with your SigNoz **ingestion key**
+* `<service_name>` is name of your service
 
 </TabItem>
 <TabItem value="self-host" label="Self-Host">
 
-Point to your OpenTelemetry collector's OTLP HTTP receiver:
-
 ```bash
-export OTEL_SERVICE_NAME=your-service-name
-export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://<collector-host>:4318/v1/traces"
-export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="http://<collector-host>:4318/v1/logs"
+export OTEL_SERVICE_NAME=<service_name>
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://<collector-host>:4318"
 ```
+
+* Replace `<collector-host>` with your OpenTelemetry collector host
+* `<service_name>` is name of your service
 
 </TabItem>
 </Tabs>
 
 ### Start Your Application
 
-Use the `-r` flag to preload the OpenTelemetry configuration before your application starts:
-
 <Tabs>
 <TabItem value="js" label="JavaScript">
 
 ```bash
+export OTEL_SERVICE_NAME=<service_name>
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
 node -r ./otel.js app.js
 ```
+
+* Set the `<region>` to match your SigNoz Cloud **region**
+* Replace `<your-ingestion-key>` with your SigNoz **ingestion key**
+* `<service_name>` is name of your service
 
 </TabItem>
 <TabItem value="ts" label="TypeScript">
 
 ```bash
+export OTEL_SERVICE_NAME=<service_name>
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
 node -r ./otel.ts app.ts
 ```
+
+* Set the `<region>` to match your SigNoz Cloud **region**
+* Replace `<your-ingestion-key>` with your SigNoz **ingestion key**
+* `<service_name>` is name of your service
 
 </TabItem>
 </Tabs>
