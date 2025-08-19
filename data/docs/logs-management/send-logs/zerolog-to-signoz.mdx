@@ -320,6 +320,7 @@ func main() {
 	r.Use(middleware.LoggingMiddleware())            // Custom trace-aware logging middleware
 
 	// Example route using trace-aware logger
+	//This is just for reference, modify it according to your application
 	r.GET("/ping", func(c *gin.Context) {
 		context.Logger(c).Info().Msg("hello")
 		c.JSON(200, gin.H{
@@ -344,15 +345,17 @@ To send your zerolog logs from your log file to SigNoz, follow this [document](h
 
 ## Visualise correlated logs and traces
 
-Once you have your logs and traces showing up in SigNoz, you can use the [logs pipeline](https://signoz.io/docs/logs-pipelines/introduction/) feature to extract the `span_id` and `trace_id` from the log body to attributes using the [trace parser](https://signoz.io/docs/logs-pipelines/processors/#trace-parser).
+Once you have your logs and traces showing up in SigNoz, you can use [logs pipeline](https://signoz.io/docs/logs-pipelines/introduction/) to extract the
+`span_id` and `trace_id` from the log body to attributes using the [trace parser](https://signoz.io/docs/logs-pipelines/processors/#trace-parser).
 
-Here's an example log from our setup:
+Let's say, this is an example log from our setup that contains the `trace_id` and `span_id` in the body:
 
 ```json
 {
-  "body": "{\"level\":\"info\",\"trace_id\":\"1110f66978ec50f01d2e49dd52aaa486\",\"span_id\":\"47da85fb2363e459\",\"method\":\"GET\",\"path\":\"/health\",\"status\":404,\"latency\":0.010917,\"client_ip\":\"::1\",\"time\":\"2025-08-19T14:38:55+05:30\",\"message\":\"Request processed\"}",
-  "id": "0hef4qkqhDAezXycKAjsAXrs8C9",
-  "timestamp": "2025-08-19T09:08:55.594909Z",
+  "body": "{\"level\":\"info\",\"trace_id\":\"95db539ae3400511c3afe5fbfce7bb36\",\"span_id\":\"e8f3b29fca420c9e\",\"method\":\"GET\",\"path\":\"/users/45\",\"status\":404,\"latency\":0.009166,\"client_ip\":\"::1\",\"time\":\"2025-08-19T16:06:45+05:30\",\"message\":\"Request processed\"}",
+  "date": "2025-08-19T10:36:45.504706Z",
+  "id": "0hehZ2k1O2ebOEqzDXsWeZL01w4",
+  "timestamp": "2025-08-19T10:36:45.504706Z",
   "attributes": {
     "log.file.name": "app.log"
   },
@@ -364,27 +367,71 @@ Here's an example log from our setup:
   "severity_number": 0,
   "scope_name": "",
   "scope_version": "",
-  "span_id": "47da85fb2363e459",
+  "span_id": "",
   "trace_flags": 0,
-  "trace_id": "1110f66978ec50f01d2e49dd52aaa486"
+  "trace_id": ""
 }
 ```
 
-To set up trace correlation:
+To set up trace correlation, we can use logs pipelines:
 
-1. **Create a new pipeline**: Go to the Logs Pipeline section in SigNoz and create a new pipeline.
+### Step 1: Create a new pipeline: 
 
-2. **Add filter condition**: In the filter section, specify that the body contains `trace_id` to target relevant logs.
+Go to the Logs Pipeline section in SigNoz and create a new pipeline.
 
-3. **Configure trace parser**: Add a trace parser processor with the following configuration:
+In the filter section, specify that the body contains `trace_id` to target relevant logs.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/send-logs/zerolog-filter-logs.webp" alt="Filter Zerolog Logs in pipeline"/>
+<figcaption><i>Filter Zerolog Logs in pipeline</i></figcaption>
+</figure>
+
+
+### Step 2: Configure trace parser: 
+
+Add a trace parser processor with the following configuration:
    - **Trace ID field**: `body.trace_id`
    - **Span ID field**: `body.span_id`
 
-4. **Save and activate**: Once you save this pipeline, all your logs will have the `span_id` and `trace_id` extracted to attributes.
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/send-logs/zerolog-extract-trace-and-span-id.webp" alt="Extract Trace and Span ID"/>
+<figcaption><i>Extract Trace and Span ID</i></figcaption>
+</figure>
 
-5. **Navigate between logs and traces**: You can now directly correlate from spans to logs or logs to spans/traces using the correlation buttons in the SigNoz UI.
+### Step 3: Save and activate:
 
-{/* Add description of how to use pipelines */}
+Once you save this pipeline, all your logs will have the `span_id` and `trace_id` extracted to attributes.
+
+Final output sample log will look like:
+
+```json
+{
+  "body": "{\"level\":\"info\",\"trace_id\":\"95db539ae3400511c3afe5fbfce7bb36\",\"span_id\":\"e8f3b29fca420c9e\",\"method\":\"GET\",\"path\":\"/users/45\",\"status\":404,\"latency\":0.009166,\"client_ip\":\"::1\",\"time\":\"2025-08-19T16:06:45+05:30\",\"message\":\"Request processed\"}",
+  "date": "2025-08-19T10:36:45.504706Z",
+  "id": "0hehZ2k1O2ebOEqzDXsWeZL01w4",
+  "timestamp": "2025-08-19T10:36:45.504706Z",
+  "attributes": {
+    "log.file.name": "app.log"
+  },
+  "resources": {
+    "signoz.workspace.key.id": "01982bf9-3376-79cb-a309-22404a54e644"
+  },
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "scope_name": "",
+  "scope_version": "",
+  "span_id": "e8f3b29fca420c9e",
+  "trace_flags": 0,
+  "trace_id": "95db539ae3400511c3afe5fbfce7bb36"
+}
+```
+
+You can now directly jump from traces to logs or logs to traces using the correlation buttons in the SigNoz UI.
+
+
+<Figure src="/img/docs/logs-management/send-logs/zerolog-correlation.gif" alt="Correlating logs and traces" caption="Correlation from Traces to Logs and vice versa in SigNoz" />
+
 
 Checkout this [guide](https://signoz.io/docs/logs-pipelines/guides/trace/) for more details about how to extract trace information from your logs.
 
@@ -401,8 +448,7 @@ Checkout this [guide](https://signoz.io/docs/logs-pipelines/guides/trace/) for m
 1. Ensure OpenTelemetry tracing is properly initialized
 2. Verify the middleware is extracting trace context correctly
 3. Check that you're using the trace-aware logger from context, not the global logger
-4. Make sure the otelgin middleware is added before your logging middleware
 
-## Example repository
+## Demo repository
 
-For a complete working example, see: [nityanandagohain/otel-zerolog-example](https://github.com/nityanandagohain/otel-zerolog-example)
+For a complete working example, checkout [this repository](https://github.com/nityanandagohain/otel-zerolog-example).
