@@ -96,7 +96,7 @@ func GetGlobalLogger() *zerolog.Logger {
 
 ### Step 2: Create middleware for web frameworks
 
-If you're using a web framework like Gin, create middleware to inject trace context into your logs:
+This middleware intercepts HTTP requests to extract trace context and creates trace-aware loggers for each request. We're using Gin as the reference framework - if you're using a different framework, you can modify the code accordingly.
 
 **pkg/middleware/logging.go**
 
@@ -106,7 +106,7 @@ package middleware
 import (
 	"time"
 
-	"golang-zerolog/pkg/logger"
+	"<module-name>/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/trace"
@@ -143,9 +143,13 @@ func LoggingMiddleware() gin.HandlerFunc {
 }
 ```
 
-### Step 3: Tracing
+- The `<module-name>` is the name of the module that you have defined in your `go.mod` file.
 
-**tracing/tracing.go**
+### Step 3: Initialize OpenTelemetry tracer
+
+This sets up the OpenTelemetry infrastructure to export traces to SigNoz via OTLP. It configures the tracer provider with proper resource attributes and handles connection failures gracefully.
+
+**pkg/tracing/tracing.go**
 
 ```go:tracing.go
 package tracing
@@ -227,15 +231,17 @@ func InitTracer(serviceName string) func() {
 }
 ```
 
-### Step 4: Context
+### Step 4: Create logger context helper
 
-**pkg/context/context.go
+This utility function retrieves the trace-aware logger from the request context, making it easy to access correlated logging throughout your application. It falls back to the global logger if no trace context is available.
+
+**pkg/context/context.go**
 
 ```go:context.go
 package context
 
 import (
-	"golang-zerolog/pkg/logger"
+	"<module-name>/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -252,6 +258,8 @@ func Logger(c *gin.Context) *zerolog.Logger {
 	return logger.GetGlobalLogger()
 }
 ```
+
+- The `<module-name>` is the name of the module that you have defined in your `go.mod` file.
 
 ### Step 5: Using the trace aware logger in your application
 
