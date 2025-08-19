@@ -1,6 +1,6 @@
 ---
-date: 2024-12-07
-title: Auto-instrumenting Node.js Applications with Pino Logger
+date: 2025-08-19
+title: Auto-instrumenting Node.js Applications with Pino
 id: nodejs-pino-logs
 description: Automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Pino logging library
 ---
@@ -131,9 +131,9 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ```
 
-* Set the `<region>` to match your SigNoz Cloud **region**
-* Replace `<your-ingestion-key>` with your SigNoz **ingestion key**
-* `<service_name>` is name of your service
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
 
 </TabItem>
 <TabItem value="self-host" label="Self-Host">
@@ -143,8 +143,8 @@ export OTEL_SERVICE_NAME=<service_name>
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://<collector-host>:4318"
 ```
 
-* Replace `<collector-host>` with your OpenTelemetry collector host
-* `<service_name>` is name of your service
+- Replace `<collector-host>` with your OpenTelemetry collector host
+- `<service_name>` is name of your service
 
 </TabItem>
 </Tabs>
@@ -155,31 +155,15 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="http://<collector-host>:4318"
 <TabItem value="js" label="JavaScript">
 
 ```bash
-export OTEL_SERVICE_NAME=<service_name>
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-
 node -r ./otel.js app.js
 ```
-
-* Set the `<region>` to match your SigNoz Cloud **region**
-* Replace `<your-ingestion-key>` with your SigNoz **ingestion key**
-* `<service_name>` is name of your service
 
 </TabItem>
 <TabItem value="ts" label="TypeScript">
 
 ```bash
-export OTEL_SERVICE_NAME=<service_name>
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-
 node -r ./otel.ts app.ts
 ```
-
-* Set the `<region>` to match your SigNoz Cloud **region**
-* Replace `<your-ingestion-key>` with your SigNoz **ingestion key**
-* `<service_name>` is name of your service
 
 </TabItem>
 </Tabs>
@@ -191,30 +175,10 @@ The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your ap
 After starting your application:
 
 1. **Make some requests** to your application endpoints
-2. **Check SigNoz** for incoming traces and logs
-3. **Verify correlation** - your logs should contain trace IDs and be correlated with spans
+2. **Check SigNoz** for incoming logs
+3. **Verify correlation** - your logs should contain trace IDs and be correlated with spans if available
 
-### What to Look For
-
-- **Traces** appearing in the SigNoz Traces tab
-- **Logs** appearing in the SigNoz Logs tab
-- **Trace correlation** - logs should contain `traceId` and `spanId` fields
-
-## Troubleshooting
-
-### Common Issues
-
-**No traces appearing:**
-- Ensure the preload script (`-r ./otel.js`) is used
-- Check that environment variables are set correctly
-- Verify network connectivity to SigNoz
-
-**No logs appearing:**
-- Confirm Pino is being used for logging in your application
-- Check that the Pino instrumentation is properly configured
-- Verify the OTLP logs endpoint is correct
-
-**Missing trace correlation:**
-- Ensure OpenTelemetry is loaded before Pino is imported
-- Check that the Pino instrumentation is enabled
-- Verify spans are being created (check traces first)
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/send-logs/nodejs-pino-logs.webp" alt="Pino Logs with Span ID and Trace ID"/>
+    <figcaption><i>Pino Logs with Span ID and Trace ID for Correlation</i></figcaption>
+</figure>
