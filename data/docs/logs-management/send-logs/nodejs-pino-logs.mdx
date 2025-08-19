@@ -118,32 +118,9 @@ process.on('SIGTERM', () => {
 - **Pino instrumentation** injects trace context into your logs and forwards log records to the OpenTelemetry Logs SDK
 - The SDK must be started **before** your application imports Pino
 
-## Step 3: Run with Preload
+## Step 3: Configure and Run Your Application
 
-Use the `-r` flag to preload the OpenTelemetry configuration before your application starts:
-
-<Tabs>
-<TabItem value="js" label="JavaScript">
-
-```bash
-node -r ./otel.js app.js
-```
-
-</TabItem>
-<TabItem value="ts" label="TypeScript">
-
-```bash
-node -r ./otel.ts app.ts
-```
-
-</TabItem>
-</Tabs>
-
-The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Pino.
-
-## Configuration
-
-### Environment Variables
+### Set Environment Variables
 
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
@@ -175,9 +152,9 @@ export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="http://<collector-host>:4318/v1/logs"
 </TabItem>
 </Tabs>
 
-### Running Your Application
+### Start Your Application
 
-Start your application with OpenTelemetry instrumentation:
+Use the `-r` flag to preload the OpenTelemetry configuration before your application starts:
 
 <Tabs>
 <TabItem value="js" label="JavaScript">
@@ -196,6 +173,8 @@ node -r ./otel.ts app.ts
 </TabItem>
 </Tabs>
 
+The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Pino.
+
 ## Verification
 
 After starting your application:
@@ -209,7 +188,6 @@ After starting your application:
 - **Traces** appearing in the SigNoz Traces tab
 - **Logs** appearing in the SigNoz Logs tab
 - **Trace correlation** - logs should contain `traceId` and `spanId` fields
-- **Service mapping** showing your service in the dependency graph
 
 ## Troubleshooting
 
@@ -229,26 +207,3 @@ After starting your application:
 - Ensure OpenTelemetry is loaded before Pino is imported
 - Check that the Pino instrumentation is enabled
 - Verify spans are being created (check traces first)
-
-### Debug Mode
-
-Enable debug logging to troubleshoot issues:
-
-<Tabs>
-<TabItem value="js" label="JavaScript">
-
-```bash
-export OTEL_LOG_LEVEL=debug
-node -r ./otel.js app.js
-```
-
-</TabItem>
-<TabItem value="ts" label="TypeScript">
-
-```bash
-export OTEL_LOG_LEVEL=debug
-node -r ./otel.ts app.ts
-```
-
-</TabItem>
-</Tabs>
