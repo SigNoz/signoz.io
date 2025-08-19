@@ -265,7 +265,7 @@ func Logger(c *gin.Context) *zerolog.Logger {
 
 ### Step 5: Using the trace aware logger in your application
 
-This code demonstrates how to wire everything together by initializing the logger with both console and file output, setting up OpenTelemetry tracing, and configuring Gin with the necessary middleware for trace correlation.
+This code demonstrates how to wire everything together by initializing the logger with both console and file output (`app.log`), setting up OpenTelemetry tracing, and configuring Gin with the necessary middleware for trace correlation.
 
 **main.go**
 
@@ -287,31 +287,39 @@ import (
 )
 
 func main() {
+	// Configure logger outputs
 	consoleWriter := zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		TimeFormat: time.RFC3339,
 	}
 
+	// Create or open log file for persistent logging
 	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log := zerolog.New(consoleWriter).With().Timestamp().Logger()
 		log.Fatal().Err(err).Msg("Failed to open log file")
 	}
 
+	// Setup multi-level writer for both console and file output
 	multi := zerolog.MultiLevelWriter(consoleWriter, file)
 
+	// Initialize logger with the multi-writer
 	logger.InitWithWriter(multi)
 	log := logger.GetGlobalLogger()
 
+	// Initialize OpenTelemetry tracer for sending traces to SigNoz
 	cleanup := tracing.InitTracer("<service-name>")
 	defer cleanup()
 
+	// Create Gin router
 	r := gin.New()
 
-	r.Use(gin.Recovery())
-	r.Use(otelgin.Middleware("<service-name>"))
-	r.Use(middleware.LoggingMiddleware())
+	// Add middleware stack
+	r.Use(gin.Recovery())                            // Panic recovery middleware
+	r.Use(otelgin.Middleware("<service-name>"))      // OpenTelemetry tracing middleware
+	r.Use(middleware.LoggingMiddleware())            // Custom trace-aware logging middleware
 
+	// Example route using trace-aware logger
 	r.GET("/ping", func(c *gin.Context) {
 		context.Logger(c).Info().Msg("hello")
 		c.JSON(200, gin.H{
@@ -319,6 +327,7 @@ func main() {
 		})
 	})
 
+	// Start the server
 	log.Info().Msg("Starting server on :8080")
 	if err := r.Run(":8080"); err != nil {
 		log.Fatal().Err(err).Msg("Failed to start server")
@@ -331,15 +340,53 @@ func main() {
 
 ### Step 6: Send logs to SigNoz
 
-To send logs from your log file to SigNoz, follow this [document](https://signoz.io/docs/userguide/collect_logs_from_file/).
+To send your zerolog logs from your log file to SigNoz, follow this [document](https://signoz.io/docs/userguide/collect_logs_from_file/).
 
-## Correlate logs with traces
+## Visualise correlated logs and traces
 
-Once you have your logs coming up in SigNoz, use the logs pipelines to extract the trace id and span id from the logs using the trace processor.
+Once you have your logs and traces showing up in SigNoz, you can use the [logs pipeline](https://signoz.io/docs/logs-pipelines/introduction/) feature to extract the `span_id` and `trace_id` from the log body to attributes using the [trace parser](https://signoz.io/docs/logs-pipelines/processors/#trace-parser).
+
+Here's an example log from our setup:
+
+```json
+{
+  "body": "{\"level\":\"info\",\"trace_id\":\"1110f66978ec50f01d2e49dd52aaa486\",\"span_id\":\"47da85fb2363e459\",\"method\":\"GET\",\"path\":\"/health\",\"status\":404,\"latency\":0.010917,\"client_ip\":\"::1\",\"time\":\"2025-08-19T14:38:55+05:30\",\"message\":\"Request processed\"}",
+  "id": "0hef4qkqhDAezXycKAjsAXrs8C9",
+  "timestamp": "2025-08-19T09:08:55.594909Z",
+  "attributes": {
+    "log.file.name": "app.log"
+  },
+  "resources": {
+    "signoz.workspace.key.id": "01982bf9-3376-79cb-a309-22404a54e644"
+  },
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "scope_name": "",
+  "scope_version": "",
+  "span_id": "47da85fb2363e459",
+  "trace_flags": 0,
+  "trace_id": "1110f66978ec50f01d2e49dd52aaa486"
+}
+```
+
+To set up trace correlation:
+
+1. **Create a new pipeline**: Go to the Logs Pipeline section in SigNoz and create a new pipeline.
+
+2. **Add filter condition**: In the filter section, specify that the body contains `trace_id` to target relevant logs.
+
+3. **Configure trace parser**: Add a trace parser processor with the following configuration:
+   - **Trace ID field**: `body.trace_id`
+   - **Span ID field**: `body.span_id`
+
+4. **Save and activate**: Once you save this pipeline, all your logs will have the `span_id` and `trace_id` extracted to attributes.
+
+5. **Navigate between logs and traces**: You can now directly correlate from spans to logs or logs to spans/traces using the correlation buttons in the SigNoz UI.
 
 {/* Add description of how to use pipelines */}
 
-Checkout[ this guide](https://signoz.io/docs/logs-pipelines/guides/trace/) for more details about how to extract trace information from your logs.
+Checkout this [guide](https://signoz.io/docs/logs-pipelines/guides/trace/) for more details about how to extract trace information from your logs.
 
 ## Troubleshooting
 
