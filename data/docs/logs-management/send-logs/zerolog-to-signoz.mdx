@@ -1,5 +1,5 @@
 ---
-date: '2025-08-17'
+date: 2025-08-17
 id: zerolog-to-signoz
 title: Send Zerolog Logs to SigNoz
 description: Learn how to send Zerolog logs with trace correlation to SigNoz for unified observability.
@@ -9,375 +9,320 @@ description: Learn how to send Zerolog logs with trace correlation to SigNoz for
 
 ## Overview
 
-This document explains how to collect log data from [Zerolog](https://github.com/rs/zerolog) with proper trace correlation and visualize it in [SigNoz](https://signoz.io/).
-
-Zerolog is a high-performance, zero-allocation JSON logger for Go. When integrated with OpenTelemetry, it can automatically include trace context (trace_id and span_id) in logs, enabling powerful correlation between logs and traces in SigNoz.
+Zerolog is a high-performance, zero-allocation JSON logger for Go. This document explains how to collect log data from [Zerolog](https://github.com/rs/zerolog) with 
+proper trace correlation and visualize it in [SigNoz](https://signoz.io/).
 
 ## Prerequisites
 
-- A running Golang application
-- OpenTelemetry instrumentation set up for tracing (if you want trace correlation)
-- SigNoz account (cloud or self-hosted)
+- A Golang application that is instrumented with [OpenTelemetry](https://signoz.io/docs/instrumentation/opentelemetry-golang/) and sends traces to SigNoz
+- Application logs that are recorded to a log file
 
 ## Setup
 
-### Step 1: Install dependencies
 
-Navigate to the root folder of your Golang application and run the following command to install the required dependencies:
-
-```bash
-go get \
-  github.com/rs/zerolog \
-  go.opentelemetry.io/otel/sdk/log \
-  go.opentelemetry.io/otel/sdk/trace \
-  go.opentelemetry.io/otel/trace \
-  go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc \
-  go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp
-```
-
-### Step 2: Create a trace-aware logger
+### Step 1: Create a trace-aware logger
 
 To properly correlate logs with traces, you need to create a logger that extracts trace context from requests. Create a logger package with the following structure:
 
-#### logger/logger.go
+**pkg/logger/logger.go**
 
-```go
+```go:logger.go
 package logger
 
 import (
-    "os"
-    "time"
+	"os"
+	"time"
 
-    "github.com/rs/zerolog"
-    "go.opentelemetry.io/otel/trace"
+	"github.com/rs/zerolog"
+	"go.opentelemetry.io/otel/trace"
 )
 
-var globalLogger zerolog.Logger
+var log zerolog.Logger
 
-// Init initializes the global logger
+// Init initializes the logger to write to the console.
 func Init() {
-    zerolog.TimeFieldFormat = time.RFC3339
-    zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	zerolog.TimeFieldFormat = time.RFC3339
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
-    // Console writer for development
-    output := zerolog.ConsoleWriter{
-        Out:        os.Stdout,
-        TimeFormat: time.RFC3339,
-    }
+	// Configure console writer with color
+	consoleWriter := zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		TimeFormat: time.RFC3339,
+	}
 
-    globalLogger = zerolog.New(output).With().Timestamp().Logger()
+	log = zerolog.New(consoleWriter).With().Timestamp().Logger()
 }
 
-// GetLogger returns a logger with trace context
+// InitWithWriter initializes the logger with a custom writer.
+func InitWithWriter(writer zerolog.LevelWriter) {
+	zerolog.TimeFieldFormat = time.RFC3339
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+
+	log = zerolog.New(writer).With().Timestamp().Logger()
+}
+
+// GetLogger returns a logger instance with trace ID if available
 func GetLogger(ctx trace.SpanContext) *zerolog.Logger {
-    logger := globalLogger.With()
+	logger := log.With()
 
-    // Add trace ID if available
-    if ctx.HasTraceID() {
-        logger = logger.Str("trace_id", ctx.TraceID().String())
-    }
+	// Add trace ID if available
+	if ctx.HasTraceID() {
+		logger = logger.Str("trace_id", ctx.TraceID().String())
+	}
 
-    // Add span ID if available
-    if ctx.HasSpanID() {
-        logger = logger.Str("span_id", ctx.SpanID().String())
-    }
+	// Add span ID if available
+	if ctx.HasSpanID() {
+		logger = logger.Str("span_id", ctx.SpanID().String())
+	}
 
-    l := logger.Logger()
-    return &l
+	l := logger.Logger()
+	return &l
 }
 
 // GetGlobalLogger returns the global logger instance
 func GetGlobalLogger() *zerolog.Logger {
-    return &globalLogger
+	return &log
 }
 ```
 
-### Step 3: Create middleware for web frameworks
+### Step 2: Create middleware for web frameworks
 
 If you're using a web framework like Gin, create middleware to inject trace context into your logs:
 
-#### middleware/logging.go
+**pkg/middleware/logging.go**
 
-```go
+```go:logging.go
 package middleware
 
 import (
-    "time"
-    "your-app/logger"
+	"time"
 
-    "github.com/gin-gonic/gin"
-    "go.opentelemetry.io/otel/trace"
+	"golang-zerolog/pkg/logger"
+
+	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/trace"
 )
 
+// LoggerKey is the key used to store the logger in the Gin context
 const LoggerKey = "trace_logger"
 
-// LoggingMiddleware creates a trace-aware logger for each request
+// LoggingMiddleware returns a gin middleware that logs requests with trace information
 func LoggingMiddleware() gin.HandlerFunc {
-    return func(c *gin.Context) {
-        start := time.Now()
+	return func(c *gin.Context) {
+		// Start timer
+		start := time.Now()
 
-        // Extract trace context from request
-        spanCtx := trace.SpanContextFromContext(c.Request.Context())
-        traceLogger := logger.GetLogger(spanCtx)
+		// Get trace context and create logger
+		spanCtx := trace.SpanContextFromContext(c.Request.Context())
+		traceLogger := logger.GetLogger(spanCtx)
 
-        // Store logger in context for use in handlers
-        c.Set(LoggerKey, traceLogger)
+		// Store logger in context
+		c.Set(LoggerKey, traceLogger)
 
-        // Process request
-        c.Next()
+		// Process request
+		c.Next()
 
-        // Log request details with trace context
-        traceLogger.Info().
-            Str("method", c.Request.Method).
-            Str("path", c.Request.URL.Path).
-            Int("status", c.Writer.Status()).
-            Dur("latency", time.Since(start)).
-            Str("client_ip", c.ClientIP()).
-            Msg("Request processed")
-    }
+		// Log request details
+		traceLogger.Info().
+			Str("method", c.Request.Method).
+			Str("path", c.Request.URL.Path).
+			Int("status", c.Writer.Status()).
+			Dur("latency", time.Since(start)).
+			Str("client_ip", c.ClientIP()).
+			Msg("Request processed")
+	}
 }
 ```
 
-### Step 4: Send logs to SigNoz via OTLP
+### Step 3: Tracing
 
-Create a custom hook to send Zerolog logs to SigNoz via OTLP:
+**tracing/tracing.go**
 
-#### logger/otlp_hook.go
-
-```go
-package logger
+```go:tracing.go
+package tracing
 
 import (
-    "context"
-    "io"
-    "os"
-    "sync"
-    "time"
+	"context"
+	"log"
+	"os"
+	"strings"
 
-    "github.com/rs/zerolog"
-    "go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
-    "go.opentelemetry.io/otel/log/global"
-    sdklog "go.opentelemetry.io/otel/sdk/log"
-    "go.opentelemetry.io/otel/sdk/resource"
-    semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
-    "go.opentelemetry.io/otel/log"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-// OTLPHook is a zerolog hook that sends logs to OTLP
-type OTLPHook struct {
-    logger log.Logger
-}
+// InitTracer initializes the OpenTelemetry tracer
+func InitTracer(serviceName string) func() {
+	ctx := context.Background()
 
-// Run implements zerolog.Hook
-func (h OTLPHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
-    if h.logger == nil {
-        return
-    }
+	// Get environment variables
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "localhost:4317" // default endpoint
+	}
 
-    ctx := context.Background()
-    
-    // Convert zerolog level to OTEL severity
-    var severity log.Severity
-    switch level {
-    case zerolog.TraceLevel:
-        severity = log.SeverityTrace
-    case zerolog.DebugLevel:
-        severity = log.SeverityDebug
-    case zerolog.InfoLevel:
-        severity = log.SeverityInfo
-    case zerolog.WarnLevel:
-        severity = log.SeverityWarn
-    case zerolog.ErrorLevel:
-        severity = log.SeverityError
-    case zerolog.FatalLevel:
-        severity = log.SeverityFatal
-    default:
-        severity = log.SeverityInfo
-    }
+	// Create OTLP exporter with non-blocking connection
+	conn, err := grpc.Dial(endpoint,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		// Remove WithBlock to make it non-blocking
+	)
+	if err != nil {
+		log.Printf("Warning: Failed to create gRPC connection to collector: %v", err)
+		// Return a no-op cleanup function
+		return func() {}
+	}
 
-    // Create log record
-    record := log.Record{}
-    record.SetTimestamp(time.Now())
-    record.SetSeverity(severity)
-    record.SetBody(log.StringValue(msg))
-    
-    // Note: Additional attributes from the event could be added here
-    // This is a simplified version
-    
-    h.logger.Emit(ctx, record)
-}
+	exporter, err := otlptrace.New(ctx, otlptracegrpc.NewClient(otlptracegrpc.WithGRPCConn(conn)))
+	if err != nil {
+		log.Printf("Warning: Failed to create trace exporter: %v", err)
+		// Return a no-op cleanup function
+		return func() {}
+	}
 
-// InitWithOTLP initializes logger with OTLP export
-func InitWithOTLP(serviceName string) func() {
-    ctx := context.Background()
+	// Create resource with service information
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String(serviceName),
+			attribute.String("environment", strings.ToLower(os.Getenv("ENV"))),
+		),
+	)
+	if err != nil {
+		log.Printf("Warning: Failed to create resource: %v", err)
+		// Return a no-op cleanup function
+		return func() {}
+	}
 
-    // Create OTLP log exporter
-    endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-    if endpoint == "" {
-        endpoint = "localhost:4317"
-    }
+	// Create trace provider
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+	)
 
-    exporter, err := otlploggrpc.New(ctx,
-        otlploggrpc.WithEndpoint(endpoint),
-        otlploggrpc.WithInsecure(), // Use WithInsecure() for non-TLS endpoints
-    )
-    if err != nil {
-        panic(err)
-    }
+	// Set global trace provider
+	otel.SetTracerProvider(tp)
 
-    // Create resource with service information
-    res, err := resource.New(ctx,
-        resource.WithAttributes(
-            semconv.ServiceNameKey.String(serviceName),
-        ),
-    )
-    if err != nil {
-        panic(err)
-    }
-
-    // Create log provider
-    logProvider := sdklog.NewLoggerProvider(
-        sdklog.WithBatcher(exporter),
-        sdklog.WithResource(res),
-    )
-
-    // Set global logger provider
-    global.SetLoggerProvider(logProvider)
-
-    // Get logger
-    otelLogger := logProvider.Logger(serviceName)
-
-    // Create OTLP hook
-    otlpHook := OTLPHook{logger: otelLogger}
-
-    // Configure console writer
-    consoleWriter := zerolog.ConsoleWriter{
-        Out:        os.Stdout,
-        TimeFormat: time.RFC3339,
-    }
-
-    // Create multi-writer that includes our hook
-    multiWriter := zerolog.MultiLevelWriter(consoleWriter)
-    
-    // Initialize global logger with hook
-    globalLogger = zerolog.New(multiWriter).
-        Hook(otlpHook).
-        With().
-        Timestamp().
-        Logger()
-
-    // Return cleanup function
-    return func() {
-        if err := logProvider.Shutdown(ctx); err != nil {
-            panic(err)
-        }
-    }
-}
-
-// Alternative approach: Write logs to file and use OTEL Collector
-func InitWithFile(filename string) {
-    logFile, err := os.OpenFile(filename, 
-        os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-    if err != nil {
-        panic(err)
-    }
-
-    // Write to both console and file
-    consoleWriter := zerolog.ConsoleWriter{
-        Out:        os.Stdout,
-        TimeFormat: time.RFC3339,
-    }
-    
-    multi := zerolog.MultiLevelWriter(consoleWriter, logFile)
-    globalLogger = zerolog.New(multi).With().Timestamp().Logger()
+	// Return cleanup function
+	return func() {
+		if err := tp.Shutdown(ctx); err != nil {
+			log.Printf("Error shutting down tracer provider: %v", err)
+		}
+	}
 }
 ```
 
-### Step 5: Using the trace-aware logger in your application
+### Step 4: Context
 
-#### main.go
+**pkg/context/context.go
 
-```go
-package main
+```go:context.go
+package context
 
 import (
-    "your-app/logger"
-    "your-app/middleware"
-    
-    "github.com/gin-gonic/gin"
-    "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"golang-zerolog/pkg/logger"
+
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 )
 
+// LoggerKey is the key used to store the logger in the Gin context
+const LoggerKey = "trace_logger"
+
+// Logger returns the trace-aware logger from the Gin context
+func Logger(c *gin.Context) *zerolog.Logger {
+	if logger, exists := c.Get(LoggerKey); exists {
+		return logger.(*zerolog.Logger)
+	}
+	return logger.GetGlobalLogger()
+}
+```
+
+### Step 5: Using the trace aware logger in your application
+
+```go:main.Go
+import (
+   // Add these as imports
+	"<module-name>/pkg/context"
+	"<module-name>/pkg/logger"
+	"<module-name>/pkg/middleware"
+	"<module-name>/pkg/tracing"
+    ...
+)
+```
+
+The `<module-name>` is the name of the module that you have defined in your `go.mod` file.
+
+Utilise the trace-aware logger in your application:
+
+```go:main.go
 func main() {
-    // Initialize logger with OTLP export
-    logCleanup := logger.InitWithOTLP("your-service-name")
-    defer logCleanup()
-    
-    log := logger.GetGlobalLogger()
+	// Initialize logger
+	// Configure console writer with color
+	consoleWriter := zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		TimeFormat: time.RFC3339,
+	}
 
-    // Initialize your OpenTelemetry tracer
-    // ... tracer initialization code ...
+	// Configure file writer
+	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log := zerolog.New(consoleWriter).With().Timestamp().Logger()
+		log.Fatal().Err(err).Msg("Failed to open log file")
+	}
 
-    // Create Gin router
-    r := gin.New()
+	// Create multi-level writer
+	multi := zerolog.MultiLevelWriter(consoleWriter, file)
 
-    // Add OpenTelemetry middleware for tracing
-    r.Use(otelgin.Middleware("your-service-name"))
-    
-    // Add logging middleware for trace correlation
-    r.Use(middleware.LoggingMiddleware())
+	// Initialize logger with multi-level writer
+	logger.InitWithWriter(multi)
+	log := logger.GetGlobalLogger()
 
-    // Define routes
-    r.GET("/ping", func(c *gin.Context) {
-        // Get trace-aware logger from context
-        logger := c.MustGet(middleware.LoggerKey).(*zerolog.Logger)
-        
-        // Use the logger - it automatically includes trace_id and span_id
-        logger.Info().Msg("Processing ping request")
-        
-        c.JSON(200, gin.H{
-            "message": "pong",
-        })
-    })
+	// Initialize tracer
+	cleanup := tracing.InitTracer("gin-zerolog-app")
+	defer cleanup()
 
-    // Start server
-    log.Info().Msg("Starting server on :8080")
-    if err := r.Run(":8080"); err != nil {
-        log.Fatal().Err(err).Msg("Failed to start server")
-    }
+	// Create Gin router
+	r := gin.New()
+
+	// Add middlewares
+	r.Use(gin.Recovery())
+	r.Use(otelgin.Middleware("gin-zerolog-app")) // OpenTelemetry middleware
+	r.Use(middleware.LoggingMiddleware())        // Custom logging middleware
+
+	// // Add routes 
+	// r.GET("/ping", func(c *gin.Context) {
+	// 	context.Logger(c).Info().Msg("hello")
+	// 	c.JSON(200, gin.H{
+	// 		"message": "pong",
+	// 	})
+	// })
+
+	// // Start server
+	// log.Info().Msg("Starting server on :8080")
+	// if err := r.Run(":8080"); err != nil {
+	// 	log.Fatal().Err(err).Msg("Failed to start server")
+	// }
 }
 ```
 
-### Step 6: Run your application
+### Step 6: Send logs to SigNoz
 
-To send logs to SigNoz Cloud:
+To send logs from your log file to SigNoz, follow this [document](https://signoz.io/docs/userguide/collect_logs_from_file/).
 
-```bash
-OTEL_EXPORTER_OTLP_ENDPOINT="ingest.<region>.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-go run main.go
-```
+## Correlate logs with traces
 
-Replace:
-- `<region>` with your SigNoz Cloud region (us, eu, or in)
-- `<your-ingestion-key>` with your actual ingestion key
+Once you have your logs coming up in SigNoz, use the logs pipelines to extract the trace id and span id from the logs using the trace processor.
 
-For self-hosted SigNoz:
+{/* Add description of how to use pipelines */}
 
-```bash
-OTEL_EXPORTER_OTLP_ENDPOINT="<your-otel-collector>:4317" \
-go run main.go
-```
-
-## Viewing correlated logs in SigNoz
-
-1. Navigate to the **Logs** tab in SigNoz
-2. You should see logs with `trace_id` and `span_id` fields
-3. Click on any log entry to see details
-4. Use the "View in Traces" button to jump to the associated trace
-5. From the Traces view, you can also see all related logs
-
-![Zerolog logs with trace correlation](/img/docs/logs-management/send-logs/zerolog-trace-correlation.webp)
+Checkout[ this guide](https://signoz.io/docs/logs-pipelines/guides/trace/) for more details about how to extract trace information from your logs.
 
 ## Troubleshooting
 
@@ -386,7 +331,6 @@ go run main.go
 1. Check your ingestion key and endpoint are correct
 2. Ensure your application has network access to SigNoz
 3. Check for any errors in application logs
-4. Verify that the OTLP exporter is properly initialized
 
 ### Missing trace_id or span_id in logs
 
