@@ -5,7 +5,7 @@ id: nodejs-winston-logs
 description: Automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Winston logging library
 ---
 
-This documentation shows you how to automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Winston logging library. This setup provides automatic correlation between your application traces and logs in SigNoz, giving you **automatic trace generation** for HTTP requests, Express routes, and other common libraries, **structured logs** with trace correlation automatically injected, **unified observability** with traces and logs correlated in SigNoz, and **production-ready configuration** with batch processing for optimal performance.
+This document shows you how to send logs from your Node.js application using the Winston logging library to SigNoz. The setup automatically correlates your logs with traces when available, providing unified observability in SigNoz.
 
 ## Prerequisites
 
@@ -37,8 +37,8 @@ npm i @opentelemetry/sdk-node \
 
 Create an OpenTelemetry configuration file at your project root:
 
-<details>
-<summary><strong>JavaScript (otel.js)</strong></summary>
+<Tabs>
+<TabItem value="js" label="JavaScript">
 
 ```javascript
 // otel.js
@@ -97,10 +97,9 @@ process.on('SIGTERM', () => {
   sdk.shutdown().finally(() => process.exit(0));
 });
 ```
-</details>
 
-<details>
-<summary><strong>TypeScript (otel.ts)</strong></summary>
+</TabItem>
+<TabItem value="ts" label="TypeScript">
 
 ```typescript
 // otel.ts
@@ -157,7 +156,9 @@ process.on('SIGTERM', () => {
   sdk.shutdown().finally(() => process.exit(0));
 });
 ```
-</details>
+
+</TabItem>
+</Tabs>
 
 ### Configuration Notes
 
@@ -167,69 +168,73 @@ process.on('SIGTERM', () => {
 - **LoggerProvider** must be set up globally for Winston log forwarding to work
 - The SDK must be started **before** your application imports Winston
 
-## Step 3: Run with Preload
+## Step 3: Configure and Run Your Application
 
-Use the `-r` flag to preload the OpenTelemetry configuration before your application starts:
-
-**For JavaScript:**
-```bash
-node -r ./otel.js app.js
-```
-
-**For TypeScript:**
-```bash
-node -r ./otel.ts app.ts
-```
-
-The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Winston.
-
-## Configuration
-
-### Environment Variables
+### Set Environment Variables
 
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-Set the following environment variables for SigNoz Cloud:
-
 ```bash
-export OTEL_SERVICE_NAME=your-service-name
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=YOUR_INGESTION_KEY"
+export OTEL_SERVICE_NAME=<service_name>
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ```
 
-Replace `{region}` with your SigNoz Cloud region:
-- **US**: `ingest.us.signoz.cloud`
-- **India**: `ingest.in.signoz.cloud`  
-- **Europe**: `ingest.eu.signoz.cloud`
+* Set the `<region>` to match your SigNoz Cloud **region**
+* Replace `<your-ingestion-key>` with your SigNoz **ingestion key**
+* `<service_name>` is name of your service
 
 </TabItem>
 <TabItem value="self-host" label="Self-Host">
 
-Point to your OpenTelemetry collector's OTLP HTTP receiver:
-
 ```bash
-export OTEL_SERVICE_NAME=your-service-name
-export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://<collector-host>:4318/v1/traces"
-export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="http://<collector-host>:4318/v1/logs"
+export OTEL_SERVICE_NAME=<service_name>
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://<collector-host>:4318"
 ```
+
+* Replace `<collector-host>` with your OpenTelemetry collector host
+* `<service_name>` is name of your service
 
 </TabItem>
 </Tabs>
 
-### Running Your Application
+### Start Your Application
 
-Start your application with OpenTelemetry instrumentation:
+<Tabs>
+<TabItem value="js" label="JavaScript">
 
-**For JavaScript:**
 ```bash
+export OTEL_SERVICE_NAME=<service_name>
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
 node -r ./otel.js app.js
 ```
 
-**For TypeScript:**
+* Set the `<region>` to match your SigNoz Cloud **region**
+* Replace `<your-ingestion-key>` with your SigNoz **ingestion key**
+* `<service_name>` is name of your service
+
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
 ```bash
+export OTEL_SERVICE_NAME=<service_name>
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
 node -r ./otel.ts app.ts
 ```
+
+* Set the `<region>` to match your SigNoz Cloud **region**
+* Replace `<your-ingestion-key>` with your SigNoz **ingestion key**
+* `<service_name>` is name of your service
+
+</TabItem>
+</Tabs>
+
+The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Winston.
 
 ## Verification
 
@@ -244,7 +249,6 @@ After starting your application:
 - **Traces** appearing in the SigNoz Traces tab
 - **Logs** appearing in the SigNoz Logs tab
 - **Trace correlation** - logs should contain `trace_id`, `span_id`, and `trace_flags` fields
-- **Service mapping** showing your service in the dependency graph
 
 ## Troubleshooting
 
@@ -271,19 +275,3 @@ After starting your application:
 - Ensure `disableLogSending: false` in Winston instrumentation
 - Check that `@opentelemetry/winston-transport` package is installed
 - Verify the global LoggerProvider is properly configured
-
-### Debug Mode
-
-Enable debug logging to troubleshoot issues:
-
-**For JavaScript:**
-```bash
-export OTEL_LOG_LEVEL=debug
-node -r ./otel.js app.js
-```
-
-**For TypeScript:**
-```bash
-export OTEL_LOG_LEVEL=debug
-node -r ./otel.ts app.ts
-```
