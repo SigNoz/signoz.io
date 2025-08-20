@@ -26,12 +26,12 @@ cd ~/opentelemetry-collector
 
 Defines how the OpenTelemetry Collector receives, processes, and exports telemetry data to SigNoz.
 
-Create `otel-config.yaml`:
+Create `config.yaml`:
 
 <Tabs>
 <TabItem value="cloud" label="SigNoz Cloud" default>
 
-```yaml:otel-config.yaml
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -39,37 +39,8 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-      processes: {}
-
 processors:
   batch:
-    send_batch_size: 1000
-    timeout: 10s
-  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
-  resourcedetection:
-    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
-    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
-    timeout: 2s
-    system:
-      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
-
-extensions:
-  health_check: {}
-  zpages: {}
 
 exporters:
   otlp:
@@ -81,21 +52,19 @@ exporters:
   debug:
     verbosity: normal
 
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
 service:
-  telemetry:
-    metrics:
-      level: basic
-  extensions: [health_check, zpages]
+  extensions: [health_check, pprof, zpages]
   pipelines:
-    metrics:
+    traces:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlp]
-    metrics/internal:
-      receivers: [hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    traces:
+    metrics:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlp]
@@ -112,7 +81,7 @@ service:
 </TabItem>
 <TabItem value="self-hosted" label="Self-Hosted SigNoz">
 
-```yaml
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -120,37 +89,9 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-      processes: {}
 
 processors:
   batch:
-    send_batch_size: 1000
-    timeout: 10s
-  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
-  resourcedetection:
-    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
-    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
-    timeout: 2s
-    system:
-      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
-
-extensions:
-  health_check: {}
-  zpages: {}
 
 exporters:
   otlp:
@@ -160,21 +101,19 @@ exporters:
   debug:
     verbosity: normal
 
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
 service:
-  telemetry:
-    metrics:
-      level: basic
-  extensions: [health_check, zpages]
+  extensions: [health_check, pprof, zpages]
   pipelines:
-    metrics:
+    traces:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlp]
-    metrics/internal:
-      receivers: [hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    traces:
+    metrics:
       receivers: [otlp]
       processors: [batch]
       exporters: [otlp]
@@ -199,7 +138,7 @@ docker run --name opentelemetry-collector \
   --restart unless-stopped \
   --detach \
   -p 4317:4317 -p 4318:4318 \
-  -v "$(pwd)/otel-config.yaml":/etc/otelcol-contrib/config.yaml \
+  -v "$(pwd)/config.yaml":/etc/otelcol-contrib/config.yaml \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
 
@@ -220,6 +159,13 @@ docker logs opentelemetry-collector
 ```
 
 You will see the OpenTelemetry Collector logs indicating successful startup and readiness to process data.
+
+## Send Docker data
+
+Once you have your collector up and running, you can see your container logs, metrics and application traces by following the below links:
+- [Send Docker logs](https://signoz.io/docs/userguide/collect_docker_logs/)
+- [Send Containers metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/)
+- [Send Application traces](https://signoz.io/docs/instrumentation/)
 
 ## Troubleshooting
 

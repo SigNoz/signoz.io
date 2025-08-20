@@ -242,6 +242,11 @@ const docsSideNav = [
             route: '/docs/operate/migration/upgrade-standard',
             label: 'Upgrade Standard',
           },
+           {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.92',
+            label: 'Upgrade to v0.92',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.88',
@@ -567,7 +572,7 @@ const docsSideNav = [
           {
             route: '/docs/collection-agents/docker/install',
             type: 'doc',
-            label: 'Overview',
+            label: 'Install',
           },
         ],
       },
@@ -874,34 +879,6 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'Trace API',
-        // route: '',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/traces-management/trace-api/overview',
-            label: 'Overview',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/trace-api/payload-model',
-            label: 'Payload Model',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/trace-api/search-traces',
-            label: 'Search Traces',
-          },
-          {
-            type: 'doc',
-            route: '/docs/traces-management/trace-api/aggregate-traces',
-            label: 'Aggregate Traces',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
         label: 'Tutorials',
         // route: '',
         items: [
@@ -1114,6 +1091,11 @@ const docsSideNav = [
             route: '/docs/logs-management/send-logs/collect-systemd-logs',
             label: 'SystemD logs',
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/zerolog-to-signoz',
+            label: 'Zerolog',
+          },
         ],
       },
       {
@@ -1196,39 +1178,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/features/logs-quick-filters',
             label: 'Logs Quick Filters',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Logs API',
-        // route: '',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/overview',
-            label: 'Overview',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/payload-model',
-            label: 'Payload Model',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/search-logs',
-            label: 'Search Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/aggregate-logs',
-            label: 'Aggregate Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/logs-management/logs-api/logs-url-for-explorer-page',
-            label: 'Logs URL for Explorer',
           },
         ],
       },
@@ -1356,11 +1305,6 @@ const docsSideNav = [
         label: 'Drop Metrics',
       },
       {
-        type: 'doc',
-        route: '/docs/metrics-management/query-range-api',
-        label: 'Query Range API',
-      },
-      {
         type: 'category',
         label: 'Guides',
         isExpanded: false,
@@ -1455,6 +1399,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/userguide/manage-variables',
         label: 'Manage Variables',
+      },
+      {
+        type: 'doc',
+        route: '/docs/dashboards/import-dashboard',
+        label: 'Import Dashboard',
       },
       {
         type: 'category',
@@ -1851,25 +1800,48 @@ const docsSideNav = [
             label: 'Time Aggregation Best Practices',
           }
         ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/apdex-alerts',
+        label: 'Apdex Alerts',
       }
     ],
   },
   {
-    label: 'Frontend & Mobile Monitoring',
+    label: 'Frontend Monitoring',
     type: 'category',
     isExpanded: false,
-    route: '/docs/frontend-and-mobile-monitoring',
+    route: '/docs/frontend-monitoring',
     items: [
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/document-load',
-        label: 'Document Load',
+        route: '/docs/frontend-monitoring/sending-logs',
+        label: 'Sending Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-traces',
+        label: 'Sending Traces',
       },
       {
         type: 'doc',
         route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
         label: 'Web Vitals',
       },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/document-load',
+        label: 'Document Load',
+      },
+    ],
+  },
+  {
+    label: 'Mobile Monitoring',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/mobile-monitoring',
+    items: [
       {
         type: 'doc',
         label: 'Swift UI',
@@ -2198,6 +2170,84 @@ const docsSideNav = [
             label: 'Troubleshooting',
           },
         ],
+      },
+    ],
+  },
+  {
+    label: 'SigNoz APIs',
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        type: 'doc',
+        route: '/api-reference/',
+        label: 'API Reference',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Trace API',
+        // route: '',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/traces-management/trace-api/overview',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/trace-api/payload-model',
+            label: 'Payload Model',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/trace-api/search-traces',
+            label: 'Search Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/trace-api/aggregate-traces',
+            label: 'Aggregate Traces',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Logs API',
+        // route: '',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/overview',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/payload-model',
+            label: 'Payload Model',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/search-logs',
+            label: 'Search Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/aggregate-logs',
+            label: 'Aggregate Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/logs-api/logs-url-for-explorer-page',
+            label: 'Logs URL for Explorer',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/query-range-api',
+        label: 'Metrics Query API',
       },
     ],
   },

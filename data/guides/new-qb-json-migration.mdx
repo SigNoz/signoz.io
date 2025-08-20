@@ -1,0 +1,557 @@
+---
+title: Query Builder Migration
+slug: new-qb-json-migration
+id: new-qb-json-migration
+date: 2025-08-14
+description: Guide to help in query builder migration
+authors: [srikanthccv]
+---
+
+# Query Builder v5 Dashboard&Alert JSON Migration Guide
+
+This guide explains how your widget and alert JSON structures change with Query Builder v5. While the migration occurs automatically for each instance, understanding these changes helps you work with the new format and provides guidance for Terraform users.
+
+Manual editing is error-prone and time-consuming. We recommend waiting for the migration to complete (you'll receive an email notification), then using the updated JSON in your integrations (API, terraform, etc...).
+
+## Dashboard Migration
+
+### 1. Aggregation field changes
+
+In v5, `aggregateOperator` and `aggregateAttribute` are combined with `expression` inside `aggregations` array. The new query builder supports multiple aggregations in the same query for logs and traces.
+
+#### For Traces/Logs
+
+**Before (v4)**:
+```json
+{
+  "builder": {
+    "queryData": [
+      {
+        "aggregateOperator": "avg",
+        "aggregateAttribute": {
+            "key": "duration_nano"
+        }
+      }
+    ]
+  }
+}
+```
+
+**After (v5)**:
+```json
+{
+  "builder": {
+    "queryData": [
+      {
+        "aggregations": [{
+          "expression": "avg(duration_nano)"
+        }]
+      }
+    ]
+  }
+}
+```
+
+#### Why are we doing this?
+
+Currently, calculating max, min, and avg values for numeric attributes in logs/traces requires creating three separate queries with identical configurations. This approach is inefficient and impacts performance since it runs multiple queries against the same dataset. The enhanced aggregations feature addresses these limitations to provide a better user experience. Additionally, we plan to introduce conditional aggregations in the near future. For more details, visit https://github.com/SigNoz/signoz/issues/8792.
+
+#### For Metrics
+
+**Before (v4)**:
+```json
+{
+  "aggregateOperator": "p99",
+  "aggregateAttribute": {
+    "key": "signoz_latency.bucket"
+  },
+  "spaceAggregation": "p99"
+}
+```
+
+**After (v5)**:
+```json
+{
+  "aggregations": [{
+    "metricName": "signoz_latency.bucket",
+    "spaceAggregation": "p99",
+    "reduceTo": "avg"
+  }]
+}
+```
+
+**Before (v4)**:
+```json
+{
+  "aggregateOperator": "p99",
+  "aggregateAttribute": {
+    "key": "signoz_calls_total"
+  },
+  "spaceAggregation": "sum",
+  "timeAggregation": "rate"
+}
+```
+
+**After (v5)**:
+```json
+{
+  "aggregations": [{
+    "metricName": "signoz_calls_total",
+    "spaceAggregation": "sum",
+    "timeAggregation": "rate",
+    "reduceTo": "avg"
+  }]
+}
+```
+
+#### Note about metrics
+
+Currently, multiple aggregations are available only for traces and logs. Support for multiple aggregations on metrics data is planned for future releases. The updated metric aggregation specification eliminates the ambiguous "Aggregate Attribute" terminology, resulting in a cleaner and more intuitive naming.
+
+### 2. Filter Transformation
+
+Filters change from structured objects to SQL-like expression:
+
+**Before (v4)**:
+```json
+{
+  "filters": {
+    "items": [
+      {
+        "key": {
+          "key": "service.name",
+          "type": "resource"
+        },
+        "op": "=",
+        "value": "{{.service.name}}"
+      },
+      {
+        "key": {
+          "key": "httpMethod",
+          "type": "tag"
+        },
+        "op": "exists"
+      },
+      {
+        "key": {
+          "key": "spanKind",
+          "type": "tag"
+        },
+        "op": "=",
+        "value": "Server"
+      }
+    ],
+    "op": "AND"
+  }
+}
+```
+
+**After (v5)**:
+```json
+{
+  "filter": {
+    "expression": "(serviceName = $service.name AND httpMethod EXISTS AND spanKind = 'Server')"
+  }
+}
+```
+
+#### Why are we doing this?
+
+- We're making this change for several reasons: to add OR operator support, enable complex searches combining AND, OR, and parentheses, allow in-place editing, and support copying search expressions. The original structured approach to filtering hasn't scaled well over time, so we're addressing it now.
+- As filtering needs have grown more complex, the current query builder has developed numerous UX issues that can be frustrating for users.
+
+### 3. Group By Changes
+
+Remains unchanged for dashboards.
+
+### 4. Order By Changes
+
+**Before (v4)**:
+```json
+{
+  "orderBy": [{
+    "columnName": "#SIGNOZ_VALUE",
+    "order": "desc"
+  }]
+}
+```
+
+**After (v5)**:
+```json
+{
+  "orderBy": [{
+    "columnName": "count()",
+    "order": "desc"
+  }]
+}
+```
+
+The `#SIGNOZ_VALUE` placeholder is replaced with either the actual aggregation expression or, in list views, the field used for ordering results. This cryptic placeholder is only meaningful to the feature's original developer. Previously, we haven't prioritized Infrastructure as Code (IaC) for managing SigNoz, but this change is a step in that direction.
+
+### 5. Variable Format Changes
+
+Variables are standardized to use the `$` prefix:
+
+- `{{.service.name}}` → `$service.name`
+- `{{deployment.environment}}` → `$deployment.environment`
+- `[[variable]]` → `$variable`
+
+#### Why are we doing this?
+
+Single naming scheme to work with variables across the product
+
+### 6. Having Clause Changes
+
+The having clause transforms from an array of conditions to a expression:
+
+**Before (v4)**:
+```json
+{
+  "having": [
+    {
+      "columnName": "#SIGNOZ_VALUE",
+      "op": ">",
+      "value": 50
+    },
+    {
+      "columnName": "#SIGNOZ_VALUE",
+      "op": "<",
+      "value": 100
+    }
+  ]
+}
+```
+
+**After (v5)**:
+```json
+{
+  "having": {
+    "expression": "count() > 50 AND count() < 100"
+  }
+}
+```
+
+#### Why are we doing this?
+
+This cryptic placeholder is only understandable to the original developer. We're removing it in favor of a more intuitive approach. For empty having clauses, the field can simply remain unset.
+
+### 7. Function Migration
+
+Functions now use named argument format:
+
+**Before (v4)**:
+```json
+{
+  "functions": [
+    {
+      "name": "cutOffMin",
+      "args": [2]
+    }
+  ]
+}
+```
+
+**After (v5)**:
+```json
+{
+  "functions": [
+    {
+      "name": "cutOffMin",
+      "args": [
+        {"name": "threshold", "value": 2}
+      ]
+    }
+  ]
+}
+```
+
+### 8. Dashboard Widget Example
+
+**HTTP Endpoint Monitoring Widget - Before (v4)**:
+```json
+{
+  "query": {
+    "builder": {
+      "queryData": [{
+        "aggregateOperator": "count",
+        "dataSource": "traces",
+        "filters": {
+          "items": [
+            {"key": {"key": "serviceName"}, "op": "=", "value": "{{.service.name}}"},
+            {"key": {"key": "httpMethod"}, "op": "exists"},
+            {"key": {"key": "spanKind"}, "op": "=", "value": "Server"}
+          ],
+          "op": "AND"
+        },
+        "groupBy": [
+          {"key": "httpRoute", "type": "tag"},
+          {"key": "httpMethod", "type": "tag"}
+        ],
+        "orderBy": [{"columnName": "#SIGNOZ_VALUE", "order": "desc"}],
+        "queryName": "A"
+      }]
+    },
+    "queryType": "builder"
+  }
+}
+```
+
+**After (v5)**:
+```json
+{
+  "query": {
+    "builder": {
+      "queryData": [{
+        "aggregations": [{"expression": "count()"}],
+        "dataSource": "traces",
+        "filter": {
+          "expression": "(serviceName = $service.name AND httpMethod EXISTS AND spanKind = 'Server')"
+        },
+        "groupBy": [
+          {"key": "httpRoute"},
+          {"key": "httpMethod"}
+        ],
+        "orderBy": [{"columnName": "count()", "order": "desc"}],
+        "queryName": "A"
+      }]
+    },
+    "queryType": "builder"
+  }
+}
+```
+
+## Alert Migration
+
+### What to migrate with terraform/API?
+
+When using Terraform or the API to manage alerts after the migration to Query Builder v5, you need to make two key changes:
+
+1. **Add version field**: Set `version = "v5"` in your alert resource (at the same level as `alert_type`)
+2. **Update the condition field**: Replace your entire condition JSON with the new v5 format that uses the unified `queries` array
+
+#### Terraform Alert Example
+
+Using the error rate alert example from above, here's how it looks in Terraform:
+
+```hcl
+resource "signoz_alert" "error_rate_alert" {
+  # All other fields remain unchanged
+  ...
+  version            = "v5"  # Required for v5 migration
+  
+  # Only the condition field changes - use the new v5 format
+  condition = jsonencode({
+    "compositeQuery": {
+      "queries": [
+        {
+          "type": "builder_query",
+          "spec": {
+            "name": "A",
+            "signal": "traces",
+            "aggregations": [{"expression": "count()"}],
+            "filter": {
+              "expression": "serviceName = 'redis' AND statusCode = 'STATUS_CODE_ERROR'"
+            }
+          }
+        },
+        {
+          "type": "builder_query",
+          "spec": {
+            "name": "B",
+            "signal": "traces",
+            "aggregations": [{"expression": "count()"}],
+            "filter": {
+              "expression": "serviceName = 'redis'"
+            }
+          }
+        },
+        {
+          "type": "builder_formula",
+          "spec": {
+            "name": "F1",
+            "expression": "A/B*100",
+            "legend": "error percentage"
+          }
+        }
+      ]
+    },
+    "op": "1",
+    "target": 5,
+    "matchType": "1",
+    "selectedQueryName": "F1"
+  })
+  
+  # All other fields remain unchanged
+  ...
+}
+```
+
+**Important**: The Terraform provider currently defaults to v4, so the `version = "v5"` field is mandatory for using the new format. Without this field, you may encounter 502 errors when testing alerts created via Terraform.
+
+### 1. Alert Query Structure Changes
+
+The alerts is moving from separate query type objects to a unified `queries` array:
+
+#### Fields Removed in v5
+- `aggregateOperator` and `aggregateAttribute`
+- `filters` (replaced by `filter.expression`)
+- `builderQueries`, `promQueries`, `chQueries` (unified into `queries`)
+- `temporality`, `timeAggregation`, `spaceAggregation` (moved into aggregations for metrics)
+
+#### New Fields in v5
+- `queries` array containing all query types
+- `type` field to identify query type
+- `spec` object containing query specification
+- `signal` field for builder queries (traces, logs, metrics)
+- `filter.expression` for SQL-like filter syntax
+
+**Before (v4)**:
+```json
+{
+  "condition": {
+    "compositeQuery": {
+      "builderQueries": {
+        "A": {
+          "aggregateOperator": "count",
+          "dataSource": "traces",
+          "filters": {}
+        },
+        "B": {
+          "aggregateOperator": "avg",
+          "dataSource": "traces",
+          "filters": {}
+        }
+      },
+      "promQueries": {
+        "C": {
+          "query": "rate(http_requests[5m])"
+        }
+      },
+      "queryFormulas": {
+        "F1": {
+          "expression": "A/B"
+        }
+      }
+    }
+  }
+}
+```
+
+**After (v5)**:
+```json
+{
+  "condition": {
+    "compositeQuery": {
+      "queries": [
+        {
+          "type": "builder_query",
+          "spec": {
+            "name": "A",
+            "signal": "traces",
+            "aggregations": [{"expression": "count()"}],
+            "filter": {}
+          }
+        },
+        {
+          "type": "builder_query",
+          "spec": {
+            "name": "B",
+            "signal": "traces",
+            "aggregations": [{"expression": "avg(durationNano)"}],
+            "filter": {}
+          }
+        },
+        {
+          "type": "builder_formula",
+          "spec": {
+            "name": "F1",
+            "expression": "A/B"
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+### 2. Error Rate Alert Example
+
+**Before (v4)**:
+```json
+{
+  "condition": {
+    "compositeQuery": {
+      "builderQueries": {
+        "A": {
+          "aggregateOperator": "count",
+          "dataSource": "traces",
+          "filters": {
+            "items": [
+              {"key": {"key": "serviceName"}, "op": "=", "value": "redis"},
+              {"key": {"key": "statusCode"}, "op": "=", "value": "STATUS_CODE_ERROR"}
+            ],
+            "op": "AND"
+          }
+        },
+        "B": {
+          "aggregateOperator": "count",
+          "dataSource": "traces",
+          "filters": {
+            "items": [
+              {"key": {"key": "serviceName"}, "op": "=", "value": "redis"}
+            ]
+          }
+        }
+      },
+      "queryFormulas": {
+        "F1": {
+          "expression": "A/B*100",
+          "legend": "error percentage"
+        }
+      }
+    }
+  }
+}
+```
+
+**After (v5)**:
+```json
+{
+  "condition": {
+    "compositeQuery": {
+      "queries": [
+        {
+          "type": "builder_query",
+          "spec": {
+            "name": "A",
+            "signal": "traces",
+            "aggregations": [{"expression": "count()"}],
+            "filter": {
+              "expression": "serviceName = 'redis' AND statusCode = 'STATUS_CODE_ERROR'"
+            }
+          }
+        },
+        {
+          "type": "builder_query",
+          "spec": {
+            "name": "B",
+            "signal": "traces",
+            "aggregations": [{"expression": "count()"}],
+            "filter": {
+              "expression": "serviceName = 'redis'"
+            }
+          }
+        },
+        {
+          "type": "builder_formula",
+          "spec": {
+            "name": "F1",
+            "expression": "A/B*100",
+            "legend": "error percentage"
+          }
+        }
+      ]
+    }
+  }
+}
+```
