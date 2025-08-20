@@ -1,15 +1,15 @@
 ---
 date: 2025-08-19
 id: install
-title: ECS Sidecar Collection Agent - Install
-description: Install and deploy the sidecar container for ECS infrastructure monitoring
+title: ECS Serverless Collection Agent - Install
+description: Install and deploy the sidecar container for ECS Serverless infrastructure monitoring
 ---
-This guide walks you through installing the sidecar container to collect metrics, traces, and logs from your ECS infrastructure.
+This guide walks you through installing the sidecar container to collect metrics, traces, and logs from your ECS Serverless infrastructure.
 
 ## Prerequisites Check
 
 Before starting, verify you have:
-- ECS cluster with any launch type (**Fargate**, **EC2**, or **External**)
+- ECS cluster with any launch type (**Fargate**)
 - AWS CLI configured with appropriate permissions  
 - SigNoz Cloud account or self-hosted SigNoz instance
 - Access to AWS Parameter Store and CloudWatch Logs
@@ -70,7 +70,7 @@ The OpenTelemetry Collector configuration defines what data to collect and where
       otlp:
         endpoint: "ingest.{region}.signoz.cloud:443"
         headers:
-          "signoz-access-token": "SIGNOZ_INGESTION_KEY"
+          "signoz-ingestion-key": "SIGNOZ_INGESTION_KEY"
 
     service:
       extensions: [health_check]
@@ -231,12 +231,12 @@ In your ECS [task definition](https://docs.aws.amazon.com/AmazonECS/latest/devel
                 "startPeriod": 1
             },
             "logConfiguration": {
-                "logDriver": "awslogs",
+                "logDriver": "awsfirelens",
                 "options": {
-                "awslogs-group": "/ecs/signoz-otel-EC2-sidcar",
-                "awslogs-region": "<aws-region>",
-                "awslogs-stream-prefix": "ecs",
-                "awslogs-create-group": "True"
+                    "Name": "forward",
+                    "Host": "127.0.0.1",
+                    "Port": "8006",
+                    "tls": "off"
                 }
             }
         }

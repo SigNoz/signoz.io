@@ -538,6 +538,23 @@ const docsSideNav = [
               },
             ],
           },
+          {
+            type: 'category',
+            label: 'Serverless (EKS Fargate)',
+            isExpanded: false,
+            items: [
+              {
+                label: 'Overview',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/serverless/overview',
+              },
+              {
+                label: 'Install',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/serverless/install',
+              },
+            ],
+          },
         ],
       },
       {
