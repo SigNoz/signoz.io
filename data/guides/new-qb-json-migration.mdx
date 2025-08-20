@@ -322,6 +322,72 @@ Functions now use named argument format:
 
 ## Alert Migration
 
+### What to migrate with terraform/API?
+
+When using Terraform or the API to manage alerts after the migration to Query Builder v5, you need to make two key changes:
+
+1. **Add version field**: Set `version = "v5"` in your alert resource (at the same level as `alert_type`)
+2. **Update the condition field**: Replace your entire condition JSON with the new v5 format that uses the unified `queries` array
+
+#### Terraform Alert Example
+
+Using the error rate alert example from above, here's how it looks in Terraform:
+
+```hcl
+resource "signoz_alert" "error_rate_alert" {
+  # All other fields remain unchanged
+  ...
+  version            = "v5"  # Required for v5 migration
+  
+  # Only the condition field changes - use the new v5 format
+  condition = jsonencode({
+    "compositeQuery": {
+      "queries": [
+        {
+          "type": "builder_query",
+          "spec": {
+            "name": "A",
+            "signal": "traces",
+            "aggregations": [{"expression": "count()"}],
+            "filter": {
+              "expression": "serviceName = 'redis' AND statusCode = 'STATUS_CODE_ERROR'"
+            }
+          }
+        },
+        {
+          "type": "builder_query",
+          "spec": {
+            "name": "B",
+            "signal": "traces",
+            "aggregations": [{"expression": "count()"}],
+            "filter": {
+              "expression": "serviceName = 'redis'"
+            }
+          }
+        },
+        {
+          "type": "builder_formula",
+          "spec": {
+            "name": "F1",
+            "expression": "A/B*100",
+            "legend": "error percentage"
+          }
+        }
+      ]
+    },
+    "op": "1",
+    "target": 5,
+    "matchType": "1",
+    "selectedQueryName": "F1"
+  })
+  
+  # All other fields remain unchanged
+  ...
+}
+```
+
+**Important**: The Terraform provider currently defaults to v4, so the `version = "v5"` field is mandatory for using the new format. Without this field, you may encounter 502 errors when testing alerts created via Terraform.
+
 ### 1. Alert Query Structure Changes
 
 The alerts is moving from separate query type objects to a unified `queries` array:
@@ -421,7 +487,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
           "dataSource": "traces",
           "filters": {
             "items": [
-              {"key": {"key": "serviceName"}, "op": "=", "value": "{{.service.name}}"},
+              {"key": {"key": "serviceName"}, "op": "=", "value": "redis"},
               {"key": {"key": "statusCode"}, "op": "=", "value": "STATUS_CODE_ERROR"}
             ],
             "op": "AND"
@@ -432,7 +498,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
           "dataSource": "traces",
           "filters": {
             "items": [
-              {"key": {"key": "serviceName"}, "op": "=", "value": "{{.service.name}}"}
+              {"key": {"key": "serviceName"}, "op": "=", "value": "redis"}
             ]
           }
         }
@@ -461,7 +527,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
             "signal": "traces",
             "aggregations": [{"expression": "count()"}],
             "filter": {
-              "expression": "serviceName = $service.name AND statusCode = 'STATUS_CODE_ERROR'"
+              "expression": "serviceName = 'redis' AND statusCode = 'STATUS_CODE_ERROR'"
             }
           }
         },
@@ -472,7 +538,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
             "signal": "traces",
             "aggregations": [{"expression": "count()"}],
             "filter": {
-              "expression": "serviceName = $service.name"
+              "expression": "serviceName = 'redis'"
             }
           }
         },
