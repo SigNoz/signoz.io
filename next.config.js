@@ -64,6 +64,7 @@ module.exports = () => {
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+    productionBrowserSourceMaps: true,
     eslint: {
       dirs: ['app', 'components', 'layouts', 'scripts'],
     },
