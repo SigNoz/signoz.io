@@ -1,5 +1,5 @@
 ---
-date: 2025-08-13
+date: 2025-08-19
 title: Auto-instrumenting Node.js Applications with Winston Logger
 id: nodejs-winston-logs
 description: Automatically instrument your existing Node.js application with OpenTelemetry to capture both traces and logs using the Winston logging library
@@ -11,7 +11,9 @@ This document shows you how to send logs from your Node.js application using the
 
 - Existing Node.js application using [Winston](https://github.com/winstonjs/winston) for logging
 
-## Step 1: Install Required Packages
+## Setup
+
+### Step 1: Install Required Packages
 
 Install the OpenTelemetry packages needed for auto-instrumentation:
 
@@ -24,7 +26,7 @@ npm i @opentelemetry/sdk-node \
       @opentelemetry/winston-transport
 ```
 
-### Package Breakdown
+#### Package Breakdown
 
 - **`@opentelemetry/sdk-node`** - Core OpenTelemetry SDK for Node.js runtime
 - **`@opentelemetry/auto-instrumentations-node`** - Automatic instrumentation for popular libraries (HTTP, Express, etc.)
@@ -33,7 +35,7 @@ npm i @opentelemetry/sdk-node \
 - **`@opentelemetry/exporter-logs-otlp-http`** - OTLP HTTP exporter for logs
 - **`@opentelemetry/winston-transport`** - Enables automatic log forwarding to OpenTelemetry Logs SDK
 
-## Step 2: Create OpenTelemetry Configuration
+### Step 2: Create OpenTelemetry Configuration
 
 Create an OpenTelemetry configuration file at your project root:
 
@@ -160,7 +162,7 @@ process.on('SIGTERM', () => {
 </TabItem>
 </Tabs>
 
-### Configuration Notes
+#### Configuration Details
 
 - **Batch processors** are used for production efficiency, batching spans and logs before export
 - **Auto-instrumentations** automatically create spans for HTTP requests, Express routes, and other common libraries
@@ -168,7 +170,7 @@ process.on('SIGTERM', () => {
 - **LoggerProvider** must be set up globally for Winston log forwarding to work
 - The SDK must be started **before** your application imports Winston
 
-## Step 3: Create Winston Logger Configuration
+### Step 3: Create Winston Logger Configuration
 
 Create a Winston logger configuration file that your application will use:
 
@@ -227,7 +229,7 @@ export default logger;
 </TabItem>
 </Tabs>
 
-### Logger Configuration Notes
+#### Logger Configuration Details
 
 - **Level**: Controls which log levels are output (debug, info, warn, error)
 - **Format**: Defines how log messages are formatted for readability
@@ -235,9 +237,57 @@ export default logger;
 - **DefaultMeta**: Adds metadata to every log entry
 - **OpenTelemetry Integration**: The Winston instrumentation automatically injects trace context and forwards logs
 
-## Step 4: Configure and Run Your Application
+#### Using the Logger in Your Application
 
-### Set Environment Variables
+Import and use the logger in your application code:
+
+<Tabs>
+<TabItem value="js" label="JavaScript">
+
+```javascript
+// Import the logger in your application main file (Ex: app.js)
+const logger = require('./logger');
+
+// Example usage in your application
+app.get('/', (req, res) => {
+  logger.info('Handling request to root endpoint');
+  res.json({ message: 'Hello World' });
+});
+
+app.get('/error', (req, res) => {
+  logger.error('Simulated error occurred', { 
+    userId: 123, 
+    endpoint: '/error' 
+  });
+  res.status(500).json({ error: 'Something went wrong' });
+});
+```
+
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
+```typescript
+// Import the logger in your application main file (Ex: app.js)
+import logger from './logger';
+
+// Example usage in your application
+app.get('/', (req, res) => {
+  logger.info('Handling request to root endpoint');
+  res.json({ message: 'Hello World' });
+});
+
+app.get('/error', (req, res) => {
+  logger.error('Simulated error occurred', { 
+    userId: 123, 
+    endpoint: '/error' 
+  });
+  res.status(500).json({ error: 'Something went wrong' });
+});
+```
+
+### Step 4: Configure and Run Your Application
+
+#### Set Environment Variables
 
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
@@ -266,7 +316,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="http://<collector-host>:4318"
 </TabItem>
 </Tabs>
 
-### Start Your Application
+#### Start Your Application
 
 <Tabs>
 <TabItem value="js" label="JavaScript">
@@ -287,10 +337,6 @@ node -r ./otel.js app.js
 <TabItem value="ts" label="TypeScript">
 
 ```bash
-export OTEL_SERVICE_NAME=<service_name>
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-
 node -r ./otel.ts app.ts
 ```
 
@@ -303,52 +349,6 @@ node -r ./otel.ts app.ts
 
 The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Winston.
 
-### Using the Logger in Your Application
-
-Import and use the logger in your application code:
-
-<Tabs>
-<TabItem value="js" label="JavaScript">
-
-```javascript
-const logger = require('./logger');
-
-// Example usage in your application
-app.get('/', (req, res) => {
-  logger.info('Handling request to root endpoint');
-  res.json({ message: 'Hello World' });
-});
-
-app.get('/error', (req, res) => {
-  logger.error('Simulated error occurred', { 
-    userId: 123, 
-    endpoint: '/error' 
-  });
-  res.status(500).json({ error: 'Something went wrong' });
-});
-```
-
-</TabItem>
-<TabItem value="ts" label="TypeScript">
-
-```typescript
-import logger from './logger';
-
-// Example usage in your application
-app.get('/', (req, res) => {
-  logger.info('Handling request to root endpoint');
-  res.json({ message: 'Hello World' });
-});
-
-app.get('/error', (req, res) => {
-  logger.error('Simulated error occurred', { 
-    userId: 123, 
-    endpoint: '/error' 
-  });
-  res.status(500).json({ error: 'Something went wrong' });
-});
-```
-
 </TabItem>
 </Tabs>
 
@@ -357,37 +357,7 @@ app.get('/error', (req, res) => {
 After starting your application:
 
 1. **Make some requests** to your application endpoints
-2. **Check SigNoz** for incoming traces and logs
-3. **Verify correlation** - your logs should contain trace IDs and be correlated with spans
+2. **Check SigNoz** for incoming logs
+3. **Verify correlation** - your logs should contain trace IDs and be correlated with spans if available
 
-### What to Look For
 
-- **Traces** appearing in the SigNoz Traces tab
-- **Logs** appearing in the SigNoz Logs tab
-- **Trace correlation** - logs should contain `trace_id`, `span_id`, and `trace_flags` fields
-
-## Troubleshooting
-
-### Common Issues
-
-**No traces appearing:**
-- Ensure the preload script (`-r ./otel.js`) is used
-- Check that environment variables are set correctly
-- Verify network connectivity to SigNoz
-
-**No logs appearing:**
-- Confirm Winston is being used for logging in your application
-- Check that the Winston instrumentation is properly configured
-- Verify the OTLP logs endpoint is correct
-- Ensure `@opentelemetry/winston-transport` is installed (required for log forwarding)
-
-**Missing trace correlation:**
-- Ensure OpenTelemetry is loaded before Winston is imported
-- Check that `disableLogCorrelation: false` in Winston instrumentation
-- Verify that the LoggerProvider is set globally before Winston creates loggers
-- Verify spans are being created (check traces first)
-
-**Logs not being forwarded to OpenTelemetry:**
-- Ensure `disableLogSending: false` in Winston instrumentation
-- Check that `@opentelemetry/winston-transport` package is installed
-- Verify the global LoggerProvider is properly configured
