@@ -588,6 +588,21 @@ module.exports = () => {
           source: "/docs/userguide/collecting-ecs-sidecar-infra",
           destination: "/docs/collection-agents/ecs/sidecar/overview",
           permanent: true
+        },
+        {
+          source: "/docs/operate/0.75.0/query-service/user-invitation-smtp",
+          destination: "/docs/manage/administrator-guide/configuration/smtp-email-invitations/#versions-less-than-or-equal-to-084x",
+          permanent:  true
+        },
+        {
+          source: "/docs/operate/0.75.0/query-service/reset-admin-password",
+          destination: "docs/operate/reset-admin-password",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/0.75.0/configuration",
+          destination: "/docs/operate/configuration",
+          permanent: true 
         }
       ]
     },
