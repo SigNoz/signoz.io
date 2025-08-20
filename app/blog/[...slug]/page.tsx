@@ -40,7 +40,7 @@ export async function generateMetadata({
     return coreContent(authorResults as Authors)
   })
   if (!post) {
-    return notFound() // this is a test
+    return
   }
 
   const publishedAt = new Date(post.date).toISOString()
