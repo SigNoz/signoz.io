@@ -2990,16 +2990,28 @@ const docsSideNav = [
   {
     type: 'category',
     isExpanded: false,
-    label: 'About SigNoz',
+    label: 'LLM Monitoring',
     items: [
       {
-        route: '/docs/contributing',
-        label: 'Contributing Guidelines',
+        route: '/docs/llm/opentelemetry-openai-monitoring',
+        label: 'OpenAI Monitoring',
         type: 'doc',
       },
-      // 'about-signoz/architecture',
-      // 'about-signoz/contributing',
-      // 'about-signoz/roadmap',
+      {
+        route: '/docs/community/llm-monitoring',
+        label: 'LLM Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/llm/vercel-ai-sdk-monitoring',
+        label: 'Vercel AI SDK Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/llm/llamaindex-monitoring',
+        label: 'LlamaIndex Monitoring',
+        type: 'doc',
+      },
     ],
   },
   {
@@ -3015,6 +3027,11 @@ const docsSideNav = [
       {
         label: 'Community Channels',
         route: '/docs/community',
+        type: 'doc',
+      },
+      {
+        route: '/docs/contributing',
+        label: 'Contributing Guidelines',
         type: 'doc',
       },
     ],
