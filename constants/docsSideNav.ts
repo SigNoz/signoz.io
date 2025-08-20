@@ -1091,6 +1091,11 @@ const docsSideNav = [
             route: '/docs/logs-management/send-logs/collect-systemd-logs',
             label: 'SystemD logs',
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/zerolog-to-signoz',
+            label: 'Zerolog',
+          },
         ],
       },
       {
