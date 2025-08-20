@@ -5,18 +5,18 @@ import Script from 'next/script'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Launch Week 4.0 | May 12 - 16 | 9 AM PT',
+    absolute: 'Launch Week 5.0 | Sep 08 - 12 | 9 AM PT',
   },
   openGraph: {
-    title: 'Launch Week 4.0 | May 12 - 16 | 9 AM PT',
+    title: 'Launch Week 5.0 | Sep 08 - 12 | 9 AM PT',
     description: 'Join us for a week of announcing new features at 9 AM PT daily.',
-    images: '/img/events/launch-week-4/launch-week-4-cover.webp',
+    images: '/img/events/launch-week-5/launch-week-5-cover.webp',
   },
   description: 'Join us for a week of announcing new features at 9 AM PT daily.',
   twitter: {
-    title: 'Launch Week 4.0 | May 12 - 16 | 9 AM PT',
+    title: 'Launch Week 5.0 | Sep 08 - 12 | 9 AM PT',
     description: 'Join us for a week of announcing new features at 9 AM PT daily.',
-    images: '/img/events/launch-week-4/launch-week-4-cover.webp',
+    images: '/img/events/launch-week-5/launch-week-5-cover.webp',
   },
 }
 
