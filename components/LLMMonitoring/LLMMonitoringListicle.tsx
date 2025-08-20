@@ -15,19 +15,19 @@ interface IconCardData {
 const LLMMonitoringData: IconCardData[] = [
   {
     name: 'OpenAI',
-    href: '/docs/llm/opentelemetry-openai-monitoring',
+    href: '/docs/opentelemetry-openai-monitoring',
     icon: <SiOpenai className="h-7 w-7 text-white" />,
     clickName: 'OpenAI Monitoring',
   },
   {
     name: 'Vercel AI SDK',
-    href: '/docs/llm/vercel-ai-sdk-monitoring',
+    href: '/docs/vercel-ai-sdk-monitoring',
     icon: <SiVercel className="h-7 w-7 text-white" />,
     clickName: 'Vercel AI SDK Monitoring',
   },
   {
     name: 'LlamaIndex',
-    href: '/docs/llm/llamaindex-monitoring',
+    href: '/docs/llamaindex-monitoring',
     icon: <img src="/svgs/icons/LLMMonitoring/llamaindex-icon.svg" alt="LlamaIndex Icon" className="h-7 w-7" />,
     clickName: 'LlamaIndex Monitoring',
   },

@@ -1859,27 +1859,27 @@ const docsSideNav = [
   {
     type: 'category',
     isExpanded: false,
-    route: '/docs/llm/llm-observability',
+    route: '/docs/llm-observability',
     label: 'LLM Observability',
 
     items: [
       {
-        route: '/docs/llm/opentelemetry-openai-monitoring',
+        route: '/docs/opentelemetry-openai-monitoring',
         label: 'OpenAI Monitoring',
         type: 'doc',
       },
       {
-        route: '/docs/community/llm-community-integrations',
+        route: '/docs/llm-community-integrations',
         label: 'LLM Community Integrations',
         type: 'doc',
       },
       {
-        route: '/docs/llm/vercel-ai-sdk-monitoring',
+        route: '/docs/vercel-ai-sdk-monitoring',
         label: 'Vercel AI SDK Monitoring',
         type: 'doc',
       },
       {
-        route: '/docs/llm/llamaindex-monitoring',
+        route: '/docs/llamaindex-monitoring',
         label: 'LlamaIndex Monitoring',
         type: 'doc',
       },
