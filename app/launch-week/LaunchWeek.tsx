@@ -60,9 +60,9 @@ const MainSection: React.FC = () => {
 
           <div className="z-[1] my-6 ml-5 flex min-h-[40px] w-fit items-center justify-center gap-1.5 overflow-hidden rounded-sm bg-white px-4 py-2 text-sm leading-none text-signoz_ink-500  ">
             <a
-              href="https://lu.ma/event/evt-rsG0WzmmgF9FPfy"
-              data-luma-action="checkout"
-              data-luma-event-id="evt-rsG0WzmmgF9FPfy"
+              href="https://lu.ma/signoz-launch-week"
+              target="_blank"
+              rel="noopener noreferrer"
               id="launch-page-subscribe"
             >
               <div className="flex items-center gap-1.5">
