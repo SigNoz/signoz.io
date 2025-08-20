@@ -543,6 +543,23 @@ const docsSideNav = [
               },
             ],
           },
+          {
+            type: 'category',
+            label: 'Serverless (EKS Fargate)',
+            isExpanded: false,
+            items: [
+              {
+                label: 'Overview',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/serverless/overview',
+              },
+              {
+                label: 'Install',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/serverless/install',
+              },
+            ],
+          },
         ],
       },
       {
@@ -574,6 +591,57 @@ const docsSideNav = [
             type: 'doc',
             label: 'Install',
           },
+        ],
+      },
+      {
+        type: 'category',
+        label: 'ECS',
+        isExpanded: false,
+        items: [
+         {
+          type: "category",
+          label: "EC2",
+          isExpanded: false,
+          items: [
+            {
+              type: 'doc',
+              label: "Overview",
+              route: "/docs/collection-agents/ecs/ec2/overview"
+            },
+            {
+              type: 'doc',
+              label: 'Install',
+              route: "/docs/collection-agents/ecs/ec2/install"
+            },
+            {
+              type : 'doc',
+              label: "Configure",
+              route: "/docs/collection-agents/ecs/ec2/configure"
+            }
+          ]
+         },
+         {
+          type: "category",
+          label: "Serverless",
+          isExpanded: false,
+          items: [
+            {
+              type: 'doc',
+              label: "Overview",
+              route: "/docs/collection-agents/ecs/sidecar/overview"
+            },
+            {
+              type: 'doc',
+              label: 'Install',
+              route: "/docs/collection-agents/ecs/sidecar/install"
+            },
+            {
+              type : 'doc',
+              label: "Configure",
+              route: "/docs/collection-agents/ecs/sidecar/configure"
+            }
+          ]
+         }
         ],
       },
     ],
@@ -1303,23 +1371,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/userguide/drop-metrics',
         label: 'Drop Metrics',
-      },
-      {
-        type: 'category',
-        label: 'Guides',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/userguide/collecting-ecs-logs-and-metrics',
-            label: 'ECS Infra Metrics & Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/collecting-ecs-sidecar-infra',
-            label: 'ECS Infra Sidecar',
-          },
-        ],
       },
       {
         type: 'category',
