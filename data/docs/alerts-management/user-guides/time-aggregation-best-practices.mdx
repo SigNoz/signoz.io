@@ -25,12 +25,13 @@ To learn more about aggregations in metrics, visit the [Metric types and aggrega
 ## Aggregation Examples
 
 **For Container Restarts:**
-```
+~~~
 Metric: k8s.container.restarts
-Aggregation: max (not count distinct)
+Aggregation: max (use running_diff to compute increments)
 Evaluation: at least once
-Reason: You want the maximum restart count, not the number of unique restart values
-```
+Formula: running_diff(k8s.container.restarts, cutoff_min=0)
+Reason: Restart counters are cumulative and don't reset to zero immediately after a restart, which can make alerts continuously fire. Compute the difference between consecutive samples and drop negative values (caused by counter resets) using:
+~~~
 
 **For Memory Usage:**
 ```
