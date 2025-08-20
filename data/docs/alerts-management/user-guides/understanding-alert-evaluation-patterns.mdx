@@ -46,6 +46,12 @@ Condition: > 90
 Evaluation: All the time for 10 minutes
 ```
 
+**Note about sparse metrics:** If a metric is sparse (many timestamps have no datapoints in the evaluation window), the "All the Time" pattern is evaluated only against the samples that exist. This can lead to surprising results:
+- If only a few samples are present and they all meet the condition, the alert may fire even though most of the window had no data.
+- Depending on the evaluation engine's "no data" handling, missing points might be treated as non-matching and prevent firing, or ignored entirely.
+
+Mitigation: ensure enough samples by increasing the evaluation window or collection frequency, configure "No Data" behavior or minimum sample counts, or choose a different pattern (e.g., "On Average" or "At Least Once") when working with sparse metrics.
+
 ### 3. On Average
 **When to use:** When you want to smooth out temporary spikes and focus on the overall trend.
 
@@ -112,3 +118,4 @@ Evaluation: Last value
 - **Consider your evaluation window carefully** - longer windows reduce noise but delay detection of issues.
 - **Use "Last" pattern sparingly** - only when the most recent value is truly the only relevant data point.
 - **Match alert severity to evaluation pattern** - stricter patterns (All the Time) for lower severity, looser patterns (At Least Once) for critical alerts.
+- **Handle sparse metrics explicitly:** For metrics with intermittent sampling, prefer longer evaluation windows, align the evaluation window with the scrape/collection interval, configure "No Data" or minimum-samples behavior, or use patterns less sensitive to missing points (e.g., "On Average" or "In Total") to avoid false positives/negatives from sparse data.
