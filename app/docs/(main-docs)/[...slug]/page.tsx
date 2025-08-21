@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 
 export const dynamicParams = false
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
@@ -17,6 +18,10 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allDocs.find((p) => p.slug === slug)
+
+  if (!post) {
+    notFound()
+  }
 
   return {
     title: post?.title,
@@ -37,8 +42,10 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
-  const paths = allDocs.map((p) => ({ slug: p.slug?.split('/') }))
-
+  const paths = allDocs
+  .filter((p) => p.slug !== 'introduction')
+  .map((p) => ({ slug: p.slug?.split('/') })) // Don't want to generate static params for introduction page
+  
   return paths
 }
 

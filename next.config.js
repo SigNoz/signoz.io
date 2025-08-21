@@ -540,6 +540,46 @@ module.exports = () => {
           permanent: true
         },
         {
+          source: "/newsroom/launch-week-1-day-1/",
+          destination: "/blog/launch-week-1-day-1/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1-day-2/",
+          destination: "/blog/launch-week-1-day-2/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1-day-3/",
+          destination: "/blog/launch-week-1-day-3/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1-day-4/",
+          destination: "/blog/launch-week-1-day-4/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1-day-5/",
+          destination: "/blog/launch-week-1-day-5/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1/",
+          destination: "/blog/launch-week-1/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/signoz-funding/",
+          destination: "/blog/signoz-funding/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/",
+          destination: "/blog/",
+          permanent: true
+        },
+        {
           source: "/docs/userguide/collecting-ecs-logs-and-metrics",
           destination: "/docs/collection-agents/ecs/ec2/overview/",
           permanent: true

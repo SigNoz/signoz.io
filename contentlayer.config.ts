@@ -165,6 +165,7 @@ export const Blog = defineDocumentType(() => ({
     toc_max_heading_level: { type: 'number', required: false },
     cta_title: { type: 'string', required: false },
     cta_text: { type: 'string', required: false },
+    is_newsroom: { type: 'boolean', required: false },
   },
   computedFields: {
     ...computedFields,
