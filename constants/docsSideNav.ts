@@ -217,6 +217,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/install/uninstall',
+            label: 'Uninstall',
+          },
+          {
+            type: 'doc',
             label: 'Troubleshooting',
             route: '/docs/install/troubleshooting',
           },
@@ -3003,96 +3008,28 @@ const docsSideNav = [
   {
     type: 'category',
     isExpanded: false,
-    label: 'Operate Self-Hosted SigNoz',
-    route: '/docs/operate',
-    // link: {
-    // type: 'generated-index',
-    // title: 'Operate',
-    // description:
-    // 'The following sections provide an overview of the activities that are required to successfully operate SigNoz. Based on your environment, proceed to one of the sections below.',
-    // slug: '/docs/operate',
-    // },
+    label: 'LLM Monitoring',
     items: [
       {
-        type: 'category',
-        isExpanded: false,
-        label: '<=0.75.0',
-        //route: '/docs/operate/migration',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Migration Guides',
-        // description:
-        // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
-        // slug: '/docs/operate/migration/migration',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/0.75.0/configuration',
-            label: 'Configuration',
-          },
-          {
-            type: 'category',
-            isExpanded: false,
-            label: 'Query Service',
-            route: '/docs/operate/0.75.0/query-service',
-            // link: {
-            // type: 'generated-index',
-            // title: 'Query Service',
-            // description:
-            // 'The following sections provide instructions to operate Query Service. You can proceed to one of the sections below.',
-            // slug: '/docs/operate/query-service',
-            // },
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/operate/0.75.0/query-service/reset-admin-password',
-                label: 'Reset Admin Password',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/0.75.0/query-service/user-invitation-smtp',
-                label: 'Enable SMTP for User Invitations',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/docker-standalone',
-        label: 'Docker Standalone',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/docker-swarm',
-        label: 'Docker Swarm',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/kubernetes',
-        label: 'Kubernetes',
-      },
-      {
-        type: 'doc',
-        route: '/docs/production-readiness',
-        label: 'Best Practices for Production',
-      },
-    ],
-  },
-  {
-    type: 'category',
-    isExpanded: false,
-    label: 'About SigNoz',
-    items: [
-      {
-        route: '/docs/contributing',
-        label: 'Contributing Guidelines',
+        route: '/docs/llm/opentelemetry-openai-monitoring',
+        label: 'OpenAI Monitoring',
         type: 'doc',
       },
-      // 'about-signoz/architecture',
-      // 'about-signoz/contributing',
-      // 'about-signoz/roadmap',
+      {
+        route: '/docs/community/llm-monitoring',
+        label: 'LLM Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/llm/vercel-ai-sdk-monitoring',
+        label: 'Vercel AI SDK Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/llm/llamaindex-monitoring',
+        label: 'LlamaIndex Monitoring',
+        type: 'doc',
+      },
     ],
   },
   {
@@ -3108,6 +3045,11 @@ const docsSideNav = [
       {
         label: 'Community Channels',
         route: '/docs/community',
+        type: 'doc',
+      },
+      {
+        route: '/docs/contributing',
+        label: 'Contributing Guidelines',
         type: 'doc',
       },
     ],
