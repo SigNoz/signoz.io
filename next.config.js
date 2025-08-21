@@ -588,7 +588,53 @@ module.exports = () => {
           source: "/docs/userguide/collecting-ecs-sidecar-infra",
           destination: "/docs/collection-agents/ecs/sidecar/overview",
           permanent: true
-        }
+        },
+        {
+          source: "/docs/operate/0.75.0/query-service/user-invitation-smtp",
+          destination: "/docs/manage/administrator-guide/configuration/smtp-email-invitations/#versions-less-than-or-equal-to-084x",
+          permanent:  true
+        },
+        {
+          source: "/docs/operate/0.75.0/query-service/reset-admin-password",
+          destination: "docs/operate/reset-admin-password",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/0.75.0/configuration",
+          destination: "/docs/operate/configuration",
+          permanent: true 
+        },
+        {
+          source: "/docs/operate/docker-standalone/#upgrade",
+          destination: "/docs/operate/migration/upgrade-standard/#docker-standalone",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
+          destination: "/docs/install/uninstall/#docker-standalone",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-swarm/#upgrade-signoz-cluster",
+          destination: "/docs/operate/migration/upgrade-standard/#docker-swarm-cluster",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
+          destination: "/docs/install/uninstall/#docker-swarm",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/kubernetes/#upgrade-signoz",
+          destination: "/docs/operate/migration/upgrade-standard/#kubernetes-deployment",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/kubernetes/#uninstall-signoz",
+          destination: "/docs/install/uninstall/#kubernetes",
+          permanent: true
+        },
+
       ]
     },
     webpack: (config, options) => {
