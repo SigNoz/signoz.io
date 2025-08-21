@@ -10,7 +10,7 @@ keywords: [monitor, observe, opentelemetry, LlamaIndex, integrations, SigNoz]
 
 LlamaIndex has become a popular choice for building Retrieval-Augmented Generation (RAG) applications, helping developers seamlessly connect large language models with private or domain-specific data. But RAG workflows can be complex with slow retrieval times, irrelevant or inconsistent responses, and silent failures in the data pipeline can all degrade the user experience. 
 
-That's why observability is essential. By instrumenting your LlamaIndex-based RAG app with OpenTelemetry and sending the telemetry data to SigNoz, you can track retrieval and generation performance, pinpoint bottlenecks, catch errors early, and gain actionable insights into how your app behaves in production with minimal setup.
+That’s why observability is essential. By instrumenting your LlamaIndex-based RAG app with OpenTelemetry and sending the telemetry data to SigNoz, you can track retrieval and generation performance, pinpoint bottlenecks, catch errors early, and gain actionable insights into how your app behaves in production with minimal setup.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/09/llamaindex-cover.webp" />
@@ -18,29 +18,29 @@ That's why observability is essential. By instrumenting your LlamaIndex-based RA
 
 ## Why Observability Matters for LlamaIndex RAG Apps
 
-RAG applications built with LlamaIndex are like well-orchestrated conversations between multiple moving parts. You've got a retriever pulling the most relevant documents, a vector database storing embeddings, and an LLM generating the final answer, all stitched together by your application logic. When it works, it feels magical. But when something slows down or breaks, it can be a nightmare to figure out why.
+RAG applications built with LlamaIndex are like well-orchestrated conversations between multiple moving parts. You’ve got a retriever pulling the most relevant documents, a vector database storing embeddings, and an LLM generating the final answer, all stitched together by your application logic. When it works, it feels magical. But when something slows down or breaks, it can be a nightmare to figure out why.
 
-Maybe your retriever is taking too long because the vector store is under heavy load. Maybe the LLM is producing off-target answers because the retrieval stage returned poor results. Or maybe a third-party API silently failed, causing gaps in the data pipeline. Without observability, you're left guessing.
+Maybe your retriever is taking too long because the vector store is under heavy load. Maybe the LLM is producing off-target answers because the retrieval stage returned poor results. Or maybe a third-party API silently failed, causing gaps in the data pipeline. Without observability, you’re left guessing.
 
-This is where tools like OpenTelemetry and SigNoz shine. With proper instrumentation, you can see exactly how long each step of your RAG workflow takes, spot bottlenecks before they impact users, and understand errors in their full context. Instead of sifting through logs blindly, you get a clear, connected view of your entire app's behaviour, so you can keep your LlamaIndex-powered RAG app running smoothly.
+This is where tools like OpenTelemetry and SigNoz shine. With proper instrumentation, you can see exactly how long each step of your RAG workflow takes, spot bottlenecks before they impact users, and understand errors in their full context. Instead of sifting through logs blindly, you get a clear, connected view of your entire app’s behaviour, so you can keep your LlamaIndex-powered RAG app running smoothly.
 
 ## How OpenTelemetry + SigNoz can help
 
 **What is OpenTelemetry?**
 
-[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) (OTel) is an open-source observability framework that provides a unified way to collect telemetry data: traces, metrics, and logs from across your application stack. It's a CNCF project with support for multiple programming languages and a wide range of integrations. The beauty of OTel is that you instrument your code once, and you can send that data to any observability backend you choose without any vendor lock-in. For LlamaIndex-based RAG apps, this means you can capture detailed performance and error data from each stage of the retrieval and generation process without reinventing the wheel.
+[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) (OTel) is an open-source observability framework that provides a unified way to collect telemetry data: traces, metrics, and logs from across your application stack. It’s a CNCF project with support for multiple programming languages and a wide range of integrations. The beauty of OTel is that you instrument your code once, and you can send that data to any observability backend you choose without any vendor lock-in. For LlamaIndex-based RAG apps, this means you can capture detailed performance and error data from each stage of the retrieval and generation process without reinventing the wheel.
 
 **What is SigNoz?**
 
-[SigNoz](https://signoz.io/) is an all-in-one observability platform built on top of OpenTelemetry. It provides a rich UI to visualise traces, monitor performance metrics, and set alerts, all in real time. With SigNoz, you can drill into slow retrieval calls, spot bottlenecks in LLM responses, or trace a user request end-to-end across your RAG pipeline. By pairing OpenTelemetry's standardised data collection with SigNoz's powerful analysis tools, you get a complete observability stack tailored for modern, distributed, and AI-driven applications.
+[SigNoz](https://signoz.io/) is an all-in-one observability platform built on top of OpenTelemetry. It provides a rich UI to visualise traces, monitor performance metrics, and set alerts, all in real time. With SigNoz, you can drill into slow retrieval calls, spot bottlenecks in LLM responses, or trace a user request end-to-end across your RAG pipeline. By pairing OpenTelemetry’s standardised data collection with SigNoz’s powerful analysis tools, you get a complete observability stack tailored for modern, distributed, and AI-driven applications.
 
 To demonstrate how OpenTelemetry and SigNoz work together in a real-world LlamaIndex RAG scenario, we created a small demo app that utilises the SigNoz developer documentation to generate an AI-powered chatbot.
 
 ## Building the Example App: A SigNoz Docs RAG Chatbot
 
-To make this guide more concrete, we've built a RAG chatbot powered by LlamaIndex, OpenTelemetry, and SigNoz. The idea is simple: the LLM has ingested all of the SigNoz developer documentation, so you can ask it any question about SigNoz—how to set up tracing, configure dashboards, or troubleshoot common issues—and it will pull the answer directly from the docs.
+To make this guide more concrete, we’ve built a RAG chatbot powered by LlamaIndex, OpenTelemetry, and SigNoz. The idea is simple: the LLM has ingested all of the SigNoz developer documentation, so you can ask it any question about SigNoz—how to set up tracing, configure dashboards, or troubleshoot common issues—and it will pull the answer directly from the docs.
 
-Under the hood, the app uses LlamaIndex to structure and query the ingested documentation, a vector store to handle semantic search, and an LLM to generate user-friendly answers. With OpenTelemetry instrumentation baked in, every retrieval, embedding generation, and LLM call is traced and sent to SigNoz, giving a full picture of the app's performance and behaviour.
+Under the hood, the app uses LlamaIndex to structure and query the ingested documentation, a vector store to handle semantic search, and an LLM to generate user-friendly answers. With OpenTelemetry instrumentation baked in, every retrieval, embedding generation, and LLM call is traced and sent to SigNoz, giving a full picture of the app’s performance and behaviour.
 
 To make it more interactive, the chatbot also lets users give feedback on the retrieved answer, whether it was helpful or not. This feedback loop can be logged and analysed in SigNoz, helping identify where the retrieval or generation steps might need improvement.
 
@@ -57,7 +57,7 @@ Want to explore the RAG chatbot in action? Clone the [repo](https://github.com/S
 git clone https://github.com/SigNoz/llamaindex-rag-opentelemetry-demo.git
 ```
 
-After cloning the repo and getting set up, you can run the chatbot locally and start exploring SigNoz through your queries. If you'd rather instrument your own LlamaIndex app, continue to the next section for detailed instructions on integrating OpenTelemetry and SigNoz.
+After cloning the repo and getting set up, you can run the chatbot locally and start exploring SigNoz through your queries. If you’d rather instrument your own LlamaIndex app, continue to the next section for detailed instructions on integrating OpenTelemetry and SigNoz.
 
 ## Instrument your LlamaIndex RAG app
 
@@ -107,9 +107,9 @@ span_exporter = OTLPSpanExporter(
 provider.add_span_processor(BatchSpanProcessor(span_exporter))
 ```
 
-- **`<service_name>`** is the name of your service
-- Set the **`<region>`** to match your SigNoz Cloud [**region**](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace **`<your-ingestion-key>`** with your SigNoz [**ingestion key**](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- **`<service_name>`** is the name of your service
+- Set the **`<region>`** to match your SigNoz Cloud [**region**](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace **`<your-ingestion-key>`** with your SigNoz [**ingestion key**](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 **Step 5:** Instrument LlamaIndex using OpenInference and the configured Tracer Provider
 
@@ -142,7 +142,7 @@ When you click on a trace ID in SigNoz, you'll see a detailed view of the trace,
 
 In addition to traces and metrics, you can also emit logs from your LlamaIndex app to capture valuable runtime information. For example, you might log the number of document chunks embedded into vectors, the number of most relevant documents retrieved during a query, or the feedback provided by users on the generated answers. These logs, when correlated with traces in SigNoz, give you richer context for debugging issues and improving your RAG pipeline.
 
-**Step 1.** Install OpenTelemetry packages for logging
+**Step 1.** Install OpenTelemetry packages for logging
 
 ```bash
 pip install opentelemetry-api
@@ -150,7 +150,7 @@ pip install opentelemetry-sdk
 pip install opentelemetry-exporter-otlp
 ```
 
-**Step 2.** Create telemetry.py file
+**Step 2.** Create telemetry.py file
 
 ```python
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
@@ -181,11 +181,11 @@ def configure_logging():
     logging.getLogger().addHandler(handler)
 ```
 
-- ****`<service_name>`**** is the name of your service
-- Set the ****`<region>`**** to match your SigNoz Cloud [****region****](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace ****`<your-ingestion-key>`**** with your SigNoz [****ingestion key****](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- ****`<service_name>`**** is the name of your service
+- Set the ****`<region>`**** to match your SigNoz Cloud [****region****](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace ****`<your-ingestion-key>`**** with your SigNoz [****ingestion key****](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-**Step 3.** Import and call `configure_logging()` in your LlamaIndex app
+**Step 3.** Import and call `configure_logging()` in your LlamaIndex app
 
 ```python
 from telemetry import configure_logging
@@ -235,7 +235,7 @@ These are what the log details would look like:
     <figcaption><i>Log View of Query</i></figcaption>
 </figure>
 
-Finally, we log user feedback on chatbot responses to track how well the system is performing from the end-user's perspective:
+Finally, we log user feedback on chatbot responses to track how well the system is performing from the end-user’s perspective:
 
 ```python
 logger.info(
@@ -353,7 +353,7 @@ This panel counts the total number of text chunks created during document ingest
 
 **Average Similarity Scores for Top‑Ranked Documents** 
 
-This panel shows the relevance of retrieved documents to the user's query, based on vector similarity scores. By tracking the top‑1 and top‑2 scores over time, you can spot changes in retrieval accuracy and tune your pipeline accordingly.
+This panel shows the relevance of retrieved documents to the user’s query, based on vector similarity scores. By tracking the top‑1 and top‑2 scores over time, you can spot changes in retrieval accuracy and tune your pipeline accordingly.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/09/similarity-scores.webp" alt="Similarity Scores"/>
@@ -371,7 +371,7 @@ This panel indicates the configured number of documents fetched for each query. 
 
 **User Feedback Distribution** 
 
-This panel shows how users are rating the chatbot's responses, broken down into positive ("up") and negative ("down") feedback. Monitoring this helps identify trends in answer quality and provides a direct signal for improving retrieval or generation steps.
+This panel shows how users are rating the chatbot’s responses, broken down into positive (“up”) and negative (“down”) feedback. Monitoring this helps identify trends in answer quality and provides a direct signal for improving retrieval or generation steps.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/09/feedback-distribution.webp" alt="Feedback Distribution"/>
@@ -398,8 +398,8 @@ This panel displays the number of input and output tokens processed by the LLM. 
 
 ## Wrapping it Up
 
-Building LlamaIndex‑based RAG applications is exciting. There's something magical about watching your AI instantly pull the right answers from your own data. But that magic only lasts if the app stays fast, reliable, and accurate. To make that happen, you need a clear view of what's going on under the hood.
+Building LlamaIndex‑based RAG applications is exciting. There’s something magical about watching your AI instantly pull the right answers from your own data. But that magic only lasts if the app stays fast, reliable, and accurate. To make that happen, you need a clear view of what’s going on under the hood.
 
-By pairing OpenTelemetry's vendor‑neutral instrumentation with SigNoz's powerful observability platform, you can follow every step of your RAG workflow—chunking, embedding, retrieval, generation—and even capture user feedback to drive improvements. With this visibility, debugging becomes faster, performance tuning becomes data‑driven, and your users get consistently great experiences.
+By pairing OpenTelemetry’s vendor‑neutral instrumentation with SigNoz’s powerful observability platform, you can follow every step of your RAG workflow—chunking, embedding, retrieval, generation—and even capture user feedback to drive improvements. With this visibility, debugging becomes faster, performance tuning becomes data‑driven, and your users get consistently great experiences.
 
-In AI‑powered apps, guesswork is the enemy. Observability is how you replace it with clarity, and that's how you build RAG systems you can trust. In the race to build smarter AI, the real edge isn't just better models—it's better observability.
+In AI‑powered apps, guesswork is the enemy. Observability is how you replace it with clarity, and that’s how you build RAG systems you can trust. In the race to build smarter AI, the real edge isn’t just better models—it’s better observability.
