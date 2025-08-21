@@ -1880,6 +1880,35 @@ const docsSideNav = [
     ],
   },
   {
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/llm-observability',
+    label: 'LLM Observability',
+
+    items: [
+      {
+        route: '/docs/opentelemetry-openai-monitoring',
+        label: 'OpenAI Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/llm-community-integrations',
+        label: 'LLM Community Integrations',
+        type: 'doc',
+      },
+      {
+        route: '/docs/vercel-ai-sdk-monitoring',
+        label: 'Vercel AI SDK Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/llamaindex-monitoring',
+        label: 'LlamaIndex Monitoring',
+        type: 'doc',
+      },
+    ],
+  },
+  {
     label: 'Integrations',
     type: 'category',
     isExpanded: false,
@@ -3028,33 +3057,6 @@ const docsSideNav = [
       // 'about-signoz/architecture',
       // 'about-signoz/contributing',
       // 'about-signoz/roadmap',
-    ],
-  },
-  {
-    type: 'category',
-    isExpanded: false,
-    label: 'LLM Monitoring',
-    items: [
-      {
-        route: '/docs/llm/opentelemetry-openai-monitoring',
-        label: 'OpenAI Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/community/llm-monitoring',
-        label: 'LLM Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/llm/vercel-ai-sdk-monitoring',
-        label: 'Vercel AI SDK Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/llm/llamaindex-monitoring',
-        label: 'LlamaIndex Monitoring',
-        type: 'doc',
-      },
     ],
   },
   {
