@@ -603,7 +603,38 @@ module.exports = () => {
           source: "/docs/operate/0.75.0/configuration",
           destination: "/docs/operate/configuration",
           permanent: true 
-        }
+        },
+        {
+          source: "/docs/operate/docker-standalone/#upgrade",
+          destination: "/docs/operate/migration/upgrade-standard/#docker-standalone",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
+          destination: "/docs/install/uninstall/#docker-standalone",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-swarm/#upgrade-signoz-cluster",
+          destination: "/docs/operate/migration/upgrade-standard/#docker-swarm-cluster",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
+          destination: "/docs/install/uninstall/#docker-swarm",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/kubernetes/#upgrade-signoz",
+          destination: "/docs/operate/migration/upgrade-standard/#kubernetes-deployment",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/kubernetes/#uninstall-signoz",
+          destination: "/docs/install/uninstall/#kubernetes",
+          permanent: true
+        },
+
       ]
     },
     webpack: (config, options) => {

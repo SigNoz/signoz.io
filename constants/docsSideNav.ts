@@ -216,27 +216,9 @@ const docsSideNav = [
             route: '/docs/install/marketplaces',
           },
           {
-            type: 'category',
-            isExpanded: false,
-            label: 'Operate Self-Host',
-            route: '/docs/operate',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/operate/docker-standalone',
-                label: 'Docker Standalone',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/docker-swarm',
-                label: 'Docker Swarm',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/kubernetes',
-                label: 'Kubernetes',
-              },
-            ],
+            type: 'doc',
+            route: '/docs/install/uninstall',
+            label: 'Uninstall',
           },
           {
             type: 'doc',
