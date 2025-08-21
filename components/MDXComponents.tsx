@@ -57,6 +57,8 @@ import KubernetesDashboardsListicle from './Dashboards/KubernetesDashboardsListi
 import APMDashboardsListicle from './Dashboards/APMDashboardsListicle'
 import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsListicle'
 
+import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
+
 export const components: MDXComponents = {
   Image,
   TOCInline,
@@ -114,4 +116,5 @@ export const components: MDXComponents = {
   APMDashboardsListicle,
   HostMetricsDashboardsListicle,
   MarketplaceInstallationListicle,
+  LLMMonitoringListicle,
 }
