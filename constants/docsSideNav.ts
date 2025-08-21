@@ -216,6 +216,29 @@ const docsSideNav = [
             route: '/docs/install/marketplaces',
           },
           {
+            type: 'category',
+            isExpanded: false,
+            label: 'Operate Self-Host',
+            route: '/docs/operate',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/operate/docker-standalone',
+                label: 'Docker Standalone',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/docker-swarm',
+                label: 'Docker Swarm',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/kubernetes',
+                label: 'Kubernetes',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'Troubleshooting',
             route: '/docs/install/troubleshooting',
@@ -341,29 +364,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.8.0',
             label: 'Upgrade to v0.8.0',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Operate Self-Host',
-        route: '/docs/operate',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/docker-standalone',
-            label: 'Docker Standalone',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/docker-swarm',
-            label: 'Docker Swarm',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/kubernetes',
-            label: 'Kubernetes',
           },
         ],
       },
