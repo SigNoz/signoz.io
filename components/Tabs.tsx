@@ -19,13 +19,17 @@ const Tabs = ({ children, entityName }) => {
   }
 
   const firstValidChild = childrenArray.find(isValidElement)
-  const defaultChild = childrenArray.find(child => isValidElement(child) && child.props.default)
-  const defaultActiveTab = defaultChild ? defaultChild.props.value : (firstValidChild ? firstValidChild.props.value : null)
+  const defaultChild = childrenArray.find((child): child is React.ReactElement => 
+    isValidElement(child) && child.props.default
+  )
+  const defaultActiveTab = defaultChild?.props.value ?? firstValidChild?.props.value ?? null
   
   let selectedTab
   if (entityName === 'plans') {
     selectedTab = defaultActiveTab
-  } else if (environment && childrenArray.some(child => isValidElement(child) && child.props.value === environment)) {
+  } else if (environment && childrenArray.some((child): child is React.ReactElement => 
+    isValidElement(child) && child.props.value === environment
+  )) {
     // If environment matches a tab value directly, use it
     selectedTab = environment
   } else if (environment) {
