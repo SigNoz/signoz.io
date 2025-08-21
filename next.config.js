@@ -579,6 +579,16 @@ module.exports = () => {
           destination: "/blog/",
           permanent: true
         },
+        {
+          source: "/docs/userguide/collecting-ecs-logs-and-metrics",
+          destination: "/docs/collection-agents/ecs/ec2/overview/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/collecting-ecs-sidecar-infra",
+          destination: "/docs/collection-agents/ecs/sidecar/overview",
+          permanent: true
+        }
       ]
     },
     webpack: (config, options) => {

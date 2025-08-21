@@ -543,6 +543,23 @@ const docsSideNav = [
               },
             ],
           },
+          {
+            type: 'category',
+            label: 'Serverless (EKS Fargate)',
+            isExpanded: false,
+            items: [
+              {
+                label: 'Overview',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/serverless/overview',
+              },
+              {
+                label: 'Install',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/serverless/install',
+              },
+            ],
+          },
         ],
       },
       {
@@ -574,6 +591,57 @@ const docsSideNav = [
             type: 'doc',
             label: 'Install',
           },
+        ],
+      },
+      {
+        type: 'category',
+        label: 'ECS',
+        isExpanded: false,
+        items: [
+         {
+          type: "category",
+          label: "EC2",
+          isExpanded: false,
+          items: [
+            {
+              type: 'doc',
+              label: "Overview",
+              route: "/docs/collection-agents/ecs/ec2/overview"
+            },
+            {
+              type: 'doc',
+              label: 'Install',
+              route: "/docs/collection-agents/ecs/ec2/install"
+            },
+            {
+              type : 'doc',
+              label: "Configure",
+              route: "/docs/collection-agents/ecs/ec2/configure"
+            }
+          ]
+         },
+         {
+          type: "category",
+          label: "Serverless",
+          isExpanded: false,
+          items: [
+            {
+              type: 'doc',
+              label: "Overview",
+              route: "/docs/collection-agents/ecs/sidecar/overview"
+            },
+            {
+              type: 'doc',
+              label: 'Install',
+              route: "/docs/collection-agents/ecs/sidecar/install"
+            },
+            {
+              type : 'doc',
+              label: "Configure",
+              route: "/docs/collection-agents/ecs/sidecar/configure"
+            }
+          ]
+         }
         ],
       },
     ],
@@ -1091,6 +1159,11 @@ const docsSideNav = [
             route: '/docs/logs-management/send-logs/collect-systemd-logs',
             label: 'SystemD logs',
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/zerolog-to-signoz',
+            label: 'Zerolog',
+          },
         ],
       },
       {
@@ -1301,23 +1374,6 @@ const docsSideNav = [
       },
       {
         type: 'category',
-        label: 'Guides',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/userguide/collecting-ecs-logs-and-metrics',
-            label: 'ECS Infra Metrics & Logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/collecting-ecs-sidecar-infra',
-            label: 'ECS Infra Sidecar',
-          },
-        ],
-      },
-      {
-        type: 'category',
         route: '/docs/metrics-management/troubleshooting/troubleshooting',
         label: 'Troubleshooting',
         isExpanded: false,
@@ -1394,6 +1450,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/userguide/manage-variables',
         label: 'Manage Variables',
+      },
+      {
+        type: 'doc',
+        route: '/docs/dashboards/import-dashboard',
+        label: 'Import Dashboard',
       },
       {
         type: 'category',
@@ -1755,24 +1816,47 @@ const docsSideNav = [
         route: '/docs/alerts-management/terraform-provider-signoz',
         label: 'Terraform Provider',
       },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/apdex-alerts',
+        label: 'Apdex Alerts',
+      },
     ],
   },
   {
-    label: 'Frontend & Mobile Monitoring',
+    label: 'Frontend Monitoring',
     type: 'category',
     isExpanded: false,
-    route: '/docs/frontend-and-mobile-monitoring',
+    route: '/docs/frontend-monitoring',
     items: [
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/document-load',
-        label: 'Document Load',
+        route: '/docs/frontend-monitoring/sending-logs',
+        label: 'Sending Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-traces',
+        label: 'Sending Traces',
       },
       {
         type: 'doc',
         route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
         label: 'Web Vitals',
       },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/document-load',
+        label: 'Document Load',
+      },
+    ],
+  },
+  {
+    label: 'Mobile Monitoring',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/mobile-monitoring',
+    items: [
       {
         type: 'doc',
         label: 'Swift UI',
@@ -1792,6 +1876,35 @@ const docsSideNav = [
         type: 'doc',
         label: 'Flutter',
         route: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter',
+      },
+    ],
+  },
+  {
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/llm-observability',
+    label: 'LLM Observability',
+
+    items: [
+      {
+        route: '/docs/opentelemetry-openai-monitoring',
+        label: 'OpenAI Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/llm-community-integrations',
+        label: 'LLM Community Integrations',
+        type: 'doc',
+      },
+      {
+        route: '/docs/vercel-ai-sdk-monitoring',
+        label: 'Vercel AI SDK Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/llamaindex-monitoring',
+        label: 'LlamaIndex Monitoring',
+        type: 'doc',
       },
     ],
   },
@@ -2944,33 +3057,6 @@ const docsSideNav = [
       // 'about-signoz/architecture',
       // 'about-signoz/contributing',
       // 'about-signoz/roadmap',
-    ],
-  },
-  {
-    type: 'category',
-    isExpanded: false,
-    label: 'LLM Monitoring',
-    items: [
-      {
-        route: '/docs/llm/opentelemetry-openai-monitoring',
-        label: 'OpenAI Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/community/llm-monitoring',
-        label: 'LLM Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/llm/vercel-ai-sdk-monitoring',
-        label: 'Vercel AI SDK Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/llm/llamaindex-monitoring',
-        label: 'LlamaIndex Monitoring',
-        type: 'doc',
-      },
     ],
   },
   {
