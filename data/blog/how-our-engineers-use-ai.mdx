@@ -1,0 +1,155 @@
+---
+title: How our engineers use AI for coding (and where they refuse to)
+slug: how-our-engineers-use-ai
+date: 2025-08-20
+tags: [AI, Coding]
+authors: [elizabeth_mathew]
+image: /img/blog/2025/08/ai-engineers.webp
+description: This blog is a look into how our engineers use AI for coding (and where they refuse to) with practical tips that you can adopt asa well.
+keywords: [ai, coding, devs, engineers, ]
+---
+
+Okay, picture this: if you drew a Venn diagram of folks in tech right now, it'd probably look something like this:
+
+<Figure 
+  src="/img/blog/2025/08/ai-engineers.webp"
+  alt="Venn diagram of tech folks"
+  caption="Venn diagram showing different perspectives on AI in tech"
+/>
+
+You'll probably find yourself in one of those circles, right? I’m guilty of falling in the intersection!
+Because let's be real, the 'will AI replace developers by 20xx?' debate is *everywhere* – Reddit, Hacker News, team Slack and *even* your local cafe.
+
+Well, we decided to go straight to the source. 
+
+We chatted with our own engineers to see how they're actually using AI in their day-to-day to supercharge their productivity. And we've put together some awesome ideas that you can easily incorporate into your workflow. ☺️
+
+## #1  Understanding Large Codebases Faster [ELI5 with AI]
+
+We’ve all been in situations where we are presented with HUGE codebases, and we have literally no idea where to begin understanding the context. Over time, we do become familiar with helper functions, existing libraries, etc, but the starting trouble is not only scary, it is overwhelming. 
+
+This happens when we are onboarding to a new org, get assigned a new project or have to work on a new service. 
+
+New hires on our team (by the way, [we are actively hiring](https://jobs.ashbyhq.com/SigNoz)!) use Cursor profusely to wrap their head around unfamiliar codebases. One dev shared:
+
+*"I added a function body as context and asked Cursor to explain what it was doing. Then I asked it to walk me through the database design and schema."*
+
+Another strategy that worked well: summarising key concepts into **Markdown (.md) files**. These summaries weren’t just for understanding, but they were fed back as **context inputs** in new chats, helping the AI give more informed answers.
+
+We’ve also found **ChatGPT-5** useful in scraping context directly from GitHub, if your project is open-source. 
+
+Between local context windows in tools like Cursor and the broader internet-scraping capabilities of newer models, this combo drastically cuts onboarding time into new codebases.
+
+<Admonition>
+
+
+For large codebases, break it into pieces. Ask for summaries of individual files or modules. Then, refine your understanding with direct inspection.
+
+</Admonition>
+
+## #2  Using AI for Coding. But Wisely.
+
+When I was an engineer, I was once tasked with switching the entire codebase to a common design system, which included moving to a common colour palette, default margins etc. This was pre-Cursor era. My workflow was auditing, the codebase semi-manually and making updates. It took over a week, to get the entire frontend system updated. If I was doing it today, it would have taken a few prompts on cursor and a few minutes to make the PR and mark it done!
+
+Using AI for coding is like getting an excited junior pair-programmer who never sleeps and need no coffee. We’ve found it fantastic for speeding up mundane coding tasks, but there’s a catch: you must use it *wisely*.
+
+ Tools like Cursor or Copilot or ChatGPT can generate code in seconds. Sometimes it feels like it reads your mind, sometimes it does quite the opposite as well. **Boilerplate, repetitive functions, or those “ugh” tasks you’d rather not hand-write** are prime targets for AI assistance. That mirrors our experience: AI can shoulder the boring parts and let you focus on the interesting problems.
+
+But (and this is a big **but**) you can’t just blindly trust AI-generated code. Treat it like code from a human intern: review it, test it, and make sure it actually does what you wanted.
+
+**Srikanth**, one of our backend engineers, shared that he used Claude to write production-level code for features like caching query ranges. Because he had deep expertise in the problem space, he used AI the way a lead engineer would delegate work:
+
+*“It’s like I tell another engineer to do this. I give the problem, the interfaces, and then I review the output like a PR.”*
+
+## #3  Refactoring the messy bits 
+
+You know the code works, but it’s ugly or inefficient and needs cleaning up - maybe renaming variables, splitting functions, or updating an old API usage across the codebase. 
+For instance, if we have a legacy function that’s doing too much, we’ll paste it into ChatGPT and say: *“Refactor this function into smaller functions and improve its readability.”* Nine times out of ten, the AI will output a cleaner version or suggest better naming and structure which is not disappointing.
+
+## #4 Debugging with AI
+
+I’ve always felt that troubleshooting is a lonely activity. You are alone with your code and a coffee that went cold, trying to figure out why the pipeline broke when it passed all the 2309xx7 test cases successfully.
+
+I think any sort of AI assistant makes this not-so-lonely. Apart from that, it’s a great way to get more context when debugging systems you are not familiar with. One of our engineers said, 
+
+*“I know Kubernetes enough to judge if something is bonkers or makes sense. But I don’t have the full expertise to troubleshoot complex things — so I paste all the logs into Claude and ask it what’s going on and what I should do.”*
+
+*Especially* useful when you are on call.
+
+And of course, you need a certain amount of understanding to know if AI is nudging you down a messy path or if it’s the right way forward.
+
+<Admonition type="warning">
+
+Don't paste **sensitive or proprietary code** into external AI tools unless you're allowed to. For open source or personal projects, go for it. For company code, we sanitize the snippet to avoid secret leakage. Debugging with AI is awesome, just do it responsibly.
+
+</Admonition>
+
+## #5 Asking AI to Critique Your Work
+
+Sometimes you finish writing a piece of code or drafting an architecture, and you get that nagging feeling: *“Is there a better way?”* This is when a second opinion can be helpful. Our engineers use AI to critique or get suggestions to improve what they have already done.
+
+One of our engineers said, 
+
+ ”AI has seen Stripe, Reddit, basically every public API out there. So I say: *‘Here’s my structure. Critique it’ ”.*
+
+For subject matter on which AI has sufficient context [for example, REST API norms, caching mechanisms, polling strategies, etc], it becomes a great partner to brainstorm with and provide criticism.
+
+## #6 Reviewing PRs with an Extra Set of AI Eyes
+
+AI can be amazing at providing a first round of reviews. Lately, we’ve been experimenting with AI to **assist** (not replace) our pull request (PR) review process. We use [ellipsis](https://www.ellipsis.dev/) for doing a preliminary round of reviews. 
+
+AI will look at every line without the “fatigue” a human might get on their 5th review of the day. It applies the same scrutiny everywhere, and has knowledge of a zillion code patterns, so it might catch an SQL injection possibility or a security no-no if it’s obvious from code.
+
+**However**, we *never blindly accept* AI suggestions in a PR. It’s more of a safety net. Ultimately, the human reviewer or code owner still makes the final decision.
+
+## #7 Tests? Let AI deal with it.
+
+Personally, I’ve not been a fan of writing tests. I think it’s a very tedious activity. But it’s also one of the most important guardrails as well. 
+We can use AI to write unit and integration tests with our code as the context, but ensure to do it step-by-step and review it at each step of the way. 
+
+We also use it for generating integration test scenarios. For instance, “Give me a list of scenarios to test for the user signup flow.” It might list: “empty email, invalid email format, password too short, happy path, email already registered, etc.” This helps us ensure we’re not missing obvious cases. It’s like a brainstorming partner that has read every QA checklist ever written.
+
+However, and this is important: be cautious using AI-generated tests blindly. If you just ask it to generate tests from the code, it might create assertions that essentially mirror the code logic [thus not truly verifying behaviour from an external perspective]. 
+
+In the worst case, AI can produce a test that always passes even for wrong reasons, or uses hardcoded values that don’t generalise. 
+
+AI can also **over-engineer test suites**. It can generate large numbers of brittle, overly specific tests that tightly couple to the current implementation. This feels great at first (“Wow, 100% coverage!”), But the downside is painful: **when the code evolves, even with legitimate and safe changes, these overly rigid tests start failing**. 
+
+The smarter approach is to use AI tests as a starting point: **review and refine them**. Ensure they actually test the expected behaviour, not just echo the code.
+
+## #8 Let’s try AI Rubber Ducking
+
+This is something I’ve been personally experimenting with for a while. Rubber-ducking is a problem-solving technique where you explain your code or task to a rubber duck, or any inanimate object and **discover the solution yourself through the act of explaining**. It's brilliant because it works and is effectively free.
+
+<Figure 
+  src="/img/blog/2025/08/rubberducking.webp"
+  alt="Rubber-ducking comic"
+  caption="Rubber-ducking comic."
+  link="https://sketchplanations.com/rubberducking"
+  sourceText="Sketchplanations"
+/>
+
+Now imagine the duck **talks back with helpful suggestions**. That’s what using AI as a rubber duck should feel like. The AI’s response might compare the approaches, possibly bringing up considerations you hadn’t mentioned. It might say something like, *“Approach A could be more reliable for long-term storage, whereas B might be faster but risk data loss on crashes.”* Even if you *knew* these points, seeing them articulated helps weigh the options *better*. It’s like your rubber duck has a degree in software engineering and can discuss trade-offs. 
+
+Perhaps you could give this a try?
+
+## #9  Dear AI, Please Don’t Touch My PRD. Ever.
+
+After all these glowing use cases, you might think we’re shoving AI into every corner of our work. But there are some tasks we’ve learned *not* to hand over to AI [or at least to be very careful with]. One of those is writing **Product Requirement Documents [PRDs]** or similar high-level planning docs. We actually tried this, feeding some initial ideas to AI (Claude, Perplexity) and asking it to draft a PRD, and the result was… underwhelming.
+
+One of our engineers said,
+*”The same thing that helps me with APIs cuts against me in PRDs. It knows too much — about everything — and nothing specific.”*
+
+PRDs require you to think through, be innovative, align with feature goals and solve user problems, for which nothing beats human thinking and intent. AI can be used as a reviewer and to brainstorm ideas, but almost at every step of the way, you will need extreme human input and thinking.
+
+## #10  AI to help write Docs? Pass.
+
+Documentation, especially user-facing docs or developer guides, is another area where our team has pulled back on using AI. At SigNoz, **we treat documents also like products**, and a lot of attention is given to ensure they’re insanely user-friendly. However, AI helps a lot with reviews, grammar checks, structure, outline, etc. The thought and idea behind a doc is always human. 
+
+We are also [actively looking for a human to join us](https://jobs.ashbyhq.com/SigNoz/c852f108-4677-4dba-b05d-c9cd4f31e872), who can create excellent docs!
+
+At the end of the day, AI is becoming an indispensable part of the modern developer toolkit. Our team’s journey with AI has been about finding sweet spots where it adds value and also recognising its limits. 
+
+So, whether you were in the “AI will take my job” camp or the “AI is just a fad” camp, we invite you to join the pragmatic middle: try these tips out in your own workflow and see what works for you. You might boost your productivity, or at least save mental energy for the fun parts of coding. AI is here to stay – as developers, our job is to harness it**s potential** without compromising the craftsmanship and critical thinking that make us valuable. 
+
+Happy coding, and don’t worry... We’ll keep an eye on them so they don’t plot to replace us just yet! 😉
