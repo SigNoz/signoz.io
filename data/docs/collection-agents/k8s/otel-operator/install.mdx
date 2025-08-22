@@ -1,0 +1,1016 @@
+---
+date: 2025-08-21
+id: install
+title: OpenTelemetry Operator - Install
+description: How to install OpenTelemetry Operator in your Kubernetes Cluster
+---
+import OtelOperatorOTLPEndpoint from '@/components/shared/otel-operator-otlp-endpoint.mdx'
+import OtelOperatorAutoInstrumentation from '@/components/shared/otel-operator-auto-instrumentation.mdx'
+import OtelOperatorPetClinic from '@/components/shared/otel-operator-pet-clinic.md'
+import OtelOperatorCleanUp from '@/components/shared/otel-operator-cleanup.md'
+
+[OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator) makes it easier to set up the OpenTelemetry collector and auto-instrument workloads deployed on Kubernetes.
+
+A Kubernetes operator is a method of packaging, deploying, and managing a Kubernetes application. OpenTelemetry Operator helps a lot in managing OpenTelemetry collectors and enables auto-instrumentation.
+
+## Prerequisite
+
+Before installing the OpenTelemetry Operator, ensure you have:
+
+- A running Kubernetes cluster (v1.19 or later recommended)
+- Administrative kubectl access to your cluster
+- SigNoz installed and running ([Installation Guide](https://signoz.io/docs/install/))
+- [cert-manager](https://cert-manager.io/docs/installation/) installed in your cluster
+
+## Installing the OpenTelemetry Operator
+
+Choose your preferred installation method to deploy the operator:
+
+<Tabs>
+<TabItem label="Kubectl - Apply Manifest" value="manifest">
+Deploy the operator directly using the latest release manifest:
+
+```bash
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+```
+
+Verify the installation:
+```bash
+kubectl get deployment opentelemetry-operator-controller-manager -n opentelemetry-operator-system
+```
+</TabItem>
+<TabItem label="Helm Chart" value="helm">
+Add the OpenTelemetry Helm repository:
+
+```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
+```
+
+Install the OpenTelemetry Operator:
+
+```bash
+helm install opentelemetry-operator open-telemetry/opentelemetry-operator \
+  --create-namespace \
+  --namespace opentelemetry-operator-system
+```
+
+Check the [OpenTelemetry Operator Helm Chart Documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator#install-chart) for advanced configuration options.
+</TabItem>
+</Tabs>
+
+Once the `opentelemetry-operator` deployment is ready, you can proceed with creating OpenTelemetry Collector instances and configuring automatic instrumentation.
+
+## OpenTelemetry Collector
+
+The OpenTelemetry Operator provides a [Custom Resource Definition (CRD) for OpenTelemetry Collectors](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/opentelemetrycollectors.md) with flexible deployment options through the `.Spec.Mode` property. You can deploy collectors as:
+
+The `.Spec.Config` property contains the OpenTelemetry Collector configuration YAML. Explore additional [deployment mode examples](https://github.com/open-telemetry/opentelemetry-operator?tab=readme-ov-file#deployment-modes) in the official repository.
+
+OpenTelemetry Operator provides [examples](https://github.com/open-telemetry/opentelemetry-operator?tab=readme-ov-file#deployment-modes) for each deployment mode.
+
+<Tabs>
+<TabItem value="deployment" label="Independent Deployment">
+Create an independent OpenTelemetry Collector deployment that can receive telemetry data from multiple applications:
+
+<Tabs>
+<TabItem value="signoz-cloud" label="SigNoz Cloud">
+```bash
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: signoz-collector
+spec:
+  mode: deployment
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
+    exporters:
+      otlp/signoz:
+        endpoint: https://ingest.{region}.signoz.cloud:443
+        headers:
+          signoz-ingestion-key: "<SIGNOZ_INGESTION_KEY>"
+      debug:
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        logs:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+EOF
+```
+
+<Admonition>
+- Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
+- Replace `{region}` with the region of your SigNoz Cloud instance.
+  Refer to the table below for the region-specific endpoints:
+  | Region	| Endpoint                   |
+  | ------- | -------------------------- |
+  | US      | ingest.us.signoz.cloud:443 |
+  | IN      | ingest.in.signoz.cloud:443 |
+  | EU      | ingest.eu.signoz.cloud:443 |
+</Admonition>
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+```bash
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: signoz-collector
+spec:
+  mode: deployment
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
+    exporters:
+      otlp/signoz:
+        endpoint: <SIGNOZ_RELEASE_ENDPOINT>:4317>
+        tls:
+          insecure: true
+      debug:
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        logs:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+EOF
+```
+</TabItem>
+</Tabs>
+
+<Admonition type="info">
+The above simplest `otelcol` example receives OTLP traces data using gRPC and HTTP protocols,
+batches the data and logs it to the console.
+</Admonition>
+
+</TabItem>
+
+<TabItem label="Across the Nodes - DaemonSet" value="daemonset">
+OpenTelemetry Collector instance can be deployed with `DaemonSet` mode, which ensures that all (or some) nodes run copy of the collector pod.
+
+<Tabs>
+<TabItem value="signoz-cloud" label="SigNoz Cloud">
+```bash
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: signoz-collector
+spec:
+  mode: daemonset
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
+    exporters:
+      otlp/signoz:
+        endpoint: https://ingest.{region}.signoz.cloud:443
+        headers:
+          signoz-ingestion-key: "<SIGNOZ_INGESTION_KEY>"
+      debug:
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        logs:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+EOF
+```
+
+<Admonition>
+- Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
+- Replace `{region}` with the region of your SigNoz Cloud instance.
+  Refer to the table below for the region-specific endpoints:
+  | Region	| Endpoint                   |
+  | ------- | -------------------------- |
+  | US      | ingest.us.signoz.cloud:443 |
+  | IN      | ingest.in.signoz.cloud:443 |
+  | EU      | ingest.eu.signoz.cloud:443 |
+</Admonition>
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+```bash
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: signoz-collector
+spec:
+  mode: daemonset
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    processors:
+      batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
+    exporters:
+      otlp/signoz:
+        endpoint: <SIGNOZ_RELEASE_ENDPOINT>:4317>
+        tls:
+          insecure: true
+      debug:
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        logs:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+EOF
+```
+</TabItem>
+</Tabs>
+
+<Admonition type="info">
+`DaemonSet` is suitable for tasks such as log collection daemons, storage daemons,
+and node monitoring daemons.
+</Admonition>
+</TabItem>
+
+<TabItem label="SideCar Injection" value="sidecar">
+A sidecar with the OpenTelemetry Collector can be injected into pod-based workloads by setting the pod annotation `sidecar.opentelemetry.io/inject` to either `"true"`, or to the name of a concrete `OpenTelemetryCollector`
+from the same namespace.
+
+<Tabs>
+<TabItem value="signoz-cloud" label="SigNoz Cloud">
+```bash
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: signoz-sidecar
+spec:
+  mode: sidecar
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+      jaeger:
+        protocols:
+          thrift_compact:
+    processors:
+      batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
+    exporters:
+      otlp/signoz:
+        endpoint: https://ingest.{region}.signoz.cloud:443
+        headers:
+          signoz-ingestion-key: "<SIGNOZ_INGESTION_KEY>"
+      debug:
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp, jaeger]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        logs:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+EOF
+```
+
+<Admonition>
+- Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
+- Replace `{region}` with the region of your SigNoz Cloud instance.
+  Refer to the table below for the region-specific endpoints:
+  | Region	| Endpoint                   |
+  | ------- | -------------------------- |
+  | US      | ingest.us.signoz.cloud:443 |
+  | IN      | ingest.in.signoz.cloud:443 |
+  | EU      | ingest.eu.signoz.cloud:443 |
+</Admonition>
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+```bash
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: signoz-sidecar
+spec:
+  mode: sidecar
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+      jaeger:
+        protocols:
+          thrift_compact:
+    processors:
+      batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
+    exporters:
+      otlp/signoz:
+        endpoint: <SIGNOZ_RELEASE_ENDPOINT>:4317>
+        tls:
+          insecure: true
+      debug:
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp, jaeger]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        logs:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+EOF
+```
+</TabItem>
+</Tabs>
+
+Next, let us create a `Pod` using `jaeger` example image and set
+`sidecar.opentelemetry.io/inject` annotations to `"true"`:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp
+  annotations:
+    sidecar.opentelemetry.io/inject: "true"
+spec:
+  containers:
+  - name: myapp
+    image: jaegertracing/vertx-create-span:operator-e2e-tests
+    ports:
+      - containerPort: 8080
+        protocol: TCP
+EOF
+```
+
+</TabItem>
+<TabItem value="sts" label="StatefulSet">
+There are following main advantages to deploying the Collector as a StatefulSet:
+
+- Predictable names of the Collector instance will be expected. Using the approaches above, the pod name will be unique (name plus random sequence), but each Pod in a StatefulSet derives its hostname from the StatefulSet name and the Pod's ordinal (my-col-0, my-col-1, etc.).
+- Rescheduling occurs when a Collector replica fails. Kubernetes tries to reschedule a new pod with the same name on the same node and attach the same sticky identity (e.g., volumes).
+
+<Tabs>
+<TabItem value="signoz-cloud" label="SigNoz Cloud">
+```bash
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: signoz-statefulset
+spec:
+  mode: statefulset
+  replicas: 3
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc: {}
+          http: {}
+      jaeger:
+        protocols:
+          grpc: {}
+    processors:
+      batch: {}
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
+
+    exporters:
+      otlp/signoz:
+        endpoint: https://ingest.{region}.signoz.cloud:443
+        headers:
+          signoz-ingestion-key: "<SIGNOZ_INGESTION_KEY>"
+      debug: {}
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp, jaeger]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        logs:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+EOF
+```
+
+<Admonition>
+- Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
+- Replace `{region}` with the region of your SigNoz Cloud instance.
+  Refer to the table below for the region-specific endpoints:
+  | Region	| Endpoint                   |
+  | ------- | -------------------------- |
+  | US      | ingest.us.signoz.cloud:443 |
+  | IN      | ingest.in.signoz.cloud:443 |
+  | EU      | ingest.eu.signoz.cloud:443 |
+</Admonition>
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+```bash
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: signoz-statefulset
+spec:
+  mode: statefulset
+  replicas: 3
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc: {}
+          http: {}
+      jaeger:
+        protocols:
+          grpc: {}
+    processors:
+      batch: {}
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
+
+    exporters:
+      otlp/signoz:
+        endpoint: <SIGNOZ_RELEASE_ENDPOINT>:4317>
+        tls:
+          insecure: true
+      debug: {}
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp, jaeger]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+        logs:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp/signoz]
+EOF
+```
+</TabItem>
+</Tabs>
+</TabItem>
+</Tabs>
+
+## OpenTelemetry Auto-instrumentation Injection
+
+The operator can inject and configure [OpenTelemetry auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/) libraries. Currently, Apache HTTPD, DotNet, Go, Java, Nginx, NodeJS and Python are supported.
+
+To manage automatic instrumentation, the Operator must be configured to identify which pods to instrument and select the appropriate automatic instrumentation for those pods. This configuration is done through the [Instrumentation CRD](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md) and adding [Annontations](http://localhost:3000/docs/collection-agents/k8s/otel-operator/install/#annontations-for-auto-instrumentation-injection) to the workloads
+
+### Instrumentation Resource Configuration
+
+The [Instrumentation CRD](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md) defines how automatic instrumentation should be applied to your applications.
+
+**Key Configuration Properties:**
+
+- **`exporter.endpoint`** - Target endpoint for telemetry data in OTLP format
+- **`propagators`** - Context propagation mechanisms (tracecontext, baggage, b3)
+- **`sampler`** - Sampling strategy (parentbased_always_on, traceidratio)
+- **Language configurations** - Custom instrumentation images for each supported language
+
+To create an instance of `Instrumentation`:
+<Tabs>
+<TabItem value="operator-collector" label="For Operator-Managed Collectors">
+
+If you've deployed an OtelCollector (SideCar, Deployment, DaemonSet, StatefulSet) with the help of OpenTelemetry Operator
+```bash
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: my-instrumentation
+spec:
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_always_on
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
+EOF
+```
+
+Select the deployment mode of your OpenTelemetry Collector:
+
+<Tabs>
+<TabItem value="sidecar" label="Sidecar" default>
+
+When using the **Sidecar** mode, configure your Instrumentation resource to forward telemetry data to the local sidecar collector (usually available at `http://localhost:4317`).
+
+We just need to add the SideCar Annontations as we did during the installation
+```bash {16}
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-petclinic
+spec:
+  selector:
+    matchLabels:
+      app: spring-petclinic
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: spring-petclinic
+      annotations:
+        sidecar.opentelemetry.io/inject: "true"
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/pavolloffay/spring-petclinic:latest
+EOF
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="signoz" label="Send Directly to SigNoz">
+
+To create an instance of `Instrumentation` which sends OTLP data to SigNoz endpoint and you've not deployed OtelCollector with the help of OpenTelemetry Operator:
+
+Select the type of SigNoz instance you are running: **SigNoz Cloud** or **Self-Hosted**.
+
+<Tabs>
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```bash {7-13}
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: my-instrumentation
+spec:
+  exporter:
+    endpoint: https://ingest.{region}.signoz.cloud:443
+  env:
+    - name: OTEL_EXPORTER_OTLP_HEADERS
+      value: signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+    - name: OTEL_EXPORTER_OTLP_INSECURE
+      value: "false"
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.25"
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
+EOF
+```
+
+<Admonition>
+- Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
+- Replace `{region}` with the region of your SigNoz Cloud instance.
+  Refer to the table below for the region-specific endpoints:
+  | Region	| Endpoint                   |
+  | ------- | -------------------------- |
+  | US      | ingest.us.signoz.cloud:443 |
+  | IN      | ingest.in.signoz.cloud:443 |
+  | EU      | ingest.eu.signoz.cloud:443 |
+
+</Admonition>
+
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
+
+```bash {8}
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: my-instrumentation
+spec:
+  exporter:
+    endpoint: <SIGNOZ_RELEASE_ENDPOINT>:4317>
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.25"
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
+EOF
+```
+
+<OtelOperatorOTLPEndpoint />
+
+</TabItem>
+<TabItem value="k8s-infra" label="K8s-Infra Helm Chart">
+
+```bash {7-13}
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: my-instrumentation
+spec:
+  exporter:
+    endpoint: http://\$(OTEL_HOST_IP):4317
+  env:
+    - name: OTEL_HOST_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.25"
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
+EOF
+```
+
+In the above example, we will use downward API of Kubernetes to get host IP of `otel-agent`
+DaemonSet of K8s-Infra Helm Chart and use it as `OTEL_HOST_IP` environment variable.
+Using this, we can send telemetry data to `otel-agent` which would in turn relay it to
+any desired collector endpoint as per the configuration of `otel-agent`.
+
+</TabItem>
+</Tabs>
+</TabItem>
+</Tabs>
+
+### Annontations for Auto-Instrumentation Injection
+The operator can inject and configure OpenTelemetry auto-instrumentation libraries. Currently, Apache HTTPD, DotNet, Go, Java, Nginx, NodeJS and Python are supported.
+
+The instrumentation is enabled when the following annotation is applied to a workload or a namespace.
+
+<Tabs>
+  <TabItem value="java" label="Java">
+
+  ```
+  instrumentation.opentelemetry.io/inject-java: "true"
+  ```
+
+  </TabItem>
+  <TabItem value="nodejs" label="NodeJS">
+
+  ```
+  instrumentation.opentelemetry.io/inject-nodejs: "true"
+  ```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+  Python auto-instrumentation also honors an annotation that will permit it to run on images with a different C library than glibc.
+
+  ```
+  instrumentation.opentelemetry.io/inject-python: "true"
+  instrumentation.opentelemetry.io/otel-python-platform: "glibc" # for Linux glibc based images, this is the default value and can be omitted
+  instrumentation.opentelemetry.io/otel-python-platform: "musl" # for Linux musl based images
+  ```
+
+  </TabItem>
+  <TabItem value="dotnet" label=".NET">
+
+  .NET auto-instrumentation also honors an annotation that will be used to set the .NET Runtime Identifiers (RIDs). Currently, only two RIDs are supported: linux-x64 and linux-musl-x64. By default linux-x64 is used.
+
+  ```
+  instrumentation.opentelemetry.io/inject-dotnet: "true"
+  instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-x64" # for Linux glibc based images, this is default value and can be omitted
+  instrumentation.opentelemetry.io/otel-dotnet-auto-runtime: "linux-musl-x64"  # for Linux musl based images
+  ```
+
+  </TabItem>
+  <TabItem value="go" label="Go">
+
+  Go auto-instrumentation also honors an annotation that will be used to set the OTEL_GO_AUTO_TARGET_EXE env var. This env var can also be set via the Instrumentation resource, with the annotation taking precedence. Since Go auto-instrumentation requires OTEL_GO_AUTO_TARGET_EXE to be set, you must supply a valid executable path via the annotation or the Instrumentation resource. Failure to set this value causes instrumentation injection to abort, leaving the original pod unchanged.
+
+  ```
+  instrumentation.opentelemetry.io/inject-go: "true"
+  instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/path/to/container/executable"
+  ```
+
+  Go auto-instrumentation also requires elevated permissions. The below permissions are set automatically and are required.
+
+  ```yaml
+  securityContext:
+    privileged: true
+    runAsUser: 0
+  ```
+
+  </TabItem>
+  <TabItem value="apache-httpd" label="Apache HTTPD">
+
+  ```
+  instrumentation.opentelemetry.io/inject-apache-httpd: "true"
+  ```
+
+  </TabItem>
+  <TabItem value="nginx" label="Nginx">
+
+  ```
+  instrumentation.opentelemetry.io/inject-nginx: "true"
+  ```
+
+  </TabItem>
+  <TabItem value="sdk" label="OpenTelemetry SDK environment variables only">
+
+  ```
+  instrumentation.opentelemetry.io/inject-sdk: "true"
+  ```
+
+  </TabItem>
+</Tabs>
+
+The possible values for the annotation can be:
+ - `"true"` - inject and Instrumentation resource from the namespace.
+ - `"my-instrumentation"` - name of Instrumentation CR instance in the current namespace.
+ - `"my-other-namespace/my-instrumentation"` - name and namespace of Instrumentation CR
+ instance in another namespace.
+ - `"false"` - do not inject.
+
+For example for adding :
+We would just have set the pod annotation `instrumentation.opentelemetry.io/inject-java`
+to `"true"` for our Java Springboot workload deployed in K8s.
+
+### Inject OpenTelemetry SDK Environment Variables OpenTelemetry
+
+You can configure the OpenTelemetry SDK for applications which can't currently
+be autoinstrumented by using `inject-sdk` in place of (e.g.) `inject-python` or
+`inject-java`.
+
+This will inject environment variables like `OTEL_RESOURCE_ATTRIBUTES`,
+`OTEL_TRACES_SAMPLER`, and `OTEL_EXPORTER_OTLP_ENDPOINT`, that you can configure in the
+Instrumentation, but will not actually provide the SDK.
+
+```bash {16-23}
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: my-sidecar
+spec:
+  mode: sidecar
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          http:
+          grpc:
+    processors:
+      batch:
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: staging
+          action: upsert
+    exporters:
+      debug:
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp]
+        metrics:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [debug, otlp]
+EOF
+```
+
+
+## Spring Pet Clinic Example
+
+Deploy a fully instrumented Java application with automatic OpenTelemetry integration:
+
+### Instrumentation Resource
+Instrumentation Resource To send the telemetry data directly to SigNoz
+```bash {7-13}
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: my-instrumentation
+spec:
+  exporter:
+    endpoint: https://ingest.{region}.signoz.cloud:443
+  env:
+    - name: OTEL_EXPORTER_OTLP_HEADERS
+      value: signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+    - name: OTEL_EXPORTER_OTLP_INSECURE
+      value: "false"
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.25"
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
+EOF
+
+```
+### Application Deployment
+Application Deployment with Auto-instrumentation Injection and Using Instrumentation Resource Exporter to send directly to SigNoz
+```bash
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-petclinic
+  namespace: default
+  labels:
+    app: spring-petclinic
+spec:
+  selector:
+    matchLabels:
+      app: spring-petclinic
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: spring-petclinic
+        version: v1.0.0
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: # inject java-instrumentation
+        sidecar.opentelemetry.io/inject: "false"  # Send directly to SigNoz integration
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/pavolloffay/spring-petclinic:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: OTEL_SERVICE_NAME
+          value: "spring-petclinic"
+        - name: OTEL_SERVICE_VERSION
+          value: "1.0.0"
+        - name: OTEL_JAVAAGENT_DEBUG
+          value: "false"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "mysql"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+```
+
+<OtelOperatorAutoInstrumentation />
+
+<OtelOperatorPetClinic />
+
+![Spring Pet Clinic metrics page](/img/docs/otel-operator-spring-pet-clinic.webp)

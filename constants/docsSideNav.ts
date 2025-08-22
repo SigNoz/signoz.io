@@ -565,6 +565,23 @@ const docsSideNav = [
               },
             ],
           },
+          {
+            type: 'category',
+            label: 'OpenTelemetry Operator',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                label: 'Overview',
+                route: '/docs/collection-agents/k8s/otel-operator/overview'
+              },
+              {
+                type: 'doc',
+                label: 'Install',
+                route: '/docs/collection-agents/k8s/otel-operator/install'
+              }
+            ]
+          }
         ],
       },
       {
