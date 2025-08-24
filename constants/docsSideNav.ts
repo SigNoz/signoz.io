@@ -247,7 +247,7 @@ const docsSideNav = [
             route: '/docs/operate/migration/upgrade-standard',
             label: 'Upgrade Standard',
           },
-           {
+          {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.92',
             label: 'Upgrade to v0.92',
@@ -603,50 +603,50 @@ const docsSideNav = [
         label: 'ECS',
         isExpanded: false,
         items: [
-         {
-          type: "category",
-          label: "EC2",
-          isExpanded: false,
-          items: [
-            {
-              type: 'doc',
-              label: "Overview",
-              route: "/docs/collection-agents/ecs/ec2/overview"
-            },
-            {
-              type: 'doc',
-              label: 'Install',
-              route: "/docs/collection-agents/ecs/ec2/install"
-            },
-            {
-              type : 'doc',
-              label: "Configure",
-              route: "/docs/collection-agents/ecs/ec2/configure"
-            }
-          ]
-         },
-         {
-          type: "category",
-          label: "Serverless",
-          isExpanded: false,
-          items: [
-            {
-              type: 'doc',
-              label: "Overview",
-              route: "/docs/collection-agents/ecs/sidecar/overview"
-            },
-            {
-              type: 'doc',
-              label: 'Install',
-              route: "/docs/collection-agents/ecs/sidecar/install"
-            },
-            {
-              type : 'doc',
-              label: "Configure",
-              route: "/docs/collection-agents/ecs/sidecar/configure"
-            }
-          ]
-         }
+          {
+            type: 'category',
+            label: 'EC2',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                label: 'Overview',
+                route: '/docs/collection-agents/ecs/ec2/overview',
+              },
+              {
+                type: 'doc',
+                label: 'Install',
+                route: '/docs/collection-agents/ecs/ec2/install',
+              },
+              {
+                type: 'doc',
+                label: 'Configure',
+                route: '/docs/collection-agents/ecs/ec2/configure',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            label: 'Serverless',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                label: 'Overview',
+                route: '/docs/collection-agents/ecs/sidecar/overview',
+              },
+              {
+                type: 'doc',
+                label: 'Install',
+                route: '/docs/collection-agents/ecs/sidecar/install',
+              },
+              {
+                type: 'doc',
+                label: 'Configure',
+                route: '/docs/collection-agents/ecs/sidecar/configure',
+              },
+            ],
+          },
         ],
       },
     ],
@@ -987,9 +987,9 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/traces-management/troubleshooting/faqs',
             label: 'General FAQs',
-	        },
-	      ],
-	    },
+          },
+        ],
+      },
     ],
   },
   {
@@ -1297,8 +1297,8 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/troubleshooting/faqs',
             label: 'General FAQs',
-          }
-        ]
+          },
+        ],
       },
       // {
       //   type: 'doc',
@@ -1348,10 +1348,10 @@ const docsSideNav = [
         label: 'Configure custom buckets for histograms',
       },
       {
-      label: 'Send Metrics',
-      type: 'category',
-      isExpanded: false,
-      items: [
+        label: 'Send Metrics',
+        type: 'category',
+        isExpanded: false,
+        items: [
           {
             type: 'doc',
             className: 'new-doc',
@@ -1370,7 +1370,7 @@ const docsSideNav = [
             route: '/docs/metrics-management/mysql-metrics',
             label: 'MySQL metrics',
           },
-        ]
+        ],
       },
       {
         type: 'doc',
@@ -1389,6 +1389,24 @@ const docsSideNav = [
             label: 'General FAQs',
           },
         ],
+      },
+    ],
+  },
+  {
+    label: 'Cost Meter',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/cost-meter/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/cost-meter/meter-explorer',
+        label: 'Meter Explorer',
       },
     ],
   },
@@ -1834,7 +1852,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
+            route:
+              '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
             label: 'Alerts Firing Without Visible Threshold Breach',
           },
         ],
@@ -1854,14 +1873,14 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
             label: 'Time Aggregation Best Practices',
-          }
+          },
         ],
       },
       {
         type: 'doc',
         route: '/docs/alerts-management/apdex-alerts',
         label: 'Apdex Alerts',
-      }
+      },
     ],
   },
   {
