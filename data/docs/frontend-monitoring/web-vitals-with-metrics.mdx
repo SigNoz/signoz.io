@@ -16,7 +16,7 @@ This documentation provides a step-by-step guide to setting up web vitals monito
 ### Step 1: Setup OTel Collector
 Install Otel collector binary using [these instructions](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
-You would also need to update the collector config to whitelist the frontend domain.
+You would also need to update the collector config to whitelist the frontend domain. This is required to allow Cross-Origin Resource Sharing (CORS) requests from your frontend application to the OpenTelemetry collector.
 
 ```sh
 receivers:
@@ -55,50 +55,20 @@ receivers:
   </TabItem>
 </Tabs>
 
+<details>
+<summary> Read more about the dependencies </summary>
 - **`web-vitals`**: Core library for measuring and reporting web vitals metrics (LCP, INP, CLS, TTFB, FCP)
 - **`@opentelemetry/api`**: Provides the core OpenTelemetry API for creating metrics and meters
 - **`@opentelemetry/exporter-metrics-otlp-http`**: Exports metrics to OpenTelemetry Protocol (OTLP) over HTTP
 - **`@opentelemetry/sdk-metrics`**: Provides the OpenTelemetry metrics SDK implementation
 - **`@opentelemetry/resources`**: Defines service metadata and attributes for your application
+</details>
 
 ### Step 3: Create an instrumentation file
 
 The `instrument.ts` file is required to setup the `MeterProvider` which is used to create custom metrics.
 
 <Tabs groupId="web-vitals-instrumentation">
-  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
-    ```ts
-    import {
-      MeterProvider,
-      PeriodicExportingMetricReader,
-    } from '@opentelemetry/sdk-metrics';
-    import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
-    import { resourceFromAttributes } from '@opentelemetry/resources';
-    import { metrics } from '@opentelemetry/api';
-
-    // Define your resource, e.g., service name, environment.
-    const resource = resourceFromAttributes({
-      'service.name': '<<SERVICE_NAME>>',
-    });
-
-    // Create a metric reader with OTLP exporter configured to send metrics to a local collector.
-    const metricReader = new PeriodicExportingMetricReader({
-      exporter: new OTLPMetricExporter({
-        url: '<<SIGNOZ_COLLECTOR_URL>>/v1/metrics',
-      }),
-      exportIntervalMillis: 10000, // Export metrics every 10 seconds.
-    });
-
-    // Initialize a MeterProvider with the above configurations.
-    const myServiceMeterProvider = new MeterProvider({
-      resource,
-      readers: [metricReader],
-    });
-
-    // Set the initialized MeterProvider as global to enable metric collection across the app.
-    metrics.setGlobalMeterProvider(myServiceMeterProvider);
-    ```
-  </TabItem>
   <TabItem value="cloud" label="SigNoz Cloud" default>
     ```ts
     import {
@@ -134,6 +104,46 @@ The `instrument.ts` file is required to setup the `MeterProvider` which is used 
     // Set the initialized MeterProvider as global to enable metric collection across the app.
     metrics.setGlobalMeterProvider(myServiceMeterProvider);
     ```
+
+    - Set the `<<INGESTION_REGION>>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - Replace `<<INGESTION_KEY>>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+    - `<<SERVICE_NAME>>` is the name of your service
+  </TabItem>
+  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
+    ```ts
+    import {
+      MeterProvider,
+      PeriodicExportingMetricReader,
+    } from '@opentelemetry/sdk-metrics';
+    import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
+    import { metrics } from '@opentelemetry/api';
+
+    // Define your resource, e.g., service name, environment.
+    const resource = resourceFromAttributes({
+      'service.name': '<<SERVICE_NAME>>',
+    });
+
+    // Create a metric reader with OTLP exporter configured to send metrics to a local collector.
+    const metricReader = new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({
+        url: '<<SIGNOZ_COLLECTOR_URL>>/v1/metrics',
+      }),
+      exportIntervalMillis: 10000, // Export metrics every 10 seconds.
+    });
+
+    // Initialize a MeterProvider with the above configurations.
+    const myServiceMeterProvider = new MeterProvider({
+      resource,
+      readers: [metricReader],
+    });
+
+    // Set the initialized MeterProvider as global to enable metric collection across the app.
+    metrics.setGlobalMeterProvider(myServiceMeterProvider);
+    ```
+
+    - `<<SERVICE_NAME>>` is the name of your service
+    - `<<SIGNOZ_COLLECTOR_URL>>` is the url where your collector is running
   </TabItem>
 </Tabs>
 
@@ -207,6 +217,8 @@ The captured web vitals can be viewed in the [Metrics Explorer](https://signoz.i
 ### Setup Dashboard and alerts
 You can create a [custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard) and [set alerts](https://signoz.io/docs/setup-alerts-notification/)
 to monitor your core web-vitals and be notified about anything critical.
+
+You can find custom dashboard templates for web vitals [here](https://github.com/SigNoz/dashboards/tree/main/frontend-monitoring)
 
 <figure data-zoomable align='center'>
 <img className="box-shadowed-image" src="/img/events/launch-week-1/web-vitals.webp" alt="Core Web Vitals Monitoring in SigNoz"/>
