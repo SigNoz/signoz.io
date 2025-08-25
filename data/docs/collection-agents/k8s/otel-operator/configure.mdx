@@ -13,9 +13,9 @@ This guide explains how to configure the OpenTelemetry Operator to deploy collec
 - A reachable SigNoz OTLP endpoint (gRPC 4317 and/or HTTP 4318)
 
 <Admonition type="tip">
-The **`k8s-infra`** Helm chart is a SigNoz-provided, pre-configured Helm-Chart designed specifically for Kubernetes infrastructure observability. It offers a simple, out-of-the-box solution: just install the chart in your cluster, and it will automatically collect metrics, logs, traces, and events from your entire Kubernetes environment—no manual configuration required.
+**`k8s-infra`** is a pre-configured Helm chart from SigNoz, tailored for Kubernetes infrastructure observability. It provides a straightforward, out-of-the-box solution: simply install the chart in your cluster, and it will automatically gather metrics, logs, traces, and events from your entire Kubernetes environment and no manual configuration needed.
 
-To learn more, see the [K8s-infra Collection Agent](/docs/collection-agents/k8s/otel-operator/k8s-infra).
+For more information, refer to the [K8s-infra Collection Agent](https://signoz.io/docs/collection-agents/k8s/k8s-infra/overview/).
 
 </Admonition>
 ## Configuring for DaemonSet
@@ -827,6 +827,20 @@ kubectl get pods -A -l app.kubernetes.io/name=opentelemetry-collector
 # Tail Deployment logs (replace <NAMESPACE> if different)
 kubectl logs -n <NAMESPACE> deploy/signoz-collector-deployment --since=5m
 ```
+### Verify the Installation
+
+```bash
+# List collector CRs
+kubectl get opentelemetrycollectors.oteltel.opentelemetry.io -A || kubectl get otelcol -A || kubectl get opentelemetrycollector -A
+
+# List pods and check status
+kubectl get pods -A -l app.kubernetes.io/name=opentelemetry-collector
+
+# Tail logs (replace <NAMESPACE> if different)
+kubectl logs -n <NAMESPACE> ds/signoz-collector-daemonset --since=5m
+kubectl logs -n <NAMESPACE> deploy/signoz-collector-deployment --since=5m
+```
+
 
 ## Auto-instrumentation with OpenTelemetry Operator
 
@@ -843,17 +857,4 @@ High-level flow:
 - Create an `Instrumentation` resource that points to your SigNoz OTLP endpoint/headers
 - Add the language-specific inject annotation on your workloads (e.g., `instrumentation.opentelemetry.io/inject-java: "true"`)
 
-### Verify the Installation
-
-```bash
-# List collector CRs
-kubectl get opentelemetrycollectors.oteltel.opentelemetry.io -A || kubectl get otelcol -A || kubectl get opentelemetrycollector -A
-
-# List pods and check status
-kubectl get pods -A -l app.kubernetes.io/name=opentelemetry-collector
-
-# Tail logs (replace <NAMESPACE> if different)
-kubectl logs -n <NAMESPACE> ds/signoz-collector-daemonset --since=5m
-kubectl logs -n <NAMESPACE> deploy/signoz-collector-deployment --since=5m
-```
 
