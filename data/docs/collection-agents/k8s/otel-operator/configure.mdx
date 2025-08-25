@@ -827,34 +827,10 @@ kubectl get pods -A -l app.kubernetes.io/name=opentelemetry-collector
 # Tail Deployment logs (replace <NAMESPACE> if different)
 kubectl logs -n <NAMESPACE> deploy/signoz-collector-deployment --since=5m
 ```
-### Verify the Installation
-
-```bash
-# List collector CRs
-kubectl get opentelemetrycollectors.oteltel.opentelemetry.io -A || kubectl get otelcol -A || kubectl get opentelemetrycollector -A
-
-# List pods and check status
-kubectl get pods -A -l app.kubernetes.io/name=opentelemetry-collector
-
-# Tail logs (replace <NAMESPACE> if different)
-kubectl logs -n <NAMESPACE> ds/signoz-collector-daemonset --since=5m
-kubectl logs -n <NAMESPACE> deploy/signoz-collector-deployment --since=5m
-```
 
 
 ## Auto-instrumentation with OpenTelemetry Operator
 
 The Operator can also inject language agents automatically into your workloads using the `Instrumentation` CRD and simple pod annotations. This enables traces/metrics/logs without manual code changes.
-
-- In these docs, Kubernetes auto-instrumentation is performed via the OpenTelemetry Operator.
-
 - See the upstream guide: [Automatic instrumentation via the Operator](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/)
 - For language-specific steps, use our instrumentation docs. For example, Java: [Kubernetes (OTel Operator) section](/docs/instrumentation/opentelemetry-java#kubernetes)
-
-We provide separate, language-specific docs for auto-instrumentation (Java, Node, Python, etc.), and the OpenTelemetry Operator supports auto-instrumentation across these languages via the `Instrumentation` CRD and per-language inject annotations. Prefer the language docs for end-to-end steps and use this page to wire your cluster-level collector with the Operator.
-
-High-level flow:
-- Create an `Instrumentation` resource that points to your SigNoz OTLP endpoint/headers
-- Add the language-specific inject annotation on your workloads (e.g., `instrumentation.opentelemetry.io/inject-java: "true"`)
-
-

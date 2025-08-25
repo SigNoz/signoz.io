@@ -634,7 +634,11 @@ module.exports = () => {
           destination: "/docs/install/uninstall/#kubernetes",
           permanent: true
         },
-
+        {
+          source: "/docs/tutorial/opentelemetry-operator-usage/",
+          destination: "/docs/collection-agents/k8s/otel-operator/overview",
+          permanent: true
+        }
       ]
     },
     webpack: (config, options) => {
