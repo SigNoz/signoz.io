@@ -474,11 +474,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/tutorial/opentelemetry-operator-usage',
-            label: 'OpenTelemetry Operator Usage',
-          },
-          {
-            type: 'doc',
             route: '/docs/tutorial/setting-up-tls-for-signoz',
             label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
           },
@@ -565,6 +560,28 @@ const docsSideNav = [
               },
             ],
           },
+          {
+            type: 'category',
+            label: 'OpenTelemetry Operator',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                label: 'Overview',
+                route: '/docs/collection-agents/k8s/otel-operator/overview'
+              },
+              {
+                type: 'doc',
+                label: 'Install',
+                route: '/docs/collection-agents/k8s/otel-operator/install'
+              },
+              {
+                type: 'doc',
+                label: 'Configure',
+                route: '/docs/collection-agents/k8s/otel-operator/configure'
+              }
+            ]
+          }
         ],
       },
       {
