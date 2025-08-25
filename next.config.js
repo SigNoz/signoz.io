@@ -63,6 +63,7 @@ module.exports = () => {
   const plugins = [withContentlayer, withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
+    productionBrowserSourceMaps: true, // Enable source maps for debugging
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
       dirs: ['app', 'components', 'layouts', 'scripts'],
@@ -651,6 +652,11 @@ module.exports = () => {
         })
       }
 
+      // Ensure source maps are generated in production (server & client)
+      if (!options.dev) {
+        config.devtool = 'source-map'
+      }
+
       return config
     },
   })
@@ -664,9 +670,9 @@ module.exports = withSentryConfig(module.exports, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-  org: `${process.env.SENTRY_ORG}`,
-  project: `${process.env.SENTRY_PROJECT}`,
-  sentryUrl: `${process.env.SENTRY_URL}`,
+  org: `${process.env.NEXT_PUBLIC_SENTRY_ORG}`,
+  project: `${process.env.NEXT_PUBLIC_SENTRY_PROJECT}`,
+  sentryUrl: `${process.env.NEXT_PUBLIC_SENTRY_URL}`,
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
