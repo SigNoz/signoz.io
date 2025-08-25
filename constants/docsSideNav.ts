@@ -474,11 +474,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/tutorial/opentelemetry-operator-usage',
-            label: 'OpenTelemetry Operator Usage',
-          },
-          {
-            type: 'doc',
             route: '/docs/tutorial/setting-up-tls-for-signoz',
             label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
           },
