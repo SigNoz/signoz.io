@@ -1,26 +1,42 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { detectBotFromUserAgent } from '@/utils/logEvent'
+import DOMPurify from 'dompurify';
 
 function snapshotSanitizedSSR(): string | null {
   try {
     if (typeof document === 'undefined') return null;
 
-    // Clone current body and strip scripts and modulepreloads
+    // Clone current body and strip dangerous elements
     const bodyClone = document.body.cloneNode(true) as HTMLElement;
-
-    bodyClone.querySelectorAll('script').forEach((n) => n.remove());
-    bodyClone.querySelectorAll('link[rel="modulepreload"], link[as="script"], link[rel="preload"][as="script"]').forEach((n) => n.remove());
-
-    // Remove inline event handlers for safety
-    bodyClone.querySelectorAll('[onload],[onclick],[onerror]').forEach((el) => {
-      (el as any).onload = null; (el as any).onclick = null; (el as any).onerror = null;
-    });
-
+    bodyClone.querySelectorAll('script, object, embed, iframe').forEach((n) => n.remove());
+    bodyClone.querySelectorAll('link[rel="modulepreload"], link[as="script"]').forEach((n) => n.remove());
+    
     const html = bodyClone.innerHTML || '';
-
-    return html.trim().length > 0 ? html : null;
+    
+    if (html.trim().length === 0) return null;
+    
+    // Sanitize with DOMPurify for enhanced security
+    const sanitized = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: [
+        'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
+        'a', 'img', 'ul', 'ol', 'li', 'br', 'strong', 'em', 'b', 'i',
+        'article', 'section', 'nav', 'header', 'footer', 'main', 'aside',
+        'table', 'thead', 'tbody', 'tr', 'td', 'th', 'code', 'pre',
+        'blockquote', 'figure', 'figcaption', 'time', 'small'
+      ],
+      ALLOWED_ATTR: [
+        'class', 'id', 'href', 'src', 'alt', 'title', 'role', 
+        'aria-label', 'aria-labelledby', 'aria-describedby',
+        'data-testid', 'data-id', 'width', 'height'
+      ],
+      FORBID_TAGS: ['script', 'object', 'embed', 'iframe', 'form', 'input', 'button', 'select', 'textarea'],
+      FORBID_ATTR: ['onload', 'onclick', 'onerror', 'onmouseover', 'onmouseout', 'onfocus', 'onblur', 'style'],
+      KEEP_CONTENT: true // Keep text content even if wrapper is removed
+    });
+    
+    return sanitized.trim().length > 0 ? sanitized : null;
   } catch {
     return null;
   }
@@ -67,6 +83,12 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   const hasPreserved = Boolean(preservedRef.current && preservedRef.current.length > 200);
 
+  // Memoize the sanitized HTML to avoid re-processing
+  const sanitizedHTML = useMemo(() => {
+    if (!preservedRef.current) return '';
+    return preservedRef.current; // Already sanitized in snapshotSanitizedSSR
+  }, []);
+
   return (
     <html lang="en">
       <head>
@@ -109,7 +131,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
         )}
 
         {hasPreserved ? (
-          <div dangerouslySetInnerHTML={{ __html: preservedRef.current as string }} />
+          <div dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />
         ) : (
           <div style={{
             margin: 'auto', maxWidth: 560, padding: 32, background: '#1e1f24',
