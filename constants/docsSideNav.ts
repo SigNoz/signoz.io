@@ -1901,6 +1901,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/frontend-monitoring/sending-metrics',
+        label: 'Sending Metrics',
+      },
+      {
+        type: 'doc',
         route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
         label: 'Web Vitals',
       },
