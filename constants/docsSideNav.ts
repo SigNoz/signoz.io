@@ -579,6 +579,11 @@ const docsSideNav = [
                 type: 'doc',
                 label: 'Install',
                 route: '/docs/collection-agents/k8s/otel-operator/install'
+              },
+              {
+                type: 'doc',
+                label: 'Configure',
+                route: '/docs/collection-agents/k8s/otel-operator/configure'
               }
             ]
           }
