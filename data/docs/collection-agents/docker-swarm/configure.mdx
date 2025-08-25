@@ -1,0 +1,159 @@
+---
+title: OpenTelemetry Collector for Docker Swarm - Configure
+id: configure
+description: Configure container and service level metrics collection in Docker Swarm using docker_stats
+---
+
+## Overview
+
+This page shows how to collect Docker container and service-level metrics in Docker Swarm using the `docker_stats` receiver.
+
+## Prerequisites
+
+- Docker Swarm initialized (`docker swarm init`)
+- OpenTelemetry Collector deployed on Swarm
+- Access to the Docker socket on nodes running the collector
+
+## Configure the Collector
+
+Add the `docker_stats` receiver and include it in the metrics pipeline. The receiver reads from the local Docker Engine via the Unix socket.
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    collection_interval: 60s
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "ingest.<YOUR_REGION>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<YOUR_INGESTION_KEY>"
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp, docker_stats]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+**Notes:**
+- Set `<YOUR_REGION>` and `<YOUR_INGESTION_KEY>` as per your SigNoz Cloud setup.
+
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    collection_interval: 60s
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "http://<SIGNOZ_HOST>:4317"
+    tls:
+      insecure: true
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp, docker_stats]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+**Notes:**
+- Replace `<SIGNOZ_HOST>` with your SigNoz instance hostname or IP.
+
+</TabItem>
+</Tabs>
+
+## Deploy with Docker Swarm
+
+To allow the collector to read Docker stats, mount the Docker socket in the service:
+
+```bash
+docker service update \
+  --mount-add type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock,ro=true \
+  opentelemetry-collector
+```
+
+If creating the service for the first time:
+
+```bash
+docker service create \
+  --name opentelemetry-collector \
+  --publish target=4317,published=4317,protocol=tcp \
+  --publish target=4318,published=4318,protocol=tcp \
+  --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock,ro=true \
+  --config source=otelcol_config,target=/etc/otelcol-contrib/config.yaml,mode=0444 \
+  otel/opentelemetry-collector-contrib:0.130.1
+```
+
+## Verification
+
+```bash
+docker service logs -f opentelemetry-collector
+```
+
+You should see metrics being scraped by `docker_stats`. Use SigNoz to view container and service dashboards.
+
+## Troubleshooting
+
+- Ensure `/var/run/docker.sock` is mounted and readable by the collector container.
+- Confirm the Swarm task is scheduled on a node with the Docker Engine socket at the default path.
+- Check for permission errors or incorrect config key names.
+
