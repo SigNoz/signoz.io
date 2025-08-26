@@ -54,6 +54,36 @@ export default function FAQsPage() {
                 apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY || '',
                 primaryBrandColor: '#E75536',
                 organizationDisplayName: 'SigNoz',
+                colorMode: {
+                  forcedColorMode: 'dark',
+                },
+                theme: {
+                  styles: [
+                    {
+                      key: 'faq-dark-theme',
+                      type: 'style',
+                      value: `
+                        /* Force dark theme for the search bar */
+                        .ikp-search-bar__button {
+                          background: rgb(31 41 55);
+                          color: rgb(229 231 235);
+                          border: 1px solid rgb(55 65 81);
+                        }
+                        .ikp-search-bar__button:hover {
+                          background: rgb(31 41 55 / 0.9);
+                        }
+                        .ikp-search-bar__text {
+                          color: rgb(156 163 175);
+                        }
+                        .ikp-search-bar__kbd-wrapper {
+                          background: rgb(17 24 39);
+                          border: 1px solid rgb(55 65 81);
+                          color: rgb(156 163 175);
+                        }
+                      `,
+                    },
+                  ],
+                },
               }}
               searchSettings={{
                 placeholder: 'Search FAQs...',

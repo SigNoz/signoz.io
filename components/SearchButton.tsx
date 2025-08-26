@@ -11,6 +11,9 @@ const SearchButton = () => {
         apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY || '',
         primaryBrandColor: '#E75536',
         organizationDisplayName: 'SigNoz',
+        colorMode: {
+          forcedColorMode: 'dark',
+        },
         theme: {
           styles: [
             {
@@ -27,7 +30,7 @@ const SearchButton = () => {
                   background: rgb(23 25 34);
                   color: rgb(229 231 235);
                   border-radius: 9999px;
-                  padding: 2px 14px 2px 16px;
+                  padding: 2px 14px 2px 16p
                   min-height: 2rem;
                   height: 1.5rem;
                   font-size: 13px;
