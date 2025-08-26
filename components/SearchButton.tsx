@@ -24,7 +24,7 @@ const SearchButton = () => {
                   min-width: unset !important;
                 }
                 .ikp-search-bar__button {
-                  background: rgb(51 65 85);
+                  background: rgb(23 25 34);
                   color: rgb(229 231 235);
                   border-radius: 9999px;
                   padding: 2px 14px 2px 16px;
