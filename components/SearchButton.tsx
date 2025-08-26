@@ -9,7 +9,6 @@ const SearchButton = () => {
     const config: InkeepSearchBarProps = {
       baseSettings: {
         apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY || '',
-        organizationId: process.env.NEXT_PUBLIC_INKEEP_ORGANIZATION_ID || '',
         primaryBrandColor: '#E75536',
         organizationDisplayName: 'SigNoz',
         theme: {

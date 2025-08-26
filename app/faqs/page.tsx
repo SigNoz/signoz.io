@@ -3,13 +3,11 @@
 import Button from '@/components/ui/Button'
 import { allFAQs } from 'contentlayer/generated'
 import Link from 'next/link'
-import { useState } from 'react'
-import { InkeepSearchBar, type SearchBarMethods } from '@inkeep/cxkit-react'
-import { useRef } from 'react'
+import React, { useState } from 'react'
+import { InkeepSearchBar } from '@inkeep/cxkit-react'
 
 export default function FAQsPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const searchRef = useRef<SearchBarMethods>(null)
 
   // Get unique tags from all FAQs
   const allTags = Array.from(
@@ -52,73 +50,27 @@ export default function FAQsPage() {
           
           <div className="mx-auto mt-6 sm:mt-8 w-full max-w-xl px-4 flex flex-col">
             <InkeepSearchBar
-              ref={searchRef}
               baseSettings={{
                 apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY || '',
-                integrationId: process.env.NEXT_PUBLIC_INKEEP_INTEGRATION_ID || '',
-                organizationId: process.env.NEXT_PUBLIC_INKEEP_ORGANIZATION_ID || '',
                 primaryBrandColor: '#E75536',
                 organizationDisplayName: 'SigNoz',
               }}
-              modalSettings={{
-                isOpen: undefined,
-                onOpen: () => {},
-                onClose: () => {},
-                closeOnOverlayClick: true,
-              }}
-              defaultView="search"
-              shouldShowAskAICard={true}
-              askAICardLabel="Ask AI"
-              askAILabel="Ask AI"
-              searchLabel="Search"
-              aiChatSettings={{
-                placeholder: 'Ask a question about SigNoz...',
-                quickQuestions: [
-                  'How does SigNoz ensure data security and privacy?',
-                  'Who uses SigNoz in production?',
-                  'Can SigNoz handle large-scale production environments effectively?',
-                ],
-              }}
               searchSettings={{
                 placeholder: 'Search FAQs...',
-                resultsShortcuts: {
-                  openChatInstead: ['shift+enter'],
-                },
               }}
-            >
-              {({ open }) => (
-                <button
-                  onClick={open}
-                  className="w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-2 text-signoz_vanilla-100 placeholder-signoz_vanilla-400 focus:border-primary-500 focus:outline-none flex items-center gap-2"
-                  aria-label="Ask a question about SigNoz"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                  </svg>
-                  <span className="text-signoz_vanilla-400">Ask a question about SigNoz</span>
-                </button>
-              )}
-            </InkeepSearchBar>
+              aiChatSettings={{
+                placeholder: 'Ask a question about SigNoz...',
+              }}
+            />
 
             <div className="mt-4 flex flex-wrap gap-2 justify-center">
               {allTags.map((tag) => (
                 <Button 
                   isButton={true}
                   key={tag}
-                  onClick={() => toggleTag(tag)}
+                  onClick={() => toggleTag(tag as string)}
                   className={`rounded-full px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors ${
-                    selectedTags.includes(tag)
+                    selectedTags.includes(tag as string)
                       ? 'bg-primary-500 text-signoz_vanilla-100'
                       : 'bg-signoz_ink-400 text-signoz_vanilla-400 hover:bg-signoz_ink-300'
                   } border border-signoz_slate-400`}
