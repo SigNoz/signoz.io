@@ -566,7 +566,7 @@ export default function TopNav() {
               </div>
             )}
           </div>
-          <div className="flex justify-end lg:hidden">
+          <div className="flex items-center justify-end gap-1 lg:hidden">
             {!mobileMenuOpen && <SearchButton />}
             <button
               type="button"

@@ -4,11 +4,12 @@ import Button from '@/components/ui/Button'
 import { allFAQs } from 'contentlayer/generated'
 import Link from 'next/link'
 import { useState } from 'react'
-import { TrieveModalSearch } from 'trieve-search-component'
-import 'trieve-search-component/dist/index.css'
+import { InkeepSearchBar, type SearchBarMethods } from '@inkeep/cxkit-react'
+import { useRef } from 'react'
 
 export default function FAQsPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const searchRef = useRef<SearchBarMethods>(null)
 
   // Get unique tags from all FAQs
   const allTags = Array.from(
@@ -50,25 +51,47 @@ export default function FAQsPage() {
           </p>
           
           <div className="mx-auto mt-6 sm:mt-8 w-full max-w-xl px-4 flex flex-col">
-            <TrieveModalSearch
-              theme="dark"
-              apiKey='tr-cK2MylVI0my78NUoafAiTvvmpdktntO3'
-              datasetId='4650e231-7857-45aa-beb1-cb52006a2460'
-              defaultSearchQueries={[
-                "How does SigNoz ensure data security and privacy?",
-                "Who uses SigNoz in production?",
-                "Can SigNoz handle large-scale production environments effectively?",
-              ]}
-              defaultAiQuestions={[
-                "What is SigNoz?",
-                "How to change retention period?",
-                "How do I install SigNoz?",
-              ]}
-              brandColor="#E75536"
-              brandName='SigNoz'
-              brandLogoImgSrcUrl="https://avatars.githubusercontent.com/u/76905799?s=200&v=4"
-              ButtonEl={() => (
-                <div className="w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-2 text-signoz_vanilla-100 placeholder-signoz_vanilla-400 focus:border-primary-500 focus:outline-none flex items-center gap-2">
+            <InkeepSearchBar
+              ref={searchRef}
+              baseSettings={{
+                apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY || '',
+                integrationId: process.env.NEXT_PUBLIC_INKEEP_INTEGRATION_ID || '',
+                organizationId: process.env.NEXT_PUBLIC_INKEEP_ORGANIZATION_ID || '',
+                primaryBrandColor: '#E75536',
+                organizationDisplayName: 'SigNoz',
+              }}
+              modalSettings={{
+                isOpen: undefined,
+                onOpen: () => {},
+                onClose: () => {},
+                closeOnOverlayClick: true,
+              }}
+              defaultView="search"
+              shouldShowAskAICard={true}
+              askAICardLabel="Ask AI"
+              askAILabel="Ask AI"
+              searchLabel="Search"
+              aiChatSettings={{
+                placeholder: 'Ask a question about SigNoz...',
+                quickQuestions: [
+                  'How does SigNoz ensure data security and privacy?',
+                  'Who uses SigNoz in production?',
+                  'Can SigNoz handle large-scale production environments effectively?',
+                ],
+              }}
+              searchSettings={{
+                placeholder: 'Search FAQs...',
+                resultsShortcuts: {
+                  openChatInstead: ['shift+enter'],
+                },
+              }}
+            >
+              {({ open }) => (
+                <button
+                  onClick={open}
+                  className="w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-2 text-signoz_vanilla-100 placeholder-signoz_vanilla-400 focus:border-primary-500 focus:outline-none flex items-center gap-2"
+                  aria-label="Ask a question about SigNoz"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -84,9 +107,9 @@ export default function FAQsPage() {
                     <path d="m21 21-4.3-4.3"></path>
                   </svg>
                   <span className="text-signoz_vanilla-400">Ask a question about SigNoz</span>
-                </div>
+                </button>
               )}
-            />
+            </InkeepSearchBar>
 
             <div className="mt-4 flex flex-wrap gap-2 justify-center">
               {allTags.map((tag) => (

@@ -1,59 +1,122 @@
+'use client'
+
 import React from 'react'
 import siteMetadata from '@/data/siteMetadata'
-import { TrieveModalSearch } from 'trieve-search-component'
-import 'trieve-search-component/dist/index.css'
+import { InkeepSearchBar, type InkeepSearchBarProps } from '@inkeep/cxkit-react'
 
 const SearchButton = () => {
   if (siteMetadata.search) {
-    return (
-      <TrieveModalSearch
-        theme="dark"
-        apiKey="tr-cK2MylVI0my78NUoafAiTvvmpdktntO3"
-        datasetId="4650e231-7857-45aa-beb1-cb52006a2460"
-        openKeyCombination={[
-          {
-            key: '/',
-          },
-        ]}
-        defaultSearchQueries={[
-          'App Service Diagnostic Settings EventHub',
-          'Logstash to SigNoz configuration tutorial',
-          'EventHub and App Service logging integration',
-        ]}
-        defaultAiQuestions={[
-          'What is SigNoz?',
-          'How to change retention period?',
-          'How do I install SigNoz?',
-        ]}
-        brandColor="#E75536"
-        brandName="SigNoz"
-        brandLogoImgSrcUrl="https://avatars.githubusercontent.com/u/76905799?s=200&v=4"
-        ButtonEl={() => (
-          <div className="-mt-1 flex min-h-8 items-center justify-between rounded-full pb-0 pl-4 pr-0 pt-1 sm:bg-signoz_slate-500 sm:pb-1 sm:pr-4">
-            <div className="mr-4 flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </svg>
-              <span className="hidden text-sm text-signoz_vanilla-400 sm:inline">Search...</span>
-            </div>
-            <div className="hidden h-5 w-5 items-center justify-center rounded-sm border-1.5 border-b-2 border-signoz_ink-200 text-[10px] font-bold sm:flex">
-              /
-            </div>
-          </div>
-        )}
-      />
-    )
+    const config: InkeepSearchBarProps = {
+      baseSettings: {
+        apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY || '',
+        organizationId: process.env.NEXT_PUBLIC_INKEEP_ORGANIZATION_ID || '',
+        primaryBrandColor: '#E75536',
+        organizationDisplayName: 'SigNoz',
+        theme: {
+          styles: [
+            {
+              key: 'signoz-searchbar-style',
+              type: 'style',
+              value: `
+                .ikp-search-bar__container {
+                  display: flex;
+                  align-items: center;
+                  width: fit-content !important;
+                  min-width: unset !important;
+                }
+                .ikp-search-bar__button {
+                  background: rgb(51 65 85);
+                  color: rgb(229 231 235);
+                  border-radius: 9999px;
+                  padding: 2px 14px 2px 16px;
+                  min-height: 2rem;
+                  height: 1.5rem;
+                  font-size: 13px;
+                  border: none;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  transition: all 0.2s;
+                  width: auto;
+                  min-width: 120px;
+                  margin: 0;
+                }
+                .ikp-search-bar__button:hover {
+                  background: rgb(51 65 85 / 0.85);
+                }
+                .ikp-search-bar__icon {
+                  width: 14px;
+                  height: 14px;
+                  flex-shrink: 0;
+                }
+                .ikp-search-bar__text {
+                  color: rgb(163 163 163);
+                  font-size: 13px;
+                  white-space: nowrap;
+                }
+                .ikp-search-bar__kbd-wrapper {
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  background: transparent;
+                  border: 0px solid rgb(82 82 91);
+                  border-bottom-width: 0px;
+                  border-radius: 3px;
+                  padding: 0;
+                  width: 18px;
+                  height: 18px;
+                  font-size: 10px;
+                  font-weight: 700;
+                  color: rgb(163 163 163);
+                  flex-shrink: 0;
+                  margin-left: 6px;
+                }
+                .ikp-search-bar__content-wrapper {
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                }
+                @media (max-width: 640px) {
+                  .ikp-search-bar__button {
+                    background: transparent;
+                    border: none;
+                    padding: 8px;
+                    min-width: unset;
+                    width: auto;
+                    height: auto;
+                    min-height: unset;
+                  }
+                  .ikp-search-bar__icon {
+                    width: 20px;
+                    height: 20px;
+                    color: rgb(163 163 163);
+                  }
+                  .ikp-search-bar__text {
+                    display: none;
+                  }
+                  .ikp-search-bar__kbd-wrapper {
+                    display: none;
+                  }
+                }
+              `,
+            },
+          ],
+        },
+      },
+      searchSettings: {
+        placeholder: 'Search docs...',
+      },
+      aiChatSettings: {
+        placeholder: 'Ask about SigNoz...',
+      },
+      defaultView: 'search',
+      shouldShowAskAICard: true,
+      askAICardLabel: 'Ask AI',
+      askAILabel: 'Ask AI',
+      searchLabel: 'Search',
+    }
+
+    return <InkeepSearchBar {...config} />
   }
 }
 

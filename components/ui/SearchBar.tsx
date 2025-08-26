@@ -36,7 +36,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     return () => clearInterval(interval)
   }, [placeholders.length, rotationInterval])
 
-  // Enable Cmd+K shortcut
+  // Enable / shortcut
   useSearchShortcut({
     onOpen: () => setIsModalOpen(true),
     isEnabled: !isModalOpen,
@@ -83,14 +83,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <span className="flex-1 text-left text-sm text-signoz_vanilla-400 transition-all duration-300">
           {currentPlaceholder}
         </span>
-        <div className="text-signoz_vanilla-500 flex items-center space-x-1 text-xs">
-          <kbd className="rounded border border-signoz_slate-300 bg-signoz_slate-500 px-2 py-1 font-mono">
-            ⌘
-          </kbd>
-          <kbd className="rounded border border-signoz_slate-300 bg-signoz_slate-500 px-2 py-1 font-mono">
-            K
-          </kbd>
-        </div>
+        <kbd className="rounded border border-signoz_slate-300 bg-signoz_slate-500 px-2 py-1 font-mono text-xs text-signoz_vanilla-500">
+          /
+        </kbd>
       </div>
 
       <ChatModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
