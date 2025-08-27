@@ -609,9 +609,33 @@ const docsSideNav = [
         label: 'Docker',
         items: [
           {
-            route: '/docs/collection-agents/docker/install',
-            type: 'doc',
-            label: 'Install',
+            type: 'category',
+            label: 'Standalone',
+            isExpanded: false,
+            items: [
+              {
+                route: '/docs/collection-agents/docker/install',
+                type: 'doc',
+                label: 'Install',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            label: 'Swarm',
+            isExpanded: false,
+            items: [
+              {
+                route: '/docs/collection-agents/docker-swarm/install',
+                type: 'doc',
+                label: 'Install',
+              },
+              {
+                route: '/docs/collection-agents/docker-swarm/configure',
+                type: 'doc',
+                label: 'Configure',
+              },
+            ],
           },
         ],
       },
