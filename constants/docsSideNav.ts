@@ -2007,6 +2007,11 @@ const docsSideNav = [
         label: 'LlamaIndex Monitoring',
         type: 'doc',
       },
+      {
+        route: '/docs/langchain-monitoring',
+        label: 'LangChain Monitoring',
+        type: 'doc',
+      },
     ],
   },
   {
