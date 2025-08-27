@@ -1,5 +1,5 @@
 ---
-title: OpenTelemetry Collector for Docker Swarm - Install
+title: Docker Swarm Collector - Install
 id: install
 description: Step-by-step guide to install OpenTelemetry Collector on Docker Swarm
 ---
@@ -75,9 +75,11 @@ service:
       exporters: [otlp]
 ```
 
-**Configuration Steps:**
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition>
+- Set your ingestion endpoint according to your SigNoz Cloud region. Refer to [the SigNoz Cloud ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) to find the correct endpoint for your deployment.
+- Replace `<SIGNOZ_INGESTION_KEY>` with the one provided by SigNoz.
+</Admonition>
 
 </TabItem>
 <TabItem value="self-hosted" label="Self-Hosted SigNoz">
@@ -167,7 +169,6 @@ docker service create \
   otel/opentelemetry-collector-contrib:0.130.1
 ```
 
-Tip: To collect container and service metrics, follow Configure and add the `docker_stats` receiver.
 
 ## Verification
 
@@ -192,42 +193,7 @@ docker service logs -f opentelemetry-collector
 
 You should see logs indicating successful startup and readiness to process data.
 
-## Send Docker data
+## Next Steps
 
-Once you have your collector up and running, you can see your container logs, metrics and application traces by following the below links:
-- [Send Docker logs](https://signoz.io/docs/userguide/collect_docker_logs/)
-- [Send Containers metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/)
-- [Send Application traces](https://signoz.io/docs/instrumentation/)
+- [Configure the Collector](/docs/collection-agents/docker-swarm/configure)
 
-## Troubleshooting
-
-### Service Already Exists
-
-If you get an error about the service already existing:
-
-```bash
-# Check existing services
-docker service ls | grep opentelemetry-collector
-
-# Remove the existing service
-docker service rm opentelemetry-collector
-
-# Then re-create the service
-```
-
-### Configuration Errors
-
-If the collector fails to start, check the service logs and task status:
-
-```bash
-docker service logs -f opentelemetry-collector
-docker service ps opentelemetry-collector --no-trunc
-```
-
-Common issues:
-- Invalid YAML syntax in config file
-- Missing or incorrect SigNoz credentials
-- Port conflicts with other services on published ports
-- Config not found or unreadable (ensure the config name matches and path is `/etc/otelcol-contrib/config.yaml`)
-
-The OpenTelemetry Collector service is now running and ready to receive telemetry data on ports 4317 (gRPC) and 4318 (HTTP) across your Swarm cluster.
