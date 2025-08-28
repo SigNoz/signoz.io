@@ -1,0 +1,451 @@
+{
+  "schemaVersion": "1.5",
+  "pathHead": "v0.92.0",
+  "general": {
+    "upgradeSummary": [
+      "This tool provides the mandatory sequential path to upgrade your instance safely.",
+      "Each version listed is a mandatory stop with specific instructions. Do not skip any steps.",
+      "Before you begin, please review the checklists and common warnings below."
+    ],
+    "checklist": {
+      "preUpgrade": [
+        "Backup your database and configuration files.",
+        "Review changelogs for all versions in your upgrade path.",
+        "Schedule the upgrade during a low-traffic period."
+      ],
+      "postUpgrade": [
+        "Verify all services have restarted successfully.",
+        "Clear your browser cache to see the latest UI changes.",
+        "Monitor system performance and error logs."
+      ]
+    },
+    "commonWarnings": [
+      {
+        "title": "Potential Downtime",
+        "details": "The upgrade process requires restarting services, which will result in a brief period of downtime."
+      }
+    ],
+    "troubleshootingUrl": "https://signoz.io/docs/user-guide/troubleshooting/"
+  },
+  "releases": {
+    "v0.92.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": null,
+      "releaseDate": "2025-08-13",
+      "patchRelease": {
+        "label": "v0.92.1",
+        "href": "https://github.com/SigNoz/signoz/releases/tag/v0.92.1"
+      },
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.92",
+      "instructions": [
+        "This release introduces the new Query Builder v5, migrates the CLI to a Cobra-based structure, and supports ClickHouse 25.5.6",
+        "An automatic migration is in place for dashboards, alerts, and saved views, so no manual updates are needed for them.",
+        "For Linux Binary installations, you must update the systemd service file to use the new `server` subcommand (e.g., `signoz server`)."
+      ],
+      "deprecations": [
+        {
+          "title": "Legacy CLI Arguments",
+          "details": "Extra or unknown command line arguments are now ignored. Future work will move all flags to be config-driven via a configuration file."
+        }
+      ],
+      "warnings": [
+        {
+          "title": "Cobra CLI Migration",
+          "details": "SigNoz now uses a Cobra command structure. To run the server, you must use the `signoz server` command. Please update your `launch.json` args and any execution scripts accordingly."
+        }
+      ]
+    },
+    "v0.91.0": {
+      "isMandatoryStop": false,
+      "nextMandatoryStop": "v0.92.0",
+      "releaseDate": "2025-07-24",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-standard",
+      "instructions": [
+        "This is not a breaking change release. No special actions are needed."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.90.0": {
+      "isMandatoryStop": false,
+      "nextMandatoryStop": null,
+      "releaseDate": "2025-07-16",
+      "patchRelease": {
+        "label": "v0.90.1",
+        "href": "https://github.com/SigNoz/signoz/releases/tag/v0.90.1"
+      },
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-standard",
+      "instructions": [
+        "This is not a breaking change release. No special actions are needed."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.89.0": {
+      "isMandatoryStop": false,
+      "nextMandatoryStop": null,
+      "releaseDate": "2025-07-09",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-standard",
+      "instructions": [
+        "This is not a breaking change release. No special actions are needed."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.88.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": null,
+      "releaseDate": "2025-07-02",
+      "patchRelease": {
+        "label": "v0.88.1",
+        "href": "https://github.com/SigNoz/signoz/releases/tag/v0.88.1"
+      },
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.88",
+      "instructions": [
+        "This migration is a one-time process. Once it is successfully completed, your system will be fully transitioned to the new metrics exporter.",
+        "The migration scripts are idempotent, so there is no need to worry about running them multiple times.",
+        "After completing the migration, remove any configuration changes made for it, based on your deployment type."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+          "title": "signoz-otel-collector version",
+          "details": "Version is greater or equal to v0.111.29"
+        },
+        {
+          "title": "Dual Exporter Setup",
+          "details": "Both Exporters clickhousemetricswrite and signozclickhousemetrics exporters are enabled for your metrics retention period."
+        }
+      ]
+    },
+    "v0.86.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.88.0",
+      "patchRelease": {
+        "label": "v0.86.2",
+        "href": "https://github.com/SigNoz/signoz/releases/tag/v0.86.2"
+      },
+      "releaseDate": "2025-06-04",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.86",
+      "instructions": [
+        "Upgrade to v0.86.0 before any later version. Follow the platform-specific guide and use v0.86.0 images (except schema-migrator and signoz-otel-collector). Database migrations run automatically; no manual steps needed."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.77.0": {
+      "isMandatoryStop": false,
+      "nextMandatoryStop": "v0.88.0",
+      "releaseDate": "2025-04-02",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-standard",
+      "instructions": [
+        "This is not a breaking change release. No special actions are needed."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.76.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.88.0",
+      "releaseDate": "2025-03-14",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.76",
+      "patchRelease": {
+        "href": "https://github.com/SigNoz/signoz/releases/tag/v0.76.2",
+        "label": "v0.76.2"
+      },
+      "instructions": [
+        "This is a major upgrade consolidating `query-service`, `frontend`, and `alertmanager` into a single `signoz` binary. Careful migration is required.",
+        "The frontend port has changed from `3301` to `8080`. Update your reverse proxy or ingress configurations accordingly.",
+        "For Kubernetes, backup the SQLite database, replace the `queryService` key with `signoz` in `my-values.yaml`, and configure the migration `initContainer` as per the guide.",
+        "For Docker Standalone & Swarm, you must be on version `v0.70.0` before upgrading to `v0.76.0`.",
+        "After a successful upgrade, the migration container in Kubernetes should be disabled, and old unused volumes can be deleted.",
+        "If you see an 'Oops! Something went wrong' screen, try logging out and back in, or clearing your browser's local storage."
+      ],
+      "deprecations": [
+        {
+          "title": "Service Consolidation",
+          "details": "The separate `query-service`, `frontend`, and `alertmanager` services/containers are deprecated and have been replaced by a single `signoz` binary."
+        },
+        {
+          "title": "Helm Chart Configuration",
+          "details": "In Kubernetes `my-values.yaml`, the top-level key `queryService` is deprecated and must be replaced with `signoz`."
+        },
+        {
+          "title": "Frontend Port",
+          "details": "The default frontend port `3301` is deprecated. The new service runs on port `8080`."
+        },
+        {
+          "title": "Old Volumes",
+          "details": "The PersistentVolumeClaims for `query-service` and `alertmanager` (Kubernetes) and the `signoz-alertmanager` volume (Docker) are no longer used and can be deleted after migration."
+        }
+      ],
+      "warnings": [
+        {
+          "title": "Database Backup Required (Kubernetes)",
+          "details": "Before starting the upgrade on Kubernetes, you must backup your SQLite database (`signoz.db`) to prevent data loss."
+        },
+        {
+          "title": "Version Prerequisite (Docker/Swarm)",
+          "details": "Users on Docker Standalone or Docker Swarm must first be on version `v0.70.0` before attempting to upgrade to `v0.76.0`."
+        },
+        {
+          "title": "Alertmanager Email Configuration",
+          "details": "If you are using Alertmanager to send emails, you will need to re-apply your configuration after upgrading. Refer to the documentation for details."
+        }
+      ]
+    },
+    "v0.70.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.76.0",
+      "releaseDate": "2025-01-29",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.70",
+      "instructions": [
+        "This upgrade is only for Docker Standalone and Docker Swarm.",
+        "Migrate data from bind mount to Docker Volume using provided scripts.",
+        "After migration, verify Docker volumes and old data in SigNoz UI.",
+        "Optionally, delete old bind mount data."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+          "title": "Disk Space Requirement",
+          "details": "Make sure you have sufficient free disk space to backup your data (preferably more than 50% free)."
+        }
+      ]
+    },
+    "v0.64.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.70.0",
+      "releaseDate": "2024-12-18",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.64",
+      "instructions": [
+        "Update clickhouse queries in dashboards and alerts.",
+        "If you changed the default retention period, adjust configs before upgrading.",
+        "Run migration script to copy TTL settings and materialized columns from old table."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+          "title": "Retention Period and Data Loss",
+          "details": "If you changed the default retention period, you must update your configs before upgrading to avoid data loss. See the 'Config to Keep Using Old Table' section in the upgrade guide."
+        },
+        {
+          "title": "Wait for Retention Period",
+          "details": "If you want to use the new schema without migrating old data, ensure SigNoz has been running for at least the duration of your retention period before upgrading. Otherwise, follow the migration steps to backfill old data."
+        },
+        {
+          "title": "Dashboard and Alert Query Updates",
+          "details": "You must update all ClickHouse queries in dashboards and alerts to use the new schema. See the documentation for details."
+        }
+      ]
+    },
+    "v0.55.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.64.0",
+      "releaseDate": "2024-09-25",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.55",
+      "instructions": [
+        "Update clickhouse queries in dashboards and alerts.",
+        "If you changed the default retention period, adjust configs before upgrading.",
+        "Run migration script to copy TTL settings and materialized columns from old table."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+          "title": "Retention Period and Data Loss",
+          "details": "If you changed the default retention period, you must update your configs before upgrading to avoid data loss. See the 'Config to Keep Using Old Table' section in the upgrade guide."
+        },
+        {
+          "title": "Wait for Retention Period",
+          "details": "If you want to use the new schema without migrating old data, ensure SigNoz has been running for at least the duration of your retention period before upgrading. Otherwise, follow the migration steps to backfill old data."
+        },
+        {
+          "title": "Dashboard and Alert Query Updates",
+          "details": "You must update all ClickHouse queries in dashboards and alerts to use the new schema. See the documentation for details."
+        }
+      ]
+    },
+    "v0.51.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.55.0",
+      "releaseDate": "2024-07-31",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.51",
+      "instructions": [
+        "Drop the body index in ClickHouse, wait for mutation to complete, then add the new body index."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.49.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.51.0",
+      "releaseDate": "2024-07-03",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.49",
+      "instructions": [
+        "Update log pipeline filters to use '.' instead of '_' in attribute names."
+      ],
+      "deprecations": [
+        {
+          "title": "Log Attribute Naming",
+          "details": "The measure to support '_' in log attribute names is removed; use '.' going forward."
+        }
+      ],
+      "warnings": []
+    },
+    "v0.45.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.49.0",
+      "releaseDate": "2024-05-09",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.45",
+      "instructions": [
+        "Run migration script to sanitize dashboard data (panel height)."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.38.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.45.0",
+      "releaseDate": "2024-01-31",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.38",
+      "instructions": [
+        "Run migration script to update dashboards and alerts for dot ('.') attribute support.",
+        "Ensure v0.36 migration is successful before running this."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.37.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.38.0",
+      "releaseDate": "2024-01-19",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.37",
+      "instructions": [
+        "The 'otel-collector-metrics' container is removed; move scrape jobs to 'otel-collector'."
+      ],
+      "deprecations": [
+        {
+          "title": "otel-collector-metrics Container",
+          "details": "'otel-collector-metrics' container is deprecated and removed."
+        }
+      ],
+      "warnings": []
+    },
+    "v0.36.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.37.0",
+      "releaseDate": "2023-12-22",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.36",
+      "instructions": [
+        "Run migration script 10-15 mins after upgrading to v0.36.",
+        "Adds support for dot ('.') in attribute names."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.27.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.36.0",
+      "releaseDate": "2023-08-23",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.27",
+      "instructions": [
+        "Run migration script to update log attribute indexing."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.23.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.27.0",
+      "releaseDate": "2023-07-14",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.23",
+      "instructions": [
+        "Upgrade ClickHouse operator CRDs before upgrading SigNoz chart."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+          "title": "ClickHouse Downtime",
+          "details": "Single node ClickHouse cluster may see some downtime during upgrade."
+        }
+      ]
+    },
+    "v0.19.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.23.0",
+      "releaseDate": "2023-05-20",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.19",
+      "instructions": [
+        "Run migration script to sanitize alerts and dashboards data."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.12.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.19.0",
+      "releaseDate": "2022-12-11",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.12",
+      "instructions": [
+        "v0.12 introduces distributed clickhouse setup.",
+        "Update dashboard/alert queries to use new distributed table names."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.10.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.12.0",
+      "releaseDate": "2022-07-16",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.10",
+      "instructions": [
+        "Run migration script for errors and exceptions section."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.9.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.10.0",
+      "releaseDate": "2022-06-30",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.9",
+      "instructions": [
+        "v0.9 is a breaking release; run data migration scripts for past data."
+      ],
+      "deprecations": [],
+      "warnings": []
+    },
+    "v0.8.1": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.9.0",
+      "releaseDate": "2022-06-09",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.8.1",
+      "instructions": [
+        "Run migration script to sanitize dashboard data if created in v0.8.0 or before."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+          "title": "Dashboard Migration Required",
+          "details": "Run migration script before modifying any existing dashboards after upgrade."
+        }
+      ]
+    },
+    "v0.8.0": {
+      "isMandatoryStop": true,
+      "nextMandatoryStop": "v0.8.1",
+      "releaseDate": "2022-05-06",
+      "guideUrl": "https://signoz.io/docs/operate/migration/upgrade-0.8.0",
+      "instructions": [
+        "v0.8.0 is a breaking release; run data migration scripts for past data."
+      ],
+      "deprecations": [],
+      "warnings": [
+        {
+          "title": "Data Migration Required",
+          "details": "Past data will not be visible until migration script is run."
+        }
+      ]
+    }
+  }
+}

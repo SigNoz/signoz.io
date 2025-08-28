@@ -1,0 +1,453 @@
+---
+title: Feature in Spotlight - Frontend Monitoring [Day 3] 🧬
+slug: launch-week-1-day-3
+date: 2024-02-28
+tags: [OpenTelemetry, SigNoz]
+authors: [ankit_anand]
+description: Welcome to SigNoz Launch Week 1.0. This is our first launch week, and we’re excited to introduce you to some cool new features in SigNoz. The feature in spotlight for Day 3 is Frontend monitoring in SigNoz. Learn how to monitor core web vitals...
+image: /img/events/launch-week-1/launch-week-day-3-cover.webp
+hide_table_of_contents: false
+toc_min_heading_level: 2
+toc_max_heading_level: 2
+keywords:
+  - launch week
+  - day 3
+  - frontend monitoring
+  - signoz
+  - observability
+is_newsroom: true
+---
+
+
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/launch-week-1-day-3/"/>
+   <meta property="og:image" content="https://signoz.io/img/events/launch-week-1/launch-week-day-3-cover.webp"/>
+  <meta name ="twitter:image" content="https://signoz.io/img/events/launch-week-1/launch-week-day-3-cover.webp"/>
+</head>
+
+<div className='announcementContainer'>
+
+<span class="badge badge--secondary mb-4">Launch Week 1.0</span>
+
+# Feature in Spotlight: Frontend Monitoring [Day 3] 🧬
+
+<div class="avatar">
+  <a
+    class="avatar__photo-link avatar__photo avatar__photo--lg"
+    href="https://www.linkedin.com/in/ankit-anand-686a53a1/">
+    <img
+      alt="Ankit Profile"
+      src="/img/users/ankit-anand.webp" />
+  </a>
+  <div class="avatar__intro">
+    <div class="avatar__name">Ankit Anand</div>
+    <small class="avatar__subtitle">
+      Maintainer, SigNoz
+    </small>
+  </div>
+</div>
+
+<br />
+
+Welcome to SigNoz Launch Week Day 3!
+
+Today’s feature in the spotlight is **Frontend Monitoring with SigNoz.**
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/launch-week-day-3-cover.webp" alt="Cover pic"/>
+</figure>
+
+
+Frontend monitoring is a very popular topic in our open-source community. So we wanted to dedicate a day to what you can accomplish in frontend monitoring with SigNoz.
+
+## Builders - The Frontend Team
+
+The frontend team of SigNoz, comprising of [Yunus](https://www.linkedin.com/in/younix/), [Rajat](https://www.linkedin.com/in/rajat-dabade/), and [Vikrant](https://www.linkedin.com/in/vikrant-gupta-0107a9165/) are the brains behind all the colorful data-intensive charts and graphs of SigNoz. Building the frontend of an observability product like SigNoz is a unique challenge with millions of data points and querying involved. And Yunus, Rajat and Vikrant have taken this challenge head-on.
+
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/frontend-team-final.webp" alt="Cover pic"/>
+</figure>
+
+
+## Why is Frontend Observability Important?
+
+Frontend observability will help you identify any performance issues or errors that are not reported to the backend. Having a working frontend is critical for a good user experience, and things like UI crashes can impact the business of any digital company.
+
+Identifying areas of improvement with a robust observability setup can go a long way in improving the overall user experience. It also makes sense for SigNoz to have a great frontend monitoring experience so that our users can set up an end-to-end monitoring of their applications.
+
+You ultimately want to tie what’s happening in the frontend to the backend, and having everything under a single pane makes monitoring your application very easy.
+
+## Frontend Monitoring with SigNoz
+
+Frontend monitoring can be divided into multiple aspects:
+
+- Error/Exceptions Monitoring
+- Performance Monitoring
+- Real User Monitoring
+
+Currently, OpenTelemetry does not have much support for frontend observability apart from supporting traces. But we have built some cool dashboards for monitoring important things like core web vitals. Let us check them out.
+
+### Core Web Vitals Monitoring with SigNoz
+
+Web Vitals is an initiative by Google aimed at offering consistent advice for key indicators of web page quality crucial for a superior web user experience. Its goal is to streamline the myriad of performance measurement tools available and assist website owners in concentrating on the most significant metrics, known as the Core Web Vitals.
+
+Currently, there are three core web vitals:
+
+- **Largest Contentful Paint**<br></br>
+    It measures loading performance. To provide a good user experience, LCP must occur within **2.5 seconds** of when the page first starts loading.
+
+- **First Input Delay**<br></br>
+    It measures *interactivity*. To provide a good user experience, pages must have a FID of **100 milliseconds** or less.
+
+- **Cumulative Layout Shift**<br></br>
+    It measures *visual stability*. To provide a good user experience, must should maintain a CLS of **0.1.** or less.
+
+Here’s a quick guide that provides a step-by-step approach to monitor core web vitals such as Largest Contentful Paint (LCP), First Input Delay (FID), and First Contentful Paint (FCP) using OpenTelemetry, SigNoz, and the **`web-vitals`** library.
+
+**Step 1: Setup the metrics provider**
+
+The first step involves setting up the **`MeterProvider`** from OpenTelemetry**,** using which we can generate custom metrics in our application.
+
+```jsx
+import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { opentelemetry } from '@opentelemetry/api';
+
+// Define your resource, e.g., service name, environment.
+const resource = new Resource({
+  'service.name': 'yourServiceName',
+});
+
+// Create a metric reader with OTLP exporter configured to send metrics to a local collector.
+const metricReader = new PeriodicExportingMetricReader({
+  exporter: new OTLPMetricExporter({
+    url: 'http://127.0.0.1:4318/v1/metrics',
+  }),
+  exportIntervalMillis: 10000, // Export metrics every 10 seconds.
+});
+
+// Initialize a MeterProvider with the above configurations.
+const myServiceMeterProvider = new MeterProvider({
+  resource,
+  readers: [metricReader],
+});
+
+// Set the initialized MeterProvider as global to enable metric collection across the app.
+opentelemetry.metrics.setGlobalMeterProvider(myServiceMeterProvider);
+
+```
+
+**Step 2: Capture Core Web Vitals**
+
+Utilize the **`web-vitals`** library to capture performance metrics like LCP, FID, and FCP. This library provides a simple API to capture web performance metrics.
+
+```jsx
+import { getCLS, getFCP, getFID, getLCP, getTTFB } from 'web-vitals';
+
+getCLS(yourCustomCallback);
+getFID(yourCustomCallback);
+getLCP(yourCustomCallback);
+```
+
+**Step 3: Exporting the Data**
+
+Given that web vitals are non-additive values, we can utilize Observable Async Gauges from OpenTelemetry to periodically observe and export these metrics. This metric type is suitable for web vitals because it allows observing values over time without assuming additive behavior, which is essential for accurately representing metrics like LCP, FCP, and FID.
+
+```jsx
+import { metrics } from '@opentelemetry/api';
+
+const meter = metrics.getMeter('web-vitals');
+const lcp = meter.createObservableGauge('lcp');
+
+case 'LCP': {
+	lcp.addCallback((result) => {
+	result.observe(metric.value);
+	});
+}
+```
+
+You can send the metrics to SigNoz, and build a customized dashboard to monitor your core web vitals.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/web-vitals.webp" alt="Core Web Vitals Monitoring in SigNoz"/>
+<figcaption><i>Core Web Vitals Monitoring in SigNoz </i></figcaption>
+</figure>
+
+
+One of the cool features of SigNoz charts is that you can create thresholds in the chart with different color coding. For example, in the below graph there are three thresholds for `good`, `needs improvement`, and `critical` level.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/thresholds-chart.webp" alt="Thresholds in SigNoz"/>
+<figcaption><i>Thresholds provide a visual cue to how your performance is </i></figcaption>
+</figure>
+
+
+You can also create alerts and set notifications to a preferred channel to be notified about anything critical that needs to be investigated.
+
+### Error Tracking with SigNoz
+
+One of the other important aspects of frontend monitoring is error tracking. In SigNoz, you can track errors with the help of trace data.
+
+Here’s a quick guide that walks you through setting up frontend error tracking in your React application using SigNoz. By following these steps, you can monitor and trace errors in your frontend application efficiently.
+
+**Step 1: Initialize the Trace Provider**
+
+First, we need to set up the **`TraceProvider`**, which is essential for tracking errors and sending traces to the SigNoz backend.
+
+```jsx
+const provider = new WebTracerProvider({
+	resource,
+});
+
+const exporter = new OTLPTraceExporter({
+	url: 'http://127.0.0.1:4318/v1/traces',
+});
+
+const processor = new BatchSpanProcessor(exporter);
+provider.addSpanProcessor(processor);
+```
+
+**Step 2: Integrate Error Tracking with React**
+
+To capture all errors from your React application, use an **`ErrorBoundary`** component. This component will catch JavaScript errors in any child component tree and log them as traces.
+
+1. **Wrap Your Application with ErrorBoundary**<br></br>
+    Modify your application's root component to include the **`ErrorBoundary`**. This ensures that any error in the app is caught and processed.
+    
+    ```jsx
+    import ErrorBoundary from './ErrorBoundary'; // Make sure to create this component
+    import ErrorBoundaryFallback from './ErrorBoundaryFallback'; // A fallback UI component
+    
+    <ErrorBoundary FallbackComponent={ErrorBoundaryFallback} onError={reportErrorStackTrace}>
+      {/* Your App Component */}
+    </ErrorBoundary>
+    
+    ```
+    
+
+2. **Implement the Error Reporting Function**<br></br>
+    Create a function to report errors from the **`ErrorBoundary`**. This function will send error details to SigNoz.
+    
+    ```jsx
+    import { SpanStatusCode, trace } from '@opentelemetry/api';
+    import { defaultTo } from 'lodash-es';
+    import { ErrorInfo } from 'react';
+    
+    export function reportErrorStackTrace(error: Error, info: ErrorInfo): void {
+    	const tracer = trace.getTracer('Error Boundary');
+    	tracer.startActiveSpan('Error Boundary', (span) => {
+    
+    		span.recordException(error);
+    		
+        // Optional: Set custom attributes on the trace
+    		span.setAttribute('stackTrace', defaultTo(error.stack, ''));
+    		span.setAttribute('errorMessage', error.message);
+    		
+        // Mark the span with an error status
+    		span.setStatus({
+    			code: SpanStatusCode.ERROR,
+    		});
+    
+    		//Always end the open span
+    		span.end();
+    	});
+    }
+    ```
+    
+
+Once you’re done with the set up, you can create a customized dashboard for monitoring the errors in SigNoz.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/error-tracking.webp" alt="Error Monitoring dashboard in SigNoz"/>
+<figcaption><i>Create customized dashboards for monitoring errors in SigNoz </i></figcaption>
+</figure>
+
+
+SigNoz lets you write queries on all signals - logs, metrics, and traces. For error tracking, you can create queries on trace data to build different panels.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/query-builder-trace-data.webp" alt="Query trace data for error tracking"/>
+<figcaption><i>Query your trace data for error tracking</i></figcaption>
+</figure>
+
+
+You can also click on any errors in the list and see the exact span in flame graph view of the trace. From there, you can get more information on the error with the help of span attributes.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/errors-to-trace.gif" alt="Error to trace"/>
+</figure>
+
+
+We also have a dedicated tab for exception tracking.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/exceptions-tab.webp" alt="Exceptions Tab in SigNoz"/>
+<figcaption><i>Exceptions Tab in SigNoz</i></figcaption>
+</figure>
+
+
+If you want to investigate further, you can check out the entire stacktrace of the exception.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/stacktrace.webp" alt="Stacktrace for errors in your application"/>
+<figcaption><i>Stacktrace for errors in your application</i></figcaption>
+</figure>
+
+
+## Frontend Engineering At SigNoz
+
+SigNoz is a very data-intensive product. For example, a single trace might contain thousands of spans and to render them in our frontend efficiently is a challenging task. Yunus shares that it is what makes it exciting to work as a Frontend engineer at SigNoz.
+
+There are two types of improvement the frontend team is working on to improve the performance of SigNoz UI:
+
+- **Improving Perceived Performance**<br></br>
+
+- **Optimizing chart rendering**<br></br>
+    We were previously using chartjs, but our UI performance was taking a hit. In our research, we found uPlot library has a better performance even for large datasets, especially when it is dealing with time-series data. So it was a perfect fit for us.
+    
+    The challenge that we faced with uPlot was a lack of good documentation, but our team was able to roll it out to improve our charts’ performance.
+
+We have also implemented design tokens for making our frontend development more consistent and efficient. 
+
+## What’s next?
+
+One of our key objectives is to introduce out-of-the-box dashboards tailored specifically for frontend observability. We're also excited to unveil panel grouping functionality, which will help users organize their dashboard panels more effectively, providing clearer and more insightful visualizations.
+
+We will also be working on implementing a wide array of integrations. These integrations will facilitate easy onboarding to SigNoz, allowing users to effortlessly connect to a variety of sources and sinks for telemetry data. Additionally, we're exploring the possibility of incorporating query suggestions and quick filters, streamlining the data exploration process for users of all levels.
+
+We’re going to work on more frontend-specific features that takes user experience in SigNoz to the next level. For example, our team is working on keyboard shortcuts which will enable users to access different things in SigNoz quickly. The first version is already available to users of SigNoz.
+
+Furthermore, we will be working towards empowering our product and marketing teams with the ability to update copy within the product independently, without needing to involve the engineering team. This will streamline the process of iterating on our product's messaging and ensure that our users receive the most up-to-date information at all times.
+
+
+
+
+<YouTube id="pmxl11pAQRQ" mute={false} />
+
+
+
+
+# Features in Spotlight:
+
+
+<div class="row spotlight-row">
+  <div class="col col--6">
+    <div class="card-demo">
+      <a class="card" href="https://signoz.io/blog/launch-week-1-day-1/"
+						rel="noopener noreferrer"
+						target="_blank">
+        <div class="card__image">
+        <img
+          src="/img/events/launch-week-1/launch-week-day-1-cover.webp"
+          alt="Image alt text"
+          title="Launch Week Day 1" />
+        </div>
+        <div class="card__body">
+        <h4>Feature in Spotlight: Logs Explorer</h4>
+        <small>
+          Builder: Nitya & Shuvam.
+        </small>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="col col--6">
+    <div class="card-demo">
+      <a class="card" href="https://signoz.io/blog/launch-week-1-day-2/"
+						rel="noopener noreferrer"
+						target="_blank">
+        <div class="card__image">
+        <img
+          src="/img/events/launch-week-1/launch-week-day-2-cover.webp"
+          alt="Image alt text"
+          title="Launch Week Day 2" />
+        </div>
+        <div class="card__body">
+        <h4>Feature in Spotlight: Metrics & Query Builder</h4>
+        <small>
+          Builder: Srikanth Chekuri.
+        </small>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row spotlight-row">
+  <div class="col col--6">
+    <div class="card-demo">
+      <a class="card" href="https://signoz.io/blog/launch-week-1-day-3/"
+						rel="noopener noreferrer"
+						target="_blank">
+        <div class="card__image">
+        <img
+          src="/img/events/launch-week-1/launch-week-day-3-cover.webp"
+          alt="Image alt text"
+          title="Launch Week Day 3" />
+        </div>
+        <div class="card__body">
+        <h4>Feature in Spotlight: Frontend Monitoring</h4>
+        <small>
+          Builder: Yunus, Rajat & Shuvam.
+        </small>
+        </div>
+      </a>
+    </div>
+  </div>
+
+
+  <div class="col col--6">
+    <div class="card-demo">
+      <a class="card" href="https://signoz.io/blog/launch-week-1-day-4/"
+						rel="noopener noreferrer"
+						target="_blank">
+        <div class="card__image">
+        <img
+          src="/img/events/launch-week-1/launch-week-day-4-cover.webp"
+          alt="Image alt text"
+          title="Launch Week Day 4" />
+        </div>
+        <div class="card__body">
+        <h4>Feature in Spotlight: Logs Pipeline</h4>
+        <small>
+          Builder: Raj.
+        </small>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="row spotlight-row">
+
+<div class="col col--6">
+    <div class="card-demo">
+      <a class="card" href="https://signoz.io/blog/launch-week-1-day-5/"
+						rel="noopener noreferrer"
+						target="_blank">
+        <div class="card__image">
+        <img
+          src="/img/events/launch-week-1/launch-week-day-5-cover.webp"
+          alt="Image alt text"
+          title="Launch Week Day 5" />
+        </div>
+        <div class="card__body">
+        <h4>Feature in Spotlight: Access Token Management & Onboarding </h4>
+        <small>
+          Builder: Vishal & Chitransh.
+        </small>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+</div>

@@ -10,6 +10,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
+import Button from '@/components/ui/Button'
 
 export async function generateMetadata({
   params,
@@ -87,12 +88,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       />
 
       <div className="container mx-auto">
-        <Link href={`/faqs/`}>
-          <button className="ml-3.5 mt-10 flex items-center">
+        <Button variant={"ghost"} isButton={true} className="ml-3.5 mt-10 hover:bg-transparent">
+          <Link href={`/faqs/`} className="flex items-center">
             <SidebarIcons.ArrowLeft />
             <span className="pl-1.5 text-sm">Back to FAQs</span>
-          </button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <FAQLayout 

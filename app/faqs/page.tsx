@@ -1,5 +1,6 @@
 'use client'
 
+import Button from '@/components/ui/Button'
 import { allFAQs } from 'contentlayer/generated'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -89,7 +90,8 @@ export default function FAQsPage() {
 
             <div className="mt-4 flex flex-wrap gap-2 justify-center">
               {allTags.map((tag) => (
-                <button
+                <Button 
+                  isButton={true}
                   key={tag}
                   onClick={() => toggleTag(tag)}
                   className={`rounded-full px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors ${
@@ -99,7 +101,7 @@ export default function FAQsPage() {
                   } border border-signoz_slate-400`}
                 >
                   {tag}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

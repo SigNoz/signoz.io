@@ -573,7 +573,7 @@ const SigNozVsDatadogV2 = () => {
                     <img
                       src="/img/product-comparisons/signoz-vs-datadog/datadog-otel-lambda-integration-issue.webp"
                       alt="User describing their experience of sending telemetry data from AWS Lambdas to Datadog using OpenTelemetry"
-                      className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                      className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 transition-transform duration-300 hover:scale-[1.02]"
                     />
                     <figcaption className="text-sm text-gray-400">
                       User describing their experience of sending telemetry data from AWS Lambdas to
@@ -697,7 +697,7 @@ const SigNozVsDatadogV2 = () => {
                     alt="Enhance observability of messaging queues with OTel powered correlated trace and metrics"
                     width={800}
                     height={400}
-                    className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                    className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 transition-transform duration-300 hover:scale-[1.02]"
                   />
                   <figcaption className="text-sm text-gray-400">
                     Enhance observability of messaging queues with OTel powered correlated trace and
@@ -1172,7 +1172,7 @@ const SigNozVsDatadogV2 = () => {
                   <img
                     src="/img/product-comparisons/signoz-vs-datadog/cart-service-key-operations.webp"
                     alt="Key operations shown for Cart Service in SigNoz"
-                    className="rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                    className="rounded-lg border border-gray-800 bg-gray-900/50 p-2 transition-transform duration-300 hover:scale-[1.02]"
                   />
                   <p className="mt-2 text-sm text-gray-400">
                     Key operations shown for Cart Service in SigNoz
@@ -1193,7 +1193,7 @@ const SigNozVsDatadogV2 = () => {
                   <img
                     src="/img/product-comparisons/signoz-vs-datadog/datadog-service-summary-getcart-endpoint.webp"
                     alt="Datadog shows servcie-level metrics derived from only one primary operation"
-                    className="rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                    className="rounded-lg border border-gray-800 bg-gray-900/50 p-2 transition-transform duration-300 hover:scale-[1.02]"
                   />
                   <p className="mt-2 text-sm text-gray-400">
                     Datadog shows servcie-level metrics derived from only one primary operation
@@ -2194,7 +2194,7 @@ const SigNozVsDatadogV2 = () => {
                   alt="Host based pricing issue"
                   width={800}
                   height={400}
-                  className="rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                  className="rounded-lg border border-gray-800 bg-gray-900/50 p-2 transition-transform duration-300 hover:scale-[1.02]"
                 />
                 <figcaption className="mt-2 text-sm text-gray-400">
                   A user discussing how they optimized their architecture to control Datadog costs.
@@ -2254,7 +2254,7 @@ const SigNozVsDatadogV2 = () => {
             </div>
           </div>
 
-          <div className="mt-12">
+          {/* <div className="mt-12">
             <p className="mb-4 text-[1.1rem] italic text-gray-300">
               Listen to Shiv Ansal, CTO at Bands, explaining why he chose SigNoz over Datadog for
               his startup, Bands.
@@ -2267,7 +2267,7 @@ const SigNozVsDatadogV2 = () => {
                 title="YouTube video player"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                className="rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                className="rounded-lg border border-gray-800 bg-gray-900/50 p-2 transition-transform duration-300 hover:scale-[1.02]"
               ></iframe>
               <Link
                 href="https://signoz.io/teams/"
@@ -2277,7 +2277,7 @@ const SigNozVsDatadogV2 = () => {
                 Get Started with SigNoz for Free →
               </Link>
             </div>
-          </div>
+          </div> */}
         </section>
         {/* Section End */}
 

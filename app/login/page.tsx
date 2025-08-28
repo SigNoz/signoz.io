@@ -6,6 +6,7 @@ import React, { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, ArrowUpRight, Dot, Loader2, Pencil } from 'lucide-react'
 import { useLogEvent } from '../../hooks/useLogEvent'
+import Button from '@/components/ui/Button'
 
 interface ErrorsProps {
   workEmail?: string
@@ -207,25 +208,30 @@ export default function Login() {
                     cloud support for assistance.
                   </div>
 
-                  <button
+                  <Button
                     type="submit"
-                    className="btn-primary mt-[24px] flex w-full items-center justify-center gap-4 rounded-full px-[16px] py-[8px] text-sm font-medium"
+                    variant={"default"}
+                    rounded={"full"} 
+                    className='w-full mt-6'
+                    isButton={true}
                     onClick={() => window.location.reload()}
                   >
                     <span className="text-xs leading-5">Refresh page</span>
-                  </button>
+                  </Button>
 
-                  <a
+                  <Button
+                    variant={"secondary"}
+                    rounded={"full"}
                     type="submit"
-                    className="btn-secondary mt-3 flex w-full items-center justify-center gap-4 rounded-full px-[16px] py-[8px] text-sm font-medium"
+                    className='w-full mt-3'
                     href="mailto:cloud-support@signoz.io"
                   >
                     <span className="text-xs leading-5">Contact cloud support</span>
                     <ArrowRight size={14} />
-                  </a>
+                  </Button>
                 </div>
               ) : (
-                <form className="w-100 mt-[24px]">
+                <form className="w-100 mt-6">
                   <div className="mb-[28px] rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-8">
                     <label htmlFor="workEmail" className="mb-2 block font-medium">
                       Work email
@@ -244,13 +250,15 @@ export default function Login() {
                       />
 
                       {workEmail && submitSuccess && (
-                        <button
+                        <Button
+                          variant={"secondary"}
+                          rounded={"default"}
+                          isButton={true}
                           type="button"
-                          className="border-to flex items-center justify-center gap-2 border border-solid border-signoz_slate-400 bg-signoz_ink-300 px-[16px] py-[8px] text-xs font-normal text-stone-300"
                           onClick={handleChangeEmail}
                         >
                           <Pencil size={14} /> Change
-                        </button>
+                        </Button>
                       )}
                     </div>
 
@@ -302,10 +310,13 @@ export default function Login() {
                   </div>
 
                   {!submitSuccess && (
-                    <button
+                    <Button
+                      isButton={true}
+                      variant={"default"}
+                      rounded={"full"}
                       disabled={isSubmitting || !isValid}
                       onClick={handleSubmit}
-                      className={`mb-[16px] flex w-full items-center justify-center rounded-full bg-signoz_robin-500 py-2 pl-4 pr-3 font-medium ${isSubmitting || !isValid ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                      className='w-full mb-4'
                     >
                       <span className="flex items-center gap-1.5 px-px text-sm">
                         Next
@@ -315,7 +326,7 @@ export default function Login() {
                           <ArrowRight size={16} />
                         )}
                       </span>
-                    </button>
+                    </Button>
                   )}
                 </form>
               )}
@@ -324,15 +335,18 @@ export default function Login() {
                 <div className="text-sm text-signoz_vanilla-400">
                   No deployments are currently associated with this email. You can get started now
                   with a free trial account for 30 days.
-                  <button
+                  <Button 
+                    isButton={true}
+                    rounded={'full'}
+                    variant={"default"}
+                    className='my-4 w-full'
                     onClick={handleGetStarted}
-                    className="my-4 flex w-full items-center justify-center rounded-full bg-signoz_robin-500  py-2 pl-4 pr-3 font-medium text-signoz_vanilla-100"
                   >
                     <span className="flex items-center gap-1.5 px-px text-sm">
                       Get Started - Free
                       <ArrowRight size={16} />
                     </span>
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -341,10 +355,10 @@ export default function Login() {
       </div>
 
       <div className="absolute bottom-0 m-auto mt-8 flex w-full items-center justify-center">
-        <div className="flex w-[70%] items-center justify-center">
-          <section className="b mb-6 flex min-w-[240px] flex-wrap items-center gap-8 self-stretch rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-2 px-8 max-md:max-w-full">
+        <div className="flex w-[70%] items-center justify-center max-sm:w-[90%]">
+          <section className="b mb-6 grid grid-cols-2 md:flex md:flex-wrap items-center gap-4 self-stretch rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-4 md:p-2 max-md:max-w-full max-md:w-full">
             {trustBadges.map((badge, index) => (
-              <div className="my-auto flex items-center gap-2.5 self-stretch" key={index}>
+              <div className="my-auto flex items-center gap-2.5 self-stretch justify-center md:justify-start" key={index}>
                 {badge.icon && (
                   <img
                     loading="lazy"
@@ -364,7 +378,7 @@ export default function Login() {
                 )}
 
                 {index < trustBadges.length - 1 && (
-                  <Dot size={24} color="#3C4152" className="ml-4" />
+                  <Dot size={24} color="#3C4152" className="ml-4 hidden md:block" />
                 )}
               </div>
             ))}

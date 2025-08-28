@@ -7,99 +7,13 @@ description: Instructions that should resolve most installation issues
 
 This troubleshooting guide includes step-by-step instructions that should resolve most installation issues.
 
-## Using SigNoz Troubleshooting Repository
-
-You can use the [SigNoz troubleshoot](https://github.com/SigNoz/troubleshoot) to test if SigNoz otel collector
-is accessible from where you are running your applications.
-
-### Binary installation
-
-You can run the one liner script below to download the troubleshoot binary:
-
-```bash
-curl -sL https://github.com/SigNoz/troubleshoot/raw/main/scripts/install.sh | bash
-```
-
-Here is the syntax:
-
-```bash
-./troubleshoot checkEndpoint --endpoint=<endpoint-to-check>
-```
-
-#### Binary
-
-For example, if Otel Collector should be accessible in `localhost:4317`:
-
-```bash
-./troubleshoot checkEndpoint --endpoint=localhost:4317
-```
-
-#### Docker
-
-You can also use troubleshoot Docker image:
-
-```bash
-docker run -it --rm signoz/troubleshoot checkEndpoint --endpoint=172.17.0.1:4317
-```
-
-<Admonition>
-SigNoz Otel Collector should be accessible in `172.17.0.1:4317` from your application even if running in different docker network.
-</Admonition>
-
-#### Kubernetes
-
-Let's spin up a pod in Kubernetes with `platform` namespace to check if `otel collector` is running properly:
-
-```bash
-kubectl -n platform run troubleshoot --image=signoz/troubleshoot \
-  --restart='Never' -i --tty --rm --command -- ./troubleshoot checkEndpoint \
-  --endpoint=my-release-signoz-otel-collector.platform.svc.cluster.local:4317
-```
-
-You can also spin up a pod in Kubernetes with same namespace as your application to check if `otel collector` is accessible:
-
-```bash
-kubectl -n app-namespace run troubleshoot --image=signoz/troubleshoot \
-  --restart='Never' -i --tty --rm --command -- ./troubleshoot checkEndpoint \
-  --endpoint=my-release-signoz-otel-collector.platform.svc.cluster.local:4317
-```
-
-<Admonition>
-  1. Replace `app-namespace` with your application namespace, `my-release` with SigNoz helm release name, and `platform` with SigNoz namespace.
-  2. In case on multiple k8s cluster, you might have to set otel collector service type as `NodePort` or `LoadBalancer`.
-</Admonition>
-
-```bash
-helm upgrade --install -n platform my-release signoz/signoz \
-  --set otelCollector.serviceType="<NodePort or LoadBalancer>"
-```
-
-
-
-### Troubleshooting Video
-
-If you instead prefer to watch a video, check out this video:
-
- 
-
-<div style={{
-  maxHeight:"535px",
-  overflow:"hidden",
-  postiton:"relative"
-}}>
-<YouTube id="Y7OkvmuTRQ8" mute={false} />
-</div>
-
-
-
-
 ## Troubleshooting Docker Standalone Installation of SigNoz
 
 1. Before you install SigNoz on Docker Standalone, ensure that all [prerequisites](/docs/install/docker/#prerequisites) are met.
 2. Run the `docker ps` command and ensure that the `signoz-clickhouse` and `signoz-signoz` containers are running. If these containers are not running, increase the memory allocated to Docker.
 3. If you don't see any data in the front-end, please wait two or three minutes.
 4. Run the `install.sh` script again. The script will try to reinstall the containers that failed.
-5. Follow the steps for [uninstalling SigNoz](/docs/operate/docker-standalone/#uninstall-signoz) section and then install SigNoz again by following the steps in the [Install SigNoz on Docker Standalone](/docs/install/docker) section.
+5. Follow the steps for [uninstalling SigNoz](/docs/install/uninstall/#docker-standalone) section and then install SigNoz again by following the steps in the [Install SigNoz on Docker Standalone](/docs/install/docker) section.
 6. If you're still facing issues trying to install SigNoz, please reach out to us on [Slack](https://signoz.io/slack) 
 
 ## Troubleshooting ClickHouse container crashes

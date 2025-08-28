@@ -30,7 +30,9 @@ export default function DocLayout({ children }: LayoutProps) {
 
   const scrollToHash = () => {
     if (window.location.hash && source !== ONBOARDING_SOURCE) {
-      const element = document.querySelector(window.location.hash)
+      const hash = window.location.hash
+      const targetId = decodeURIComponent(hash.startsWith('#') ? hash.slice(1) : hash)
+      const element = document.getElementById(targetId)
 
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' })

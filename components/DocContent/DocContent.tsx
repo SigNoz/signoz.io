@@ -1,6 +1,8 @@
 'use client'
 
 import React from 'react'
+import { Edit } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import PageFeedback from '../PageFeedback/PageFeedback'
@@ -15,7 +17,8 @@ const DocContent: React.FC<{
   post: any
   toc: any
   hideTableOfContents: boolean
-}> = ({ title, post, toc, hideTableOfContents }) => {
+  editLink?: string
+}> = ({ title, post, toc, hideTableOfContents, editLink }) => {
   const searchParams = useSearchParams()
   const lastUpdatedDate = post?.lastmod || post?.date
   const formattedDate =
@@ -33,11 +36,21 @@ const DocContent: React.FC<{
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
         <h2 className="mt-2 text-3xl">{title}</h2>
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
-        {formattedDate && (
-          <p className="mt-8 text-sm text-gray-500">
-            Last updated: {formattedDate}
-          </p>
-        )}
+        <div className="flex justify-between items-center mt-8 text-sm">
+          {formattedDate && (
+            <p className="text-gray-500 dark:text-gray-400">Last updated: {formattedDate}</p>
+          )}
+          {editLink && (
+            <Button
+              href={editLink}
+              variant='outline'
+              className="gap-2 no-underline"
+            >
+              <Edit size={16} />
+              Edit on GitHub
+            </Button>
+          )}
+        </div>
         <PageFeedback />
         <DocsPrevNext />
       </div>

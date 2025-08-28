@@ -20,7 +20,7 @@ const APMDashboardsData: IconCardData[] = [
   },
   {
     name: 'Database Calls Monitoring',
-    href: 'https://github.com/SigNoz/dashboards/blob/main/apm/db-calls-monitoring.json',
+    href: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
     icon: <Database className="h-7 w-7 text-purple-600" />,
     clickName: 'Database Calls Monitoring Dashboard Template',
   },

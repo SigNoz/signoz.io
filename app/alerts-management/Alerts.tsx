@@ -1,9 +1,8 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from "@/components/ui/Button"
 import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
@@ -35,37 +34,6 @@ const PlatformCard = ({ title, description }) => {
     <div className="rounded-md border border-signoz_slate-500 bg-signoz_ink-400 p-4">
       <h3 className="mb-2 text-base font-medium text-signoz_vanilla-100">{title}</h3>
       <p className="mb-0 text-sm font-normal text-signoz_vanilla-400">{description}</p>
-    </div>
-  )
-}
-
-const FeatureList = () => {
-  const features = [
-    {
-      title: 'Host Monitoring',
-      description: 'Monitor any hosts such as VM, physical machines, containers, etc.',
-    },
-    {
-      title: 'Build dashboards for application metrics',
-      description: 'You can create customized dashboards for your application metrics',
-    },
-    {
-      title: 'Kubernetes Infrastructure Monitoring',
-      description:
-        'Query logs for specific conditions and add them to dashboards for continuous monitoring.',
-    },
-    {
-      title: 'Share log lines',
-      description:
-        'Improved collaboration with your teammates while debugging by sharing specific log lines.',
-    },
-  ]
-
-  return (
-    <div className="flex w-full flex-col gap-4">
-      {features.map((feature, index) => (
-        <PlatformCard key={index} title={feature.title} description={feature.description} />
-      ))}
     </div>
   )
 }
@@ -103,35 +71,6 @@ const UsageList = () => {
   )
 }
 
-const DocsList = () => {
-  const Docs = [
-    {
-      title: 'Node.js instrumentation',
-      description: 'Instrument your Node.js application and monitor with SigNoz',
-    },
-    {
-      title: 'Python instrumentation',
-      description: 'Instrument your Python application and monitor with SigNoz',
-    },
-    {
-      title: 'Java instrumentation',
-      description: 'Instrument your Java application and monitor with SigNoz',
-    },
-    {
-      title: 'Get started with SigNoz APM',
-      description: 'Instrument your Java application and monitor with SigNoz',
-    },
-  ]
-
-  return (
-    <div className="flex w-full flex-col gap-4">
-      {Docs.map((feature, index) => (
-        <PlatformCard key={index} title={feature.title} description={feature.description} />
-      ))}
-    </div>
-  )
-}
-
 const Header = () => {
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
@@ -151,18 +90,18 @@ const Header = () => {
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <Button id="btn-get-started-homepage-hero">
-          <Link href="/teams/" className="flex-center">
+        <Button to="/teams/" variant={"default"} rounded={"full"} id="btn-get-started-homepage-hero">
+          <span className="flex-center">
             Get Started - Free
             <ArrowRight size={14} />
-          </Link>
+          </span>
         </Button>
 
-        <Button type={Button.TYPES.SECONDARY} id="btn-read-documentation-homepage-hero">
-          <Link href="/docs/introduction/" className="flex-center">
+        <Button variant="secondary" to="/docs/introduction/" rounded={"full"} id="btn-read-documentation-homepage-hero">
+          <span className="flex-center">
             <BookOpen size={14} />
             Read Documentation
-          </Link>
+          </span>
         </Button>
       </div>
       <div className="section-container !mx-auto !mt-0 -mb-[9rem] !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
@@ -230,11 +169,13 @@ const TrustedByTeams = ({ page }) => {
           <div className="flex flex-col items-center text-center">
             <Button
               id={customerStoriesId}
-              className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+              variant={"secondary"}
+              rounded={"full"}
+              to="/case-study/"
             >
-              <Link href="/case-study/" className="flex-center z-[1] mx-2">
+              <span className="flex-center z-[1] mx-2">
                 Read customer stories <ArrowRight size={14} />
-              </Link>
+              </span>
             </Button>
           </div>
         </div>
@@ -377,26 +318,6 @@ const SigNozFeatures = () => {
   )
 }
 
-const SigNozUsage = () => {
-  return (
-    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-      <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            Use SigNoz
-            <br /> Metrics & Dashboards for...
-          </p>
-        </div>
-        <div className="flex-[2_2_0%]">
-          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
-            <FeatureList />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 const UsageBasedPricing = () => {
   return (
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
@@ -418,31 +339,12 @@ const UsageBasedPricing = () => {
               We’re here for you.
             </p>
             <UsageList />
-            <Button id="btn-get-started-homepage-hero" className="mt-5">
-              <Link href="/pricing/" className="flex-center">
+            <Button to="/pricing/" variant={"default"} rounded={"full"} id="btn-get-started-homepage-hero" className="mt-5">
+              <span className="flex-center">
                 Check Pricing
                 <ArrowRight size={14} />
-              </Link>
+              </span>
             </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const ExploreDocs = () => {
-  return (
-    <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-      <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%]  flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            Explore Docs
-          </p>
-        </div>
-        <div className="flex-[2_2_0%]">
-          <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
-            <DocsList />
           </div>
         </div>
       </div>
@@ -488,23 +390,25 @@ const SigNozStats = () => {
               ))}
             </div>
             <div className="flex flex-col items-center gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 py-6 sm:flex-row sm:py-6 sm:pl-10">
-              <Button className="text-xs sm:text-sm" id="btn-join-community-homepage">
-                <Link href="https://signoz.io/slack/" className="flex-center">
+              <Button href="https://signoz.io/slack/" variant={"default"} rounded={"full"} id="btn-join-community-homepage">
+                <span className="flex-center">
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   Join the community
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </Link>
+                </span>
               </Button>
-              <Button
-                type={Button.TYPES.SECONDARY}
+              <Button isButton
+                variant="secondary"
+                rounded={"full"}
                 className="text-xs sm:text-sm"
                 id="btn-github-repo-homepage"
+                href="https://github.com/SigNoz/signoz/"
               >
-                <Link href="https://github.com/SigNoz/signoz/" className="flex-center">
+                <span className="flex-center">
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   GitHub Repository
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </Link>
+                </span>
               </Button>
             </div>
           </div>
@@ -529,18 +433,18 @@ const GetStarted = ({ page }) => {
                   Get started with <br /> SigNoz Cloud today
                 </p>
                 <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                  <Button id={getStartedId}>
-                    <Link href="/teams/" className="flex-center">
+                  <Button to="/teams/" variant={"default"} rounded={"full"} id={getStartedId}>
+                    <span className="flex-center">
                       Get Started - Free
                       <ArrowRight size={14} />
-                    </Link>
+                    </span>
                   </Button>
 
-                  <Button type={Button.TYPES.SECONDARY} id={readDocumentationId}>
-                    <Link href="/docs/introduction/" className="flex-center">
+                  <Button to="/docs/introduction/" variant="secondary" rounded={"full"} id={readDocumentationId}>
+                    <span className="flex-center">
                       <BookOpen size={14} />
                       Read Documentation
-                    </Link>
+                    </span>
                   </Button>
                 </div>
               </div>

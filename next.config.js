@@ -63,6 +63,7 @@ module.exports = () => {
   const plugins = [withContentlayer, withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
+    productionBrowserSourceMaps: true, // Enable source maps for debugging
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
       dirs: ['app', 'components', 'layouts', 'scripts'],
@@ -147,7 +148,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-35r3be4oh-~4ociQZPFeQJ2COfKvDPLQ',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3am701p9u-qEO6jxUapH4Vnnptot_RGA',
           basePath: false,
           permanent: true,
         },
@@ -188,8 +189,8 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/operate/upgrade/',
-          destination: '/docs/operate/migration/upgrade-0.8.0',
+          source: '/docs/operate/migration',
+          destination: '/docs/operate/upgrade',
           permanent: true,
         },
         {
@@ -494,6 +495,151 @@ module.exports = () => {
           destination: '/docs/migration/migrate-from-newrelic-to-signoz/',
           permanent: true,
         },
+        {
+          source: '/dashboards',
+          destination: '/docs/dashboards/dashboard-templates/overview/',
+          permanent: true,
+        },
+        {
+          source: "/docs/tutorial/kubernetes-infra-metrics/",
+          destination: "/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/",
+          permanent: true
+        },
+        {
+          source: "/docs/metrics-management/k8s-infra-otel-config/",
+          destination: "/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra/",
+          permanent: true
+        },
+        {
+          source: "/docs/troubleshooting/signoz-cloud/logs-troubleshooting/",
+          destination: "/docs/logs-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/logs_troubleshooting/",
+          destination: "/docs/logs-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/troubleshooting/signoz-cloud/traces-troubleshooting/",
+          destination: "/docs/traces-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/troubleshooting/signoz-cloud/metrics-troubleshooting/",
+          destination: "/docs/metrics-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/troubleshooting/signoz-cloud/general-troubleshooting/",
+          destination: "/docs/faqs/general/",
+          permanent: true
+        },
+        {
+          source: "/docs/instrumentation/troubleshoot-instrumentation/",
+          destination: "/docs/traces-management/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1-day-1/",
+          destination: "/blog/launch-week-1-day-1/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1-day-2/",
+          destination: "/blog/launch-week-1-day-2/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1-day-3/",
+          destination: "/blog/launch-week-1-day-3/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1-day-4/",
+          destination: "/blog/launch-week-1-day-4/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1-day-5/",
+          destination: "/blog/launch-week-1-day-5/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/launch-week-1/",
+          destination: "/blog/launch-week-1/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/signoz-funding/",
+          destination: "/blog/signoz-funding/",
+          permanent: true
+        },
+        {
+          source: "/newsroom/",
+          destination: "/blog/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/collecting-ecs-logs-and-metrics",
+          destination: "/docs/collection-agents/ecs/ec2/overview/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/collecting-ecs-sidecar-infra",
+          destination: "/docs/collection-agents/ecs/sidecar/overview",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/0.75.0/query-service/user-invitation-smtp",
+          destination: "/docs/manage/administrator-guide/configuration/smtp-email-invitations/#versions-less-than-or-equal-to-084x",
+          permanent:  true
+        },
+        {
+          source: "/docs/operate/0.75.0/query-service/reset-admin-password",
+          destination: "docs/operate/reset-admin-password",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/0.75.0/configuration",
+          destination: "/docs/operate/configuration",
+          permanent: true 
+        },
+        {
+          source: "/docs/operate/docker-standalone/#upgrade",
+          destination: "/docs/operate/migration/upgrade-standard/#docker-standalone",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
+          destination: "/docs/install/uninstall/#docker-standalone",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-swarm/#upgrade-signoz-cluster",
+          destination: "/docs/operate/migration/upgrade-standard/#docker-swarm-cluster",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
+          destination: "/docs/install/uninstall/#docker-swarm",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/kubernetes/#upgrade-signoz",
+          destination: "/docs/operate/migration/upgrade-standard/#kubernetes-deployment",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/kubernetes/#uninstall-signoz",
+          destination: "/docs/install/uninstall/#kubernetes",
+          permanent: true
+        },
+        {
+          source: "/docs/tutorial/opentelemetry-operator-usage/",
+          destination: "/docs/collection-agents/k8s/otel-operator/overview",
+          permanent: true
+        }
       ]
     },
     webpack: (config, options) => {
@@ -510,7 +656,49 @@ module.exports = () => {
         })
       }
 
+      // Ensure source maps are generated in production (server & client)
+      if (!options.dev) {
+        config.devtool = 'source-map'
+      }
+
       return config
     },
   })
 }
+
+// Injected content via Sentry wizard below
+
+const { withSentryConfig } = require('@sentry/nextjs')
+
+module.exports = withSentryConfig(module.exports, {
+  // For all available options, see:
+  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+
+  org: `${process.env.NEXT_PUBLIC_SENTRY_ORG}`,
+  project: `${process.env.NEXT_PUBLIC_SENTRY_PROJECT}`,
+  sentryUrl: `${process.env.NEXT_PUBLIC_SENTRY_URL}`,
+
+  // Only print logs for uploading source maps in CI
+  silent: !process.env.CI,
+
+  // For all available options, see:
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+
+  // Upload a larger set of source maps for prettier stack traces (increases build time)
+  widenClientFileUpload: true,
+
+  // Uncomment to route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
+  // This can increase your server load as well as your hosting bill.
+  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
+  // side errors will fail.
+  // tunnelRoute: "/monitoring",
+
+  // Automatically tree-shake Sentry logger statements to reduce bundle size
+  disableLogger: true,
+
+  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
+  // See the following for more information:
+  // https://docs.sentry.io/product/crons/
+  // https://vercel.com/docs/cron-jobs
+  automaticVercelMonitors: true,
+})

@@ -10,6 +10,7 @@ import CountdownTimer from '@/components/Timer'
 import { Linkedin } from '@/components/social-icons/SolidIcons'
 import Youtube from '@/components/VideoPlayer/VideoPlayer'
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
+import { Card } from "@/components/ui/Card"
 
 const MainSection: React.FC = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -23,8 +24,8 @@ const MainSection: React.FC = () => {
   return (
     <>
       <section className="flex w-full flex-col items-start px-20 pt-12 font-medium max-md:max-w-full max-md:px-5">
-        <div
-          className="container !mt-[-40px] mb-0 ml-5 flex max-h-full max-w-full flex-col border-l border-r border-dashed border-signoz_slate-100 !px-0"
+        <Card
+          className="container !mt-[-40px] mb-0 ml-5 flex max-h-full max-w-full flex-col !px-0 bg-transparent"
           style={{
             backgroundImage: "url('/img/launch_week/launch-week-3-bg.svg')",
             backgroundRepeat: 'no-repeat',
@@ -33,25 +34,25 @@ const MainSection: React.FC = () => {
         >
           <div className="flex w-full flex-col max-md:max-w-full">
             <div className="mt-10 flex max-w-full flex-col">
-              <div className="flex flex-col justify-between gap-6 sm:flex-row">
+              <div className="mt-10 flex flex-col justify-between gap-6 sm:flex-row">
                 <div className="max-w-full px-6 font-mono text-xl text-signoz_vanilla-400 max-md:max-w-full">
-                  {`// May 12 ⎯ 16`}
+                  {`// Sep 08 ⎯ 12`}
                 </div>
                 <div className="flex flex-row items-center gap-4 px-6">
                   <div className="inline-block h-3 w-3 rounded-sm bg-signoz_forest-500" />
                   <div className="pr-2 font-mono text-lg uppercase text-signoz_vanilla-400 max-md:max-w-full sm:text-xl">
-                    ONLINE — WORLDWIDE, May 12, 9AM PT
+                    ONLINE — WORLDWIDE, Sep 08, 9AM PT
                   </div>
                 </div>
               </div>
-              <div className="mt-8 max-w-full border-b border-dashed border-signoz_slate-100 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
+              <div className="mt-8 max-w-full border-b-2 border-dashed border-signoz_slate-200/50 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
                 Launch Week{' '}
                 <span className="launch-week-counter rounded bg-signoz_cherry-500  text-signoz_vanilla-100">
-                  4
+                  5
                 </span>
               </div>
             </div>
-            <div className="z-10 mt-11 self-stretch border-b border-dashed border-signoz_slate-100 px-6 font-mono text-base font-medium leading-8 text-signoz_vanilla-400 max-md:mt-10 max-md:max-w-full">
+            <div className="z-10 mt-11 self-stretch border-b-2 border-dashed border-signoz_slate-200/50 px-6 font-mono text-base font-medium leading-8 text-signoz_vanilla-400 max-md:mt-10 max-md:max-w-full">
               Join us for a week of new features and find new ways
               <br className="hidden sm:block" /> to level up on your observability goals.
             </div>
@@ -59,9 +60,9 @@ const MainSection: React.FC = () => {
 
           <div className="z-[1] my-6 ml-5 flex min-h-[40px] w-fit items-center justify-center gap-1.5 overflow-hidden rounded-sm bg-white px-4 py-2 text-sm leading-none text-signoz_ink-500  ">
             <a
-              href="https://lu.ma/event/evt-rsG0WzmmgF9FPfy"
-              data-luma-action="checkout"
-              data-luma-event-id="evt-rsG0WzmmgF9FPfy"
+              href="https://lu.ma/signoz-launch-week"
+              target="_blank"
+              rel="noopener noreferrer"
               id="launch-page-subscribe"
             >
               <div className="flex items-center gap-1.5">
@@ -73,7 +74,7 @@ const MainSection: React.FC = () => {
             </a>
           </div>
 
-          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          {/* <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Monday ⎯ May 12</div>
               <div className="flex flex-col gap-2">
@@ -144,7 +145,7 @@ const MainSection: React.FC = () => {
             </Modal>
           </div>
 
-          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Tuesday ⎯ May 13</div>
               <div className="flex flex-col gap-2">
@@ -198,7 +199,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ May 14</div>
               <div className="flex flex-col gap-2">
@@ -252,7 +253,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Thursday ⎯ May 15</div>
               <div className="flex flex-col gap-2">
@@ -306,7 +307,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">FRIDAY ⎯ May 16</div>
               <div className="flex flex-col gap-2">
@@ -359,25 +360,25 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-          </div>
+          </div> */}
 
-          {/* Timer  */}
+          {/* Timer */}
           {[
-            // 'Monday ⎯ May 12',
-            // 'Tuesday ⎯ May 13',
-            // 'Wednesday ⎯ May 14',
-            //'Thursday ⎯ May 15',
-            //'Friday ⎯ May 16',
+             'Monday ⎯ Sep 08',
+             'Tuesday ⎯ Sep 09',
+             'Wednesday ⎯ Sep 10',
+            'Thursday ⎯ Sep 11',
+            'Friday ⎯ Sep 12',
           ].map((day, index) => (
             <div
               key={index}
-              className="flex flex-grow items-center justify-between border-b border-dashed border-signoz_slate-100 px-6 py-2"
+              className="flex flex-grow items-center justify-between border-b-2 border-dashed border-signoz_slate-200/50 px-6 py-2"
             >
               <div className="w-[32%] font-mono text-sm font-medium uppercase text-signoz_vanilla-400 sm:text-base">
                 {day}
               </div>
               <div className="flex w-[68%] justify-end sm:justify-start">
-                <CountdownTimer eventDate={`2025-05-${16 + index} 21:30:00`} />
+                <CountdownTimer eventDate={`2025-09-${8 + index} 21:30:00`} />
               </div>
             </div>
           ))}
@@ -398,7 +399,7 @@ const MainSection: React.FC = () => {
               ))}
             </div>
           </div> */}
-        </div>
+        </Card>
       </section>
       <GetStarted page="launch-week" />
     </>
@@ -407,47 +408,14 @@ const MainSection: React.FC = () => {
 
 export default MainSection
 
-const cardData = [
-  {
-    title: 'SOC2 Type II and HIPAA Compliant',
-    description: 'SigNoz is now SOC2 Type II and HIPAA compliant',
-    url: '/blog/signoz-is-soc2-type2-and-hipaa-compliant/',
-  },
-  {
-    title: 'Chat with Ankit, CTO of SigNoz',
-    description: 'Get a sneak peek of the upcoming roadmap of SigNoz',
-    url: '/blog/insights-into-signoz-latest-features/',
-  },
-]
-
-const Card = ({ title, description, url }) => {
-  return (
-    <Link
-      href={url}
-      target="_blank"
-      className="launch-week-card-background group flex max-w-96 cursor-pointer flex-col rounded-md border border-signoz_slate-500 px-5 py-4 hover:bg-[#121317]"
-    >
-      <div>
-        <div className="mb-2 text-base font-medium">{title}</div>
-        <div className="mb-10 text-sm font-medium text-signoz_vanilla-400">{description}</div>
-      </div>
-      <div className="flex">
-        <div className="button-background flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5">
-          <ArrowRight size={14} />
-        </div>
-      </div>
-    </Link>
-  )
-}
-
 const GetStarted = ({ page }) => {
   const getStartedId = `btn-get-started-${page}-bottom`
   const readDocumentationId = `btn-read-documentation-${page}-bottom`
 
   return (
-    <div className="flex flex-col gap-16 px-20 font-medium max-md:max-w-full max-md:px-5 ">
+    <Card className="flex flex-col gap-16 px-20 font-medium max-md:max-w-full max-md:px-5 bg-transparent">
       <div className="bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:45%] bg-[center_top_-12rem] sm:bg-no-repeat">
-        <section className="container flex max-h-full max-w-full flex-col border-l border-r border-dashed border-signoz_slate-100 !px-0">
+        <section className="container flex max-h-full max-w-full flex-col !px-0">
           <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[length:110%] bg-[center_top_calc(-250px)] bg-no-repeat">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-4xl font-bold">
@@ -479,6 +447,6 @@ const GetStarted = ({ page }) => {
           </div>
         </section>
       </div>
-    </div>
+    </Card>
   )
 }

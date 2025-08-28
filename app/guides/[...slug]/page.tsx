@@ -18,6 +18,7 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
+import Button from '@/components/ui/Button'
 
 const defaultLayout = 'PostLayout'
 const layouts = {
@@ -30,6 +31,7 @@ const layouts = {
 }
 
 export const dynamicParams = false
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
@@ -38,14 +40,16 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allGuides.find((p) => p.slug === slug)
+
+  if (!post) {
+    return notFound()
+  }
+
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
   })
-  if (!post) {
-    return
-  }
 
   const publishedAt = new Date(post.date).toISOString()
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()
@@ -131,12 +135,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       />
 
       <div className="container mx-auto">
-        <Link href={`/resource-center/guides/`}>
-          <button className="ml-3.5 mt-10 flex items-center">
+        <Button variant={"ghost"} to={`/resource-center/guides/`} className="ml-3.5 mt-10 hover:bg-transparent">
+          <span className="flex items-center">
             <SidebarIcons.ArrowLeft />
             <span className="pl-1.5 text-sm">Back to Guides</span>
-          </button>
-        </Link>
+          </span>
+        </Button>
       </div>
 
       <Layout

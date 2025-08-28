@@ -78,11 +78,6 @@ Please use non-root user (mainly for Git repository cloning), otherwise you may 
     Creating service signoz_alertmanager
     ```
 
-5. _(Optional)_ By default, the instructions in this document create three replicas,
-    and each replica can handle 50K spans per second. To handle an increased load,
-    perform the steps in the [Scale Up](/docs/operate/docker-swarm/#scale-up) section
-    of the [Operate on Docker Swarm](/docs/operate/docker-swarm/) page.
-
 ## Verify the Installation
 
 1. Using the `docker stack services` command, monitor the SigNoz deployment process.
@@ -105,71 +100,30 @@ Please use non-root user (mainly for Git repository cloning), otherwise you may 
 
     ```
 
-## Set Up Infra Agent
-
-You can set up the Infra Agent to collect logs and metrics from your infrastructure.
-
-1. Change directory to `deploy/docker-swarm/generator/infra`
-
-  ```bash
-  cd deploy/docker-swarm/generator/infra
-  ```
-
-2. Deploy the Infra Agent by running the `docker stack deploy` command:
-
-  ```bash
-  docker stack deploy -d --prune -c docker-compose.yaml signoz-infra
-  ```
-
-  The output should look similar to the following:
-
-  ```output
-  Creating service signoz-infra_infra-logspout
-  Creating service signoz-infra_infra-otel-agent
-  ```
-
-3. Verify that the Infra Agent is running correctly. To view the status of your containers, run the following command:
-
-  ```bash
-  docker stack services infra
-  ```
-
-  The output should look similar to the following:
-
-  ```output
-  ID             NAME                 MODE         REPLICAS   IMAGE                                          PORTS
-  k8gbgzz6u277   infra_logspout       global       2/2        gliderlabs/logspout:v3.2.14                    
-  da9p8vg6ydu4   infra_otel-agent     global       2/2        otel/opentelemetry-collector-contrib:0.111.0   
-  5ja92xi7im22   infra_otel-metrics   replicated   1/1        otel/opentelemetry-collector-contrib:0.111.0   
-  ```
-
-4. _(Optional)_ To scrape metrics from other services using labels, you can add the following to your application's `docker-compose.yaml` file:
-
-  ```yaml
-  services:
-    <service-name>:
-      ...
-      deploy:
-        labels:
-          signoz.io/scrape: "true"
-          signoz.io/port: "<port-where-metrics-are-exposed>"
-          signoz.io/path: "/metrics"
-  networks:
-    signoz-net:
-      name: signoz-net
-      external: true
-  ...
-  ```
-
-5. _(Optional)_ To stop the Infra Agent, run the following command:
-
-  ```bash
-  docker stack rm signoz-infra
-  ```
-
 <RetentionInfo />
 
-## Next Steps
 
+
+## Scale Up SigNoz Cluster
+
+SigNoz uses the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector) to ingest data.
+By default, the instructions in the [Install SigNoz on Docker Swarm](/docs/install/docker-swarm) document create
+three replicas, and each replica can handle 50K spans per second. To handle an increased load, perform the following steps:
+
+1. Open the `deploy/docker-swarm/docker-compose.yaml` file in a plain-text editor.
+
+2. In the `services.otel-collector.deploy.replicas` field, enter the number of replicas you wish to create. The following example creates four replicas:
+
+  ![Open Telemetry Collector - Create four replicas](/img/scale-up-otel.webp)
+
+3. Update the `signoz` stack by entering the following command:
+
+  ```bash
+  docker stack deploy --prune -d -c docker-compose.yaml signoz
+  ```
+
+
+## Next Steps
+- [Collect Telemetry from your Docker Clusters](/docs/collection-agents/docker/install/)
 - [Instrument Your Application](/docs/instrumentation/overview)
 - [Tutorials](/docs/tutorials/)

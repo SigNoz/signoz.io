@@ -1,394 +1,469 @@
 ---
-title: NGINX Logging | Configuring Error and Access Logs, Sending Nginx Logs to Syslog & more
-slug: nginx-logging
-date: 2022-12-28
-tags: [Tech Tutorial, Log Management]
-authors: [selva]
-description: NGINX is a prominent web server, reverse proxy server, and mail proxy utilized by many websites and applications to serve content to their users. Nginx logging refers to the process of recording events and information related to the operation of an Nginx web server. Two most important Nginx log types are error logs and access logs....
-image: /img/blog/2022/12/nginx_logging_cover.jpeg
-keywords: [nginx logging,nginx,nginx logs,nginx error logs,nginx access logs,log management]
+title: "Complete NGINX Logging Guide: Access Logs, Error Logs & Advanced Configuration"
+slug: "nginx-logging"
+date: "2025-07-30"
+tags: [Logging, NGINX]
+authors: [daniel]
+description: "Master NGINX logging with our comprehensive guide covering access logs, error logs, custom formats, troubleshooting, and integration with modern observability tools. Includes practical examples and best practices."
+keywords: [nginx logging, access logs, error logs, log configuration, nginx troubleshooting, log formats, nginx monitoring, web server logging, log analysis, nginx performance]
 ---
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/nginx-logging/"/>
-</head>
 
-NGINX is a prominent web server, reverse proxy server, and mail proxy utilized by many websites and applications to serve content to their users. One important aspect of managing a web server is logging, which refers to the process of recording information about the server's activity and performance.
+When your NGINX server starts experiencing issues, whether it's slow response times, failed requests, or security threats, your first instinct is to check the logs. But what if your logs aren't capturing the right information? Or worse, what if you can't make sense of the data they're recording?
 
+Whether you're troubleshooting a production incident at 2 AM or analyzing traffic patterns to optimize performance, your NGINX logging configuration can make the difference between quick resolution and prolonged downtime.
 
+This guide covers everything from basic log configuration to advanced topics like performance optimization, security considerations, and integration with modern observability platforms. You'll gain a complete understanding of NGINX logging and the skills to implement robust log management for your applications.
 
-![Cover Image](/img/blog/2022/12/nginx_logging_cover.webp)
+## Understanding NGINX Logging Fundamentals
 
-In NGINX, logging is done using the **error_log** and **access_log** directives. 
+Before diving into specific configurations, let's understand how NGINX logging works at its core. NGINX provides two primary types of logs through dedicated directives, each serving distinct purposes in your monitoring strategy:
 
-**`error_log`** directive specifies the file where NGINX should log errors.
+- **`error_log`** captures server-side issues, configuration errors, and operational problems
+- **`access_log`** records every client request processed by NGINX, providing insights into traffic patterns and user behavior
 
-**`access_log`** directive specifies the file where NGINX should log information about incoming requests and responses.
+These logs are essential for maintaining web server health, troubleshooting issues, analyzing user behavior, and ensuring security compliance. The beauty of NGINX logging lies in its flexibility, you can customize what gets logged, where it gets stored, and how it's formatted to match your specific operational needs.
 
-## What are Nginx Error Logs?
+## NGINX Access Logs: Configuration and Customization
 
-The `error_log` directive is typically used to log information about errors and other important events that occur on the server. This can include messages about failed requests, issues with the server configuration, and other issues that may require attention.
+Now that you understand the fundamentals, let's explore how to configure access logs effectively. Access logs are configured in your NGINX configuration file (typically located at `/etc/nginx/nginx.conf` or within your site-specific configuration files in `/etc/nginx/sites-available/`).
 
-An example of an error log is shown in the picture below:
+The basic syntax for access log configuration involves two key components: defining a log format and applying it to a log file. Let's walk through this process step by step.
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_error_log_example.webp" alt="Nginx Error log example"/>
-    <figcaption><i>Nginx Error log example</i></figcaption>
-</figure>
+### Understanding Access Log Formats
 
+NGINX offers several predefined log formats, with **combined** being the most commonly used. The combined log format is a standard format that includes essential client request details, making it ideal for most web applications and analysis tools:
 
-
-
-## What are Nginx Access Logs?
-
-The `access_log` directive, on the other hand, is used to log information about incoming requests and responses. This can include details such as the IP address of the client making the request, the URL of the requested resource, the response status code, and the size of the response.
-
-An example of access logs is shown in the picture below:
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_access_log_example.webp" alt="Nginx Access log example"/>
-    <figcaption><i>Nginx Access log example</i></figcaption>
-</figure>
-
-
-NGINX logs can be useful for various purposes, including tracking the server's performance, identifying potential issues or errors, and analyzing the usage patterns of the server. However, managing logs can also be challenging, as they can quickly grow in size and become difficult to manage.
-
-In this tutorial, we will illustrate how to handle NGINX logs with an open source log management tool - [SigNoz](https://signoz.io/).
-
-
-Let's get started.
-
-## Prerequisites
-
-- Docker
-- Nginx
-
-## Installing SigNoz
-
-SigNoz may be installed in three simple steps on macOS or Linux PCs using a simple install script.
-
-Docker Engine is installed automatically on Linux by the installation script. However, before running the setup script on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a>.
-
-```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
+```nginx
+log_format combined '$remote_addr - $remote_user [$time_local] '
+                   '"$request" $status $body_bytes_sent '
+                   '"$http_referer" "$http_user_agent"';
 ```
 
-You can visit the documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+This format captures the following variables:
+- **$remote_addr**: Client IP address  
+- **$time_local**: Timestamp when request was processed
+- **$request**: Full HTTP request line
+- **$status**: HTTP response status code  
+- **$body_bytes_sent**: Size of response body in bytes
+- **$http_referer**: Referrer URL
+- **$http_user_agent**: Browser/client information
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
-
-
-## Installing Nginx
-
-### Installing NGINX on Linux
-
-```jsx
-sudo apt update
-sudo apt install nginx
-
+An example log entry using the combined format looks like this:
+```
+192.168.1.10 - - [30/Jul/2025:15:57:19 +0000] "GET /index.html HTTP/1.1" 200 1024 "http://example.com/start" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 ```
 
-To start NGINX
+### Custom Log Formats for Specific Use Cases
 
-```jsx
-service nginx start
+While the combined format works well for general purposes, you might need more specific information for your use case. Let's explore how to create tailored log formats to capture the data most relevant to your needs.
+
+#### Performance Monitoring Format
+When performance is critical, you'll want to track request timing metrics:
+
+```nginx
+log_format performance '$remote_addr - $remote_user [$time_local] '
+                       '"$request" $status $body_bytes_sent '
+                       '"$request_time" "$upstream_response_time"';
 ```
 
-### Installing NGINX on Mac
-
-You can install NGINX on Mac using <a href = "https://brew.sh/" rel="noopener noreferrer nofollow" target="_blank" >Homebrew</a> :
-
-```jsx
-brew install nginx
+This configuration adds request timing metrics to help identify slow requests and upstream performance issues. An example log entry shows:
+```
+192.168.1.10 - - [30/Jul/2025:15:57:19 +0000] "GET /api/users HTTP/1.1" 200 2048 "0.125" "0.098"
 ```
 
-To start NGINX:
+#### JSON Format for Structured Logging
+For modern log analysis tools and better parsing, JSON format is increasingly popular:
 
-```jsx
-brew services start nginx 
+```nginx
+log_format json_combined escape=json
+'{
+  "timestamp": "$time_iso8601",
+  "remote_addr": "$remote_addr",
+  "request": "$request",
+  "status": "$status",
+  "bytes_sent": "$body_bytes_sent",
+  "request_time": "$request_time",
+  "user_agent": "$http_user_agent"
+}';
 ```
 
-You can then access your NGINX server on localhost. Go to [http://localhost](http://localhost), and you should see a screen like the one below.
+The `escape=json` directive ensures proper JSON formatting by escaping special characters, making logs compatible with modern log analysis tools.
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/localhost_nginx.webp" alt="NGINX server running on localhost"/>
-    <figcaption><i>NGINX server running on localhost</i></figcaption>
-</figure>
+#### Security-Focused Format
+When security is a priority, especially in environments with load balancers or proxies, you'll want to capture the real client IP addresses:
 
-
-## Configuring NGINX to generate access logs
-
-Let's go ahead and make the necessary changes to the **nginx.conf** file in order to change the location and structure of the logs. 
-
-By default, NGINX logs all incoming requests to the **`access.log`** file in the **`/var/log/nginx`** directory. The format of the log entries in this file is defined by the **`log_format`** directive in the NGINX configuration file.
-
-Let’s define the custom Nginx log pattern to the **`nginx.conf`** file in the directory **`/etc/nginx/nginx.conf`**, as shown below.
-
-```json
-log_format logger-json escape=json 
-'{'
-'"source": "nginx",'
-'"message":"nginx log captured",'
-'"time": $time_iso8601,'
-'"resp_body_size": $body_bytes_sent,'
-'"host": "$http_host",' 
-'"address": "$remote_addr",' 
-'"request_length": $request_length,'
-'"method": "$request_method",' 
-'"uri": "$request_uri",' 
-'"status": $status,'  
-'"user_agent": "$http_user_agent",' 
-'"resp_time": $request_time,' 
-'"upstream_addr": "$upstream_addr"'
-'}';
-
+```nginx
+log_format security '$remote_addr - [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_user_agent" '
+                    '"$http_x_forwarded_for"';
 ```
 
-When configuring the server's access logs, we provide the preferred **log_format** **(logger-json)** in a server directive.
+This format includes the `$http_x_forwarded_for` header to capture real IP addresses when NGINX sits behind a load balancer or proxy.
 
-Make a log format with the name and pattern shown below.
+### Implementing Conditional Logging
 
-```jsx
-http {
-        sendfile on;
-        tcp_nopush on;
-        tcp_nodelay on;
-        keepalive_timeout 65;
-        types_hash_max_size 2048;
-     
-				log_format logger-json escape=json '{"source": "nginx","message":"nginx log captured","time": $time_iso8601, "resp_body_size": $body_bytes_sent, "host": "$http_host", "address": "$remote_addr", "request_length": $request_length, "method": "$request_method", "uri": "$request_uri", "status": $status,  "user_agent": "$http_user_agent", "resp_time": $request_time, "upstream_addr": "$upstream_addr"}';
-       
-        include /etc/nginx/mime.types;
-        default_type application/octet-stream;
+As your traffic grows, you might want to reduce log volume while maintaining visibility into important events. Conditional logging allows you to be selective about what gets recorded:
 
-        ##
-        # Logging Settings
-        ##
+```nginx
+# Map to determine what should be logged
+map $status $loggable {
+    ~^[23]  0;  # Don't log 2xx and 3xx responses
+    default 1;  # Log everything else
+}
 
-        access_log /home/user/Work/logs/access.log logger-json;
+# Apply conditional logging
+access_log /var/log/nginx/access.log combined if=$loggable;
+```
+
+This approach filters out successful responses while logging errors and redirects. It's particularly useful for:
+- Filtering out successful health checks
+- Logging only error responses (4xx/5xx)
+- Excluding bot traffic or specific user agents
+
+<Figure src="/img/blog/2022/12/nginx_access_log_example.webp" caption="Example of NGINX access logs showing request details" alt="Nginx Access log example"/>
+
+## NGINX Error Logs: Severity Levels and Configuration
+
+While access logs tell you what happened, error logs tell you what went wrong. Understanding how to configure error logs effectively is crucial for maintaining system health and quickly resolving issues when they occur.
+
+Error logs in NGINX are configured using the `error_log` directive, which can be placed in the main configuration context, http block, server block, or location block, depending on the scope of logging you need.
+
+### Error Log Severity Levels
+
+NGINX categorizes error messages into eight severity levels, each serving different diagnostic purposes:
+
+| Level | Description | Use Case |
+|-------|-------------|----------|
+| debug | Detailed debugging information | Development and troubleshooting |
+| info | Informational messages | General operational events |
+| notice | Normal but significant events | Important operational changes |
+| warn | Warning conditions | Potential issues requiring attention |
+| error | Error conditions | Failed requests and server errors |
+| crit | Critical conditions | Serious problems affecting functionality |
+| alert | Immediate action required | System-level issues |
+| emerg | System unusable | Emergency situations |
+
+Setting the error log level determines which messages get recorded. For example, setting the level to `warn` will capture warn, error, crit, alert, and emerg messages, while filtering out info, notice, and debug messages.
+
+### Error Log Configuration Examples
+
+Let's look at practical configurations for different scenarios:
+
+#### Basic Configuration
+The simplest error log configuration specifies a file location and minimum severity level:
+
+```nginx
+error_log /var/log/nginx/error.log warn;
+```
+
+This configuration logs warning-level and higher severity messages to a single file, which is suitable for most production environments where you want to capture potential issues without overwhelming detail.
+
+#### Multiple Log Files for Different Severities
+For more granular control, you can configure multiple error logs with different severity levels:
+
+```nginx
+error_log /var/log/nginx/error.log error;
+error_log /var/log/nginx/critical.log crit;
+error_log /var/log/nginx/debug.log debug;
+```
+
+Using multiple log files helps separate routine warnings from critical issues requiring immediate attention. Note that a message will go to all logs with a severity level equal to or less severe than the message’s level (e.g., a `crit` message will also be logged to `error.log` and `debug.log`).
+
+#### Syslog Integration
+For centralized log management, you can send error logs directly to a syslog server:
+
+```nginx
+error_log syslog:server=192.168.1.100:514,facility=local7,tag=nginx error;
+```
+
+This sends error logs directly to a remote syslog server for centralized log management, which is particularly valuable in distributed environments.
+
+<Figure src="/img/blog/2022/12/nginx_error_log_example.webp" caption="Example of NGINX error logs showing different severity levels" alt="Nginx Error log example"/>
+
+## Advanced Logging Configuration
+
+As your NGINX deployment grows more complex, you'll likely need more sophisticated logging configurations. Let's explore advanced techniques that can provide deeper insights while maintaining performance.
+
+### Custom Log Formats with Performance Metrics
+
+For applications where performance monitoring is critical, NGINX provides numerous variables for creating detailed log formats that capture timing information throughout the request lifecycle:
+
+```nginx
+log_format comprehensive '$remote_addr - $remote_user [$time_local] '
+                        '"$request" $status $body_bytes_sent '
+                        '"$http_referer" "$http_user_agent" '
+                        'rt=$request_time uct="$upstream_connect_time" '
+                        'uht="$upstream_header_time" urt="$upstream_response_time"';
+```
+
+This format includes timing metrics for understanding where delays occur in your application stack:
+- `rt`: Total request processing time
+- `uct`: Time to establish connection with upstream
+- `uht`: Time to receive response headers from upstream  
+- `urt`: Total response time from upstream
+
+### Implementing Log Sampling for High-Traffic Sites
+
+For high-traffic environments, logging every single request can create performance bottlenecks and storage challenges. Log sampling allows you to maintain statistical relevance while reducing overhead:
+
+```nginx
+# Sample 10% of requests based on a hash of the request ID
+split_clients $request_id $sample_log {
+            10% 1;
+            *   0;
+}
+
+access_log /var/log/nginx/sampled.log combined if=$sample_log;
+```
+
+This approach maintains statistical relevance while significantly reducing log volume and disk I/O. You can adjust the sampling rate based on your traffic volume and storage capacity.
+
+### Configuring Multiple Log Destinations
+
+Modern infrastructure often requires sending logs to multiple destinations simultaneously. NGINX supports this through multiple access_log directives:
+
+```nginx
+access_log /var/log/nginx/access.log combined;
+access_log /var/log/nginx/json.log json_combined;
+access_log syslog:server=log.example.com:514 combined;
+```
+
+This configuration enables you to maintain local logs while also forwarding to centralized logging systems, providing both local access for immediate troubleshooting and centralized analysis for long-term monitoring.
+
+## Performance Optimization for NGINX Logging
+
+While logging is essential, it shouldn't come at the cost of application performance. Let's explore techniques to optimize your logging configuration for high-performance environments.
+
+### Asynchronous Logging with Buffering
+
+One of the most effective ways to improve logging performance is through buffering. Instead of writing each log entry immediately to disk, NGINX can buffer entries in memory:
+
+```nginx
+access_log /var/log/nginx/access.log combined buffer=32k flush=5s;
+```
+
+This configuration buffers up to 32KB of log data in memory and flushes to disk every 5 seconds or when the buffer is full. This significantly reduces disk I/O operations, especially important for high-traffic sites where frequent disk writes can impact performance.
+
+### Log File Cache Optimization
+
+NGINX can also optimize file descriptor handling through log file caching:
+
+```nginx
+open_log_file_cache max=1000 inactive=20s valid=1m min_uses=2;
+```
+
+The parameters work as follows:
+- **max=1000**: Cache up to 1000 log file descriptors
+- **inactive=20s**: Remove unused descriptors after 20 seconds
+- **valid=1m**: Revalidate file existence every minute
+- **min_uses=2**: Cache only files accessed at least twice
+
+### Managing Log Rotation
+
+Proper log rotation prevents disk space issues and maintains system performance. Here's a production-ready logrotate configuration:
+
+```bash
+# /etc/logrotate.d/nginx
+/var/log/nginx/*.log {
+    daily
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
+    create 644 nginx nginx
+    postrotate
+        systemctl reload nginx
+    endscript
 }
 ```
 
-A list of available variables can be found <a href = "http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+This configuration rotates logs daily, keeps 52 weeks of history, and compresses old logs to save disk space while ensuring NGINX continues logging without interruption.
 
-Restart the Nginx for the config to take effect:
+## Security Considerations for NGINX Logs
 
-```jsx
-sudo service nginx restart
+Logs often contain sensitive information, making security a critical consideration in your logging strategy. Let's explore how to protect this valuable but potentially sensitive data.
+
+### Protecting Sensitive Information
+
+When logs contain sensitive data, implementing proper security measures is essential for both operational security and compliance requirements.
+
+#### File Permissions
+Start with basic file system security by restricting access to log files:
+
+```bash
+# Secure log file permissions
+chmod 640 /var/log/nginx/*.log
+chown nginx:adm /var/log/nginx/*.log
 ```
 
-<Admonition>
-The nginx config path for Mac OS will be under **`/usr/local/etc/nginx`.** So please ensure to update the config properly.
-</Admonition>
+Restricting file permissions ensures only authorized users can access log files, reducing the risk of sensitive information exposure.
 
-Go to url [http://localhost](http://localhost/) and now look at the access.log file.
+#### Data Masking for Privacy Compliance
+For privacy compliance (such as GDPR), you might need to mask or anonymize certain data elements:
 
-Every line in the access.log file, which is in `/home/user/Work/logs/access.log`, has one log record. One example of a log record is shown below.
+```nginx
+# Mask IP addresses for privacy compliance
+map $remote_addr $masked_ip {
+    ~(?P<ip>\d+\.\d+\.\d+)\.\d+ $ip.xxx;
+}
 
-```jsx
-{
-  "source": "nginx",
-  "message": "nginx log captured",
-  "time": 2022-12-11T03:52:58-08:00,
-  "resp_body_size": 396,
-  "host": "192.168.1.2",
-  "address": "192.168.1.8",
-  "request_length": 198,
-  "method": "GET",
-  "uri": "/",
-  "status": 200,
-  "user_agent": "PostmanRuntime/7.29.2",
-  "resp_time": 0.000,
-  "upstream_addr": ""
+log_format privacy '$masked_ip - $remote_user [$time_local] '
+                   '"$request" $status $body_bytes_sent';
+```
+
+This configuration masks the last octet of IP addresses to comply with privacy regulations while maintaining network segment information for analysis.
+
+### GDPR and Privacy Compliance
+
+For GDPR compliance, consider implementing comprehensive privacy protection measures:
+- Implementing log retention policies that automatically delete old logs
+- Masking or hashing personally identifiable information
+- Providing mechanisms for data deletion requests
+- Securing log transmission and storage with encryption
+
+## Integration with OpenTelemetry and SigNoz for Advanced Observability
+
+Modern observability requires integrating logs with metrics and traces for a complete view of system performance. [SigNoz](https://signoz.io/) is a one-stop observability platform that provides comprehensive log management capabilities built on OpenTelemetry standards. By correlating logs with metrics and traces in a single platform, SigNoz offers unified observability for your NGINX servers.
+
+For a detailed, step-by-step guide on configuring NGINX with SigNoz, you can follow the [official documentation](https://signoz.io/docs/integrations/nginx/). 
+
+<Figure src="/img/docs/integrations/nginx/nginx-integration-data-collected.webp" caption="NGINX and SigNoz integration" alt="NGINX and SigNoz integration"/>
+
+### Get Started with SigNoz
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+## Troubleshooting Common NGINX Logging Issues
+
+Even with proper configuration, logging issues can arise. Let's address the most common problems and their solutions to keep your logging infrastructure running smoothly.
+
+### Logs Not Appearing
+
+When logs aren't being generated or written, there are several common causes to investigate:
+
+**Permission Issues** are often the culprit:
+```bash
+# Check log directory permissions
+ls -la /var/log/nginx/
+# Fix permissions if needed
+sudo chown -R nginx:nginx /var/log/nginx/
+sudo chmod 755 /var/log/nginx/
+```
+
+**Disk Space Issues** can prevent log writing:
+```bash
+# Check available disk space
+df -h /var/log/
+# Clear old logs if necessary
+sudo find /var/log/nginx/ -name "*.log.*" -mtime +30 -delete
+```
+
+**Configuration Errors** might prevent logging from starting:
+```bash
+# Test NGINX configuration
+sudo nginx -t
+# Check for syntax errors in log directives
+```
+
+### Performance Issues from Excessive Logging
+
+When logging begins to impact application performance, optimization strategies can help:
+
+**Implement Log Sampling** to reduce volume while maintaining visibility:
+```nginx
+map $request_uri $skip_log {
+    /health-check 0;
+    /status 0;
+    default 1;
+}
+
+access_log /var/log/nginx/access.log combined if=$skip_log;
+```
+
+This configuration excludes health check and status endpoints from logging while capturing all other requests.
+
+**Use Buffering** to reduce I/O operations:
+```nginx
+access_log /var/log/nginx/access.log combined buffer=64k flush=5s;
+```
+
+**Optimize Log Format** by removing unnecessary fields from custom log formats to reduce processing overhead and disk space usage.
+
+## Best Practices for Production Environments
+
+Running NGINX logging in production requires careful attention to reliability, performance, and maintainability. Let's examine the key practices that ensure your logging infrastructure scales with your application.
+
+### Log Retention and Archival
+
+Implementing a comprehensive log management strategy prevents storage issues while maintaining necessary historical data:
+
+```bash
+# Example logrotate configuration for production
+/var/log/nginx/*.log {
+    daily
+    rotate 30
+    compress
+    delaycompress
+    missingok
+    notifempty
+    sharedscripts
+    postrotate
+        systemctl reload nginx > /dev/null 2>&1
+    endscript
 }
 ```
 
-You can view the `access.log` file through the terminal using the `cat` command as shown below.
+This configuration maintains 30 days of logs locally while compressing older files to save storage space. The `sharedscripts` directive ensures the postrotate script runs only once even when multiple log files are rotated.
 
+### Monitoring Log Health
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/access_log_file-1.webp" alt="access.log file which generates Nginx logs"/>
-    <figcaption><i>access.log file which generates Nginx logs</i></figcaption>
-</figure>
+Setting up monitoring for your logging infrastructure ensures you'll know when problems occur:
 
-
-The next step is to send these logs to the SigNoz platform.
-
-## Configuring NGINX to generate error logs
-
-To enable the error log, choose the log level and log file location. Using the error log directive in the nginx.conf configuration file, you may select the log level as shown below:
-
-```json
-error_log  /home/user/Work/logs/nginx_error.log emerg;
-error_log  /home/user/Work/logs/nginx_info.log info;
+**Monitor Log Volume** to detect unusual patterns:
+```bash
+# Check log growth rate
+du -sh /var/log/nginx/access.log
 ```
 
-There are several levels of error logging that you can use to specify the types of errors that should be logged. These log levels are:
+**Alert on Missing Logs**: Create alerts when log files haven't been updated within expected timeframes. This can indicate NGINX issues, configuration problems, or disk space issues.
 
-1. **`debug`**: Debug-level messages are very detailed and are typically used for debugging purposes.
-2. **`info`**: Information-level messages are used to log important events, such as the start and stop of the Nginx server.
-3. **`notice`**: Notice-level messages are used to log events that are not necessarily error conditions, but are worth noting.
-4. **`warn`**: Warning-level messages are used to log potential error conditions that may require attention.
-5. **`error`**: Error-level messages are used to log actual error conditions that have occurred.
-6. **`crit`**: Critical-level messages are used to log very severe error conditions that may require immediate attention.
-7. **`alert`**: Alert-level messages are used to log conditions that require immediate action.
-8. **`emerg`**: Emergency-level messages are used to log conditions that are so severe that the Nginx server may be unable to continue running.
+**Monitor Error Rates**: Track error log entries to identify trends and potential issues early. Sudden spikes in error rates often precede more serious problems.
 
-You need to reload the nginx configuration for these changes to take effect. You can do this by running the command `service nginx restart`
+### Security Hardening
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_error_logs_generated.webp" alt="Nginx error log configuration"/>
-</figure>
+Production logging environments require additional security measures:
 
-
-## Sending NGINX logs to Syslog
-
-Syslog is a standard for logging system events. It is used to record and store the log messages produced by various system components, including the kernel, system libraries, and applications. Syslog provides a centralised method for managing and storing log messages, making it easier to monitor and resolve system issues.
-
-To collect syslog from Nginx, you will need to configure Nginx to send its log messages to syslog.
-
-Add the following line to the configuration file, replacing "**syslog_server_hostname**" with the hostname or IP address of your syslog server:
-
-```json
-error_log syslog:server=syslog_server_hostname:54527,facility=local7,tag=nginx,severity=error;
-access_log syslog:server=syslog_server_hostname:54527,facility=local7,tag=nginx,severity=debug;
+**Restrict Log Access**:
+```bash
+# Limit access to log files
+chmod 640 /var/log/nginx/*.log
+chown nginx:adm /var/log/nginx/*.log
 ```
 
-Save the configuration file and restart Nginx.
+**Secure Log Transmission**: When forwarding logs to external systems, use encrypted connections and authentication to protect sensitive data in transit.
 
-Now, Nginx will send its log messages to the syslog server, which can be accessed and analyzed as needed.
-
-There are several options that you can use to customize the way that Nginx sends syslog messages. Here are a few examples:
-
-- **"facility"**: This option specifies the facility to which the log message should be sent. The facility is used to categorize log messages and can be used to filter log data on the syslog server. Common facilities include "local0" through "local7", "user", "daemon", and "system".
-
-- **"tag":** This option specifies a tag to be added to the log message. The tag can be used to identify the source of the log message, and can be used to filter log data on the syslog server.
-
-- **"severity"**: This option specifies the severity level of the log message. Common severity levels include "emerg", "alert", "crit", "error", "warning", "notice", "info", and "debug".
-
-
-<Admonition>
-The above configuration will send only error messages to syslog. If you want to send other log levels (e.g. info, warning, etc.), you can adjust the "severity" parameter in the configuration line.
-</Admonition>
-
-To configure syslog on the signoz platform, refer this [documentation](https://signoz.io/docs/userguide/collecting_syslogs/).
-
-## NGINX Logging and Analysis with SigNoz
-
-SigNoz is a full stack observability platform which provides metrics, traces and logs in a single pane. You can easily correlate these signals to get more contextual information while debugging your application.
-
-SigNoz uses a columnar database ClickHouse to store logs, which is very efficient at ingesting and storing logs data. Columnar databases like ClickHouse are very effective in storing log data and making it available for analysis.
-
-Using SigNoz for NGINX logs can make troubleshooting easier. SigNoz comes with an advanced log query builder, live tail logs, and the ability to filter log data across multiple fields.
-
-Let us see how to collect and analyze Nginx logs with SigNoz.
-
-## Steps for collecting Nginx logs into SigNoz
-
-Modify the `docker-compose.yaml` file present inside `deploy/docker` to expose to mount the log file to otel-collector. The file is located [here](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose.yaml). Mount the path where the Nginx access logs are available `~/Work/logs/access.log:/tmp/access.log`  to docker volume.
-
-```jsx
-otel-collector:
-    image: signoz/signoz-otel-collector:0.88.11
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    user: root # required for reading docker container logs
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      //highlight-next-line
-      - ~/Work/logs/access.log:/tmp/access.log
-```
-
-Here we are mounting the log file of our application to the `tmp` directory of SigNoz otel-collector. You will have to replace `<path>`with the path where your log file is present.
-
-Add the `filelog` receiver to [otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) which is present inside `deploy/docker` and include the path `/tmp/access.log`:
-
-```jsx
-receivers:
-  filelog:
-  //highlight-next-line
-    include: [  "/tmp/access.log" ]
-    start_at: beginning
-    operators:
-    - type: json_parser
-      timestamp:
-        parse_from: attributes.time
-        layout: '%Y-%m-%dT%H:%M:%S%z'
-    - type: move
-      id: parse_body
-      from: attributes.message
-      to: body
-    - type: remove
-      id: time
-      field: attributes.time
-```
-
-Next we will modify our pipeline inside [otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) to include the receiver we have created above.
-
-```jsx
-service:
-    ....
-    logs:
-    //highlight-next-line
-        receivers: [otlp, filelog]
-        processors: [batch]
-        exporters: [clickhouselogsexporter]
-```
-
-Once the changes are made, we need to restart the OTel Collector container to apply new changes. Use the command `docker compose restart`.
-
-Check if all the containers are running properly by using the command `docker ps`:
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_docker_ps.webp" alt="Check if all the containers are running properly"/>
-    <figcaption><i>Check if all the containers are running properly</i></figcaption>
-</figure>
-
-
-We can now go to the URL [http://localhost](http://localhost) and generate some Nginx logs into the access.log
-
-Go to the SigNoz URL, click on the Logs tab, and look for the word "nginx”. [http://localhost:3301/](http://192.168.1.2:3301/logs?q=nginx)
-
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_logs_signoz.webp" alt="Nginx logs sent to SigNoz"/>
-    <figcaption><i>Nginx logs sent to SigNoz</i></figcaption>
-</figure>
-
-
-Click on the individual log to get a detailed view:
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_individual_logs_signoz.webp" alt="Details of individual Nginx logs"/>
-    <figcaption><i>Details of individual Nginx logs</i></figcaption>
-</figure>
-
-
-You can also view the logs in JSON format.
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/nginx_logs_json.webp" alt="Nginx logs in JSON format"/>
-    <figcaption><i>Nginx logs in JSON format</i></figcaption>
-</figure>
+**Regular Log Auditing**: Implement automated log analysis to detect unusual patterns or potential security threats. This might include unusual request patterns, suspicious user agents, or unexpected geographic distributions of requests.
 
 
 ## Conclusion
 
-NGINX logs provides useful information to debug Nginx web servers. By using the **error_log** and **access_log** directives, you can track the performance and usage of your server and identify potential issues or errors. 
+Effective NGINX logging is crucial for maintaining web server performance, security, and reliability. By implementing the configurations and best practices outlined in this guide, you can:
 
-The error_log directive can give you information about all errors, and you can use these logs to identify exactly what went wrong. The access_log directive gives you information about HTTP requests received by the Nginx server, and other client information like IP address, response status code, etc.
+- Set up comprehensive access and error logging with appropriate formats
+- Optimize performance through buffering, sampling, and conditional logging
+- Integrate with modern observability platforms like SigNoz for advanced analysis
+- Implement security measures to protect sensitive data
+- Troubleshoot common logging issues effectively
 
-While debugging a single Nginx server by directly accessing Nginx logs can be done, it’s often not the case in production. Managing multiple Nginx servers and troubleshooting them effectively requires a centralized log management solution. In case of server downtime, you need to troubleshoot issues quickly, and effective dashboards around Nginx monitoring is needed.
+Start with basic configurations and gradually implement more advanced features as your monitoring needs grow. With proper NGINX logging in place, you'll have the visibility needed to maintain high-performance web services and quickly resolve any issues that arise.
 
-With SigNoz logs, you can effectively manage your Nginx logging. You can check out its GitHub repo now.
+Whether you're managing a single server or a fleet of NGINX instances, these principles and configurations will help you build a robust logging foundation that scales with your infrastructure needs.
 
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+Hope we answered all your questions regarding NGINX logging. If you have more questions, feel free to join and ask on our [slack community](https://signoz.io/slack/).
 
----
-
-**Related Posts**
-
-[SigNoz - A Lightweight Open Source ELK alternative](https://signoz.io/blog/elk-alternative-open-source/)
-
-[OpenTelemetry Logs - A complete introduction](https://signoz.io/blog/opentelemetry-logs/)
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz — get open source, OpenTelemetry, and devtool-building stories straight to your inbox.
