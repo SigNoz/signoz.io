@@ -3,9 +3,8 @@
 import Button from '@/components/ui/Button'
 import { allFAQs } from 'contentlayer/generated'
 import Link from 'next/link'
-import { useState } from 'react'
-import { TrieveModalSearch } from 'trieve-search-component'
-import 'trieve-search-component/dist/index.css'
+import React, { useState } from 'react'
+import { InkeepSearchBar } from '@inkeep/cxkit-react'
 
 export default function FAQsPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -50,42 +49,50 @@ export default function FAQsPage() {
           </p>
           
           <div className="mx-auto mt-6 sm:mt-8 w-full max-w-xl px-4 flex flex-col">
-            <TrieveModalSearch
-              theme="dark"
-              apiKey='tr-cK2MylVI0my78NUoafAiTvvmpdktntO3'
-              datasetId='4650e231-7857-45aa-beb1-cb52006a2460'
-              defaultSearchQueries={[
-                "How does SigNoz ensure data security and privacy?",
-                "Who uses SigNoz in production?",
-                "Can SigNoz handle large-scale production environments effectively?",
-              ]}
-              defaultAiQuestions={[
-                "What is SigNoz?",
-                "How to change retention period?",
-                "How do I install SigNoz?",
-              ]}
-              brandColor="#E75536"
-              brandName='SigNoz'
-              brandLogoImgSrcUrl="https://avatars.githubusercontent.com/u/76905799?s=200&v=4"
-              ButtonEl={() => (
-                <div className="w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-2 text-signoz_vanilla-100 placeholder-signoz_vanilla-400 focus:border-primary-500 focus:outline-none flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                  </svg>
-                  <span className="text-signoz_vanilla-400">Ask a question about SigNoz</span>
-                </div>
-              )}
+            <InkeepSearchBar
+              baseSettings={{
+                apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY || '',
+                primaryBrandColor: '#E75536',
+                organizationDisplayName: 'SigNoz',
+                colorMode: {
+                  forcedColorMode: 'dark',
+                },
+                theme: {
+                  styles: [
+                    {
+                      key: 'faq-dark-theme',
+                      type: 'style',
+                      value: `
+                        /* Force dark theme for the search bar */
+                        .ikp-search-bar__button {
+                          background: rgb(31 41 55);
+                          color: rgb(229 231 235);
+                          border: 1px solid rgb(55 65 81);
+                        }
+                        .ikp-search-bar__button:hover {
+                          background: rgb(31 41 55 / 0.9);
+                        }
+                        .ikp-search-bar__text {
+                          color: rgb(156 163 175);
+                        }
+                        .ikp-search-bar__kbd-wrapper {
+                          background: rgb(17 24 39);
+                          border: 1px solid rgb(55 65 81);
+                          color: rgb(156 163 175);
+                        }
+                      `,
+                    },
+                  ],
+                },
+              }}
+              // Disable Cmd/Ctrl+K here to avoid duplicate shortcuts with TopNav
+              modalSettings={{ shortcutKey: null }}
+              searchSettings={{
+                placeholder: 'Search FAQs...',
+              }}
+              aiChatSettings={{
+                placeholder: 'Ask a question about SigNoz...',
+              }}
             />
 
             <div className="mt-4 flex flex-wrap gap-2 justify-center">
@@ -93,9 +100,9 @@ export default function FAQsPage() {
                 <Button 
                   isButton={true}
                   key={tag}
-                  onClick={() => toggleTag(tag)}
+                  onClick={() => toggleTag(tag as string)}
                   className={`rounded-full px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors ${
-                    selectedTags.includes(tag)
+                    selectedTags.includes(tag as string)
                       ? 'bg-primary-500 text-signoz_vanilla-100'
                       : 'bg-signoz_ink-400 text-signoz_vanilla-400 hover:bg-signoz_ink-300'
                   } border border-signoz_slate-400`}

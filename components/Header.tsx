@@ -37,7 +37,8 @@ const Header = () => {
               {link.title}
             </Link>
           ))}
-        <SearchButton />
+        {/* Disable Cmd/Ctrl+K here since TopNav owns the global shortcut */}
+        <SearchButton disableShortcut />
         <ThemeSwitch />
         <MobileNav />
       </div>
