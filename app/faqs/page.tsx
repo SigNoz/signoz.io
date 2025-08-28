@@ -85,6 +85,8 @@ export default function FAQsPage() {
                   ],
                 },
               }}
+              // Disable Cmd/Ctrl+K here to avoid duplicate shortcuts with TopNav
+              modalSettings={{ shortcutKey: null }}
               searchSettings={{
                 placeholder: 'Search FAQs...',
               }}

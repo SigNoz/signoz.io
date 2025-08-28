@@ -4,7 +4,11 @@ import React from 'react'
 import siteMetadata from '@/data/siteMetadata'
 import { InkeepSearchBar, type InkeepSearchBarProps } from '@inkeep/cxkit-react'
 
-const SearchButton = () => {
+type SearchButtonProps = {
+  disableShortcut?: boolean
+}
+
+const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
   if (siteMetadata.search) {
     const config: InkeepSearchBarProps = {
       baseSettings: {
@@ -30,7 +34,7 @@ const SearchButton = () => {
                   background: rgb(23 25 34);
                   color: rgb(229 231 235);
                   border-radius: 9999px;
-                  padding: 2px 14px 2px 16p
+                  padding: 2px 14px 2px 16px
                   min-height: 2rem;
                   height: 1.5rem;
                   font-size: 13px;
@@ -105,6 +109,7 @@ const SearchButton = () => {
           ],
         },
       },
+      // modalSettings will be attached below only when disabling the shortcut
       searchSettings: {
         placeholder: 'Search docs...',
       },
@@ -116,6 +121,13 @@ const SearchButton = () => {
       askAICardLabel: 'Ask AI',
       askAILabel: 'Ask AI',
       searchLabel: 'Search',
+    }
+
+    // Attach modalSettings only when disabling the shortcut, to avoid overriding
+    // Inkeep's default "k" when we want it enabled.
+    if (disableShortcut) {
+      // @ts-expect-error - assigning optional prop conditionally
+      config.modalSettings = { shortcutKey: null }
     }
 
     return <InkeepSearchBar {...config} />

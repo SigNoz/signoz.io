@@ -186,6 +186,8 @@ export default function TopNav() {
   const [isOpenResources, setIsOpenResources] = useState(false)
   const [timeoutId, setTimeoutId] = useState<any>(null)
   const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null)
+  // Track viewport >= lg (1024px) to ensure only one SearchButton mounts
+  const [isLg, setIsLg] = useState<boolean | null>(null)
 
   const loginRoute = '/login/'
   const signupRoute = '/teams/'
@@ -222,6 +224,26 @@ export default function TopNav() {
       setShouldShowTabs(false)
     }
   }, [pathname])
+
+  // Determine breakpoint on mount to avoid double-mounting SearchButton (and Cmd+K)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mql = window.matchMedia('(min-width: 1024px)')
+    const handler = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsLg('matches' in e ? e.matches : (e as MediaQueryList).matches)
+    }
+    // Initialize and subscribe
+    handler(mql as unknown as MediaQueryList)
+    mql.addEventListener?.('change', handler as (ev: Event) => void)
+    // Fallback for older browsers
+    // @ts-ignore
+    mql.addListener?.(handler)
+    return () => {
+      mql.removeEventListener?.('change', handler as (ev: Event) => void)
+      // @ts-ignore
+      mql.removeListener?.(handler)
+    }
+  }, [])
 
   // Hide TopNav on teams page or if source is onboarding
   if (isSignupRoute|| isWordleRoute || source === ONBOARDING_SOURCE) {
@@ -567,7 +589,8 @@ export default function TopNav() {
             )}
           </div>
           <div className="flex items-center justify-end gap-1 lg:hidden">
-            {!mobileMenuOpen && <SearchButton />}
+            {/* Render SearchButton on mobile only when below lg */}
+            {!mobileMenuOpen && isLg === false && <SearchButton />}
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
@@ -585,7 +608,8 @@ export default function TopNav() {
           <div className="hidden items-center gap-3 lg:flex lg:flex-1 lg:justify-end">
             {!isLoginRoute && (
               <>
-                <SearchButton />
+                {/* Render SearchButton on desktop only when at/above lg */}
+                {isLg === true && <SearchButton />}
                 <GitHubStars location="Top Navbar" />
 
                 <TrackingButton
