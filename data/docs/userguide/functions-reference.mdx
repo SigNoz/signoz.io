@@ -11,6 +11,24 @@ This guide covers functions available for querying array fields in SigNoz.
 
 ## Available Functions
 
+### hasToken() Function
+
+Check if a token is present in a string.
+
+The search term must be a single token—meaning a sequence of alphanumeric characters (A-Z, a-z, 0-9) that appears in the text separated by spaces, punctuation, or at the start/end of the string.
+hasToken will only match the term as a whole word, not as a substring inside another word (e.g., matches uuid123 but not abcuuid123xyz)
+
+**Syntax:**
+```
+has(field, value)
+```
+
+**Examples:**
+```
+has(body, "john@test.com")
+has(body, "e8ff7fe2-6f6a-4795-bd7f-d07f8e49d764")
+```
+
 ### has() Function
 
 Checks if an array contains a specific value.
@@ -29,7 +47,7 @@ has(body.regions, 'us-east')
 
 ## Important Notes
 
-1. **Body fields only** - Functions currently work only with JSON body fields (fields prefixed with `body.`)
+1. **Body fields only** - Functions currently work only with JSON body fields (fields prefixed with `body.`) except for the hasToken function.
 2. **Array data** - The field must contain an array for these functions to work properly
 
 ## Combining with Other Conditions
