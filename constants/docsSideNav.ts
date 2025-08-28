@@ -50,6 +50,11 @@ const docsSideNav = [
             route: '/docs/product-features/invite-team-member',
             label: 'Invite Team Member',
           },
+          {
+            type: 'doc',
+            route: '/docs/product-features/keyboard-shortcuts',
+            label: 'Keyboard Shortcuts',
+          },
         ],
       },
       {
@@ -1915,6 +1920,11 @@ const docsSideNav = [
             route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
             label: 'Time Aggregation Best Practices',
           },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
+            label: 'How to Configure Alerts for Missing Data',
+          }
         ],
       },
       {

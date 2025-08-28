@@ -28,6 +28,36 @@ We rely on the semantic conventions provided by OpenTelemetry. Every unique `se
  configured and received is part of the service list. You can read more about it from our [docs](https://signoz.io/docs/userguide/metrics/#open-the-services-section).
 
 
+### Facing Permission Issues in SigNoz
+
+A. If you're seeing permission errors when creating new or editing dashboards, views, alerts, this is often caused by cached user permissions in your session. 
+Solution — refresh your session permissions by logging out and back in:
+
+<details>
+
+<summary> Show detailed steps </summary>
+
+1. Click the logout option in your dashboard.  
+2. Log back in with your credentials.  
+3. Try creating or editing dashboards again.
+
+Additional Troubleshooting
+
+If logging out and back in does not resolve the issue, contact support for further assistance.
+</details>
+
 ### My services are not showing up in the Service Map section (but present in the services and traces tab), what should I do?
 
-You might need to zoom out a bit to see your service. Also, if you’re getting started the service map shows services from the sample hotrod application. Since your services are not connected to the hotrod application, it will appear isolated.
+A. You might need to zoom out a bit to see your service.  
+**Note:** Standalone services (without dependencies/calls to other services) are not shown in the Service Map. Only services with interdependencies (i.e., calls to other services) are visualized. For more details, refer to our [Service Map documentation](https://signoz.io/docs/userguide/service-map/).
+
+<details>
+
+<summary> Show detailed steps </summary>
+
+1. Zoom out on the Service Map to ensure the service isn't off-screen.  
+2. Confirm your services have inter-service calls (spans) — the Service Map visualizes dependencies, not standalone services.  
+3. Verify instrumentation is sending spans with proper service.name and relevant span attributes.  
+4. If needed, inspect traces in the Traces tab to confirm calls between services are present.
+
+</details>
