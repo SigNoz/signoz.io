@@ -98,7 +98,7 @@ export default function Monitor() {
         },
         {
           name: 'LLMs',
-          href: '/docs/community/llm-monitoring/',
+          href: '/docs/llm-observability/',
           icon: <BrainCircuit className="h-5 w-5 text-purple-600" />,
           clickName: 'LLMs Monitoring Link',
         },
