@@ -311,7 +311,7 @@ export default function TopNav() {
             </TrackingLink>
 
             {!isLoginRoute && (
-              <div className="hidden items-center gap-x-6 lg:flex">
+              <div className="hidden items-center gap-x-6 lg:ml-6 lg:flex">
                 <div
                   onMouseEnter={handleMouseEnterProduct}
                   onMouseLeave={handleMouseLeaveProduct}
