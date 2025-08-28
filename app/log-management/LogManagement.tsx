@@ -5,7 +5,7 @@ import TabPanel from '@/components/TabPanel'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, Atom, Coins, DatabaseZap } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import StatsCard from '@/components/Card/Card'
+import StatsCard from '@/components/Card/card'
 import { Card } from '@/components/ui/Card'
 import Tabs from '@/components/Tabs'
 import { Badge } from "@signozhq/badge"
