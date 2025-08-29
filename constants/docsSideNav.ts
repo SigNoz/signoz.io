@@ -1645,6 +1645,11 @@ const docsSideNav = [
             route: '/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard',
             label: 'Vercel AI SDK',
           },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/claude-code-dashboard',
+            label: 'Claude Code',
+          },
         ],
       },
       {
