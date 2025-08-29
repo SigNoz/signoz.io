@@ -2022,6 +2022,11 @@ const docsSideNav = [
         label: 'LangChain Monitoring',
         type: 'doc',
       },
+      {
+        route: '/docs/claude-code-monitoring',
+        label: 'Claude Code Monitoring',
+        type: 'doc',
+      },
     ],
   },
   {
