@@ -1,0 +1,270 @@
+---
+date: 2025-01-09
+id: parsing
+title: How to Parse Logs Using Pipelines
+---
+
+This guide explains how to parse logs using SigNoz log pipelines. Whether your logs are structured JSON, semi-structured text, or completely unstructured, this guide will help you extract meaningful information and transform your logs for better querying and analysis.
+
+## Understanding Log Parsing
+
+Log parsing is the process of extracting structured information from raw log data. Raw logs often contain valuable information buried in text format, making it difficult to query, filter, or create dashboards. By parsing these logs, you can:
+
+- Extract specific values into searchable attributes
+- Normalize data across different services
+- Enable advanced filtering and aggregation
+- Create meaningful dashboards and alerts
+- Improve query performance
+
+## Step-by-Step Parsing Workflow
+
+### Step 1: Analyze Your Logs
+
+Before creating a pipeline, examine your raw logs to understand their structure:
+
+1. **Identify the log format**: Is it JSON, key-value pairs, delimited text, or completely unstructured?
+2. **Find patterns**: Look for consistent patterns, delimiters, or structures
+3. **Determine what to extract**: Identify which fields would be valuable as attributes
+4. **Note edge cases**: Consider variations in format or missing fields
+
+Example raw log analysis:
+```
+2024-01-09 10:15:30 INFO [user-service] Processing request for user=12345 method=POST path=/api/users status=200 duration=45ms
+```
+
+**Analysis**:
+- Format: Semi-structured text with consistent patterns
+- Extractable fields: timestamp, level, service, user_id, method, path, status, duration
+- Pattern: Space-delimited with key=value pairs
+
+### Step 2: Choose Your Parsing Strategy
+
+Based on your log format, select the appropriate parsing approach:
+
+| Log Format | Recommended Processors | Use Case |
+|------------|----------------------|-----------|
+| **JSON** | JSON Parser | Structured logs from modern applications |
+| **Key-Value Pairs** | Regex or Grok | Semi-structured logs with consistent patterns |
+| **Delimited Text** | Regex or Grok | CSV-like or space-delimited logs |
+| **Custom Format** | Regex | Completely custom or legacy log formats |
+| **Mixed Content** | Multiple processors | Logs with varying structures |
+
+### Step 3: Create Pipeline Filter
+
+Create a filter to identify which logs should be processed by your pipeline. This ensures the pipeline only processes relevant logs and prevents errors.
+
+**Example filters**:
+- `body contains "user-service"` - Process logs containing specific service name
+- `attributes.source == "nginx"` - Process logs from specific source
+- `body matches ".*ERROR.*"` - Process error logs only
+
+### Step 4: Configure Processors
+
+Chain processors to extract and transform data step by step.
+
+## Common Parsing Patterns
+
+### Pattern 1: JSON Logs
+
+For structured JSON logs, use the JSON Parser processor:
+
+**Raw Log**:
+```json
+{
+  "body": "{\"timestamp\":\"2024-01-09T10:15:30Z\",\"level\":\"INFO\",\"message\":\"User authenticated\",\"user_id\":12345,\"ip\":\"192.168.1.1\"}",
+  "attributes": {}
+}
+```
+
+**Pipeline Configuration**:
+- **Processor**: JSON Parser
+- **Parse From**: `body`
+- **Parse To**: `attributes`
+- **Enable Flattening**: Yes
+
+**Result**:
+```json
+{
+  "body": "{\"timestamp\":\"2024-01-09T10:15:30Z\",\"level\":\"INFO\",\"message\":\"User authenticated\",\"user_id\":12345,\"ip\":\"192.168.1.1\"}",
+  "attributes": {
+    "timestamp": "2024-01-09T10:15:30Z",
+    "level": "INFO", 
+    "message": "User authenticated",
+    "user_id": 12345,
+    "ip": "192.168.1.1"
+  }
+}
+```
+
+### Pattern 2: Key-Value Pairs
+
+For logs with key=value patterns, use Grok or Regex processor:
+
+**Raw Log**:
+```
+2024-01-09 10:15:30 INFO user=12345 action=login ip=192.168.1.1 success=true
+```
+
+**Grok Pattern**:
+```
+%{TIMESTAMP_ISO8601:timestamp} %{WORD:level} user=%{INT:user_id} action=%{WORD:action} ip=%{IP:ip_address} success=%{WORD:success}
+```
+
+**Pipeline Configuration**:
+- **Processor**: Grok
+- **Pattern**: (pattern above)
+- **Parse From**: `body`
+- **Parse To**: `attributes`
+
+### Pattern 3: Nginx Access Logs
+
+For standard web server logs:
+
+**Raw Log**:
+```
+192.168.1.1 - - [09/Jan/2024:10:15:30 +0000] "GET /api/users HTTP/1.1" 200 1234 "https://example.com" "Mozilla/5.0..."
+```
+
+**Grok Pattern**:
+```
+%{IPORHOST:client_ip} - - \[%{HTTPDATE:timestamp}\] "%{WORD:method} %{URIPATH:path} HTTP/%{NUMBER:http_version}" %{INT:status_code} %{INT:response_size} "%{URI:referrer}" "%{GREEDYDATA:user_agent}"
+```
+
+### Pattern 4: Application Logs with Custom Format
+
+For custom application logs, use Regex:
+
+**Raw Log**:
+```
+[2024-01-09 10:15:30.123] [WARN] [OrderService] Order processing failed: order_id=ORD-12345, error=timeout, retry_count=3
+```
+
+**Regex Pattern**:
+```
+\[(?P<timestamp>[^\]]+)\] \[(?P<level>[^\]]+)\] \[(?P<service>[^\]]+)\] (?P<message>.*): order_id=(?P<order_id>[^,]+), error=(?P<error_type>[^,]+), retry_count=(?P<retry_count>\d+)
+```
+
+## Multi-Step Parsing Examples
+
+### Complex JSON Extraction
+
+For nested JSON that requires multiple steps:
+
+1. **JSON Parser**: Parse main JSON structure
+2. **JSON Parser**: Parse nested JSON strings 
+3. **Move/Copy**: Reorganize fields as needed
+4. **Remove**: Clean up intermediate fields
+
+### Log Enrichment
+
+Enhance parsed logs with additional context:
+
+1. **Regex/Grok**: Extract basic fields
+2. **Add**: Add environment or service tags
+3. **Timestamp Parser**: Parse custom timestamp formats
+4. **Severity Parser**: Normalize log levels
+
+## Processor Selection Guide
+
+| Need to... | Use Processor | Example |
+|------------|---------------|---------|
+| Parse JSON strings | JSON Parser | `{"user": "john", "action": "login"}` |
+| Extract with patterns | Grok | `user=john action=login time=10:15:30` |
+| Custom regex matching | Regex | Complex custom formats |
+| Parse timestamps | Timestamp Parser | `2024-01-09T10:15:30.123Z` |
+| Normalize log levels | Severity Parser | `ERROR`, `WARN` → standardized levels |
+| Add metadata | Add | Adding environment tags |
+| Clean up fields | Remove | Removing sensitive data |
+| Rename fields | Move | `user_name` → `username` |
+| Copy fields | Copy | Duplicate important fields |
+
+## Testing Your Pipeline
+
+### 1. Start with Simple Cases
+Test your pipeline with the most common log format first.
+
+### 2. Use Preview Mode  
+Use SigNoz's pipeline preview to test before applying to live logs.
+
+### 3. Test Edge Cases
+- Empty or null values
+- Missing fields
+- Malformed data
+- Different variations of the same log type
+
+### 4. Monitor Pipeline Performance
+- Check for processing errors
+- Monitor pipeline execution time
+- Verify all expected fields are extracted
+
+## Best Practices
+
+### Pipeline Design
+- **One responsibility per pipeline**: Each pipeline should handle one type of transformation
+- **Order matters**: Place more specific pipelines before generic ones
+- **Use descriptive names**: Name pipelines and processors clearly
+
+### Error Handling
+- **Set proper error actions**: Decide whether to drop logs or continue processing on errors
+- **Test thoroughly**: Validate with various log samples
+- **Monitor logs**: Keep track of parsing failures
+
+### Performance
+- **Efficient filters**: Use specific filters to reduce unnecessary processing
+- **Minimize regex complexity**: Simple patterns perform better
+- **Remove unused fields**: Clean up intermediate parsing artifacts
+
+### Maintenance
+- **Document patterns**: Comment complex regex or grok patterns
+- **Version control**: Keep track of pipeline changes
+- **Regular review**: Periodically review and optimize pipelines
+
+## Troubleshooting Common Issues
+
+### Pipeline Not Matching Logs
+- **Check filters**: Ensure pipeline filter matches your logs
+- **Verify log format**: Confirm logs match expected structure
+- **Test with samples**: Use simple test cases first
+
+### Parsing Failures
+- **Check patterns**: Verify regex/grok patterns are correct
+- **Handle optional fields**: Use `?` for optional regex groups
+- **Escape special characters**: Properly escape regex metacharacters
+
+### Performance Issues
+- **Optimize patterns**: Simplify complex regex patterns
+- **Reduce scope**: Use more specific filters
+- **Monitor resource usage**: Check pipeline processing metrics
+
+### Missing Fields
+- **Check field paths**: Verify `parse_from` and `parse_to` paths
+- **Test incrementally**: Add processors one at a time
+- **Validate data types**: Ensure extracted values match expected types
+
+## Next Steps
+
+After mastering basic parsing:
+
+1. **Explore Advanced Features**: Learn about trace correlation and custom processors
+2. **Create Dashboards**: Use parsed fields in visualizations
+3. **Set Up Alerts**: Create alerts based on parsed log data
+4. **Optimize Performance**: Fine-tune pipelines for better performance
+
+For specific parsing scenarios, check out our specialized guides:
+- [JSON Processing Guide](/docs/logs-pipelines/guides/json)
+- [Nested JSON Fields](/docs/logs-pipelines/guides/nested-json)  
+- [Severity Level Parsing](/docs/logs-pipelines/guides/severity-parsing)
+- [Trace Correlation](/docs/logs-pipelines/guides/trace)
+
+## Summary
+
+Log parsing with SigNoz pipelines follows a systematic approach:
+
+1. **Analyze** your log structure and identify extraction targets
+2. **Choose** appropriate processors based on log format
+3. **Create** filters to identify relevant logs
+4. **Configure** processors to extract and transform data
+5. **Test** thoroughly with various log samples
+6. **Monitor** and optimize pipeline performance
+
+With this foundation, you can transform any log format into structured, queryable data that unlocks the full potential of your observability stack.
