@@ -10,10 +10,18 @@ const useSearchShortcut = ({ onOpen, isEnabled = true }: UseSearchShortcutProps)
     if (!isEnabled) return
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-        event.preventDefault()
-        onOpen()
+      // Check for / key (slash) to open search
+      if (event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        // Don't trigger if user is typing in an input, textarea, or contenteditable
+        const target = event.target as HTMLElement
+        const isTyping = target.tagName === 'INPUT' || 
+                        target.tagName === 'TEXTAREA' || 
+                        target.contentEditable === 'true'
+        
+        if (!isTyping) {
+          event.preventDefault()
+          onOpen()
+        }
       }
     }
 

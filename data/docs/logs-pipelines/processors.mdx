@@ -63,6 +63,10 @@ The JSON parsing processor can be used to parse serialized JSON text into log at
 |     Name      | A descriptive name for the processor. |
 |     Parse&#160;From      | The log field containing serialized JSON text. Eg: `body` or `attributes.sessionInfo` |
 |     Parse&#160;To      | The path to parse to. Eg: If set to `attributes`, parsing the JSON text `'{ "userId": 8888 }'` would set `attributes.userId` to `8888` |
+| Enable&#160;Flattening | Enable/Disable flattening when parsing JSON. If enabled, nested JSON fields are flattened into dot-separated attribute keys. For example, parsing `{ "metadata": { "id": 1 } }` with flattening enabled would set `attributes.metadata.id = 1`. |
+| Enable&#160;Paths | Enable/Disable full path preservation after flattening. If enabled, the full path from the root is used (e.g., `attributes.metadata.id`). If disabled, only the leaf key is used (e.g., `attributes.id`). |
+| Path&#160;Prefix | If paths are enabled, you can specify a prefix for all flattened keys. For example, with prefix `parsed`, flattening `{ "metadata": { "id": 1 } }` would set `attributes.parsed.metadata.id = 1`. |
+| Enable&#160;Mapping | Enable mapping after flattening. This allows you to map certain JSON keys directly to top-level log fields (such as `body`, `severity`, etc.) without needing additional processors. For example, mapping `metadata.message` to `body` would set the log's body to the value of `metadata.message`. |
 
 
 ## Trace Parser

@@ -50,6 +50,11 @@ const docsSideNav = [
             route: '/docs/product-features/invite-team-member',
             label: 'Invite Team Member',
           },
+          {
+            type: 'doc',
+            route: '/docs/product-features/keyboard-shortcuts',
+            label: 'Keyboard Shortcuts',
+          },
         ],
       },
       {
@@ -217,6 +222,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/install/uninstall',
+            label: 'Uninstall',
+          },
+          {
+            type: 'doc',
             label: 'Troubleshooting',
             route: '/docs/install/troubleshooting',
           },
@@ -242,7 +252,7 @@ const docsSideNav = [
             route: '/docs/operate/migration/upgrade-standard',
             label: 'Upgrade Standard',
           },
-           {
+          {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.92',
             label: 'Upgrade to v0.92',
@@ -469,11 +479,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/tutorial/opentelemetry-operator-usage',
-            label: 'OpenTelemetry Operator Usage',
-          },
-          {
-            type: 'doc',
             route: '/docs/tutorial/setting-up-tls-for-signoz',
             label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
           },
@@ -560,6 +565,28 @@ const docsSideNav = [
               },
             ],
           },
+          {
+            type: 'category',
+            label: 'OpenTelemetry Operator',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                label: 'Overview',
+                route: '/docs/collection-agents/k8s/otel-operator/overview'
+              },
+              {
+                type: 'doc',
+                label: 'Install',
+                route: '/docs/collection-agents/k8s/otel-operator/install'
+              },
+              {
+                type: 'doc',
+                label: 'Configure',
+                route: '/docs/collection-agents/k8s/otel-operator/configure'
+              }
+            ]
+          }
         ],
       },
       {
@@ -587,9 +614,33 @@ const docsSideNav = [
         label: 'Docker',
         items: [
           {
-            route: '/docs/collection-agents/docker/install',
-            type: 'doc',
-            label: 'Install',
+            type: 'category',
+            label: 'Standalone',
+            isExpanded: false,
+            items: [
+              {
+                route: '/docs/collection-agents/docker/install',
+                type: 'doc',
+                label: 'Install',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            label: 'Swarm',
+            isExpanded: false,
+            items: [
+              {
+                route: '/docs/collection-agents/docker-swarm/install',
+                type: 'doc',
+                label: 'Install',
+              },
+              {
+                route: '/docs/collection-agents/docker-swarm/configure',
+                type: 'doc',
+                label: 'Configure',
+              },
+            ],
           },
         ],
       },
@@ -598,50 +649,50 @@ const docsSideNav = [
         label: 'ECS',
         isExpanded: false,
         items: [
-         {
-          type: "category",
-          label: "EC2",
-          isExpanded: false,
-          items: [
-            {
-              type: 'doc',
-              label: "Overview",
-              route: "/docs/collection-agents/ecs/ec2/overview"
-            },
-            {
-              type: 'doc',
-              label: 'Install',
-              route: "/docs/collection-agents/ecs/ec2/install"
-            },
-            {
-              type : 'doc',
-              label: "Configure",
-              route: "/docs/collection-agents/ecs/ec2/configure"
-            }
-          ]
-         },
-         {
-          type: "category",
-          label: "Serverless",
-          isExpanded: false,
-          items: [
-            {
-              type: 'doc',
-              label: "Overview",
-              route: "/docs/collection-agents/ecs/sidecar/overview"
-            },
-            {
-              type: 'doc',
-              label: 'Install',
-              route: "/docs/collection-agents/ecs/sidecar/install"
-            },
-            {
-              type : 'doc',
-              label: "Configure",
-              route: "/docs/collection-agents/ecs/sidecar/configure"
-            }
-          ]
-         }
+          {
+            type: 'category',
+            label: 'EC2',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                label: 'Overview',
+                route: '/docs/collection-agents/ecs/ec2/overview',
+              },
+              {
+                type: 'doc',
+                label: 'Install',
+                route: '/docs/collection-agents/ecs/ec2/install',
+              },
+              {
+                type: 'doc',
+                label: 'Configure',
+                route: '/docs/collection-agents/ecs/ec2/configure',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            label: 'Serverless',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                label: 'Overview',
+                route: '/docs/collection-agents/ecs/sidecar/overview',
+              },
+              {
+                type: 'doc',
+                label: 'Install',
+                route: '/docs/collection-agents/ecs/sidecar/install',
+              },
+              {
+                type: 'doc',
+                label: 'Configure',
+                route: '/docs/collection-agents/ecs/sidecar/configure',
+              },
+            ],
+          },
         ],
       },
     ],
@@ -982,9 +1033,9 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/traces-management/troubleshooting/faqs',
             label: 'General FAQs',
-	        },
-	      ],
-	    },
+          },
+        ],
+      },
     ],
   },
   {
@@ -1292,8 +1343,8 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/troubleshooting/faqs',
             label: 'General FAQs',
-          }
-        ]
+          },
+        ],
       },
       // {
       //   type: 'doc',
@@ -1343,10 +1394,10 @@ const docsSideNav = [
         label: 'Configure custom buckets for histograms',
       },
       {
-      label: 'Send Metrics',
-      type: 'category',
-      isExpanded: false,
-      items: [
+        label: 'Send Metrics',
+        type: 'category',
+        isExpanded: false,
+        items: [
           {
             type: 'doc',
             className: 'new-doc',
@@ -1365,7 +1416,7 @@ const docsSideNav = [
             route: '/docs/metrics-management/mysql-metrics',
             label: 'MySQL metrics',
           },
-        ]
+        ],
       },
       {
         type: 'doc',
@@ -1384,6 +1435,24 @@ const docsSideNav = [
             label: 'General FAQs',
           },
         ],
+      },
+    ],
+  },
+  {
+    label: 'Cost Meter',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/cost-meter/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/cost-meter/meter-explorer',
+        label: 'Meter Explorer',
       },
     ],
   },
@@ -1817,6 +1886,48 @@ const docsSideNav = [
         label: 'Terraform Provider',
       },
       {
+        type: 'category',
+        route: '/docs/alerts-management/troubleshooting/troubleshooting',
+        label: 'Troubleshooting',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/troubleshooting/faqs',
+            label: 'General FAQs',
+          },
+          {
+            type: 'doc',
+            route:
+              '/docs/alerts-management/troubleshooting/alerts-firing-without-visible-threshold-breach',
+            label: 'Alerts Firing Without Visible Threshold Breach',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        route: '/docs/alerts-management/user-guides/user-guides',
+        label: 'User Guides',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/understanding-alert-evaluation-patterns',
+            label: 'Understanding Alert Evaluation Patterns',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
+            label: 'Time Aggregation Best Practices',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
+            label: 'How to Configure Alerts for Missing Data',
+          }
+        ],
+      },
+      {
         type: 'doc',
         route: '/docs/alerts-management/apdex-alerts',
         label: 'Apdex Alerts',
@@ -1904,6 +2015,16 @@ const docsSideNav = [
       {
         route: '/docs/llamaindex-monitoring',
         label: 'LlamaIndex Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/langchain-monitoring',
+        label: 'LangChain Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/claude-code-monitoring',
+        label: 'Claude Code Monitoring',
         type: 'doc',
       },
     ],
@@ -2965,101 +3086,6 @@ const docsSideNav = [
     ],
   },
   {
-    type: 'category',
-    isExpanded: false,
-    label: 'Operate Self-Hosted SigNoz',
-    route: '/docs/operate',
-    // link: {
-    // type: 'generated-index',
-    // title: 'Operate',
-    // description:
-    // 'The following sections provide an overview of the activities that are required to successfully operate SigNoz. Based on your environment, proceed to one of the sections below.',
-    // slug: '/docs/operate',
-    // },
-    items: [
-      {
-        type: 'category',
-        isExpanded: false,
-        label: '<=0.75.0',
-        //route: '/docs/operate/migration',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Migration Guides',
-        // description:
-        // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
-        // slug: '/docs/operate/migration/migration',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/0.75.0/configuration',
-            label: 'Configuration',
-          },
-          {
-            type: 'category',
-            isExpanded: false,
-            label: 'Query Service',
-            route: '/docs/operate/0.75.0/query-service',
-            // link: {
-            // type: 'generated-index',
-            // title: 'Query Service',
-            // description:
-            // 'The following sections provide instructions to operate Query Service. You can proceed to one of the sections below.',
-            // slug: '/docs/operate/query-service',
-            // },
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/operate/0.75.0/query-service/reset-admin-password',
-                label: 'Reset Admin Password',
-              },
-              {
-                type: 'doc',
-                route: '/docs/operate/0.75.0/query-service/user-invitation-smtp',
-                label: 'Enable SMTP for User Invitations',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/docker-standalone',
-        label: 'Docker Standalone',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/docker-swarm',
-        label: 'Docker Swarm',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/kubernetes',
-        label: 'Kubernetes',
-      },
-      {
-        type: 'doc',
-        route: '/docs/production-readiness',
-        label: 'Best Practices for Production',
-      },
-    ],
-  },
-  {
-    type: 'category',
-    isExpanded: false,
-    label: 'About SigNoz',
-    items: [
-      {
-        route: '/docs/contributing',
-        label: 'Contributing Guidelines',
-        type: 'doc',
-      },
-      // 'about-signoz/architecture',
-      // 'about-signoz/contributing',
-      // 'about-signoz/roadmap',
-    ],
-  },
-  {
     label: 'Community',
     type: 'category',
     isExpanded: false,
@@ -3072,6 +3098,11 @@ const docsSideNav = [
       {
         label: 'Community Channels',
         route: '/docs/community',
+        type: 'doc',
+      },
+      {
+        route: '/docs/contributing',
+        label: 'Contributing Guidelines',
         type: 'doc',
       },
     ],

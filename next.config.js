@@ -63,6 +63,7 @@ module.exports = () => {
   const plugins = [withContentlayer, withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
+    productionBrowserSourceMaps: true, // Enable source maps for debugging
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
       dirs: ['app', 'components', 'layouts', 'scripts'],
@@ -588,6 +589,76 @@ module.exports = () => {
           source: "/docs/userguide/collecting-ecs-sidecar-infra",
           destination: "/docs/collection-agents/ecs/sidecar/overview",
           permanent: true
+        },
+        {
+          source: "/docs/operate/0.75.0/query-service/user-invitation-smtp",
+          destination: "/docs/manage/administrator-guide/configuration/smtp-email-invitations/#versions-less-than-or-equal-to-084x",
+          permanent:  true
+        },
+        {
+          source: "/docs/operate/0.75.0/query-service/reset-admin-password",
+          destination: "docs/operate/reset-admin-password",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/0.75.0/configuration",
+          destination: "/docs/operate/configuration",
+          permanent: true 
+        },
+        {
+          source: "/docs/operate/docker-standalone/#upgrade",
+          destination: "/docs/operate/migration/upgrade-standard/#docker-standalone",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
+          destination: "/docs/install/uninstall/#docker-standalone",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-swarm/#upgrade-signoz-cluster",
+          destination: "/docs/operate/migration/upgrade-standard/#docker-swarm-cluster",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/docker-standalone/#uninstall-signoz-cluster",
+          destination: "/docs/install/uninstall/#docker-swarm",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/kubernetes/#upgrade-signoz",
+          destination: "/docs/operate/migration/upgrade-standard/#kubernetes-deployment",
+          permanent: true
+        },
+        {
+          source: "/docs/operate/kubernetes/#uninstall-signoz",
+          destination: "/docs/install/uninstall/#kubernetes",
+          permanent: true
+        },
+        {
+          source: "/docs/tutorial/opentelemetry-operator-usage/",
+          destination: "/docs/collection-agents/k8s/otel-operator/overview",
+          permanent: true
+        },
+        {
+          source: "/docs/llm/opentelemetry-openai-monitoring/",
+          destination: "/docs/opentelemetry-openai-monitoring/",
+          permanent: true
+        },
+        {
+          source: "/docs/community/llm-monitoring/",
+          destination: "/docs/llm-observability/",
+          permanent: true
+        },
+        {
+          source: "/docs/llm/vercel-ai-sdk-monitoring/",
+          destination: "/docs/vercel-ai-sdk-monitoring/",
+          permanent: true
+        },
+        {
+          source: "/docs/llm/llamaindex-monitoring/",
+          destination: "/docs/llamaindex-monitoring/",
+          permanent: true
         }
       ]
     },
@@ -605,7 +676,49 @@ module.exports = () => {
         })
       }
 
+      // Ensure source maps are generated in production (server & client)
+      if (!options.dev) {
+        config.devtool = 'source-map'
+      }
+
       return config
     },
   })
 }
+
+// Injected content via Sentry wizard below
+
+const { withSentryConfig } = require('@sentry/nextjs')
+
+module.exports = withSentryConfig(module.exports, {
+  // For all available options, see:
+  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+
+  org: `${process.env.NEXT_PUBLIC_SENTRY_ORG}`,
+  project: `${process.env.NEXT_PUBLIC_SENTRY_PROJECT}`,
+  sentryUrl: `${process.env.NEXT_PUBLIC_SENTRY_URL}`,
+
+  // Only print logs for uploading source maps in CI
+  silent: !process.env.CI,
+
+  // For all available options, see:
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+
+  // Upload a larger set of source maps for prettier stack traces (increases build time)
+  widenClientFileUpload: true,
+
+  // Uncomment to route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
+  // This can increase your server load as well as your hosting bill.
+  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
+  // side errors will fail.
+  // tunnelRoute: "/monitoring",
+
+  // Automatically tree-shake Sentry logger statements to reduce bundle size
+  disableLogger: true,
+
+  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
+  // See the following for more information:
+  // https://docs.sentry.io/product/crons/
+  // https://vercel.com/docs/cron-jobs
+  automaticVercelMonitors: true,
+})

@@ -73,7 +73,7 @@ After cloning the repo and getting set up, you can run the chatbot locally and s
 
 ### Instrumenting LlamaIndex and Exporting to SigNoz
 
-To capture detailed telemetry from LlamaIndex without modifying your core application logic, we use [**OpenInference](https://arize.com/docs/ax/learn/tracing-concepts/what-is-openinference),** a community-driven standard that provides pre-built instrumentation for popular AI frameworks like LlamaIndex, built on top of OpenTelemetry. This allows you to trace your LlamaIndex application with minimal configuration.
+To capture detailed telemetry from LlamaIndex without modifying your core application logic, we use [OpenInference](https://arize.com/docs/ax/learn/tracing-concepts/what-is-openinference), a community-driven standard that provides pre-built instrumentation for popular AI frameworks like LlamaIndex, built on top of OpenTelemetry. This allows you to trace your LlamaIndex application with minimal configuration.
 
 Check out detailed instructions on how to set up OpenInference instrumentation in your LlamaIndex application over [here](https://pypi.org/project/openinference-instrumentation-llama-index/).
 
@@ -85,7 +85,7 @@ opentelemetry-exporter-otlp \
 opentelemetry-sdk
 ```
 
-**Step 3:** Import the necessary modules in your Python application
+**Step 2:** Import the necessary modules in your Python application
 
 ```python
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -95,7 +95,7 @@ from opentelemetry.sdk.resources import Resource
 from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 ```
 
-**Step 4:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+**Step 3:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
 
 ```python
 resource = Resource.create({"service.name": "<service_name>"})
@@ -111,7 +111,7 @@ provider.add_span_processor(BatchSpanProcessor(span_exporter))
 - Set the **`<region>`** to match your SigNoz Cloud [**region**](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace **`<your-ingestion-key>`** with your SigNoz [**ingestion key**](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-**Step 5:** Instrument LlamaIndex using OpenInference and the configured Tracer Provider
+**Step 4:** Instrument LlamaIndex using OpenInference and the configured Tracer Provider
 
 Use the `LlamaIndexInstrumentor` from OpenInference to automatically trace LlamaIndex operations with your OpenTelemetry setup:
 
@@ -138,7 +138,7 @@ When you click on a trace ID in SigNoz, you'll see a detailed view of the trace,
     <figcaption><i>Detailed Trace View in SigNoz</i></figcaption>
 </figure>
 
-### **Adding Logging to Your App**
+### Adding Logging to Your App
 
 In addition to traces and metrics, you can also emit logs from your LlamaIndex app to capture valuable runtime information. For example, you might log the number of document chunks embedded into vectors, the number of most relevant documents retrieved during a query, or the feedback provided by users on the generated answers. These logs, when correlated with traces in SigNoz, give you richer context for debugging issues and improving your RAG pipeline.
 

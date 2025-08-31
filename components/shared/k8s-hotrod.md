@@ -43,5 +43,3 @@ Wait for all the pods to be in running state:
      --restart='OnFailure' -i --tty --rm --command -- curl \
      http://locust-master:8089/stop
    ```
-
-Go to [Kubernetes Operate](/docs/operate/kubernetes) section for detailed instructions.
