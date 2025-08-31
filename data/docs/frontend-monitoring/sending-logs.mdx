@@ -94,12 +94,14 @@ Inside your `src` directory, create a file named `instrument.js` (or `instrument
           'service.name': '<<SERVICE_NAME>>',
         }),
         processors: [
-          new OTLPLogExporter({
-            url: `https://ingest.<<INGESTION_REGION>>.signoz.cloud:443/v1/logs`,
-            headers: {
-              'signoz-ingestion-key': <<INGESTION_KEY>>,
-            },
-          })
+          new SimpleLogRecordProcessor(
+            new OTLPLogExporter({
+              url: `https://ingest.<<INGESTION_REGION>>.signoz.cloud:443/v1/logs`,
+              headers: {
+                'signoz-ingestion-key': <<INGESTION_KEY>>,
+              },
+            }),
+          ),
         ],
       });
 
@@ -377,8 +379,6 @@ To do so, you need to write a custom implementation on top of `LogRecordProcesso
   </TabItem>
 </Tabs>
 
-
-
 Update your `instrumentation` file to include this processor before the default one.
 
 ```ts
@@ -405,6 +405,65 @@ Now every log exported will include these additional contextual attributes.
   />
   <figcaption>
     <i>Additional Attributes in Logs</i>
+  </figcaption>
+</figure>
+
+### Tracking Errors within your application
+
+You can track various console errors, javascript errors and exceptions by adding event handlers on each of them to send custom logs to SigNoz.
+
+Create a separate `error-tracking.js` (or `.ts` for TypeScript) containing the event handlers.
+
+```js:error-tracking.js
+import { logError } from './logger';
+
+// JavaScript Errors
+window.addEventListener('error', (event) => {
+  logError('window.onerror', {
+    'exception.message': event.message,
+    'exception.type': event.error?.name || 'Error',
+    'exception.stacktrace': event.error?.stack || '',
+    'exception.source': event.filename,
+    'exception.lineno': event.lineno,
+    'exception.colno': event.colno,
+  });
+});
+
+// JavaScript Rejections
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason || {};
+  logError('unhandledrejection', {
+    'exception.message': reason.message || String(reason),
+    'exception.stacktrace': reason.stack || '',
+    'exception.type': reason.name || typeof reason || 'UnhandledRejection',
+  });
+});
+
+
+// JavaScript Console Errors
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  const message = args.map(String).join(' ');
+  logError('console.error', {
+    'exception.message': message,
+    'exception.type': 'ConsoleError',
+    'exception.stacktrace': new Error().stack || '',
+  });
+
+  originalConsoleError(...args);
+};
+```
+
+These captured logs can then also be viewed in the [Logs Explorer](https://signoz.io/docs/userguide/logs/).
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/guides/2025/frontend-monitoring/sending-logs/logs-explorer-view.webp"
+    alt="SigNoz Logs Explorer"
+  />
+  <figcaption>
+    <i>SigNoz Logs Explorer</i>
   </figcaption>
 </figure>
 
