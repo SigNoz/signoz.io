@@ -546,6 +546,18 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra',
               },
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
+                    label: 'Monitor Multiple K8SClusters',
+                  },
+                ]
+              }
             ],
           },
           {
