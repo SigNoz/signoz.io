@@ -548,13 +548,13 @@ const docsSideNav = [
               },
               {
                 type: 'category',
-                label: 'Guides',
+                label: 'User Guides',
                 isExpanded: false,
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/collection-agents/k8s/k8s-infra/guides/k8s-infra-multi-cluster',
-                    label: 'Monitor Multiple Clusters',
+                    route: '/docs/collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
+                    label: 'Monitor Multiple K8SClusters',
                   },
                 ]
               }
