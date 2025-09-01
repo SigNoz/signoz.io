@@ -19,8 +19,26 @@ const Tabs = ({ children, entityName }) => {
   }
 
   const firstValidChild = childrenArray.find(isValidElement)
-  const initialActiveTab = firstValidChild ? firstValidChild.props.value : null
-  const selectedTab = entityName === 'plans' ? initialActiveTab : environment || initialActiveTab
+  const defaultChild = childrenArray.find((child): child is React.ReactElement => 
+    isValidElement(child) && child.props.default
+  )
+  const defaultActiveTab = defaultChild?.props.value ?? firstValidChild?.props.value ?? null
+  
+  let selectedTab
+  if (entityName === 'plans') {
+    selectedTab = defaultActiveTab
+  } else if (environment && childrenArray.some((child): child is React.ReactElement => 
+    isValidElement(child) && child.props.value === environment
+  )) {
+    // If environment matches a tab value directly, use it
+    selectedTab = environment
+  } else if (environment) {
+    // If environment is set but doesn't match any tab directly, use default tab
+    selectedTab = defaultActiveTab
+  } else {
+    // No environment parameter, use default tab
+    selectedTab = defaultActiveTab
+  }
   const [activeTab, setActiveTab] = useState(selectedTab)
   const hideSelfHostTab = source === ONBOARDING_SOURCE && entityName === 'plans'
 
