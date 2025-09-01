@@ -1,0 +1,67 @@
+---
+date: 2025-09-01
+title: Sending Python Logs
+id: opentelemetry-python-logs
+hide_table_of_contents: true
+---
+
+You can send Python logs to SigNoz using Auto instrumentation which is the fast, no code change way to send logs to SigNoz.
+
+## Prerequisites
+
+- A [auto-instrumented](https://signoz.io/docs/instrumentation/opentelemetry-python/#send-traces-directly-to-signoz-cloud) python application with logging implemented
+
+## Setup
+
+### Step 1: Instrument your application
+
+Follow the steps in our [Python instrumentation document](https://signoz.io/docs/instrumentation/opentelemetry-python/#send-traces-directly-to-signoz-cloud) to auto-instrument your application.
+
+
+### Step 2: Run your application
+
+Now, run your application with the following environment variables set:
+
+```bash
+OTEL_SERVICE_NAME=<service_name> \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
+opentelemetry-instrument <your_run_command>
+```
+
+This attaches an OTLP log handler, injects trace context into each log record. This will allow you to correlate logs with traces.
+
+- `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` when set to `true` will [attach the OTLP log handler](https://opentelemetry.io/docs/zero-code/python/configuration/#logging) to the root logger. That is what sends the logs out.
+
+
+<figure data-zoomable align='center'>
+<img src="/img/docs/traces-management/correlate-traces-with-logs.gif" alt="Correlated Logs and Traces"/>
+<figcaption><i>Correlated Logs and Traces</i></figcaption>
+</figure>
+
+
+## Python application on Kubernetes
+
+If your application is running on Kubernetes, you can use the [k8s-infra-chart](https://signoz.io/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/) to get your logs directly to SigNoz.
+
+The chart has [presets.logsCollection.enabled](https://signoz.io/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra/#3-container-log-collection) property to **true** which adds a `filelogreceiver`. This receiver is configured to read the files where Kubernetes 
+container runtime writes all containers console output **(/var/log/pods/*/*/*.log)**.
+
+### Parse attributes 
+
+Once you have the logs in SigNoz, you can parse different attributes from the log body using [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
+Logs pipelines give you the ability to pre-process logs by providing you with a number of [log processors](https://signoz.io/docs/logs-pipelines/processors/).
+Checkout [these guides](https://signoz.io/docs/category/guides/) to learn how you can use logs pipelines for different use-cases.
+
+## Fine Grained Control
+
+If you need more control over your logging, you can use the OpenTelemetry Python SDK to manually instrument your application. It provides a handler that can be used to transport logs to any OTLP-compatible backend. 
+
+Here are some references to get you started with manual instrumentation:
+- [Configure OTel logs SDK in Python](https://signoz.io/opentelemetry/logging-in-python/) part of implementing OTel in Python applications [series](https://signoz.io/opentelemetry/python-overview/)
+- Official OpenTelemetry [SDK example for python](https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples/logs) logs
+- OpenTelemetry [docs for python instrumentation](https://opentelemetry.io/docs/languages/python/instrumentation/#logs) logs section

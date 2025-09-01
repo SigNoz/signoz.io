@@ -659,6 +659,16 @@ module.exports = () => {
           source: "/docs/llm/llamaindex-monitoring/",
           destination: "/docs/llamaindex-monitoring/",
           permanent: true
+        },
+        {
+          source: "/docs/userguide/python-logs-auto-instrumentation/",
+          destination: "/docs/send-logs/python-logs/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/collecting_application_logs_otel_sdk_python/",
+          destination: "/docs/send-logs/python-logs/",
+          permanent: true
         }
       ]
     },
