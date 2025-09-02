@@ -2157,6 +2157,11 @@ const docsSideNav = [
         route: '/docs/integrations/sql-server',
         label: 'Microsoft SQL Server',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/supabase',
+        label: 'Supabase',
+      },
     ],
   },
   {
