@@ -1,133 +1,302 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import TabPanel from '@/components/TabPanel'
-import Link from 'next/link'
 import { ArrowRight, BookOpen, Atom, Coins, DatabaseZap } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import StatsCard from '@/components/Card/card'
 import { Card } from '@/components/ui/Card'
 import Tabs from '@/components/Tabs'
 import { Badge } from "@signozhq/badge"
-// import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
 import AlternatingSides from '@/components/AlternatingSides/AlternatingSides'
 import PricingCalculator from 'app/pricing/pricingv1/components/PricingCalculator'
+
+const TESTIMONIALS = [
+  {
+    name: "Charlie Shen",
+    role: "Lead DevOps Engineer, Brainfish",
+    testimonial: "I've studied more than 10 observability tools in the market. We eventually landed on SigNoz, which says a lot. Compared to Elastic Cloud, it's a breeze with SigNoz.",
+    image: "/img/case_study/profile-photos/brainfish.webp"
+  },
+  {
+    name: "Niranjan Ravichandra",
+    role: "Co-founder & CTO, Cedana",
+    testimonial: "Getting started with SigNoz was incredibly easy. We were able to set up the OpenTelemetry collector quickly and start monitoring our systems almost immediately.",
+    image: "/img/case_study/profile-photos/cedana.webp"
+  },
+  {
+    name: "Poonkuyilan V",
+    role: "IT Infrastructure Lead, The Hindu",
+    testimonial: "Recently, we configured alerts for pod restarts and were able to quickly identify and resolve the root cause before it escalated. Additionally, SigNoz's tracing capabilities helped us spot unwanted calls to third-party systems, allowing us to optimize our applications.",
+    image: "/img/case_study/profile-photos/the-hindu.png"
+  },
+  {
+    name: "Avneesh Kumar",
+    role: "VP of Engineering, Mailmodo",
+    testimonial: "We have started saving almost six hours on a daily basis, which we can now invest in other tech debts and backlogs. The best thing about SigNoz is that it's open source. I can go into the source code and look at what's happening. That's a great confidence booster for long-term usage.",
+    image: "/img/case_study/profile-photos/mailmodo.webp"
+  },
+  {
+    name: "Khushhal Reddy",
+    role: "Senior Backend Engineer, Kiwi",
+    testimonial: "SigNoz is something we use daily. If I have ten tabs open, six of them are SigNoz. We used traces and it helped us take 30 seconds down to 3 seconds.",
+    image: "/img/case_study/profile-photos/kiwi.webp"
+  }
+];
+
+const CustomerStories = () => {
+  return (
+    <>
+      <section className="relative mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] overflow-hidden">
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90 pointer-events-none" />
+        
+        <div className="relative z-10">
+          <div className={`container pb-16`}>
+            <div className="flex flex-col gap-6 pb-32">
+              <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
+                <div className="text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100 flex flex-col items-center gap-12">
+                  <Image src="/img/case_study/logos/shaped-logo.svg" alt="Shaped" width={100} height={100} />
+                  Every single time we have an issue, SigNoz is always the first place to check. It was super straightforward to migrate - just updating the exporter configuration, basically three lines of code.
+                  <span className="text-signoz_vanilla-400 text-sm"><span className="font-semibold">Karl Lyons</span> <br /> Senior SRE, Shaped</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <div className="section-container !mx-auto !w-[100vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed p-0">
+        <div className="container pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-20">
+            {TESTIMONIALS.map((testimonial, index) => (
+              <Card key={index} className="p-0 [&>*]:border-1 [&>*]:border-solid">
+                <div className="flex flex-col gap-4 p-6">
+                  <div className="flex items-center gap-4">
+                    <Image 
+                      src={testimonial.image} 
+                      alt={testimonial.name} 
+                      width={48} 
+                      height={48} 
+                      className="rounded-full"
+                    />
+                    <div>
+                      <h3 className="text-signoz_vanilla-100 font-medium">{testimonial.name}</h3>
+                      <p className="text-signoz_vanilla-400 text-sm">{testimonial.role}</p>
+                    </div>
+                  </div>
+                  <p className="text-signoz_vanilla-100">{testimonial.testimonial}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="flex justify-center items-end -mt-96 z-5 bg-gradient-to-t from-signoz_ink-500 to-transparent relative h-[50vh] py-6">
+            <Button 
+              variant="secondary" 
+              rounded="full"
+              className="flex items-center gap-2"
+              to="/case-study/"
+            >
+              Read customer stories
+              <ArrowRight size={14} />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+const AutoCarousel = ({ images }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 2000); // Change image every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  return (
+    <div className="relative w-full h-[400px] overflow-hidden rounded-lg">
+      {images.map((image, index) => (
+        <div
+          key={index}
+          className={`absolute w-full h-full transition-opacity duration-1000 ${
+            index === currentIndex ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <Image
+            src={image.src}
+            alt={image.alt}
+            className="w-full h-full object-cover"
+            width={1000}
+            height={400}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const CORRELATION_IMAGES = [
+  {
+    src: "/img/log-management/Logs-to-Metrics.png",
+    alt: "Correlation Example 1"
+  },
+  {
+    src: "/img/log-management/APM-to-Logs.png",
+    alt: "Correlation Example 2"
+  },
+  {
+    src: "/img/log-management/trace_id.png",
+    alt: "Correlation Example 3"
+  }
+];
+
+const STORAGE_DATA = {
+  headers: {
+    hot: "HOT STORAGE PERIOD",
+    cold: "PERIOD IN COLD STORAGE AFTER HOT STORAGE"
+  },
+  subHeader: "$ / GB",
+  coldPeriods: [
+    { value: "0", unit: "days" },
+    { value: "90", unit: "days" },
+    { value: "180", unit: "days" },
+    { value: "1", unit: "year" },
+    { value: "2", unit: "years" }
+  ],
+  rows: [
+    {
+      period: { value: "15", unit: "days" },
+      prices: [0.3, 0.45, 0.6, 0.9, 1.3]
+    },
+    {
+      period: { value: "30", unit: "days" },
+      prices: [0.4, 0.55, 0.7, 1.0, 1.4]
+    },
+    {
+      period: { value: "90", unit: "days" },
+      prices: [0.6, 0.75, 0.9, 1.2, 1.6]
+    },
+    {
+      period: { value: "180", unit: "days" },
+      prices: [0.8, 0.95, 1.1, 1.4, 1.8]
+    }
+  ]
+};
 
 const FEATURES = [
   {
     title: "Ingest Logs from Anywhere",
     description: "Get native infrastructure support to securely store logs from anywhere. With multiple collection methods to pick up, and bring your own tools to make data ingestion powered by OpenTelemetry standards.",
     buttonText: "Read Documentation",
-    buttonLink: "/docs/introduction",
+    buttonLink: "/docs/userguide/logs/",
     component: (
       <Tabs entityName="sources">
         <TabPanel value="supported-sources" label="Supported Sources">
           <div className="flex flex-col gap-8">
-            {/* Cloud Section */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">CLOUD</h3>
-                <div className="grid grid-cols-3 gap-8">
+                <div className="flex justify-start items-center gap-4">
                   <div className="flex items-center">
-                    <img src="/img/sources/aws.svg" alt="AWS" className="h-8" />
+                    <img src="/img/icons/aws-icon.svg" alt="AWS" className="h-8" />
                   </div>
                   <div className="flex items-center">
-                    <img src="/img/sources/gcp.svg" alt="Google Cloud" className="h-8" />
+                    <img src="/img/icons/gcp-icon.svg" alt="Google Cloud" className="h-8" />
                   </div>
                   <div className="flex items-center">
-                    <img src="/img/sources/azure.svg" alt="Azure" className="h-8" />
+                    <img src="/img/icons/azure-icon.svg" alt="Azure" className="h-8" />
                   </div>
                 </div>
               </div>
               <div>
                 <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">CONTAINERS</h3>
-                <div className="grid grid-cols-3 gap-8">
+                <div className="flex justify-start items-center gap-4">
                   <div className="flex items-center">
-                    <img src="/img/sources/aws.svg" alt="AWS" className="h-8" />
+                    <img src="/img/icons/docker-icon.svg" alt="Docker" className="h-8" />
                   </div>
                   <div className="flex items-center">
-                    <img src="/img/sources/gcp.svg" alt="Google Cloud" className="h-8" />
-                  </div>
-                  <div className="flex items-center">
-                    <img src="/img/sources/azure.svg" alt="Azure" className="h-8" />
+                    <img src="/img/icons/kubernetes-icon.svg" alt="Kubernetes" className="h-8" />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Popular Tools Section */}
             <div>
               <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">POPULAR TOOLS</h3>
-              <div className="grid grid-cols-6 gap-8">
+              <div className="flex justify-start items-center gap-4">
                 <div className="flex items-center">
-                  <img src="/img/sources/heroku.svg" alt="Heroku" className="h-8" />
+                  <img src="/img/icons/heroku-icon.svg" alt="Heroku" className="h-8" />
                 </div>
                 <div className="flex items-center">
-                  <img src="/img/sources/datadog.svg" alt="Datadog" className="h-8" />
+                  <img src="/img/icons/fluentd-icon.svg" alt="Fluentd" className="h-8" />
                 </div>
                 <div className="flex items-center">
-                  <img src="/img/sources/splunk.svg" alt="Splunk" className="h-8" />
+                  <img src="/img/icons/vercel-icon.svg" alt="Vercel" className="h-8" />
                 </div>
                 <div className="flex items-center">
-                  <img src="/img/sources/redis.svg" alt="Redis" className="h-8" />
+                  <img src="/img/icons/redis-icon.svg" alt="Redis" className="h-8" />
                 </div>
                 <div className="flex items-center">
-                  <img src="/img/sources/mongodb.svg" alt="MongoDB" className="h-8" />
+                  <img src="/img/icons/mongo-icon.svg" alt="Mongo" className="h-8" />
                 </div>
                 <div className="flex items-center">
-                  <img src="/img/sources/nginx.svg" alt="Nginx" className="h-8" />
+                  <img src="/img/icons/nginx-icon.svg" alt="Nginx" className="h-8" />
                 </div>
               </div>
             </div>
-            <Button variant="ghost" rounded="full" size={null} className="flex justify-center items-center gap-2 w-fit">
+            <Button variant="ghost" to="/docs/logs-management/send-logs-to-signoz/" rounded="full" size={null} className="flex justify-center items-center gap-2 w-fit hover:bg-transparent">
               VIEW ALL 50+ SOURCES
             </Button>
           </div>
         </TabPanel>
         <TabPanel value="collection-methods" label="Collection Methods">
           <div className="flex flex-col gap-8">
-            {/* OpenTelemetry Section */}
+            <div className="flex items-center md:flex-row flex-col gap-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <h3 className="text-sm font-medium uppercase text-signoz_vanilla-400 m-0">OPENTELEMETRY</h3>
                 <Badge color="vanilla">Recommended</Badge>
               </div>
               <div className="flex items-center gap-8">
-                <img src="/img/sources/opentelemetry.svg" alt="OpenTelemetry" className="h-8" />
+                <img src="/img/website/opentelemetry-icon-color.svg" alt="OpenTelemetry" className="h-8" />
               </div>
             </div>
-
-            {/* Existing Agents Section */}
             <div>
               <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">EXISTING AGENTS</h3>
-              <div className="grid grid-cols-4 gap-8">
+              <div className="flex justify-start items-center gap-4">
                 <div className="flex items-center">
-                  <img src="/img/sources/fluentbit.svg" alt="Fluent Bit" className="h-8" />
+                  <img src="/img/icons/fluentd-icon.svg" alt="Fluentd" className="h-8" />
                 </div>
                 <div className="flex items-center">
-                  <img src="/img/sources/fluentd.svg" alt="Fluentd" className="h-8" />
+                  <img src="/img/icons/fluentbit-icon.svg" alt="Fluentbit" className="h-8" />
                 </div>
                 <div className="flex items-center">
-                  <img src="/img/sources/vector.svg" alt="Vector" className="h-8" />
+                  <img src="/img/icons/logstash-icon.svg" alt="Logstash" className="h-8" />
                 </div>
               </div>
             </div>
+            </div>
 
-            {/* Direct Integrations Section */}
             <div>
               <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">DIRECT INTEGRATIONS</h3>
               <div className="flex flex-wrap gap-2">
-                <Badge color="vanilla">HTTP Endpoints</Badge>
-                <Badge color="vanilla">SDK Integrations</Badge>
-                <Badge color="vanilla">Legacy support</Badge>
+                <Badge color="vanilla" className="rounded-sm">HTTP Endpoints</Badge>
+                <Badge color="vanilla" className="rounded-sm">SDK Integrations</Badge>
+                <Badge color="vanilla" className="rounded-sm">Legacy support</Badge>
               </div>
             </div>
 
             {/* View Integration Guides */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" rounded="full" size={null}>
+              <Button variant="ghost" rounded="full" size={null} className="hover:bg-transparent">
                 VIEW INTEGRATION GUIDES
               </Button>
             </div>
@@ -140,24 +309,25 @@ const FEATURES = [
     title: "Process on the Fly",
     description: "A powerful log pipeline helps you analyze everything you ingest, including service maps, application logs, and exceptions. Monitoring is effortless using lifecycle alerts including storage usage limits. Manual data manipulation is eliminated.",
     buttonText: "Read Documentation",
-    buttonLink: "/docs/introduction",
+    buttonLink: "/docs/logs-pipelines/concepts/",
     component: <Image src="/img/log-management/process-logs.png" alt="Process on the Fly" width={10000} height={10000} />
   },
   {
     title: "Correlate your Signals",
     description: "Monitor logs and traces automatically and easily debug from APM traces to related logs. Metrics correlation is log-based, and easy to add with OpenTelemetry standards.",
-    buttonText: "Read Documentation",
-    buttonLink: "/docs/introduction",
-    component: "PLACEHOLDER_COMPONENT_3" // TODO: Replace with image
+    buttonText: "Read Blog",
+    buttonLink: "/opentelemetry/correlating-traces-logs-metrics-nodejs/",
+    component: <AutoCarousel images={CORRELATION_IMAGES} />
   },
   {
     title: "Analyze the Logs",
     description: "Optimized columnar storage design provides the high performance capabilities to scale storage and query millions of logs. Use dynamic alerts, advanced dashboards, and more integrated metrics to get advanced correlation filtering.",
     buttonText: "Read Documentation",
-    buttonLink: "/docs/introduction",
+    buttonLink: "/docs/userguide/logs_query_builder/",
     component: <Image src="/img/log-management/analyse-the-logs.png" alt="Analyze the Logs" width={10000} height={10000} />
   }
 ]
+
 function LogsManagement() {
   return (
     <main className="!mt-[-10px] mb-auto">
@@ -166,18 +336,77 @@ function LogsManagement() {
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
         <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
         <Header />
-        {/* <TrustedByTeams page="LogsManagement" /> */}
-        {/* <SigNozFeatures /> */}
         <HeroCards />
         <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-        <AlternatingSides items={FEATURES} />
-          </div>
-        {/* <SigNozUsage /> */}
+          <AlternatingSides items={FEATURES} />
+          <Card className="p-0 [&>*]:rounded-none [&>*]:border-1 bg-transparent">
+            <div className="flex flex-col md:flex-row gap-12 items-start h-full p-6">
+              <div className="flex-1 h-full flex flex-col justify-between">
+                <h2 className="font-semibold text-signoz_vanilla-100">Store your Data</h2>
+                <p className="text-signoz_vanilla-400 mb-32 leading-relaxed">Configurable hot and cold storage periods let you balance query performance with storage costs for long-term log retention and compliance needs.</p>
+                <div className="flex gap-12">
+                  <div className="border-r border-signoz_slate-400/60 border-dashed pr-12">
+                    <h3 className=" font-semibold text-signoz_vanilla-100 mb-4">50%</h3>
+                    <div className="text-signoz_vanilla-400">Storage Savings</div>
+                  </div>
+                  <div>
+                    <h3 className=" font-semibold text-signoz_vanilla-100 mb-4">2 years</h3>
+                    <div className="text-signoz_vanilla-400">Configurable Retention</div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="w-full">
+                  <table className="w-full border-collapse">
+                    <thead className='!border-1 !border-signoz_slate-400/50'>
+                      <tr className='!border-signoz_slate-400/50 border-y-1'>
+                        <td className="!border-none !border-signoz_slate-800 px-2 py-4 bg-signoz_ink-400/60">
+                          <div className="text-sm font-medium text-signoz_vanilla-400">
+                            HOT STORAGE PERIOD
+                          </div>
+                        </td>
+                        <td className="!border-none !border-signoz_slate-800 px-2 py-4 text-center bg-signoz_ink-400" colSpan={5}>
+                          <div className="text-sm font-medium text-signoz_vanilla-400">
+                            PERIOD IN COLD STORAGE AFTER HOT STORAGE
+                          </div>
+                        </td>
+                      </tr>
+                      <tr className='!border-signoz_slate-400/50 border-y-1'>
+                        <td className="!border-none p-2 bg-signoz_ink-400" />
+                        {STORAGE_DATA.coldPeriods.map((period, index) => (
+                          <td key={index} className="!border-none p-4 text-center">
+                            <div className="text-sm font-medium text-signoz_vanilla-400">
+                              {period.value} {period.unit}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="w-full !border-1 !border-signoz_slate-400/50">
+                      {STORAGE_DATA.rows.map((row, rowIndex) => (
+                        <tr key={rowIndex} className="!border-signoz_slate-400/50 border-y-1 bg-signoz_ink-400/40">
+                          <td className="!border-none p-2 bg-signoz_ink-400/60">
+                            <div className="flex justify-between items-center text-signoz_robin-400">
+                              {row.period.value} {row.period.unit} <Badge color="vanilla">$ / GB</Badge>
+                            </div>
+                          </td>
+                          {row.prices.map((price, priceIndex) => (
+                            <td key={priceIndex} className="!border-none p-2 text-center text-signoz_vanilla-100">
+                              {price}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
         <UsageBasedPricing />
-        {/* <ExploreDocs /> */}
         <SigNozStats />
-        {/* TODO: Customer stories card */}
-        {/* <GetStarted page="LogsManagement" /> */}
+        <CustomerStories />
       </div>
     </main>
   )
@@ -208,11 +437,11 @@ const HeroCards = () => {
         {CARDS.map((card, index) => (
           <Card key={index} className="p-0 [&>*]:rounded-none [&>*]:border-1 bg-transparent">
             <div className="p-4">
-            <div className="grid grid-cols-1 gap-4">
-              {card.icon}
-              <h3 className="text-xl font-semibold text-signoz_vanilla-100">{card.title}</h3>
-            </div>
-            <p className="mt-2 text-sm text-signoz_vanilla-400">{card.description}</p>
+              <div className="grid grid-cols-1 gap-4">
+                {card.icon}
+                <h3 className="text-xl font-semibold text-signoz_vanilla-100">{card.title}</h3>
+              </div>
+              <p className="mt-2 text-sm text-signoz_vanilla-400">{card.description}</p>
             </div>
           </Card>
         ))}
@@ -232,39 +461,6 @@ const PlatformCard = ({ title, description }) => {
   )
 }
 
-const FeatureList = () => {
-  const features = [
-    {
-      title: 'Use correlated logs and traces to debug applications.',
-      description:
-        'Use traces to identify performance bottlenecks and then debug it with logs associated with that trace.',
-    },
-    {
-      title: 'Create alerts from logs.',
-      description:
-        'For example, create alerts on error logs in the last 5 minutes based on a threshold.',
-    },
-    {
-      title: 'Create dashboards to view all the error logs from different services.',
-      description:
-        'Query logs for specific conditions and add them to dashboards for continuous monitoring.',
-    },
-    {
-      title: 'Share specific log lines with your teammates while troubleshooting',
-      description:
-        'Improved collaboration with your teammates while debugging by sharing specific log lines.',
-    },
-  ]
-
-  return (
-    <div className="flex w-full flex-col gap-4">
-      {features.map((feature, index) => (
-        <PlatformCard key={index} title={feature.title} description={feature.description} />
-      ))}
-    </div>
-  )
-}
-
 const DevelopersLoveSigNozCards = () => {
   const Usage = [
     {
@@ -275,70 +471,13 @@ const DevelopersLoveSigNozCards = () => {
     {
       title: 'Self-Host',
       description:
-        'For tighter security & data residency requirements. It’s Apache 2.0 open source, built on open standards.'
+        'For tighter security & data residency requirements. It is Apache 2.0 open source, built on open standards.'
     },
   ]
 
   return (
     <div className="flex w-full flex-col gap-4">
       {Usage.map((feature, index) => (
-        <PlatformCard key={index} title={feature.title} description={feature.description} />
-      ))}
-    </div>
-  )
-}
-
-// const UsageList = () => {
-//   const Usage = [
-//     {
-//       title: 'Pay only for data you send',
-//       description:
-//         'We don’t have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.3 per GB of ingested logs.',
-//     },
-//     {
-//       title: 'Add unlimited team members',
-//       description:
-//         'Observability should be available to every developer at your company. After all, anyone can need debugging. That’s why we don’t charge for user seats, and you can add as many team members as you want.',
-//     },
-//     {
-//       title: 'No Host (container or node) based pricing',
-//       description:
-//         'For modern cloud-based applications it doesn’t make sense to charge on the basis of number of hosts or containers. You don’t need to worry about auto-scaling during peak hours. Only pay for the amount of data sent no matter the number of hosts.',
-//     },
-//   ]
-
-//   return (
-//     <div className="flex w-full flex-col gap-4">
-//       {Usage.map((feature, index) => (
-//         <PlatformCard key={index} title={feature.title} description={feature.description} />
-//       ))}
-//     </div>
-//   )
-// }
-
-const DocsList = () => {
-  const Docs = [
-    {
-      title: 'Node.js instrumentation',
-      description: 'Instrument your Node.js application and monitor with SigNoz',
-    },
-    {
-      title: 'Python instrumentation',
-      description: 'Instrument your Python application and monitor with SigNoz',
-    },
-    {
-      title: 'Java instrumentation',
-      description: 'Instrument your Java application and monitor with SigNoz',
-    },
-    {
-      title: 'Get started with SigNoz APM',
-      description: 'Instrument your Java application and monitor with SigNoz',
-    },
-  ]
-
-  return (
-    <div className="flex w-full flex-col gap-4">
-      {Docs.map((feature, index) => (
         <PlatformCard key={index} title={feature.title} description={feature.description} />
       ))}
     </div>
@@ -362,6 +501,7 @@ const Header = () => {
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
         <Button 
+          to="/teams/"
           variant="default" 
           rounded="full" 
           className="flex-center !w-fit" 
@@ -372,6 +512,7 @@ const Header = () => {
         </Button>
 
         <Button 
+          to="/docs/introduction/"
           variant="secondary" 
           rounded="full" 
           className="flex-center !w-fit" 
@@ -419,258 +560,6 @@ const COMPANIES = [
   { image: '/img/users/wombo.svg', imageDesc: 'wombo logo' },
 ]
 
-const TrustedByTeams = ({ page }) => {
-  const customerStoriesId = `btn-customer-stories-${page}-hero`
-  return (
-    <section
-      className={`relative z-[1] !m-0 !mx-auto !w-[100vw]  border !border-b-0 border-dashed border-signoz_slate-400 bg-signoz_ink-500 pt-10 md:!w-[80vw]`}
-    >
-      <div className="section-container">
-        <div className="mb-2 flex flex-col items-center text-center md:mb-12">
-          <div className="text-sm font-semibold uppercase leading-5 tracking-[0.05em] text-signoz_vanilla-400">
-            Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
-          </div>
-        </div>
-        <div className="mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 px-2 sm:grid-cols-4 sm:gap-x-8  sm:gap-y-14 md:mt-0 md:grid-cols-6 ">
-          {COMPANIES.map((company, idx) => (
-            <div key={`${idx}-${company.image}`} className="flex items-center justify-center">
-              <img
-                className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
-                src={company.image}
-                alt={company.imageDesc}
-              />
-            </div>
-          ))}
-        </div>
-        <div
-          className={`wavy-line relative mx-[-1rem]
-          after:absolute after:top-[50%] after:h-0 after:w-full after:bg-transparent after:content-['']
-        `}
-        >
-          <div className="flex flex-col items-center text-center">
-            <Button
-              id={customerStoriesId}
-              className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
-            >
-              <Link href="/case-study/" className="flex-center z-[1] mx-2">
-                Read customer stories <ArrowRight size={14} />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// const SigNozFeatures = () => {
-//   const sections = [
-//     {
-//       title: 'Logs at any scale powered by a Columnar Database',
-//       desc: (
-//         <>
-//           SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore ⎯ an extremely
-//           fast and highly optimized storage for logs data.
-//           <p />
-//           It is a column-oriented database built for complex analytical queries ⎯ they are at least
-//           1000 times faster in processing most queries. Aggregation and filtering are lightning-fast
-//           on log data. For ingestion, we found SigNoz to be 2.5x faster than ELK and about 13 times
-//           faster than ELK for aggregation queries.
-//           <a
-//             href="https://signoz.io/blog/logs-performance-benchmark/"
-//             target="_blank"
-//             className="text-signoz_robin-300"
-//           >
-//             {' '}
-//             (Logs Perf Benchmark).
-//           </a>
-//         </>
-//       ),
-//       figure: '/img/landing/property-no-vendor-lock-in.webp',
-//       logo: '/img/log-management/logs.svg',
-//     },
-//     {
-//       title: 'Fast troubleshooting with Query Builder',
-//       desc: [
-//         'Query your logs quickly with our powerful logs query builder. No need to learn any complex query language, just select some dropdowns and hit Run.',
-//         'Get a list of common filters for your logs data and quickly filter your required logs. Apply various aggregations, such as count, sum, and average, and group your log data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.',
-//       ],
-//       figure: '/img/landing/property-ease-of-use.webp',
-//       logo: '/img/log-management/fast.svg',
-//       buttonText: 'Learn More',
-//       buttonLink: 'https://signoz.io/docs/userguide/query-builder/',
-//     },
-//     {
-//       title: 'Cost-effective long-term storage of logs',
-//       desc: 'You can store your logs in long-term storage for compliance and auditing purposes. You can either forward the logs to your own S3/ Google cloud storage or object storage in SigNoz cloud. The data is stored in ClickHouse native format and you can query it whenever you want. Log forwarding cost is only $0.25 per GB.',
-//       figure: '/img/landing/property-covers-all-use-cases.webp',
-//       logo: '/img/log-management/wallet.svg',
-//       buttonText: 'Learn More',
-//       buttonLink: 'https://signoz.io/docs/logs-management/long-term-storage/',
-//     },
-//     {
-//       title: 'Identify Root Cause with Correlated Signals',
-//       desc: [
-//         'We provide logs, metrics, and traces under a single pane of glass powered by OpenTelemetry SDKs.',
-//         'You can correlate your logs with traces and vice-versa to gain better insights while debugging. Powered by OpenTelemetry semantic conventions, correlated signals can help you understand your applications better and identify the root cause of issues faster.',
-//       ],
-//       figure: '/img/landing/property-standardize-observability.webp',
-//       logo: '/img/log-management/signals.svg',
-//     },
-//   ]
-
-//   const scrollsections = [
-//     {
-//       title: 'Powerful Query Builder',
-//       desc: 'Apply various aggregations, such as count, sum, and average, and group your log data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.',
-//       image: '/img/features/logs/powerful-query-builder.webp',
-//       buttonText: 'Learn More',
-//       buttonLink: 'https://signoz.io/docs/userguide/query-builder/',
-//     },
-//     {
-//       title: 'Parse Logs with Log Pipelines',
-//       desc: "Transform logs before they get ingested to SigNoz to suit your querying and aggregation needs. Powered by OpenTelemetry Opamp, log pipelines enable you to unleash the full potential of your logs by pre-processing them to suit your needs before they get stored. This unlocks valuable logs based queries and dashboards that wouldn't be possible otherwise.",
-//       image: '/img/features/logs/logs-pipeline.webp',
-//       buttonText: 'Learn More',
-//       buttonLink: 'https://signoz.io/docs/logs-pipelines/introduction/',
-//     },
-//     {
-//       title: 'Quick Search & Filter',
-//       desc: 'Get a list of common filters for your logs data and quickly filter your required logs with operators like conatins, in, not_in, like, not_like, etc. ',
-//       image: '/img/features/logs/quick-search-filter.webp',
-//       buttonText: 'Learn More',
-//       buttonLink: 'https://signoz.io/docs/product-features/logs-explorer/',
-//     },
-//     {
-//       title: 'Log Visualizations',
-//       desc: 'Our logs explorer comes packed with different visualizations to simplify troubleshooting and finding patterns.',
-//       image: '/img/features/logs/log-visualizations.webp',
-//       buttonText: 'Learn More',
-//       buttonLink: 'https://signoz.io/docs/product-features/logs-explorer/#views',
-//     },
-//     {
-//       title: 'Logs in Detail',
-//       desc: 'Get a comprehensive view of your logs with a detailed view of logs. See overview, search for attributes, filters based on JSON data, and more to let you explore your logs in detail.',
-//       image: '/img/features/logs/logs-in-detail.webp',
-//       buttonText: 'Learn More',
-//       buttonLink: 'https://signoz.io/docs/product-features/logs-explorer/#log-details',
-//     },
-//     {
-//       title: 'Logs in Context',
-//       desc: 'Get more context around a log entry with Context view. For example, for a particular service view logs of the specific host, while that service might be running on multiple hosts.',
-//       image: '/img/features/logs/logs-in-context.webp',
-//     },
-//     {
-//       title: 'Saved Views',
-//       desc: 'Save views that matter - Apply complex queries and save that view for future reference. Your teammates can also access them if they need to.',
-//       image: '/img/features/logs/saved-views.webp',
-//     },
-//     {
-//       title: 'JSON Search',
-//       desc: 'Quickly apply filters on JSON data present inside the logs body.',
-//       image: '/img/features/logs/json-logs.webp',
-//     },
-//     {
-//       title: 'Live Logs',
-//       desc: 'View logs in real-time with Live Logs.',
-//       image: '/img/features/logs/live-logs.webp',
-//     },
-//     {
-//       title: 'Correlation with other signals',
-//       desc: 'Correlate your logs with traces and vice-versa to get a much richer context while debugging. Using OpenTelemetry for application observability can unlock the true potential of your telemetry data.',
-//       image: '/img/features/logs/correlation-of-signals.webp',
-//     },
-//     {
-//       title: 'Add to dashboards & Create Alerts',
-//       desc: 'Anything that you query can be added to dashboards for continued monitoring and visualization.',
-//       image: '/img/features/logs/add-to-dashboards-logs.webp',
-//     },
-//     {
-//       title: '',
-//     },
-//   ]
-//   return (
-//     <>
-//       <div className="bg-[url('/img/background_blur/Frame_1862.png')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
-//         <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
-//           <div className={`container pb-16`}>
-//             <div className="flex flex-col gap-6 pb-44 pt-28 ">
-//               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
-//                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-//                   Why use SigNoz for <br /> Log Management?
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-//       </div>
-//       <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
-//         <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
-//           {sections.map((section, index) => (
-//             <Card
-//               key={index}
-//               // logo={section.logo}
-//               subTitle={section.title}
-//               description={section.desc}
-//               buttonText={section.buttonText}
-//               buttonLink={section.buttonLink}
-//               logoSize={24}
-//               subTitleSize={2}
-//             />
-//           ))}
-//         </div>
-//       </div>
-
-//       <div className="bg-[url('/img/background_blur/Frame_1862.png')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
-//         <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
-//           <div className={`container pb-16`}>
-//             <div className="flex flex-col gap-6 pb-44 pt-28 ">
-//               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
-//                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-//                   SigNoz Log Management <br /> Overview
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-//       </div>
-
-//       <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
-//         {scrollsections.map((scrollsections, index) => (
-//           <FeatureCard
-//             key={index}
-//             title={scrollsections.title}
-//             description={scrollsections.desc}
-//             buttonText={scrollsections.buttonText}
-//             buttonLink={scrollsections.buttonLink}
-//             img={scrollsections.image}
-//           />
-//         ))}
-//       </div>
-//     </>
-//   )
-// }
-
-// const SigNozUsage = () => {
-//   return (
-//     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-//       <div className="flex flex-col sm:flex-row">
-//         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-//           <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-//             Use SigNoz
-//             <br /> Logs for...
-//           </p>
-//         </div>
-//         <div className="flex-[2_2_0%]">
-//           <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
-//             <FeatureList />
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
 const UsageBasedPricing = () => {
   return (
     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
@@ -688,19 +577,18 @@ const UsageBasedPricing = () => {
                 Pricing you can trust
               </div>
               <p className="text-base font-normal text-signoz_vanilla-400">
-                Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?
+                Tired of Datadog's unpredictable bills or New Relic's user-based pricing?
                 <br />
-                We’re here for you.
+                We're here for you.
               </p>
-            <PricingCalculator />
-            {/* <UsageList /> */}
-            <Card className="bg-transparent p-0 [&>div]:border-0">
-              <div className="flex items-center justify-center gap-4 p-2 bg-signoz_robin-500/10 rounded-lg">
-                <span className="text-base font-normal text-signoz_robin-400">Calculate your exact monthly bill</span>
-                <Button variant="default" rounded="full" className="flex-center !w-fit" id="btn-get-started-homepage-hero" to="/pricing/">
-                  Check Pricing
-                  <ArrowRight size={14} />
-                </Button>
+              <PricingCalculator show={["logs"]} showHeader={false} showFooter={false} />
+              <Card className="bg-transparent p-0 [&>div]:border-0">
+                <div className="flex items-center justify-between gap-4 p-4 bg-signoz_robin-500/10 rounded-lg">
+                  <span className="text-signoz_robin-400">Calculate your exact monthly bill</span>
+                  <Button variant="default" rounded="full" className="flex-center !w-fit" id="btn-get-started-homepage-hero" to="/pricing/">
+                    Check Pricing
+                    <ArrowRight size={14} />
+                  </Button>
                 </div>
               </Card>
             </div>
@@ -711,25 +599,6 @@ const UsageBasedPricing = () => {
   )
 }
 
-// const ExploreDocs = () => {
-//   return (
-//     <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-//       <div className="flex flex-col sm:flex-row">
-//         <div className="!w-[100%]  flex-1 md:!w-[300px]">
-//           <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-//             Explore Docs
-//           </p>
-//         </div>
-//         <div className="flex-[2_2_0%]">
-//           <div className="ml-0 justify-between gap-8 border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400 px-10 py-10 sm:flex-row">
-//             <DocsList />
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
 const SigNozStats = () => {
   const STATS_LIST = [
     {
@@ -739,8 +608,6 @@ const SigNozStats = () => {
       value: '10 million+',
     },
     { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '23k+' },
-    // { id: 3, logo: '/img/index_features/contributions.svg', name: 'Contributors', value: '140+' },
-    // { id: 4, logo: '/img/index_features/community.svg', name: 'Community Members', value: '4.5k+' },
   ]
   return (
     <section>
@@ -790,43 +657,3 @@ const SigNozStats = () => {
     </section>
   )
 }
-
-// const GetStarted = ({ page }) => {
-//   const getStartedId = `btn-get-started-${page}-bottom`
-//   const readDocumentationId = `btn-read-documentation-${page}-bottom`
-
-//   return (
-//     <div className="bg-[url('/img/background_blur/Rectangle_959.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-//       <div className="bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-//         <section className="!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
-//           <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-250px)] bg-no-repeat">
-//             <div className="flex flex-col gap-16">
-//               <div className="flex flex-col gap-12">
-//                 <p className="mb-0 mt-20 text-center text-4xl font-bold">
-//                   Get started with <br /> SigNoz Cloud today
-//                 </p>
-//                 <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-//                   <Button variant="default" rounded="full" to="/teams/" className="flex-center !w-fit" id={getStartedId}>
-//                     Get Started - Free
-//                     <ArrowRight size={14} />
-//                   </Button>
-//                   <Button variant="secondary" rounded="full" to="/docs/introduction/" className="flex-center !w-fit" id={readDocumentationId}>
-//                     <BookOpen size={14} />
-//                     Read Documentation
-//                   </Button>
-//                 </div>
-//               </div>
-//               <div className="relative flex items-center justify-center">
-//                 <img
-//                   src="/img/landing/landing_thumbnail.webp"
-//                   alt="Custom Thumbnail"
-//                   className="z-[0] -mb-36 w-3/5 rounded-lg max-sm:-mb-8"
-//                 />
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-//       </div>
-//     </div>
-//   )
-// }
