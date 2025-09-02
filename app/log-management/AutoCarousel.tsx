@@ -1,38 +1,49 @@
 "use client"
-import { useState, useEffect } from "react";
 import Image from "next/image";
+import Carousel from 'react-multi-carousel';
+import 'react-multi-carousel/lib/styles.css';
+
+const responsive = {
+  desktop: {
+    breakpoint: { max: 3000, min: 1024 },
+    items: 1,
+  },
+  tablet: {
+    breakpoint: { max: 1024, min: 464 },
+    items: 1,
+  },
+  mobile: {
+    breakpoint: { max: 464, min: 0 },
+    items: 1,
+  },
+};
 
 const AutoCarousel = ({ images }: { images: { src: string; alt: string }[] }) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
-  
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-      }, 2000); // Change image every 2 seconds
-  
-      return () => clearInterval(interval);
-    }, [images.length]);
-  
-    return (
-      <div className="relative w-full h-[400px] overflow-hidden rounded-lg">
+  return (
+    <div className="w-full h-[400px] rounded-lg">
+      <Carousel
+        responsive={responsive}
+        infinite={true}
+        autoPlay={true}
+        autoPlaySpeed={2000}
+        showDots={false}
+        arrows={false}
+        className="h-full"
+      >
         {images.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute w-full h-full transition-opacity duration-1000 ${
-              index === currentIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
+          <div key={index} className="w-full h-[400px]">
             <Image
               src={image.src}
               alt={image.alt}
               className="w-full h-full object-cover"
               width={1000}
-              height={400}
+              height={1000}
             />
           </div>
         ))}
-      </div>
-    );
-  };
+      </Carousel>
+    </div>
+  );
+};
 
-  export default AutoCarousel;
+export default AutoCarousel;
