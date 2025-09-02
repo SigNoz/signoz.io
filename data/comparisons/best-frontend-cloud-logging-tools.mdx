@@ -35,7 +35,13 @@ If GitHub stars determined logging tools, Sentry would win by a landslide. With 
 
 Sentry's intelligent error grouping is its killer feature. Instead of drowning in duplicate errors, Sentry automatically groups similar errors together, showing you the unique issues affecting your users. The breadcrumb trail feature captures the exact sequence of events leading to an error, including **console logs, network requests, and user interactions.**
 
+The session replay feature, while newer than competitors, integrates seamlessly with error reports. When an error occurs, you can watch exactly what the user did, with privacy controls to mask sensitive data.
 
+**Real Implementation Experience:**
+
+Setting up Sentry took just 8 minutes from signup to first error captured. The wizard automatically detected our NextJS project and provided copy-paste configuration. Within minutes, we had errors flowing in with full stack traces and logs.
+
+This is how the key implemenation part of sentry looks like:
 ```javascript
 // NextJS implementation with Sentry
 import * as Sentry from "@sentry/nextjs";
@@ -53,12 +59,6 @@ Sentry.init({
   ],
 });
 ```
-
-The session replay feature, while newer than competitors, integrates seamlessly with error reports. When an error occurs, you can watch exactly what the user did, with privacy controls to mask sensitive data.
-
-**Real Implementation Experience:**
-
-Setting up Sentry took just 8 minutes from signup to first error captured. The wizard automatically detected our NextJS project and provided copy-paste configuration. Within minutes, we had errors flowing in with full stack traces and logs.
 
 <Figure src="/img/comparisons/2025/09/best-frontend-cloud-logging-tools-sentry-error-details.webp" alt="Sentry logs dashboard showing errors coming from Chrome browser." caption="Sentry logs dashboard showing errors coming from Chrome browser." />
 
@@ -90,6 +90,11 @@ LogRocket takes a different approach: instead of just logging errors, it records
 
 LogRocket's session replay is unmatched in detail. It captures the full DOM, Redux/Vuex state changes, console logs, network requests with headers and responses, and even performance metrics. When debugging complex issues, this level of detail is invaluable.
 
+**Real Implementation Experience:**
+
+LogRocket's default installation captures everything, which felt invasive initially. We spent considerable time configuring privacy settings to redact sensitive data. The Redux integration was seamless, allowing us to see state changes alongside user actions.
+
+This is how the key implementation part of LogRocket looks like:
 ```javascript
 // LogRocket implementation
 import LogRocket from 'logrocket';
@@ -113,10 +118,6 @@ LogRocket.init('YOUR_APP_ID', {
 import setupLogRocketReact from 'logrocket-react';
 setupLogRocketReact(LogRocket);
 ```
-
-**Real Implementation Experience:**
-
-LogRocket's default installation captures everything, which felt invasive initially. We spent considerable time configuring privacy settings to redact sensitive data. The Redux integration was seamless, allowing us to see state changes alongside user actions.
 
 **Pros:**
 - Unparalleled debugging context with full session replay
@@ -147,6 +148,11 @@ When your frontend logs need to talk to your backend traces, Datadog Real User M
 
 The killer feature is end-to-end tracing. Click on a frontend error, and you can follow the request all the way through your backend services, databases, and third-party APIs. This correlation is powerful for debugging complex distributed systems.
 
+**Real Implementation Experience:**
+
+Datadog's setup was straightforward for teams already using Datadog. The integration with backend APM was seamless. However, the pricing calculator was complex, and costs can escalate quickly with high-traffic applications.
+
+This is how the key implementation part of Datadog RUM looks like:
 ```javascript
 // Datadog RUM implementation
 import { datadogRum } from '@datadog/browser-rum';
@@ -170,10 +176,6 @@ datadogRum.init({
 datadogRum.addLoggerGlobalContext('user_id', userId);
 datadogLogs.logger.info('User action', { action: 'checkout', amount: 99.99 });
 ```
-
-**Real Implementation Experience:**
-
-Datadog's setup was straightforward for teams already using Datadog. The integration with backend APM was seamless. However, the pricing calculator was complex, and costs can escalate quickly with high-traffic applications.
 
 <Figure src="/img/comparisons/2025/09/best-frontend-cloud-logging-tools-datadog-pricing.webp" alt="Datadog pricing calculator showing complex multi-tier pricing structure" caption="Datadog pricing calculator showing complex multi-tier pricing structure" />
 
@@ -220,6 +222,11 @@ New Relic Browser is part of New Relic's all-in-one monitoring platform. It's th
 
 New Relic's unified platform approach means you get frontend monitoring, backend APM, infrastructure monitoring, and log management all in one place. The generous free tier (100GB/month data ingest) is surprisingly capable for small to medium applications.
 
+**Real Implementation Experience:**
+
+New Relic's browser agent was easy to implement, but the UI feels dated compared to newer tools. The wealth of features can be overwhelming initially, but the documentation is comprehensive. Session replay works well but is an add-on feature.
+
+This is how the key implementation part of New Relic Browser looks like:
 ```javascript
 // New Relic Browser implementation
 // Can be added via NPM or script tag
@@ -246,10 +253,6 @@ new BrowserAgent(options)
 // Manual log capture
 newrelic.log('User completed checkout', {level: 'info'})
 ```
-
-**Real Implementation Experience:**
-
-New Relic's browser agent was easy to implement, but the UI feels dated compared to newer tools. The wealth of features can be overwhelming initially, but the documentation is comprehensive. Session replay works well but is an add-on feature.
 
 **Pros:**
 - Generous free tier (100GB/month)
@@ -279,6 +282,11 @@ Grafana's Frontend Observability brings the power of Grafana's visualization to 
 
 Grafana's strength lies in its incredible visualization capabilities and open architecture. You can create custom dashboards that combine frontend metrics with any other data source. The Faro Web SDK is built on OpenTelemetry standards, ensuring no vendor lock-in.
 
+**Real Implementation Experience:**
+
+Grafana's setup requires more technical knowledge than other tools. You need to understand Grafana's ecosystem, but once configured, the flexibility is unmatched. The ability to correlate frontend data with infrastructure metrics in custom dashboards is powerful.
+
+This is how the key implementation part of Grafana Faro looks like:
 ```javascript
 // Grafana Faro implementation
 import { initializeFaro } from '@grafana/faro-web-sdk';
@@ -306,10 +314,6 @@ faro.api.pushLog(['User action'], {
   context: { userId: '123', action: 'checkout' }
 });
 ```
-
-**Real Implementation Experience:**
-
-Grafana's setup requires more technical knowledge than other tools. You need to understand Grafana's ecosystem, but once configured, the flexibility is unmatched. The ability to correlate frontend data with infrastructure metrics in custom dashboards is powerful.
 
 **Pros:**
 - Incredible visualization and dashboard capabilities
@@ -341,6 +345,11 @@ SigNoz brings a fresh perspective as an OpenTelemetry-native observability platf
 
 SigNoz is built on OpenTelemetry from the ground up, meaning no vendor lock-in and standardized instrumentation. You can self-host for complete data control or use their cloud offering for convenience. The correlation between logs and traces is particularly powerful.
 
+**Real Implementation Experience:**
+
+SigNoz required more initial setup than SaaS alternatives, but the OpenTelemetry foundation means excellent flexibility. The ability to correlate frontend logs with backend traces using trace IDs was incredibly valuable for debugging.
+
+This is how the key implementation part of SigNoz looks like:
 ```javascript
 // SigNoz implementation with OpenTelemetry
 import { LoggerProvider, SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
@@ -383,10 +392,6 @@ logger.emit({
   }
 });
 ```
-
-**Real Implementation Experience:**
-
-SigNoz required more initial setup than SaaS alternatives, but the OpenTelemetry foundation means excellent flexibility. The ability to correlate frontend logs with backend traces using trace IDs was incredibly valuable for debugging.
 
 <Figure src="/img/comparisons/2025/09/best-frontend-cloud-logging-tools-signoz-trace-correlation.webp" alt="SigNoz Trace Correlation view showing frontend logs connected to backend traces" caption="SigNoz Trace Correlation view showing frontend logs connected to backend traces" />
 
