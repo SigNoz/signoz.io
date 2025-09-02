@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import TabPanel from '@/components/TabPanel'
 import { ArrowRight, BookOpen, Atom, Coins, DatabaseZap } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import StatsCard from '@/components/Card/card'
@@ -12,6 +11,7 @@ import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
 import AlternatingSides from '@/components/AlternatingSides/AlternatingSides'
 import PricingCalculator from 'app/pricing/pricingv1/components/PricingCalculator'
+import TabItem from '@/components/TabItem'
 
 const TESTIMONIALS = [
   {
@@ -199,7 +199,7 @@ const FEATURES = [
     buttonLink: "/docs/userguide/logs/",
     component: (
       <Tabs entityName="sources">
-        <TabPanel value="supported-sources" label="Supported Sources">
+        <TabItem value="supported-sources" label="Supported Sources">
           <div className="flex flex-col gap-8">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -256,8 +256,8 @@ const FEATURES = [
               VIEW ALL 50+ SOURCES
             </Button>
           </div>
-        </TabPanel>
-        <TabPanel value="collection-methods" label="Collection Methods">
+        </TabItem>
+        <TabItem value="collection-methods" label="Collection Methods">
           <div className="flex flex-col gap-8">
             <div className="flex items-center md:flex-row flex-col gap-8">
             <div>
@@ -296,12 +296,12 @@ const FEATURES = [
 
             {/* View Integration Guides */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" rounded="full" size={null} className="hover:bg-transparent">
+              <Button variant="ghost" rounded="full" size={null} className="hover:bg-transparent" to="/docs/logs-management/send-logs-to-signoz/">
                 VIEW INTEGRATION GUIDES
               </Button>
             </div>
           </div>
-        </TabPanel>
+        </TabItem>
       </Tabs>
     )
   },
