@@ -54,6 +54,7 @@ Configure the service pipeline to include the httpcheck receiver:
 
 ```yaml:config.yaml
 service:
+  pipelines:
     metrics:
       receivers: [otlp, httpcheck]
       processors: [batch]
@@ -99,6 +100,7 @@ Configure the service pipeline to include the `httpcheck` receiver:
 
 ```yaml:config.yaml
 service:
+  pipelines:
     metrics:
       receivers: [otlp, httpcheck]
       processors: [batch]
@@ -158,10 +160,11 @@ receivers:
     collection_interval: 300s
 
 service:
-  metrics:
-    receivers: [otlp, httpcheck/rapid, httpcheck/frequent, httpcheck/low]
-    processors: [batch]
-    exporters: [otlp]
+  pipelines:
+    metrics:
+      receivers: [otlp, httpcheck/rapid, httpcheck/frequent, httpcheck/low]
+      processors: [batch]
+      exporters: [otlp]
 ```
 
 **Note:** The receiver name format is `httpcheck` for the base receiver and `httpcheck/{name}` for additional instances. Using `httpchecklow` (without the slash) would return an error.
