@@ -9,10 +9,10 @@ import {
   SiDigitalocean,
   SiHelm,
   SiArgo,
-  SiLinux,
   SiAmazonecs,
   SiRedhatopenshift
 } from 'react-icons/si'
+import { VscVm } from "react-icons/vsc";
 import IconCardGrid from '../Card/IconCardGrid'
 
 /**
@@ -61,7 +61,7 @@ export default function SelfHostInstallationListicle({
 
   // Icons
   const dockerIcon = <SiDocker className="h-7 w-7 text-blue-500" />
-  const linuxIcon = <SiLinux className="h-7 w-7 text-black dark:text-white" />
+  const vmIcon = <VscVm className="h-7 w-7 text-black dark:text-white" />
   const k8sIcon = <SiKubernetes className="h-7 w-7 text-blue-600" />
   const awsIcon = <SiAmazonwebservices className="h-7 w-7 text-amber-500" />
   const gcpIcon = <SiGooglecloud className="h-7 w-7 text-blue-400" />
@@ -126,7 +126,7 @@ export default function SelfHostInstallationListicle({
         sectionName="VM"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
         cards={[
-          { name: 'Linux', href: '/docs/collection-agents/linux/overview', icon: linuxIcon, clickName: 'Linux VM' },
+          { name: 'OpenTelemetry Binary', href: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/', icon: vmIcon, clickName: 'OpenTelemetry Binary' },
         ]}
       />
     </div>
