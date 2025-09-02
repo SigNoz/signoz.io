@@ -520,6 +520,7 @@ const docsSideNav = [
     label: 'Collection Agents',
     type: 'category',
     isExpanded: false,
+    route: '/docs/collection-agents/agents',
     items: [
       {
         type: 'category',
