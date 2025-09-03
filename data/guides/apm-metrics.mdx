@@ -8,9 +8,17 @@ description: "Learn APM metrics in 2025: P50/P95/P99 latency, throughput, error 
 keywords: [APM metrics, application performance monitoring, APM tools, performance metrics, application monitoring, SigNoz, monitoring metrics, distributed tracing, microservices monitoring, OpenTelemetry]
 ---
 
+## What are APM Metrics?
+
+APM (Application Performance Monitoring) metrics are quantifiable measurements that track your application's response times, error rates, throughput, and resource consumption to ensure optimal performance, reliability, and user experience.
+
+**Analogy:**
+
 Think of your application like a patient in a hospital. Just as doctors rely on vital signs: heart rate, blood pressure, temperature to assess human health, Application Performance Monitoring (APM) uses metrics to assess application health. 
 
-But here's where the analogy gets interesting: while human vital signs are relatively straightforward to measure, modern applications are like complex organisms with thousands of interconnected systems. A single user request might travel through multiple services, databases, caches, and third-party APIs before returning a response. When something goes wrong in this intricate web, APM metrics become your diagnostic tools for rapid problem identification and resolution.
+But here's where the analogy gets interesting: while human vital signs are relatively straightforward to measure, modern applications are like complex organisms with thousands of interconnected systems. A single user request might travel through multiple services, databases, caches, and third-party APIs before returning a response. 
+
+When something goes wrong in this intricate web, **APM metrics become your diagnostic tools for rapid problem identification and resolution.**
 
 The difference between a minor hiccup and a costly outage often comes down to how quickly you can answer three fundamental questions:
 
@@ -446,19 +454,12 @@ The fastest way to get started with comprehensive APM is using SigNoz's managed 
 
 **2. Instrument your application** using OpenTelemetry auto-instrumentation:
 
-```bash
-# For Node.js applications
-npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
+To instrument your application with OpenTelemetry and send data to SigNoz, follow the instructions for your programming language or framework below.
 
-# Run your application with instrumentation
-export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"  
-export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="your-service-name"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
-node app.js
-```
+1. [JavaScript](/docs/instrumentation/javascript/)
+2. [Python](/docs/instrumentation/python/)
+3. [Java](/docs/instrumentation/java/)
+4. For additional languages and frameworks, see the complete [instrumentation documentation](https://signoz.io/docs/instrumentation/).
 
 **3. View your data**: Within minutes, you'll see service maps, performance metrics, and distributed traces in the SigNoz dashboard.
 
@@ -476,17 +477,39 @@ Those who have the expertise to manage SigNoz themselves or just want to start w
 
 APM metrics serve as your application's vital signs, providing the visibility needed to maintain optimal performance in increasingly complex distributed systems. The key to successful APM implementation lies not in collecting every possible metric, but in focusing on measurements that directly impact user experience and business outcomes.
 
-The journey from reactive firefighting to proactive performance management starts with understanding the fundamentals—response time percentiles that reveal user experience, error rates that indicate reliability, throughput that shows capacity, and resource utilization that predicts future needs. These core metrics provide the foundation upon which more sophisticated monitoring builds.
+Here is a quick reference to the APM metrics we covered in this guide:
 
-Modern applications demand modern monitoring approaches. Distributed tracing helps you understand request flows across microservices, while OpenTelemetry ensures your instrumentation investment remains portable across different backends. Container-native monitoring acknowledges that infrastructure is increasingly ephemeral, requiring service-focused rather than host-focused observability.
+### APM Metrics Quick Reference
 
-Perhaps most importantly, effective APM bridges the gap between technical implementation and business outcomes. SLIs, SLOs, and error budgets transform raw metrics into reliability targets that balance feature development velocity with user satisfaction. This business alignment ensures that monitoring provides genuine value rather than just technical curiosity.
+#### Performance Metrics
+- [Response Time/Latency](#response-timelatency-beyond-simple-averages) - P50, P95, P99 percentiles
+- [Throughput](#throughput-measuring-your-applications-capacity) - Requests per second/minute
+- [Time to First Byte (TTFB)](#time-to-first-byte-ttfb-the-foundation-of-user-experience) - Initial server response time
 
-Choose tools that align with your team size, technical requirements, and budget constraints, always prioritizing solutions your team will actually use over feature-rich platforms that create more noise than signal. Whether you opt for enterprise solutions with comprehensive features or open-source alternatives like SigNoz for cost-effective observability, the most important step is beginning the journey toward data-driven application management.
+#### Reliability Metrics
+- [Error Rates](#error-rates-your-applications-health-indicator) - Failed request percentages
+- [Availability/Uptime](#availabilityuptime-the-foundation-of-service-reliability) - Service operational time
 
-Start with basic monitoring of your most critical user journeys, establish performance baselines, and continuously refine your approach based on real-world operational experience. The investment in comprehensive application performance monitoring pays dividends through improved user satisfaction, reduced incident response times, and the confidence that comes from truly understanding your application's health.
+#### User Experience Metrics
+- [Apdex Score](#apdex-score-quantifying-user-satisfaction) - User satisfaction index
+- [Page Load Time](#page-load-time-components-understanding-the-complete-user-journey) - Core Web Vitals (LCP, INP, CLS)
 
-Your applications' reliability—and your users' trust—depends on the insights that only proper monitoring can provide.
+#### Infrastructure Metrics
+- [Resource Utilization](#resource-utilization-reading-your-systems-vital-signs) - CPU, memory, disk, network usage
+
+#### Database Performance Metrics
+- [Query Performance](#database-performance-metrics-the-hidden-performance-killer) - Slow queries, execution frequency
+- Connection Pool Health - Pool utilization and wait times
+- Cache Hit Ratios - Database and application cache performance
+
+#### Microservices Metrics
+- [Service Dependencies](#microservices-specific-metrics-navigating-distributed-complexity) - Circuit breaker status, retry patterns
+- Inter-Service Communication - Service-to-service latency
+- Distributed Transactions - Cross-service transaction success rates
+
+Start with basic monitoring of your most critical user journeys, establish performance baselines, and continuously refine your approach based on real-world operational experience.
+
+Your applications' reliability and your users' trust depends on the insights that only proper monitoring can provide.
 
 ---
 
