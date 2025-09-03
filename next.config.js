@@ -63,7 +63,8 @@ module.exports = () => {
   const plugins = [withContentlayer, withBundleAnalyzer]
   return plugins.reduce((acc, next) => next(acc), {
     reactStrictMode: true,
-    productionBrowserSourceMaps: true, // Enable source maps for debugging
+    // Source maps can significantly increase memory usage during build
+    productionBrowserSourceMaps: false,
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
       dirs: ['app', 'components', 'layouts', 'scripts'],
@@ -648,17 +649,15 @@ module.exports = () => {
         use: ['@svgr/webpack'],
       })
 
-      // this is to avoid caching for webpack
-      // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache
-      if (config.cache && !options.dev) {
-        config.cache = Object.freeze({
-          type: 'memory',
-        })
+      // Disable webpack filesystem cache in production to reduce peak memory during CI builds
+      // https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache
+      if (!options.dev) {
+        config.cache = false
       }
 
-      // Ensure source maps are generated in production (server & client)
+      // Keep devtool minimal in production to reduce memory usage
       if (!options.dev) {
-        config.devtool = 'source-map'
+        config.devtool = false
       }
 
       return config
