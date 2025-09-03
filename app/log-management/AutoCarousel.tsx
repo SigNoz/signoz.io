@@ -3,6 +3,7 @@ import Image from "next/image";
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 
+// Auto carousel responsive
 const responsive = {
   desktop: {
     breakpoint: { max: 3000, min: 1024 },
