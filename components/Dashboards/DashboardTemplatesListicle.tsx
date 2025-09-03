@@ -93,6 +93,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'CI/CD Dashboard Template',
   },
   {
+    name: 'Claude Code',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/claude-code',
+    icon: <SiClaude className="h-7 w-7 text-orange-500" />,
+    clickName: 'Claude Code Dashboard Template',
+  },
+  {
     name: 'ClickHouse',
     href: 'https://github.com/SigNoz/dashboards/tree/main/clickhouse',
     icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
@@ -259,12 +265,6 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/vercel-ai-sdk',
     icon: <SiVercel className="h-7 w-7 text-black-600" />,
     clickName: 'Vercel AI SDK Dashboard Template',
-  },
-  {
-    name: 'Claude Code',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/claude-code',
-    icon: <SiClaude className="h-7 w-7 text-orange-500" />,
-    clickName: 'Claude Code Dashboard Template',
   },
 ]
 
