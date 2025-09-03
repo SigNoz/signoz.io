@@ -640,6 +640,26 @@ module.exports = () => {
           source: "/docs/tutorial/opentelemetry-operator-usage/",
           destination: "/docs/collection-agents/k8s/otel-operator/overview",
           permanent: true
+        },
+        {
+          source: "/docs/llm/opentelemetry-openai-monitoring/",
+          destination: "/docs/opentelemetry-openai-monitoring/",
+          permanent: true
+        },
+        {
+          source: "/docs/community/llm-monitoring/",
+          destination: "/docs/llm-observability/",
+          permanent: true
+        },
+        {
+          source: "/docs/llm/vercel-ai-sdk-monitoring/",
+          destination: "/docs/vercel-ai-sdk-monitoring/",
+          permanent: true
+        },
+        {
+          source: "/docs/llm/llamaindex-monitoring/",
+          destination: "/docs/llamaindex-monitoring/",
+          permanent: true
         }
       ]
     },

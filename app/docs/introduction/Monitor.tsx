@@ -86,19 +86,19 @@ export default function Monitor() {
       internalLinks: [
         {
           name: 'Frontend',
-          href: '/docs/frontend-monitoring/opentelemetry-web-vitals/',
+          href: '/docs/frontend-monitoring/',
           icon: <SiReact className="h-5 w-5 text-blue-400" />,
           clickName: 'Frontend Monitoring Link',
         },
         {
           name: 'Mobile',
-          href: '/docs/frontend-and-mobile-monitoring/',
+          href: '/docs/mobile-monitoring/',
           icon: <SiAndroid className="h-5 w-5 text-green-500" />,
           clickName: 'Mobile Monitoring Link',
         },
         {
           name: 'LLMs',
-          href: '/docs/community/llm-monitoring/',
+          href: '/docs/llm-observability/',
           icon: <BrainCircuit className="h-5 w-5 text-purple-600" />,
           clickName: 'LLMs Monitoring Link',
         },

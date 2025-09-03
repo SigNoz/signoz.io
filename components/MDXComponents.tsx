@@ -47,6 +47,7 @@ import HostingDecision from './shared/HostingDecision'
 import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
 import K8sInstallationListicle from './Setup/K8sInstallationListicle'
 import MarketplaceInstallationListicle from './Setup/MarketplaceInstallationListicle'
+import CollectionAgentsListicle from './Setup/CollectionAgentsListicle'
 
 import ArticleSeriesBottom from './ArticleSeries/ArticleSeriesBottom'
 import ArticleSeriesTop from './ArticleSeries/ArticleSeriesTop'
@@ -59,6 +60,8 @@ import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsLis
 
 import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
 import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
+
+import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
 
 export const components: MDXComponents = {
   Image,
@@ -119,4 +122,6 @@ export const components: MDXComponents = {
   MarketplaceInstallationListicle,
   LLMMonitoringListicle,
   OtelCollectorFlow,
+  CollectionAgentsListicle,
+  ResponseTimeVisualizer,
 }

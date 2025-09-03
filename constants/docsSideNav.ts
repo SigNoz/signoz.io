@@ -50,6 +50,11 @@ const docsSideNav = [
             route: '/docs/product-features/invite-team-member',
             label: 'Invite Team Member',
           },
+          {
+            type: 'doc',
+            route: '/docs/product-features/keyboard-shortcuts',
+            label: 'Keyboard Shortcuts',
+          },
         ],
       },
       {
@@ -515,6 +520,7 @@ const docsSideNav = [
     label: 'Collection Agents',
     type: 'category',
     isExpanded: false,
+    route: '/docs/collection-agents/get-started',
     items: [
       {
         type: 'category',
@@ -541,6 +547,18 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra',
               },
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
+                    label: 'Monitor Multiple K8SClusters',
+                  },
+                ]
+              }
             ],
           },
           {
@@ -1915,6 +1933,11 @@ const docsSideNav = [
             route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
             label: 'Time Aggregation Best Practices',
           },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
+            label: 'How to Configure Alerts for Missing Data',
+          }
         ],
       },
       {
@@ -1939,6 +1962,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/frontend-monitoring/sending-traces',
         label: 'Sending Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-metrics',
+        label: 'Sending Metrics',
       },
       {
         type: 'doc',
@@ -2010,6 +2038,11 @@ const docsSideNav = [
       {
         route: '/docs/langchain-monitoring',
         label: 'LangChain Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/claude-code-monitoring',
+        label: 'Claude Code Monitoring',
         type: 'doc',
       },
     ],
@@ -3067,33 +3100,6 @@ const docsSideNav = [
             label: 'Metrics',
           },
         ],
-      },
-    ],
-  },
-  {
-    type: 'category',
-    isExpanded: false,
-    label: 'LLM Monitoring',
-    items: [
-      {
-        route: '/docs/llm/opentelemetry-openai-monitoring',
-        label: 'OpenAI Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/community/llm-monitoring',
-        label: 'LLM Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/llm/vercel-ai-sdk-monitoring',
-        label: 'Vercel AI SDK Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/llm/llamaindex-monitoring',
-        label: 'LlamaIndex Monitoring',
-        type: 'doc',
       },
     ],
   },

@@ -1,4 +1,43 @@
-# Contributing a Blog to the SigNoz Repository
+# Development Setup
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) - We use Node.js version 18.19.0
+- [NVM (Node Version Manager)](https://github.com/nvm-sh/nvm) - For managing Node.js versions
+- [Yarn](https://yarnpkg.com/) - Package manager
+
+## Setting Up Your Development Environment
+
+1. Install NVM if you haven't already:
+   ```bash
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+   ```
+
+2. Install and use the correct Node.js version by running the following commands in the project directory:
+   ```bash
+   nvm install
+   nvm use
+   ```
+
+3. Install dependencies:
+   ```bash
+   yarn install
+   ```
+
+4. Build the project to ensure there are no errors:
+   ```bash
+   yarn build
+   ```
+   This will create a `build` directory with the production build of the website. Check the output for any errors.
+
+5. Start the development server:
+   ```bash
+   yarn dev
+   ```
+
+6. Open your browser and navigate to `http://localhost:3000` to view the website locally.
+
+# Contributing a Blog to SigNoz
 
 We appreciate your interest in contributing to the SigNoz blog! Follow the steps below to create and submit your blog post.
 
@@ -125,33 +164,28 @@ Before pushing your changes, it's a good idea to fetch and merge any changes fro
     
     ```
 
-## Step 10: Build the Project Locally
+## Step 10: Test Your Changes
 
-1. Install the project dependencies using Yarn:
+After setting up your development environment (see [Development Setup](#development-setup) section above), make sure to:
 
+1. Install the project dependencies:
    ```bash
    yarn install
    ```
 
 2. Build the project to ensure there are no errors:
-
    ```bash
    yarn build
    ```
 
-3. This will create a `build` directory with the production build of the website. Check the output for any errors.
-
-## Step 11: Run the Project Locally
-
-1. Start the development server:
-
+3. Start the development server:
    ```bash
-   yarn start
+   yarn dev
    ```
 
-2. Open your browser and navigate to `http://localhost:3000` to view the website locally. Check your blog post to ensure everything looks correct.
+4. Open your browser and navigate to `http://localhost:3000` to view the website locally. Check your blog post to ensure everything looks correct.
 
-## Step 12: Create a Pull Request
+## Step 11: Create a Pull Request
 
 1. Navigate to your forked repository on GitHub.
 2. Click on the "Compare & pull request" button.
