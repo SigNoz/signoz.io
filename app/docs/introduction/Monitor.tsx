@@ -92,7 +92,7 @@ export default function Monitor() {
         },
         {
           name: 'Mobile',
-          href: '/docs/frontend-and-mobile-monitoring/',
+          href: '/docs/mobile-monitoring/',
           icon: <SiAndroid className="h-5 w-5 text-green-500" />,
           clickName: 'Mobile Monitoring Link',
         },
