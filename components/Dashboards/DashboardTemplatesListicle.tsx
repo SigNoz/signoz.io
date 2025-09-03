@@ -14,6 +14,7 @@ import {
   SiSnowflake,
   SiClickhouse,
   SiVercel,
+  SiClaude
 } from 'react-icons/si'
 import { 
   Monitor, 
@@ -90,6 +91,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/cicd',
     icon: <Settings className="h-7 w-7 text-green-600" />,
     clickName: 'CI/CD Dashboard Template',
+  },
+  {
+    name: 'Claude Code',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/claude-code',
+    icon: <SiClaude className="h-7 w-7 text-orange-500" />,
+    clickName: 'Claude Code Dashboard Template',
   },
   {
     name: 'ClickHouse',
