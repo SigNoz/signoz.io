@@ -61,7 +61,6 @@ import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsLis
 import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
 
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
-import ThroughputCapacityVisualizer from './APMMetrics/ThroughputCapacityVisualizer'
 
 export const components: MDXComponents = {
   Image,
@@ -123,5 +122,4 @@ export const components: MDXComponents = {
   LLMMonitoringListicle,
   CollectionAgentsListicle,
   ResponseTimeVisualizer,
-  ThroughputCapacityVisualizer,
 }
