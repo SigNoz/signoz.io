@@ -60,6 +60,8 @@ import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsLis
 
 import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
 
+import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
+
 export const components: MDXComponents = {
   Image,
   TOCInline,
@@ -119,4 +121,5 @@ export const components: MDXComponents = {
   MarketplaceInstallationListicle,
   LLMMonitoringListicle,
   CollectionAgentsListicle,
+  ResponseTimeVisualizer,
 }
