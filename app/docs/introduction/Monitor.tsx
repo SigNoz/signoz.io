@@ -86,7 +86,7 @@ export default function Monitor() {
       internalLinks: [
         {
           name: 'Frontend',
-          href: '/docs/frontend-monitoring/opentelemetry-web-vitals/',
+          href: '/docs/frontend-monitoring/',
           icon: <SiReact className="h-5 w-5 text-blue-400" />,
           clickName: 'Frontend Monitoring Link',
         },
