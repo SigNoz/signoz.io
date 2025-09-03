@@ -58,6 +58,7 @@ import APMDashboardsListicle from './Dashboards/APMDashboardsListicle'
 import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsListicle'
 
 import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
+import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 
 export const components: MDXComponents = {
   Image,
@@ -117,4 +118,5 @@ export const components: MDXComponents = {
   HostMetricsDashboardsListicle,
   MarketplaceInstallationListicle,
   LLMMonitoringListicle,
+  OtelCollectorFlow,
 }
