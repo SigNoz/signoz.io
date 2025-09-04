@@ -94,7 +94,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'Claude Code',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/claude-code',
+    href: '/docs/dashboards/dashboard-templates/claude-code-dashboard/',
     icon: <SiClaude className="h-7 w-7 text-orange-500" />,
     clickName: 'Claude Code Dashboard Template',
   },
