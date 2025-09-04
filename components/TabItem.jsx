@@ -1,7 +1,7 @@
 import React from 'react';
 
-const TabItem = ({ value, label, children }) => {
-  return <div value={value} label={label}>{children}</div>;
+const TabItem = ({ value, label, children, default: defaultProp }) => {
+  return <div value={value} label={label} data-default={defaultProp}>{children}</div>;
 };
 
 export default TabItem;
