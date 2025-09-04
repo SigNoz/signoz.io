@@ -1574,6 +1574,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/claude-code-dashboard',
+            label: 'Claude Code',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
             label: 'Docker Container',
           },
