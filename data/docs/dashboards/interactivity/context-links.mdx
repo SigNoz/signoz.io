@@ -1,0 +1,69 @@
+---
+date: 2025-09-03
+id: context-links
+title: Context Links
+---
+
+**Context Links** are links available in a panel’s **context menu**.  
+They let you attach dynamic URLs to a panel and navigate to **internal explorers** (Logs, Traces, Metrics) or **external tools** (e.g. Jenkins, PagerDuty) using the values of the data point you clicked.  
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/context-links-eg.png" width="80%" alt="Context Links in Menu"/>
+    <figcaption><i>Context Links in Menu</i></figcaption>
+</figure>
+
+---
+
+## How it works
+1. Edit a panel and open the **Context Links** section.  
+2. Click **+ Context Link** and configure:  
+   - **Label**: The menu text (fallback is the raw URL).  
+   - **URL**: A template URL with variables like `{{_service.name}}` or `{{timestamp_start}}`.  
+   - **Query params**: Manage key–value pairs visually in the table. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/create-context-links.png" width="80%" alt="Creating a Context Link"/>
+    <figcaption><i>Creating a Context Link</i></figcaption>
+</figure>
+ 
+3. The modal keeps the URL and key–value table in sync:  
+   - Editing the URL auto-populates the params table (values are decoded).  
+   - Editing the table updates the URL (values are encoded).  
+4. In the dashboard, **click** a chart datapoint, bar segment, or table row to open the **context menu**.  
+5. **Select the created link** — variables are resolved and the destination opens.  
+
+---
+
+## Available variables
+You can use different types of variables inside the URL or param values:
+
+| Type | Description | Syntax | Example |
+|------|-------------|--------|---------|
+| **Time range** | Inserts the current dashboard’s absolute start and end time (epoch ms). | `{{timestamp_start}}`, `{{timestamp_end}}` | `from={{timestamp_start}}&to={{timestamp_end}}` |
+| **Query variables** | The group by fields in the query the user clicks on. Available only when the panel query has a **GROUP BY**. | `{{_fieldName}}` | `{{_service.name}}`, `{{_trace_id}}` |
+| **Dashboard variables** | Any dashboard-level variable defined in the dashboard settings. | `{{varName}}` | `{{host}}`, `{{env}}` |
+
+---
+
+## Examples
+**1. View trace details from a table**
+```yaml
+Label: View Trace Details
+URL: /trace/{{_trace_id}}
+```
+
+**2. External link with variables (Jenkins / PagerDuty)**
+```yaml
+Label: Open in Jenkins
+URL: https://jenkins.example.com/job/{{_service.name}}?from={{timestamp_start}}&to={{timestamp_end}}
+
+Label: PagerDuty Alerts
+URL: https://pagerduty.example.com/incidents?service={{_service.name}}&since={{timestamp_start}}&until={{timestamp_end}}
+```
+
+---
+
+## Why use it
+- **Seamless navigation**: Jump across signals (Logs ↔ Traces ↔ Metrics) or to external tools.
+- **Context preservation**: Links carry the clicked value, filters, and time range automatically.
+- **Faster debugging**: One-click access to deep-dive views without rebuilding queries.
