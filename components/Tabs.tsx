@@ -22,13 +22,13 @@ const Tabs = ({ children, entityName }) => {
   const defaultChild = childrenArray.find((child): child is React.ReactElement => 
     isValidElement(child) && child.props.default
   )
-  const defaultActiveTab = (defaultChild?.props.value || defaultChild?.props.label) ?? (firstValidChild?.props.value || firstValidChild?.props.label) ?? null
+  const defaultActiveTab = defaultChild?.props.value ?? firstValidChild?.props.value ?? null
   
   let selectedTab
   if (entityName === 'plans') {
     selectedTab = defaultActiveTab
   } else if (environment && childrenArray.some((child): child is React.ReactElement => 
-    isValidElement(child) && (child.props.value || child.props.label) === environment
+    isValidElement(child) && child.props.value === environment
   )) {
     // If environment matches a tab value directly, use it
     selectedTab = environment
@@ -48,18 +48,17 @@ const Tabs = ({ children, entityName }) => {
         {childrenArray.map((child) => {
           if (!isValidElement(child)) return null
           const { value, label } = child.props
-          const tabValue = value || label
 
-          if (hideSelfHostTab && tabValue === 'self-host') return null
+          if (hideSelfHostTab && value === 'self-host') return null
           return (
             <button
-              key={tabValue}
+              key={value}
               className={`px-4 py-2 text-sm font-medium focus:outline-none ${
-                activeTab === tabValue
+                activeTab === value
                   ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
-              onClick={() => setActiveTab(tabValue)}
+              onClick={() => setActiveTab(value)}
             >
               {label}
             </button>
@@ -68,12 +67,12 @@ const Tabs = ({ children, entityName }) => {
       </div>
       <div className="p-4">
         {childrenArray.map((child) => {
-          if (!isValidElement(child) || (hideSelfHostTab && (child.props.value || child.props.label) === 'self-host')) {
+          if (!isValidElement(child) || (hideSelfHostTab && child.props.value === 'self-host')) {
             return null
           }
 
-          if ((child.props.value || child.props.label) === activeTab)
-            return <div key={(child.props.value || child.props.label)}>{child.props.children}</div>
+          if (child.props.value === activeTab)
+            return <div key={child.props.value}>{child.props.children}</div>
           return null
         })}
       </div>
