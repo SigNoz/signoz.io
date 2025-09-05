@@ -1138,7 +1138,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/send-logs/python-logs',
+                route: '/docs/logs-management/send-logs/python-logs',
                 label: 'Python Logs',
               },
               {
