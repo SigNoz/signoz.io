@@ -14,7 +14,8 @@ import {
   SiSnowflake,
   SiClickhouse,
   SiVercel,
-  SiClaude
+  SiClaude,
+  SiGooglegemini
 } from 'react-icons/si'
 import { 
   Monitor, 
@@ -133,6 +134,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/gcp/compute-engine',
     icon: <Cloud className="h-7 w-7 text-blue-500" />,
     clickName: 'GCP Compute Engine Dashboard Template',
+  },
+  {
+    name: 'Google Gemini',
+    href: 'https://github.com/SigNoz/dashboards/tree/main/google-gemini',
+    icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
+    clickName: 'Google Gemini Dashboard Template',
   },
   {
     name: 'Hadoop',
