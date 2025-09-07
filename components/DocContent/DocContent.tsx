@@ -31,11 +31,12 @@ const DocContent: React.FC<{
         })
       : null
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  const isOnboarding = source === ONBOARDING_SOURCE
 
   return (
     <>
-      <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
-        {post.tags && post.tags.length > 0 && (
+      <div className={`doc-content ${isOnboarding ? 'product-onboarding' : ''}`}>
+        {!isOnboarding && post.tags && post.tags.length > 0 && (
           <TagsWithTooltips tags={post.tags} />
         )}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-2 mb-4">
