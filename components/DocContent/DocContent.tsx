@@ -11,6 +11,7 @@ import TableOfContents from '../DocsTOC/DocsTOC'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
+import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 
 const DocContent: React.FC<{
   title: string
@@ -34,7 +35,12 @@ const DocContent: React.FC<{
   return (
     <>
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
-        <h2 className="mt-2 text-3xl">{title}</h2>
+        {post.tags && post.tags.length > 0 && (
+          <TagsWithTooltips tags={post.tags} />
+        )}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-2 mb-4">
+          <h2 className="text-3xl m-0">{title}</h2>
+        </div>
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
         <div className="flex justify-between items-center mt-8 text-sm">
           {formattedDate && (
