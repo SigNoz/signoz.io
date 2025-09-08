@@ -2,7 +2,7 @@
 title: "Fixing Upstream Connect Errors (Docker, Kubernetes, Spring Boot & More)"
 slug: "upstream-connect-error"
 date: "2025-09-08"
-tags: [networking, devops, spring-boot, java]
+tags: [devops]
 authors: ["niyati_thakkar"]
 description: "Fix upstream connect errors in 5 minutes. Complete guide with copy-paste solutions for Docker, Kubernetes, Spring Boot, Nginx. Includes troubleshooting flowchart and real examples."
 keywords: [upstream connect error, 502 bad gateway nginx upstream, 503 service unavailable kubernetes, connection refused while connecting to upstream, upstream connect error spring boot, java 11 networking, docker nginx upstream connection failed]
@@ -324,6 +324,8 @@ server {
 }
 ```
 
+The `proxy_next_upstream` directive automatically retries failed requests on different backend servers. Combined with appropriate timeouts, this prevents single-point failures from affecting users.
+
 #### Docker Compose Networking
 
 Docker Compose automatically creates a network for your services, making inter-container communication easier. Here's a complete working configuration:
@@ -370,7 +372,7 @@ networks:
     driver: bridge
 ```
 
-The `depends_on` with `condition: service_healthy` ensures nginx only starts after the backend is responding to health checks, preventing startup-order related upstream errors.
+The `depends_on` with `condition: service_healthy` ensures nginx only starts after the backend is responding to health checks, preventing startup-order related upstream errors. The `expose` directive makes port 3000 available only to linked services, not to the host system, enhancing security.
 
 ### Kubernetes Solutions
 
@@ -443,6 +445,8 @@ spec:
   type: ClusterIP
 ```
 
+The readiness probe prevents traffic from reaching pods until they're ready to handle requests. The liveness probe restarts unhealthy pods automatically. This combination ensures only healthy pods receive traffic.
+
 To verify the Service has discovered Pods:
 
 ```bash
@@ -456,6 +460,8 @@ kubectl get endpoints backend-service
 kubectl get pods --show-labels
 kubectl describe service backend-service
 ```
+
+The `kubectl get endpoints` command reveals whether Kubernetes has successfully matched pods to your service. Empty endpoints indicate a selector mismatch—the most common cause of upstream errors in Kubernetes.
 
 #### Istio Service Mesh Issues
 
@@ -489,6 +495,8 @@ spec:
     mode: PERMISSIVE  # Accepts both encrypted and plain text
 ```
 
+PERMISSIVE mode allows gradual migration to mTLS. Services with sidecars communicate securely while legacy services without sidecars still work, preventing upstream errors during transition.
+
 2. **DestinationRule for connection management:**
 
 ```yaml
@@ -514,6 +522,8 @@ spec:
       minHealthPercent: 30         # Panic threshold
 ```
 
+The outlier detection acts as a circuit breaker, automatically removing unhealthy instances from the load balancing pool. This prevents cascading failures when backend services become unreliable.
+
 To debug Istio-related upstream errors:
 
 ```bash
@@ -529,6 +539,8 @@ kubectl logs $POD -c istio-proxy | grep -E "UC|UF|UH"
 # UF = Upstream Connection Failure
 # UH = No Healthy Upstream
 ```
+
+These Envoy-specific commands expose internal proxy metrics. The error flags (UC, UF, UH) pinpoint exactly why connections fail, whether it's network issues or health check failures.
 
 ## Spring Boot & Java 11 Specific Considerations
 
@@ -561,21 +573,25 @@ When diagnosing upstream errors in Spring Boot applications, follow this systema
 ```bash
 curl http://localhost:8080/actuator/health | jq .
 ```
+The health endpoint aggregates all component statuses. A DOWN status in any dependency (database, message broker) often causes upstream errors.
 
 2. **Review Connection Pool Metrics**:
 ```bash
 curl http://localhost:8080/actuator/metrics/hikaricp.connections.active | jq .
 ```
+Connection pool exhaustion is a common cause of upstream errors. If active connections equal max pool size, requests queue and eventually timeout.
 
 3. **Analyze Thread Dump for Blocked Threads**:
 ```bash
 curl http://localhost:8080/actuator/threaddump | jq '.threads[] | select(.threadState == "BLOCKED")'
 ```
+Blocked threads waiting for connections indicate pool exhaustion or deadlocks. Multiple blocked HTTP client threads suggest upstream services are slow or unresponsive.
 
 4. **Check Circuit Breaker Status**:
 ```bash
 curl http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.state | jq .
 ```
+An OPEN circuit breaker stops calling failing services, preventing upstream errors from cascading. Check if breakers are open unexpectedly.
 
 5. **Enable HTTP Client Debug Logging**:
 ```bash
@@ -583,6 +599,7 @@ curl http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.state | 
 logging.level.org.apache.http.wire=DEBUG
 logging.level.org.apache.http.headers=DEBUG
 ```
+Wire-level logging reveals exactly what's happening during HTTP communication, including connection establishment, TLS handshakes, and request/response details.
 
 6. **Monitor JVM Network Connections**:
 ```bash
@@ -592,6 +609,7 @@ netstat -an | grep ESTABLISHED | grep <port>
 # Monitor connection states
 watch -n 1 'netstat -an | grep <port> | awk "{print \$6}" | sort | uniq -c'
 ```
+Real-time connection monitoring reveals patterns like connection leaks (growing ESTABLISHED count) or exhaustion (many TIME_WAIT states), helping identify the root cause of upstream errors.
 
 ## Monitoring with SigNoz
 
@@ -661,6 +679,8 @@ Build dashboards that show the health of your entire request pipeline:
 3. **P99 Latency**: Identify performance degradation before it becomes an error
 4. **Connection Pool Metrics**: Monitor connection usage and exhaustion
 5. **JVM Metrics**: For Spring Boot apps, track heap usage, GC activity, and thread pools
+
+<Figure src="/img/docs/dashboards/dashboard-templates/jvm-metrics.webp" alt="JVM metrics dashboard" caption="JVM metrics dashboard" />
 
 ## Get Started with SigNoz
 
