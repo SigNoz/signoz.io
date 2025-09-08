@@ -1543,36 +1543,8 @@ const docsSideNav = [
       },
       {
         type: 'category',
-        isExpanded: false,
         route: '/docs/dashboards/interactivity',
         label: 'Interactivity',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/dashboards/interactivity/view-in-logs-traces',
-            label: 'View in Logs/Traces',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/interactivity/breakout-by',
-            label: 'Breakout by',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/interactivity/context-links',
-            label: 'Context Links',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/interactivity/cross-filtering',
-            label: 'Cross-filtering',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/interactivity/filter-in-tables',
-            label: 'Filter in Tables',
-          },
-        ],
       },
       {
         type: 'doc',
