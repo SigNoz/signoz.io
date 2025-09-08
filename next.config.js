@@ -149,7 +149,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3am701p9u-qEO6jxUapH4Vnnptot_RGA',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3cy3atyr6-yjgvOm42ZqD2HeszrXuvOA',
           basePath: false,
           permanent: true,
         },
@@ -659,6 +659,11 @@ module.exports = () => {
         {
           source: "/docs/llm/llamaindex-monitoring/",
           destination: "/docs/llamaindex-monitoring/",
+          permanent: true
+        },
+        {
+          source: "/guides/upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11/",
+          destination: "/guides/upstream-connect-error/",
           permanent: true
         }
       ]
