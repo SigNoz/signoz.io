@@ -1139,13 +1139,8 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/userguide/python-logs-auto-instrumentation',
-                label: 'Python Logs Auto-Instrumentation',
-              },
-              {
-                type: 'doc',
-                route: '/docs/userguide/collecting_application_logs_otel_sdk_python',
-                label: 'Using OTel Python SDK',
+                route: '/docs/logs-management/send-logs/python-logs',
+                label: 'Python Logs',
               },
               {
                 type: 'doc',
