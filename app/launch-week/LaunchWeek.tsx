@@ -102,7 +102,7 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href=""
+              href="/blog/interactive-dashboards"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
@@ -120,7 +120,7 @@ const MainSection: React.FC = () => {
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
-                    
+                    <ArrowRight size={14} />
                   </div>
                 </div>
               </div>
@@ -144,12 +144,12 @@ const MainSection: React.FC = () => {
             </Modal>
           </div>
 
-         {/* <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
+        <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
-              <div className="text-base uppercase text-signoz_vanilla-400">Tuesday ⎯ May 13</div>
+              <div className="text-base uppercase text-signoz_vanilla-400">Tuesday ⎯ Sep 09</div>
               <div className="flex flex-col gap-2">
                 <Link
-                  href="https://www.linkedin.com/events/introducingmetricsexplorer-sign7325454315593105410/theater/"
+                  href="https://www.linkedin.com/events/querybuilderv5-signozlaunchweek7368361520373620736/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
                   className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
@@ -162,7 +162,7 @@ const MainSection: React.FC = () => {
                 <div
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
-                  onClick={() => handleOpenModal('mClFZxf9A3E')}
+                  onClick={() => handleOpenModal('a6GtE_Fah-g')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -172,33 +172,31 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/metrics-explorer"
+              href=""
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/blog/2025/05/metrics-explorer-cover.webp"
+                src="/img/blog/2025/09/query-builder-v5.webp"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div className="min-w-[306px]">
                   <div className="font-eedium mb-2 text-base">
-                    Metrics Explorer - Search, Query, and Analyze all your Metrics at one place
+                    Query Builder v5
                   </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    Building dashboards just got a whole lot easier. Instantly discover, filter, and
-                    validate every metric flowing into your stack with Metrics Explorer.
+                    v5 brings familiar SQL-like syntax to observability data with expression-based querying that works across logs, metrics, and traces. Write complex queries using the syntax you already know.
                   </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
-                    <ArrowRight size={14} />
                   </div>
                 </div>
               </div>
             </Link>
           </div>
 
-          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
+           {/*<div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ May 14</div>
               <div className="flex flex-col gap-2">
