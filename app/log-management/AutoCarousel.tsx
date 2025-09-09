@@ -21,7 +21,7 @@ const responsive = {
 
 const AutoCarousel = ({ images }: { images: { src: string; alt: string }[] }) => {
   return (
-    <div className="w-full h-[400px] rounded-lg">
+    <div className="w-full h-80 rounded-lg">
       <Carousel
         responsive={responsive}
         infinite={true}
@@ -32,7 +32,7 @@ const AutoCarousel = ({ images }: { images: { src: string; alt: string }[] }) =>
         className="h-full"
       >
         {images.map((image, index) => (
-          <div key={index} className="w-full h-[400px]">
+          <div key={index} className="w-full">
             <Image
               src={image.src}
               alt={image.alt}

@@ -19,7 +19,7 @@ const CustomerStories = () => {
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90 pointer-events-none" />
         
-        <div className="relative z-10">
+        <div className="relative">
           <div className={`container pb-16`}>
             <div className="flex flex-col gap-6 pb-32">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
@@ -120,11 +120,11 @@ function LogsManagement() {
         <HeroCards />
         <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
           <AlternatingSides items={FEATURES} />
-          <Card className="p-0 [&>*]:rounded-none [&>*]:border-1 bg-transparent">
+          <div className="p-0 border-b border-signoz_slate-400/50 border-dashed bg-transparent">
             <div className="flex flex-col md:flex-row gap-12 items-start h-full p-6">
               <div className="flex-1 h-full flex flex-col justify-between">
                 <h2 className="font-semibold text-signoz_vanilla-100">Store your Data</h2>
-                <p className="text-signoz_vanilla-400 mb-32 leading-relaxed">Configurable hot and cold storage periods let you balance query performance with storage costs for long-term log retention and compliance needs.</p>
+                <p className="text-signoz_vanilla-400 mb-24 leading-relaxed">Configurable hot and cold storage periods let you balance query performance with storage costs for long-term log retention and compliance needs.</p>
                 <div className="flex gap-12">
                   <div className="border-r border-signoz_slate-400/60 border-dashed pr-12">
                     <h3 className=" font-semibold text-signoz_vanilla-100 mb-4">50%</h3>
@@ -142,12 +142,12 @@ function LogsManagement() {
                     <thead className='!border-1 !border-signoz_slate-400/50'>
                       <tr className='!border-signoz_slate-400/50 border-y-1'>
                         <td className="!border-none !border-signoz_slate-800 px-2 py-4 bg-signoz_ink-400/60">
-                          <div className="text-sm font-medium text-signoz_vanilla-400">
+                          <div className="text-xs font-medium text-signoz_vanilla-400">
                             HOT STORAGE PERIOD
                           </div>
                         </td>
                         <td className="!border-none !border-signoz_slate-800 px-2 py-4 text-center bg-signoz_ink-400" colSpan={5}>
-                          <div className="text-sm font-medium text-signoz_vanilla-400">
+                          <div className="text-xs font-medium text-signoz_vanilla-400">
                             PERIOD IN COLD STORAGE AFTER HOT STORAGE
                           </div>
                         </td>
@@ -156,7 +156,7 @@ function LogsManagement() {
                         <td className="!border-none p-2 bg-signoz_ink-400" />
                         {STORAGE_DATA.coldPeriods.map((period, index) => (
                           <td key={index} className="!border-none p-4 text-center">
-                            <div className="text-sm font-medium text-signoz_vanilla-400">
+                            <div className="text-xs font-medium text-signoz_vanilla-400">
                               {period.value} {period.unit}
                             </div>
                           </td>
@@ -167,12 +167,12 @@ function LogsManagement() {
                       {STORAGE_DATA.rows.map((row, rowIndex) => (
                         <tr key={rowIndex} className="!border-signoz_slate-400/50 border-y-1 bg-signoz_ink-400/40">
                           <td className="!border-none p-2 bg-signoz_ink-400/60">
-                            <div className="flex justify-between items-center text-signoz_robin-400">
+                            <div className="flex justify-between items-center text-signoz_robin-400 text-xs">
                               {row.period.value} {row.period.unit} <Badge color="vanilla">$ / GB</Badge>
                             </div>
                           </td>
                           {row.prices.map((price, priceIndex) => (
-                            <td key={priceIndex} className="!border-none p-2 text-center text-signoz_vanilla-100">
+                            <td key={priceIndex} className="!border-none p-2 text-center text-signoz_vanilla-100 text-xs">
                               {price}
                             </td>
                           ))}
@@ -183,7 +183,7 @@ function LogsManagement() {
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
         </div>
         <UsageBasedPricing />
         <SigNozStats />
@@ -198,7 +198,7 @@ const HeroCards = () => {
     <div className="section-container !mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed p-0">
       <div className="grid grid-cols-1 md:grid-cols-3">
         {CARDS.map((card, index) => (
-          <Card key={index} className="p-0 [&>*]:rounded-none [&>*]:border-1 bg-transparent">
+          <div key={index} className="p-0 border-r border-t border-signoz_slate-400/50 border-dashed bg-transparent">
             <div className="p-4">
               <div className="grid grid-cols-1 gap-4">
                 {card.icon}
@@ -206,7 +206,7 @@ const HeroCards = () => {
               </div>
               <p className="mt-2 text-sm text-signoz_vanilla-400">{card.description}</p>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
     </div>
@@ -319,7 +319,7 @@ const UsageBasedPricing = () => {
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <Card className="bg-transparent p-0 [&>div]:border-1 [&>div]:rounded-none">
+          <div className="bg-transparent p-0 border-b border-l border-signoz_slate-400/50 border-dashed">
             <div className="px-10 py-10 flex flex-col gap-2">
               <div className="text-2xl font-semibold text-signoz_vanilla-100">
                 Pricing you can trust
@@ -340,7 +340,7 @@ const UsageBasedPricing = () => {
                 </div>
               </Card>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>
@@ -372,7 +372,7 @@ const SigNozStats = () => {
           </div>
 
           <div className="flex flex-[2_2_0%] flex-col">
-            <Card className="p-0 bg-transparent [&>*]:border-1">
+            <div className="p-0 bg-transparent border-b border-l border-signoz_slate-400/50 border-dashed">
               <div className="p-6">
                 <DevelopersLoveSigNozCards />
               </div>
@@ -399,7 +399,7 @@ const SigNozStats = () => {
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </Button>
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       </div>

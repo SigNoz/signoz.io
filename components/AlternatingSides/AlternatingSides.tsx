@@ -26,7 +26,7 @@ const AlternatingSidesItem: React.FC<AlternatingSidesItemProps> = ({
   isReversed = false,
 }) => {
   const contentSide = (
-    <div className="flex flex-col justify-between p-8 md:w-1/2">
+    <div className="flex flex-col p-8 md:w-1/2">
       <div>
         <h2 className="text-signoz_vanilla-100">{title}</h2>
         <p className="text-signoz_vanilla-400">{description}</p>
@@ -58,12 +58,12 @@ const AlternatingSides: React.FC<AlternatingSidesProps> = ({ items }) => {
   return (
     <div className="w-full">
       {items.map((item, index) => (
-        <Card
+        <div
           key={index}
-          className="bg-transparent p-0 [&>div]:border-1 [&>div]:rounded-none"
+          className="bg-transparent p-0 border-b border-signoz_slate-400/50 border-dashed"
         >
           <AlternatingSidesItem {...item} isReversed={index % 2 !== 0} />
-        </Card>
+        </div>
       ))}
     </div>
   );

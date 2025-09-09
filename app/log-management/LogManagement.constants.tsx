@@ -30,93 +30,95 @@ export const FEATURES = [
       component: (
         <Tabs entityName="sources">
           <TabItem value="supported-sources" label="Supported Sources">
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-4 min-h-56">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">CLOUD</h3>
+                <div className="border-r-1 border-signoz_slate-400 border-dashed">
+                  <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">CLOUD</h3>
                   <div className="flex justify-start items-center gap-4">
                     <div className="flex items-center">
-                      <img src="/img/icons/aws-icon.svg" alt="AWS" className="h-8" />
+                      <Image src="/img/icons/aws-icon.svg" alt="AWS" className="h-8" width={32} height={32} />
                     </div>
                     <div className="flex items-center">
-                      <img src="/img/icons/gcp-icon.svg" alt="Google Cloud" className="h-8" />
+                      <Image src="/img/icons/gcp-icon.svg" alt="Google Cloud" className="h-8" width={32} height={32} />
                     </div>
                     <div className="flex items-center">
-                      <img src="/img/icons/azure-icon.svg" alt="Azure" className="h-8" />
+                      <Image src="/img/icons/azure-icon.svg" alt="Azure" className="h-8" width={32} height={32} />
                     </div>
                   </div>
                 </div>
                 <div>
-                  <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">CONTAINERS</h3>
+                  <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">CONTAINERS</h3>
                   <div className="flex justify-start items-center gap-4">
                     <div className="flex items-center">
-                      <img src="/img/icons/docker-icon.svg" alt="Docker" className="h-8" />
+                      <Image src="/img/icons/docker-icon.svg" alt="Docker" className="h-8" width={32} height={32} />
                     </div>
                     <div className="flex items-center">
-                      <img src="/img/icons/kubernetes-icon.svg" alt="Kubernetes" className="h-8" />
+                      <Image src="/img/icons/kubernetes-icon.svg" alt="Kubernetes" className="h-8" width={32} height={32} />
                     </div>
                   </div>
                 </div>
               </div>
+
+              <div className="border-b-1 border-signoz_slate-400 border-dashed" />
   
               <div>
-                <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">POPULAR TOOLS</h3>
+                <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">POPULAR TOOLS</h3>
                 <div className="flex justify-start items-center gap-4">
                   <div className="flex items-center">
-                    <img src="/img/icons/heroku-icon.svg" alt="Heroku" className="h-8" />
+                    <Image src="/img/icons/heroku-icon.svg" alt="Heroku" className="h-8" width={32} height={32} />
                   </div>
                   <div className="flex items-center">
-                    <img src="/img/icons/fluentd-icon.svg" alt="Fluentd" className="h-8" />
+                    <Image src="/img/icons/fluentd-icon.svg" alt="Fluentd" className="h-8" width={32} height={32} />
                   </div>
                   <div className="flex items-center">
-                    <img src="/img/icons/vercel-icon.svg" alt="Vercel" className="h-8" />
+                    <Image src="/img/icons/vercel-icon.svg" alt="Vercel" className="h-8" width={32} height={32} />
                   </div>
                   <div className="flex items-center">
-                    <img src="/img/icons/redis-icon.svg" alt="Redis" className="h-8" />
+                    <Image src="/img/icons/redis-icon.svg" alt="Redis" className="h-8" width={32} height={32} />
                   </div>
                   <div className="flex items-center">
-                    <img src="/img/icons/mongo-icon.svg" alt="Mongo" className="h-8" />
+                    <Image src="/img/icons/mongo-icon.svg" alt="Mongo" className="h-8" width={32} height={32} />
                   </div>
                   <div className="flex items-center">
-                    <img src="/img/icons/nginx-icon.svg" alt="Nginx" className="h-8" />
+                    <Image src="/img/icons/nginx-icon.svg" alt="Nginx" className="h-8" width={32} height={32} />
                   </div>
                 </div>
               </div>
-              <Button variant="ghost" to="/docs/logs-management/send-logs-to-signoz/" rounded="full" size={null} className="flex justify-center items-center gap-2 w-fit hover:bg-transparent">
+              <Button variant="ghost" to="/docs/logs-management/send-logs-to-signoz/" rounded="full" size={null} className="flex justify-center items-center gap-2 w-fit hover:bg-transparent text-xs">
                 VIEW ALL 50+ SOURCES
               </Button>
             </div>
           </TabItem>
           <TabItem value="collection-methods" label="Collection Methods">
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-8 min-h-56">
               <div className="flex items-center md:flex-row flex-col gap-8">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <h3 className="text-sm font-medium uppercase text-signoz_vanilla-400 m-0">OPENTELEMETRY</h3>
-                  <Badge color="vanilla">Recommended</Badge>
-                </div>
-                <div className="flex items-center gap-8">
-                  <img src="/img/website/opentelemetry-icon-color.svg" alt="OpenTelemetry" className="h-8" />
-                </div>
-              </div>
-              <div>
-                <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">EXISTING AGENTS</h3>
-                <div className="flex justify-start items-center gap-4">
-                  <div className="flex items-center">
-                    <img src="/img/icons/fluentd-icon.svg" alt="Fluentd" className="h-8" />
+                <div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <h3 className="text-sm font-medium uppercase text-signoz_vanilla-400 m-0 text-xs">OPENTELEMETRY</h3>
+                    <Badge color="vanilla" className="text-xs">Recommended</Badge>
                   </div>
-                  <div className="flex items-center">
-                    <img src="/img/icons/fluentbit-icon.svg" alt="Fluentbit" className="h-8" />
-                  </div>
-                  <div className="flex items-center">
-                    <img src="/img/icons/logstash-icon.svg" alt="Logstash" className="h-8" />
+                  <div className="flex items-center gap-8">
+                    <Image src="/img/website/opentelemetry-icon-color.svg" alt="OpenTelemetry" className="h-8" width={32} height={32} />
                   </div>
                 </div>
-              </div>
+                <div>
+                  <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">EXISTING AGENTS</h3>
+                  <div className="flex justify-start items-center gap-4">
+                    <div className="flex items-center">
+                      <Image src="/img/icons/fluentd-icon.svg" alt="Fluentd" className="h-8" width={32} height={32} />
+                    </div>
+                    <div className="flex items-center">
+                      <Image src="/img/icons/fluentbit-icon.svg" alt="Fluentbit" className="h-8" width={32} height={32} />
+                    </div>
+                    <div className="flex items-center">
+                      <Image src="/img/icons/logstash-icon.svg" alt="Logstash" className="h-8" width={32} height={32} />
+                    </div>
+                  </div>
+                </div>
               </div>
   
               <div>
-                <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400">DIRECT INTEGRATIONS</h3>
+                <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">DIRECT INTEGRATIONS</h3>
                 <div className="flex flex-wrap gap-2">
                   <Badge color="vanilla" className="rounded-sm">HTTP Endpoints</Badge>
                   <Badge color="vanilla" className="rounded-sm">SDK Integrations</Badge>
@@ -126,7 +128,7 @@ export const FEATURES = [
   
               {/* View Integration Guides */}
               <div className="flex items-center gap-2">
-                <Button variant="ghost" rounded="full" size={null} className="hover:bg-transparent" to="/docs/logs-management/send-logs-to-signoz/">
+                <Button variant="ghost" rounded="full" size={null} className="hover:bg-transparent text-xs" to="/docs/logs-management/send-logs-to-signoz/">
                   VIEW INTEGRATION GUIDES
                 </Button>
               </div>
