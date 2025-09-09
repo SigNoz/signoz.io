@@ -1,396 +1,713 @@
 ---
-
-title: How to Fix "Upstream Connect Error" in Spring Boot with Java 11
-slug: upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11
-date: 2024-09-06
-tags: [faq]
-authors: [niyati_thakkar]
-description: Learn how to diagnose and resolve the "Upstream Connect Error" in Spring Boot applications running on Java 11. Discover best practices and tools for prevention.
-keywords: [upstream connect error, Spring Boot, Java 11, microservices, error handling, connection failure, Kubernetes, Istio]
-
+title: "Fixing Upstream Connect Errors (Docker, Kubernetes, Spring Boot & More)"
+slug: "upstream-connect-error"
+date: "2025-09-08"
+tags: [networking, devops, spring-boot, java]
+authors: ["niyati_thakkar"]
+description: "Fix upstream connect errors in 5 minutes. Complete guide with copy-paste solutions for Docker, Kubernetes, Spring Boot, Nginx. Includes troubleshooting flowchart and real examples."
+keywords: [upstream connect error, 502 bad gateway nginx upstream, 503 service unavailable kubernetes, connection refused while connecting to upstream, upstream connect error spring boot, java 11 networking, docker nginx upstream connection failed]
 ---
 
-The "Upstream Connect Error" is a common yet frustrating issue that plagues many Spring Boot applications, especially those running on Java 11. This error can significantly impact your application's performance and user experience, often leaving developers scratching their heads. In this comprehensive guide, we'll dive deep into the causes of this error, provide step-by-step solutions, and offer best practices to prevent future occurrences.
+## What Are Upstream Connect Errors?
 
-## Understanding the Upstream Connect Error in Spring Boot
+An upstream connect error occurs when a reverse proxy or load balancer cannot establish a TCP connection to the backend service it's trying to reach. Think of it like a postal service scenario: you hand your letter to the local post office (proxy), but they can't reach the destination post office (upstream server) to deliver it. The connection never even gets established.
 
-The "upstream connect error or disconnect/reset before headers" is an error message that typically appears when a connection between services in a distributed system fails to be established or is prematurely closed. This error is particularly prevalent in Spring Boot applications running on Java 11, often manifesting in microservices architectures or when dealing with reverse proxies (like ENVOY or NGINX).
+These errors typically manifest as:
+- **502 Bad Gateway**: The proxy received an invalid response from the upstream server
+- **503 Service Unavailable**: The upstream service is temporarily unavailable  
+- **Connection refused**: The upstream service rejected the connection attempt
 
-In Spring Boot environments running on Java 11, this error can be triggered by various factors, including network issues, incorrect proxy configurations, or mismatched timeouts. Understanding the root causes is critical for maintaining the application's stability and avoiding disruptions to user experience.
+The error sits in the critical path of your request flow: Client → Reverse Proxy → [ERROR HERE] → Backend Service. Unlike timeout errors where a connection is established but the response is slow, upstream connect errors mean the TCP handshake never completes.
 
-### Anatomy of the Error Message
+## How Upstream Errors Manifest Across Platforms
 
-Let's break down the components of this error message:
+Different platforms and technologies report upstream connect errors in unique ways. Understanding these error messages helps you quickly identify the issue.
 
-- "Upstream connect error": Indicates a failure to establish a connection with an upstream service. In microservices architectures, the upstream service could be another microservice or a third-party API.
-- "Disconnect/reset before headers": Suggests that the connection was terminated before the HTTP headers were fully transmitted or received. The error occurs early in the communication process, likely before any meaningful data can be exchanged between the client and the upstream service.
-- "Reset reason: connection failure": This clarifies that the problem lies at the connection level—either due to a network timeout, a closed connection, or failure in transport—rather than an issue with the HTTP request or protocol itself.
+### Common Error Messages by Platform
 
-In Spring Boot and Java 11, this error often occurs due to network configuration issues, service mesh complexities, or improper handling of connections at the application level. Java 11 introduces enhanced networking APIs and changes in the default garbage collection mechanism, which may also affect how connections are established and managed under certain circumstances.
+**Docker**
+```
+nginx: [error] connect() failed (111: Connection refused) while connecting to upstream
+```
 
-## Common Scenarios Triggering Upstream Connect Errors
+**Kubernetes with Istio**
+```
+upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111
+```
 
-1. Microservices Communication Failures: In Kubernetes environments, services may fail to communicate due to network policies or DNS resolution issues. 
-    
-    For example, services might fail to connect if NetworkPolicies are overly restrictive or if the Kubernetes DNS resolver is not correctly set up. 
-    
-    Check network policies with `kubectl describe networkpolicy` and inspect pod logs using `kubectl logs <pod-name>`. Verify DNS configurations with `kubectl describe pod <pod-name>`, and ensure service discovery is functioning correctly.
-    
-2. Istio Service Mesh Misconfigurations: Incorrect Istio virtual service, gateway configurations, or destination rule settings can lead to connection problems. 
-    
-    Analyze Istio’s virtual service and destination rule configurations using `istioctl` and inspect the Envoy proxy logs for routing issues.
-    
-3. Docker Container Networking: Improper network mode settings or container-to-container communication issues can trigger this error. 
-    
-    Use Docker networking commands like `docker network inspect` and container logs to diagnose issues.
-    
-4. Load Balancer or Reverse Proxy Misconfiguration: Incorrect backend service definitions or health check failures can result in upstream connect errors. 
-    
-    Examine the load balancer configuration and logs, and ensure that backend services are properly defined and healthy.
-    
+**AWS Application Load Balancer**
+```
+502 Bad Gateway - The server was acting as a gateway or proxy and received an invalid response from the upstream server
+```
 
-## Diagnosing Upstream Connect Errors in Spring Boot
+**Traditional Nginx**
+```
+upstream timed out (110: Connection timed out) while connecting to upstream
+no live upstreams while connecting to upstream
+```
 
-To effectively diagnose these errors, follow these steps:
+**Spring Boot Applications**
+```
+java.net.ConnectException: Connection refused (Connection refused)
+org.springframework.web.client.ResourceAccessException: I/O error on GET request: Connection refused
+feign.RetryableException: Connection refused executing GET http://service-name/endpoint
+```
 
-1. Enable Spring Boot Debug Logs:
-Add the following to your `application.properties`:
-    
-    ```
-    logging.level.org.springframework.web=DEBUG
-    logging.level.org.springframework.web.servlet.DispatcherServlet=DEBUG
-    ```
-    
-    Pay attention to logs around request handling, specifically any anomalies such as timeouts, failed connections, or issues with proxies in request handling and routing logs.
-    
-2. Utilize Java 11 Diagnostic Tools:
-    - `jcmd`: This versatile tool sends diagnostic commands to a running JVM. For capturing a thread dump to analyze thread states or diagnose issues like deadlocks, use:
-        
-        ```bash
-        jcmd <pid> Thread.print
-        ```
-        
-    - `jstack`: A tool for printing thread dumps, which helps in analyzing thread states and detecting issues like deadlocks or high CPU usage. Capture a thread dump with:
-        
-        ```bash
-        jstack <pid> > threaddump.txt
-        ```
-        
-    - `jstat`: Monitors JVM statistics such as garbage collection and memory usage. For tracking garbage collection behavior, use:
-        
-        ```bash
-        jstat -gc <pid> 1000
-        ```
-        
-    - `jmap`: Provides memory-related details including heap dumps and histogram reports, useful for diagnosing memory issues. Generate a heap dump with:
-        
-        ```bash
-        jmap -dump:live,format=b,file=heapdump.hprof <pid>
-        ```
-        
-    - `jconsole`: A graphical tool for real-time JVM monitoring, including memory usage, thread activity, and class loading. Start it and connect to your JVM to visualize performance metrics.
-    
-    ---
-    
-    These descriptions integrate the purpose and the relevant command in a compact format.
-    
-    1. JConsole: Visualize and monitor memory usage, threads, and garbage collection.
-    
-    2. VisualVM: A more advanced tool offering profiling, thread analysis, and MBean management.
-    
-    3. jstat: Real-time statistics on garbage collection, class loading, and more.
-    
-    4. jstack: Generate thread dumps for analyzing thread states and potential deadlocks.
-    
-    5. jmap: Heap dump generation for memory analysis and leak detection.
-    
-    6. jcmd: A versatile tool for various diagnostic tasks, including GC tuning and MBean operations.
-    
-    7. Java Flight Recorder (JFR): Record low-level events for detailed performance analysis and troubleshooting.
-    
-    ```bash
-    jcmd <pid> Thread.print
-    ```
-    
-    Identify blocked or waiting threads that could indicate networking issues or misconfigurations.
-    
-3. Monitor Service-to-Service Communication:
-Implement distributed tracing using tools like Jaeger or Zipkin to visualize request flows.
-Look for increased latency or errors in trace spans, particularly where requests cross service boundaries.
-4. Analyze Error Patterns:
-Look for correlations between error occurrences and specific conditions (e.g., high load, network latency spikes).
-Notice if errors coincide with specific events like deployments, high traffic periods, or external API calls.
+Each message provides clues about the underlying problem. "Connection refused" typically means the service isn't listening on the expected port, while "no live upstreams" indicates all backend servers failed health checks.
 
-### Tools for Error Investigation
+## Root Causes by Platform
 
-- Spring Boot Actuator: Enable health checks and metrics endpoints to gain metrics such as memory usage, CPU load, active thread count, and request response times. These metrics help identify bottlenecks or abnormal behaviors like excessive memory usage or high request latencies that might be causing errors in your application's state.
-    
-    Enable and configure Actuator in your `application.properties`:
-    
-    ```
-    management.endpoints.web.exposure.include=health,metrics
-    ```
-    
-- Java Flight Recorder: Capture detailed runtime data, including CPU usage, memory allocation, and method call timings for in-depth analysis:
-    
-    ```bash
-    java -XX:StartFlightRecording=duration=60s,filename=recording.jfr -jar your-app.jar
-    ```
-    
-    For investigating networking or connection errors, look for the following in  in JFR metrics:
-    
-    - CPU spikes: Indicate resource strain during connection attempts.
-    - GC pauses: Frequent pauses can delay handling requests.
-    - Thread states: Blocked or waiting threads, especially in network-related tasks, may point to timeouts or resource exhaustion.
-- Kubernetes and Istio Logging: Use `kubectl logs` and `istioctl proxy-config` to inspect service and proxy configurations.
-    - Kubernetes: Use `kubectl logs <pod-name>` to fetch logs from your pods.
-    - Istio: Use `istioctl proxy-config log <pod-name>` to inspect proxy configurations and logs.
-        
-        Some of the commonly occurring Istio errors are as follows:
-        
-        - “upstream connect error or disconnect/reset”: Istio proxy struggles to connect to the upstream service. Check service configurations and network connectivity.
-        - “No healthy upstream”: Misconfigured services or unavailable pods. Verify service health and pod availability.
-        - “x-envoy-upstream-service-time”: Slow upstream response, possibly due to network congestion or overload. Investigate network performance and service load.
+Understanding the common causes for your specific platform helps narrow down the troubleshooting process. Let's examine the most frequent issues for each environment.
 
-## Step-by-Step Guide to Resolving Upstream Connect Errors
+### Docker: Network Isolation Issues
 
-1. Verify Network Configurations:
-    - Check firewall rules and security groups.
-    - Ensure correct port mappings between services.
-2. Verify Port Numbers and YAML Configurations:
-A common cause of upstream connect errors is incorrect port numbers or misconfigurations in YAML files.
-    - Port Numbers: Ensure that the service and application are configured to use the correct ports. Verify the port mappings in your Spring Boot configuration, Docker settings, and Kubernetes service definitions.
-    - YAML Files: Carefully inspect your YAML files for any syntax errors or incorrect configurations. Pay special attention to fields like `targetPort`, `nodePort`, and `host` in Kubernetes or Docker Compose files.
-3. Adjust Spring Boot Application Properties:
-    - Increase connection timeouts:
-        
-        ```
-        spring.mvc.async.request-timeout=30000
-        ```
-        
-    - Configure connection pooling: Over-configuring the pool size can lead to resource exhaustion if not tuned properly for the application load. Proper tuning of HikariCP (Spring Boot's default connection pool) is crucial. For more in-depth guidelines on tuning HikariCP, refer to <a href="https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing" rel="noopener noreferrer nofollow" target="_blank">this resource</a>.
-        
-        ```
-        spring.datasource.hikari.maximum-pool-size=10
-        spring.datasource.hikari.connection-timeout=30000
-        ```
-        
-4. Optimize Java 11 Network Settings:
-    - Tune JVM network parameters:
-        
-        ```bash
-        java -Dsun.net.client.defaultConnectTimeout=30000 -Dsun.net.client.defaultReadTimeout=30000 -jar your-app.jar
-        
-        ```
-        
-5. Implement Retry Mechanisms:
-    - Use Spring Retry for automatic retries:
-        
-        ```java
-        @EnableRetry
-        @Configuration
-        public class RetryConfig {
-            @Bean
-            public RetryTemplate retryTemplate() {
-                SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-                retryPolicy.setMaxAttempts(3);
-        
-                FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
-                backOffPolicy.setBackOffPeriod(1000); // 1 second
-        
-                RetryTemplate template = new RetryTemplate();
-                template.setRetryPolicy(retryPolicy);
-                template.setBackOffPolicy(backOffPolicy);
-        
-                return template;
-            }
-        }
-        ```
-        
+Docker's containerized networking creates isolated namespaces that often confuse developers. The most common mistake involves using `localhost` or `127.0.0.1` in proxy configurations.
 
-### Specific Fixes for Common Scenarios
+Here's what happens when you misconfigure localhost in Docker:
 
-1. Resolving Istio Sidecar Proxy Issues:
-    1. Incorrect Configuration: Ensure `VirtualService`, `Gateway`, and `ServiceEntry` are correctly set up. Adjust Istio `VirtualService` configurations:
-        
-        ```yaml
-        apiVersion: networking.istio.io/v1alpha3
-        kind: VirtualService
-        metadata:
-          name: my-service
-        spec:
-          hosts:
-          - my-service
-          http:
-          - timeout: 5s
-            retries:
-              attempts: 3
-              perTryTimeout: 2s
-        ```
-        
-        This `VirtualService` configuration sets a 5-second timeout for HTTP requests and retries up to 3 times, with each retry having a 2-second timeout.
-        
-    2. Network Connectivity: Check firewall rules and network policies.
-    3. TLS Certificates: Verify certificates are valid and correctly configured.
-    4. Sidecar Injection: Ensure the correct sidecar image and injection settings.
+<Figure
+  src="/img/guides/2025/09/upstream-connect-error-docker-localhost-problem.webp"
+  alt="Docker localhost problem causing upstream connect error"
+  caption="When nginx in a container tries to connect to localhost:3000, it looks inside its own container, not at the host or other containers"
+/>
+
+When nginx runs in a container and you configure it to connect to `localhost:3000`, it looks for port 3000 inside the nginx container itself, not on your host machine or in other containers. Each container has its own network namespace with its own localhost.
+
+This is how Docker networking should work:
+
+<Figure
+  src="/img/guides/2025/09/upstream-connect-error-docker-networking-correct.webp"
+  alt="Docker networking with correct configuration"
+  caption="Docker's internal DNS resolves container names to IP addresses for seamless inter-container communication"
+/>
+
+Docker's internal DNS automatically resolves container names to their IP addresses, enabling seamless communication between containers on the same network.
+
+Other Docker-specific causes include:
+- Containers running in different Docker networks that can't communicate
+- Port mapping confusion between internal and external ports
+- Container startup order issues where the proxy starts before the backend
+- Resource limits causing containers to crash or become unresponsive
+
+### Kubernetes: Service Discovery Failures
+
+Kubernetes abstracts networking through Services and Endpoints, which introduces additional failure points. The most common issue occurs when Service selectors don't match Pod labels, resulting in no Endpoints being created.
+
+#### Kubernetes Service Discovery Flow
+
+Here's how service discovery works in Kubernetes:
+
+<Figure
+  src="/img/guides/2025/09/upstream-connect-error-kubernetes-service-discovery.webp"
+  alt="Kubernetes service discovery flow"
+  caption="Kubernetes Service uses selectors to find matching Pods and create Endpoints for traffic routing"
+/>
+
+The service discovery flow works like this:
+1. Client Pod makes a request to a Service (ClusterIP)
+2. Service uses selectors to find matching Pods
+3. If no Pods match, no Endpoints are created
+4. Request fails with 503 Service Unavailable
+
+Additional Kubernetes-specific causes:
+- DNS resolution failures within the cluster
+- Network policies blocking traffic between namespaces
+- Readiness probes failing, removing Pods from service rotation
+- Istio/Envoy sidecar proxy misconfiguration or mTLS issues
+
+### Cloud Load Balancers: Security and Health Checks
+
+Cloud providers add their own layer of complexity through security groups, health checks, and target configurations. 
+
+#### Load Balancer Architecture
+
+Here's how cloud load balancers manage traffic:
+
+<Figure
+  src="/img/guides/2025/09/upstream-connect-error-load-balancer-architecture.webp"
+  alt="Load balancer architecture and health checks"
+  caption="Cloud load balancers continuously monitor target health and only route traffic to healthy instances"
+/>
+The load balancer continuously monitors target health and only routes traffic to healthy instances. 
+When health checks fail, the load balancer removes instances from rotation. If ALL
+instances fail health checks (even if they're actually running), the load balancer has no upstream
+targets to connect to, causing upstream connect errors
+
+Common issues include:
+
+**AWS ALB/NLB**:
+- Security groups not allowing traffic from the load balancer to targets
+- Target health checks failing due to incorrect paths or expected status codes
+- Timeout misalignment between ALB (default 60s) and backend services
+- Wrong target type (instance vs IP vs Lambda)
+
+**Azure Application Gateway**:
+- Backend pool misconfiguration with incorrect IP addresses
+- Health probe settings too aggressive, marking healthy instances as unhealthy
+- NSG rules blocking traffic from the gateway subnet
+
+**Google Cloud Load Balancing**:
+- Firewall rules blocking health check IP ranges
+- Backend service capacity settings too restrictive
+- Connection draining timeout too short during deployments
+
+### Traditional Web Servers: Configuration and OS-Level Issues
+
+Even in traditional deployments with nginx, Apache, or HAProxy, upstream errors occur due to:
+
+- SELinux blocking network connections (especially on RHEL/CentOS)
+- Firewall rules preventing proxy-to-backend communication  
+- Backend services binding to wrong network interfaces (only listening on localhost)
+- File descriptor limits preventing new connections
+- Connection pool exhaustion
+
+## Systematic Debugging Approach
+
+Rather than randomly checking configurations, follow this systematic approach to identify and resolve upstream errors efficiently.
+
+### Quick Diagnosis Decision Tree
+
+Start with this decision tree to quickly narrow down the issue:
+
+<Figure
+  src="/img/guides/2025/09/upstream-connect-error-diagnosis-decision-tree.webp"
+  alt="Upstream error diagnosis decision tree"
+  caption="Decision tree to quickly identify whether you're dealing with a service availability issue (502/503) or network connectivity problem (timeout)"
+/>
+
+This decision tree helps you quickly identify whether you're dealing with a service availability issue (502/503) or a network connectivity problem (timeout), directing your troubleshooting efforts appropriately.
+
+### Step 1: Verify the Backend Service Is Running
+
+Before diving into complex networking issues, confirm your backend service is actually running and accessible.
+
+```bash
+# Check if the service process is running
+ps aux | grep [s]ervice-name
+systemctl status backend-service
+
+# For Docker containers
+docker ps | grep backend
+docker logs backend-container --tail 50
+
+# For Kubernetes pods
+kubectl get pods -l app=backend
+kubectl logs -l app=backend --tail=50
+
+# For Spring Boot applications
+jps -l | grep jar
+ps aux | grep java | grep your-application.jar
+```
+
+If the service isn't running, start it and check the logs for startup errors. A service that crashes immediately after starting will cause upstream errors.
+
+### Step 2: Test Direct Connectivity
+
+Once you've confirmed the service is running, test if you can connect to it directly, bypassing the proxy. This isolates whether the problem is with the backend or the proxy configuration.
+
+```bash
+# Test HTTP endpoint directly
+curl -v http://backend-host:3000/health
+
+# If that fails, test basic TCP connectivity
+telnet backend-host 3000
+nc -zv backend-host 3000
+
+# For services using a different interface
+curl -v http://10.0.1.5:3000/health
+
+# For Spring Boot actuator endpoints
+curl -v http://backend-host:8080/actuator/health
+```
+
+The verbose output from curl (`-v` flag) shows the entire connection process, including DNS resolution, TCP connection, and HTTP response. If the direct connection works but the proxy connection doesn't, the issue is with proxy configuration or network routing.
+
+### Step 3: Verify DNS Resolution
+
+Many upstream errors stem from DNS resolution failures, especially in containerized environments. The proxy might not be able to resolve the backend hostname.
+
+```bash
+# Check DNS resolution
+nslookup backend-service
+dig backend-service
+
+# In Docker, check from within the proxy container
+docker exec nginx-container nslookup backend-service
+
+# In Kubernetes, check from within a pod
+kubectl exec -it nginx-pod -- nslookup backend-service
+```
+
+If DNS resolution fails, check your `/etc/resolv.conf` or equivalent DNS configuration. In Kubernetes, ensure CoreDNS is running. In Docker, verify containers are on the same network.
+
+### Step 4: Examine Proxy Configuration
+
+Review your proxy configuration for common mistakes. Each proxy has its own configuration syntax and requirements.
+
+For nginx, test the configuration syntax:
+```bash
+nginx -t
+# nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+
+Look for these common configuration issues:
+- Using `localhost` instead of service names in containerized environments
+- Incorrect port numbers (using external ports instead of internal container ports)
+- Missing timeout configurations causing premature connection drops
+- Incorrect upstream server addresses
+
+### Step 5: Analyze Logs for Patterns
+
+Logs provide crucial information about when and why connections fail. Check both proxy and backend logs, correlating timestamps to understand the failure sequence.
+
+```bash
+# Check proxy error logs
+tail -f /var/log/nginx/error.log | grep upstream
+
+# Check backend application logs
+journalctl -u backend-service -f
+
+# In Kubernetes, check both containers
+kubectl logs nginx-pod -c nginx --tail=100
+kubectl logs backend-pod --tail=100
+
+# For Spring Boot applications
+tail -f /var/log/myapp/application.log | grep -E "ERROR|WARN.*connection"
+```
+
+Look for patterns like:
+- Errors occurring immediately vs after a delay (connection refused vs timeout)
+- Errors affecting all requests vs intermittent failures
+- Correlation with deployment times or traffic spikes
+
+## Platform-Specific Solutions
+
+Now let's dive into detailed solutions for each platform, with explanations of why these configurations work.
+
+### Docker Solutions
+
+#### Fixing the Localhost Problem
+
+The most common Docker networking mistake is using `localhost` in proxy configurations. Here's why it fails and how to fix it:
+
+**Why it fails:** Each Docker container has its own network namespace. When nginx container tries to connect to `localhost:3000`, it looks inside its own container, not at other containers or the host.
+
+**The solution:** Use Docker's internal DNS to reference other containers by name.
+
+```nginx
+# ❌ WRONG - Will cause upstream connect error
+upstream backend {
+    server localhost:3000;      # Looks inside nginx container
+    server 127.0.0.1:3000;      # Same problem
+}
+
+# ✅ CORRECT - Use container names or service names
+upstream backend {
+    server backend-service:3000;  # Docker's DNS resolves this to the backend container
+}
+
+server {
+    listen 80;
     
-    Troubleshooting:
-    
-    - Use `istioctl logs` for Istio logs.
-    - Verify configurations and inspect network connectivity with `kubectl exec`.
-    - Use tools like `istioctl authn tls-check` for further analysis.
-2. Addressing Docker Networking Conflicts:
-    1. Use host network mode for sensitive services:
+    location / {
+        proxy_pass http://backend;
         
-        ```
-        FROM openjdk:11-jre-slim
-        COPY target/my-app.jar app.jar
-        ENTRYPOINT ["java","-jar","/app.jar"]
-        ```
+        # Important: Set appropriate timeouts to prevent premature connection drops
+        proxy_connect_timeout 10s;   # Time to establish TCP connection
+        proxy_send_timeout 60s;       # Time to send request to backend
+        proxy_read_timeout 60s;       # Time to wait for backend response
         
-        *This Dockerfile builds an image using OpenJDK 11, copies the application JAR into the image, and sets the entry point to run the JAR file using Java.*
-        
-    
-    ```bash
-    docker run --network host my-app-image
-    ```
-    
-    1. Port Conflicts: Avoid multiple containers using the same port; use Docker Compose for port management.
-    2. Network Modes: Use `-network host` cautiously or default to `bridge` for isolated environments. Create custom networks with `docker network create` as needed.
-    
-    Troubleshooting:
-    
-    - Check container logs for errors.
-    - Inspect networks with `docker network ls` and container settings with `docker inspect`.
-    - Experiment with different network modes to identify conflicts.
-3. Tuning Kubernetes Service Discovery:
-    1. Implement readiness probes to ensure services are truly ready:
-        
-        ```yaml
+        # Handle connection failures gracefully
+        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;
+        proxy_next_upstream_tries 3;
+    }
+}
+```
+
+#### Docker Compose Networking
+
+Docker Compose automatically creates a network for your services, making inter-container communication easier. Here's a complete working configuration:
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"  # Map host port 80 to container port 80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      backend:
+        condition: service_healthy  # Wait for backend to be healthy
+    networks:
+      - app-network
+
+  backend:
+    image: node:18-alpine
+    container_name: backend-service
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    command: node server.js
+    expose:
+      - "3000"  # Only exposed to other containers, not host
+    networks:
+      - app-network
+    # Health check ensures the service is ready before nginx starts using it
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s  # Give the app time to start
+
+networks:
+  app-network:
+    driver: bridge
+```
+
+The `depends_on` with `condition: service_healthy` ensures nginx only starts after the backend is responding to health checks, preventing startup-order related upstream errors.
+
+### Kubernetes Solutions
+
+#### Service Discovery Configuration
+
+Kubernetes uses Services to provide stable network endpoints for Pods. The most common upstream error occurs when Service selectors don't match Pod labels.
+
+**How Service discovery works:**
+1. Service defines selectors (e.g., `app: backend`)
+2. Kubernetes finds all Pods with matching labels
+3. These Pods become the Service's Endpoints
+4. kube-proxy routes traffic to these Endpoints
+
+Here's a correct configuration:
+
+```yaml
+# Deployment with properly labeled pods
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend        # Deployment selector
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: backend      # Pod labels must match
+        version: v1
+    spec:
+      containers:
+      - name: backend
+        image: myapp:latest
+        ports:
+        - containerPort: 3000  # Container listens on this port
+        # Readiness probe prevents routing traffic to unready pods
         readinessProbe:
           httpGet:
-            path: /actuator/health
-            port: 8080
+            path: /health
+            port: 3000
           initialDelaySeconds: 10
           periodSeconds: 5
-        ```
-        
-        *This Kubernetes `readinessProbe` checks the application's health at the `/actuator/health` endpoint on port 8080, starting 10 seconds after the container starts and repeating every 5 seconds.*
-        
-    2. Service Definition: Ensure `selector` and `ports` match the targeted pods.
-    3. Endpoint Updates: Verify the endpoint controller is functioning; manually update endpoints if necessary. 
-    4. DNS Resolution: Ensure CoreDNS is running and properly configured.
-    
-    Troubleshooting:
-    
-    - Verify service definitions with `kubectl describe service`.
-    - Inspect endpoints using `kubectl get endpoints`.
-    - Check DNS resolution within pods using `nslookup`.
+          failureThreshold: 3
+        # Liveness probe restarts unhealthy pods
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
 
-## Best Practices for Preventing Upstream Connect Errors
+---
+# Service that discovers pods using selectors
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend          # Must match pod labels exactly
+    version: v1           # All selectors must match
+  ports:
+  - port: 80             # Service port (what other pods use)
+    targetPort: 3000     # Pod port (must match containerPort)
+    protocol: TCP
+  type: ClusterIP
+```
 
-It is best to follow best practices from the beginning to avoid errors. Here are some of the best practices you can follow:
+To verify the Service has discovered Pods:
 
-### Implement Robust Error Handling:
+```bash
+# Check if Service has endpoints
+kubectl get endpoints backend-service
+# NAME              ENDPOINTS                          AGE
+# backend-service   10.1.2.3:3000,10.1.2.4:3000       5m
 
-- Circuit Breakers: Use libraries like Resilience4j to prevent cascading failures and gracefully degrade service availability.
-- Retry Policies: Implement retry policies with exponential backoff to avoid overwhelming upstream services.
-- Fallback Mechanisms: Provide fallback responses or alternative paths to ensure service availability.
+# If ENDPOINTS is empty, no pods match the selector
+# Debug by comparing labels
+kubectl get pods --show-labels
+kubectl describe service backend-service
+```
 
-### Design Resilient Microservices Architectures:
+#### Istio Service Mesh Issues
 
-- Health Checks: Implement health checks for both your application and upstream services to monitor their status and availability.
-- Graceful Degradation: Design your application to gracefully degrade functionality in case of upstream failures.
-- Asynchronous Communication: Consider using asynchronous communication patterns like messaging or event-driven architectures to decouple components and improve resilience.
+Istio adds mTLS and traffic management, which can cause upstream errors if misconfigured. The "UC" (Upstream Connection) error flag indicates connection failures at the Envoy proxy level.
 
-### Configure Timeouts and Connection Pools:
+##### Service Mesh Request Flow
 
-- Timeouts: Set reasonable timeouts for all external calls to prevent long-running requests that may fail.
-- Connection Pools: Use connection pooling to manage resources efficiently and reduce connection overhead.
+Here's how requests flow through an Istio service mesh:
 
-### Regular Monitoring and Proactive Maintenance:
+<Figure
+  src="/img/guides/2025/09/upstream-connect-error-istio-service-mesh-flow.webp"
+  alt="Istio service mesh request flow"
+  caption="Each pod's sidecar proxy intercepts all network traffic in an Istio service mesh"
+/>
 
-- Comprehensive Logging: Implement detailed logging to track network connections and identify potential issues.
-- Monitoring: Use monitoring tools to track performance metrics, error rates, and latency.
-- Performance Audits and Load Testing: Conduct regular performance audits and load testing to identify bottlenecks and areas for improvement.
+Each pod's sidecar proxy intercepts all network traffic, adding security and observability but also introducing potential failure points.
 
-### Additional Considerations:
+**Common Istio problems and solutions:**
 
-- Rate Limiting: Implement rate limiting to prevent excessive traffic to upstream services.
-- Caching: Use caching to reduce the load on upstream services and improve response times.
-- Service Discovery: Use a reliable service discovery mechanism to ensure your application can locate and connect to upstream services.
-- Security: Implement appropriate security measures to protect your application and upstream services from unauthorized access or attacks.
+1. **mTLS Misconfiguration**: When some services have sidecars and others don't:
 
-## Leveraging SigNoz for Enhanced Error Detection and Resolution
+```yaml
+# Allow both mTLS and plain text during migration
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: production
+spec:
+  mtls:
+    mode: PERMISSIVE  # Accepts both encrypted and plain text
+```
 
-SigNoz, a feature-rich open-source Application Performance Monitoring (APM) tool, empowers you to detect and resolve upstream connect errors within your Spring Boot applications. By providing centralized monitoring, detailed error analysis, and real-time alerts, SigNoz becomes an invaluable ally for enhancing application performance and reliability.
+2. **DestinationRule for connection management:**
 
-Advantages of SigNoz:
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: backend-destination
+spec:
+  host: backend-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 100
+    # Circuit breaker configuration
+    outlierDetection:
+      consecutive5xxErrors: 5      # Errors before ejection
+      interval: 30s                # Analysis interval
+      baseEjectionTime: 30s        # How long to eject
+      maxEjectionPercent: 50       # Max % of backends to eject
+      minHealthPercent: 30         # Panic threshold
+```
 
-- Unified Dashboard: SigNoz offers a single interface for application metrics, traces, and logs, enabling faster identifying upstream issues.
-- In-Depth Error Analysis: SigNoz correlates logs with traces and metrics, allowing for precise error source identification and quicker resolutions.
-- Proactive Response with Real-Time Alerts: Configure SigNoz to send alerts for specific errors or performance issues, allowing you to address problems before they escalate.
+To debug Istio-related upstream errors:
 
-### Setting up SigNoz for Spring Boot Monitoring
+```bash
+# Check Envoy clusters and their health
+kubectl exec $POD -c istio-proxy -- curl -s localhost:15000/clusters | grep backend
 
-1. Setup [SigNoz](https://signoz.io/):
-    
-    Enjoy the simplicity of SigNoz Cloud. [Sign up](https://signoz.io/teams/) for a free account and gain 30 days of unrestricted access to all features.
-    
-    <GetStartedSigNoz />
-    Join the [open-source SigNoz](https://github.com/signoz/signoz) community of 18,000+ developers who love SigNoz. Find installation instructions for self-hosting.
-    
-2. Add the SigNoz Java agent to your Spring Boot application:
-    
-    ```bash
-    java -javaagent:/path/to/signoz-otel-agent.jar -jar your-spring-boot-app.jar
-    ```
-    
-3. Download OTel java binary agent:
-    
-    ```
-    wget <a href="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar" rel="noopener noreferrer nofollow" target="_blank">https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar</a>
-    ```
-    
+# View Envoy statistics
+kubectl exec $POD -c istio-proxy -- curl -s localhost:15000/stats/prometheus | grep upstream_rq
 
-### Configuring Custom Alerts for Upstream Connect Errors
+# Check Envoy access logs for error flags
+kubectl logs $POD -c istio-proxy | grep -E "UC|UF|UH"
+# UC = Upstream Connection Error
+# UF = Upstream Connection Failure
+# UH = No Healthy Upstream
+```
 
-With SigNoz, you can set up custom alerts to proactively notify you of potential upstream connect errors:
+## Spring Boot & Java 11 Specific Considerations
 
-1. Navigate to the Alerts page in the SigNoz dashboard.
-2. Create a new alert rule targeting the "http.status_code" metric.
-3. Set the condition to trigger when the status code equals 502 (typical for upstream connect errors).
-4. Configure notification channels (e.g., email, Slack) for immediate alerts.
+Spring Boot applications, especially those running on Java 11, face unique challenges with upstream connections due to changes in the JVM networking stack and the complexity of microservices architectures.
 
-### Analyzing Error Patterns with SigNoz
+### How Java 11 Affects Upstream Connections
 
-SigNoz provides powerful visualization tools to help you identify patterns in error occurrences:
+Java 11 introduced several networking changes that can impact upstream connectivity:
 
-1. Use the Service Map to visualize dependencies and identify problematic connections.
-2. Analyze Traces to pinpoint the exact locations of failures in your request flow.
-3. Correlate errors with system metrics to identify resource constraints or environmental factors contributing to the issue.
+1. **HTTP Client Changes**: The new HttpClient API in Java 11 supports HTTP/2 (can be enabled with .version(HttpClient.Version.HTTP_2))
+2. **TLS 1.3 Default**: Java 11 defaults to TLS 1.3, which may not be supported by older services
+3. **DNS Caching**: JVM DNS caching behavior can cause issues when services change IP addresses
+4. **Connection Pool Behavior**: Default connection pool settings may not be optimal for cloud environments
 
-## Key Takeaways
+Note: Early Java 11 versions had HTTP/2 connection issues (JDK-8211806) fixed in 11.0.2 and later versions
 
-- Upstream connect errors in Spring Boot with Java 11 often stem from network configuration or service communication problems.
-- Proper diagnosis involves analyzing logs, monitoring service interactions, and using tools like SigNoz for comprehensive insights.
-- Resolving these errors requires a multi-faceted approach, including application-level changes, infrastructure optimizations, and implementing resilience patterns.
-- Proactive monitoring and following best practices can significantly reduce the occurrence of upstream connect errors in your Spring Boot applications.
+### Spring Boot Application Architecture Context
 
-## FAQs
+In a typical Spring Boot microservices architecture, upstream errors commonly occur at these points:
+- RestTemplate or WebClient calls to other services
+- Feign client interactions
+- Database connection pools (HikariCP)
+- Message broker connections (RabbitMQ, Kafka)
 
-### What causes upstream connect errors in Spring Boot applications?
+### Spring Boot Debugging Approaches
 
-These errors typically arise from network issues, misconfigured proxies, service outages, or restrictive timeout settings, especially in microservices where service communication can break down.
+When diagnosing upstream errors in Spring Boot applications, follow this systematic approach:
 
-### How does Java 11 impact upstream connect errors?
+1. **Check Application Health**:
+```bash
+curl http://localhost:8080/actuator/health | jq .
+```
 
-Java 11's updated networking stack and enhanced security features can lead to more frequent upstream connect errors if Spring Boot configurations need to be properly tuned.
+2. **Review Connection Pool Metrics**:
+```bash
+curl http://localhost:8080/actuator/metrics/hikaricp.connections.active | jq .
+```
 
-### Can upstream connect errors be completely eliminated in microservices architectures?
+3. **Analyze Thread Dump for Blocked Threads**:
+```bash
+curl http://localhost:8080/actuator/threaddump | jq '.threads[] | select(.threadState == "BLOCKED")'
+```
 
-While complete elimination is tough, robust error handling, proper timeouts, circuit breakers, and tools like SigNoz can greatly reduce their occurrence.
+4. **Check Circuit Breaker Status**:
+```bash
+curl http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.state | jq .
+```
 
-### What are the key differences in handling these errors in Kubernetes vs. traditional deployments?
+5. **Enable HTTP Client Debug Logging**:
+```bash
+# Add to application.properties
+logging.level.org.apache.http.wire=DEBUG
+logging.level.org.apache.http.headers=DEBUG
+```
 
-In Kubernetes, dynamic service discovery, network policies, pod lifecycle, and ingress controllers complicate error handling compared to traditional, more static environments, but Kubernetes also offers self-healing and scaling benefits.
+6. **Monitor JVM Network Connections**:
+```bash
+# Check established connections
+netstat -an | grep ESTABLISHED | grep <port>
+
+# Monitor connection states
+watch -n 1 'netstat -an | grep <port> | awk "{print \$6}" | sort | uniq -c'
+```
+
+## Monitoring with SigNoz
+
+While traditional monitoring can identify upstream errors after they occur, modern observability platforms like SigNoz help you understand the complete request flow and identify issues before they become critical.
+
+### Why Observability Matters for Upstream Errors
+
+Upstream errors rarely occur in isolation. They're often symptoms of deeper issues like:
+- Cascading failures from dependent services
+- Resource exhaustion under load
+- Network latency spikes
+- Database connection pool exhaustion
+
+SigNoz provides distributed tracing that shows you exactly where requests fail in your service mesh, making root cause analysis much faster.
+
+### Setting Up Upstream Error Monitoring
+
+Configure your services to send telemetry data to SigNoz:
+
+```yaml
+# Docker Compose with OpenTelemetry integration
+services:
+  backend:
+    image: myapp:latest
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://signoz-otel-collector:4317
+      - OTEL_SERVICE_NAME=backend-service
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      
+  spring-boot-app:
+    image: spring-app:latest
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://signoz-otel-collector:4317
+      - OTEL_SERVICE_NAME=spring-service
+      - JAVA_OPTS=-javaagent:/opentelemetry-javaagent.jar
+```
+
+For Spring Boot applications, add OpenTelemetry integration:
+
+```xml
+<!-- pom.xml -->
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-api</artifactId>
+    <version>1.35.0</version>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-sdk</artifactId>
+    <version>1.35.0</version>
+</dependency>
+```
+
+With SigNoz, you can:
+- Track error rates across all services in real-time
+- View distributed traces showing exactly where connections fail
+- Set up intelligent alerts based on error patterns
+- Correlate upstream errors with resource metrics and logs
+
+### Creating Effective Dashboards
+
+Build dashboards that show the health of your entire request pipeline:
+
+1. **Service Map**: Visualize dependencies and identify which services are experiencing upstream errors
+2. **Error Rate Panel**: Track 5xx errors across all services with drill-down capability
+3. **P99 Latency**: Identify performance degradation before it becomes an error
+4. **Connection Pool Metrics**: Monitor connection usage and exhaustion
+5. **JVM Metrics**: For Spring Boot apps, track heap usage, GC activity, and thread pools
+
+## Get Started with SigNoz
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+## Conclusion
+
+Upstream connect errors are symptoms of connectivity issues between your proxy and backend services. While the error message itself is generic, the root causes follow predictable patterns based on your platform.
+
+The key to quick resolution is understanding:
+1. **Your platform's networking model** - How Docker, Kubernetes, Spring Boot, or cloud providers handle network connections
+2. **Common misconfiguration patterns** - Like using localhost in containers, mismatched selectors in Kubernetes, or exhausted connection pools in Spring Boot
+3. **Systematic debugging approach** - Following a methodical process rather than random troubleshooting
+
+Most upstream errors stem from simple misconfigurations that can be fixed quickly once identified. The challenge is knowing where to look and what to check.
+
+### Quick Reference Checklist
+
+When facing an upstream error, check these items in order:
+
+**Immediate checks:**
+- [ ] Is the backend service actually running?
+- [ ] Can you connect to the backend directly (bypassing the proxy)?
+- [ ] Does DNS resolution work for the backend hostname?
+- [ ] Are you using the correct hostname (not localhost in containers)?
+- [ ] Do the ports match between proxy configuration and backend service?
+
+**Platform-specific checks:**
+- [ ] Docker: Are containers on the same network?
+- [ ] Kubernetes: Do service selectors match pod labels?
+- [ ] Cloud: Are security groups/firewall rules allowing traffic?
+- [ ] Traditional: Is SELinux blocking connections?
+- [ ] Spring Boot: Are connection pools exhausted?
+- [ ] Java 11: Are there TLS or HTTP/2 compatibility issues?
+
+**Configuration checks:**
+- [ ] Are timeout values properly aligned across the stack?
+- [ ] Do health checks use valid endpoints and expect correct responses?
+- [ ] Is the proxy configuration syntax valid?
+- [ ] Are circuit breakers and retry policies configured appropriately?
+
+Remember that upstream errors often indicate broader system issues. Implementing proper monitoring and observability helps you catch these problems before they impact users.
+
+Hope we answered all your questions regarding upstream connect errors. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

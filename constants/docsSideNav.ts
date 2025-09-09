@@ -50,6 +50,11 @@ const docsSideNav = [
             route: '/docs/product-features/invite-team-member',
             label: 'Invite Team Member',
           },
+          {
+            type: 'doc',
+            route: '/docs/product-features/keyboard-shortcuts',
+            label: 'Keyboard Shortcuts',
+          },
         ],
       },
       {
@@ -246,6 +251,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/migration/upgrade-standard',
             label: 'Upgrade Standard',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.94',
+            label: 'Upgrade to v0.94',
           },
           {
             type: 'doc',
@@ -515,6 +525,7 @@ const docsSideNav = [
     label: 'Collection Agents',
     type: 'category',
     isExpanded: false,
+    route: '/docs/collection-agents/get-started',
     items: [
       {
         type: 'category',
@@ -541,6 +552,18 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra',
               },
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
+                    label: 'Monitor Multiple K8SClusters',
+                  },
+                ]
+              }
             ],
           },
           {
@@ -1458,14 +1481,27 @@ const docsSideNav = [
     // route: '',
     items: [
       {
-        type: 'doc',
-        route: '/docs/userguide/manage-dashboards',
-        label: 'Manage Dashboards',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/manage-panels',
-        label: 'Manage Panels',
+        label: 'Manage',
+        type: 'category',
+        className: 'new-doc',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-dashboards',
+            label: 'Manage Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-panels',
+            label: 'Manage Panels',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-variables',
+            label: 'Manage Variables',
+          },
+        ],
       },
       {
         type: 'category',
@@ -1511,9 +1547,9 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/manage-variables',
-        label: 'Manage Variables',
+        type: 'category',
+        route: '/docs/dashboards/interactivity',
+        label: 'Interactivity',
       },
       {
         type: 'doc',
@@ -1553,6 +1589,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
             label: 'CICD',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/claude-code-dashboard',
+            label: 'Claude Code',
           },
           {
             type: 'doc',
@@ -1915,6 +1956,11 @@ const docsSideNav = [
             route: '/docs/alerts-management/user-guides/time-aggregation-best-practices',
             label: 'Time Aggregation Best Practices',
           },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
+            label: 'How to Configure Alerts for Missing Data',
+          }
         ],
       },
       {
@@ -1939,6 +1985,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/frontend-monitoring/sending-traces',
         label: 'Sending Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/sending-metrics',
+        label: 'Sending Metrics',
       },
       {
         type: 'doc',
@@ -2010,6 +2061,11 @@ const docsSideNav = [
       {
         route: '/docs/langchain-monitoring',
         label: 'LangChain Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/claude-code-monitoring',
+        label: 'Claude Code Monitoring',
         type: 'doc',
       },
     ],
@@ -2123,6 +2179,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/sql-server',
         label: 'Microsoft SQL Server',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/supabase',
+        label: 'Supabase',
       },
     ],
   },
@@ -3067,33 +3128,6 @@ const docsSideNav = [
             label: 'Metrics',
           },
         ],
-      },
-    ],
-  },
-  {
-    type: 'category',
-    isExpanded: false,
-    label: 'LLM Monitoring',
-    items: [
-      {
-        route: '/docs/llm/opentelemetry-openai-monitoring',
-        label: 'OpenAI Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/community/llm-monitoring',
-        label: 'LLM Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/llm/vercel-ai-sdk-monitoring',
-        label: 'Vercel AI SDK Monitoring',
-        type: 'doc',
-      },
-      {
-        route: '/docs/llm/llamaindex-monitoring',
-        label: 'LlamaIndex Monitoring',
-        type: 'doc',
       },
     ],
   },
