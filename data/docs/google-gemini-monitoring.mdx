@@ -32,6 +32,7 @@ pip install \
   opentelemetry-sdk \
   opentelemetry-exporter-otlp \
   opentelemetry-instrumentation-system-metrics \
+  opentelemetry-instrumentation-httpx \
   google-genai \
   openinference-instrumentation-google-genai
 ```
@@ -52,10 +53,11 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 **Logs:**
 
 ```python
-from opentelemetry._logs import set_logger_provider
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry._logs import set_logger_provider
+import logging
 ```
 
 **Metrics:**
@@ -66,6 +68,7 @@ from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExp
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry import metrics
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 ```
 
 **Step 3:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
@@ -107,15 +110,12 @@ GoogleGenAIInstrumentor().instrument(tracer_provider=provider)
 **Step 5**: Setup Logs
 
 ```python
-from opentelemetry.sdk.resources import Resource
+import logging
+import os
 from opentelemetry._logs import set_logger_provider
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
-import logging
-import os
-
-resource = Resource.create({"service.name": "<service_name>"})
 
 logger_provider = LoggerProvider(resource=resource)
 set_logger_provider(logger_provider)
@@ -127,7 +127,6 @@ otlp_log_exporter = OTLPLogExporter(
 logger_provider.add_log_record_processor(
     BatchLogRecordProcessor(otlp_log_exporter)
 )
-
 # Attach OTel logging handler to root logger
 handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
 logging.basicConfig(level=logging.INFO, handlers=[handler])
@@ -163,13 +162,14 @@ meter = metrics.get_meter(__name__)
 
 # turn on out-of-the-box metrics
 SystemMetricsInstrumentor().instrument()
+HTTPXClientInstrumentor().instrument()
 ```
 
 - **`<service_name>`** is the name of your service
 - **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud metrics endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), not Gemini-specific metrics. Gemini does not expose metrics as part of their SDK. If you want to add custom metrics to your Gemini application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/). 
+> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. These are not Gemini-specific metrics. Gemini does not expose metrics as part of their SDK. If you want to add custom metrics to your Gemini application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/). 
 
 **Step 7:** Run an example
 
@@ -184,6 +184,8 @@ response = client.models.generate_content(
 )
 print(response.text)
 ```
+> 📌 Note: Ensure that the `GEMINI_API_KEY` environment variable is properly defined with your API key before running the code.
+
 
 </TabItem>
 </Tabs>
