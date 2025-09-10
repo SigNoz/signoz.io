@@ -172,7 +172,7 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href=""
+              href="/blog/query-builder-v5/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
@@ -190,18 +190,20 @@ const MainSection: React.FC = () => {
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
+                  <ArrowRight size={14} />
+
                   </div>
                 </div>
               </div>
             </Link>
           </div>
 
-           {/*<div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
+           <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
-              <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ May 14</div>
+              <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ Sep 10</div>
               <div className="flex flex-col gap-2">
                 <Link
-                  href="https://www.linkedin.com/events/thirdpartyapimonitoringpoweredb7325856959461576705/theater/"
+                  href="https://www.linkedin.com/events/ossimprovements-signozlaunchwee7368855069955457024/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
                   className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
@@ -214,7 +216,7 @@ const MainSection: React.FC = () => {
                 <div
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
-                  onClick={() => handleOpenModal('ODUFMrfPdpI')}
+                  onClick={() => handleOpenModal('MC--XaSxbdY')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -224,33 +226,31 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/third-party-api-monitoring/"
+              href=""
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/blog/2025/05/third-party-observability.webp"
+                src="/img/blog/2025/09/oss-improvements.webp"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-eedium mb-2 text-base">
-                    Third party API Monitoring powered by OpenTelemetry semantics
+                    OSS Improvements
                   </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    Get out-of-the-box monitoring for all your external services, with every API
-                    call automatically correlated to the internal services making them.
+                    Self-hosting SigNoz just got significantly easier with community-focused improvements that remove deployment friction and give you more flexibility in how you run your observability stack.
                   </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
-                    <ArrowRight size={14} />
                   </div>
                 </div>
               </div>
             </Link>
           </div>
 
-          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
+          {/*<div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Thursday ⎯ May 15</div>
               <div className="flex flex-col gap-2">
@@ -361,9 +361,9 @@ const MainSection: React.FC = () => {
 
           {/* Timer */}
           {[
-             'Monday ⎯ Sep 08',
-             'Tuesday ⎯ Sep 09',
-             'Wednesday ⎯ Sep 10',
+              //'Monday ⎯ Sep 08',
+              //'Tuesday ⎯ Sep 09',
+              //'Wednesday ⎯ Sep 10',
             'Thursday ⎯ Sep 11',
             'Friday ⎯ Sep 12',
           ].map((day, index) => (
@@ -375,7 +375,7 @@ const MainSection: React.FC = () => {
                 {day}
               </div>
               <div className="flex w-[68%] justify-end sm:justify-start">
-                <CountdownTimer eventDate={`2025-09-${8 + index} 21:30:00`} />
+                <CountdownTimer eventDate={`2025-09-${11 + index} 21:30:00`} />
               </div>
             </div>
           ))}
