@@ -233,20 +233,157 @@ export default function LogsInstrumentationListicle({
   const renderCloudSection = () => (
     <div className="mb-10">
       <h2 className="mb-4 text-2xl font-semibold">Cloud Logs</h2>
+
+      <h3 className="mb-4 text-2xl font-semibold">AWS</h3>
       <IconCardGrid
         cards={[
           {
+            name: 'EC2',
+            href: '/docs/aws-monitoring/ec2-logs/',
+            icon: <img src="/img/icons/ec2.svg" width={20} height={20} alt="EC2" />,
+            clickName: 'EC2 Logs Link',
+          },
+          {
+            name: 'EKS',
+            href: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/',
+            icon: <img src="/img/icons/eks.svg" width={20} height={20} alt="EKS" />,
+            clickName: 'EKS Logs Link',
+          },
+          {
+            name: 'ELB',
+            href: '/docs/aws-monitoring/elb-logs/',
+            icon: <img src="/img/icons/elb.svg" width={20} height={20} alt="ELB" />,
+            clickName: 'ELB Logs Link',
+          },
+          {
+            name: 'VPC',
+            href: '/docs/aws-monitoring/vpc-logs/',
+            icon: <img src="/img/icons/vpc.svg" width={20} height={20} alt="VPC" />,
+            clickName: 'VPC Logs Link',
+          },
+          {
+            name: 'RDS',
+            href: '/docs/aws-monitoring/rds-logs/',
+            icon: <img src="/img/icons/rds.svg" width={20} height={20} alt="RDS" />,
+            clickName: 'RDS Logs Link',
+          },
+          {
             name: 'Cloudwatch',
             href: '/docs/userguide/send-cloudwatch-logs-to-signoz',
-            icon: <SiAmazonwebservices className="h-7 w-7 text-orange-400" />,
+            icon: <img src="/img/icons/cloudwatch.svg" width={20} height={20} alt="Cloudwatch" />,
             clickName: 'Cloudwatch Logs Link',
           },
           {
-            name: 'AWS Lambda',
+            name: 'Lambda NodeJS',
             href: '/docs/logs-management/send-logs/aws-lambda-nodejs',
-            icon: <SiAmazonwebservices className="h-7 w-7 text-orange-500" />,
+            icon: <img src="/img/icons/lambda.svg" width={20} height={20} alt="Lambda" />,
             clickName: 'AWS Lambda Logs Link',
           },
+        ]}
+        sectionName="AWS"
+        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+      />
+      <h3 className="mb-4 text-2xl font-semibold">Azure</h3>
+        <IconCardGrid
+        cards={[
+          {
+            name: 'App Service',
+            href: '/docs/azure-monitoring/app-service/logging/',
+            icon: <img src="/img/icons/azure-app-service.svg" width={20} height={20} alt="App Service" />,
+            clickName: 'App Service Logs Link',
+          },
+          {
+            name: 'AKS',
+            href: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/',
+            icon: <img src="/img/icons/azure-aks.svg" width={20} height={20} alt="AKS" />,
+            clickName: 'AKS Logs Link',
+          },
+          {
+            name: 'Container Apps',
+            href: '/docs/azure-monitoring/az-container-apps/logging/',
+            icon: <img src="/img/icons/azure-container-apps.svg" width={20} height={20} alt="Container Apps" />,
+            clickName: 'Container Apps Logs Link',
+          },
+          {
+            name: 'Azure Functions',
+            href: '/docs/azure-monitoring/az-fns/logging/',
+            icon: <img src="/img/icons/azure-functions.svg" width={20} height={20} alt="Azure Functions" />,
+            clickName: 'Azure Functions Logs Link',
+          },
+          {
+            name: 'Blob Storage',
+            href: '/docs/azure-monitoring/az-blob-storage/logging/',
+            icon: <img src="/img/icons/azure-blob-storage.svg" width={20} height={20} alt="Blob Storage" />,
+            clickName: 'Blob Storage Logs Link',
+          },
+        ]}
+        sectionName="Azure"
+        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+      />
+      <h3 className="mb-4 text-2xl font-semibold">GCP</h3>
+        <IconCardGrid
+        cards={[
+          {
+            name: 'Cloud Functions',
+            href: '/docs/gcp-monitoring/gcp-fns/logging/',
+            icon: <img src="/img/icons/gcp-cloud-functions.svg" width={20} height={20} alt="Cloud Functions" />,
+            clickName: 'Cloud Functions Logs Link',
+          },
+          {
+            name: 'App Engine',
+            href: '/docs/gcp-monitoring/app-engine/logging/',
+            icon: <img src="/img/icons/gcp-app-engine.svg" width={20} height={20} alt="App Engine" />,
+            clickName: 'App Engine Logs Link',
+          },
+          {
+            name: 'Compute Engine',
+            href: '/docs/gcp-monitoring/compute-engine/logging/',
+            icon: <img src="/img/icons/gcp-compute-engine.svg" width={20} height={20} alt="Compute Engine" />,
+            clickName: 'Compute Engine Logs Link',
+          },
+          {
+            name: 'Cloud Storage',
+            href: '/docs/gcp-monitoring/gcs/logging/',
+            icon: <img src="/img/icons/gcp-cloud-storage.svg" width={20} height={20} alt="Cloud Storage" />,
+            clickName: 'Cloud Storage Logs Link',
+          },
+          {
+            name: 'Cloud SQL',
+            href: '/docs/gcp-monitoring/cloud-sql/logging/',
+            icon: <img src="/img/icons/gcp-cloud-sql.svg" width={20} height={20} alt="Cloud SQL" />,
+            clickName: 'Cloud SQL Logs Link',
+          },
+          {
+            name: 'Cloud Load Balancer',
+            href: '/docs/gcp-monitoring/gcp-clb/logging/',
+            icon: <img src="/img/icons/gcp-cloud-load-balancer.svg" width={20} height={20} alt="Cloud Load Balancer" />,
+            clickName: 'Cloud Load Balancer Logs Link',
+          },
+          {
+            name: 'Serverless VPC',
+            href: '/docs/gcp-monitoring/vpc/logging/',
+            icon: <img src="/img/icons/gcp-vpc.svg" width={20} height={20} alt="VPC" />,
+            clickName: 'VPC Logs Link',
+          },
+          {
+            name: 'GKE',
+            href: '/docs/gcp-monitoring/gke/gke-logging-and-metrics/',
+            icon: <img src="/img/icons/gcp-gke.svg" width={20} height={20} alt="GKE" />,
+            clickName: 'GKE Logs Link',
+          },
+          {
+            name: 'Cloud Run',
+            href: '/docs/gcp-monitoring/cloud-run/logging/',
+            icon: <img src="/img/icons/gcp-cloud-run.svg" width={20} height={20} alt="Cloud Run" />,
+            clickName: 'Cloud Run Logs Link',
+          },
+        ]}
+        sectionName="GCP"
+        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+      />
+      <h3 className="mb-4 text-2xl font-semibold">Others</h3>
+        <IconCardGrid
+        cards={[
           {
             name: 'Heroku',
             href: '/docs/userguide/heroku_logs_to_signoz',
@@ -264,7 +401,7 @@ export default function LogsInstrumentationListicle({
             clickName: 'Vercel Cloud Logs Link',
           },
         ]}
-        sectionName="Cloud Logs"
+        sectionName="Others"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
     </div>
