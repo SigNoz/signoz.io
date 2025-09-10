@@ -38,13 +38,18 @@ const DocContent: React.FC<{
   return (
     <>
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
-        <h2 className="mt-2 text-3xl">{title}</h2>
-        {!isIntroductionPage && post.body?.raw && (
-          <CopyAsMarkdown 
-            markdownContent={post.body.raw}
-            className="shrink-0"
-          />
-        )}
+        <div className="mt-2 flex items-baseline justify-between gap-2">
+          <h2 className="text-3xl leading-tight">{title}</h2>
+          {!isIntroductionPage && post.body?.raw && (
+            <CopyAsMarkdown
+              markdownContent={post.body.raw}
+              className="shrink-0"
+              buttonVariant="ghost"
+              buttonSize="sm"
+              label="Copy markdown"
+            />
+          )}
+        </div>
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
         <div className="flex justify-between items-center mt-8 text-sm">
           {formattedDate && (
