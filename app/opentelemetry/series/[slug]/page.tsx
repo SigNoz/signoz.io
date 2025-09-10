@@ -10,6 +10,7 @@ import { ArrowRight, Clock, List, CheckCircle, BookOpen, Target } from 'lucide-r
 // Map series keys to clean URL slugs
 const SERIES_SLUG_MAP: Record<string, string> = {
   'opentelemetry-nextjs': 'nextjs',
+  'opentelemetry-nodejs': 'nodejs',
   // Add more series mappings here as needed
   // 'opentelemetry-python': 'python',
   // 'opentelemetry-go': 'go-series', // avoid conflict with existing /go route
