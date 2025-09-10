@@ -1,0 +1,141 @@
+---
+date: 2025-01-03
+id: aws-elasticache-redis
+title: AWS ElastiCache Redis Dashboard
+description: Monitor AWS ElastiCache Redis instances with comprehensive CloudWatch metrics including CPU utilization, memory usage, network traffic, cache performance, and replication metrics.
+---
+
+This dashboard provides comprehensive monitoring of AWS ElastiCache Redis instances using CloudWatch metrics. It offers detailed visibility into both host-level metrics (CPU, memory, network) and Redis engine-specific metrics (cache hits, evictions, replication lag) to help optimize cache performance and troubleshoot issues.
+
+<div className="flex justify-center">
+  <DashboardActions 
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/aws-elasticache/redis/overview.json"
+    dashboardName="AWS ElastiCache Redis Dashboard"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks essential AWS ElastiCache Redis metrics to help you:
+
+- **Performance Monitoring**: Track CPU utilization, memory usage, and cache hit rates
+- **Capacity Planning**: Monitor memory usage percentages and capacity utilization
+- **Network Analysis**: Analyze network traffic patterns and bandwidth utilization
+- **Cache Efficiency**: Track cache hit rates, evictions, and memory fragmentation
+- **Replication Health**: Monitor replication lag and connection metrics
+- **Resource Optimization**: Identify performance bottlenecks and optimize configurations
+
+## Metrics Included
+
+### CPU and Engine Performance
+
+#### CPU Utilization
+- **Description**: Host-level CPU utilization percentage for the ElastiCache node
+- **Use Case**: Monitor overall system performance and identify CPU bottlenecks
+- **Grouping**: By cache cluster ID for multi-cluster monitoring
+
+#### Engine CPU Utilization
+- **Description**: Redis engine-specific CPU utilization percentage
+- **Use Case**: Track Redis process CPU consumption separate from system overhead
+- **Grouping**: By cache cluster ID to compare engine performance across clusters
+
+### Memory Management
+
+#### Database Memory Usage Percentage
+- **Description**: Percentage of allocated memory currently used by Redis
+- **Use Case**: Monitor memory consumption and plan for capacity needs
+- **Critical Thresholds**: High values (>80%) may indicate need for scaling
+
+#### Database Capacity Usage Percentage
+- **Description**: Percentage of total available memory capacity in use
+- **Use Case**: Track capacity utilization for scaling decisions
+- **Planning**: Essential for understanding growth patterns
+
+#### Memory Fragmentation Ratio
+- **Description**: Ratio of memory allocated by Redis vs. memory used by the OS
+- **Use Case**: Identify memory fragmentation issues that can impact performance
+- **Optimization**: Values significantly above 1.0 may indicate fragmentation
+
+#### Freeable Memory
+- **Description**: Amount of memory available for allocation (in bytes)
+- **Use Case**: Monitor available memory before hitting limits
+- **Unit**: Displayed in decimal bytes for precise capacity tracking
+
+### Cache Performance
+
+#### Cache Hit Rate
+- **Description**: Number of successful cache lookups (cache hits)
+- **Use Case**: Measure cache effectiveness and application performance
+- **Optimization**: Higher hit rates indicate better cache utilization
+
+#### Evictions
+- **Description**: Number of items evicted from cache due to memory pressure
+- **Use Case**: Monitor memory pressure and optimize cache policies
+- **Troubleshooting**: High eviction rates may indicate insufficient memory
+
+### Network Activity
+
+#### Network Bytes In
+- **Description**: Number of bytes received by the ElastiCache node
+- **Use Case**: Monitor inbound network traffic and bandwidth utilization
+- **Unit**: Displayed in decimal bytes for traffic analysis
+
+#### Network Bytes Out
+- **Description**: Number of bytes sent from the ElastiCache node
+- **Use Case**: Track outbound network traffic and response data volume
+- **Capacity Planning**: Essential for understanding network requirements
+
+### Connection and System Metrics
+
+#### Current Connections
+- **Description**: Number of active client connections to the Redis instance
+- **Use Case**: Monitor connection usage and identify connection leaks
+- **Capacity Planning**: Track connection patterns for scaling decisions
+
+#### Swap Usage
+- **Description**: Amount of swap space used by the ElastiCache node
+- **Use Case**: Identify memory pressure that forces swapping
+- **Performance Impact**: High swap usage can significantly degrade performance
+
+#### Replication Lag
+- **Description**: Maximum lag time between master and replica nodes (in seconds)
+- **Use Case**: Monitor replication health in Redis clusters
+- **Reliability**: Essential for ensuring data consistency across replicas
+
+## Dashboard Variables
+
+This dashboard includes filtering capabilities:
+
+- **cache_cluster_id**: Filter metrics by specific ElastiCache cluster ID
+  - **Multi-select**: Monitor multiple clusters simultaneously
+  - **All option**: View aggregate metrics across all clusters
+  - **Dynamic**: Automatically populates from available cluster IDs
+
+## Monitoring Best Practices
+
+### Performance Optimization
+- Monitor **Cache Hit Rate** to ensure efficient cache utilization
+- Track **CPU Utilization** metrics to identify processing bottlenecks
+- Watch **Memory Fragmentation Ratio** for memory efficiency
+
+### Capacity Planning
+- Use **Database Memory Usage Percentage** for scaling decisions
+- Monitor **Freeable Memory** to prevent out-of-memory conditions
+- Track **Network Bytes** for bandwidth planning
+
+### Troubleshooting
+- High **Evictions** may indicate insufficient memory allocation
+- Elevated **Swap Usage** suggests memory pressure
+- Increased **Replication Lag** indicates replication issues
+
+### Alerting Recommendations
+- **CPU Utilization** > 80% - Consider scaling or optimization
+- **Memory Usage** > 85% - Plan for memory scaling
+- **Cache Hit Rate** < 90% - Review cache strategy
+- **Replication Lag** > 5 seconds - Investigate replication health
+
+## Related Dashboards
+
+- [AWS RDS](/docs/dashboards/dashboard-templates/aws-rds)
+- [Redis](/docs/dashboards/dashboard-templates/redis)
+- [Key Operations](/docs/dashboards/dashboard-templates/key-operations)

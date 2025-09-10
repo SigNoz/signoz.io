@@ -26,7 +26,7 @@ const APMDashboardsData: IconCardData[] = [
   },
   {
     name: 'HTTP API Monitoring',
-    href: 'https://github.com/SigNoz/dashboards/blob/main/apm/http-api-monitoring.json',
+    href: '/docs/dashboards/dashboard-templates/http-api-monitoring',
     icon: <Globe className="h-7 w-7 text-green-600" />,
     clickName: 'HTTP API Monitoring Dashboard Template',
   },

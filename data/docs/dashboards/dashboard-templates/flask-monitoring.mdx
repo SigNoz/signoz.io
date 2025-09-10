@@ -1,0 +1,103 @@
+---
+date: 2025-01-03
+id: flask-monitoring
+title: Flask Monitoring Dashboard
+description: Monitor Flask web application performance with comprehensive metrics including request rates, response times, error tracking, and latency analysis built on Prometheus Flask metrics.
+---
+
+This dashboard provides comprehensive monitoring of Flask web application performance, offering detailed visibility into request rates, response times, error tracking, and latency analysis. Built on top of Flask Prometheus metrics, it enables teams to track and optimize their Flask-based web applications.
+
+<div className="flex justify-center">
+  <DashboardActions 
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/flask-monitoring/flask-monitoring.json"
+    dashboardName="Flask Monitoring Dashboard"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks essential Flask application performance metrics to help you:
+
+- **Request Rate Monitoring**: Track incoming request volume and throughput patterns
+- **Response Time Analysis**: Monitor application response times and latency percentiles
+- **Error Rate Tracking**: Identify and analyze application errors and failure patterns
+- **Performance Optimization**: Analyze request duration distributions for performance tuning
+- **Endpoint Analysis**: Monitor specific Flask routes and their performance characteristics
+
+## Metrics Included
+
+### Request Volume and Rate
+
+#### Requests Per Second
+- **Description**: Rate of successful HTTP requests (status 200) processed by the Flask application
+- **Metric Source**: `flask_http_request_duration_seconds.count` with status filter
+- **Use Case**: Monitor application load and traffic patterns
+- **Grouping**: By path for endpoint-specific analysis
+- **Critical for**: Capacity planning and load balancing decisions
+
+### Response Time Analysis
+
+#### Average Response Time
+- **Description**: Mean response time for successful requests across Flask endpoints
+- **Metric Source**: `flask_http_request_duration_seconds.sum` divided by count
+- **Use Case**: Track overall application performance and identify slow endpoints
+- **Grouping**: By path to identify performance bottlenecks per route
+- **Optimization**: Higher values indicate need for performance optimization
+
+#### Request Duration P90
+- **Description**: 90th percentile response time for successful requests
+- **Metric Source**: PromQL histogram quantile calculation from duration buckets
+- **Query**: `histogram_quantile(0.9, rate(flask_http_request_duration_seconds.bucket[30s]))`
+- **Use Case**: Monitor tail latency and ensure consistent user experience
+- **SLA Monitoring**: Critical for performance SLA compliance
+
+### Error Monitoring
+
+#### Errors Per Second
+- **Description**: Rate of all HTTP requests regardless of status code
+- **Metric Source**: `flask_http_request_duration_seconds.count` without status filtering
+- **Use Case**: Track overall request volume including errors for error rate calculation
+- **Analysis**: Compare with successful requests to calculate error percentage
+- **Alerting**: Essential for identifying application issues and outages
+
+### Performance Insights
+
+#### Request Rate by Endpoint
+- **Visualization**: Time-series graph showing request patterns
+- **Filtering**: Focused on successful requests (HTTP 200 status)
+- **Benefits**: Identify popular endpoints and traffic distribution
+- **Capacity Planning**: Understand which routes require optimization
+
+#### Latency Distribution
+- **Analysis**: P90 latency tracking for performance monitoring
+- **Histogram Data**: Utilizes Flask's duration histogram buckets
+- **Performance Tuning**: Identify endpoints with inconsistent response times
+- **User Experience**: Monitor tail latency impact on user satisfaction
+
+## Dashboard Variables
+
+This dashboard can be enhanced with filtering variables for:
+
+- **instance**: Filter by specific Flask application instances
+- **path**: Focus on particular Flask routes or endpoints
+- **method**: Filter by HTTP methods (GET, POST, PUT, DELETE)
+- **status**: Monitor specific HTTP status codes
+
+## Flask Metrics Integration
+
+### Prometheus Flask Exporter
+- **Required**: Flask application instrumented with prometheus_flask_exporter
+- **Metrics Collection**: Automatic HTTP request duration and count metrics
+- **Installation**: `pip install prometheus-flask-exporter`
+- **Integration**: Simple decorator-based instrumentation
+
+### Metric Details
+- **flask_http_request_duration_seconds**: Histogram of request durations
+- **Labels**: Includes method, status, and path for detailed analysis
+- **Bucket Configuration**: Configurable latency buckets for histogram analysis
+
+## Related Dashboards
+
+- [HTTP API Monitoring](/docs/dashboards/dashboard-templates/http-api-monitoring)
+- [APM Metrics](/docs/dashboards/dashboard-templates/apm-metrics)
+- [Key Operations](/docs/dashboards/dashboard-templates/key-operations)

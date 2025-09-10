@@ -65,13 +65,13 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'ArgoCD',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/argocd',
+    href: '/docs/dashboards/dashboard-templates/argocd-dashboard',
     icon: <GitBranch className="h-7 w-7 text-orange-500" />,
     clickName: 'ArgoCD Dashboard Template',
   },
   {
     name: 'AWS ElastiCache Redis',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/aws-elasticache/redis',
+    href: '/docs/dashboards/dashboard-templates/aws-elasticache-redis',
     icon: <Cloud className="h-7 w-7 text-orange-600" />,
     clickName: 'AWS ElastiCache Redis Dashboard Template',
   },
@@ -101,7 +101,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'ClickHouse',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/clickhouse',
+    href: '/docs/dashboards/dashboard-templates/clickhouse-monitoring',
     icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
     clickName: 'ClickHouse Dashboard Template',
   },
@@ -125,7 +125,7 @@ const DashboardTemplatesData: IconCardData[] = [
   },
   {
     name: 'Flask Monitoring',
-    href: 'https://github.com/SigNoz/dashboards/tree/main/flask-monitoring',
+    href: '/docs/dashboards/dashboard-templates/flask-monitoring',
     icon: <Globe className="h-7 w-7 text-black" />,
     clickName: 'Flask Monitoring Dashboard Template',
   },
