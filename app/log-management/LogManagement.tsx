@@ -120,7 +120,7 @@ function LogsManagement() {
         <HeroCards />
         <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
           <AlternatingSides items={FEATURES} />
-          <div className="p-0 border-b border-signoz_slate-400/50 border-dashed bg-transparent">
+          <div className="p-0 border-signoz_slate-400 border-dashed bg-transparent">
             <div className="flex flex-col md:flex-row gap-12 items-start h-full p-6">
               <div className="flex-1 h-full flex flex-col justify-between">
                 <h2 className="font-semibold text-signoz_vanilla-100">Store your Data</h2>
@@ -139,8 +139,8 @@ function LogsManagement() {
               <div className="flex-1">
                 <div className="w-full">
                   <table className="w-full border-collapse">
-                    <thead className='!border-1 !border-signoz_slate-400/50'>
-                      <tr className='!border-signoz_slate-400/50 border-y-1'>
+                    <thead className='!border-1 !border-signoz_slate-400'>
+                      <tr className='!border-signoz_slate-400 border-y-1'>
                         <td className="!border-none !border-signoz_slate-800 px-2 py-4 bg-signoz_ink-400/60">
                           <div className="text-xs font-medium text-signoz_vanilla-400">
                             HOT STORAGE PERIOD
@@ -152,7 +152,7 @@ function LogsManagement() {
                           </div>
                         </td>
                       </tr>
-                      <tr className='!border-signoz_slate-400/50 border-y-1'>
+                      <tr className='!border-signoz_slate-400 border-y-1'>
                         <td className="!border-none p-2 bg-signoz_ink-400" />
                         {STORAGE_DATA.coldPeriods.map((period, index) => (
                           <td key={index} className="!border-none p-4 text-center">
@@ -163,9 +163,9 @@ function LogsManagement() {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="w-full !border-1 !border-signoz_slate-400/50">
+                    <tbody className="w-full !border-1 !border-signoz_slate-400">
                       {STORAGE_DATA.rows.map((row, rowIndex) => (
-                        <tr key={rowIndex} className="!border-signoz_slate-400/50 border-y-1 bg-signoz_ink-400/40">
+                        <tr key={rowIndex} className="!border-signoz_slate-400 border-y-1 bg-signoz_ink-400/40">
                           <td className="!border-none p-2 bg-signoz_ink-400/60">
                             <div className="flex justify-between items-center text-signoz_robin-400 text-xs">
                               {row.period.value} {row.period.unit} <Badge color="vanilla">$ / GB</Badge>
@@ -198,13 +198,13 @@ const HeroCards = () => {
     <div className="section-container !mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed p-0">
       <div className="grid grid-cols-1 md:grid-cols-3">
         {CARDS.map((card, index) => (
-          <div key={index} className="p-0 border-r border-t border-signoz_slate-400/50 border-dashed bg-transparent">
-            <div className="p-4">
+          <div key={index} className="p-0 border-r border-t border-signoz_slate-400 border-dashed bg-transparent">
+            <div className="p-8">
               <div className="grid grid-cols-1 gap-4">
                 {card.icon}
-                <h3 className="text-xl font-semibold text-signoz_vanilla-100">{card.title}</h3>
+                <h3 className="text-xl font-semibold text-signoz_vanilla-100 m-0">{card.title}</h3>
               </div>
-              <p className="mt-2 text-sm text-signoz_vanilla-400">{card.description}</p>
+              <p className="mt-2 mb-0 text-sm text-signoz_vanilla-400">{card.description}</p>
             </div>
           </div>
         ))}
@@ -319,7 +319,7 @@ const UsageBasedPricing = () => {
           </p>
         </div>
         <div className="flex-[2_2_0%]">
-          <div className="bg-transparent p-0 border-b border-l border-signoz_slate-400/50 border-dashed">
+          <div className="bg-transparent p-0 border-b border-l border-signoz_slate-400 border-dashed">
             <div className="px-10 py-10 flex flex-col gap-2">
               <div className="text-2xl font-semibold text-signoz_vanilla-100">
                 Pricing you can trust
@@ -329,7 +329,9 @@ const UsageBasedPricing = () => {
                 <br />
                 We're here for you.
               </p>
-              <PricingCalculator show={["logs"]} showHeader={false} showFooter={false} />
+              <div className="[&>div]:border-0 [&>div]:bg-transparent">
+                <PricingCalculator show={["logs"]} showHeader={false} showFooter={false} />
+              </div>
               <Card className="bg-transparent p-0 [&>div]:border-0">
                 <div className="flex items-center justify-between gap-4 p-4 bg-signoz_robin-500/10 rounded-lg">
                   <span className="text-signoz_robin-400">Calculate your exact monthly bill</span>
@@ -372,11 +374,11 @@ const SigNozStats = () => {
           </div>
 
           <div className="flex flex-[2_2_0%] flex-col">
-            <div className="p-0 bg-transparent border-b border-l border-signoz_slate-400/50 border-dashed">
+            <div className="p-0 bg-transparent border-b border-l border-signoz_slate-400 border-dashed">
               <div className="p-6">
                 <DevelopersLoveSigNozCards />
               </div>
-              <div className="grid grid-cols-1 text-left sm:grid-cols-2">
+              <div className="grid grid-cols-1 text-left sm:grid-cols-2 [&>div]:border-l-0 [&>div]:!border-r-1 [&>div]:border-signoz_slate-400">
                 {STATS_LIST.map((stat, index) => (
                   <StatsCard
                     logo={stat.logo}
@@ -387,7 +389,7 @@ const SigNozStats = () => {
                   />
                 ))}
               </div>
-              <div className="flex flex-col items-center gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 py-6 sm:flex-row sm:py-6 sm:pl-10">
+              <div className="flex flex-col items-center gap-3 border-t border-signoz_slate-400 border-dashed py-6 sm:flex-row sm:py-6 sm:pl-10">
                 <Button variant="default" rounded="full" href="https://signoz.io/slack/" className="flex-center !w-fit" id="btn-join-community-homepage">
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   Join the community

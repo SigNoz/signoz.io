@@ -411,8 +411,8 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
   )
 
   return (
-    <Card>
-      <div id="estimate-your-monthly-bill" className="p-3 md:p-4">
+    <Card className={`${show?.length === 1 ? "p-0 md:p-0 [&>div]:border-0" : ""}`}>
+      <div id="estimate-your-monthly-bill" className={`p-3 md:p-4 ${show?.length === 1 ? "p-0 md:p-0" : ""}`}>
         {showHeader && (
           <div className="mb-4 flex items-start justify-between">
           <div className="flex-1">
@@ -727,29 +727,149 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
           </div>
         ) : (
           // Desktop view - Grid Layout
-          <div className={cn(`grid grid-cols-6 gap-y-3`, 
-            show?.length === 0 && "hidden", 
-            show?.length === 1 && "grid-rows-2", 
-            show?.length === 2 && "grid-rows-3", 
-            (show?.length === 3 || show?.length === undefined) && "grid-rows-4"
-          )}>
-            {/* Header Row */}
-            <div className="col-start-1 p-2"></div>
-            <div className="col-start-2 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
-              Pricing per unit
-            </div>
-            <div className="col-start-3 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
-              Retention
-            </div>
-            <div className="col-start-4 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
-              Scale of ingestion (per month)
-            </div>
-            <div className="col-start-5 py-2 pr-2 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
-              Estimated usage
-            </div>
-            <div className="col-start-6 py-2 pr-2 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
-              Subtotal
-            </div>
+          <>
+            {show?.length === 1 ? (
+              // Single section layout - Show pricing estimated usage and subtotal in one section
+              <div className="space-y-6">
+                {/* Header section with icon, pricing, estimated usage, and subtotal */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {isSectionVisible("traces") && (
+                      <>
+                        {/* <img src="/img/index_features/drafting-compass.svg" alt="Traces Icon" className="h-5 w-5" /> */}
+                        <DraftingCompass isActive={true} />
+                        <span className="text-md font-medium text-signoz_vanilla-100">Traces</span>
+                      </>
+                    )}
+                    {isSectionVisible("logs") && (
+                      <>
+                        {/* <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" /> */}
+                        <LogsIcon isActive={true} />
+                        <span className="text-md font-medium text-signoz_vanilla-100">Logs</span>
+                      </>
+                    )}
+                    {isSectionVisible("metrics") && (
+                      <>
+                        {/* <img src="/img/index_features/bar-chart-2.svg" alt="Metrics Icon" className="h-5 w-5" /> */}
+                        <MetricsIcon isActive={true} />
+                        <span className="text-md font-medium text-signoz_vanilla-100">Metrics</span>
+                      </>
+                    )}
+                    <span className="text-md font-medium text-signoz_robin-400">
+                      ${isSectionVisible("metrics") ? METRICS_PRICES[metricsRetentionPeriod] : TRACES_AND_LOGS_PRICES[isSectionVisible("traces") ? tracesRetentionPeriod : logsRetentionPeriod]} / {isSectionVisible("metrics") ? "mn samples" : "GB"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-8">
+                    <div className="text-center">
+                      <div className="text-xs font-semibold uppercase text-signoz_vanilla-400">ESTIMATED USAGE</div>
+                      <div className="text-md font-medium text-signoz_vanilla-100">
+                        {isSectionVisible("traces") && `${formatNumber(Number(inputTracesValue))} GB`}
+                        {isSectionVisible("logs") && `${formatNumber(Number(inputLogsValue))} GB`}
+                        {isSectionVisible("metrics") && `${formatNumber(Number(inputMetricsValue))} mn`}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs font-semibold uppercase text-signoz_vanilla-400">SUBTOTAL</div>
+                      <div className="text-md font-medium text-signoz_vanilla-100">
+                        ${formatNumber(isSectionVisible("traces") ? tracesSubtotal : isSectionVisible("logs") ? logsSubtotal : metricsSubtotal)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Configuration section */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <div className="text-xs font-semibold uppercase text-signoz_vanilla-400 mb-2">RETENTION</div>
+                      <select
+                        className="block h-8 w-32 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 py-1.5 pl-2 pr-1.5 text-sm text-signoz_vanilla-100"
+                        value={isSectionVisible("traces") ? tracesRetentionPeriod : isSectionVisible("logs") ? logsRetentionPeriod : metricsRetentionPeriod}
+                        onChange={(e) => {
+                          const value = Number(e.target.value)
+                          if (isSectionVisible("traces")) setTracesRetentionPeriod(value)
+                          else if (isSectionVisible("logs")) setLogsRetentionPeriod(value)
+                          else setMetricsRetentionPeriod(value)
+                        }}
+                      >
+                        {(isSectionVisible("traces") || isSectionVisible("logs")) ? (
+                          RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
+                            <option key={`${isSectionVisible("traces") ? "traces" : "logs"}-${option.days}-${idx}`} value={option.days}>
+                              {`${option.days} days`}
+                            </option>
+                          ))
+                        ) : (
+                          RETENTION_PERIOD.METRICS.map((option, idx) => (
+                            <option key={`metrics-${option.months}-${idx}`} value={option.months}>
+                              {`${option.months} ${option.months === 1 ? "month" : "months"}`}
+                            </option>
+                          ))
+                        )}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex-1 max-w-md ml-8">
+                    <div className="text-xs font-semibold uppercase text-signoz_vanilla-400 mb-2">SCALE OF INGESTION</div>
+                    {isSectionVisible("traces") && renderSlider(
+                      tracesValue,
+                      handleChangeTraces,
+                      "secondary",
+                      "0 GB",
+                      "500TB",
+                      formatBytes,
+                      "signoz_robin-500",
+                      "Adjust traces ingestion volume",
+                      inputTracesValue,
+                    )}
+                    {isSectionVisible("logs") && renderSlider(
+                      logsValue,
+                      handleChangeLogs,
+                      "danger",
+                      "0 GB",
+                      "500TB",
+                      formatBytes,
+                      "signoz_sakura-500",
+                      "Adjust logs ingestion volume",
+                      inputLogsValue,
+                    )}
+                    {isSectionVisible("metrics") && renderSlider(
+                      metricsValue,
+                      handleChangeMetrics,
+                      "warning",
+                      "0M",
+                      "500B",
+                      formatMetrics,
+                      "signoz_amber-500",
+                      "Adjust metrics ingestion volume",
+                      inputMetricsValue,
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Multi-section grid layout
+              <div className={cn(`grid grid-cols-6 gap-y-3`, 
+                show?.length === 0 && "hidden", 
+                show?.length === 2 && "grid-rows-3", 
+                (show?.length === 3 || show?.length === undefined) && "grid-rows-4"
+              )}>
+                {/* Header Row */}
+                <div className="col-start-1 p-2"></div>
+                <div className="col-start-2 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Pricing per unit
+                </div>
+                <div className="col-start-3 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Retention
+                </div>
+                <div className="col-start-4 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Scale of ingestion (per month)
+                </div>
+                <div className="col-start-5 py-2 pr-2 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Estimated usage
+                </div>
+                <div className="col-start-6 py-2 pr-2 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Subtotal
+                </div>
 
             {isSectionVisible("traces") && (
               <>
@@ -915,12 +1035,19 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                 <div className="metrics-background col-start-6 p-2 text-right">${formatNumber(metricsSubtotal)}</div>
               </>
             )}
-          </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Total estimate - always shown */}
-        <div className="button-background mt-6 flex items-center justify-between rounded-md px-3 py-4">
-          <span className="text-base font-medium text-signoz_vanilla-100">Monthly estimate</span>
+        <div className={cn(
+          "mt-6 flex items-center justify-between rounded-md px-3 py-4",
+          show?.length === 1 ? "bg-signoz_slate-400/40" : "button-background"
+        )}>
+          <span className="text-base font-medium text-signoz_vanilla-100">
+            {show?.length === 1 ? "Monthly estimate for usage-based plan" : "Monthly estimate"}
+          </span>
           <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
           <div className="text-xl font-bold text-signoz_vanilla-100">${formatNumber(totalEstimate)}</div>
         </div>

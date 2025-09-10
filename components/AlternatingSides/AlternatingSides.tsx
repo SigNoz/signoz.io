@@ -60,7 +60,7 @@ const AlternatingSides: React.FC<AlternatingSidesProps> = ({ items }) => {
       {items.map((item, index) => (
         <div
           key={index}
-          className="bg-transparent p-0 border-b border-signoz_slate-400/50 border-dashed"
+          className="bg-transparent p-0 border-b border-signoz_slate-400 border-dashed"
         >
           <AlternatingSidesItem {...item} isReversed={index % 2 !== 0} />
         </div>
