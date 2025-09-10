@@ -16,7 +16,7 @@ const TagsWithTooltips: React.FC<TagsWithTooltipsProps> = ({ tags, className = '
   }
 
   return (
-    <div className={`flex flex-wrap items-center gap-2 mb-4 ${className}`}>
+    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
       {tags.map((tag) => {
         const tooltipContent = tagDefinitions[tag as keyof typeof tagDefinitions]
         
@@ -33,6 +33,7 @@ const TagsWithTooltips: React.FC<TagsWithTooltipsProps> = ({ tags, className = '
                 className="cursor-pointer transition-colors"
               >
                 {tag}
+                <span className="sr-only"> - {tooltipContent}</span>
               </Badge>
             </div>
           </Tooltip>
