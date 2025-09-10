@@ -1,0 +1,389 @@
+---
+date: 2025-04-04
+title: Instrument Temporal TypeScript Applications with OpenTelemetry
+id: opentelemetry-temporal-typescript
+description: Learn how to instrument Temporal TypeScript applications to send traces, metrics and logs to SigNoz using OpenTelemetry
+---
+
+### Step 1: Add OpenTelemetry Dependencies
+
+Add the following dependencies to your `package.json`:
+
+```json
+"dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "^0.55.0",
+    "@opentelemetry/instrumentation-http": "^0.200.0",
+    "@opentelemetry/core": "^1.30.0",
+    "@opentelemetry/sdk-node": "^0.57.0",
+    "@opentelemetry/sdk-trace-node": "^1.30.0",
+    "@temporalio/interceptors-opentelemetry": "^1.11.6"
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.57.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.57.0",
+    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.57.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.57.0",
+    "@opentelemetry/resources": "^1.30.0",
+    "@opentelemetry/sdk-metrics": "^1.30.0",
+    "@opentelemetry/sdk-node": "^0.57.0",
+    "@opentelemetry/sdk-trace-node": "^1.30.0",
+    "@opentelemetry/semantic-conventions": "^1.28.0",
+    "@opentelemetry/winston-transport": "^0.11.0",
+}
+```
+
+### Step 2: Configure OpenTelemetry SDK
+
+Create `src/instrumentation.ts` to configure the OpenTelemetry SDK and initialize tracing and metrics for your Temporal application:
+```typescript:src/instrumentation.ts
+// OpenTelemetry's Node.js documentation recommends to setup instrumentation from a
+// dedicated file, which can be required before anything else in the application;
+// e.g. by running node with `--require ./instrumentation.js`. See
+// https://opentelemetry.io/docs/languages/js/getting-started/nodejs/#setup for details.
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { ConsoleSpanExporter, SpanExporter } from '@opentelemetry/sdk-trace-node';
+import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
+import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
+import { MetricReader, PeriodicExportingMetricReader, ConsoleMetricExporter } from '@opentelemetry/sdk-metrics';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { Resource, detectResourcesSync } from '@opentelemetry/resources';
+import { envDetector, hostDetector, osDetector, processDetector } from '@opentelemetry/resources';
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+import { ConnectInstrumentation } from '@opentelemetry/instrumentation-connect';
+import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns';
+import { FsInstrumentation } from '@opentelemetry/instrumentation-fs';  
+import { Runtime } from '@temporalio/worker';
+/* eslint-enable @typescript-eslint/no-unused-vars */
+
+export const OTEL_EXPORTER_OTLP_ENDPOINT = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317'
+
+export const OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT || `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318'}/v1/logs`;
+
+export const OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318'}/v1/traces`;
+
+export const OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT || `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318'}/v1/metrics`;
+
+
+// Function to parse headers from OTEL_EXPORTER_OTLP_HEADERS
+function parseHeaders(headersString: string | undefined): Record<string, string> {
+  if (!headersString) return {};
+
+  const headers: Record<string, string> = {};
+  const pairs = headersString.split(',');
+
+  pairs.forEach((pair) => {
+    const [key, value] = pair.split('=');
+    if (key && value) {
+      headers[key.trim()] = value.trim();
+    }
+  });
+
+  return headers;
+}
+
+// Parse headers from the environment variable
+export const otlpHeaders = parseHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS);
+
+
+// Function to parse OTEL_RESOURCE_ATTRIBUTES into an object
+function parseResourceAttributes(attributesString: string | undefined): { [key: string]: string } {
+  if (!attributesString) return {};
+
+  const attributes: { [key: string]: string } = {};
+  const pairs = attributesString.split(',');
+
+  pairs.forEach((pair) => {
+    const [key, value] = pair.split('=');
+    if (key && value) {
+      attributes[key] = value;
+    }
+  });
+
+  return attributes;
+}
+
+// Parse resource attributes from environment variable
+const resourceAttributesString = process.env.OTEL_RESOURCE_ATTRIBUTES;
+const parsedAttributes = parseResourceAttributes(resourceAttributesString);
+
+// Merge parsed attributes with service name
+const resourceAttributes = {
+  ...parsedAttributes,
+  'service.name': process.env.OTEL_SERVICE_NAME || 'default-temporal-service',
+};
+
+// Detect resources using built-in detectors
+const detectedResources = detectResourcesSync({
+  detectors: [
+    envDetector, 
+    hostDetector, 
+    osDetector,
+    processDetector
+  ]
+});
+
+// Filter out process.pid from the detected resources
+const filteredAttributes = { ...detectedResources.attributes };
+delete filteredAttributes['process.command_args'];
+const filteredResources = new Resource(filteredAttributes);
+
+// Create final resource by merging detected resources with custom attributes
+export const resource = new Resource(resourceAttributes).merge(filteredResources);
+
+
+function setupTraceExporter(): SpanExporter | undefined {
+
+  return new OTLPTraceExporterHttp({
+    url: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
+    headers: otlpHeaders,
+  
+    // Default is 10s, which reduces performance overhead in production,
+    // but a shorter value is convenient in dev and test use cases.
+    timeoutMillis: 10000,
+  });
+
+  return undefined;
+}
+
+
+function setupMetricReader(): MetricReader | undefined {
+ 
+  return new PeriodicExportingMetricReader({
+    exporter: new OTLPMetricExporterHttp({
+      url: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
+      headers: otlpHeaders,  
+
+
+      // Default is 10s, which reduces performance overhead in production,
+      // but a shorter value is convenient in dev and test use cases.
+      timeoutMillis: 10000,
+    }),
+  });
+
+}
+
+export const traceExporter = setupTraceExporter();
+const metricReader = setupMetricReader();
+
+export const otelSdk = new NodeSDK({
+  // This is required for use with the `@temporalio/interceptors-opentelemetry` package.
+  resource,
+
+  // This is required for use with the `@temporalio/interceptors-opentelemetry` package.
+  traceExporter,
+
+  // This is optional; it enables collecting metrics about the Node process, and some other libraries.
+  // Note that Temporal's Worker metrics are controlled through the Runtime options and do not relate
+  // to this option.
+  metricReader,
+
+  // This is optional; it enables auto-instrumentation for certain libraries.
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+try {
+  otelSdk.start();
+  diag.info(`[TELEMETRY] OpenTelemetry SDK initialized successfully ...`);
+} catch (error) {
+  diag.error(`[TELEMETRY] Failed to initialize OpenTelemetry SDK: ${error}`);
+  throw error;
+}
+```
+
+### Step 3: Add OpenTelemetry Interceptor
+
+Add the OpenTelemetry interceptor to your Temporal client configuration:
+
+```typescript:src/client.ts
+import { OpenTelemetryWorkflowClientInterceptor } from '@temporalio/interceptors-opentelemetry';
+
+const client = new Client({
+  // ... other client config ...
+  interceptors: {
+    workflow: [new OpenTelemetryWorkflowClientInterceptor()],
+  },
+});
+```
+
+This interceptor enables automatic tracing and metrics collection for your Temporal workflows.
+
+### Step 4: Configure Temporal Worker
+
+Add OpenTelemetry instrumentation to your worker:
+
+```typescript:src/worker.ts
+import { DefaultLogger, makeTelemetryFilterString, NativeConnection, Runtime, Worker } from '@temporalio/worker';
+import { getConnectionOptions } from './connection';
+import {
+  OpenTelemetryActivityInboundInterceptor,
+  OpenTelemetryActivityOutboundInterceptor,
+  makeWorkflowExporter,
+} from '@temporalio/interceptors-opentelemetry/lib/worker';
+import { OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_METRICS_ENDPOINT, otelSdk, otlpHeaders, resource, traceExporter } from './instrumentation';
+import { MetricReader } from '@opentelemetry/sdk-metrics';
+import { logger } from './logger';
+function initializeRuntime() {
+  
+  Runtime.install({
+
+    logger,
+
+    telemetryOptions: {
+      metrics: {
+
+        otel: {
+          url: OTEL_EXPORTER_OTLP_ENDPOINT,
+          headers: otlpHeaders,
+          metricsExportInterval: 10000,
+        },
+      },
+
+      logging: {
+        forward: {},
+        filter: makeTelemetryFilterString({ core: 'INFO', other: 'INFO' }),
+      },
+    },
+  });
+}
+async function run() {
+  initializeRuntime();
+
+  ...
+  ...
+
+  try {
+    worker = await Worker.create({
+      // ... other worker config ...
+      sinks: traceExporter && {
+        exporter: makeWorkflowExporter(traceExporter, resource),
+      },
+      interceptors: traceExporter && {
+        workflowModules: [require.resolve('./workflows')],
+        activity: [
+          (ctx) => ({
+            inbound: new OpenTelemetryActivityInboundInterceptor(ctx),
+            outbound: new OpenTelemetryActivityOutboundInterceptor(ctx),
+          }),
+        ],
+      },
+    });
+  } catch (err) {
+    // ... error handling ...
+  } finally {
+    await otelSdk.shutdown();
+  }
+}
+```
+
+This configuration enables OpenTelemetry instrumentation for both workflow and activity telemetry in your Temporal worker.
+
+### Step 5: Configure Temporal Workflow
+
+Add OpenTelemetry interceptors to your workflow code:
+
+```typescript:src/workflows.ts
+import { WorkflowInterceptorsFactory } from '@temporalio/workflow';
+import {
+  OpenTelemetryInboundInterceptor,
+  OpenTelemetryOutboundInterceptor,
+  OpenTelemetryInternalsInterceptor,
+} from '@temporalio/interceptors-opentelemetry/lib/workflow';
+import { log } from '@temporalio/workflow';
+
+// ... other workflow config ...
+export const interceptors: WorkflowInterceptorsFactory = () => ({
+  inbound: [new OpenTelemetryInboundInterceptor()],
+  outbound: [new OpenTelemetryOutboundInterceptor()],
+  internals: [new OpenTelemetryInternalsInterceptor()],
+});
+```
+
+These interceptors enable telemetry collection for inbound signals, outbound activities, and internal workflow operations.
+
+
+
+### Step 6: Configure logger
+
+Connect winston logger with temporal logger and otel logger
+
+```typescript:src/logger.ts
+import winston, { transports } from 'winston';
+import type { Logger as TemporalLogger } from '@temporalio/common/lib/logger';
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { logs, SeverityNumber } from '@opentelemetry/api-logs';
+import { BatchLogRecordProcessor, ConsoleLogRecordExporter, LoggerProvider, LogRecord } from '@opentelemetry/sdk-logs';
+import { OpenTelemetryTransportV3 } from '@opentelemetry/winston-transport';
+import { Resource } from '@opentelemetry/resources';
+import { SimpleLogRecordProcessor } from '@opentelemetry/sdk-logs';
+import { LogLevel, LogMetadata, Logger } from '@temporalio/common';
+import { OTEL_EXPORTER_OTLP_LOGS_ENDPOINT, otlpHeaders, resource } from './instrumentation';
+
+// Initialize the Logger provider
+const loggerProvider = new LoggerProvider({
+    resource,
+  })
+
+
+// Configure OTLP exporter for SigNoz
+const otlpExporter = new OTLPLogExporter({
+    url: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT,
+    headers: otlpHeaders
+})
+
+// Add processor with the OTLP exporter
+loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(otlpExporter))
+// loggerProvider.addLogRecordProcessor(new BatchLogRecordProcessor(otlpExporter))
+logs.setGlobalLoggerProvider(loggerProvider);
+
+
+const otlp_logger = loggerProvider.getLogger('default', '1.0.0');
+
+
+const winstonLogger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+        new transports.Console(),
+        new OpenTelemetryTransportV3(),
+    ],
+});
+
+
+export const logger: Logger = {
+    trace: (...args) => winstonLogger.debug(...args),
+    debug: (...args) => winstonLogger.debug(...args),
+    info: (...args) => winstonLogger.info(...args),
+    warn: (...args) => winstonLogger.warn(...args),
+    error: (...args) => winstonLogger.error(...args),
+    log: (level, message, ...args) => {
+
+        otlp_logger.emit({
+            // severityNumber: 16,
+            severityText: level,
+            body: message,
+            // attributes: args[0] || {},
+            attributes: Object.assign({}, ...args),
+        });
+        // console.log(`Message: ${message}, Level: ${level}, Attributes: ${JSON.stringify(Object.assign({}, ...args))}`);
+        return (winstonLogger as any)[level]?.(...args) || winstonLogger.info(...args)
+    }
+};
+
+```
+
+## Sample hello-world temporal application with opentelemetry instrumentation
+
+```bash
+https://github.com/ankitnayan/samples-typescript/tree/try_instrument_traces/hello-world
+```
+
+
+## Environment variables for your worker
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT='https://ingest.<region>.signoz.cloud:443' OTEL_RESOURCE_ATTRIBUTES="service.name=<service name>" OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<ingestion key>" npm run start.watch
+```
