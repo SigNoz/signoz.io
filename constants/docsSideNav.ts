@@ -1607,6 +1607,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/google-gemini-dashboard',
+            label: 'Google Gemini',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/haproxy-monitoring',
             label: 'HAProxy',
           },
