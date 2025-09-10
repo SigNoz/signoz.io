@@ -11,6 +11,7 @@ import TableOfContents from '../DocsTOC/DocsTOC'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
+import CopyAsMarkdown from '@/components/CopyAsMarkdown'
 
 const DocContent: React.FC<{
   title: string
@@ -30,11 +31,20 @@ const DocContent: React.FC<{
         })
       : null
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  
+  // Check if this is the introduction page (exclude copy functionality)
+  const isIntroductionPage = post.slug === 'introduction'
 
   return (
     <>
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
         <h2 className="mt-2 text-3xl">{title}</h2>
+        {!isIntroductionPage && post.body?.raw && (
+          <CopyAsMarkdown 
+            markdownContent={post.body.raw}
+            className="shrink-0"
+          />
+        )}
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
         <div className="flex justify-between items-center mt-8 text-sm">
           {formattedDate && (
