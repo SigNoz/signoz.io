@@ -2049,6 +2049,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/anthropic-monitoring',
+        label: 'Anthropic API Monitoring',
+        type: 'doc',
+      },
+      {
         route: '/docs/claude-code-monitoring',
         label: 'Claude Code Monitoring',
         type: 'doc',
