@@ -412,7 +412,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
 
   return (
     <Card className={`${show?.length === 1 ? "p-0 md:p-0 [&>div]:border-0" : ""}`}>
-      <div id="estimate-your-monthly-bill" className={`p-3 md:p-4 ${show?.length === 1 ? "p-0 md:p-0" : ""}`}>
+      <div id="estimate-your-monthly-bill" className={`p-3 md:p-4 ${show?.length === 1 ? "!p-0 md:!p-0" : ""}`}>
         {showHeader && (
           <div className="mb-4 flex items-start justify-between">
           <div className="flex-1">

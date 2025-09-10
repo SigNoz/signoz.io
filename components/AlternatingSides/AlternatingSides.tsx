@@ -26,13 +26,13 @@ const AlternatingSidesItem: React.FC<AlternatingSidesItemProps> = ({
   isReversed = false,
 }) => {
   const contentSide = (
-    <div className="flex flex-col p-8 md:w-1/2">
+    <div className="flex flex-col justify-between p-8 md:w-1/2">
       <div>
         <h2 className="text-signoz_vanilla-100">{title}</h2>
         <p className="text-signoz_vanilla-400">{description}</p>
       </div>
       {buttonText && buttonLink && (
-        <Button variant="secondary" to={buttonLink} rounded="full" className="flex justify-center items-center gap-2 w-fit">
+        <Button variant="secondary" to={buttonLink} rounded="full" className="flex justify-center items-center gap-2 w-fit mb-8">
           {buttonText}
           <ArrowRight size={14} />
         </Button>
