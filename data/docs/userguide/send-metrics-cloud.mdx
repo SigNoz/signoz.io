@@ -7,36 +7,347 @@ title: Send Metrics to SigNoz Cloud
 import GetHelp from '@/components/shared/get-help.md'
 import SaveChangesRestart from '@/components/shared/save-changes-and-restart.md'
 
-## Methods to Send Metrics
-There are two primary ways to send metrics to SigNoz:
+This document contains instructions on how to send metrics to SigNoz Cloud from your applications and infrastructure, and view your metrics in SigNoz.
 
-1. From your application
-2. From OpenTelemetry Collector
+## Overview
 
-This document will cover sending metrics from the OpenTelemetry Collector.
+There are multiple ways to send metrics to SigNoz Cloud:
 
-## Prerequisites
-Before you begin, ensure you have the following:
+1. **From your application** - Send custom application metrics directly
+2. **From OpenTelemetry Collector** - Collect infrastructure and system metrics
+3. **From existing Prometheus endpoints** - Scrape metrics from Prometheus-compatible services
 
-- A running instance of SigNoz Cloud.
-- OpenTelemetry Collector installed.
-- Appropriate access and permissions.
+## Send Metrics to SigNoz Cloud
 
-In this document, we will cover how to send metrics from OpenTelemetry Collector. The Collector is a swiss-army knife that can collect metrics from various sources and send them to SigNoz.
+Based on your application environment and use case, you can choose the appropriate method below to send metrics to SigNoz Cloud.
 
-- [How does OpenTelemetry Collector collect data](#how-does-opentelemetry-collector-collect-data)
-- [Enable a Specific Metric Receiver](#enable-a-specific-metric-receiver)
-- [Enable a Prometheus Receiver](#enable-a-prometheus-receiver)
-- [Find Metrics available in SigNoz](#find-metrics-available-in-signoz)
-  - [Metrics from Hostmetrics receiver](#metrics-from-hostmetrics-receiver)
-- [Related Videos](#related-videos)
-- [Get Help](#get-help)
+### Send Application Metrics Directly
+
+#### Step 1. Install OpenTelemetry SDK
+
+For applications, you can send custom metrics directly to SigNoz Cloud using OpenTelemetry SDKs:
+
+**Python:**
+```bash
+pip install opentelemetry-api==1.22.0
+pip install opentelemetry-sdk==1.22.0
+pip install opentelemetry-exporter-otlp==1.22.0
+```
+
+**Node.js:**
+```bash
+npm install @opentelemetry/api @opentelemetry/sdk-metrics @opentelemetry/exporter-metrics-otlp-http
+```
+
+**Java:**
+```xml
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-api</artifactId>
+    <version>1.32.0</version>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-sdk-metrics</artifactId>
+    <version>1.32.0</version>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-exporter-otlp</artifactId>
+    <version>1.32.0</version>
+</dependency>
+```
+
+#### Step 2. Configure Metrics Export
+
+**Python Example:**
+```python
+from opentelemetry import metrics
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+
+# Configure the OTLP metrics exporter
+otlp_exporter = OTLPMetricExporter(
+    endpoint="https://ingest.<region>.signoz.cloud:443",
+    headers={"signoz-ingestion-key": "<your-ingestion-key>"},
+    insecure=False,
+)
+
+# Configure the meter provider
+reader = PeriodicExportingMetricReader(exporter=otlp_exporter, export_interval_millis=10000)
+provider = MeterProvider(metric_readers=[reader])
+metrics.set_meter_provider(provider)
+
+# Create a meter
+meter = metrics.get_meter("my-application")
+
+# Create metrics
+counter = meter.create_counter("request_count", description="Number of requests")
+histogram = meter.create_histogram("request_duration", description="Request duration")
+
+# Use metrics in your application
+counter.add(1, {"endpoint": "/api/users"})
+histogram.record(0.5, {"endpoint": "/api/users"})
+```
+
+**Node.js Example:**
+```javascript
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+const { MeterProvider, PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-http');
+
+// Configure the OTLP metrics exporter
+const metricExporter = new OTLPMetricExporter({
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/metrics',
+  headers: {
+    'signoz-ingestion-key': '<your-ingestion-key>',
+  },
+});
+
+// Configure the meter provider
+const meterProvider = new MeterProvider({
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'my-application',
+  }),
+  readers: [
+    new PeriodicExportingMetricReader({
+      exporter: metricExporter,
+      exportIntervalMillis: 10000,
+    }),
+  ],
+});
+
+// Create a meter
+const meter = meterProvider.getMeter('my-application');
+
+// Create metrics
+const counter = meter.createCounter('request_count', {
+  description: 'Number of requests',
+});
+
+const histogram = meter.createHistogram('request_duration', {
+  description: 'Request duration in seconds',
+});
+
+// Use metrics in your application
+counter.add(1, { endpoint: '/api/users' });
+histogram.record(0.5, { endpoint: '/api/users' });
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+#### Step 3. Validate Metrics Ingestion
+
+To verify your application is sending metrics correctly:
+
+1. Trigger some activity in your application that generates the custom metrics
+2. Wait a few minutes for metrics to be processed
+3. Navigate to the **Metrics Explorer** in SigNoz to view your custom metrics
+4. Use the metric name you defined in your code to search and create visualizations
+
+### Send Metrics via OpenTelemetry Collector
+
+The OpenTelemetry Collector is recommended for collecting infrastructure metrics, system metrics, and metrics from multiple sources.
+
+#### Step 1. Install OpenTelemetry Collector
+
+You can install the OpenTelemetry Collector using the binary, Docker, or on Kubernetes. 
+
+For detailed installation instructions, see the [OpenTelemetry Collector installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+
+#### Step 2. Configure Collectors for Different Environments
+
+**Basic Configuration:**
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: localhost:4317
+      http:
+        endpoint: localhost:4318
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  resourcedetection:
+    detectors: [env, system, ec2]
+    timeout: 2s
+
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+**Kubernetes Configuration:**
+
+For Kubernetes environments, you can configure the Prometheus receiver to scrape metrics from various services:
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      global:
+        scrape_interval: 15s
+      scrape_configs:
+        # Kubernetes API server metrics
+        - job_name: 'kubernetes-apiservers'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - default
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+              action: keep
+              regex: default;kubernetes;https
+          scheme: https
+          tls_config:
+            ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+        # Kubernetes node metrics
+        - job_name: 'kubernetes-nodes'
+          kubernetes_sd_configs:
+            - role: node
+          relabel_configs:
+            - source_labels: [__address__]
+              regex: '(.*):10250'
+              replacement: '${1}:9100'
+              target_label: __address__
+
+        # Kubernetes pod metrics
+        - job_name: 'kubernetes-pods'
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+
+  # Host metrics for Kubernetes nodes
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  resource:
+    attributes:
+      - key: cluster.name
+        value: "my-k8s-cluster"
+        action: upsert
+
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus, hostmetrics]
+      processors: [resource, batch]
+      exporters: [otlp]
+```
+
+To deploy this in Kubernetes, create a ConfigMap and DaemonSet:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: monitoring
+data:
+  config.yaml: |
+    # Insert the above YAML configuration here
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: otel-collector
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      name: otel-collector
+  template:
+    metadata:
+      labels:
+        name: otel-collector
+    spec:
+      serviceAccount: otel-collector
+      containers:
+      - name: otel-collector
+        image: otel/opentelemetry-collector-contrib:latest
+        args:
+        - "--config=/etc/config/config.yaml"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: otel-collector-config
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+```
 
 ## How does OpenTelemetry Collector collect data?
 
 Data collection in OpenTelemetry Collector is facilitated through receivers. Receivers are configured via YAML under the top-level `receivers` section. To ensure a valid configuration, at least one receiver must be enabled.
 
-Below is an example of an **`otlp`** receiver:
+Below is an example of an **`otlp`** receiver:
 
 ```yaml
 receivers:
@@ -48,7 +359,7 @@ receivers:
 
 The OTLP receiver accepts data through gRPC or HTTP in the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank" >OTLP</a> format. 
 
-Here’s a sample configuration for an otlp receiver:
+Here's a sample configuration for an otlp receiver:
 
 ```yaml
 receivers:
@@ -68,9 +379,9 @@ receivers:
 
 To see more configuration options for otlp receiver, you can checkout [this link](https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md).
 
-Once a receiver is configured, it needs to be **enabled** to start the data flow. This involves setting up **pipelines** within a **`service`**. A **pipeline** acts as a streamlined pathway for data, outlining how it should be processed and where it should go. A pipeline comprises of the following:
+Once a receiver is configured, it needs to be **enabled** to start the data flow. This involves setting up **pipelines** within a **`service`**. A **pipeline** acts as a streamlined pathway for data, outlining how it should be processed and where it should go. A pipeline comprises of the following:
 
-- **Receivers:** These are entry points for data into the OpenTelemetry Collector, responsible for collecting data from various sources and feeding it into the pipeline.
+- **Receivers:** These are entry points for data into the OpenTelemetry Collector, responsible for collecting data from various sources and feeding it into the pipeline.
 - **Processors:** Metrics data is processed using the **`batch`** processor. This processor batches metrics before exporting them, optimizing the data flow.
 - **Exporters:** Metrics processed through this pipeline are exported to the OTLP endpoint mentioned in the configuration file. 
 
@@ -85,11 +396,11 @@ service:
       exporters: [otlp]
 ```
 
-Here’s a breakdown of the above metrics pipeline:
+Here's a breakdown of the above metrics pipeline:
 
-- **Receivers:** This pipeline is configured to receive metrics data from two sources: OTLP and HTTP Check. The **`otlp`** receiver collects metrics using both gRPC and HTTP protocols, while the **`httpcheck`** receiver gathers metrics from the HTTP endpoint.
-- **Processors:** Metrics data is processed using the **`batch`** processor. This processor likely batches metrics before exporting them, optimizing the data flow.
-- **Exporters:** Metrics processed through this pipeline are exported to the OTLP destination. The **`otlp`** exporter sends data to an endpoint specified in the configuration.
+- **Receivers:** This pipeline is configured to receive metrics data from two sources: OTLP and HTTP Check. The **`otlp`** receiver collects metrics using both gRPC and HTTP protocols, while the **`httpcheck`** receiver gathers metrics from the HTTP endpoint.
+- **Processors:** Metrics data is processed using the **`batch`** processor. This processor likely batches metrics before exporting them, optimizing the data flow.
+- **Exporters:** Metrics processed through this pipeline are exported to the OTLP destination. The **`otlp`** exporter sends data to an endpoint specified in the configuration.
 
 ## Enable a Specific Metric Receiver
 
@@ -222,7 +533,8 @@ service:
       processors: [resourcedetection, batch]
       exporters: [otlp]
 ```
-  For details about configuring OpenTelemetry receivers, see the [README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/README.md) page of the `opentelemetry-collector` GitHub repository.
+
+For details about configuring OpenTelemetry receivers, see the [README](https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/README.md) page of the `opentelemetry-collector` GitHub repository.
 
 ## Enable a Prometheus Receiver
 
@@ -270,9 +582,75 @@ To enable a Prometheus receiver, follow the steps below:
     If you'd like to learn more about how to monitor Prometheus Metrics with OpenTelemetry Collector, 
     refer to this [blog](https://signoz.io/blog/opentelemetry-collector-prometheus-receiver/#how-does-opentelemetry-collector-collect-data).
 
-## Find Metrics available in SigNoz
+## Viewing Your Metrics in SigNoz
 
-You can use this metrics to plot in the [Dashboard](/docs/userguide/manage-dashboards) section.
+Once your metrics are being sent to SigNoz Cloud, you can view and analyze them using the **Metrics Explorer**:
+
+### Using Metrics Explorer
+
+1. **Navigate to Metrics Explorer**: In the SigNoz dashboard, click on **Metrics** in the left sidebar to access the Metrics Explorer.
+
+2. **Search for Your Metrics**: Use the metric name search to find your custom metrics or infrastructure metrics. You can search by:
+   - Metric name (e.g., `request_count`, `cpu_usage`)
+   - Service name
+   - Labels/tags
+
+3. **Create Visualizations**: 
+   - Select time ranges to analyze metric trends
+   - Apply filters using labels and tags
+   - Choose different chart types (line charts, bar charts, etc.)
+   - Aggregate data using functions like sum, average, percentile
+
+4. **Build Dashboards**: Use the metrics from the explorer to create custom dashboards in the [Dashboard](/docs/userguide/manage-dashboards) section.
+
+### Common Metrics Available
+
+After setting up the configurations above, you'll have access to various types of metrics:
+
+**Application Metrics:**
+- Custom business metrics (counters, histograms, gauges)
+- Request/response metrics
+- Error rates and latencies
+
+**Infrastructure Metrics:**
+- CPU, memory, disk, and network usage
+- Host-level performance metrics
+- Container and Kubernetes metrics
+
+**Service Metrics:**
+- Database connection pools
+- Message queue depths
+- Cache hit/miss ratios
+- External service call metrics
+
+## Troubleshooting
+
+### Metrics not appearing in SigNoz
+
+1. **Check Ingestion Key**: Ensure your SigNoz ingestion key is correct and has the proper permissions.
+
+2. **Verify Endpoint**: Confirm you're using the correct region endpoint for your SigNoz Cloud instance.
+
+3. **Check Collector Logs**: If using OpenTelemetry Collector, check the collector logs for any export errors:
+   ```bash
+   # For Docker deployments
+   docker logs <collector-container-name>
+   
+   # For Kubernetes deployments
+   kubectl logs -n <namespace> <collector-pod-name>
+   ```
+
+4. **Test Metric Export**: You can enable debug logging in your collector configuration to see what metrics are being processed:
+   ```yaml
+   exporters:
+     debug:
+       verbosity: detailed
+   ```
+
+5. **Network Connectivity**: Ensure your application/collector can reach the SigNoz Cloud endpoint. Test connectivity:
+   ```bash
+   curl -v https://ingest.<region>.signoz.cloud:443
+   ```
 
 ## Related Videos
 
