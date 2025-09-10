@@ -14,7 +14,8 @@ import {
   SiSnowflake,
   SiClickhouse,
   SiVercel,
-  SiClaude
+  SiClaude,
+  SiAnthropic
 } from 'react-icons/si'
 import { 
   Monitor, 
@@ -50,6 +51,12 @@ interface IconCardData {
 }
 
 const DashboardTemplatesData: IconCardData[] = [
+  {
+    name: 'Anthropic API',
+    href: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
+    icon: <SiAnthropic className="h-7 w-7 text-orange-600" />,
+    clickName: 'Anthropic API Dashboard Template',
+  },
   {
     name: 'Apache Web Server',
     href: '/docs/dashboards/dashboard-templates/apache-web-server',

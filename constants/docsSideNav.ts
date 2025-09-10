@@ -1562,6 +1562,11 @@ const docsSideNav = [
         route: '/docs/dashboards/dashboard-templates/overview',
         label: 'Out of Box Dashboards',
         items: [
+           {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
+            label: 'Anthropic API Dashboard',
+          },
           {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
