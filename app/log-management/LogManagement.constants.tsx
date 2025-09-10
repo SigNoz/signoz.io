@@ -5,6 +5,7 @@ import { Badge } from "@signozhq/badge";
 import Image from "next/image";
 import AutoCarousel from "./AutoCarousel";
 import { Atom, Coins, DatabaseZap } from "lucide-react";
+import { Card } from "@/components/ui/Card";
 
 const CORRELATION_IMAGES = [
   {
@@ -28,9 +29,10 @@ export const FEATURES = [
       buttonText: "Read Documentation",
       buttonLink: "/docs/userguide/logs/",
       component: (
+        <Card className="p-0 w-full bg-transparent [&>div]:border-1 [&>*]:p-4">
         <Tabs entityName="sources">
           <TabItem value="supported-sources" label="Supported Sources">
-            <div className="flex flex-col gap-4 min-h-56">
+            <div className="flex flex-col gap-4 min-h-52">
               <div className="grid grid-cols-2 gap-4">
                 <div className="border-r-1 border-signoz_slate-400 border-dashed">
                   <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">CLOUD</h3>
@@ -90,7 +92,7 @@ export const FEATURES = [
             </div>
           </TabItem>
           <TabItem value="collection-methods" label="Collection Methods">
-            <div className="flex flex-col gap-8 min-h-56">
+            <div className="flex flex-col gap-8 min-h-52">
               <div className="flex items-center md:flex-row flex-col gap-8">
                 <div>
                   <div className="flex items-center gap-3 mb-4">
@@ -135,6 +137,7 @@ export const FEATURES = [
             </div>
           </TabItem>
         </Tabs>
+        </Card>
       )
     },
     {

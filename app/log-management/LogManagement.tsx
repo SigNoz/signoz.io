@@ -290,7 +290,7 @@ const Header = () => {
           <div className="product-explainer-video hero-figure rounded-xl px-3">
             <div className="embed-container">
               <div className="absolute w-full">
-                <div className="p-1">
+                <div className="p-0">
                   <Image
                     src="/img/log-management/LogManagementHero.svg"
                     alt="Log management hero"
