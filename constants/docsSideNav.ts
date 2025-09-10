@@ -1706,6 +1706,19 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/dashboards/integrations',
+        label: 'Integrations',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/integrations/snowflake-dashboard',
+            label: 'Snowflake Dashboard',
+          }
+        ],
+      },
     ],
   },
   {
