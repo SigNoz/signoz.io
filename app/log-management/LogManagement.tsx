@@ -34,7 +34,7 @@ const CustomerStories = () => {
         </div>
       </section>
       
-      <div className="section-container !mx-auto !w-[100vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed p-0">
+      <div className="section-container !mx-auto !w-[100vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-md:-mb-[3rem] md:!w-[80vw] md:border-dashed p-0">
         <div className="container pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-20">
             {TESTIMONIALS.map((testimonial, index) => (
@@ -59,7 +59,7 @@ const CustomerStories = () => {
             ))}
           </div>
           
-          <div className="flex justify-center items-end -mt-96 z-5 bg-gradient-to-t from-signoz_ink-500 to-transparent relative h-[50vh] py-6">
+          <div className="flex justify-center items-end -mt-96 z-5 bg-gradient-to-t from-signoz_ink-500 to-transparent relative h-[50vh] py-6 max-md:py-16">
             <Button 
               variant="secondary" 
               rounded="full"
@@ -136,9 +136,9 @@ function LogsManagement() {
                   </div>
                 </div>
               </div>
-              <div className="flex-1">
-                <div className="w-full">
-                  <table className="w-full border-collapse">
+              <div className="flex-1 max-md:w-full">
+                <div className="w-full max-md:overflow-x-auto max-md:flex max-md:justify-center">
+                  <table className="w-full border-collapse max-md:min-w-[80vw] max-md:mx-auto">
                     <thead className='!border-1 !border-signoz_slate-400'>
                       <tr className='!border-signoz_slate-400 border-y-1'>
                         <td className="!border-none !border-signoz_slate-800 px-2 py-4 bg-signoz_ink-400/60">
@@ -153,7 +153,7 @@ function LogsManagement() {
                         </td>
                       </tr>
                       <tr className='!border-signoz_slate-400 border-y-1'>
-                        <td className="!border-none p-2 bg-signoz_ink-400" />
+                        <td className="!border-none p-2 bg-signoz_ink-400 max-md:p-1" />
                         {STORAGE_DATA.coldPeriods.map((period, index) => (
                           <td key={index} className="!border-none p-4 text-center">
                             <div className="text-xs font-medium text-signoz_vanilla-400">
@@ -195,10 +195,10 @@ function LogsManagement() {
 
 const HeroCards = () => {
   return (
-    <div className="section-container !mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed p-0">
+    <div className="section-container !mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-md:mt-8 md:!w-[80vw] md:border-dashed p-0">
       <div className="grid grid-cols-1 md:grid-cols-3">
         {CARDS.map((card, index) => (
-          <div key={index} className="p-0 border-r border-t border-signoz_slate-400 border-dashed bg-transparent">
+          <div key={index} className="p-0 border-r border-t max-md:border-l border-signoz_slate-400 border-dashed bg-transparent">
             <div className="p-8">
               <div className="grid grid-cols-1 gap-4">
                 {card.icon}
@@ -285,7 +285,7 @@ const Header = () => {
           <ArrowRight size={14} />
         </Button>
       </div>
-      <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
+      <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-md:-mb-[3rem] md:!w-[80vw] md:border-dashed">
         <div className="w-100 mx-[-28px]">
           <div className="product-explainer-video hero-figure rounded-xl px-3">
             <div className="embed-container">
