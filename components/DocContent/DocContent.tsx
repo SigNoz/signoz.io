@@ -41,12 +41,12 @@ const DocContent: React.FC<{
     <>
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-3xl leading-tight mt-0 flex flex-col items-start gap-2">
+          <div>
             {!isOnboarding && post.tags && post.tags.length > 0 && (
               <TagsWithTooltips tags={post.tags} />
             )}
-            {title}
-          </h2>
+            <h2 className="text-3xl leading-tight mt-2">{title}</h2>
+          </div>
           {!isIntroductionPage && post.body?.raw && (
             <CopyAsMarkdown
               markdownContent={post.body.raw}
