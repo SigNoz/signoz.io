@@ -2200,6 +2200,11 @@ const docsSideNav = [
         route: '/docs/integrations/supabase',
         label: 'Supabase',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nomad',
+        label: 'Nomad'
+      }
     ],
   },
   {
