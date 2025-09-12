@@ -355,7 +355,7 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-          </div> */
+          </div>
 
           {/* Timer */}
           {[
