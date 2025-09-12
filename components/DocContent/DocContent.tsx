@@ -12,6 +12,7 @@ import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import CopyAsMarkdown from '@/components/CopyAsMarkdown'
+import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 
 const DocContent: React.FC<{
   title: string
@@ -22,24 +23,28 @@ const DocContent: React.FC<{
 }> = ({ title, post, toc, hideTableOfContents, editLink }) => {
   const searchParams = useSearchParams()
   const lastUpdatedDate = post?.lastmod || post?.date
-  const formattedDate =
-    lastUpdatedDate
-      ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })
-      : null
+  const formattedDate = lastUpdatedDate
+    ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
-  
+  const isOnboarding = source === ONBOARDING_SOURCE
   // Check if this is the introduction page (exclude copy functionality)
   const isIntroductionPage = post.slug === 'introduction'
 
   return (
     <>
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
-        <div className="mt-2 flex items-baseline justify-between gap-2">
-          <h2 className="text-3xl leading-tight">{title}</h2>
+        <div className="doc-title-row mb-4 flex items-center justify-between gap-2">
+          <div className="flex flex-col items-start gap-2">
+            {!isOnboarding && post.tags && post.tags.length > 0 && (
+              <TagsWithTooltips tags={post.tags} />
+            )}
+            <h2 className="mt-2 text-3xl leading-tight">{title}</h2>
+          </div>
           {!isIntroductionPage && post.body?.raw && (
             <CopyAsMarkdown
               markdownContent={post.body.raw}
@@ -50,17 +55,15 @@ const DocContent: React.FC<{
             />
           )}
         </div>
-        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
-        <div className="flex justify-between items-center mt-8 text-sm">
+        <article className="prose prose-slate max-w-none pb-6 dark:prose-invert">
+          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
+        </article>
+        <div className="mt-8 flex items-center justify-between text-sm">
           {formattedDate && (
             <p className="text-gray-500 dark:text-gray-400">Last updated: {formattedDate}</p>
           )}
           {editLink && (
-            <Button
-              href={editLink}
-              variant='outline'
-              className="gap-2 no-underline"
-            >
+            <Button href={editLink} variant="outline" className="gap-2 no-underline">
               <Edit size={16} />
               Edit on GitHub
             </Button>
