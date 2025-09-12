@@ -2736,6 +2736,25 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'From OpenTelemetry',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-opentelemetry-to-signoz',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-opentelemetry/cloud',
+            label: 'Migrate to SigNoz Cloud',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-opentelemetry/self-hosted',
+            label: 'Migrate to Self-Hosted SigNoz',
+          },
+        ],
+      },
+      {
         type: 'doc',
         route: '/docs/migration/migrate-from-signoz-self-host-to-signoz-cloud',
         label: 'From Self-Hosted to Cloud',
