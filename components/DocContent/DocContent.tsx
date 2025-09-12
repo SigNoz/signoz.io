@@ -12,6 +12,7 @@ import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import CopyAsMarkdown from '@/components/CopyAsMarkdown'
+import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 
 const DocContent: React.FC<{
   title: string
@@ -31,6 +32,7 @@ const DocContent: React.FC<{
         })
       : null
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  const isOnboarding = source === ONBOARDING_SOURCE
   
   // Check if this is the introduction page (exclude copy functionality)
   const isIntroductionPage = post.slug === 'introduction'
@@ -38,8 +40,13 @@ const DocContent: React.FC<{
   return (
     <>
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
-        <div className="mt-2 flex items-baseline justify-between gap-2">
-          <h2 className="text-3xl leading-tight">{title}</h2>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col items-start gap-2">
+            {!isOnboarding && post.tags && post.tags.length > 0 && (
+              <TagsWithTooltips tags={post.tags} />
+            )}
+            <h2 className="text-3xl leading-tight mt-2">{title}</h2>
+          </div>
           {!isIntroductionPage && post.body?.raw && (
             <CopyAsMarkdown
               markdownContent={post.body.raw}
