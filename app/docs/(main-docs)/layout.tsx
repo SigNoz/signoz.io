@@ -61,13 +61,11 @@ export default function DocLayout({ children }: LayoutProps) {
           )}
 
           <div
-            className={`doc-content md:px-0 lg:px-4 ${
+            className={`doc-content md:px-0 lg:px-4 py-6 ${
               source === ONBOARDING_SOURCE ? 'product-onboarding' : ''
             }`}
           >
-            <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
-              {children}
-            </article>
+            {children}
           </div>
         </div>
       </SectionContainer>
