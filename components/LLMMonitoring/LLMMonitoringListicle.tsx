@@ -5,7 +5,8 @@ import {
   SiVercel,
   SiLangchain,
   SiClaude,
-  SiGooglegemini
+  SiGooglegemini,
+  SiAnthropic
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -16,6 +17,12 @@ interface IconCardData {
 }
 
 const LLMMonitoringData: IconCardData[] = [
+  {
+    name: 'Anthropic API',
+    href: '/docs/anthropic-monitoring',
+    icon: <SiAnthropic className="h-7 w-7 text-orange-500" />,
+    clickName: 'Anthropic API Monitoring',
+  },
   {
     name: 'Claude Code',
     href: '/docs/claude-code-monitoring',
