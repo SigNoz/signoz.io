@@ -226,7 +226,7 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/trace-operators/"
+              href="/blog/oss-improvements/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
@@ -279,7 +279,7 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href=""
+              href="/blog/trace-operators/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
@@ -295,16 +295,21 @@ const MainSection: React.FC = () => {
                     Map service dependencies and validate architectural patterns without manually analyzing trace flows. Trace Operators let you query relationships between services within distributed traces using simple, intuitive syntax.
                   </div>
                 </div>
+                <div className="flex justify-end">
+                  <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
+                  <ArrowRight size={14} />
+                  </div>
+                </div>
               </div>
             </Link>
           </div>
 
-          {/*<div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b-2 border-t border-dashed border-signoz_slate-200/50 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
-              <div className="text-base uppercase text-signoz_vanilla-400">FRIDAY ⎯ May 16</div>
+              <div className="text-base uppercase text-signoz_vanilla-400">FRIDAY ⎯ Sep 12</div>
               <div className="flex flex-col gap-2">
                 <Link
-                  href="https://www.linkedin.com/events/tracingfunnels-definefunnelsb-w7327644976916455424/theater/"
+                  href="https://www.linkedin.com/events/costcontrol-signozlaunchweek5-07370073117991432192/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
                   className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
@@ -317,7 +322,7 @@ const MainSection: React.FC = () => {
                 <div
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
-                  onClick={() => handleOpenModal('Q9Apz8uAezw')}
+                  onClick={() => handleOpenModal('X_qVjWB9TvY')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -327,22 +332,20 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/tracing-funnels-observability-distributed-systems/"
+              href="/blog/cost-meter/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/blog/2025/05/tracing-funnels.webp"
+                src="/img/blog/2025/09/cost-meter.webp"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-eedium mb-2 text-base">
-                    Tracing Funnels - Define funnels b/w spans in your distributed system
+                    Cost Control
                   </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    Industry's first funnel analysis for distributed traces, enabling engineers to
-                    measure conversion, errors, and latency between key spans across services within
-                    a single trace.
+                    Take control of your observability spending with complete transparency into usage patterns across logs, metrics, and traces. No more surprise bills or blind cost optimization - get the visibility you need to manage budgets effectively.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -352,7 +355,7 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-          </div> */}
+          </div> */
 
           {/* Timer */}
           {[
@@ -360,7 +363,7 @@ const MainSection: React.FC = () => {
               //'Tuesday ⎯ Sep 09',
               //'Wednesday ⎯ Sep 10',
             //'Thursday ⎯ Sep 11',
-            'Friday ⎯ Sep 12',
+            //'Friday ⎯ Sep 12',
           ].map((day, index) => (
             <div
               key={index}

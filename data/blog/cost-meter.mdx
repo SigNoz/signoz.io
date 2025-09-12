@@ -1,0 +1,139 @@
+---
+
+title: Introducing Cost Meter - Proactive Observability Cost Control with Per-Hour Granularity
+slug: cost-meter
+date: 2025-09-12
+tags: [Product]
+authors: [anushka_karmakar]
+description: Take control of your observability spending with complete transparency into usage patterns across logs, metrics, and traces. No more surprise bills or blind cost optimization - get the visibility you need to manage budgets effectively.
+image: /img/blog/2025/09/cost-meter.webp
+keywords: [observability cost management, telemetry data ingestion, meter metrics, cost monitoring, ingestion quotas, observability spend optimization, usage-based pricing]
+
+---
+
+The irony isn't lost on us - observability platforms are built to be proactive about system health, yet when it comes to managing observability costs themselves, teams are forced to be reactive. Today, that changes with Cost Meter, now live in our platform.
+
+Cost Meter transforms observability spend management from a monthly billing surprise into a proactive, data-driven process with hourly aggregated metrics that give you complete visibility into your telemetry ingestion patterns.
+
+<YouTube id="iY9BP6-PbU8" mute={false} />
+
+## The Technical Architecture: Metrics-First Approach to Cost Data
+
+We've built Cost Meter on a foundation that DevOps teams already understand: metrics. Instead of creating a separate cost monitoring system, we've exposed all cost data as five queryable metrics within our platform.
+
+### Core Meter Metrics
+
+All meter data follows the `signoz.meter` namespace and provides delta temporality sum metrics:
+
+```
+signoz.meter.log.count       # Total log records ingested
+signoz.meter.log.size        # Total size of log records (bytes)
+signoz.meter.span.count      # Total spans ingested
+signoz.meter.span.size       # Total size of spans (bytes)
+signoz.meter.metric.datapoint.count  # Total metric datapoints ingested
+
+```
+
+Each metric is aggregated hourly, providing the perfect balance between granularity and data volume. This means you get 24 data points per day instead of thousands, making analysis straightforward without losing meaningful insights.
+
+### Multi-Dimensional Analysis with Labels
+
+Every meter metric includes four key labels that enable powerful slicing and dicing:
+
+- `service.name`: Identify which services are your biggest cost drivers
+- `deployment.environment`: Compare costs across staging, UAT, and production
+- `host.name`: Pinpoint hosts generating excessive telemetry
+- `signoz.workspace.key.id`: Track ingestion by team or project using separate ingestion keys
+
+This labeling strategy enables queries like:
+
+```
+signoz.meter.log.size{service.name="payment-service", deployment.environment="production"}
+
+```
+
+## Real-World Implementation: From Reactive to Proactive
+
+Here's where Cost Meter fundamentally changes the game. Previously, teams would discover cost overruns 24 hours later through billing data, often approximating log sizes based on rough calculations (3-4KB per log line). Now, you can:
+
+### 1. Implement Team-Based Quotas
+
+Distribute ingestion keys per team and track their usage in real-time. For example, if your platform team has a 200GB monthly quota and the growth team has 300GB, you can monitor consumption hourly:
+
+```
+signoz.meter.log.size{signoz.workspace.key.id="platform-team-key-id"}
+```
+
+### 2. Environment-Specific Optimization
+
+Discover that your staging environment is sending debug logs consuming 40% of your ingestion budget? With deployment environment breakdown, you can immediately identify and fix such inefficiencies:
+
+```
+signoz.meter.log.size{group-by:deployment.environment}
+```
+
+### 3. Service-Level Cost Attribution
+
+Finally answer "How much is the recommendation service costing us?" with actual data instead of estimates. Group by service.name to get precise cost attribution for internal chargebacks or optimization priorities.
+
+## Data Retention and Predictive Analysis
+
+Cost Meter retains data for one full year, enabling sophisticated trend analysis and accurate forecasting. This extended retention serves multiple purposes:
+
+- **Quarterly Planning**: Align observability budgets with standard quarterly planning cycles
+- **Seasonal Pattern Recognition**: Identify and prepare for predictable spikes (Black Friday, end-of-quarter processing)
+- **Growth Projection**: Calculate month-over-month or quarter-over-quarter growth rates for accurate budget forecasting
+
+## Integration with Existing Workflows
+
+### No Setup Required
+
+For our existing Cloud customers, Cost Meter is already collecting data. Simply navigate to the Cost Meter section - no configuration, no agents, no additional setup needed.
+
+### Saved Views for Recurring Analysis
+
+Create saved views for common queries like "Daily ingestion by service" or "Weekly environment comparison" to avoid rewriting queries. Your entire team can access these standardized views for consistent cost monitoring.
+
+### UTC Time Zone Alignment
+
+When comparing with billing data, remember that billing operates in UTC. The platform provides helpful guidance right in the interface for timezone conversion. For precise billing reconciliation:
+
+- Select the converted time range in your local timezone for accurate billing comparison (for example, if you’re in IST, for the billing of Jan 1, select your time range as Jan 1, 5:30 AM – Jan 2, 5:29 AM IST)
+- Data before August 22nd, 2025 was in beta - use post-August 22nd data for accurate analysis
+
+## What Makes Our Cost Meter Different
+
+Unlike competitors who often have hidden cost multipliers or complex pricing calculations, our usage-based pricing model means what you see in Cost Meter directly translates to your bill. No derivatives, no surprises, no hidden calculations.
+
+This transparency enables accurate predictions. If you're ingesting 60MB per hour consistently, you can confidently project your monthly costs without worrying about invisible multipliers or tiered pricing surprises.
+
+## Coming Soon: Proactive Alerting
+
+While the current release provides unprecedented visibility, we're not stopping here. Within the next few weeks, expect:
+
+- **Threshold-based alerts**: "Alert me when daily usage exceeds 10GB for payment-service"
+- **Quota breach notifications**: Know immediately when teams exceed their allocated budgets
+- **Rate limit warnings**: Get notified when ingestion keys hit their configured limits
+- **Billing cycle-aware alerting**: Alerts that understand your specific billing cycle start/end times
+
+Following alerting, we'll introduce intelligent cost optimization recommendations based on your actual ingestion patterns, helping you maintain observability coverage while reducing spend.
+
+## Getting Started with Cost Meter
+
+1. **Navigate to Cost Meter** in your sidebar (currently in beta, soon to be stable)
+2. **Review the Total Overview** to understand your aggregate costs across all signals
+3. **Explore signal-specific sections** for detailed logs, traces, and metrics analysis
+4. **Use Meter Explorer** for advanced queries with our familiar query interface
+5. **Create saved views** for queries you'll run regularly
+
+Remember: Select time ranges of 1 hour or greater, as meter data is aggregated hourly.
+
+## The Bottom Line
+
+Cost Meter transforms observability cost management from a reactive, approximate process into a proactive, data-driven practice. With hourly granularity, year-long retention, and complete transparency, you finally have the tools to optimize your observability spend without compromising coverage.
+
+No more end-of-month billing shocks. No more rough calculations. Just clear, actionable data about your observability costs, available when you need it.
+
+---
+
+Cost Meter is now available for all users. For detailed documentation, visit our [Cost Meter Overview](https://signoz.io/docs/cost-meter/overview/) and [Meter Explorer](https://signoz.io/docs/cost-meter/meter-explorer/) guides.
