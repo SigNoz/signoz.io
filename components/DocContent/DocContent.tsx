@@ -38,7 +38,7 @@ const DocContent: React.FC<{
   return (
     <>
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
-        <div className="doc-title-row flex items-center justify-between gap-2">
+        <div className="doc-title-row mb-4 flex items-center justify-between gap-2">
           <div className="flex flex-col items-start gap-2">
             {!isOnboarding && post.tags && post.tags.length > 0 && (
               <TagsWithTooltips tags={post.tags} />
