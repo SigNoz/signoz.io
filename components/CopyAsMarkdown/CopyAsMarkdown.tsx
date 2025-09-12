@@ -44,7 +44,7 @@ const CopyAsMarkdown: React.FC<CopyAsMarkdownProps> = ({
     try {
       await navigator.clipboard.writeText(markdownContent)
       setCopied(true)
-      
+
       // Reset the copied state after 2 seconds
       setTimeout(() => {
         setCopied(false)
@@ -74,3 +74,4 @@ const CopyAsMarkdown: React.FC<CopyAsMarkdownProps> = ({
 }
 
 export default CopyAsMarkdown
+
