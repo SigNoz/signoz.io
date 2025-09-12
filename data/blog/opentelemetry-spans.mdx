@@ -98,6 +98,7 @@ The above can also be written as:
 
 Knowing the order ID, payment method, and inventory status associated with each step of an order helps in precise identification and tracking. Later, when you're examining traces, these attributes become invaluable. You can use them to filter and search for specific orders based on their unique IDs and payment methods or even check the availability of items in the inventory.
 
+
 Here's a Go snippet that demonstrates how to add span attributes:
 
 ```jsx
@@ -110,6 +111,25 @@ import (
 span.SetAttributes(attribute.String("order_id", "12345"), attribute.String("payment_method", "Credit Card"), attribute.String("inventory_status", "In Stock"))
 
 ```
+
+## What are Span Kinds?
+
+  *Span Kind* is a crucial attribute that defines a span's role in a distributed interaction. It tells visualization
+  tools whether the span represents a client making a request, a server handling it, an asynchronous
+  producer/consumer, or a simple internal function. This is essential for correctly understanding the topology of
+  your system.
+
+  There are five kinds:
+
+   - `SERVER`: For the server-side handling of a request, like an incoming API call.
+   - `CLIENT`: For the client-side making of a request, like calling an external API.
+   - `PRODUCER`: For sending a message to a queue, like publishing to Kafka.
+   - `CONSUMER`: For receiving and processing a message from a queue.
+   - `INTERNAL`: For operations that don't cross service boundaries (the default).
+
+  Correctly setting the kind like *CLIENT* on an outgoing call and *SERVER* on the corresponding incoming call is what
+  allows observability platforms to build an accurate graph of your services.
+
 
 ## What are Span events?
 
@@ -145,7 +165,6 @@ span.AddEvent("Gateway response received", trace.WithAttributes(
     attribute.Bool("payment.successful", true),
 ))
 ```
-
 
 ## Span creation
 
@@ -283,11 +302,21 @@ span := trace.SpanFromContext(ctx)
 // Do something with the current span, optionally calling `span.End()` if you want it to end
 ```
 
-### Nested span
+### Nested Spans: Creating Parent-Child Relationships
 
-Nested spans can be used to track work in a nested operation. If the `context.Context` instance you have a handle on already contains a span, creating a new span will result in a nested span.
+  When you need to track a specific operation within a larger one, you can create nested spans. If you start a new
+  span from a context that already contains an active span, you create a parent-child relationship.
 
-This can be useful when you want to track the performance of a specific operation within the context of a larger operation. To create a nested span, initiate a new span within the existing span's context.
+   - The first span in a trace, which has no parent, is the *root span*.
+   - The original, outer span is the *parent span*.
+   - The new, nested span is the *child span*.
+
+  This hierarchy is fundamental to tracing. It allows you to see how a larger operation is broken down into smaller
+  steps. For example, a parentSpan might track an entire API request, while several childSpan instances could track
+  individual database queries or function calls made during that request.
+
+  Visualization tools use this parent-child linkage to reconstruct the flow of the operation, often displaying it as
+  a Gantt chart or flamegraph.
 
 For example:
 
@@ -312,6 +341,44 @@ func childFunction(ctx context.Context) {
 ```
 
 Remember that once a span has been completed, it becomes immutable, and any further modifications to it are not possible. This ensures that the captured data and attributes of the span remain intact and unaltered.
+
+
+## Span Links and Context Propagation
+
+  While a parent-child hierarchy is great for operations within a single service, traces truly shine when they cross
+  process and network boundaries. This is made possible by *span links* and *context propagation*.
+
+  ### Span Links: For Asynchronous Workflows
+
+  First, let's address a common scenario that doesn't fit the parent-child model: asynchronous processing. Imagine a
+  Producer service sends 100 messages to a queue, and later, multiple Consumer services process those messages. The
+  producer's "send-batch" span is causally related to all the consumer spans, but it's not their direct parent.
+
+  Span Links solve this by creating an explicit pointer from one span to another, even across different traces. Each
+  consumer's span can add a Link back to the producer's original span, creating a complete, understandable end-to-end
+  flow for the asynchronous workflow.
+
+  ### Context Propagation: The Underlying Concept
+
+  This leads to a crucial question: how does the consumer know the identity of the producer's span to create that
+  link? 
+  The answer is *context propagation*.
+
+  *Context Propagation* is the mechanism by which tracing information (the "context," including the Trace ID and Span
+  ID) is carried across service boundaries. It works in two steps:
+
+   1. Injection: Before a service sends a request or message, the OpenTelemetry library injects the current span's
+      context into the request's headers (for HTTP) or the message's metadata (for queues).
+   2. Extraction: When the receiving service gets the request or message, its OpenTelemetry library extracts that
+      context.
+
+  This extracted context is the key to connecting distributed systems. It is used to:
+   * Create a child span if the relationship is a standard parent-child call.
+   * Provide the information needed to create a Span Link for asynchronous relationships.
+
+  This entire process is standardized by specifications like the W3C Trace Context (traceparent header), ensuring
+  that traces can be seamlessly connected across services written in different languages. In essence, Context
+  Propagation is the fundamental process that makes all distributed tracing possible.
 
 ## Getting started with OpenTelemetry tracing
 
