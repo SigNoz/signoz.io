@@ -99,6 +99,19 @@ The above can also be written as:
 Knowing the order ID, payment method, and inventory status associated with each step of an order helps in precise identification and tracking. Later, when you're examining traces, these attributes become invaluable. You can use them to filter and search for specific orders based on their unique IDs and payment methods or even check the availability of items in the inventory.
 
 
+Here's a Go snippet that demonstrates how to add span attributes:
+
+```jsx
+import (
+    "go.opentelemetry.io/otel/attribute"
+    "go.opentelemetry.io/otel/trace"
+)
+
+// ... inside a function with an active span
+span.SetAttributes(attribute.String("order_id", "12345"), attribute.String("payment_method", "Credit Card"), attribute.String("inventory_status", "In Stock"))
+
+```
+
 ## What are Span Kinds?
 
   *Span Kind* is a crucial attribute that defines a span's role in a distributed interaction. It tells visualization
@@ -114,23 +127,9 @@ Knowing the order ID, payment method, and inventory status associated with each 
    - `CONSUMER`: For receiving and processing a message from a queue.
    - `INTERNAL`: For operations that don't cross service boundaries (the default).
 
-  Correctly setting the kind—like *CLIENT* on an outgoing call and *SERVER* on the corresponding incoming call—is what
+  Correctly setting the kind like *CLIENT* on an outgoing call and *SERVER* on the corresponding incoming call is what
   allows observability platforms to build an accurate graph of your services.
 
-
-=======
-Here's a Go snippet that demonstrates how to add span attributes:
-
-```jsx
-import (
-    "go.opentelemetry.io/otel/attribute"
-    "go.opentelemetry.io/otel/trace"
-)
-
-// ... inside a function with an active span
-span.SetAttributes(attribute.String("order_id", "12345"), attribute.String("payment_method", "Credit Card"), attribute.String("inventory_status", "In Stock"))
-
-```
 
 ## What are Span events?
 
