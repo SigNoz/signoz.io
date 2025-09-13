@@ -47,11 +47,11 @@ const MigrateVendorsData: IconCardData[] = [
         // eslint-disable-next-line @next/next/no-img-element
         <img
         src="/svgs/icons/honeycomb.svg"
-        alt="SigNoz"
+        alt="Honeycomb"
         className="h-7 w-7 object-contain"
         />
     ),
-    clickName: 'Migrate from Self-Hosted SigNoz',
+    clickName: 'Migrate from Honeycomb',
   },
   {
     name: 'Migrate from Self-Hosted SigNoz',

@@ -1,0 +1,208 @@
+---
+date: 2025-09-09
+id: migrate-metrics-from-honeycomb
+title: Migrate Metrics from Honeycomb to SigNoz
+description: Learn how to migrate metrics and SLOs from Honeycomb to SigNoz using Prometheus receiver, OTLP metrics.
+---
+
+
+With Honeycomb's transition to OpenTelemetry-first approach, migrating your metrics monitoring to SigNoz becomes straightforward while offering enhanced capabilities through unified observability.
+This guide walks you through migrating custom metrics, converting SLOs to alert rules, and leveraging SigNoz's comprehensive metrics platform.
+
+## Prerequisites
+
+- [SigNoz Cloud account](https://signoz.io/teams/) or [self-hosted SigNoz](https://signoz.io/docs/install/self-host/) setup
+- [OpenTelemetry data flowing to SigNoz](/docs/migration/migrate-from-opentelemetry-to-signoz/)
+- Access to your current Honeycomb metrics and derived columns
+- Understanding of your existing SLO definitions
+
+
+## Understanding the Migration Path
+
+### Honeycomb Metrics Model
+
+Honeycomb treats metrics as derived insights from events:
+
+- **Derived Columns**: Calculated fields from trace and event data
+- **Custom Events**: Application-specific metrics sent as structured events  
+- **SLOs**: Service Level Objectives based on event query aggregations
+- **Triggers**: Alert conditions based on query thresholds and burn rates
+
+### SigNoz Unified Metrics Platform
+
+SigNoz provides comprehensive metrics capabilities:
+
+- **Native OpenTelemetry**: OTLP metrics ingestion with full semantic conventions
+- **Prometheus Compatible**: Complete PromQL support and Prometheus ecosystem integration
+- **Infrastructure Monitoring**: Built-in host, container, and Kubernetes metrics
+- **Unified Dashboards**: Metrics, logs, and traces correlation in single interface
+- **Advanced Alerting**: Multi-condition rules with notification channel integrations
+
+## Migration Strategy
+
+### Path 1: Already Using OpenTelemetry with Honeycomb
+
+If you're already sending OpenTelemetry data to Honeycomb via OTLP, migration is simply changing endpoints. **No SDK changes needed** since both platforms use OpenTelemetry.
+
+
+**Current Configuration (Honeycomb):**
+```yaml
+# OpenTelemetry Collector config
+exporters:
+  otlp:
+    endpoint: "api.honeycomb.io:443"
+    headers:
+      "x-honeycomb-team": "${HONEYCOMB_API_KEY}"
+      "x-honeycomb-dataset": "your-dataset"
+```
+
+**Updated Configuration [(SigNoz Cloud)](/docs/migration/migrate-from-opentelemetry/cloud/):**
+```yaml
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "${SIGNOZ_INGESTION_KEY}"
+```
+
+**Updated Configuration [(Self-hosted SigNoz)](/docs/migration/migrate-from-opentelemetry/self-hosted/):**
+```yaml
+exporters:
+  clickhousemetricsexporter:
+    dsn: tcp://clickhouse:9000/?database=signoz_metrics
+    timeout: 5s
+```
+
+**Application Environment Variables:**
+```bash
+# Before (Honeycomb)
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://api.honeycomb.io:443
+export OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=YOUR_API_KEY"
+
+# After (SigNoz Cloud)
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=YOUR_SIGNOZ_KEY"
+```
+### Path 2: Using Legacy Honeycomb SDKs (Two-Step Migration)
+
+If you're using legacy Honeycomb SDKs (Beelines, Honeycomb Distributions), you need a two-step approach:
+
+#### Migrate to OpenTelemetry First
+
+**Follow Honeycomb's official migration documentation to move from legacy SDKs to OpenTelemetry:**
+
+- **[Migrate from Honeycomb Distributions](https://docs.honeycomb.io/troubleshoot/product-lifecycle/recommended-migrations/migrate-from-honeycomb-distributions/)**
+- **[Migrating from Beeline SDKs](https://docs.honeycomb.io/getting-data-in/beelines/)**
+
+This ensures you:
+- Replace legacy SDK calls with OpenTelemetry instrumentation
+- Configure proper metric collection using OpenTelemetry standards
+- Maintain compatibility with both Honeycomb (during testing) and SigNoz
+
+#### Step 2: Change OpenTelemetry Endpoint to SigNoz
+
+Once you've migrated to OpenTelemetry and verified your metrics work with Honeycomb, follow **Path 1** above to change the endpoint to SigNoz.
+
+
+## Configure Additional Metrics Sources
+
+After completing the basic OpenTelemetry endpoint migration, you may need to configure additional metrics collection methods to capture all your Honeycomb metrics in SigNoz.
+
+SigNoz supports multiple metrics ingestion methods:
+- **OTLP Metrics**: Direct from OpenTelemetry SDKs (primary method)
+- **Prometheus Receiver**: For existing Prometheus metrics endpoints
+- **Custom Metrics**: Application-specific business metrics
+
+The following sections guide you through setting up these additional metrics sources.
+
+
+## 1. Enable Metrics Collection in SigNoz
+
+### Configure Prometheus Receiver
+
+Enable the Prometheus receiver in your SigNoz OpenTelemetry Collector configuration to scrape existing Prometheus metrics:
+
+```yaml
+# otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      global:
+        scrape_interval: 15s
+        evaluation_interval: 15s
+      scrape_configs:
+        - job_name: 'my-application'
+          static_configs:
+            - targets: ['localhost:8080']
+          metrics_path: '/metrics'
+          scrape_interval: 30s
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"  # For SigNoz Cloud
+    headers:
+      "signoz-access-token": "${SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+For detailed Prometheus receiver setup, follow the [Prometheus Receiver configuration guide](https://signoz.io/docs/userguide/send-metrics/#enable-a-prometheus-receiver).
+
+### Configure OTLP Metrics
+
+If your applications use OpenTelemetry SDKs, ensure metrics are enabled:
+
+**Environment Variables:**
+```bash
+export OTEL_METRICS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://ingest.{region}.signoz.cloud:443/v1/metrics
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=${SIGNOZ_INGESTION_KEY}"
+```
+
+---
+
+## Using the SigNoz Metrics Explorer
+
+SigNoz Metrics Explorer allows you to query, filter, and visualize your metrics data using PromQL or the visual [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
+
+<Figure src="/img/docs/migration/metrics-explorer.webp" alt="SigNoz Metrics Explorer" caption="SigNoz Metrics Explorer interface" />
+
+To explore your metrics in SigNoz:
+
+1. In the SigNoz UI, click on `Metrics` in the left sidebar
+2. Find a metric from the `List View`
+3. Check metric attributes by clicking on the metric name
+4. Alternatively, use the `Search Filter` to find metrics with specific attributes
+
+---
+
+## 2. Verifying Metrics in SigNoz
+
+After updating your configuration, restart your applications and verify that metrics are flowing to SigNoz:
+1. Check Metrics Explorer - Navigate to the Metrics tab in SigNoz to confirm your custom metrics are appearing
+2. Verify metric names - Ensure your application metrics show up with expected names and labels
+3. Test queries - Use the Query Builder or PromQL to validate metric data
+
+## Next Steps
+
+Now that metrics are flowing to SigNoz, continue with:
+
+1. **[Migrate Dashboards](/docs/migration/migrate-from-honeycomb/dashboards/)** - Recreate your Honeycomb boards and queries in SigNoz
+2. **[Migrate Alerts](/docs/migration/migrate-from-honeycomb/alerts/)** - Convert SLOs and triggers to SigNoz alert rules  
+3. **[Explore Metrics Features](/docs/userguide/metrics/)** - Learn advanced SigNoz Metrics Explorer capabilities
+
+For complex metrics setups requiring Prometheus scraping, see [Enable Prometheus Receiver](https://signoz.io/docs/userguide/send-metrics/#enable-a-prometheus-receiver).
+
+
+
+
