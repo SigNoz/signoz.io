@@ -2042,7 +2042,7 @@ const docsSideNav = [
     route: '/docs/llm-observability',
     label: 'LLM Observability',
 
-    items: [ 
+    items: [
       {
         route: '/docs/llm-community-integrations',
         label: 'LLM Community Integrations',
@@ -2731,6 +2731,35 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/migration/migrate-from-newrelic/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
+      },
+      {
+        label: 'From Honeycomb',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-honeycomb-to-signoz',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/data',
+            label: 'Migrating Data',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/alerts',
             label: 'Migrating Alerts',
           },
         ],
