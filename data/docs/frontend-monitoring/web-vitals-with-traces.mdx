@@ -191,9 +191,8 @@ These are captured through callback functions that you define and exported as tr
         'web_vital.delta': metric.delta,
         'web_vital.rating': metric.rating,
         'web_vital.value': metric.value,
-        'page.url': window.location.href,
+        'url.full': window.location.href,
         'page.title': document.title,
-        timestamp: Date.now(),
       });
 
       webVitalsSpan.end();
@@ -265,9 +264,8 @@ These are captured through callback functions that you define and exported as tr
         'web_vital.delta': metric.delta,
         'web_vital.rating': metric.rating,
         'web_vital.value': metric.value,
-        'page.url': window.location.href,
+        'url.full': window.location.href,
         'page.title': document.title,
-        timestamp: Date.now(),
       });
 
       webVitalsSpan.end();
@@ -320,53 +318,121 @@ You can enrich web vitals with additional metadata like browser type, user ID, p
 
 To do so, you need to write a custom implementation of `SpanProcessor` which will intercept all your exported spans and attach additional attributes to them.
 
-```ts
-import { SpanProcessor } from '@opentelemetry/sdk-trace-node';
-import { UAParser } from 'ua-parser-js';
+<Tabs entityName="plans">
+  <TabItem value="ts" label="TypeScript">
+    ```ts
+    import type { SpanProcessor } from '@opentelemetry/sdk-trace-web';
+    import { UAParser } from 'ua-parser-js';
 
-export const CONSTANTS = {
-  USER_ID: 'user.id',
-  BROWSER_NAME: 'browser.name',
-  BROWSER_VERSION: 'browser.version',
-};
+    export const CONSTANTS = {
+      USER_ID: 'user.id',
+      USER_AGENT_ORIGINAL: 'user_agent.original',
+      USER_AGENT_VERSION: 'user_agent.version',
+      USER_AGENT_NAME: 'user_agent.name',
+    };
 
-function getBrowserInfo() {
-  // You can add your custom browser tracking logic here as well.
-  // This example uses the ua-parser-js package.
-  const parser = new UAParser();
-  const result = parser.getResult();
-  return {
-    browserName: result.browser.name || '',
-    browserVersion: result.browser.version || '',
-    userAgent: result.ua || '',
-  };
-}
+    function getBrowserInfo() {
+      // You can add your custom browser tracking logic here as well.
+      // This example uses the ua-parser-js package.
+      const parser = new UAParser();
+      const result = parser.getResult();
+      return {
+        userAgentOriginal: result.ua || '',
+        userAgentVersion: result.browser.version || '',
+        userAgentName: result.browser.name || '',
+      };
+    }
 
-function getUserId() {
-  // You can add your custom user ID tracking logic here as well.
-  // This example uses localStorage.
-  const userId = localStorage.getItem('userId');
-  return {
-    userId: userId || '',
-  };
-}
+    function getUserId() {
+      // You can add your custom user ID tracking logic here as well.
+      // This example uses localStorage.
+      const userId = localStorage.getItem('userId');
+      return {
+        userId: userId || '',
+      };
+    }
 
-const CustomSpanProcessor: SpanProcessor = {
-  onStart: span => {
-    const userData = getUserId();
-    const browserInfo = getBrowserInfo();
+    const CustomSpanProcessor: SpanProcessor = {
+      onStart: span => {
+        const userData = getUserId();
+        const browserInfo = getBrowserInfo();
 
-    span.setAttribute(CONSTANTS.USER_ID, userData.userId);
-    span.setAttribute(CONSTANTS.BROWSER_NAME, browserInfo.browserName);
-    span.setAttribute(CONSTANTS.BROWSER_VERSION, browserInfo.browserVersion);
-  },
-  onEnd: () => Promise.resolve(),
-  forceFlush: () => Promise.resolve(),
-  shutdown: () => Promise.resolve(),
-};
+        span.setAttribute(CONSTANTS.USER_ID, userData.userId);
+        span.setAttribute(
+          CONSTANTS.USER_AGENT_ORIGINAL,
+          browserInfo.userAgentOriginal
+        );
+        span.setAttribute(
+          CONSTANTS.USER_AGENT_VERSION,
+          browserInfo.userAgentVersion
+        );
+        span.setAttribute(CONSTANTS.USER_AGENT_NAME, browserInfo.userAgentName);
+      },
+      onEnd: () => Promise.resolve(),
+      forceFlush: () => Promise.resolve(),
+      shutdown: () => Promise.resolve(),
+    };
 
-export default CustomSpanProcessor;
-```
+    export default CustomSpanProcessor;
+    ```
+  </TabItem>
+  <TabItem value="js" label="JavaScript" default>
+    ```js
+    import { UAParser } from 'ua-parser-js';
+
+    export const CONSTANTS = {
+      USER_ID: 'user.id',
+      USER_AGENT_ORIGINAL: 'user_agent.original',
+      USER_AGENT_VERSION: 'user_agent.version',
+      USER_AGENT_NAME: 'user_agent.name',
+    };
+
+    function getBrowserInfo() {
+      // You can add your custom browser tracking logic here as well.
+      // This example uses the ua-parser-js package.
+      const parser = new UAParser();
+      const result = parser.getResult();
+      return {
+        userAgentOriginal: result.ua || '',
+        userAgentVersion: result.browser.version || '',
+        userAgentName: result.browser.name || '',
+      };
+    }
+
+    function getUserId() {
+      // You can add your custom user ID tracking logic here as well.
+      // This example uses localStorage.
+      const userId = localStorage.getItem('userId');
+      return {
+        userId: userId || '',
+      };
+    }
+
+    const CustomSpanProcessor = {
+      onStart: span => {
+        const userData = getUserId();
+        const browserInfo = getBrowserInfo();
+
+        span.setAttribute(CONSTANTS.USER_ID, userData.userId);
+        span.setAttribute(
+          CONSTANTS.USER_AGENT_ORIGINAL,
+          browserInfo.userAgentOriginal
+        );
+        span.setAttribute(
+          CONSTANTS.USER_AGENT_VERSION,
+          browserInfo.userAgentVersion
+        );
+        span.setAttribute(CONSTANTS.USER_AGENT_NAME, browserInfo.userAgentName);
+      },
+      onEnd: () => Promise.resolve(),
+      forceFlush: () => Promise.resolve(),
+      shutdown: () => Promise.resolve(),
+    };
+
+    export default CustomSpanProcessor;
+    ```
+  </TabItem>
+</Tabs>
 
 Update your `instrument.ts` file to include this processor.
 
