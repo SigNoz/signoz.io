@@ -1997,7 +1997,7 @@ const docsSideNav = [
         label: 'Sending Metrics',
       },
       {
-        type: 'doc',
+        type: 'category',
         route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
         label: 'Web Vitals',
         items: [
