@@ -1,0 +1,235 @@
+---
+date: 2024-08-02
+title: Web Vitals Monitoring with Metrics
+id: web-vitals-with-metrics
+---
+
+This documentation provides a step-by-step guide to setting up web vitals monitoring with metrics using SigNoz and OpenTelemetry.
+
+## Prerequisites
+
+- [SigNoz Cloud](https://signoz.io/teams/) or self-hosted account
+- A web application from where you want to send web vitals
+
+## Setup
+
+### Step 1: Setup OTel Collector
+Install Otel collector binary using [these instructions](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+
+You would also need to update the collector config to whitelist the frontend domain. This is required to allow Cross-Origin Resource Sharing (CORS) requests from your frontend application to the OpenTelemetry collector.
+
+```sh
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - <<YOUR_FRONTEND_URL>>
+          allowed_headers: ['*']
+```
+
+### Step 2: Install dependencies
+
+<Tabs groupId="web-vitals-dependencies">
+  <TabItem value="npm" label="Npm" default>
+    ```sh
+      npm install web-vitals
+      npm install @opentelemetry/api
+      npm install @opentelemetry/exporter-metrics-otlp-http
+      npm install @opentelemetry/sdk-metrics               
+      npm install @opentelemetry/resources                 
+    ```
+  </TabItem>
+  <TabItem value="yarn" label="Yarn">
+    ```sh
+      yarn add web-vitals
+      yarn add @opentelemetry/api
+      yarn add @opentelemetry/exporter-metrics-otlp-http
+      yarn add @opentelemetry/sdk-metrics               
+      yarn add @opentelemetry/resources  
+    ```
+  </TabItem>
+</Tabs>
+
+<details>
+<summary> Read more about the dependencies </summary>
+- **`web-vitals`**: Core library for measuring and reporting web vitals metrics (LCP, INP, CLS, TTFB, FCP)
+- **`@opentelemetry/api`**: Provides the core OpenTelemetry API for creating metrics and meters
+- **`@opentelemetry/exporter-metrics-otlp-http`**: Exports metrics to OpenTelemetry Protocol (OTLP) over HTTP
+- **`@opentelemetry/sdk-metrics`**: Provides the OpenTelemetry metrics SDK implementation
+- **`@opentelemetry/resources`**: Defines service metadata and attributes for your application
+</details>
+
+### Step 3: Create an instrumentation file
+
+The `instrument.ts` file is required to setup the `MeterProvider` which is used to create custom metrics.
+
+<Tabs entityName="plans">
+  <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+    ```ts
+    import {
+      MeterProvider,
+      PeriodicExportingMetricReader,
+    } from '@opentelemetry/sdk-metrics';
+    import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
+    import { metrics } from '@opentelemetry/api';
+
+    // Define your resource, e.g., service name, environment.
+    const resource = resourceFromAttributes({
+      'service.name': '<<SERVICE_NAME>>',
+    });
+
+    // Create a metric reader with OTLP exporter configured to send metrics to a local collector.
+    const metricReader = new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({
+        url: `https://ingest.<<INGESTION_REGION>>.signoz.cloud:443/v1/metrics`,
+        headers: {
+          'signoz-ingestion-key': <<INGESTION_KEY>>,
+        },
+      }),
+      exportIntervalMillis: 10000, // Export metrics every 10 seconds.
+    });
+
+    // Initialize a MeterProvider with the above configurations.
+    const myServiceMeterProvider = new MeterProvider({
+      resource,
+      readers: [metricReader],
+    });
+
+    // Set the initialized MeterProvider as global to enable metric collection across the app.
+    metrics.setGlobalMeterProvider(myServiceMeterProvider);
+    ```
+
+    - Set the `<<INGESTION_REGION>>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - Replace `<<INGESTION_KEY>>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+    - `<<SERVICE_NAME>>` is the name of your service
+  </TabItem>
+  <TabItem value="self-host" label="Self-Host">
+    ```ts
+    import {
+      MeterProvider,
+      PeriodicExportingMetricReader,
+    } from '@opentelemetry/sdk-metrics';
+    import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
+    import { metrics } from '@opentelemetry/api';
+
+    // Define your resource, e.g., service name, environment.
+    const resource = resourceFromAttributes({
+      'service.name': '<<SERVICE_NAME>>',
+    });
+
+    // Create a metric reader with OTLP exporter configured to send metrics to a local collector.
+    const metricReader = new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({
+        url: '<<SIGNOZ_COLLECTOR_URL>>/v1/metrics',
+      }),
+      exportIntervalMillis: 10000, // Export metrics every 10 seconds.
+    });
+
+    // Initialize a MeterProvider with the above configurations.
+    const myServiceMeterProvider = new MeterProvider({
+      resource,
+      readers: [metricReader],
+    });
+
+    // Set the initialized MeterProvider as global to enable metric collection across the app.
+    metrics.setGlobalMeterProvider(myServiceMeterProvider);
+    ```
+
+    - `<<SERVICE_NAME>>` is the name of your service
+    - `<<SIGNOZ_COLLECTOR_URL>>` is the url where your collector is running
+  </TabItem>
+</Tabs>
+
+### Step 4: Capture and export Web Vitals
+Use the `web-vitals` library to capture key performance metrics like CLS, FID, LCP, TTFB, and FCP. 
+These are captured through callback functions that you define and exported as metrics.
+
+```ts
+import { metrics } from '@opentelemetry/api';
+import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
+
+const meter = metrics.getMeter('web-vitals');
+const lcp = meter.createHistogram('lcp');
+const cls = meter.createObservableGauge('cls');
+const inp = meter.createHistogram('inp');
+const ttfb = meter.createHistogram('ttfb');
+const fcp = meter.createHistogram('fcp');
+
+function sendToAnalytics(metric) {
+  switch (metric.name) {
+    case 'LCP': {
+      lcp.record(metric.value);
+      break;
+    }
+    case 'CLS': {
+      cls.addCallback(result => {
+        result.observe(metric.value);
+      });
+      break;
+    }
+    case 'INP': {
+      inp.record(metric.value);
+      break;
+    }
+    case 'TTFB': {
+      ttfb.record(metric.value);
+      break;
+    }
+    case 'FCP': {
+      fcp.record(metric.value);
+      break;
+    }
+    default: {
+      console.log('unexpected metric name');
+    }
+  }
+}
+
+onCLS(sendToAnalytics);
+onINP(sendToAnalytics);
+onLCP(sendToAnalytics);
+onTTFB(sendToAnalytics);
+onFCP(sendToAnalytics);
+```
+
+### Step 6: Viewing captured Web Vitals
+
+The captured web vitals can be viewed in the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/guides/frontend-monitoring/web-vitals/web-vitals-metrics-explorer.webp"
+    alt="Web Vitals"
+  />
+  <figcaption>
+    <i>Web Vitals</i>
+  </figcaption>
+</figure>
+
+### Setup Dashboard and alerts
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/web-vitals.webp" alt="Core Web Vitals Monitoring in SigNoz"/>
+<figcaption><i>Core Web Vitals Monitoring in SigNoz </i></figcaption>
+</figure>
+
+One of the cool feature of SigNoz charts is that you can create thresholds in the chart with different color coding. For example, in the below graph there are three thresholds for `good`, `needs improvement`, and `critical` level.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/events/launch-week-1/thresholds-chart.webp" alt="Thresholds in SigNoz"/>
+<figcaption><i>Thresholds provide a visual cue about your application's performance </i></figcaption>
+</figure>
+
+### Out of Box Dashboard
+You can [import](https://signoz.io/docs/dashboards/import-dashboard/) our out-of-the-box [Dashboard for web vitals monitoring](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/dashboard-templates)
+
+## Demo Application
+We have set up a [Demo React application](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/web-vitals-with-metrics) that demonstrates monitoring Core Web Vitals along with metrics using OpenTelemetry and sending them to SigNoz.
