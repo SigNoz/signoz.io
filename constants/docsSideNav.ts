@@ -2000,6 +2000,18 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
         label: 'Web Vitals',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/web-vitals-with-metrics',
+            label: 'Web Vitals with Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/web-vitals-with-traces',
+            label: 'Web Vitals with Traces',
+          },
+        ],
       },
       {
         type: 'doc',
