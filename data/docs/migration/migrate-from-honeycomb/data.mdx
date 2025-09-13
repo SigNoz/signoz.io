@@ -1,0 +1,263 @@
+---
+date: 2025-09-09
+id: migrate-data-from-honeycomb
+title: Migrate Data from Honeycomb to SigNoz
+description: Learn how to migrate traces, logs, and metrics data from Honeycomb to SigNoz with unified observability benefits.
+---
+
+This guide explains how to migrate observability data from Honeycomb to SigNoz, leveraging the unified OpenTelemetry approach that both platforms now support. You'll learn how traces, logs, and metrics flow seamlessly through a single OTLP endpoint to SigNoz, enabling enhanced correlation and unified observability.
+
+## Prerequisites
+
+Before migrating your data from Honeycomb to SigNoz:
+
+- **SigNoz Setup**: Active [SigNoz Cloud](https://signoz.io/teams/) account or [self-hosted SigNoz](https://signoz.io/docs/install/self-host/) instance
+- **Application Access**: Ability to modify OpenTelemetry configuration and restart instrumented applications
+- **Honeycomb Data Documentation**: Understanding of your current data types and retention requirements
+
+## Understanding Unified Data Flow
+
+Before migrating your data, it's important to understand how Honeycomb and SigNoz handle observability data differently. This knowledge will help you plan your migration strategy and configure proper data correlation in SigNoz.
+
+### Honeycomb's Data Model
+
+Honeycomb treats most observability data as events with structured fields:
+
+| Data Type | Honeycomb Approach | Characteristics |
+|-----------|-------------------|-----------------|
+| **Traces** | Structured events with trace context | Events with span relationships |
+| **Logs** | Structured events with custom fields | Application logs as events |
+| **Metrics** | Derived columns, custom events, and SLOs | Calculated from events + custom metrics |
+| **Events** | Core data structure | Flexible schema with arbitrary fields |
+
+### SigNoz's Unified Approach
+
+SigNoz provides native OpenTelemetry support with configurable correlation:
+
+| Data Type | SigNoz Approach | Advantages |
+|-----------|----------------|------------|
+| **Traces** | Native OpenTelemetry spans | Standard distributed tracing |
+| **Logs** | Structured logs with trace correlation | Trace-to-log linking when configured |
+| **Metrics** | OpenTelemetry metrics + Prometheus | PromQL querying with trace correlation |
+| **Correlation** | Configurable signal linking with trace context | Enhanced debugging when properly configured |
+
+## Unified Data Flow to SigNoz
+
+### Single OTLP Endpoint Benefits
+
+SigNoz uses a unified OpenTelemetry collector that receives traces, logs, and metrics through a single OTLP endpoint. This seamless approach provides:
+
+- **Automatic correlation**: Traces, logs, and metrics with matching trace context are automatically linked
+- **Unified timestamps**: All signals share consistent timing for accurate debugging
+- **Single configuration**: One endpoint handles all telemetry types without separate setup
+- **Reduced complexity**: No need to configure separate pipelines for different signal types
+
+### How Signals Flow and Correlate
+
+When properly configured, telemetry data flows seamlessly:
+1. Applications send all signals to the same SigNoz OTLP endpoint
+2. SigNoz automatically correlates data using trace context (trace_id, span_id)
+3. Users can jump from metrics to traces to logs with automatic linking
+4. Unified dashboards show all signals together for complete observability
+
+## OpenTelemetry Configuration
+
+Since both Honeycomb and SigNoz use OpenTelemetry, migrating your data involves updating your OTLP endpoint configuration to point to SigNoz instead of Honeycomb. 
+
+**Complete the basic setup first**: Follow the [OpenTelemetry endpoint migration guide](/docs/migration/migrate-from-opentelemetry-to-signoz/) to configure your applications to send data to SigNoz.
+
+This guide covers the data aspects of migration - configuring trace correlation, formatting logs properly, understanding retention differences, and verifying that traces, logs, and metrics are all flowing correctly to SigNoz.
+
+## Traces Migration
+
+### Honeycomb Events to OpenTelemetry Spans
+
+Honeycomb represents traces as events with span relationships, while SigNoz uses standard OpenTelemetry spans with full distributed tracing support.
+
+### Trace Configuration Examples
+
+**Java Applications:**
+```java
+// OpenTelemetry Java auto-instrumentation
+// Add to JVM arguments:
+-javaagent:path/to/opentelemetry-javaagent.jar
+-Dotel.exporter.otlp.endpoint=https://ingest.{region}.signoz.cloud:443
+-Dotel.exporter.otlp.headers=signoz-access-token=YOUR_KEY
+-Dotel.service.name=your-service-name
+```
+
+**Node.js Applications:**
+```javascript
+// OpenTelemetry Node.js setup
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+
+const sdk = new NodeSDK({
+  instrumentations: [getNodeAutoInstrumentations()],
+  serviceName: 'your-service-name',
+});
+
+sdk.start();
+```
+
+**Python Applications:**
+```python
+# OpenTelemetry Python auto-instrumentation
+# Install: pip install opentelemetry-distro opentelemetry-exporter-otlp
+# Run with:
+opentelemetry-bootstrap -a install
+opentelemetry-instrument \
+  --exporter_otlp_endpoint=https://ingest.{region}.signoz.cloud:443 \
+  --exporter_otlp_headers=signoz-access-token=YOUR_KEY \
+  --service_name=your-service-name \
+  python your_app.py
+```
+
+## Logs Migration
+
+### Structured Logs with Trace Correlation
+
+SigNoz automatically correlates logs with traces when both contain matching trace and span IDs, providing enhanced debugging capabilities beyond Honeycomb's event-based approach.
+
+### Log Configuration Examples
+
+To enable automatic log-to-trace correlation in SigNoz, configure your logging libraries to include trace_id and span_id fields in log output:
+
+**Application Logs with Trace Correlation:**
+
+**Java (Logback):**
+```xml
+<!-- logback-spring.xml -->
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <pattern>
+                        {
+                          "timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
+                          "level": "%level",
+                          "thread": "%thread",
+                          "logger": "%logger{40}",
+                          "message": "%message",
+                          "trace_id": "%X{trace_id:-}",
+                          "span_id": "%X{span_id:-}"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
+```
+
+**Node.js (Winston):**
+```javascript
+const winston = require('winston');
+const { trace } = require('@opentelemetry/api');
+
+const logger = winston.createLogger({
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json(),
+    winston.format.printf((info) => {
+      const span = trace.getActiveSpan();
+      if (span) {
+        const spanContext = span.spanContext();
+        info.trace_id = spanContext.traceId;
+        info.span_id = spanContext.spanId;
+      }
+      return JSON.stringify(info);
+    })
+  ),
+  transports: [new winston.transports.Console()]
+});
+```
+
+**Python (structlog):**
+```python
+import structlog
+from opentelemetry import trace
+
+def add_trace_info(logger, method_name, event_dict):
+    span = trace.get_current_span()
+    if span:
+        span_context = span.get_span_context()
+        event_dict["trace_id"] = format(span_context.trace_id, "032x")
+        event_dict["span_id"] = format(span_context.span_id, "016x")
+    return event_dict
+
+structlog.configure(
+    processors=[
+        add_trace_info,
+        structlog.processors.JSONRenderer()
+    ]
+)
+```
+
+### Centralized Log Collection
+
+For advanced centralized log collection using OpenTelemetry Collector, see the [SigNoz logs ingestion documentation](https://signoz.io/docs/userguide/logs/).
+
+## Data Retention and Historical Considerations
+
+### Historical Data Migration
+
+**Important**: SigNoz cannot directly import historical data from Honeycomb. Plan your migration strategy accordingly:
+
+| Consideration | Recommendation |
+|---------------|---------------|
+| **Historical Data** | Cannot be migrated - plan for parallel operation during transition |
+| **Retention Overlap** | Run both systems temporarily to maintain historical access |
+| **Compliance Requirements** | Ensure retention policies meet regulatory needs |
+| **Data Export** | Export critical historical data from Honeycomb before migration |
+
+While both platforms use OpenTelemetry for data ingestion, they store data in different formats. Honeycomb uses proprietary event-based storage, while SigNoz stores telemetry data in ClickHouse using schemas optimized for analytical queries. Direct data migration between these systems is not supported.
+
+### Retention Policy Comparison
+
+| Platform | Retention Options | Cost Model |
+|----------|-------------------|------------|
+| **Honeycomb** | Plan-based limits (14-90 days typical) | Per-event pricing |
+| **SigNoz Cloud** | Configurable retention (7-90 days) | Predictable monthly pricing |
+| **Self-hosted SigNoz** | Unlimited (storage-dependent) | Infrastructure costs only |
+
+SigNoz offers more flexible retention options, especially with self-hosted deployments where retention is limited only by your storage capacity. This can provide significant cost advantages for organizations requiring longer data retention periods. Honeycomb's per-event pricing model can become expensive with high-volume applications, while SigNoz Cloud provides predictable monthly costs regardless of event volume. For maximum cost control and unlimited retention, self-hosted SigNoz allows you to scale storage based on your infrastructure budget rather than vendor-imposed limits.
+
+## Verify Unified Data Flow
+
+After completing your data migration configuration, verify that all telemetry signals are flowing correctly to SigNoz and correlating properly.
+
+
+### Check Signal Flow
+
+**Verify each telemetry type in SigNoz:**
+
+1. **Traces**: Navigate to **Services** tab and confirm your applications appear with recent traces
+2. **Logs**: Check **Logs** tab for properly formatted application logs with trace_id and span_id fields  
+3. **Metrics**: Open **Metrics** tab to verify application and infrastructure metrics are appearing
+4. **Correlation**: Test that traces link to related logs and metrics for unified debugging
+
+### Validate Data Accuracy
+
+During parallel operation, compare data consistency between platforms:
+
+**Key validation checks:**
+- **Request volumes**: Verify similar trace and log counts between Honeycomb and SigNoz
+- **Latency metrics**: Compare percentile values (p95, p99) for consistency  
+- **Error rates**: Ensure error percentages match between platforms
+- **Custom metrics**: Validate business metrics show similar values
+
+If discrepancies appear, review your OpenTelemetry configuration and ensure all applications are sending complete telemetry data to SigNoz.
+
+
+## Next Steps
+
+With your data migration complete, continue with the remaining migration components:
+
+1. **[Migrate Metrics](/docs/migration/migrate-from-honeycomb/metrics/)** - Configure custom metrics, derived columns, and additional metrics sources
+2. **[Migrate Dashboards](/docs/migration/migrate-from-honeycomb/dashboards/)** - Recreate Honeycomb boards with enhanced SigNoz visualizations
+3. **[Migrate Alerts](/docs/migration/migrate-from-honeycomb/alerts/)** - Convert triggers to SigNoz alert rules with multi-signal correlation
