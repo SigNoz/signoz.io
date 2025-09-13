@@ -35,7 +35,7 @@ receivers:
 ### Step 2: Install dependencies
 
 <Tabs groupId="web-vitals-dependencies">
-  <TabItem value="npm" label="Npm">
+  <TabItem value="npm" label="Npm" default>
     ```sh
       npm install web-vitals
       npm install @opentelemetry/api
@@ -44,7 +44,7 @@ receivers:
       npm install @opentelemetry/resources                 
     ```
   </TabItem>
-  <TabItem value="yarn" label="Yarn" default>
+  <TabItem value="yarn" label="Yarn">
     ```sh
       yarn add web-vitals
       yarn add @opentelemetry/api
@@ -68,8 +68,8 @@ receivers:
 
 The `instrument.ts` file is required to setup the `MeterProvider` which is used to create custom metrics.
 
-<Tabs groupId="web-vitals-instrumentation">
-  <TabItem value="cloud" label="SigNoz Cloud" default>
+<Tabs entityName="plans">
+  <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
     ```ts
     import {
       MeterProvider,
@@ -109,7 +109,7 @@ The `instrument.ts` file is required to setup the `MeterProvider` which is used 
     - Replace `<<INGESTION_KEY>>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
     - `<<SERVICE_NAME>>` is the name of your service
   </TabItem>
-  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
+  <TabItem value="self-host" label="Self-Host">
     ```ts
     import {
       MeterProvider,
@@ -215,10 +215,6 @@ The captured web vitals can be viewed in the [Metrics Explorer](https://signoz.i
 </figure>
 
 ### Setup Dashboard and alerts
-You can create a [custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard) and [set alerts](https://signoz.io/docs/setup-alerts-notification/)
-to monitor your core web-vitals and be notified about anything critical.
-
-You can find custom dashboard templates for web vitals [here](https://github.com/SigNoz/dashboards/tree/main/frontend-monitoring)
 
 <figure data-zoomable align='center'>
 <img className="box-shadowed-image" src="/img/events/launch-week-1/web-vitals.webp" alt="Core Web Vitals Monitoring in SigNoz"/>
@@ -232,4 +228,8 @@ One of the cool feature of SigNoz charts is that you can create thresholds in th
 <figcaption><i>Thresholds provide a visual cue about your application's performance </i></figcaption>
 </figure>
 
-You can find and try the demo application [here](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/web-vitals-with-metrics) and also use our [custom dashboards](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/dashboard-templates).
+### Out of Box Dashboard
+You can [import](https://signoz.io/docs/dashboards/import-dashboard/) our out-of-the-box [Dashboard for web vitals monitoring](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/dashboard-templates)
+
+## Demo Application
+We have set up a [Demo React application](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/web-vitals-with-metrics) that demonstrates monitoring Core Web Vitals along with metrics using OpenTelemetry and sending them to SigNoz.
