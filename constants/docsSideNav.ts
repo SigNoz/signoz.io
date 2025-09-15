@@ -1562,7 +1562,7 @@ const docsSideNav = [
         route: '/docs/dashboards/dashboard-templates/overview',
         label: 'Out of Box Dashboards',
         items: [
-           {
+          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
             label: 'Anthropic API Dashboard',
@@ -1599,6 +1599,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/claude-code-dashboard',
             label: 'Claude Code',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
+            label: 'DeepSeek API Dashboard',
           },
           {
             type: 'doc',
