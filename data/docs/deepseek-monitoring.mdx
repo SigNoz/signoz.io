@@ -1,0 +1,235 @@
+---
+date: 2025-09-15
+id: deepseek-monitoring-with-opentelemetry
+title: Monitoring DeepSeek API with SigNoz
+description: Monitor DeepSeek API performance and usage with OpenTelemetry instrumentation and send traces, logs, and metrics to SigNoz
+---
+
+## Overview
+
+This guide walks you through setting up monitoring for DeepSeek API using [OpenTelemetry](https://opentelemetry.io/) and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe model performance, capture request/response details, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your DeepSeek applications.
+
+Instrumenting DeepSeek in your LLM applications with telemetry ensures full observability across your AI workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+- Internet access to send telemetry data to SigNoz Cloud
+- An [DeepSeek](https://api-docs.deepseek.com/) API account with a working API Key
+- `pip` installed for managing Python packages
+- *(Optional but recommended)* A Python virtual environment to isolate dependencies
+
+## Monitoring DeepSeek
+
+**Step 1: I**nstall the necessary packages in your Python environment.
+
+```bash
+pip install \
+  opentelemetry-api \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  openai \
+  openinference-instrumentation-openai
+```
+
+**Step 2:** Import the necessary modules in your Python application
+
+**Traces:**
+
+```python
+from openinference.instrumentation.openai import OpenAIInstrumentor
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+```
+
+**Logs:**
+
+```python
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry._logs import set_logger_provider
+import logging
+```
+
+**Metrics:**
+
+```python
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+```
+
+**Step 3:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry import trace
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+provider = TracerProvider(resource=resource)
+span_exporter = OTLPSpanExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_TRACES_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+processor = BatchSpanProcessor(span_exporter)
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+**Step 4:** Instrument DeepSeek using `OpenAInstrumentor` and the configured Tracer Provider
+
+```python
+from openinference.instrumentation.openai import OpenAIInstrumentor
+
+OpenAIInstrumentor().instrument(tracer_provider=provider)
+```
+
+> 📌 Important:  Place this code at the start of your application logic — before any DeepSeek functions are called or used — to ensure telemetry is correctly captured.
+> 
+
+**Step 5**: Setup Logs
+
+```python
+import logging
+from opentelemetry.sdk.resources import Resource
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+logger_provider = LoggerProvider(resource=resource)
+set_logger_provider(logger_provider)
+
+otlp_log_exporter = OTLPLogExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_LOGS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(otlp_log_exporter)
+)
+# Attach OTel logging handler to root logger
+handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+logger = logging.getLogger(__name__)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+**Step 6**: Setup Metrics
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+import os
+
+resource = Resource.create({"service.name": "<service-name>"})
+metric_exporter = OTLPMetricExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+reader = PeriodicExportingMetricReader(metric_exporter)
+metric_provider = MeterProvider(metric_readers=[reader], resource=resource)
+metrics.set_meter_provider(metric_provider)
+
+meter = metrics.get_meter(__name__)
+
+# turn on out-of-the-box metrics
+SystemMetricsInstrumentor().instrument()
+HTTPXClientInstrumentor().instrument()
+
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. These are not DeepSeek-specific metrics. DeepSeek does not expose metrics as part of their SDK. If you want to add custom metrics to your DeepSeek application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+> 
+
+**Step 7:** Run an example
+
+```python
+import openai
+import os
+ 
+client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
+
+response = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant"},
+        {"role": "user", "content": "What is SigNoz?"},
+    ],
+    stream=False
+)
+
+print(response.choices[0].message.content)
+```
+
+> **📌** Note**:** Before running this code, ensure that you have set the environment variable `DEEPSEEK_API_KEY` with your generated API key.
+> 
+
+## View Traces, Logs, and Metrics in SigNoz
+
+Your DeepSeek commands should now automatically emit traces, logs, and metrics. 
+
+You should be able to view traces in Signoz Cloud under the traces tab:
+
+<Figure src="/img/docs/llm/deepseek/deepseek-traces.webp" alt="DeepSeek Trace View" caption="DeepSeek API Trace View" />
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure src="/img/docs/llm/deepseek/deepseek-detailed-traces.webp" alt="DeepSeek Detailed Trace View" caption="DeepSeek API Detailed Trace View" />
+
+You should be able to view logs in Signoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/llm/deepseek/related-logs.webp" alt="Related logs" width="300"/>
+    <figcaption><i>Related logs button</i></figcaption>
+</figure>
+
+<Figure src="/img/docs/llm/deepseek/deepseek-log.webp" alt="DeepSeek Logs View" caption="DeepSeek API Logs View" />
+
+When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+
+<Figure src="/img/docs/llm/deepseek/deepseek-detailed-log.webp" alt="DeepSeek Detailed Log View" caption="DeepSeek API Detailed Logs View" />
+
+You should be able to see DeepSeek related metrics in Signoz Cloud under the metrics tab:
+
+<Figure src="/img/docs/llm/deepseek/deepseek-metrics.webp" alt="DeepSeek Metrics View" caption="DeepSeek API Metrics View" />
+
+When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+
+<Figure src="/img/docs/llm/deepseek/deepseek-detailed-metrics.webp" alt="DeepSeek Detailed Metrics View" caption="DeepSeek API Detailed Metrics View" />
+
+## Dashboard
+
+You can also check out our custom DeepSeek API dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/deepseek-dashboard/) which provides specialized visualizations for monitoring your DeepSeek API usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure src="/img/docs/llm/deepseek/deepseek-dashboard.webp" alt="DeepSeek Dashboard" caption="DeepSeek API Dashboard Template" />
