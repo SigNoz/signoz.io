@@ -1602,6 +1602,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/couchdb',
+            label: 'CouchDB',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
             label: 'DeepSeek API Dashboard',
           },
@@ -1609,11 +1614,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
             label: 'Docker Container',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/couchdb',
-            label: 'CouchDB',
           },
           {
             type: 'doc',
