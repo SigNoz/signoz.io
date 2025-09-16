@@ -16,8 +16,8 @@ Instrumenting DeepSeek in your LLM applications with telemetry ensures full obse
 - A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
 - Internet access to send telemetry data to SigNoz Cloud
 - An [DeepSeek](https://api-docs.deepseek.com/) API account with a working API Key
-- `pip` installed for managing Python packages
-- *(Optional but recommended)* A Python virtual environment to isolate dependencies
+- For Python: `pip` installed for managing Python packages and *(optional but recommended)* a Python virtual environment to isolate dependencies
+- For JavaScript: Node.js (version 14 or higher) and `npm` installed for managing Node.js packages
 
 ## Monitoring DeepSeek
 
@@ -196,6 +196,268 @@ print(response.choices[0].message.content)
 
 > 📌 Note: Before running this code, ensure that you have set the environment variable `DEEPSEEK_API_KEY` with your generated API key.
 > 
+
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+
+**Step 1:** Install the necessary packages in your Node.js project.
+
+```bash
+npm install \
+  @opentelemetry/api \
+  @opentelemetry/sdk-node \
+  @opentelemetry/sdk-trace-node \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/sdk-metrics \
+  @opentelemetry/exporter-otlp-http \
+  @opentelemetry/instrumentation \
+  @opentelemetry/instrumentation-http \
+  @opentelemetry/host-metrics \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions \
+  @arizeai/openinference-instrumentation-openai \
+  openai
+```
+
+**Step 2:** Import the necessary modules in your JavaScript/Node.js application
+
+**Traces:**
+
+```javascript
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { Resource } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-http');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { OpenAIInstrumentation } = require('@arizeai/openinference-instrumentation-openai');
+```
+
+**Logs:**
+
+```javascript
+const { LoggerProvider, BatchLogRecordProcessor } = require('@opentelemetry/sdk-logs');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-otlp-http');
+const { logs } = require('@opentelemetry/api');
+```
+
+**Metrics:**
+
+```javascript
+const { MeterProvider, PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+const { OTLPMetricExporter } = require('@opentelemetry/exporter-otlp-http');
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { HostMetrics } = require('@opentelemetry/host-metrics');
+const { metrics } = require('@opentelemetry/api');
+```
+
+**Step 3:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+
+```javascript
+const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+const { trace } = require('@opentelemetry/api');
+
+const resource = Resource.default({
+  attributes: {
+    [ATTR_SERVICE_NAME]: '<service_name>',
+  },
+});
+
+const provider = new NodeTracerProvider({
+  resource: resource,
+});
+
+const traceExporter = new OTLPTraceExporter({
+  url: process.env.OTEL_EXPORTER_TRACES_ENDPOINT,
+  headers: {
+    'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY,
+  },
+});
+
+const spanProcessor = new BatchSpanProcessor(traceExporter);
+provider.addSpanProcessor(spanProcessor);
+provider.register();
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+**Step 4:** Instrument DeepSeek using `OpenAIInstrumentation` and the configured Tracer Provider
+
+```javascript
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { OpenAIInstrumentation } = require('@arizeai/openinference-instrumentation-openai');
+
+registerInstrumentations({
+  instrumentations: [
+    new OpenAIInstrumentation({
+      tracerProvider: provider,
+    }),
+  ],
+});
+```
+
+> 📌 Important:  Place this code at the start of your application logic — before any DeepSeek functions are called or used — to ensure telemetry is correctly captured.
+>
+
+**Step 5**: Setup Logs
+
+```javascript
+const { LoggerProvider, BatchLogRecordProcessor } = require('@opentelemetry/sdk-logs');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+const { logs } = require('@opentelemetry/api');
+
+const logResource = Resource.default({
+  attributes: {
+    [ATTR_SERVICE_NAME]: '<service_name>',
+  },
+});
+
+const loggerProvider = new LoggerProvider({
+  resource: logResource,
+});
+
+const logExporter = new OTLPLogExporter({
+  url: process.env.OTEL_EXPORTER_LOGS_ENDPOINT,
+  headers: {
+    'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY,
+  },
+});
+
+loggerProvider.addLogRecordProcessor(
+  new BatchLogRecordProcessor(logExporter)
+);
+
+logs.setGlobalLoggerProvider(loggerProvider);
+
+// Create a logger instance
+const logger = logs.getLogger('deepseek-app');
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+**Step 6**: Setup Metrics
+
+```javascript
+const { MeterProvider, PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+const { OTLPMetricExporter } = require('@opentelemetry/exporter-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+const { metrics } = require('@opentelemetry/api');
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+
+const metricResource = Resource.default({
+  attributes: {
+    [ATTR_SERVICE_NAME]: '<service_name>',
+  },
+});
+
+const metricExporter = new OTLPMetricExporter({
+  url: process.env.OTEL_EXPORTER_METRICS_ENDPOINT,
+  headers: {
+    'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY,
+  },
+});
+
+const metricReader = new PeriodicExportingMetricReader({
+  exporter: metricExporter,
+  exportIntervalMillis: 10000,
+});
+
+const meterProvider = new MeterProvider({
+  resource: metricResource,
+  readers: [metricReader],
+});
+
+metrics.setGlobalMeterProvider(meterProvider);
+
+// Create a meter instance
+const meter = metrics.getMeter('deepseek-app');
+
+// Register HTTP instrumentation for outbound HTTP metrics
+registerInstrumentations({
+  instrumentations: [
+    new HttpInstrumentation(),
+  ],
+});
+
+// Initialize host metrics for system-level monitoring
+const hostMetrics = new HostMetrics({
+  meterProvider: meterProvider,
+});
+hostMetrics.start();
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+> 📌 Note: HostMetrics provides system-level metrics (CPU, memory, disk, network, etc.), and HttpInstrumentation provides outbound HTTP request metrics such as request duration. These are not DeepSeek-specific metrics. DeepSeek does not expose metrics as part of their SDK. If you want to add custom metrics to your DeepSeek application, see [JavaScript Custom Metrics](https://signoz.io/opentelemetry/javascript-custom-metrics/).
+>
+
+**Step 7:** Run an example
+
+```javascript
+const OpenAI = require('openai');
+
+const client = new OpenAI({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: 'https://api.deepseek.com',
+});
+
+async function main() {
+  try {
+    const response = await client.chat.completions.create({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant' },
+        { role: 'user', content: 'What is SigNoz?' },
+      ],
+      stream: false,
+    });
+
+    console.log(response.choices[0].message.content);
+
+    // Optional: Log the interaction
+    logger.emit({
+      severityText: 'INFO',
+      body: 'DeepSeek API call completed successfully',
+      attributes: {
+        'deepseek.model': 'deepseek-chat',
+        'deepseek.response.length': response.choices[0].message.content.length,
+      },
+    });
+  } catch (error) {
+    console.error('Error calling DeepSeek API:', error);
+
+    // Optional: Log the error
+    logger.emit({
+      severityText: 'ERROR',
+      body: 'DeepSeek API call failed',
+      attributes: {
+        'error.message': error.message,
+        'deepseek.model': 'deepseek-chat',
+      },
+    });
+  }
+}
+
+main();
+```
+
+> 📌 Note: Before running this code, ensure that you have set the environment variable `DEEPSEEK_API_KEY` with your generated API key.
+>
 
 </TabItem>
 </Tabs>
