@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry Operator Complete Guide [OTel Collector + Auto-Instrumentation Demo]
 slug: opentelemetry-operator-complete-guide
-date: 2024-08-07
+date: 2025-09-16
 tags: [OpenTelemetry]
 authors: [daniel]
 image: /img/blog/2023/11/opentelemetry-operator-cover.jpeg
@@ -128,22 +128,6 @@ Manually deploying and managing OpenTelemetry components in a Kubernetes environ
 
 OpenTelemetry Operators provide a solution to this problem by automating the deployment, configuration, and management of OpenTelemetry components in Kubernetes clusters, making it easier for operation teams to implement observability in their applications.
 
-In this tutorial, we will cover:
-
-- [What is OpenTelemetry?](#what-is-opentelemetry)
-- [What is a Kubernetes Operator?](#what-is-a-kubernetes-operator)
-- [OpenTelemetry Operator for Kubernetes](#opentelemetry-operator-for-kubernetes)
-- [Using an OpenTelemetry Operator to auto-instrument a Java application](#using-an-opentelemetry-operator-to-auto-instrument-a-java-application)
-  - [Prerequisite](#prerequisite)
-  - [Setting up SigNoz](#setting-up-signoz)
-  - [Setting up your Java application](#setting-up-your-java-application)
-  - [Setting up the OpenTelemetry Operator](#setting-up-the-opentelemetry-operator)
-  - [Setup the OpenTelemetry Collector instance](#setup-the-opentelemetry-collector-instance)
-- [Creating an Instrumentation Instance](#creating-an-instrumentation-instance)
-  - [Auto-instrument your Java app with OpenTelemetry](#auto-instrument-your-java-app-with-opentelemetry)
-- [Conclusion](#conclusion)
-- [Getting started with SigNoz](#getting-started-with-signoz)
-- [Further Reading](#further-reading)
 
 ## What is OpenTelemetry?
 
@@ -233,19 +217,41 @@ You can then access the running application at [localhost:8090](http://localhost
 
 ### Setting up the OpenTelemetry Operator
 
+There are two ways to install the OpenTelemetry Operator in your Kubernetes cluster,
+
+1/ Applying the release YAML directly
+2/ Using the official Helm chart
+
+For this tutorial, we'll use the direct kubectl apply method because it's fast and straightforward. This command
+installs the operator, its Custom Resource Definitions (CRDs), and all the necessary RBAC rules.
+
 To install the operator in the existing K8s cluster, run the following command:
 
 ```jsx
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+
 ```
 
-Installing the OpenTelemetry Operator sets up the necessary components and configurations to enable the observability and monitoring of applications running in the cluster.
+While the direct apply method is good for a quick start, the recommended method for production and the best practice is to use the official Helm chart. 
+Helm allows you to easily manage configuration options, set resource limits, and handle version upgrades more robustly.
+
+
+Assuming you have Helm installed, you can add the OpenTelemetry repository and install the operator with these commands:
+
+```jsx
+# 1. Add the OpenTelemetry Helm repository
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+
+# 2. Install the operator into its own namespace
+helm install opentelemetry-operator open-telemetry/opentelemetry-operator --namespace
+     opentelemetry-operator-system --create-namespace
+```
 
 ### Setup the OpenTelemetry Collector instance
 
 Once the `opentelemetry-operator` has been deployed, you can proceed with the creation of the OpenTelemetry Collector (`otelcol`) instance. The OpenTelemetry Collector collects, processes, and exports telemetry data.
 
-There are different <a href = "https://github.com/open-telemetry/opentelemetry-operator#deployment-modes" rel="noopener noreferrer nofollow" target="_blank">deployment modes</a> for the OpenTelemetryCollector, and you can specify them in the **`spec.mode`** section of the custom resource. The available deployment modes are:
+There are different <a href = "https://github.com/open-telemetry/opentelemetry-operator#deployment-modes" rel="noopener noreferrer nofollow" target="_blank">deployment modes</a> for the OpenTelemetry Collector, and you can specify them in the **`spec.mode`** section of the custom resource. The available deployment modes are:
 
 - Daemonset
 - Sidecar
@@ -258,7 +264,7 @@ To create a simple instance of the OpenTelemetry Collector, run the below in you
 
 ```jsx
 kubectl apply -f - <<EOF
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: simplest
@@ -293,7 +299,7 @@ To create an instance of `Instrumentation`, run the below configuration in your 
 
 ```jsx
 kubectl apply -f - <<EOF
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: Instrumentation
 metadata:
   name: my-instrumentation
