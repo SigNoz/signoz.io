@@ -1562,10 +1562,10 @@ const docsSideNav = [
         route: '/docs/dashboards/dashboard-templates/overview',
         label: 'Out of Box Dashboards',
         items: [
-           {
+          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
-            label: 'Anthropic API Dashboard',
+            label: 'Anthropic API',
           },
           {
             type: 'doc',
@@ -1602,13 +1602,18 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
-            label: 'Docker Container',
+            route: '/docs/dashboards/dashboard-templates/couchdb',
+            label: 'CouchDB',
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/couchdb',
-            label: 'CouchDB',
+            route: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
+            label: 'DeepSeek API',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
+            label: 'Docker Container',
           },
           {
             type: 'doc',

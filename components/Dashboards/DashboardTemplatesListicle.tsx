@@ -113,16 +113,22 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'ClickHouse Dashboard Template',
   },
   {
-    name: 'Docker Container Metrics',
-    href: '/docs/dashboards/dashboard-templates/docker-container-metrics',
-    icon: <SiDocker className="h-7 w-7 text-blue-400" />,
-    clickName: 'Docker Container Metrics Dashboard Template',
-  },
-  {
     name: 'CouchDB',
     href: '/docs/dashboards/dashboard-templates/couchdb',
     icon: <Database className="h-7 w-7 text-red-500" />,
     clickName: 'CouchDB Dashboard Template',
+  },
+  {
+    name: 'DeepSeek API',
+    href: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
+    icon: <img src="/svgs/icons/LLMMonitoring/deepseek-icon.svg" alt="DeepSeek Icon" className="h-7 w-7" />,
+    clickName: 'DeepSeek API Dashboard Template',
+  },
+  {
+    name: 'Docker Container Metrics',
+    href: '/docs/dashboards/dashboard-templates/docker-container-metrics',
+    icon: <SiDocker className="h-7 w-7 text-blue-400" />,
+    clickName: 'Docker Container Metrics Dashboard Template',
   },
   {
     name: 'ECS Infra Metrics',
