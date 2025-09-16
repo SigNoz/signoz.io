@@ -1565,7 +1565,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
-            label: 'Anthropic API Dashboard',
+            label: 'Anthropic API',
           },
           {
             type: 'doc',
