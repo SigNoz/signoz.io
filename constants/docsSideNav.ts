@@ -1608,7 +1608,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
-            label: 'DeepSeek API Dashboard',
+            label: 'DeepSeek API',
           },
           {
             type: 'doc',
