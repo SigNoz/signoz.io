@@ -30,6 +30,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Claude Code Monitoring',
   },
   {
+    name: 'DeepSeek API',
+    href: '/docs/deepseek-monitoring',
+    icon: <img src="/svgs/icons/LLMMonitoring/deepseek-icon.svg" alt="DeepSeek Icon" className="h-7 w-7" />,
+    clickName: 'DeepSeek Monitoring',
+  },
+  {
     name: 'Google Gemini',
     href: '/docs/google-gemini-monitoring',
     icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,

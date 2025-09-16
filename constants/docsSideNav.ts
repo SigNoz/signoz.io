@@ -2069,6 +2069,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/deepseek-monitoring',
+        label: 'DeepSeek Monitoring',
+        type: 'doc',
+      },
+      {
         route: '/docs/google-gemini-monitoring',
         label: 'Google Gemini Monitoring',
         type: 'doc',
