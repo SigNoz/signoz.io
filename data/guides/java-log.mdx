@@ -1,1024 +1,686 @@
 ---
-title: Java Log - Complete Guide to Logging in Java
+title: "Master Java Logging: From System.out.println to Production-Ready Logs"
 slug: java-log
-date: 2024-07-10
-tags: [logging]
-authors: [niyati_thakkar]
-description: Discover the complete guide to logging in Java. Learn about essential components like Loggers, Handlers, Log Levels, Formatters, and Logging methods. Master the built-in Java logging library java.util.logging and explore popular frameworks like Logback, Log4j 2, and SLF4J for advanced logging techniques and best practices.
-keywords:
-  [
-    Java logging,
-    Java log,
-    logging in Java,
-    Java logging guide,
-    Java loggers,
-    Java log levels,
-    Java handlers,
-    Java formatters,
-    java.util.logging,
-    Logback,
-    Log4j 2,
-    SLF4J,
-    Java logging frameworks,
-    logging best practices,
-    Java logging methods,
-    configure Java logging,
-  ]
+date: 2025-09-16
+tags: ["java", "logging"]
+authors: ["niyati_thakkar", "yuvraj"]
+description: "Move your Java application from println debugging to production-ready logging with this hands-on guide."
+keywords: ["java logging", "log4j2", "slf4j", "logging tutorial", "java logging best practices"]
 ---
 
-<head>
-<script
-    type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Java Log - Complete Guide to Logging in Java",
-  "alternativeHeadline": "Master Java logging with this comprehensive guide to essential components, built-in libraries, and popular frameworks",
-  "author": {
-    "@type": "Person",
-    "name": "Niyati Thakkar"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2024-07-10T00:00:00Z",
-  "dateModified": "2024-07-10T00:00:00Z",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/guides/java-log/"
-  },
-  "description": "Discover the complete guide to logging in Java. Learn about essential components like Loggers, Handlers, Log Levels, Formatters, and Logging methods. Master the built-in Java logging library java.util.logging and explore popular frameworks like Logback, Log4j 2, and SLF4J for advanced logging techniques and best practices.",
-  "keywords": "Java logging, Java log, logging in Java, Java logging guide, Java loggers, Java log levels, Java handlers, Java formatters, java.util.logging, Logback, Log4j 2, SLF4J, Java logging frameworks, logging best practices, Java logging methods, configure Java logging",
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "Java Logging",
-      "description": "The process of recording events and information during the execution of a Java application"
-    },
-    {
-      "@type": "Thing",
-      "name": "Logging Frameworks",
-      "description": "Software libraries that provide advanced logging capabilities for Java applications"
-    },
-    {
-      "@type": "Thing",
-      "name": "Log Levels",
-      "description": "Categories used to classify the severity and importance of log messages"
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "Java",
-      "applicationCategory": "ProgrammingLanguage"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "Log4j",
-      "applicationCategory": "LoggingFramework"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "Logback",
-      "applicationCategory": "LoggingFramework"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "SLF4J",
-      "applicationCategory": "LoggingFramework"
-    }
-  ],
-  "mainEntity": {
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What is a log for Java?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "A Java log is like a personal diary for your program. It keeps track of important events, errors, and general activity, helping you understand how it's functioning."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Where can I find the Java log?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "By default, Java logs might go to the console (your terminal window) or a file depending on the program's setup. Some Java applications use separate log files which can be located inside the programs directory."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How to create a log in Java?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Java provides a standard logging library also known as JUL which can be used to log. We can import java.util.log and create a logger object. This logger object can be used to log messages. We can also use external libraries that provide additional functionalities."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How to print logs in Java?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "We can either use the log() method or more specific methods like info(), debug(), and error() present in the standard Java Log library to write different types of messages to the log."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is a log level in Java?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Log levels are classifications used to determine the severity of the log message. It helps developers and administrators to filter the logs and quickly respond to the urgent ones."
-        }
-      }
-    ]
-  },
-  "tutorial": {
-    "@type": "HowTo",
-    "name": "How to Implement Logging in Java",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Choose a Logging Framework",
-        "text": "Decide between using the built-in java.util.logging or a third-party framework like Log4j, Logback, or SLF4J."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Add Dependencies",
-        "text": "If using a third-party framework, add the necessary dependencies to your project."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Configure Logging",
-        "text": "Set up logging configuration, including log levels, output destinations, and message formats."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create Logger Instances",
-        "text": "Create logger instances in your Java classes to handle logging."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Add Log Statements",
-        "text": "Insert log statements at appropriate points in your code."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Test and Refine",
-        "text": "Run your application, review the logs, and refine your logging strategy as needed."
-      }
-    ]
-  }
-}) }}
-  />
-</head>
 
-Ever felt lost in your own code?
+If you're still debugging with `System.out.println`, this article is for you. The statement is handy for quick experiments, yet it should not be used in real applications because it hides context, timing, and severity when production issues arise.
 
-Wondering why your Java app's acting weird?
+This guide shows you how to move from println-driven debugging to production-grade logging that actually speeds up incident response. We'll build the logging stack step by step, explain why each choice matters, and highlight the details you need to keep operations calm once the system goes live.
 
-Tired of `System.out.println()` everywhere?
+## Why Java's System.out.println Fails in Production
 
-Java logging's got your back.
-
-It helps in understanding the behavior of the application, tracing errors, optimizing performance, and tracking the application flow.
-
-In Java, logging is managed through various components each playing a crucial role in the logging process. The key logging components are Loggers, Handlers, Log Levels, Formatters, and Logging methods.
-
-Think of it as your app's diary:
-
-- Every key play gets recorded
-- When something goes wrong, you've got the replay
-- No more guessing what happened during runtime
-
-Java provides a built-in logging library `java.util.logging.` Additionally, other frameworks can be used to perform logging and follow best practices for effective logging.
-
-To quickly address the key points about Java logging, here's a quick reference guide.
-
-## Java Log Quick Reference
-
-Java logging is a crucial feature for monitoring, debugging, and maintaining Java applications.
-
-### Built-in Logging
-
-Java provides a built-in logging framework called `java.util.logging` (JUL).
-
-### Basic Usage
+Let's start with the code every Java developer writes when they're starting out:
 
 ```java
-import java.util.logging.Logger;
-
-Logger logger = Logger.getLogger("MyClassName");
-logger.info("This is an informational message");
-logger.warning("This is a warning message");
-
-```
-
-### Log Levels
-
-From highest to lowest severity - SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST.
-
-### Popular External Frameworks
-
-- Log4j 2
-- SLF4J
-- Logback
-
-### Key Components
-
-- Loggers: Create and manage log messages
-- Handlers: Determine where log messages are sent (console, file, etc.)
-- Formatters: Define how log messages are formatted
-
-### Best Practices
-
-- Use appropriate log levels
-- Include relevant context in log messages
-- Configure [log rotation](https://signoz.io/guides/logrotate-linux/) for file logging
-- Avoid logging sensitive information
-
-### Configuration
-
-Can be done programmatically or via configuration files (e.g., `logging.properties` for JUL, XML files for external frameworks).
-
-### Advanced Logging
-
-For more advanced logging needs, consider using external frameworks which offer better performance, more features, and easier configuration.
-
-## Java Logging Components
-
-### Loggers
-
-Applications create logs with the help of Logger objects also known as Loggers. These Loggers are obtained from LoggerFactory using the `getLogger()` method.
-
-Logger names are usually arbitrary strings but they contain the package names and class names of the logged component separated by the `dot(.)`. Users can also create anonymous Logger objects that don’t appear in the shared namespace.
-
-Logger objects keep track of their parent loggers. If the log level or any other attributes are not present then handlers go up in the hierarchy of the given logger to get the information.
-
-A strong reference to the logger object must be stored to avoid it being collected by a garbage collector.
-
-Here is an example of requesting a Logger object from the Logger factory:
-
-```java
-package com.example.mypackage;
-import java.util.logging.Logger;
-public class GetLoggerExample {
-
-    public static void main(String[] args) {
-        // Get a logger using the class name
-        Logger logger = Logger.getLogger(GetLoggerExample.class.getName());
-        logger.fine("This is a fine log message");
-
-    }
-}
-
-```
-
-Output:
-
-```
-FINE: This is a fine log message
-```
-
-### Log Levels
-
-Every Log message has a LogLevel object. It is usually an Enumeration of 5 to 7 elements indicating the importance and extremity of the given log message `SEVERE` being the most important and FINE being the least important.
-
-The application is also set to a log level. So based on the current log level of the application, it only cares about the log messages that are marked with equal or severe log levels. Loggers perform a cheap check to see if the message is effective.
-
-After the test Loggers allocate a LogRecord describing the logging message, and then the filter is called to further check if the log record should be published or not. If the LogRecord passes the filter’s test then it is sent to the Handlers.
-
-| Log Level | Meaning                                                                                                           |
-| --------- | ----------------------------------------------------------------------------------------------------------------- |
-| SEVERE    | Severe is the most critical log message which tells the developer that the application needs immediate attention. |
-| WARNING   | Warning message highlights potential issues which could create severe problems in the future if not addressed.    |
-| INFO      | If you just want to inform that some event is performed Info level can be used.                                   |
-| CONFIG    | It is responsible for logging configuration details.                                                              |
-| FINE      | Fine log level is used for debugging, it provides complete details of the application behavior.                   |
-| FINER     | Even more, minute debug information is written in finer logs, usually used for complex logging needs.             |
-| FINEST    | Messages with extreme log details are written at this level.                                                      |
-
-There are two additional levels OFF and ALL:
-
-| ALL | This level prints all the logging messages irrespective of the logging level. |
-| --- | ----------------------------------------------------------------------------- |
-| OFF | This level turns off all the logs.                                             |
-
-Let us look at an example for logging messages in different logging levels in the Java Standard Logging Library.
-
-```java
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-public class LogLevelExample {
-
-    public static void main(String[] args) {
-        // Get a logger for this class
-        Logger logger = Logger.getLogger(LogLevelExample.class.getName());
-
-        // Set the log level to FINE (shows all messages from FINE and above)
-        logger.setLevel(Level.FINE);
-
-        // Add a console handler to print logs to the console
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINE); // Set handler level to match logger level
-        logger.addHandler(handler);
-
-        // Log messages at all levels
-        logger.severe("This is a SEVERE error message");
-        logger.warning("This is a WARNING message");
-        logger.info("This is an INFO message");
-        logger.config("This is a CONFIG message");
-        logger.fine("This is a FINE debug message");
-        logger.finer("This is a FINER debug message (more detailed)");
-        logger.finest("This is a FINEST debug message (most detailed)");
-    }
-}
-```
-
-Output:
-
-```java
-SEVERE: This is a SEVERE error message
-WARNING: This is a WARNING message
-INFO: This is an INFO message
-CONFIG: This is a CONFIG message
-FINE: This is a FINE debug message
-```
-
-The above code only logs the messages that are either `FINE` or above it as the log level is set to `FINE`.
-
-### Handlers
-
-Loggers allocate objects to a Handler object called LogRecord. This Handler objects Filter and Format the given LogRecord.
-
-Java SE Handler classes are:
-
-- StreamHandler - It allows us to write formatted records to the OutputStream.
-- FileHandler - The file handler as the name suggests is responsible for writing to one or more rotating log files.
-- ConsoleHandler - It writes to the `System.err`.
-- SocketHandler - Socket Handler writes log records to the remote TCP ports.
-- MemoryHandler - Memory Handler buffers log records inside memory.
-
-Apart from these built-in classes, developers can also create a Handler class either from scratch or deriving from one of these classes to extend the functionality.
-
-Let us look at an example of a File Handler and Console Handler:
-
-```java
-import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-public class HandlerLevelExample {
-
-    public static void main(String[] args) {
-        // Get a logger for this class
-        Logger logger = Logger.getLogger(HandlerLevelExample.class.getName());
-
-        // Set the logger level to INFO (shows INFO and above)
-        logger.setLevel(Level.INFO);
-
-        // Console handler set to show only WARNING and above
-        ConsoleHandler consoleHandler = new ConsoleHandler();
-        consoleHandler.setLevel(Level.WARNING);
-        logger.addHandler(consoleHandler);
-
-        // File handler set to show all messages (from FINEST to SEVERE)
-        FileHandler fileHandler = null;
+public class PaymentService {
+    public void processPayment(String orderId, double amount) {
+        System.out.println("Processing payment");
+        
         try {
-            fileHandler = new FileHandler("log.txt");
-            fileHandler.setLevel(Level.ALL);
+            // Payment logic here
+            chargeCard(orderId, amount);
+            System.out.println("Payment successful");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Payment failed: " + e.getMessage());
         }
-        logger.addHandler(fileHandler);
-
-        // Log messages at all levels
-        logger.severe("This is a SEVERE error message");
-        logger.warning("This is a WARNING message");
-        logger.info("This is an INFO message");
-        logger.config("This is a CONFIG message");
-        logger.fine("This is a FINE debug message");
-        logger.finer("This is a FINER debug message (more detailed)");
-        logger.finest("This is a FINEST debug message (most detailed)");
     }
 }
 ```
 
-Console:
+This looks fine when you're testing locally but once this code is deployed on production and payments starts to fail, you will not be able to answer critical questions like when the error occurred, which user, order, or transaction has failed. Moreover there will be a lot of noise in the log data due to no default severity level or log structure.
 
-```java
-WARNING: This is a WARNING message
-SEVERE: This is a SEVERE error message
-```
+Now that we understand the problem, let's fix it properly.
 
-log.txt file
+## Setting Up Real Java Logging in Your Java Application
 
-```java
-FINEST: This is a FINEST debug message (most detailed)
-FINER: This is a FINER debug message (more detailed)
-FINE: This is a FINE debug message
-CONFIG: This is a CONFIG message
-INFO: This is an INFO message
-WARNING: This is a WARNING message
-SEVERE: This is a SEVERE error message
-```
+First, you need the right tools. Java logging uses two key concepts: a logging facade (SLF4J) that provides a consistent API, and a logging implementation (Log4j2) that does the actual work. 
 
-### Formatters
+<Figure src="/img/guides/2025/09/java-log-slf4jvslog4j2.webp" alt="Java Logging Setup with SLF4J and Log4j2" caption="Java Logging Setup with SLF4J and Log4j2" />
 
-Formatters facilitate the formatting of the string given as log messages. The `formatMessage()` is suggested to be used for local format message fields. It takes a `logRecord` object as a parameter and returns the formatted logRecord.
+This separation means you can switch logging implementations later without changing your code.
 
-The event represented by the `logRecord` is passed to the suitable formatter by the handler. The formatter then returns formatted output to the handler which can be written to the output devices.
-
-Java SE has two standard Formatter classes:
-
-- SimpleFormatter - Simple Formatter writes brief summaries of the log records.
-- XMLFormatter - XML formatters write XML structured information.
-
-Let us now try to format out logged messages using the formatter
-
-In the Standard Logging library of Java, we are required to create a class that derives from the `Formatter` class to define a custom formatter. String Builder is used to format the message.
-
-CustomFormatter.java
-
-```java
-package com.example.logging;
-
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-public class CustomFormatter extends Formatter {
-
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    @Override
-    public String format(LogRecord record) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(dateFormat.format(new Date(record.getMillis())))
-          .append(" [").append(record.getThreadID()).append("] ")
-          .append(record.getLevel()).append(" ")
-          .append(record.getLoggerName()).append(" - ")
-          .append(formatMessage(record)).append("\n");
-        return sb.toString();
-    }
-}
-
-```
-
-MyApp.java
-
-```java
-package com.example.logging;
-
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-public class MyApp {
-    public static void main(String[] args) {
-        // Create a logger object
-        Logger logger = Logger.getLogger(MyApp.class.getName());
-
-        // Remove default handlers
-        logger.setUseParentHandlers(false);
-
-        // Create and configure console handler
-        ConsoleHandler consoleHandler = new ConsoleHandler();
-        consoleHandler.setFormatter(new CustomFormatter());
-        logger.addHandler(consoleHandler);
-
-        // Set the logger level
-        logger.setLevel(Level.ALL);
-        consoleHandler.setLevel(Level.ALL);
-
-        // Use the logger
-        logger.fine("This is a fine message");
-        logger.info("This is an info message");
-        logger.warning("This is a warning message");
-        logger.severe("This is a severe message");
-    }
-}
-```
-
-Output:
-
-```java
-2024-07-04 12:34:56 [1] INFO com.example.logging.MyApp - This is an info message
-2024-07-04 12:34:56 [1] WARNING com.example.logging.MyApp - This is a warning message
-2024-07-04 12:34:56 [1] SEVERE com.example.logging.MyApp - This is an error message
-```
-
-### Logging Methods
-
-There are ample logging methods for the developer's convenience to generate log messages. There is a classic `logger.log(LogLevel, Log message)` format as well as quick `log.warning(Log message)` methods.
-
-While logging we can pass the class and the method name explicitly along with the log message. This is useful for debugging purposes and tracing the flow of the application. This helps in identifying the exact location where the log message was generated irrespective of how logging is implemented.
-
-```java
-void warning(String sourceClass, String sourceMethod, String msg);
-```
-
-The other set of methods is comparatively simpler for developers and only takes the message as an input. These methods attempt to automatically determine its calling class and method using techniques like reflection.
-
-But the problem with this method is modern Virtual machines perform optimizations in the form of just-in-time compiling and may remove complete stack frames which store the necessary information which implies that they may or may not be correct.
-
-```java
-void warning(String msg);
-```
-
-## Java Logging Control Flow
-
-Java Logging Control Flow consists of the Java Logging Components. The Application requests the Logger, this logger object allocates a `LogRecord` object which is then passed to the `Handler`. Both `Handler` and `Logger` use the `LogLevel` to filter out or decide if the `LogRecord` is of interest or not.
-
-Next, when it needs to publish the `LogRecord` it calls the Formatter object to localize and format the log message to file, console, streams, etc.
-
-<Figure
-  src="/img/guides/2024/07/java-log-image1.webp"
-  alt="Logging Process in Java"
-  caption="Logging Process in Java"
-/>
-
-Logging Process in Java
-
-The Logging APIs are designed in a way that they can perform cheap operational checks if some logging level is disabled. The operations like getting messages, formatting, etc. are costly operations and thus are performed only if the log level is the same or higher than the logger's configured log level. In this way, the logger also tries to minimize the cost if the Logging level is enabled before sending the control to the `LogRecord`. Localizations and Formatting are expensive operations and thus, Handler avoids them until necessary.
-
-The function would look something like this:
-
-```java
-public void publish(LogRecord record) {
-	if (!isLoggable(record)) {
-		return;
-	}
-	// Only perform localization and formatting if loggable
-	String message = getLocalizedMessage(record);
-	String formattedMessage = formatMessage(record);
-	// Now write the message to the output
-	writeLog(formattedMessage);
-}
-```
-
-So initially it performs a cheap check to avoid unnecessary operations.
-
-## Using the Standard Java Logging Framework
-
-### Why Use a Logging Framework?
-
-Logging is necessary for all applications, and therefore Java came up with JUL`(java.util.logging)` since Java 1.4 (2002) bundled with JDK. It provides a logger and lets us configure the behavior using Handlers. But with the spanning of use of the application and its features, JUL has shortcomings in the past. JUL is slower, has fewer configuration options, very little documentation, etc.
-
-Benefits of using frameworks:
-
-- Flexibility - Frameworks like Logback, and Log4j 2, offer extensive configuration options, developers can define their own log levels, format messages along with timestamps, add context information, and log to console, files, network servers, etc.
-- Performance - For high throughput applications, frameworks are optimized for performance.
-- Features - Advanced features are offered by frameworks, such as filtering messages, easy integration, tools for management and analysis, rolling log files(creating new files automatically if the current one reaches the size limit), etc. We can also use cloud services like [Signoz Cloud](https://signoz.io/docs/userguide/logs/) to store large log files.
-- Abstraction - Some Logging Frameworks provide an abstraction layer which makes it easier to integrate more than one library for different features and switch between these logging implementations without modifying application code.
-
-### Popular Logging Frameworks
-
-1. Logback - Logback is written after Log4j, it is a mature and solid logging library.
-2. Log4j 2 - It is also a successor to the Log4j library and is inspired by all the other existing libraries. It has better performance and better API.
-3. SLF4j - SLF4J stands for Simple Logging Facade for Java, which is similar to the ACL ‘bridging’ library, and it provides flexibility to switch between frameworks.
-4. Log4j - This was the first version and was released in 2001. It is still used in many old projects. It gives a fair amount of control but modern libraries have more advanced features.
-
-### Adding a Logging Framework to Your Project
-
-Here we are going to discuss adding a logging framework to a Maven Project. Adding Logging frameworks includes downloading the `.jar` files and adding a dependency in the `pom.xml` file. Let us take the example of the Log4j 2 library.
+Add these dependencies to your Maven `pom.xml` (check [Maven Central](https://search.maven.org/) for the latest versions):
 
 ```xml
-<dependency>
-  <groupId>org.apache.logging.log4j</groupId>
-  <artifactId>log4j-api</artifactId>
-  <version>3.1.0</version>
-</dependency>
-<dependency>
-  <groupId>org.apache.logging.log4j</groupId>
-  <artifactId>log4j-core</artifactId>
-  <version>3.1.0</version>
-</dependency>
+<dependencies>
+    <!-- SLF4J API -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>2.0.17</version>
+    </dependency>
+    
+    <!-- Log4j2 Implementation -->
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>2.25.0</version>
+    </dependency>
+    
+    <!-- Bridge between SLF4J and Log4j2 -->
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-slf4j2-impl</artifactId>
+        <version>2.25.0</version>
+    </dependency>
+</dependencies>
 ```
 
-### Framework Configuration
+For Gradle users, add this to your `build.gradle`:
 
-To configure the libraries further we can configure logging frameworks by creating a separate file. For LOG4J we can create a log4j2.xml file in src/main/resources. Let us take an example of configuring Appenders. Appenders can be used to set the destination of the log. The destination can be a console, file, or server network. To set the destination as Console we can use the following code. We can also set the format of the message logged:
+```gradle
+dependencies {
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'org.apache.logging.log4j:log4j-core:2.25.0'
+    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.25.0'
+}
+```
+
+Now update `PaymentService` to rely on the logger instead of println statements:
+
+```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class PaymentService {
+    private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
+    
+    public void processPayment(String orderId, double amount) {
+        logger.info("Processing payment for order: {} with amount: ${}", orderId, amount);
+        
+        try {
+            chargeCard(orderId, amount);
+            logger.info("Payment successful for order: {}", orderId);
+        } catch (Exception e) {
+            logger.error("Payment failed for order: {}", orderId, e);
+        }
+    }
+}
+```
+
+Above code creates one logger per class. The `static final` means it's shared across all instances and never changes. The class name tells us exactly where logs come from, making debugging much easier.
+
+Each logging call declares its severity ("info", "error", and more levels we cover in the next section), so operators can dial log verbosity up or down without touching the code.
+
+Notice the `{}` placeholders? These are incredibly efficient, the string is only built if that log level is enabled. No more wasting CPU on string concatenation for disabled debug logs.
+
+The `logger.error` call with the exception (`e`) as the last parameter automatically captures the full stack trace, giving you the complete error context you need for debugging. Log4j2 recognises that trailing argument as a `Throwable`, so it prints the cause chain with line numbers without any extra formatting code.
+
+## Configuring Where Your Java Logs Go
+
+Your logger needs instructions on where to write logs and how to format them. Create a file named `log4j2.xml` in `src/main/resources`:
 
 ```xml
-<Configuration status="debug" name="signoz" packages="">
-  <Appenders>
-    <Console name="stdout" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{MM/dd/yyyy} %p %m%n" />
-    </Console>
-  </Appenders>
-  <Loggers>
-    <Root level="info">
-      <AppenderRef ref="stdout" />
-    </Root>
-  </Loggers>
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Console output for development -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+    
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
 </Configuration>
 ```
 
-### Using the Standard Java Logging API
+This configuration tells Log4j2 WHERE to write logs (Console appender), HOW to format them (PatternLayout), and WHAT to log (info level and above). The pattern includes timestamp, thread name, log level, logger name, and the message content.
 
-Standard Java Logging API or JUL is very easy to import and use in Java applications.
+Run your application now, and instead of plain text, you'll see:
 
-First, we will create a logger object using the `getLogger()` method.
+```
+2025-09-16 10:23:45.123 [main] INFO  com.myapp.PaymentService - Processing payment for order: ORD-12345 with amount: $99.99
+2025-09-16 10:23:45.567 [main] INFO  com.myapp.PaymentService - Payment successful for order: ORD-12345
+```
+
+Now you can see exactly when things happened, which thread was involved, the severity level, and which class logged the message. This context makes debugging significantly easier.
+
+## Making Your Java Logs Production-Ready
+
+Console output works great during development, but production systems need persistent logs that survive server restarts and can be analyzed later. Add file logging with automatic rotation to prevent disk space issues:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Console for development -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        
+        <!-- Rolling file for production -->
+        <RollingFile name="RollingFile" 
+                     fileName="logs/app.log"
+                     filePattern="logs/app-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="%d{ISO8601} [%thread] %-5level %logger - %msg%n"/>
+            <Policies>
+                <!-- Roll over daily -->
+                <TimeBasedTriggeringPolicy />
+                <!-- Roll over when file reaches 100MB -->
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <!-- Keep 30 days of logs -->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
+```
+
+This configuration writes logs to both console and file. The RollingFile appender automatically rotates logs daily at midnight or when they reach 100MB, compresses old logs to save space, and keeps 30 days of history. Your ops team will thank you for not filling up the disk.
+
+With the basics covered, take the next step and tune the configuration so production logs stay useful without overwhelming your team.
+
+## Understanding and Using Log Levels
+
+Not all logs are created equal. Log4j2 provides six log levels, each serving a specific purpose:
+
+| Level | Purpose | Example |
+|-------|---------|---------|
+| **TRACE** | Most detailed information, typically only enabled when diagnosing problems | Method entry/exit, variable values at each step |
+| **DEBUG** | Detailed information useful during development | SQL queries, configuration values, intermediate calculations |
+| **INFO** | Important business events that should be tracked | User login, payment processed, order shipped |
+| **WARN** | Potentially harmful situations that need attention | Deprecated API usage, recoverable errors, slow queries |
+| **ERROR** | Error events that might still allow the application to continue | Payment failure, external service timeout, validation errors |
+| **FATAL** | Severe errors that will likely cause the application to abort | Database connection lost, out of memory, corrupted data |
+
+Here's how to use them effectively in your code:
 
 ```java
-Logger logger = Logger.getLogger("MyClassName");
+public class PaymentService {
+    private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
+    
+    public void processPayment(String orderId, double amount) {
+        logger.trace("Entering processPayment with orderId: {}, amount: {}", orderId, amount);
+        logger.debug("Validating payment request for order: {}", orderId);
+        
+        if (amount <= 0) {
+            logger.warn("Invalid amount {} for order: {}", amount, orderId);
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+        
+        logger.info("Processing payment for order: {} with amount: ${}", orderId, amount);
+        
+        try {
+            chargeCard(orderId, amount);
+            logger.info("Payment successful for order: {}", orderId);
+        } catch (PaymentException e) {
+            logger.error("Payment failed for order: {}", orderId, e);
+            throw e;
+        } catch (Exception e) {
+            logger.fatal("Unexpected error processing payment for order: {}", orderId, e);
+            throw new RuntimeException("Critical payment error", e);
+        }
+    }
+}
 ```
 
-To log messages we can use logger.log() or more standard methods such as `logger.severe()`, `logger.fine()`, `logger.info()` etc.
+Run the method once with a valid order and once with a bad amount, and the console displays clearly separated levels:
+
+```
+2025-09-16 09:15:12.101 [main] TRACE com.myapp.PaymentService - Entering processPayment with orderId: ORD-1, amount: 42.0
+2025-09-16 09:15:12.103 [main] DEBUG com.myapp.PaymentService - Validating payment request for order: ORD-1
+2025-09-16 09:15:12.104 [main] INFO  com.myapp.PaymentService - Processing payment for order: ORD-1 with amount: $42.0
+2025-09-16 09:15:12.309 [main] INFO  com.myapp.PaymentService - Payment successful for order: ORD-1
+2025-09-16 09:15:12.311 [main] TRACE com.myapp.PaymentService - Entering processPayment with orderId: ORD-2, amount: -5.0
+2025-09-16 09:15:12.312 [main] DEBUG com.myapp.PaymentService - Validating payment request for order: ORD-2
+2025-09-16 09:15:12.312 [main] WARN  com.myapp.PaymentService - Invalid amount -5.0 for order: ORD-2
+```
+
+The key is choosing the right level for each situation. Use DEBUG for information that helps during development but would be noise in production. Use INFO for business events you want to track. Use ERROR for problems that need investigation.
+
+## Controlling Log Verbosity by Package
+
+Your application logs are important, but framework logs can be overwhelming. You want detailed logs from your code but only warnings from libraries. Here's how to achieve that balance:
+
+```xml
+<Loggers>
+    <!-- Your application: DEBUG level for detailed troubleshooting -->
+    <Logger name="com.myapp" level="debug"/>
+    
+    <!-- Database queries: Show warnings only to reduce noise -->
+    <Logger name="org.hibernate" level="warn"/>
+    
+    <!-- Spring Framework: Info level for important events -->
+    <Logger name="org.springframework" level="info"/>
+    
+    <!-- Everything else defaults to INFO level -->
+    <Root level="info">
+        <AppenderRef ref="Console"/>
+        <AppenderRef ref="RollingFile"/>
+    </Root>
+</Loggers>
+```
+
+This configuration gives you fine-grained control. Your application code logs at DEBUG level, showing detailed information. Hibernate only logs warnings and errors, hiding the verbose SQL logging. Spring logs at INFO level, showing important lifecycle events. Everything else defaults to INFO.
+
+This approach prevents log flooding while ensuring you have the details you need from your own code.
+
+## Adding Context to Java Logs with MDC (Mapped Diagnostic Context)
+
+Here's where logging becomes truly powerful. MDC lets you add contextual information that automatically appears in every log message within a request, without passing parameters everywhere:
 
 ```java
-logger.severe("An error occurred!");
-logger.info("Application started successfully.");
-logger.fine("Processing data for item ID 123.");
+import org.slf4j.MDC;
+
+public class RequestHandler {
+    private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+    
+    public void handleRequest(String requestId, String userId, String orderId) {
+        // Add context at the beginning of request processing
+        MDC.put("requestId", requestId);
+        MDC.put("userId", userId);
+        MDC.put("orderId", orderId);
+        
+        try {
+            logger.info("Starting request processing");
+            
+            // These methods don't need to know about requestId or userId
+            // but their logs will still include this context
+            validateUser();
+            processOrder();
+            sendNotification();
+            
+            logger.info("Request completed successfully");
+        } catch (Exception e) {
+            logger.error("Request failed", e);
+        } finally {
+            // Critical: Clear MDC to prevent context leaking to other requests
+            MDC.clear();
+        }
+    }
+    
+    private void processOrder() {
+        // This log automatically includes requestId, userId, and orderId
+        // even though we didn't pass them to this method
+        logger.info("Processing order");
+    }
+}
 ```
 
-Output:
+MDC works like thread-local storage for logging context: the `MDC.put` calls stash each identifier on the current thread, every log emitted while the request runs reads those keys, and `MDC.clear()` in the `finally` block keeps the next request from inheriting stale data. This is invaluable for tracing requests through your system.
 
-```
-SEVERE: An error occurred!
-INFO: Application started successfully.
-FINE: Processing data for item ID 123.
-```
+Update your log pattern to include MDC values:
 
-While JUL is easy to use, its configuration options are limited compared to dedicated logging frameworks. However, you can configure logging aspects like log levels and destinations using a configuration file (often in XML format). This offers some control over how your logs are handled.
-
-## Logging Frameworks in Action
-
-### Log4J
-
-Log4J was one of the first logging frameworks, there are more advanced frameworks available today but it lays the foundation for logging.
-
-1. Dependency
-
-   First of all, we need to add the Log4J library in our dependencies in the `pom.xml` file in the maven project as follows:
-
-   ```xml
-   <dependency>
-     <groupId>log4j</groupId>
-     <artifactId>log4j</artifactId>
-     <version>1.2.17</version>
-   </dependency>
-   ```
-
-   On the official websites for each of these frameworks, there are lot many versions available and each version contains ample `.jar` files. We are not required to add all of these to our project. `<framework>-api-<x.x.version>.jar` and `<framework>-core-<x.x.version>.jar` most. Rest can be added based on the nature of the project.
-
-   The JAR file can be found on Apache websites and the same provides dependency to be added to properly integrate the framework into the project. Make sure to check the version and the `artifactId`. As of now, the latest stable version is suggested for use which is 1.2.17 in the above case.
-
-   Other JAR files are used for the specific needs of the projects.
-
-2. Configuration
-
-   Next, we can configure this framework to achieve various functionality. Let us take a simple example to configure our application.
-
-   ```xml
-   <!-- Root configuration element for logging settings -->
-   <Configuration status="debug" name="MyApp">
-
-     <!-- Define appenders, which specify where the log output will be sent -->
-     <Appenders>
-       <Console name="stdout" target="SYSTEM_OUT">
-         <PatternLayout pattern="%d{dd-MMM-yyyy HH:mm:ss} %p %m%n" />
-       </Console>
-       <!-- File appender for logging to a file -->
-       <File name="mylogfile.log" fileName="/path/to/logs/myapp_%d{yyyy-MM-dd_HH-mm-ss}.log" append="true">
-         <!-- Pattern layout to define the format of the log messages -->
-         <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %p %m%n" />
-       </File>
-     </Appenders>
-
-     <!-- Define loggers, which determine the logging level and which appenders to use -->
-     <Loggers>
-       <Root level="info">
-         <!-- Reference to the console appender -->
-         <AppenderRef ref="stdout" />
-         <!-- Reference to the file appender -->
-         <AppenderRef ref="file" />
-       </Root>
-     </Loggers>
-   </Configuration>
-
-   <!-- Define filters, which control the flow of log events based on specific criteria -->
-   <Filters>
-     <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY">
-       <!-- Apply the filter to a specific logger by name -->
-       <Logger name="com.myapp.package" />
-     </ThresholdFilter>
-   </Filters>
-
-   ```
-
-   In the example above we have configured how our Java application will handle logging messages. The Configuration has two tags status and name which sets the logging status and the name of the logging configuration.
-
-   Next are appenders that let us decide the destination of the logs like console and file in this case.
-
-   Loggers define how logs will be handled from different parts of the application. It defines the root log level, then configures the root logger to use the stdout appender.
-
-   The filter will filter the log messages based on their log level.
-
-3. Usage
-
-   Here is a simple usecase of the above logging system that we configured and its output:
-
-   ```java
-   import org.apache.log4j.Logger;
-
-   public class MyApp {
-
-     private static final Logger logger = Logger.getLogger(MyApp.class);
-
-     public static void main(String[] args) {
-
-       logger.debug("This is a debug message (filtered out).");
-
-       logger.info("This is an informational message.");
-
-       logger.warn("This is a warning message.");
-
-       logger.error("This is an error message.");
-
-     }
-
-   }
-   ```
-
-   Output:
-
-   ```
-   28-Jun-2024 16:32:17 INFO  com.myapp.MyApp [main] This is an informational message.
-   28-Jun-2024 16:32:17 WARN  com.myapp.MyApp [main] This is a warning message.
-   28-Jun-2024 16:32:17 ERROR com.myapp.MyApp [main] This is an error message.
-   ```
-
-Note: The log4j.xml file containing the configuration must be contained in the src/main/resources folder of the Java\Maven Project.
-
-To learn more about logs collection refer to [Log Monitoring 101 Detailed Guide](https://signoz.io/blog/log-monitoring/)
-
-### SLF4J
-
-While Log4J2 and Logback are fully-fledged logging frameworks, slf4j or Simple Logging Facade for Java is an abstraction layer meaning that it is a universal plug to integrate logging functionality.
-
-SLF4J acts as an abstraction layer above the Standard Java Logging Library, allowing us to write messages and decouple the underlying frameworks like Log4J or Logback.
-
-SLF4J acts as an abstraction layer above the Standard Java Logging Library, allowing us to write messages and decouple the underlying frameworks like Log4J or Logback. It hides the underlying details of filtering, formatting, etc., and makes it easier to switch between frameworks.
-
-SLF4J is an API, we can flexibly switch between different frameworks without any code change. Additionally, we can separate the implementation from the code making it less dependent on the logging framework. In the future, we can integrate new and advanced frameworks without the overhead of modifying the code.
-
-### Logback
-
-The developer that created Log4J created Logback and is meant to be a better version of it. It has many new features that were absent in LOG4J.
-
-Logback Features:
-
-- Asynchronous Loggers - Logback doesn’t wait for the main thread to log, it rather creates a separate thread and logs when it is free. Thus, it provides better performance.
-- Advanced Filtering - Rather than only filtering using log levels as in Log4j, Logback allows filtering using regex, markers, or custom conditions.
-- Automatic Configuration Reloading - Unlike Log4J it doesn’t require a restart when configuration is changed.
-- Support for multiple APIs - Apart from Log4Js API it can also be integrated with SLF4J API and makes it easier to migrate between different frameworks.
-
-Other features include custom log levels, custom logging format, etc.
-
-1. Dependency
-
-   Add the Logback dependency to your project's pom.xml file:
-
-   ```xml
-   <dependency>
-     <groupId>ch.qos.logback</groupId>
-     <artifactId>logback-classic</artifactId>
-     <version>1.4.5</version>
-   </dependency>
-   ```
-
-2. Configuration
-
-   Create a file named logback.xml in your project's src/main/resources directory with the following content:
-
-   ```xml
-   <!-- Logback configuration file for MyApp with logging level set to DEBUG -->
-   <configuration status="debug" name="MyApp">
-
-     <!-- Console Appender: Logs output to the console -->
-     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
-       <encoder>
-         <!-- Pattern for log messages: date, priority, logger name, and message -->
-         <pattern>%d{dd-MMM-yyyy HH:mm:ss} %p %logger{36} - %msg%n</pattern>
-       </encoder>
-     </appender>
-
-     <!-- Rolling File Appender: Logs output to a file with rolling policy -->
-     <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
-       <!-- The log file location and naming pattern -->
-       <file>/path/to/logs/myapp_%d{yyyy-MM-dd}.log</file>
-       <!-- Rolling policy: rotates log files based on date -->
-       <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-         <fileNamePattern>/path/to/logs/archived/myapp_%d{yyyy-MM-dd}.log.gz</fileNamePattern>
-       </rollingPolicy>
-       <encoder>
-         <pattern>%d{dd-MMM-yyyy HH:mm:ss} %p %logger{36} - %msg%n</pattern>
-       </encoder>
-     </appender>
-
-     <!-- Logger for a specific package with DEBUG level -->
-     <logger name="com.myapp.package" level="debug">
-       <!-- Do not log messages to parent loggers -->
-       <additivity>false</additivity>
-       <!-- Reference to async appender -->
-       <appender-ref ref="async" />
-     </logger>
-
-     <logger name="root" level="info">
-       <appender-ref ref="stdout" />
-       <!-- Reference to rolling file appender --
-       <appender-ref ref="rollingFile" />
-     </logger>
-
-     <!-- Asynchronous appender to improve performance -->
-     <async name="async" bufferSize="512">
-       <!-- Maximum size of the logging queue -->
-       <queueSize>1024</queueSize>
-       <!-- Whether to discard logs on overflow -->
-       <discardingOnOverflow>false</discardingOnOverflow>
-       <!-- Reference to rolling file appender -->
-       <appender-ref ref="rollingFile" />
-     </async>
-
-   </configuration>
-   ```
-
-   In the configuration file, we have used Appenders similar to the previous example to append to the console and file. We are using the `rollingFile` appender, what it does is rotate logs daily and compress them with Gzip.
-
-   In the loggers section the level of the root logger is set to info and a new logger is introduced by the name com.myapp.package which follows the Java naming convention.
-
-   Additionally, we have added an AsyncAppender. This will log the messages asynchronously which improves the performance. Rather than appending a log at the time it is encountered affecting the performance of the main thread, asynchronous logging adds the logs to the queue and a separate thread is used to execute the logs.
-
-3. Usage
-
-   The example of the Logback is the same as Log4J but the code will differ in imports:
-
-   ```java
-   import org.slf4j.Logger;
-   import org.slf4j.LoggerFactory;
-
-   public class MyApp {
-
-     private static final Logger logger = LoggerFactory.getLogger(MyApp.class);
-
-     public static void main(String[] args) {
-
-       logger.debug("This is a debug message.");
-
-       logger.info("This is an informational message.");
-
-       logger.warn("This is a warning message.");
-
-       logger.error("This is an error message.");
-
-     }
-   }
-   ```
-
-Output:
-
-```
-DEBUG: This is a debug message.
-INFO: This is an informational message.
-WARN: This is a warning message.
-ERROR: This is an error message.
+```xml
+<PatternLayout pattern="%d{ISO8601} [%thread] %-5level %logger - [%X{requestId}] [%X{userId}] - %msg%n"/>
 ```
 
-Note: Logback requires SLF4J.
+Now your logs show the complete context:
 
-### Log4J 2
+```
+2025-09-16 10:23:45.123 [http-1] INFO  RequestHandler - [REQ-123] [USER-456] - Starting request processing
+2025-09-16 10:23:45.234 [http-1] INFO  RequestHandler - [REQ-123] [USER-456] - Processing order
+2025-09-16 10:23:45.567 [http-1] INFO  RequestHandler - [REQ-123] [USER-456] - Request completed successfully
+```
 
-1. Dependency
+When debugging production issues, this context is gold. You can trace a specific request across all your services and see exactly what happened.
 
-   Dependency for the Log4J can be added as below. Here rather than complement implementation we are taking API and `log4j-core`. This library provides the core functionalities used by Log4j2 for logging operations such as appenders, filters, loggers, layouts, etc.
+## Structuring Logs for Modern Analysis
 
-   ```xml
-   <dependency>
-   	<groupId>org.apache.logging.log4j</groupId>
-   	<artifactId>log4j-api</artifactId>
-   	<version>2.x.x</version>
-   </dependency>
-   <dependency>
-   	<groupId>org.apache.logging.log4j</groupId>
-   	<artifactId>log4j-core</artifactId>
-   	<version>2.x.x</version>
-   </dependency>
-   ```
+Plain text logs work, but structured logs are searchable, filterable, and analyzable. The configuration below keeps human-readable console output for developers while also writing JSON to disk for downstream analysis, rotating the file daily or at 100MB and tagging each event with static attributes:
 
-A similar configuration can also be written for the Log4J2 to get the desired results.
+```xml
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Human-readable console for development -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+        </Console>
+        
+        <!-- JSON format for production analysis -->
+        <RollingFile name="JsonFile" 
+                     fileName="logs/app.json"
+                     filePattern="logs/app-%d{yyyy-MM-dd}-%i.json.gz">
+            <JsonLayout compact="true" eventEol="true">
+                <KeyValuePair key="application" value="payment-service"/>
+                <KeyValuePair key="environment" value="${env:ENVIRONMENT:-dev}"/>
+            </JsonLayout>
+            <!-- Note: For Log4j2 2.17+, consider JsonTemplateLayout for better performance -->
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="JsonFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
+```
 
-## Comparison of Java Logging Frameworks
+Your production logs now look like this:
 
-| Feature           | JUL (java.util.logging)    | SLF4J (Simple Logging Facade for Java) | Logback                             | Log4j 2                          |
-| ----------------- | -------------------------- | -------------------------------------- | ----------------------------------- | -------------------------------- |
-| Type              | Built-in JDK library       | Facade, not a framework                | Third-party framework               | Third-party framework            |
-| Functionality     | Basic logging              | Abstraction layer for other frameworks | Feature-rich, built on top of SLF4J | Feature-rich, successor to Log4j |
-| Configuration     | Limited (properties files) | None (uses underlying framework)       | Flexible (XML, JSON, YAML)          | Flexible (XML, JSON, YAML)       |
-| Performance       | Moderate                   | N/A (depends on underlying framework)  | Fast                                | Fastest                          |
-| Flexibility       | Limited                    | High (works with various frameworks)   | High                                | High                             |
-| Community Support | Good (part of JDK)         | Strong                                 | Strong                              | Active                           |
-| Learning Curve    | Easiest                    | Easy (uses familiar concepts)          | Moderate                            | Moderate                         |
+```json
+{
+  "timestamp": "2025-09-16T10:23:45.123Z",
+  "level": "INFO",
+  "thread": "http-1",
+  "logger": "PaymentService",
+  "message": "Payment processed",
+  "application": "payment-service",
+  "environment": "prod",
+  "requestId": "REQ-123",
+  "userId": "USER-456",
+  "orderId": "ORD-789"
+}
+```
 
-## Best practices for Logging
+This structure makes it trivial to query your logs. Want all ERROR logs for a specific user in the last hour? That's a simple JSON query in any log aggregation system. Need to calculate average response times? Parse the JSON and analyze the timestamp fields.
 
-1. Utilize a Dedicated Logging Framework:
+## Optimizing Performance: Async Logging
 
-Though the Java Standard library provides basic logging capabilities (JUL), dedicated frameworks offer significant advantages.
+Logging I/O can slow down your application. Every time you log, your thread might wait for disk writes. For high-throughput applications, asynchronous logging is essential:
 
-- Enhanced Configurability: This lets us customize the message format, set the destination for the logs, define custom logging levels, etc.
-- Improved Performance: It provides optimization and efficiency.
-- Advanced Features: Offers advanced logging features to ease the logging process such as filtering, integration, etc.
+```xml
+<Configuration status="WARN">
+    <Appenders>
+        <RollingFile name="AsyncFile" fileName="logs/app.log"
+                     filePattern="logs/app-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="%d{ISO8601} [%thread] %-5level %logger - %msg%n"/>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <!-- AsyncRoot makes all logging asynchronous -->
+        <AsyncRoot level="info">
+            <AppenderRef ref="AsyncFile"/>
+        </AsyncRoot>
+    </Loggers>
+</Configuration>
+```
 
-1. Log Messages must be Clear and Concise: Logs must contain necessary information but at the same time must be short and to the point. Considering the length of the logs in an application it should be easy to locate and analyze.
-2. Leverage Logging Levels:
+The RollingFile appender still writes to disk, but wrapping the root logger in `AsyncRoot` moves the work to Log4j2's async queue so request threads simply enqueue events. The configuration keeps the log format familiar (`PatternLayout`) while the background thread handles rotation by day through the `filePattern` rule.
 
-   Different Logging levels offer different numbers of logging levels, the common ones are debug, info, error, and warning. Utilize these strategically, to categorize information and improve manageability.
+To put simply, with async logging, your application threads hand off log messages to a background thread and continue immediately. The background thread performs the disk I/O, so request threads stay responsive even when the filesystem is slow.
 
-3. Prioritize Security
+To enable this configuration you must add the Disruptor dependency and start your JVM with the asynchronous context selector:
 
-   Log files should contain necessary information but should not leak important or sensitive data. Consider masking sensitive data or employing secure logging configurations.
+```xml
+<dependency>
+    <groupId>com.lmax</groupId>
+    <artifactId>disruptor</artifactId>
+    <version>3.4.4</version>
+</dependency>
+```
 
-4. Monitor Logs
+> **Important**: Use Disruptor 3.x series only. Disruptor 4.x is not compatible with Log4j2's async loggers. Always check [Maven Central](https://search.maven.org/artifact/com.lmax/disruptor) for the latest 3.x version.
 
-   Examination of the logs can help detect errors in the early stages. Logs can also serve to track down issues if something suspicious is detected. Logs can be monitored using open-source external tools available like Signoz.
+```bash
+java -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -jar app.jar
+```
 
-By adhering to these best practices, proper monitoring systems for Java applications can be made robust and enhance overall maintainability.
-
-The actual process of logging consists of collecting, analyzing, and managing logs generated by computers, applications, and networks. This can be done with dedicated paid or open-source software like [SigNoz](https://signoz.io/). Refer to the article [Collecting Application Logs Using OTEL Java Agent](https://signoz.io/blog/log-monitoring/) to collect application logs.
-
-## Conclusion
-
-- Jogging is essential for any application development, debugging, and maintenance. It lets developers have insight into application behavior, flow, performance, and issues.
-- Java provides a standard logging library also known as JUL which offers basic logging functionalities.
-- For logging, we are required to create a logger object using the loggerFactory. This logger then can be used to log messages with the log level. If the log level is higher or equal to the message’s level, then it creates a logRecord object.
-- This logRecord object is then passed to Handler which filters and formats the message and sends it to the respective destination like console, file, or network.
-- Though JUL provides various functionalities, for advanced needs, dedicated logging frameworks like Log4j 2, SLF4J, Logback, etc are used due to extensive configureability, performance optimizations, and other helpful features.
-
-## FAQs:
-
-### What is a log for Java?
-
-A Java log is like a personal diary for your program. It keeps track of important events, errors, and general activity, helping you understand how it's functioning.
-
-### Where can I find the Java log?
-
-By default, Java logs might go to the console (your terminal window) or a file depending on the program's setup. Some Java applications use separate log files which can be located inside the programs directory.
-
-### How to create a log in Java?
-
-Java provides a standard logging library also known as JUL which can be used to log. We can import java.util.log and create a logger object. This logger object can be used to log messages. We can also use external libraries that provide additional functionalities.
-
-### How to print logs in Java?
-
-We can either use the log() method or more specific methods like info(), debug(), and error() present in the standard Java Log library to write different types of messages to the log.
-
-### How to enable Java logs?
-
-To enable logging in Java, we can set the log level to INFO, DEBUG, or WARNING. The logs can be found in the console or a log file in the projects folder.
-
-### How to keep logs in Java?
-
-We can keep logs by saving them in a file. Logging libraries provide methods for adding file handlers and setting formatters to the logger object.
-
-### How to check the log level in Java?
-
-The `logger.getLevel()` method can be used to get the current log level. It returns a Level object.
-
-### How to format logs in Java?
-
-You can customize how log messages appear, including timestamps, severity levels, and even adding context-like variable values.
-
-### How to log a value in Java?
-
-To log values of variables in Java, we can pass an object array or use `String.format()` with the log message as follows:
+But async logging requires care with string building. Avoid expensive operations in your log statements:
 
 ```java
-logger.log(Level.WARNING, "logging: {0} {1} {2}", new Object[] { "p1", "p2", "p3" });
-logger.log(Level.WARNING, String.format("logging: %s %s %s %s", "p1", "p2", "p3", "additional string"));
+// BAD: Creates strings even when DEBUG is disabled
+logger.debug("Processing " + list.size() + " items for user " + userId);
+
+// GOOD: Only creates strings if DEBUG is enabled
+logger.debug("Processing {} items for user {}", list.size(), userId);
+
+// BEST: For expensive operations, check first
+if (logger.isDebugEnabled()) {
+    logger.debug("Cache state: {}", cache.generateExpensiveReport());
+}
 ```
 
-### What is a log level in Java?
+The placeholders (`{}`) are your friends. They defer string creation until the logger knows it actually needs the message.
 
-Log levels are classifications used to determine the severity of the log message. It helps developers and administrators to filter the logs and quickly respond to the urgent ones.
+## Handling Different Environments
 
-### What is an access log in Java?
+Development teams need verbose output on the console, while production teams need structured files that rotate predictably. Maintain two configuration files—`log4j2-dev.xml` for local debugging and `log4j2-prod.xml` for production and pick the right one at startup:
 
-Access logs track web server activity, not directly related to Java application code. They might reside in the web server's configuration directory.
+```bash
+# Local run with colored console logs
+java -Dlog4j.configurationFile=log4j2-dev.xml -jar app.jar
+
+# Production run with JSON + rolling files
+java -Dlog4j.configurationFile=log4j2-prod.xml -jar app.jar
+```
+
+You can still keep shared defaults by extracting them into `log4j2-base.xml` and referencing that file with the `<include file="log4j2-base.xml"/>` feature available in Log4j2 2.10+. Within each environment-specific file, pull critical values such as log level or log directory from environment variables:
+
+```xml
+<Properties>
+    <Property name="LOG_LEVEL">${env:LOG_LEVEL:-INFO}</Property>
+    <Property name="LOG_DIR">${env:LOG_DIR:-logs}</Property>
+</Properties>
+
+<Root level="${LOG_LEVEL}">
+    <AppenderRef ref="Console"/>
+</Root>
+```
+
+This pattern keeps configuration explicit, avoids brittle conditional expressions, and lets operations teams adjust verbosity or destinations without touching the codebase.
+
+## Troubleshooting Common Java Logging Problems
+
+When logs don't appear as expected, here's how to diagnose the issue systematically.
+
+### Problem: No Logs Appearing
+
+First, verify Log4j2 found your configuration:
+
+```java
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+
+// Check where Log4j2 is loading configuration from
+LoggerContext context = (LoggerContext) LogManager.getContext(false);
+System.out.println("Config location: " + 
+    context.getConfiguration().getConfigurationSource().getLocation());
+```
+
+If the location is null or unexpected, Log4j2 didn't find your config file. Make sure `log4j2.xml` is in the classpath.
+
+Next, check for conflicting logging libraries:
+
+```bash
+# Maven: Check for multiple logging implementations
+mvn dependency:tree | grep -E "log4j|slf4j|logback"
+```
+
+If you see multiple implementations (like both Log4j2 and Logback), exclude the unwanted ones from your dependencies.
+
+### Problem: MDC Context Leaking Between Requests
+
+MDC uses thread-local storage, which can leak in application servers if you forget to clear it. Use the helper provided by SLF4J 2.x so the context automatically resets:
+
+```java
+try (MDC.MDCCloseable closeable = MDC.putCloseable("requestId", requestId)) {
+    processRequest();
+} // Context restored even when processRequest throws
+```
+
+If you're on an older SLF4J version, wrap the MDC calls in a `finally` block and clear the context yourself.
+
+## Migrating from Legacy Java Logging Systems
+
+If you have existing code using old logging frameworks, you don't need to rewrite everything. Use bridge libraries to redirect old logging to your new setup.
+
+### Migrating from Log4j 1.x
+
+Add the Log4j 1.x bridge:
+
+```xml
+<dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-1.2-api</artifactId>
+    <version>2.25.0</version>
+</dependency>
+```
+
+Your old Log4j 1.x code continues working unchanged:
+
+```java
+// Old Log4j 1.x code - automatically uses Log4j2 now
+import org.apache.log4j.Logger;
+Logger logger = Logger.getLogger(MyClass.class);
+logger.info("This goes through Log4j2");
+```
+
+### Migrating from java.util.logging
+
+Bridge JUL to SLF4J at application startup:
+
+```java
+import org.slf4j.bridge.SLF4JBridgeHandler;
+
+public class Application {
+    static {
+        // Remove default JUL handlers
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        // Install SLF4J bridge
+        SLF4JBridgeHandler.install();
+    }
+    
+    public static void main(String[] args) {
+        // JUL logs now go through your Log4j2 configuration
+    }
+}
+```
+
+This approach lets you modernize your logging infrastructure gradually, without a big-bang rewrite.
+
+## Production Checklist: Are You Really Ready?
+
+Before deploying to production, confirm these basics:
+
+- Structured logging (JSON format) for easy parsing and analysis
+- Async logging for high-throughput applications
+- MDC for request tracing across your system
+- Log rotation to prevent disk space issues
+- Package-specific log levels to control verbosity
+- No sensitive data in logs (passwords, tokens, credit cards)
+- Correlation IDs for distributed tracing
+- Separate error logs for monitoring and alerting
+
+Here's a battle-tested production configuration that implements all these practices:
+
+```xml
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{ISO8601} [%thread] %-5level %logger - %X{correlationId} - %msg%n
+        </Property>
+    </Properties>
+    
+    <Appenders>
+        <!-- Async wrapper for performance -->
+        <AsyncAppender name="AsyncFile" includeLocation="true">
+            <AppenderRef ref="RollingFile"/>
+        </AsyncAppender>
+        
+        <!-- Main application logs with rotation -->
+        <RollingFile name="RollingFile" 
+                     fileName="logs/app.log"
+                     filePattern="logs/app-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+        
+        <!-- Separate error log for monitoring -->
+        <RollingFile name="ErrorFile" 
+                     fileName="logs/error.log"
+                     filePattern="logs/error-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+    </Appenders>
+    
+    <Loggers>
+        <!-- Your app: Configurable via environment -->
+        <Logger name="com.myapp" level="${env:APP_LOG_LEVEL:-INFO}"/>
+        
+        <!-- Frameworks: WARN only to reduce noise -->
+        <Logger name="org.springframework" level="WARN"/>
+        <Logger name="org.hibernate" level="WARN"/>
+        
+        <Root level="INFO">
+            <AppenderRef ref="AsyncFile"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
+```
+
+This configuration separates errors into their own file for easy monitoring, uses async logging for performance, and allows runtime configuration through environment variables.
+
+## Making Your Java Logging Actionable with Monitoring
+
+Logs sitting on disk do not help anyone. Once you emit structured events, wire them into monitoring rules. Stream Java logs to SigNoz, create a view that filters `level:ERROR`, and alert when the count spikes or when a service stops sending logs altogether.
+
+In a Spring Boot application, you can add a lightweight self-test by emitting a heartbeat log at startup and verifying it reaches SigNoz using a query such as:
+
+```
+log_type = "application" and service.name = "payment-service" and message = "logging-heartbeat"
+```
+
+If the query shows no events for a few minutes, alert the on-call engineer, because the logging pipeline may be broken.
+
+## Get Started with SigNoz
+
+SigNoz offers three deployment paths. Start quickly with the [SigNoz cloud](https://signoz.io/teams/) trial, which provides full-feature access for 30 days. Teams that must retain data on their own infrastructure can pick the [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/). If you prefer to manage the stack yourself, deploy the [community edition](https://signoz.io/docs/install/self-host/). 
+
+Once you have SigNoz running, point the OpenTelemetry Collector to the structured log file you created earlier. The `filelog` receiver tails the JSON output and forwards it to SigNoz without additional changes to your application code:
+
+```yaml
+receivers:
+  filelog:
+    include:
+      - /var/log/myapp/app-*.json
+    start_at: beginning
+
+exporters:
+  otlp:
+    endpoint: https://ingest.signoz.io:443
+    headers:
+      signoz-access-token: ${SIGNOZ_ACCESS_TOKEN}
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      exporters: [otlp]
+```
+
+With SigNoz, you can correlate logs with traces and metrics, search across all your services, and set up intelligent alerts for critical errors. Your logs become part of a complete observability solution.
+
+<Figure src="/img/guides/2025/09/java-log-signoz-log-dashboard.webp" alt="SigNoz log dashboard" caption="SigNoz log dashboard" />
+
+For end-to-end instructions on forwarding Java logs, follow the [SigNoz guide for collecting application logs with the OpenTelemetry Java SDK](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/).
+
+## Your Next Steps
+
+You now have a clear path from println debugging to production-ready logging. 
+
+Remember, good logging isn't about logging everything, it's about logging the right things with enough context to solve problems quickly. The difference between finding a production bug in minutes versus hours often comes down to the quality of your logs.
+
+Start implementing these practices now, before you need them. When production issues strike, the groundwork already laid in your logs keeps diagnosis fast.
+
+Need help along the way? Try the SigNoz AI chatbot or join our [Slack community](https://signoz.io/slack/). You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for observability deep dives and updates from the SigNoz team.
