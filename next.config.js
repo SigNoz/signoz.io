@@ -179,6 +179,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/kubernetes/deployment/',
+          destination: '/docs/install/kubernetes/',
+          permanent: true,
+        },
+        {
           source: '/docs/installation/',
           destination: '/docs/install',
           permanent: true,
@@ -191,6 +196,16 @@ module.exports = () => {
         {
           source: '/docs/operate/migration',
           destination: '/docs/operate/upgrade',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/',
+          destination: '/docs/manage/administrator-guide/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/kubernetes/',
+          destination: '/docs/install/kubernetes/',
           permanent: true,
         },
         {
@@ -362,6 +377,11 @@ module.exports = () => {
         {
           source: '/docs/instrumentation/python/',
           destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/ruby/',
+          destination: '/docs/instrumentation/ruby-on-rails/',
           permanent: true,
         },
         {
