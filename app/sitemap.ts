@@ -93,7 +93,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'guides', // Add the main guides page
     'faqs', // Add the main FAQs page
   ].map((route) => ({
-    url: `${siteUrl}/${route}${route ? '/' : ''}`,
+    url: `${currentUrl}/${route}${route ? '/' : ''}`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: mapChangeFrequency('weekly'),
   }))
