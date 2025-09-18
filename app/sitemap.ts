@@ -22,10 +22,15 @@ const mapChangeFrequency = (
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = siteMetadata.siteUrl
 
+  const isProduction = process.env.VERCEL_ENV === 'production'
+  const currentUrl = isProduction 
+    ? siteMetadata.siteUrl 
+    : `https://staging.signoz.io`
+
   const blogRoutes = allBlogs
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
+      url: `${currentUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -34,7 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const docRoutes = allDocs
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
+      url: `${currentUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -43,7 +48,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const comparisonRoutes = allComparisons
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
+      url: `${currentUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -52,7 +57,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const opentelemetryRoutes = allOpentelemetries
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}/`,
+      url: `${currentUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -62,14 +67,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const guideRoutes = allGuides
     .filter((guide) => !guide.draft)
     .map((guide) => ({
-      url: `${siteUrl}/${guide.path}/`,
+      url: `${currentUrl}/${guide.path}/`,
       lastModified: guide.lastmod || guide.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.7,
     }))
 
   const faqRoutes = allFAQs.map((faq) => ({
-    url: `${siteUrl}/${faq.path}/`,
+    url: `${currentUrl}/${faq.path}/`,
     lastModified: faq.lastmod || faq.date,
   }))
 
