@@ -52,6 +52,7 @@ const DocContent: React.FC<{
               buttonVariant="ghost"
               buttonSize="sm"
               label="Copy markdown"
+              docSlug={post.slug}
             />
           )}
         </div>
