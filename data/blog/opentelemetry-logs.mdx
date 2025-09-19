@@ -45,7 +45,7 @@ Before deep diving into OpenTelemetry logs, let's briefly overview OpenTelemetry
 OpenTelemetry provides instrumentation libraries for your application. The development of these libraries is guided by the <a href = "https://github.com/open-telemetry/opentelemetry-specification" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry specification</a>. The OpenTelemetry specification describes the cross-language requirements and design expectations for all OpenTelemetry implementations in various programming languages.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2025/09/log-pipeline.webp" alt="OpenTelemetry Architecture"/>
+    <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry Architecture"/>
     <figcaption><i>How OpenTelemetry fits in an application architecture. OTel collector refers to OpenTelemetry Collector</i></figcaption>
 </figure>
 
@@ -95,7 +95,7 @@ The primary goal of OpenTelemetry's log data model is to ensure a common underst
 
 **ObservedTimestamp:** The time when the event was observed by the collection system.
 
-**[Trace Context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) Fields:** These include TraceId, SpanId, and TraceFlags which are essential for correlating logs with traces.
+**Trace Context Fields:** These include TraceId, SpanId, and TraceFlags which are essential for correlating logs with traces.
 
 **Severity Text:** This is a string that represents the original *log level* as it was written by the source system
           (e.g., "INFO", "WARN", "DEBUG"). 
@@ -242,7 +242,7 @@ There are **two** ways to collect application logs:
   Here, the logs of the application are directly collected by the OpenTelemetry receiver using collectors like **filelog receiver.** Then operators and processors are used for parsing them into the OpenTelemetry log data model.
 
     <figure data-zoomable align='center'>
-    <img src="/img/logs/file_stdout.webp" alt="Collecting logs via file or Stdout logs"/>
+    <img src="/img/blog/2025/09/log-pipeline.webp" alt="Collecting logs via file or Stdout logs"/>
     <figcaption><i>Collecting logs via file or Stdout logs</i></figcaption>
     </figure>
     
@@ -271,7 +271,7 @@ from its SDK.
 
   Now, let's see how to use this combination in practice.
 
-  *Example 1. Instrumenting Python with a Logging Handler*
+  **Example 1. Instrumenting Python with a Logging Handler**
 
   Here's an example of using OpenTelemetry's [LoggingInstrumentor](https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/logging/logging.html) to instrument the logging library to automatically add trace context in a Python application.
 
@@ -289,7 +289,9 @@ from its SDK.
         logging.info("User login successful.")
   ```
 
-  *Example 2. Instrumenting in Java with a Log Appender*
+  **Example 2. Instrumenting in Java with a Log Appender**
+
+
   For Java applications, which commonly use logging frameworks like Logback or Log4j, OpenTelemetry
   integrates by providing a custom Log Appender.
 
