@@ -9,7 +9,7 @@ This guide walks you through configuring your existing OpenTelemetry instrumenta
 
 ## Prerequisites
 
-- Existing OpenTelemetry instrumented application
+- Applications instrumented with [OpenTelemetry SDKs](https://opentelemetry.io/docs/languages/) or [OpenTelemetry Collectors](https://opentelemetry.io/docs/collector/)
 - OTLP exporters configured (HTTP or gRPC)
 - Docker or Kubernetes environment for SigNoz installation
 
@@ -35,7 +35,7 @@ Locate your SigNoz OpenTelemetry Collector endpoints. These are typically:
 
 ## Step 3: Update OpenTelemetry Configuration
 
-Now you need to reconfigure your OpenTelemetry exporters to send data to your SigNoz instance instead of your previous backend. The easiest approach is using environment variables, which works with all OpenTelemetry SDKs without code changes.
+Now you need to reconfigure your OpenTelemetry exporters to send data to your SigNoz instance instead of your previous backend. You can do this through environment variables (recommended) or by updating your application code directly.
 
 ### Environment Variables (Recommended)
 
@@ -54,7 +54,76 @@ export OTEL_EXPORTER_OTLP_TIMEOUT="30000"
 # For insecure connections (development only)
 export OTEL_EXPORTER_OTLP_INSECURE="true"
 ```
-## Step 4: Configure OpenTelemetry Collector (Optional)
+
+### Programmatic Configuration Examples
+
+If you prefer to configure exporters directly in code, here are examples for common languages:
+
+#### Node.js
+```javascript
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-grpc');
+
+const exporter = new OTLPTraceExporter({
+  url: 'http://your-signoz-host:4317',
+  compression: 'gzip'
+});
+```
+
+#### Python
+```python
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+exporter = OTLPSpanExporter(
+    endpoint="http://your-signoz-host:4317",
+    insecure=True,  # For HTTP endpoints
+    compression="gzip"
+)
+```
+
+#### Go
+```go
+exporter, err := otlptracegrpc.New(ctx,
+    otlptracegrpc.WithEndpoint("http://your-signoz-host:4317"),
+    otlptracegrpc.WithInsecure(), // For HTTP endpoints
+)
+```
+
+#### Java
+```java
+OtlpGrpcSpanExporter exporter = OtlpGrpcSpanExporter.builder()
+    .setEndpoint("http://your-signoz-host:4317")
+    .setCompression("gzip")
+    .build();
+```
+
+#### .NET
+```csharp
+using var tracerProvider = TracerProviderBuilder.Create()
+    .AddOtlpExporter(options =>
+    {
+        options.Endpoint = new Uri("http://your-signoz-host:4317");
+        options.Protocol = OtlpExportProtocol.Grpc;
+    })
+    .Build();
+```
+
+#### PHP
+```php
+use OpenTelemetry\Contrib\Otlp\SpanExporter;
+
+$exporter = new SpanExporter('http://your-signoz-host:4317');
+```
+
+#### Ruby
+```ruby
+require 'opentelemetry/exporter/otlp'
+
+exporter = OpenTelemetry::Exporter::OTLP::Exporter.new(
+  endpoint: 'http://your-signoz-host:4317'
+)
+```
+
+## Step 4: Update OpenTelemetry Collector Configuration
 
 If you're using an OpenTelemetry Collector in your infrastructure to aggregate telemetry data before sending it to backends, you'll need to update its configuration to point to your SigNoz instance. This is common in production setups where the collector handles data processing, filtering, and routing.
 
