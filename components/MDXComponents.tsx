@@ -59,6 +59,7 @@ import APMDashboardsListicle from './Dashboards/APMDashboardsListicle'
 import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsListicle'
 
 import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
+import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
 
@@ -120,6 +121,7 @@ export const components: MDXComponents = {
   HostMetricsDashboardsListicle,
   MarketplaceInstallationListicle,
   LLMMonitoringListicle,
+  OtelCollectorFlow,
   CollectionAgentsListicle,
   ResponseTimeVisualizer,
 }

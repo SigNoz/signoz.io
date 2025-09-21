@@ -148,7 +148,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3am701p9u-qEO6jxUapH4Vnnptot_RGA',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3cy3atyr6-yjgvOm42ZqD2HeszrXuvOA',
           basePath: false,
           permanent: true,
         },
@@ -179,6 +179,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/kubernetes/deployment/',
+          destination: '/docs/install/kubernetes/',
+          permanent: true,
+        },
+        {
           source: '/docs/installation/',
           destination: '/docs/install',
           permanent: true,
@@ -191,6 +196,16 @@ module.exports = () => {
         {
           source: '/docs/operate/migration',
           destination: '/docs/operate/upgrade',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/',
+          destination: '/docs/manage/administrator-guide/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/kubernetes/',
+          destination: '/docs/install/kubernetes/',
           permanent: true,
         },
         {
@@ -362,6 +377,11 @@ module.exports = () => {
         {
           source: '/docs/instrumentation/python/',
           destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/ruby/',
+          destination: '/docs/instrumentation/ruby-on-rails/',
           permanent: true,
         },
         {
@@ -658,6 +678,11 @@ module.exports = () => {
         {
           source: "/docs/llm/llamaindex-monitoring/",
           destination: "/docs/llamaindex-monitoring/",
+          permanent: true
+        },
+        {
+          source: "/guides/upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11/",
+          destination: "/guides/upstream-connect-error/",
           permanent: true
         }
       ]

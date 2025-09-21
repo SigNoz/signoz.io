@@ -1,15 +1,11 @@
 import 'css/prism.css'
 import 'katex/dist/katex.css'
 
-import PageTitle from '@/components/PageTitle'
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { allAuthors, allComparisons } from 'contentlayer/generated'
-import type { Authors, Blog, Comparison, Opentelemetry } from 'contentlayer/generated'
-import PostSimple from '@/layouts/PostSimple'
-import PostLayout from '@/layouts/PostLayout'
-import PostBanner from '@/layouts/PostBanner'
+import type { Authors, Comparison } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import BlogLayout from '@/layouts/BlogLayout'
 import { Metadata } from 'next'
@@ -18,11 +14,8 @@ import { notFound } from 'next/navigation'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
 
-const defaultLayout = 'PostLayout'
+const defaultLayout = 'BlogLayout'
 const layouts = {
-  PostSimple,
-  PostLayout,
-  PostBanner,
   OpenTelemetryLayout,
   BlogLayout,
 }

@@ -254,6 +254,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.94',
+            label: 'Upgrade to v0.94',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.92',
             label: 'Upgrade to v0.92',
           },
@@ -1476,14 +1481,27 @@ const docsSideNav = [
     // route: '',
     items: [
       {
-        type: 'doc',
-        route: '/docs/userguide/manage-dashboards',
-        label: 'Manage Dashboards',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/manage-panels',
-        label: 'Manage Panels',
+        label: 'Manage',
+        type: 'category',
+        className: 'new-doc',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-dashboards',
+            label: 'Manage Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-panels',
+            label: 'Manage Panels',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-variables',
+            label: 'Manage Variables',
+          },
+        ],
       },
       {
         type: 'category',
@@ -1529,9 +1547,9 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/manage-variables',
-        label: 'Manage Variables',
+        type: 'category',
+        route: '/docs/dashboards/interactivity',
+        label: 'Interactivity',
       },
       {
         type: 'doc',
@@ -1544,6 +1562,11 @@ const docsSideNav = [
         route: '/docs/dashboards/dashboard-templates/overview',
         label: 'Out of Box Dashboards',
         items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
+            label: 'Anthropic API',
+          },
           {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
@@ -1579,13 +1602,23 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/couchdb',
+            label: 'CouchDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
+            label: 'DeepSeek API',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
             label: 'Docker Container',
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/couchdb',
-            label: 'CouchDB',
+            route: '/docs/dashboards/dashboard-templates/google-gemini-dashboard',
+            label: 'Google Gemini',
           },
           {
             type: 'doc',
@@ -2019,25 +2052,30 @@ const docsSideNav = [
     route: '/docs/llm-observability',
     label: 'LLM Observability',
 
-    items: [
-      {
-        route: '/docs/opentelemetry-openai-monitoring',
-        label: 'OpenAI Monitoring',
-        type: 'doc',
-      },
+    items: [ 
       {
         route: '/docs/llm-community-integrations',
         label: 'LLM Community Integrations',
         type: 'doc',
       },
       {
-        route: '/docs/vercel-ai-sdk-monitoring',
-        label: 'Vercel AI SDK Monitoring',
+        route: '/docs/anthropic-monitoring',
+        label: 'Anthropic API Monitoring',
         type: 'doc',
       },
       {
-        route: '/docs/llamaindex-monitoring',
-        label: 'LlamaIndex Monitoring',
+        route: '/docs/claude-code-monitoring',
+        label: 'Claude Code Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/deepseek-monitoring',
+        label: 'DeepSeek Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/google-gemini-monitoring',
+        label: 'Google Gemini Monitoring',
         type: 'doc',
       },
       {
@@ -2046,8 +2084,18 @@ const docsSideNav = [
         type: 'doc',
       },
       {
-        route: '/docs/claude-code-monitoring',
-        label: 'Claude Code Monitoring',
+        route: '/docs/llamaindex-monitoring',
+        label: 'LlamaIndex Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/opentelemetry-openai-monitoring',
+        label: 'OpenAI Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/vercel-ai-sdk-monitoring',
+        label: 'Vercel AI SDK Monitoring',
         type: 'doc',
       },
     ],
@@ -2167,6 +2215,11 @@ const docsSideNav = [
         route: '/docs/integrations/supabase',
         label: 'Supabase',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nomad',
+        label: 'Nomad'
+      }
     ],
   },
   {

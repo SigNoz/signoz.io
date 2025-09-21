@@ -7,7 +7,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
-import BlogHeader, { AuthorProps } from '@/components/BlogHeader/BlogHeader'
+import BlogHeader from '@/components/BlogHeader/BlogHeader'
 import RelatedArticles from '@/components/RelatedArticles/RelatedArticles'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 
