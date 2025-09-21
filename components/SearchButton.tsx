@@ -11,17 +11,15 @@ import {
   useState,
   Fragment,
   type KeyboardEvent as ReactKeyboardEvent,
-  type ReactNode,
 } from 'react'
 import {
   InstantSearch,
   Highlight,
-  Snippet,
   useHits,
   useInstantSearch,
   useSearchBox,
 } from 'react-instantsearch'
-import { ArrowUpRight, Clock3, Command, Loader2, Search, X } from 'lucide-react'
+import { Clock3, Command, Loader2, Search, X } from 'lucide-react'
 
 import siteMetadata from '@/data/siteMetadata'
 import { cn } from 'app/lib/utils'
@@ -273,23 +271,12 @@ const SearchResults = ({ onSelect }: { onSelect: (url: string) => void }) => {
   const { status } = useInstantSearch()
   const { query } = useSearchBox()
 
-  const grouped = useMemo(() => {
-    const sections = new Map<string, DocHit[]>()
-    hits.forEach((hit) => {
-      const group = hit.hierarchy?.lvl0?.trim() || 'Results'
-      const list = sections.get(group) || []
-      list.push(hit)
-      sections.set(group, list)
-    })
-    return Array.from(sections.entries())
-  }, [hits])
-
   const renderEmptyState = status === 'loading' || status === 'stalled'
 
   return (
-    <div className="max-h-[65vh] overflow-y-auto px-2 pb-4">
+    <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
       {renderEmptyState && (
-        <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-black/40 px-6 py-10 text-center text-sm text-white/70">
+        <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-[#131419] px-6 py-10 text-center text-sm text-white/70">
           <Loader2 className="h-6 w-6 animate-spin text-primary-300" />
           <p>Searching the SigNoz docs…</p>
         </div>
@@ -298,80 +285,89 @@ const SearchResults = ({ onSelect }: { onSelect: (url: string) => void }) => {
       {!renderEmptyState && !query && hits.length === 0 && null}
 
       {!renderEmptyState && query && hits.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-black/40 px-6 py-10 text-center text-sm text-white/70">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-[#131419] px-6 py-10 text-center text-sm text-white/70">
           <Clock3 className="h-6 w-6 text-white/50" />
           <p>No results found.</p>
         </div>
       )}
 
       {!renderEmptyState && hits.length > 0 && (
-        <div className="space-y-6">
-          {grouped.map(([section, sectionHits]) => (
-            <div key={section}>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
-                {section === 'Results' ? 'All Results' : section}
-              </p>
-              <ul className="space-y-2">
-                {sectionHits.map((hit) => (
-                  <li key={hit.objectID}>
-                    <button
-                      type="button"
-                      onClick={() => hit.url && onSelect(hit.url)}
-                      className="group flex w-full items-center gap-3 rounded-lg bg-black/40 px-3 py-2.5 text-left text-white transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-                    >
-                      <ResultIcon label={section} />
-                      <div className="flex flex-1 flex-col gap-1">
-                        <div className="flex items-center gap-2 text-[11px] text-white/50">
-                          <Badge>{deriveBadge(hit)}</Badge>
-                          {hit.url && <span className="truncate">{safeHostname(hit.url)}</span>}
-                        </div>
-                        <p className="text-[15px] font-semibold leading-6 text-white group-hover:text-primary-100">
-                          <Highlight hit={hit} attribute="hierarchy.lvl1" />
-                        </p>
-                        <p className="line-clamp-2 text-[13px] text-white/65">
-                          <Snippet hit={hit} attribute="content" />
-                        </p>
-                      </div>
-                      <ArrowUpRight className="mt-1 h-4 w-4 flex-shrink-0 text-white/40 transition group-hover:text-primary-200" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div className="mt-2 overflow-hidden rounded-2xl bg-[#131419] shadow-[0_20px_45px_rgba(0,0,0,0.35)]">
+          <ul className="divide-white/6 my-0 divide-y p-0 text-sm">
+            {hits.map((hit) => {
+              const titleAttribute = hit.title
+                ? 'title'
+                : hit.hierarchy?.lvl1
+                  ? 'hierarchy.lvl1'
+                  : hit.hierarchy?.lvl0
+                    ? 'hierarchy.lvl0'
+                    : undefined
+
+              const fallbackTitle =
+                hit.title ||
+                hit.hierarchy?.lvl1 ||
+                hit.hierarchy?.lvl0 ||
+                hit.hierarchy?.lvl2 ||
+                hit.hierarchy?.lvl3 ||
+                hit.content ||
+                hit.url ||
+                'Untitled result'
+
+              return (
+                <li key={hit.objectID} className="border-b border-gray-800/70">
+                  <button
+                    type="button"
+                    onClick={() => hit.url && onSelect(hit.url)}
+                    className="w-full px-8 py-6 text-left transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                  >
+                    <p className="text-[15px] font-semibold leading-6 text-white">
+                      {titleAttribute ? (
+                        <Highlight
+                          hit={hit}
+                          attribute={titleAttribute as any}
+                          classNames={{
+                            highlighted: 'bg-white/15 text-white px-1 py-[2px] rounded-sm',
+                          }}
+                        />
+                      ) : (
+                        fallbackTitle
+                      )}
+                    </p>
+                    {hit.url && (
+                      <p className="mb-0 mt-2 text-[13px] text-white/55">
+                        <Breadcrumbs url={hit.url} hierarchy={hit.hierarchy} />
+                      </p>
+                    )}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
         </div>
       )}
     </div>
   )
 }
 
-const ResultIcon = ({ label }: { label: string }) => (
-  <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white/10 text-white/70">
-    <span className="text-sm font-semibold uppercase tracking-widest">
-      {label.trim().slice(0, 2).toUpperCase() || 'SN'}
-    </span>
-  </div>
-)
+const Breadcrumbs = ({ url, hierarchy }: { url: string; hierarchy?: DocHit['hierarchy'] }) => {
+  const hierarchySegments = [hierarchy?.lvl0, hierarchy?.lvl1, hierarchy?.lvl2, hierarchy?.lvl3]
+    .map((segment) => segment?.trim())
+    .filter(Boolean) as string[]
 
-const Badge = ({ children }: { children: ReactNode }) => (
-  <span className="inline-flex items-center rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-white/55">
-    {children}
-  </span>
-)
-
-const deriveBadge = (hit: DocHit) => {
-  if (hit.type && hit.type !== 'content') {
-    return hit.type.replace(/lvl/, 'Section ')
+  if (hierarchySegments.length > 0) {
+    return <>{hierarchySegments.join(' › ')}</>
   }
 
-  return hit.hierarchy?.lvl2 || hit.hierarchy?.lvl1 || 'Docs'
-}
-
-const safeHostname = (rawUrl: string) => {
   try {
-    return new URL(rawUrl).hostname.replace('www.', '')
+    const parsed = new URL(url)
+    const pathSegments = parsed.pathname
+      .split('/')
+      .filter(Boolean)
+      .map((segment) => segment.replace(/-/g, ' '))
+
+    return <>{[parsed.hostname.replace('www.', ''), ...pathSegments].join(' › ')}</>
   } catch (error) {
-    return rawUrl
+    return <>{url}</>
   }
 }
 
