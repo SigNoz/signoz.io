@@ -1,7 +1,7 @@
 'use client'
 
 import { Dialog, Transition } from '@headlessui/react'
-import { liteClient as algoliasearch, type SearchClient } from 'algoliasearch/lite'
+import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import { useRouter } from 'next/navigation'
 import {
   useCallback,
@@ -32,7 +32,7 @@ type SearchModalProps = {
   isOpen: boolean
   onClose: () => void
   onSelect: (url: string) => void
-  searchClient: SearchClient
+  searchClient: AlgoliaSearchClient
   indexName: string
 }
 
@@ -40,6 +40,7 @@ type DocHit = {
   objectID: string
   url?: string
   content?: string
+  title?: string
   type?: string
   hierarchy?: {
     lvl0?: string | null
@@ -51,30 +52,36 @@ type DocHit = {
 
 type SearchMode = 'search' | 'ask-ai'
 
+type AlgoliaSearchClient = ReturnType<typeof algoliasearch>
+
 const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
   const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
   const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
   const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME
   const hasAlgoliaConfig = Boolean(appId && apiKey && indexName)
 
-  const baseClient = useMemo(() => {
+  const baseClient = useMemo<AlgoliaSearchClient | null>(() => {
     if (!hasAlgoliaConfig || !appId || !apiKey) {
       return null
     }
     return algoliasearch(appId, apiKey)
   }, [hasAlgoliaConfig, appId, apiKey])
 
-  const searchClient = useMemo(() => {
+  const searchClient = useMemo<AlgoliaSearchClient | null>(() => {
     if (!baseClient) {
       return null
     }
 
-    return {
+    const clientWithOverride: AlgoliaSearchClient = {
       ...baseClient,
-      search(requests: Parameters<SearchClient['search']>[0]) {
-        if (requests.every(({ params }) => !params?.query)) {
+      search(requests) {
+        const normalizedRequests = (Array.isArray(requests) ? requests : [requests]) as ReadonlyArray<
+          { params?: { query?: string | null } } & Record<string, unknown>
+        >
+
+        if (normalizedRequests.every((request) => !request.params?.query)) {
           return Promise.resolve({
-            results: requests.map(() => ({
+            results: normalizedRequests.map(() => ({
               hits: [],
               nbHits: 0,
               page: 0,
@@ -85,12 +92,15 @@ const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
               query: '',
               params: '',
             })),
+            // Cast required because Algolia types expect readonly array but we're returning static object
           })
         }
 
         return baseClient.search(requests)
       },
-    } satisfies SearchClient
+    }
+
+    return clientWithOverride
   }, [baseClient])
 
   const router = useRouter()
