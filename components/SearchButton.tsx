@@ -19,7 +19,7 @@ import {
   useInstantSearch,
   useSearchBox,
 } from 'react-instantsearch'
-import { Clock3, Command, Loader2, Search, X } from 'lucide-react'
+import { Clock3, Command, Loader2, Search, Sparkles } from 'lucide-react'
 
 import siteMetadata from '@/data/siteMetadata'
 import { cn } from 'app/lib/utils'
@@ -48,6 +48,8 @@ type DocHit = {
     lvl3?: string | null
   }
 }
+
+type SearchMode = 'search' | 'ask-ai'
 
 const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
   const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
@@ -180,46 +182,64 @@ const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
   )
 }
 
-const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: SearchModalProps) => (
-  <Transition appear show={isOpen} as={Fragment}>
-    <Dialog as="div" className="relative z-[80]" onClose={onClose}>
-      <Transition.Child
-        as={Fragment}
-        enter="ease-out duration-200"
-        enterFrom="opacity-0"
-        enterTo="opacity-100"
-        leave="ease-in duration-150"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0"
-      >
-        <div className="fixed inset-0 bg-black/55" />
-      </Transition.Child>
+const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: SearchModalProps) => {
+  const [mode, setMode] = useState<SearchMode>('search')
 
-      <div className="fixed inset-0 overflow-y-auto">
-        <div className="flex min-h-full items-start justify-center px-4 py-24">
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-200"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-150"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
-          >
-            <Dialog.Panel className="relative w-full max-w-2xl overflow-visible bg-transparent text-white">
-              <InstantSearch indexName={indexName} searchClient={searchClient}>
-                <SearchHeader onClose={onClose} />
-                <SearchResults onSelect={onSelect} />
-              </InstantSearch>
-            </Dialog.Panel>
-          </Transition.Child>
+  useEffect(() => {
+    if (isOpen) {
+      setMode('search')
+    }
+  }, [isOpen])
+
+  return (
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-[80]" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-200"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-150"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/55" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-start justify-center px-4 py-24">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-200"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-150"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="relative w-full max-w-2xl overflow-visible bg-transparent text-white">
+                <InstantSearch indexName={indexName} searchClient={searchClient}>
+                  <SearchHeader mode={mode} onModeChange={setMode} onClose={onClose} />
+                  {mode === 'search' ? <SearchResults onSelect={onSelect} /> : <AskAIContent />}
+                </InstantSearch>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
         </div>
-      </div>
-    </Dialog>
-  </Transition>
-)
+      </Dialog>
+    </Transition>
+  )
+}
 
-const SearchHeader = ({ onClose }: { onClose: () => void }) => {
+const SearchHeader = ({
+  onClose,
+  mode,
+  onModeChange,
+}: {
+  onClose: () => void
+  mode: SearchMode
+  onModeChange: (mode: SearchMode) => void
+}) => {
   const { query, refine, isSearchStalled } = useSearchBox()
   const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -241,7 +261,7 @@ const SearchHeader = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="px-2 py-2">
-      <div className="flex h-14 items-center rounded-2xl bg-[#131419]/95 px-5 text-white shadow-[0_18px_40px_rgba(0,0,0,0.4)] ring-1 ring-black/40">
+      <div className="flex h-14 items-center gap-4 rounded-2xl bg-[#131419]/95 px-5 text-white shadow-[0_18px_40px_rgba(0,0,0,0.4)] ring-1 ring-black/40">
         <Search className="h-5 w-5 flex-shrink-0 text-white/70" />
         <input
           ref={inputRef}
@@ -249,18 +269,14 @@ const SearchHeader = ({ onClose }: { onClose: () => void }) => {
           onChange={(event) => refine(event.currentTarget.value)}
           onKeyDown={handleKeyDown}
           placeholder="Search anything..."
-          className="ml-4 flex-1 border-none bg-transparent text-base text-white outline-none placeholder:text-white/50 focus:outline-none focus:ring-0"
+          className="flex-1 border-none bg-transparent text-base text-white outline-none placeholder:text-white/50 focus:outline-none focus:ring-0"
         />
-        {isSearchStalled ? <Loader2 className="mr-3 h-4 w-4 animate-spin text-white/60" /> : null}
-        <div className="bg-white/12 mx-3 h-6 w-px" />
-        <button
-          type="button"
-          onClick={() => (query ? refine('') : onClose())}
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-white/70 transition hover:text-white"
-          aria-label={query ? 'Clear search' : 'Close search'}
-        >
-          <X className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-3">
+          {mode === 'search' && isSearchStalled ? (
+            <Loader2 className="h-4 w-4 animate-spin text-white/60" />
+          ) : null}
+          <SearchModeToggle mode={mode} onModeChange={onModeChange} />
+        </div>
       </div>
     </div>
   )
@@ -370,5 +386,57 @@ const Breadcrumbs = ({ url, hierarchy }: { url: string; hierarchy?: DocHit['hier
     return <>{url}</>
   }
 }
+
+const SearchModeToggle = ({
+  mode,
+  onModeChange,
+}: {
+  mode: SearchMode
+  onModeChange: (mode: SearchMode) => void
+}) => (
+  <div className="flex items-center rounded-xl border border-white/10 bg-white/5 p-1 text-xs font-medium text-white/70">
+    <button
+      type="button"
+      onClick={() => onModeChange('search')}
+      className={cn(
+        'flex items-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+        mode === 'search' ? 'bg-white/15 text-white shadow-inner' : 'hover:text-white'
+      )}
+    >
+      <Search className="h-3.5 w-3.5" />
+      Search
+    </button>
+    <button
+      type="button"
+      onClick={() => onModeChange('ask-ai')}
+      className={cn(
+        'flex items-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+        mode === 'ask-ai' ? 'bg-white/15 text-white shadow-inner' : 'hover:text-white'
+      )}
+    >
+      <Sparkles className="h-3.5 w-3.5" />
+      Ask AI
+    </button>
+  </div>
+)
+
+const AskAIContent = () => (
+  <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
+    <div className="mt-2 overflow-hidden rounded-2xl bg-[#131419] shadow-[0_20px_45px_rgba(0,0,0,0.35)]">
+      <div className="w-full bg-[#131419]">
+        <iframe
+          src="https://www.chatbase.co/chatbot-iframe/ZXMN63dnzm9r1LEY0He6U"
+          className="h-[420px] w-full border-0 sm:h-[520px]"
+          frameBorder="0"
+          title="SigNoz Chat Assistant"
+          allow="microphone"
+        />
+      </div>
+      <div className="border-t border-white/10 bg-black/20 px-6 py-4 text-xs text-white/60">
+        Responses are AI-generated from SigNoz docs. Double-check important details before acting.
+      </div>
+    </div>
+  </div>
+)
 
 export default SearchButton
