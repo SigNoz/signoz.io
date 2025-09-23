@@ -14,16 +14,9 @@ This document helps you get started with OpenTelemetry using annotations in a Ja
 
 For the most part automatic instrumentation is sufficient. But sometimes, we want to create spans for our custom code without having to change code much. That's where the `WithSpan` and `SpanAttribute` annotations come into picture, these allow us to create spans with minimal code.
 
-## Requirements
+### Requirements
 
 Java 8 or higher
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-
-## Send traces to SigNoz Cloud
-
-OpenTelemetry provides a handy Java JAR agent that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks.
 
 ### Installing Dependencies
 
@@ -95,11 +88,14 @@ public class SomeClass {
 }
 ```
 
-### Send traces directly to SigNoz Cloud
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-OpenTelemetry Java agent can send traces directly to SigNoz Cloud.
+## Send traces to SigNoz Cloud
 
-**Step 1:** Download OTel Java agent binary
+OpenTelemetry provides a handy Java JAR agent that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks.
+
+**Step 1:** Download the latest OpenTelemetry Java agent binary
 
 ```bash
 curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
@@ -117,6 +113,44 @@ java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
+
+</TabItem>
+
+<TabItem value="self-host" label="Self-Host">
+
+## Send traces to Self-Hosted SigNoz
+
+OpenTelemetry provides a handy Java JAR agent that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks.
+
+**Step 1:** Download the latest OpenTelemetry Java agent binary
+
+```bash
+curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+**Step 2:** Run your application with the agent and set the exporter endpoint to your SigNoz backend
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
+```
+
+- Replace `<IP of SigNoz Backend>` with the address of your SigNoz backend (e.g., `localhost` if running locally)
+- `<service_name>` is the name of your service
+
+Alternatively, you can specify environment variables as Java system properties:
+
+```bash
+java -javaagent:$PWD/opentelemetry-javaagent.jar \
+    -Dotel.exporter.otlp.endpoint=http://<IP of SigNoz Backend>:4317 \
+    -Dotel.resource.attributes=service.name=<service_name> \
+    -jar <my-app>.jar
+```
+
+<Admonition>
+  💡 Remember to allow incoming requests to port 4317 of the machine where SigNoz backend is hosted.
+</Admonition>
 
 </TabItem>
 </Tabs>
