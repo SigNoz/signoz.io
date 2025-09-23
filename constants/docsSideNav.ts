@@ -1564,6 +1564,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
+            label: 'Anthropic API',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
             label: 'Apache Web Server',
           },
@@ -1597,13 +1602,23 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/couchdb',
+            label: 'CouchDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
+            label: 'DeepSeek API',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/docker-container-metrics',
             label: 'Docker Container',
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/couchdb',
-            label: 'CouchDB',
+            route: '/docs/dashboards/dashboard-templates/google-gemini-dashboard',
+            label: 'Google Gemini',
           },
           {
             type: 'doc',
@@ -2037,25 +2052,30 @@ const docsSideNav = [
     route: '/docs/llm-observability',
     label: 'LLM Observability',
 
-    items: [
-      {
-        route: '/docs/opentelemetry-openai-monitoring',
-        label: 'OpenAI Monitoring',
-        type: 'doc',
-      },
+    items: [ 
       {
         route: '/docs/llm-community-integrations',
         label: 'LLM Community Integrations',
         type: 'doc',
       },
       {
-        route: '/docs/vercel-ai-sdk-monitoring',
-        label: 'Vercel AI SDK Monitoring',
+        route: '/docs/anthropic-monitoring',
+        label: 'Anthropic API Monitoring',
         type: 'doc',
       },
       {
-        route: '/docs/llamaindex-monitoring',
-        label: 'LlamaIndex Monitoring',
+        route: '/docs/claude-code-monitoring',
+        label: 'Claude Code Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/deepseek-monitoring',
+        label: 'DeepSeek Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/google-gemini-monitoring',
+        label: 'Google Gemini Monitoring',
         type: 'doc',
       },
       {
@@ -2064,8 +2084,18 @@ const docsSideNav = [
         type: 'doc',
       },
       {
-        route: '/docs/claude-code-monitoring',
-        label: 'Claude Code Monitoring',
+        route: '/docs/llamaindex-monitoring',
+        label: 'LlamaIndex Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/opentelemetry-openai-monitoring',
+        label: 'OpenAI Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/vercel-ai-sdk-monitoring',
+        label: 'Vercel AI SDK Monitoring',
         type: 'doc',
       },
     ],
@@ -2185,6 +2215,11 @@ const docsSideNav = [
         route: '/docs/integrations/supabase',
         label: 'Supabase',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nomad',
+        label: 'Nomad'
+      }
     ],
   },
   {

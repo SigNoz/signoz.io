@@ -2,8 +2,6 @@ import { RelatedArticleProps } from '@/layouts/PostLayout'
 import Link from 'next/link'
 import * as React from 'react'
 
-const EXPIRY = 3600000
-
 interface ArticleCardProps {
   title: string
   url: string
