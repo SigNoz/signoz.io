@@ -4,13 +4,16 @@ import { Dialog, Transition } from '@headlessui/react'
 import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import { useRouter } from 'next/navigation'
 import {
+  Fragment,
+  forwardRef,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
-  Fragment,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MutableRefObject,
 } from 'react'
 import {
   InstantSearch,
@@ -54,6 +57,15 @@ type SearchMode = 'search' | 'ask-ai'
 
 type AlgoliaSearchClient = ReturnType<typeof algoliasearch>
 
+type SearchResultsHandle = {
+  focusFirstResult: () => boolean
+  focusLastResult: () => boolean
+  focusNextResult: () => boolean
+  focusPreviousResult: () => boolean
+  clearActiveResult: () => void
+  hasHits: () => boolean
+}
+
 const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
   const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID
   const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
@@ -75,9 +87,9 @@ const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
     const clientWithOverride: AlgoliaSearchClient = {
       ...baseClient,
       search(requests) {
-        const normalizedRequests = (Array.isArray(requests) ? requests : [requests]) as ReadonlyArray<
-          { params?: { query?: string | null } } & Record<string, unknown>
-        >
+        const normalizedRequests = (
+          Array.isArray(requests) ? requests : [requests]
+        ) as ReadonlyArray<{ params?: { query?: string | null } } & Record<string, unknown>>
 
         if (normalizedRequests.every((request) => !request.params?.query)) {
           return Promise.resolve({
@@ -194,6 +206,21 @@ const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
 
 const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: SearchModalProps) => {
   const [mode, setMode] = useState<SearchMode>('search')
+  const resultsRef = useRef<SearchResultsHandle | null>(null)
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
+
+  const registerInput = useCallback((input: HTMLInputElement | null) => {
+    searchInputRef.current = input
+  }, [])
+
+  const focusSearchInput = useCallback(() => {
+    if (!searchInputRef.current) {
+      return
+    }
+
+    searchInputRef.current.focus()
+    searchInputRef.current.select()
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
@@ -229,8 +256,23 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
             >
               <Dialog.Panel className="relative w-full max-w-2xl overflow-visible bg-transparent text-white">
                 <InstantSearch indexName={indexName} searchClient={searchClient}>
-                  <SearchHeader mode={mode} onModeChange={setMode} onClose={onClose} />
-                  {mode === 'search' ? <SearchResults onSelect={onSelect} /> : <AskAIContent />}
+                  <SearchHeader
+                    mode={mode}
+                    onModeChange={setMode}
+                    onClose={onClose}
+                    registerInput={registerInput}
+                    resultsRef={resultsRef}
+                  />
+                  {mode === 'search' ? (
+                    <SearchResults
+                      ref={resultsRef}
+                      onSelect={onSelect}
+                      onClose={onClose}
+                      onFocusInput={focusSearchInput}
+                    />
+                  ) : (
+                    <AskAIContent />
+                  )}
                 </InstantSearch>
               </Dialog.Panel>
             </Transition.Child>
@@ -245,10 +287,14 @@ const SearchHeader = ({
   onClose,
   mode,
   onModeChange,
+  registerInput,
+  resultsRef,
 }: {
   onClose: () => void
   mode: SearchMode
   onModeChange: (mode: SearchMode) => void
+  registerInput: (input: HTMLInputElement | null) => void
+  resultsRef: MutableRefObject<SearchResultsHandle | null>
 }) => {
   const { query, refine, isSearchStalled } = useSearchBox()
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -258,14 +304,35 @@ const SearchHeader = ({
     inputRef.current?.select()
   }, [])
 
+  useEffect(() => {
+    registerInput(inputRef.current)
+    return () => registerInput(null)
+  }, [registerInput])
+
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape') {
       if (query) {
         event.stopPropagation()
         refine('')
+        resultsRef.current?.clearActiveResult()
       } else {
         onClose()
       }
+      return
+    }
+
+    if (event.key === 'ArrowDown') {
+      if (resultsRef.current?.focusFirstResult()) {
+        event.preventDefault()
+      }
+      return
+    }
+
+    if (event.key === 'ArrowUp') {
+      if (resultsRef.current?.focusLastResult()) {
+        event.preventDefault()
+      }
+      return
     }
   }
 
@@ -278,7 +345,8 @@ const SearchHeader = ({
           value={query}
           onChange={(event) => refine(event.currentTarget.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Search anything..."
+          onFocus={() => resultsRef.current?.clearActiveResult()}
+          placeholder="Search SigNoz's Docs..."
           className="flex-1 border-none bg-transparent text-base text-white outline-none placeholder:text-white/50 focus:outline-none focus:ring-0"
         />
         <div className="flex items-center gap-3">
@@ -292,88 +360,231 @@ const SearchHeader = ({
   )
 }
 
-const SearchResults = ({ onSelect }: { onSelect: (url: string) => void }) => {
-  const { hits } = useHits<DocHit>()
-  const { status } = useInstantSearch()
-  const { query } = useSearchBox()
-
-  const renderEmptyState = status === 'loading' || status === 'stalled'
-
-  return (
-    <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
-      {renderEmptyState && (
-        <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-signoz_slate-500 px-6 py-10 text-center text-sm text-white/70">
-          <Loader2 className="h-6 w-6 animate-spin text-primary-300" />
-          <p>Searching the SigNoz docs…</p>
-        </div>
-      )}
-
-      {!renderEmptyState && !query && hits.length === 0 && null}
-
-      {!renderEmptyState && query && hits.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-signoz_slate-500 px-6 py-10 text-center text-sm text-white/70">
-          <Clock3 className="h-6 w-6 text-white/50" />
-          <p>No results found.</p>
-        </div>
-      )}
-
-      {!renderEmptyState && hits.length > 0 && (
-        <div className="mt-2 overflow-hidden rounded-2xl bg-signoz_slate-500 shadow-[0_20px_45px] shadow-black/40">
-          <ul className="divide-white/6 my-0 divide-y p-0 text-sm">
-            {hits.map((hit) => {
-              const titleAttribute = hit.title
-                ? 'title'
-                : hit.hierarchy?.lvl1
-                  ? 'hierarchy.lvl1'
-                  : hit.hierarchy?.lvl0
-                    ? 'hierarchy.lvl0'
-                    : undefined
-
-              const fallbackTitle =
-                hit.title ||
-                hit.hierarchy?.lvl1 ||
-                hit.hierarchy?.lvl0 ||
-                hit.hierarchy?.lvl2 ||
-                hit.hierarchy?.lvl3 ||
-                hit.content ||
-                hit.url ||
-                'Untitled result'
-
-              return (
-                <li key={hit.objectID} className="border-b border-gray-800/70">
-                  <button
-                    type="button"
-                    onClick={() => hit.url && onSelect(hit.url)}
-                    className="w-full px-8 py-6 text-left transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-                  >
-                    <p className="text-[15px] font-semibold leading-6 text-white">
-                      {titleAttribute ? (
-                        <Highlight
-                          hit={hit}
-                          attribute={titleAttribute as any}
-                          classNames={{
-                            highlighted: 'bg-white/15 text-white px-1 py-[2px] rounded-sm',
-                          }}
-                        />
-                      ) : (
-                        fallbackTitle
-                      )}
-                    </p>
-                    {hit.url && (
-                      <p className="mb-0 mt-2 text-[13px] text-white/55">
-                        <Breadcrumbs url={hit.url} hierarchy={hit.hierarchy} />
-                      </p>
-                    )}
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
+type SearchResultsProps = {
+  onSelect: (url: string) => void
+  onClose: () => void
+  onFocusInput: () => void
 }
+
+const SearchResults = forwardRef<SearchResultsHandle, SearchResultsProps>(
+  ({ onSelect, onClose, onFocusInput }, ref) => {
+    const { hits } = useHits<DocHit>()
+    const { status } = useInstantSearch()
+    const { query } = useSearchBox()
+
+    const renderEmptyState = status === 'loading' || status === 'stalled'
+
+    const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
+    const [activeIndex, setActiveIndex] = useState<number | null>(null)
+
+    useEffect(() => {
+      itemRefs.current = itemRefs.current.slice(0, hits.length)
+    }, [hits.length])
+
+    useEffect(() => {
+      setActiveIndex(null)
+    }, [query])
+
+    useEffect(() => {
+      if (activeIndex == null) {
+        return
+      }
+
+      const target = itemRefs.current[activeIndex]
+      if (target && document.activeElement !== target) {
+        target.focus()
+      }
+    }, [activeIndex])
+
+    const focusFirstResult = useCallback(() => {
+      if (hits.length === 0) {
+        return false
+      }
+
+      setActiveIndex(0)
+      return true
+    }, [hits.length])
+
+    const focusLastResult = useCallback(() => {
+      if (hits.length === 0) {
+        return false
+      }
+
+      const lastIndex = hits.length - 1
+      setActiveIndex(lastIndex)
+      return true
+    }, [hits.length])
+
+    const focusNextResult = useCallback(() => {
+      if (hits.length === 0) {
+        return false
+      }
+
+      const nextIndex = activeIndex == null ? 0 : Math.min(activeIndex + 1, hits.length - 1)
+
+      if (nextIndex === activeIndex) {
+        return false
+      }
+
+      setActiveIndex(nextIndex)
+      return true
+    }, [activeIndex, hits.length])
+
+    const focusPreviousResult = useCallback(() => {
+      if (hits.length === 0) {
+        onFocusInput()
+        return false
+      }
+
+      if (activeIndex == null || activeIndex <= 0) {
+        onFocusInput()
+        setActiveIndex(null)
+        return false
+      }
+
+      const previousIndex = activeIndex - 1
+      setActiveIndex(previousIndex)
+      return true
+    }, [activeIndex, hits.length, onFocusInput])
+
+    const clearActiveResult = useCallback(() => {
+      setActiveIndex(null)
+    }, [])
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        focusFirstResult,
+        focusLastResult,
+        focusNextResult,
+        focusPreviousResult,
+        clearActiveResult,
+        hasHits: () => hits.length > 0,
+      }),
+      [
+        clearActiveResult,
+        focusFirstResult,
+        focusLastResult,
+        focusNextResult,
+        focusPreviousResult,
+        hits.length,
+      ]
+    )
+
+    return (
+      <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
+        {renderEmptyState && (
+          <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-signoz_slate-500 px-6 py-10 text-center text-sm text-white/70">
+            <Loader2 className="h-6 w-6 animate-spin text-primary-300" />
+            <p>Searching the SigNoz docs…</p>
+          </div>
+        )}
+
+        {!renderEmptyState && !query && hits.length === 0 && null}
+
+        {!renderEmptyState && query && hits.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-signoz_slate-500 px-6 py-10 text-center text-sm text-white/70">
+            <Clock3 className="h-6 w-6 text-white/50" />
+            <p>No results found.</p>
+          </div>
+        )}
+
+        {!renderEmptyState && hits.length > 0 && (
+          <div className="mt-2 overflow-hidden rounded-2xl bg-signoz_slate-500 shadow-[0_20px_45px] shadow-black/40">
+            <ul className="divide-white/6 my-0 divide-y p-0 text-sm" role="listbox">
+              {hits.map((hit, index) => {
+                const titleAttribute = hit.title
+                  ? 'title'
+                  : hit.hierarchy?.lvl1
+                    ? 'hierarchy.lvl1'
+                    : hit.hierarchy?.lvl0
+                      ? 'hierarchy.lvl0'
+                      : undefined
+
+                const fallbackTitle =
+                  hit.title ||
+                  hit.hierarchy?.lvl1 ||
+                  hit.hierarchy?.lvl0 ||
+                  hit.hierarchy?.lvl2 ||
+                  hit.hierarchy?.lvl3 ||
+                  hit.content ||
+                  hit.url ||
+                  'Untitled result'
+
+                const isActive = activeIndex === index
+
+                return (
+                  <li
+                    key={hit.objectID}
+                    className="border-b border-gray-800/70"
+                    role="presentation"
+                  >
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isActive}
+                      ref={(node) => {
+                        itemRefs.current[index] = node
+                      }}
+                      onFocus={() => {
+                        if (activeIndex !== index) {
+                          setActiveIndex(index)
+                        }
+                      }}
+                      onClick={() => hit.url && onSelect(hit.url)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'ArrowDown') {
+                          event.preventDefault()
+                          focusNextResult()
+                        } else if (event.key === 'ArrowUp') {
+                          event.preventDefault()
+                          const moved = focusPreviousResult()
+                          if (!moved) {
+                            clearActiveResult()
+                          }
+                        } else if (event.key === 'Escape') {
+                          event.preventDefault()
+                          clearActiveResult()
+                          onFocusInput()
+                          onClose()
+                        }
+                      }}
+                      className={cn(
+                        'w-full px-8 py-6 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30',
+                        isActive ? 'bg-white/10' : 'hover:bg-white/10'
+                      )}
+                    >
+                      <p className="text-[15px] font-semibold leading-6 text-white">
+                        {titleAttribute ? (
+                          <Highlight
+                            hit={hit}
+                            attribute={titleAttribute as any}
+                            classNames={{
+                              highlighted: 'bg-white/15 text-white px-1 py-[2px] rounded-sm',
+                            }}
+                          />
+                        ) : (
+                          fallbackTitle
+                        )}
+                      </p>
+                      {hit.url && (
+                        <p className="mb-0 mt-2 text-[13px] text-white/55">
+                          <Breadcrumbs url={hit.url} hierarchy={hit.hierarchy} />
+                        </p>
+                      )}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        )}
+      </div>
+    )
+  }
+)
+
+SearchResults.displayName = 'SearchResults'
 
 const Breadcrumbs = ({ url, hierarchy }: { url: string; hierarchy?: DocHit['hierarchy'] }) => {
   const hierarchySegments = [hierarchy?.lvl0, hierarchy?.lvl1, hierarchy?.lvl2, hierarchy?.lvl3]
