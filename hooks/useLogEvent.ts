@@ -10,6 +10,7 @@ const UTM_PARAM_NAMES = [
   'utm_campaign',
   'utm_term',
   'utm_content',
+  'gclid',
 ]
 
 const getInitialReferrer = (): string | undefined => {
