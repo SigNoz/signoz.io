@@ -228,6 +228,17 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
     }
   }, [isOpen])
 
+  useEffect(() => {
+    if (mode === 'ask-ai') {
+      resultsRef.current?.clearActiveResult()
+      return
+    }
+
+    if (mode === 'search') {
+      focusSearchInput()
+    }
+  }, [mode, focusSearchInput])
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[80]" onClose={onClose}>
@@ -300,14 +311,23 @@ const SearchHeader = ({
   const inputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
+    if (mode !== 'search') {
+      return
+    }
+
     inputRef.current?.focus()
     inputRef.current?.select()
-  }, [])
+  }, [mode])
 
   useEffect(() => {
+    if (mode !== 'search') {
+      registerInput(null)
+      return
+    }
+
     registerInput(inputRef.current)
     return () => registerInput(null)
-  }, [registerInput])
+  }, [mode, registerInput])
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape') {
@@ -336,25 +356,42 @@ const SearchHeader = ({
     }
   }
 
+  const isSearchMode = mode === 'search'
+
   return (
     <div className="px-2 py-2">
-      <div className="flex h-14 items-center gap-4 rounded-2xl bg-signoz_slate-500/95 px-5 text-white shadow-[0_18px_40px] shadow-black/40 ring-1 ring-black/40">
-        <Search className="h-5 w-5 flex-shrink-0 text-white/70" />
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(event) => refine(event.currentTarget.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => resultsRef.current?.clearActiveResult()}
-          placeholder="Search SigNoz's Docs..."
-          className="flex-1 border-none bg-transparent text-base text-white outline-none placeholder:text-white/50 focus:outline-none focus:ring-0"
-        />
-        <div className="flex items-center gap-3">
-          {mode === 'search' && isSearchStalled ? (
-            <Loader2 className="h-4 w-4 animate-spin text-white/60" />
-          ) : null}
-          <SearchModeToggle mode={mode} onModeChange={onModeChange} />
-        </div>
+      <div
+        className={cn(
+          'flex h-14 items-center gap-4 rounded-2xl bg-signoz_slate-500/95 px-5 text-white shadow-[0_18px_40px] shadow-black/40 ring-1 ring-black/40',
+          isSearchMode ? undefined : 'justify-between'
+        )}
+      >
+        {isSearchMode ? (
+          <>
+            <Search className="h-5 w-5 flex-shrink-0 text-white/70" />
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(event) => refine(event.currentTarget.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => resultsRef.current?.clearActiveResult()}
+              placeholder="Search SigNoz's Docs..."
+              className="flex-1 border-none bg-transparent text-base text-white outline-none placeholder:text-white/50 focus:outline-none focus:ring-0"
+            />
+            <div className="flex items-center gap-3">
+              {isSearchStalled ? <Loader2 className="h-4 w-4 animate-spin text-white/60" /> : null}
+              <SearchModeToggle mode={mode} onModeChange={onModeChange} />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-1 items-center gap-3">
+              <Sparkles className="h-5 w-5 text-white/70" />
+              <span className="text-sm font-medium text-white">Ask your questions below</span>
+            </div>
+            <SearchModeToggle mode={mode} onModeChange={onModeChange} />
+          </>
+        )}
       </div>
     </div>
   )
