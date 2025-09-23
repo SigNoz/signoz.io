@@ -48,7 +48,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     >
       <div className="relative mx-4 h-[80vh] w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
         {/* Chat iframe content */}
-        <div className="flex h-full w-full flex-col bg-[#131419]">
+        <div className="flex h-full w-full flex-col bg-signoz_slate-500">
           <div className="flex-1">
             <iframe
               src="https://www.chatbase.co/chatbot-iframe/ZXMN63dnzm9r1LEY0He6U"
@@ -60,7 +60,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
             />
           </div>
           {/* Disclaimer */}
-          <div className="border-t border-white/10 bg-[#131419] px-4 py-3">
+          <div className="border-t border-white/10 bg-signoz_slate-500 px-4 py-3">
             <p className="m-0 p-0 text-xs text-white/60">
               This is a custom LLM for SigNoz with full access to our docs. Keep in mind that
               responses are AI-generated and might not be 100% accurate, so please verify before you

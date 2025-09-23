@@ -167,9 +167,9 @@ const SearchButton = ({ disableShortcut = false }: SearchButtonProps) => {
         type="button"
         onClick={open}
         className={cn(
-          'group flex items-center gap-1.5 rounded-full bg-[rgb(23,25,34)] px-3 py-1 text-xs text-slate-300 transition',
+          'group flex items-center gap-1.5 rounded-full bg-signoz_slate-500 px-3 py-1 text-xs text-slate-300 transition',
           'hover:bg-slate-700/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
-          'dark:bg-[rgb(23,25,34)] dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
+          'dark:bg-signoz_slate-500 dark:hover:bg-slate-700/80 dark:focus-visible:ring-slate-600'
         )}
       >
         <Search className="h-3.5 w-3.5 text-slate-400 transition group-hover:text-white" />
@@ -271,7 +271,7 @@ const SearchHeader = ({
 
   return (
     <div className="px-2 py-2">
-      <div className="flex h-14 items-center gap-4 rounded-2xl bg-[#131419]/95 px-5 text-white shadow-[0_18px_40px_rgba(0,0,0,0.4)] ring-1 ring-black/40">
+      <div className="flex h-14 items-center gap-4 rounded-2xl bg-signoz_slate-500/95 px-5 text-white shadow-[0_18px_40px] shadow-black/40 ring-1 ring-black/40">
         <Search className="h-5 w-5 flex-shrink-0 text-white/70" />
         <input
           ref={inputRef}
@@ -302,7 +302,7 @@ const SearchResults = ({ onSelect }: { onSelect: (url: string) => void }) => {
   return (
     <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
       {renderEmptyState && (
-        <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-[#131419] px-6 py-10 text-center text-sm text-white/70">
+        <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-signoz_slate-500 px-6 py-10 text-center text-sm text-white/70">
           <Loader2 className="h-6 w-6 animate-spin text-primary-300" />
           <p>Searching the SigNoz docs…</p>
         </div>
@@ -311,14 +311,14 @@ const SearchResults = ({ onSelect }: { onSelect: (url: string) => void }) => {
       {!renderEmptyState && !query && hits.length === 0 && null}
 
       {!renderEmptyState && query && hits.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-[#131419] px-6 py-10 text-center text-sm text-white/70">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-white/10 bg-signoz_slate-500 px-6 py-10 text-center text-sm text-white/70">
           <Clock3 className="h-6 w-6 text-white/50" />
           <p>No results found.</p>
         </div>
       )}
 
       {!renderEmptyState && hits.length > 0 && (
-        <div className="mt-2 overflow-hidden rounded-2xl bg-[#131419] shadow-[0_20px_45px_rgba(0,0,0,0.35)]">
+        <div className="mt-2 overflow-hidden rounded-2xl bg-signoz_slate-500 shadow-[0_20px_45px] shadow-black/40">
           <ul className="divide-white/6 my-0 divide-y p-0 text-sm">
             {hits.map((hit) => {
               const titleAttribute = hit.title
@@ -432,8 +432,8 @@ const SearchModeToggle = ({
 
 const AskAIContent = () => (
   <div className="max-h-[65vh] overflow-y-auto px-2 pb-2">
-    <div className="mt-2 overflow-hidden rounded-2xl bg-[#131419] shadow-[0_20px_45px_rgba(0,0,0,0.35)]">
-      <div className="w-full bg-[#131419]">
+    <div className="mt-2 overflow-hidden rounded-2xl bg-signoz_slate-500 shadow-[0_20px_45px] shadow-black/40">
+      <div className="w-full bg-signoz_slate-500">
         <iframe
           src="https://www.chatbase.co/chatbot-iframe/ZXMN63dnzm9r1LEY0He6U"
           className="h-[420px] w-full border-0 sm:h-[520px]"
