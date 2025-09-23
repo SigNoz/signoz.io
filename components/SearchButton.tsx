@@ -255,7 +255,7 @@ const SearchModal = ({ isOpen, onClose, onSelect, searchClient, indexName }: Sea
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-start justify-center px-4 py-24">
+          <div className="flex min-h-full items-start justify-center px-3 py-10 sm:px-4 sm:py-24">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-200"
@@ -362,34 +362,45 @@ const SearchHeader = ({
     <div className="px-2 py-2">
       <div
         className={cn(
-          'flex h-14 items-center gap-4 rounded-2xl bg-signoz_slate-500/95 px-5 text-white shadow-[0_18px_40px] shadow-black/40 ring-1 ring-black/40',
-          isSearchMode ? undefined : 'justify-between'
+          'flex flex-col gap-3 rounded-2xl bg-signoz_slate-500/95 p-4 text-white shadow-[0_18px_40px] shadow-black/40 ring-1 ring-black/40',
+          'sm:h-14 sm:flex-row sm:items-center sm:gap-4',
+          isSearchMode ? undefined : 'sm:justify-between'
         )}
       >
         {isSearchMode ? (
           <>
-            <Search className="h-5 w-5 flex-shrink-0 text-white/70" />
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(event) => refine(event.currentTarget.value)}
-              onKeyDown={handleKeyDown}
-              onFocus={() => resultsRef.current?.clearActiveResult()}
-              placeholder="Search SigNoz's Docs..."
-              className="flex-1 border-none bg-transparent text-base text-white outline-none placeholder:text-white/50 focus:outline-none focus:ring-0"
-            />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 sm:flex-1">
+              <Search className="h-5 w-5 flex-shrink-0 text-white/70" />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(event) => refine(event.currentTarget.value)}
+                onKeyDown={handleKeyDown}
+                onFocus={() => resultsRef.current?.clearActiveResult()}
+                placeholder="Search SigNoz's Docs..."
+                className="flex-1 border-none bg-transparent text-base text-white outline-none placeholder:text-white/50 focus:outline-none focus:ring-0"
+              />
+            </div>
+            <div className="flex items-center justify-between gap-3 sm:flex-none sm:justify-end">
               {isSearchStalled ? <Loader2 className="h-4 w-4 animate-spin text-white/60" /> : null}
-              <SearchModeToggle mode={mode} onModeChange={onModeChange} />
+              <SearchModeToggle
+                mode={mode}
+                onModeChange={onModeChange}
+                className="w-full justify-between sm:w-auto"
+              />
             </div>
           </>
         ) : (
           <>
-            <div className="flex flex-1 items-center gap-3">
+            <div className="flex items-center gap-3 text-sm sm:flex-1 sm:text-base">
               <Sparkles className="h-5 w-5 text-white/70" />
-              <span className="text-sm font-medium text-white">Ask your questions below</span>
+              <span className="font-medium text-white">Ask your question below</span>
             </div>
-            <SearchModeToggle mode={mode} onModeChange={onModeChange} />
+            <SearchModeToggle
+              mode={mode}
+              onModeChange={onModeChange}
+              className="w-full justify-between sm:w-auto"
+            />
           </>
         )}
       </div>
@@ -648,16 +659,24 @@ const Breadcrumbs = ({ url, hierarchy }: { url: string; hierarchy?: DocHit['hier
 const SearchModeToggle = ({
   mode,
   onModeChange,
+  className,
 }: {
   mode: SearchMode
   onModeChange: (mode: SearchMode) => void
+  className?: string
 }) => (
-  <div className="flex items-center rounded-xl border border-white/10 bg-white/5 p-1 text-xs font-medium text-white/70">
+  <div
+    className={cn(
+      'flex items-center rounded-xl border border-white/10 bg-white/5 p-1 text-xs font-medium text-white/70',
+      'sm:w-auto',
+      className
+    )}
+  >
     <button
       type="button"
       onClick={() => onModeChange('search')}
       className={cn(
-        'flex items-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+        'flex w-full items-center justify-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:w-auto sm:justify-start',
         mode === 'search' ? 'bg-white/15 text-white shadow-inner' : 'hover:text-white'
       )}
     >
@@ -668,7 +687,7 @@ const SearchModeToggle = ({
       type="button"
       onClick={() => onModeChange('ask-ai')}
       className={cn(
-        'flex items-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40',
+        'flex w-full items-center justify-center gap-1 rounded-md px-2.5 py-1 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 sm:w-auto sm:justify-start',
         mode === 'ask-ai' ? 'bg-white/15 text-white shadow-inner' : 'hover:text-white'
       )}
     >
