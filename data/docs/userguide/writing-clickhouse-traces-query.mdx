@@ -369,7 +369,6 @@ WITH __resource_filter AS (
     SELECT fingerprint 
     FROM signoz_traces.distributed_traces_v3_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'frontend') 
-    AND (simpleJSONExtractString(labels, 'environment') = 'production')
     AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
 )
 SELECT 
