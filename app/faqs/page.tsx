@@ -64,13 +64,15 @@ export default function FAQsPage() {
               ))}
             </div>
             {selectedTags.length > 0 && (
-              <button
+              <Button
+                isButton
                 type="button"
                 onClick={() => setSelectedTags([])}
-                className="mt-4 block w-full text-center text-xs sm:text-sm font-medium text-primary-400 hover:text-primary-300"
+                variant="link"
+                className="mt-4 w-full justify-center text-xs sm:text-sm font-medium text-primary-400 hover:text-primary-300"
               >
                 Clear filters
-              </button>
+              </Button>
             )}
           </div>
         </div>
