@@ -3,6 +3,15 @@ import { logEvent, LogEventPayload, detectBotClientSide } from '../utils/logEven
 import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '../utils/userUtils'
 
 const INITIAL_REFERRER_KEY = 'app_initial_referrer'
+const UTM_PARAMS_KEY = 'app_utm_params'
+const UTM_PARAM_NAMES = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+  'gclid',
+]
 
 const getInitialReferrer = (): string | undefined => {
   if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return undefined
@@ -61,6 +70,7 @@ const getTimezone = (): string => {
 export const useLogEvent = () => {
   useEffect(() => {
     getInitialReferrer()
+    captureAndStoreUtmParams()
   }, [])
 
   return useCallback(
@@ -78,6 +88,8 @@ export const useLogEvent = () => {
       // Detect bots on client side for additional coverage
       const clientBotDetection = detectBotClientSide()
 
+      const utmParams = getStoredUtmParams()
+
       const enhancedAttributes = {
         ...attributes,
         custom_os: getOS(),
@@ -92,6 +104,7 @@ export const useLogEvent = () => {
         custom_bot_type_client: clientBotDetection.botType,
         custom_bot_detection_reason: clientBotDetection.reason,
         custom_has_javascript: true, // This runs in JS context
+        ...utmParams,
       }
 
       const eventPayload: LogEventPayload = {
@@ -107,8 +120,46 @@ export const useLogEvent = () => {
         eventPayload.groupId = resolvedGroupId
       }
 
-      logEvent(eventPayload)
+      logEvent(eventPayload, {
+        queryParams: utmParams,
+      })
     },
     []
   )
+}
+
+const captureAndStoreUtmParams = () => {
+  if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return
+
+  try {
+    const searchParams = new URLSearchParams(window.location.search)
+    const utmParams: Record<string, string> = {}
+
+    UTM_PARAM_NAMES.forEach((key) => {
+      const value = searchParams.get(key)
+      if (value) {
+        utmParams[key] = value
+      }
+    })
+
+    if (Object.keys(utmParams).length > 0) {
+      sessionStorage.setItem(UTM_PARAMS_KEY, JSON.stringify(utmParams))
+    }
+  } catch (error) {
+    // Ignore storage errors
+  }
+}
+
+const getStoredUtmParams = (): Record<string, string> => {
+  if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return {}
+
+  try {
+    const stored = sessionStorage.getItem(UTM_PARAMS_KEY)
+    if (!stored) return {}
+
+    const parsed = JSON.parse(stored) as Record<string, string>
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch (error) {
+    return {}
+  }
 }
