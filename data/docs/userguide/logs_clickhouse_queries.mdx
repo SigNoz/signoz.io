@@ -77,14 +77,17 @@ In the new schema for logs i.e `distributed_logs_v2`, we have a new column
 `ts_bucket_start` which is used to store the start timestamp of the bucket. This is used for faster filtering on timestamp attribute.
 
 How to use this column in the queries?
-If your timestamp query is `timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}` then you will have to add 
- `ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}`
+If your timestamp query is `timestamp BETWEEN $start_timestamp_nano AND $start_timestamp_nano` then you will have to add 
+ `ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp`
 
 We have added -1800, as bucketing is done in 30 minute intervals.
 
 ## Using Resource Attributes for Better Performance
 
 Resource attributes represent metadata about the source of your logs (like service name, host, environment, etc.). Using resource attributes in your queries will **significantly improve query performance** because they allow ClickHouse to filter data more efficiently using the dedicated `distributed_logs_v2_resource` table.
+
+You can read more about it [here](/blog/query-performance-improvement/)
+
 
 <Admonition type="tip">
 **Always include resource attribute filters** in your queries when possible. This is one of the most effective ways to optimize log query performance.
@@ -101,7 +104,7 @@ WITH __resource_filter AS (
     SELECT fingerprint 
     FROM signoz_logs.distributed_logs_v2_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'myservice') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 ```
 
@@ -112,13 +115,13 @@ WITH __resource_filter AS (
     SELECT fingerprint 
     FROM signoz_logs.distributed_logs_v2_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'myservice') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT count(*) 
 FROM signoz_logs.distributed_logs_v2 
 WHERE resource_fingerprint GLOBAL IN __resource_filter
-    AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
-    AND timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}
+    AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+    AND timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano
 ```
 
 ### Using Resource Attributes in SELECT and GROUP BY
@@ -171,7 +174,7 @@ For selected (indexed) attributes, use the direct column name: `attribute_<dataT
 In the above example, if `status` is an [selected field](#selected-indexed-attributes) , then it can be referenced as `attribute_string_status`
 </Admonition>
 
-We will use two variables i.e `{{.start_timestamp_nano}}` and  `{{.end_timestamp_nano}}` while writing our queries to specify the time range. 
+We will use two variables i.e `$start_timestamp_nano` and  `$end_timestamp_nano` while writing our queries to specify the time range. 
 
 ### Timeseries
 
@@ -181,29 +184,41 @@ This panel is used when you want to view your aggregated data in a timeseries.
 
 #### Count of log lines per minute
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_logs.distributed_logs_v2_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT 
     toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS ts,
     toFloat64(count()) AS value 
 FROM 
     signoz_logs.distributed_logs_v2
 WHERE 
-    (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    resource_fingerprint GLOBAL IN  __resource_filter AND
+    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY ts 
 ORDER BY ts ASC;
 ```
 
 #### Count of log lines per minute group by container name attribute
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_logs.distributed_logs_v2_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT 
     toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS ts,
     attributes_string['container_name'] as container_name,
     toFloat64(count()) AS value 
 FROM 
     signoz_logs.distributed_logs_v2
-WHERE 
-    (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} AND
+WHERE
+    resource_fingerprint GLOBAL IN  __resource_filter AND
+    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
     mapContains(attributes_string, 'container_name')
 GROUP BY container_name, ts
 ORDER BY ts ASC;
@@ -211,15 +226,21 @@ ORDER BY ts ASC;
 
 #### Count of log lines per minute where `severity_text = 'INFO'`
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_logs.distributed_logs_v2_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT 
     toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS ts, 
     toFloat64(count()) AS value 
 FROM 
     signoz_logs.distributed_logs_v2  
-WHERE 
-    (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND 
+WHERE
+    resource_fingerprint GLOBAL IN  __resource_filter AND
+    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND 
     severity_text='INFO' AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY ts 
 ORDER BY ts ASC;
 ```
@@ -229,7 +250,7 @@ ORDER BY ts ASC;
 WITH __resource_filter AS (
     SELECT fingerprint FROM signoz_logs.distributed_logs_v2_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'demo') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT 
     toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS ts, 
@@ -238,10 +259,10 @@ FROM
     signoz_logs.distributed_logs_v2  
 WHERE 
     resource_fingerprint GLOBAL IN  __resource_filter AND
-    (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND
+    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND
     severity_text='INFO' AND
     attributes_string['method'] = 'GET' AND 
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY ts 
 ORDER BY ts ASC;
 ```
@@ -252,7 +273,7 @@ ORDER BY ts ASC;
 WITH __resource_filter AS (
     SELECT fingerprint FROM signoz_logs.distributed_logs_v2_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'demo') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT 
     toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS ts, 
@@ -261,10 +282,10 @@ FROM
     signoz_logs.distributed_logs_v2  
 WHERE 
     resource_fingerprint GLOBAL IN  __resource_filter AND
-    (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND 
+    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND 
     severity_text='INFO' AND 
     attribute_string_method = 'GET' AND 
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY ts 
 ORDER BY ts ASC;
 ```
@@ -282,7 +303,7 @@ You can reduce your end result to either average, latest, sum, min, or max.
 WITH __resource_filter AS (
     SELECT fingerprint FROM signoz_logs.distributed_logs_v2_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'demo') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT 
     avg(value) as value, 
@@ -294,10 +315,10 @@ SELECT
             signoz_logs.distributed_logs_v2  
         WHERE 
             resource_fingerprint GLOBAL IN  __resource_filter AND
-            (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND
+            (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND
             severity_text='INFO' AND
             attributes_string['method'] = 'GET' AND 
-            ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+            ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
         GROUP BY ts 
         ORDER BY ts ASC
     )
@@ -316,18 +337,24 @@ The query is similar to timeseries query but instead of using time interval we u
 
 #### Count of log lines where `severity_text = 'INFO'` ,  `method = 'GET'`  group by  `service.name`. Here `method` is an attribute while `service.name` is a resource attribute.
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_logs.distributed_logs_v2_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT 
     now() as ts,
-    resource.service.name as service_name,
+    resource.service.name as `service.name`,
     toFloat64(count()) AS value 
 FROM 
     signoz_logs.distributed_logs_v2
 WHERE 
-    (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND
+    resource_fingerprint GLOBAL IN  __resource_filter AND
+    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND
     severity_text='INFO' AND
     attributes_string['method'] = 'GET' AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
-GROUP BY service_name, ts 
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+GROUP BY `service.name`, ts 
 ORDER BY ts ASC;
 ```
 
@@ -340,6 +367,11 @@ ORDER BY ts ASC;
 ### Number of log lines generated by each kubernetes cluster
 
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_logs.distributed_logs_v2_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT 
     toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS ts,
     resource.k8s.cluster.name::String as k8s_cluster_name,
@@ -347,9 +379,10 @@ SELECT
 FROM 
     signoz_logs.distributed_logs_v2  
 WHERE 
-    (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND 
+    resource_fingerprint GLOBAL IN  __resource_filter AND
+    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND 
     k8s_cluster_name IS NOT NULL AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY k8s_cluster_name, ts
 ORDER BY ts ASC;
 ```
@@ -357,18 +390,24 @@ ORDER BY ts ASC;
 ### Number of error logs generated by each service
 
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_logs.distributed_logs_v2_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT 
     toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS ts,
-    resource.service.name as service_name,
+    resource.`service.name`::String as `service.name`,
     toFloat64(count()) AS value 
 FROM 
     signoz_logs.distributed_logs_v2  
 WHERE 
-    (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND 
+    resource_fingerprint GLOBAL IN  __resource_filter AND
+    (timestamp >= $start_timestamp_nano AND timestamp <= $end_timestamp_nano) AND 
     severity_text='ERROR' AND
-    service_name IS NOT NULL AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
-GROUP BY service_name,ts 
+    `service.name` IS NOT NULL AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+GROUP BY `service.name`, ts
 ORDER BY ts ASC;
 ```
 

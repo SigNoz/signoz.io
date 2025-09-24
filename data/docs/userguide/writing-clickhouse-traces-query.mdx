@@ -231,14 +231,16 @@ In the new schema for traces i.e `distributed_signoz_index_v3`, we have a new co
 `ts_bucket_start` which is used to store the start timestamp of the bucket. This is used for faster filtering on timestamp attribute.
 
 How to use this column in the queries?
-If your timestamp query is `timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}` then you will have to add 
- `ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}`
+If your timestamp query is `timestamp BETWEEN $start_datetime AND $end_datetime` then you will have to add 
+ `ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp`
 
 We have added -1800, as bucketing is done in 30 minute intervals.
 
 ## Using Resource Attributes for distributed_signoz_index_v3
 
 Resource attributes represent metadata about the source of your traces (like service name, host, environment, etc.). Using resource attributes in your queries will **significantly improve query performance** because they allow ClickHouse to filter data more efficiently using the dedicated `distributed_traces_v3_resource` table.
+
+You can read more about it [here](/blog/query-performance-improvement/)
 
 <Admonition type="tip">
 **Always include resource attribute filters** in your queries when possible. This is one of the most effective ways to optimize trace query performance.
@@ -255,7 +257,7 @@ WITH __resource_filter AS (
     SELECT fingerprint 
     FROM signoz_traces.distributed_traces_v3_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'myservice') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 ```
 
@@ -266,12 +268,12 @@ WITH __resource_filter AS (
     SELECT fingerprint 
     FROM signoz_traces.distributed_traces_v3_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'myservice') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT count(*) 
 FROM signoz_traces.distributed_signoz_index_v3 
 WHERE resource_fingerprint GLOBAL IN __resource_filter
-    AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
     AND timestamp >= {{.start_datetime}} AND timestamp <= {{.end_datetime}}
 ```
 
@@ -343,6 +345,11 @@ This panel is used when you want to view your aggregated data in a timeseries.
 Plot a chart of 1 minute showing count of spans in 100ms interval of service frontend with duration > 50ms
 
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT fromUnixTimestamp64Milli(intDiv( toUnixTimestamp64Milli ( timestamp ), 100) * 100) AS interval, 
 toFloat64(count()) AS count 
 FROM (
@@ -351,7 +358,7 @@ FROM (
  WHERE resource_string_service$$name='frontend' 
  AND duration_nano>=50*exp10(6) 
  AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
- AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}})
+ AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp)
  GROUP BY interval ORDER BY interval ASC;
 ```
 
@@ -369,7 +376,7 @@ WITH __resource_filter AS (
     SELECT fingerprint 
     FROM signoz_traces.distributed_traces_v3_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'frontend') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT 
     avg(value) as value, 
@@ -381,7 +388,7 @@ SELECT
             signoz_traces.distributed_signoz_index_v3
         WHERE 
             timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
-            ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} AND
+            ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
             http_method = 'POST' AND 
             resource_fingerprint GLOBAL IN __resource_filter AND
         GROUP BY ts 
@@ -397,7 +404,7 @@ WITH __resource_filter AS (
     FROM signoz_traces.distributed_traces_v3_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'frontend') 
     AND (simpleJSONExtractString(labels, 'environment') = 'production')
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT 
     toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
@@ -407,7 +414,7 @@ FROM
 WHERE 
     resource_fingerprint GLOBAL IN __resource_filter AND
     timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY ts 
 ORDER BY ts ASC;
 ```
@@ -419,7 +426,7 @@ WITH __resource_filter AS (
     SELECT fingerprint 
     FROM signoz_traces.distributed_traces_v3_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'api-service') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT 
     avg(value) as value, 
@@ -432,7 +439,7 @@ SELECT
         WHERE 
             resource_fingerprint GLOBAL IN __resource_filter AND
             timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
-            ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} AND
+            ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
             http_method = 'GET'
         GROUP BY ts 
         ORDER BY ts ASC
@@ -450,12 +457,17 @@ The query is similar to timeseries query but instead of using time interval we u
 ##### GroupBy a tag/attribute in distributed tracing data
 
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT now() as ts, 
-attributes_string['example_string_attribute'] AS attribute_name, 
-toFloat64(avg(duration_nano)) AS value 
+    attributes_string['example_string_attribute'] AS attribute_name, 
+    toFloat64(avg(duration_nano)) AS value 
 FROM signoz_traces.distributed_signoz_index_v3  
 WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
-AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY (attribute_name, ts) order by (attribute_name, ts) ASC;
 ```
 
@@ -465,20 +477,20 @@ GROUP BY (attribute_name, ts) order by (attribute_name, ts) ASC;
 WITH __resource_filter AS (
     SELECT fingerprint 
     FROM signoz_traces.distributed_traces_v3_resource 
-    WHERE seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT 
     now() as ts,
-    resource.service.name::String as service_name,
+    resource.service.name::String as `service.name`,
     toFloat64(count()) AS value 
 FROM 
     signoz_traces.distributed_signoz_index_v3
 WHERE 
     resource_fingerprint GLOBAL IN __resource_filter AND
     timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} AND
-    service_name IS NOT NULL
-GROUP BY service_name, ts 
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
+    `service.name` IS NOT NULL
+GROUP BY `service.name`, ts 
 ORDER BY value DESC;
 ```
 
@@ -489,7 +501,7 @@ WITH __resource_filter AS (
     SELECT fingerprint 
     FROM signoz_traces.distributed_traces_v3_resource 
     WHERE (simpleJSONExtractString(labels, 'service.name') = 'api-gateway') 
-    AND seen_at_ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 )
 SELECT 
     now() as ts,
@@ -500,7 +512,7 @@ FROM
 WHERE 
     resource_fingerprint GLOBAL IN __resource_filter AND
     timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
     http_method IS NOT NULL AND http_method != ''
 GROUP BY http_method, ts 
 ORDER BY avg_duration_nano DESC;
@@ -511,34 +523,46 @@ ORDER BY avg_duration_nano DESC;
 ### Number of spans generated by each service
 
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT 
     toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
-    resource.service.name::String as service_name,
+    resource.service.name::String as `service.name`,
     toFloat64(count()) AS value 
 FROM 
     signoz_traces.distributed_signoz_index_v3  
 WHERE 
+    resource_fingerprint GLOBAL IN __resource_filter AND
     timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND 
-    service_name IS NOT NULL AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
-GROUP BY service_name, ts
+    `service.name` IS NOT NULL AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+GROUP BY `service.name`, ts
 ORDER BY ts ASC;
 ```
 
 ### Number of error spans generated by each service
 
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT 
     toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
-    resource.service.name::String as service_name,
+    resource.service.name::String as `service.name`,
     toFloat64(count()) AS value 
 FROM 
     signoz_traces.distributed_signoz_index_v3  
 WHERE 
+    resource_fingerprint GLOBAL IN __resource_filter AND
     timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND 
     has_error = true AND
-    service_name IS NOT NULL AND
-    ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
-GROUP BY service_name, ts 
+    `service.name` IS NOT NULL AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+GROUP BY `service.name`, ts 
 ORDER BY ts ASC;
 ```
