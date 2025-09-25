@@ -489,7 +489,7 @@ const CorrelationCarousel: React.FC = () => {
                 onClick={() => handleCardClick(index)}
                 className={`cursor-pointer transition-all duration-500 ease-in-out transform ${
                   activeIndex === index 
-                    ? 'bg-signoz_robin-500/20 border-signoz_robin-400 shadow-lg' 
+                    ? 'bg-signoz_robin-500/10 border-signoz_robin-500/10 shadow-lg' 
                     : 'bg-signoz_ink-400 border-signoz_slate-400 hover:bg-signoz_ink-300'
                 } border rounded-lg p-4 relative overflow-hidden`}
               >
