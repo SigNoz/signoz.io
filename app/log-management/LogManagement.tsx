@@ -169,11 +169,11 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             className="rounded-full"
           />
           <div>
-            <h3 className="text-signoz_vanilla-100 font-medium">{name}</h3>
-            <p className="text-signoz_vanilla-400 text-sm">{role}</p>
+            <h3 className="text-signoz_vanilla-100 font-medium mb-0">{name}</h3>
+            <p className="text-signoz_vanilla-400 text-sm mb-0">{role}</p>
           </div>
         </div>
-        <p className="text-signoz_vanilla-100">{testimonial}</p>
+        <p className="text-signoz_vanilla-100 mb-0">{testimonial}</p>
       </div>
     </Card>
   )
