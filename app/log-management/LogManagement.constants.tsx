@@ -69,7 +69,7 @@ export const CARDS = [
   {
     icon: <Atom />, 
     title: "Advanced Query Builder", 
-    description: "Auto-suggestions, JSON filtering, and one-click dashboard creation without learning complex syntax."
+    description: "Build ClickHouse queries visually with auto-complete for log attributes."
   }, 
   {
     icon: <Coins />, 
@@ -79,7 +79,7 @@ export const CARDS = [
   {
     icon: <DatabaseZap />, 
     title: "Smart Tiered Storage", 
-    description: "Configurable hot retention periods to balance query performance for long-term compliance needs."
+    description: "Configure hot retention periods to balance query performance with storage costs for compliance."
   }
 ];
 

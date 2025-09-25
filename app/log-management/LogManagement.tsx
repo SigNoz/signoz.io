@@ -60,7 +60,7 @@ const CustomerStories = () => {
             ))}
           </div>
           
-          <div className="flex justify-center items-end -mt-96 z-5 bg-gradient-to-t from-signoz_ink-500 to-transparent relative h-[50vh] py-6 max-md:py-16">
+          <div className="flex justify-center items-end -mt-[25rem] z-5 bg-gradient-to-t from-signoz_ink-500 to-transparent relative h-[50vh] py-6 max-md:py-16">
             <Button 
               variant="secondary" 
               rounded="full"
@@ -80,7 +80,7 @@ const CustomerStories = () => {
 const VisualQueryBuilder = () => {
   return (
     <>
-    <div className="bg-signoz_ink-500 px-6">
+    <div className="bg-signoz_ink-500 p-6 border-t-1 border-signoz_slate-400 border-dashed">
       <div className="max-w-4xl">
         <h2 className="text-signoz_vanilla-100 mb-6">
           Build ClickHouse queries visually with auto-complete for log attributes
@@ -99,16 +99,16 @@ const VisualQueryBuilder = () => {
         </Button>
       </div>
 
-      <Image src="/img/log-management/logs-explorer-qb.png" alt="Query Builder" width={10000} height={10000} />
+      <Image src="/img/log-management/logs-explorer-qb.png" alt="Query Builder" width={100000} height={100000} />
     </div>
-    <HeroCards cards={QUERY_BUILDER_CARDS} />
+    <HeroCards cards={QUERY_BUILDER_CARDS} variant="combined" />
     </>
   )
 }
 
 const LogProcessingSection = () => {
   return (
-    <div className="bg-signoz_ink-500 py-16">
+    <div className="bg-signoz_ink-500 py-16 mt-12 border-y-1 border-signoz_slate-400 border-dashed">
       <div className="grid grid-cols-1 lg:grid-cols-2">
         <div className="flex flex-col px-6">
           <div className='min-h-72 flex flex-col justify-between'>
@@ -131,7 +131,7 @@ const LogProcessingSection = () => {
             </Button>
           </div>
           
-          <Card className="bg-transparent [&>div]:border-1 [&>*]:p-4">
+          <Card className="bg-signoz_ink-400 [&>div]:border-1 [&>*]:p-4">
             <Tabs entityName="sources">
               <TabItem value="supported-sources" label="Supported Sources">
                 <div className="flex flex-col gap-4 min-h-52">
@@ -242,7 +242,7 @@ const LogProcessingSection = () => {
           </div>
           
           {/* Content Card */}
-          <Image src="/img/log-management/process-logs.png" alt="Log Processing" width={10000} height={10000} />
+          <Image src="/img/log-management/process-logs.png" alt="Log Processing" width={100000} height={100000} />
         </div>
       </div>
     </div>
@@ -338,7 +338,7 @@ const CorrelationCarousel = () => {
                   style={{ height: `${100 / CORRELATION_CAROUSEL_DATA.length}%` }}
                 >
                   <div className="h-full flex items-center justify-center">
-                    <Image src={item.image} alt={item.title} width={1000} height={1000} />
+                    <Image src={item.image} alt={item.title} width={10000} height={10000} />
                   </div>
                 </div>
               ))}
@@ -361,7 +361,7 @@ function LogsManagement() {
         <HeroCards cards={CARDS} />
         <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
           <LogProcessingSection />
-          <div className="px-6 !w-[80vw] !mx-auto">
+          <div className="p-6 !w-[80vw] !mx-auto">
             <h2 className="text-signoz_vanilla-100 mb-6">
               Automatic correlation between logs, metrics, and traces
             </h2>
@@ -371,7 +371,7 @@ function LogsManagement() {
           </div>
           <CorrelationCarousel />
           <VisualQueryBuilder />
-          <div className="p-0 border-signoz_slate-400 border-dashed bg-transparent">
+          <div className="p-0 bg-transparent border-t-1 border-signoz_slate-400 border-dashed">
             <div className="flex flex-col md:flex-row gap-12 items-start h-full p-6">
               <div className="flex-1 h-full flex flex-col justify-between">
                 <h2 className="font-semibold text-signoz_vanilla-100">Configure Hot and Cold Storage</h2>
@@ -444,12 +444,12 @@ function LogsManagement() {
   )
 }
 
-const HeroCards = ({ cards }) => {
+const HeroCards = ({ cards, variant = "default" }) => {
   return (
     <div className="section-container !mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-md:mt-8 md:!w-[80vw] md:border-dashed p-0">
       <div className="grid grid-cols-1 md:grid-cols-3">
         {cards.map((card, index) => (
-          <div key={index} className="p-0 border-r border-t max-md:border-l border-signoz_slate-400 border-dashed bg-transparent">
+          <div key={index} className={`p-0 border-r border-t max-md:border-l border-signoz_slate-400 border-dashed bg-transparent ${variant === "combined" ? "border-none" : ""}`}>
             <div className="p-8">
               <div className="grid grid-cols-1 gap-4">
                 {card.icon}
