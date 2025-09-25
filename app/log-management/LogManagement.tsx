@@ -494,7 +494,7 @@ const CorrelationCarousel: React.FC = () => {
                 } border rounded-lg p-4 relative overflow-hidden`}
               >
                 <div className="flex gap-2 h-fit">
-                  <div className="flex h-10 w-0.5 flex-shrink-0 items-center justify-center mr-2">
+                  <div className="flex h-11 w-0.5 flex-shrink-0 items-center justify-center mr-2">
                     <div className={`h-full w-full rounded-full ${
                       activeIndex === index ? 'bg-signoz_robin-600/60' : 'bg-signoz_slate-200/80'
                     }`}></div>
