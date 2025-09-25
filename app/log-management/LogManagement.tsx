@@ -8,9 +8,10 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from "@signozhq/badge"
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
-import AlternatingSides from '@/components/AlternatingSides/AlternatingSides'
 import PricingCalculator from 'app/pricing/pricingv1/components/PricingCalculator'
-import { CARDS, FEATURES, TESTIMONIALS } from './LogManagement.constants'
+import { CARDS, CLOUD_ICONS, CONTAINER_ICONS, CORRELATION_CAROUSEL_DATA, DIRECT_INTEGRATIONS, EXISTING_AGENTS_ICONS, POPULAR_TOOLS_ICONS, QUERY_BUILDER_CARDS, TESTIMONIALS, STORAGE_DATA } from './LogManagement.constants'
+import TabItem from '@/components/TabItem'
+import Tabs from '@/components/Tabs'
 
 const CustomerStories = () => {
   return (
@@ -76,38 +77,278 @@ const CustomerStories = () => {
   )
 }
 
-const STORAGE_DATA = {
-  headers: {
-    hot: "HOT STORAGE PERIOD",
-    cold: "PERIOD IN COLD STORAGE AFTER HOT STORAGE"
-  },
-  subHeader: "$ / GB",
-  coldPeriods: [
-    { value: "0", unit: "days" },
-    { value: "90", unit: "days" },
-    { value: "180", unit: "days" },
-    { value: "1", unit: "year" },
-    { value: "2", unit: "years" }
-  ],
-  rows: [
-    {
-      period: { value: "15", unit: "days" },
-      prices: [0.3, 0.45, 0.6, 0.9, 1.3]
-    },
-    {
-      period: { value: "30", unit: "days" },
-      prices: [0.4, 0.55, 0.7, 1.0, 1.4]
-    },
-    {
-      period: { value: "90", unit: "days" },
-      prices: [0.6, 0.75, 0.9, 1.2, 1.6]
-    },
-    {
-      period: { value: "180", unit: "days" },
-      prices: [0.8, 0.95, 1.1, 1.4, 1.8]
+const VisualQueryBuilder = () => {
+  return (
+    <>
+    <div className="bg-signoz_ink-500 px-6">
+      <div className="max-w-4xl">
+        <h2 className="text-signoz_vanilla-100 mb-6">
+          Build ClickHouse queries visually with auto-complete for log attributes
+        </h2>
+        <p className="text-signoz_vanilla-400 mb-8 leading-relaxed">
+          Run aggregations grouped by multiple dimensions, filter with regex and LIKE patterns, query nested JSON with dot notation, and work directly with the generated SQL. Create dashboards directly from query results or export to CSV for analysis.
+        </p>
+        <Button 
+          to="/docs/userguide/query-builder-v5/"
+          variant="secondary" 
+          rounded="full"
+          className="flex items-center gap-2 w-fit"
+        >
+          Read Documentation
+          <ArrowRight size={14} />
+        </Button>
+      </div>
+
+      <Image src="/img/log-management/logs-explorer-qb.jpg" alt="Query Builder" width={10000} height={10000} />
+    </div>
+    <HeroCards cards={QUERY_BUILDER_CARDS} />
+    </>
+  )
+}
+
+const LogProcessingSection = () => {
+  return (
+    <div className="bg-signoz_ink-500 py-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
+        <div className="flex flex-col px-6">
+          <div className='min-h-72 flex flex-col justify-between'>
+            <div>
+              <h2 className="text-signoz_vanilla-100 mb-6">
+                Ingest Logs from Anywhere
+              </h2>
+              <p className="text-signoz_vanilla-400 mb-8 leading-relaxed">
+                OTel-native architecture supports extensive data source integration through multiple collection patterns, eliminating vendor lock-in while providing superior correlation capabilities.
+              </p>
+            </div>
+            <Button 
+              variant="secondary" 
+              rounded="full"
+              className="flex items-center gap-2 w-fit mb-8"
+              to="/docs/logs-management/send-logs-to-signoz/"
+            >
+              Read Documentation
+              <ArrowRight size={14} />
+            </Button>
+          </div>
+          
+          <Card className="bg-transparent [&>div]:border-1 [&>*]:p-4">
+            <Tabs entityName="sources">
+              <TabItem value="supported-sources" label="Supported Sources">
+                <div className="flex flex-col gap-4 min-h-52">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="border-r-1 border-signoz_slate-400 border-dashed">
+                      <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">CLOUD</h3>
+                      <div className="flex justify-start items-center gap-4">
+                        {CLOUD_ICONS.map((icon, index) => (
+                          <div key={index} className="flex items-center">
+                            <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">CONTAINERS</h3>
+                      <div className="flex justify-start items-center gap-4">
+                        {CONTAINER_ICONS.map((icon, index) => (
+                          <div key={index} className="flex items-center">
+                            <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-b-1 border-signoz_slate-400 border-dashed" />
+
+                  <div>
+                    <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">POPULAR TOOLS</h3>
+                    <div className="flex justify-start items-center gap-4">
+                      {POPULAR_TOOLS_ICONS.map((icon, index) => (
+                        <div key={index} className="flex items-center">
+                          <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <Button variant="ghost" to="/docs/logs-management/send-logs-to-signoz/" rounded="full" size={null} className="flex justify-center items-center gap-2 w-fit hover:bg-transparent text-xs">
+                    VIEW ALL 50+ SOURCES
+                  </Button>
+                </div>
+              </TabItem>
+              <TabItem value="collection-methods" label="Collection Methods">
+                <div className="flex flex-col gap-8 min-h-52">
+                  <div className="flex items-center md:flex-row flex-col gap-8">
+                    <div>
+                      <div className="flex items-center gap-3 mb-4">
+                        <h3 className="text-sm font-medium uppercase text-signoz_vanilla-400 m-0 text-xs">OPENTELEMETRY</h3>
+                        <Badge color="vanilla" className="text-xs">Recommended</Badge>
+                      </div>
+                      <div className="flex items-center gap-8">
+                        <Image src="/img/website/opentelemetry-icon-color.svg" alt="OpenTelemetry" className="h-8" width={32} height={32} />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">EXISTING AGENTS</h3>
+                      <div className="flex justify-start items-center gap-4">
+                        {EXISTING_AGENTS_ICONS.map((icon, index) => (
+                          <div key={index} className="flex items-center">
+                            <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">DIRECT INTEGRATIONS</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {DIRECT_INTEGRATIONS.map((integration, index) => (
+                        <Badge key={index} color="vanilla" className="rounded-sm">{integration}</Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* View Integration Guides */}
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" rounded="full" size={null} className="hover:bg-transparent text-xs" to="/docs/logs-management/send-logs-to-signoz/">
+                      VIEW INTEGRATION GUIDES
+                    </Button>
+                  </div>
+                </div>
+              </TabItem>
+            </Tabs>
+          </Card>
+        </div>
+        
+        <div className="flex flex-col px-6 border-l border-signoz_slate-400 border-dashed">
+          <div className='min-h-72 flex flex-col justify-between'>
+            <div>
+              <h2 className="text-signoz_vanilla-100 mb-6">
+                Parse and transform logs before storage
+              </h2>
+              <p className="text-signoz_vanilla-400 mb-8 leading-relaxed">
+                Create processing pipelines through a visual UI to parse unstructured logs, extract attributes, flatten nested JSON, and mask sensitive data. Apply processors like Grok patterns, regex, and JSON parsers to transform logs before they're stored and indexed.
+              </p>
+            </div>
+            <Button 
+              variant="secondary" 
+              rounded="full"
+              className="flex items-center gap-2 w-fit mb-8"
+              to="/docs/logs-pipelines/concepts/"
+            >
+              Read Documentation
+              <ArrowRight size={14} />
+            </Button>
+          </div>
+          
+          {/* Content Card */}
+          <Image src="/img/log-management/process-logs.png" alt="Log Processing" width={10000} height={10000} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const CorrelationCarousel = () => {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setActiveIndex((prev) => (prev + 1) % CORRELATION_CAROUSEL_DATA.length);
+        setIsTransitioning(false);
+      }, 300);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleCardClick = (index: number) => {
+    if (index !== activeIndex && !isTransitioning) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setActiveIndex(index);
+        setIsTransitioning(false);
+      }, 300);
     }
-  ]
-};
+  };
+
+  return (
+    <div className="bg-signoz_ink-500 pb-16 px-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="flex flex-col">
+          <Button 
+            variant="secondary" 
+            rounded="full"
+            className="flex items-center gap-2 w-fit mb-12"
+            to="/opentelemetry/correlating-traces-logs-metrics-nodejs/"
+          >
+            Read Blog
+            <ArrowRight size={14} />
+          </Button>
+          
+          <div className="space-y-4">
+            {CORRELATION_CAROUSEL_DATA.map((item, index) => (
+              <div
+                key={item.id}
+                onClick={() => handleCardClick(index)}
+                className={`cursor-pointer transition-all duration-500 ease-in-out transform ${
+                  activeIndex === index 
+                    ? 'bg-signoz_robin-500/20 border-signoz_robin-400 shadow-lg' 
+                    : 'bg-signoz_ink-400 border-signoz_slate-400 hover:bg-signoz_ink-300'
+                } border rounded-lg p-4 relative overflow-hidden`}
+              >
+                 <div className="flex gap-2 h-fit">
+                  <div className="flex h-10 w-0.5 flex-shrink-0 items-center justify-center mr-2">
+                    <div className={`h-full w-full rounded-full ${activeIndex === index ? 'bg-signoz_robin-600/60' : 'bg-signoz_slate-200/80'}`}></div>
+                  </div>
+                  <div>
+                    <h3 className={`text-sm font-semibold mb-2 transition-colors duration-300 ${
+                      activeIndex === index ? 'text-signoz_robin-600' : 'text-signoz_vanilla-100'
+                    }`}>
+                      {item.title}
+                    </h3>
+                    <p className={`m-0 text-xs text-signoz_vanilla-400 transition-colors duration-300 ${
+                      activeIndex === index ? 'text-signoz_robin-200' : 'text-signoz_vanilla-100'
+                    }`}>
+                      {item.description}
+                    </p>
+                  </div>
+                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="relative">
+          <div className="relative overflow-hidden rounded-lg h-96">
+            <div 
+              className="transition-all duration-500 ease-in-out flex flex-col"
+              style={{
+                transform: `translateY(-${activeIndex * (100 / CORRELATION_CAROUSEL_DATA.length)}%)`,
+                height: `${CORRELATION_CAROUSEL_DATA.length * 100}%`
+              }}
+            >
+              {CORRELATION_CAROUSEL_DATA.map((item) => (
+                <div
+                  key={item.id}
+                  className="h-full flex-shrink-0 relative"
+                  style={{ height: `${100 / CORRELATION_CAROUSEL_DATA.length}%` }}
+                >
+                  <div className="h-full flex items-center justify-center">
+                    <Image src={item.image} alt={item.title} width={1000} height={1000} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function LogsManagement() {
   return (
@@ -117,14 +358,24 @@ function LogsManagement() {
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
         <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
         <Header />
-        <HeroCards />
+        <HeroCards cards={CARDS} />
         <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
-          <AlternatingSides items={FEATURES} />
+          <LogProcessingSection />
+          <div className="px-6 !w-[80vw] !mx-auto">
+            <h2 className="text-signoz_vanilla-100 mb-6">
+              Automatic correlation between logs, metrics, and traces
+            </h2>
+            <p className="text-signoz_vanilla-400 mb-8 leading-relaxed">
+              Use OpenTelemetry semantic conventions to automatically link logs with traces and metrics. Jump from APM traces to their related logs, from infrastructure metrics to log context, and from alerts to root cause with consistent trace ID correlation.
+            </p>
+          </div>
+          <CorrelationCarousel />
+          <VisualQueryBuilder />
           <div className="p-0 border-signoz_slate-400 border-dashed bg-transparent">
             <div className="flex flex-col md:flex-row gap-12 items-start h-full p-6">
               <div className="flex-1 h-full flex flex-col justify-between">
-                <h2 className="font-semibold text-signoz_vanilla-100">Store your Data</h2>
-                <p className="text-signoz_vanilla-400 mb-24 leading-relaxed">Configurable hot and cold storage periods let you balance query performance with storage costs for long-term log retention and compliance needs.</p>
+                <h2 className="font-semibold text-signoz_vanilla-100">Configure Hot and Cold Storage</h2>
+                <p className="text-signoz_vanilla-400 mb-24 leading-relaxed">Set retention from 15-180 days in hot storage for fast queries. Older logs move to cold storage where they remain queryable at 3x slower speeds for compliance needs.</p>
                 <div className="flex gap-12">
                   <div className="border-r border-signoz_slate-400/60 border-dashed pr-12">
                     <h3 className=" font-semibold text-signoz_vanilla-100 mb-4">50%</h3>
@@ -193,11 +444,11 @@ function LogsManagement() {
   )
 }
 
-const HeroCards = () => {
+const HeroCards = ({ cards }) => {
   return (
     <div className="section-container !mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-md:mt-8 md:!w-[80vw] md:border-dashed p-0">
       <div className="grid grid-cols-1 md:grid-cols-3">
-        {CARDS.map((card, index) => (
+        {cards.map((card, index) => (
           <div key={index} className="p-0 border-r border-t max-md:border-l border-signoz_slate-400 border-dashed bg-transparent">
             <div className="p-8">
               <div className="grid grid-cols-1 gap-4">

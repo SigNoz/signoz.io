@@ -1,26 +1,19 @@
-import TabItem from "@/components/TabItem";
-import Tabs from "@/components/Tabs";
-import Button from "@/components/ui/Button";
-import { Badge } from "@signozhq/badge";
-import Image from "next/image";
-import AutoCarousel from "./AutoCarousel";
 import { Atom, Coins, DatabaseZap } from "lucide-react";
-import { Card } from "@/components/ui/Card";
 
-const CORRELATION_IMAGES = [
-  {
-    src: "/img/log-management/Logs-to-Metrics.png",
-    alt: "Correlation Example 1"
-  },
-  {
-    src: "/img/log-management/APM-to-Logs.png",
-    alt: "Correlation Example 2"
-  },
-  {
-    src: "/img/log-management/trace_id.png",
-    alt: "Correlation Example 3"
-  }
-];
+// const CORRELATION_IMAGES = [
+//   {
+//     src: "/img/log-management/Logs-to-Metrics.png",
+//     alt: "Correlation Example 1"
+//   },
+//   {
+//     src: "/img/log-management/APM-to-Logs.png",
+//     alt: "Correlation Example 2"
+//   },
+//   {
+//     src: "/img/log-management/trace_id.png",
+//     alt: "Correlation Example 3"
+//   }
+// ];
 
 export const CLOUD_ICONS = [
   { src: "/img/icons/aws-icon.svg", alt: "AWS" },
@@ -54,124 +47,124 @@ export const DIRECT_INTEGRATIONS = [
   "Legacy support"
 ];
 
-export const FEATURES = [
-  {
-    title: "Ingest Logs from Anywhere",
-    description: "Get native infrastructure support to securely store logs from anywhere. With multiple collection methods to pick up, and bring your own tools to make data ingestion powered by OpenTelemetry standards.",
-    buttonText: "Read Documentation",
-    buttonLink: "/docs/userguide/logs/",
-    component: (
-      <Card className="p-0 w-full bg-transparent [&>div]:border-1 [&>*]:p-4">
-        <Tabs entityName="sources">
-          <TabItem value="supported-sources" label="Supported Sources">
-            <div className="flex flex-col gap-4 min-h-52">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="border-r-1 border-signoz_slate-400 border-dashed">
-                  <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">CLOUD</h3>
-                  <div className="flex justify-start items-center gap-4">
-                    {CLOUD_ICONS.map((icon, index) => (
-                      <div key={index} className="flex items-center">
-                        <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">CONTAINERS</h3>
-                  <div className="flex justify-start items-center gap-4">
-                    {CONTAINER_ICONS.map((icon, index) => (
-                      <div key={index} className="flex items-center">
-                        <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+// export const FEATURES = [
+//   {
+//     title: "Ingest Logs from Anywhere",
+//     description: "Get native infrastructure support to securely store logs from anywhere. With multiple collection methods to pick up, and bring your own tools to make data ingestion powered by OpenTelemetry standards.",
+//     buttonText: "Read Documentation",
+//     buttonLink: "/docs/userguide/logs/",
+//     component: (
+//       <Card className="p-0 w-full bg-transparent [&>div]:border-1 [&>*]:p-4">
+//         <Tabs entityName="sources">
+//           <TabItem value="supported-sources" label="Supported Sources">
+//             <div className="flex flex-col gap-4 min-h-52">
+//               <div className="grid grid-cols-2 gap-4">
+//                 <div className="border-r-1 border-signoz_slate-400 border-dashed">
+//                   <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">CLOUD</h3>
+//                   <div className="flex justify-start items-center gap-4">
+//                     {CLOUD_ICONS.map((icon, index) => (
+//                       <div key={index} className="flex items-center">
+//                         <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </div>
+//                 <div>
+//                   <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">CONTAINERS</h3>
+//                   <div className="flex justify-start items-center gap-4">
+//                     {CONTAINER_ICONS.map((icon, index) => (
+//                       <div key={index} className="flex items-center">
+//                         <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </div>
+//               </div>
 
-              <div className="border-b-1 border-signoz_slate-400 border-dashed" />
+//               <div className="border-b-1 border-signoz_slate-400 border-dashed" />
 
-              <div>
-                <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">POPULAR TOOLS</h3>
-                <div className="flex justify-start items-center gap-4">
-                  {POPULAR_TOOLS_ICONS.map((icon, index) => (
-                    <div key={index} className="flex items-center">
-                      <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <Button variant="ghost" to="/docs/logs-management/send-logs-to-signoz/" rounded="full" size={null} className="flex justify-center items-center gap-2 w-fit hover:bg-transparent text-xs">
-                VIEW ALL 50+ SOURCES
-              </Button>
-            </div>
-          </TabItem>
-          <TabItem value="collection-methods" label="Collection Methods">
-            <div className="flex flex-col gap-8 min-h-52">
-              <div className="flex items-center md:flex-row flex-col gap-8">
-                <div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <h3 className="text-sm font-medium uppercase text-signoz_vanilla-400 m-0 text-xs">OPENTELEMETRY</h3>
-                    <Badge color="vanilla" className="text-xs">Recommended</Badge>
-                  </div>
-                  <div className="flex items-center gap-8">
-                    <Image src="/img/website/opentelemetry-icon-color.svg" alt="OpenTelemetry" className="h-8" width={32} height={32} />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">EXISTING AGENTS</h3>
-                  <div className="flex justify-start items-center gap-4">
-                    {EXISTING_AGENTS_ICONS.map((icon, index) => (
-                      <div key={index} className="flex items-center">
-                        <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+//               <div>
+//                 <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">POPULAR TOOLS</h3>
+//                 <div className="flex justify-start items-center gap-4">
+//                   {POPULAR_TOOLS_ICONS.map((icon, index) => (
+//                     <div key={index} className="flex items-center">
+//                       <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
+//                     </div>
+//                   ))}
+//                 </div>
+//               </div>
+//               <Button variant="ghost" to="/docs/logs-management/send-logs-to-signoz/" rounded="full" size={null} className="flex justify-center items-center gap-2 w-fit hover:bg-transparent text-xs">
+//                 VIEW ALL 50+ SOURCES
+//               </Button>
+//             </div>
+//           </TabItem>
+//           <TabItem value="collection-methods" label="Collection Methods">
+//             <div className="flex flex-col gap-8 min-h-52">
+//               <div className="flex items-center md:flex-row flex-col gap-8">
+//                 <div>
+//                   <div className="flex items-center gap-3 mb-4">
+//                     <h3 className="text-sm font-medium uppercase text-signoz_vanilla-400 m-0 text-xs">OPENTELEMETRY</h3>
+//                     <Badge color="vanilla" className="text-xs">Recommended</Badge>
+//                   </div>
+//                   <div className="flex items-center gap-8">
+//                     <Image src="/img/website/opentelemetry-icon-color.svg" alt="OpenTelemetry" className="h-8" width={32} height={32} />
+//                   </div>
+//                 </div>
+//                 <div>
+//                   <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">EXISTING AGENTS</h3>
+//                   <div className="flex justify-start items-center gap-4">
+//                     {EXISTING_AGENTS_ICONS.map((icon, index) => (
+//                       <div key={index} className="flex items-center">
+//                         <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
+//                       </div>
+//                     ))}
+//                   </div>
+//                 </div>
+//               </div>
 
-              <div>
-                <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">DIRECT INTEGRATIONS</h3>
-                <div className="flex flex-wrap gap-2">
-                  {DIRECT_INTEGRATIONS.map((integration, index) => (
-                    <Badge key={index} color="vanilla" className="rounded-sm">{integration}</Badge>
-                  ))}
-                </div>
-              </div>
+//               <div>
+//                 <h3 className="mb-4 text-sm font-medium uppercase text-signoz_vanilla-400 text-xs">DIRECT INTEGRATIONS</h3>
+//                 <div className="flex flex-wrap gap-2">
+//                   {DIRECT_INTEGRATIONS.map((integration, index) => (
+//                     <Badge key={index} color="vanilla" className="rounded-sm">{integration}</Badge>
+//                   ))}
+//                 </div>
+//               </div>
 
-              {/* View Integration Guides */}
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" rounded="full" size={null} className="hover:bg-transparent text-xs" to="/docs/logs-management/send-logs-to-signoz/">
-                  VIEW INTEGRATION GUIDES
-                </Button>
-              </div>
-            </div>
-          </TabItem>
-        </Tabs>
-      </Card>
-    )
-  },
-  {
-    title: "Process on the Fly",
-    description: "A powerful log pipeline helps you analyze everything you ingest, including service maps, application logs, and exceptions. Monitoring is effortless using lifecycle alerts including storage usage limits. Manual data manipulation is eliminated.",
-    buttonText: "Read Documentation",
-    buttonLink: "/docs/logs-pipelines/concepts/",
-    component: <Image src="/img/log-management/process-logs.png" alt="Process on the Fly" width={10000} height={10000} />
-  },
-  {
-    title: "Correlate your Signals",
-    description: "Monitor logs and traces automatically and easily debug from APM traces to related logs. Metrics correlation is log-based, and easy to add with OpenTelemetry standards.",
-    buttonText: "Read Blog",
-    buttonLink: "/opentelemetry/correlating-traces-logs-metrics-nodejs/",
-    component: <AutoCarousel images={CORRELATION_IMAGES} />
-  },
-  {
-    title: "Analyze the Logs",
-    description: "Optimized columnar storage design provides the high performance capabilities to scale storage and query millions of logs. Use dynamic alerts, advanced dashboards, and more integrated metrics to get advanced correlation filtering.",
-    buttonText: "Read Documentation",
-    buttonLink: "/docs/userguide/logs_query_builder/",
-    component: <Image src="/img/log-management/analyse-the-logs.png" alt="Analyze the Logs" width={10000} height={10000} />
-  }
-]
+//               {/* View Integration Guides */}
+//               <div className="flex items-center gap-2">
+//                 <Button variant="ghost" rounded="full" size={null} className="hover:bg-transparent text-xs" to="/docs/logs-management/send-logs-to-signoz/">
+//                   VIEW INTEGRATION GUIDES
+//                 </Button>
+//               </div>
+//             </div>
+//           </TabItem>
+//         </Tabs>
+//       </Card>
+//     )
+//   },
+//   {
+//     title: "Process on the Fly",
+//     description: "A powerful log pipeline helps you analyze everything you ingest, including service maps, application logs, and exceptions. Monitoring is effortless using lifecycle alerts including storage usage limits. Manual data manipulation is eliminated.",
+//     buttonText: "Read Documentation",
+//     buttonLink: "/docs/logs-pipelines/concepts/",
+//     component: <Image src="/img/log-management/process-logs.png" alt="Process on the Fly" width={10000} height={10000} />
+//   },
+//   {
+//     title: "Correlate your Signals",
+//     description: "Monitor logs and traces automatically and easily debug from APM traces to related logs. Metrics correlation is log-based, and easy to add with OpenTelemetry standards.",
+//     buttonText: "Read Blog",
+//     buttonLink: "/opentelemetry/correlating-traces-logs-metrics-nodejs/",
+//     component: <AutoCarousel images={CORRELATION_IMAGES} />
+//   },
+//   {
+//     title: "Analyze the Logs",
+//     description: "Optimized columnar storage design provides the high performance capabilities to scale storage and query millions of logs. Use dynamic alerts, advanced dashboards, and more integrated metrics to get advanced correlation filtering.",
+//     buttonText: "Read Documentation",
+//     buttonLink: "/docs/userguide/logs_query_builder/",
+//     component: <Image src="/img/log-management/analyse-the-logs.png" alt="Analyze the Logs" width={10000} height={10000} />
+//   }
+// ]
 
 export const TESTIMONIALS = [
   {
@@ -223,3 +216,85 @@ export const CARDS = [
     description: "Configurable hot retention periods to balance query performance for long-term compliance needs."
   }
 ];
+
+
+export const QUERY_BUILDER_CARDS = [
+  {
+    icon: (
+      <Atom />
+    ),
+    title: "Visual Query Builder",
+    description: "Build complex filters with AND/OR logic using auto-complete for attributes and values. Supports operators like CONTAINS, REGEX, IN, and LIKE with real-time suggestions from your actual log data."
+  },
+  {
+    icon: (
+      <Atom />
+    ),
+    title: "Aggregations & Grouping",
+    description: "Run COUNT, SUM, AVG, P50/P95/P99 across billions of logs. Group by multiple dimensions simultaneously and filter results with HAVING clauses for advanced analysis."
+  },
+  {
+    icon: (
+      <Atom />
+    ),
+    title: "JSON & Dashboard Creation",
+    description: "Query nested JSON fields using dot notation like `attributes.user.id`. Create dashboard panels directly from query results or export to CSV for external analysis."
+  }
+];
+
+export const CORRELATION_CAROUSEL_DATA = [
+  {
+    id: 0,
+    title: "Logs → Metrics",
+    description: "Jump from logs to relevant service metrics.",
+    image: "/img/log-management/Logs-to-Metrics.png",
+    isActive: true
+  },
+  {
+    id: 1,
+    title: "Logs → Traces",
+    description: "Find traces using trace IDs in logs.",
+    image: "/img/log-management/Logs-to-Trace.png",
+    isActive: false
+  },
+  {
+    id: 2,
+    title: "APM → Logs",
+    description: "Go from APM metrics to related logs.",
+    image: "/img/log-management/APM-to-Logs.png",
+    isActive: false
+  }
+];
+
+export const STORAGE_DATA = {
+  headers: {
+    hot: "HOT STORAGE PERIOD",
+    cold: "PERIOD IN COLD STORAGE AFTER HOT STORAGE"
+  },
+  subHeader: "$ / GB",
+  coldPeriods: [
+    { value: "0", unit: "days" },
+    { value: "90", unit: "days" },
+    { value: "180", unit: "days" },
+    { value: "1", unit: "year" },
+    { value: "2", unit: "years" }
+  ],
+  rows: [
+    {
+      period: { value: "15", unit: "days" },
+      prices: [0.3, 0.45, 0.6, 0.9, 1.3]
+    },
+    {
+      period: { value: "30", unit: "days" },
+      prices: [0.4, 0.55, 0.7, 1.0, 1.4]
+    },
+    {
+      period: { value: "90", unit: "days" },
+      prices: [0.6, 0.75, 0.9, 1.2, 1.6]
+    },
+    {
+      period: { value: "180", unit: "days" },
+      prices: [0.8, 0.95, 1.1, 1.4, 1.8]
+    }
+  ]
+};
