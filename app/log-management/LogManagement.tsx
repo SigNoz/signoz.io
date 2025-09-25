@@ -99,7 +99,7 @@ const VisualQueryBuilder = () => {
         </Button>
       </div>
 
-      <Image src="/img/log-management/logs-explorer-qb.jpg" alt="Query Builder" width={10000} height={10000} />
+      <Image src="/img/log-management/logs-explorer-qb.png" alt="Query Builder" width={10000} height={10000} />
     </div>
     <HeroCards cards={QUERY_BUILDER_CARDS} />
     </>
