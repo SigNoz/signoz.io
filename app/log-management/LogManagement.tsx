@@ -826,7 +826,7 @@ const CustomerStories: React.FC = () => {
             ))}
           </GridLayout>
           
-          <div className="flex justify-center items-end -mt-[400px] z-5 bg-gradient-to-t from-signoz_ink-500 to-transparent relative h-[50vh] py-6 max-md:py-16">
+          <div className="flex justify-center items-end -mt-[25rem] z-5 bg-gradient-to-t from-signoz_ink-500 to-transparent relative h-[50vh] py-6 max-md:py-16">
             <Button 
               variant="secondary" 
               rounded="full"
