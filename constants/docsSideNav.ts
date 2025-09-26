@@ -222,6 +222,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/signoz-mcp-server',
+            label: 'SigNoz MCP Server',
+          },
+          {
+            type: 'doc',
             route: '/docs/install/uninstall',
             label: 'Uninstall',
           },
