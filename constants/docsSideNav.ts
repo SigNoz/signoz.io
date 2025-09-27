@@ -1928,6 +1928,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/alerts-management/routing-policy',
+        label: 'Routing Policies',
+      },
+      {
+        type: 'doc',
         route: '/docs/alerts-management/alerts-history',
         label: 'Alerts History',
       },
