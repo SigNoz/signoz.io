@@ -1,0 +1,114 @@
+---
+title: LLM Observability in the Wild - Why OpenTelemetry should be the Standard
+slug: llm-observability-opentelemetry
+date: 2025-09-25
+tags: [OpenTelemetry]
+authors: [pranay]
+description: LLM Observability breaks in wild today as new libraries like OpenInference don't adhere to OpenTelemetry standards leading to silos and suboptimal performance for users who want to tie LLM observability with rest of their observability stack
+image: /img/blog/2025/09/LLM-Observability-OpenTelemetry.png
+keywords: [LLM Observability, OpenInference, OpenTelemetry, OpenStandards]
+---
+
+A few days ago I hosted a live conversation with Pranav, co-founder of Chatwoot, about issues his team was running into with LLM observability. 
+
+The short version: building, debugging, and improving AI agents in production gets messy fast. There's multiple competing standards for default libraries for LLM observability. And many such libraries like OpenInference  which claim to be based on OpenTelemetry don't strictly adhere to it's conventions. This introduces problems for users who are trying to get better observability across their stack.
+
+Here’s a write-up of what we covered and what I think it means for anyone shipping LLM features into real products. Feel free to watch the complete video 
+
+<YouTube id="DPL35sYPGPU" mute={false} />
+
+## The Problem Emerges in Prod
+
+Pranav and I go way back to our YC days in 2021, and it's always interesting to see how our paths have evolved. Chatwoot has built something really compelling \- an open-source customer support platform that unifies conversations across every channel you can imagine: live chat, email, WhatsApp, social media, you name it. All in a single dashboard.
+
+But here's where it gets interesting. They've built an AI agent called "Captain" that can work across all these channels. You build the logic once, and it can handle support queries whether they come through email, live chat, or WhatsApp. Pretty neat, right?
+
+The problem started showing up in production in the most unexpected ways. Sometimes their AI would randomly respond in Spanish when it absolutely shouldn't. Other times, responses just weren't quite right, and they had no visibility into *why*.
+
+## The Quest for LLM Observability
+
+This is where Pranav's journey into LLM observability began, it mirrors what I've been seeing across many companies building LLM applications. You need to understand:
+
+* What documents were retrieved for a RAG query?  
+* Which tool calls were made?  
+* What was the exact input and output at each step?  
+* Why did the AI make certain decisions?
+
+Without this visibility, you're essentially flying blind in production.
+
+## The Standards Problem
+
+Here's where things get really interesting, and frankly, frustrating. Pranav explored several solutions:
+
+**OpenAI's native tracing** looked promising with rich, detailed traces showing guardrails, agent flows, and tool calls. But it's tightly coupled to OpenAI's agent framework. Also, it only provides traces as an atomic unit. If you want to filter spans based on attributes or just examine specific spans directly, you can't do that. 
+
+
+<Figure src="/img/blog/2025/09/openAI-agent-traces.webp" alt="OpenAI agent workflow traces" caption="OpenAI agent workflow traces" />
+
+
+**New Relic** was easy to integrate since they already use it, and it supports OpenTelemetry. But the UI required clicking through 5-6 layers just to see relevant information. Not ideal when you're trying to debug production issues.
+
+**Phoenix** caught their attention because it follows the OpenInference standard, which provides much richer, AI-specific span types. You can easily filter for just LLM calls, tool calls, or agent spans. The traces are beautiful and informative.
+
+<Figure src="/img/blog/2025/09/phoenix-unknown.webp" alt="Phoenix doesn't recognize OpenTelemetry span kinds" caption="Phoenix doesn't recognize OpenTelemetry span kinds" />
+
+
+But here's the kicker: Chatwoot is primarily a Ruby on Rails shop, and guess what? No Ruby SDK for OpenInference. Moreover, Phoenix doesn't completely adhere to OTel semantic conventions, so if you send it telemetry data directly via OpenTelemetry, it doesn't recognize the type of spans, etc. 
+
+As shown in the example above, Phoenix doesn't shows data sent with OpenTelemetry span kinds as `unknown`.
+
+## The OpenTelemetry vs OpenInference Divide
+
+This is where the conversation got really technical and revealed a fundamental industry problem. There are essentially two standards emerging:
+
+**OpenTelemetry** is the industry standard. It has libraries for every language, it's production-ready, and it's widely adopted. But it was built for traditional applications, not AI workflows. It only supports basic span types: internal, server, client, producer, consumer. That's it.
+
+**OpenInference** was created specifically for AI applications. It has rich span types like LLM, tool, chain, embedding, agent, etc. You can easily query for "show me all the LLM calls" or "what were all the tool executions." But it's newer, has limited language support, and isn't as widely adopted.
+
+The tragic part? OpenInference claims to be "OpenTelemetry compatible," but as Pranav discovered, that compatibility is shallow. You can send OpenTelemetry format data to Phoenix, but it doesn't recognize the AI-specific semantics and just shows everything as "unknown" spans.
+
+## The Ruby Problem Makes It Worse
+
+For teams using languages like Ruby that don't have direct OpenInference SDK support, this becomes even more challenging. Pranav had to choose between:
+
+1. Building an SDK from scratch for Ruby
+2. Using OpenTelemetry and losing AI-specific insights  
+3. Switching to a different language stack just for AI observability (way tougher)
+
+None of these are great options.
+
+## Why we (still) bias to OpenTelemetry
+
+At SigNoz we’re all-in on OpenTelemetry. One reason: OTel’s consistency enables out-of-the-box experiences across your *whole* stack. Example: we can auto-surface [external API](https://signoz.io/docs/external-api-monitoring/overview/) usage and performance based on span kinds and attributes. When parts of the app send telemetry via non-OTel conventions, those views degrade.
+
+Chatwoot lands similarly: their entire product already emits OTel. Pulling in a second telemetry standard just for LLMs fragments the picture and complicates how they go about observability. This also silos their observability into different products which makes it difficult to solves issues when they occur.
+
+## Takeaways for builders
+
+* **Pick one telemetry backbone** - If most of your app is OTel, prefer staying OTel-native for LLMs too, even if it means adding richer attributes until GenAI conventions catch up.
+* **LLM specific libraries** - Even if you have to use LLM specific libraries like OpenInference, try to keep your usage as close to OpenTelemetry as possible so that you are aware what non-OTel attributes you are using which may break things.
+* **Follow OTel GenAI working group** - There is active work happening in OTel [Gen AI working group](https://opentelemetry.io/blog/2024/otel-generative-ai/). Follow the work happening there and do share your use cases so that the standards which OpenTelemetry builds are able to cater to most common use cases.
+
+As the LLM space is still evolving rapidly, we as a community need to share our voices so that the standards are robust.
+
+---
+
+## What we’re doing at SigNoz
+
+We’re continuing to invest in OpenTelemetry-native LLM observability so teams don’t have to choose between stability and clarity. Concretely, that means:
+
+* Clear dashboards and traces when LLM calls are modeled using OTel spans/attributes. You can find examples and dashboards in our  [LLM observability](https://signoz.io/docs/llm-observability/) docs. Though we have also use LLM specific libraries like OpenInference in our docs (as they are still the easiest way for ppl to get started), we have kept the dashboards as close to OTel standards as possible. We also plan to actively update this as OTel GenAI semantic conventions become more mature.
+
+* Guidance and examples for popular frameworks (LangChain, LlamaIndex, etc.) on emitting OTel-friendly telemetry.
+
+* Build features leveraging OpenTelemetry semantic conventions so that you get great out-of-box experience in SigNoz and adhere to thoughtful defaults that keep your services, DBs, queues, and LLM agents—in one coherent picture. 
+
+If you’re wrestling with these trade-offs, we’d love to hear what’s breaking for you and what “rich semantics” you actually use day-to-day.
+
+---
+
+## What next?
+
+Huge thanks to Pranav for going deep, especially from the Ruby perspective. If you’re shipping AI features and care about operability, add your voice: push for richer GenAI semantics in OpenTelemetry, and share real traces (sanitized) that show what you need to see.
+
+If you want to compare notes or need help getting your LLM telemetry into an OTel-native view, ping me.
