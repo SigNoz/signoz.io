@@ -232,11 +232,6 @@ const docsSideNav = [
           },
         ],
       },
-      {
-          type: 'doc',
-          route: '/docs/signoz-mcp-server',
-          label: 'SigNoz MCP Server',
-      },
     ],
   },
 
@@ -2102,6 +2097,19 @@ const docsSideNav = [
         route: '/docs/vercel-ai-sdk-monitoring',
         label: 'Vercel AI SDK Monitoring',
         type: 'doc',
+      },
+    ],
+  },
+  {
+    type: 'category',
+    isExpanded: false,
+    label: 'SigNoz MCP',
+
+    items: [ 
+      {
+          type: 'doc',
+          route: '/docs/signoz-mcp-server',
+          label: 'SigNoz MCP Server',
       },
     ],
   },
