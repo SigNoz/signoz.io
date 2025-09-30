@@ -142,7 +142,7 @@ module.exports = () => {
         },
         {
           source: '/learn/user-stories/',
-          destination: '/observability-user-stories',
+          destination: '/blog/community-update-06/#observability-user-stories',
           permanent: true,
         },
         {
@@ -557,7 +557,12 @@ module.exports = () => {
         },
         {
           source: "/docs/instrumentation/troubleshoot-instrumentation/",
-          destination: "/docs/traces-management/troubleshooting/",
+          destination: "/docs/traces-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/query-handles-missing-values/",
+          destination: "/docs/userguide/query-builder/",
           permanent: true
         },
         {
