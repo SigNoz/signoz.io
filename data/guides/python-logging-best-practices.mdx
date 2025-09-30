@@ -22,8 +22,8 @@ The most basic step is to move away from using `print()` for debugging or tracki
 
 The built-in `logging` module offers several advantages:
 
-- **Log Levels:** You can categorize messages by severity (e.g., `DEBUG`, `INFO`, `WARNING`, `ERROR`), allowing you to filter out noise.1
-- **Configurability:** You can easily change the logging output: sending it to the console, a file, or a network service, without changing your application code.
+- **Log Levels:** You can categorize messages by severity (e.g., `DEBUG`, `INFO`, `WARNING`, `ERROR`), allowing you to filter out noise.
+- **Configurability:** You can easily change the logging output to the console, a file, or a network service, without changing your application code.
 - **Contextual Information:** Automatically include rich information like timestamps, module names, and line numbers.
 
 ### 2. Avoid the Root Logger (and Use `__name__`)
@@ -59,6 +59,8 @@ Here’s a simple guide on when to use each level:
 - **`CRITICAL`**: A very severe error that might cause the application to terminate. Example: `Application is out of memory.`
 
 In development, you might set the level to `DEBUG`, but in production, you'd likely set it to `INFO` or `WARNING` to reduce noise.
+
+Note: Python log levels also have numeric values used for filtering and formatting — `NOTSET=0`, `DEBUG=10`, `INFO=20`, `WARNING=30`, `ERROR=40`, `CRITICAL=50`. `logger.setLevel()` and handler levels accept either names or numbers, and you can include the numeric level in output with the `%(levelno)s` formatter. For custom levels, pick a number between existing ones (e.g., `TRACE=5` or `TRACE=15`). If you forward logs to systems like syslog, be aware Python’s numeric levels don’t map 1:1 to syslog severities.
 
 ### 4. Centralize Your Logging Configuration
 
@@ -207,7 +209,7 @@ With `structlog`, you get powerful structured logging that's easy to read during
 
 In web applications or microservices, it's crucial to trace a single request as it moves through the system. The best way to do this is with a **Correlation ID** (or Request ID) that is automatically injected into every log message for that request.
 
-While the standard `logging` library requires a custom `Filter` object, `structlog` makes this pattern much simpler using its built-in support for Python's `contextvars`. A `ContextVar` holds data that is local to a specific task or thread, making it perfect for storing request-scoped information.
+While the standard `logging` library requires a custom `Filter` object, `structlog` makes this pattern much simpler using its built-in support for Python's `contextvars`. A `ContextVar` object (from the `contextvars` module) holds data that is local to a specific task or thread, making it perfect for storing request-scoped information.
 
 First, ensure the `merge_contextvars` processor is included in your `structlog` configuration. This processor automatically adds any data from `structlog`'s context into your log's event dictionary.
 
