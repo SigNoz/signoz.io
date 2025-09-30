@@ -216,6 +216,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Deploying to Azure Container Apps',
+            route: '/docs/install/azure-container-apps',
+          },
+          {
+            type: 'doc',
             isExpanded: false,
             label: 'Deploying from Marketplaces',
             route: '/docs/install/marketplaces',
