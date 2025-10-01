@@ -20,7 +20,7 @@ If you're now searching for a stable, future-proof alternative to Lightstep, you
 
 Lightstep was a powerful observability platform, highly regarded for its pioneering work in distributed tracing. Many engineering teams chose it for its:
 
-* **Strong OpenTelemetry Support:** Lightstep was an early and significant contributor to OpenTelemetry (OTel), building its platform to be OTel-native. This meant users could instrument their applications with open standards, avoiding agent lock-in.
+* **Strong OpenTelemetry Support:** Lightstep was an early and significant contributor to OpenTelemetry (OTel), building its platform to provided first-class OpenTelemetry support. This meant users could instrument their applications with open standards, avoiding agent lock-in.
 * **Unified Observability:** It provided unified dashboards to visualize logs, metrics, and traces in one place, which helped teams correlate different telemetry signals during an investigation.
 * **Advanced Tracing Features:** It offered features like service diagrams, root cause analysis, and "Change Intelligence" to correlate performance deviations with deployments.
 
@@ -225,7 +225,7 @@ Splunk Observability Cloud is a comprehensive SaaS platform that combines APM, i
 **Considerations & Trade-offs:**
 
 - **High Cost:** Splunk is notoriously expensive, and the Observability Cloud is no exception. It is one of the premium-priced solutions on the market.
-- **Segregated Architecture:** A key architectural drawback is that logs reside in a different backend (Splunk Enterprise/Cloud) from metrics and traces. This separation can introduce complexity and latency compared to platforms with a truly unified data store.
+- **Segregated Architecture:** Logs typically live in the Splunk Platform, while metrics/traces live in Splunk Observability Cloud. Log Observer Connect correlates these without re-ingest. This separation can add architectural complexity versus a single-store design.
 
 **Verdict:**
 
@@ -301,7 +301,7 @@ exporters:
   otlp/signoz:
     # Replace <REGION> with your SigNoz cloud region
     # ex: us, in, eu
-    endpoint: "ingest.<REGION>.signoz.io:443"
+    endpoint: "ingest.<REGION>.signoz.cloud:443"
     headers:
       "signoz-access-token": "${SIGNOZ_ACCESS_TOKEN}"
 
