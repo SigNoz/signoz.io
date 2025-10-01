@@ -24,7 +24,7 @@ These are custom labels you define when creating alert rules. They remain consta
 
 **Usage in expressions:**
 ```
-type == "infrastructure" && team == "platform"
+type = "infrastructure" AND team = "platform"
 ```
 
 ### 2. Platform-Provided Labels
@@ -37,7 +37,7 @@ SigNoz automatically adds these labels to provide context about the alert's stat
 
 **Usage in expressions:**
 ```
-threshold.name == "critical" && type == "application"
+threshold.name = "critical" AND type = "application"
 ```
 
 ### 3. Dynamic Query Labels
@@ -46,7 +46,7 @@ These labels come from the GROUP BY clause in your alert query. They represent t
 
 **Common examples:**
 - **Kubernetes labels**: `k8s.pod.name`, `k8s.namespace.name`, `k8s.deployment.name`
-- **Service labels**: `service.name`, `service.version`, `service.environment`
+- **Service labels**: `service.name`, `service.version`
 - **Infrastructure labels**: `host.name`, `cloud.region`, `cloud.availability_zone`
 - **HTTP labels**: `http.method`, `http.status_code`, `http.route`
 - **Database labels**: `db.name`, `db.operation`, `db.system`
@@ -54,8 +54,8 @@ These labels come from the GROUP BY clause in your alert query. They represent t
 
 **Usage in expressions:**
 ```
-k8s.namespace.name == "production" && service.name contains "api"
-host.name in ["prod-server-1", "prod-server-2"] && cloud.region == "us-east-1"
+k8s.namespace.name = "production" AND service.name CONTAINS "api"
+host.name IN ["prod-server-1", "prod-server-2"] AND cloud.region = "us-east-1"
 ```
 
 ## Creating a New Routing Policy
@@ -78,7 +78,7 @@ To create a routing policy:
 ### Required Fields
 
 - **Routing Policy Name**: A descriptive name for your policy (e.g., "Checkout team critical alerts")
-- **Expression**: The condition that determines when this policy applies (e.g., `service.name == "checkout" && type == "application" && threshold.name == "critical"`)
+- **Expression**: The condition that determines when this policy applies (e.g., `service.name = "checkout" AND type = "application" AND threshold.name = "critical"`)
 - **Notification Channels**: Select one or more channels where matching alerts should be sent
 
 ### Optional Fields
@@ -154,25 +154,26 @@ team: "checkout"
 ```
 
 This alert would match policies with expressions like:
-- `team == "checkout"` 
-- `threshold.name == "critical" && deployment.environment == "production"`
-- `team == "checkout" && type == "application"`
+- `team = "checkout"`
+- `threshold.name = "critical" AND deployment.environment = "production"`
+- `team = "checkout" AND type = "application"`
 
 ## Expression Syntax
 
-Routing policy expressions uses [Expr lang](https://expr-lang.org/docs/getting-started):
+Routing policy expressions support the subset of the [search syntax](/docs/userguide/search-syntax):
 
 ### Basic Operators
 
-- **Equality**: `==` (e.g., `service.name == "api"`)
+- **Equality**: `=` (e.g., `service.name = "api"`)
 - **Inequality**: `!=` (e.g., `environment != "development"`)
-- **Contains**: `contains` (e.g., `service.name contains "auth"`)
+- **Contains**: `CONTAINS` (e.g., `service.name CONTAINS "auth"`)
+- **Regular expression**: `REGEXP` (e.g., `service.name REGEXP "auth"`)
 - **In**: `in` (e.g., `severity in ["critical", "warning"]`)
 
 ### Logical Operators
 
-- **AND**: `&&` (both conditions must be true)
-- **OR**: `||` (at least one condition must be true)
+- **AND**: `AND` (both conditions must be true)
+- **OR**: `OR` (at least one condition must be true)
 - **Parentheses**: `()` for grouping
 
 ## Detailed Example
@@ -197,35 +198,35 @@ You have:
 **Policy 1: Critical Production Alerts**
 ```
 Name: Production Critical Escalation
-Expression: deployment.environment == "production" && threshold.name == "critical"
+Expression: deployment.environment = "production" AND threshold.name = "critical"
 Channels: [ops-email, platform-oncall]
 ```
 
 **Policy 2: Checkout Service Alerts**
 ```
 Name: Checkout Team Alerts
-Expression: service.name == "checkout" && threshold.name in ["critical", "warning"]
+Expression: service.name = "checkout" AND threshold.name IN ["critical", "warning"]
 Channels: [checkout-pagerduty]
 ```
 
 **Policy 3: Payment Service Monitoring**
 ```
 Name: Payment Service All Envs
-Expression: service.name == "payment" && (threshold.name == "critical" || (threshold.name == "warning" && deployment.environment == "production"))
+Expression: service.name = "payment" AND (threshold.name = "critical" OR (threshold.name = "warning" AND deployment.environment = "production"))
 Channels: [payment-pagerduty]
 ```
 
 **Policy 4: General Development Alerts**
 ```
 Name: Dev Environment Notifications
-Expression: deployment.environment == "development"
+Expression: deployment.environment = "development"
 Channels: [general-slack]
 ```
 
 **Policy 5: Infrastructure Alerts**
 ```
 Name: Infrastructure Critical
-Expression: type == "infrastructure" && threshold.name == "critical"
+Expression: type = "infrastructure" AND threshold.name = "critical"
 Channels: [platform-oncall, ops-email]
 ```
 
