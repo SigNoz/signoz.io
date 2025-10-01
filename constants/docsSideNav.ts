@@ -1592,6 +1592,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/azure-openai-dashboard',
+            label: 'Azure OpenAI API',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
             label: 'CICD',
           },
