@@ -2064,6 +2064,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/azure-openai-monitoring',
+        label: 'Azure OpenAI API Monitoring',
+        type: 'doc',
+      },
+      {
         route: '/docs/claude-code-monitoring',
         label: 'Claude Code Monitoring',
         type: 'doc',
