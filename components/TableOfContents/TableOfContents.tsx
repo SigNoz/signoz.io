@@ -82,8 +82,8 @@ const TableOfContents = ({
               data-level={tocItem.depth}
               href={tocItem.url}
               onClick={handleClick}
-              className={`line-clamp-2 text-[11px] transition-colors hover:text-white ${
-                isActive ? 'font-medium text-signoz_robin-500' : 'text-gray-500'
+              className={`line-clamp-2 text-[11px] transition-colors hover:text-primary-400 focus-visible:text-primary-400 focus-visible:outline-none ${
+                isActive ? 'font-medium text-primary-500' : 'text-gray-400'
               }`}
             >
               {tocItem.value}
