@@ -379,7 +379,7 @@ const LogProcessingSection: React.FC = () => {
         <div className="flex flex-col px-6">
           <div className="min-h-72 flex flex-col justify-between">
             <div>
-              <h2 className="text-signoz_vanilla-100 mb-6">Ingest Logs from Anywhere</h2>
+              <h2 className="text-signoz_vanilla-100 mb-6">Ingest logs from anywhere</h2>
               <p className="text-signoz_vanilla-400 mb-8 leading-relaxed">
                 OTel-native architecture supports extensive data source integration through multiple 
                 collection patterns, eliminating vendor lock-in while providing superior correlation capabilities.
@@ -586,7 +586,7 @@ const StorageSection: React.FC = () => {
     <div className="p-0 bg-transparent border-y-1 border-signoz_slate-400 border-dashed mb-12">
       <div className="flex flex-col md:flex-row gap-12 items-start h-full p-6">
         <div className="flex-1 h-full flex flex-col justify-between">
-          <h2 className="font-semibold text-signoz_vanilla-100 mb-6">Configure Hot and Cold Storage</h2>
+          <h2 className="font-semibold text-signoz_vanilla-100 mb-6">Configure hot and cold storage</h2>
           <p className="text-signoz_vanilla-400 mb-24 leading-relaxed">
             Set retention from 15-180 days in hot storage for fast queries. Older logs move to cold 
             storage where they remain queryable at 3x slower speeds for compliance needs.
