@@ -72,6 +72,9 @@ opentelemetry-instrument <your_run_command>
 </TabItem>
 <TabItem value="java" label="Java" default>
 
+<Tabs entityName="Instrumentation">
+<TabItem value="manual" label="Manual" default>
+
 ## Requirements
 
 - Java 8 or newer
@@ -317,6 +320,122 @@ sdk.getSdkLoggerProvider().shutdown();
 ```
 > 📌 Note: Before running this code, ensure that you have set the environment variable or .env file `OPENAI_API_KEY` with your generated API key.
 > 
+
+</TabItem>
+
+<TabItem value="Auto" label="Auto(Java Agent)" default>
+
+## Requirements
+
+- Java 8 or newer
+- OpenAI Java SDK (`openai-java >= 1.1.0`)
+- Valid OpenAI API key
+- OpenTelemetry Java agent (if not already installed)
+
+## Setup with Auto-Instrumentation
+
+If you're already using the OpenTelemetry Java agent for auto-instrumentation, you can add OpenAI instrumentation on top of your existing setup.
+
+### Step 1. Add dependencies
+
+**For Gradle (build.gradle.kts):**
+
+```gradle
+dependencies {
+    implementation("com.openai:openai-java:3.6.1")
+    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.20.1-alpha"))
+    implementation("io.opentelemetry.instrumentation:opentelemetry-openai-java-1.1")
+}
+```
+
+**For Maven (pom.xml):**
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.openai</groupId>
+        <artifactId>openai-java</artifactId>
+        <version>3.6.1</version>
+    </dependency>
+    <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-openai-java-1.1</artifactId>
+        <version>2.20.1-alpha</version>
+    </dependency>
+</dependencies>
+```
+
+### Step 2. Import the necessary modules in your Java application
+
+```java
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.instrumentation.openai.v1_1.OpenAITelemetry;
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.models.ChatModel;
+import com.openai.models.chat.completions.ChatCompletion;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+```
+
+### Step 3. Wrap your OpenAI client with OpenTelemetry instrumentation
+
+```java
+// Get the global OpenTelemetry instance configured by the Java agent
+OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
+
+// Create your OpenAI client
+OpenAIClient client = OpenAIOkHttpClient.builder()
+    .apiKey(System.getenv("OPENAI_API_KEY"))
+    .build();
+
+// Wrap it with OpenTelemetry instrumentation
+OpenAIClient otelClient = OpenAITelemetry.builder(openTelemetry)
+    .build()
+    .wrap(client);
+
+// Use otelClient for all OpenAI API calls
+ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
+    .addUserMessage("What is SigNoz?")
+    .model("gpt-4")
+    .build();
+
+ChatCompletion chatCompletion = otelClient.chat().completions().create(params);
+System.out.println(chatCompletion);
+```
+
+### Step 4. Download the OpenTelemetry Java agent (if not already installed)
+
+```bash
+curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+### Step 5. Run your application with the Java agent
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
+```
+
+**Configuration Variables:**
+
+- Set `<service_name>` to the name of your service
+- Set `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Replace `<my-app>` with your application JAR file name
+
+> 📌 **Note:** This approach uses `GlobalOpenTelemetry.get()` to retrieve the OpenTelemetry instance configured by the Java agent. This ensures that OpenAI traces are properly correlated with traces from auto-instrumented components (HTTP servers, databases, etc.).
+
+> 📌 **Note:** Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
+
+> 📌 **Note:** The Java agent will automatically instrument common frameworks and libraries (Spring Boot, JDBC, HTTP clients, etc.). The OpenAI instrumentation library adds specific telemetry for OpenAI API calls on top of this existing instrumentation.
+
+> 📌 **Note:** If you're running a web application or microservice, the OpenAI spans will automatically be linked as child spans to incoming HTTP request spans, providing full distributed tracing across your application.
+
+</TabItem>
+</Tabs>
 
 </TabItem>
 </Tabs>
