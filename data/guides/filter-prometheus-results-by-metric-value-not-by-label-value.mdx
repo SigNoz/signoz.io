@@ -67,7 +67,7 @@ http_requests_total[5m]
 
 This query retrieves the count of HTTP requests within the last 5 minutes. You can apply additional filters to focus on specific requests within this time window.
 
-4. Aggregation and Grouping: Aggregation functions like `sum`, `avg`, `min`, `max`, and `rate` allow you to filter and aggregate metrics for analysis. By combining these functions with filters, you can gain valuable insights into high-level system behavior or detect anomalies in specific parts of the system.
+4. Aggregation and Grouping: Aggregation functions like `sum`, `avg`, `min`, `max`, and `rate` allow you to filter and [aggregate metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/) for analysis. By combining these functions with filters, you can gain valuable insights into high-level system behavior or detect anomalies in specific parts of the system.
 
 Example:
 
@@ -241,7 +241,7 @@ To filter Prometheus results by metric value, use PromQL (Prometheus Query Langu
         
     4. Minimize Result Cardinality
         
-        Be mindful of result cardinality when writing queries. High cardinality can lead to performance issues, as Prometheus needs to process a larger number of series. To minimize cardinality:
+        Be mindful of result cardinality when writing queries. [High cardinality](https://signoz.io/blog/high-cardinality-data/) can lead to performance issues, as Prometheus needs to process a larger number of series. To minimize cardinality:
         
         - Avoid using too many label dimensions in queries.
         - Use value-based filtering to limit the number of time series returned. For instance:
@@ -302,7 +302,7 @@ Combining label filters with value filters allows you to refine your queries and
     In this example, the query returns CPU utilization metrics for `server1` that exceed 80%. This approach ensures that your monitoring efforts focus on the right targets without unnecessary noise from other instances.
     
 3. Handling Time Series with Multiple Samples in Value Filtering:
-Prometheus metrics often contain multiple samples over time, making it essential to use functions that consider historical data when filtering.
+[Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/) often contain multiple samples over time, making it essential to use functions that consider historical data when filtering.
     
     ```
     avg_over_time(node_cpu_utilization[5m]) > 0.75
@@ -432,16 +432,16 @@ Grafana, a popular visualization tool for Prometheus, supports value-based filte
 
 ### Troubleshooting Common Grafana-Prometheus Integration Issues
 
-1. Data Source Configuration: Ensure that your Prometheus data source is correctly configured in Grafana. Check the URL, access permissions, and authentication settings to prevent connection issues.
+1. Data Source Configuration: Ensure that your [Prometheus data](https://signoz.io/guides/how-does-grafana-get-data-from-prometheus/) source is correctly configured in Grafana. Check the URL, access permissions, and authentication settings to prevent connection issues.
 2. Query Errors: If queries return unexpected results or errors, verify the syntax and logic of your PromQL queries. Using the Prometheus expression browser can help you test queries before implementing them in Grafana.
 3. Performance Optimization: If dashboards load slowly, consider optimizing your queries. High cardinality or complex queries can slow down performance. Limit the data points retrieved and use aggregation functions wisely to enhance performance.
 4. Alerts Not Triggering: If alerts aren’t firing as expected, check the alert rules and conditions. Ensure that thresholds are set correctly and that the alerting mechanism (like email or Slack notifications) is properly configured.
 
 ## Enhancing Observability with SigNoz
 
-To effectively monitor your applications and systems, leveraging an advanced observability platform like [SigNoz](https://signoz.io/) can elevate your monitoring strategy. [SigNoz](https://signoz.io/) is an open-source observability tool that provides end-to-end monitoring, troubleshooting, and alerting capabilities across your entire application stack.
+To effectively monitor your applications and systems, leveraging an advanced observability platform like [SigNoz](https://signoz.io/) can elevate your monitoring strategy. [SigNoz](https://signoz.io/) is an open-source observability tool that provides [end-to-end monitoring](https://signoz.io/comparisons/end-to-end-monitoring-tools/), troubleshooting, and alerting capabilities across your entire application stack.
 
-Built on OpenTelemetry—the emerging industry standard for telemetry data—SigNoz integrates seamlessly with your existing Prometheus and Grafana setup. This unified observability solution enhances your ability to monitor HTTP requests per minute alongside deep traces, giving you a comprehensive view of your application's performance. 
+Built on [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)—the emerging industry standard for telemetry data—SigNoz integrates seamlessly with your existing Prometheus and Grafana setup. This [unified observability](https://signoz.io/unified-observability/) solution enhances your ability to monitor HTTP requests per minute alongside deep traces, giving you a comprehensive view of your application's performance. 
 SigNoz complements this setup by offering additional monitoring features:
 
 - User-Friendly Interface: Easily build complex queries without in-depth PromQL knowledge, making insights accessible for all skill levels.
@@ -454,7 +454,7 @@ To enhance your observability with SigNoz, you can follow the [OpenTelemetry Col
 
 ## Key Takeaways
 
-- Value-Based Filtering: Prometheus allows you to analyze metrics using value-based filtering, which provides insights that go beyond traditional label-based queries. This capability enables you to identify metrics based on specific numerical values, facilitating precise performance analysis.
+- Value-Based Filtering: Prometheus allows you to [analyze metrics](https://signoz.io/blog/metrics-explorer/) using value-based filtering, which provides insights that go beyond traditional label-based queries. This capability enables you to identify metrics based on specific numerical values, facilitating precise performance analysis.
 - PromQL Flexibility: The Prometheus Query Language (PromQL) provides a wide range of comparison and logical operators, allowing you to write sophisticated queries that assess several criteria at the same time. This adaptability is essential for extensive examination of system performance.
 - Combining Filters: For optimal query performance and accuracy, you can combine both label and value filters in your queries. This approach helps you refine your results, ensuring you capture only the most relevant metrics for your monitoring needs.
 - Advanced Techniques: Techniques such as subqueries and vector matching further enhance your filtering capabilities. These advanced methods enable you to perform more sophisticated analyses, allowing for better insights into the relationships between different metrics.
@@ -488,7 +488,7 @@ Yes, complex value-based filters can consume more resources than simpler label f
 
 ### Can I use value-based filtering with PromQL functions like rate() or increase()?
 
-Absolutely! You can apply value-based filters to the results of PromQL functions. For instance:
+Absolutely! You can apply value-based filters to the results of [PromQL functions](https://signoz.io/guides/promql-cheat-sheet/). For instance:
 
 ```
 rate(http_requests_total[5m]) > 100

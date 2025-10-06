@@ -18,9 +18,11 @@ const options = {
   csv: 'interlinking.csv',
   root: process.cwd(),
   dryRun: false,
-  limit: Infinity,
+  limit: Infinity, // successful row insertions cap
+  sourceLimit: Infinity, // unique sources to modify cap
   onlySource: null, // URL filter
-  saveEvery: 50, // rows
+  saveEvery: 50, // rows between CSV saves
+  forceReprocess: false, // process rows even if status exists
 };
 
 for (let i = 0; i < args.length; i++) {
@@ -29,15 +31,21 @@ for (let i = 0; i < args.length; i++) {
   else if (a === '--root') options.root = args[++i];
   else if (a === '--dry-run') options.dryRun = true;
   else if (a === '--limit') options.limit = Number(args[++i] || '0') || Infinity;
+  else if (a === '--source-limit') options.sourceLimit = Number(args[++i] || '0') || Infinity;
   else if (a === '--only-source') options.onlySource = args[++i];
   else if (a === '--save-every') options.saveEvery = Number(args[++i] || '50');
+  else if (a === '--force-reprocess') options.forceReprocess = true;
   else if (a === '--help') {
-    console.log(`Usage: node scripts/interlinker.mjs [--csv interlinking.csv] [--dry-run] [--limit N] [--only-source URL] [--save-every N]\n`);
+    console.log(`Usage: node scripts/interlinker.mjs [--csv interlinking.csv] [--dry-run] [--limit N] [--source-limit N] [--only-source URL] [--save-every N] [--force-reprocess]\n`);
     process.exit(0);
   }
 }
 
 // ---------------- CSV PARSER/WRITER ----------------
+// Denylisted keywords (case-insensitive) that should never be linked
+const KEYWORD_DENYLIST = new Set([
+  'prometheus or',
+]);
 function parseCSV(text) {
   // Robust-enough CSV parser supporting quoted fields with commas and newlines.
   const rows = [];
@@ -175,62 +183,72 @@ function containsUrl(content, targetUrl) {
 }
 
 function blockify(content) {
-  // Build text blocks (paragraph-ish) where we can modify
-  const lines = content.split(/\r?\n/);
+  // Build blocks using precise offsets that respect \r\n vs \n
+  // Build line objects with correct start/end offsets
+  const lines = [];
+  let pos = 0;
+  const re = /\r?\n/g;
+  let m;
+  while ((m = re.exec(content)) !== null) {
+    const lineText = content.slice(pos, m.index);
+    const end = re.lastIndex; // includes the newline(s)
+    lines.push({ text: lineText, start: pos, end });
+    pos = end;
+  }
+  // last line
+  if (pos <= content.length) {
+    const lineText = content.slice(pos);
+    lines.push({ text: lineText, start: pos, end: content.length });
+  }
+
   let inFront = false;
   let inFence = false;
   const blocks = [];
   let cur = [];
-  let lineStartIndex = 0;
-  let idx = 0;
-  const lineStartPositions = [];
-  for (const line of lines) {
-    lineStartPositions.push(idx);
-    idx += line.length + 1; // + newline
-  }
+
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const startPos = lineStartPositions[i];
-    if (i === 0 && line.trim() === '---') { inFront = true; continue; }
-    if (inFront) { if (line.trim() === '---') inFront = false; continue; }
-    if (line.trim().startsWith('```')) { inFence = !inFence; continue; }
+    const L = lines[i];
+    const line = L.text;
+    const trimmed = line.trim();
+    if (i === 0 && trimmed === '---') { inFront = true; continue; }
+    if (inFront) { if (trimmed === '---') inFront = false; continue; }
+    if (trimmed.startsWith('```')) { inFence = !inFence; continue; }
     if (inFence) {
       if (cur.length) { blocks.push(cur); cur = []; }
       continue;
     }
-    if (/^\s*#/.test(line) || /^\s*\|/.test(line) || /^\s*</.test(line)) {
-      if (cur.length) { blocks.push(cur); cur = []; }
-      continue;
-    }
-    if (line.trim() === '') {
-      if (cur.length) { blocks.push(cur); cur = []; }
-    } else {
-      if (cur.length === 0) lineStartIndex = startPos;
-      cur.push({ line, startPos });
-    }
+    if (/^\s*>/.test(line)) { if (cur.length) { blocks.push(cur); cur = []; } continue; }
+    if (/^\s*\[[^\]]+\]:\s*\S+/.test(line)) { if (cur.length) { blocks.push(cur); cur = []; } continue; }
+    if (/^\s*#/.test(line) || /^\s*\|/.test(line) || /^\s*</.test(line)) { if (cur.length) { blocks.push(cur); cur = []; } continue; }
+
+    if (trimmed === '') { if (cur.length) { blocks.push(cur); cur = []; } }
+    else { cur.push(L); }
   }
   if (cur.length) blocks.push(cur);
-  // Map to {text, start, end, hasLink}
-  return blocks.map(linesArr => {
-    const start = linesArr[0].startPos;
-    const end = linesArr[linesArr.length - 1].startPos + linesArr[linesArr.length - 1].line.length;
-    const text = linesArr.map(o => o.line).join('\n');
-    const hasLink = /\]\([^)]*\)/.test(text) || /https?:\/\//.test(text);
+
+  // Map to {text, start, end, hasLink, words, startWord, endWord, index}
+  let cum = 0;
+  const out = blocks.map((linesArr, idx) => {
+    const start = linesArr[0].start;
+    const end = linesArr[linesArr.length - 1].end;
+    const text = linesArr.map(o => o.text).join('\n');
+    const hasLink = /\]\([^)]*\)/.test(text) || /https?:\/\//.test(text) || /\[[^\]]+\]\[[^\]]+\]/.test(text);
     const words = text.trim().split(/\s+/).filter(Boolean).length;
-    return { text, start, end, hasLink, words };
+    const startWord = cum;
+    const endWord = cum + words;
+    cum = endWord;
+    return { text, start, end, hasLink, words, startWord, endWord, index: idx };
   });
+  return out;
 }
 
 function paragraphHasInlineCode(text) {
   return /`[^`]+`/.test(text);
 }
 
-function pickBlockIndex(blocks, preferNoLink = true) {
-  // Helper to sort blocks: prefer blocks without existing links
-  return blocks
-    .map((b, i) => ({ i, score: (b.hasLink ? 1 : 0) + (paragraphHasInlineCode(b.text) ? 2 : 0) }))
-    .sort((a, b) => a.score - b.score)
-    .map(o => o.i);
+function pickBlockIndexNoLink(blocks) {
+  // Earlier paragraphs first, without existing links
+  return blocks.filter(b => !b.hasLink).sort((a, b) => a.index - b.index).map(b => b.index);
 }
 
 function contextMatchScore(text, context) {
@@ -243,39 +261,110 @@ function contextMatchScore(text, context) {
   return score;
 }
 
-function findEligibleMatchInBlock(blockText, keyword) {
-  // Find a whole-word match not inside link text [] or inline code ``
+function getProtectedRanges(text) {
+  const ranges = [];
+  // Inline code: `...`
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === '`') {
+      const start = i;
+      i++;
+      while (i < text.length && text[i] !== '`') i++;
+      const end = i < text.length ? i + 1 : text.length;
+      ranges.push([start, end]);
+      i = end;
+      continue;
+    }
+    i++;
+  }
+  // Markdown links and images: ![alt](url) or [text](url)
+  const linkRe = /!\[[^\]]*\]\([^\)]+\)|\[[^\]]+\]\([^\)]+\)/g;
+  for (const m of text.matchAll(linkRe)) {
+    ranges.push([m.index, m.index + m[0].length]);
+  }
+  // HTML anchors: <a ...>...</a>
+  const htmlARe = /<a\b[^>]*>[\s\S]*?<\/a>/gi;
+  for (const m of text.matchAll(htmlARe)) {
+    ranges.push([m.index, m.index + m[0].length]);
+  }
+  // Any HTML tag (to protect attributes like alt, title, href, etc.)
+  const htmlTagRe = /<[^>]+>/g;
+  for (const m of text.matchAll(htmlTagRe)) {
+    ranges.push([m.index, m.index + m[0].length]);
+  }
+  // Reference-style links: [text][id]
+  const refRe = /\[[^\]]+\]\[[^\]]+\]/g;
+  for (const m of text.matchAll(refRe)) {
+    ranges.push([m.index, m.index + m[0].length]);
+  }
+  // Inline autolinks: <http://...>
+  const angleRe = /<https?:\/\/[^>\s]+>/g;
+  for (const m of text.matchAll(angleRe)) {
+    ranges.push([m.index, m.index + m[0].length]);
+  }
+  // Plain URLs
+  const urlRe = /https?:\/\/[^\s)]+/g;
+  for (const m of text.matchAll(urlRe)) {
+    ranges.push([m.index, m.index + m[0].length]);
+  }
+  // Email addresses
+  const emailRe = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+  for (const m of text.matchAll(emailRe)) {
+    ranges.push([m.index, m.index + m[0].length]);
+  }
+  // Sort & merge
+  ranges.sort((a, b) => a[0] - b[0]);
+  const merged = [];
+  for (const r of ranges) {
+    if (!merged.length || r[0] > merged[merged.length - 1][1]) merged.push(r);
+    else merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], r[1]);
+  }
+  return merged;
+}
+
+function isInRanges(pos, ranges) {
+  let lo = 0, hi = ranges.length - 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    const [s, e] = ranges[mid];
+    if (pos < s) hi = mid - 1; else if (pos >= e) lo = mid + 1; else return true;
+  }
+  return false;
+}
+
+function isWordChar(ch) {
+  return /[\p{L}\p{N}_]/u.test(ch || '');
+}
+
+function findEligibleMatchInRange(content, startIdx, endIdx, keyword) {
+  // Work on the original substring exactly as in file, preserving CRLF
+  const blockText = content.slice(startIdx, endIdx);
   const kw = keyword.trim();
   if (!kw) return null;
-  const rx = new RegExp(`(^|[^\\p{L}\\p{N}_])(${escapeRegex(kw)})(?![\\p{L}\\p{N}_])`, 'iu');
-  const m = blockText.match(rx);
-  if (!m) return null;
-  const idx = m.index + m[1].length; // start of the actual match
-  const end = idx + m[2].length;
-  // Inside inline code?
-  const before = blockText.slice(0, idx);
-  const backticksBefore = (before.match(/`/g) || []).length;
-  const backticksToEnd = (blockText.slice(0, end).match(/`/g) || []).length;
-  if (backticksBefore % 2 === 1 || backticksToEnd % 2 === 1) return null;
-  // Inside link text?
-  const lastOpen = before.lastIndexOf('[');
-  if (lastOpen !== -1) {
-    const close = blockText.indexOf(']', lastOpen);
-    const hasParen = close !== -1 && blockText[close + 1] === '(';
-    if (lastOpen < idx && close !== -1 && idx <= close && hasParen) return null;
+  const protectedRanges = getProtectedRanges(blockText);
+  const rx = new RegExp(escapeRegex(kw), 'giu');
+  for (const m of blockText.matchAll(rx)) {
+    const start = m.index;
+    const end = start + m[0].length;
+    const before = blockText[start - 1];
+    const after = blockText[end];
+    if (isWordChar(before) || isWordChar(after)) continue; // word boundaries
+    if (isInRanges(start, protectedRanges) || isInRanges(end - 1, protectedRanges)) continue;
+    // avoid crossing newlines in anchor text
+    if (blockText.slice(start, end).includes('\n') || blockText.slice(start, end).includes('\r')) continue;
+    return { start, end, text: blockText.slice(start, end) };
   }
-  return { start: idx, end, text: m[2] };
+  return null;
 }
 
 function insertLinkIntoContent(content, block, match, targetUrl) {
   const beforeBlock = content.slice(0, block.start);
-  const blockText = block.text;
+  const blockText = content.slice(block.start, block.end);
   const afterBlock = content.slice(block.end);
   const beforeMatch = blockText.slice(0, match.start);
   const matchText = blockText.slice(match.start, match.end);
   const afterMatch = blockText.slice(match.end);
-  const linked = `${beforeMatch}[${matchText}](${targetUrl})${afterMatch}`;
-  const newBlockText = linked;
+  const newBlockText = `${beforeMatch}[${matchText}](${targetUrl})${afterMatch}`;
   const newContent = beforeBlock + newBlockText + afterBlock;
   const delta = newBlockText.length - blockText.length;
   return { newContent, delta };
@@ -309,8 +398,25 @@ async function main() {
 
   const stateBySource = new Map();
   const sourcesTouched = new Set();
-  let processed = 0;
+  const modifiedSources = new Set();
+  let processed = 0; // successful row insertions
   let changesSinceSave = 0;
+
+  function collectExistingAnchorTexts(content) {
+    const s = new Set();
+    // Markdown links
+    for (const m of content.matchAll(/\[([^\]]+)\]\([^\)]+\)/g)) {
+      const t = m[1].replace(/<[^>]+>/g, '').trim().toLowerCase();
+      if (t) s.add(t);
+    }
+    // HTML anchors
+    for (const m of content.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/gi)) {
+      const inner = m[1].replace(/<[^>]+>/g, '');
+      const t = inner.trim().toLowerCase();
+      if (t) s.add(t);
+    }
+    return s;
+  }
 
   async function loadSourceState(sourceUrl) {
     let st = stateBySource.get(sourceUrl);
@@ -320,7 +426,7 @@ async function main() {
     const content = await fsp.readFile(mdPath, 'utf8');
     const totalWords = wordCountEligible(content);
     const cap = Math.floor(totalWords / 200);
-    return { path: mdPath, content, cap, added: 0, usedTargets: new Set(), blocks: null, wordsSinceLast: 1e9 };
+    return { path: mdPath, content, cap, added: 0, usedTargets: new Set(), blocks: null, lastInsertWordPos: null, existingAnchorTexts: collectExistingAnchorTexts(content) };
   }
 
   function rebuildBlocks(st) {
@@ -365,16 +471,38 @@ async function main() {
     if (!sourceUrl || !keyword || !targetUrl) { status(row, 'skipped', 'missing_required_fields'); continue; }
     if (options.onlySource && sourceUrl !== options.onlySource) continue;
 
-    // Skip already processed rows (resume)
-    if (row[COL_STATUS]) continue;
+    // Skip already processed rows unless forcing reprocess
+    if (row[COL_STATUS] && !options.forceReprocess) continue;
+
+    // Denylist check
+    if (KEYWORD_DENYLIST.has(String(keyword).trim().toLowerCase())) {
+      status(row, 'skipped', 'denylist_keyword');
+      continue;
+    }
+
+    // Basic anchor quality
+    const letters = /[A-Za-z]/.test(keyword);
+    if (keyword.trim().length < 3 || !letters) { status(row, 'skipped', 'low_quality_anchor'); continue; }
 
     const st = await loadSourceState(sourceUrl);
     stateBySource.set(sourceUrl, st);
     if (!st.path) { status(row, 'skipped', 'source_not_found'); continue; }
 
+    // Enforce source-limit: before first modification for a source
+    if (!modifiedSources.has(st.path) && modifiedSources.size >= options.sourceLimit) {
+      break; // stop processing
+    }
+
     if (containsUrl(st.content, targetUrl)) {
       st.usedTargets.add(targetUrl);
       status(row, 'skipped', 'existing_target_present');
+      continue;
+    }
+
+    // Skip if keyword already used as anchor anywhere
+    const keywordKey = keyword.trim().toLowerCase();
+    if (st.existingAnchorTexts && st.existingAnchorTexts.has(keywordKey)) {
+      status(row, 'skipped', 'existing_anchor_for_keyword');
       continue;
     }
 
@@ -392,31 +520,47 @@ async function main() {
     if (!st.blocks) rebuildBlocks(st);
 
     // Candidate blocks in preference order
-    const order = pickBlockIndex(st.blocks);
+    const orderNoLink = pickBlockIndexNoLink(st.blocks);
     let best = null;
     let bestScore = -1;
-    for (const idx of order) {
+    const contextWords = Array.from(new Set((context || '').toLowerCase().split(/[^a-z0-9]+/i).filter(w => w.length >= 4)));
+    const requireContext = contextWords.length > 0;
+
+    // Pass 1: prefer paragraphs without links, enforce spacing, avoid tiny intro
+    for (const idx of orderNoLink) {
       const b = st.blocks[idx];
-      // simple spacing rule: try to keep ~100 words between links if possible
-      if (st.wordsSinceLast < 100 && !b.hasLink) {
-        continue;
+      if (b.index === 0 && b.words < 15) continue; // avoid very short intro
+      if (st.lastInsertWordPos != null) {
+        const dist = Math.abs(b.startWord - st.lastInsertWordPos);
+        if (dist < 100) continue; // try to keep spacing
       }
-      const match = findEligibleMatchInBlock(b.text, keyword);
+      const match = findEligibleMatchInRange(st.content, b.start, b.end, keyword);
       if (!match) continue;
-      const score = contextMatchScore(b.text, context) - (b.hasLink ? 0.5 : 0);
+      const score = contextMatchScore(st.content.slice(b.start, b.end), context);
       if (score > bestScore) { best = { idx, block: b, match }; bestScore = score; }
     }
 
+    // Pass 2: relax spacing if nothing found
     if (!best) {
-      // fallback: allow block with links if no other
-      for (const idx of order) {
+      for (const idx of orderNoLink) {
         const b = st.blocks[idx];
-        const match = findEligibleMatchInBlock(b.text, keyword);
-        if (match) { best = { idx, block: b, match }; break; }
+        if (b.index === 0 && b.words < 15) continue;
+        const match = findEligibleMatchInRange(st.content, b.start, b.end, keyword);
+        if (match) { best = { idx, block: b, match }; bestScore = contextMatchScore(st.content.slice(b.start, b.end), context); break; }
+      }
+    }
+
+    // Pass 3 (optional): if still nothing, allow blocks that already contain a link
+    if (!best) {
+      for (const b of st.blocks) {
+        if (b.index === 0 && b.words < 15) continue;
+        const match = findEligibleMatchInRange(st.content, b.start, b.end, keyword);
+        if (match) { best = { idx: b.index, block: b, match }; bestScore = contextMatchScore(st.content.slice(b.start, b.end), context); break; }
       }
     }
 
     if (!best) { status(row, 'skipped', 'not_found_or_ineligible'); continue; }
+    if (requireContext && bestScore <= 0) { status(row, 'skipped', 'context_mismatch'); continue; }
 
     // Apply replacement
     const { newContent, delta } = insertLinkIntoContent(st.content, best.block, best.match, targetUrl);
@@ -425,11 +569,12 @@ async function main() {
     st.usedTargets.add(targetUrl);
     st.dirty = true;
     status(row, 'added', '');
+    modifiedSources.add(st.path);
+    if (st.existingAnchorTexts) st.existingAnchorTexts.add(keywordKey);
 
     // Update blocks ranges due to delta: simplest is to rebuild
     rebuildBlocks(st);
-    // Update wordsSinceLast (approx: use the block words)
-    st.wordsSinceLast = 0;
+    st.lastInsertWordPos = best.block.endWord;
 
     processed++;
     changesSinceSave++;
@@ -447,6 +592,7 @@ async function main() {
   }
 
   console.log(`Processed rows: ${processed}.`);
+  if (modifiedSources.size !== Infinity) console.log(`Modified sources: ${modifiedSources.size}.`);
   if (addedCols.length) console.log(`Added CSV columns: ${addedCols.join(', ')}`);
   if (sourcesTouched.size) {
     console.log('Updated sources:');
@@ -458,4 +604,3 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
-

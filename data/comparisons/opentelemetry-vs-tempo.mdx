@@ -85,7 +85,7 @@ For example:
 
 1. Latency Tracking: In a distributed system, latency can occur at multiple points, and tracing helps you find the exact point where delays are happening.
 2. Service Dependency Complexity: In a microservices environment, one service often depends on many others. Distributed tracing uncovers these dependencies, helping you understand how issues in one service affect the entire system.
-3. Context Propagation: Distributed tracing ensures that context is passed along with each request, meaning that the tracing information follows a request through every service it touches, ensuring complete visibility.
+3. [Context Propagation](https://signoz.io/blog/opentelemetry-context-propagation/): Distributed tracing ensures that context is passed along with each request, meaning that the tracing information follows a request through every service it touches, ensuring complete visibility.
 
 Example: E-Commerce Purchase Flow
 
@@ -248,7 +248,7 @@ Configuration Options and Best Practices for Deployment
 
 When deploying the OpenTelemetry Collector, consider the following best practices:
 
-1. Configuring Receivers and Exporters: Tailor the configuration based on your data sources and backends. For example, if you're collecting metrics from Prometheus and sending traces to Grafana Tempo, you would configure the Prometheus receiver and the Tempo exporter.
+1. Configuring Receivers and Exporters: Tailor the configuration based on your data sources and backends. For example, if you're collecting metrics from Prometheus and sending traces to Grafana Tempo, you would configure the [Prometheus receiver](https://signoz.io/blog/opentelemetry-collector-prometheus-receiver/) and the Tempo exporter.
 2. Batching and Filtering: Use batching and filtering processors to reduce the volume of data, minimize network traffic, and optimize resource usage.
 3. Resource Allocation: Ensure that you allocate sufficient CPU and memory to your Collector instances, especially when dealing with large volumes of telemetry data.
 4. Security: Set up TLS encryption and authentication where needed to secure the transmission of sensitive telemetry data.
@@ -340,7 +340,7 @@ Tempo takes a unique approach to trace storage, optimized for long-term retentio
 Tempo is built to seamlessly integrate with the Grafana ecosystem, providing an end-to-end observability experience. Key integrations include:
 
 - Grafana Loki: Log aggregation system that can be used to search for trace IDs within logs, bridging the gap between logs and traces.
-- Grafana: Tempo traces can be visualized in Grafana dashboards alongside metrics (from Prometheus or other sources) and logs (from Loki), providing unified observability.
+- Grafana: Tempo traces can be visualized in Grafana dashboards alongside metrics (from Prometheus or other sources) and logs (from Loki), providing [unified observability](https://signoz.io/unified-observability/).
 - Prometheus: You can correlate traces with metrics, making it easier to investigate performance issues or system anomalies.
 
 ### Tempo's Cost-Effective Model for Long-Term Trace Storage
@@ -415,7 +415,7 @@ Overview of Tempo's Query Language and Capabilities
 Grafana Tempo doesn’t have its own dedicated query language; instead, it relies on trace IDs retrieved from logs (via Loki) or other sources to query and visualize trace data. Users typically search for traces by providing:
 
 - Trace IDs: The primary way to retrieve specific traces stored in Tempo.
-- Logs: In combination with Grafana Loki, you can search logs to extract trace IDs, and then visualize them in Tempo.
+- Logs: In combination with Grafana Loki, you can [search logs](https://signoz.io/docs/logs-management/logs-api/search-logs/) to extract trace IDs, and then visualize them in Tempo.
 
 This simplified approach avoids the complexity of building query indexes, which makes Tempo both efficient and scalable for querying large volumes of trace data.
 
@@ -423,7 +423,7 @@ Integration with Grafana for Trace Visualization
 
 Tempo integrates seamlessly with Grafana, allowing you to visualize trace data in Grafana dashboards. With this integration, you can:
 
-- Search Traces: Once a trace ID is identified, it can be visualized in the Tempo data source panel in Grafana.
+- Search Traces: Once a [trace ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/) is identified, it can be visualized in the Tempo data source panel in Grafana.
 - Correlate Logs, Metrics, and Traces: Grafana provides the ability to view logs (from Loki), metrics (from Prometheus), and traces (from Tempo) in a single dashboard, enabling full-stack observability.
 
 For example, when monitoring an application, you might start by looking at metrics (e.g., CPU usage spikes) and then correlate that data with traces to pinpoint the exact problem in the system.
@@ -629,7 +629,7 @@ SigNoz offers:
 
 ### Key Features of SigNoz for End-to-End Application Monitoring
 
-- Distributed Tracing: SigNoz captures distributed traces, letting you understand the entire lifecycle of a request across different microservices.
+- Distributed Tracing: SigNoz captures [distributed traces](https://signoz.io/blog/distributed-tracing/), letting you understand the entire lifecycle of a request across different microservices.
 - Metrics and Dashboards: SigNoz automatically creates dashboards to visualize key application metrics such as request rate, error rate, and latency.
 - Log Management: It integrates logs with traces, enabling you to pinpoint issues faster by correlating them with specific trace data.
 - Built-in Alerting: Set up alerts based on metrics or traces to get notified of issues before they impact users.
@@ -639,7 +639,7 @@ SigNoz offers:
 To get started with SigNoz, follow these steps:
 
 1. Install SigNoz: You can install [SigNoz](https://signoz.io/docs/install/) on your local machine or in a cloud environment.
-2. Configure OpenTelemetry SDK in your application to send traces and metrics to SigNoz:
+2. Configure [OpenTelemetry SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) in your application to send traces and metrics to SigNoz:
     
     ```yaml
     exporters:
@@ -655,7 +655,7 @@ As distributed systems continue to grow in complexity, distributed tracing plays
 
 - OpenTelemetry has become the de facto standard for observability, merging OpenCensus and OpenTracing. Future standards are likely to revolve around OTLP (OpenTelemetry Protocol), which ensures seamless integration between various tools and systems.
 - OpenTelemetry will continue to expand its ecosystem of instrumentation libraries and improve on its performance optimizations for large-scale deployments.
-- Grafana Tempo may evolve to offer enhanced trace storage optimization and better integration with metrics (via Prometheus) and logs (via Loki), to provide a holistic observability stack at scale.
+- Grafana Tempo may evolve to offer enhanced trace storage optimization and better integration with metrics (via Prometheus) and logs (via Loki), to provide a holistic [observability stack](https://signoz.io/guides/observability-stack/) at scale.
 - As serverless and edge computing grow, distributed tracing will be essential to track request flows across highly fragmented infrastructures. These environments introduce unique challenges due to ephemeral instances and stateless function executions.
 - Distributed tracing tools will need to evolve to handle the short-lived nature of serverless functions, and to offer low-latency tracing across edge nodes.
 
@@ -665,7 +665,7 @@ As distributed systems continue to grow in complexity, distributed tracing plays
 - Tempo offers scalable, cost-effective trace storage and querying capabilities.
 - Combining OpenTelemetry with Tempo creates a powerful end-to-end tracing solution.
 - SigNoz enhances the observability stack with advanced analytics and visualization features.
-- The future of distributed tracing points towards increased automation and integration with emerging computing paradigms.
+- The future of [distributed tracing](https://signoz.io/distributed-tracing/) points towards increased automation and integration with emerging computing paradigms.
 
 ## FAQs
 
