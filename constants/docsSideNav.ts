@@ -480,6 +480,12 @@ const docsSideNav = [
                 label: 'JWT Secret',
                 isExpanded: false,
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/database',
+                label: 'Relational Databases Support',
+                isExpanded: false,
+              },
             ],
           },
           {
