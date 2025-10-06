@@ -936,7 +936,7 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/instrumentation/manual-instrumentation/java/opentelemetry-java-annotations',
+                    route: '/docs/instrumentation/manual-instrumentation/java/annotations',
                     label: 'Using Annotations',
                   },
                 ]
