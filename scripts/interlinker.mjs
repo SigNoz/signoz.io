@@ -15,7 +15,7 @@ import path from 'node:path';
 // ---------------- CLI ----------------
 const args = process.argv.slice(2);
 const options = {
-  csv: 'interlinking.csv',
+  csv: 'scripts/data/interlinking.csv',
   root: process.cwd(),
   dryRun: false,
   limit: Infinity, // successful row insertions cap
@@ -36,7 +36,7 @@ for (let i = 0; i < args.length; i++) {
   else if (a === '--save-every') options.saveEvery = Number(args[++i] || '50');
   else if (a === '--force-reprocess') options.forceReprocess = true;
   else if (a === '--help') {
-    console.log(`Usage: node scripts/interlinker.mjs [--csv interlinking.csv] [--dry-run] [--limit N] [--source-limit N] [--only-source URL] [--save-every N] [--force-reprocess]\n`);
+    console.log(`Usage: node scripts/interlinker.mjs [--csv scripts/data/interlinking.csv] [--dry-run] [--limit N] [--source-limit N] [--only-source URL] [--save-every N] [--force-reprocess]\n`);
     process.exit(0);
   }
 }
