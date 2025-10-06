@@ -937,6 +937,18 @@ const docsSideNav = [
               {
                 type: 'category',
                 isExpanded: false,
+                label: 'Java',
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/instrumentation/manual-instrumentation/java/annotations',
+                    label: 'Using Annotations',
+                  },
+                ]
+              },
+              {
+                type: 'category',
+                isExpanded: false,
                 label: 'JavaScript',
                 // route: '',
                 // link: {
