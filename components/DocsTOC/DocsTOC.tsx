@@ -58,8 +58,11 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
     const computeFiltered = () => {
       const next: TocItemProps[] = []
       toc.forEach((item) => {
-        const id = item.url.startsWith('#') ? item.url.slice(1) : item.url
-        const el = typeof document !== 'undefined' ? document.getElementById(id) : null
+        const rawId = item.url.startsWith('#') ? item.url.slice(1) : item.url
+        const normalizedId = rawId.replace(/-+$/g, '') // trim trailing hyphens
+        const el = typeof document !== 'undefined'
+          ? (document.getElementById(rawId) || document.getElementById(normalizedId))
+          : null
         if (!el) return
         // Only include headings that are currently rendered (not display:none)
         // Using getClientRects is robust across nested hidden ancestors
@@ -115,8 +118,9 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
 
       e.preventDefault()
       const hash = anchor.getAttribute('href') || ''
-      const id = hash.replace('#', '')
-      const el = document.getElementById(id)
+      const rawId = hash.replace('#', '')
+      const normalizedId = rawId.replace(/-+$/g, '')
+      const el = document.getElementById(rawId) || document.getElementById(normalizedId)
       if (!el) return
 
       // Activate all ancestor tabs (handles nested Tabs inside Tabs)
@@ -144,7 +148,9 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
       // Smooth scroll to the target after switching
       setTimeout(() => {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        setActiveSection(`#${id}`)
+        // Set active section using the element's id to avoid slug mismatches
+        const finalId = el.getAttribute('id') || normalizedId || rawId
+        setActiveSection(`#${finalId}`)
       }, 0)
     }
 
