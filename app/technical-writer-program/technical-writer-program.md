@@ -33,7 +33,7 @@ Are you a developer who loves creating content and getting it across to a global
 SigNoz is an open-source observability tool that provides metrics, traces, and logs under a single pane of glass. We're an open-source alternative to tools like Datadog, New Relic, etc.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="A trace represented with Flamegraph in the upper part and a Gantt Chart in the lower part in SigNoz"/>
+    <img src="/img/docs/apm-and-distributed-tracing/traces-view.webp" alt="A trace represented with Flamegraph in the upper part and a Gantt Chart in the lower part in SigNoz"/>
     <figcaption><i>SigNoz dashboard showing a distributed trace</i></figcaption>
 </figure>
 

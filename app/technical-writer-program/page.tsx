@@ -1,13 +1,11 @@
 import MarkdownRenderer from '@/components/ReactMarkdown'
 import React from 'react'
 
-
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Technical Writer Program',
 }
-
 
 const markdownContent = `
 
@@ -20,7 +18,7 @@ Are you a developer who loves creating content and getting it across to a global
 
 SigNoz is an open-source observability tool that provides metrics, traces, and logs under a single pane of glass. We're an open-source alternative to tools like Datadog, New Relic, etc.
 
-![SigNoz dashboard showing a distributed trace](/img/blog/common/signoz_flamegraphs.webp)
+![SigNoz dashboard showing a distributed trace](/img/docs/apm-and-distributed-tracing/traces-view.webp)
 
 As a developer-focused tool, we are loved in the developer community. With about [15k GitHub stars](https://github.com/signoz/signoz), SigNoz is one of the top open-source developer tools in the observability domain. 
 
