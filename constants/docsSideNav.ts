@@ -2138,6 +2138,19 @@ const docsSideNav = [
     ],
   },
   {
+    type: 'category',
+    isExpanded: false,
+    label: 'SigNoz MCP',
+
+    items: [ 
+      {
+          type: 'doc',
+          route: '/docs/signoz-mcp-server',
+          label: 'SigNoz MCP Server',
+      },
+    ],
+  },
+  {
     label: 'Integrations',
     type: 'category',
     isExpanded: false,
