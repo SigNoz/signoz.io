@@ -6,7 +6,7 @@ import {
   SiLangchain,
   SiClaude,
   SiGooglegemini,
-  SiAnthropic
+  SiAnthropic,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -22,6 +22,12 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/anthropic-monitoring',
     icon: <SiAnthropic className="h-7 w-7 text-orange-500" />,
     clickName: 'Anthropic API Monitoring',
+  },
+  {
+    name: 'Azure OpenAI API',
+    href: '/docs/azure-openai-monitoring',
+    icon: <img src="/svgs/icons/LLMMonitoring/azure-logo.webp" alt="Azure OpenAI Icon" className="h-7 w-7" />,
+    clickName: 'Azure OpenAI API Monitoring',
   },
   {
     name: 'Claude Code',
