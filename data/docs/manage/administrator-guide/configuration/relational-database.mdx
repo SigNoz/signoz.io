@@ -1,0 +1,26 @@
+---
+date: 2025-10-07
+id: relational-database
+title: Configuring SigNoz to Use Relational Databases
+description: Learn how to configure SigNoz to use Relational Databases
+---
+
+SigNoz ships with SQLite by default for quick setups. For production and larger deployments, you can configure SigNoz to use a relational database. 
+
+Refer to the [GitHub Issue #7316](https://github.com/SigNoz/signoz/issues/7316) for the latest information on supported databases.
+
+## Configuration
+
+Set the `SIGNOZ_SQLSTORE_PROVIDER` environment variable to select the database backend. See [configuration options](/docs/operate/configuration#environment-variables) for details.
+
+### PostgreSQL
+
+To use PostgreSQL, set the following environment variables on the `signoz` service:
+
+```bash
+SIGNOZ_SQLSTORE_PROVIDER: postgres
+SIGNOZ_SQLSTORE_POSTGRES_DSN: postgres://signoz:your_password@postgres:5432/signoz?sslmode=disable
+```
+
+- On first startup with PostgreSQL, SigNoz runs automatic schema migrations. This may take some time depending on database size and latency.
+- Ensure the specified database already exists and the user has privileges to create and migrate tables.

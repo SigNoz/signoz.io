@@ -482,7 +482,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/manage/administrator-guide/configuration/database',
+                route: '/docs/manage/administrator-guide/configuration/relational-database',
                 label: 'Relational Databases Support',
                 isExpanded: false,
               },
