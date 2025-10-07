@@ -937,6 +937,18 @@ const docsSideNav = [
               {
                 type: 'category',
                 isExpanded: false,
+                label: 'Java',
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/instrumentation/manual-instrumentation/java/annotations',
+                    label: 'Using Annotations',
+                  },
+                ]
+              },
+              {
+                type: 'category',
+                isExpanded: false,
                 label: 'JavaScript',
                 // route: '',
                 // link: {
@@ -1038,6 +1050,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/traces-management/guides/drop-spans',
             label: 'Control Traces Volume',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/pii-scrubbing/',
+            label: 'PII Scrubbing'
           },
           {
             type: 'doc',
