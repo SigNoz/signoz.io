@@ -186,7 +186,7 @@ The *logsCollection* preset in our DaemonSet collector is designed to collect lo
 Effective logging in Kubernetes involves more than just collecting *stdout/stderr*. Here are some best practices:
 
 1. **Log to Standard Output/Error:** This is the most fundamental practice. Containerised applications should write all logs to *stdout* and *stderr*. Kubernetes automatically captures these streams and hands them off to the container runtime [e.g., containerd, Docker], which then writes them to a file on the node [typically in `/var/log/pods/<pod-uid>/<container-name>/<log-id>.log` ]. This is exactly what the *filelog* receiver in OpenTelemetry collects.
-2. **[Structured Logging](https://signoz.io/guides/structlog/):** Whenever possible, applications should emit logs in a structured format, such as JSON. This makes logs much easier to parse, query, and analyze programmatically. Instead of plain text, a [JSON log](https://signoz.io/blog/json-logs/) might look like,
+2. **[structured logging](https://signoz.io/blog/structured-logs/):** Whenever possible, applications should emit logs in a structured format, such as JSON. This makes logs much easier to parse, query, and analyze programmatically. Instead of plain text, a [JSON log](https://signoz.io/blog/json-logs/) might look like,
     
     ```json
     {"timestamp": "...", "level": "INFO", "service": "frontend", "message": "User logged in", "user_id": "123", "ip_address": "192.168.1.10"}
