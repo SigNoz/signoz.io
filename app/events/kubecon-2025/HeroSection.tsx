@@ -17,9 +17,9 @@ const HeroSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="space-y-6 h-full py-20 px-6 bg-gradient-to-r from-black to-black/50">
             <div className="font-mono flex flex-col">
-              <span>// NOV 10 TO 13</span>
-              <span>// ATLANTA, GEORGIA</span>
-              <span>// BOOTH 1372</span>
+              <span>{`// NOV 10 TO 13`}</span>
+              <span>{`// ATLANTA, GEORGIA`}</span>
+              <span>{`// BOOTH 1372`}</span>
             </div>
             <div className="space-y-4">
               <div>

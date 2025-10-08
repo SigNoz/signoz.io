@@ -55,7 +55,7 @@ const KubeConPage: React.FC = () => {
         viewSchedule={talks.viewSchedule}
         viewScheduleLink={talks.viewScheduleLink}
       >
-        <div className="font-mono mb-4 text-xs">// WED NOV 10</div>
+        <div className="font-mono mb-4 text-xs">{`// WED NOV 10`}</div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {talks.items1.map((talk, index) => (
             <Card
@@ -75,7 +75,7 @@ const KubeConPage: React.FC = () => {
             </Card>
           ))}
         </div>
-        <div className="font-mono my-4 text-xs">// WED NOV 12</div>
+        <div className="font-mono my-4 text-xs">{`// WED NOV 12`}</div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {talks.items2.map((talk, index) => (
             <Card
