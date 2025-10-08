@@ -3,6 +3,7 @@ import TalksLayout from './TalksLayout';
 import { Card } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { ArrowRight } from 'lucide-react';
+import CTASection from './CTASection';
 
 const talks = {
   title: "Talks from SigNoz Team",
@@ -96,6 +97,8 @@ const KubeConPage: React.FC = () => {
           ))}
         </div>
       </TalksLayout>
+      {/* //////////////////////// */ }
+      <CTASection />
     </div>
   );
 };
