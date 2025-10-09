@@ -23,7 +23,7 @@ In this blog, we will uncover why infra monitoring with OpenTelemetry is easy to
 
 OpenTelemetry [OTel] started primarily as a solution for distributed tracing, but it has since evolved into a full-fledged telemetry framework covering metrics and logs as well. In fact, as of 2025, the project reached general availability for metrics and logs, meaning those APIs and SDKs are stable for production use. 
 
-Crucially for infrastructure monitoring, OpenTelemetry isn’t limited to just tracing your microservices, it can collect **host and system metrics out of the box**. The OpenTelemetry Collector includes a built-in `hostmetrics` receiver that gathers CPU, RAM, disk, network, and other OS-level stats from the host. 
+Crucially for infrastructure monitoring, OpenTelemetry isn’t limited to just tracing your microservices, it can collect **host and system metrics out of the box**. The [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) includes a built-in `hostmetrics` receiver that gathers CPU, RAM, disk, network, and other OS-level stats from the host. 
 
 <Figure src="/img/blog/2025/04/otel-infra-cover-comic.webp" alt="cloudWatch-cover" caption="Getting started with OTel for infra monitoring is EASY!" />
 
@@ -33,10 +33,10 @@ Beyond just individual hosts, OpenTelemetry has also made it easy to monitor **K
 <Figure src="/img/blog/2025/04/otel-infra-prom.webp" alt="cloudWatch-cover" caption="Shifting from Prometheus to OTel is now smooth." />
 
 
-Combined with its ability to **scrape Prometheus endpoints** and forward logs, OpenTelemetry offers a unified infrastructure monitoring whether you're running bare metal, VMs, or Kubernetes. This also means that if your system already exposes Prometheus-format metrics [as many existing apps and exporters do], adopting OpenTelemetry becomes much easier. You can just reuse your existing instrumentation and incrementally route that data through OTel pipelines easily without ripping everything out.
+Combined with its ability to **scrape [Prometheus endpoints](https://signoz.io/guides/prometheus-metrics-endpoint/)** and forward logs, OpenTelemetry offers a unified infrastructure monitoring whether you're running bare metal, VMs, or Kubernetes. This also means that if your system already exposes Prometheus-format metrics [as many existing apps and exporters do], adopting OpenTelemetry becomes much easier. You can just reuse your existing instrumentation and incrementally route that data through OTel pipelines easily without ripping everything out.
 
 <Admonition>
-The [Prometheus receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver) of the OTel collector allows you to collect metrics from any software that exposes Prometheus metrics. It serves as a drop-in replacement for Prometheus to scrape your services.
+The [Prometheus receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver) of the OTel collector allows you to collect metrics from any software that exposes [Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/). It serves as a drop-in replacement for Prometheus to scrape your services.
 </Admonition>
 
 
@@ -102,7 +102,7 @@ service:
 
 In this example, we have used SigNoz as our observability backend. [make sure to add your observability backend as an exporter]
 
-Once your setup is done, you should see your Hostname in the Hosts tab of *Infrastructure Monitoring* section in SigNoz, as shown below. 
+Once your setup is done, you should see your Hostname in the Hosts tab of *Infrastructure Monitoring* section in [SigNoz](https://signoz.io/docs/introduction/), as shown below. 
 
 Infrastructure Monitoring in SigNoz is built ground-up for OpenTelemetry,  supports Host and Kubernetes monitoring, which provides a comprehensive interface for monitoring and analysing host and pods performance, traces, and logs. SigNoz also leverages OpenTelemetry's semantic conventions to ensure seamless correlation.
 
@@ -129,7 +129,7 @@ Let’s look at two common challenges faced by lack of correlation:
 - **Tooling Fatigue**: Managing multiple tools means dealing with different configurations, maintenance routines, and learning curves, leading to increased operational overhead.
 - **Siloed Metrics**: With metrics, logs, and traces scattered across various platforms, correlating issues across the stack becomes cumbersome, hindering swift diagnosis and resolution.
 
-OpenTelemetry addresses this challenge by providing a unified framework for collecting and correlating infra metrics and APM. By standardising telemetry data and metadata, OTel enables seamless correlation across different observability signals, facilitating faster and more accurate RCA.
+OpenTelemetry addresses this challenge by providing a unified framework for collecting and correlating infra metrics and APM. By standardising telemetry data and metadata, [OTel](https://signoz.io/blog/what-is-opentelemetry/) enables seamless correlation across different observability signals, facilitating faster and more accurate RCA.
 
 Let’s look at how OTel achieves this correlation.
 
