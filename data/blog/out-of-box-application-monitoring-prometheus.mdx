@@ -22,7 +22,7 @@ Prometheus is undoubtedly growing as the native monitoring tool for Kubernetes. 
 
 Prometheus is undoubtedly growing as the native monitoring tool for Kubernetes. We have been using Prometheus to collect metrics about our infrastructure for a long time and there are plenty of dashboards available to get the dashboards up fast. For some time, I have been wondering why there aren't out of box application metrics, something like node-exporter for infrastructure metrics.
 
-Let me explain you with an example. Installing kube-state metrics and node-exporter in your instance sends a lot of metrics about that instance to Prometheus. If the metric labels are consistent then you can get the dashboard by using publicly available Grafana dashboards, such as **[Kubernetes Capacity Planning](https://grafana.com/grafana/dashboards/5499).**
+Let me explain you with an example. Installing kube-state metrics and node-exporter in your instance sends a lot of metrics about that instance to Prometheus. If the [metric labels](https://signoz.io/guides/what-are-prometheus-labels/) are consistent then you can get the dashboard by using publicly available Grafana dashboards, such as **[Kubernetes Capacity Planning](https://grafana.com/grafana/dashboards/5499).**
 
 This dashboard includes graphs for CPU usage, memory usage, disk IO, network usage, etc. Everything is ready in a few minutes.
 
@@ -44,7 +44,7 @@ We have 2 Clusters.
 
 By adding remote-write url with cluster labels you can visualise metrics from multiple Prometheus instances from different clusters. We have a running cortex at our backend that can be used for the following purposes:
 
-1. Long term storage of Prometheus metrics
+1. Long term storage of [Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/)
 2. De-duplicating metrics for HA Prometheus setup
 3. Single pane of Grafana dashboard for metrics from multiple clusters
 
@@ -136,10 +136,10 @@ We need to set a few flags like setting external_labels cluster and replica, rem
 ```
 
 - Remote Write url will send your samples to Cortex for long term storage
-- Setting flag cluster will let you aggregate metrics across clusters
+- Setting flag cluster will let you [aggregate metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/) across clusters
 - Setting flag replica will enable HA Prometheus setup and will deduplicate metrics from multiple Prometheus instances from the same cluster
 
-3. Add **_signoz_** python package in your requirements.txt and re-build your docker image. This sensor will get your application metrics and send them to signoz-agent which shall let Prometheus scrape them
+3. Add **_signoz_** python package in your requirements.txt and re-build your docker image. This sensor will get your application metrics and send them to [signoz](https://signoz.io/docs/introduction/)-agent which shall let Prometheus scrape them
 
 > We have separate packages for different languages and thus enabling a wide variety of technologies in Python, NodeJs, Java, etc
 
@@ -166,13 +166,13 @@ Skip Prometheus installation and rather only change the configuration to add rem
 
 ### For those who only want managed Prometheus long term storage
 
-Skip all steps and change your Prometheus config to include remote_write urls and authentication
+Skip all steps and change your [Prometheus config](https://signoz.io/guides/what-is-prometheus-target/) to include remote_write urls and authentication
 
 ## What are the advantages over simple Prometheus?
 
 - Managed long term storage
 - Multi cluster view on a single pane of window
-- Enabling HA Prometheus setup by running multiple prom instances
+- Enabling [HA Prometheus](https://signoz.io/blog/ha-prometheus-cortex-cassandra/) setup by running multiple prom instances
 - Out of box application metrics
 - Zero Instrumentation
 - Pre-built Grafana dashboards on Infrastructure and Application metrics

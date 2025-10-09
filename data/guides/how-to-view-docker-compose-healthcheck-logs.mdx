@@ -229,7 +229,7 @@ Follow these best practices to maximize the effectiveness of your healthchecks:
 
 ## Monitoring Docker-Compose Healthchecks with SigNoz
 
-To effectively monitor Docker Compose Healthchecks, using an advanced observability platform like SigNoz can be highly beneficial. [SigNoz](https://signoz.io/) is an open-source observability tool that provides end-to-end monitoring, troubleshooting, and alerting capabilities for your applications and infrastructure.
+To effectively monitor Docker Compose Healthchecks, using an advanced observability platform like SigNoz can be highly beneficial. [SigNoz](https://signoz.io/) is an open-source observability tool that provides [end-to-end monitoring](https://signoz.io/comparisons/end-to-end-monitoring-tools/), troubleshooting, and alerting capabilities for your applications and infrastructure.
 
 Here's how you can leverage SigNoz for monitoring Docker Compose Healthchecks:
 
@@ -255,7 +255,7 @@ To obtain the SigNoz ingestion key and region, navigate to the “Settings” pa
 
 <Figure src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-08-28_at_9.04.01_AM.webp" alt="SigNoz Ingestion Settings" caption="SigNoz Ingestion Settings" />
 
-1. Set Up the OpenTelemetry Collector Config
+1. Set Up the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)Config
 
 An [OTel Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) is a vendor-agnostic service that receives, processes, and exports telemetry data (metrics, logs, and traces) from various sources to various destinations.
 
@@ -302,7 +302,7 @@ service:
       exporters: [otlp]
 ```
 
-The above configuration sets up the OpenTelemetry Collector to listen on `0.0.0.0:2255` for incoming Docker logs over TCP and to parse and filter the logs using a regex parser. The logs are then processed in batches for optimized handling and exported securely via OTLP to the `OTEL_COLLECTOR_ENDPOINT` specified in your `.env` file.
+The above configuration sets up the OpenTelemetry Collector to listen on `0.0.0.0:2255` for incoming [Docker logs](https://signoz.io/guides/docker-logs-location/) over TCP and to parse and filter the logs using a regex parser. The logs are then processed in batches for optimized handling and exported securely via OTLP to the `OTEL_COLLECTOR_ENDPOINT` specified in your `.env` file.
 
 4. Add Services to the Docker Compose File
 
@@ -345,7 +345,7 @@ In your Docker Compose file, add the below configuration:
 The above Docker Compose configuration sets up two services:
 
 - `otel-collector`:
-    - Uses the Signoz OpenTelemetry Collector image.
+    - Uses the Signoz [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) image.
     - Mounts the `otel-collector-config.yaml` file into the container.
     - Uses environment variables from the `.env` file for configuration.
     - Exposes ports `4317` (OTLP gRPC receiver) and `4318` (OTLP HTTP receiver).
@@ -427,4 +427,4 @@ Implementing multi-stage healthchecks is an effective strategy for ensuring that
     
     In this example, the `web` service is monitored by checking its web interface, while the `db` service uses a database-specific healthcheck. Each service is monitored according to its specific needs.
     
-3. Utilizing external health checking services: External checks can often be integrated with monitoring and alerting tools, such as SigNoz or Prometheus, allowing you to track healthcheck results over time, generate alerts on failures, and correlate healthcheck data with other application metrics.
+3. Utilizing external health checking services: External checks can often be integrated with [monitoring and alerting tools](https://signoz.io/comparisons/infrastructure-monitoring-tools/), such as SigNoz or Prometheus, allowing you to track healthcheck results over time, generate alerts on failures, and correlate healthcheck data with other application metrics.
