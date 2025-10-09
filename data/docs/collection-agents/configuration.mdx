@@ -4,23 +4,31 @@ id: otel-collector-config
 title: OpenTelemetry Collector Configuration Explained in Detail
 ---
 
+import GetHelp from '@/components/shared/get-help.md'
+
 ## Overview
 
-This document helps you understand the various concepts of OpenTelemetry (OTel) Collector configuration in detail.
+The OpenTelemetry (OTel) Collector is a vendor-agnostic telemetry data pipeline that receives, processes, and exports traces, metrics and logs. This guide helps you understand the various concepts of OTel Collector and helps you configure it.
 
 ## What is OpenTelemetry Collector?
 
-The OpenTelemetry Collector is a vendor-neutral data collection agent which can receive, process, and export telemetry data such as traces, logs, metrics. It supports receiving data in multiple formats such as OTLP, Jaeger, Prometheus, etc. and exporting telemetry data to multiple backends. It also supports processing of telemetry data before it is sent to backends.
+The OpenTelemetry Collector acts as a central hub or agent for telemetry data with three key capabilities:
+
+- **Receive:** Telemetry data in multiple formats (OTLP, Jaeger, Prometheus, Zipkin, etc.)
+- **Process:** Data through transformation, filtering
+- **Export:** To one or more observability backends
 
 ## OTel Collector Configuration Structure
 
-Basic YAML structure of OTel Collector is given below, let's understand each component of OTel Collector Configuration one by one:
+The collector uses a YAML configuration file with 5 main components:
 
-1. [Receivers](#receivers)
-2. [Processors](#processors)
-3. [Exporters](#exporters)
-4. [Extensions](#extensions)
-5. [Service](#service)
+1. [Receivers](#1-receivers) - Defines how data enters the collector
+2. [Processors](#2-processors) - Transforms and filters data
+3. [Exporters](#3-exporters) - Send data to backends
+4. [Extensions](#4-extensions) - Offer additional capabilities
+5. [Service](#5-service) - Connect components with pipelines
+
+### Basic Configuration Example
 
 ```yaml
 receivers:
@@ -64,18 +72,13 @@ service:
 
 ## Core Components
 
-### Receivers
+### 1. Receivers
 
-Receivers control how telemetry data enters OTel Collector. Receivers can collect telelemetry data from one or more sources.
+Receivers define how telemetry data enters the OTel Collector. Receivers can collect telemetry data from one or more sources and they can be pull or push based. Each receiver listens on a network endpoint, or scrapes metrics from targets.
 
-#### Common Receiver Types
+#### OTLP Receiver
 
-- OTLP Receiver
-- Jaeger Receiver
-- Prometheus Receiver
-- Zipkin Receiver
-
-#### Configuration Example
+The native OpenTelemetry protocol receiver which supports both gRCP and HTTP.
 
 ```yaml
 receivers:
@@ -85,82 +88,223 @@ receivers:
         endpoint: '0.0.0.0:4317'
       http:
         endpoint: '0.0.0.0:4318'
+```
+
+#### Prometheus Receiver
+
+This receiver scrapes metrics from endpoints which are Prometheus compatible. This is a **pull** based receiver, it actively scrapes metrics from targets instead of listening for incoming data.
+
+```yaml
+receivers:
   prometheus:
     config:
       scrape_configs:
-        - job_name: otel-collector
-          scrape_interval: 5s
+        - job_name: 'node-exporter'
+          scrape_interval: 30s
           static_configs:
-            - targets:
-                - 'localhost:8888'
+            - targets: ['localhost:9100']
 ```
 
-### Processors
+#### Jaeger Receiver
 
-Processors are used to transform, filter, or enrich telemetry data before sending to exporters.
+This receiver accepts traces in Jaeger formats (Thrift, gRPC, HTTP).
 
-#### Common Processors Type
+```yaml
+receivers:
+  jaeger:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14250
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+```
 
-- Batch Processor
-- Memory Limiter
-- Resource Processor
-- Attributes Processor
-- Filter Processor
+#### Zipkin Receiver
 
-#### Configuration Example
+This receiver accepts trace data in Zipkin format.
+
+```yaml
+receivers:
+  zipkin:
+    endpoint: 0.0.0.0:9411
+```
+
+A full list of receivers can be obtained from [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver) and [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver).
+
+### 2. Processors
+
+Processors are used to transform, filter, or enrich telemetry data between receivers and exporters.
+
+#### Batch Processor
+
+This processor batches telemetry data to reduce network overhead and improve throughput.
 
 ```yaml
 processors:
   batch:
-  memory_limiter:
-    check_interval: 1s
-    limit_mib: 4000
-    spike_limit_mib: 800
+    timeout: 10s # Max time before sending batch
+    send_batch_size: 1024 # Send when batch reaches this size
+    send_batch_max_size: 2048 # Maximum batch size limit
 ```
 
-### Exporters
+#### Memory Limiter
 
-Exporters send telemetry data to backends.
+This processor prevents out-of-memory (OOM) errors by checking memory usage of the collector.
 
-#### Common Exporter Types
+```yaml
+processors:
+  memory_limiter:
+    check_interval: 5s # How often to check memory
+    limit_mib: 4000 # Hard memory limit
+    spike_limit_mib: 800 # Additional headroom for spikes
+```
 
-- OTLP Exporter
-- Prometheus Exporter
-- Jaeger Exporter
-- Logging Exporter
+#### Resource Processor
 
-#### Configuration Example
+This processor adds, updates or removes resource attributes on telemetry data.
+
+```yaml
+processors:
+  resource:
+    attributes:
+      - key: environment
+        value: production
+        action: upsert # Always set environment=production
+      - key: team
+        value: backend
+        action: insert # Only add if not already present
+      - key: internal.debug
+        action: delete # Remove this attribute
+      - key: user.id
+        action: hash # Hash PII data
+```
+
+#### Attributes Processor
+
+This processor modifies span, log, or metric attributes.
+
+```yaml
+processors:
+  attributes:
+    actions:
+      - key: http.url
+        action: delete # Remove sensitive URLs
+      - key: db.statement
+        action: hash # Hash SQL queries
+```
+
+#### Filter Processor
+
+This processor drops telemetry data based on conditions.
+
+```yaml
+processors:
+  filter:
+    error_mode: ignore
+    traces:
+      span:
+        - attributes["http.status_code"] == 200 # Drop successful health checks
+```
+
+A full list of processors can be obtained from [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor) and [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor).
+
+### 3. Exporters
+
+Exporters send processed telemetry data to observability backends. You can configure multiple exporters to send data to various backends.
+
+#### OTLP gRPC Exporter
+
+Exports data via gRPC using OpenTelemetry protocol.
 
 ```yaml
 exporters:
   otlp:
-    endpoint: backend:4317
+    endpoint: 'ingest.<region>.signoz.cloud:443'
     tls:
       insecure: false
+    headers:
+      'signoz-ingestion-key': '<your-ingestion-key>'
 ```
 
-### Extensions
+#### OTLP/HTTP Exporter
 
-Extensions are additional components which add capabilities which directly don't process telemetry data.
+Exports data via HTTP using OpenTelemetry protocol.
 
-#### Common Extensions
+```yaml
+exporters:
+  otlphttp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '<your-ingestion-key>'
+```
 
-- Health Check
-- pprof
-- zpages
+#### Debug Exporter
 
-#### Configuration Example
+Logs telemetry data to console for debugging purposes.
+
+```yaml
+exporters:
+  debug:
+    verbosity: detailed
+```
+
+#### Prometheus Exporter
+
+Exposes metrics in Prometheus format which can be scraped at configured endpoints.
+
+```yaml
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    namespace: otel
+```
+
+A full list of exporters can be obtained from [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter) and [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter).
+
+### 4. Extensions
+
+Extensions are additional components which add capabilities to the collector without directly processing telemetry data.
+
+#### Health Check Extension
+
+Provides an HTTP endpoint for health checks.
 
 ```yaml
 extensions:
   health_check:
+    endpoint: 0.0.0.0:13133
+    path: /health
+```
+
+#### pprof Extension
+
+Enables Go profiling for performance analysis.
+
+```yaml
+extensions:
   pprof:
     endpoint: 0.0.0.0:1777
 ```
 
-### Service Section
+#### zpages Extension
 
-Service section defines pipelines that connect components with each others.
+Provides live debugging pages showing pipeline activity.
+
+```yaml
+extensions:
+  zpages:
+    endpoint: 0.0.0.0:55679
+```
+
+Access the extension pages at `http://localhost:55679/debug/tracez` and `/debug/pipelinez`
+
+A full list of extensions can be obtained from [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension) and [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension).
+
+### 5. Service
+
+Service section defines pipelines that connect components with each other. Each pipeline defines the flow of data through receivers, processors, and exporters.
 
 #### Pipeline Types
 
@@ -168,14 +312,35 @@ Service section defines pipelines that connect components with each others.
 - metrics
 - logs
 
-#### Configuration Example
+#### Pipeline Structure
 
 ```yaml
 service:
-  extensions: [health_check, pprof]
+  extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp, debug]
+
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [otlp, debug, prometheus]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp, debug]
 ```
+
+## Best Practices
+
+1. **Always use batch processor:** Improves performance and reduces load on backend
+2. **Place memory_limiter first:** Protects collector from OOM crashes
+3. **Monitor collector health:** Use `health_check` and `zpages` extensions
+4. **Test configuration:** Use `--dry-run` flag to validate configuration before deployment
+
+## Get Help
+
+<GetHelp />
