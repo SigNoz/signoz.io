@@ -1,0 +1,181 @@
+---
+date: 2025-10-08
+id: otel-collector-config
+title: OpenTelemetry Collector Configuration Explained in Detail
+---
+
+## Overview
+
+This document helps you understand the various concepts of OpenTelemetry (OTel) Collector configuration in detail.
+
+## What is OpenTelemetry Collector?
+
+The OpenTelemetry Collector is a vendor-neutral data collection agent which can receive, process, and export telemetry data such as traces, logs, metrics. It supports receiving data in multiple formats such as OTLP, Jaeger, Prometheus, etc. and exporting telemetry data to multiple backends. It also supports processing of telemetry data before it is sent to backends.
+
+## OTel Collector Configuration Structure
+
+Basic YAML structure of OTel Collector is given below, let's understand each component of OTel Collector Configuration one by one:
+
+1. [Receivers](#receivers)
+2. [Processors](#processors)
+3. [Exporters](#exporters)
+4. [Extensions](#extensions)
+5. [Service](#service)
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: otelcol:4317
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+## Core Components
+
+### Receivers
+
+Receivers control how telemetry data enters OTel Collector. Receivers can collect telelemetry data from one or more sources.
+
+#### Common Receiver Types
+
+- OTLP Receiver
+- Jaeger Receiver
+- Prometheus Receiver
+- Zipkin Receiver
+
+#### Configuration Example
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: '0.0.0.0:4317'
+      http:
+        endpoint: '0.0.0.0:4318'
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: otel-collector
+          scrape_interval: 5s
+          static_configs:
+            - targets:
+                - 'localhost:8888'
+```
+
+### Processors
+
+Processors are used to transform, filter, or enrich telemetry data before sending to exporters.
+
+#### Common Processors Type
+
+- Batch Processor
+- Memory Limiter
+- Resource Processor
+- Attributes Processor
+- Filter Processor
+
+#### Configuration Example
+
+```yaml
+processors:
+  batch:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 4000
+    spike_limit_mib: 800
+```
+
+### Exporters
+
+Exporters send telemetry data to backends.
+
+#### Common Exporter Types
+
+- OTLP Exporter
+- Prometheus Exporter
+- Jaeger Exporter
+- Logging Exporter
+
+#### Configuration Example
+
+```yaml
+exporters:
+  otlp:
+    endpoint: backend:4317
+    tls:
+      insecure: false
+```
+
+### Extensions
+
+Extensions are additional components which add capabilities which directly don't process telemetry data.
+
+#### Common Extensions
+
+- Health Check
+- pprof
+- zpages
+
+#### Configuration Example
+
+```yaml
+extensions:
+  health_check:
+  pprof:
+    endpoint: 0.0.0.0:1777
+```
+
+### Service Section
+
+Service section defines pipelines that connect components with each others.
+
+#### Pipeline Types
+
+- traces
+- metrics
+- logs
+
+#### Configuration Example
+
+```yaml
+service:
+  extensions: [health_check, pprof]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```

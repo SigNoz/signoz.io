@@ -718,6 +718,11 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        type: 'doc',
+        label: 'Collector Config',
+        route: '/docs/collection-agents/configuration'
+      },
     ],
   },
   {
