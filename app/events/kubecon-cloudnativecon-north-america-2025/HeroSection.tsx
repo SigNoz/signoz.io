@@ -34,7 +34,7 @@ const HeroSection = () => {
         </div>
       </div>
       <Image
-        src="/img/events/kubecon-2025/hero-illustration.png"
+        src="/img/events/kubecon-cloudnativecon-north-america-2025/hero-illustration.png"
         alt="Kubecon Hero Illustration"
         fill
         className="object-contain -z-10"
