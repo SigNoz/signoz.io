@@ -2112,6 +2112,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/crewai-monitoring',
+        label: 'Crew AI Monitoring',
+        type: 'doc',
+      },
+      {
         route: '/docs/deepseek-monitoring',
         label: 'DeepSeek Monitoring',
         type: 'doc',
