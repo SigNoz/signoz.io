@@ -1640,6 +1640,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/crewai-dashboard',
+            label: 'Crew AI',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
             label: 'DeepSeek API',
           },
@@ -2109,6 +2114,11 @@ const docsSideNav = [
       {
         route: '/docs/claude-code-monitoring',
         label: 'Claude Code Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/crewai-monitoring',
+        label: 'Crew AI Monitoring',
         type: 'doc',
       },
       {
