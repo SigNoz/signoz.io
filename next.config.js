@@ -689,6 +689,11 @@ module.exports = () => {
           source: "/guides/upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11/",
           destination: "/guides/upstream-connect-error/",
           permanent: true
+        },
+        {
+          source: "/docs/tutorial/writing-clickhouse-queries-in-dashboard/",
+          destination: "/docs/userguide/writing-clickhouse-traces-query/",
+          permanent: true
         }
       ]
     },
