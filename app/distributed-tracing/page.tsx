@@ -1,5 +1,5 @@
 import React from 'react'
-import DistributedTracing from './DistributedTracing'
+import DistributedTracingPage from './DistributedTracingPage'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -8,18 +8,18 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Distributed Tracing | SigNoz',
-    description: 'Implement distributed tracing in your microservices-based applications powered by OpenTelemetry SDKs. Track user requests across services to help you identify performance bottlenecks.',
-    images:"/img/features/distributed-tracing/distributed-tracing-cover.webp"
+    // description: 'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
+    // images:"/img/platform/LogsManagementHero.webp"
   },
   description:
-    'Implement distributed tracing in your microservices-based applications powered by OpenTelemetry SDKs. Track user requests across services to help you identify performance bottlenecks.',
+    'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
   twitter:{
     title: 'Distributed Tracing | SigNoz',
-    description: 'Implement distributed tracing in your microservices-based applications powered by OpenTelemetry SDKs. Track user requests across services to help you identify performance bottlenecks.',
-    images:"/img/features/distributed-tracing/distributed-tracing-cover.webp",
+    // description: 'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
+    // images:"/img/platform/LogsManagementHero.webp",
   }
 }
 
-export default function Page() {
-  return <DistributedTracing />
+export default function DistributedTracing() {
+  return <DistributedTracingPage />
 }
