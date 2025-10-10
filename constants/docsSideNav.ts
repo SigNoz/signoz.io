@@ -2142,6 +2142,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/mastra-monitoring',
+        label: 'Mastra Monitoring',
+        type: 'doc',
+      },
+      {
         route: '/docs/opentelemetry-openai-monitoring',
         label: 'OpenAI Monitoring',
         type: 'doc',
