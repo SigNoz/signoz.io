@@ -719,9 +719,16 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        label: 'Collector Config',
-        route: '/docs/collection-agents/configuration'
+        type: 'category',
+        label: 'OpenTelemetry Collector Reference',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            label: 'Configuration Components',
+            route: '/docs/collection-agents/configuration'
+          },
+        ]
       },
     ],
   },

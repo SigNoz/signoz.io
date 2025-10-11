@@ -1,7 +1,7 @@
 ---
 date: 2025-10-08
 id: otel-collector-config
-title: OpenTelemetry Collector Configuration Explained in Detail
+title: OpenTelemetry Collector Configuration
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -129,7 +129,12 @@ receivers:
     endpoint: 0.0.0.0:9411
 ```
 
-A full list of receivers can be obtained from [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver) and [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver).
+<Admonition>
+  A full list of receivers can be obtained from
+  [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver)
+  and
+  [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver).
+</Admonition>
 
 ### 2. Processors
 
@@ -149,7 +154,7 @@ processors:
 
 #### Memory Limiter
 
-This processor prevents out-of-memory (OOM) errors by checking memory usage of the collector.
+This processor prevents out-of-memory (OOM) errors by continuously checking and limiting the memory usage of the collector.
 
 ```yaml
 processors:
@@ -161,7 +166,9 @@ processors:
 
 #### Resource Processor
 
-This processor adds, updates or removes resource attributes on telemetry data.
+Resource attributes provide additional contextual information about the source of the telemetry data, such as service name, environment, hostname, and deployment details. These attributes enable better filtering, grouping, and correlation of telemetry data in SigNoz.
+
+The [resource](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourceprocessor/README.md) processor adds, updates or removes resource attributes on telemetry data.
 
 ```yaml
 processors:
@@ -179,9 +186,13 @@ processors:
         action: hash # Hash PII data
 ```
 
+For more examples on using resource attributes, refer to the docs [here](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/).
+
 #### Attributes Processor
 
-This processor modifies span, log, or metric attributes.
+Attributes provide additional metadata, or context within telemetry data, such as HTTP status code, HTTP URL, log level.
+
+The [attributes](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/attributesprocessor/README.md) processor modifies span, log, or metric attributes in telemetry data.
 
 ```yaml
 processors:
@@ -195,7 +206,7 @@ processors:
 
 #### Filter Processor
 
-This processor drops telemetry data based on conditions.
+The [filter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md) processor drops telemetry data based on custom conditions. This is useful for reducing noise, excluding irrelevant data, which can help to significantly reduce storage and optimize billing.
 
 ```yaml
 processors:
@@ -204,9 +215,59 @@ processors:
     traces:
       span:
         - attributes["http.status_code"] == 200 # Drop successful health checks
+        - attributes["http.request.method"] == nil # Drop non-HTTP spans
+
+    metrics:
+      metric:
+        # Drop metrics related to the /health endpoint
+        - 'name == "http.server.duration" and attributes["http.route"] == "/health"'
+
+    logs:
+      log_record:
+        # Drop log entries containing passwords
+        - 'IsMatch(body, ".*password.*")'
 ```
 
-A full list of processors can be obtained from [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor) and [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor).
+#### Transform Processor
+
+The [transform](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md) processor modifies the telemetry data using [OpenTelemetry Transformation Language](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl) (OTTL). This is especially useful for scenarios such as:
+
+- **Scrubbing sensitive data** (example includes PII data, passwords)
+- **Redacting secrets** (example includes API tokens, authorization headers)
+- **Standardizing attribute names or values**
+
+```yaml
+processors:
+  transform:
+    error_mode: ignore
+    trace_statements:
+      # Redact IP address
+      - replace_pattern(span.attributes["client.address"], "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}", "*.*.*.*")
+
+      # Redact password
+      - replace_pattern(span.attributes["process.command_line"], "password\\=[^\\s]*(\\s?)", "password=***")
+    metric_statements:
+      # Rename a metric
+      - set(metric.name, "http.server.duration") where metric.name == "http.server.requests.duration"
+
+      # Convert sum to gauge metric type
+      - convert_sum_to_gauge() where metric.name == "system.processes.count"
+    log_statements:
+      # Redact Authorization header
+      - delete_key(log.attributes, "http.request.header.authorization")
+
+      # Mark log severity as FAIL for specific message
+      - set(log.severity_text, "FAIL") where log.body == "request failed"
+```
+
+For more examples, you can check guides for scrubbing PII in [logs](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) and [traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/).
+
+<Admonition>
+  A full list of processors can be obtained from
+  [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor)
+  and
+  [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor).
+</Admonition>
 
 ### 3. Exporters
 
@@ -261,7 +322,12 @@ exporters:
     namespace: otel
 ```
 
-A full list of exporters can be obtained from [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter) and [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter).
+<Admonition>
+  A full list of exporters can be obtained from
+  [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter)
+  and
+  [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter).
+</Admonition>
 
 ### 4. Extensions
 
@@ -269,7 +335,7 @@ Extensions are additional components which add capabilities to the collector wit
 
 #### Health Check Extension
 
-Provides an HTTP endpoint for health checks.
+The [health_check](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/healthcheckextension/README.md) extension provides an HTTP endpoint that can be probed to see the status of the collector.
 
 ```yaml
 extensions:
@@ -278,9 +344,9 @@ extensions:
     path: /health
 ```
 
-#### pprof Extension
+#### Performance Profiler Extension
 
-Enables Go profiling for performance analysis.
+The [pprof](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/pprofextension/README.md) extension enables performance profiling of the OTel Collector using Go's build-in [pprof](https://pkg.go.dev/net/http/pprof) tools. This is useful for debugging performance issues such as high CPU or memory usage, goroutine leaks.
 
 ```yaml
 extensions:
@@ -288,9 +354,13 @@ extensions:
     endpoint: 0.0.0.0:1777
 ```
 
-#### zpages Extension
+#### zPages Extension
 
-Provides live debugging pages showing pipeline activity.
+The [zPages](https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/zpagesextension/README.md) extension provides live debugging pages that has real-time information about the collector's internal state including traces and pipeline activity. This is useful for:
+
+- Verifying telemetry data flow
+- Monitoring span activity
+- Diagnosing dropped data
 
 ```yaml
 extensions:
@@ -298,13 +368,21 @@ extensions:
     endpoint: 0.0.0.0:55679
 ```
 
-Access the extension pages at `http://localhost:55679/debug/tracez` and `/debug/pipelinez`
+Once enabled, you can access the extension pages at:
 
-A full list of extensions can be obtained from [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension) and [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension).
+- `http://localhost:55679/debug/tracez`
+- `/debug/pipelinez`
+
+<Admonition>
+  A full list of extensions can be obtained from
+  [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension)
+  and
+  [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension).
+</Admonition>
 
 ### 5. Service
 
-Service section defines pipelines that connect components with each other. Each pipeline defines the flow of data through receivers, processors, and exporters.
+The service section defines pipelines that connect components with each other. Each pipeline defines the flow of data through receivers, processors, and exporters.
 
 #### Pipeline Types
 
@@ -336,10 +414,30 @@ service:
 
 ## Best Practices
 
-1. **Always use batch processor:** Improves performance and reduces load on backend
-2. **Place memory_limiter first:** Protects collector from OOM crashes
-3. **Monitor collector health:** Use `health_check` and `zpages` extensions
-4. **Test configuration:** Use `--dry-run` flag to validate configuration before deployment
+### 1. Use the batch processor
+
+Always include the [`batch`](#batch-processor) processor to group and buffer telemetry data before export. This reduces the number of export requests, improves the throughput.
+
+The batch processor should be placed at the end of the processor list, just before the exporters. This ensures that all the transformations and filtering are in place before batching.
+
+### 2. Place memory_limiter at the beginning
+
+To prevent out-of-memory (OOM) crashes, configure the [`memory_limiter`](#memory-limiter) as the first processor. It monitors memory usage of the collector and makes sure the memory usage stays within safe limits.
+
+### 3. Monitor collector health
+
+Use [`health_check`](#health-check-extension) extension to monitor the health of the collector. It exposes `/health` HTTP endpoint which can be probed to check the collector's status.
+
+### 4. Validate configuration before deployment
+
+Before deploying the collector, validate the configuration with the `--dry-run` flag. This allows you misconfigurations or issues with the config without starting the collector.
+
+```bash
+otelcol --config ./otel-collector-config.yaml --dry-run
+
+# Or if you are using OTel Collector Contrib
+otelcol-contrib --config ./otel-collector-config.yaml --dry-run
+```
 
 ## Get Help
 
