@@ -824,7 +824,7 @@ const CustomerStories: React.FC = () => {
 }
 
 // Main Component
-const LogsManagement: React.FC = () => {
+const DistributedTracing: React.FC = () => {
   return (
     <main className="!mt-[-10px] mb-auto">
       <ProductNav />
@@ -863,4 +863,4 @@ const LogsManagement: React.FC = () => {
   )
 }
 
-export default LogsManagement
+export default DistributedTracing
