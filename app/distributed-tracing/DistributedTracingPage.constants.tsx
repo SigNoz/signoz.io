@@ -7,7 +7,12 @@ import {
   SiExpress,
   SiFlask,
   SiDjango,
+  SiApachekafka,
+  SiRabbitmq,
 } from 'react-icons/si'
+import { BiLogoPostgresql } from "react-icons/bi";
+import { GrMysql } from "react-icons/gr";
+
 
 export const CLOUD_ICONS = [
   { src: "/img/icons/aws-icon.svg", alt: "AWS" },
@@ -23,19 +28,20 @@ export const CONTAINER_ICONS = [
 ];
 
 export const POPULAR_TOOLS_ICONS = [
-  { src: "/img/icons/heroku-icon.svg", alt: "Heroku" },
-  { src: "/img/icons/fluentd-icon.svg", alt: "Fluentd" },
-  { src: "/img/icons/vercel-icon.svg", alt: "Vercel" },
+  { src: <BiLogoPostgresql className="h-7 w-7 text-blue-600" />, alt: "Postgres" },
   { src: "/img/icons/redis-icon.svg", alt: "Redis" },
+  { src: <SiApachekafka className="h-7 w-7" />, alt: "Apache Kafka" },
+  { src: "/img/icons/grpc-icon.svg", alt: "gRPC"},
+  { src: <GrMysql className="h-7 w-7 text-cyan-600" />, alt: "MySQL" },
   { src: "/img/icons/mongo-icon.svg", alt: "Mongo" },
-  { src: "/img/icons/nginx-icon.svg", alt: "Nginx" }
+  { src: <SiRabbitmq className="h-7 w-7 text-orange-600" />, alt: "RabbitMQ" },
+  { src: "/img/icons/elastic-icon.svg", alt: "Elastic" }
 ];
 
 export const LEGACY_FORMAT_SUPPORT_ICONS = [
-  { src: <SiPython className="h-5 w-5 text-blue-500" />, alt: "Python" },
-  { src: "/img/icons/java-icon.svg", alt: "Java" },
-  { src: <SiGo className="h-7 w-7 text-cyan-500" />, alt: "Golang" },
-  { src: <SiDotnet className="h-7 w-7" />, alt: "Dotnet" }
+  { src: "/img/icons/jaeger-stag-face-icon.svg", alt: "Jaeger" },
+  { src: "/img/icons/zipkin-icon.svg", alt: "Zipkin" },
+  { src: "/img/icons/opencensus-icon.svg", alt: "OpenCensus" }
 ];
 
 export const LANGUAGES_ICONS = [

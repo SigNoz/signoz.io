@@ -335,7 +335,7 @@ const LogProcessingSection: React.FC = () => {
         size={null} 
         className="flex justify-center items-center gap-2 w-fit hover:bg-transparent text-xs"
       >
-        VIEW ALL 50+ SOURCES
+        VIEW ALL INSTRUMENTATION GUIDES
       </Button>
     </div>
   )
@@ -374,7 +374,7 @@ const LogProcessingSection: React.FC = () => {
         className="hover:bg-transparent text-xs justify-start" 
         to="/docs/instrumentation/"
       >
-        VIEW INTEGRATION GUIDES
+        VIEW ALL INSTRUMENTATION GUIDES
       </Button>
     </div>
   )
