@@ -125,6 +125,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'CouchDB Dashboard Template',
   },
   {
+    name: 'Crew AI',
+    href: '/docs/dashboards/dashboard-templates/crewai-dashboard',
+    icon: <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />,
+    clickName: 'Crew AI Dashboard Template',
+  },
+  {
     name: 'DeepSeek API',
     href: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
     icon: <img src="/svgs/icons/LLMMonitoring/deepseek-icon.svg" alt="DeepSeek Icon" className="h-7 w-7" />,

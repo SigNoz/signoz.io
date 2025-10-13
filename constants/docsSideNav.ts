@@ -480,6 +480,12 @@ const docsSideNav = [
                 label: 'JWT Secret',
                 isExpanded: false,
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/relational-database',
+                label: 'Relational Databases Support',
+                isExpanded: false,
+              },
             ],
           },
           {
@@ -1634,6 +1640,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/crewai-dashboard',
+            label: 'Crew AI',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
             label: 'DeepSeek API',
           },
@@ -2106,6 +2117,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/crewai-monitoring',
+        label: 'Crew AI Monitoring',
+        type: 'doc',
+      },
+      {
         route: '/docs/deepseek-monitoring',
         label: 'DeepSeek Monitoring',
         type: 'doc',
@@ -2117,7 +2133,7 @@ const docsSideNav = [
       },
       {
         route: '/docs/langchain-monitoring',
-        label: 'LangChain Monitoring',
+        label: 'LangChain/LangGraph Monitoring',
         type: 'doc',
       },
       {

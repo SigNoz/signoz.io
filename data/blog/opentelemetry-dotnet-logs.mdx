@@ -40,7 +40,7 @@ For example, consider a user encounters a 500 Internal Server Error. You want to
 
 <Figure src="/img/blog/2025/06/monitor-.NET8-apps-NET-SigNoz-example.webp" alt="An image displaying user triggering a 500 internal server error flow request." caption="An image displaying user triggering a 500 internal server error flow request." />
 
-- Exception is logged using `ILogger<T>` with OpenTelemetry context.
+- Exception is logged using `ILogger<T>` with [OpenTelemetry context](https://signoz.io/blog/opentelemetry-context-propagation/).
 - Trace ID and Span ID are automatically included (if `OTEL_LOGS_INCLUDE_TRACE_CONTEXT=true`).
 - SigNoz shows trace-log correlation for fast debugging.
 
@@ -48,7 +48,7 @@ For example, consider a user encounters a 500 Internal Server Error. You want to
 
 ## OTLP Exporter vs. OpenTelemetry Collector
 
-You can export telemetry from a .NET 8 application to SigNoz using either the OTLP exporter or the OpenTelemetry Collector.
+You can export telemetry from a .NET 8 application to SigNoz using either the OTLP exporter or the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/).
 
 ### Option 1: OLTP Exporter
 
@@ -266,7 +266,7 @@ To enhance observability, include `TraceId` and `SpanId` in log messages. Correl
 OpenTelemetry automatically correlates logs with traces when configured correctly. Here's how it works:
 
 - When you start an activity i.e span with `ActivitySource.StartActivity()`, the SDK tracks the `TraceId` and `SpanId` of the current request.
-- When logging using `ILogger<T>`, OpenTelemetry includes this trace context in log messages automatically.
+- When logging using `ILogger<T>`, [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) includes this trace context in log messages automatically.
 - When you use `AddOpenTelemetry()` for logging, and you've set the environment variable `OTEL_LOGS_INCLUDE_TRACE_CONTEXT=true` (enabled by default) to ensure trace context is included in logs.
 
 <Figure src="/img/blog/2025/06/monitor-.NET8-apps-Net-log-coffee-example.webp" alt="An image displaying User sending POST coffee order API" caption="An image displaying User sending POST coffee order API" />
@@ -281,7 +281,7 @@ This integration allows you to trace logs directly in SigNoz without manually pa
     using var activity = ActivitySource.StartActivity("BrewOperation");
     ```
     
-    Starts a span with a unique TraceId and SpanId.
+    Starts a span with a unique TraceId and [SpanId](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/).
     
 2. **Emit Logs Within Activity Context**
     

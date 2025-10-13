@@ -9,9 +9,9 @@ image: /img/blog/2023/08/log_parsing_cover.jpeg
 keywords: [opentelemetry,signoz,observability]
 ---
 
-This guide is for anyone who is getting started monitoring their application with OpenTelemetry, and is generating unstructured logs. As is well understood at this point, structured logs are ideal for post-hoc incident analysis and broad-range querying of your data. However, it’s not always feasible to implement highly structured logging at the code level.
+This guide is for anyone who is getting started monitoring their application with OpenTelemetry, and is generating unstructured logs. As is well understood at this point, structured logs are ideal for post-hoc incident analysis and broad-range querying of your data. However, it’s not always feasible to implement highly [structured logging](https://signoz.io/blog/structured-logs/) at the code level.
 
-With SigNoz, you get some parsing automatically to identify details like timestamp, container ID, container name, and an optional body. But it’s possible to go much deeper with a relatively simple configuration. It’s also a good idea to check for attributes that may contain Personal Identifying Information (PII) and remove them with filters. Since the SigNoz collector is a fork of the OpenTelemetry collector, this tutorial will also work for configuring a baseline OpenTelemetry collector.
+With SigNoz, you get some parsing automatically to identify details like timestamp, container ID, container name, and an optional body. But it’s possible to go much deeper with a relatively simple configuration. It’s also a good idea to check for attributes that may contain Personal Identifying Information (PII) and remove them with filters. Since the SigNoz collector is a fork of the [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/), this tutorial will also work for configuring a baseline OpenTelemetry collector.
 
 
 
@@ -25,10 +25,10 @@ For the purposes of this tutorial, we’ll be running the SigNoz collector and o
 
 ## Step 2. Send Logs
 
-Currently, logging is not natively supported by the OpenTelemetry sdk in several languages. This means you’ll need to leverage your existing logs pipeline to send logs to the SigNoz (or OpenTelemetry) collector. There are several ways to get your logs into OpenTelemetry:
+Currently, logging is not natively supported by the [OpenTelemetry sdk](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) in several languages. This means you’ll need to leverage your existing logs pipeline to send logs to the SigNoz (or OpenTelemetry) collector. There are several ways to get your logs into OpenTelemetry:
 
 - The [Bridge API](https://opentelemetry.io/docs/specs/otel/logs/bridge-api/) is intended to connect existing logging with OpenTelemetry. It can be used together with existing logging libraries to automatically inject the trace context in the emitted logs, and provide an easy way to send the logs via OTLP.
-- File or stdout export - if you have access to read your logging file periodically or tail your logs, you can parse bare files or .csv or json-formatted and send them to the collector. If you cannot parse your logs yourself, another log collection agent, such as FluentBit can collect the logs, [then send the logs](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/receiver/fluentforwardreceiver) to OpenTelemetry Collector.
+- File or stdout export - if you have access to read your logging file periodically or tail your logs, you can parse bare files or .csv or json-formatted and send them to the collector. If you cannot parse your logs yourself, another log collection agent, such as [FluentBit](https://signoz.io/docs/userguide/fluentbit_to_signoz/) can collect the logs, [then send the logs](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/master/receiver/fluentforwardreceiver) to OpenTelemetry Collector.
 
 In Java, you also have the option of using automatic instrumentation to collect logs. 
 
@@ -198,7 +198,7 @@ Notably it *is* possible that we will wish we had a `userID` for this log, but i
 
 ## Step 6: Parse Incoming Logs with a receiver regex
 
-Before any processor sees our logs, they first hit the configured receivers. At the top of our baseline config for the SigNoz OpenTelemetry Receiver you find this expression:
+Before any processor sees our logs, they first hit the configured receivers. At the top of our baseline config for the [SigNoz](https://signoz.io/docs/introduction/) OpenTelemetry Receiver you find this expression:
 
 ```yaml
 receivers:
@@ -240,6 +240,6 @@ See further documentation on logs [receivers and operators](https://signoz.io/do
 
 ## Conclusions
 
-Logs processing is extremely flexible and powerful with the OpenTelemetry Collector, and a combination of receivers and processors makes it possible to transform raw logs into highly structured data.
+Logs processing is extremely flexible and powerful with the [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) Collector, and a combination of receivers and processors makes it possible to transform raw logs into highly structured data.
 
-If you’d like to see how powerful this log parsing can be, before you re-configure your collector, [check out our new logs explorer](https://signoz.io/blog/diving-in-to-opentelemetry-data-with-our-new-trace-and-logs-explorer/) to dive in to your logging data. You’ll often find interesting insights, and can generalize them for next time by parsing your data more deeply.
+If you’d like to see how powerful this [log parsing](https://signoz.io/guides/log-parsing/) can be, before you re-configure your collector, [check out our new logs explorer](https://signoz.io/blog/diving-in-to-opentelemetry-data-with-our-new-trace-and-logs-explorer/) to dive in to your logging data. You’ll often find interesting insights, and can generalize them for next time by parsing your data more deeply.

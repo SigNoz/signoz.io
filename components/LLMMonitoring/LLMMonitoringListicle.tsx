@@ -6,7 +6,7 @@ import {
   SiLangchain,
   SiClaude,
   SiGooglegemini,
-  SiAnthropic,
+  SiAnthropic
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -36,6 +36,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Claude Code Monitoring',
   },
   {
+    name: 'Crew AI',
+    href: '/docs/crewai-monitoring',
+    icon: <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />,
+    clickName: 'Crew AI Monitoring',
+  },
+  {
     name: 'DeepSeek API',
     href: '/docs/deepseek-monitoring',
     icon: <img src="/svgs/icons/LLMMonitoring/deepseek-icon.svg" alt="DeepSeek Icon" className="h-7 w-7" />,
@@ -48,7 +54,7 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Google Gemini Monitoring',
   },
   {
-    name: 'LangChain',
+    name: 'LangChain/LangGraph',
     href: '/docs/langchain-monitoring',
     icon: <SiLangchain className="h-7 w-7 text-white" />,
     clickName: 'LangChain Monitoring',

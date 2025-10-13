@@ -186,7 +186,7 @@ Dividing metrics in Prometheus provides significant advantages for system admini
     This query computes the percentage of used storage capacity for filesystems. Monitoring this over time reveals usage patterns, enabling you to anticipate when additional capacity will be required.
     
 
-PromQL, Prometheus Query Language, enables users to manipulate and analyze metrics with ease. It supports operations like dividing metrics to calculate rates, percentages, and averages, as sown above. PromQL’s flexibility allows for complex computations and the creation of meaningful insights, making it a crucial tool for effective monitoring and troubleshooting.
+PromQL, Prometheus Query Language, enables users to manipulate and [analyze metrics](https://signoz.io/blog/metrics-explorer/) with ease. It supports operations like dividing metrics to calculate rates, percentages, and averages, as sown above. PromQL’s flexibility allows for complex computations and the creation of meaningful insights, making it a crucial tool for effective monitoring and troubleshooting.
 
 ## Prerequisites for Dividing Metrics in Prometheus
 
@@ -252,7 +252,7 @@ When dividing metrics with different label sets, there are several important con
         
 2. Handling High Cardinality
     
-    High cardinality in metric labels (e.g., having many unique `instance` or `pod` labels) can complicate the division process. To address this:
+    High cardinality in [metric labels](https://signoz.io/guides/what-are-prometheus-labels/) (e.g., having many unique `instance` or `pod` labels) can complicate the division process. To address this:
     
     - Aggregate Labels Before Division: To manage high cardinality, it's advisable to aggregate metrics by labels like `instance` or `pod` before performing operations. Using the `sum()` or `avg()` functions with the `without()` modifier excludes high-cardinality labels. For example:
         
@@ -262,7 +262,7 @@ When dividing metrics with different label sets, there are several important con
         sum without(instance, pod) (rate(http_request_duration_seconds_count[5m]))
         ```
         
-    - Recording Rules: Implementing recording rules to pre-aggregate metrics can help reduce high cardinality before performing operations. This strategy improves query performance and simplifies complex metric calculations
+    - Recording Rules: Implementing recording rules to pre-[aggregate metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/) can help reduce high cardinality before performing operations. This strategy improves query performance and simplifies complex metric calculations
     - Label Matchers: Use label matchers to filter out specific values of labels that are irrelevant to the division. This helps focus the division on the most relevant metric subsets.
 3. Grouping and Aggregation Strategies
     
@@ -287,7 +287,7 @@ Here are some advanced methods for metric division in Prometheus:
 
 1. Implementing Complex Calculations:
     
-    Advanced monitoring requires deriving actionable insights from raw metrics. By combining multiple PromQL functions, we can compute nuanced metrics, such as latency distributions or error-weighted durations, offering deeper performance analysis.
+    Advanced monitoring requires deriving actionable insights from raw metrics. By combining multiple [PromQL functions](https://signoz.io/guides/promql-cheat-sheet/), we can compute nuanced metrics, such as latency distributions or error-weighted durations, offering deeper performance analysis.
     
     ```jsx
     sum(rate(http_request_duration_seconds_bucket{le="2.5"}[5m])) / sum(rate(http_requests_total[5m]))
@@ -345,7 +345,7 @@ This ensures that even if there are no requests, the denominator is set to 1, av
 
 ## Visualizing Divided Metrics in Grafana
 
-To retrieve data from Prometheus, Grafana must first establish a connection to the Prometheus data source. This process includes several steps:
+To retrieve data from Prometheus, Grafana must first establish a connection to the [Prometheus data](https://signoz.io/guides/how-does-grafana-get-data-from-prometheus/) source. This process includes several steps:
 
 1. Set up Prometheus as a Data Source in Grafana
     - Navigate to Connections → Data Sources → Add data source in the left side panel.
@@ -479,7 +479,7 @@ receivers:
 
 ## Optimizing Performance When Dividing Metrics
 
-Dividing metrics in Prometheus can provide valuable insights but may impact query performance due to the increased computational overhead of calculating ratios for each time series. High cardinality and complex divisions (involving many labels) can further strain resources, especially in large-scale environments. To optimize performance, consider the following strategies:
+Dividing metrics in Prometheus can provide valuable insights but may impact query performance due to the increased computational overhead of calculating ratios for each time series. [High cardinality](https://signoz.io/blog/high-cardinality-data/) and complex divisions (involving many labels) can further strain resources, especially in large-scale environments. To optimize performance, consider the following strategies:
 
 1. Reduce Cardinality and Improve Query Efficiency
 
@@ -547,17 +547,17 @@ When working with metric division in Prometheus, several issues can arise that a
 
 ## Enhancing Observability with SigNoz
 
-SigNoz is a comprehensive observability platform designed to enhance your system monitoring and management. It provides insights into your application’s health with visualizations, metrics, logs, and traces. Built on OpenTelemetry, SigNoz offers a unified solution for collecting telemetry data, tracking performance, and efficiently troubleshooting issues, making it ideal for DevOps, SRE teams, and developers seeking deeper observability.
+SigNoz is a comprehensive observability platform designed to enhance your system monitoring and management. It provides insights into your application’s health with visualizations, metrics, logs, and traces. Built on [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/), SigNoz offers a unified solution for collecting telemetry data, tracking performance, and efficiently troubleshooting issues, making it ideal for DevOps, SRE teams, and developers seeking deeper observability.
 
 ### Seamless Integration of SigNoz with Prometheus for Advanced Metric Analysis
 
-SigNoz integrates seamlessly with Prometheus by leveraging the OpenTelemetry collector to collect and ingest metrics from Prometheus, enhancing your existing observability stack. While Prometheus is excellent at gathering and storing metrics, SigNoz takes it further by enabling advanced metric division, aggregation, and visualization, making complex data analysis simpler and more intuitive.
+SigNoz integrates seamlessly with Prometheus by leveraging the [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) to collect and ingest metrics from Prometheus, enhancing your existing [observability stack](https://signoz.io/guides/observability-stack/). While Prometheus is excellent at gathering and storing metrics, SigNoz takes it further by enabling advanced metric division, aggregation, and visualization, making complex data analysis simpler and more intuitive.
 
 Here’s how SigNoz enhances your Prometheus setup:
 
 - Native PromQL support
     
-    With SigNoz, you can leverage PromQL directly within the SigNoz platform. This feature allows you to perform metric divisions and calculations with ease. Whether you're interested in tracking error rates, resource utilization, or throughput, you can calculate these metrics directly from the query builder with just a few clicks.
+    With SigNoz, you can leverage PromQL directly within the SigNoz platform. This feature allows you to perform metric divisions and calculations with ease. Whether you're interested in tracking error rates, resource utilization, or throughput, you can calculate these metrics directly from the [query builder](https://signoz.io/blog/query-builder-v5/) with just a few clicks.
     
     <Figure src="/img/guides/2024/12/divide-two-metrics-in-prometheus-image%2011.webp" alt="Leveraging PromQL Query for custom dashboard generation" caption="Leveraging PromQL Query for custom dashboard generation" />
     
@@ -577,7 +577,7 @@ Here’s how SigNoz enhances your Prometheus setup:
     
 - Proactive Alerts Based on Divided Metrics
     
-    Similarly, you can create alerts based on the same query provided, enabling proactive monitoring of system performance. By setting custom thresholds on divided metrics, SigNoz ensures you’re notified of potential issues before they impact your system. For more information on configuring custom metric alerts, refer to the [Official SigNoz documentation](https://signoz.io/docs/alerts-management/metrics-based-alerts/?utm_source=product&utm_medium=alert-creation-page).
+    Similarly, you can create alerts based on the same query provided, enabling [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) of system performance. By setting custom thresholds on divided metrics, SigNoz ensures you’re notified of potential issues before they impact your system. For more information on configuring custom metric alerts, refer to the [Official SigNoz documentation](https://signoz.io/docs/alerts-management/metrics-based-alerts/?utm_source=product&utm_medium=alert-creation-page).
     
     <Figure src="/img/guides/2024/12/divide-two-metrics-in-prometheus-image%2013.webp" alt="Custom Alerts Based on PromQL Queries for CPU Load Monitoring" caption="Custom Alerts Based on PromQL Queries for CPU Load Monitoring" />
     
