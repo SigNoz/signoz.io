@@ -1,14 +1,12 @@
 'use client'
 
 import React from 'react'
-import { ArrowRight, BookOpen } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import StatsCard from '@/components/Card/card'
 import { Card } from '@/components/ui/Card'
 import { Badge } from "@signozhq/badge"
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
-import PricingCalculator from 'app/pricing/pricingv1/components/PricingCalculator'
 import { 
   CARDS, 
   CLOUD_ICONS, 
@@ -18,200 +16,19 @@ import {
   EXISTING_AGENTS_ICONS, 
   POPULAR_TOOLS_ICONS, 
   QUERY_BUILDER_CARDS, 
-  TESTIMONIALS, 
   STORAGE_DATA 
 } from './LogManagement.constants'
 import TabItem from '@/components/TabItem'
 import Tabs from '@/components/Tabs'
+import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
+import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
+import TestimonialCards from '@/shared/components/molecules/FeaturePages/TestimonialCard'
+import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
+import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
+import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
+import FeatureCard from '@/shared/components/molecules/FeaturePages/FeatureCard'
+import IconGrid from '@/shared/components/molecules/FeaturePages/IconGrid'
 
-// Types
-interface SectionLayoutProps {
-  children: React.ReactNode
-  className?: string
-  variant?: 'default' | 'full-width' | 'bordered' | 'no-border'
-  withBackground?: boolean
-}
-
-interface GridLayoutProps {
-  children: React.ReactNode
-  cols?: number
-  className?: string
-  variant?: 'default' | 'equal' | 'split'
-}
-
-interface FeatureCardProps {
-  icon: React.ReactNode
-  title: string
-  description: string
-  variant?: 'default' | 'combined'
-  className?: string
-}
-
-interface TestimonialCardProps {
-  name: string
-  role: string
-  testimonial: string
-  image: string
-  className?: string
-}
-
-interface ButtonGroupProps {
-  buttons: Array<{
-    text: string
-    href: string
-    variant: 'default' | 'secondary' | 'ghost'
-    icon?: React.ReactNode
-    className?: string
-  }>
-  className?: string
-}
-
-interface IconGridProps {
-  icons: Array<{ src: string; alt: string }>
-  title: string
-  className?: string
-}
-
-// HOCs and Layout Components
-const SectionLayout: React.FC<SectionLayoutProps> = ({ 
-  children, 
-  className = '', 
-  variant = 'default',
-  withBackground = false
-}) => {
-  const getVariantClasses = () => {
-    switch (variant) {
-      case 'full-width':
-        return '!mx-auto !w-[100vw] md:!w-[80vw]'
-      case 'bordered':
-        return '!mx-auto !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]'
-      case 'no-border':
-        return '!mx-auto !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw]'
-      default:
-        return '!mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]'
-    }
-  }
-
-  const backgroundClass = withBackground ? 'bg-signoz_ink-500' : ''
-
-  return (
-    <div className={`section-container ${getVariantClasses()} ${backgroundClass} ${className}`}>
-      {children}
-    </div>
-  )
-}
-
-const GridLayout: React.FC<GridLayoutProps> = ({ 
-  children, 
-  cols = 3, 
-  className = '', 
-  variant = 'default' 
-}) => {
-  const getGridClasses = () => {
-    const baseClasses = 'grid gap-8'
-    
-    switch (variant) {
-      case 'equal':
-        return `${baseClasses} grid-cols-1 md:grid-cols-${cols}`
-      case 'split':
-        return `${baseClasses} grid-cols-1 lg:grid-cols-2`
-      default:
-        return `${baseClasses} grid-cols-1 md:grid-cols-${cols}`
-    }
-  }
-
-  return (
-    <div className={`${getGridClasses()} ${className}`}>
-      {children}
-    </div>
-  )
-}
-
-// Reusable Components
-const FeatureCard: React.FC<FeatureCardProps> = ({ 
-  icon, 
-  title, 
-  description, 
-  variant = 'default',
-  className = '' 
-}) => {
-  const borderClass = variant === 'combined' ? 'border-none' : 'border-r border-t border-b max-md:border-l border-signoz_slate-400 border-dashed'
-  
-  return (
-    <div className={`p-0 ${borderClass} bg-transparent ${className}`}>
-      <div className="p-8">
-        <div className="grid grid-cols-1 gap-4">
-          <div className="">{icon}</div>
-          <h3 className="text-xl font-semibold text-signoz_vanilla-100 m-0">{title}</h3>
-        </div>
-        <p className="mt-2 mb-0 text-sm text-signoz_vanilla-400">{description}</p>
-      </div>
-    </div>
-  )
-}
-
-const TestimonialCard: React.FC<TestimonialCardProps> = ({ 
-  name, 
-  role, 
-  testimonial, 
-  image, 
-  className = '' 
-}) => {
-  return (
-    <Card className={`p-0 [&>*]:border-1 [&>*]:border-solid ${className}`}>
-      <div className="flex flex-col gap-4 p-6">
-        <div className="flex items-center gap-4">
-          <Image 
-            src={image} 
-            alt={name} 
-            width={48} 
-            height={48} 
-            className="rounded-full"
-          />
-          <div>
-            <h3 className="text-signoz_vanilla-100 font-medium mb-0">{name}</h3>
-            <p className="text-signoz_vanilla-400 text-sm mb-0">{role}</p>
-          </div>
-        </div>
-        <p className="text-signoz_vanilla-100 mb-0">{testimonial}</p>
-      </div>
-    </Card>
-  )
-}
-
-const ButtonGroup: React.FC<ButtonGroupProps> = ({ buttons, className = '' }) => {
-  return (
-    <div className={`flex flex-col items-center justify-center gap-3 md:flex-row ${className}`}>
-      {buttons.map((button, index) => (
-        <Button 
-          key={index}
-          to={button.href}
-          variant={button.variant} 
-          rounded="full" 
-          className={`flex items-center gap-2 !w-fit ${button.className || ''}`}
-        >
-          {button.text}
-          {button.icon || <ArrowRight size={14} />}
-        </Button>
-      ))}
-    </div>
-  )
-}
-
-const IconGrid: React.FC<IconGridProps> = ({ icons, title, className = '' }) => {
-  return (
-    <div className={className}>
-      <h3 className="mb-4 text-xs font-medium uppercase text-signoz_vanilla-400">{title}</h3>
-      <div className="flex justify-start items-center gap-4">
-        {icons.map((icon, index) => (
-          <div key={index} className="flex items-center">
-            <Image src={icon.src} alt={icon.alt} className="h-8" width={32} height={32} />
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 // Main Component Sections
 const Header: React.FC = () => {
@@ -655,138 +472,6 @@ const StorageSection: React.FC = () => {
   )
 }
 
-const UsageBasedPricing: React.FC = () => {
-  return (
-    <SectionLayout variant="bordered" className="!px-0 !border-t-1 border-signoz_slate-400 border-dashed">
-      <div className="flex flex-col sm:flex-row">
-        <div className="!w-[100%] flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            Simple<br /> usage-based <br /> pricing
-          </p>
-        </div>
-        <div className="flex-[2_2_0%]">
-          <div className="bg-transparent p-0 border-b border-l border-signoz_slate-400 border-dashed">
-            <div className="px-10 py-10 flex flex-col gap-2">
-              <div className="text-2xl font-semibold text-signoz_vanilla-100">
-                Pricing you can trust
-              </div>
-              <p className="text-base font-normal text-signoz_vanilla-400">
-                Tired of Datadog's unpredictable bills or New Relic's user-based pricing?<br />
-                We're here for you.
-              </p>
-              <div className="[&>div]:border-0 [&>div]:bg-transparent">
-                <PricingCalculator show={["logs"]} showHeader={false} showFooter={false} />
-              </div>
-              <Card className="bg-transparent p-0 [&>div]:border-0">
-                <div className="flex items-center justify-between gap-4 p-4 bg-signoz_robin-500/10 rounded-lg">
-                  <span className="text-signoz_robin-400">Calculate your exact monthly bill</span>
-                  <Button 
-                    variant="default" 
-                    rounded="full" 
-                    className="flex-center !w-fit" 
-                    to="/pricing/"
-                  >
-                    Check Pricing
-                    <ArrowRight size={14} />
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-    </SectionLayout>
-  )
-}
-
-const SigNozStats: React.FC = () => {
-  const STATS_LIST = [
-    {
-      id: 1,
-      logo: '/img/index_features/download.svg',
-      name: 'OSS Downloads',
-      value: '10 million+',
-    },
-    { 
-      id: 2, 
-      logo: '/img/index_features/github.svg', 
-      name: 'GitHub Stars', 
-      value: '23k+' 
-    },
-  ]
-
-  const PlatformCard: React.FC<{ title: string; description: string }> = ({ title, description }) => (
-    <div className="rounded-md border border-signoz_slate-500 bg-signoz_ink-400 p-4">
-      <h3 className="mb-2 text-base font-medium text-signoz_vanilla-100">{title}</h3>
-      <p className="mb-0 text-sm font-normal text-signoz_vanilla-400">{description}</p>
-    </div>
-  )
-
-  const platformFeatures = [
-    {
-      title: 'Cloud',
-      description: 'Fully managed, SOC 2-compliant, ideal for teams who want to start quickly without managing infrastructure.',
-    },
-    {
-      title: 'Self-Host',
-      description: 'For tighter security & data residency requirements. It is Apache 2.0 open source, built on open standards.'
-    },
-  ]
-
-  const communityButtons = [
-    {
-      text: "Join the community",
-      href: "https://signoz.io/slack/",
-      variant: "default" as const,
-      icon: <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-    },
-    {
-      text: "GitHub Repository",
-      href: "https://github.com/SigNoz/signoz/",
-      variant: "secondary" as const,
-      icon: <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-    }
-  ]
-
-  return (
-    <section>
-      <SectionLayout variant="bordered" className="flex flex-col sm:flex-row !px-0">
-        <div className="!w-[300px] flex-1 border !border-b-1 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
-          <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
-            Developers <br />Love<br />SigNoz
-          </p>
-        </div>
-
-        <div className="flex flex-[2_2_0%] flex-col">
-          <div className="p-0 bg-transparent border-b border-l border-signoz_slate-400 border-dashed">
-            <div className="p-6">
-              <div className="flex w-full flex-col gap-4">
-                {platformFeatures.map((feature, index) => (
-                  <PlatformCard key={index} title={feature.title} description={feature.description} />
-                ))}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 text-left sm:grid-cols-2 [&>div]:border-l-0 [&>div]:!border-r-1 [&>div]:border-signoz_slate-400">
-              {STATS_LIST.map((stat, index) => (
-                <StatsCard
-                  logo={stat.logo}
-                  stats={stat.value}
-                  description={stat.name}
-                  logoSize={24}
-                  key={index}
-                />
-              ))}
-            </div>
-            <div className="border-t border-signoz_slate-400 border-dashed py-6 sm:py-6 sm:pl-10">
-              <ButtonGroup buttons={communityButtons} className="flex-col gap-3 sm:flex-row" />
-            </div>
-          </div>
-        </div>
-      </SectionLayout>
-    </section>
-  )
-}
-
 const CustomerStories: React.FC = () => {
   return (
     <>
@@ -814,17 +499,7 @@ const CustomerStories: React.FC = () => {
       {/* Testimonials grid */}
       <SectionLayout variant="bordered" className="!mx-auto max-md:-mb-[3rem] p-0">
         <div className="container pb-16">
-          <GridLayout cols={2} className="px-20">
-            {TESTIMONIALS.map((testimonial, index) => (
-              <TestimonialCard
-                key={index}
-                name={testimonial.name}
-                role={testimonial.role}
-                testimonial={testimonial.testimonial}
-                image={testimonial.image}
-              />
-            ))}
-          </GridLayout>
+          <TestimonialCards />
           
           <div className="flex justify-center items-end -mt-[25rem] z-5 bg-gradient-to-t from-signoz_ink-500 to-transparent relative h-96 py-6 max-md:py-16">
             <Button 
@@ -877,7 +552,7 @@ const LogsManagement: React.FC = () => {
           <StorageSection />
         </SectionLayout>
         
-        <UsageBasedPricing />
+        <UsageBasedPricing show={["logs"]} />
         <SigNozStats />
         <CustomerStories />
       </div>
