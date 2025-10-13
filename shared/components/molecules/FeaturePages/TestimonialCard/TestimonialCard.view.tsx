@@ -42,5 +42,5 @@ export const TestimonialCardGrid: React.FC = () => {
     </GridLayout>
   )
 }
-  
-  export default TestimonialCardGrid
+
+export default TestimonialCardGrid
