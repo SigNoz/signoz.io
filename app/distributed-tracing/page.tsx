@@ -4,7 +4,7 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Distributed Tracing | SigNoz',
+    absolute: 'Process Million-Span Traces Without Sampling | SigNoz',
   },
   openGraph: {
     "title": "Process Million-Span Traces Without Sampling",
