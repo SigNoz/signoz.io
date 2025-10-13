@@ -187,32 +187,14 @@ const LogProcessingSection: React.FC = () => {
               <ArrowRight size={14} />
             </Button>
           </div>
-          
-          {/* <Card className="bg-signoz_ink-400 [&>div]:border-1 [&>*]:p-4">
-            <Tabs entityName="sources">
-              <TabItem value="supported-sources" label="Supported Languages and Frameworks">
-                {sourcesTabContent}
-              </TabItem>
-              <TabItem value="collection-methods" label="Collection Methods">
-                {methodsTabContent}
-              </TabItem>
-            </Tabs>
-          </Card> */}
         </div>
         
         {/* Right Column - Processing */}
         <div className="flex flex-col px-6 -my-10 py-8">
           <div className="min-h-72 flex flex-col justify-between">
             <div>
-              {/* <h2 className="text-signoz_vanilla-100 mb-6">Parse and transform logs before storage</h2>
-              <p className="text-signoz_vanilla-400 mb-8 leading-relaxed">
-                Create processing pipelines through a visual UI to parse unstructured logs, extract attributes, 
-                flatten nested JSON, and mask sensitive data. Apply processors like Grok patterns, regex, and 
-                JSON parsers to transform logs before they're stored and indexed.
-              </p> */}
               <Card className="bg-signoz_ink-400 [&>div]:border-1 [&>*]:p-4">
                 <Tabs entityName="sources">
-                  {/* <TabItem value="supported-sources" label="Supported Languages and Frameworks"> */}
                   <TabItem value="supported-sources" label={<span className='flex-center'><MonitorDown /> Supported Languages & Frameworks</span>}>
                     {sourcesTabContent}
                   </TabItem>
@@ -222,23 +204,7 @@ const LogProcessingSection: React.FC = () => {
                 </Tabs>
               </Card>
             </div>
-            {/* <Button 
-              variant="secondary" 
-              rounded="full"
-              className="flex items-center gap-2 w-fit mb-8"
-              to="/docs/logs-pipelines/concepts/"
-            >
-              Read Documentation
-              <ArrowRight size={14} />
-            </Button> */}
           </div>
-          
-          {/* <Image 
-            src="/img/log-management/process-logs.png" 
-            alt="Log Processing" 
-            width={10000} 
-            height={10000} 
-          /> */}
         </div>
       </GridLayout>
     </div>

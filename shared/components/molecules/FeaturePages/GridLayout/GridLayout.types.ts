@@ -1,4 +1,4 @@
-exprot interface GridLayoutProps {
+export interface GridLayoutProps {
     children: React.ReactNode
     cols?: number
     className?: string
