@@ -159,7 +159,7 @@ const LogProcessingSection: React.FC = () => {
         variant="ghost" 
         rounded="full" 
         size={null} 
-        className="hover:bg-transparent text-xs" 
+        className="hover:bg-transparent text-xs justify-start" 
         to="/docs/logs-management/send-logs-to-signoz/"
       >
         VIEW INTEGRATION GUIDES
