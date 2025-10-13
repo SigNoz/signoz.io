@@ -9,11 +9,6 @@ image: /img/blog/2023/12/otel-haproxy-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability,metrics,logs,haproxy]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-haproxy-metrics-and-logs-monitoring/"/>
-</head>
-
 For extremely high throughput web applications, it is important to load balance the traffic across multiple servers. However, load balancing the traffic alone is not enough at times. The reverse proxy server that handles the workload needs to be performant, too. In our [previous article](https://signoz.io/blog/nginx-metrics-and-logs-monitoring-with-opentelemetry/), we discussed the NGINX reverse proxy server and understood how to monitor it. In this article, we set up monitoring for an even more performant reverse proxy server - <a href = "https://www.haproxy.org" rel="noopener noreferrer nofollow" target="_blank" >HAProxy</a>.
 
 
@@ -107,7 +102,7 @@ service:
 
 ## Pre-requisites
 
-This tutorial assumes that you have the OpenTelemetry collector installed on the same host as your HAProxy if you plan to monitor a local HAProxy setup. In case you are looking to monitor a remote HAProxy setup, you would need to open up the network port to allow the OpenTelemetry collector to access the metrics.
+This tutorial assumes that you have the [OpenTelemetry collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) installed on the same host as your HAProxy if you plan to monitor a local HAProxy setup. In case you are looking to monitor a remote HAProxy setup, you would need to open up the network port to allow the OpenTelemetry collector to access the metrics.
 
 Logs, however, would require an OpenTelemetry collector to run locally to access the files.
 
@@ -224,7 +219,7 @@ mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.90.0_darwin_arm64.tar.gz -C 
 
 ### Step 3 - Setting up the configuration file
 
-In this tutorial, we would not just be monitoring the metrics of HAProxy but also visualizing its access and error logs. Let’s create a `config.yaml` in the `otelcol-contrib` folder. This will configure the collector with the HAProxy receiver for metrics and <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver" rel="noopener noreferrer nofollow" target="_blank" >File Log receiver</a> for logs.
+In this tutorial, we would not just be monitoring the metrics of HAProxy but also visualizing its access and [error logs](https://signoz.io/guides/error-log/). Let’s create a `config.yaml` in the `otelcol-contrib` folder. This will configure the collector with the HAProxy receiver for metrics and <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver" rel="noopener noreferrer nofollow" target="_blank" >File Log receiver</a> for logs.
 
 
 <Admonition>

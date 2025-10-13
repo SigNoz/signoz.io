@@ -36,7 +36,7 @@ Unlike traditional monitoring systems like Nagios or Zabbix, Prometheus is optim
 ### Where is Prometheus Used?
 
 - **Server & Cloud Monitoring:** Track resource usage like CPU, memory, and network activity.
-- **Application Monitoring:** Monitor APIs, database performance, and response times.
+- **Application Monitoring:** [Monitor APIs](https://signoz.io/blog/api-monitoring-tools/), database performance, and response times.
 - **Kubernetes & Microservices:** Automatically detect and track containerized applications.
 - **Business Insights:** Measure website traffic, transactions, and system availability.
 
@@ -46,10 +46,10 @@ Prometheus is great for time-series monitoring but not ideal for:
 
 - **Log Management:** Designed for numerical metrics, not raw logs. Use SigNoz, ELK Stack or Loki instead.
 - **Long-Term Storage:** Data retention is limited; Thanos or Cortex is needed for historical analysis.
-- **Tracing Requests:** Lacks distributed tracing; Jaeger or SigNoz with OpenTelemetry are better options.
+- **Tracing Requests:** Lacks distributed tracing; Jaeger or SigNoz with [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) are better options.
 - **Real-Time Streaming:** Works on intervals, not real-time events. Use Kafka or Flink for that.
 
-Prometheus is best paired with other tools for a complete observability stack.
+Prometheus is best paired with other tools for a complete [observability stack](https://signoz.io/guides/observability-stack/).
 
 
 ## How Does Prometheus Work?
@@ -116,7 +116,7 @@ Prometheus comprises several key components that work together to create a compr
         - **Slack:** Sends alerts to Slack channels.
         - **PagerDuty:** Handles incident response workflows.
     
-    Alerts are configured in Prometheus rules and pushed to Alertmanager when triggered.
+    Alerts are configured in [Prometheus rules](https://signoz.io/guides/what-is-a-prometheus-rule/) and pushed to Alertmanager when triggered.
     
 5. **Visualization Tools**
     
@@ -126,7 +126,7 @@ Prometheus comprises several key components that work together to create a compr
     
     - **Prometheus Web UI:** Built-in interface for basic exploration and querying.
     - **Grafana:** Advanced dashboards with rich visualizations.
-    - **SigNoz:** Combines observability and monitoring, focusing on end-to-end tracking.
+    - **SigNoz:** Combines [observability and monitoring](https://signoz.io/blog/observability-vs-monitoring/), focusing on end-to-end tracking.
     - **PromLens:** Simplifies PromQL query building and exploration.
     
     Grafana is the most popular tool for dashboarding, but SigNoz provides deeper observability integrations.
@@ -150,7 +150,7 @@ Prometheus comprises several key components that work together to create a compr
     
 8. **Query Language (PromQL)**
     
-    **Purpose:** Prometheus's query language, is used to retrieve and analyze metrics data.
+    **Purpose:** Prometheus's query language, is used to retrieve and [analyze metrics](https://signoz.io/blog/metrics-explorer/) data.
     
     **PromQL allows for flexible querying with features like filtering, aggregation, and mathematical operations to extract actionable insights.**
     
@@ -170,7 +170,7 @@ Prometheus comprises several key components that work together to create a compr
     - **Infrastructure Components:** Such as Linux hosts, Docker containers, Kubernetes pods, and other system-level entities.
     - **Third-Party Exporters:** Services that bridge the gap between Prometheus and non-native systems by exposing metrics on behalf of those systems.
     
-    Targets are defined in the Prometheus configuration file or dynamically discovered via service discovery.
+    Targets are defined in the [Prometheus configuration](https://signoz.io/guides/what-is-prometheus-target/) file or dynamically discovered via service discovery.
     
 <InterlinkCard title="Read more on How Does Prometheus Work?" href="/guides/how-does-prometheus-work/" />
 
@@ -268,14 +268,14 @@ Adopting consistent naming conventions is crucial for readability and maintainab
 While creating and organizing metrics there are some best practices to be followed.
 
 1. Use Descriptive Names: Choose metric names that clearly describe what they measure and avoid overly generic names.
-2. Leverage Labels for Granularity: Use labels to capture different dimensions (e.g., method, status code) but avoid using high cardinality labels that could increase storage and query complexity.
+2. Leverage Labels for Granularity: Use labels to capture different dimensions (e.g., method, status code) but avoid using [high cardinality](https://signoz.io/blog/high-cardinality-data/) labels that could increase storage and query complexity.
 3. Be Consistent with Naming: Stick to a consistent naming pattern for your metrics, labels, and units (e.g., `seconds` for durations, `bytes` for sizes).
 4. Avoid Too Many Metrics: Only create metrics that provide value for monitoring and troubleshooting. Too many metrics can make the system harder to manage.
 5. Use Histograms and Summaries Wisely: Choose between histograms and summaries based on the use case. Histograms are typically better for large-scale aggregations, while summaries are more useful for precise quantile calculations.
 
 ## Querying Prometheus Data with PromQL
 
-PromQL (Prometheus Query Language) is a powerful query language that allows you to retrieve, filter, and manipulate time-series data in Prometheus. Here’s a guide to get you started with basic syntax, common queries, and tips for efficiency:
+PromQL ([Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/)) is a powerful query language that allows you to retrieve, filter, and manipulate time-series data in Prometheus. Here’s a guide to get you started with basic syntax, common queries, and tips for efficiency:
 
 ### Basic PromQL Syntax and Operators
 
@@ -296,7 +296,7 @@ http_requests_total{status="200"}
 
 ### Common Query Patterns and Examples
 
-1. Rate of Change: Calculate the rate of change for a counter metric (e.g., requests per second).
+1. Rate of Change: Calculate the rate of change for a [counter metric](https://signoz.io/guides/what-is-the-difference-between-a-gauge-and-a-counter/) (e.g., requests per second).
     
     ```
     rate(http_requests_total[5m])
@@ -367,7 +367,7 @@ PromQL includes a variety of functions that allow for complex aggregation and an
 
 ## Visualizing Prometheus Data
 
-Visualizing Prometheus data helps you gain actionable insights from raw metrics. Here’s how you can use Prometheus’s built-in tools and integrate with Grafana for advanced visualizations:
+Visualizing [Prometheus data](https://signoz.io/guides/how-does-grafana-get-data-from-prometheus/) helps you gain actionable insights from raw metrics. Here’s how you can use Prometheus’s built-in tools and integrate with Grafana for advanced visualizations:
 
 ### Prometheus’s Built-in Expression Browser
 
@@ -570,13 +570,13 @@ If no existing exporter meets your requirements, you can create custom exporters
 | Visualization | Requires Grafana | Integrated dashboards |
 | Ease of Setup | Manual configuration | Simple out-of-the-box setup |
 
-While Prometheus is an excellent tool for collecting and querying metrics, SigNoz provides a more comprehensive observability solution by including distributed tracing and log management alongside metrics. SigNoz is built on open standards like OpenTelemetry, ensuring compatibility and flexibility, while simplifying the setup and management of complex observability tasks.
+While Prometheus is an excellent tool for collecting and querying metrics, SigNoz provides a more comprehensive observability solution by including [distributed tracing](https://signoz.io/blog/distributed-tracing/) and log management alongside metrics. SigNoz is built on open standards like OpenTelemetry, ensuring compatibility and flexibility, while simplifying the setup and management of complex observability tasks.
 
 <GetStartedSigNoz />
 
 ### Sending Prometheus Metrics to SigNoz Cloud
 
-To monitor Prometheus in SigNoz Cloud, you need to install the OpenTelemetry Collector and configure it to scrape Prometheus metrics.
+To [monitor Prometheus](https://signoz.io/guides/how-do-i-monitor-api-in-prometheus/) in SigNoz Cloud, you need to install the [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) and configure it to scrape Prometheus metrics.
 
 Pre-requisites:
 
@@ -588,7 +588,7 @@ Follow these steps:
 
 1. Set Up the Prometheus Receiver
     
-    Once the OpenTelemetry Collector is installed, configure it to scrape Prometheus metrics. Edit your `otel-collector-config.yaml` file and add a Prometheus receiver configuration:
+    Once the OpenTelemetry Collector is installed, configure it to scrape Prometheus metrics. Edit your `otel-collector-config.yaml` file and add a [Prometheus receiver](https://signoz.io/blog/opentelemetry-collector-prometheus-receiver/) configuration:
     
     - New Job:
     

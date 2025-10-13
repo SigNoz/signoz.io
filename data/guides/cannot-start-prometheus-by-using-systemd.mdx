@@ -33,7 +33,7 @@ Systemd records service activity and errors in logs, which can be accessed using
     - `prometheus.service: Failed to start Prometheus`
     - `execvp failed: No such file or directory` (indicating an incorrect path to the Prometheus binary)
 - Permission Denied Errors: If the Prometheus service does not have appropriate permissions to access necessary files or directories, systemd will log “permission denied” errors.
-- Configuration File Access Issues: Incorrect permissions or missing configuration files can prevent Prometheus from starting, which systemd logs can help identify. Errors such as `error loading configuration file 'prometheus.yml'` can indicate syntax issues or missing files in the configuration.
+- Configuration File Access Issues: Incorrect permissions or missing configuration files can prevent Prometheus from starting, which [systemd logs](https://signoz.io/guides/systemctl-logs/) can help identify. Errors such as `error loading configuration file 'prometheus.yml'` can indicate syntax issues or missing files in the configuration.
 - Storage Directory Problems: Prometheus requires access to specific directories for data storage. Problems such as missing directories or improper permissions can cause the service to fail.
 - Service Dependency Failures: Systemd manages dependencies, and if a required service or target (like network availability) is not met, Prometheus may fail to start.
 
@@ -109,7 +109,7 @@ This checklist offers a step-by-step approach to diagnose and resolve common iss
     
     <Figure src="/img/guides/2024/11/cannot-start-prometheus-by-using-systemd-8a0e8890-7170-4026-ad56-f37b267e4633.webp" alt="Verifying File permissions" caption="Verifying File permissions" />
     
-4. Validate Service Configuration: Review the Prometheus configuration file (`prometheus.yml`) to check for any syntax errors or misconfigurations, as these can prevent the service from starting or cause unexpected behavior. After making any changes, remember to reload or restart the service to apply them.
+4. Validate Service Configuration: Review the [Prometheus configuration](https://signoz.io/guides/what-is-prometheus-target/) file (`prometheus.yml`) to check for any syntax errors or misconfigurations, as these can prevent the service from starting or cause unexpected behavior. After making any changes, remember to reload or restart the service to apply them.
     
     To verify the systemd service configuration for Prometheus, you can use: 
     
@@ -286,12 +286,12 @@ By following these steps, you can resolve common Prometheus issues, set up secur
 
 ## SigNoz: A Single-Pane Alternative to your Observability Needs
 
-If managing Prometheus with systemd has proven difficult, [SigNoz](https://signoz.io/) offers a powerful alternative with numerous advantages, including easier setup, automatic recovery, and integration with OpenTelemetry for unified observability. Designed for teams seeking a solution with minimal configuration, built-in alerting, and seamless integration of metrics, traces, and logs, SigNoz provides a modern and efficient approach to monitoring.
+If managing Prometheus with systemd has proven difficult, [SigNoz](https://signoz.io/) offers a powerful alternative with numerous advantages, including easier setup, automatic recovery, and integration with OpenTelemetry for [unified observability](https://signoz.io/unified-observability/). Designed for teams seeking a solution with minimal configuration, built-in alerting, and seamless integration of metrics, traces, and logs, SigNoz provides a modern and efficient approach to monitoring.
 
-Elevate your monitoring game with SigNoz—an open-source observability tool that simplifies your strategy. With seamless OpenTelemetry integration, SigNoz effortlessly collects and correlates metrics, traces, and logs, providing a comprehensive view of your system’s performance. Below, are key advantages that make SigNoz an essential solution for modern observability requirements:
+Elevate your monitoring game with SigNoz—an open-source observability tool that simplifies your strategy. With seamless [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) integration, SigNoz effortlessly collects and correlates metrics, traces, and logs, providing a comprehensive view of your system’s performance. Below, are key advantages that make SigNoz an essential solution for modern observability requirements:
 
 - Zero Configuration Setup: Say goodbye to complex systemd configurations. SigNoz offers a hassle-free installation process that automatically sets up monitoring services for you.
-- Automatic Failure Recovery: Never miss a beat with built-in recovery features that automatically restart your services, ensuring high availability and reliability.
+- Automatic Failure Recovery: Never miss a beat with built-in recovery features that automatically restart your services, ensuring high [availability and reliability](https://signoz.io/comparisons/availability-vs-reliability/).
 - Smart Storage Management: Forget about manual retention policies; SigNoz intelligently manages storage for you, optimizing performance without additional overhead.
 - Pre-configured Alerts and Dashboards: Get started quickly with out-of-the-box alerts and dashboards, allowing you to monitor critical metrics right away.
 
@@ -327,7 +327,7 @@ Regular backups of Prometheus configuration files are crucial in production envi
     Explanation: The `cp` command creates a backup of `prometheus.yml`, which can be invaluable for restoring configurations if the original file is accidentally modified or deleted. Automating this backup as part of a script or cron job is a best practice in production environments.
     
 3. Performance Settings: 
-Configuring Prometheus storage to manage resource usage efficiently is important for production environments with large data volumes. You can control the amount of data stored by setting retention policies based on time or storage limits.
+Configuring [Prometheus storage](https://signoz.io/guides/how-to-increase-prometheus-storage-retention/) to manage resource usage efficiently is important for production environments with large data volumes. You can control the amount of data stored by setting retention policies based on time or storage limits.
     
     Configure Storage Retention: Adjust retention settings in `prometheus.yml` to define how much historical data Prometheus should keep.
     

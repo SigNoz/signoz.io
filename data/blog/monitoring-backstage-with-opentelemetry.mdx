@@ -54,7 +54,7 @@ Language-specific SDKs [in our case, Node.js] and auto-instrumentation packages 
 
 ### Resource and Context Propagation
 
-OTel attaches context [like trace IDs] to operations and propagates it across function calls and even between services. Backstage already has built-in support for OTel’s context propagation and uses the OTel APIs for some of its internals. This means when we enable OTel, many Backstage components [catalogue, scaffolder, etc.] will start emitting traces/metrics without heavy custom coding.
+OTel attaches context [like trace IDs] to operations and propagates it across function calls and even between services. Backstage already has built-in support for OTel’s [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/) and uses the OTel APIs for some of its internals. This means when we enable OTel, many Backstage components [catalogue, scaffolder, etc.] will start emitting traces/metrics without heavy custom coding.
 
 ### Collectors and Exporters
 
@@ -62,7 +62,7 @@ OpenTelemetry data can be exported to a backend of your choice. Often this is do
 
 ### Signals like Traces, Metrics, Logs
 
-With OTel, Backstage can emit distributed traces, metrics and logs. By capturing all three signals, we can correlate issues from multiple angles. For instance, an error log can be tied to a specific trace of a failing request, and metrics can alert on error rates or latency.
+With OTel, Backstage can emit [distributed traces](https://signoz.io/blog/distributed-tracing/), metrics and logs. By capturing all three signals, we can correlate issues from multiple angles. For instance, an [error log](https://signoz.io/guides/error-log/) can be tied to a specific trace of a failing request, and metrics can alert on error rates or latency.
 
 In summary, OpenTelemetry provides the tools to instrument and export Backstage’s internal behaviour. Next, we’ll walk through how to apply OTel to Backstage’s backend.
 
@@ -83,7 +83,7 @@ yarn --cwd packages/backend add @opentelemetry/exporter-trace-otlp-http @opentel
 
 ```
 
-*(If you prefer Prometheus for metrics or a different exporter, adjust accordingly. Backstage’s documentation uses a Prometheus exporter in their example, but here we’ll use OTLP exporters to send data to an OpenTelemetry Collector.)*
+*(If you prefer Prometheus for metrics or a different exporter, adjust accordingly. Backstage’s documentation uses a Prometheus exporter in their example, but here we’ll use OTLP exporters to send data to an [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) Collector.)*
 
 ### Step 2: Create an instrumentation startup file
 
@@ -130,7 +130,7 @@ Let’s break down what this does:
 
 - We create a NodeSDK instance, providing it with the OTLP Trace Exporter and OTLP Metric Exporter pointed at our collector. We wrap the metric exporter in a PeriodicExportingMetricReader [which periodically pushes metrics].
     
-    For a production setup, you’d point the URL to your OpenTelemetry Collector, SigNoz ingestion endpoint, or your backend vendor's endpoint.
+    For a production setup, you’d point the URL to your OpenTelemetry Collector, [SigNoz](https://signoz.io/docs/introduction/) ingestion endpoint, or your backend vendor's endpoint.
     
 - We include getNodeAutoInstrumentations(), which enables a suite of auto-instrumentation plugins for Node. This covers Express, HTTP, DNS, MySQL, and more, automatically generating spans for operations in those libraries.
 - Finally, we call sdk.start().
@@ -158,7 +158,7 @@ At this point, if you start Backstage, it should begin emitting telemetry:
 
 ### Step 4: Verify telemetry data
 
- You can check that your OTel Collector or SigNoz is receiving data. With OTLP and SigNoz, you’d look in the SigNoz UI for your service name or check the collector logs to ensure data is flowing. 
+ You can check that your [OTel Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) or SigNoz is receiving data. With OTLP and SigNoz, you’d look in the SigNoz UI for your service name or check the collector logs to ensure data is flowing. 
 <Figure src="/img/blog/2025/06/backstage-traces.webp" alt="Backstage traces flow to SigNoz" caption="Backstage traces flow to SigNoz" />
 
 ## Advanced Use Cases and Benefits
@@ -195,7 +195,7 @@ In practice, this means faster detection of issues like an unreachable ArgoCD se
 
 By having Backstage instrumented, developers using Backstage can benefit from in-app observability cues. 
 
-For instance, if a plugin fails to load data, you could surface an error message that includes a trace ID. The developer can then use that trace ID in their observability tooling to get a full trace and logs for the failed request. 
+For instance, if a plugin fails to load data, you could surface an error message that includes a [trace ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/). The developer can then use that trace ID in their observability tooling to get a full trace and logs for the failed request. 
 
 This *tight coupling* between Backstage and your monitoring system transforms Backstage into not just a portal for your services, but a monitored app *itself* that engineers can trust. It reduces MTTR for Backstage issues significantly.
 

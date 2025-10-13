@@ -216,6 +216,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Deploying to Azure Container Apps',
+            route: '/docs/install/azure-container-apps',
+          },
+          {
+            type: 'doc',
             isExpanded: false,
             label: 'Deploying from Marketplaces',
             route: '/docs/install/marketplaces',
@@ -473,6 +478,12 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/manage/administrator-guide/configuration/jwt-secret',
                 label: 'JWT Secret',
+                isExpanded: false,
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/relational-database',
+                label: 'Relational Databases Support',
                 isExpanded: false,
               },
             ],
@@ -932,6 +943,18 @@ const docsSideNav = [
               {
                 type: 'category',
                 isExpanded: false,
+                label: 'Java',
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/instrumentation/manual-instrumentation/java/annotations',
+                    label: 'Using Annotations',
+                  },
+                ]
+              },
+              {
+                type: 'category',
+                isExpanded: false,
                 label: 'JavaScript',
                 // route: '',
                 // link: {
@@ -1033,6 +1056,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/traces-management/guides/drop-spans',
             label: 'Control Traces Volume',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/pii-scrubbing/',
+            label: 'PII Scrubbing'
           },
           {
             type: 'doc',
@@ -1592,6 +1620,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/azure-openai-dashboard',
+            label: 'Azure OpenAI API',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
             label: 'CICD',
           },
@@ -1604,6 +1637,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/couchdb',
             label: 'CouchDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/crewai-dashboard',
+            label: 'Crew AI',
           },
           {
             type: 'doc',
@@ -1928,6 +1966,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/alerts-management/routing-policy',
+        label: 'Routing Policies',
+      },
+      {
+        type: 'doc',
         route: '/docs/alerts-management/alerts-history',
         label: 'Alerts History',
       },
@@ -2064,8 +2107,18 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/azure-openai-monitoring',
+        label: 'Azure OpenAI API Monitoring',
+        type: 'doc',
+      },
+      {
         route: '/docs/claude-code-monitoring',
         label: 'Claude Code Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/crewai-monitoring',
+        label: 'Crew AI Monitoring',
         type: 'doc',
       },
       {
@@ -2080,7 +2133,7 @@ const docsSideNav = [
       },
       {
         route: '/docs/langchain-monitoring',
-        label: 'LangChain Monitoring',
+        label: 'LangChain/LangGraph Monitoring',
         type: 'doc',
       },
       {
@@ -2097,6 +2150,19 @@ const docsSideNav = [
         route: '/docs/vercel-ai-sdk-monitoring',
         label: 'Vercel AI SDK Monitoring',
         type: 'doc',
+      },
+    ],
+  },
+  {
+    type: 'category',
+    isExpanded: false,
+    label: 'SigNoz MCP',
+
+    items: [ 
+      {
+          type: 'doc',
+          route: '/docs/signoz-mcp-server',
+          label: 'SigNoz MCP Server',
       },
     ],
   },

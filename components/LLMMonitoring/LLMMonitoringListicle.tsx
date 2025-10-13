@@ -24,10 +24,22 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Anthropic API Monitoring',
   },
   {
+    name: 'Azure OpenAI API',
+    href: '/docs/azure-openai-monitoring',
+    icon: <img src="/svgs/icons/LLMMonitoring/azure-logo.webp" alt="Azure OpenAI Icon" className="h-7 w-7" />,
+    clickName: 'Azure OpenAI API Monitoring',
+  },
+  {
     name: 'Claude Code',
     href: '/docs/claude-code-monitoring',
     icon: <SiClaude className="h-7 w-7 text-orange-500" />,
     clickName: 'Claude Code Monitoring',
+  },
+  {
+    name: 'Crew AI',
+    href: '/docs/crewai-monitoring',
+    icon: <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />,
+    clickName: 'Crew AI Monitoring',
   },
   {
     name: 'DeepSeek API',
@@ -42,7 +54,7 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Google Gemini Monitoring',
   },
   {
-    name: 'LangChain',
+    name: 'LangChain/LangGraph',
     href: '/docs/langchain-monitoring',
     icon: <SiLangchain className="h-7 w-7 text-white" />,
     clickName: 'LangChain Monitoring',

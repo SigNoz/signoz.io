@@ -43,7 +43,7 @@ const DocContent: React.FC<{
             {!isOnboarding && post.tags && post.tags.length > 0 && (
               <TagsWithTooltips tags={post.tags} />
             )}
-            <h2 className="mt-2 text-3xl leading-tight">{title}</h2>
+            <h1 className="mt-2 text-3xl leading-tight">{title}</h1>
           </div>
           {!isIntroductionPage && post.body?.raw && (
             <CopyAsMarkdown

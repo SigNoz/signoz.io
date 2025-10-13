@@ -11,11 +11,6 @@ keywords: [opentelemetry,webinar,openllmetry,traceloop,signoz,observability]
 ---
 
 
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-webinar-openllmetry/"/>
-</head>
-
 Join <a href="https://github.com/serverless-mom" rel="nofollow">Nočnica Mellifera</a> and <a href="https://www.linkedin.com/in/nirga/" rel="nofollow">Nir</a> to discuss how machine learning can be monitored with OpenTelemetry. We'll see how the SigNoz dashboards can help you monitor resource use, performance, and find problems before your infra budget goes haywire.
 
 
@@ -66,7 +61,7 @@ You know you can read them if you're a visual learner, but talk to me about the 
 
 I remember when that was the case. It was like, "Oh yeah, you have this one library to do this one thing." For example, database indexing. That's an example of something not very event-based or request-based. "Is it compatible with my observability dashboard?" Of course, you find out no, it won't handle those kinds of metrics these days. 
 
-In the OpenTelemetry space, it's like, "Will it report to the OpenTelemetry collector?" If yes, then yes. If no, then no. But generally, the answer is yes. You know there's some kind of ingestion tool for it. But you're right that the actual, like, giving a prompt, adding a single vector, and getting back a response that looks like a trace, with a request-response pattern to it.
+In the OpenTelemetry space, it's like, "Will it report to the [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)?" If yes, then yes. If no, then no. But generally, the answer is yes. You know there's some kind of ingestion tool for it. But you're right that the actual, like, giving a prompt, adding a single vector, and getting back a response that looks like a trace, with a request-response pattern to it.
 
 **NIR:** Yeah, exactly. 
 
@@ -74,11 +69,11 @@ In the OpenTelemetry space, it's like, "Will it report to the OpenTelemetry coll
 
 All right, so talk to me a little bit about the limitations of existing tools. We're not trying to embarrass anybody, but this is new technology, so of course, there are limitations to what's out there.
 
-**NIR:** I think the thing I like the most about OpenTelemetry or one of the things I like the most, is auto-instrumentation. So you don't have to do anything. You just initialize the standard OpenTelemetry SDK, and you immediately get visibility into HTTP calls, database calls, whatever you want. So we wanted to have the same experience with LLMs. 
+**NIR:** I think the thing I like the most about OpenTelemetry or one of the things I like the most, is auto-instrumentation. So you don't have to do anything. You just initialize the standard [OpenTelemetry SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/), and you immediately get visibility into HTTP calls, database calls, whatever you want. So we wanted to have the same experience with LLMs. 
 
 Right now, the existing tools for observability with LLMs require you to manually log and specify in your code where you call OpenAI or replace the OpenAI API with some other proprietary API, which is a lot of work if you have a significant code base already using LLMs. What's great about OpenTelemetry is that you get a great infrastructure for auto-instrumenting these calls. So basically, you just add one line of code, and you get instant visibility into your vector database calls, LLMs calls, and anything you want.
 
-**NICA:** This is such a big piece with OpenTelemetry. This context propagation and automatic instrumentation is fantastic. A lot of the early tools for adding observability to IoT, for example, tend to be very single-use tools. It's a specific dashboard, a specific call. But yeah, also you'll see where it's like, "Oh, we're fully bought into this technology, so we have 500 calls for it across the code base." That's going to be a tough sell.
+**NICA:** This is such a big piece with OpenTelemetry. This [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/) and automatic instrumentation is fantastic. A lot of the early tools for adding observability to IoT, for example, tend to be very single-use tools. It's a specific dashboard, a specific call. But yeah, also you'll see where it's like, "Oh, we're fully bought into this technology, so we have 500 calls for it across the code base." That's going to be a tough sell.
 
 **NIR:** Definitely. 
 
@@ -120,9 +115,9 @@ Lastly, before we go into a demo, do you have advice for engineers who are consi
 
 **NICA:** Yeah, it makes sense, especially when you're dealing with sensitive data like sales relationships on the enterprise side or therapy questions on the personal side. It's the kind of data you don't want to see spread about or shared. Talking about self-hosting and open-source tools as alternatives for how you're modeling certain data makes a lot of sense. Telemetry's strength is that you can route data to multiple places, so you can have the same collector doing that kind of routing.
 
-This has been a fantastic talk, and I can't wait for us to dive into a little demo of implementing it on your own set of tools and reporting some of the data over to SigNoz.
+This has been a fantastic talk, and I can't wait for us to dive into a little demo of implementing it on your own set of tools and reporting some of the data over to [SigNoz](https://signoz.io/docs/introduction/).
 
-**NIR:** One of the questions people keep asking is, "Hey, why is this separate from OpenTelemetry? Are you planning on integrating it back into OpenTelemetry, giving it to the bigger project?" I've been contributing to the OpenTelemetry project for a long time, and I'd love to become part of OpenTelemetry at some point. But you have to understand that OpenTelemetry is a big project.
+**NIR:** One of the questions people keep asking is, "Hey, why is this separate from OpenTelemetry? Are you planning on integrating it back into OpenTelemetry, giving it to the bigger project?" I've been contributing to the [OpenTelemetry project](https://signoz.io/blog/opentelemetry-apm/) for a long time, and I'd love to become part of OpenTelemetry at some point. But you have to understand that OpenTelemetry is a big project.
 
 This is a huge project with a lot of stakeholders, and a lot of users are using it outside of the LM world. It's hard to commit the semantic conventions we're defining for the instrumentations today into the main OpenTelemetry repo. This is still evolving, and we're trying to figure out what's the right way to report the different prompts or bases.
 
@@ -164,7 +159,7 @@ Let's see how long it takes...
 
 **NICA:** Sorry, I have a funny story to tell you. I had not used a code completion tool like a modern code completion tool until this week because a friend asked me to try out their tool. I was like, "Oh, this is very nice!" I was doing my imports and it said, "Do you want to import this other thing that you use later in your code?" I was like, "Uh, why are you telling me to import this random component?" Then I saw, "Oh, right, because I use it and I forgot to import it." It was marked in the parser and stuff, but I was like, "Oh, that's pretty nice!" Thank you for that 
 
-When you are first implementing open telemetry instrumentation or when using instrumentation, it is important to disable batching so that you can see each request traced in your dashboard. This is because you want to be able to see the results of your changes as soon as possible. 
+When you are first implementing [open telemetry](https://signoz.io/blog/what-is-opentelemetry/) instrumentation or when using instrumentation, it is important to disable batching so that you can see each request traced in your dashboard. This is because you want to be able to see the results of your changes as soon as possible. 
 
 **NIR:** Absolutely. So, I'll do that now. We're using Poetry to install the SDK. 
 
@@ -211,7 +206,7 @@ This helps us see how different parts of our system are performing and if any ar
 
 Once you have disabled batching, you can see the traces of your requests in the Trace Loop dashboard. You can also see how long each request took and which services were called.
 
-*They demonstrate how to enable a trace loop, sign up, and create an API key to export traces to the OpenTelemetry dashboard. However, they realize that the generated traces are individual and not a connected sequence.*
+*They demonstrate how to enable a trace loop, sign up, and create an API key to export traces to the [OpenTelemetry dashboard](https://signoz.io/blog/opentelemetry-visualization/). However, they realize that the generated traces are individual and not a connected sequence.*
 
 To see a complete connected trace, annotations are needed. OpenTelemetry recommends annotating your workflow to view a unified trace. You can use decorators to connect and visualize the overall process.
 

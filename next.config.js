@@ -142,13 +142,13 @@ module.exports = () => {
         },
         {
           source: '/learn/user-stories/',
-          destination: '/observability-user-stories',
+          destination: '/blog/community-update-06/#observability-user-stories',
           permanent: true,
         },
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3cy3atyr6-yjgvOm42ZqD2HeszrXuvOA',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3f0a8p8iv-Q_owXy6v0KUxlrJEkV_7hw',
           basePath: false,
           permanent: true,
         },
@@ -557,7 +557,12 @@ module.exports = () => {
         },
         {
           source: "/docs/instrumentation/troubleshoot-instrumentation/",
-          destination: "/docs/traces-management/troubleshooting/",
+          destination: "/docs/traces-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/query-handles-missing-values/",
+          destination: "/docs/userguide/query-builder/",
           permanent: true
         },
         {

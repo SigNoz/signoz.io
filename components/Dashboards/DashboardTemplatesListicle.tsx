@@ -95,6 +95,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'AWS SQS Prometheus Dashboard Template',
   },
   {
+    name: 'Azure OpenAI API',
+    href: '/docs/dashboards/dashboard-templates/azure-openai-dashboard',
+    icon: <img src="/svgs/icons/LLMMonitoring/azure-logo.webp" alt="Azure OpenAI Icon" className="h-7 w-7" />,
+    clickName: 'Azure OpenAI API Dashboard Template',
+  },
+  {
     name: 'CI/CD',
     href: '/docs/dashboards/dashboard-templates/cicd',
     icon: <Settings className="h-7 w-7 text-green-600" />,
@@ -117,6 +123,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/couchdb',
     icon: <Database className="h-7 w-7 text-red-500" />,
     clickName: 'CouchDB Dashboard Template',
+  },
+  {
+    name: 'Crew AI',
+    href: '/docs/dashboards/dashboard-templates/crewai-dashboard',
+    icon: <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />,
+    clickName: 'Crew AI Dashboard Template',
   },
   {
     name: 'DeepSeek API',

@@ -17,7 +17,7 @@ With microservices becoming popular, tracing is increasingly more important in d
 
 #### What is distributed tracing?
 
-Distributed tracing, also called distributed request tracing, is a method used to profile and monitor applications, especially those built using a microservices architecture. Distributed tracing helps pinpoint where failures occur and what causes poor performance.
+[Distributed tracing](https://signoz.io/distributed-tracing/), also called distributed request tracing, is a method used to profile and monitor applications, especially those built using a microservices architecture. Distributed tracing helps pinpoint where failures occur and what causes poor performance.
 
 #### How does tracing differ from logs?
 
@@ -38,7 +38,7 @@ Jaeger was originally built and open-sourced by Uber. Jaeger is a Cloud Native C
 ![architecture of Jaeger](/img/blog/2020/05/image.webp)Architecture of Jaeger
 **Jaeger Architecture [[Official Doc](https://www.jaegertracing.io/docs/1.17/architecture/)]:**
 
-- Instrument application using jaeger client libraries available in multiple languages
+- [Instrument application](https://signoz.io/docs/instrumentation/) using jaeger client libraries available in multiple languages
 - JaegerClient sends spans to jaeger-agent which is usually deployed as a daemonSet in each host to receive UDP or HTTP spans. If we skip jaeger-agent and send spans directly to jaeger-collector then UDP spans may be missed
 - Jaeger-Agent can be set to batch the span and sample data before sending to the collector which then stores to DB for persistence
 - Jaeger supports Elastic, Cassandra and Kafka as backend databases but there is a [github issue](https://github.com/jaegertracing/jaeger/issues/638) tracking integration of other storage plugins like BadgerKV and InfluxDB
@@ -274,7 +274,7 @@ Chapter 9 from this book from Yuri Shkuro, the author of Jaeger gives details on
 
 I have been working with Jaeger and see a lot of potential in improving the UI of traces. More importantly, I would say there is a need to merge monitoring and tracing for the following reasons:
 
-- Prometheus gives us aggregated metrics, which is great for getting alerts on an erroneous service or a spike in latency. To debug it, we need to drill down to traces in during that time and figure out exactly which spans and tags of traces during that time need inspection.
+- Prometheus gives us [aggregated metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/), which is great for getting alerts on an erroneous service or a spike in latency. To debug it, we need to drill down to traces in during that time and figure out exactly which spans and tags of traces during that time need inspection.
 - Tracing alone does not provide the overall performance of a service. We may need to maintain SLAs of individual services and hence looking into anomalies in traces of that service needs attention on priority.
 
 I am also analyzing the cost of running Jaeger in-house and the price APM vendors ask. I think there is a huge gap in between. If it remains the case companies will always be confused whether to use commercial vendors or run everything in-house.
