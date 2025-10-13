@@ -29,8 +29,7 @@ To enable log collection, please follow these steps:
 
 Create a dedicated Kubernetes namespace which AWS requires to be named `aws-observability` with the label `aws-observability: enabled`.
 
-```yaml
-# aws-observability-namespace.yaml
+```yaml:aws-observability-namespace.yaml
 kind: Namespace
 apiVersion: v1
 metadata:
@@ -41,7 +40,7 @@ metadata:
 
 Apply the manifest with kubectl:
 
-```bash
+```shell
 kubectl apply -f aws-observability-namespace.yaml
 ```
 
@@ -50,7 +49,7 @@ kubectl apply -f aws-observability-namespace.yaml
 Create a `ConfigMap` with a Fluent Conf data value to ship container logs to a destination. Fluent Conf is a fast and lightweight log processor configuration language used by Fluent Bit to route container logs to a log destination of your choice. For more information, see [Configuration](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/configuration-file) in the Fluent Bit documentation.
 
 <Admonition type="warning">
-AWS requires following this configuration for Fluent Bit:
+AWS validates against following configuration for Fluent Bit:
 - The Fargate log router manages the `Service` and `Input` sections, which cannot be modified and are not needed in your ConfigMap.
 - `[FILTER]`, `[OUTPUT]`, and `[PARSER]` are supposed to be specified under each corresponding key. For example, `[FILTER]` must be under `filters.conf`. You can have one or more `[FILTER]` sections under `filters.conf`. The `[OUTPUT]` and `[PARSER]` sections should also be under their corresponding keys. By specifying multiple `[OUTPUT]` sections, you can route your logs to different destinations at the same time.
 - Fargate validates against the following supported outputs: `es`, `firehose`, `kinesis_firehose`, `cloudwatch`, `cloudwatch_logs`, and `kinesis`.
@@ -66,8 +65,7 @@ Since AWS Fargate does not allow the use of either `fluent-forward` or `OpenTele
 
 The following Fluent Bit configuration uses the [Kubernetes Filter](https://docs.fluentbit.io/manual/data-pipeline/filters/kubernetes):
 
-```yaml
-# fluentbit-config-map.yaml
+```yaml:fluentbit-config-map.yaml
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -113,13 +111,13 @@ data:
 
 Apply the ConfigMap with kubectl:
 
-```bash
+```shell
 kubectl apply -f fluentbit-config-map.yaml
 ```
 
 After creating the ConfigMap, we need to set up permissions for the Fargate Pod execution role to send logs to the destination:
 
-```bash
+```shell
 ## Download the IAM policy for your destination to your computer
 curl -O https://raw.githubusercontent.com/aws-samples/amazon-eks-fluent-logging-examples/mainline/examples/fargate/cloudwatchlogs/permissions.json
 
@@ -142,8 +140,7 @@ Depending on the output you've configured in Fluent Bit, configure the OpenTelem
 We will be using the [awscloudwatchreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/awscloudwatchreceiver) to ingest logs from AWS CloudWatch into the OpenTelemetry Collector. If you've opted for a different output in Fluent Bit, such as Kinesis or Firehose, you can use other receivers made available by the OpenTelemetry community.
 
 Add the following to your OpenTelemetry Collector ConfigMap created during installation:
-```yaml
-# otel-agent-sidecar-ConfigMap
+```yaml:otel-agent-sidecar-ConfigMap
 receivers:
   awscloudwatch:
     region: <REGION>
@@ -169,13 +166,13 @@ After creating the ConfigMap, we need to set up AWS credentials for the OpenTele
 
 1. Create an IAM OIDC identity provider for your cluster using the following command:
 
-```bash
+```shell
 eksctl utils associate-iam-oidc-provider --cluster ${CLUSTER_NAME} --region ${REGION} --approve
 ```
 
 2. Assign IAM roles to the Kubernetes service account for the OTel Collector using the following command. We will be using the [CloudWatchReadOnlyAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/CloudWatchReadOnlyAccess.html) policy to get the logs from CloudWatch:
 
-```bash
+```shell
 eksctl create iamserviceaccount \
   --name ${COLLECTOR_SERVICE_ACCOUNT} \
   --namespace ${NAMESPACE} \
@@ -192,6 +189,6 @@ After making all of the above changes, we need to restart the application deploy
 
 Once you restart the deployments, you should see the following in the deployment events:
 
-```bash
+```shell
 Normal  LoggingEnabled  3m5s   fargate-scheduler  Successfully enabled logging for pod
 ```
