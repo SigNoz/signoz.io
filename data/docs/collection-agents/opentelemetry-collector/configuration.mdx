@@ -228,6 +228,8 @@ processors:
         - 'IsMatch(body, ".*password.*")'
 ```
 
+For more examples on dropping data, you can check guides for dropping [logs](https://signoz.io/docs/logs-management/guides/drop-logs/) and [metrics](https://signoz.io/docs/userguide/drop-metrics/).
+
 #### Transform Processor
 
 The [transform](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md) processor modifies the telemetry data using [OpenTelemetry Transformation Language](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl) (OTTL). This is especially useful for scenarios such as:
@@ -382,15 +384,30 @@ Once enabled, you can access the extension pages at:
 
 ### 5. Service
 
-The service section defines pipelines that connect components with each other. Each pipeline defines the flow of data through receivers, processors, and exporters.
+The `service` section in OTel Collector configuration defines the overall flow for how telemetry data is processed, which extensions to enable and how different pipelines are connected with each other.
+
+#### Understanding Pipelines
+
+A pipeline is a directed path that telemetry data follows through the collector. Each pipeline consists of:
+
+1. [Receivers](#1-receivers) - Where data enters
+2. [Processors](#2-processors) - How data is transformed (applied in order)
+3. [Exporters](#3-exporters) - Where data exits
+
+<figure data-zoomable align='center'>
+  <img src="/img/docs/opentelemetry-collector-service.svg" alt="Receivers → Processors → Exporters"/>
+  <figcaption><i>OpenTelemetry Collector: Receivers → Processors → Exporters → SigNoz Cloud</i></figcaption>
+</figure>
 
 #### Pipeline Types
 
-- traces
-- metrics
-- logs
+- traces - Distributed tracing data (spans)
+- metrics - Time-series measurements and gauges
+- logs - Log entries and events
 
-#### Pipeline Structure
+Each pipeline type processes data independently, which allows us to configure different handling for traces, metrics and logs.
+
+#### Configuration Structure
 
 ```yaml
 service:
@@ -412,23 +429,128 @@ service:
       exporters: [otlp, debug]
 ```
 
+<Admonition>
+  The order of few components defined in service configuration section matters and is explained
+  below.
+</Admonition>
+
+## The Order of Components in Service Section
+
+### 1. Order of Processors
+
+Processors execute in the exact order you specify them in the configuration. This order directly impacts data transformation and manipulation. Recommended processor ordering:
+
+```yaml
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors:
+        - memory_limiter # 1st: Protect against OOM
+        - attributes # 2nd: Enrich/modify attributes
+        - filter # 3rd: Drop unwanted data early
+        - transform # 4th: Complex transformations
+        - resource # 5th: Add resource context
+        - batch # 6th: Batch for efficiency (should be last)
+      exporters: [otlp, debug]
+```
+
+#### Why the order matters for processors
+
+- **memory_limiter first**: Prevents out-of-memory (OOM) errors early
+- **filtering early**: Reomves unnecessary data before any processing or transformation
+- **batch last**: Ensures all processing is done before batching telemetry data for export
+
+### 2. Order of Receivers
+
+The order of receivers listed in the configuration array does not affect data processing. As all receivers run in parallel, so their placement in the list does not affect behavior or performance.
+
+### 3. Order of Exporters
+
+Similarly, exporters work independently and in parallel. The order in which exporters are definied has no effect on how data is exported.
+
+## Other Options
+
+### Environment Variables
+
+The OpenTelemetry Collector supports environment variables within its YAML configuration file. This keeps sensitive information (like API tokens) out of the configuration file and allows you to manage configuration dynamically.
+
+To use an environment variable, reference it in your YAML configuration file using `${ENV_NAME}` syntax.
+
+#### Example
+
+Set the SigNoz region and ingestion key dynamically using the `SIGNOZ_REGION` and `SIGNOZ_INGESTION_KEY` environment variables.
+
+```bash
+export SIGNOZ_REGION="us"
+export SIGNOZ_INGESTION_KEY="your-ingestion-key"
+```
+
+Then reference these environment variables in `otel-collector-config.yaml`:
+
+```yaml
+exporters:
+  otlp:
+    endpoint: 'ingest.${SIGNOZ_REGION}.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '${SIGNOZ_INGESTION_KEY}'
+```
+
 ## Best Practices
 
-### 1. Use the batch processor
+#### Place memory_limiter at the beginning
+
+To prevent out-of-memory (OOM) crashes, configure the [`memory_limiter`](#memory-limiter) as the first processor. It monitors memory usage of the collector and makes sure the memory usage stays within safe limits.
+
+#### Use the batch processor
 
 Always include the [`batch`](#batch-processor) processor to group and buffer telemetry data before export. This reduces the number of export requests, improves the throughput.
 
 The batch processor should be placed at the end of the processor list, just before the exporters. This ensures that all the transformations and filtering are in place before batching.
 
-### 2. Place memory_limiter at the beginning
+#### Filtering early
 
-To prevent out-of-memory (OOM) crashes, configure the [`memory_limiter`](#memory-limiter) as the first processor. It monitors memory usage of the collector and makes sure the memory usage stays within safe limits.
+Drop unwanted telemetry (low severity logs, health checks endpoints, unwanted spans, etc.) as early as possible in the pipeline.
 
-### 3. Monitor collector health
+#### Redaction / obfuscation
+
+Scrub sensitive attributes (PII etc.) before exporting telemetry data. Use filters or transform processor to redact the sensitive data.
+
+#### Secure configuration storage
+
+Don't hardcode secrets such as API keys, ingestion keys in plain config file, use environment variables to dynamically set these values in OTel Collector configuration file.
+
+#### Minimize components
+
+Only enable receivers, processors, exporters and extensions, you actually need. Fewer components mean smooth functioning of the collector.
+
+#### Use encrypted endpoints (TLS) wherever possible
+
+Use TLS enabled HTTP endpoints for receivers/exporters. Don't leave endpoints open as `0.0.0.0` unless absolutely necessary.
+
+#### Bind to specific interface
+
+For internal use or local testing, always bind the collector to a specific interface such as `localhost` (loopback interface) rather than listening on all interfaces.
+
+#### Least privilege and permissions
+
+Run collection with non-root user, for Kubernetes, use RBAC, service accounts, limit volume mounts, etc.
+
+#### Set timeouts and retries
+
+Set appropriate timeouts and retry policies so that slow downstreams don't cause the collector to block or accumulate data infinitely.
+
+#### Use compression
+
+Wherever possible, use compression in exporters to reduce network usage.
+
+#### Monitor collector health
 
 Use [`health_check`](#health-check-extension) extension to monitor the health of the collector. It exposes `/health` HTTP endpoint which can be probed to check the collector's status.
 
-### 4. Validate configuration before deployment
+#### Validate configuration before deployment
 
 Before deploying the collector, validate the configuration with the `--dry-run` flag. This allows you misconfigurations or issues with the config without starting the collector.
 
