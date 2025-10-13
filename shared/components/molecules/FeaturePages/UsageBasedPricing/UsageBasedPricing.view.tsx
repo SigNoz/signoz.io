@@ -3,8 +3,9 @@ import PricingCalculator from "app/pricing/pricingv1/components/PricingCalculato
 import { Card } from "@/components/ui/Card"
 import Button from "@/components/ui/Button"
 import { ArrowRight } from "lucide-react"
+import { Section } from "app/pricing/pricingv1/components/PricingCalculator"
 
-const UsageBasedPricing: React.FC = ({ show }: { show: string[] }) => {
+const UsageBasedPricing: React.FC<{ show: Section[] }> = ({ show }) => {
     return (
       <SectionLayout variant="bordered" className="!px-0 !border-t-1 border-signoz_slate-400 border-dashed">
         <div className="flex flex-col sm:flex-row">

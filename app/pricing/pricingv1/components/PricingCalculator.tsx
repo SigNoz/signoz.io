@@ -12,7 +12,7 @@ import TrackingButton from "../../../../components/TrackingButton"
 import { Card } from "@/components/ui/Card"
 import { cn } from "app/lib/utils"
 
-type Section = "traces" | "logs" | "metrics"
+export type Section = "traces" | "logs" | "metrics"
 interface PricingCalculatorProps {
   // If undefined, show all sections (to ensure backward compatibility). If [], show none.
   show?: Section[]
