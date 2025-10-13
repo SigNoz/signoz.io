@@ -54,7 +54,7 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Google Gemini Monitoring',
   },
   {
-    name: 'LangChain',
+    name: 'LangChain/LangGraph',
     href: '/docs/langchain-monitoring',
     icon: <SiLangchain className="h-7 w-7 text-white" />,
     clickName: 'LangChain Monitoring',

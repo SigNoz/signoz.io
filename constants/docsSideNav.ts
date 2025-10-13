@@ -2133,7 +2133,7 @@ const docsSideNav = [
       },
       {
         route: '/docs/langchain-monitoring',
-        label: 'LangChain Monitoring',
+        label: 'LangChain/LangGraph Monitoring',
         type: 'doc',
       },
       {
