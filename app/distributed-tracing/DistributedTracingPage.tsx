@@ -395,7 +395,7 @@ const StorageSection: React.FC = () => {
             Click any span to see correlated logs instantly. OpenTelemetry automatically injects trace context into your logs, connecting traces and logs in both directions. Jump from traces to logs with one click, or click `trace_id` in any log to view the complete distributed trace.
           </p>
           <div className="flex flex-col">
-            <Button variant="secondary" rounded="full" className="flex items-center gap-2 w-fit" to="/blog/traces-without-limits/">
+            <Button variant="secondary" rounded="full" className="flex items-center gap-2 w-fit" to="/docs/traces-management/guides/correlate-traces-and-logs/">
               Read Documentation
               <ArrowRight size={14} />
             </Button>
