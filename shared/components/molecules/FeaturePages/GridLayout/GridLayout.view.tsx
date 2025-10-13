@@ -7,7 +7,7 @@ const GridLayout: React.FC<GridLayoutProps> = ({
     variant = 'default' 
   }) => {
     const getGridClasses = () => {
-      const baseClasses = 'grid gap-8'
+      const baseClasses = 'grid'
       
       switch (variant) {
         case 'equal':

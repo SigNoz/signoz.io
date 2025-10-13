@@ -26,8 +26,8 @@ import TestimonialCards from '@/shared/components/molecules/FeaturePages/Testimo
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
-import FeatureCard from '@/shared/components/molecules/FeaturePages/FeatureCard'
 import IconGrid from '@/shared/components/molecules/FeaturePages/IconGrid'
+import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 
 
 // Main Component Sections
@@ -92,27 +92,6 @@ const Header: React.FC = () => {
         </div>
       </SectionLayout>
     </header>
-  )
-}
-
-const HeroCards: React.FC<{ cards: typeof CARDS; variant?: 'default' | 'combined' }> = ({ 
-  cards, 
-  variant = 'default' 
-}) => {
-  return (
-    <SectionLayout variant="no-border" className="max-md:mt-8 p-0">
-      <GridLayout cols={3}>
-        {cards.map((card, index) => (
-          <FeatureCard 
-            key={index}
-            icon={card.icon}
-            title={card.title}
-            description={card.description}
-            variant={variant}
-          />
-        ))}
-      </GridLayout>
-    </SectionLayout>
   )
 }
 
@@ -393,7 +372,7 @@ const VisualQueryBuilder: React.FC = () => {
         className="mb-8"
       />
       
-      <HeroCards cards={QUERY_BUILDER_CARDS} variant="combined" />
+      <HeroCards cards={QUERY_BUILDER_CARDS} layoutVariant={'no-border'} variant="combined" />
     </div>
   )
 }
