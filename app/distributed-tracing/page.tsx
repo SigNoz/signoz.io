@@ -4,18 +4,18 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Process Million-Span Traces Without Sampling | SigNoz',
+    absolute: 'High-Performance Trace Analysis Powered by Columnar Storage | SigNoz',
   },
   openGraph: {
-    "title": "Process Million-Span Traces Without Sampling",
-    "description": "See every database query, service call, and error in production. Correlate traces with logs and metrics, compare error vs success patterns with Trace Funnels, and run multi-query analysis to find root cause in distributed systems.",
-    "images": "/img/platform/DistributedTracingMeta.png"
+    title: "High-Performance Trace Analysis Powered by Columnar Storage",
+    description: "Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.",
+    images: "/img/platform/DistributedTracingMeta.png"
   },
-  "description": "See every database query, service call, and error in production. Correlate traces with logs and metrics, compare error vs success patterns with Trace Funnels, and run multi-query analysis to find root cause in distributed systems.",
+  description: "Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.",
   twitter:{
-    "title": "Process Million-Span Traces Without Sampling",
-    "description": "See every database query, service call, and error in production. Correlate traces with logs and metrics, compare error vs success patterns with Trace Funnels, and run multi-query analysis to find root cause in distributed systems.",
-    "images": "/img/platform/DistributedTracingMeta.png"
+    title: "High-Performance Trace Analysis Powered by Columnar Storage",
+    description: "Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.",
+    images: "/img/platform/DistributedTracingMeta.png"
   }
 }
 

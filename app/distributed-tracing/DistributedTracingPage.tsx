@@ -54,11 +54,11 @@ const Header: React.FC = () => {
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
 
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
-          Process Million-Span Traces <br /> Without Sampling
+          High-Performance Trace Analysis <br /> Powered by Columnar Storage
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
-          See every database query, service call, and error in production. Correlate <br /> traces with logs and metrics, compare error vs success patterns with Trace <br /> Funnels, and run multi-query analysis to find root cause in distributed systems.
+        Aggregate and analyze millions of spans with ClickHouse performance. Correlate <br /> traces with logs and metrics to find root cause in distributed systems.
         </p>
       </div>
 
