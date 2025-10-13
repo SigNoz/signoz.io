@@ -39,7 +39,7 @@ const Header: React.FC = () => {
     },
     {
       text: "Read Documentation", 
-      href: "/docs/introduction/",
+      href: "/docs/instrumentation/overview/",
       variant: "secondary" as const,
       className: "flex-center"
     }
@@ -111,6 +111,7 @@ const LogProcessingSection: React.FC = () => {
       <IconGrid
         icons={POPULAR_TOOLS_ICONS}
         title="AUTO-INSTRUMENTATED LIBRARIES"
+        className="pb-3"
       />
       
       <Button 
@@ -353,14 +354,14 @@ const VisualQueryBuilder: React.FC = () => {
 const StorageSection: React.FC = () => {
   return (
     <div className="p-0 bg-transparent border-y-1 border-signoz_slate-400 border-dashed mb-12">
-      <div className="flex flex-col md:flex-row gap-8 items-start h-full p-6">
-        <div className="w-full h-full flex flex-col justify-between">
+      <div className="flex flex-col md:flex-row gap-8 items-start h-full px-6">
+        <div className="w-full h-full flex flex-col justify-between border-r-1 border-signoz_slate-400 border-dashed pr-6 py-6">
           <h2 className="font-semibold text-signoz_vanilla-100 mb-6">See related logs of every span</h2>
           <p className="text-signoz_vanilla-400 mb-6 leading-relaxed">
             Click any span to see correlated logs instantly. OpenTelemetry automatically injects trace context into your logs, connecting traces and logs in both directions. Jump from traces to logs with one click, or click `trace_id` in any log to view the complete distributed trace.
           </p>
           <div className="flex flex-col">
-            <Button variant="secondary" rounded="full" className="flex items-center gap-2 w-fit" to="/docs/traces-management/guides/correlate-traces-and-logs/">
+            <Button variant="secondary" rounded="full" className="flex items-center gap-2 w-fit z-10" to="/docs/traces-management/guides/correlate-traces-and-logs/">
               Read Documentation
               <ArrowRight size={14} />
             </Button>
@@ -368,7 +369,7 @@ const StorageSection: React.FC = () => {
           </div>
         </div>
         
-        <div className="w-full h-full flex flex-col justify-between">
+        <div className="w-full h-full flex flex-col justify-between py-6">
           <h2 className="font-semibold text-signoz_vanilla-100 mb-6">Control traces volume</h2>
           <p className="text-signoz_vanilla-400 mb-6 leading-relaxed">
             Drop spans you don't need to optimize costs further. Define filter rules to exclude health checks, internal endpoints, or noisy traces. Remove sensitive attributes before storage, or drop entire spans based on service, operation name, or custom span attributes.
