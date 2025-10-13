@@ -132,12 +132,16 @@ aws iam attach-role-policy \
   --role-name <POD_EXECUTION_ROLE>
 ```
 
-### 3. CloudWatch Receiver in OpenTelemetry Collector
+### 3. Configure Receiver in OpenTelemetry Collector
 
-We will be using the [awscloudwatchreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/awscloudwatchreceiver) to ingest the logs from AWS CloudWatch to the OpenTelemetry Collector. If you've opted for output in Fluent Bit such as Kinesis or Firehose, then you can use other receivers made available by the OpenTelemetry community.
+Depending on the output you've configured in Fluent Bit, configure the OpenTelemetry Collector to ingest logs accordingly.
 
-Add the following to your [OpenTelemetry Collector ConfigMap]() created during installation:
+<Tabs default="cloudwatch">
+<TabItem label="CloudWatch" value="cloudwatch">
 
+We will be using the [awscloudwatchreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/awscloudwatchreceiver) to ingest logs from AWS CloudWatch into the OpenTelemetry Collector. If you've opted for a different output in Fluent Bit, such as Kinesis or Firehose, you can use other receivers made available by the OpenTelemetry community.
+
+Add the following to your OpenTelemetry Collector ConfigMap created during installation:
 ```yaml
 # otel-agent-sidecar-ConfigMap
 receivers:
@@ -159,6 +163,8 @@ service:
         - awscloudwatch
 ```
 
+</TabItem>
+</Tabs>
 After creating the ConfigMap, we need to set up AWS credentials for the OpenTelemetry Collector to get logs from CloudWatch. We will use this [documentation](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-OTLPSimplesetup.html?utm_source=chatgpt.com#CloudWatch-SetupIAMPermissionsonpremises) to set up the required credentials.
 
 1. Create an IAM OIDC identity provider for your cluster using the following command:
