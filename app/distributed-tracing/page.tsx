@@ -7,16 +7,15 @@ export const metadata: Metadata = {
     absolute: 'Distributed Tracing | SigNoz',
   },
   openGraph: {
-    title: 'Distributed Tracing | SigNoz',
-    // description: 'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
-    // images:"/img/platform/LogsManagementHero.webp"
+    "title": "Process Million-Span Traces Without Sampling",
+    "description": "See every database query, service call, and error in production. Correlate traces with logs and metrics, compare error vs success patterns with Trace Funnels, and run multi-query analysis to find root cause in distributed systems.",
+    "images": "/img/platform/DistributedTracingMeta.png"
   },
-  description:
-    'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
+  "description": "See every database query, service call, and error in production. Correlate traces with logs and metrics, compare error vs success patterns with Trace Funnels, and run multi-query analysis to find root cause in distributed systems.",
   twitter:{
-    title: 'Distributed Tracing | SigNoz',
-    // description: 'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
-    // images:"/img/platform/LogsManagementHero.webp",
+    "title": "Process Million-Span Traces Without Sampling",
+    "description": "See every database query, service call, and error in production. Correlate traces with logs and metrics, compare error vs success patterns with Trace Funnels, and run multi-query analysis to find root cause in distributed systems.",
+    "images": "/img/platform/DistributedTracingMeta.png"
   }
 }
 
