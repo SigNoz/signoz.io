@@ -726,7 +726,7 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Configuration Components',
-            route: '/docs/collection-agents/configuration'
+            route: '/docs/collection-agents/opentelemetry-collector/configuration'
           },
         ]
       },
