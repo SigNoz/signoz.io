@@ -2593,11 +2593,6 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/tutorial/instrumenting-angular-frontend',
-        label: 'Instrumenting Angular Frontend Web App',
-      },
-      {
-        type: 'doc',
         route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
         label: 'Setting Up SSO SAML 2.0 With Keycloak',
       },
