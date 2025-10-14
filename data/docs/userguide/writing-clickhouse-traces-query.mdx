@@ -1,5 +1,6 @@
 ---
 date: 2024-06-06
+tags : [SigNoz Cloud, Self-Host]
 title: Writing traces based ClickHouse queries for building dashboard panels
 id: writing-clickhouse-traces-query
 ---
@@ -565,4 +566,103 @@ WHERE
     ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY `service.name`, ts 
 ORDER BY ts ASC;
+```
+
+
+### GroupBy a tag/attribute in distributed tracing data
+
+```sql
+SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, 
+attributes_string['http.method'] AS method,
+toFloat64(avg(durationNano)) AS value 
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE attributes_string['http.method']!=''
+AND timestamp > now() - INTERVAL 30 MINUTE
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY (method, interval) order by (method, interval) ASC;
+```
+
+### Show count of each `customer_id` which is present as attribute of a span event
+
+```sql
+WITH arrayFilter(x -> JSONExtractString(x, 'name')='Getting customer', events) AS filteredEvents
+SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, toFloat64(count()) AS count, 
+arrayJoin(arrayMap(x -> JSONExtractString(JSONExtractString(x, 'attributeMap'), 'customer_id'), filteredEvents)) AS resultArray 
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE not empty(filteredEvents) 
+AND timestamp > toUnixTimestamp(now() - INTERVAL 30 MINUTE) 
+GROUP BY (resultArray, interval) order by (resultArray, interval) ASC;
+```
+
+### Avg latency between 2 spans of interest (part of the trace tree)
+
+```sql
+SELECT
+    interval,
+    round(avg(time_diff), 2) AS result
+FROM
+(
+    SELECT
+        interval,
+        traceID,
+        if(startTime1 != 0, if(startTime2 != 0, (toUnixTimestamp64Nano(startTime2) - toUnixTimestamp64Nano(startTime1)) / 1000000, nan), nan) AS time_diff
+    FROM
+    (
+        SELECT
+            toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+            traceID,
+            minIf(timestamp, if(resource_string_service$$name='driver', if(name = '/driver.DriverService/FindNearest', if((resources_string['component']) = 'gRPC', true, false), false), false)) AS startTime1,
+            minIf(timestamp, if(resource_string_service$$name='route', if(name = 'HTTP GET /route', true, false), false)) AS startTime2
+        FROM signoz_traces.distributed_signoz_index_v3
+        WHERE (timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}) AND (ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}) AND (resource_string_service$$name IN ('driver', 'route'))
+        GROUP BY (interval, traceID)
+        ORDER BY (interval, traceID) ASC
+    )
+)
+WHERE isNaN(time_diff) = 0
+GROUP BY interval
+ORDER BY interval ASC;
+```
+
+
+### Show sum of values  of `customer_id` which is present as attribute of a span event
+
+```sql
+WITH arrayFilter(x -> JSONExtractString(x, 'name')='Getting customer', events) AS filteredEvents
+SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, toFloat64(sum(toInt32(resultArray))) AS sum, 
+arrayJoin(arrayMap(x -> JSONExtractString(JSONExtractString(x, 'attributeMap'), 'customer_id'), filteredEvents)) AS resultArray 
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE not empty(filteredEvents) and timestamp > toUnixTimestamp(now() - INTERVAL 30 MINUTE) 
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY (resultArray, interval) order by (resultArray, interval) ASC;
+```
+
+
+### Plotting a chart on `100ms` interval
+
+Plot a chart of 1 minute showing count of spans in `100ms` interval of service `frontend` with duration > 50ms
+
+```sql
+SELECT fromUnixTimestamp64Milli(intDiv( toUnixTimestamp64Milli ( timestamp ), 100) * 100) AS interval, 
+toFloat64(count()) AS count 
+FROM (
+ SELECT timestamp 
+ FROM signoz_traces.distributed_signoz_index_v3
+ WHERE resource_string_service$$name='frontend' 
+ AND durationNano>=50*exp10(6) 
+ AND timestamp > now() - INTERVAL 1 MINUTE AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(1))) - 1800)
+ GROUP BY interval 
+ ORDER BY interval ASC;
+```
+
+### Show count of loglines per minute
+
+```sql
+SELECT toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS interval, 
+toFloat64(count()) AS value 
+FROM signoz_logs.distributed_logs_v2
+WHERE timestamp > toUnixTimestamp64Nano(now64() - INTERVAL 30 MINUTE) 
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY interval 
+ORDER BY interval ASC;
 ```
