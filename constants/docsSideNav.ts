@@ -967,6 +967,11 @@ const docsSideNav = [
                     route:
                       '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs',
                   },
+                  {
+                    type: 'doc',
+                    label: 'Enable/disable Instrumentation',
+                    route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation'
+                  },
                 ],
               },
             ],

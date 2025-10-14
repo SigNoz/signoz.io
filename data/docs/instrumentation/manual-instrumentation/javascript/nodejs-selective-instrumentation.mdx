@@ -1,0 +1,366 @@
+---
+date: 2025-10-12
+id: nodejs-selective-instrumentation
+title: Enable/Disable OpenTelemetry Instrumentation in Node.js
+hide_table_of_contents: true
+tags: [SigNoz Cloud, Self-Host]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+The OpenTelemetry auto-instrumentation for Node.js automatically includes a lot of libraries and frameworks, which can result in a lot of noise and irrelevant telemetry data.
+
+This guide helps you to use **environment variables** and **programmatic configuration** to control which libraries are enabled/disabled for auto-instrumentation. By limiting instrumented libraries, we can reduce noise and only have relevant telemetry data.
+
+## Prerequisites
+
+- Node.js version 18.0 or higher
+- OpenTelemetry SDK installed
+
+## Setup
+
+Run the following commands to install required packages:
+
+```bash
+npm install --save @opentelemetry/api
+npm install --save @opentelemetry/auto-instrumentations-node
+```
+
+The `@opentelemetry/api` and `@opentelemetry/auto-instrumentations-node` packages contain OpenTelemetry API, SDK, and the auto-instrumentation code.
+
+You can then enable auto-instrumentation by using `--require` flag:
+
+```bash
+node --require '@opentelemetry/auto-instrumentations-node/register' app.js
+```
+
+Or by using environment variable:
+
+```bash
+NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+```
+
+## Excluding Specific Instrumentation Libraries
+
+### Use Case
+
+By default all [supported libraries](https://github.com/open-telemetry/opentelemetry-js-contrib/blob/main/packages/auto-instrumentations-node/README.md#supported-instrumentations) are automatically instrumented. However, in some cases might only want telemetry for specific frameworks:
+
+- Reducing telemetry noise from irrelevant libraries
+- Debugging specific parts of your application
+
+### Using Environment Variables
+
+#### Enable specific libraries
+
+Use `OTEL_NODE_ENABLED_INSTRUMENTATIONS` environment variable to specify which libraries should be instrumented. Provide a comma separated list of library names without the `@opentelemetry/instrumentation-` prefix.
+
+```bash
+export OTEL_NODE_ENABLED_INSTRUMENTATIONS="http,express"
+```
+
+<Admonition>
+  Only libraries listed in `OTEL_NODE_ENABLED_INSTRUMENTATIONS` are instrumented.
+</Admonition>
+
+#### Disable specific libraries
+
+Use `OTEL_NODE_DISABLED_INSTRUMENTATIONS` environment variable to specify which libraries to disable for instrumentation. Provide a comma separated list of library names without the `@opentelemetry/instrumentation-` prefix.
+
+```bash
+OTEL_NODE_DISABLED_INSTRUMENTATIONS="fs,grpc"
+```
+
+<Admonition>
+  Only libraries listed in `OTEL_NODE_DISABLED_INSTRUMENTATIONS` are disabled for instrumentation,
+  other supported libraries are enabled.
+</Admonition>
+
+**Note:** If both environment variables are set, `OTEL_NODE_ENABLED_INSTRUMENTATIONS` is applied first, and `OTEL_NODE_DISABLED_INSTRUMENTATIONS` is applied afterwards. So, if a library is written in both environment variables, it will not be enabled.
+
+### Using Programmatic Configuration
+
+You can also enable/disable libraries programmatically in your application code.
+
+Install required libraries by:
+
+```bash
+npm install --save @opentelemetry/sdk-node
+npm install --save @opentelemetry/auto-instrumentations-node
+npm install --save @opentelemetry/exporter-trace-otlp-http
+```
+
+Create an `instrumentation.js` file:
+
+```javascript:instrumentation.js
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+
+// Define which instrumentations to enable
+const instrumentations = getNodeAutoInstrumentations({
+  '@opentelemetry/instrumentation-fs': {
+    enabled: false,
+  },
+  '@opentelemetry/instrumentation-http': {
+    enabled: true,
+  },
+  '@opentelemetry/instrumentation-express': {
+    enabled: true,
+  },
+  '@opentelemetry/instrumentation-dns': {
+    enabled: false,
+  },
+  '@opentelemetry/instrumentation-grpc': {
+    enabled: false,
+  },
+});
+
+// Configure OTLP exporter
+const traceExporter = new OTLPTraceExporter({
+  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+  headers: process.env.OTEL_EXPORTER_OTLP_HEADERS ?
+    Object.fromEntries(
+      process.env.OTEL_EXPORTER_OTLP_HEADERS.split(',').map(h => h.split('='))
+    ) : {},
+});
+
+// Initialize SDK with resource and instrumentations
+const sdk = new NodeSDK({
+  traceExporter,
+  instrumentations: [instrumentations],
+});
+
+sdk.start();
+
+console.log('OpenTelemetry SDK started');
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('OpenTelemetry SDK shut down'))
+    .catch((err) => console.log('Error shutting down SDK', err))
+    .finally(() => process.exit(0));
+});
+```
+
+Then require this file before any application code:
+
+```javascript:app.js
+require('./instrumentation.js');
+const express = require('express');
+const app = express();
+
+// ... rest of your application
+```
+
+Or run your application with:
+
+```bash
+export OTEL_NODE_ENABLED_INSTRUMENTATIONS="http,express"
+export OTEL_SERVICE_NAME="my-app"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+node -r ./instrumentation.js app.js
+```
+
+## Examples
+
+Create `app.js` with the following content:
+
+```javascript:app.js
+// app.js - Express application with selective OpenTelemetry instrumentation
+
+const express = require('express');
+const app = express();
+
+// Middleware
+app.use(express.json());
+
+// Routes
+app.get('/', (_req, res) => {
+  res.json({
+    message: 'Hello World'
+  });
+});
+
+app.get('/api/users', async (_req, res) => {
+  // Simulate an external API call
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/users/1');
+    const user = await response.json();
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/data', (req, res) => {
+  const data = req.body;
+  res.json({
+    received: data,
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.listen(3002, () => {
+  console.log('Server running on http://localhost:3002');
+});
+```
+
+Examples for using auto-instrumentation with environment variables for SigNoz Cloud and Self-Hosted is given below.
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+## Send Traces to SigNoz Cloud
+
+### Example 1: Enable only HTTP and Express
+
+Run the application to enable only HTTP and express libraries using:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_NODE_ENABLED_INSTRUMENTATIONS="http,express"
+export OTEL_SERVICE_NAME=“<service_name>”
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node app.js
+```
+
+This will only instrument `http` and `express` libraries.
+
+<Admonition>
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+
+</Admonition>
+
+### Example 2: Disable verbose instrumentations (production setup)
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_NODE_DISABLED_INSTRUMENTATIONS="fs,dns,child_process"
+export OTEL_SERVICE_NAME=“<service_name>”
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node app.js
+```
+
+Useful in production to reduce noise from filesystem and DNS operations.
+
+### Example 3: Development - enable everything
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME=“<service_name>”
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node app.js
+```
+
+All supported libraries are instrumented for debugging.
+
+</TabItem>
+
+<TabItem value='self-host' label='Self-Host'>
+
+## Send Traces to Self-Hosted SigNoz
+
+### Example 1: Enable only HTTP and Express
+
+Run the application to enable only HTTP and express libraries using:
+
+```bash
+export OTEL_NODE_ENABLED_INSTRUMENTATIONS="http,express"
+export OTEL_SERVICE_NAME="my-api"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node app.js
+```
+
+This will only instrument `http` and `express` libraries.
+
+### Example 2: Disable verbose instrumentations (production setup)
+
+```bash
+export OTEL_NODE_DISABLED_INSTRUMENTATIONS="fs,dns,child_process"
+export OTEL_SERVICE_NAME="my-api"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node app.js
+```
+
+Useful in production to reduce noise from filesystem and DNS operations.
+
+### Example 3: Development - enable everything
+
+```bash
+export OTEL_SERVICE_NAME="my-api-dev"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node app.js
+```
+
+All supported libraries are instrumented for debugging.
+
+</TabItem>
+</Tabs>
+
+## Validate Traces in SigNoz
+
+After running your app and making a few HTTP requests, navigate to your SigNoz dashboard and visit Traces Explorer to see Traces:
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/instrumentation/auto-instrumentation-using-envs-nodejs.webp"
+    alt="Sample trace output using only HTTP and Express instrumentation"
+  />
+  <figcaption>
+    <i>Sample trace showing reduced noise with only HTTP and Express instrumentation enabled</i>
+  </figcaption>
+</figure>
+
+## Troubleshooting
+
+If your application is not sending traces as expected or if you want to see verbose OpenTelemetry logs, you can enable verbose logs.
+
+Set the following environment variable before running the application:
+
+```bash
+export OTEL_LOG_LEVEL=debug
+```
+
+This enables verbose logging and prints detailed information about the OpenTelemetry SDK configuration, exporters, and any errors encountered during exporting of traces.
+
+<Admonition>
+  Debug mode is useful for verifying configuration and diagnosing missing spans. It's not
+  recommended to use in production.
+</Admonition>
+
+### Common Issues
+
+1. No traces appearing in SigNoz
+
+Ensure `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` variables are set properly.
+
+2. Missing or incomplete spans
+
+- Verify that the relevant instrumentation libraries are set via the environment variable `OTEL_NODE_ENABLED_INSTRUMENTATIONS`.
+- Make sure `NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"` is set before your application starts.
+
+3. Invalid or missing ingestion key
+
+- Double-check your ingestion key in `OTEL_EXPORTER_OTLP_HEADERS`.
+- The format should be:
+
+```bash
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+## Get Help
+
+<GetHelp />
