@@ -694,6 +694,11 @@ module.exports = () => {
           source: "/docs/tutorial/writing-clickhouse-queries-in-dashboard/",
           destination: "/docs/userguide/writing-clickhouse-traces-query/",
           permanent: true
+        },
+        {
+          source: "/docs/tutorial/instrumenting-angular-frontend/",
+          destination: "/docs/instrumentation/opentelemetry-angular/",
+          permanent: true
         }
       ]
     },
