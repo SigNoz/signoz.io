@@ -16,7 +16,8 @@ import {
   SiVercel,
   SiClaude,
   SiGooglegemini,
-  SiAnthropic
+  SiAnthropic,
+  SiAmazonwebservices
 } from 'react-icons/si'
 import { 
   Monitor, 
@@ -52,6 +53,12 @@ interface IconCardData {
 }
 
 const DashboardTemplatesData: IconCardData[] = [
+  {
+    name: 'Amazon Bedrock',
+    href: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
+    icon: <SiAmazonwebservices className="h-7 w-7 text-white" />,
+    clickName: 'Amazon Bedrock Dashboard Template',
+  },
   {
     name: 'Anthropic API',
     href: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
