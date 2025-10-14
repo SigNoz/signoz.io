@@ -592,6 +592,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/collection-agents/k8s/serverless/install',
               },
+               {
+                label: 'Configure',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/serverless/configure',
+              },
             ],
           },
           {
