@@ -241,6 +241,30 @@ const CustomerStories: React.FC = () => {
   )
 }
 
+const StopLosingUsersBanner: React.FC = () => {
+  const stopLosingUsersButtons = [
+    {
+      text: "Start your free trial",
+      href: "/teams/",
+      variant: "default" as const,
+      className: "flex-center"
+    },
+    {
+      text: "Read Documentation",
+      href: "/docs/trace-funnels/overview/",
+      variant: "secondary" as const,
+      className: "flex-center"
+    }
+  ]
+
+  return (
+    <div className="bg-signoz_ink-500 p-6 py-20 border-t-1 border-signoz_slate-400 border-dashed flex flex-col items-center justify-center">
+      <h2 className="text-4xl text-signoz_vanilla-100 mb-6 text-center">Stop Losing Users in Multi- <br />Step Flows</h2>
+      <ButtonGroup buttons={stopLosingUsersButtons} />
+    </div>
+  )
+}
+
 // Main Component
 const TraceFunnels: React.FC = () => {
   return (
@@ -260,6 +284,7 @@ const TraceFunnels: React.FC = () => {
           <SeeDropOffsBetweenSteps />
           <IdentifyProblemTraces />
           <AnalyzeRequestFlowsAcrossMultipleTraceIds />
+          <StopLosingUsersBanner />
         </SectionLayout>
         
         <UsageBasedPricing show={["traces"]} />
