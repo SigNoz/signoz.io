@@ -73,6 +73,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'LlamaIndex Monitoring',
   },
   {
+    name: 'Mastra',
+    href: '/docs/mastra-monitoring',
+    icon: <img src="/img/docs/llm/mastra/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />,
+    clickName: 'Mastra Monitoring',
+  },
+  {
     name: 'OpenAI',
     href: '/docs/opentelemetry-openai-monitoring',
     icon: <SiOpenai className="h-7 w-7 text-green-400" />,
