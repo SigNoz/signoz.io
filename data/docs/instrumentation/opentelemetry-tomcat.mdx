@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 id: tomcat
+tags : [SigNoz Cloud, Self-Host]
 title: Tomcat OpenTelemetry Instrumentation
 description: Instrument your Tomcat application with OpenTelemetry and send data to SigNoz
 hide_table_of_contents: true
@@ -119,11 +120,11 @@ In case you encounter an issue where all applications do not get listed in the s
 
 You can auto-instrument sending traces from Java Tomcat application using one of the following methods:
 
-1. Using Kubernetes OTel Operator (recommended)
+1. Using Kubernetes OTel Operator
 2. Using OTel Collector Agent
 
 <Tabs>
-<TabItem value="k8s-otel-operator" label="K8s OTel Operator" default>
+<TabItem value="k8s-otel-operator" label="K8s OTel Operator">
 
 For Java Tomcat application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
 
@@ -320,7 +321,7 @@ You can now access the application on port 8080.
 You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
 </TabItem>
-<TabItem value="otel-collector-agent" label="OTel Collector Agent">
+<TabItem value="otel-collector-agent" label="OTel Collector Agent" default>
 For Java Tomcat application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry java instrumentation by following the below steps:
@@ -485,6 +486,8 @@ Here's a video on how to instrument Tomcat applications with SigNoz and a [blog]
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 </TabItem>
 </Tabs>
+
+**Note:** By default, Java auto-instrumentation does not create spans for user-defined functions. In such scenarios, we can use annotations to quickly create spans for user-defined functions with minimal code change. You can instrument your Tomcat application following this [guide on annotations](/docs/instrumentation/manual-instrumentation/java/annotations/).
 
 ## Validating instrumentation by checking for traces
 

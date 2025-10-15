@@ -1,6 +1,7 @@
 ---
 date: 2024-12-06
 id: opentelemetry-quarkus
+tags : [SigNoz Cloud, Self-Host]
 title: Quarkus OpenTelemetry Instrumentation
 description: Instrument your Quarkus application with OpenTelemetry and send data to SigNoz
 ---
@@ -123,11 +124,11 @@ java -jar build/libs/quarkus-app.jar
 <TabItem value="k8s" label="Kubernetes">
 You can auto-instrument sending traces from Java Quarkus application using one of the following methods:
 
-1. Using Kubernetes OTel Operator (recommended)
+1. Using Kubernetes OTel Operator
 2. Using OTel Collector Agent
 
 <Tabs>
-<TabItem value="k8s-otel-operator" label="K8s OTel Operator" default>
+<TabItem value="k8s-otel-operator" label="K8s OTel Operator">
 
 For Java Quarkus application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
 
@@ -324,7 +325,7 @@ You can now access the application on port 8080.
 You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
 </TabItem>
-<TabItem value="otel-collector-agent" label="OTel Collector Agent">
+<TabItem value="otel-collector-agent" label="OTel Collector Agent" default>
 1. Export the OTEL Environment variables:
 
 ```bash
@@ -709,6 +710,8 @@ java -jar build/libs/quarkus-app.jar
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting).
 
+**Note:** By default, Java auto-instrumentation does not create spans for user-defined functions. In such scenarios, we can use annotations to quickly create spans for user-defined functions with minimal code change. You can instrument your Quarkus application following this [guide on annotations](/docs/instrumentation/manual-instrumentation/java/annotations/).
+
 ## Validating Instrumentation
 
 To verify your instrumentation is working:
@@ -745,7 +748,7 @@ If traces are not appearing:
 - Verify your configuration in `application.properties`
 - Check application logs for OpenTelemetry-related errors
 - Try enabling debug logging by setting `quarkus.log.category."io.opentelemetry".level=DEBUG`
-- Check logs if your application is able to reach the SigNoz endpoint, If not you will see errors in the logs similar to
+- Check logs if your application is able to reach the SigNoz endpoint, If not you will see errors in the logs similar to:
   ```
   2024-12-15 12:06:43,469 WARNING [io.ope.exp.int.htt.HttpExporter] (OkHttp https://ingest.in.signoz.cloud/...) Failed to export spans. Server responded with HTTP status code 401. Error message: Unable to parse response body, HTTP status message: Unauthorized
   ```

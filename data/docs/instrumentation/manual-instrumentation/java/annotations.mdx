@@ -1,0 +1,183 @@
+---
+date: 2025-09-23
+id: java-annotations
+tags : [SigNoz Cloud, Self-Host]
+title: Create Custom Spans with Annotations in Java
+description: Learn how to create custom spans with annotations in Java and send telemetry data to SigNoz.
+hide_table_of_contents: true
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+This document helps you get started with annotations in Java to create custom spans for user-defined functions and view your application traces in SigNoz.
+
+## Annotations
+
+For the most part automatic instrumentation is sufficient. But sometimes, we want to create spans for our custom code without having to change code much. That's where the `WithSpan` and `SpanAttribute` annotations come into picture, these allow us to create spans with minimal code.
+
+### Requirements
+
+Java 8 or higher
+
+### Installing Dependencies
+
+You will need to add `opentelemetry-instrumentation-annotations` to use `WithSpan` annotations.
+
+<Tabs>
+<TabItem value="maven" label="Maven" default>
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>io.opentelemetry.instrumentation</groupId>
+    <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+    <version>2.20.1</version>
+  </dependency>
+</dependencies>
+```
+
+</TabItem>
+
+<TabItem value="gradle" label="Gradle" default>
+
+```
+dependencies {
+    implementation('io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.20.0')
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Creating spans using `@WithSpan`
+
+We can create a span around a particular method by annotating with `@WithSpan`.
+
+```java
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+
+public class SomeClass {
+    @WithSpan
+    public void someMethod() {
+        <...>
+    }
+}
+```
+
+Each time the application calls the annotated method, it creates a span that denotes the entire lifecycle and duration of that method and provides exceptions if any. By default, the span name is `<class_name>.<method_name>`, you can provide span name in annotation parameter such as:
+
+```java
+@WithSpan("span name")
+public void otherMethod() {
+    <...>
+}
+```
+
+### Adding attributes to span using `@SpanAttribute`
+
+When a span is created for an annotated method, the values of the arguments can be automatically added to the attributes of the span. Annotate the method parameters with `@SpanAttribute` annotation:
+
+```java
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+
+public class SomeClass {
+    @WithSpan
+    public void someMethod(@SpanAttribute("argument1") String argument1, @SpanAttribute("argument2") String argument2) {
+        <...>
+    }
+}
+```
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+## Send traces to SigNoz Cloud
+
+OpenTelemetry provides a handy Java JAR agent that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks.
+
+**Step 1:** Download the latest OpenTelemetry Java agent binary
+
+```bash
+curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+**Step 2:** Run your application
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+
+</TabItem>
+
+<TabItem value="self-host" label="Self-Host">
+
+## Send traces to Self-Hosted SigNoz
+
+OpenTelemetry provides a handy Java JAR agent that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks.
+
+**Step 1:** Download the latest OpenTelemetry Java agent binary
+
+```bash
+curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+**Step 2:** Run your application with the agent and set the exporter endpoint to your SigNoz backend
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
+```
+
+- Replace `<IP of SigNoz Backend>` with the address of your SigNoz backend (e.g., `localhost` if running locally)
+- `<service_name>` is the name of your service
+
+Alternatively, you can specify environment variables as Java system properties:
+
+```bash
+java -javaagent:$PWD/opentelemetry-javaagent.jar \
+    -Dotel.exporter.otlp.endpoint=http://<IP of SigNoz Backend>:4317 \
+    -Dotel.resource.attributes=service.name=<service_name> \
+    -jar <my-app>.jar
+```
+
+<Admonition>
+  💡 Remember to allow incoming requests to port 4317 of the machine where SigNoz backend is hosted.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+## Validating instrumentation by checking for traces
+
+With your application running, you can verify that you've instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
+
+To do this, you need to ensure that your application generates some data. Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz.
+
+Validate your traces in SigNoz:
+
+1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time.
+2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner.
+3. Go to the `Traces` tab, and apply relevant filters to see your application's traces.
+
+## Configuring the agent
+
+The agent is highly configurable. You can check out all the configuration options available [here](https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/).
+
+## Manual Instrumentation
+
+For manual instrumentation of Java applications, refer to the docs [here](https://opentelemetry.io/docs/instrumentation/java/manual/).
+
+## Get Help
+
+<GetHelp />
