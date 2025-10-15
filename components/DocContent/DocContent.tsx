@@ -35,6 +35,9 @@ const DocContent: React.FC<{
   // Check if this is the introduction page (exclude copy functionality)
   const isIntroductionPage = post.slug === 'introduction'
 
+  const hasTabs = !!post?.body?.raw && post.body.raw.includes('<Tabs')
+  const effectiveHideTOC = hideTableOfContents && !hasTabs
+
   return (
     <>
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
@@ -74,10 +77,10 @@ const DocContent: React.FC<{
         <DocsPrevNext />
       </div>
 
-      {!hideTableOfContents && (
+      {!effectiveHideTOC && (
         <TableOfContents
           toc={toc}
-          hideTableOfContents={hideTableOfContents}
+          hideTableOfContents={effectiveHideTOC}
           source={source || ''}
         />
       )}
