@@ -234,6 +234,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'LLM Observability Dashboard Template',
   },
   {
+    name: 'Mastra',
+    href: '/docs/dashboards/dashboard-templates/mastra-dashboard',
+    icon: <img src="/svgs/icons/LLMMonitoring/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />,
+    clickName: 'Mastra Dashboard Template',
+  },
+  {
     name: 'Memcached',
     href: '/docs/dashboards/dashboard-templates/memcached',
     icon: <HardDrive className="h-7 w-7 text-green-600" />,
