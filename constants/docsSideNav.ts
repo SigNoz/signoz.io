@@ -729,6 +729,18 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        type: 'category',
+        label: 'OpenTelemetry Collector Reference',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            label: 'Configuration Components',
+            route: '/docs/collection-agents/opentelemetry-collector/configuration'
+          },
+        ]
+      },
     ],
   },
   {
