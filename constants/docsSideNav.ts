@@ -1597,6 +1597,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
+            label: 'Amazon Bedrock API',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
             label: 'Anthropic API',
           },
