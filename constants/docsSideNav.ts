@@ -2107,6 +2107,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/amazon-bedrock-monitoring',
+        label: 'Amazon Bedrock Monitoring',
+        type: 'doc',
+      },
+      {
         route: '/docs/anthropic-monitoring',
         label: 'Anthropic API Monitoring',
         type: 'doc',

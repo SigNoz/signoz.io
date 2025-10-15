@@ -6,7 +6,8 @@ import {
   SiLangchain,
   SiClaude,
   SiGooglegemini,
-  SiAnthropic
+  SiAnthropic,
+  SiAmazonwebservices
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -17,6 +18,12 @@ interface IconCardData {
 }
 
 const LLMMonitoringData: IconCardData[] = [
+  {
+    name: 'Amazon Bedrock',
+    href: '/docs/amazon-bedrock-monitoring',
+    icon: <SiAmazonwebservices className="h-7 w-7 text-white" />,
+    clickName: 'Amazon Bedrock Monitoring',
+  },
   {
     name: 'Anthropic API',
     href: '/docs/anthropic-monitoring',
