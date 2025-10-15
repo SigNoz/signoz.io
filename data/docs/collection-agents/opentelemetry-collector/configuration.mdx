@@ -274,27 +274,35 @@ For more examples, you can check guides for scrubbing PII in [logs](https://sign
 
 #### Resource Detection Processor
 
-The [resource detection processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md) can be used to collect resource information about the host environment. The processor can detect attributes like hostname, OS information, cloud provider details, and Kubernetes metadata:
+The [resource detection processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md) is used to collect resource information about the host environment. It can automatically detect attributes like hostname, OS information, cloud provider information (AWS, GCP, Azure, etc.), and Kubernetes metadata:
 
 ```yaml
 processors:
   resourcedetection:
-    detectors: [host, docker]
+    detectors: [env, host, system, docker, k8snode]
     system:
       hostname_sources: ['os']
     timeout: 5s
 
 service:
   pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, batch]
       exporters: [otlp]
 ```
 
-This processor automatically adds resource attributes from the host and Docker. The `timeout` defines how long the processor waits for detection to complete.
+This is just one example of using resource detection processor which automatically adds resource attributes from the environment, host system, Docker containers, and Kubernetes nodes in traces, logs, and metrics. The complete list of supported detectors can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#supported-detectors).
 
-Check [this](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor) guide for setting resource attributes in logs.
+The `timeout` defines how long the processor waits for detection to complete. Check [this](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor) guide for setting resource attributes in logs.
 
 ### 3. Exporters
 
@@ -560,11 +568,7 @@ Only enable receivers, processors, exporters and extensions, you actually need. 
 
 Use TLS enabled HTTP endpoints for receivers/exporters. Don't leave endpoints open as `0.0.0.0` unless absolutely necessary.
 
-<Admonition>
-  See the [OpenTelemetry Security Best
-  Practices](https://opentelemetry.io/docs/security/config-best-practices/#use-encryption-and-authentication)
-  for more details.
-</Admonition>
+See the [OpenTelemetry Security Best Practices](https://opentelemetry.io/docs/security/config-best-practices/#use-encryption-and-authentication) for more details.
 
 #### Bind to specific interface
 
@@ -572,25 +576,7 @@ For internal use or local testing, always bind the collector to a specific inter
 
 This prevents unintended external access to the OTel Collector telemetry ingestion endpoints (OTLP for example), which could otherwise be accessible externally from other devices on the same network. By restricting the collector to `localhost` we make sure only the applications running on the host server are able to access the OTel Collector.
 
-<Admonition>
-  See the [OpenTelemetry Security Best
-  Practices](https://opentelemetry.io/docs/security/config-best-practices/#protect-against-denial-of-service-attacks)
-  for more information on minimizing the exposure of OTel Collector endpoints.
-</Admonition>
-
-#### Least privilege and permissions
-
-Run collection with non-root users, for Kubernetes, use RBAC, service accounts, limit volume mounts, etc.
-
-This helps reduce the attack surface in case of misconfiguration or compromise.
-
-<Admonition>
-  See [OpenTelemetry Collector Security Best
-  Practices](https://opentelemetry.io/docs/security/config-best-practices/#set-permissions-carefully)
-  and the [Kubernetes Security Best
-  Practices](https://kubernetes.io/docs/concepts/security/overview/#principle-of-least-privilege)
-  for more details.
-</Admonition>
+See the [OpenTelemetry Security Best Practices](https://opentelemetry.io/docs/security/config-best-practices/#protect-against-denial-of-service-attacks) for more information on minimizing the exposure of OTel Collector endpoints.
 
 #### Set timeouts and retries
 
