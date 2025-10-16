@@ -1,4 +1,6 @@
-export const CORRELATION_CAROUSEL_DATA = [
+import { CarouselCard } from '@/shared/components/molecules/FeaturePages/CarouselCards'
+
+export const CORRELATION_CAROUSEL_DATA: Array<CarouselCard> = [
   {
     id: 0,
     title: "All Endpoints",

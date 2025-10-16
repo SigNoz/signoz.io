@@ -1,4 +1,5 @@
 import { Atom, Coins, DatabaseZap } from "lucide-react";
+import { CarouselCard } from "@/shared/components/molecules/FeaturePages/CarouselCards";
 
 export const CLOUD_ICONS = [
   { src: "/img/icons/aws-icon.svg", alt: "AWS" },
@@ -74,7 +75,7 @@ export const QUERY_BUILDER_CARDS = [
   }
 ];
 
-export const CORRELATION_CAROUSEL_DATA = [
+export const CORRELATION_CAROUSEL_DATA: Array<CarouselCard> = [
   {
     id: 0,
     title: "Logs → Metrics",
