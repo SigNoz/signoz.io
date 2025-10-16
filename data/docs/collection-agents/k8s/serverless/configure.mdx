@@ -1,0 +1,194 @@
+---
+date: 2025-07-18
+title: K8s Serverless (EKS Fargate) - Configure
+id: configure
+---
+
+This guide explains how to configure the OpenTelemetry Collectors deployed in EKS Fargate. You'll learn how to set up telemetry data collection and enable the collection of metrics, logs, and traces from your Kubernetes cluster.
+
+To install OpenTelemetry Collector in your EKS Fargate Kubernetes cluster, please check out the [EKS Fargate Installation guide](/docs/collection-agents/k8s/serverless/install).
+
+## Prerequisites
+
+- An EKS cluster with Fargate profiles set up
+- A SigNoz backend (either SigNoz Cloud or self-hosted)
+- `kubectl` access to update your app Deployment/Pod specs
+- A Kubernetes ServiceAccount mapped to your workloads with sufficient RBAC permissions
+
+## Logs Collection 
+
+<Admonition type="info">
+Kubernetes stores logs from the Pod/Containers under the `/var/log/containers/` directory, but Fargate does not allow mounting host volumes, which blocks the use of the filelog receiver in the OpenTelemetry Collector Pipeline. The same applies to Fluent Bit, as log collection from files will not be possible.
+</Admonition>
+
+Amazon EKS on Fargate offers a built-in log router based on Fluent Bit. This means that you don't explicitly run a Fluent Bit container as a sidecar, but Amazon runs it for you. All you have to do is configure the log router. 
+
+To enable log collection, please follow these steps:
+
+### 1. Create AWS Managed Observability Namespace
+
+Create a dedicated Kubernetes namespace which AWS requires to be named `aws-observability` with the label `aws-observability: enabled`.
+
+```yaml:aws-observability-namespace.yaml
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: aws-observability
+  labels:
+    aws-observability: enabled
+```
+
+Apply the manifest with kubectl:
+
+```shell
+kubectl apply -f aws-observability-namespace.yaml
+```
+
+### 2. FluentBit Configuration
+
+Create a `ConfigMap` with a Fluent Conf data value to ship container logs to a destination. Fluent Conf is a fast and lightweight log processor configuration language used by Fluent Bit to route container logs to a log destination of your choice. For more information, see [Configuration](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/classic-mode/configuration-file) in the Fluent Bit documentation.
+
+<Admonition type="warning">
+AWS validates against following configuration for Fluent Bit:
+- The Fargate log router manages the `Service` and `Input` sections, which cannot be modified and are not needed in your ConfigMap.
+- `[FILTER]`, `[OUTPUT]`, and `[PARSER]` are supposed to be specified under each corresponding key. For example, `[FILTER]` must be under `filters.conf`. You can have one or more `[FILTER]` sections under `filters.conf`. The `[OUTPUT]` and `[PARSER]` sections should also be under their corresponding keys. By specifying multiple `[OUTPUT]` sections, you can route your logs to different destinations at the same time.
+- Fargate validates against the following supported outputs: `es`, `firehose`, `kinesis_firehose`, `cloudwatch`, `cloudwatch_logs`, and `kinesis`.
+
+For more details, check out the [AWS Managed Fargate Log Router Documentation](https://docs.aws.amazon.com/eks/latest/userguide/fargate-logging.html#fargate-logging-log-router-configuration).
+</Admonition>
+
+<Tabs default='cloudwatch'>
+
+<TabItem value="cloudwatch" label="cloudwatch">
+
+Since AWS Fargate does not allow the use of either `fluent-forward` or `OpenTelemetry` output, we will be using the `CloudWatch` output to ship the logs to CloudWatch and then ingest logs from there to the OpenTelemetry Collector. 
+
+The following Fluent Bit configuration uses the [Kubernetes Filter](https://docs.fluentbit.io/manual/data-pipeline/filters/kubernetes):
+
+```yaml:fluentbit-config-map.yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: aws-logging
+  namespace: aws-observability # Namespace should be aws-observability
+data:
+  flb_log_cw: "false"  # Set to true to ship Fluent Bit process logs to CloudWatch.
+  filters.conf: |
+    [FILTER]
+        Name parser
+        Match *
+        Key_name log
+        Parser crio
+    [FILTER]
+        Name kubernetes # Kubernetes Log Filter
+        Match kube.*
+        Merge_Log On
+        Keep_Log Off
+        Buffer_Size 0
+        Kube_Meta_Cache_TTL 300s
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude On
+  output.conf: |
+    [OUTPUT]
+        Name cloudwatch_logs
+        Match   kube.*
+        region us-east-1
+        log_group_name <LOG_GROUP> # Set to log group
+        log_stream_prefix <LOG_STREAM_PREFIX> # Set the prefix you want to use for Log Stream
+        log_retention_days 60
+        auto_create_group false # Set to true to auto-create the log group if it does not exist
+  parsers.conf: |
+    [PARSER]
+        Name crio
+        Format Regex
+        Regex ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>P|F) (?<log>.*)$
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+```
+
+</TabItem>
+</Tabs>
+
+Apply the ConfigMap with kubectl:
+
+```shell
+kubectl apply -f fluentbit-config-map.yaml
+```
+
+After creating the ConfigMap, we need to set up permissions for the Fargate Pod execution role to send logs to the destination:
+
+```shell
+## Download the IAM policy for your destination to your computer
+curl -O https://raw.githubusercontent.com/aws-samples/amazon-eks-fluent-logging-examples/mainline/examples/fargate/cloudwatchlogs/permissions.json
+
+## Create an IAM policy from the policy file that you downloaded
+aws iam create-policy --policy-name eks-fargate-logging-policy --policy-document file://permissions.json
+
+## Attach the IAM policy to the pod execution role specified for your Fargate profile with the following command
+aws iam attach-role-policy \
+  --policy-arn arn:aws:iam::<eks-fargate-logging-policy-arn>:policy/eks-fargate-logging-policy \
+  --role-name <POD_EXECUTION_ROLE>
+```
+
+### 3. Configure Receiver in OpenTelemetry Collector
+
+Depending on the output you've configured in Fluent Bit, configure the OpenTelemetry Collector to ingest logs accordingly.
+
+<Tabs default="cloudwatch">
+<TabItem label="CloudWatch" value="cloudwatch">
+
+We will be using the [awscloudwatchreceiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/awscloudwatchreceiver) to ingest logs from AWS CloudWatch into the OpenTelemetry Collector. If you've opted for a different output in Fluent Bit, such as Kinesis or Firehose, you can use other receivers made available by the OpenTelemetry community.
+
+Add the following to your OpenTelemetry Collector ConfigMap created during installation:
+```yaml:otel-agent-sidecar-ConfigMap
+receivers:
+  awscloudwatch:
+    region: <REGION>
+    logs:
+      poll_interval: 1m
+      groups:
+        autodiscover:
+          limit: 100
+          prefix: <LOG_GROUP>
+          streams:
+            prefixes: [<LOG_STREAM_PREFIX>]
+
+service:
+  pipelines:
+    logs:
+      receivers:
+        - awscloudwatch
+```
+
+</TabItem>
+</Tabs>
+After creating the ConfigMap, we need to set up AWS credentials for the OpenTelemetry Collector to get logs from CloudWatch. We will use this [documentation](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch-OTLPSimplesetup.html?utm_source=chatgpt.com#CloudWatch-SetupIAMPermissionsonpremises) to set up the required credentials.
+
+1. Create an IAM OIDC identity provider for your cluster using the following command:
+
+```shell
+eksctl utils associate-iam-oidc-provider --cluster ${CLUSTER_NAME} --region ${REGION} --approve
+```
+
+2. Assign IAM roles to the Kubernetes service account for the OTel Collector using the following command. We will be using the [CloudWatchReadOnlyAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/CloudWatchReadOnlyAccess.html) policy to get the logs from CloudWatch:
+
+```shell
+eksctl create iamserviceaccount \
+  --name ${COLLECTOR_SERVICE_ACCOUNT} \
+  --namespace ${NAMESPACE} \
+  --cluster ${CLUSTER_NAME} \
+  --region ${REGION} \
+  --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess \
+  --approve \
+  --override-existing-serviceaccounts
+```
+
+### 4. Restart the Application Deployments
+
+After making all of the above changes, we need to restart the application deployment to allow AWS to start with managed logging.
+
+Once you restart the deployments, you should see the following in the deployment events:
+
+```shell
+Normal  LoggingEnabled  3m5s   fargate-scheduler  Successfully enabled logging for pod
+```

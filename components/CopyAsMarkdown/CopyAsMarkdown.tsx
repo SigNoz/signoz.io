@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { Copy, Check } from 'lucide-react'
 import Button, { type ButtonProps } from '@/components/ui/Button'
+import { useLogEvent } from 'hooks/useLogEvent'
 
 interface CopyAsMarkdownProps {
   /**
@@ -17,6 +18,10 @@ interface CopyAsMarkdownProps {
    * Optional label override (defaults to a subtle 'Copy markdown')
    */
   label?: string
+  /**
+   * Optional slug for the doc being copied. Used for analytics.
+   */
+  docSlug?: string
   /**
    * Button variant to use. Defaults to a subtle ghost button.
    */
@@ -33,9 +38,11 @@ const CopyAsMarkdown: React.FC<CopyAsMarkdownProps> = ({
   label = 'Copy markdown',
   buttonVariant = 'ghost',
   buttonSize = 'sm',
+  docSlug,
 }) => {
   const [copied, setCopied] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const logEvent = useLogEvent()
 
   const handleCopy = async () => {
     if (!markdownContent || isLoading) return
@@ -43,6 +50,17 @@ const CopyAsMarkdown: React.FC<CopyAsMarkdownProps> = ({
     setIsLoading(true)
     try {
       await navigator.clipboard.writeText(markdownContent)
+      logEvent({
+        eventName: 'Website Click',
+        eventType: 'track',
+        attributes: {
+          clickType: 'button',
+          clickName: 'copy_markdown',
+          clickLocation: 'docs_header',
+          clickText: label,
+          docSlug,
+        },
+      })
       setCopied(true)
 
       // Reset the copied state after 2 seconds
@@ -74,4 +92,3 @@ const CopyAsMarkdown: React.FC<CopyAsMarkdownProps> = ({
 }
 
 export default CopyAsMarkdown
-

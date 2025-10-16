@@ -1,33 +1,32 @@
 ---
 title: OpenTelemetry and Jaeger | Key Features & Differences [2025]
 slug: opentelemetry-vs-jaeger
-date: 2025-01-02
+date: 2025-09-23
 tags: [Tools Comparison, Jaeger]
 authors: [ankit_anand]
 description: OpenTelemetry is a broader, vendor-neutral framework for generating and collecting telemetry data (logs, metrics, traces), offering flexible backend integration. Jaeger, on the other hand, is focused on distributed tracing in microservices...
-image: /img/blog/2024/01/opentelemetry-vs-jaeger-cover.webp
+image: /img/blog/2022/09/opentelemetry_architecture.webp
 keywords: [opentelemetry vs jaeger,opentelemetry,jaeger,distributed tracing,observability,monitoring,apm tools,application performance monitoring]
 cta_text: "Create your Free Workspace"
 ---
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-vs-jaeger/"/>
-</head>
+
+OpenTelemetry is a broader, vendor-neutral framework for generating and collecting telemetry data (logs, metrics, traces), offering flexible backend integration. 
+Jaeger, on the other hand, is focused on [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) in microservices. 
+**Earlier Jaeger had its own SDKs based on OpenTracing APIs for instrumenting applications, but now Jaeger recommends using OpenTelemetry instrumentation and SDKs.**
 
 
+<Admonition type="warning">
+The original Jaeger client SDKs (based on OpenTracing) are archived and no longer maintained. For any new 
+project, using the [OpenTelemetry SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) is the only supported path for instrumenting your applications to send data to Jaeger.
+</Admonition>
 
 
-OpenTelemetry is a broader, vendor-neutral framework for generating and collecting telemetry data (logs, metrics, traces), offering flexible backend integration. Jaeger, on the other hand, is focused on [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) in microservices. Earlier Jaeger had its own SDKs based on OpenTracing APIs for instrumenting applications, but now Jaeger recommends using OpenTelemetry instrumentation and SDKs.
+Both OpenTelemetry and Jaeger are open-source projects incubated under Cloud Native Computing Foundation. OpenTelemetry and Jaeger enable application owners to set up monitoring and observability to measure application performance. But their solutions are meant for different problems. While OpenTelemetry helps generate telemetry data, Jaeger is a distributed [tracing tool](https://signoz.io/blog/distributed-tracing-tools/).
 
 
+Here are some quick takeaways of [OpenTelemetry vs Jaeger](https://signoz.io/blog/opentelemetry-vs-jaeger/#what-is-opentelemetry):
 
-![Cover Image](/img/blog/2024/01/opentelemetry-vs-jaeger-cover.webp)
-
-Both OpenTelemetry and Jaeger are open-source projects incubated under Cloud Native Computing Foundation. OpenTelemetry and Jaeger enable application owners to set up monitoring and observability to measure application performance. But their solutions are meant for different problems. While OpenTelemetry helps generate telemetry data, Jaeger is a distributed tracing tool.
-
-
-If you're in a hurry, here are some quick takeaways of OpenTelemetry vs Jaeger:
-
-- **Scope and Functionality:**<br></br> OpenTelemetry is a comprehensive tool for generating and managing telemetry data (logs, metrics, traces) and is vendor-agnostic, while Jaeger specializes in distributed tracing in microservices environments.
+- **Scope and Functionality:**<br></br> OpenTelemetry is a comprehensive tool for generating and managing telemetry data (logs, metrics, traces) and is vendor-agnostic, while Jaeger specializes in [distributed tracing in microservices](https://signoz.io/blog/distributed-tracing-java/) environments.
 
 - **Instrumentation and Data Collection:**<br></br> OpenTelemetry provides a broad set of APIs and libraries for various languages to instrument applications, whereas Jaeger is focused on tracing and does not support logs or metrics.
 
@@ -41,10 +40,15 @@ Jaeger is an open-source tool focused on distributed tracing of requests in a mi
 
 Before we deep-dive into differences of OpenTelemetry and Jaeger, let's have a brief overview of both projects.
 
-> **What is Observability?**<br></br>
+ 
+
+<Admonition type="info">
+
+**What is Observability?**
 In control theory, the term “observability” states that a system is observable if the internal states of the system can be determined by looking at its inputs and outputs.
 For distributed software systems, observability means how well we are able to troubleshoot our systems for performance issues with collected data from the system.
-> 
+
+</Admonition>
 
 ## What is OpenTelemetry?
 
@@ -54,7 +58,7 @@ It is a collection of APIs, SDKs, and client libraries that is used to generate 
 
 The biggest advantage of using OpenTelemetry is that you have the freedom to choose a backend of your choice. You don’t get locked into a vendor, and engineering teams can get ramped up on a single technology to generate telemetry data.
 
-To integrate OpenTelemetry with your application code, you can use the OpenTelemetry client libraries of the required programming language. OpenTelemetry also provides a collector known as OTel (OpenTelemetry) collector that can be used to process and export telemetry data in multiple formats.
+To integrate OpenTelemetry with your application code, you can use the OpenTelemetry client libraries of the required programming language. OpenTelemetry also provides a collector known as [OTel](https://signoz.io/blog/what-is-opentelemetry/) (OpenTelemetry) collector that can be used to process and export telemetry data in multiple formats.
 
 
 
@@ -71,10 +75,15 @@ A distributed tracing tool tracks user requests across services and gives a cent
 
 Jaeger does not support logs and metrics.
 
-It provides instrumentation libraries that were built on OpenTracing standards. The libraries cover popular programming languages like Go, Java, Node, Python, C++, and C#. For storing trace data, it supports two storage backends:
+It provides instrumentation libraries that were built on OpenTracing standards. The libraries cover popular programming languages like Go, Java, Node, Python, C++, and C#. 
+For storing trace data, Jaeger has a pluggable architecture. It has long supported scalable backends like
+*Cassandra and Elasticsearch*. More recently, Jaeger has also introduced experimental support for a simplified, built-in storage 
+option.
 
-- Cassandra
-- Elasticsearch
+<Admonition type="info">
+The in-memory storage is not intended for production workloads. It’s intended as a simple solution 
+to get started quickly and data will be lost once the process is gone.
+</Admonition>
 
 Jaeger provides a minimal UI to analyze the trace data captured.
 
@@ -105,7 +114,7 @@ The key differences between OpenTelemetry and Jaeger can be summarized in the fo
 
 ## Key Features of OpenTelemetry and Jaeger
 
-Both OpenTelemetry and Jaeger aim to improve the observability of cloud-native applications by targeting different levels of the observability stack.
+Both OpenTelemetry and Jaeger aim to improve the observability of cloud-native applications by targeting different levels of the [observability stack](https://signoz.io/guides/observability-stack/).
 
 The main features of OpenTelemetry as an instrumentation layer include:
 
@@ -122,7 +131,7 @@ The main features of Jaeger as a distributed tracing tool include:
 - Performance and latency optimization
 - Root cause analysis
 - Service dependency analysis
-- Distributed context propagation
+- Distributed [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/)
 
 ## A better alternative to Jaeger
 
@@ -130,9 +139,10 @@ OpenTelemetry is the future of instrumentation for cloud-native applications. It
 
 Instrumenting every aspect of your application and infrastructure is the first critical step to keeping a check on application performance. OpenTelemetry can take care of the entire instrumentation layer as it supports multiple programming languages and technologies.
 
-The next step is about choosing a backend analysis tool. Jaeger supports data formats of OpenTelemetry. But Jaeger is limited in terms of its UI and does only distributed tracing. For a robust monitoring and observability framework, you need a unified UI for both metrics and traces. And that's where [SigNoz](https://signoz.io/) is far [more suited](https://signoz.io/blog/jaeger-vs-signoz/) than Jaeger as a distributed tracing tool.
+The next step is about choosing a backend analysis tool. Jaeger supports data formats of OpenTelemetry. But Jaeger is limited in terms of its UI and does only distributed tracing. For a robust monitoring and observability framework, you need a unified UI for both metrics, traces and logs. And that's where [SigNoz](https://signoz.io/) is far [more suited](https://signoz.io/blog/jaeger-vs-signoz/) than Jaeger as a distributed tracing tool.
 
-SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger. SigNoz is built to support OpenTelemetry natively. It also provides a fast OLAP database - ClickHouse as the storage backend.
+SigNoz is a full-stack application performance monitoring and observability tool which can be used in place of Jaeger. 
+SigNoz is built to support OpenTelemetry natively. It also provides a fast OLAP database - ClickHouse as the storage backend.
 
 It comes with out-of-box application metrics charts.
 
@@ -151,7 +161,7 @@ You can analyze tracing data with powerful filters. You can also analyze service
 SigNoz also provides a rich visualization of tracing data with the help of [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/). You can see exactly how a single event performed as part of an entire user request.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs and Gantt charts in SigNoz dashbaord"/>
+    <img src="/img/blog/2025/09/signoz-flamegraphs.webp" alt="Flamegraphs and Gantt charts in SigNoz dashbaord"/>
     <figcaption><i>Flamegraphs and Gantt charts in SigNoz dashbaord</i></figcaption>
 </figure>
 

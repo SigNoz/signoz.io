@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry Exporters - Types and Configuration Steps
 slug: opentelemetry-exporters
-date: 2023-10-04
+date: 2025-09-22
 tags: [OpenTelemetry]
 authors: [daniel]
 description: An OpenTelemetry Exporter is an OpenTelemetry component responsible for transmitting the collected telemetry data from the application to the chosen backend. These software components are designed to transform code objects, which represent the...
@@ -9,13 +9,6 @@ image: /img/blog/2023/10/opentelemetry-exporters-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-exporters/"/>
-</head>
-
-
-
 In this post, we will talk about OpenTelemetry exporters. OpenTelemetry exporters help in exporting the telemetry data collected by OpenTelemetry. OpenTelemetry frees you from any kind of vendor lock-in by letting you export the collected telemetry data to any backend of your choice.
 
 
@@ -30,8 +23,8 @@ This article discusses the need for OpenTelemetry Exporters, the types of OpenTe
 
 ## What is OpenTelemetry?
 
-OpenTelemetry is an open-source collection of tools, APIs, and SDKs that aims to standardize the way we generate and collect telemetry data. It follows a specification-driven development. The <a href = "https://github.com/open-telemetry/opentelemetry-specification/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry specification</a>  has design and implementation guidelines for how the instrumentation libraries should be implemented. In addition, it provides client libraries in all the major programming languages that follow the specification.
-
+OpenTelemetry is an open-source collection of tools, APIs, and SDKs that aims to standardize the way we generate and collect telemetry data. It follows a specification-driven development. 
+The <a href = "https://github.com/open-telemetry/opentelemetry-specification/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry specification</a>  has design and implementation guidelines for how the instrumentation libraries should be implemented. In addition, it provides client libraries in all the major programming languages that follow the specification.
 OpenTelemetry was formed after the merger of two open-source projects - OpenCensus and OpenTracing in 2019. Since then, it has been the go-to open-source standard for instrumenting cloud-native applications.
 
 The specification is designed into distinct types of telemetry known as signals. Presently, OpenTelemetry has specifications for these three signals:
@@ -46,7 +39,7 @@ Together, these three signals form the [three pillars of observability](https://
 
 OpenTelemetry plays a crucial role in the data collection process, offering invaluable insights into the behavior and performance of applications. However, once this data is acquired, it's important to note that it remains within the application environment and isn't readily available for immediate analysis or further processing.
 
-OpenTelemetry provides exporters, which serve as the conduits for transferring collected data to an OpenTelemetry Collector or a specified backend. This ensures that the data can be effectively utilized for comprehensive analysis, monitoring, and optimization of the application's performance and behavior.
+OpenTelemetry provides exporters, which serve as the conduits for transferring collected data to an [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) or a specified backend. This ensures that the data can be effectively utilized for comprehensive analysis, monitoring, and optimization of the application's performance and behavior.
 
 ## What are OpenTelemetry Exporters?
 
@@ -58,12 +51,18 @@ In essence, OpenTelemetry Exporters serve as the vital link between the applicat
 
 ## Types of OpenTelemetry Exporters
 
-In this section, we'll look at different types of OpenTelemetry Exporters and their unique capabilities in enhancing observability and data analysis workflows. They are:
+Once you've instrumented your application, you need to choose how to send your telemetry data out. OpenTelemetry provides a
+variety of exporters for this purpose. Your choice of exporter will depend on your destination, whether you're sending to an
+[OTel](https://signoz.io/blog/what-is-opentelemetry/)-native backend, an existing open-source system like Jaeger, or just printing to your console for debugging.
+  
+Here are the some exporters you can choose from:
 
 - OTLP
 - Zipkin
 - Jaeger
 - OpenCensus
+
+
 
 ### OpenTelemetry Protocol (OTLP)
 
@@ -85,15 +84,17 @@ The <a href = "https://opentelemetry-python.readthedocs.io/en/latest/exporter/zi
 
 Additionally, the <a href = "https://opentelemetry-python.readthedocs.io/en/latest/exporter/zipkin/zipkin.html#opentelemetry-zipkin-protobuf-exporter/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Zipkin Protobuf Exporter</a> efficiently sends traces to Zipkin by transmitting the traces to the designated Zipkin collector endpoint via HTTP, and it supports the efficient v2 protobuf format for trace data.
 
-### Jaeger
+ ### Jaeger Exporter (Legacy)
 
-<a href = "https://www.jaegertracing.io/" rel="noopener noreferrer nofollow" target="_blank" >Jaeger</a> is an open-source, distributed tracing system that monitors and troubleshoots the flow of requests through complex, microservices-based applications, providing a comprehensive view of system interactions.
+  In the past, OpenTelemetry provided a specific exporter to send trace data directly to Jaeger backends.
 
-OpenTelemetry integrates with Jaeger, providing two exporters for sending telemetry data to collected by OpenTelemetry into Jaeger: OpenTelemetry Jaeger Thrift Exporter and OpenTelemetry Jaeger Protobuf Exporter.
+  However, this dedicated Jaeger exporter is now broadly deprecated in most language SDKs and will be 
+  removed in future versions.
 
-The <a href = "https://opentelemetry-python.readthedocs.io/en/latest/exporter/jaeger/jaeger.html#opentelemetry-jaeger-thrift-exporter/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Jaeger Thrift Exporter</a> efficiently transmits traces to the designated agent via the Thrift compact protocol over UDP. In cases where deploying the Jaeger Agent alongside an application proves challenging, as in the case of Lambda functions, a collector can be set up to relay spans using Thrift over HTTP. If both the agent and collector are in use, the exporter will exclusively route traces to the collector, avoiding any redundant entries.
-
-The <a href = "https://opentelemetry-python.readthedocs.io/en/latest/exporter/jaeger/jaeger.html#opentelemetry-jaeger-protobuf-exporter/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Jaeger Protobuf Exporter</a> operates by sending traces to the designated agent through the efficient Protobuf serialization format facilitated by the high-performance gRPC communication protocol. For instance, in a microservices-based application, if one service makes an API call to another, the Jaeger Protobuf Exporter captures this interaction, converts it into Protobuf format, and sends it via gRPC to the configured agent for further processing and analysis. This ensures rapid and reliable transmission of trace data.
+  The modern and officially recommended way to send data to a Jaeger backend is to use the OTLP Exporter. The Jaeger project has added
+  native support for the OpenTelemetry Protocol (OTLP) and encourages this approach for all new instrumentation.
+ 
+  You can also refer [this](https://github.com/open-telemetry/opentelemetry-java/issues/5096) for more information.
 
 ### OpenCensus
 
@@ -185,10 +186,6 @@ Finally, update your exporter endpoint if you’re specifying it in code:
 ```
 OTLPSpanExporter((endpoint = "<traces-endpoint>/v1/traces"));
 ```
-
-<Admonition>
-There is not currently an OTLP/HTTP metric exporter.
-</Admonition>
 
 Subsequently, you can configure an exporter for Python applications using <a href = "https://opentelemetry.io/docs/instrumentation/python/exporters/#jaeger/" rel="noopener noreferrer nofollow" target="_blank" >Jaeger</a>, <a href = "https://opentelemetry.io/docs/instrumentation/python/exporters/#zipkin/" rel="noopener noreferrer nofollow" target="_blank" >Zipkin</a>, and <a href = "https://opentelemetry.io/docs/instrumentation/python/exporters/#prometheus/" rel="noopener noreferrer nofollow" target="_blank" >Prometheus</a>.
 

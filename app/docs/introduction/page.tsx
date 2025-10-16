@@ -12,9 +12,6 @@ import QuickStartCloud from '@/components/QuickStartCloud'
 import InstallLocallySection from './InstallLocallySection'
 import { Metadata } from 'next'
 import Chatbase from '@/components/Chatbase'
-import { evaluateFeatureFlag } from '@/utils/growthbookServer'
-import { EXPERIMENTS } from '@/constants/experiments'
-import { ExperimentTracker } from '@/components/ExperimentTracker'
 import HoverableSidebar from '@/components/HoverableSidebar'
 
 export const metadata: Metadata = {
@@ -23,22 +20,11 @@ export const metadata: Metadata = {
     'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.',
 }
 
-export default async function DocsIntroductionPage() {
-  // Check if the chatbase bubble experiment is enabled
-  const isChatbaseBubbleVariant = await evaluateFeatureFlag(
-    EXPERIMENTS.CHATBASE_BUBBLE?.flagName || 'chatbase-bubble-experiment'
-  )
-
-  // Safety check for experiment configuration
-  const chatbaseExperiment = EXPERIMENTS.CHATBASE_BUBBLE
-  const experimentId = chatbaseExperiment?.id || 'chatbase-bubble-experiment'
-  const variantId = chatbaseExperiment?.variants?.VARIANT || 'with-chatbase-bubble'
-  const controlId = chatbaseExperiment?.variants?.CONTROL || 'no-chatbase-bubble'
-
+export default function DocsIntroductionPage() {
   return (
     <>
       <HoverableSidebar />
-      <Header showSearchBar={isChatbaseBubbleVariant} />
+      <Header showSearchBar />
       <SendData />
       <Monitor />
       <Integrations />
@@ -49,16 +35,7 @@ export default async function DocsIntroductionPage() {
       <AdditionalResources />
       <InstallLocallySection />
       <QuickStartCloud />
-
-      {isChatbaseBubbleVariant ? (
-        <ExperimentTracker experimentId={experimentId} variantId={variantId}>
-          <Chatbase />
-        </ExperimentTracker>
-      ) : (
-        <ExperimentTracker experimentId={experimentId} variantId={controlId}>
-          <></>
-        </ExperimentTracker>
-      )}
+      <Chatbase disableFloatingMessages />
     </>
   )
 }

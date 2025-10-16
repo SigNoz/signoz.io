@@ -82,6 +82,8 @@ export const EXPERIMENTS = {
       VARIANT: 'with-chatbase-bubble',
     },
     flagName: 'chatbase-bubble-experiment',
+    concluded: true,
+    defaultVariant: 'with-chatbase-bubble',
   },
   // Add more experiments here as needed
 } as const

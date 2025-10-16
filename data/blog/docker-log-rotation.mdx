@@ -8,14 +8,8 @@ description: Docker uses the JSON-file logging driver by default, and it records
 image: /img/blog/2022/07/docker_log_rotation_cover.jpeg
 keywords: [docker,docker logs,docker log rotation,docker logging drivers]
 ---
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/docker-log-rotation/"/>
-   <title>Docker Log Rotation Configuration Guide | SigNoz</title>
-</head>
 
-
-
-It is essential to configure log rotation for Docker containers. Log rotation is not performed by default, and if it’s not configured, logs on the Docker host can build up and eat up disk space. This guide will teach us how to set up Docker log rotation.
+It is essential to configure log rotation for Docker containers. Log rotation is not performed by default, and if it’s not configured, logs on the Docker host can build up and eat up disk space. This guide will teach us how to set up [Docker log rotation](https://signoz.io/blog/docker-log-rotation/#configuring-docker-log-rotation).
 
 
 
@@ -24,7 +18,7 @@ It is essential to configure log rotation for Docker containers. Log rotation is
 Logs are an essential piece of telemetry data. Logs can be used to debug performance issues in applications. They produce a thorough list of the events that take place in your application, which can be used to troubleshoot issues and identify the root cause of a problem.
 
 With containerization, it is easier to scale applications. But the operation complexity has increased manifolds. Containers are ephemeral. Frequently changing container-based environments are challenging to monitor. [Docker logs](https://signoz.io/blog/docker-logs/) can help debug performance issues.
-Applications in Docker containers emit logs through `stdout` and `stderr` output streams. The logging driver that you choose can access these streams. Based on your logging driver, you can configure the format and storage of Docker logs. You can also send the emitted logs to a central log management system.
+Applications in Docker containers emit logs through `stdout` and `stderr` output streams. The logging driver that you choose can access these streams. Based on your logging driver, you can configure the format and storage of Docker logs. You can also send the emitted logs to a central [log management system](https://signoz.io/blog/open-source-log-management/).
 
 Before deep-diving into configuring Docker log rotation, let's briefly overview Docker logs.
 
@@ -42,7 +36,7 @@ In Docker, primarily, there are two types of log files.
 
 Docker does not impose a size restriction on logging files. Hence they will inevitably increase over time and consume storage if left unchecked. You can imagine the growth of log files over time and the amount of storage they would require in a scenario where you have numerous containers running.
 
-Limiting the size and quantity of locally stored log files is the main goal of log rotation. Docker logs must be cycled at predetermined intervals because manually deleting logs is a laborious task. But the first question is, where are Docker logs stored?
+Limiting the size and quantity of locally stored log files is the main goal of log rotation. Docker logs must be cycled at predetermined intervals because manually deleting logs is a laborious task. But the first question is, [where are Docker logs](https://signoz.io/guides/docker-view-logs/#exporting-logs) stored?
 
 <LogsPerf />
 
@@ -80,7 +74,7 @@ Let’s first configure the Docker daemon to a particular log driver.
 
 To configure the Docker Daemon to a particular log driver:
 
-**Step 1:** Go to the Docker daemon configuration file location:<br></br>
+**Step 1:** Go to the [Docker daemon](https://signoz.io/guides/docker-daemon-logs/) configuration file location:<br></br>
 On Linux: `/etc/docker/` directory
 
 On Windows: `C:\ProgramData\docker\config\daemon.json`
@@ -192,7 +186,7 @@ You can also have a look at the <a href = "https://docs.docker.com/config/contai
 
 ## Final Thoughts
 
-In this guide, we learned how to set up Docker log rotation. Container environments are highly dynamic, with multiple layers of abstraction. As a result, it's hard to debug such environments, and logs can play a critical role in providing much-needed visibility into performance issues.
+In this guide, we learned how to set up [Docker log](https://signoz.io/guides/docker-view-logs/) rotation. Container environments are highly dynamic, with multiple layers of abstraction. As a result, it's hard to debug such environments, and logs can play a critical role in providing much-needed visibility into performance issues.
 
 Docker provides various terminal commands to interact with Docker logs. You can use your console to view logs while developing your application or debugging a specific scenario. But in production environments, it’s advisable to centralize your logs for storage and analysis. That’s where a log management solution comes into the picture.
 

@@ -7,6 +7,6 @@
  * If no definition is provided, the tag will be displayed, but the tooltip will not be shown.
  */
 export const tagDefinitions: Record<string, string> = {
-  "instrumentation": "The article covers instrumentation of applications for telemetry data.",
-  "opentelemetry": "The article covers OpenTelemetry integration, instrumentation, and compatibility."
+  "SigNoz Cloud": "This page is relevant for SigNoz Cloud editions.",
+  "Self-Host": "This page is relevant for self-hosted SigNoz editions.",
 }

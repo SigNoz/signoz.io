@@ -9,11 +9,6 @@ image: /img/blog/2023/10/million-dollar-bill-cover-min.jpg
 hide_table_of_contents: false
 keywords: [operations,budget,observability]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/justifying-a-million-dollar-observability-bill/"/>
-</head>
-
 In a recent reddit thread, I got into a conversation about <a href = "https://devops.com/observability-costs-are-too-damn-high/" rel="noopener noreferrer nofollow" target="_blank" >justifying the cost of observability</a>. It got to a really basic question about running a tech company: how do you know that any cost is justified? While a small number of expenses have clear and direct business values, a bunch of other costs, I would even say _most_ costs, just aren’t that clear cut.
 
 I’d like to write a bit about how Observability costs are significant, how these costs tend to be justified, and how precise amount a company spends on _anything_ tends to be more subjective than you’d think. This article is not about how to reduce or control these costs, but rather how the costs are justified.
@@ -48,7 +43,7 @@ def do_work(work_type):
     print("doing some work...")
 ```
 
-Now let’s add OpenTelemetry manual instrumentation:
+Now let’s add [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) manual instrumentation:
 
 ```python
 # Acquire a tracer
@@ -95,7 +90,7 @@ Obviously a contrived example, but it’s worth noting that there were more line
 
 ### Cost reductions are possible
 
-Again, this is not the focus of this piece (geez don’t you read the introductory paragraphs??), but it’s important to note that it’s completely possible to significantly reduce the costs of observability. Tools like the OpenTelemetry Collector have tons of processors available to filter, parse, and compress data so that you’re sending way less data than your app’s actual workload.
+Again, this is not the focus of this piece (geez don’t you read the introductory paragraphs??), but it’s important to note that it’s completely possible to significantly reduce the costs of observability. Tools like the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) have tons of processors available to filter, parse, and compress data so that you’re sending way less data than your app’s actual workload.
 
 And open-source options are absolutely going to give more bang for your buck than closed-source SaaS tools. While companies like Datadog and New Relic may claim support for open standards like OpenTelemetry, [the reality is a little different](https://signoz.io/blog/is-opentelemetry-a-first-class-citizen-in-your-dashboard-a-datadog-and-newrelic-comparison/).
 
@@ -127,7 +122,7 @@ If this situation is hard to believe, consider that most airlines can’t specif
 
 ### The real argument for observability: the cost of not having it
 
-When a developer uses a cool tracing tool to find the bit of code that’s slowing down performance, the dollar benefit of that act to the company is extremely difficult to show. You might try calculating how long the developer would have spent trying to fix the problem without the tool, but that’s always going to be a _very_ rough estimate since a proper observability tool <a href = "https://www.cncf.io/blog/2022/12/16/why-opentelemetry-is-taking-cloud-native-to-new-heights/" rel="noopener noreferrer nofollow" target="_blank" >fundamentally alters the way dev teams operate</a> so a simple time estimate is unlikely to be accurate.
+When a developer uses a cool [tracing tool](https://signoz.io/blog/distributed-tracing-tools/) to find the bit of code that’s slowing down performance, the dollar benefit of that act to the company is extremely difficult to show. You might try calculating how long the developer would have spent trying to fix the problem without the tool, but that’s always going to be a _very_ rough estimate since a proper observability tool <a href = "https://www.cncf.io/blog/2022/12/16/why-opentelemetry-is-taking-cloud-native-to-new-heights/" rel="noopener noreferrer nofollow" target="_blank" >fundamentally alters the way dev teams operate</a> so a simple time estimate is unlikely to be accurate.
 
 No, the real way to show what observability has to offer is the cost of _not_ having it. The cost of downtime, system slowdowns, and dissatisfied users is one that every exec can estimate.
 
@@ -149,8 +144,8 @@ The initial rush to implement observability tools like Datadog, New Relic, and S
 
 ### OpenTelemetry and SigNoz can help with out-of-control-costs
 
-This piece helps explain why observability SaaS offerings have often received a blank check as long as they reduced the risk of downtime. We haven't discussed why, so often, observability bills continue to grow and often outpace the growth in infrastructure costs. To explain that, we have to admit that part of the story is lock-in. With a closed-source SaaS offering for observability, switching service providers means at least an arduous change of installed software agents. In the worst case, teams will have added thousands of custom metric calls to their application code which will all have to be changed to switch APM tools. Inevitably, this leaves customers 'stuck' and unable to do much as their observability bill grows.
+This piece helps explain why observability SaaS offerings have often received a blank check as long as they reduced the risk of downtime. We haven't discussed why, so often, observability bills continue to grow and often outpace the growth in infrastructure costs. To explain that, we have to admit that part of the story is lock-in. With a closed-source SaaS offering for observability, switching service providers means at least an arduous change of installed software agents. In the worst case, teams will have added thousands of custom metric calls to their application code which will all have to be changed to switch [APM tools](https://signoz.io/blog/open-source-apm-tools/). Inevitably, this leaves customers 'stuck' and unable to do much as their observability bill grows.
 
 OpenTelemetry can solve this problem. By implementing open standards for how observability data is gathered and transmitted, OpenTelemetry makes it very easy to switch service providers. If you're using the OpenTelemetry Collector (and you should be), all you have to do is reconfigure your collection endpoint in a single place.
 
-Along with OpenTelemetry, you'll need a backend to report and chart data. The OpenTelemetry project is neutral about your data backend, but a tool like <a href = "https://github.com/SigNoz/signoz" rel="noopener noreferrer nofollow" target="_blank" >SigNoz</a> uses the power of Clickhouse to store data efficiently, and it even has a self-hosted option.
+Along with OpenTelemetry, you'll need a backend to report and chart data. The [OpenTelemetry project](https://signoz.io/blog/opentelemetry-apm/) is neutral about your data backend, but a tool like <a href = "https://github.com/SigNoz/signoz" rel="noopener noreferrer nofollow" target="_blank" >SigNoz</a> uses the power of Clickhouse to store data efficiently, and it even has a self-hosted option.

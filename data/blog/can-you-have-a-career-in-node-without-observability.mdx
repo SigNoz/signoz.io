@@ -9,11 +9,6 @@ image: /img/blog/2023/09/js-otel-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,javascript,signoz,observability]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/can-you-have-a-career-in-node-without-observability/"/>
-</head>
-
 ## Why Observability Matters to JS Developers
 
 ”Isn’t Observability something for Ops to worry about?” I’ve heard this response more than once when talking about how developers should learn OpenTelemetry. I wanted to write this piece to show you how important _and_ how easy it is to learn observability from day one as a coder. We’ll start with explaining observability’s role in software development, and the second half of this piece is a guide to instrumenting a demo app with the open source tools OpenTelemetry and SigNoz.
@@ -65,7 +60,7 @@ Since we don’t want to use expensive paid tools, we’ll use OpenTelemetry to 
 
 ## Instrumenting a Node application with OpenTelemetry
 
-This guide starts from the OpenTelemetry [getting started guide for Javascript](https://opentelemetry.io/docs/instrumentation/js/getting-started/nodejs/), but resolves some fragmentation in that documentation and adds a final part where you report data to an OpenTelemetry dashboard with SigNoz. This guide requires no special knowledge beyond the ability to read Javascript and run commands in bash.
+This guide starts from the OpenTelemetry [getting started guide for Javascript](https://opentelemetry.io/docs/instrumentation/js/getting-started/nodejs/), but resolves some fragmentation in that documentation and adds a final part where you report data to an [OpenTelemetry dashboard](https://signoz.io/blog/opentelemetry-visualization/) with SigNoz. This guide requires no special knowledge beyond the ability to read Javascript and run commands in bash.
 
 ### Step 1: Building our app
 
@@ -123,7 +118,7 @@ You can start the application with `node app.js` and you can visit [`http://loca
 
 ### Step 2: Add Auto-instrumentation
 
-A source of some confusion for new developers is the difference between manual instrumentation and auto-instrumentation. Remember that our goal with a basic application is trace data that shows where work is occurring as our application handles requests. It’s possible to construct this trace data 100% manually by adding calls into your code similar to the way you might be adding logging now. The OpenTelemetry SDK has support for creating and sending traces, letting you define trace context, add attributes and starting and stopping the time measurements (called ‘spans’) that make up a trace. For this example we’ll use the automatic option, which requires no direct changes to our code, and instead patches in wrappers for our functions that will automatically create traces.
+A source of some confusion for new developers is the difference between manual instrumentation and auto-instrumentation. Remember that our goal with a basic application is trace data that shows where work is occurring as our application handles requests. It’s possible to construct this trace data 100% manually by adding calls into your code similar to the way you might be adding logging now. The [OpenTelemetry SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) has support for creating and sending traces, letting you define trace context, add attributes and starting and stopping the time measurements (called ‘spans’) that make up a trace. For this example we’ll use the automatic option, which requires no direct changes to our code, and instead patches in wrappers for our functions that will automatically create traces.
 
 If you haven’t interacted with an automatic instrumentation package before it can seem quite magical, but if you look at our Flask app it’s rather easy to imagine how we can start a trace (when handing a request at a single route) and how we can label the following spans (function names), and how they can be connected.
 
@@ -214,7 +209,7 @@ If you leave the application running, the `PeriodicExportingMetricReader` will e
 
 ## Step 3: Report Traces to a SigNoz dashboard
 
-We’ll report traces to a dashboard on SigNoz.io. SigNoz offers a fully free and open source version you can run on your own cloud or laptop, but since we’re developers not operations specialists, we can use the new SigNoz cloud to create an online endpoint and dashboard.
+We’ll report traces to a dashboard on [SigNoz.io](https://signoz.io/application-performance-monitoring/). SigNoz offers a fully free and open source version you can run on your own cloud or laptop, but since we’re developers not operations specialists, we can use the new SigNoz cloud to create an online endpoint and dashboard.
 
 Head to [https://signoz.io/teams/](https://signoz.io/teams/) to sign up for a team account to try it out.
 
@@ -279,7 +274,7 @@ process.on("SIGTERM", () => {
 ```
 
 <Admonition>
-In this simplified first run, our node app will speak directly to the SigNoz servers. This isn’t ideal, to start with because we really shouldn’t be hard-coding anything’s URL. For this tutorial we’re not using an OpenTelemetry Collector. Later articles will cover running this necessary ‘middleman’ between our running code and our metrics back end.
+In this simplified first run, our node app will speak directly to the [SigNoz](https://signoz.io/docs/introduction/) servers. This isn’t ideal, to start with because we really shouldn’t be hard-coding anything’s URL. For this tutorial we’re not using an OpenTelemetry Collector. Later articles will cover running this necessary ‘middleman’ between our running code and our metrics back end.
 </Admonition>
 
 Find your ingestion key in the account setup email, then run our revised app with:
@@ -307,7 +302,7 @@ Now that you’ve reported your first traces to a dashboard, there are a number 
 
 ## Conclusion: OpenTelemetry should be for everyone
 
-Learning how to implement OpenTelemetry in applications is a valuable skill for developers, especially those who are trying to get their first roles as production developers. Observability is a critical element in modern software development, especially in complex, distributed systems. OpenTelemetry offers a unified approach to collecting distributed traces, metrics, and logs, allowing you to understand not just what is happening inside your application but also why it’s happening. This knowledge is instrumental in diagnosing issues, improving system performance, and understanding user behavior.
+Learning how to implement [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) in applications is a valuable skill for developers, especially those who are trying to get their first roles as production developers. Observability is a critical element in modern software development, especially in complex, distributed systems. OpenTelemetry offers a unified approach to collecting [distributed traces](https://signoz.io/blog/distributed-tracing/), metrics, and logs, allowing you to understand not just what is happening inside your application but also why it’s happening. This knowledge is instrumental in diagnosing issues, improving system performance, and understanding user behavior.
 
 By integrating OpenTelemetry, developers get a consistent and standardized way to collect telemetry data across various parts of an application, critical for reducing the mean time to resolve (MTTR) during incidents. Without proper observability, debugging issues becomes a time-consuming and error-prone process.
 

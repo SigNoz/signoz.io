@@ -1,6 +1,7 @@
 ---
 date: 2025-08-13
 id: overview
+tags : [SigNoz Cloud, Self-Host]
 title: ECS EC2 Collection Agent - Install
 description: View metrics and logs for your ECS infrastructure
 ---
@@ -131,13 +132,6 @@ Resources:
           Secrets:
             - Name: SIGNOZ_CONFIG_CONTENT
               ValueFrom: !Ref SigNozConfigPath
-          HealthCheck:
-            Command:
-              - CMD-SHELL
-              - wget -qO- http://localhost:13133/ || exit 1
-            Interval: 5
-            Retries: 2
-            Timeout: 3
           LogConfiguration:
             LogDriver: json-file
       RequiresCompatibilities:
@@ -486,7 +480,7 @@ exporters:
     tls:
       insecure: false
     headers:
-      signoz-access-token: "<SIGNOZ_INGESTION_KEY>"
+      signoz-ingestion-key: "<SIGNOZ_INGESTION_KEY>"
   logging:
     verbosity: basic
 

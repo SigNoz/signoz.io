@@ -3,30 +3,21 @@ import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { allGuides, allAuthors } from 'contentlayer/generated'
-import type { Authors, Blog, Guide } from 'contentlayer/generated'
-import PostSimple from '@/layouts/PostSimple'
-import PostLayout from '@/layouts/PostLayout'
-import PostBanner from '@/layouts/PostBanner'
+import type { Authors, Guide } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
-import BlogLayout from '@/layouts/BlogLayout'
 import GuidesLayout from '@/layouts/GuidesLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
 import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 import Button from '@/components/ui/Button'
 
-const defaultLayout = 'PostLayout'
+const defaultLayout = 'GuidesLayout'
 const layouts = {
-  PostSimple,
-  PostLayout,
-  PostBanner,
   OpenTelemetryLayout,
-  BlogLayout,
   GuidesLayout,
 }
 

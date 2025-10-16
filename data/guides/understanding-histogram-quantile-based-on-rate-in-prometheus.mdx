@@ -122,7 +122,7 @@ The syntax for `rate` is:
 rate(counter_metric[time_range])
 ```
 
-where `metric` is the counter metric, and `time_range` defines the period (e.g., `5m` for 5 minutes, `1h` for 1 hour) over which the rate is calculated. Shorter time ranges capture immediate changes, while longer ranges provide a more general trend.
+where `metric` is the [counter metric](https://signoz.io/guides/what-is-the-difference-between-a-gauge-and-a-counter/), and `time_range` defines the period (e.g., `5m` for 5 minutes, `1h` for 1 hour) over which the rate is calculated. Shorter time ranges capture immediate changes, while longer ranges provide a more general trend.
 
 ### Importance of `Rate` in Analyzing Counter Metrics
 
@@ -146,7 +146,7 @@ The `rate` function in Prometheus is highly useful for tracking changes over tim
     
     <Figure src="/img/guides/2024/11/understanding-histogram-quantile-based-on-rate-in-prometheus-6934ff57-80ce-4eb6-836f-a1d003f3af82.webp" alt="Monitoring rate of request, normal traffic and spikes" caption="Monitoring rate of request, normal traffic and spikes" />
     
-    Here, `rate(http_server_requests_seconds_count[5m])` calculates the average rate of HTTP server requests per second over the past 5 minutes. This metric can help you monitor normal traffic levels and identify spikes.
+    Here, `rate(http_server_requests_seconds_count[5m])` calculates the average rate of HTTP [server requests](https://signoz.io/guides/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count/) per second over the past 5 minutes. This metric can help you monitor normal traffic levels and identify spikes.
     
 2. Throughput Analysis:
     
@@ -371,13 +371,13 @@ Choose from the environment options that match your setup. Since I'm running thi
     <Figure src="/img/guides/2024/11/understanding-histogram-quantile-based-on-rate-in-prometheus-Screenshot_2024-11-08_at_23.23.47.webp" alt="SigNoz Env Details" caption="SigNoz Env Details" />
     
 7. Using OpenTelemtry SDK or Collector to send data to SigNoz
-To send data to SigNoz, we will use the OpenTelemetry Collector. The OpenTelemetry Collector is a vendor-agnostic service that receives, processes, and exports telemetry data (metrics, logs, and traces) from various sources to various destinations. 
+To send data to SigNoz, we will use the [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) Collector. The OpenTelemetry Collector is a vendor-agnostic service that receives, processes, and exports telemetry data (metrics, logs, and traces) from various sources to various destinations. 
 For more details, visit [OpenTelemetry Collector Guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/).
     
     <Figure src="/img/guides/2024/11/understanding-histogram-quantile-based-on-rate-in-prometheus-Screenshot_2024-08-05_at_11.43.33_AM.webp" alt="Select the method using to send data to SigNoz OTEL SDK or OTEL Collector to send data." caption="Select the method using to send data to SigNoz OTEL SDK or OTEL Collector to send data." />
     
 8. Start Your Application with SigNoz
-To begin sending telemetry data from your application to SigNoz, use the following command to start your app. This command specifies key configuration details like the service name, ingestion key, and the endpoint for the OpenTelemetry collector.
+To begin sending telemetry data from your application to SigNoz, use the following command to start your app. This command specifies key configuration details like the service name, ingestion key, and the endpoint for the [OpenTelemetry collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/).
     
     ```bash
     SERVICE_NAME=goApp INSECURE_MODE=false 
@@ -390,7 +390,7 @@ From this tab, you can monitor your app's performance metrics, including latency
     
     <Figure src="/img/guides/2024/11/understanding-histogram-quantile-based-on-rate-in-prometheus-Screenshot_2024-11-09_at_00.29.59.webp" alt="SigNoz Services tab" caption="SigNoz Services tab" />
     
-10. Using `histogram_quantile` to Analyze Metrics:
+10. Using `histogram_quantile` to [Analyze Metrics](https://signoz.io/blog/metrics-explorer/):
 Navigate to the Traces section via the sidebar menu in the SigNoz dashboard. In the Search Filter section, input the necessary query expressions. This allows you to filter and analyze specific metrics.
     
     <Figure src="/img/guides/2024/11/understanding-histogram-quantile-based-on-rate-in-prometheus-735d3ae6-eb7a-472b-aea6-cd5776bc6277.webp" alt="Navigate to Traces to use the Search Filter" caption="Navigate to Traces to use the Search Filter" />
@@ -423,7 +423,7 @@ When using `histogram_quantile` and `rate` functions in Prometheus, applying bes
     If you frequently query certain metrics, using recording rules can speed up response times. Recording rules precompute specific queries and store their results, allowing you to access them faster in dashboards or alerts. For example, if you consistently track the 95th percentile of response times, set up a recording rule to avoid recalculating it each time you access the metric.
     
 3. Avoid Common Pitfalls
-    - `histogram_quantile` Requires Histogram Metrics: The `histogram_quantile` function is designed specifically for Prometheus histogram metrics, which organize data into configurable "buckets" (ranges). Using it on non-histogram data will lead to inaccurate results. Always verify that your metric is a histogram type before using `histogram_quantile`.
+    - `histogram_quantile` Requires Histogram Metrics: The `histogram_quantile` function is designed specifically for [Prometheus histogram](https://signoz.io/guides/what-is-a-bucket-in-prometheus/) metrics, which organize data into configurable "buckets" (ranges). Using it on non-histogram data will lead to inaccurate results. Always verify that your metric is a histogram type before using `histogram_quantile`.
     - Ensure Sufficient Data Points for Accuracy: Calculating accurate percentiles requires enough data points. For example, in high-traffic applications, calculating a 99th percentile with minimal data might not be meaningful. Monitoring data density can help ensure that your percentiles reliably reflect real behavior.
 4. Create Meaningful Dashboards
     

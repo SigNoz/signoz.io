@@ -142,13 +142,13 @@ module.exports = () => {
         },
         {
           source: '/learn/user-stories/',
-          destination: '/observability-user-stories',
+          destination: '/blog/community-update-06/#observability-user-stories',
           permanent: true,
         },
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3cy3atyr6-yjgvOm42ZqD2HeszrXuvOA',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3f0a8p8iv-Q_owXy6v0KUxlrJEkV_7hw',
           basePath: false,
           permanent: true,
         },
@@ -557,7 +557,12 @@ module.exports = () => {
         },
         {
           source: "/docs/instrumentation/troubleshoot-instrumentation/",
-          destination: "/docs/traces-management/troubleshooting/",
+          destination: "/docs/traces-management/troubleshooting/troubleshooting/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/query-handles-missing-values/",
+          destination: "/docs/userguide/query-builder/",
           permanent: true
         },
         {
@@ -683,6 +688,16 @@ module.exports = () => {
         {
           source: "/guides/upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11/",
           destination: "/guides/upstream-connect-error/",
+          permanent: true
+        },
+        {
+          source: "/docs/tutorial/writing-clickhouse-queries-in-dashboard/",
+          destination: "/docs/userguide/writing-clickhouse-traces-query/",
+          permanent: true
+        },
+        {
+          source: "/docs/tutorial/instrumenting-angular-frontend/",
+          destination: "/docs/instrumentation/opentelemetry-angular/",
           permanent: true
         }
       ]
