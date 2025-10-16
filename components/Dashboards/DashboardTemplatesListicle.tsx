@@ -17,7 +17,8 @@ import {
   SiClaude,
   SiGooglegemini,
   SiAnthropic,
-  SiAmazonwebservices
+  SiAmazonwebservices,
+  SiPydantic
 } from 'react-icons/si'
 import { 
   Monitor, 
@@ -274,6 +275,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/postgresql',
     icon: <SiPostgresql className="h-7 w-7 text-blue-600" />,
     clickName: 'PostgreSQL Dashboard Template',
+  },
+  {
+    name: 'Pydantic AI',
+    href: '/docs/dashboards/dashboard-templates/pydantic-ai-dashboard',
+    icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
+    clickName: 'Pydantic AI Dashboard Template',
   },
   {
     name: 'RabbitMQ',
