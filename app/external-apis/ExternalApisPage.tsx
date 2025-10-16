@@ -203,7 +203,7 @@ const FilterAndAutomaticDetectionSection: React.FC = () => {
       <GridLayout variant="split">
         {/* Left Column - Ingestion */}
         <div className="flex flex-col px-6">
-          <div className="min-h-72 flex flex-col justify-between">
+          <div className="min-h-56 flex flex-col justify-between">
             <div>
               <h2 className="text-signoz_vanilla-100 mb-6">Filter by environment, service or method</h2>
               <p className="text-signoz_vanilla-400 mb-8 leading-relaxed">
@@ -222,7 +222,7 @@ const FilterAndAutomaticDetectionSection: React.FC = () => {
         
         {/* Right Column - Processing */}
         <div className="flex flex-col px-6 border-l-1 border-signoz_slate-400 border-dashed -my-16 pt-16">
-          <div className="min-h-72 flex flex-col justify-between">
+          <div className="min-h-56 flex flex-col justify-between">
             <div>
               <h2 className="text-signoz_vanilla-100 mb-6">Automatic detection of external calls</h2>
               <p className="text-signoz_vanilla-400 mb-8 leading-relaxed">
@@ -231,12 +231,14 @@ const FilterAndAutomaticDetectionSection: React.FC = () => {
             </div>
           </div>
           
-          <Image 
-            src="/img/external-apis/automatic-detection-of-external-calls.png" 
-            alt="Automatic detection of external calls" 
-            width={10000} 
-            height={10000} 
-          />
+          <div className="h-full flex flex-col justify-center items-center pb-16">
+            <Image 
+              src="/img/external-apis/automatic-detection-of-external-calls.png" 
+              alt="Automatic detection of external calls" 
+              width={10000} 
+              height={10000} 
+            />
+          </div>
         </div>
       </GridLayout>
     </div>
