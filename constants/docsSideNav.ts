@@ -2184,6 +2184,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/pydantic-ai-monitoring',
+        label: 'Pydantic AI Monitoring',
+        type: 'doc',
+      },
+      {
         route: '/docs/vercel-ai-sdk-monitoring',
         label: 'Vercel AI SDK Monitoring',
         type: 'doc',
