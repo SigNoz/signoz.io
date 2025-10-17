@@ -20,24 +20,6 @@ Before you begin, ensure the following:
 - You have a Node.js (version 18.0 or higher) application already instrumented with OpenTelemetry.
 - The OpenTelemetry SDK is installed and configured.
 
-You can follow this [guide](https://signoz.io/docs/instrumentation/opentelemetry-javascript/#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended) for step-by-step instructions on automatically instrumenting a JavaScript application with OpenTelemetry.
-
-### About Auto-Instrumentation
-
-The `@opentelemetry/api` and `@opentelemetry/auto-instrumentations-node` packages contain OpenTelemetry API, SDK, and the auto-instrumentation code.
-
-You can then enable auto-instrumentation by using `--require` flag:
-
-```bash
-node --require '@opentelemetry/auto-instrumentations-node/register' app.js
-```
-
-Or by using environment variable:
-
-```bash
-NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
-```
-
 ## Exclude Specific Instrumentation Libraries
 
 ### Use Case
@@ -72,6 +54,8 @@ export OTEL_NODE_ENABLED_INSTRUMENTATIONS="http,express"
 export OTEL_NODE_DISABLED_INSTRUMENTATIONS="fs,grpc"
 ```
 
+Explore full list of supported libraries [here](https://github.com/open-telemetry/opentelemetry-js-contrib/blob/main/packages/auto-instrumentations-node/README.md#supported-instrumentations).
+
 <Admonition>
   If both variables are set, `OTEL_NODE_ENABLED_INSTRUMENTATIONS` is applied first, and
   `OTEL_NODE_DISABLED_INSTRUMENTATIONS` is applied afterwards. So, if a library appears in both, it
@@ -97,65 +81,74 @@ For Self-Hosted SigNoz, set `OTEL_EXPORTER_OTLP_ENDPOINT` to your OTLP endpoint 
 Example:
 
 ```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 ```
+
+#### Note
+
+These environment variables work **only with auto-instrumentation setups**, where instrumentation is enabled using `NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"`. You can follow this [guide](https://signoz.io/docs/instrumentation/opentelemetry-javascript/#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended) for step-by-step guide on no-code automatic instrumentation for a JavaScript application with OpenTelemetry.
+
+If you're using code based auto instrumentation with the OpenTelemetry SDK, use the programmatic configuration method described below instead.
 
 ### Using Programmatic Configuration
 
-You can also enable/disable libraries programmatically in your application code.
+You can also enable/disable libraries programmatically in your application code, modify your exisiting `instrumentation.js` or `instrumentation.ts` where you have initialized OpenTelemetry SDK.
 
-Create an `instrumentation.js` file:
+#### What to change
+
+In your existing file:
+
+1. Import `getNodeAutoInstrumentations` from `@opentelemetry/auto-instrumentations-node`.
+2. Use it to specify which instrumentations to enable/disable.
+3. Keep the rest of your SDK and exporter configuration unchanged.
+
+#### Before
 
 ```javascript:instrumentation.js
-const { NodeSDK } = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+// instrumentation.js (existing setup)
+const { NodeSDK } = require('@opentelemetry/sdk-node')
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
 
-// Define which instrumentations to enable
-const instrumentations = getNodeAutoInstrumentations({
-  '@opentelemetry/instrumentation-fs': {
-    enabled: false,
-  },
-  '@opentelemetry/instrumentation-http': {
-    enabled: true,
-  },
-  '@opentelemetry/instrumentation-express': {
-    enabled: true,
-  },
-  '@opentelemetry/instrumentation-dns': {
-    enabled: false,
-  },
-  '@opentelemetry/instrumentation-grpc': {
-    enabled: false,
-  },
-});
-
-// Configure OTLP exporter
 const traceExporter = new OTLPTraceExporter({
   url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
-  headers: process.env.OTEL_EXPORTER_OTLP_HEADERS ?
-    Object.fromEntries(
-      process.env.OTEL_EXPORTER_OTLP_HEADERS.split(',').map(h => h.split('='))
-    ) : {},
+})
+
+const sdk = new NodeSDK({
+  traceExporter,
+})
+
+sdk.start()
+```
+
+#### After
+
+```javascript:instrumentation.js {6-12}
+// instrumentation.js (modified)
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+
+const instrumentations = getNodeAutoInstrumentations({
+  '@opentelemetry/instrumentation-fs': { enabled: false },
+  '@opentelemetry/instrumentation-http': { enabled: true },
+  '@opentelemetry/instrumentation-express': { enabled: true },
+  '@opentelemetry/instrumentation-dns': { enabled: false },
+  '@opentelemetry/instrumentation-grpc': { enabled: false },
 });
 
-// Initialize SDK with resource and instrumentations
+const traceExporter = new OTLPTraceExporter({
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: {
+    'signoz-ingestion-key': '<your-ingestion-key>'
+  }
+});
+
 const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [instrumentations],
 });
 
 sdk.start();
-
-console.log('OpenTelemetry SDK started');
-
-// Handle graceful shutdown
-process.on('SIGTERM', () => {
-  sdk.shutdown()
-    .then(() => console.log('OpenTelemetry SDK shut down'))
-    .catch((err) => console.log('Error shutting down SDK', err))
-    .finally(() => process.exit(0));
-});
 ```
 
 Then require this file before any application code:
@@ -173,10 +166,9 @@ Or run your application with:
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_NODE_ENABLED_INSTRUMENTATIONS="http,express"
-export OTEL_SERVICE_NAME="my-app"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service_name>"
 node -r ./instrumentation.js app.js
 ```
 
@@ -185,7 +177,7 @@ For Self-Hosted SigNoz, set `OTEL_EXPORTER_OTLP_ENDPOINT` to your OTLP endpoint 
 Example:
 
 ```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 ```
 
 ## Troubleshooting
@@ -232,7 +224,6 @@ Now that you have instrumented Node.js selectively, explore related topics to en
 - [Node.js - Manual Instrumentation](https://signoz.io/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/)
 - [Instrument JavaScript](https://signoz.io/docs/instrumentation/opentelemetry-javascript/)
 - [Instrument Express](https://signoz.io/docs/instrumentation/opentelemetry-express/)
-- [Exclude HTTP Endpoints in Node.js](https://signoz.io/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation/)
 
 ## Get Help
 
