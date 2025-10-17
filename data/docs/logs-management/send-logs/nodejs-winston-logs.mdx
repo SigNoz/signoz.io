@@ -19,13 +19,21 @@ This document shows you how to send logs from your Node.js application using the
 Install the OpenTelemetry packages needed for auto-instrumentation:
 
 ```bash
-npm i @opentelemetry/sdk-node \
-      @opentelemetry/auto-instrumentations-node \
-      @opentelemetry/instrumentation-winston \
-      @opentelemetry/exporter-trace-otlp-http \
-      @opentelemetry/exporter-logs-otlp-http \
-      @opentelemetry/winston-transport
+npm install @opentelemetry/api-logs@^0.56.0 \
+            @opentelemetry/auto-instrumentations-node@^0.65.0 \
+            @opentelemetry/exporter-logs-otlp-http@^0.56.0 \
+            @opentelemetry/exporter-trace-otlp-http@^0.56.0 \
+            @opentelemetry/instrumentation-winston@^0.51.0 \
+            @opentelemetry/resources@^1.29.0 \
+            @opentelemetry/sdk-logs@^0.56.0 \
+            @opentelemetry/sdk-node@^0.56.0 \
+            @opentelemetry/semantic-conventions@^1.29.0 \
+            @opentelemetry/winston-transport@^0.17.0 \    
 ```
+
+<Admonition>
+The Resource class from @opentelemetry/resources@2.1.0 is incompatible with the v0.206.x series of sdk-node and related packages. The versions above ensure everything aligns correctly.
+</Admonition>
 
 #### Package Breakdown
 
@@ -284,6 +292,9 @@ app.get('/error', (req, res) => {
 });
 ```
 
+</TabItem>
+</Tabs>
+
 ### Step 4: Configure and Run Your Application
 
 #### Set Environment Variables
@@ -321,10 +332,6 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="http://<collector-host>:4318"
 <TabItem value="js" label="JavaScript">
 
 ```bash
-export OTEL_SERVICE_NAME=<service_name>
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-
 node -r ./otel.js app.js
 ```
 
@@ -348,8 +355,6 @@ node -r ./otel.ts app.ts
 
 The `-r` flag ensures the OpenTelemetry SDK loads and initializes before your application imports Winston.
 
-</TabItem>
-</Tabs>
 
 ## Verification
 
