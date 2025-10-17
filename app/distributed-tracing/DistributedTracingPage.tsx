@@ -349,16 +349,16 @@ const DistributedTracing: React.FC = () => {
         <SectionLayout variant="bordered" className="!px-0">
           <LogProcessingSection />
           
-          <div className="px-6 pt-6 !w-[80vw] !mx-auto">
+          <SectionLayout variant="full-width" className="px-6 pt-6">
             <h2 className="text-signoz_vanilla-100 mb-6">
               Load traces with million spans without browser crashes
             </h2>
             <p className="text-signoz_vanilla-400 mb-2 leading-relaxed">
               Virtualized rendering and progressive loading handle traces with 1M+ spans without UI degradation. Synchronized flame graph and waterfall views update together as you navigate, with span events appearing as timeline indicators. Hierarchical flame graphs provide topology overview while detailed waterfall views show exact timing. Scroll and drill down with instant response times. 
             </p>
-          </div>
+          </SectionLayout>
           
-          <CarouselCards cards={CORRELATION_CAROUSEL_DATA} />
+          <CarouselCards cards={CORRELATION_CAROUSEL_DATA} buttonLink="/opentelemetry/correlating-traces-logs-metrics-nodejs/" buttonText="Read Blog" />
           <VisualQueryBuilder />
           <StorageSection />
         </SectionLayout>

@@ -4,8 +4,9 @@ import GridLayout from '../GridLayout'
 import Button from '@/components/ui/Button'
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
+import SectionLayout from '../SectionLayout'
 
-const CarouselCards: React.FC<{ cards: Array<CarouselCard> }> = ({ cards }) => {
+const CarouselCards: React.FC<{ cards: Array<CarouselCard>, buttonLink?: string, buttonText?: string }> = ({ cards, buttonLink, buttonText }) => {
   const [activeIndex, setActiveIndex] = React.useState(0)
   const [isTransitioning, setIsTransitioning] = React.useState(false)
 
@@ -32,18 +33,18 @@ const CarouselCards: React.FC<{ cards: Array<CarouselCard> }> = ({ cards }) => {
   }
 
   return (
-    <div className="bg-signoz_ink-500 pb-16 px-6">
+    <SectionLayout variant="full-width">
       <GridLayout variant="split" className="gap-12 items-center">
         <div className="flex flex-col">
-          <Button 
+          {buttonLink && <Button 
             variant="secondary" 
             rounded="full"
-            className="flex items-center gap-2 w-fit mb-12"
-            to="/opentelemetry/correlating-traces-logs-metrics-nodejs/"
+            className="flex items-center gap-2 w-fit md:mb-12 mb-8"
+            to={buttonLink}
           >
-            Read Blog
+            {buttonText}
             <ArrowRight size={14} />
-          </Button>
+          </Button>}
           
           <div className="space-y-4">
             {cards.map((item, index) => (
@@ -104,7 +105,7 @@ const CarouselCards: React.FC<{ cards: Array<CarouselCard> }> = ({ cards }) => {
           </div>
         </div>
       </GridLayout>
-    </div>
+    </SectionLayout>
   )
 }
 
