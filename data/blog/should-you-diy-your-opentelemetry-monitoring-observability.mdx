@@ -10,17 +10,10 @@ hide_table_of_contents: false
 keywords: [OpenTelemetry]
 ---
 
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/should-you-diy-your-opentelemetry-monitoring-observability/"/>
-</head>
-<meta property="twitter:card" content="summary_large_image"/>
-  <meta property="twitter:url" content="https://signoz.io/blog/should-you-diy-your-opentelemetry-monitoring-observability/"/>
-  <meta property="twitter:description" content=""/>
-  <meta name ="twitter:image" content="https://signoz.io/img/blog/2023/07/diy_otel_cover-min.jpg"/>
 
 I recently read this <a href="https://cloud-native.slack.com/archives/CJFCJHG4Q/p1688032004306969" rel="noopener noreferrer nofollow" target="_blank" >thread in the CNCF slack</a> from someone wanting to send metrics and traces directly to Postgres. Reasonable enough right? After all once your data is in postgres you can query it to your heart’s content. And isn’t the general culture of OpenTelemetry that you should be able to do all of Observability without resorting to SaaS tools?
 
-The thread, however, is pretty universally opposed to this approach; and I have to say that I agree. While several replies recommend SaaS tools as endpoints to receive OpenTelemetry data, and the tools mentioned are great, there are also fully open-source and self-hosted tools that will make your life much much easier than trying to import directly to Postgres.
+The thread, however, is pretty universally opposed to this approach; and I have to say that I agree. While several replies recommend SaaS tools as endpoints to receive [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) data, and the tools mentioned are great, there are also fully open-source and self-hosted tools that will make your life much much easier than trying to import directly to Postgres.
 
 
 
@@ -62,11 +55,11 @@ Notably: if you’re a very large team of developers, this actually might make s
 
 ## On the other hand: Why not both? Advanced analysis
 
-Reading so far, it seems like the agreement is universal: you should never ever send Otel data straight to your database unless it’s purpose-built. Martin Thwaites of Honeycomb talks about one reason to send your data to more than one place:
+Reading so far, it seems like the agreement is universal: you should never ever send [OTel](https://signoz.io/blog/what-is-opentelemetry/) data straight to your database unless it’s purpose-built. Martin Thwaites of Honeycomb talks about one reason to send your data to more than one place:
 
 > This is a very common usecase. Send to a vendor or OSS backend to have the analysis features for production observability, then push to something like S3 and use athena for auditing and other types of querying that doesn't need really fast querying and visualisations […] I used to put trace data into redshift years ago to look at search data for trend/performance analysis over 12 months.
 
-Here we see one of the superpowers of OpenTelemetry. With the OTel Collector you can send data almost anywhere, even sending copies to multiple endpoints. And there will always be ways that an out-of-the-box observability tool doesn’t do all the analysis you want. Martin makes a strong point that while you shouldn’t use your own DB for _all_ your observability, it’s a good tool to keep in your quiver.
+Here we see one of the superpowers of OpenTelemetry. With the [OTel Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) you can send data almost anywhere, even sending copies to multiple endpoints. And there will always be ways that an out-of-the-box observability tool doesn’t do all the analysis you want. Martin makes a strong point that while you shouldn’t use your own DB for _all_ your observability, it’s a good tool to keep in your quiver.
 
 ## A hybrid option: SaaS for prod, local for dev
 

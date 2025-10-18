@@ -6,13 +6,17 @@ import ChatbaseCookieSync from './ChatbaseCookieSync'
 
 interface ChatbaseServerProps {
   className?: string
+  disableFloatingMessages?: boolean
 }
 
 /**
  * Server component that handles Chatbase identity verification
  * Generates the user hash on the server and passes it to the client component
  */
-export default async function ChatbaseServer({ className }: ChatbaseServerProps) {
+export default async function ChatbaseServer({
+  className,
+  disableFloatingMessages,
+}: ChatbaseServerProps) {
   // Get the secret key from environment variables
   const secret = process.env.CHATBASE_SECRET_KEY
 
@@ -21,7 +25,10 @@ export default async function ChatbaseServer({ className }: ChatbaseServerProps)
     return (
       <>
         <ChatbaseCookieSync />
-        <ChatbaseClient className={className} />
+        <ChatbaseClient
+          className={className}
+          disableFloatingMessages={disableFloatingMessages}
+        />
       </>
     )
   }
@@ -37,7 +44,10 @@ export default async function ChatbaseServer({ className }: ChatbaseServerProps)
     return (
       <>
         <ChatbaseCookieSync />
-        <ChatbaseClient className={className} />
+        <ChatbaseClient
+          className={className}
+          disableFloatingMessages={disableFloatingMessages}
+        />
       </>
     )
   }
@@ -48,7 +58,12 @@ export default async function ChatbaseServer({ className }: ChatbaseServerProps)
   return (
     <>
       <ChatbaseCookieSync />
-      <ChatbaseClient className={className} userId={anonymousId} userHash={userHash} />
+      <ChatbaseClient
+        className={className}
+        userId={anonymousId}
+        userHash={userHash}
+        disableFloatingMessages={disableFloatingMessages}
+      />
     </>
   )
 }

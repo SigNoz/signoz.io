@@ -11,11 +11,6 @@ keywords: [opentelemetry,webinar,kafka,otlp,signoz,observability]
 ---
 
 
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/otel-webinar-kafka-otlp/"/>
-</head>
-
 Join <a href="https://github.com/serverless-mom" rel="nofollow">Nočnica Mellifera</a> and <a href="https://github.com/ankitnayan" rel="nofollow">Ankit</a> as they discuss discuss the relationship between OpenTelemetry and ApacheKafka.
 
 
@@ -59,13 +54,13 @@ So, I want to kind of start there by sorting out why would somebody want to use 
 
 So, some point that I thought may be useful to discuss with all of us is tiering of OpenTelemetry collectors, it's always fine. But there are a few pros and cons that we need to keep in hindsight, thought on so that we enable better monitoring and better transmitting of data to different background sources. 
 
-First, like the Kafka-like wall or queue, whatever you say, it is very helpful at scale and near the backend systems that deal with the observability data, right? So, if you have to handle scale like 100,000 spans per second or maybe up to a million spans per second from the observability data, it's perfectly fine to have tiering of OpenTelemetry collectors even before the data goes into Kafka. 
+First, like the Kafka-like wall or queue, whatever you say, it is very helpful at scale and near the backend systems that deal with the observability data, right? So, if you have to handle scale like 100,000 spans per second or maybe up to a million spans per second from the observability data, it's perfectly fine to have tiering of [OpenTelemetry collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) even before the data goes into Kafka. 
 
 The tiering of collectors is very useful near the clients, right? So, OpenTelemetry has the advantage that it is very lightweight and can have some amount of data that is configurable in memory. Okay, so the nearer to the client is, the less scale it has to deal with, and it can keep things in memory for a short duration of time. 
 
 To provide robustness to this system, you need to have some failover mechanism. What if the remote OpenTelemetry collector it is communicating to, fails, or whatever the backend or the next tier of OpenTelemetry collector that it communicates is down for some time? How much of the telemetric data does the client OpenTelemetry collector have to keep in memory? 
 
-Right, so that is a very complex capacity planning you would have to do or use the default settings. Let's say my tier one OpenTelemetry collector, just wants to hold 10,000 spans overall. And if the downstream collector is down for a larger period of time, where does the client OpenTelemetry collector overflow the 10 spans, and the data is dropped? Right? So, like these things and like OpenTelemetry collector second tiers, first tiers, or even third tiers, they are very helpful when there are, I would say, flaky networks or edge devices where the network call might fail. A small amount of data or some buffer amount of data can be held in the OpenTelemetry collectors in memory. 
+Right, so that is a very complex capacity planning you would have to do or use the default settings. Let's say my tier one [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/), just wants to hold 10,000 spans overall. And if the downstream collector is down for a larger period of time, where does the client OpenTelemetry collector overflow the 10 spans, and the data is dropped? Right? So, like these things and like OpenTelemetry collector second tiers, first tiers, or even third tiers, they are very helpful when there are, I would say, flaky networks or edge devices where the network call might fail. A small amount of data or some buffer amount of data can be held in the OpenTelemetry collectors in memory. 
 
 The Kafka is like a huge bus. It can ingest a huge amount of data. The advantage is it provides durability. You can persist the data right directly to the disk. The OpenTelemetry collectors do not have a provision, and they have a buffer to keep things in memory. So, when things come to a scale, let's say you have 500 GB of data, right? 
 
@@ -115,7 +110,7 @@ If you have that collector very close to each of these services, then you're abl
 
 **NICA:** Awesome. So, let's dive into some specific Kafka configs to consider when we start talking about the options that we have. So, I talked a little bit about using multiple collectors, and a collector very close to the service, and saying, "Okay, there I could configure how I want it to handle my OpenTelemetry data." But you can also use Kafka is not completely neutral here, right? You can do config to it to modify how you're collecting data. Can you talk a little bit about that?
 
-**ANKIT:** Sure, yeah. So basically, there are a few angles. An example that is very relevant to our OpenTelemetry data, in general, would be if we need to enable tail-based sampling, what we can do is, like, the tail-based sampling needs all the traces under the same Trace ID to be present in the otel collector, in the same otel collector. That is a very big limitation that we had to deal with. 
+**ANKIT:** Sure, yeah. So basically, there are a few angles. An example that is very relevant to our OpenTelemetry data, in general, would be if we need to enable tail-based sampling, what we can do is, like, the tail-based sampling needs all the traces under the same [Trace ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/) to be present in the otel collector, in the same otel collector. That is a very big limitation that we had to deal with. 
 
 And there have been many architectures around it. But yeah, like if you can partition by Trace ID and write it to a topic, there can be multiple consumers who can read from the different partitions of a topic, and all those consumers can run in parallel with that Trace ID as the partition key. It helps a lot in managing the tailbase samples. 
 
@@ -135,15 +130,15 @@ Acknowledgments like fire and fogget, then wait for the leader to respond with a
 
 So the second one, like if just a leader responds that you have received the data, it should be fine. But this helps a lot in retries and reducing the time that Kafka receives the data. These are one and like always use compression. 
 
-**NICA:** I love that, and I think this is great advice for people. I wanted to step to kind of our last question that I had that I think is critical because we're taking up our full time here, which is just talking about this. This is sort of just sort of a footnote here is that the other thing you do, and also this is what you find folks when you try to Google like OpenTelemetry Kafka is you get a lot of answers about monitoring your Kafka queue with OpenTelemetry. So, just want to cover that very briefly, like talking about what is kind of the critical things that you should be monitoring when you're monitoring the health of your Kafka queue.
+**NICA:** I love that, and I think this is great advice for people. I wanted to step to kind of our last question that I had that I think is critical because we're taking up our full time here, which is just talking about this. This is sort of just sort of a footnote here is that the other thing you do, and also this is what you find folks when you try to Google like [OpenTelemetry Kafka](https://signoz.io/blog/maximizing-scalability-apache-kafka-and-opentelemetry/) is you get a lot of answers about monitoring your Kafka queue with OpenTelemetry. So, just want to cover that very briefly, like talking about what is kind of the critical things that you should be monitoring when you're monitoring the health of your Kafka queue.
 
 **ANKIT:** Kafka has a lot of metrics. It has brokers; it has producers; it has consumers. I would say like the useful stuff you can figure out like the heap memory and all these things. Apart from that, the few relevant things that you should monitor in Kafka are consumer lag. 
 
 That is very important. What is the offset that the producer is writing to, and how far is the consumer from reading that data? If that lag is increasing, then you should check into your consumer services as to why are they not able to process that amount of data or what is happening. That's number one. 
 
-You should check out if you're talking about the complete pipeline that the otel collector writes to Kafka, and if a otel collector is reading from Kafka, you must monitor how much data is being written to Kafka in each partition in each topic, how much data is being read by the consumers. Is the OpenTelemetry exporter failing to write data to Kafka? Is Kafka going through a rebalancing due to the consumer clients' numbers changing, which can change for a lot of reasons due to restarting of ports, scaling up, scaling down of the consumers, and all? So these are the few basic operational things you must monitor apart from the general health of the broker and the producers.
+You should check out if you're talking about the complete pipeline that the otel collector writes to Kafka, and if a otel collector is reading from Kafka, you must monitor how much data is being written to Kafka in each partition in each topic, how much data is being read by the consumers. Is the [OpenTelemetry exporter](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) failing to write data to Kafka? Is Kafka going through a rebalancing due to the consumer clients' numbers changing, which can change for a lot of reasons due to restarting of ports, scaling up, scaling down of the consumers, and all? So these are the few basic operational things you must monitor apart from the general health of the broker and the producers.
 
-**NICA:** Yeah, I think it's so critical because right Kafka is meant to be monitored and meant to be like an operational tool. So, of course, it generates a ton of signals, but you're so right that it's like if you look at the default importer for this stuff, right? You see like 30-plus different signals that show up. And, you know, when I start thinking about making a dashboard, it's something like SigNoz that have 30 different things being charted, and you ask someone, you say, "Hey, I think something's wrong with our Kafka queue. What's up?" And you're looking at 30 things. It starts to get pretty tough. 
+**NICA:** Yeah, I think it's so critical because right Kafka is meant to be monitored and meant to be like an operational tool. So, of course, it generates a ton of signals, but you're so right that it's like if you look at the default importer for this stuff, right? You see like 30-plus different signals that show up. And, you know, when I start thinking about making a dashboard, it's something like [SigNoz](https://signoz.io/docs/introduction/) that have 30 different things being charted, and you ask someone, you say, "Hey, I think something's wrong with our Kafka queue. What's up?" And you're looking at 30 things. It starts to get pretty tough. 
 
 So, yeah, you want to try to keep it to about four, right? That you say, "Hey, I need to see these top level; otherwise, we are healthy or we're not. And I'll fool with the time window or something to see if there's a pattern, but you know, you want to try to get this as a very ground-level thing about observability. 
 
@@ -163,7 +158,7 @@ SigNoz is part of your solution for observability and is especially effective. O
 
 So, I was like SigNoz, baby. I didn't know how to say SigNoz. I love it. One of our community members came in and said, hey, the thing you're describing is SigNoz. So, that was cool. 
 
-Anyway, we will be back next week with a new topic. I think we're going to dive deeper into the OpenTelemetry API, maybe we're going to do something. It's going to be so fun. But I'm not going to promise which topic is going to be. I'll get that listed later today. Thank you so much for joining, everybody. We will see you soon. Bye-bye.
+Anyway, we will be back next week with a new topic. I think we're going to dive deeper into the [OpenTelemetry API](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/), maybe we're going to do something. It's going to be so fun. But I'm not going to promise which topic is going to be. I'll get that listed later today. Thank you so much for joining, everybody. We will see you soon. Bye-bye.
 
 
 

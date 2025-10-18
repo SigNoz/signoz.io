@@ -20,7 +20,7 @@ By setting alerting rules, users can define precise thresholds for various metri
 
 ### Importance of Managing and Deleting Alerts
 
-While creating alerts is essential, managing and deleting them is equally important. Over time, some alerts may become irrelevant as infrastructure changes or thresholds adjust. Old or redundant alerts can lead to "alert fatigue," where users are overwhelmed with too many notifications, many of which may no longer be useful. Effectively managing and deleting outdated alerts keeps the alerting system streamlined and relevant, ensuring that notifications signal only the issues requiring immediate attention.
+While creating alerts is essential, managing and deleting them is equally important. Over time, some alerts may become irrelevant as infrastructure changes or thresholds adjust. Old or redundant alerts can lead to "[alert fatigue](https://signoz.io/blog/alert-fatigue/)," where users are overwhelmed with too many notifications, many of which may no longer be useful. Effectively managing and deleting outdated alerts keeps the alerting system streamlined and relevant, ensuring that notifications signal only the issues requiring immediate attention.
 
 ### Overview of Prometheus v2 Data Storage Structure
 
@@ -86,7 +86,7 @@ Deleting time series alerts in Prometheus requires careful execution to ensure a
 Before deleting alerts, you need to precisely identify which alerts you want to remove. Prometheus provides multiple ways to locate and verify alerts:
 
 - Using the Prometheus UI: Navigate to the Alerts page (typically at `/alerts`) in your Prometheus web interface. This provides a visual overview of all configured alerts and their current states.
-- Using PromQL Queries: You can use label matchers in PromQL to identify specific alerts. Label matchers let you precisely target alerts based on their labels, such as `alertname`, `severity`, or `instance`. To identify an alert in Prometheus, use a query with PromQL (Prometheus Query Language):
+- Using PromQL Queries: You can use label matchers in PromQL to identify specific alerts. Label matchers let you precisely target alerts based on their labels, such as `alertname`, `severity`, or `instance`. To identify an alert in Prometheus, use a query with PromQL ([Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/)):
     
     ```java
     # Query for a specific alert by name
@@ -150,7 +150,7 @@ ALERTS{alertname="InstanceDown"}
 
 <Figure src="/img/guides/2024/11/how-do-i-delete-a-time-series-from-prometheus-v2-specifically-a-series-of-alerts-Screenshot_2024-11-05_at_12.36.03_PM.webp" alt="No result for the query" caption="No result for the query" />
 
-If the deletion was successful, this query should return no results for the specified alert name. This confirms that the alert data has been removed from the Prometheus database. If the alert still appears in your query results, double-check the API request parameters and try executing the delete command again
+If the deletion was successful, this query should return no results for the specified alert name. This confirms that the alert data has been removed from the [Prometheus database](https://signoz.io/guides/which-database-is-used-in-prometheus/). If the alert still appears in your query results, double-check the API request parameters and try executing the delete command again
 
 ### Using the TSDB Admin API
 
@@ -266,11 +266,11 @@ For certain types of alerts, configuring time-based auto-expiration can help in 
 
 To effectively monitor your applications and systems, leveraging an advanced observability platform like [SigNoz](https://signoz.io/) can elevate your monitoring strategy. [SigNoz](https://signoz.io/) is an open-source observability tool that provides end-to-end monitoring, troubleshooting, and alerting capabilities across your entire application stack.
 
-Built on OpenTelemetry—the emerging industry standard for telemetry data—SigNoz integrates seamlessly with your existing Managed Prometheus setup. Using the OpenTelemetry Collector’s Prometheus receiver, SigNoz ingests Prometheus metrics and correlates them with distributed traces and logs, delivering a unified observability solution. This integration allows you to:
+Built on [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)—the emerging industry standard for telemetry data—SigNoz integrates seamlessly with your existing [Managed Prometheus](https://signoz.io/guides/managed-prometheus/) setup. Using the OpenTelemetry Collector’s [Prometheus receiver](https://signoz.io/blog/opentelemetry-collector-prometheus-receiver/), SigNoz ingests [Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/) and correlates them with [distributed traces](https://signoz.io/blog/distributed-tracing/) and logs, delivering a [unified observability](https://signoz.io/unified-observability/) solution. This integration allows you to:
 
 1. Enhanced Monitoring of Alert Deletions: Maintain your existing Prometheus setup while using SigNoz to monitor alert deletions specifically, tracking any changes or trends in alert configuration and understanding their impact on overall observability.
 2. Improved Root Cause Analysis: Correlate Prometheus metrics with traces and logs in SigNoz to pinpoint issues caused by alert deletions. This helps you quickly identify unintended consequences or performance issues following the removal of specific alerts.
-3. Detailed Analysis of Alerting Gaps: Utilize both PromQL and SigNoz’s advanced query builder to analyze potential gaps left by deleted alerts. This enables you to assess whether alert deletions may leave certain metrics unmonitored, ensuring coverage across your monitoring system.
+3. Detailed Analysis of Alerting Gaps: Utilize both PromQL and SigNoz’s advanced [query builder](https://signoz.io/blog/query-builder-v5/) to analyze potential gaps left by deleted alerts. This enables you to assess whether alert deletions may leave certain metrics unmonitored, ensuring coverage across your monitoring system.
 4. Centralized Dashboards for Alert Management: Create unified dashboards in SigNoz that display metrics, traces, and logs in real time, allowing you to oversee alert deletions alongside key performance indicators. This visibility helps you proactively monitor the effects of alert changes across your infrastructure.
 
 <Figure src="/img/guides/2024/11/how-do-i-delete-a-time-series-from-prometheus-v2-specifically-a-series-of-alerts-image.webp" alt="SigNoz Dashboard" caption="SigNoz Dashboard" />

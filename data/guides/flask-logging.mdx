@@ -355,7 +355,7 @@ Now, back to our `app.py` wherein we wanted to customize our web application’s
 
 ### Configure a Logger
 
-In the `Set up a simple logger` section we saw how when we accessed the `/info` route we did not see the info because by default Flask logger ignores messages with a log level lower than `WARNING` and one way, we can get around it is by overriding default configurations. 
+In the `Set up a simple logger` section we saw how when we accessed the `/info` route we did not see the info because by default [Flask logger](https://signoz.io/guides/flask-logging/#handler) ignores messages with a log level lower than `WARNING` and one way, we can get around it is by overriding default configurations. 
 
 To override default configurations, we can use `logging.config.dictConfig()` method to our existing code in `app.py` 
 
@@ -845,7 +845,7 @@ We use the `TimedRotatingFileHandler` from Python's `logging.handlers` module wh
 
 In Flask applications, structuring log messages also ensures that logs are not only human-readable but also machine-parseable, facilitating easier analysis and monitoring.
 
-While formatters provide a basic structure, structured logging goes further by logging data in a structured format like `JSON` or key-value pairs. We can enhance log readability and allows for easier parsing and analysis using log management tools.
+While formatters provide a basic structure, structured logging goes further by logging data in a structured format like `JSON` or key-value pairs. We can enhance log readability and allows for easier parsing and analysis using [log management tools](https://signoz.io/blog/open-source-log-management/).
 
 Before we can start logging with `structlog`, you must download the package with the following command as:
 
@@ -920,7 +920,7 @@ We configure `structlog` for handling log entries in `JSON` format by first sett
 - `TimeStamper`for adding a timestamp in `ISO` format.
 - `JSONRenderer` to format the log entry itself as `JSON`.
 
-Then we define `dict` as the `context_class` to ensure that log entries maintain a structured format using dictionaries for contextual information. `structlog.stdlib.LoggerFactory()` is used as the logger factory, ensuring compatibility with Python's standard logging mechanisms, and `structlog.stdlib.BoundLogger` is used as the wrapper class to enhance logger instances with additional functionalities. `cache_logger_on_first_use=True` is then enabled to optimize performance by caching loggers upon their initial use.
+Then we define `dict` as the `context_class` to ensure that log entries maintain a structured format using dictionaries for contextual information. `structlog.stdlib.LoggerFactory()` is used as the [logger factory](https://signoz.io/guides/loggerFactory-getLogger-cannot-be-resolved-to-a-type/), ensuring compatibility with Python's standard logging mechanisms, and `structlog.stdlib.BoundLogger` is used as the wrapper class to enhance logger instances with additional functionalities. `cache_logger_on_first_use=True` is then enabled to optimize performance by caching loggers upon their initial use.
 
 Access the `/` route using `flask run`
 
@@ -1028,7 +1028,7 @@ Learn more about different ways you can use to send logs to SigNoz [here](https:
 - A handler defines where and how log messages should be output. They are also responsible for storing, displaying as well as sending log records (messages) to specified destinations.
 - Multiple loggers are crucial in web applications for handling various types of messages and sending them to the right places. They help organize log entries based on their importance, which makes it easier to debug and monitor what's going on.
 - Web applications often require logs to contain specific information such as user IDs, request paths, session data, or custom tags. For this purpose, we require a custom formatter that can customize the formatting logic beyond the default capabilities, giving you more control over the log message format.
-- While formatters provide a basic structure, structured logging goes further by logging data in a structured format like `JSON` or key-value pairs using `structlog`
+- While formatters provide a basic structure, [structured logging](https://signoz.io/blog/structured-logs/) goes further by logging data in a structured format like `JSON` or key-value pairs using `structlog`
 
 ## FAQs
 

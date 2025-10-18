@@ -1,0 +1,326 @@
+---
+date: 2025-10-10
+id: nomad
+tags : [SigNoz Cloud, Self-Host]
+title: Monitor HashiCorp Nomad with SigNoz
+description: Learn how to collect and visualize metrics from HashiCorp Nomad using SigNoz.
+---
+
+HashiCorp Nomad is a flexible, enterprise-grade cluster scheduler. Monitoring Nomad is essential for ensuring the health and performance of your workloads. This guide shows you how to collect Nomad metrics and send them to SigNoz for visualization and alerting.
+
+## Prerequisites
+
+- A running [SigNoz](https://signoz.io/docs/install/) instance (self-hosted or cloud)
+- Access to your Nomad cluster
+
+## Step 1: Enable Nomad Metrics Endpoint
+
+Nomad exposes metrics via a [Prometheus-compatible endpoint](https://developer.hashicorp.com/nomad/docs/telemetry).  
+Ensure telemetry is enabled in your Nomad agent configuration:
+
+```hcl
+# On Nomad servers and clients
+telemetry {
+  # Expose Prometheus metrics
+  prometheus_metrics      = true
+
+  # Include allocation & runtime metrics (optional but recommended)
+  publish_allocation_metrics = true
+  publish_node_metrics       = true
+
+  # Adjust as needed
+  collection_interval = "15s"
+}
+```
+
+The full set of telemetry options (like `prometheus_metrics`, `publish_allocation_metrics`, and `collection_interval`) is documented in Nomad’s [telemetry configuration](https://developer.hashicorp.com/nomad/docs/configuration/telemetry). 
+
+For operational guidance on what to monitor and how to interpret key signals, see the [Nomad monitoring guide](https://developer.hashicorp.com/nomad/docs/monitor). Metric names and labels you’ll see in SigNoz are defined in the [Nomad metrics reference](https://developer.hashicorp.com/nomad/docs/reference/metrics).
+
+Once telemetry is enabled, Nomad exposes metrics in Prometheus format from the HTTP API at `/v1/metrics?format=prometheus` (default port `4646`). The Collector configuration below scrapes that endpoint.
+
+## Step 2: Deploy OpenTelemetry Collector on Nomad
+
+The following Nomad job runs the OpenTelemetry Collector and scrapes Nomad metrics. It then forwards metrics to SigNoz (Cloud or self-hosted). Replace the placeholders with your values.
+
+<Tabs>
+
+<TabItem value="cloud" label="SigNoz Cloud">
+```hcl
+variables {
+  # Pin to a tested Collector image
+  otel_image = "otel/opentelemetry-collector-contrib:0.109.0"
+}
+
+job "otel-collector" {
+  datacenters = ["dc1"]
+  type        = "service"
+
+  group "otel-collector" {
+    count = 1
+
+    network {
+      # Collector's own metrics (optional)
+      port "metrics" { to = 8888 }
+
+      # Ingestion ports (keep if you also want to receive traces/logs)
+      port "grpc"               { to = 4317 }
+      port "jaeger-grpc"        { to = 14250 }
+      port "jaeger-thrift-http" { to = 14268 }
+      port "zipkin"             { to = 9411 }
+      port "zpages"             { to = 55679 }
+    }
+
+    service {
+      name     = "otel-collector"
+      port     = "grpc"
+      tags     = ["grpc"]
+      provider = "nomad"
+    }
+
+    task "otel-collector" {
+      driver = "docker"
+
+      env {
+
+        SIGNOZ_ENDPOINT = "ingest.<YOUR_REGION>.signoz.cloud:443"
+        SIGNOZ_API_KEY  = "<SIGNOZ_INGESTION_KEY>"
+        SIGNOZ_INSECURE = "false"
+
+        # Used to form a default local scrape target; adjust as needed
+        NOMAD_NODE_IP = "${attr.unique.network.ip-address}"
+
+        # Optional: label your environment
+        DEPLOY_ENV = "nomad"
+      }
+
+      config {
+        image = var.otel_image
+        args = [
+          "--config=local/config/otel-collector-config.yaml",
+        ]
+        ports = ["metrics","grpc","jaeger-grpc","jaeger-thrift-http","zipkin","zpages"]
+      }
+
+      resources {
+        cpu    = 500
+        memory = 2048
+      }
+
+      template {
+        data = <<EOF
+receivers:
+  # Receive OTLP from apps (traces/logs/metrics) if you want
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+  # Scrape Nomad metrics (Prometheus format)
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "nomad"
+          metrics_path: /v1/metrics
+          params:
+            format: ["prometheus"]
+          scrape_interval: 15s
+          static_configs:
+            # Replace with your Nomad server/client endpoints resolvable from this task
+            - targets: ["$${env:NOMAD_NODE_IP}:4646"]
+              # Examples:
+              # - "nomad.service.consul:4646"
+              # - "nomad-server-1:4646"
+              # - "nomad-client-1:4646"
+
+processors:
+  batch:
+
+extensions:
+  zpages: {}
+
+exporters:
+  # ===== SigNoz (choose ONE of these based on your deployment) =====
+  otlp/signoz_cloud:
+    endpoint: "$${env:SIGNOZ_ENDPOINT}"
+    tls:
+      insecure: "$${env:SIGNOZ_INSECURE}"
+    headers:
+      # API key header required for SigNoz Cloud:
+      signoz-ingestion-key: "$${env:SIGNOZ_API_KEY}"
+
+service:
+  extensions: [zpages]
+  pipelines:
+    # Keep traces if you want to ingest traces from apps via OTLP
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/signoz_cloud]
+
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp/signoz_cloud]
+EOF
+        destination = "local/config/otel-collector-config.yaml"
+      }
+    }
+  }
+}
+```
+<Admonition>
+- Set your ingestion endpoint according to your SigNoz Cloud region. Refer to [the SigNoz Cloud ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) to find the correct endpoint for your deployment.
+- Replace `<SIGNOZ_INGESTION_KEY>` with the one provided by SigNoz.
+- If your Nomad API isn’t on `NOMAD_NODE_IP:4646` or not resolvable from the Collector task, replace the `static_configs.targets` with reachable addresses (or use Consul service discovery if available).
+- Ensure network ACLs allow the Collector to reach the Nomad HTTP API and SigNoz ingest endpoint.
+</Admonition>
+</TabItem>
+
+
+<TabItem value="self-host" label="SigNoz Self-Host">
+```hcl
+variables {
+  # Pin to a tested Collector image
+  otel_image = "otel/opentelemetry-collector-contrib:0.109.0"
+}
+
+job "otel-collector" {
+  datacenters = ["dc1"]
+  type        = "service"
+
+  group "otel-collector" {
+    count = 1
+
+    network {
+      # Collector's own metrics (optional)
+      port "metrics" { to = 8888 }
+
+      # Ingestion ports (keep if you also want to receive traces/logs)
+      port "grpc"               { to = 4317 }
+      port "jaeger-grpc"        { to = 14250 }
+      port "jaeger-thrift-http" { to = 14268 }
+      port "zipkin"             { to = 9411 }
+      port "zpages"             { to = 55679 }
+    }
+
+    service {
+      name     = "otel-collector"
+      port     = "grpc"
+      tags     = ["grpc"]
+      provider = "nomad"
+    }
+
+    task "otel-collector" {
+      driver = "docker"
+
+      env {
+        SIGNOZ_ENDPOINT = <YOUR_SIGNOZ_COLLECTOR_ENDPOINT
+        SIGNOZ_INSECURE = "false"
+
+        # Used to form a default local scrape target; adjust as needed
+        NOMAD_NODE_IP = "${attr.unique.network.ip-address}"
+
+        # Optional: label your environment
+        DEPLOY_ENV = "nomad"
+      }
+
+      config {
+        image = var.otel_image
+        args = [
+          "--config=local/config/otel-collector-config.yaml",
+        ]
+        ports = ["metrics","grpc","jaeger-grpc","jaeger-thrift-http","zipkin","zpages"]
+      }
+
+      resources {
+        cpu    = 500
+        memory = 2048
+      }
+
+      template {
+        data = <<EOF
+receivers:
+  # Receive OTLP from apps (traces/logs/metrics) if you want
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+  # Scrape Nomad metrics (Prometheus format)
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "nomad"
+          metrics_path: /v1/metrics
+          params:
+            format: ["prometheus"]
+          scrape_interval: 15s
+          static_configs:
+            # Replace with your Nomad server/client endpoints resolvable from this task
+            - targets: ["$${env:NOMAD_NODE_IP}:4646"]
+              # Examples:
+              # - "nomad.service.consul:4646"
+              # - "nomad-server-1:4646"
+              # - "nomad-client-1:4646"
+
+processors:
+  batch:
+
+extensions:
+  zpages: {}
+
+exporters:
+  # ===== SigNoz (choose ONE of these based on your deployment) =====
+  otlp/signoz_cloud:
+    endpoint: "$${env:SIGNOZ_ENDPOINT}"
+    tls:
+      insecure: "$${env:SIGNOZ_INSECURE}"
+
+service:
+  extensions: [zpages]
+  pipelines:
+    # Keep traces if you want to ingest traces from apps via OTLP
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/signoz_cloud]
+
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp/signoz_cloud]
+EOF
+        destination = "local/config/otel-collector-config.yaml"
+      }
+    }
+  }
+}
+```
+<Admonition>
+- If your Nomad API isn’t on `NOMAD_NODE_IP:4646` or not resolvable from the Collector task, replace the `static_configs.targets` with reachable addresses (or use Consul service discovery if available).
+- Ensure network ACLs allow the Collector to reach the Nomad HTTP API and SigNoz ingest endpoint.
+</Admonition>
+</TabItem>
+
+</Tabs>
+
+## Step 3: Run the job
+
+```bash
+nomad job run otel-collector.nomad.hcl
+```
+
+Verify the task is running:
+
+```bash
+nomad status otel-collector | cat
+```
+
+## Step 4: Validate data in SigNoz
+
+- Check the Collector’s logs for export success lines.
+- In SigNoz, open the Metrics section and search for Nomad-related metrics (for example, `nomad_runtime_*`, `nomad_client_*`, `nomad_raft_*`).
+- Optionally, build a dashboard using PromQL metrics from the Nomad exporter.
+
+If you also send application telemetry via OTLP to this Collector, you will see traces and logs in SigNoz as well.

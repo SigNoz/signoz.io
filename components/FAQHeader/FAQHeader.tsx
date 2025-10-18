@@ -1,9 +1,4 @@
-import { BackwardIcon } from '@heroicons/react/24/outline'
-import { ArrowBigLeftIcon, ArrowLeft, MoveLeft } from 'lucide-react'
-import Link from 'next/link'
 import * as React from 'react'
-import AuthorInfo from '../AuthorInfo'
-import { format, parseISO } from 'date-fns'
 
 interface TagProps {
   children: React.ReactNode

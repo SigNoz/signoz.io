@@ -50,7 +50,7 @@ Node.js apps come with their own set of performance risks:
 
 That’s where **proactive monitoring** steps in. It gives you visibility into potential bottlenecks before they spiral into full-blown outages.
 
-For instance, a fintech company once identified a creeping memory leak in its job queue system using proactive monitoring tools. Fixing it not only stopped their weekly crashes but also improved overall response times by 40%.
+For instance, a fintech company once identified a creeping memory leak in its job queue system using [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) tools. Fixing it not only stopped their weekly crashes but also improved overall response times by 40%.
 
 It’s not just about catching failures — proactive monitoring helps you build resilient, performant systems that stay healthy even under pressure.
 
@@ -96,7 +96,7 @@ Install the required OpenTelemetry libraries:
 npm install @opentelemetry/api @opentelemetry/sdk-metrics @opentelemetry/exporter-metrics-otlp-http
 ```
 
-Then configure the OpenTelemetry SDK to start collecting and exporting metrics:
+Then configure the [OpenTelemetry SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) to start collecting and exporting metrics:
 
 ```jsx
 import HostMetrics from '@opentelemetry/host-metrics';
@@ -112,7 +112,7 @@ hostMetricsCollector.start();
 const metricExporter = new OTLPMetricExporter({
   url: 'https://ingest.<region>.signoz.cloud/v1/metrics',
   headers: {
-    'signoz-access-token': 'YOUR_SIGNOZ_ACCESS_TOKEN',
+    'signoz-ingestion-key': 'SIGNOZ_INGESTION_KEY',
   },
 });
 
@@ -154,7 +154,7 @@ import {
 const exporter = new OTLPMetricExporter({
   url: 'https://ingest.in.signoz.cloud/v1/metrics',
   headers: {
-    'signoz-access-token': 'YOUR_SIGNOZ_ACCESS_TOKEN',
+    'signoz-ingestion-key': 'SIGNOZ_INGESTION_KEY',
   },
 });
 
@@ -197,7 +197,7 @@ setInterval(() => {
 
 ```
 
-After you’ve implemented the above OpenTelemetry setup in your Node.js application, your app will start sending custom metrics — like `custom_node_metric` — to SigNoz every 5 seconds.
+After you’ve implemented the above [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) setup in your Node.js application, your app will start sending custom metrics — like `custom_node_metric` — to SigNoz every 5 seconds.
 
 <Figure src="/img/blog/2025/06/nodejs-performance-monitoring-image.webp" alt="Custom metrics sent as seen in command terminal" caption="Custom metrics sent as seen in command terminal" />
 
@@ -238,7 +238,7 @@ This tells you how often your custom event occurred over the past 5 minutes. It 
 
 ### Custom Dashboards
 
-Once you’re comfortable viewing metrics through the query builder, you might want to build a custom dashboard to **visualize multiple metrics in one place**.
+Once you’re comfortable viewing metrics through the [query builder](https://signoz.io/blog/query-builder-v5/), you might want to build a custom dashboard to **visualize multiple metrics in one place**.
 
 You can add your custom metric widgets, combine them with other telemetry signals, and even **switch from time series to bar charts** for better comparative insights — useful for non-time-dependent visualizations like success vs. failure counts or region-wise breakdowns.
 
@@ -275,7 +275,7 @@ If you're running your app in production, combining system and app-level metrics
 
 As you implement monitoring, you may encounter these challenges:
 
-1. **Microservices complexity**: In distributed architectures, it’s tough to trace how a request flows across services. Accurate **context propagation** — especially across async calls and middleware — is key. Instrumenting core libraries like `express`, `http`, and `axios` ensures visibility into how requests move through your stack.
+1. **Microservices complexity**: In distributed architectures, it’s tough to trace how a request flows across services. Accurate **[context propagation](https://signoz.io/blog/opentelemetry-context-propagation/)** — especially across async calls and middleware — is key. Instrumenting core libraries like `express`, `http`, and `axios` ensures visibility into how requests move through your stack.
 2. **High-volume data**: Implement sampling and aggregation to manage large amounts of monitoring data. Consider **tail-based sampling** if you want to retain only traces that exhibit high latency or errors, instead of sampling blindly upfront.
 3. **Root cause analysis**: Link logs to traces and use **span attributes** to enrich your telemetry, making incident analysis faster and more precise.
 4. **Serverless monitoring**: Serverless functions introduce unique observability gaps due to short lifespans and cold starts. Adapt your monitoring strategy for serverless Node.js deployments, which have unique characteristics.
@@ -297,7 +297,7 @@ To get meaningful insights without overwhelming your system or team, it’s impo
 
 1. **SigNoz**: A full-stack observability tool with tracing, dashboards, and alerts; free to self-host but requires setup and maintenance.
 2. **Prometheus + Grafana**: Collects metrics with flexible dashboards and alerting; great for Kubernetes users but lacks tracing/logging by default.
-3. **Elastic APM**: Integrates with the ELK stack for tracing and monitoring; powerful for logging but can be complex and resource-intensive.
+3. **[Elastic APM](https://signoz.io/comparisons/opentelemetry-vs-elastic-apm/)**: Integrates with the ELK stack for tracing and monitoring; powerful for logging but can be complex and resource-intensive.
 4. **PM2**: A process manager with basic monitoring and log handling; easy to use but limited APM capabilities.
 
 ### Commercial

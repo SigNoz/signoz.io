@@ -7,6 +7,7 @@ import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
+import Chatbase from '@/components/Chatbase'
 
 export const dynamicParams = false
 export const dynamic = 'force-static'
@@ -43,13 +44,13 @@ export async function generateMetadata({
 
 export const generateStaticParams = async () => {
   const paths = allDocs
-  .filter((p) => p.slug !== 'introduction')
-  .map((p) => ({ slug: p.slug?.split('/') })) // Don't want to generate static params for introduction page
-  
+    .filter((p) => p.slug !== 'introduction')
+    .map((p) => ({ slug: p.slug?.split('/') })) // Don't want to generate static params for introduction page
+
   return paths
 }
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
   const post = allDocs.find((p) => p.slug === slug) as Doc
 
@@ -62,14 +63,17 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const { title, hide_table_of_contents } = mainContent
 
   return (
-    <div className="doc">
-      <DocContent
-  title={title}
-  post={post}
-  toc={toc}
-  hideTableOfContents={hide_table_of_contents || false}
-  editLink={`https://github.com/SigNoz/signoz-web/edit/main/data/docs/${slug}.mdx`}
-/>
-    </div>
+    <>
+      <div className="doc">
+        <DocContent
+          title={title}
+          post={post}
+          toc={toc}
+          hideTableOfContents={hide_table_of_contents || false}
+          editLink={`https://github.com/SigNoz/signoz-web/edit/main/data/docs/${slug}.mdx`}
+        />
+      </div>
+      <Chatbase disableFloatingMessages />
+    </>
   )
 }

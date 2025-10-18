@@ -157,7 +157,7 @@ Functions like `rate`, `irate`, and `increase` are commonly used with range vect
     This calculates the instantaneous rate of HTTP requests per second over the last 15 minutes based on the most recent counter increments.
     
 4. Use Filters or Labels (Optional):
-Prometheus metrics often come with labels that provide additional context, such as `method="POST"` or `status="200"`. You can use these labels to filter data within a range vector query to target specific data.
+[Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/) often come with labels that provide additional context, such as `method="POST"` or `status="200"`. You can use these labels to filter data within a range vector query to target specific data.
     
     ```
     rate(prometheus_http_requests_total{code="200"}[5m])
@@ -223,7 +223,7 @@ Sometimes, data may have delayed ingestion due to network issues or other factor
 
 ### Handling Missing or Incomplete Data Points
 
-Prometheus data may sometimes be incomplete due to collection delays, system issues, or network interruptions. Handling missing data points gracefully in range vector queries is important to ensure reliable results. Here are ways to handle these situations:
+[Prometheus data](https://signoz.io/guides/how-does-grafana-get-data-from-prometheus/) may sometimes be incomplete due to collection delays, system issues, or network interruptions. Handling missing data points gracefully in range vector queries is important to ensure reliable results. Here are ways to handle these situations:
 
 1. Using Functions to Handle Missing Data:
 Prometheus functions such as `rate`, `irate`, and `increase` are generally resilient to missing data points because they calculate rates and totals based on available data. However, if you have a specific need to handle missing data, the `present_over_time` function can be useful:
@@ -455,13 +455,13 @@ Choose from the environment options that match your setup. Since I'm running thi
     <Figure src="/img/guides/2024/11/generating-range-vectors-from-return-values-in-prometheus-queries-Screenshot_2024-11-08_at_23.23.47.webp" alt="SigNoz Env Details" caption="SigNoz Env Details" />
     
 4. Using OpenTelemtry SDK or Collector to send data to SigNoz :
-To send data to SigNoz, we will use the OpenTelemetry Collector. The OpenTelemetry Collector is a vendor-agnostic service that receives, processes, and exports telemetry data (metrics, logs, and traces) from various sources to various destinations. 
+To send data to SigNoz, we will use the [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) Collector. The OpenTelemetry Collector is a vendor-agnostic service that receives, processes, and exports telemetry data (metrics, logs, and traces) from various sources to various destinations. 
 For more details, visit [OpenTelemetry Collector Guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/).
     
     <Figure src="/img/guides/2024/11/generating-range-vectors-from-return-values-in-prometheus-queries-Screenshot_2024-08-05_at_11.43.33_AM.webp" alt="Select the method using to send data to SigNoz OTEL SDK or OTEL Collector to send data." caption="Select the method using to send data to SigNoz OTEL SDK or OTEL Collector to send data." />
     
 5. Start Your Application with SigNoz
-To begin sending telemetry data from your application to SigNoz, use the following command to start your app. This command specifies key configuration details like the service name, access token, and the endpoint for the OpenTelemetry collector.
+To begin sending telemetry data from your application to SigNoz, use the following command to start your app. This command specifies key configuration details like the service name, access token, and the endpoint for the [OpenTelemetry collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/).
     
     ```bash
     SERVICE_NAME=goApp 
@@ -476,7 +476,7 @@ From this tab, you can monitor your app's performance metrics, including latency
     
     <Figure src="/img/guides/2024/11/generating-range-vectors-from-return-values-in-prometheus-queries-Screenshot_2024-11-09_at_00.29.59.webp" alt="SigNoz Services tab" caption="SigNoz Services tab" />
     
-7. Use Range Vector Queries to Analyze Metrics:
+7. Use Range Vector Queries to [Analyze Metrics](https://signoz.io/blog/metrics-explorer/):
 Navigate to the Traces section via the sidebar menu in the SigNoz dashboard. In the Search Filter section, input the necessary query expressions. This allows you to filter and analyze specific metrics.
     
     <Figure src="/img/guides/2024/11/generating-range-vectors-from-return-values-in-prometheus-queries-735d3ae6-eb7a-472b-aea6-cd5776bc6277.webp" alt="Navigate to Traces to use the Search Filter" caption="Navigate to Traces to use the Search Filter" />
@@ -507,7 +507,7 @@ Working with range vector queries in Prometheus can sometimes lead to unexpected
     - Solution:
         - Ensure the time range in your query matches your data retention settings. Prometheus retains data for a specified duration, so if you query outside that range, you’ll get no results.
         - Verify that the metric exists during the specified period. Use a simple `up` query to confirm that Prometheus was scraping data from the relevant target at that time.
-2. High Cardinality
+2. [High Cardinality](https://signoz.io/blog/high-cardinality-data/)
     - Problem: High cardinality in queries, especially when grouping by labels with many unique values (like `user_id`), can slow down queries and increase memory usage.
     - Solution:
         - Group by labels with fewer unique values. For example, instead of grouping by `user_id`, consider using `user_category` or another higher-level grouping.

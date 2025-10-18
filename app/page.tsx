@@ -11,9 +11,6 @@ import { GetStarted } from '@/components/GetStarted'
 import { NextUIProvider } from '@nextui-org/react'
 import { Metadata } from 'next'
 import Chatbase from '@/components/Chatbase'
-import { evaluateFeatureFlag } from '@/utils/growthbookServer'
-import { EXPERIMENTS } from '@/constants/experiments'
-import { ExperimentTracker } from '@/components/ExperimentTracker'
 
 export const metadata: Metadata = {
   title: 'SigNoz | The Open Source Datadog Alternative',
@@ -26,18 +23,7 @@ export const metadata: Metadata = {
     'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
 }
 
-export default async function Page() {
-  // Check if the chatbase bubble experiment is enabled
-  const isChatbaseBubbleVariant = await evaluateFeatureFlag(
-    EXPERIMENTS.CHATBASE_BUBBLE?.flagName || 'chatbase-bubble-experiment'
-  )
-
-  // Safety check for experiment configuration
-  const chatbaseExperiment = EXPERIMENTS.CHATBASE_BUBBLE
-  const experimentId = chatbaseExperiment?.id || 'chatbase-bubble-experiment'
-  const variantId = chatbaseExperiment?.variants?.VARIANT || 'with-chatbase-bubble'
-  const controlId = chatbaseExperiment?.variants?.CONTROL || 'no-chatbase-bubble'
-
+export default function Page() {
   return (
     <NextUIProvider>
       <div className="relative mt-[-56px] bg-signoz_ink-500 ">
@@ -54,15 +40,7 @@ export default async function Page() {
           <Testimonials page="homepage" />
           <GetStarted page="homepage" />
         </main>
-        {isChatbaseBubbleVariant ? (
-          <ExperimentTracker experimentId={experimentId} variantId={variantId}>
-            <Chatbase />
-          </ExperimentTracker>
-        ) : (
-          <ExperimentTracker experimentId={experimentId} variantId={controlId}>
-            <></>
-          </ExperimentTracker>
-        )}
+        <Chatbase />
       </div>
     </NextUIProvider>
   )

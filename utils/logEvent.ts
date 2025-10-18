@@ -12,9 +12,37 @@ export type LogEventPayload = {
   timestamp?: string
 }
 
-export const logEvent = async (payload: LogEventPayload) => {
+type LogEventOptions = {
+  queryParams?: Record<string, string>
+}
+
+const buildQueryString = (queryParams?: Record<string, string>) => {
+  if (!queryParams) return ''
+
+  const sanitized = Object.entries(queryParams).reduce<Record<string, string>>((acc, [key, value]) => {
+    if (typeof value === 'string' && value.trim() !== '') {
+      acc[key] = value
+    }
+    return acc
+  }, {})
+
+  const searchParams = new URLSearchParams(sanitized)
+  const serialized = searchParams.toString()
+  return serialized ? `?${serialized}` : ''
+}
+
+export const logEvent = async (payload: LogEventPayload, options?: LogEventOptions) => {
+  const endpoint = process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
+
+  if (!endpoint) {
+    console.warn('No tunnel endpoint configured for client-side logging')
+    return
+  }
+
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT}/log`, {
+    const queryString = buildQueryString(options?.queryParams)
+
+    await fetch(`${endpoint}/log${queryString}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -28,7 +56,11 @@ export const logEvent = async (payload: LogEventPayload) => {
 }
 
 // Server-side compatible logging function
-export const logEventServerSide = async (payload: LogEventPayload, tunnelEndpoint?: string) => {
+export const logEventServerSide = async (
+  payload: LogEventPayload,
+  tunnelEndpoint?: string,
+  options?: LogEventOptions
+) => {
   try {
     const endpoint = tunnelEndpoint || process.env.NEXT_PUBLIC_TUNNEL_ENDPOINT
     if (!endpoint) {
@@ -36,7 +68,9 @@ export const logEventServerSide = async (payload: LogEventPayload, tunnelEndpoin
       return
     }
 
-    await fetch(`${endpoint}/log`, {
+    const queryString = buildQueryString(options?.queryParams)
+
+    await fetch(`${endpoint}/log${queryString}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

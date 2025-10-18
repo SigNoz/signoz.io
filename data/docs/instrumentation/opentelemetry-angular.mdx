@@ -1,17 +1,11 @@
 ---
 date: 2024-06-06
 id: angular
+tags : [SigNoz Cloud, Self-Host]
 title: Angular OpenTelemetry Instrumentation
 description: Instrument your angular frontend app with OpenTelemetry and send data to SigNoz
 hide_table_of_contents: true
 ---
-
-
-
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
-
-{/* ![Angular Instrumentation](/img/angular-instrumentation.webp) */}
-
 
 {/* This document contains instructions on how to set up OpenTelemetry instrumentation in your Angular applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Angular application. */}
 
@@ -90,7 +84,7 @@ const sdk = new opentelemetry.NodeSDK({
     // optional - default url is http://localhost:4318/v1/traces
     url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // url is optional and can be omitted 
       headers: {
-        "signoz-access-token": "<your-ingestion-key>"
+        "signoz-ingestion-key": "<your-ingestion-key>"
       } // an optional object containing custom headers to be sent with each request
   }),
   instrumentations: [getNodeAutoInstrumentations()],
@@ -153,7 +147,7 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
@@ -478,7 +472,7 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
@@ -632,7 +626,7 @@ const sdk = new opentelemetry.NodeSDK({
     // optional - default url is http://localhost:4318/v1/traces
     url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // url is optional and can be omitted 
       headers: {
-        "signoz-access-token": "<your-ingestion-key>"
+        "signoz-ingestion-key": "<your-ingestion-key>"
       } // an optional object containing custom headers to be sent with each request
   }),
   instrumentations: [getNodeAutoInstrumentations()],
@@ -697,7 +691,7 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 $env:OTEL_TRACES_EXPORTER="otlp"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 $env:OTEL_SERVICE_NAME="<service_name>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"

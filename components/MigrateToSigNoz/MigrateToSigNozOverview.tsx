@@ -5,6 +5,7 @@ import {
   SiElastic,
   SiDatadog,
   SiNewrelic,
+  SiOpentelemetry,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -41,6 +42,12 @@ const MigrateVendorsData: IconCardData[] = [
     clickName: 'Migrate from New Relic',
   },
   {
+    name: 'Migrate from OpenTelemetry',
+    href: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
+    icon: <SiOpentelemetry className="h-7 w-7 text-blue-500" />,
+    clickName: 'Migrate from OpenTelemetry',
+  },
+  {
     name: 'Migrate from Self-Hosted SigNoz',
     href: '/docs/migration/migrate-to-signoz-cloud/',
     icon: (
@@ -66,4 +73,3 @@ export default function MigrateToSigNoz() {
     />
   )
 }
-

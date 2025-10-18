@@ -1,0 +1,642 @@
+---
+date: 2025-10-08
+id: otel-collector-config
+title: OpenTelemetry Collector Configuration
+tags: [SigNoz Cloud, Self-Host]
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+The OpenTelemetry (OTel) Collector is a vendor-agnostic telemetry data pipeline that receives, processes, and exports traces, metrics and logs. This guide helps you understand the various concepts of OTel Collector and helps you configure it.
+
+## What is OpenTelemetry Collector?
+
+The OpenTelemetry Collector acts as a central hub or agent for telemetry data with three key capabilities:
+
+- **Receive:** Telemetry data in multiple formats (OTLP, Jaeger, Prometheus, Zipkin, etc.)
+- **Process:** Data through transformation, filtering
+- **Export:** To one or more observability backends
+
+## OTel Collector Configuration Structure
+
+The collector uses a YAML configuration file with 5 main components:
+
+1. [Receivers](#1-receivers) - Defines how data enters the collector
+2. [Processors](#2-processors) - Transforms and filters data
+3. [Exporters](#3-exporters) - Send data to backends
+4. [Extensions](#4-extensions) - Offer additional capabilities
+5. [Service](#5-service) - Connect components with pipelines
+
+### Basic Configuration Example
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: otelcol:4317
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+## Core Components
+
+### 1. Receivers
+
+Receivers define how telemetry data enters the OTel Collector. Receivers can collect telemetry data from one or more sources and they can be pull or push based. Each receiver listens on a network endpoint, or scrapes metrics from targets.
+
+#### OTLP Receiver
+
+The native OpenTelemetry protocol receiver which supports both gRCP and HTTP.
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: '0.0.0.0:4317'
+      http:
+        endpoint: '0.0.0.0:4318'
+```
+
+#### Prometheus Receiver
+
+This receiver scrapes metrics from endpoints which are Prometheus compatible. This is a **pull** based receiver, it actively scrapes metrics from targets instead of listening for incoming data.
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'node-exporter'
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['localhost:9100']
+```
+
+#### Jaeger Receiver
+
+This receiver accepts traces in Jaeger formats (Thrift, gRPC, HTTP).
+
+```yaml
+receivers:
+  jaeger:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14250
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+```
+
+#### Zipkin Receiver
+
+This receiver accepts trace data in Zipkin format.
+
+```yaml
+receivers:
+  zipkin:
+    endpoint: 0.0.0.0:9411
+```
+
+<Admonition>
+  A full list of receivers can be obtained from
+  [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver)
+  and
+  [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver).
+</Admonition>
+
+### 2. Processors
+
+Processors are used to transform, filter, or enrich telemetry data between receivers and exporters.
+
+#### Batch Processor
+
+This processor batches telemetry data to reduce network overhead and improve throughput.
+
+```yaml
+processors:
+  batch:
+    timeout: 10s # Max time before sending batch
+    send_batch_size: 1024 # Send when batch reaches this size
+    send_batch_max_size: 2048 # Maximum batch size limit
+```
+
+#### Memory Limiter
+
+This processor prevents out-of-memory (OOM) errors by continuously checking and limiting the memory usage of the collector.
+
+```yaml
+processors:
+  memory_limiter:
+    check_interval: 5s # How often to check memory
+    limit_mib: 4000 # Hard memory limit
+    spike_limit_mib: 800 # Additional headroom for spikes
+```
+
+#### Resource Processor
+
+Resource attributes provide additional contextual information about the source of the telemetry data, such as service name, environment, hostname, and deployment details. These attributes enable better filtering, grouping, and correlation of telemetry data in SigNoz.
+
+The [resource](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourceprocessor/README.md) processor adds, updates or removes resource attributes on telemetry data.
+
+```yaml
+processors:
+  resource:
+    attributes:
+      - key: environment
+        value: production
+        action: upsert # Always set environment=production
+      - key: team
+        value: backend
+        action: insert # Only add if not already present
+      - key: internal.debug
+        action: delete # Remove this attribute
+      - key: user.id
+        action: hash # Hash PII data
+```
+
+For more examples on using resource attributes, refer to the docs [here](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-processor).
+
+#### Attributes Processor
+
+Attributes provide additional metadata, or context within telemetry data, such as HTTP status code, HTTP URL, log level.
+
+The [attributes](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/attributesprocessor/README.md) processor modifies span, log, or metric attributes in telemetry data.
+
+```yaml
+processors:
+  attributes:
+    actions:
+      - key: http.url
+        action: delete # Remove sensitive URLs
+      - key: db.statement
+        action: hash # Hash SQL queries
+```
+
+#### Filter Processor
+
+The [filter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md) processor drops telemetry data based on custom conditions. This is useful for reducing noise, excluding irrelevant data, which can help to significantly reduce storage and optimize billing.
+
+```yaml
+processors:
+  filter:
+    error_mode: ignore
+    traces:
+      span:
+        - attributes["http.status_code"] == 200 # Drop successful health checks
+        - attributes["http.request.method"] == nil # Drop non-HTTP spans
+
+    metrics:
+      metric:
+        # Drop metrics related to the /health endpoint
+        - 'name == "http.server.duration" and attributes["http.route"] == "/health"'
+
+    logs:
+      log_record:
+        # Drop log entries containing passwords
+        - 'IsMatch(body, ".*password.*")'
+```
+
+For more examples on dropping data, you can check guides for dropping [logs](https://signoz.io/docs/logs-management/guides/drop-logs/), [metrics](https://signoz.io/docs/userguide/drop-metrics/) and [traces](https://signoz.io/docs/traces-management/guides/drop-spans/#filter-processor).
+
+#### Transform Processor
+
+The [transform](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md) processor modifies the telemetry data using [OpenTelemetry Transformation Language](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl) (OTTL). This is especially useful for scenarios such as:
+
+- **Scrubbing sensitive data** (example includes PII data, passwords)
+- **Redacting secrets** (example includes API tokens, authorization headers)
+- **Standardizing attribute names or values**
+
+```yaml
+processors:
+  transform:
+    error_mode: ignore
+    trace_statements:
+      # Redact IP address
+      - replace_pattern(span.attributes["client.address"], "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}", "*.*.*.*")
+
+      # Redact password
+      - replace_pattern(span.attributes["process.command_line"], "password\\=[^\\s]*(\\s?)", "password=***")
+    metric_statements:
+      # Rename a metric
+      - set(metric.name, "http.server.duration") where metric.name == "http.server.requests.duration"
+
+      # Convert sum to gauge metric type
+      - convert_sum_to_gauge() where metric.name == "system.processes.count"
+    log_statements:
+      # Redact Authorization header
+      - delete_key(log.attributes, "http.request.header.authorization")
+
+      # Mark log severity as FAIL for specific message
+      - set(log.severity_text, "FAIL") where log.body == "request failed"
+```
+
+For more examples, you can check guides for scrubbing PII in [logs](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) and [traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/).
+
+<Admonition>
+  A full list of processors can be obtained from
+  [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor)
+  and
+  [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor).
+</Admonition>
+
+#### Resource Detection Processor
+
+The [resource detection processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md) is used to collect resource information about the host environment. It can automatically detect attributes like hostname, OS information, cloud provider information (AWS, GCP, Azure, etc.), and Kubernetes metadata:
+
+```yaml
+processors:
+  resourcedetection:
+    detectors: [env, host, system, docker, k8snode]
+    system:
+      hostname_sources: ['os']
+    timeout: 5s
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+This is just one example of using resource detection processor which automatically adds resource attributes from the environment, host system, Docker containers, and Kubernetes nodes in traces, logs, and metrics. The complete list of supported detectors can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md#supported-detectors).
+
+The `timeout` defines how long the processor waits for detection to complete. Check [this](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor) guide for setting resource attributes in logs.
+
+### 3. Exporters
+
+Exporters send processed telemetry data to observability backends. You can configure multiple exporters to send data to various backends.
+
+#### OTLP gRPC Exporter
+
+Exports data via gRPC using OpenTelemetry protocol.
+
+```yaml
+exporters:
+  otlp:
+    endpoint: 'ingest.<region>.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '<your-ingestion-key>'
+```
+
+#### OTLP/HTTP Exporter
+
+Exports data via HTTP using OpenTelemetry protocol.
+
+```yaml
+exporters:
+  otlphttp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '<your-ingestion-key>'
+```
+
+#### Debug Exporter
+
+Logs telemetry data to console for debugging purposes.
+
+```yaml
+exporters:
+  debug:
+    verbosity: detailed
+```
+
+#### Prometheus Exporter
+
+Exposes metrics in Prometheus format which can be scraped at configured endpoints.
+
+```yaml
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    namespace: otel
+```
+
+<Admonition>
+  A full list of exporters can be obtained from
+  [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter)
+  and
+  [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter).
+</Admonition>
+
+### 4. Extensions
+
+Extensions are additional components which add capabilities to the collector without directly processing telemetry data.
+
+#### Health Check Extension
+
+The [health_check](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/healthcheckextension/README.md) extension provides an HTTP endpoint that can be probed to see the status of the collector. This extension can be used as a liveness and/or readiness probe on Kubernetes.
+
+```yaml
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+    path: /health
+```
+
+#### Performance Profiler Extension
+
+The [pprof](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/pprofextension/README.md) extension enables performance profiling of the OTel Collector using Go's build-in [pprof](https://pkg.go.dev/net/http/pprof) tools. This is useful for debugging performance issues such as high CPU or memory usage, goroutine leaks.
+
+```yaml
+extensions:
+  pprof:
+    endpoint: 0.0.0.0:1777
+```
+
+#### zPages Extension
+
+The [zPages](https://github.com/open-telemetry/opentelemetry-collector/blob/main/extension/zpagesextension/README.md) extension provides live debugging pages that has real-time information about the collector's internal state including traces and pipeline activity. This is useful for:
+
+- Verifying telemetry data flow
+- Monitoring span activity
+- Diagnosing dropped data
+
+```yaml
+extensions:
+  zpages:
+    endpoint: 0.0.0.0:55679
+```
+
+Once enabled, you can access the extension pages at:
+
+- `http://localhost:55679/debug/tracez`
+- `/debug/pipelinez`
+
+<Admonition>
+  A full list of extensions can be obtained from
+  [opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension)
+  and
+  [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension).
+</Admonition>
+
+### 5. Service
+
+The `service` section in OTel Collector configuration defines the overall flow for how telemetry data is processed, which extensions to enable and how different pipelines are connected with each other.
+
+#### Understanding Pipelines
+
+A pipeline is a directed path that telemetry data follows through the collector. Each pipeline consists of:
+
+1. [Receivers](#1-receivers) - Where data enters
+2. [Processors](#2-processors) - How data is transformed (applied in order)
+3. [Exporters](#3-exporters) - Where data exits
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/opentelemetry-collector-service.svg"
+    alt="Receivers → Processors → Exporters"
+  />
+  <figcaption>
+    <i>OpenTelemetry Collector: Receivers → Processors → Exporters → SigNoz Cloud</i>
+  </figcaption>
+</figure>
+
+#### Pipeline Types
+
+- traces - Distributed tracing data (spans)
+- metrics - Time-series measurements and gauges
+- logs - Log entries and events
+
+Each pipeline type processes data independently, which allows us to configure different handling for traces, metrics and logs.
+
+#### Configuration Structure
+
+```yaml
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp, debug]
+
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [otlp, debug, prometheus]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp, debug]
+```
+
+<Admonition>
+  The order of few components defined in service configuration section matters and is explained
+  below.
+</Admonition>
+
+## The Order of Components in Service Section
+
+### 1. Order of Processors
+
+Processors execute in the exact order you specify them in the configuration. This order directly impacts data transformation and manipulation. Recommended processor ordering:
+
+```yaml
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors:
+        - memory_limiter # 1st: Protect against OOM
+        - attributes # 2nd: Enrich/modify attributes
+        - filter # 3rd: Drop unwanted data early
+        - transform # 4th: Complex transformations
+        - resource # 5th: Add resource context
+        - batch # 6th: Batch for efficiency (should be last)
+      exporters: [otlp, debug]
+```
+
+#### Why the order matters for processors
+
+- **memory_limiter first**: Prevents out-of-memory (OOM) errors early
+- **filtering early**: Removes unnecessary data before any processing or transformation
+- **batch last**: Ensures all processing is done before batching telemetry data for export
+
+### 2. Order of Receivers
+
+The order of receivers listed in the configuration array does not affect data processing. As all receivers run in parallel, their placement in the list does not affect behavior or performance.
+
+### 3. Order of Exporters
+
+Similarly, exporters work independently and in parallel. The order in which exporters are defined has no effect on how data is exported.
+
+## Other Options
+
+### Environment Variables
+
+The OpenTelemetry Collector supports environment variables within its YAML configuration file. This keeps sensitive information (like API tokens) out of the configuration file and allows you to manage configuration dynamically.
+
+To use an environment variable, reference it in your YAML configuration file using `${ENV_NAME}` syntax.
+
+#### Example
+
+Set the SigNoz region and ingestion key dynamically using the `SIGNOZ_REGION` and `SIGNOZ_INGESTION_KEY` environment variables.
+
+```bash
+export SIGNOZ_REGION="us"
+export SIGNOZ_INGESTION_KEY="your-ingestion-key"
+```
+
+Then reference these environment variables in `otel-collector-config.yaml`:
+
+```yaml
+exporters:
+  otlp:
+    endpoint: 'ingest.${SIGNOZ_REGION}.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '${SIGNOZ_INGESTION_KEY}'
+```
+
+## Best Practices
+
+#### Place memory_limiter at the beginning
+
+To prevent out-of-memory (OOM) crashes, configure the [`memory_limiter`](#memory-limiter) as the first processor. It monitors memory usage of the collector and makes sure the memory usage stays within safe limits.
+
+#### Use the batch processor
+
+Always include the [`batch`](#batch-processor) processor to group and buffer telemetry data before export. This reduces the number of export requests, improves the throughput.
+
+The batch processor should be placed at the end of the processor list, just before the exporters. This ensures that all the transformations and filtering are in place before batching.
+
+#### Filtering early
+
+Drop unwanted telemetry (low severity logs, health checks endpoints, unwanted spans, etc.) as early as possible in the pipeline by using [filters](#filter-processor).
+
+#### Redaction / obfuscation
+
+Scrub sensitive attributes (PII etc.) before exporting telemetry data. Use [filters](#filter-processor) or [transform](#transform-processor) processors to redact the sensitive data.
+
+#### Secure configuration storage
+
+Don't hardcode secrets such as API keys, ingestion keys in plain config file, use environment variables to dynamically set these values in OTel Collector configuration file.
+
+#### Minimize components
+
+Only enable receivers, processors, exporters and extensions, you actually need. Fewer components mean smooth functioning of the collector.
+
+#### Use encrypted endpoints (TLS) wherever possible
+
+Use TLS enabled HTTP endpoints for receivers/exporters. Don't leave endpoints open as `0.0.0.0` unless absolutely necessary.
+
+See the [OpenTelemetry Security Best Practices](https://opentelemetry.io/docs/security/config-best-practices/#use-encryption-and-authentication) for more details.
+
+#### Bind to specific interface
+
+For internal use or local testing, always bind the collector to a specific interface such as `localhost` (loopback interface) rather than listening on all interfaces.
+
+This prevents unintended external access to the OTel Collector telemetry ingestion endpoints (OTLP for example), which could otherwise be accessible externally from other devices on the same network. By restricting the collector to `localhost` we make sure only the applications running on the host server are able to access the OTel Collector.
+
+See the [OpenTelemetry Security Best Practices](https://opentelemetry.io/docs/security/config-best-practices/#protect-against-denial-of-service-attacks) for more information on minimizing the exposure of OTel Collector endpoints.
+
+#### Set timeouts and retries
+
+Set appropriate **timeouts** and **retry policies** so that the collector doesn't get blocked or accumulate data indefinitely when downstream systems are slow or temporarily unavailable.
+
+You can configure these settings under the `sending_queue` and `retry_on_failure` options for each exporter. For example:
+
+```yaml
+exporters:
+  otlp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    compression: gzip
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 5000
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
+    timeout: 15s
+```
+
+- `timeout`: maximum time to wait for a single request before aborting
+- `retry_on_failure`: defines retry policy for failed requests
+- `sending_queue`: enables buffering of data when the exporter backend is temporarily unavailable
+
+This configuration prevents the collector from blocking, ensures it retries for failed requests, and helps avoid excessive memory usage under heavy loads. Check out [exporter configuration](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/exporterhelper/README.md#configuration) for more configuration options.
+
+#### Use compression
+
+Wherever possible, use compression in exporters to reduce network bandwidth and improve efficiency, especially while exporting large traces, logs or metrics.
+
+```yaml
+exporters:
+  otlp:
+    endpoint: 'https://ingest.<region>.signoz.cloud:443'
+    compression: gzip
+```
+
+This setting compresses telemetry data before sending it over the network to the backends.
+
+Check [this](https://github.com/open-telemetry/opentelemetry-collector/blob/main/config/configgrpc/README.md#compression-comparison) list for detailed comparison of different compression techniques.
+
+#### Monitor collector health
+
+Use [`health_check`](#health-check-extension) extension to monitor the health of the collector. It exposes `/health` HTTP endpoint which can be probed to check the collector's status. It can be used as a liveness and/or readiness probe on Kubernetes.
+
+#### Validate configuration before deployment
+
+Before deploying the collector, validate the configuration with the `--dry-run` flag. This allows you misconfigurations or issues with the config without starting the collector.
+
+```bash
+otelcol --config ./otel-collector-config.yaml --dry-run
+
+# Or if you are using OTel Collector Contrib
+otelcol-contrib --config ./otel-collector-config.yaml --dry-run
+```
+
+## Get Help
+
+<GetHelp />

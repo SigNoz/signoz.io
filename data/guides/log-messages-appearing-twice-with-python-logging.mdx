@@ -107,7 +107,7 @@ Before diving into detailed solutions, here's a quick checklist to address commo
     ```
     
 2. Change `logger.propagate` settings for loggers: 
-    1. Centralized logging with `logger.propagate=true` : If you have several loggers in your application, each with its own handler, it can lead to duplicate log messages in your output. This can be solved by attaching a single handler to the root logger and letting log messages propagate up to it. This approach consolidates logging and prevents duplication.
+    1. [Centralized logging](https://signoz.io/blog/centralized-logging/) with `logger.propagate=true` : If you have several loggers in your application, each with its own handler, it can lead to duplicate log messages in your output. This can be solved by attaching a single handler to the root logger and letting log messages propagate up to it. This approach consolidates logging and prevents duplication.
     2. Isolated logger handling with `logger.propagate=false` : If you have a custom logger for a specific module with its own handler to isolate that component in your application, enabling propagation `propagate = True` could lead to duplicate log entries. This happens because the custom logger’s handler processes the log messages, and the same messages are then propagated to the root logger’s handler, resulting in redundancy. To avoid this duplication, you should set `propagate = False` on the custom logger, ensuring that its log messages are not forwarded to the root logger and preventing multiple outputs of the same log entry.
 
     
@@ -624,13 +624,13 @@ logging.getLogger('suspected_logger').disabled = True
     
     This method allows you to control which loggers are active and helps determine if disabling certain loggers resolves the duplication problem.
     
-2. Use log analysis tools: Tools like <a href="https://pypi.org/project/log-analyzer/" rel="noopener noreferrer nofollow" target="_blank">log_analyzer</a> can help identify patterns in your logs. These tools can help you detect patterns, anomalies, or redundancy in your log messages. They often provide features like filtering, sorting, and visualizing log data to make it easier to spot issues
+2. Use [log analysis tools](https://signoz.io/comparisons/log-analysis-tools/): Tools like <a href="https://pypi.org/project/log-analyzer/" rel="noopener noreferrer nofollow" target="_blank">log_analyzer</a> can help identify patterns in your logs. These tools can help you detect patterns, anomalies, or redundancy in your log messages. They often provide features like filtering, sorting, and visualizing log data to make it easier to spot issues
 
 ## Enhancing Logging with SigNoz for Distributed Systems
 
 For complex, distributed applications, consider using advanced observability tools like SigNoz. SigNoz offers:
 
-- Distributed tracing to correlate logs across services. By correlating logs with traces, you can see the end-to-end journey of requests through your system, making it easier to identify performance bottlenecks or errors.
+- [Distributed tracing](https://signoz.io/blog/distributed-tracing/) to correlate logs across services. By correlating logs with traces, you can see the end-to-end journey of requests through your system, making it easier to identify performance bottlenecks or errors.
 - Performance metrics alongside logs for comprehensive debugging and to give you a broader view of system behavior, helping you understand the context of logs and troubleshoot issues more effectively.
 - Custom dashboards for visualizing log data and performance metrics in a way that suits your needs, facilitating better monitoring and analysis.
 
@@ -642,7 +642,7 @@ Install the required packages:
 pip install flask opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
 ```
 
-We can then setup a sample flask app that sends the logs to SigNoz using OpenTelemetry
+We can then setup a sample flask app that sends the logs to SigNoz using [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)
 
 ```python
 import logging
@@ -710,7 +710,7 @@ By correlating logs with traces, SigNoz provides a powerful tool for debugging c
 - Use `propagate=False` for child loggers to prevent duplication
 - Centralize logging configuration for consistency
 - Regularly audit and test logging behavior across modules
-- Consider advanced tools like SigNoz for complex, distributed systems
+- Consider advanced tools like [SigNoz](https://signoz.io/docs/introduction/) for complex, distributed systems
 
 ## FAQs
 
