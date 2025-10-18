@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 id: manage-variables
+tags : [SigNoz Cloud, Self-Host]
 title: Manage Variables in SigNoz
 ---
 
@@ -14,70 +15,149 @@ import PrereqsInstrument from '@/components/shared/prereqs-instrument.md'
 
 ## Variables
 
-Variables are now supported for the dashboard panel chart for all three query types. The widget plots can use these variables and update the charts dynamically without updating the query for each value. When the value of the variable changes, the refreshed dashboard will reflect the new value. Variables allow users to make interactive dashboards. Variables are most commonly used to avoid hard coding the values for host names, Kubernetes pods, namespaces, etc. Variables are independent for each dashboard. Variables are shown using the dropdowns at the top of the dashboard.
+Variables allow you to build dynamic dashboards where multiple panels can instantly update their content based on dashboard input values. Variables support several key use cases:
+
+- Replace hard-coded query values with flexible parameters
+- Apply a single dashboard template across different services and infrastructure components
+- Allow viewers to modify displayed data without altering underlying queries 
 
 ## How to add a Variable to a Dashboard?
 
 To add a variable to a dashboard, follow the steps below:
 
-1. From the left sidebar, choose **Dashboards**.
-2. Find the dashboard to which you want to add a new variable.
-3. Select **Configure**.
-4. Select **Add Variable** from the **Variables** section tab.
-5. Populate the following fields:
-    1. **Name**: Name of the variable. This is used in Metrics builder/ClickHouse query/ PromQL later
-    2. **Description**: Enter a brief and meaningful description of your variable.
-    3. **Type**: Select the variable type from the list of available choices, and the UI changes accordingly.
-    4. _(Optional)_ **Sort**: Sort the values from the above variable type if applicable.
+1. Access Dashboards from the navigation menu
+2. Open the dashboard you want to modify
+3. Enter configuration mode by selecting Configure
+4. Switch to the Variables section and select Add Variable
+5. Complete the configuration:
+    1. **Name**: Define the variable identifier for use in queries
+    2. **Description**: Enter a brief and meaningful description of your variable
+    3. **Type**: Pick the appropriate variable type (UI updates based on selection)
+    4. _(Optional)_ **Sort**: Arrange values in ascending/descending order.
     5. _(Optional)_ **Enable multiple values to be checked**: Make dropdown multi-select
     6. _(Optional)_ **Include an option for ALL values**: Show the `ALL` option which includes all options from the multi-select dropdown
-6. When you’ve finished, select the **Save** button.
+6. When you've finished, select the **Save** button.
 
+## Supported Variable types:
 
-## Supported Variables types:
+SigNoz supports four ways of creating variables: dynamic, query, custom, and textbox.
 
-SigNoz supports three ways of creating variables: query, custom, and textbox.
+### Dynamic variable
 
-1. Query - A ClickHouse SQL query that fetches data from ClickHouse (only supported data source at the time) server SigNoz configured to use
+Dynamic variables automatically retrieve attribute values without requiring manual queries. They are configured using two parameters.
+
+1. Field - either an OTEL telemetry intrinsic field (like span name or log severity_text) or a custom [attribute](https://opentelemetry.io/docs/concepts/glossary/#attribute) from logs, traces, or metrics
+
+2. Source: Pick where to search - it checks logs, traces, and metrics by default, but choosing just one source makes it faster. Some of the fields have identical values across signals (e.g., k8s.pod.name is the same whether from logs or traces), so one source is sufficient. Use 'All sources' only when the same field contains distinct values across different signal types.
+
+    ![Dynamic Variable](/img/docs/dashboards/variables/dynamic-variable.png)
+
+#### Dynamic variable dropdowns display values in two sections:
+
+1. **Related values**: Filtered based on other variables' current selections
+2. **All values**: Complete list regardless of other filters
+
+The 'Related values' section shows only attribute values that exist within your current context. For example, with variables `service.name` and `name` (span name): when you select `service.name = adservice`, the `name` dropdown shows:
+- **Related values**: Only spans found in the adservice
+- **All values**: Spans from all services
+
+This helps you quickly focus on relevant data within your selected context.
+
+    ![Related values for service](/img/docs/dashboards/variables/service-related-values.png)
+
+#### Note about **ALL**
+
+The ALL option in dynamic variables means 'apply no filter' rather than 'select everything visible'. When ALL is chosen:
+
+- The system sends a special `__all__` parameter instead of a value list
+- This tells the query to skip filtering on that field entirely
+- The result is the same as having no filter applied
+
+Example: If k8s.pod.name = ALL, the query includes data from all pods, regardless of what's displayed in the dropdown. However, selecting specific values creates an explicit filter using only those selections.
+
+### Query variable
+
+1. Query - A ClickHouse SQL query that fetches data from ClickHouse
 
     Example: You want to query the list of host names from the metrics database and use them as a variable. Any ClickHouse SQL query that returns a column with desired values is valid. For instance, a query to fetch all host names that are reporting the CPU metric collection would be
 
     ```sql
-    SELECT DISTINCT JSONExtractString(labels, 'host_name') AS host_name
+    SELECT DISTINCT JSONExtractString(labels, 'host.name') AS `host.name`
     FROM signoz_metrics.distributed_time_series_v4_1day
-    WHERE metric_name = 'system_cpu_time'
+    WHERE metric_name = 'system.cpu.time'
     ```
 
-    Follwing image shows above case
+    The following image shows the above case
 
-    ![Variables-with-ClickHouse](/img/docs/var_with_clickhouse_sql.png)
+    ![Variables-with-ClickHouse](/img/docs/dashboards/variables/var-with-clickhouse-sql.png)
 
-2. Custom  - A comma-separated list values as a Variable
+
+### Custom variable
+
+2. Custom  - A comma-separated list of values as a Variable
 
     Example: It is common to have some attributes with a known and small number of unique values, such as the region or availability zone of the application deployment. The custom variable type allows you to achieve this with comma-delimited values. An example for reference
 
-    ![Variables-with-Custom](/img/docs/custom-regions-vars.webp)
+    ![Variables-with-Custom](/img/docs/dashboards/variables/custom-regions-vars.png)
 
+### Textbox variable
 
 3. Textbox - A free text input field with an optional default value
 
     Example: Free text as a variable
 
-    ![Variables-with-Text](/img/docs/text-box-limit-variable.webp)
+    ![Variables-with-Text](/img/docs/dashboards/variables/text-box-trace_id.png)
 
-## Variable syntax and usage in queries
+## Using Variables in Queries
 
-All metric queries can refer to variables using any of the following syntax.
+Variables are referenced using `$var` syntax across all query types.
 
-1. `{{.variable_name}}`
-2. `$variable_name`
-3. `[[variable_name]]`
-4. `{{variable_name}}`
+### Query Builder
 
-For example, A PromQL query for service request rate using dynamic service selection would be.
+**Single-select variables**: Use the variable name directly
 
 ```
-sum(rate(signoz_calls_total{service_name="$service_name"}[5m]))
+service.name = $service.name AND has_error = true AND http.route EXISTS
+```
+
+<Admonition type="tip">
+Name your variable the same as the field to avoid confusion (e.g., variable `service.name` for field `service.name`)
+</Admonition>
+
+**Multi-select variables**: Use `IN` operator for multiple values
+
+```
+k8s.namespace.name = $k8s.namespace.name AND k8s.pod.name IN $k8s.pod.name
+```
+
+### ClickHouse Queries
+
+Reference variables with `$` prefix in your SQL:
+
+```sql
+SELECT 
+    toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval,
+    attributes_string['http.method'] AS method,
+    toFloat64(avg(durationNano)) AS value
+FROM 
+    signoz_traces.distributed_signoz_index_v3
+WHERE 
+    attributes_string['http.method'] != ''
+    AND attributes_string['http.method'] = $http.method  -- Variable usage
+    AND timestamp > now() - INTERVAL 30 MINUTE
+    AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY 
+    (method, interval)
+ORDER BY 
+    (method, interval) ASC;
+```
+
+### PromQL
+
+Variables work seamlessly in Prometheus queries:
+
+```
+sum(rate(http_requests_total{job="$job_name"}[5m]))
 ```
 
 ## Chaining Variables
@@ -86,12 +166,14 @@ It is often useful to chain variables to make the dashboard dynamic.
 
 ### Example
 
-The following example shows how to chain the service name variable to make the endpoint URL dynamic.
+Variable chaining allows you to create dependencies between variables, where one variable's selection filters the available options in another variable.
 
-1. Write the query for service with name `service_name`
+Note for Dynamic Variables: If you're using dynamic variables, explicit chaining is not necessary. Dynamic variables automatically provide "Related values" based on other variable selections, achieving the same filtering effect without manual configuration.
+
+1. Write the query for service with name `service.name`
 
     ```sql
-    SELECT DISTINCT JSONExtractString(labels, 'service_name') AS service_name
+    SELECT DISTINCT JSONExtractString(labels, 'service.name') AS `service.name`
     FROM signoz_metrics.distributed_time_series_v4_1day
     WHERE metric_name = 'signoz_calls_total'
     ```
@@ -101,8 +183,38 @@ The following example shows how to chain the service name variable to make the e
     ```sql
     SELECT DISTINCT JSONExtractString(labels, 'operation') AS operation
     FROM signoz_metrics.distributed_time_series_v4_1day
-    WHERE metric_name = 'signoz_calls_total' AND JSONExtractString(labels, 'service_name') IN {{.service_name}}
+    WHERE metric_name = 'signoz_calls_total' AND JSONExtractString(labels, 'service.name') IN $service.name
     ```
+
+
+## Why avoid ClickHouse query variables
+
+Important: We strongly discourage using ClickHouse query variables. Use dynamic variables instead for better performance and ease of use.
+
+#### Why avoid?
+
+- Performance issues: Custom queries often scan entire tables unnecessarily, causing slow dashboard loads
+- Complexity: Requires knowledge of internal table schemas and SQL optimization
+- Error-prone: Easy to write inefficient queries that impact overall system performance
+- Maintenance burden: Queries may break with schema changes
+
+#### Recommended approach:
+
+Use dynamic variables which:
+
+- Automatically optimize data retrieval
+- Don't require SQL knowledge
+- Update faster and more efficiently
+- Provide built-in "Related values" filtering
+
+#### If dynamic variables don't meet your needs:
+
+If you have a specific use case where dynamic variables don't work:
+
+1. Please comment on our tracking issue: https://github.com/SigNoz/signoz/issues/7394
+2. Or reach out to support for assistance
+
+We're actively working on dynamic variables and all feedback is welcome.
 
 ## Get Help
 

@@ -10,11 +10,6 @@ keywords: [opentelemetry,webinar,collector,signoz,observability]
 ---
 
 
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/gathering-data-with-opentelemetry-collector/" />
-</head>
-
 Join <a href="https://github.com/serverless-mom" rel="nofollow">Nočnica Mellifera</a> and <a href="https://twitter.com/pranay01" rel="nofollow">Pranay</a> as they discuss architecting and collecting data with the OpenTelemetry Collector. We discuss using Apache Kafka queues to handle OTLP data, and why you probably shouldn't push OTel data straight to Postgres.
 
 
@@ -33,7 +28,7 @@ Below is the recording and an edited transcript of the conversation.
 
 This is the first in a series of OpenTelemetry webinars. This series will be product-agnostic, and we will not be focusing on SigNoz specifically. We promise this will not be an extended sales pitch; instead, we will be discussing high-level concepts in OpenTelemetry engineering.
 
-I am joined today by Pranay, co-founder and CEO of SigNoz. We will be discussing some basic concepts of the OpenTelemetry collector. We have drawn a few questions from the CNCF Slack channel, and those specific questions have already been answered. Therefore, we will not be addressing those questions directly.
+I am joined today by Pranay, co-founder and CEO of SigNoz. We will be discussing some basic concepts of the [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) collector. We have drawn a few questions from the CNCF Slack channel, and those specific questions have already been answered. Therefore, we will not be addressing those questions directly.
 
 We will also not be discussing the specific setups that people mentioned in their questions, but we will be covering similar topics that have been asked about on Reddit and in the CNCF Slack channel.
 
@@ -208,9 +203,9 @@ Let us assume that you are currently using Jaeger or SigNoz as your backend. If 
 
 This is one of the interesting aspects of this type of OTel collector. By the way, I have just shown this in the sidecar pattern. For example, the things you see in the dotted green light are what come with SigNoz. 
 
-So, if you are running an instance of SigNoz itself, it comes with a central OTel collector, a storage backend (clickhouse in our case), and then the visualization and query layer. So, basically, the OTel collectors that are running as sidecars point to the SigNoz OTel collector, and we take care of the rest.
+So, if you are running an instance of [SigNoz](https://signoz.io/docs/introduction/) itself, it comes with a central OTel collector, a storage backend (clickhouse in our case), and then the visualization and query layer. So, basically, the OTel collectors that are running as sidecars point to the SigNoz OTel collector, and we take care of the rest.
 
-**Nica:** I believe this is one of the reasons why some vendors who have previously sold closed-source SaaS observability solutions are now nervous about the existence of the OpenTelemetry project.
+**Nica:** I believe this is one of the reasons why some vendors who have previously sold closed-source SaaS observability solutions are now nervous about the existence of the [OpenTelemetry project](https://signoz.io/blog/opentelemetry-apm/).
 
 While there is certainly an effort to embrace these standards, there is also some concern. I believe one of the reasons for this is the simple fact that you can configure OpenTelemetry to send data to a different OpenTelemetry endpoint. Of course, different tools like Prometheus and Jaeger will have different advantages and disadvantages, and they will be used for different purposes.
 
@@ -232,7 +227,7 @@ Returning to the topic of sidecar patterns, one advantage is that each OTel coll
 
 This pattern provides much greater configurability for the OTel collector for each application individually. Additionally, because all of these OTel collectors are acting independently for each application, load balancing is much easier when running the system at scale. 
 
-If the OTel collector in the observability system is scaling, you want to ensure that all of these systems or parts in the OpenTelemetry collector which are in the application pod can scale much faster. After all, they are independently sending data to the OTel collector. And because the aggregation level happens at the application level, the traffic is smoothed out, making it much easier to handle higher workloads.
+If the OTel collector in the observability system is scaling, you want to ensure that all of these systems or parts in the [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) which are in the application pod can scale much faster. After all, they are independently sending data to the OTel collector. And because the aggregation level happens at the application level, the traffic is smoothed out, making it much easier to handle higher workloads.
 
 
 
@@ -243,7 +238,7 @@ If the OTel collector in the observability system is scaling, you want to ensure
 
 
 
-The other only disadvantage or one of the disadvantages of this is that because you are running an application pod with each, like an OTel collector with each of the application pods, you are just running so many of them and that is higher resource requirements.
+The other only disadvantage or one of the disadvantages of this is that because you are running an application pod with each, like an [OTel](https://signoz.io/blog/what-is-opentelemetry/) collector with each of the application pods, you are just running so many of them and that is higher resource requirements.
 
 So generally the OTel collector should run within five to ten megabytes and then if you say are running 100 pods. that sort of scales up.
 
@@ -284,11 +279,11 @@ The trade-off in this setting is that, because there is only one OTel collector 
 
 **Nica:** Okay
 
-**Pranay:** Prometheus is renowned for its utilization of a pull-based system. In essence, the Prometheus data exposure involves designating a specific endpoint. A Prometheus scraper is then employed to retrieve data from this endpoint, exemplifying the pull-based approach.
+**Pranay:** Prometheus is renowned for its utilization of a pull-based system. In essence, the [Prometheus data](https://signoz.io/guides/how-does-grafana-get-data-from-prometheus/) exposure involves designating a specific endpoint. A Prometheus scraper is then employed to retrieve data from this endpoint, exemplifying the pull-based approach.
 
 In a contrasting manner, the post-based system involves transmitting data to the OTel (OpenTelemetry) selector. This is particularly evident in the default operational mode of OpenTelemetry SDKs. In this scenario, data is accumulated, queued, and subsequently dispatched to the collector.
 
-**Nica:** When considering the configuration of new pods, it is typical to specify the collective location and integrate the appropriate OpenTelemetry SDK. This practice is particularly relevant for instances like a Java pod executing a job application. Consequently, upon setting up a new pod, the anticipation is that it will automatically commence forwarding data to the collector without explicit intervention.
+**Nica:** When considering the configuration of new pods, it is typical to specify the collective location and integrate the appropriate [OpenTelemetry SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/). This practice is particularly relevant for instances like a Java pod executing a job application. Consequently, upon setting up a new pod, the anticipation is that it will automatically commence forwarding data to the collector without explicit intervention.
 
 **Pranay:** Admittedly, the concept behind facilitating a push-based system for the transfer of metrics and logs from a recently established pod to a shared collector remains somewhat nebulous to me. It seems that the predominant approach adopted by OpenTelemetry is of the push variety.
 
@@ -315,7 +310,7 @@ But there are a few scenarios where this has been used. For instance, if someone
 </figure>
 
 
-**Nica:** Yes, the OpenTelemetry operator might not be widely understood or extremely popular, so it's worth discussing.
+**Nica:** Yes, the [OpenTelemetry operator](https://signoz.io/blog/opentelemetry-operator-complete-guide/) might not be widely understood or extremely popular, so it's worth discussing.
 
 **Pranay:** If you're working with Kubernetes, there's something called an "*Operator*." OpenTelemetry has created default operators for you to use in your Kubernetes cluster. Currently, it offers three ways to set them up.
 
@@ -387,7 +382,7 @@ So, what you should consider looking into is the AWS version of the OpenTelemetr
 
 **Pranay:** Yes, just examine the OpenTelemetry collector receiver or repository. It lists all the receivers. I'm unsure if there are operators specifically available, but the default setup includes the host metrics receiver.
 
-**Nica:** Many of the necessary ec2 monitoring aspects are available directly through host metrics from the standard collector. Additionally, exploring the receiver libraries of the OTel collector will provide more options. Moreover, the AWS version of the OTel collector is more focused on some of the cloud watch features you'd want to integrate into OpenTelemetry.
+**Nica:** Many of the necessary [ec2 monitoring](https://signoz.io/guides/ec2-monitoring/) aspects are available directly through host metrics from the standard collector. Additionally, exploring the receiver libraries of the OTel collector will provide more options. Moreover, the AWS version of the OTel collector is more focused on some of the cloud watch features you'd want to integrate into OpenTelemetry.
 
 **Pranay:** Yes.
 

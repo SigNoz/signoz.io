@@ -1,0 +1,29 @@
+---
+date: 2025-10-07
+id: relational-database
+tags : [Self-Host]
+title: Configuring SigNoz to Use Relational Databases
+description: Learn how to configure SigNoz to use Relational Databases
+---
+
+SigNoz ships with SQLite by default for quick setups. For production and larger deployments, you can configure SigNoz to use a relational database. 
+
+<Admonition type="info">
+SigNoz uses a relational database like SQLite, Postgres exclusively for storing metadata and control-plane information, such as organizations, users, dashboards, and configurations. 
+
+**It does not replace ClickHouse, which remains necessary for storing and querying all observability telemetry data  (traces, metrics, and logs).**
+</Admonition>
+
+## Configuration
+
+Set the `SIGNOZ_SQLSTORE_PROVIDER` environment variable to select the database backend. See [configuration options](/docs/operate/configuration#environment-variables) for details.
+
+### PostgreSQL
+
+To use PostgreSQL, set the following environment variables on the `signoz` service:
+
+```yaml
+SIGNOZ_SQLSTORE_PROVIDER: postgres
+SIGNOZ_SQLSTORE_POSTGRES_DSN: postgres://signoz:your_password@postgres:5432/signoz?sslmode=disable
+```
+- Ensure the specified database already exists and the user has privileges to create and migrate tables.

@@ -8,14 +8,9 @@ description: In this deep dive blog, we explore how monitoring Kafka based appli
 hide_table_of_contents: false
 keywords: [kafka monitoring, opentelemetry, distributed tracing, signoz, troubleshooting, producers, consumers, consumer lag]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/kafka-monitoring-opentelemetry/"/>
-</head>
-
 ## Introduction
 
-Over the past few years in the observability and monitoring space, we've received numerous complaints from users about the lack of detailed monitoring for messaging queues, particularly Kafka. With the introduction of instrumentation standards like OpenTelemetry, we realized there must be a better solution to this problem.
+Over the past few years in the [observability and monitoring](https://signoz.io/blog/observability-vs-monitoring/) space, we've received numerous complaints from users about the lack of detailed monitoring for messaging queues, particularly Kafka. With the introduction of instrumentation standards like OpenTelemetry, we realized there must be a better solution to this problem.
 
 We delved deeper into the problem, seeking to understand how to improve the process of identifying and resolving issues in messaging systems, making it much easier for users.
 
@@ -23,11 +18,11 @@ The following sections focus on Kafka as a representative messaging queue to ill
 
 We would love to hear if these problem statements resonate with the community and welcome any feedback on how this can be more useful to you. We have also shared some wireframes of proposed solutions to concretize our current thought process. **We appreciate any feedback on which flows and starting points would be most useful to you.**
 
-One of our key objectives is to leverage distributed tracing. Most current monitoring solutions for Kafka show metrics about Kafka, but metrics are often aggregated and don’t give much details on exactly where things are going wrong. Traces on the other hand show you the exact path a message takes, offering much more detailed information. Our focus is on how we can use this trace information to resolve issues more quickly and effectively.
+One of our key objectives is to leverage [distributed tracing](https://signoz.io/distributed-tracing/). Most current monitoring solutions for Kafka show metrics about Kafka, but metrics are often aggregated and don’t give much details on exactly where things are going wrong. Traces on the other hand show you the exact path a message takes, offering much more detailed information. Our focus is on how we can use this trace information to resolve issues more quickly and effectively.
 
 ## Background
 
-In the modern distributed architecture, Infrastructure monitoring has become crucial, there are many components which contribute to system stability. In this blog post, we will see how end-to-end observability of Messaging queues can be achieved using [OpenTelemetry](https://opentelemetry.io/) and the problems it can solve to ensure the stability and scalability of Distributed Asynchronous Architectures.
+In the modern distributed architecture, [Infrastructure monitoring](https://signoz.io/guides/infrastructure-monitoring/) has become crucial, there are many components which contribute to system stability. In this blog post, we will see how end-to-end observability of Messaging queues can be achieved using [OpenTelemetry](https://opentelemetry.io/) and the problems it can solve to ensure the stability and scalability of Distributed Asynchronous Architectures.
 
 ![request_flow.png](/img/blog/2024/05/kafka-monitoring/request_flow.png)
 
@@ -40,7 +35,7 @@ To better understand the problem let’s take a look at a single request that’
 [![Schedule-Call](/img/blog/2024/05/kafka-monitoring/CTA-Kafka.png)](https://calendly.com/pranay-signoz/kafka-monitoring-signoz)
 
 
-[Messaging semconv](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/attributes-registry/messaging.md) is standardising on the semantics that are being used by OpenTelemetry for all the messaging queues to make an interoperable layer of observability on top of any messaging queue.
+[Messaging semconv](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/messaging/kafka.md) is standardising on the semantics that are being used by OpenTelemetry for all the messaging queues to make an interoperable layer of observability on top of any messaging queue.
 
 In Fig. 1 We have multiple producers publishing to different topics of kafka, 2 consumer groups, Topic1 have 2 partitions with replication factor as 2, and Topic2 has 1 partition with replication factor as 2.
 
@@ -54,7 +49,7 @@ Some challenges that can be solved include:
 4. Insights into maintaining, scaling and capacity planning of brokers of Kafka
 
 
-For this, we assume that the Kakfa producers and consumers use OpenTelemetry client libraries for context propagation. If you’re new to OpenTelemetry or want to follow along with an example, you can follow the [github guide](https://github.com/SigNoz/kafka-opentelemetry-instrumentation) which will help you configure the above kafka setup along with producer and consumer applications in Java, which are automatically instrumented with [Opentelemetry Java Agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). You’d be able to see metrics and traces in the SigNoz UI.
+For this, we assume that the Kakfa producers and consumers use OpenTelemetry client libraries for [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/). If you’re new to OpenTelemetry or want to follow along with an example, you can follow the [github guide](https://github.com/SigNoz/kafka-opentelemetry-instrumentation) which will help you configure the above kafka setup along with producer and consumer applications in Java, which are automatically instrumented with [Opentelemetry Java Agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). You’d be able to see metrics and traces in the [SigNoz](https://signoz.io/docs/introduction/) UI.
 
 
  **Fig 2** below describes the setup from the [guide](https://github.com/SigNoz/kafka-opentelemetry-instrumentation). We use JMX receiver, [Kafkametrics receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md) from OpenTelemetry and also traces data sent in OTLP format. 
@@ -239,7 +234,7 @@ In the above sections, we have explained the limitations of currently available 
 
 Which of the scenarios seem most relevant to you and is the proposed solution useful or you would like to see any more data points. Would love to get any inputs on that.
 
-Write to us at <a href="mailto:product@signoz.io">product@signoz.io</a> or book a call <a href="https://calendly.com/pranay-signoz/kafka-monitoring-signoz">here</a>
+Write to us at <a href="mailto:support@signoz.io">support@signoz.io</a> or book a call <a href="https://calendly.com/pranay-signoz/kafka-monitoring-signoz">here</a>
 
 [![Schedule-Call](/img/blog/2024/05/kafka-monitoring/CTA-Kafka.png)](https://calendly.com/pranay-signoz/kafka-monitoring-signoz)
 

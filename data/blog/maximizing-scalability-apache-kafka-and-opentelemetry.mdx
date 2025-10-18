@@ -9,11 +9,6 @@ image: /img/blog/2023/10/c2c-cover.jpg
 hide_table_of_contents: false
 keywords: [Kafka,OpenTelemetry]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/maximizing-scalability-apache-kafka-and-opentelemetry/"/>
-</head>
-
 On a recent thread on the [CNCF Slack’s OTel Collector channel](https://slack.cncf.io/), a user asked a question that shone a light on a topic I don't think has been effectively discussed elsewhere.
 
 
@@ -33,7 +28,7 @@ This article will discuss both multi-collector architecture and how Apache Kafka
 
 ## What the Collector Does
 
-To review, the OpenTelemetry Collector is an optional but strongly recommended part of an OpenTelemetry observability deployment. The collector can gather, compress, manage, and filter data sent by OpenTelemetry instrumentation before data gets sent to your observability backend. If sending data to the SigNoz backend, the system will look something like this:
+To review, the OpenTelemetry Collector is an optional but strongly recommended part of an [OpenTelemetry observability](https://signoz.io/blog/opentelemetry-use-cases/) deployment. The collector can gather, compress, manage, and filter data sent by OpenTelemetry instrumentation before data gets sent to your observability backend. If sending data to the [SigNoz](https://signoz.io/docs/introduction/) backend, the system will look something like this:
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/10/c2c-2.webp" alt="Graph of a simple distribution with a single collector"/>
@@ -160,7 +155,7 @@ The intermediate collector will send telemetry data to the central collector usi
 
 ## Conclusions: Kafka and the OpenTelemetry Collector Work Better Together
 
-The choice between OpenTelemetry Collector and Apache Kafka isn't a zero-sum game. Each has its unique strengths and can even complement each other in certain architectures. The OpenTelemetry Collector excels in data gathering, compression, and filtering, making it a strong candidate for reducing in-system latency and improving data quality before it reaches your backend.
+The choice between [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)and Apache Kafka isn't a zero-sum game. Each has its unique strengths and can even complement each other in certain architectures. The OpenTelemetry Collector excels in data gathering, compression, and filtering, making it a strong candidate for reducing in-system latency and improving data quality before it reaches your backend.
 
 Apache Kafka shines in scenarios where high reliability and data buffering are critical, such as during database outages or traffic spikes. Kafka's robust queuing mechanism can act as a valuable intermediary, ensuring that no data is lost and that databases are not over-provisioned.
 

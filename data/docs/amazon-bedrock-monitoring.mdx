@@ -1,0 +1,262 @@
+---
+date: 2025-10-14
+id: amazon-bedrock-monitoring-with-opentelemetry
+title: Monitoring Amazon Bedrock with SigNoz
+description: Monitor Bedrock performance and usage with OpenTelemetry instrumentation and send traces, logs, and metrics to SigNoz
+---
+
+## Overview
+
+This guide walks you through setting up monitoring for Amazon Bedrock using [OpenTelemetry](https://opentelemetry.io/) and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe model performance, capture request/response details, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your Bedrock applications.
+
+Many developers choose Amazon Bedrock over directly calling LLM models for its enterprise-grade features including unified API access to multiple foundation models (Claude, Llama, Titan, etc.), built-in safeguards for responsible AI, private and secure model invocations that don't leave AWS infrastructure, managed infrastructure that eliminates the need to manage model hosting, fine-tuning capabilities with your own data while maintaining privacy, and seamless integration with AWS services like S3, Lambda, and CloudWatch. These capabilities make Amazon Bedrock particularly valuable for organizations requiring production-grade reliability, compliance, and simplified model management without the complexity of direct model deployment.
+
+Instrumenting Amazon Bedrock in your LLM applications with telemetry ensures full observability across your AI workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+- Internet access to send telemetry data to SigNoz Cloud
+- An AWS account with [Amazon Bedrock](https://aws.amazon.com/bedrock/) working and access granted for LLM models
+- For Python: `pip` installed for managing Python packages and *(optional but recommended)* a Python virtual environment to isolate dependencies
+
+## Monitoring Amazon Bedrock
+
+<Tabs>
+<TabItem value="python" label="Python" default>
+
+**Step 1:** Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  opentelemetry-api \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  openinference-instrumentation-bedrock \
+  boto3
+```
+
+**Step 2:** Import the necessary modules in your Python application
+
+**Traces:**
+
+```python
+from openinference.instrumentation.bedrock import BedrockInstrumentor
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+```
+
+**Logs:**
+
+```python
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry._logs import set_logger_provider
+import logging
+```
+
+**Metrics:**
+
+```python
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+```
+
+**Step 3:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry import trace
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+provider = TracerProvider(resource=resource)
+span_exporter = OTLPSpanExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_TRACES_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+processor = BatchSpanProcessor(span_exporter)
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+**Step 4:** Instrument Bedrock using `BedrockInstrumentor` and the configured Tracer Provider
+
+```python
+from openinference.instrumentation.bedrock import BedrockInstrumentor
+
+BedrockInstrumentor().instrument()
+```
+
+> 📌 Important:  Place this code at the start of your application logic — before any Bedrock functions are called or used — to ensure telemetry is correctly captured.
+> 
+
+**Step 5**: Setup Logs
+
+```python
+import logging
+from opentelemetry.sdk.resources import Resource
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+logger_provider = LoggerProvider(resource=resource)
+set_logger_provider(logger_provider)
+
+otlp_log_exporter = OTLPLogExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_LOGS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(otlp_log_exporter)
+)
+# Attach OTel logging handler to root logger
+handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+logger = logging.getLogger(__name__)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+> 📌 Note: No logs are automatically emitted by the BedrockInstrumentor. If you would like logs, you need to emit them manually via `logger.info()` or other logging methods.
+
+**Step 6**: Setup Metrics
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+import os
+
+resource = Resource.create({"service.name": "<service-name>"})
+metric_exporter = OTLPMetricExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+reader = PeriodicExportingMetricReader(metric_exporter)
+metric_provider = MeterProvider(metric_readers=[reader], resource=resource)
+metrics.set_meter_provider(metric_provider)
+
+meter = metrics.get_meter(__name__)
+
+# turn on out-of-the-box metrics
+SystemMetricsInstrumentor().instrument()
+HTTPXClientInstrumentor().instrument()
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. These are not Bedrock-specific metrics. Bedrock does not expose metrics as part of their SDK. If you want to add custom metrics to your Bedrock application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+> 
+
+**Step 7:** Run an example
+
+```python
+import boto3
+import os
+ 
+bedrock = boto3.client(
+    service_name="bedrock-runtime",
+    aws_access_key_id=os.getenv("AWS_ACCESS"), aws_secret_access_key=os.getenv("AWS_SECRET"),
+    region_name="us-east-1"  # or your region
+)
+model_id = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+
+prompt = "What is SigNoz?"
+logger.info(f"Sending prompt to model {model_id}: {prompt}") #sample log
+body = {
+    "anthropic_version": "bedrock-2023-05-31",
+    "messages": [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": prompt}
+            ]
+        }
+    ],
+    "max_tokens": 512,
+    "temperature": 0.7
+}
+response = bedrock.invoke_model(
+    modelId=model_id,
+    body=json.dumps(body)
+)
+
+response_body = json.loads(response['body'].read())
+
+output_text = response_body['content'][0]['text']
+
+print("Model output:\n", output_text)
+```
+
+> 📌 Note: Before running this code, ensure that you have set the environment variables `AWS_ACCESS` and `AWS_SECRET` with your AWS credentials.
+>
+
+</TabItem>
+</Tabs>
+
+## View Traces, Logs, and Metrics in SigNoz
+
+Your Bedrock commands should now automatically emit traces, logs, and metrics. 
+
+You should be able to view traces in Signoz Cloud under the traces tab:
+
+<Figure src="/img/docs/llm/bedrock/bedrock-traces.webp" alt="Bedrock Trace View" caption="Amazon Bedrock Trace View" />
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure src="/img/docs/llm/bedrock/bedrock-detailed-traces.webp" alt="Bedrock Detailed Trace View" caption="Amazon Bedrock Detailed Trace View" />
+
+You should be able to view logs in Signoz Cloud under the logs tab. You can also view correlated logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/llm/bedrock/bedrock-related-logs.webp" alt="Related logs" width="300"/>
+    <figcaption><i>Related logs button</i></figcaption>
+</figure>
+
+<Figure src="/img/docs/llm/bedrock/bedrock-logs.webp" alt="Bedrock Logs View" caption="Amazon Bedrock Logs View" />
+
+When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+
+<Figure src="/img/docs/llm/bedrock/bedrock-detailed-logs.webp" alt="Bedrock Detailed Log View" caption="Amazon Bedrock Detailed Logs View" />
+
+You should be able to see Bedrock related metrics in Signoz Cloud under the metrics tab:
+
+<Figure src="/img/docs/llm/bedrock/bedrock-metrics.webp" alt="Bedrock Metrics View" caption="Amazon Bedrock Metrics View" />
+
+When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+<Figure src="/img/docs/llm/bedrock/bedrock-detailed-metrics.webp" alt="Bedrock Detailed Metrics View" caption="Amazon Bedrock Detailed Metrics View" />
+
+## Dashboard
+
+You can also check out our custom Amazon Bedrock dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard/) which provides specialized visualizations for monitoring your Bedrock usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure src="/img/docs/llm/bedrock/bedrock-dashboard.webp" alt="Bedrock Dashboard" caption="Amazon Bedrock Dashboard Template" />

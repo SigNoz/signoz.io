@@ -139,7 +139,7 @@ keywords: [microservices logging,logging,trace,log analytics]
   />
 </head>
 
-Microservices architectures have revolutionized software development, enabling scalability and flexibility. However, they also introduce complexities in system monitoring and troubleshooting. Effective logging is crucial for maintaining visibility and diagnosing issues in these distributed environments. This comprehensive guide explores best practices for microservices logging, helping you navigate the challenges and implement robust logging strategies. From standardized formats to advanced techniques, you'll learn how to master logging in microservices and enhance your system's observability.
+Microservices architectures have revolutionized software development, enabling scalability and flexibility. However, they also introduce complexities in system monitoring and troubleshooting. Effective logging is crucial for maintaining visibility and diagnosing issues in these distributed environments. This comprehensive guide explores best practices for microservices logging, helping you navigate the challenges and implement robust logging strategies. From standardized formats to advanced techniques, you'll learn how to master [logging in microservices](https://signoz.io/blog/microservices-logging/#overcoming-common-microservices-logging-challenges) and enhance your system's observability.
 
 <Figure src="/img/blog/2024/08/microservices-logging-CleanShot_2024-08-29_at_14.11.122x.webp" alt="Microservices logging" caption="Microservices logging" />
 
@@ -179,7 +179,7 @@ Errors: Log errors, exceptions, and stack traces to aid in troubleshooting and u
 
 ### Implement Standardized Log Formats
 
-Use a consistent log format across all services to simplify log parsing and analysis. A standardized format should include:
+Use a consistent log format across all services to simplify [log parsing](https://signoz.io/guides/log-parsing/) and analysis. A standardized format should include:
 
 - Timestamp
 - Service name
@@ -219,7 +219,7 @@ Structured logging, particularly in JSON format, offers several advantages:
 
 - Easier to parse and analyze programmatically
 - Supports complex data structures
-- Facilitates integration with log management tools
+- Facilitates integration with [log management tools](https://signoz.io/blog/open-source-log-management/)
 
 Implement structured logging in your services using libraries like Winston (Node.js) or Logback (Java).
 
@@ -257,7 +257,7 @@ At the very least, logs need to contain the following details:
 
 ### Centralized logging solution
 
-In a microservices architecture, it can be difficult to keep track of logs if they are scattered across multiple services. Using a centralized logging solution such as SigNoz or Elastic can help you to collect, query, and view logs from all your services in one place. Logs analytics tool like SigNoz provide dashboards to visually present logs data in an easily digestible format.
+In a microservices architecture, it can be difficult to keep track of logs if they are scattered across multiple services. Using a [centralized logging solution](https://signoz.io/blog/centralized-logging/) such as SigNoz or Elastic can help you to collect, query, and view logs from all your services in one place. Logs analytics tool like SigNoz provide dashboards to visually present logs data in an easily digestible format.
 
 ### Logging performance metrics
 
@@ -312,7 +312,7 @@ provider.register();
 
 Use log aggregation to collect and correlate logs from multiple services. This technique helps in understanding the flow of requests and identifying issues that span across services.
 
-Implement log correlation by including correlation IDs in all log entries and using a centralized logging system to aggregate and analyze logs based on these IDs.
+Implement log correlation by including correlation IDs in all log entries and using a [centralized logging system](https://signoz.io/blog/centralized-logging/) to aggregate and analyze logs based on these IDs.
 
 ### Log Sampling
 
@@ -363,7 +363,7 @@ For robust observability, having a seamless way to correlate your telemetry sign
 
 Now the question is how do we generate, collect, and store telemetry signals so that they can be easily correlated and analyzed together. That’s where OpenTelemetry comes into the picture.
 
-**What is OpenTelemetry?**
+**[What is OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)?**
 
 <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is a set of API, SDKs, libraries, and integrations aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud Native Computing Foundation project created after the merger of OpenCensus(from Google) and OpenTracing(From Uber).
 
@@ -385,7 +385,7 @@ We instrument our Go application to generate traces in the way described in this
 
 We will further check on how we add the context info in logs. We use zap library for logging.
 
-In order to add the trace context information such as traceID, spanID and traceFlags in the logs, we have implemented a logger wrapper that records zap log messages as events on the existing span that must be passed in a context as a first argument. It does not add anything to the logs if the context does not contain a span.
+In order to add the trace context information such as traceID, [spanID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/) and traceFlags in the logs, we have implemented a logger wrapper that records zap log messages as events on the existing span that must be passed in a context as a first argument. It does not add anything to the logs if the context does not contain a span.
 
 **Step 1:** We do an initial set up of zap logger.
 
@@ -449,7 +449,7 @@ func (log *LoggerWithCtx) Info(msg string, fields ...zap.Field) {
 
 ```
 
-**Step 3:** The services which intends to use this log method needs to pass the request context object which adds trace_id, span_id and trace_flags field to structured log messages. This option is only useful with backends that don't support OTLP and instead parse log messages to extract structured information.
+**Step 3:** The services which intends to use this log method needs to pass the request context object which adds trace_id, span_id and trace_flags field to structured log messages. This option is only useful with backends that don't support OTLP and instead [parse log](https://signoz.io/guides/log-parsing/#advanced-log-parsing-techniques) messages to extract structured information.
 
 ```
 import log "github.com/vabira200/golang-instrumentation/logger"
@@ -508,7 +508,7 @@ log.Ctx(r.Context()).Info("Order controller called", metadata...)
 
 ## OpenTelemetry Log Collection with SigNoz
 
-In this example, we will configure our application to write the logs to a log file. Then the SigNoz OpenTelemetry collector collects logs from the log file and exports them to `clickhouselogsexporter` which shows up the logs in the SigNoz UI.
+In this example, we will configure our application to write the logs to a log file. Then the [SigNoz](https://signoz.io/docs/introduction/) OpenTelemetry collector collects logs from the log file and exports them to `clickhouselogsexporter` which shows up the logs in the SigNoz UI.
 
 <figure data-zoomable align='center'>
 <img src="/img/blog/2023/01/microservices-logging-signoz-working.webp" alt="How Telemetry signals are collected and correlated with SigNoz."/>
@@ -517,7 +517,7 @@ In this example, we will configure our application to write the logs to a log fi
 
 **Steps to collect Application Logs with OpenTelemetry**
 
-Clone the SigNoz github repository:
+Clone the [SigNoz GitHub](https://github.com/signoz/signoz) repository:
 
 ```
 Start the signoz server following the instructions:
@@ -587,7 +587,7 @@ exporters: [clickhouselogsexporter]
 
 ```
 
-Now we can restart the OTel collector container so that new changes are applied, and the logs are read from the application log file. If you look at the traces tab, we can see the traces available with the traceID and span.
+Now we can restart the [OTel collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) container so that new changes are applied, and the logs are read from the application log file. If you look at the traces tab, we can see the traces available with the traceID and span.
 
 <figure data-zoomable align='center'>
 <img src="/img/blog/2023/01/microservices-logging-trace.webp" alt="Trace data visualized as flamegraphs in SigNoz."/>
@@ -649,7 +649,7 @@ Microservices logging presents unique challenges. Here's how to address some com
     - Implement centralized logging configuration management
 3. **Handling Containerized and Serverless Environments**:
     - Use container-aware logging drivers (e.g., Docker's json-file driver)
-    - Implement structured logging for easier parsing
+    - Implement [structured logging](https://signoz.io/blog/structured-logs/) for easier parsing
     - Leverage cloud-native logging solutions for serverless functions
 4. **Troubleshooting Complex Service Interactions**:
     - Implement distributed tracing
@@ -661,7 +661,7 @@ Microservices logging presents unique challenges. Here's how to address some com
 Mastering microservices logging is essential for maintaining observable and manageable distributed systems. Remember these key points:
 
 - Standardize log formats and implement structured logging for consistency
-- Use correlation IDs and distributed tracing to track requests across services
+- Use correlation IDs and [distributed tracing](https://signoz.io/distributed-tracing/) to track requests across services
 - Centralize logs for easier management, analysis, and correlation
 - Implement robust security measures to protect sensitive log data
 - Leverage integrated observability tools like SigNoz for comprehensive monitoring
@@ -706,7 +706,7 @@ Key security measures include:
 Centralized logging offers several benefits:
 
 1. Provides a unified view of logs from all services
-2. Simplifies log correlation and analysis
+2. Simplifies [log correlation](https://signoz.io/opentelemetry/correlating-traces-logs-metrics-nodejs/) and analysis
 3. Enhances security through centralized access control
 4. Enables advanced querying and visualization capabilities
 5. Facilitates easier troubleshooting and performance optimization
@@ -767,7 +767,7 @@ Centralized logging offers several benefits:
 3. Enhances security through centralized access control and monitoring.
 4. Enables advanced querying and visualization capabilities.
 5. Facilitates easier troubleshooting and performance optimization.
-6. Supports better scalability and log retention management.
+6. Supports better scalability and [log retention](https://signoz.io/guides/log-retention/) management.
 
 ### What is OpenTelemetry and how does it relate to microservices logging?
 

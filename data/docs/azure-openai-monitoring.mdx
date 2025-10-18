@@ -1,0 +1,483 @@
+---
+date: 2025-09-15
+id: azure-openai-monitoring-with-opentelemetry
+tags : [SigNoz Cloud]
+title: Monitoring Azure OpenAi API with SigNoz
+description: Monitor Azure OpenAi API performance and usage with OpenTelemetry instrumentation and send traces, logs, and metrics to SigNoz
+---
+
+## Overview
+
+This guide walks you through setting up monitoring for Azure OpenAi API using [OpenTelemetry](https://opentelemetry.io/) and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe model performance, capture request/response details, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your Azure OpenAi applications.
+
+Many developers choose Azure OpenAI over regular OpenAI for enterprise-grade features including enhanced security and compliance certifications, private network integration with Azure Virtual Networks, regional data residency options, integration with Azure Active Directory for identity management, dedicated capacity with provisioned throughput, and seamless integration with other Azure services. These capabilities make Azure OpenAI particularly valuable for organizations with strict regulatory requirements or those already invested in the Azure ecosystem.
+
+Instrumenting Azure OpenAi in your LLM applications with telemetry ensures full observability across your AI workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+- Internet access to send telemetry data to SigNoz Cloud
+- An [Microsoft Azure](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account/) account with an OpenAI resource deployed and working API Key
+- For Python: `pip` installed for managing Python packages and *(optional but recommended)* a Python virtual environment to isolate dependencies
+- For JavaScript: Node.js (version 14 or higher) and `npm` installed for managing Node.js packages
+
+## Monitoring Azure OpenAI
+
+The Azure OpenAI API uses an API format compatible with OpenAI. By modifying the configuration, you can use the OpenAI SDK or softwares compatible with the OpenAI API to access the Azure OpenAI API. Hence, a similar method to monitor OpenAI APIs can be used for monitoring Azure OpenAI APIs as well. To read more about this, you can read the [Azure OpenAI API Docs](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/responses?tabs=python-key)
+
+<Tabs>
+<TabItem value="python" label="Python" default>
+
+**Step 1:** Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  opentelemetry-api \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  openai \
+  openinference-instrumentation-openai
+```
+
+**Step 2:** Import the necessary modules in your Python application
+
+**Traces:**
+
+```python
+from openinference.instrumentation.openai import OpenAIInstrumentor
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+```
+
+**Logs:**
+
+```python
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry._logs import set_logger_provider
+import logging
+```
+
+**Metrics:**
+
+```python
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+```
+
+**Step 3:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry import trace
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+provider = TracerProvider(resource=resource)
+span_exporter = OTLPSpanExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_TRACES_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+processor = BatchSpanProcessor(span_exporter)
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+**Step 4:** Instrument Azure OpenAI using `OpenAInstrumentor` and the configured Tracer Provider
+
+```python
+from openinference.instrumentation.openai import OpenAIInstrumentor
+
+OpenAIInstrumentor().instrument(tracer_provider=provider)
+```
+
+> 📌 Important:  Place this code at the start of your application logic — before any Azure OpenAI functions are called or used — to ensure telemetry is correctly captured.
+> 
+
+**Step 5**: Setup Logs
+
+```python
+import logging
+from opentelemetry.sdk.resources import Resource
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+logger_provider = LoggerProvider(resource=resource)
+set_logger_provider(logger_provider)
+
+otlp_log_exporter = OTLPLogExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_LOGS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(otlp_log_exporter)
+)
+# Attach OTel logging handler to root logger
+handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+logger = logging.getLogger(__name__)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+**Step 6**: Setup Metrics
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+import os
+
+resource = Resource.create({"service.name": "<service-name>"})
+metric_exporter = OTLPMetricExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+reader = PeriodicExportingMetricReader(metric_exporter)
+metric_provider = MeterProvider(metric_readers=[reader], resource=resource)
+metrics.set_meter_provider(metric_provider)
+
+meter = metrics.get_meter(__name__)
+
+# turn on out-of-the-box metrics
+SystemMetricsInstrumentor().instrument()
+HTTPXClientInstrumentor().instrument()
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. These are not Azure OpenAI-specific metrics. Azure OpenAI does not expose metrics as part of their SDK. If you want to add custom metrics to your Azure OpenAI application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+> 
+
+**Step 7:** Run an example
+
+```python
+import openai
+import os
+ 
+client = OpenAI(api_key=os.getenv("AZURE_OPENAI_API_KEY"), base_url="https://YOUR-RESOURCE-NAME.openai.azure.com/openai/v1/")
+
+response = client.chat.completions.create(
+    model="<your-model-deployment-name>",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant"},
+        {"role": "user", "content": "What is SigNoz?"},
+    ],
+    stream=False
+)
+
+print(response.choices[0].message.content)
+```
+
+> 📌 Note: Before running this code, ensure that you have set the environment variable `AZURE_OPENAI_API_KEY` with your working API key.
+> 
+
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+
+**Step 1:** Install the necessary packages in your Node.js project.
+
+```bash
+npm install \
+  @opentelemetry/api \
+  @opentelemetry/sdk-node \
+  @opentelemetry/sdk-trace-node \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/sdk-metrics \
+  @opentelemetry/exporter-otlp-http \
+  @opentelemetry/instrumentation \
+  @opentelemetry/instrumentation-http \
+  @opentelemetry/host-metrics \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions \
+  @arizeai/openinference-instrumentation-openai \
+  openai
+```
+
+**Step 2:** Import the necessary modules in your JavaScript/Node.js application
+
+**Traces:**
+
+```javascript
+const { NodeSDK } = require('@opentelemetry/sdk-node');
+const { Resource } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-http');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { OpenAIInstrumentation } = require('@arizeai/openinference-instrumentation-openai');
+```
+
+**Logs:**
+
+```javascript
+const { LoggerProvider, BatchLogRecordProcessor } = require('@opentelemetry/sdk-logs');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-otlp-http');
+const { logs } = require('@opentelemetry/api');
+```
+
+**Metrics:**
+
+```javascript
+const { MeterProvider, PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+const { OTLPMetricExporter } = require('@opentelemetry/exporter-otlp-http');
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { HostMetrics } = require('@opentelemetry/host-metrics');
+const { metrics } = require('@opentelemetry/api');
+```
+
+**Step 3:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+
+```javascript
+const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+const { BatchSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+const { trace } = require('@opentelemetry/api');
+
+const resource = Resource.default({
+  attributes: {
+    [ATTR_SERVICE_NAME]: '<service_name>',
+  },
+});
+
+const provider = new NodeTracerProvider({
+  resource: resource,
+});
+
+const traceExporter = new OTLPTraceExporter({
+  url: process.env.OTEL_EXPORTER_TRACES_ENDPOINT,
+  headers: {
+    'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY,
+  },
+});
+
+const spanProcessor = new BatchSpanProcessor(traceExporter);
+provider.addSpanProcessor(spanProcessor);
+provider.register();
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+**Step 4:** Instrument Azure OpenAI using `OpenAIInstrumentation` and the configured Tracer Provider
+
+```javascript
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { OpenAIInstrumentation } = require('@arizeai/openinference-instrumentation-openai');
+
+registerInstrumentations({
+  instrumentations: [
+    new OpenAIInstrumentation({
+      tracerProvider: provider,
+    }),
+  ],
+});
+```
+
+> 📌 Important:  Place this code at the start of your application logic — before any Azure OpenAI functions are called or used — to ensure telemetry is correctly captured.
+>
+
+**Step 5**: Setup Logs
+
+```javascript
+const { LoggerProvider, BatchLogRecordProcessor } = require('@opentelemetry/sdk-logs');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+const { logs } = require('@opentelemetry/api');
+
+const logResource = Resource.default({
+  attributes: {
+    [ATTR_SERVICE_NAME]: '<service_name>',
+  },
+});
+
+const loggerProvider = new LoggerProvider({
+  resource: logResource,
+});
+
+const logExporter = new OTLPLogExporter({
+  url: process.env.OTEL_EXPORTER_LOGS_ENDPOINT,
+  headers: {
+    'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY,
+  },
+});
+
+loggerProvider.addLogRecordProcessor(
+  new BatchLogRecordProcessor(logExporter)
+);
+
+logs.setGlobalLoggerProvider(loggerProvider);
+
+// Create a logger instance
+const logger = logs.getLogger('azure-openai-app');
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+**Step 6**: Setup Metrics
+
+```javascript
+const { MeterProvider, PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+const { OTLPMetricExporter } = require('@opentelemetry/exporter-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+const { metrics } = require('@opentelemetry/api');
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+
+const metricResource = Resource.default({
+  attributes: {
+    [ATTR_SERVICE_NAME]: '<service_name>',
+  },
+});
+
+const metricExporter = new OTLPMetricExporter({
+  url: process.env.OTEL_EXPORTER_METRICS_ENDPOINT,
+  headers: {
+    'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY,
+  },
+});
+
+const metricReader = new PeriodicExportingMetricReader({
+  exporter: metricExporter,
+  exportIntervalMillis: 10000,
+});
+
+const meterProvider = new MeterProvider({
+  resource: metricResource,
+  readers: [metricReader],
+});
+
+metrics.setGlobalMeterProvider(meterProvider);
+
+// Create a meter instance
+const meter = metrics.getMeter('azure-openai-app');
+
+// Register HTTP instrumentation for outbound HTTP metrics
+registerInstrumentations({
+  instrumentations: [
+    new HttpInstrumentation(),
+  ],
+});
+
+// Initialize host metrics for system-level monitoring
+const hostMetrics = new HostMetrics({
+  meterProvider: meterProvider,
+});
+hostMetrics.start();
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+> 📌 Note: HostMetrics provides system-level metrics (CPU, memory, disk, network, etc.), and HttpInstrumentation provides outbound HTTP request metrics such as request duration. These are not Azure OpenAI-specific metrics. Azure OpenAI does not expose metrics as part of their SDK. If you want to add custom metrics to your Azure OpenAI application, see [JavaScript Custom Metrics](https://signoz.io/opentelemetry/custom-metrics-nodejs/).
+>
+
+**Step 7:** Run an example
+
+```javascript
+const OpenAI = require('openai');
+
+const client = new OpenAI({
+  apiKey: process.env.AZURE_OPENAI_API_KEY,
+  baseURL: 'https://YOUR-RESOURCE-NAME.openai.azure.com/openai/v1/',
+});
+
+async function main() {
+  const response = await client.chat.completions.create({
+    model: '<your-model-deployment-name>',
+    messages: [
+      { role: 'system', content: 'You are a helpful assistant' },
+      { role: 'user', content: 'What is SigNoz?' },
+    ],
+    stream: false,
+  });
+
+  console.log(response.choices[0].message.content);
+}
+
+main();
+```
+
+> 📌 Note: Before running this code, ensure that you have set the environment variable `AZURE_OPENAI_API_KEY` with your working API key.
+>
+
+</TabItem>
+</Tabs>
+
+## View Traces, Logs, and Metrics in SigNoz
+
+Your Azure OpenAI commands should now automatically emit traces, logs, and metrics. 
+
+You should be able to view traces in Signoz Cloud under the traces tab:
+
+<Figure src="/img/docs/llm/azure-openai/azure-traces.webp" alt="Azure OpenAI Trace View" caption="Azure OpenAI API Trace View" />
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure src="/img/docs/llm/azure-openai/azure-detailed-traces.webp" alt="Azure OpenAI Detailed Trace View" caption="Azure OpenAI API Detailed Trace View" />
+
+You should be able to view logs in Signoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/llm/azure-openai/azure-related-logs.webp" alt="Related logs" width="300"/>
+    <figcaption><i>Related logs button</i></figcaption>
+</figure>
+
+<Figure src="/img/docs/llm/azure-openai/azure-logs.webp" alt="Azure OpenAI Logs View" caption="Azure OpenAI API Logs View" />
+
+When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+
+<Figure src="/img/docs/llm/azure-openai/azure-detailed-logs.webp" alt="Azure OpenAI Detailed Log View" caption="Azure OpenAI API Detailed Logs View" />
+
+You should be able to see Azure OpenAI related metrics in Signoz Cloud under the metrics tab:
+
+<Figure src="/img/docs/llm/deepseek/deepseek-metrics.webp" alt="Azure OpenAI Metrics View" caption="Azure OpenAI API Metrics View" />
+
+When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+
+<Figure src="/img/docs/llm/deepseek/deepseek-detailed-metrics.webp" alt="Azure OpenAI Detailed Metrics View" caption="Azure OpenAI API Detailed Metrics View" />
+
+## Dashboard
+
+You can also check out our custom Azure OpenAI API dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/azure-openai-dashboard/) which provides specialized visualizations for monitoring your Azure OpenAI API usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure src="/img/docs/llm/azure-openai/azure-openai-dashboard.webp" alt="Azure OpenAI Dashboard" caption="Azure OpenAI API Dashboard Template" />

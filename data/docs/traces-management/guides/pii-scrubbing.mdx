@@ -1,0 +1,112 @@
+---
+date: 2025-09-16
+id: traces-pii-scrubbing
+tags : [SigNoz Cloud]
+title: Guide to perform PII Scrubbing in Traces using SigNoz
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+Traces often come with a lot of data, attributes which may include sensitive information, and needs to be treated before they're stored to comply with regulations like GDPR and CCPA. SigNoz simplifies this process by making use of OpenTelemetry's Processors. This guide explains how you can set up an OpenTelemetry Collector (OTel) to scrub PII data.
+
+## Prerequisites
+
+* [SigNoz Cloud](https://signoz.io/teams/) account
+* OpenTelemetry Collector to receive traces from your application
+
+## Set up OpenTelemetry Collector
+
+Set up OTel Collector to send traces to SigNoz if you have not already. The OTel Collector allows you to process, transform, and scrub sensitive data before it reaches SigNoz. Checkout [SigNoz OTel Collector setup guide](https://signoz.io/docs/collection-agents/get-started/) to get started with OTel Collector.
+
+<figure data-zoomable align='center'>
+  <img src="/img/docs/traces-management/otel-collector-pii-scrubbing.svg" alt="Application → OTel Collector → SigNoz"/>
+  <figcaption><i>Application → OpenTelemetry Collector (PII Scrubbing) → SigNoz</i></figcaption>
+</figure>
+
+1. **Instrument your application** to send traces to the OTel Collector.
+2. **Configure the OTel Collector** to receive traces, apply processors, and export to SigNoz.
+3. If you are currently sending traces directly to SigNoz, update your configuration to send them to the OTel Collector instead.
+
+## Process of scrubbing PII data
+
+OpenTelemetry Collector provides a powerful [transform processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md) to filter or modify sensitive data before it's sent to SigNoz. We'll use this processor to scrub PII data from our traces.
+
+### Sample trace
+
+Let's use the following sample trace data to demonstrate PII data scrubbing process:
+
+```json
+{
+    ...
+    "Attributes": [
+        ...
+        {
+            "Key": "client.address",
+            "Value": {
+                "Type": "STRING",
+                "Value": "127.0.0.1"
+            }
+        },
+        {
+            "Key": "http.response.status_code",
+            "Value": {
+                "Type": "INT64",
+                "Value": 200
+            }
+        },
+        ...
+    ]
+    ...
+}
+```
+
+This trace contains an attribute that we want to scrub: IP address of client.
+
+## Configuring the transform processor
+
+To scrub PII data, we're going to use a transform processor in the OpenTelemetry Collector configuration. Transform processor works by using regular expressions for scrubbing the data, you can find more about regular expressions [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions). Here's an example of how we can use the transform processor:
+
+```yaml
+processors:
+  ...
+  transform:
+    error_mode: ignore
+    trace_statements:
+      - replace_pattern(span.attributes["client.address"], "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}", "*.*.*.*")
+```
+
+Let's understand what the above statement does: [`replace_pattern`](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/ottl/ottlfuncs#replace_pattern) function replaces the client IP address with asterisks in a trace with span attribute `client.address`.
+
+## Applying the processor
+
+To apply this processor, add it to the processors pipeline:
+
+```yaml
+service:
+  ...
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch,transform]
+      exporters: [otlp]
+    ...
+```
+
+## Result
+
+After applying the transform processor and restarting OpenTelemetry Collector, the sample trace would be transformed to:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/traces-management/sample-scrubbed-trace-output.webp" alt="Sample trace output with PII data scrubbed out"/>
+    <figcaption><i>Sample trace data with client IP address scrubbed out</i></figcaption>
+</figure>
+
+As you can see, the IP address is no longer visible as it has been scrubbed out by the OpenTelemetry Collector before the data was sent to SigNoz.
+
+Learn more about Transform processor [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md).
+
+## Get Help
+
+<GetHelp />

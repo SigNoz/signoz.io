@@ -83,11 +83,30 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
       const elementId = `#${pathname.substring(0, pathname.length - 1)}`
       const element = document.getElementById(elementId)
 
-      if (element) {
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        })
+      if (element && sidebarRef.current) {
+        // Only scroll within the sidebar container, not the entire document
+        const sidebar = sidebarRef.current
+        const elementRect = element.getBoundingClientRect()
+        const sidebarRect = sidebar.getBoundingClientRect()
+        
+        // Check if element is outside the visible area of the sidebar
+        const isAboveView = elementRect.top < sidebarRect.top
+        const isBelowView = elementRect.bottom > sidebarRect.bottom
+        
+        if (isAboveView || isBelowView) {
+          // Calculate scroll position to center the element within the sidebar
+          const elementOffsetTop = element.offsetTop
+          const sidebarScrollTop = sidebar.scrollTop
+          const sidebarHeight = sidebar.clientHeight
+          const elementHeight = element.clientHeight
+          
+          const targetScrollTop = elementOffsetTop - (sidebarHeight / 2) + (elementHeight / 2)
+          
+          sidebar.scrollTo({
+            top: targetScrollTop,
+            behavior: 'smooth'
+          })
+        }
       }
     })
   }, [pathname])
