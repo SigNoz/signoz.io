@@ -10,12 +10,15 @@ export default function SelfHostInstallationListicle() {
   // --- Icons ---
   const railwayIcon = <img src="/img/icons/railway-icon.webp" alt="Railway" />
   const doIcon = <SiDigitalocean className="h-7 w-7 text-sky-400" />
+  const vultrIcon = <img src="/img/icons/vultr.svg" alt="Vultr" />
 
 
   // --- Cards for One-Click Install ---
   const oneClickCards = [
     { name: 'Railway', href: 'https://railway.com/deploy/signoz', icon: railwayIcon, clickName: 'Deploy to Railway' },
     { name: 'DigitalOcean', href: 'https://marketplace.digitalocean.com/apps/signoz', icon: doIcon, clickName: 'Deploy to DigitalOcean' },
+    { name: 'Vultr', href: 'https://www.vultr.com/marketplace/apps/signoz/', icon: vultrIcon, clickName: 'Deploy to Vultr' },
+
   ]
 
   return (

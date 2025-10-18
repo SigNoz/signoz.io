@@ -15,7 +15,7 @@ Pino solves this with a fundamentally different approach to logging:
 - **5x faster than Winston** with minimal CPU overhead
 - **Structured JSON output** that's immediately machine-readable  
 - **Asynchronous by design** to prevent event loop blocking
-- **Production-ready** with built-in security and performance optimizations
+- **[Production-ready](https://signoz.io/guides/production-readiness-checklist/)** with built-in security and performance optimizations
 
 This guide covers everything from basic setup to advanced production patterns, including integration with observability platforms for comprehensive monitoring.
 
@@ -647,14 +647,14 @@ process.on('SIGTERM', () => {
 
 ## Integration with SigNoz for Complete Observability
 
-SigNoz provides a unified platform for logs, metrics, and traces, making it ideal for comprehensive Node.js application monitoring with Pino.
+[SigNoz](https://signoz.io/docs/introduction/) provides a unified platform for logs, metrics, and traces, making it ideal for comprehensive [Node.js application monitoring](https://signoz.io/blog/nodejs-opensource-application-monitoring/) with Pino.
 
 ### Why SigNoz with Pino
 
 SigNoz offers several advantages for Pino integration:
 
 - **Unified Dashboard**: View logs alongside traces and metrics
-- **OpenTelemetry Native**: Seamless integration with modern observability standards
+- **[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) Native**: Seamless integration with modern observability standards
 - **SQL-like Querying**: Query structured log data with familiar syntax
 - **Real-time Monitoring**: Live log streaming and alerting
 - **Open Source**: Cost-effective alternative to commercial solutions
@@ -710,7 +710,7 @@ To connect your application to SigNoz, you need to set a few environment variabl
 ```bash
 # For SigNoz Cloud
 export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="https://ingest.{region}.signoz.cloud:443/v1/logs"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=YOUR_ACCESS_TOKEN"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
 export OTEL_RESOURCE_ATTRIBUTES="service.name=nodejs-api,service.version=1.0.0"
 
 # For self-hosted SigNoz
@@ -903,8 +903,8 @@ const logger = pino({
 ### Migration Strategy
 
 1. **Replace logger creation** with Pino initialization
-2. **Convert string interpolation** to structured logging  
-3. **Update error logging** to use Pino's error serializers
+2. **Convert string interpolation** to [structured logging](https://signoz.io/blog/structured-logs/)  
+3. **Update [error logging](https://signoz.io/guides/error-log/)** to use Pino's error serializers
 4. **Test performance impact** and adjust configuration
 5. **Update monitoring configurations** to handle new log format
 
@@ -935,7 +935,7 @@ As Node.js applications continue to scale, Pino's combination of speed, structur
 
 ### What is Pino package?
 
-Pino is a high-performance Node.js logging library optimized for speed and structured output. It produces JSON logs by default, uses asynchronous I/O, and focuses on minimal overhead to prevent logging from becoming an application bottleneck.
+Pino is a high-performance Node.js logging library optimized for speed and structured output. It produces [JSON logs](https://signoz.io/blog/json-logs/) by default, uses asynchronous I/O, and focuses on minimal overhead to prevent logging from becoming an application bottleneck.
 
 ### What is the common log format in Pino?
 

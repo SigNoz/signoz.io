@@ -8,12 +8,18 @@ interface ChatbaseClientProps {
   className?: string
   userId?: string
   userHash?: string
+  disableFloatingMessages?: boolean
 }
 
 /**
  * Client component that loads the Chatbase embed script and handles identity verification
  */
-export default function ChatbaseClient({ className, userId, userHash }: ChatbaseClientProps) {
+export default function ChatbaseClient({
+  className,
+  userId,
+  userHash,
+  disableFloatingMessages,
+}: ChatbaseClientProps) {
   const isInitialized = useRef(false)
   const [shouldLoadScript, setShouldLoadScript] = useState(false)
 
@@ -68,6 +74,13 @@ export default function ChatbaseClient({ className, userId, userHash }: Chatbase
       console.log('No user ID available for Chatbase configuration')
     }
 
+    if (disableFloatingMessages) {
+      window.chatbaseConfig = {
+        ...(window.chatbaseConfig || {}),
+        showFloatingInitialMessages: false,
+      }
+    }
+
     // Initialize Chatbase exactly as provided in the embed script
     if (!window.chatbase || window.chatbase('getState') !== 'initialized') {
       window.chatbase = (...args: any[]) => {
@@ -89,7 +102,7 @@ export default function ChatbaseClient({ className, userId, userHash }: Chatbase
 
     // Trigger script loading
     setShouldLoadScript(true)
-  }, [userId, userHash])
+  }, [disableFloatingMessages, userId, userHash])
 
   const handleScriptLoad = () => {
     console.log('Chatbase script loaded successfully')
@@ -125,6 +138,10 @@ declare global {
       user_id: string
       user_hash?: string
       user_metadata?: Record<string, string>
+    }
+    chatbaseConfig?: {
+      showFloatingInitialMessages?: boolean
+      [key: string]: unknown
     }
   }
 }

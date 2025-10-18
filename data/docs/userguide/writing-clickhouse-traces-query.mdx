@@ -1,15 +1,11 @@
 ---
 date: 2024-06-06
+tags : [SigNoz Cloud, Self-Host]
 title: Writing traces based ClickHouse queries for building dashboard panels
 id: writing-clickhouse-traces-query
 ---
 
 ## Traces Schema
-
-<Admonition type="info">
-The distributed tables in clickhouse have been named by prefixing distributed_ to existing single shard table names. If you want to use clickhouse queries in dashboard or alerts, you should use the distributed table names. 
-Eg, signoz_index_v3 now corresponds to the table of a single shard. To query all the shards, query against distributed_signoz_index_v3.
-</Admonition>
 
 ### distributed_signoz_index_v3
 
@@ -36,6 +32,7 @@ This is primary table of Traces which is queried to fetch spans and apply aggreg
     `attributes_number` Map(LowCardinality(String), Float64) CODEC(ZSTD(1)),
     `attributes_bool` Map(LowCardinality(String), Bool) CODEC(ZSTD(1)),
     `resources_string` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    `resource` JSON(max_dynamic_paths = 100) CODEC(ZSTD(1)),
     `events` Array(String) CODEC(ZSTD(2)),
     `links` String CODEC(ZSTD(1)),
     `response_status_code` LowCardinality(String) CODEC(ZSTD(1)),
@@ -56,31 +53,24 @@ This is primary table of Traces which is queried to fetch spans and apply aggreg
     `attribute_string_rpc$$system` LowCardinality(String) DEFAULT attributes_string['rpc.system'] CODEC(ZSTD(1)),
     `attribute_string_rpc$$service` LowCardinality(String) DEFAULT attributes_string['rpc.service'] CODEC(ZSTD(1)),
     `attribute_string_rpc$$method` LowCardinality(String) DEFAULT attributes_string['rpc.method'] CODEC(ZSTD(1)),
-    `attribute_string_peer$$service` LowCardinality(String) DEFAULT attributes_string['peer.service'] CODEC(ZSTD(1)),
-    INDEX idx_trace_id trace_id TYPE tokenbf_v1(10000, 5, 0) GRANULARITY 1,
-    INDEX idx_span_id span_id TYPE tokenbf_v1(5000, 5, 0) GRANULARITY 1,
-    INDEX idx_duration duration_nano TYPE minmax GRANULARITY 1,
-    INDEX idx_name name TYPE ngrambf_v1(4, 5000, 2, 0) GRANULARITY 1,
-    INDEX idx_kind kind TYPE minmax GRANULARITY 4,
-    INDEX idx_http_route `attribute_string_http$$route` TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_http_url http_url TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_http_host http_host TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_http_method http_method TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_timestamp timestamp TYPE minmax GRANULARITY 1,
-    INDEX idx_rpc_method `attribute_string_rpc$$method` TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_response_statusCode response_status_code TYPE set(0) GRANULARITY 1,
-    INDEX idx_status_code_string status_code_string TYPE set(3) GRANULARITY 4,
-    INDEX idx_kind_string kind_string TYPE set(5) GRANULARITY 4,
-    INDEX attributes_string_idx_key mapKeys(attributes_string) TYPE tokenbf_v1(1024, 2, 0) GRANULARITY 1,
-    INDEX attributes_string_idx_val mapValues(attributes_string) TYPE ngrambf_v1(4, 5000, 2, 0) GRANULARITY 1,
-    INDEX attributes_number_idx_key mapKeys(attributes_number) TYPE tokenbf_v1(1024, 2, 0) GRANULARITY 1,
-    INDEX attributes_number_idx_val mapValues(attributes_number) TYPE bloom_filter GRANULARITY 1,
-    INDEX attributes_bool_idx_key mapKeys(attributes_bool) TYPE tokenbf_v1(1024, 2, 0) GRANULARITY 1,
-    INDEX resources_string_idx_key mapKeys(resources_string) TYPE tokenbf_v1(1024, 2, 0) GRANULARITY 1,
-    INDEX resources_string_idx_val mapValues(resources_string) TYPE ngrambf_v1(4, 5000, 2, 0) GRANULARITY 1
+    `attribute_string_peer$$service` LowCardinality(String) DEFAULT attributes_string['peer.service'] CODEC(ZSTD(1))
 )
 ORDER BY (ts_bucket_start, resource_fingerprint, has_error, name, timestamp)
 ```
+
+For faster filtering using resource attributes we have another table i.e `distributed_traces_v3_resource`
+
+```sql
+(
+    `labels` String CODEC(ZSTD(5)),
+    `fingerprint` String CODEC(ZSTD(1)),
+    `seen_at_ts_bucket_start` Int64 CODEC(Delta(8), ZSTD(1))
+)
+```
+
+<Admonition>
+Any query that we write will be written for the `distributed_signoz_index_v3` table. If any resource filter is present then we will use the `distributed_traces_v3_resource` for better performance.
+</Admonition>
 
 #### Columns in the distributed_signoz_index_v3 table
 
@@ -104,7 +94,8 @@ ORDER BY (ts_bucket_start, resource_fingerprint, has_error, name, timestamp)
 |**attributes_string** | Map of all string tags/attributes of the span|
 |**attributes_number** | Map of all number tags/attributes of the span|
 |**attributes_bool** | Map of all bool tags/attributes of the span|
-|**resources_string** | Map of all resource tags/attributes of the span|
+|**resources_string** | [Deprecated] Map of all resource tags/attributes of the span|
+|**resource** | All the resource attributes are stored in this JSON column|
 |**events** | Events of the span. It is an array of stringified json of span events|
 |**links** | Links of the span. It is a stringified json of span links|
 |**response_status_code** | Response status code of the span. Derived from `http.status_code`, `rpc.grpc.status_code` and `rpc.jsonrpc.error_code` attribute of a span|
@@ -126,18 +117,6 @@ ORDER BY (ts_bucket_start, resource_fingerprint, has_error, name, timestamp)
 |**attribute_string_rpc$$service** | RPC service of the span. Derived from `attributes_string['rpc.service']` attribute of a span|
 |**attribute_string_rpc$$method** | RPC method of the span. Derived from `attributes_string['rpc.method']` attribute of a span|
 |**attribute_string_peer$$service** | Peer service of the span. Derived from `attributes_string['peer.service']` attribute of a span|
-
-## Timestamp Bucketing
-In the new schema for traces i.e `distributed_signoz_index_v3`, we have a new column 
-`ts_bucket_start` which is used to store the start timestamp of the bucket. This is used for faster filtering on timestamp attribute.
-
-How to use this column in the queries?
-If your timestamp query is `timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}` then you will have to add 
- `ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}`
-
-We have added -1800, as bucketing is done in 30 minute intervals.
-
-
 
 ### distributed_signoz_error_index_v2
 
@@ -247,6 +226,113 @@ This table stores all the attributes of the span.
 |**float64TagValue** | Float64 value of the attribute |
 |**isColumn** | Whether the attribute is a column or not |
 
+
+## Timestamp Bucketing for distributed_signoz_index_v3
+In the new schema for traces i.e `distributed_signoz_index_v3`, we have a new column 
+`ts_bucket_start` which is used to store the start timestamp of the bucket. This is used for faster filtering on timestamp attribute.
+
+How to use this column in the queries?
+If your timestamp query is `timestamp BETWEEN $start_datetime AND $end_datetime` then you will have to add 
+ `ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp`
+
+We have added -1800, as bucketing is done in 30 minute intervals.
+
+## Using Resource Attributes for distributed_signoz_index_v3
+
+Resource attributes represent metadata about the source of your traces (like service name, host, environment, etc.). Using resource attributes in your queries will **significantly improve query performance** because they allow ClickHouse to filter data more efficiently using the dedicated `distributed_traces_v3_resource` table.
+
+You can read more about it [here](/blog/query-performance-improvement/).
+
+<Admonition type="tip">
+**Always include resource attribute filters** in your queries when possible. This is one of the most effective ways to optimize trace query performance.
+</Admonition>
+
+### How to Filter Using Resource Attributes
+
+When filtering by resource attributes, you need to use a Common Table Expression (CTE) to first identify the relevant resource fingerprints, then use those fingerprints in your main query.
+
+#### Step 1: Create the Resource Filter CTE
+
+```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE (simpleJSONExtractString(labels, 'service.name') = 'myservice') 
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
+```
+
+#### Step 2: Use the Filter in Your Main Query
+
+```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE (simpleJSONExtractString(labels, 'service.name') = 'myservice') 
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
+SELECT count(*) 
+FROM signoz_traces.distributed_signoz_index_v3 
+WHERE resource_fingerprint GLOBAL IN __resource_filter
+    AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+    AND timestamp >= {{.start_datetime}} AND timestamp <= {{.end_datetime}}
+```
+
+### Using Resource Attributes in SELECT and GROUP BY
+
+To include resource attributes in your SELECT clause or GROUP BY statements, use the format: `resource.<keyname>::String`
+
+**Example:** `resource.service.name::String`
+
+## Selected (Indexed) Attributes for distributed_signoz_index_v3
+
+When an attribute field is converted to a [selected (indexed) field](/api-reference/#/operations/getTraceFields), two new dedicated columns are automatically created for better query performance.
+
+### How Selected Attributes Work
+
+For example, if you have an attribute named `http.method` in `attributes_string`, the following columns will be created:
+
+```sql
+`attribute_string_http$$method` LowCardinality(String) DEFAULT attributes_string['http.method'] CODEC(ZSTD(1)),
+`attribute_string_http$$method_exists` Bool MATERIALIZED if(mapContains(attributes_string, 'http.method') != 0, true, false) CODEC(ZSTD(1)),
+```
+
+<Admonition type="info">
+Selected attributes can be referenced directly by their column name (e.g., `attribute_string_http$$method`) instead of using map syntax (e.g., `attributes_string['http.method']`).
+</Admonition>
+
+## Query Syntax for Attributes
+
+When writing queries for the traces table, you need to reference attributes using the correct format based on their data type and whether they are selected fields.
+
+### Standard Attribute Reference Format
+
+For non-selected attributes, use the format: `<type>_<dataType>[<keyname>]`
+
+Where:
+- `type` = `attributes`
+- `dataType` = `string`, `number`, or `bool`
+- `keyname` = the actual attribute name
+
+**Examples:**
+- String attribute: `attributes_string['http.status_code']`
+- Number attribute: `attributes_number['response_time']`
+- Boolean attribute: `attributes_bool['is_error']`
+
+### Selected Attribute Reference Format
+
+For selected (indexed) attributes, use the direct column name: `attribute_<dataType>_<keyname_with_dollars>`
+
+**Examples:**
+- Selected string attribute: `attribute_string_http$$route`
+- Selected number attribute: `attribute_number_response$$time`
+- Selected boolean attribute: `attribute_bool_is$$error`
+
+<Admonition type="note">
+Note that in selected attribute column names, dots (.) in the original attribute name are replaced with double dollar signs ($$).
+</Admonition>
+
+
 ## Writing Clickhouse Queries for Dashboard Panels
 
 ### Timeseries
@@ -260,6 +346,11 @@ This panel is used when you want to view your aggregated data in a timeseries.
 Plot a chart of 1 minute showing count of spans in 100ms interval of service frontend with duration > 50ms
 
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT fromUnixTimestamp64Milli(intDiv( toUnixTimestamp64Milli ( timestamp ), 100) * 100) AS interval, 
 toFloat64(count()) AS count 
 FROM (
@@ -268,7 +359,7 @@ FROM (
  WHERE resource_string_service$$name='frontend' 
  AND duration_nano>=50*exp10(6) 
  AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
- AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}})
+ AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp)
  GROUP BY interval ORDER BY interval ASC;
 ```
 
@@ -279,9 +370,15 @@ You can reduce your end result to either average, latest, sum, min, or max.
 
 #### Examples
 
-##### Average duration of spans where `method = 'POST'` , `service_name = 'sample-service'`
+##### Average duration of spans where `method = 'POST'` , `service.name = 'sample-service'`
 
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE (simpleJSONExtractString(labels, 'service.name') = 'frontend') 
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT 
     avg(value) as value, 
     any(ts) as ts FROM (
@@ -292,9 +389,59 @@ SELECT
             signoz_traces.distributed_signoz_index_v3
         WHERE 
             timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
-            ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} AND
+            ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
             http_method = 'POST' AND 
-            resource_string_service$$name = 'sample-service'
+            resource_fingerprint GLOBAL IN __resource_filter
+        GROUP BY ts 
+        ORDER BY ts ASC
+    )
+```
+
+##### Count of spans per minute with resource filtering for `service.name = 'frontend'` and `environment = 'production'`
+
+```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE (simpleJSONExtractString(labels, 'service.name') = 'frontend') 
+    AND (simpleJSONExtractString(labels, 'environment') = 'production')
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
+SELECT 
+    toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
+    toFloat64(count()) AS value 
+FROM 
+    signoz_traces.distributed_signoz_index_v3
+WHERE 
+    resource_fingerprint GLOBAL IN __resource_filter AND
+    timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+GROUP BY ts 
+ORDER BY ts ASC;
+```
+
+##### Average duration of spans where `http.method = 'GET'` and `service.name = 'api-service'` using resource filtering
+
+```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE (simpleJSONExtractString(labels, 'service.name') = 'api-service') 
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
+SELECT 
+    avg(value) as value, 
+    any(ts) as ts FROM (
+        SELECT 
+            toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts, 
+            toFloat64(avg(duration_nano)) AS value 
+        FROM 
+            signoz_traces.distributed_signoz_index_v3
+        WHERE 
+            resource_fingerprint GLOBAL IN __resource_filter AND
+            timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
+            ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
+            http_method = 'GET'
         GROUP BY ts 
         ORDER BY ts ASC
     )
@@ -311,11 +458,211 @@ The query is similar to timeseries query but instead of using time interval we u
 ##### GroupBy a tag/attribute in distributed tracing data
 
 ```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
 SELECT now() as ts, 
-attributes_string['example_string_attribute'] AS attribute_name, 
-toFloat64(avg(duration_nano)) AS value 
+    attributes_string['example_string_attribute'] AS attribute_name, 
+    toFloat64(avg(duration_nano)) AS value 
 FROM signoz_traces.distributed_signoz_index_v3  
 WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
-AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
+    AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
 GROUP BY (attribute_name, ts) order by (attribute_name, ts) ASC;
+```
+
+##### Count of spans by service name with resource filtering
+
+```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
+SELECT 
+    now() as ts,
+    resource.service.name::String as `service.name`,
+    toFloat64(count()) AS value 
+FROM 
+    signoz_traces.distributed_signoz_index_v3
+WHERE 
+    resource_fingerprint GLOBAL IN __resource_filter AND
+    timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
+    `service.name` IS NOT NULL
+GROUP BY `service.name`, ts 
+ORDER BY value DESC;
+```
+
+##### Average duration by HTTP method for specific service using resource filtering
+
+```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE (simpleJSONExtractString(labels, 'service.name') = 'api-gateway') 
+    AND seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
+SELECT 
+    now() as ts,
+    http_method,
+    toFloat64(avg(duration_nano)) AS avg_duration_nano 
+FROM 
+    signoz_traces.distributed_signoz_index_v3
+WHERE 
+    resource_fingerprint GLOBAL IN __resource_filter AND
+    timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp AND
+    http_method IS NOT NULL AND http_method != ''
+GROUP BY http_method, ts 
+ORDER BY avg_duration_nano DESC;
+```
+
+## Real Life Use Cases Examples
+
+### Number of spans generated by each service
+
+```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
+SELECT 
+    toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
+    resource.service.name::String as `service.name`,
+    toFloat64(count()) AS value 
+FROM 
+    signoz_traces.distributed_signoz_index_v3  
+WHERE 
+    resource_fingerprint GLOBAL IN __resource_filter AND
+    timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND 
+    `service.name` IS NOT NULL AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+GROUP BY `service.name`, ts
+ORDER BY ts ASC;
+```
+
+### Number of error spans generated by each service
+
+```sql
+WITH __resource_filter AS (
+    SELECT fingerprint 
+    FROM signoz_traces.distributed_traces_v3_resource 
+    WHERE seen_at_ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+)
+SELECT 
+    toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
+    resource.service.name::String as `service.name`,
+    toFloat64(count()) AS value 
+FROM 
+    signoz_traces.distributed_signoz_index_v3  
+WHERE 
+    resource_fingerprint GLOBAL IN __resource_filter AND
+    timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND 
+    has_error = true AND
+    `service.name` IS NOT NULL AND
+    ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp
+GROUP BY `service.name`, ts 
+ORDER BY ts ASC;
+```
+
+
+### GroupBy a tag/attribute in distributed tracing data
+
+```sql
+SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, 
+attributes_string['http.method'] AS method,
+toFloat64(avg(durationNano)) AS value 
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE attributes_string['http.method']!=''
+AND timestamp > now() - INTERVAL 30 MINUTE
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY (method, interval) order by (method, interval) ASC;
+```
+
+### Show count of each `customer_id` which is present as attribute of a span event
+
+```sql
+WITH arrayFilter(x -> JSONExtractString(x, 'name')='Getting customer', events) AS filteredEvents
+SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, toFloat64(count()) AS count, 
+arrayJoin(arrayMap(x -> JSONExtractString(JSONExtractString(x, 'attributeMap'), 'customer_id'), filteredEvents)) AS resultArray 
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE not empty(filteredEvents) 
+AND timestamp > toUnixTimestamp(now() - INTERVAL 30 MINUTE) 
+GROUP BY (resultArray, interval) order by (resultArray, interval) ASC;
+```
+
+### Avg latency between 2 spans of interest (part of the trace tree)
+
+```sql
+SELECT
+    interval,
+    round(avg(time_diff), 2) AS result
+FROM
+(
+    SELECT
+        interval,
+        traceID,
+        if(startTime1 != 0, if(startTime2 != 0, (toUnixTimestamp64Nano(startTime2) - toUnixTimestamp64Nano(startTime1)) / 1000000, nan), nan) AS time_diff
+    FROM
+    (
+        SELECT
+            toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+            traceID,
+            minIf(timestamp, if(resource_string_service$$name='driver', if(name = '/driver.DriverService/FindNearest', if((resources_string['component']) = 'gRPC', true, false), false), false)) AS startTime1,
+            minIf(timestamp, if(resource_string_service$$name='route', if(name = 'HTTP GET /route', true, false), false)) AS startTime2
+        FROM signoz_traces.distributed_signoz_index_v3
+        WHERE (timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}) AND (ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}) AND (resource_string_service$$name IN ('driver', 'route'))
+        GROUP BY (interval, traceID)
+        ORDER BY (interval, traceID) ASC
+    )
+)
+WHERE isNaN(time_diff) = 0
+GROUP BY interval
+ORDER BY interval ASC;
+```
+
+
+### Show sum of values  of `customer_id` which is present as attribute of a span event
+
+```sql
+WITH arrayFilter(x -> JSONExtractString(x, 'name')='Getting customer', events) AS filteredEvents
+SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, toFloat64(sum(toInt32(resultArray))) AS sum, 
+arrayJoin(arrayMap(x -> JSONExtractString(JSONExtractString(x, 'attributeMap'), 'customer_id'), filteredEvents)) AS resultArray 
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE not empty(filteredEvents) and timestamp > toUnixTimestamp(now() - INTERVAL 30 MINUTE) 
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY (resultArray, interval) order by (resultArray, interval) ASC;
+```
+
+
+### Plotting a chart on `100ms` interval
+
+Plot a chart of 1 minute showing count of spans in `100ms` interval of service `frontend` with duration > 50ms
+
+```sql
+SELECT fromUnixTimestamp64Milli(intDiv( toUnixTimestamp64Milli ( timestamp ), 100) * 100) AS interval, 
+toFloat64(count()) AS count 
+FROM (
+ SELECT timestamp 
+ FROM signoz_traces.distributed_signoz_index_v3
+ WHERE resource_string_service$$name='frontend' 
+ AND durationNano>=50*exp10(6) 
+ AND timestamp > now() - INTERVAL 1 MINUTE AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(1))) - 1800)
+ GROUP BY interval 
+ ORDER BY interval ASC;
+```
+
+### Show count of loglines per minute
+
+```sql
+SELECT toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS interval, 
+toFloat64(count()) AS value 
+FROM signoz_logs.distributed_logs_v2
+WHERE timestamp > toUnixTimestamp64Nano(now64() - INTERVAL 30 MINUTE) 
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY interval 
+ORDER BY interval ASC;
 ```

@@ -1,0 +1,154 @@
+---
+
+title: Breaking Free from SQLite - Why We Added PostgreSQL Support to SigNoz
+slug: postgresql-oss-support
+date: 2025-09-11
+tags: [Product]
+authors: [anushka_karmakar]
+description: Self-hosting SigNoz just got significantly easier with community-focused improvements that remove deployment friction and give you more flexibility in how you run your observability stack.
+image: 
+keywords: [sqlite, data, observability, traces, metrics, logs, signoz, sql, postgresql]
+
+---
+
+"Let us support different relational databases apart from SQLite. Nobody likes to run SQLite in production."
+
+This was one of the most requested features from our community. Your requests have been heard, and we've added support for different relational databases, starting with PostgreSQL.
+
+If you're self-hosting SigNoz, you no longer need to worry about SQLite's limitations. Let's dive into what we've built and why it matters for your production deployments.
+
+## Setting Up PostgreSQL is Dead Simple
+
+<YouTube id="RMmOl2La9oU" mute={false} />
+
+Setting up PostgreSQL is as easy as adding a service to your Docker Compose. Here's literally all you need:
+
+```yaml
+services:
+  postgres:
+    image: postgres:15
+    container_name: signoz_postgres
+    environment:
+      POSTGRES_DB: signoz
+      POSTGRES_USER: signoz
+      POSTGRES_PASSWORD: your_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  signoz:
+    environment:
+      SIGNOZ_SQLSTORE_PROVIDER: postgres
+      SIGNOZ_SQLSTORE_POSTGRES_DSN: postgres://signoz:your_password@postgres:5432/signoz?sslmode=disable
+```
+
+Run `docker-compose up` and you're done. All schema migrations happen automatically. Your PostgreSQL instance is ready with all 47 migrations applied.
+
+## Why This Matters for Production
+
+Let's be real about SQLite's limitations. When you have multiple team members creating dashboards, setting up alerts, or using our Terraform provider for Infrastructure as Code - they're all fighting for that single writer lock. SQLite only allows one writer at a time. Everyone else queues up.
+
+With PostgreSQL, you get:
+
+### Real Multi-User Support
+
+Create a dedicated `signoz` database with specific users and permissions. Running PostgreSQL for other applications? Just create another database in the same instance. You have proper isolation and access control - something impossible with SQLite's file-based approach.
+
+### Infrastructure as Code Without Deadlocks
+
+Multiple people can now write to the same [SigNoz](https://signoz.io/docs/introduction/) instance simultaneously. When your team uses our Terraform provider to provision dashboards and alerts, PostgreSQL's transaction handling ensures everything works smoothly. No more deadlocks, no more waiting.
+
+### Production-Grade Operations
+
+- **Automated maintenance**: Background processes like autovacuum handle optimization
+- **Real backups**: Point-in-time recovery, not just copying files
+- **Monitoring built-in**: The `pg_stat` views show you slow queries, connection patterns, lock contention - everything you need to debug issues
+
+## How We Made This Possible
+
+We didn't just bolt on PostgreSQL support. We rebuilt our entire SQL layer to be database-agnostic.
+
+### The Query Layer
+
+We built the `sqlstore` package that exposes a database-agnostic interface. Our entire application queries through this interface without knowing which database runs underneath:
+
+```go
+// Your application code doesn't change whether using SQLite or PostgreSQL
+db.Query(ctx, "SELECT * FROM organizations WHERE...")
+
+```
+
+### Database-Agnostic Migrations
+
+The `sqlmigrator` package runs migrations regardless of your database choice. The `sqlschema` package translates DDL operations into database-specific commands. When you upgrade SigNoz, migrations just work.
+
+### Why PostgreSQL First?
+
+We had requests for MariaDB and MySQL too. But PostgreSQL offers:
+
+- Better handling of concurrent writes (MVCC)
+- Enterprise features out of the box
+- Superior monitoring capabilities with pg_stat views
+- Rock-solid backup and recovery options
+
+## The New Schema: Built for Scale
+
+While we were at it, we redesigned our schema using the snowflake model. Why? Because observability data is hierarchical by nature.
+
+At the heart sits **organizations**. Everything flows from there:
+
+- Organization → Users → Passwords, API Keys, Preferences
+- Organization → Dashboards → Panels → Queries
+- Organization → Alert Rules → Notification Channels
+
+This normalized structure means:
+
+- No data duplication
+- Foreign key constraints prevent bad data
+- Clear hierarchical relationships
+- Better storage efficiency as you scale
+
+You can see this clearly in our schema - when I showed the ERD, every relationship was visible. The hierarchy makes sense at a glance.
+
+## UUID v7: Small Change, Big Impact
+
+We switched from random UUIDs to UUID v7. These are timestamp-sortable UUIDs. What does this mean for you?
+
+When you insert data, the UUIDs are already in chronological order. The database doesn't need to reorganize its indexes. Result? Significantly faster inserts and better query performance for time-range queries - which is basically everything in observability.
+
+## Installation Just Got Way Easier
+
+Alongside PostgreSQL support, we've been making self-hosting simpler across the board:
+
+### One-Click Deployments
+
+- [**Railway**](https://railway.com/deploy/signoz): Deploy SigNoz with literally one click
+- [**DigitalOcean Marketplace**](https://signoz.io/docs/install/digital-ocean/): Listed and ready to deploy
+
+### Comprehensive Documentation
+
+We've added [detailed guides](https://signoz.io/docs/install/self-host/) for:
+
+- [Docker](https://signoz.io/docs/install/docker/) and [Docker Swarm](https://signoz.io/docs/install/docker-swarm/) (with SELinux support)
+- Kubernetes deployments on [AWS](https://signoz.io/docs/install/kubernetes/aws/), [GCP](https://signoz.io/docs/install/kubernetes/gcp/), [AKS](https://signoz.io/docs/install/kubernetes/aks/)
+- [OpenShift](https://signoz.io/docs/install/kubernetes/openshift/) and [ArgoCD](https://signoz.io/docs/install/argocd/)
+- [AWS ECS](https://signoz.io/docs/install/ecs/) with detailed IAM configurations
+
+Each guide includes the specific nuances of that platform - from IAM roles for ECS to network policies for OpenShift.
+
+## What's Coming Next
+
+Now that installation is easy and you can choose your database, our next focus is making data ingestion seamless.
+
+How do you send data from 20 different services across multiple environments to SigNoz? We're working on making this as simple as the installation. Stay tuned.
+
+## Upgrade Today
+
+If you're hitting SQLite limitations in your self-hosted deployment, PostgreSQL support is ready. The performance gains and operational benefits are immediate.
+
+For new installations, just add the PostgreSQL configuration to your Docker Compose. For existing installations, we'll have migration tools ready soon.
+
+Questions? Hit us up on [Slack](https://signoz.io/slack) or tag Vikrant and Nagesh directly in our community. They've been working relentlessly to make this happen.
+
+---
+
+*This is what democratizing observability looks like - giving you choices, not locking you in. SQLite for getting started, PostgreSQL for production, and more databases coming based on what you need.*

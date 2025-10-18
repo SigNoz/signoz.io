@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!seriesData) return { title: 'Series Not Found' }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://signoz.io'
-  const fullSeriesUrl = `${siteUrl}/opentelemetry/${params.slug}`
+  const fullSeriesUrl = `${siteUrl}/opentelemetry/series/${params.slug}`
   const imageUrl = seriesData.heroImageUrl
     ? seriesData.heroImageUrl.startsWith('http')
       ? seriesData.heroImageUrl
@@ -79,7 +79,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function SeriesJsonLd({ seriesData, slug }: { seriesData: SeriesData; slug: string }) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://signoz.io'
-  const fullSeriesUrl = `${siteUrl}/opentelemetry/${slug}`
+  const fullSeriesUrl = `${siteUrl}/opentelemetry/series/${slug}`
   const imageUrl = seriesData.heroImageUrl
     ? seriesData.heroImageUrl.startsWith('http')
       ? seriesData.heroImageUrl

@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 title: Search Traces
+tags : [SigNoz Cloud, Self-Host]
 id: search-traces
 ---
 This section provides detailed examples of searching traces using the SigNoz Trace API. The example queries demonstrate querying traces with specific attributes and filters.
@@ -33,97 +34,47 @@ This is the JSON payload for the example query.
 {
     "start": 1702009280000,
     "end": 1702011080000,
-    "step": 60,
+    "requestType": "raw",
     "variables": {},
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "list",
-        "builderQueries": {
-            "A": {
-                "dataSource": "traces",
-                "queryName": "A",
-                "aggregateOperator": "noop",
-                "aggregateAttribute": {},
-                "filters": {
-                    "items": [
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "traces",
+                    "filter": {
+                        "expression": "deployment_name = 'hotrod' AND httpMethod = 'GET' AND hasError = true"
+                    },
+                    "selectFields": [
                         {
-                            "key": {
-                                "key": "deployment_name",
-                                "dataType": "string",
-                                "type": "resource",
-                                "isColumn": false
-                            },
-                            "op": "=",
-                            "value": "hotrod"
+                            "name": "serviceName",
                         },
                         {
-                            "key": {
-                                "key": "httpMethod",
-                                "dataType": "string",
-                                "type": "tag",
-                                "isColumn": true
-                            },
-                            "op": "=",
-                            "value": "GET"
+                            "name": "httpMethod",
                         },
                         {
-                            "key": {
-                                "key": "hasError",
-                                "dataType": "bool",
-                                "type": "tag",
-                                "isColumn": true
-                            },
-                            "op": "=",
-                            "value": "true"
+                            "name": "responseStatusCode",
+                        },
+                        {
+                            "name": "httpUrl",
                         }
                     ],
-                    "op": "AND"
-                },
-                "expression": "A",
-                "disabled": false,
-                "having": [],
-                "stepInterval": 60,
-                "limit": 10,
-                "orderBy": [
-                    {
-                        "columnName": "timestamp",
-                        "order": "desc"
-                    }
-                ],
-                "groupBy": [],
-                "legend": "",
-                "reduceTo": "sum",
-                "offset": 0,
-                "selectColumns": [
-                    {
-                        "key": "serviceName",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true
-                    },
-                    {
-                        "key": "httpMethod",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true
-                    },
-                    {
-                        "key": "responseStatusCode",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true
-                    },
-                    {
-                        "key": "httpUrl",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true
-                    }
-                ]
+                    "order": [
+                        {
+                            "key": {
+                                "name": "timestamp"
+                            },
+                            "direction": "desc"
+                        }
+                    ],
+                    "limit": 10,
+                    "offset": 0,
+                    "disabled": false
+                }
             }
-        }
-    },
-    "dataSource": "traces"
+        ]
+    }
 }
 ```
 
@@ -148,7 +99,7 @@ You can specify the start and end timestamps in Unix format (milliseconds).
 
 <Admonition>
 
-To search for root spans, you need to add `parentSpanID` value to `""` in filters
+To search for root spans, you need to add `parentSpanID = ''` in the filter expression
 
 </Admonition>
 
@@ -160,96 +111,46 @@ This is the JSON payload for the example query.
 {
     "start": 1702009280000,
     "end": 1702011080000,
-    "step": 60,
+    "requestType": "raw",
     "variables": {},
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "list",
-        "builderQueries": {
-            "A": {
-                "dataSource": "traces",
-                "queryName": "A",
-                "aggregateOperator": "noop",
-                "aggregateAttribute": {},
-                "filters": {
-                    "items": [
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "traces",
+                    "filter": {
+                        "expression": "deployment_name = 'hotrod' AND httpMethod = 'GET' AND parentSpanID = ''"
+                    },
+                    "selectFields": [
                         {
-                            "key": {
-                                "key": "deployment_name",
-                                "dataType": "string",
-                                "type": "resource",
-                                "isColumn": false
-                            },
-                            "op": "=",
-                            "value": "hotrod"
+                            "name": "serviceName",
                         },
                         {
-                            "key": {
-                                "key": "httpMethod",
-                                "dataType": "string",
-                                "type": "tag",
-                                "isColumn": true
-                            },
-                            "op": "=",
-                            "value": "GET"
+                            "name": "httpMethod",
                         },
                         {
-                            "key": {
-                                "key": "parentSpanID",
-                                "dataType": "string",
-                                "type": "tag",
-                                "isColumn": true
-                            },
-                            "op": "=",
-                            "value": ""
+                            "name": "responseStatusCode",
+                        },
+                        {
+                            "name": "some_custom_tag",
                         }
                     ],
-                    "op": "AND"
-                },
-                "expression": "A",
-                "disabled": false,
-                "having": [],
-                "stepInterval": 60,
-                "limit": 10,
-                "orderBy": [
-                    {
-                        "columnName": "timestamp",
-                        "order": "desc"
-                    }
-                ],
-                "groupBy": [],
-                "legend": "",
-                "reduceTo": "sum",
-                "offset": 0,
-                "selectColumns": [
-                    {
-                        "key": "serviceName",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true
-                    },
-                    {
-                        "key": "httpMethod",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true
-                    },
-                    {
-                        "key": "responseStatusCode",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true
-                    },
-                    {
-                        "key": "some_custom_tag",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": false
-                    }
-                ]
+                    "order": [
+                        {
+                            "key": {
+                                "name": "timestamp"
+                            },
+                            "direction": "desc"
+                        }
+                    ],
+                    "limit": 10,
+                    "offset": 0,
+                    "disabled": false
+                }
             }
-        }
-    },
-    "dataSource": "traces"
+        ]
+    }
 }
 ```

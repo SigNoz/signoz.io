@@ -1,5 +1,6 @@
 ---
 date: 2025-08-24
+tags : [SigNoz Cloud, Self-Host]
 title: Sending Metrics from your frontend application
 id: sending-metrics-frontend
 ---
@@ -185,29 +186,41 @@ import { metrics } from '@opentelemetry/api';
 // Get a meter from the global meter provider
 const meter = metrics.getMeter('my-app-metrics');
 
-// Create a counter metric
-const requestCounter = meter.createCounter('http_requests_total', {
-  description: 'Total number of HTTP requests',
-});
-
-// Create a histogram metric for measuring request duration
-const requestDuration = meter.createHistogram('http_request_duration_seconds', {
-  description: 'Duration of HTTP requests in seconds',
+// Create a histogram metric for measuring request duration (also gives count & sum)
+const requestDuration = meter.createHistogram('http.client.request.duration', {
+  description: 'Duration of HTTP requests',
+  unit: 's', // seconds
 });
 
 // Record metrics in your application
-function handleRequest() {
+async function handleRequest() {
   const startTime = performance.now();
   
-  // Increment the request counter
-  requestCounter.add(1, { endpoint: '/api/data' });
-  
-  // Your application logic here
-  // ...
-  
-  // Record the request duration
-  const duration = (performance.now() - startTime) / 1000; // Convert to seconds
-  requestDuration.record(duration, { endpoint: '/api/data' });
+  try {
+    const response = await fetch('/api/data', { method: 'GET' });
+
+    // Record the request duration
+    const duration = (performance.now() - startTime) / 1000; // Convert to seconds
+    requestDuration.record(duration, {
+      'http.request.method': 'GET',
+      'http.response.status_code': response.status,
+      'http.route': '/api/data',
+      'url.path': '/api/data',
+      'url.scheme': window.location.protocol.replace(':', ''),
+    });
+
+    return await response.json();
+  } catch (err) {
+    const duration = (performance.now() - startTime) / 1000; // Convert to seconds
+    requestDuration.record(duration, {
+      'http.request.method': 'GET',
+      'http.response.status_code': 0,
+      'http.route': '/api/data',
+      'url.path': '/api/data',
+      'url.scheme': window.location.protocol.replace(':', ''),
+    });
+    throw err;
+  }
 }
 ```
 

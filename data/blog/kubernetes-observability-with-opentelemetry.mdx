@@ -11,7 +11,7 @@ keywords: [kubernetes observability, opentelemetry, kubernetes monitoring, kuber
 
 Kubernetes provides a wealth of telemetry data from container metrics and application traces to cluster events and logs. OpenTelemetry [OTel] offers a vendor-neutral, end-to-end solution for collecting and exporting this telemetry in a standardised format.
 
-In this blog, we’ll walk through a Kubernetes observability setup on Minikube using OpenTelemetry, but you can easily extend the setup to your Kubernetes setup as well. We’ll deploy an example instrumented application, then set up the OpenTelemetry Collector in two modes - DaemonSet and Deployment, using the official Helm charts. This two-pronged approach will capture both service-level metrics and traces, as well as cluster-level metrics and events, giving you full visibility into your Kubernetes environment.
+In this blog, we’ll walk through a [Kubernetes observability](https://signoz.io/guides/kubernetes-observability/) setup on Minikube using OpenTelemetry, but you can easily extend the setup to your Kubernetes setup as well. We’ll deploy an example instrumented application, then set up the OpenTelemetry Collector in two modes - DaemonSet and Deployment, using the official Helm charts. This two-pronged approach will capture both service-level metrics and traces, as well as cluster-level metrics and events, giving you full visibility into your Kubernetes environment.
 
 This walkthrough aims to give you a solid practical foundation and a clear blueprint to instrument your own Kubernetes cluster using OpenTelemetry.
 
@@ -46,7 +46,7 @@ Let’s start our minikube.
 minikube start --memory 8192 --cpus 6
 ```
 
-The OpenTelemetry Helm repository should be added:
+The [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) Helm repository should be added:
 
 ```bash
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
@@ -71,7 +71,7 @@ We already have a pod running OTel collector, which comes bundled with the demo.
 
 </Admonition>
 
-At this point, our Minikube cluster has a running demo application. Now we’ll set up two OpenTelemetry Collectors: 
+At this point, our Minikube cluster has a running demo application. Now we’ll set up two [OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/): 
 
 - One running on each node [DaemonSet] to act as an **agent**
 - And one running as a single-instance gateway [Deployment] for cluster-level data.
@@ -80,7 +80,7 @@ Using both ensures we capture **all layers of telemetry**.
 
 ## OpenTelemetry Collector as a DaemonSet [Agent]
 
-First, we deploy the collector as a DaemonSet. This means an OTel Collector pod will run on **each node** of the cluster [in Minikube’s case, just one node = one pod]. This “agent” collector will focus on node and pod-level metrics, container logs, and will serve as a local OTLP endpoint for application telemetry.
+First, we deploy the collector as a DaemonSet. This means an [OTel](https://signoz.io/blog/what-is-opentelemetry/) Collector pod will run on **each node** of the cluster [in Minikube’s case, just one node = one pod]. This “agent” collector will focus on node and pod-level metrics, container logs, and will serve as a local OTLP endpoint for application telemetry.
 
 In OTel terms, the DaemonSet collector will include components like,
 
@@ -162,13 +162,13 @@ You should see **one pod** [named something like `otel-collector-*****`] for the
 
 Great.
 
-We now have the **OTel agent** running, which automatically scrapes host metrics and listens for app telemetry on each node.
+We now have the **[OTel agent](https://signoz.io/comparisons/opentelemetry-collector-vs-agent/)** running, which automatically scrapes host metrics and listens for app telemetry on each node.
 
 ### Functionality of the Collector Daemonset
 
 We set `mode: daemonset` to get one collector per node. The Helm chart will handle setting the proper Kubernetes `DaemonSet` object, including RBAC permissions, **host ports**, and volume mounts needed to access the host’s logs and kubelet API.
 
-- The `kubernetesAttributes` processor is enabled to auto-annotate metrics, traces, and logs with Kubernetes context or meta [e.g. add `k8s.pod.name`, `k8s.node.name`, etc.] for correlation. This is crucial for connecting *application telemetry with the platform/ infra telemetry*.
+- The `kubernetesAttributes` processor is enabled to auto-annotate metrics, traces, and logs with Kubernetes context or meta [e.g. add `k8s.pod.name`, `k8s.node.name`, etc.] for correlation. This is crucial for connecting *[application telemetry](https://signoz.io/comparisons/opentelemetry-vs-application-insights/) with the platform/ infra telemetry*.
 - The `kubeletMetrics` preset enables the `kubeletstats` receiver. This receiver pulls resource usage metrics from each node’s Kubelet API. It provides metrics like **container memory usage**, **pod CPU usage**, and **node network errors**, among others.
     
     For example, it will report how much CPU and memory each pod/container is using, which is vital for performance monitoring and right-sizing.
@@ -179,14 +179,14 @@ By default, the Helm chart also leaves an OTLP receiver open [on the collector�
 
 ## Kubernetes Logging
 
-The *logsCollection* preset in our DaemonSet collector is designed to collect logs from `/var/log/pods/...` on each node, capturing the container *stdout/ stderr*. This is a common and effective method for integrating application logs into your observability pipeline. However, it's essential to understand the broader context of Kubernetes logging.
+The *logsCollection* preset in our DaemonSet collector is designed to collect logs from `/var/log/pods/...` on each node, capturing the container *stdout/ stderr*. This is a common and effective method for integrating application logs into your [observability pipeline](https://signoz.io/guides/observability-pipeline/). However, it's essential to understand the broader context of Kubernetes logging.
 
 ### Kubernetes Logging Best Practices
 
 Effective logging in Kubernetes involves more than just collecting *stdout/stderr*. Here are some best practices:
 
 1. **Log to Standard Output/Error:** This is the most fundamental practice. Containerised applications should write all logs to *stdout* and *stderr*. Kubernetes automatically captures these streams and hands them off to the container runtime [e.g., containerd, Docker], which then writes them to a file on the node [typically in `/var/log/pods/<pod-uid>/<container-name>/<log-id>.log` ]. This is exactly what the *filelog* receiver in OpenTelemetry collects.
-2. **Structured Logging:** Whenever possible, applications should emit logs in a structured format, such as JSON. This makes logs much easier to parse, query, and analyze programmatically. Instead of plain text, a JSON log might look like,
+2. **[structured logging](https://signoz.io/blog/structured-logs/):** Whenever possible, applications should emit logs in a structured format, such as JSON. This makes logs much easier to parse, query, and analyze programmatically. Instead of plain text, a [JSON log](https://signoz.io/blog/json-logs/) might look like,
     
     ```json
     {"timestamp": "...", "level": "INFO", "service": "frontend", "message": "User logged in", "user_id": "123", "ip_address": "192.168.1.10"}
@@ -194,7 +194,7 @@ Effective logging in Kubernetes involves more than just collecting *stdout/stder
     
 3. **Appropriate Log Levels:** Use standard log levels [DEBUG, INFO, WARN, ERROR, FATAL] consistently. This allows for filtering and severity-based alerting.
 4. **Enrich Logs with Context:** While OpenTelemetry's `kubernetesAttributes` processor automatically adds Kubernetes metadata (pod name, namespace, container ID], applications themselves can add valuable business-level context [e.g., `user_id`, `transaction_id]`. This bridges the gap between infrastructure logs and application-specific insights.
-5. **Centralised Logging System:** Ship logs to a centralised system [like an OpenTelemetry backend, Elasticsearch, Loki, etc.] for aggregation, storage, search, and analysis. Relying solely on `kubectl logs` is not scalable for production environments.
+5. **Centralised Logging System:** Ship logs to a centralised system [like an [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/), Elasticsearch, Loki, etc.] for aggregation, storage, search, and analysis. Relying solely on `kubectl logs` is not scalable for production environments.
 6. **Log Rotation and Retention:** Implement proper log rotation to prevent nodes from running out of disk space. Define clear retention policies for your centralised logging solution based on compliance and operational needs.
 7. **Resource Limits for Logging Agents:** Ensure your logging agents [like the OTel Collector DaemonSet] have appropriate CPU and memory limits to prevent them from consuming excessive resources or being evicted.
 8. **Avoid Logging Sensitive Information:** Never log sensitive data such as passwords, API keys, or personally identifiable information [PII].

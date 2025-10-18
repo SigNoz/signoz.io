@@ -1,6 +1,7 @@
 ---
 date: 2025-08-19
 id: install
+tags : [SigNoz Cloud, Self-Host]
 title: ECS Serverless Collection Agent - Install
 description: Install and deploy the sidecar container for ECS Serverless infrastructure monitoring
 ---
@@ -220,16 +221,6 @@ In your ECS [task definition](https://docs.aws.amazon.com/AmazonECS/latest/devel
                     "protocol": "tcp"
                 }
             ],
-            "healthCheck": {
-                "command": [
-                    "CMD-SHELL",
-                    "wget -qO- http://localhost:13133/ || exit 1"
-                ],
-                "interval": 5,
-                "timeout": 6,
-                "retries": 5,
-                "startPeriod": 1
-            },
             "logConfiguration": {
                 "logDriver": "awsfirelens",
                 "options": {
@@ -244,6 +235,12 @@ In your ECS [task definition](https://docs.aws.amazon.com/AmazonECS/latest/devel
 ...
 }
 ```
+<Admonition type="warning">
+Avoid defining a healthCheck for the otel-collector container in your ECS task definition.
+The OpenTelemetry Collector image is based on a minimal base and does not include a shell (/bin/sh or /bin/bash). As a result, any health check command defined in the task definition will fail because AWS ECS attempts to execute it inside the container.
+
+This failure can cause the task to remain in a UNHEALTHY state even when the collector is running correctly.
+</Admonition>
 
 The sidecar container will run the SigNoz collector and includes essential components like the **name** ("signoz-collector"), **image** (e.g., "signoz/signoz-otel-collector:0.88.7"), and **command** for execution, alongside **secrets** for secure configuration. It also specifies **memory** and **CPU** resources, **port mappings** for network communication, a **health check** to ensure operational integrity, and **log configuration** for output management.
 

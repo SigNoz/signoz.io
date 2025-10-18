@@ -41,7 +41,7 @@ If your `instrumentation.ts` is set up locally, it’ll work in production too.
 
 ```bash
 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.YOUR-REGION.signoz.cloud:443
-OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=your-token
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 ```
 
 
@@ -76,7 +76,7 @@ Pick what fits your team’s speed, scale, and infra appetite. Either way, with 
 
 ## 2. Collector vs Direct Exporter
 
-Choosing between an OpenTelemetry **Collector** and a **Direct Exporter** setup is one of the most important architectural decisions you’ll make. It affects how flexible, scalable, and robust your observability pipeline is — especially in production.
+Choosing between an OpenTelemetry **Collector** and a **Direct Exporter** setup is one of the most important architectural decisions you’ll make. It affects how flexible, scalable, and robust your [observability pipeline](https://signoz.io/guides/observability-pipeline/) is — especially in production.
 
 
 ### Collector Approach (Recommended)
@@ -128,7 +128,7 @@ exporters:
   otlp/signoz:
     endpoint: "ingest.YOUR-REGION.signoz.cloud:443"
     headers:
-      signoz-access-token: ${SIGNOZ_TOKEN}
+      signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
   prometheus:
     endpoint: "0.0.0.0:8889"
 
@@ -196,7 +196,7 @@ export function register() {
     traceExporter: new OTLPHttpJsonTraceExporter({
       url: 'https://ingest.us.signoz.cloud:443/v1/traces',
       headers: {
-        'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY || '',
+        'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || '',
       },
     }),
   })
@@ -225,7 +225,7 @@ In short: **use a collector** in production if you care about reliability, flexi
 
 Monitoring without alerts is like a smoke detector without a battery — it might know something’s wrong, but no one hears it.
 
-With SigNoz, you can set up production-grade alerts on latency, errors, external APIs, database health, and more — all powered by auto-generated metrics from your OpenTelemetry traces.
+With SigNoz, you can set up production-grade alerts on latency, errors, external APIs, database health, and more — all powered by auto-generated metrics from your [OpenTelemetry traces](https://signoz.io/blog/opentelemetry-spans/).
 
 ### Understanding SigNoz APM Metrics
 
@@ -380,7 +380,7 @@ OTEL_TRACES_SAMPLER_ARG=0.1
 
 This happens after the full trace is collected — so it’s smarter, but heavier.
 
-**Set up in the OpenTelemetry Collector:**
+**Set up in the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/):**
 
 ```yaml
 processors:
@@ -504,7 +504,7 @@ const shouldSample = (route: string) => {
 
 ### 2. Cold Starts (Serverless + Edge)
 
-Cold starts in Vercel functions or edge environments can be amplified by OTel initialization.
+Cold starts in Vercel functions or edge environments can be amplified by [OTel](https://signoz.io/blog/what-is-opentelemetry/) initialization.
 
 
 ### Mitigation Techniques
@@ -605,7 +605,7 @@ global.fetch = (...args) => {
 This guide wasn’t just about tracing code—it’s about **building smarter systems**. You’ve now got:
 
 - Real-time visibility into backend and frontend performance
-- Trace-to-log correlation for fast debugging
+- Trace-to-[log correlation](https://signoz.io/opentelemetry/correlating-traces-logs-metrics-nodejs/) for fast debugging
 - Data-driven performance insights
 - Alerting and dashboards that actually mean something
 
@@ -627,7 +627,7 @@ This guide wasn’t just about tracing code—it’s about **building smarter sy
 - Instrument from day one
 - Use `@vercel/otel` for fast setup
 - Correlate logs + traces + metrics via OTel context
-- Export to SigNoz for unified visibility
+- Export to [SigNoz](https://signoz.io/docs/introduction/) for unified visibility
 
 ### Optimization
 
