@@ -9,15 +9,10 @@ image: /img/blog/2023/09/firstclass-cover-min.jpg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/is-opentelemetry-a-first-class-citizen-in-your-dashboard-a-datadog-and-newrelic-comparison/"/>
-</head>
-
 > "Trade isn't about goods. Trade is about information. Goods sit in the warehouse until information moves them.” <br></br>
 > C. J. Cherryh
 
-OpenTelemetry is the future of Observability, APM, Monitoring, whatever you want to call ‘the process of knowing what our software is doing.’ It’s becoming common knowledge that your time is better spent gaining experience with an open, standardized system for telemetry than closed-source or otherwise proprietary standard. This truth is so universally acknowledged that all the big players in the market have made announcements of how they’re embracing OpenTelemetry. Often these statements mention how ‘open is the future’ et cetera. But how committed are these teams to OpenTelemetry? In this series, we’ll talk about how native OpenTelemetry tools compare to APM products that have adopted OpenTelemetry only partially. In this article, we will explore how, in both New Relic and Datadog, OpenTelemetry data is a ‘second class citizen.’
+OpenTelemetry is the future of Observability, APM, Monitoring, whatever you want to call ‘the process of knowing what our software is doing.’ It’s becoming common knowledge that your time is better spent gaining experience with an open, standardized system for telemetry than closed-source or otherwise proprietary standard. This truth is so universally acknowledged that all the big players in the market have made announcements of how they’re embracing OpenTelemetry. Often these statements mention how ‘open is the future’ et cetera. But how committed are these teams to OpenTelemetry? In this series, we’ll talk about how native [OpenTelemetry tools](https://signoz.io/blog/opentelemetry-visualization/) compare to APM products that have adopted OpenTelemetry only partially. In this article, we will explore how, in both New Relic and Datadog, OpenTelemetry data is a ‘second class citizen.’
 
 
 
@@ -35,7 +30,7 @@ The result is a system that is gently sloped. It guides the user, without them e
 
 ## The Big Gap Between Datadog’s Marketing and their Tools
 
-Right from the installation stage… something feels amiss when trying to use OpenTelemetry with Datadog. There seem to be no actual use cases listed for OpenTelemetry. The guide on their documentation for trying OpenTelemetry reporting with a simple Python app is out of date, and there’s something kind of odd about the linked of articles from their OpenTelemetry overview:
+Right from the installation stage… something feels amiss when trying to use [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) with Datadog. There seem to be no actual use cases listed for OpenTelemetry. The guide on their documentation for trying OpenTelemetry reporting with a simple Python app is out of date, and there’s something kind of odd about the linked of articles from their OpenTelemetry overview:
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/09/firsclass-1.webp" alt="a screenshot of datadog documentation"/>
@@ -71,7 +66,7 @@ You cannot link traces and logs automatically with the [DataDog OpenTelemetry](h
     <figcaption><i>This trace from manual OpenTelemetry instrumentation looks pretty good in Datadog, but despite several logging calls, nothing shows up here</i></figcaption>
 </figure>
 
-By contrast, with just the automatic instrumentation for Python in OpenTelemetry, an OpenTelemetry native tool like SigNoz can connect traces to related logs without the needed for an additional processor.
+By contrast, with just the automatic instrumentation for Python in OpenTelemetry, an OpenTelemetry native tool like [SigNoz](https://signoz.io/docs/introduction/) can connect traces to related logs without the needed for an additional processor.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/09/firsclass-3.webp" alt="a screenshot of SigNoz traces"/>
@@ -109,14 +104,14 @@ This gap exemplifies the drawbacks of Datadog’s attempt to fully integrate Ope
 
 ### Limitations: a separate path for metrics
 
-One of the central tenets of OpenTelemetry is that, at some point in the near future, the project will achieve a consistent standard for measuring all three observability signals _and correlating them_ with a single point of collection such that even metrics can be implicitly tied to particular traces and logs. This vision isn’t perfectly achieved yet, but it is surprisingly easy to report logs, traces, and metrics with consistent tagging to a native OpenTelemetry backend.
+One of the central tenets of OpenTelemetry is that, at some point in the near future, the project will achieve a consistent standard for measuring all three observability signals _and correlating them_ with a single point of collection such that even metrics can be implicitly tied to particular traces and logs. This vision isn’t perfectly achieved yet, but it is surprisingly easy to report logs, traces, and metrics with consistent tagging to a native [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/).
 
 In datadog, however, metrics and logging are gathered in a way quite separate from traces.
 
 - Logs are gathered by tailing a target file
-- Metrics require you to either connect an OpenTelemetry collector to datadog or use `DogStatsD` . The `StatsD` route appears to be unsupported by any OpenTelemetry SDK
+- Metrics require you to either connect an [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) to datadog or use `DogStatsD` . The `StatsD` route appears to be unsupported by any OpenTelemetry SDK
 
-Adding calls to send metrics with the OpenTelemetry SDK on an application reporting traces to Datadog, much like the trace span events mentioned above, appears to be a noop. The agent and Datadog tracing neither logs an error nor reports any data.
+Adding calls to send metrics with the [OpenTelemetry SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) on an application reporting traces to Datadog, much like the trace span events mentioned above, appears to be a noop. The agent and Datadog tracing neither logs an error nor reports any data.
 
 One limitation did surprise me: it doesn’t appear that span data is available as a ‘metric’ to be queried in Datadog.
 

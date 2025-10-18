@@ -19,7 +19,7 @@ In the sections below, we’ll explore what observability and visibility mean, h
 ## Observability vs. Visibility
 
 **Visibility** generally refers to the ability to **see** into a system’s operations using available data (metrics, logs, etc.). It is often retrospective – you gather predefined metrics or logs and detect when something has gone wrong. <br />
-For example, a basic network monitor might show that a server’s CPU spiked or that an error log was recorded, indicating an issue. Visibility asks **“What information do we have, and does it show something is wrong?”** and is typically associated with traditional monitoring tools and dashboards.
+For example, a basic network monitor might show that a server’s CPU spiked or that an [error log](https://signoz.io/guides/error-log/) was recorded, indicating an issue. Visibility asks **“What information do we have, and does it show something is wrong?”** and is typically associated with traditional monitoring tools and dashboards.
 
 **Observability**, on the other hand, is a more holistic property of a system. It is the ability to infer the internal state of the system based on its external outputs (telemetry data such as logs, metrics, traces, etc.)​
 Observability is about having **context** and the capacity to explore unknown issues. It asks
@@ -59,7 +59,7 @@ Logs are essential for drilling into what happened at a particular time – they
 
 Traces represent the **end-to-end path of a single request or transaction** through a distributed system. A trace is composed of spans, each span representing a unit of work (e.g. a service call, a database query) along that request’s journey. 
 
-Distributed tracing is key to observability in microservices and cloud-native architectures – it allows you to follow a user request as it hops through multiple services and see where delays or errors occur. Traces visualize the **flow** and timing across components, making it easier to pinpoint bottlenecks or failing interactions. Traditional monitoring usually lacked this cross-service visibility. *Traces tell you **where** a problem occurred across a workflow (e.g. which service or call in the chain is slow or failing)*
+[Distributed tracing](https://signoz.io/blog/distributed-tracing/) is key to observability in microservices and cloud-native architectures – it allows you to follow a user request as it hops through multiple services and see where delays or errors occur. Traces visualize the **flow** and timing across components, making it easier to pinpoint bottlenecks or failing interactions. Traditional monitoring usually lacked this cross-service visibility. *Traces tell you **where** a problem occurred across a workflow (e.g. which service or call in the chain is slow or failing)*
 
 ### Telemetry & Events
 
@@ -215,9 +215,9 @@ These are tools designed to gather **and** correlate metrics, logs, and traces, 
 
 **OpenTelemetry (OTel) with SigNoz:** 
 
-OpenTelemetry is an open-source framework and collection of libraries for instrumenting applications and collecting telemetry data (metrics, logs, traces) in a standardized way​. It’s not a monitoring solution by itself, but rather the plumbing that enables observability – think of it as the unified client libraries and agents you add to your code to emit data. With OpenTelemetry, you can instrument your services to send data to backends of your choice. 
+[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) is an open-source framework and collection of libraries for instrumenting applications and collecting telemetry data (metrics, logs, traces) in a standardized way​. It’s not a monitoring solution by itself, but rather the plumbing that enables observability – think of it as the unified client libraries and agents you add to your code to emit data. With OpenTelemetry, you can instrument your services to send data to backends of your choice. 
 
-The key benefit is vendor-neutrality and consistency: you use the same instrumentation for many backends. OpenTelemetry supports many languages and has autoinstrumentation for popular frameworks, making it easier for devs to produce telemetry. In an observability stack, OTel might be used to collect data, which is then sent to a metrics system, a tracing backend, etc. (For example, you might use OTel libraries in your code, and point them to send traces to Jaeger and metrics to Prometheus or SigNoz for an all in one solution).
+The key benefit is vendor-neutrality and consistency: you use the same instrumentation for many backends. OpenTelemetry supports many languages and has autoinstrumentation for popular frameworks, making it easier for devs to produce telemetry. In an observability stack, [OTel](https://signoz.io/blog/what-is-opentelemetry/) might be used to collect data, which is then sent to a metrics system, a tracing backend, etc. (For example, you might use OTel libraries in your code, and point them to send traces to Jaeger and metrics to Prometheus or SigNoz for an all in one solution).
 
 SigNoz is an open-source APM and observability platform that provides a unified solution for metrics, traces, and logs. It's designed as a more cost-effective, self-hosted alternative to commercial observability platforms like Datadog or New Relic. SigNoz uses OpenTelemetry for data collection, making it vendor-neutral and future-proof.
 
@@ -225,7 +225,7 @@ Key features of SigNoz include:
 - Application metrics monitoring with pre-built dashboards
 - Distributed tracing with flamegraphs and service dependency graphs
 - Log management with full-text search and correlation with traces
-- Infrastructure Monitoring, exception tracking and error monitoring
+- [Infrastructure Monitoring](https://signoz.io/guides/infrastructure-monitoring/), exception tracking and error monitoring
 - Custom dashboards and alerts
 - Support for multiple programming languages via OpenTelemetry
 
@@ -240,17 +240,17 @@ Prometheus is a popular open-source metrics monitoring system for cloud-native e
 
 Prometheus handles the metrics pillar of observability, particularly for golden signals (latency, traffic, errors, saturation). While it focuses on metrics only, it integrates well with other tools for a complete observability stack. It's commonly used with Grafana for visualization and can scale via solutions like Cortex/Thanos.
 
-Grafana provides a unified interface for metrics, logs, and traces through its LGTM stack (Loki, Grafana, Tempo, Mimir). This offers an open-source alternative for full observability. The ecosystem includes Prometheus Alertmanager for alerts and emerging tools for continuous profiling like Pyroscope/Parca. Organizations typically combine these tools based on their needs, unless opting for a SaaS solution.
+Grafana provides a unified interface for metrics, logs, and traces through its [LGTM](https://signoz.io/docs/migration/migrate-from-grafana-to-signoz/) stack (Loki, Grafana, Tempo, Mimir). This offers an open-source alternative for full observability. The ecosystem includes Prometheus Alertmanager for alerts and emerging tools for continuous profiling like Pyroscope/Parca. Organizations typically combine these tools based on their needs, unless opting for a SaaS solution.
 
 **Elastic Stack (ELK/Opensearch):** 
 
-A common approach for **logs** is the ELK stack – Elasticsearch, Logstash, Kibana – or its open-source fork OpenSearch/OpenSearch Dashboards. These systems store and index logs, and provide search and visualization capabilities. In terms of observability, Elasticsearch/OpenSearch can serve as the log management component: aggregating logs from many services and making them searchable in near real-time. Kibana (or OpenSearch Dashboards) can be used to set up log analytics and some basic correlations (for example, you can correlate logs with metrics if you ship metrics into Elasticsearch too, though that’s less common). Elastic has an “Observability” solution that ties together logs, metrics, and APM traces in their stack. So ELK/OpenSearch can be considered part of an observability toolkit (especially for the logging pillar). It’s a bit more DIY compared to all-in-one platforms; you need to run and scale the clusters. Many SRE teams set up centralized logging this way to improve visibility over the old approach of SSHing into servers to read log files.
+A common approach for **logs** is the ELK stack – Elasticsearch, Logstash, Kibana – or its open-source fork OpenSearch/OpenSearch Dashboards. These systems store and index logs, and provide search and visualization capabilities. In terms of observability, Elasticsearch/OpenSearch can serve as the log management component: aggregating logs from many services and making them searchable in near real-time. Kibana (or OpenSearch Dashboards) can be used to set up log analytics and some basic correlations (for example, you can correlate logs with metrics if you ship metrics into Elasticsearch too, though that’s less common). Elastic has an “Observability” solution that ties together logs, metrics, and APM traces in their stack. So ELK/OpenSearch can be considered part of an observability toolkit (especially for the logging pillar). It’s a bit more DIY compared to all-in-one platforms; you need to run and scale the clusters. Many SRE teams set up [centralized logging](https://signoz.io/blog/centralized-logging/) this way to improve visibility over the old approach of SSHing into servers to read log files.
 
 **Datadog:** 
 
 Datadog is a popular commercial **observability platform** (SaaS) that offers a one-stop solution for metrics, logs, traces, and more. It provides agents to collect data from hosts and applications, and a unified cloud platform to store, visualize, and analyze that data. 
 
-One of the strengths of Datadog is correlation – in the Datadog UI, you can jump from an alerting metric directly to related logs or APM traces with a few clicks. Datadog’s APM (Application Performance Monitoring) features include distributed tracing similar to Jaeger, complete with service dependency maps and flame graphs of requests. It also has log management where you can tail and search logs, and a custom metrics database for all your app and infrastructure metrics. Additionally, Datadog includes **machine-learning based anomaly detection** and forecasting on metrics, and **RBAC and integrations** for a huge variety of technologies (AWS, Docker, MySQL, you name it)​​. 
+One of the strengths of Datadog is correlation – in the Datadog UI, you can jump from an alerting metric directly to related logs or [APM traces](https://signoz.io/blog/apm-vs-distributed-tracing/) with a few clicks. Datadog’s APM (Application Performance Monitoring) features include distributed tracing similar to Jaeger, complete with service dependency maps and flame graphs of requests. It also has log management where you can tail and [search logs](https://signoz.io/docs/logs-management/logs-api/search-logs/), and a custom metrics database for all your app and infrastructure metrics. Additionally, Datadog includes **machine-learning based anomaly detection** and forecasting on metrics, and **RBAC and integrations** for a huge variety of technologies (AWS, Docker, MySQL, you name it)​​. 
 
 Essentially, Datadog aims to be an all-in-one visibility and observability solution – replacing the need to run separate Prometheus, ELK, Jaeger, etc. It’s very convenient but **[can be costly at scale](/blog/datadog-pricing/) (since it charges based on hosts, volumes of logs, etc.).** 
 
@@ -270,7 +270,7 @@ In the past, “logging system” often meant a syslog server or simple log file
 
 **APM (Application Performance Monitoring) Tools:**
 
-Before “observability” became a buzzword, APM suites (like earlier versions of New Relic, AppDynamics, etc.) provided a form of visibility into applications. They would instrument your app to measure things like response times, throughput, and maybe capture traces of slow transactions. Classic APM is somewhat a precursor to observability, but often more black-box – it gives you performance charts and maybe error analytics, but might not ingest arbitrary logs or allow flexible correlation. The distinction between APM and observability has blurred as APM vendors added log and trace features and as observability grew to include user-experience and business metrics. One could say observability is an evolution of APM with more openness and data sources.
+Before “observability” became a buzzword, APM suites (like earlier versions of New Relic, AppDynamics, etc.) provided a form of visibility into applications. They would instrument your app to measure things like response times, throughput, and maybe capture traces of slow transactions. Classic APM is somewhat a precursor to observability, but often more black-box – it gives you performance charts and maybe error analytics, but might not ingest arbitrary logs or allow flexible correlation. The distinction between [APM and observability](https://signoz.io/guides/apm-vs-observability/) has blurred as APM vendors added log and trace features and as observability grew to include user-experience and business metrics. One could say observability is an evolution of APM with more openness and data sources.
 
 **Network Monitoring Tools:**
 
@@ -310,7 +310,7 @@ Visibility, on the other hand, is **reactive**, focusing on predefined **metrics
 
 ### SigNoz as an Observability Platform
 
-SigNoz extends beyond traditional monitoring by offering deep visibility into system behavior, facilitating the understanding of complex interactions within distributed environments. It captures and correlates the three pillars of observability:
+SigNoz extends beyond traditional monitoring by offering deep visibility into system behavior, facilitating the understanding of complex interactions within distributed environments. It captures and correlates the three [pillars of observability](https://signoz.io/blog/three-pillars-of-observability/):
 
 - **Metrics:** SigNoz excels at collecting and visualizing key performance indicators (KPIs) relevant to SREs, including the crucial Four Golden Signals (latency, traffic, errors, and saturation). This is facilitated by features like:
     - **Custom Dashboards:** Build personalized dashboards to monitor specific metrics, Service Level Objectives (SLOs), and Service Level Indicators (SLIs) in real-time.
@@ -321,7 +321,7 @@ SigNoz extends beyond traditional monitoring by offering deep visibility into sy
         
         <Figure src="/img/guides/2025/03/observability-vs-visibility-20a1e0dc-6c4c-4ffe-859a-63b63c3734ca.webp" alt="Alerts in SigNoz" caption="Alerts in SigNoz" />
         
-    - **PromQL Compatibility:** Fully compatible with Prometheus Query Language (PromQL), enabling users to leverage their existing Prometheus queries within SigNoz.
+    - **PromQL Compatibility:** Fully compatible with [Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/) (PromQL), enabling users to leverage their existing Prometheus queries within SigNoz.
 - **Logs:** SigNoz provides robust log management capabilities, enabling users to search, filter, and correlate logs with other observability data, providing valuable context during incident investigations. Key features include:
     - **Powerful Log Querying:** Search, filter, and analyze logs using an intuitive query interface to quickly find relevant events.
         

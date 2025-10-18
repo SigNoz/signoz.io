@@ -24,9 +24,9 @@ Profiling provides insights that can lead to improved responsiveness, reduced re
 
 It's important to distinguish profiling from infrastructure monitoring and distributed tracing:
 
-* **Infrastructure monitoring** might tell you that your server's CPU usage is at 90%. **Profiling** goes deeper and tells you which specific Java method or operation is consuming that CPU time.
+* **[Infrastructure monitoring](https://signoz.io/guides/infrastructure-monitoring/)** might tell you that your server's CPU usage is at 90%. **Profiling** goes deeper and tells you which specific Java method or operation is consuming that CPU time.
 
-* **Distributed tracing** might show that a certain request took 5 seconds as it traveled through various microservices. **Profiling** can reveal *why* it took 5 seconds by pinpointing the exact lines of code or database calls that consumed most of the time.
+* **[Distributed tracing](https://signoz.io/blog/distributed-tracing/)** might show that a certain request took 5 seconds as it traveled through various microservices. **Profiling** can reveal *why* it took 5 seconds by pinpointing the exact lines of code or database calls that consumed most of the time.
 
 In essence, monitoring and tracing expose high-level symptoms at the system or service level, whereas profiling drills down to the code level root causes.
 
@@ -89,7 +89,7 @@ There are several open-source profilers available that provide more advanced fea
   ./profiler.sh -e cpu -d 30 -f flamegraph.html <pid>
   ```
 
-  This runs a 30-second CPU profile and outputs an HTML flame graph. Ideal for production due to minimal overhead.
+  This runs a 30-second CPU profile and outputs an HTML [flame graph](https://signoz.io/blog/flamegraphs/). Ideal for production due to minimal overhead.
 
 * **Eclipse Memory Analyzer (MAT)** – Tool for analyzing heap dumps. When you suspect a memory leak, take a heap dump and open it in MAT. It has a "Leak Suspects" report that automatically points out likely memory leaks.
 
@@ -256,7 +256,7 @@ Signs of I/O issues include:
 For applications using a database, the database is a common source of latency:
 
 * Enable query logging to find slow queries (in dev or with caution in production). Tools like p6spy or datasource-proxy can log all SQL statements executed and how long they took. By reviewing the logs, you might find one particular query that is called far too often or takes too long.
-* Look for N+1 query patterns (common in ORMs)
+* Look for [N+1 query](https://signoz.io/blog/N-1-query-distributed-tracing/) patterns (common in ORMs)
 * Check connection pool sizing
 
 #### Network and File I/O
@@ -273,7 +273,7 @@ Java applications today often run in containers (Docker/Kubernetes) and are part
 
 ### Microservices and Distributed Tracing
 
-In microservices, traditional profiling in one JVM won't tell the whole story. Use **distributed tracing** (OpenTelemetry, Jaeger, Zipkin) to trace requests end-to-end across services. This helps identify which service is the bottleneck before drilling down with profiling.
+In microservices, traditional profiling in one JVM won't tell the whole story. Use **distributed tracing** ([OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/), Jaeger, Zipkin) to trace requests end-to-end across services. This helps identify which service is the bottleneck before drilling down with profiling.
 
 For example, a trace might reveal that a request spends 50 ms in Service A, 20 ms in Service B, and 500 ms in Service C. That immediately tells you Service C is the problem. Then you can profile Service C specifically to see why it’s slow (maybe a database call inside C).
 
@@ -364,7 +364,7 @@ After making optimizations, always re-profile to ensure the changes had the inte
 
 ## Profiling with SigNoz (APM Integration)
 
-While profiling tools show you code-level details, an Application Performance Monitoring tool like SigNoz provides observability at the system and application level. SigNoz (a unified observability tool with logs, metrics, and traces in a single pane) can work hand-in-hand with profiling:
+While profiling tools show you code-level details, an Application Performance Monitoring tool like SigNoz provides observability at the system and application level. SigNoz (a [unified observability](https://signoz.io/unified-observability/) tool with logs, metrics, and traces in a single pane) can work hand-in-hand with profiling:
 
 * **Performance dashboards**: Identify which service/endpoint has issues
 * **Distributed tracing**: Shows request timeline across services
@@ -372,7 +372,7 @@ While profiling tools show you code-level details, an Application Performance Mo
 * **Correlation**: Links logs, errors, and performance data
 
 **Workflow example:**
-1. SigNoz alerts high latency on `/checkout` endpoint
+1. [SigNoz](https://signoz.io/docs/introduction/) alerts high latency on `/checkout` endpoint
 2. Trace shows time spent in `PaymentService`
 3. Profile PaymentService to find exact slow method
 4. Fix issue and verify improvement in SigNoz

@@ -28,7 +28,7 @@ At this point, you’ll likely explore Jaeger or Datadog. But:
 - **Jaeger**: Great for tracing, useless for metrics and logs.
 - **Datadog**: Full-featured—but don’t blink, or your bill will triple.
 
-This guide walks through how to instrument a Next.js app using OpenTelemetry, explains Jaeger’s limits, and shows how SigNoz gives you a complete observability pipeline—without breaking the bank.
+This guide walks through how to instrument a Next.js app using OpenTelemetry, explains Jaeger’s limits, and shows how SigNoz gives you a complete [observability pipeline](https://signoz.io/guides/observability-pipeline/)—without breaking the bank.
 
 ## Why Even Bother Instrumenting Next.js?
 
@@ -344,7 +344,7 @@ You’ve got instrumentation. Now it’s time to capture those traces with an Op
 
 We’ll use <a href="https://github.com/vercel/opentelemetry-collector-dev-setup" rel="noopener noreferrer nofollow" target="_blank">Vercel’s dev setup</a> which comes pre-bundled with:
 
-- OpenTelemetry Collector
+- [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
 - Jaeger
 - Zipkin
 - Prometheus
@@ -542,7 +542,7 @@ We need more than just a trace viewer. In production, you want:
 - Dashboards for teams
 - Advanced filters and KPIs
 
-Next up: how to plug SigNoz into your setup to get full-stack observability—**without** leaving OpenTelemetry.
+Next up: how to plug SigNoz into your setup to get full-stack observability—**without** leaving [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/).
 
 Let’s go.
 
@@ -588,7 +588,7 @@ exporters:
   otlp/signoz:
     endpoint: "${SIGNOZ_ENDPOINT}"
     headers:
-      signoz-access-token: "${SIGNOZ_INGESTION_KEY}"
+      signoz-ingestion-key: "${SIGNOZ_INGESTION_KEY}"
     tls:
       insecure: false
 
@@ -668,7 +668,7 @@ export function register() {
     traceExporter: new OTLPHttpJsonTraceExporter({
       url: 'https://ingest.us.signoz.cloud/v1/traces',
       headers: {
-        'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY || ''
+        'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || ''
       }
     })
   })
@@ -702,7 +702,7 @@ That means no YAML spelunking, no manual dashboard setups—just useful insights
 
 ### What Makes SigNoz APM Actually Useful?
 
-Most APMs either overload you with graphs or bury useful data behind paywalls. SigNoz hits the sweet spot: high-fidelity insights derived directly from OpenTelemetry traces, backed by high performing columnar database for blazing-fast queries and dashboards that update in near real-time.
+Most APMs either overload you with graphs or bury useful data behind paywalls. SigNoz hits the sweet spot: high-fidelity insights derived directly from [OpenTelemetry traces](https://signoz.io/blog/opentelemetry-spans/), backed by high performing columnar database for blazing-fast queries and dashboards that update in near real-time.
 
 You get:
 

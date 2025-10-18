@@ -216,6 +216,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Deploying to Azure Container Apps',
+            route: '/docs/install/azure-container-apps',
+          },
+          {
+            type: 'doc',
             isExpanded: false,
             label: 'Deploying from Marketplaces',
             route: '/docs/install/marketplaces',
@@ -251,6 +256,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/migration/upgrade-standard',
             label: 'Upgrade Standard',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.94',
+            label: 'Upgrade to v0.94',
           },
           {
             type: 'doc',
@@ -470,6 +480,12 @@ const docsSideNav = [
                 label: 'JWT Secret',
                 isExpanded: false,
               },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/configuration/relational-database',
+                label: 'Relational Databases Support',
+                isExpanded: false,
+              },
             ],
           },
           {
@@ -520,6 +536,7 @@ const docsSideNav = [
     label: 'Collection Agents',
     type: 'category',
     isExpanded: false,
+    route: '/docs/collection-agents/get-started',
     items: [
       {
         type: 'category',
@@ -574,6 +591,11 @@ const docsSideNav = [
                 label: 'Install',
                 type: 'doc',
                 route: '/docs/collection-agents/k8s/serverless/install',
+              },
+               {
+                label: 'Configure',
+                type: 'doc',
+                route: '/docs/collection-agents/k8s/serverless/configure',
               },
             ],
           },
@@ -706,6 +728,18 @@ const docsSideNav = [
             ],
           },
         ],
+      },
+      {
+        type: 'category',
+        label: 'OpenTelemetry Collector Reference',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            label: 'Configuration Components',
+            route: '/docs/collection-agents/opentelemetry-collector/configuration'
+          },
+        ]
       },
     ],
   },
@@ -926,6 +960,18 @@ const docsSideNav = [
               {
                 type: 'category',
                 isExpanded: false,
+                label: 'Java',
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/instrumentation/manual-instrumentation/java/annotations',
+                    label: 'Using Annotations',
+                  },
+                ]
+              },
+              {
+                type: 'category',
+                isExpanded: false,
                 label: 'JavaScript',
                 // route: '',
                 // link: {
@@ -937,6 +983,11 @@ const docsSideNav = [
                     label: 'NodeJS',
                     route:
                       '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs',
+                  },
+                  {
+                    type: 'doc',
+                    label: 'Enable/disable Instrumentation',
+                    route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation'
                   },
                 ],
               },
@@ -1027,6 +1078,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/traces-management/guides/drop-spans',
             label: 'Control Traces Volume',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/pii-scrubbing/',
+            label: 'PII Scrubbing'
           },
           {
             type: 'doc',
@@ -1475,14 +1531,27 @@ const docsSideNav = [
     // route: '',
     items: [
       {
-        type: 'doc',
-        route: '/docs/userguide/manage-dashboards',
-        label: 'Manage Dashboards',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/manage-panels',
-        label: 'Manage Panels',
+        label: 'Manage',
+        type: 'category',
+        className: 'new-doc',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-dashboards',
+            label: 'Manage Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-panels',
+            label: 'Manage Panels',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/manage-variables',
+            label: 'Manage Variables',
+          },
+        ],
       },
       {
         type: 'category',
@@ -1528,9 +1597,9 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/manage-variables',
-        label: 'Manage Variables',
+        type: 'category',
+        route: '/docs/dashboards/interactivity',
+        label: 'Interactivity',
       },
       {
         type: 'doc',
@@ -1543,6 +1612,16 @@ const docsSideNav = [
         route: '/docs/dashboards/dashboard-templates/overview',
         label: 'Out of Box Dashboards',
         items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
+            label: 'Amazon Bedrock API',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/anthropic-dashboard',
+            label: 'Anthropic API',
+          },
           {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/apache-web-server',
@@ -1568,8 +1647,33 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/azure-openai-dashboard',
+            label: 'Azure OpenAI API',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
             label: 'CICD',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/claude-code-dashboard',
+            label: 'Claude Code',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/couchdb',
+            label: 'CouchDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/crewai-dashboard',
+            label: 'Crew AI',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
+            label: 'DeepSeek API',
           },
           {
             type: 'doc',
@@ -1578,8 +1682,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/couchdb',
-            label: 'CouchDB',
+            route: '/docs/dashboards/dashboard-templates/google-gemini-dashboard',
+            label: 'Google Gemini',
           },
           {
             type: 'doc',
@@ -1626,6 +1730,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/mastra-dashboard',
+            label: 'Mastra',
           },
           {
             type: 'doc',
@@ -1889,6 +1998,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/alerts-management/routing-policy',
+        label: 'Routing Policies',
+      },
+      {
+        type: 'doc',
         route: '/docs/alerts-management/alerts-history',
         label: 'Alerts History',
       },
@@ -2013,20 +2127,50 @@ const docsSideNav = [
     route: '/docs/llm-observability',
     label: 'LLM Observability',
 
-    items: [
-      {
-        route: '/docs/opentelemetry-openai-monitoring',
-        label: 'OpenAI Monitoring',
-        type: 'doc',
-      },
+    items: [ 
       {
         route: '/docs/llm-community-integrations',
         label: 'LLM Community Integrations',
         type: 'doc',
       },
       {
-        route: '/docs/vercel-ai-sdk-monitoring',
-        label: 'Vercel AI SDK Monitoring',
+        route: '/docs/amazon-bedrock-monitoring',
+        label: 'Amazon Bedrock Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/anthropic-monitoring',
+        label: 'Anthropic API Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/azure-openai-monitoring',
+        label: 'Azure OpenAI API Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/claude-code-monitoring',
+        label: 'Claude Code Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/crewai-monitoring',
+        label: 'Crew AI Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/deepseek-monitoring',
+        label: 'DeepSeek Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/google-gemini-monitoring',
+        label: 'Google Gemini Monitoring',
+        type: 'doc',
+      },
+      {
+        route: '/docs/langchain-monitoring',
+        label: 'LangChain/LangGraph Monitoring',
         type: 'doc',
       },
       {
@@ -2035,14 +2179,32 @@ const docsSideNav = [
         type: 'doc',
       },
       {
-        route: '/docs/langchain-monitoring',
-        label: 'LangChain Monitoring',
+        route: '/docs/mastra-monitoring',
+        label: 'Mastra Monitoring',
         type: 'doc',
       },
       {
-        route: '/docs/claude-code-monitoring',
-        label: 'Claude Code Monitoring',
+        route: '/docs/opentelemetry-openai-monitoring',
+        label: 'OpenAI Monitoring',
         type: 'doc',
+      },
+      {
+        route: '/docs/vercel-ai-sdk-monitoring',
+        label: 'Vercel AI SDK Monitoring',
+        type: 'doc',
+      },
+    ],
+  },
+  {
+    type: 'category',
+    isExpanded: false,
+    label: 'SigNoz MCP',
+
+    items: [ 
+      {
+          type: 'doc',
+          route: '/docs/signoz-mcp-server',
+          label: 'SigNoz MCP Server',
       },
     ],
   },
@@ -2156,6 +2318,16 @@ const docsSideNav = [
         route: '/docs/integrations/sql-server',
         label: 'Microsoft SQL Server',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/supabase',
+        label: 'Supabase',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nomad',
+        label: 'Nomad'
+      }
     ],
   },
   {
@@ -2463,11 +2635,6 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/tutorial/instrumenting-angular-frontend',
-        label: 'Instrumenting Angular Frontend Web App',
-      },
-      {
-        type: 'doc',
         route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
         label: 'Setting Up SSO SAML 2.0 With Keycloak',
       },
@@ -2688,6 +2855,25 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/migration/migrate-from-newrelic/alerts',
             label: 'Migrating Alerts',
+          },
+        ],
+      },
+      {
+        label: 'From OpenTelemetry',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-opentelemetry-to-signoz',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-opentelemetry/cloud',
+            label: 'Migrate to SigNoz Cloud',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-opentelemetry/self-hosted',
+            label: 'Migrate to Self-Hosted SigNoz',
           },
         ],
       },

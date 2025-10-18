@@ -1,0 +1,134 @@
+---
+date: 2025-09-02
+id: supabase
+tags : [SigNoz Cloud, Self-Host]
+title: Supabase Metrics Integration
+description: Monitor your Supabase project health and performance in SigNoz by collecting platform metrics.
+---
+
+Monitor your Supabase project’s health and performance in SigNoz by collecting platform metrics via the OpenTelemetry (OTEL) Collector and Prometheus receiver.
+
+## How Supabase Metrics Integration Works
+
+- **Supabase exposes a Prometheus-compatible metrics endpoint** for each project:  
+  ```
+  https://<project-ref>.supabase.co/customer/v1/privileged/metrics
+  ```
+- **Authentication:**  
+  - Username: `service_role`  
+  - Password: Your Supabase service role JWT (from the Supabase dashboard)
+- **Metrics update frequency:** Every minute
+
+For more details on metrics, see the [Supabase metrics documentation](https://supabase.com/docs/guides/telemetry/metrics#supabase-grafana).
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- A **Supabase project** with access to the metrics endpoint  
+- An **OpenTelemetry Collector** installed and reachable  
+  - [Install OpenTelemetry Collector if not already installed](https://signoz.io/docs/collection-agents/get-started/)
+- A **SigNoz instance** to receive metrics
+
+## Setup Guide
+
+### Step 1: Create Collector Config
+
+Create a file named `supabase-metrics-collection-config.yaml`:
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "MySupabaseJob"
+          metrics_path: "/customer/v1/privileged/metrics"
+          scheme: https
+          basic_auth:
+            username: "service_role"
+            password: "<YOUR_SUPABASE_SERVICE_ROLE_JWT>"
+          static_configs:
+            - targets: ["<YOUR_SUPABASE_PROJECT_ID>.supabase.co:443"]
+              labels:
+                group: "MyGroupLabel"
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "ingest.<YOUR_REGION>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: "<YOUR_INGESTION_KEY>"
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+- `<YOUR_SUPABASE_SERVICE_ROLE_JWT>`: Replace this with your Supabase project's Service Role JWT, which you can find in your [Supabase dashboard](https://supabase.com/dashboard/project/_/settings/api-keys).
+- `<YOUR_SUPABASE_PROJECT_ID>`: Replace this with your Supabase project ID, which you can find in your Supabase dashboard URL (e.g., `https://<YOUR_SUPABASE_PROJECT_ID>.supabase.co`).  
+<Admonition>
+- Set your ingestion endpoint according to your SigNoz Cloud region. Refer to [the SigNoz Cloud ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) to find the correct endpoint for your deployment.
+- Replace `<SIGNOZ_INGESTION_KEY>` with the one provided by SigNoz.
+</Admonition>
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "MySupabaseJob"
+          metrics_path: "/customer/v1/privileged/metrics"
+          scheme: https
+          basic_auth:
+            username: "service_role"
+            password: "<YOUR_SUPABASE_SERVICE_ROLE_JWT>"
+          static_configs:
+            - targets: ["<YOUR_SUPABASE_PROJECT_ID>.supabase.co:443"]
+              labels:
+                group: "MyGroupLabel"
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "<YOUR_SIGNOZ_COLLECTOR_ENDPOINT>"
+    tls:
+      insecure: false
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+- `<YOUR_SUPABASE_SERVICE_ROLE_JWT>`: Replace this with your Supabase project's Service Role JWT, which you can find in your [Supabase dashboard](https://supabase.com/dashboard/project/_/settings/api-keys).
+- `<YOUR_SUPABASE_PROJECT_ID>`: Replace this with your Supabase project ID, which you can find in your Supabase dashboard URL (e.g., `https://<YOUR_SUPABASE_PROJECT_ID>.supabase.co`).  
+
+</TabItem>
+</Tabs>
+
+### Step 2: Start the Collector
+
+Start the Collector with the following command:
+
+```bash
+ --config supabase-metrics-collection-config.yaml
+```
+
+### Step 3: Verify the Metrics
+
+Verify the metrics are being collected by SigNoz.
+
+![Supabase Metrics](/img/docs/supabase-signoz-metrics.webp "Supabase Metrics")

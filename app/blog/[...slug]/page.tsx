@@ -5,9 +5,6 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { allBlogs, allAuthors } from 'contentlayer/generated'
 import type { Authors, Blog } from 'contentlayer/generated'
-import PostSimple from '@/layouts/PostSimple'
-import PostLayout from '@/layouts/PostLayout'
-import PostBanner from '@/layouts/PostBanner'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import BlogLayout from '@/layouts/BlogLayout'
 import NewsroomLayout from '@/layouts/NewsroomLayout'
@@ -17,11 +14,8 @@ import { notFound } from 'next/navigation'
 import React from 'react'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 
-const defaultLayout = 'PostLayout'
+const defaultLayout = 'BlogLayout'
 const layouts = {
-  PostSimple,
-  PostLayout,
-  PostBanner,
   OpenTelemetryLayout,
   BlogLayout,
   NewsroomLayout,

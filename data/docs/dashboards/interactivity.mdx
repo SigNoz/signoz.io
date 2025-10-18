@@ -1,0 +1,191 @@
+---
+date: 2025-09-03
+id: interactivity
+tags : [SigNoz Cloud, Self-Host]
+title: Interactivity in Dashboards
+---
+
+Dashboards in SigNoz let you interact with data through [panels](https://signoz.io/docs/dashboards/panel-types/) built in the [Query Builder](https://signoz.io/docs/userguide/query-builder-v5/), where context menus 
+and click actions allow you to drill deeper, apply filters, and move to related logs, traces, or metrics.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/context-menu.png" width="70%" alt="Dashboard context menu example"/>
+    <figcaption><i>Context menu on a metrics panel.</i></figcaption>
+</figure>
+
+These interactive features make dashboards a powerful tool for root cause analysis, helping you move from high-level trends to detailed records with just a few clicks.  
+
+
+## Features
+
+Interactive dashboards include multiple capabilities such as **View Logs and Traces**, **Breakout by**, **Context Links**, **Cross Filtering**, and **Filter in Tables**. 
+Together, these features let you drill deeper, correlate across signals, and debug issues faster.
+
+### View Logs and Traces
+
+The **View in Logs/Traces** option allows you to go beyond aggregated charts and tables by opening the **underlying raw signal data**.  
+This helps not only in viewing the exact records behind a metric or trace but also in **correlating across signals** for deeper debugging.  
+
+#### How it works
+1. Click on a datapoint in a chart or a value in a table.  
+2. A context menu will appear with options including **View in Logs** and **View in Traces**.  
+3. When you select one of these options:
+   - The current **filters**, **time range**, and **group-by context** are preserved.  
+   - SigNoz opens the corresponding **Explorer view** (Logs or Traces).  
+   - You immediately see the subset of records that contributed to the clicked datapoint.  
+
+This ensures that you can move seamlessly from **high-level aggregates** to **detailed records** without needing to rebuild queries.  
+
+#### Example
+In the example below, a **CPU Usage by Host** metrics panel shows an anomaly.  
+By right-clicking on the datapoint, you can select **View in Logs** or **View in Traces** from the context menu.  
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/view-in-logs-traces.gif" width="80%" alt="Right-clicking a datapoint in a metrics panel to open related logs and traces"/>
+    <figcaption><i>Right-clicking a datapoint in a metrics panel to open related logs and traces</i></figcaption>
+</figure>  
+
+This workflow shortens the gap between **observing anomalies** and **finding their root cause** by connecting metrics, traces, and logs in one flow.  
+
+#### Why use it
+
+- **Faster correlation:** Jump from metrics to traces and logs in context.
+- **Root cause focus:** Cut the time between spotting anomalies and debugging them.
+
+### Breakout by
+
+The **Breakout by** option allows you to **drill deeper into aggregated data** by regrouping it with another attribute.  
+Instead of building a new query from scratch, you can click on a datapoint or table cell and break it down further to uncover patterns and anomalies.  
+
+#### How it works
+1. Click on a chart datapoint, bar segment, or table cell.  
+2. From the context menu, select **Breakout by...**.  
+3. Choose an attribute from the list (for example, `k8s.pod.name` or `host.name`).  
+4. The panel is updated in place to show the new breakdown:  
+   - Existing filters, time range, and dashboard variables are preserved.  
+   - The **selected data is applied as a filter** so the new breakdown focuses only on that slice.  
+   - The chosen attribute becomes the **new group by dimension** (it replaces the previous grouping).  
+
+This lets you move from a broad overview to more granular insights step by step.  
+
+#### Example
+In the example below, a panel showing **CPU Usage by Host** can be further analyzed by selecting **Breakout by → k8s.pod.name**.  
+This reveals which pods inside the host are contributing most to CPU usage.  
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/breakout-by.gif" width="80%" alt="Breaking down CPU usage by host into pod-level details using Breakout by"/>
+    <figcaption><i>Breaking down CPU usage by host into pod-level details using Breakout by</i></figcaption>
+</figure>  
+
+#### Why use it
+- **Anomaly detection:** Spot which service, pod, or endpoint is driving unusual behavior.  
+- **Layered exploration:** Start broad (by service) and go deeper (by pod, endpoint, or trace attribute).  
+- **Faster debugging:** Explore data without manually editing queries.  
+
+### Context Links
+
+**Context Links** are links available in a panel’s **context menu**.  
+They let you attach dynamic URLs to a panel and navigate to **internal explorers** (Logs, Traces, Metrics) or **external tools** (e.g. Jenkins, PagerDuty) using the values of the datapoint you clicked.  
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/context-links-eg.png" width="80%" alt="Context menu showing dynamic links that use the clicked value and time range"/>
+    <figcaption><i>Context menu showing dynamic links that use the clicked value and time range</i></figcaption>
+</figure>
+
+#### How it works
+1. Edit a panel and open the **Context Links** section.  
+2. Click **+ Context Link** and configure:  
+   - **Label**: The menu text (fallback is the raw URL).  
+   - **URL**: A template URL with variables like `{{_service.name}}` or `{{timestamp_start}}`.  
+   - **Query params**: Manage key–value pairs visually in the table. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/create-context-links.png" width="80%" alt="Configuring a Context Link with label, URL template, and query parameters"/>
+    <figcaption><i>Configuring a Context Link with label, URL template, and query parameters</i></figcaption>
+</figure>
+ 
+3. The modal keeps the URL and key–value table in sync:  
+   - Editing the URL auto-populates the params table (values are decoded).  
+   - Editing the table updates the URL (values are encoded).  
+4. In the dashboard, **click** a chart datapoint, bar segment, or table row to open the **context menu**.  
+5. **Select the created link** — variables are resolved and the destination opens.  
+
+#### Available variables
+You can use different types of variables inside the URL or param values:
+
+| Type | Description | Syntax | Example |
+|------|-------------|--------|---------|
+| **Time range** | Inserts the current dashboard’s absolute start and end time (epoch ms). | `{{timestamp_start}}`, `{{timestamp_end}}` | `from={{timestamp_start}}&to={{timestamp_end}}` |
+| **Query variables** | The group by fields in the query the user clicks on. Available only when the panel query has a **GROUP BY**. | `{{_fieldName}}` | `{{_service.name}}`, `{{_trace_id}}` |
+| **Dashboard variables** | Any dashboard-level variable defined in the dashboard settings. | `{{varName}}` | `{{host}}`, `{{env}}` |
+
+#### Examples
+**1. View trace details from a table**
+```yaml
+Label: View Trace Details
+URL: /trace/{{_trace_id}}
+```
+
+**2. External link with variables (Jenkins / PagerDuty)**
+```yaml
+Label: Open in Jenkins
+URL: https://jenkins.example.com/job/{{_service.name}}?from={{timestamp_start}}&to={{timestamp_end}}
+
+Label: PagerDuty Alerts
+URL: https://pagerduty.example.com/incidents?service={{_service.name}}&since={{timestamp_start}}&until={{timestamp_end}}
+```
+
+#### Why use it
+- **Seamless navigation**: Jump across signals (Logs ↔ Traces ↔ Metrics) or to external tools.
+- **Context preservation**: Links carry the clicked value, filters, and time range automatically.
+- **Faster debugging**: One-click access to deep-dive views without rebuilding queries.
+
+### Cross Filtering
+
+**Cross Filtering** lets you use clicked data in a panel to update or create **dashboard variables**.  
+When you click on a service, pod, or trace ID, the panel’s **context menu** includes a **Dashboard Variables** option.  
+From here, the following actions are available:  
+
+- **Set** – Assign the clicked value to an existing dashboard variable.  
+- **Unset** – Remove the value from an existing dashboard variable.  
+- **Create var** – Add a new **dynamic dashboard variable** using the clicked field. By default, no panels are configured to use a newly created variable, but you can configure panels later to reference it.  
+
+If the clicked field already has a dynamic variable, you’ll see **Set/Unset**. Otherwise, the option will be **Create var**. Panels that use the updated variable will automatically refresh.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/cross-filtering-demo.gif" width="80%" alt="Using the context menu to set a dashboard variable from clicked panel data"/>
+    <figcaption><i>Using the context menu to set a dashboard variable from clicked panel data</i></figcaption>
+</figure> 
+
+#### Why use it
+- **On-the-fly filtering**: Narrow scope instantly without editing queries.
+- **Dynamic exploration**: Create new variables directly from clicked data.
+- **Flexible workflows**: Set, unset, or create variables depending on your analysis needs.
+
+### Filter in Tables
+
+The **Filter in Tables** option allows you to quickly narrow results by applying filters directly from table cells. Instead of editing the query manually, you can click on a group-by value in a table and add conditions on the fly.  
+
+#### How it works
+1. Open a **Table panel** with a grouped query (for example, `COUNT(*) BY service.name`).  
+2. Click on a cell in a **group-by column**.  
+
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/interactivity/filter-in-tables.png" width="80%" alt="Clicking a table cell to add a filter condition directly from the group-by value"/>
+    <figcaption><i>Clicking a table cell to add a filter condition directly from the group-by value</i></figcaption>
+</figure>
+
+
+3. From the context menu, select **Filter by...**.  
+4. Choose an operator based on the field type:  
+   - **String**: `=` or `!=`  
+   - **Number**: `=`, `>`, `<`, `>=`, `<=`  
+   - **Boolean**: `is true`, `is false`  
+5. Enter or confirm the filter value.  
+6. The table refreshes in place with the new filter applied — no manual edits or page reloads needed.  
+
+#### Why use it
+- **Faster narrowing**: Apply filters directly from the data you are inspecting.
+- **Context-aware operators**: Only valid operators for the column type are shown.
+- **No query editing**: Instantly re-run the query without touching the Query Builder.

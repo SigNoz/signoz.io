@@ -1,0 +1,1240 @@
+---
+date: 2025-09-30
+id: azure-container
+tags : [Self-Host]
+title: Deploying to Azure Container Apps
+description: Learn how to install SigNoz on Azure Container Apps
+---
+## Prerequisites
+
+Before starting, ensure you have:
+
+1. **Azure CLI** installed and authenticated (`az login`)
+2. **Permissions** to:
+   - Create [Container Apps environments](https://learn.microsoft.com/azure/container-apps/environment)
+   - Create [storage accounts and file shares](https://learn.microsoft.com/azure/container-apps/storage-mounts?pivots=azure-files)
+3. **Azure CLI version** 2.62 or higher
+
+---
+
+## Setup Azure Infrastructure
+
+### 1. Install Container Apps Extension
+
+Install the [Azure Container Apps CLI extension](https://learn.microsoft.com/azure/container-apps/azure-cli):
+
+```bash
+az extension add --name containerapp
+```
+
+For detailed setup instructions, refer to the [getting started guide](https://learn.microsoft.com/azure/container-apps/get-started?tabs=bash#setup).
+
+### 2. Configure Environment Variables
+
+Set up your deployment variables. Replace the placeholder values with your own:
+
+```bash
+# Your configuration
+SUBSCRIPTION_ID=<YOUR_SUBSCRIPTION_ID>
+RG_NAME=<YOUR_RESOURCE_GROUP>
+LOCATION=<YOUR_LOCATION>                    # Choose a supported region
+STORAGE_ACCOUNT=<uniquestorageacct>  # Lowercase letters and numbers only
+ENV_NAME=signoz
+FILE_SHARE_NAME=signoz
+```
+
+> **Note**: The storage account name must be globally unique, contain only lowercase letters and numbers, and be between 3-24 characters. See [supported regions](https://learn.microsoft.com/azure/container-apps/quotas#region-availability) for available locations.
+
+### 3. Create Resource Group and Container Apps Environment
+
+Create the foundational Azure resources:
+
+```bash
+# Set your subscription (if not already configured)
+az account set --subscription $SUBSCRIPTION_ID
+
+# Create resource group
+az group create \
+  --name $RG_NAME \
+  --location $LOCATION
+
+# Create Container Apps environment
+az containerapp env create \
+  --name $ENV_NAME \
+  --resource-group $RG_NAME \
+  --location $LOCATION
+```
+
+### 4. Create Storage Account and File Share
+
+ClickHouse requires persistent storage for configuration files. Learn more about [Azure Files with Container Apps](https://learn.microsoft.com/azure/container-apps/storage-mounts?pivots=azure-files):
+
+```bash
+# Create storage account
+az storage account create \
+  --name "$STORAGE_ACCOUNT" \
+  --resource-group "$RG_NAME" \
+  --location "$LOCATION" \
+  --sku Standard_LRS \
+  --kind StorageV2
+
+# Create file share
+az storage share-rm create \
+  --resource-group "$RG_NAME" \
+  --storage-account "$STORAGE_ACCOUNT" \
+  --name "$FILE_SHARE_NAME"
+
+# Get storage account key
+STORAGE_KEY=$(az storage account keys list \
+  --resource-group "$RG_NAME" \
+  --account-name "$STORAGE_ACCOUNT" \
+  --query "[0].value" -o tsv)
+
+# Mount storage to Container Apps environment
+az containerapp env storage set \
+  --name $ENV_NAME \
+  --resource-group $RG_NAME \
+  --storage-name signoz \
+  --azure-file-account-name $STORAGE_ACCOUNT \
+  --azure-file-account-key "$STORAGE_KEY" \
+  --azure-file-share-name $FILE_SHARE_NAME \
+  --access-mode ReadWrite
+```
+
+### 5. Prepare SigNoz Configuration Files
+
+Create the following configuration files locally, then upload them to your file share.
+
+#### Clickhouse Config
+<details>
+<summary>config.xml (Click to expand config)</summary>
+
+```xml:config.xml
+<?xml version="1.0"?>
+          <clickhouse>
+            <max_connections>4096</max_connections>
+            <keep_alive_timeout>3</keep_alive_timeout>
+            <max_concurrent_queries>100</max_concurrent_queries>
+            <mark_cache_size>5368709120</mark_cache_size>
+            <mmap_cache_size>1000</mmap_cache_size>
+            <compiled_expression_cache_size>134217728</compiled_expression_cache_size>
+            <compiled_expression_cache_elements_size>10000</compiled_expression_cache_elements_size>
+            <custom_settings_prefixes></custom_settings_prefixes>
+            <dictionaries_config>*_dictionary.xml</dictionaries_config>
+            <user_defined_executable_functions_config>*function.xml</user_defined_executable_functions_config>
+            <user_scripts_path>/var/lib/clickhouse/user_scripts/</user_scripts_path>
+            <http_port>8123</http_port>
+            <tcp_port>9000</tcp_port>
+            <mysql_port>9004</mysql_port>
+            <postgresql_port>9005</postgresql_port>
+            <interserver_http_port>9009</interserver_http_port>
+            <logger>
+              <level>information</level>
+              <formatting>
+                <type>json</type>
+              </formatting>
+            </logger>
+            <macros>
+              <shard>01</shard>
+              <replica>example01-01-1</replica>
+            </macros>
+            <prometheus>
+              <endpoint>/metrics</endpoint>
+              <port>9363</port>
+              <metrics>true</metrics>
+              <events>true</events>
+              <asynchronous_metrics>true</asynchronous_metrics>
+              <status_info>true</status_info>
+            </prometheus>
+            <opentelemetry_span_log>
+              <engine>engine MergeTree
+                      partition by toYYYYMM(finish_date)
+                      order by (finish_date, finish_time_us, trace_id)</engine>
+            </opentelemetry_span_log>
+            <query_masking_rules>
+              <rule>
+                <name>hide encrypt/decrypt arguments</name>
+                <regexp>((?:aes_)?(?:encrypt|decrypt)(?:_mysql)?)\s*\(\s*(?:'(?:\\'|.)+'|.*?)\s*\)</regexp>
+                <replace>\1(???)</replace>
+              </rule>
+            </query_masking_rules>
+            <send_crash_reports>
+              <enabled>false</enabled>
+              <anonymize>false</anonymize>
+              <endpoint>https://6f33034cfe684dd7a3ab9875e57b1c8d@o388870.ingest.sentry.io/5226277</endpoint>
+            </send_crash_reports>
+            <merge_tree_metadata_cache>
+              <lru_cache_size>268435456</lru_cache_size>
+              <continue_if_corrupted>true</continue_if_corrupted>
+            </merge_tree_metadata_cache>
+            <user_directories>
+              <users_xml>
+                  <!-- Path to configuration file with predefined users. -->
+                  <path>users.xml</path>
+              </users_xml>
+              <local_directory>
+                  <!-- Path to folder where users created by SQL commands are stored. -->
+                  <path>/var/lib/clickhouse/access/</path>
+              </local_directory>
+            </user_directories>
+            <default_profile>default</default_profile>
+              <distributed_ddl>
+                  <!-- Path in ZooKeeper to queue with DDL queries -->
+                  <path>/clickhouse/task_queue/ddl</path>
+              </distributed_ddl>
+          </clickhouse>
+```
+
+</details>
+
+<details>
+<summary>users.xml (Click to expand config)</summary>
+
+```xml:users.xml
+<?xml version="1.0"?>
+<clickhouse>
+    <profiles>
+        <default>
+            <max_memory_usage>10000000000</max_memory_usage>
+            <load_balancing>random</load_balancing>
+        </default>
+        <readonly>
+            <readonly>1</readonly>
+        </readonly>
+    </profiles>
+    <users>
+        <default>
+            <password></password>
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <profile>default</profile>
+            <quota>default</quota>
+        </default>
+    </users>
+    <quotas>
+        <default>
+            <interval>
+                <duration>3600</duration>
+                <queries>0</queries>
+                <errors>0</errors>
+                <result_rows>0</result_rows>
+                <read_rows>0</read_rows>
+                <execution_time>0</execution_time>
+            </interval>
+        </default>
+    </quotas>
+</clickhouse>
+
+```
+
+</details>
+
+<details>
+<summary>cluster.xml (Click to expand config)</summary>
+
+```xml:cluster.xml
+<?xml version="1.0"?>
+<clickhouse>
+    <zookeeper>
+        <node index="1">
+            <host>signoz-zookeeper</host>
+            <port>2181</port>
+        </node>
+    </zookeeper>
+    <remote_servers>
+        <cluster>
+            <shard>
+                <replica>
+                    <host>127.0.0.1</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </cluster>
+    </remote_servers>
+</clickhouse>
+```
+
+</details>
+
+<details>
+<summary>custom-function.yaml (Click to expand config)</summary>
+
+```xml:custom-function.xml
+<functions>
+    <function>
+        <type>executable</type>
+        <name>histogramQuantile</name>
+        <return_type>Float64</return_type>
+        <argument>
+            <type>Array(Float64)</type>
+            <name>buckets</name>
+        </argument>
+        <argument>
+            <type>Array(Float64)</type>
+            <name>counts</name>
+        </argument>
+        <argument>
+            <type>Float64</type>
+            <name>quantile</name>
+        </argument>
+        <format>CSV</format>
+        <command>./histogramQuantile</command>
+    </function>
+</functions>
+```
+
+</details>
+
+
+<details>
+<summary>signoz-otel-collector-config.xml (Click to expand config)</summary>
+
+```yaml:signoz-otel-collector-config.yaml
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        max_recv_msg_size_mib: 16
+      http:
+        endpoint: 0.0.0.0:4318
+  jaeger:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14250
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+  httplogreceiver/heroku:
+    endpoint: 0.0.0.0:8081
+    source: heroku
+  httplogreceiver/json:
+    endpoint: 0.0.0.0:8082
+    source: json
+processors:
+  batch:
+    send_batch_size: 50000
+    timeout: 1s
+  signozspanmetrics/delta:
+    metrics_exporter: signozclickhousemetrics 
+    latency_histogram_buckets: [100us, 1ms, 2ms, 6ms, 10ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 1400ms, 2000ms, 5s, 10s, 20s, 40s, 60s]
+    dimensions_cache_size: 100000
+    dimensions:
+      - name: service.namespace
+        default: default
+      - name: deployment.environment
+        default: default
+      - name: signoz.collector.id
+    aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  zpages:
+    endpoint: localhost:55679
+  pprof:
+    endpoint: localhost:1777
+exporters:
+  clickhousetraces:
+    datasource: tcp://signoz-clickhouse:9000/signoz_traces?password=password
+    use_new_schema: true
+  signozclickhousemetrics:
+    dsn: tcp://signoz-clickhouse:9000/signoz_metrics?password=password
+    timeout: 45s
+  clickhouselogsexporter:
+    dsn: tcp://signoz-clickhouse:9000/signoz_logs?password=password
+    timeout: 10s
+    use_new_schema: true
+  metadataexporter:
+    dsn: tcp://signoz-clickhouse:9000/signoz_metadata?password=password
+    timeout: 10s
+    tenant_id: default
+    cache:
+      provider: in_memory
+service:
+  telemetry:
+    logs:
+      encoding: json
+  extensions: [health_check, zpages, pprof]
+  pipelines:
+    traces:
+      receivers: [otlp, jaeger]
+      processors: [signozspanmetrics/delta, batch]
+      exporters: [clickhousetraces, metadataexporter]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [metadataexporter, signozclickhousemetrics]
+    logs:
+      receivers: [otlp, httplogreceiver/heroku, httplogreceiver/json]
+      processors: [batch]
+      exporters: [clickhouselogsexporter, metadataexporter]
+```
+</details>
+
+### 6. Upload Configuration Files to Azure File Share
+
+Upload all configuration files to the file share:
+
+```bash
+# Upload each file
+for file in config.xml users.xml cluster.xml custom-function.xml signoz-otel-collector-config.yaml; do
+  az storage file upload \
+    --account-name $STORAGE_ACCOUNT \
+    --account-key "$STORAGE_KEY" \
+    --share-name $FILE_SHARE_NAME \
+    --source ./$file \
+    --path $file
+done
+```
+
+---
+
+## Deploy SigNoz Components
+
+### 1. Deploy Zookeeper
+
+Zookeeper coordinates ClickHouse replicas and stores metadata.
+
+<details>
+<summary>zookeeper.yaml (Click to expand config)</summary>
+
+```yaml
+apiVersion: "2025-07-01"
+type: Microsoft.App/containerApps
+properties:
+  configuration:
+    ingress:
+      external: false
+      targetPort: 2181
+      allowInsecure: false
+      stickySessions:
+        affinity: none
+      transport: tcp
+  template:
+    containers:
+      - image: signoz/zookeeper:3.7.1
+        name: signoz-zookeeper
+        env:
+          - name: ZOO_SERVER_ID
+            value: "1"
+          - name: ALLOW_ANONYMOUS_LOGIN
+            value: "yes"
+          - name: ZOO_AUTOPURGE_INTERVAL
+            value: "1"
+          - name: ZOO_ENABLE_PROMETHEUS_METRICS
+            value: "yes"
+          - name: ZOO_PROMETHEUS_METRICS_PORT_NUMBER
+            value: "9141"
+        volumeMounts:
+          - volumeName: zookeeper-data
+            mountPath: /bitnami/zookeeper
+        probes:
+          - type: Liveness
+            httpGet:
+              path: /commands/ruok
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+    volumes:
+      - name: zookeeper-data
+        storageType: EmptyDir
+    scale:
+      maxReplicas: 1
+      minReplicas: 1
+```
+
+</details>
+
+Deploy Zookeeper:
+
+```bash
+az containerapp create \
+  --name signoz-zookeeper \
+  --resource-group $RG_NAME \
+  --environment $ENV_NAME \
+  --yaml zookeeper.yaml
+```
+
+Verify deployment and check logs:
+
+```bash
+# Check status
+az containerapp show \
+  --name signoz-zookeeper \
+  --resource-group $RG_NAME \
+  --output table
+
+# View logs
+az containerapp logs show \
+  --name signoz-zookeeper \
+  --resource-group $RG_NAME \
+  --follow
+```
+
+### 2. Deploy ClickHouse
+
+ClickHouse serves as the time-series database for storing metrics and traces.
+
+<details>
+<summary>clickouse.yaml (Click to expand config)</summary>
+
+```yaml
+apiVersion: "2025-07-01"
+type: Microsoft.App/containerApps
+properties:
+  configuration:
+    ingress:
+      external: false
+      targetPort: 9000
+      allowInsecure: false
+      stickySessions:
+        affinity: none
+      transport: tcp
+      additionalPortMappings:
+        - targetPort: 8123
+          external: false
+        - targetPort: 9009
+          external: false
+  template:
+    initContainers:
+      - name: signoz-clickhouse-udf-init
+        image: docker.io/alpine:3.18.2
+        command: ["sh", "-c"]
+        args:
+          - |
+            set -e
+            apk add --no-cache wget ca-certificates tar >/dev/null
+            version="v0.0.1"
+            node_os=$(uname -s | tr '[:upper:]' '[:lower:]')
+            node_arch=$(uname -m | sed s/aarch64/arm64/ | sed s/x86_64/amd64/)
+            echo "Fetching histogram-binary for ${node_os}/${node_arch}"
+            cd /tmp
+            wget -O histogram-quantile.tar.gz "https://github.com/SigNoz/signoz/releases/download/histogram-quantile%2F${version}/histogram-quantile_${node_os}_${node_arch}.tar.gz"
+            tar -xzf histogram-quantile.tar.gz
+            chmod 755 histogram-quantile
+            mv histogram-quantile /var/lib/clickhouse/user_scripts/histogramQuantile
+            echo "histogram-quantile installed"
+        volumeMounts:
+          - mountPath: /var/lib/clickhouse/user_scripts
+            volumeName: shared-binary-volume
+    containers:
+      - name: clickhouse
+        image: docker.io/clickhouse/clickhouse-server:25.5.6
+        env:
+          - name: CLICKHOUSE_SKIP_USER_SETUP
+            value: "1"
+        volumeMounts:
+          - mountPath: /var/lib/clickhouse/user_scripts
+            volumeName: shared-binary-volume
+          - mountPath: /etc/clickhouse-server/custom-function.xml
+            volumeName: chi-signoz-clickhouse-config
+            subPath: custom-function.xml
+          - mountPath: /var/lib/clickhouse
+            volumeName: data-volumeclaim-template
+          - mountPath: /etc/clickhouse-server/config.xml
+            volumeName: chi-signoz-clickhouse-config
+            subPath: config.xml
+          - mountPath: /etc/clickhouse-server/users.xml
+            volumeName: chi-signoz-clickhouse-config
+            subPath: users.xml
+          - mountPath: /etc/clickhouse-server/config.d/cluster.xml
+            volumeName: chi-signoz-clickhouse-config
+            subPath: cluster.xml
+        probes:
+          - type: Liveness
+            failureThreshold: 10
+            httpGet:
+              path: /ping
+              port: 8123
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          - type: Readiness
+            failureThreshold: 3
+            httpGet:
+              path: /ping
+              port: 8123
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+          - type: Startup
+            failureThreshold: 30
+            httpGet:
+              path: /ping
+              port: 8123
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+    volumes:
+      - name: shared-binary-volume
+        storageType: EmptyDir
+      - name: chi-signoz-clickhouse-config
+        storageType: AzureFile
+        storageName: signoz
+      - name: data-volumeclaim-template
+        storageType: EmptyDir
+    scale:
+      maxReplicas: 1
+      minReplicas: 1
+```
+
+</details>
+
+Deploy ClickHouse:
+
+```bash
+az containerapp create \
+  --name signoz-clickhouse \
+  --resource-group $RG_NAME \
+  --environment $ENV_NAME \
+  --yaml clickhouse.yaml
+```
+
+Verify deployment and check logs:
+
+```bash
+# Check status
+az containerapp show \
+  --name signoz-clickhouse \
+  --resource-group $RG_NAME \
+  --output table
+
+# View logs
+az containerapp logs show \
+  --name signoz-clickhouse \
+  --resource-group $RG_NAME \
+  --follow
+```
+
+### 3. Deploy Schema Migrator Sync Job
+
+Schema Migrator Sync handles the migrations needed in ClickHouse for running SigNoz.
+
+<details>
+<summary>sync-migrator.yaml (Click to expand config)</summary>
+
+```yaml
+apiVersion: "2025-01-01"
+type: Microsoft.App/jobs
+properties:
+  configuration:
+    triggerType: Manual
+    replicaTimeout: 1800
+    replicaRetryLimit: 3
+    manualTriggerConfig:
+      parallelism: 1
+      replicaCompletionCount: 1
+  template:
+    initContainers:
+      - name: schema-migrator-sync-init
+        image: docker.io/busybox:1.35
+        command: ["sh", "-c"]
+        args:
+          - until wget --user "$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)" --spider -q
+            signoz-clickhouse:8123/ping; do echo -e "waiting for clickhouseDB"; sleep
+            5; done; echo -e "clickhouse ready, starting schema migrator now";
+        env:
+          - name: CLICKHOUSE_HOST
+            value: signoz-clickhouse
+          - name: CLICKHOUSE_PORT
+            value: "9000"
+          - name: CLICKHOUSE_HTTP_PORT
+            value: "8123"
+          - name: CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: CLICKHOUSE_USER
+            value: ""
+          - name: CLICKHOUSE_PASSWORD
+            value: ""
+          - name: CLICKHOUSE_SECURE
+            value: "false"
+      - name: schema-migrator-sync-ch-ready
+        image: docker.io/clickhouse/clickhouse-server:25.5.6
+        command: ["sh", "-c"]
+        args:
+          - |
+            echo "Running clickhouse ready check"
+            while true
+            do
+              version="$(CLICKHOUSE_VERSION)"
+              shards="$(CLICKHOUSE_SHARDS)"
+              replicas="$(CLICKHOUSE_REPLICAS)"
+              current_version="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT version()")"
+              if [ -z "$current_version" ]; then
+                echo "waiting for clickhouse to be ready"
+                sleep 5
+                continue
+              fi
+              if [ -z "$(echo "$current_version" | grep "$version")" ]; then
+                echo "expected version: $version, current version: $current_version"
+                echo "waiting for clickhouse with correct version"
+                sleep 5
+                continue
+              fi
+              current_shards="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT count(DISTINCT(shard_num)) FROM system.clusters WHERE cluster = '${CLICKHOUSE_CLUSTER}'")"
+              if [ -z "$current_shards" ]; then
+                echo "waiting for clickhouse to be ready"
+                sleep 5
+                continue
+              fi
+              if [ "$current_shards" -ne "$shards" ]; then
+                echo "expected shard count: $shards, current shard count: $current_shards"
+                echo "waiting for clickhouse with correct shard count"
+                sleep 5
+                continue
+              fi
+              current_replicas="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT count(DISTINCT(replica_num)) FROM system.clusters WHERE cluster = '${CLICKHOUSE_CLUSTER}'")"
+              if [ -z "$current_replicas" ]; then
+                echo "waiting for clickhouse to be ready"
+                sleep 5
+                continue
+              fi
+              if [ "$current_replicas" -ne "$replicas" ]; then
+                echo "expected replica count: $replicas, current replica count: $current_replicas"
+                echo "waiting for clickhouse with correct replica count"
+                sleep 5
+                continue
+              fi
+              break
+            done
+            echo "clickhouse ready, starting schema migrator now"
+        env:
+          - name: CLICKHOUSE_HOST
+            value: signoz-clickhouse
+          - name: CLICKHOUSE_PORT
+            value: "9000"
+          - name: CLICKHOUSE_HTTP_PORT
+            value: "8123"
+          - name: CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: CLICKHOUSE_USER
+            value: ""
+          - name: CLICKHOUSE_PASSWORD
+            value: ""
+          - name: CLICKHOUSE_SECURE
+            value: "false"
+          - name: CLICKHOUSE_VERSION
+            value: "25.5.6"
+          - name: CLICKHOUSE_SHARDS
+            value: "1"
+          - name: CLICKHOUSE_REPLICAS
+            value: "1"
+    containers:
+      - name: schema-migrator
+        image: docker.io/signoz/signoz-schema-migrator:v0.129.5
+        args:
+          - sync
+          - --cluster-name
+          - $(CLICKHOUSE_CLUSTER)
+          - --dsn
+          - tcp://$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)@signoz-clickhouse:9000
+          - --up=
+        env:
+          - name: CLICKHOUSE_HOST
+            value: signoz-clickhouse
+          - name: CLICKHOUSE_PORT
+            value: "9000"
+          - name: CLICKHOUSE_HTTP_PORT
+            value: "8123"
+          - name: CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: CLICKHOUSE_USER
+            value: ""
+          - name: CLICKHOUSE_PASSWORD
+            value: ""
+          - name: CLICKHOUSE_SECURE
+            value: "false"
+```
+
+</details>
+
+Deploy and run the sync job:
+
+```bash
+az containerapp job create \
+  --name signoz-schema-migrator-sync \
+  --resource-group $RG_NAME \
+  --environment $ENV_NAME \
+  --yaml sync-migrator.yaml
+
+# Start the job
+az containerapp job start \
+  --name signoz-schema-migrator-sync \
+  --resource-group $RG_NAME
+```
+
+Verify job execution and check logs:
+
+```bash
+# Check status
+az containerapp job show \
+  --name signoz-schema-migrator-sync \
+  --resource-group $RG_NAME \
+  --output table
+
+# View logs
+az containerapp job logs show \
+  --name signoz-schema-migrator-sync \
+  --resource-group $RG_NAME \
+  --follow
+```
+
+### 4. Deploy Schema Migrator Async Job
+
+<Admonition type="warning"> 
+Please wait for the Schema Migrator Sync job completion before running this.
+</Admonition>
+<details>
+<summary>async-migrator.yaml (Click to expand config)</summary>
+
+```yaml
+apiVersion: "2025-01-01"
+type: Microsoft.App/jobs
+properties:
+  configuration:
+    triggerType: Manual
+    replicaTimeout: 1800
+    replicaRetryLimit: 3
+    manualTriggerConfig:
+      parallelism: 1
+      replicaCompletionCount: 1
+  template:
+    initContainers:
+      - name: schema-migrator-async-init
+        image: docker.io/busybox:1.35
+        command: ["sh", "-c"]
+        args:
+          - until wget --user "$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)" --spider -q
+            signoz-clickhouse:8123/ping; do echo -e "waiting for clickhouseDB"; sleep
+            5; done; echo -e "clickhouse ready, starting schema migrator now";
+        env:
+          - name: CLICKHOUSE_HOST
+            value: signoz-clickhouse
+          - name: CLICKHOUSE_PORT
+            value: "9000"
+          - name: CLICKHOUSE_HTTP_PORT
+            value: "8123"
+          - name: CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: CLICKHOUSE_USER
+            value: ""
+          - name: CLICKHOUSE_PASSWORD
+            value: ""
+          - name: CLICKHOUSE_SECURE
+            value: "false"
+      - name: schema-migrator-async-ch-ready
+        image: docker.io/clickhouse/clickhouse-server:25.5.6
+        command: ["sh", "-c"]
+        args:
+          - |
+            echo "Running clickhouse ready check"
+            while true
+            do
+              version="$(CLICKHOUSE_VERSION)"
+              shards="$(CLICKHOUSE_SHARDS)"
+              replicas="$(CLICKHOUSE_REPLICAS)"
+              current_version="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT version()")"
+              if [ -z "$current_version" ]; then
+                echo "waiting for clickhouse to be ready"
+                sleep 5
+                continue
+              fi
+              if [ -z "$(echo "$current_version" | grep "$version")" ]; then
+                echo "expected version: $version, current version: $current_version"
+                echo "waiting for clickhouse with correct version"
+                sleep 5
+                continue
+              fi
+              current_shards="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT count(DISTINCT(shard_num)) FROM system.clusters WHERE cluster = '${CLICKHOUSE_CLUSTER}'")"
+              if [ -z "$current_shards" ]; then
+                echo "waiting for clickhouse to be ready"
+                sleep 5
+                continue
+              fi
+              if [ "$current_shards" -ne "$shards" ]; then
+                echo "expected shard count: $shards, current shard count: $current_shards"
+                echo "waiting for clickhouse with correct shard count"
+                sleep 5
+                continue
+              fi
+              current_replicas="$(clickhouse client --host ${CLICKHOUSE_HOST} --port ${CLICKHOUSE_PORT} --user "${CLICKHOUSE_USER}" --password "${CLICKHOUSE_PASSWORD}" -q "SELECT count(DISTINCT(replica_num)) FROM system.clusters WHERE cluster = '${CLICKHOUSE_CLUSTER}'")"
+              if [ -z "$current_replicas" ]; then
+                echo "waiting for clickhouse to be ready"
+                sleep 5
+                continue
+              fi
+              if [ "$current_replicas" -ne "$replicas" ]; then
+                echo "expected replica count: $replicas, current replica count: $current_replicas"
+                echo "waiting for clickhouse with correct replica count"
+                sleep 5
+                continue
+              fi
+              break
+            done
+            echo "clickhouse ready, starting schema migrator now"
+        env:
+          - name: CLICKHOUSE_HOST
+            value: signoz-clickhouse
+          - name: CLICKHOUSE_PORT
+            value: "9000"
+          - name: CLICKHOUSE_HTTP_PORT
+            value: "8123"
+          - name: CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: CLICKHOUSE_USER
+            value: ""
+          - name: CLICKHOUSE_PASSWORD
+            value: ""
+          - name: CLICKHOUSE_SECURE
+            value: "false"
+          - name: CLICKHOUSE_VERSION
+            value: "25.5.6"
+          - name: CLICKHOUSE_SHARDS
+            value: "1"
+          - name: CLICKHOUSE_REPLICAS
+            value: "1"
+    containers:
+      - name: schema-migrator
+        image: docker.io/signoz/signoz-schema-migrator:v0.129.5
+        args:
+          - async
+          - --cluster-name
+          - $(CLICKHOUSE_CLUSTER)
+          - --dsn
+          - tcp://$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)@signoz-clickhouse:9000
+          - --up=
+        env:
+          - name: CLICKHOUSE_HOST
+            value: signoz-clickhouse
+          - name: CLICKHOUSE_PORT
+            value: "9000"
+          - name: CLICKHOUSE_HTTP_PORT
+            value: "8123"
+          - name: CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: CLICKHOUSE_USER
+            value: ""
+          - name: CLICKHOUSE_PASSWORD
+            value: ""
+          - name: CLICKHOUSE_SECURE
+            value: "false"
+```
+
+</details>
+
+Deploy and run the async job:
+
+```bash
+az containerapp job create \
+  --name signoz-schema-migrator-async \
+  --resource-group $RG_NAME \
+  --environment $ENV_NAME \
+  --yaml async-migrator.yaml
+
+# Start the job
+az containerapp job start \
+  --name signoz-schema-migrator-async \
+  --resource-group $RG_NAME
+```
+
+Verify job execution and check logs:
+
+```bash
+# Check status
+az containerapp job show \
+  --name signoz-schema-migrator-async \
+  --resource-group $RG_NAME \
+  --output table
+
+# View logs
+az containerapp job logs show \
+  --name signoz-schema-migrator-async \
+  --resource-group $RG_NAME \
+  --follow
+```
+
+### 5. Deploy SigNoz Application
+
+<Admonition type="warning"> 
+Please wait for the Schema Migrator Sync job completion before running this.
+</Admonition>
+
+<details>
+<summary>signoz.yaml (Click to expand config)</summary>
+
+```yaml
+apiVersion: "2025-07-01"
+type: Microsoft.App/containerApps
+properties:
+  configuration:
+    ingress:
+      external: true
+      targetPort: 8080
+      allowInsecure: false
+      stickySessions:
+        affinity: none
+      transport: http
+      additionalPortMappings:
+        - targetPort: 8085
+          external: false
+        - targetPort: 4320
+          external: false
+  template:
+    initContainers:
+      - name: signoz-init
+        image: docker.io/busybox:1.35
+        command: ["sh", "-c"]
+        args:
+          - until wget --user "$(CLICKHOUSE_USER):$(CLICKHOUSE_PASSWORD)" --spider -q
+            signoz-clickhouse:8123/ping; do echo -e "waiting for clickhouseDB"; sleep
+            5; done; echo -e "clickhouse ready, starting signoz now";
+        env:
+          - name: CLICKHOUSE_HOST
+            value: signoz-clickhouse
+          - name: CLICKHOUSE_PORT
+            value: "9000"
+          - name: CLICKHOUSE_HTTP_PORT
+            value: "8123"
+          - name: CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: CLICKHOUSE_USER
+            value: ""
+          - name: CLICKHOUSE_PASSWORD
+            value: ""
+          - name: CLICKHOUSE_SECURE
+            value: "false"
+    containers:
+      - name: signoz
+        image: docker.io/signoz/signoz:latest
+        env:
+          - name: CLICKHOUSE_HOST
+            value: signoz-clickhouse
+          - name: CLICKHOUSE_PORT
+            value: "9000"
+          - name: CLICKHOUSE_HTTP_PORT
+            value: "8123"
+          - name: CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: CLICKHOUSE_USER
+            value: default
+          - name: CLICKHOUSE_PASSWORD
+            value: ""
+          - name: CLICKHOUSE_SECURE
+            value: "false"
+          - name: SIGNOZ_TELEMETRYSTORE_PROVIDER
+            value: clickhouse
+          - name: SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN
+            value: tcp://signoz-clickhouse:9000/?username=$(CLICKHOUSE_USER)&password=$(CLICKHOUSE_PASSWORD)
+          - name: SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: SIGNOZ_PROMETHEUS_ACTIVE_QUERY_TRACKER_ENABLED
+            value: "false"
+          - name: SIGNOZ_EMAILING_ENABLED
+            value: "false"
+          - name: SIGNOZ_ALERTMANAGER_SIGNOZ_EXTERNAL_URL
+            value: http://localhost:8080
+          - name: SIGNOZ_ALERTMANAGER_PROVIDER
+            value: signoz
+          - name: DOT_METRICS_ENABLED
+            value: "true"
+        volumeMounts:
+          - mountPath: /var/lib/signoz/
+            volumeName: signoz-db
+        probes:
+          - type: Liveness
+            failureThreshold: 6
+            httpGet:
+              path: /api/v1/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          - type: Readiness
+            failureThreshold: 6
+            httpGet:
+              path: /api/v1/health?live=1
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+    volumes:
+      - name: signoz-db
+        storageType: EmptyDir
+    scale:
+      maxReplicas: 1
+      minReplicas: 1
+```
+
+</details>
+
+Deploy SigNoz:
+
+```bash
+az containerapp create \
+  --name signoz \
+  --resource-group $RG_NAME \
+  --environment $ENV_NAME \
+  --yaml signoz.yaml
+```
+
+Verify deployment and check logs:
+
+```bash
+# Check status
+az containerapp show \
+  --name signoz \
+  --resource-group $RG_NAME \
+  --output table
+
+# View logs
+az containerapp logs show \
+  --name signoz \
+  --resource-group $RG_NAME \
+  --follow
+```
+
+### 6. Deploy OpenTelemetry Collector
+
+<Admonition type="warning"> 
+Please wait for the Schema Migrator Sync job completion before running this.
+</Admonition>
+
+<details>
+<summary>otel-collector.yaml (Click to expand config)</summary>
+
+```yaml
+apiVersion: "2025-07-01"
+type: Microsoft.App/containerApps
+properties:
+  configuration:
+    ingress:
+      external: true
+      targetPort: 4317
+      allowInsecure: false
+      stickySessions:
+        affinity: none
+      transport: tcp
+      additionalPortMappings:
+        - targetPort: 4318
+          external: true
+  template:
+    containers:
+      - name: signoz-otel-collector
+        image: docker.io/signoz/signoz-otel-collector:v0.129.5
+        command:
+          - /signoz-otel-collector
+        args:
+          - --config=/conf/otel-collector-config.yaml
+          - --manager-config=/conf/otel-collector-opamp-config.yaml
+          - --copy-path=/var/tmp/collector-config.yaml
+          - --feature-gates=-pkg.translator.prometheus.NormalizeName
+        env:
+          - name: CLICKHOUSE_HOST
+            value: signoz-clickhouse
+          - name: CLICKHOUSE_PORT
+            value: "9000"
+          - name: CLICKHOUSE_HTTP_PORT
+            value: "8123"
+          - name: CLICKHOUSE_CLUSTER
+            value: cluster
+          - name: CLICKHOUSE_DATABASE
+            value: signoz_metrics
+          - name: CLICKHOUSE_TRACE_DATABASE
+            value: signoz_traces
+          - name: CLICKHOUSE_LOG_DATABASE
+            value: signoz_logs
+          - name: CLICKHOUSE_METER_DATABASE
+            value: signoz_meter
+          - name: CLICKHOUSE_USER
+            value: default
+          - name: CLICKHOUSE_PASSWORD
+            value: ""
+          - name: CLICKHOUSE_SECURE
+            value: "false"
+          - name: CLICKHOUSE_VERIFY
+            value: "false"
+          - name: LOW_CARDINAL_EXCEPTION_GROUPING
+            value: "false"
+        volumeMounts:
+          - mountPath: /conf/otel-collector-config.yaml
+            volumeName: signoz-otel-collector-config
+            subPath: otel-collector-config.yaml
+          - mountPath: /conf/otel-collector-opamp-config.yaml
+            volumeName: signoz-otel-opamp-config
+            subPath: otel-collector-opamp-config.yaml
+        probes:
+          - type: Liveness
+            failureThreshold: 6
+            httpGet:
+              path: /
+              port: 13133
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          - type: Readiness
+            failureThreshold: 6
+            httpGet:
+              path: /
+              port: 13133
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+    volumes:
+      - name: signoz-otel-collector-config
+        storageType: AzureFile
+        storageName: signoz
+      - name: signoz-otel-opamp-config
+        secret: "server_endpoint: ws://signoz:4320/v1/opamp"
+    scale:
+      maxReplicas: 1
+      minReplicas: 1
+```
+
+</details>
+
+Deploy OpenTelemetry Collector:
+
+```bash
+az containerapp create \
+  --name signoz-otel-collector \
+  --resource-group $RG_NAME \
+  --environment $ENV_NAME \
+  --yaml otel-collector.yaml
+```
+
+Verify deployment and check logs:
+
+```bash
+# Check status
+az containerapp show \
+  --name signoz-otel-collector \
+  --resource-group $RG_NAME \
+  --output table
+
+# View logs
+az containerapp logs show \
+  --name signoz-otel-collector \
+  --resource-group $RG_NAME \
+  --follow
+```
+
+### 13. Verify All Deployments
+
+Check the status of all deployed apps:
+
+```bash
+az containerapp list \
+  --resource-group $RG_NAME \
+  --environment $ENV_NAME \
+  --output table
+```

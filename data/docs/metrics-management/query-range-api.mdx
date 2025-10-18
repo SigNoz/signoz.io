@@ -1,6 +1,7 @@
 ---
 date: 2025-03-22
 title: Query Range API 
+tags : [SigNoz Cloud, Self-Host]
 id: query-range-api
 ---
 
@@ -12,7 +13,7 @@ The Query Range API is a robust interface which enables developers to query metr
 
 Endpoint for Query Range API:
 
-`POST` `https://{URL}/api/v4/query_range`
+`POST` `https://{URL}/api/v5/query_range`
 
 Replace `{URL}` with your instance URL.
 
@@ -48,77 +49,51 @@ The API specification is available in the [OpenAPI Specification](https://signoz
 {
   "start": 1742602572000,
   "end": 1742604372000,
-  "step": 60,
+  "requestType": "time_series",
   "variables": {
-    "k8s_node_name": [
-      "gke-application-eu-c-pl-addon-n2dhc4--c80039c0-2gjz"
-    ],
-    "k8s_cluster_name": "application-eu-central"
+    "k8s.node.name": {
+      "type": "custom",
+      "value": [
+        "gke-application-eu-c-pl-addon-n2dhc4--c80039c0-2gjz"
+      ]
+    },
+    "k8s.cluster.name": {
+      "type": "custom",
+      "value": "application-eu-central"
+    }
   },
-  "formatForWeb": false,
+  "formatOptions": {
+    "fillGaps": false
+  },
   "compositeQuery": {
-    "queryType": "builder",
-    "panelType": "graph",
-    "fillGaps": false,
-    "builderQueries": {
-      "A": {
-        "queryName": "A",
-        "dataSource": "metrics",
-        "aggregateAttribute": {
-          "key": "k8s_node_cpu_utilization",
-          "dataType": "float64",
-          "type": "Gauge",
-          "isColumn": true,
-          "isJSON": false
-        },
-        "expression": "A",
-        "disabled": false,
-        "timeAggregation": "avg",
-        "spaceAggregation": "sum",
-        "stepInterval": 60,
-        "reduceTo": "sum",
-        "filters": {
-          "items": [
+    "queries": [
+      {
+        "type": "builder_query",
+        "spec": {
+          "name": "A",
+          "signal": "metrics",
+          "stepInterval": 60,
+          "aggregations": [
             {
-              "key": {
-                "key": "k8s_cluster_name",
-                "dataType": "string",
-                "isColumn": false,
-                "type": "tag"
-              },
-              "op": "=",
-              "value": "{{.k8s_cluster_name}}"
-            },
-            {
-              "key": {
-                "key": "k8s_node_name",
-                "dataType": "string",
-                "isColumn": false,
-                "type": "tag"
-              },
-              "op": "in",
-              "value": [
-                "{{.k8s_node_name}}"
-              ]
+              "metricName": "k8s.node.cpu.usage",
+              "temporality": "Unspecified",
+              "timeAggregation": "avg",
+              "spaceAggregation": "sum"
             }
           ],
-          "op": "AND"
-        },
-        "groupBy": [
-          {
-            "key": "k8s_node_name",
-            "dataType": "string",
-            "isColumn": false,
-            "isJSON": false,
-            "type": "tag"
-          }
-        ],
-        "having": [],
-        "orderBy": [],
-        "legend": "{{k8s_node_name}}",
-        "functions": []
+          "filter": {
+            "expression": "k8s.cluster.name = $k8s.cluster.name AND k8s.node.name in $k8s.node.name"
+          },
+          "groupBy": [
+            {
+              "name": "k8s.node.name",
+            }
+          ],
+          "legend": "{{k8s.node.name}}",
+          "disabled": false
+        }
       }
-    }
+    ]
   }
 }
 ``` 
@@ -129,50 +104,31 @@ The API specification is available in the [OpenAPI Specification](https://signoz
 {
   "start": 1742602968000,
   "end": 1742604768000,
-  "step": 60,
-  "variables": {
-  },
-  "formatForWeb": false,
+  "requestType": "time_series",
   "compositeQuery": {
-    "queryType": "builder",
-    "panelType": "graph",
-    "fillGaps": false,
-    "builderQueries": {
-      "A": {
-        "queryName": "A",
-        "dataSource": "metrics",
-        "aggregateAttribute": {
-          "key": "jvm_gc_duration_bucket",
-          "dataType": "float64",
-          "type": "Histogram",
-          "isColumn": true,
-          "isJSON": false
-        },
-        "timeAggregation": "",
-        "spaceAggregation": "p90",
-        "expression": "A",
-        "disabled": false,
-        "stepInterval": 60,
-        "reduceTo": "avg",
-        "filters": {
-          "items": [],
-          "op": "AND"
-        },
-        "groupBy": [
-          {
-            "key": "service_name",
-            "dataType": "string",
-            "type": "tag",
-            "isColumn": false,
-            "isJSON": false
-          }
-        ],
-        "having": [],
-        "orderBy": [],
-        "functions": [],
-        "legend": "{{service_name}}"
+    "queries": [
+      {
+        "type": "builder_query",
+        "spec": {
+          "name": "A",
+          "signal": "metrics",
+          "stepInterval": 60,
+          "aggregations": [
+            {
+              "metricName": "jvm.gc.duration.bucket",
+              "spaceAggregation": "p90"
+            }
+          ],
+          "groupBy": [
+            {
+              "name": "service.name",
+            }
+          ],
+          "legend": "{{service.name}}",
+          "disabled": false
+        }
       }
-    }
+    ]
   }
 }
 ```
@@ -183,78 +139,47 @@ The API specification is available in the [OpenAPI Specification](https://signoz
 {
   "start": 1742603085000,
   "end": 1742604885000,
-  "step": 60,
+  "requestType": "time_series",
   "variables": {
-    "SIGNOZ_START_TIME": 1742603085000,
-    "SIGNOZ_END_TIME": 1742604885000,
-    "k8s_node_name": [
-      "gke-application-pl-addon-n2dhc4-od-71879e78-0ql9"
-    ],
-    "k8s_cluster_name": "application"
+    "k8s.node.name": {
+      "type": "custom",
+      "value": [
+        "gke-application-pl-addon-n2dhc4-od-71879e78-0ql9"
+      ]
+    },
+    "k8s.cluster.name": {
+      "type": "custom",
+      "value": "application"
+    }
   },
-  "formatForWeb": true,
   "compositeQuery": {
-    "queryType": "builder",
-    "panelType": "graph",
-    "fillGaps": false,
-    "builderQueries": {
-      "A": {
-        "dataSource": "metrics",
-        "queryName": "A",
-        "aggregateAttribute": {
-          "key": "k8s_node_memory_usage",
-          "dataType": "float64",
-          "type": "Gauge",
-          "isColumn": true,
-          "isJSON": false
-        },
-        "timeAggregation": "avg",
-        "spaceAggregation": "sum",
-        "expression": "A",
-        "disabled": false,
-        "stepInterval": 60,
-        "functions": [],
-        "filters": {
-          "items": [
+    "queries": [
+      {
+        "type": "builder_query",
+        "spec": {
+          "name": "A",
+          "signal": "metrics",
+          "stepInterval": 60,
+          "aggregations": [
             {
-              "key": {
-                "key": "k8s_cluster_name",
-                "dataType": "string",
-                "isColumn": false,
-                "type": "tag"
-              },
-              "op": "=",
-              "value": "{{.k8s_cluster_name}}"
-            },
-            {
-              "key": {
-                "key": "k8s_node_name",
-                "dataType": "string",
-                "isColumn": false,
-                "type": "tag"
-              },
-              "op": "in",
-              "value": [
-                "{{.k8s_node_name}}"
-              ]
+              "metricName": "k8s.node.memory.usage",
+              "timeAggregation": "avg",
+              "spaceAggregation": "sum"
             }
           ],
-          "op": "AND"
-        },
-        "having": [],
-        "orderBy": [],
-        "groupBy": [
-          {
-            "key": "k8s_node_name",
-            "dataType": "string",
-            "type": "tag",
-            "isColumn": false,
-            "isJSON": false
-          }
-        ],
-        "legend": "used",
+          "filter": {
+            "expression": "k8s.cluster.name = $k8s.cluster.name AND k8s.node.name IN $k8s.node.name"
+          },
+          "groupBy": [
+            {
+              "name": "k8s.node.name",
+            }
+          ],
+          "legend": "used",
+          "disabled": false
+        }
       }
-    }
+    ]
   }
 }
 ```
@@ -265,55 +190,32 @@ The API specification is available in the [OpenAPI Specification](https://signoz
 {
   "start": 1742603295000,
   "end": 1742605095000,
-  "step": 60,
-  "variables": {
-    "SIGNOZ_START_TIME": 1742603278000,
-    "SIGNOZ_END_TIME": 1742605078000,
-    "k8s_node_name": [
-      "gke-application-pl-addon-n2dhc4-od-71879e78-0ql9"
-    ],
-    "k8s_cluster_name": "application-eu-central"
-  },
-  "formatForWeb": false,
+  "requestType": "time_series",
   "compositeQuery": {
-    "queryType": "builder",
-    "panelType": "graph",
-    "fillGaps": false,
-    "builderQueries": {
-      "A": {
-        "dataSource": "metrics",
-        "queryName": "A",
-        "aggregateAttribute": {
-          "key": "signoz_calls_total",
-          "dataType": "float64",
-          "type": "Sum",
-          "isColumn": true,
-          "isJSON": false
-        },
-        "timeAggregation": "rate",
-        "spaceAggregation": "sum",
-        "expression": "A",
-        "disabled": false,
-        "stepInterval": 60,
-        "functions": [],
-        "filters": {
-          "items": [],
-          "op": "AND"
-        },
-        "having": [],
-        "orderBy": [],
-        "groupBy": [
-          {
-            "key": "service_name",
-            "dataType": "string",
-            "type": "tag",
-            "isColumn": false,
-            "isJSON": false
-          }
-        ],
-        "legend": "{{service_name}}",
+    "queries": [
+      {
+        "type": "builder_query",
+        "spec": {
+          "name": "A",
+          "signal": "metrics",
+          "stepInterval": 60,
+          "aggregations": [
+            {
+              "metricName": "signoz_calls_total",
+              "timeAggregation": "rate",
+              "spaceAggregation": "sum"
+            }
+          ],
+          "groupBy": [
+            {
+              "name": "service.name",
+            }
+          ],
+          "legend": "{{service.name}}",
+          "disabled": false
+        }
       }
-    }
+    ]
   }
 }
 ```
@@ -324,99 +226,66 @@ The API specification is available in the [OpenAPI Specification](https://signoz
 {
   "start": 1742601948000,
   "end": 1742605548000,
-  "step": 60,
-  "variables": {},
-  "formatForWeb": false,
+  "requestType": "time_series",
   "compositeQuery": {
-    "queryType": "builder",
-    "panelType": "graph",
-    "fillGaps": false,
-    "builderQueries": {
-      "A": {
-        "dataSource": "metrics",
-        "queryName": "A",
-        "aggregateAttribute": {
-          "key": "signoz_calls_total",
-          "dataType": "float64",
-          "type": "Sum",
-          "isColumn": true,
-          "isJSON": false
-        },
-        "timeAggregation": "rate",
-        "spaceAggregation": "sum",
-        "functions": [],
-        "filters": {
-          "items": [
+    "queries": [
+      {
+        "type": "builder_query",
+        "spec": {
+          "name": "A",
+          "signal": "metrics",
+          "stepInterval": 60,
+          "aggregations": [
             {
-              "key": {
-                "key": "status_code",
-                "dataType": "string",
-                "type": "tag",
-                "isColumn": false,
-                "isJSON": false
-              },
-              "op": "=",
-              "value": "STATUS_CODE_ERROR"
+              "metricName": "signoz_calls_total",
+              "timeAggregation": "rate",
+              "spaceAggregation": "sum"
             }
           ],
-          "op": "AND"
-        },
-        "expression": "A",
-        "disabled": true,
-        "stepInterval": 60,
-        "having": [],
-        "orderBy": [],
-        "groupBy": [
-          {
-            "key": "service_name",
-            "dataType": "string",
-            "type": "tag",
-            "isColumn": false,
-            "isJSON": false
-          }
-        ],
-        "legend": "{{service_name}}",
+          "filter": {
+            "expression": "status.code = 'STATUS_CODE_ERROR'"
+          },
+          "groupBy": [
+            {
+              "name": "service.name",
+              "dataType": "string",
+              "type": "tag"
+            }
+          ],
+          "legend": "{{service.name}}",
+          "disabled": true
+        }
       },
-      "B": {
-        "dataSource": "metrics",
-        "queryName": "B",
-        "aggregateAttribute": {
-          "key": "signoz_calls_total",
-          "dataType": "float64",
-          "type": "Sum",
-          "isColumn": true,
-          "isJSON": false
-        },
-        "timeAggregation": "rate",
-        "spaceAggregation": "sum",
-        "functions": [],
-        "filters": {
-          "items": [],
-          "op": "AND"
-        },
-        "expression": "B",
-        "disabled": true,
-        "stepInterval": 60,
-        "having": [],
-        "orderBy": [],
-        "groupBy": [
-          {
-            "key": "service_name",
-            "dataType": "string",
-            "type": "tag",
-            "isColumn": false,
-            "isJSON": false
-          }
-        ],
-        "legend": "",
+      {
+        "type": "builder_query",
+        "spec": {
+          "name": "B",
+          "signal": "metrics",
+          "stepInterval": 60,
+          "aggregations": [
+            {
+              "metricName": "signoz_calls_total",
+              "timeAggregation": "rate",
+              "spaceAggregation": "sum"
+            }
+          ],
+          "groupBy": [
+            {
+              "name": "service.name",
+            }
+          ],
+          "disabled": true
+        }
       },
-      "F1": {
-        "queryName": "F1",
-        "expression": "A/B",
-        "disabled": false,
-        "legend": ""
+      {
+        "type": "builder_formula",
+        "spec": {
+          "name": "F1",
+          "expression": "A/B",
+          "disabled": false
+        }
       }
-    }
+    ]
   }
 }
 ```

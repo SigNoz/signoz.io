@@ -1,0 +1,146 @@
+---
+
+title: Interactive Dashboards - Click Any Panel to Start Debugging
+slug: interactive-dashboards
+date: 2025-09-9
+tags: [Product]
+authors: [anushka_karmakar]
+description: Interactive Dashboards eliminate the current workflow of opening new tabs and manually recreating queries every time you need to investigate a spike or anomaly. Click directly on any data point to drill down and explore.
+image: public/img/blog/2025/09/interactive-dashboards.webp
+keywords: [apm, interactive traces, dashboard, grafana, logs, signoz]
+
+---
+
+Your dashboard shows a latency spike. To investigate it, you copy the query, open logs in a new tab, paste and modify the query, lose your dashboard filters, and repeat for traces. By the time you find the issue, you have 15 tabs open.
+
+**Starting today, you can click any panel and investigate right there. All your filters and variables carry over. No more tab juggling.**
+
+<YouTube id="YQTQXq0F5Iw" mute={false} />
+
+# What We Built
+
+Every dashboard panel now has a right-click menu with actual debugging tools. Here's what you can do:
+
+## 1. Jump between signals without losing context
+
+You're looking at a metrics panel showing high latency. Right-click it and you'll see options to "View in Logs" or "View in Traces". Click either one - the explorer opens with the same filters, same time range, same everything. You immediately see the logs or traces related to that latency spike.
+
+This works from any panel type. Whether you're looking at a metrics panel, a logs panel, or a traces panel, you can always view the related data in:
+
+- Logs explorer (View in Logs)
+- Traces explorer (View in Traces)
+
+All your dashboard context - time range, filters, variables - automatically carries over to the new view.
+
+## 2. See and edit queries directly
+
+Remember having to switch to edit mode just to see what query powers a panel? Now you can see it right in view mode:
+
+```
+histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service))
+```
+
+Want to check P95 instead of P99? Change it right there. Add a filter for production only? Do it. The query updates live. If you like the changes and have edit access, save it as a new panel.
+
+## 3. Filter tables by clicking cells
+
+Got a table showing errors by service? Click "payment-service" - now the table only shows payment service data. Click "500" in the status column - now it's only 500 errors. Click "response_time > 1000" - now it's only slow 500 errors from payment service.
+
+The query builds as you click:
+
+```sql
+WHERE service='payment-service'
+  AND status_code=500
+  AND response_time > 1000
+```
+
+## 4. Break out data to find what's actually broken
+
+Here's the killer feature. Your dashboard shows 500 errors per minute. But which service? Which endpoint? Which region?
+
+Click the error spike and select "Break out by service":
+
+- payment-service: 450 errors
+- auth-service: 40 errors
+- cart-service: 10 errors
+
+Payment service is the problem. Click it, break out by endpoint:
+
+- /api/process-payment: 440 errors
+- /api/validate-card: 10 errors
+
+Click /api/process-payment, break out by error_type:
+
+- connection_timeout: 440 errors
+
+Found it. The payment service can't connect to something. Three clicks, 30 seconds.
+
+## 5. Link to your actual tools
+
+Dashboards don't exist in a vacuum. You need to check Jenkins, look at GitHub, create Jira tickets. Context Links make this one click.
+
+### External tools
+
+`https://github.com/company/repo/commit/{{commit_hash}}
+https://jenkins.company.com/job/{{deployment_id}}
+https://app.stripe.com/payments/{{payment_id}}`
+
+### Internal navigation
+
+`/trace/{{_trace_id}}
+/dashboard/service-metrics?service={{service_name}}
+/logs?query=correlation_id:{{correlation_id}}`
+
+See a [trace ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/) in your dashboard? Click it to open trace details. See a deployment ID? Click it, Jenkins opens. Configure whatever links make sense for your workflow.
+
+## 6. Update dashboard variables from anywhere
+
+Your dashboard has a `$region` variable. You see problems in eu-west-1. Instead of scrolling up to the dropdown, just click "eu-west-1" in any panel and select "Set $region". The whole dashboard updates.
+
+Need a new variable? Click a value, create the variable on the spot. No config needed.
+
+# Example of a debugging session
+
+Here's an actual production issue debugged with Interactive Dashboards:
+
+- Alert fires: Checkout latency > 2s
+- Open dashboard, see the spike, right-click it
+    - Break out by endpoint
+    - /api/payment is slow, everything else is fine
+- Click /api/payment
+    - View traces
+    - All showing timeouts to payment-provider
+- Click a timeout trace
+    - View logs
+    - "connection pool exhausted" everywhere
+- Click the error
+    - Open runbook (context link)
+    - Instructions for scaling connection pool
+
+Two minutes from alert to root cause. No tab switching. No query copying. Just clicking through the investigation.
+
+# Works on all your dashboards right now
+
+Every dashboard you have is already interactive. No migration, no setup. Just start clicking panels.
+
+*Note: Only panels built with [query builder](https://signoz.io/blog/query-builder-v5/) are supported. Panels using raw ClickHouse queries aren't interactive yet.*
+
+Want to get more out of it?
+
+- Add context links to your runbooks and tools
+- Name dashboard variables consistently
+- Use GROUP BY in your queries so breakout analysis works
+
+# Who benefits
+
+**If you're on-call**: Debug without leaving the dashboard. Everything is one click away.
+
+**If you manage a team**: Non-engineers can now investigate issues. "Check what's wrong with payments" becomes a task anyone can do.
+
+**If you run platform**: Your dashboards now connect directly to your CD pipeline, your runbooks, your everything.
+
+# What's coming
+
+We're actively working on expanding Interactive Dashboards with more capabilities. Stay tuned for updates on future enhancements.
+
+[Interactive Dashboards](https://signoz.io/docs/dashboards/interactivity/) are live now. Next time you see something weird in a panel, just click it.
