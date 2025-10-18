@@ -236,7 +236,7 @@ Follow the steps below to create and submit either a blog post or a documentatio
 
 ### Step 1: Fork the Repository
 
-1. Go to the [SigNoz GitHub repository](https://github.com/SigNoz/signoz-web).
+1. Go to the [SigNoz GitHub repository](https://github.com/SigNoz/signoz.io).
 2. Click on the "Fork" button at the top-right corner of the page. This will create a copy of the repository under your GitHub account.
 
 ### Step 2: Clone Your Forked Repository
@@ -246,13 +246,13 @@ Follow the steps below to create and submit either a blog post or a documentatio
 3. Open your terminal and run the following command to clone the repository:
 
    ```bash
-   git clone https://github.com/<your-username>/signoz-web.git
+   git clone https://github.com/<your-username>/signoz.io.git
    ```
 
 4. Navigate into the cloned directory:
 
    ```bash
-   cd signoz-web
+   cd signoz.io
    ```
 
 ### Step 3: Set Up the Upstream Repository
@@ -262,7 +262,7 @@ Setting up the upstream repository allows you to fetch changes from the original
 1. Add the original repository as the upstream remote:
 
    ```bash
-   git remote add upstream https://github.com/SigNoz/signoz-web.git
+   git remote add upstream https://github.com/SigNoz/signoz.io.git
    ```
 
 2. Verify the new remote named `upstream`:
