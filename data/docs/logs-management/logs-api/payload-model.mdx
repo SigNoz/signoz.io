@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 title: Logs API Payload Model
+tags : [SigNoz Cloud, Self-Host]
 id: payload-model
 ---
 
@@ -12,10 +13,11 @@ The top-level of the payload model has the following fields:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
-|start| Epoch timestamp marking the start of the query range (in milliseconds or nanoseconds) |
-|end | Epoch timestamp marking the end of the query range (in milliseconds or nanoseconds) |
-|step | Aggregation interval for the query, specified in seconds |
+|start| Epoch timestamp marking the start of the query range (in milliseconds) |
+|end | Epoch timestamp marking the end of the query range (in milliseconds) |
+|requestType | Type of response expected (e.g., time_series, scalar, raw) |
 |compositeQuery | This contains the [**compositeQuery**](#composite-query) which is explained below |
+|variables | Variables for templated queries (optional) |
 
 ### Composite Query
 
@@ -23,29 +25,42 @@ The `compositeQuery` field consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
-|queryType| Type of query (e.g., builder, clickhouse, prometheus).Scope of this documentation is limited to **builder** type|
-|panelType| Type of panel (e.g., list, graph, table) |
-|offset| Offset used in pagination |
-|pageSize| Number of items to fetch, used in list view |
-|limit| For list view: - Maximum number of items to be paginate, i.e., offset + pageSize cannot exceed limit, For aggregation:- limit on the results  |
-|builderQueries | Map of [**builderQuery**](#builder-query) |
+|queries | Array of [**query envelopes**](#query-envelope) |
 
-### Builder Query
+### Query Envelope
 
-A `builderQuery` consists of:
+Each query in the `queries` array consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
+|type | Type of query (e.g., builder_query, builder_formula, clickhouse_sql, promql). Scope of this documentation is limited to **builder_query** type |
+|spec | Query specification based on type - contains the [**builderQuery**](#builder-query) for builder_query type |
+
+### Builder Query
+
+A `builderQuery` spec consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|name | Name of the query (e.g., A, B, C) |
+|signal | Source of data (e.g., logs, traces, metrics) |
 |stepInterval| Aggregation interval for query in seconds |
-|queryName| Name of the query, should match the key to this map value | 
-|dataSource| Source of data, e.g., logs |
-|aggregateOperator| Type of aggregation - noop, count, count_distinct, sum, avg, min, max, p05, p10, p20, p25, p50, p75, p90, p95, p99, rate, sum_rate, avg_rate, min_rate, max_rate, rate_sum, rate_avg, rate_min, rate_max|
-|aggregateAttribute| The [**attribute**](#attribute) against which the aggregateOperator is applied |
-|filters| Array of [**filter**](#filter) used for filtering data|
-|groupBy| Array  of [**attribute**](#attribute) used for groupBy|
-|expression| Will be same as query name but different in case of formulas|
+|aggregations | Array of [**aggregation**](#aggregation) expressions |
+|filter | [**filter**](#filter) expression for filtering data |
+|groupBy| Array of [**groupByKey**](#groupby-key) used for groupBy |
+|order | Array of [**orderBy**](#orderby) for sorting |
+|limit | Maximum number of results to return |
+|offset | Offset used in pagination |
 |disabled| Specifies if the query is disabled |
 
+### Aggregation
+
+An `aggregation` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|expression | Aggregation expression - count(), count_distinct(field), sum(field), avg(field), min(field), max(field), p50(field), p75(field), p90(field), p95(field), p99(field) |
+|alias | Optional alias for the aggregation result |
 
 ### Filter
 
@@ -53,34 +68,26 @@ A `filter` consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
-|items| Array of [**filterItem**](#filter-item)|
-|op| Operator defining how filter items are joined (e.g., AND).
+|expression | Filter expression string using operators like `=, !=, >, >=, <, <=, IN, NOT IN, CONTAINS, NOT CONTAINS, REGEXP, NOT REGEXP, EXISTS, NOT EXISTS` |
 
-### Filter Item
+### GroupBy Key
 
-The `filterItem` includes:
-
-|  NAME  | DESCRIPTION  |
-|---|---|
-|key | Corresponding [**attribute**](#attribute) |
-|op| Operators -  =, !=, >, >=, \<, \<=, in, nin, contains, ncontains, regex, nregex, like, nlike, exists, nexists, has, nhas |
-|value | Value for the filter, can be empty for some **op** |
-
-<Admonition>
-The `value` parameter will be empty for `exists` and `nexists`.
-</Admonition>
-
-### Attribute 
-
-An `attribute` consists of:
+The `groupByKey` includes:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
-|key| Name of the key |
-|type| Type of the key, i.e., tag/resource. It is empty for top level fields. (e.g., tag = method, resource = k8s_deployment_name, (empty) = trace_id) |
-|dataType| Data type of the key (e.g., string, int64, float64, bool) |
-|isColumn| Indicates if it has a materialized column, i.e., selected field |
-|isJson| Specifies if the key is a JSON key |
+|name | Name of the field |
+|fieldDataType | Data type of the field (e.g., string, int64, float64, bool) |
+|fieldContext | Type of the field, i.e., attribute/resource |
+
+### OrderBy
+
+The `orderBy` includes:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|key | Object containing the field name to order by |
+|direction | Sort direction (asc, desc) |
 
 ## Sample Payload
 
@@ -90,47 +97,39 @@ This sample payload contains the different fields that we looked at above. It qu
 {
     "start": 1700734490000,
     "end": 1700738090000,
-    "step": 60,
+    "requestType": "scalar",
     "variables": {},
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "table",
-        "builderQueries": {
-            "A": {
-                "dataSource": "logs",
-                "queryName": "A",
-                "aggregateOperator": "count_distinct",
-                "aggregateAttribute": {
-                    "key": "component",
-                    "dataType": "string",
-                    "type": "tag",
-                    "isColumn": false
-                },
-                "filters": {
-                    "items": [],
-                    "op": "AND"
-                },
-                "expression": "A",
-                "disabled": false,
-                "stepInterval": 60,
-                "orderBy": [
-                    {
-                        "columnName": "timestamp",
-                        "order": "desc"
-                    }
-                ],
-                "groupBy": [
-                    {
-                        "key": "container_id",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true,
-                        "isJSON": false
-                    }
-                ],
-                "offset": 0
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "logs",
+                    "stepInterval": 60,
+                    "aggregations": [
+                        {
+                            "expression": "count_distinct(component)",
+                            "alias": "distinct_components"
+                        }
+                    ],
+                    "groupBy": [
+                        {
+                            "name": "container_id",
+                        }
+                    ],
+                    "order": [
+                        {
+                            "key": {
+                                "name": "distinct_components"
+                            },
+                            "direction": "desc"
+                        }
+                    ],
+                    "disabled": false
+                }
             }
-        }
+        ]
     }
 }
 

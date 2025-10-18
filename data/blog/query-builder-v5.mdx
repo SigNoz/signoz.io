@@ -1,0 +1,208 @@
+---
+title: Query Builder v5 - Two Years of Technical Debt, 80 Closed Issues, and a Fundamental Rethinking
+slug: query-builder-v5
+date: 2025-09-10
+tags: [Product]
+authors: [anushka_karmakar, srikanth]
+description: Query Builder v5 brings familiar SQL like syntax to observability data with expression-based querying that works across logs, metrics, and traces. Write complex queries using the syntax you already know.
+image: /img/blog/2025/09/oss-improvements.webp
+keywords: [query, analyze, observability, traces, metrics, logs, signoz, sql]
+---
+
+## Where This Story Begins
+
+In 2022, we had three different query interfaces. Logs had a custom search syntax with no autocomplete. Traces only had predefined filters - no query builder at all. Metrics had a raw PromQL input box where you'd paste queries from somewhere else and hope they worked.
+
+Each system spoke a different language. An engineer debugging a production issue had to context-switch not just between data types, but between entirely different ways of thinking about queries.
+
+When we built v3 in 2022, we thought we were solving this. We created a unified query builder - basically a UI wrapper around SQL. Count, group by, filter, limit. It worked well enough to get us from 2022 to 2024.
+
+Turns out we were building with the wrong assumptions.
+
+## The v3/v4 Design Flaw That Took Two Years to Understand
+
+We designed v3 around traces and metrics. In these data types, you rarely need complex boolean logic. Simple AND between conditions usually covers it.
+
+But logs are different. When you're searching logs during an incident, you need expressions like:
+
+```
+(node_name contains 'management' OR pod_name contains 'test')
+AND NOT (status_code >= 500)
+```
+
+v3 couldn't do this. No OR support. No complex boolean expressions. No parentheses for precedence.
+
+This was a major limitation that blocked common use cases. Users were forced to learn ClickHouse SQL, write raw queries, and maintain them as our schemas evolved. We'd built a query builder that couldn't handle the queries users actually needed.
+
+## The Support Calls That Changed Our Philosophy
+
+After four years of support calls, we noticed a pattern that surprised us.
+
+Senior engineers - people with 5-10 years of experience - couldn't find features that seemed obvious to us. Take chronological ordering in logs. We had the feature, buried three clicks deep in v3 and v4. Users didn't just struggle to use it; they assumed we didn't support it at all.
+
+During these calls, we'd watch them search for features, see their frustration, and realize: if you built it and know exactly where it is, everything seems obvious. But if senior engineers can't discover your features, those features don't exist.
+
+For v5, we changed our approach. We decided to stop making decisions for users.
+
+In v3/v4, we tried to be clever. We'd make assumptions about what users wanted, hide complexity to "simplify" the experience. These assumptions were often wrong and led to behavior that broke trust.
+
+For v5, we set a new rule: if we must make a decision, it should be the least surprising one possible. And wherever possible, don't make the decision at all - let users control their experience.
+
+## The Architectural Reality: You Can't Ship a Query Builder in Isolation
+
+When we started building v5, we quickly discovered that the query builder isn't just one component. It's how users interact with data across the entire product.
+
+Think about the typical workflow: You write a query in the explorer to investigate an issue. Then you either:
+
+- Save it as a dashboard panel to monitor the pattern
+- Create an alert to catch it next time
+- Switch between logs, traces, and metrics to correlate data
+
+This interconnection meant we couldn't ship v5 for just the explorer. A query written in the new format had to work everywhere. This forced us to rebuild:
+
+- All three explorers (logs, traces, metrics)
+- Dashboard panel creation (including value panels that only exist in dashboards)
+- Alert creation flows
+- The underlying query API that powers all of these
+
+What started as "let's add OR support to the query builder" became a complete architectural overhaul.
+
+## The Technical Implementation
+
+### Full-Text Search That Works Like Google
+
+The most common use case during an incident is that a user sends you an error message. In v3, you'd need to construct a query with the correct syntax. In v5, you just paste and search:
+
+```
+"connection timeout in payment service"
+```
+
+Behind the scenes, we parse this into the appropriate query structure. But the user doesn't need to know that. They're debugging a problem, not learning a query language.
+
+### Complex Boolean Logic with Proper Precedence
+
+The feature that was impossible in v3/v4 and forced users to write ClickHouse queries:
+
+```
+(service_name = 'api' AND status_code >= 500)
+OR
+(service_name = 'worker' AND error_message contains 'timeout')
+```
+
+This seems basic, but implementing it required rethinking our entire query structure. We needed to support arbitrary nesting, maintain precedence rules, and still provide autocomplete and suggestions at every level.
+
+### Cross-Source Query Portability
+
+Queries are portable across data types. It’s one of the most powerful features that users don’t notice initially.
+
+Write a query filtering for `service_name = 'api'` in logs. Copy it. Paste it in traces explorer. It works.
+
+This seems simple, but the implementation is complex. Logs, traces, and metrics have:
+
+- Different underlying table schemas
+- Different column names for similar concepts
+- Different valid operations
+
+We built an abstraction layer that translates queries between these contexts automatically. Users think in terms of their data, not our storage schema.
+
+### Performance at Scale: Instant Suggestions
+
+When you're typing a query, you need suggestions immediately. But we're dealing with:
+
+- Millions of unique field values
+- Multiple data sources
+- Complex hierarchical data structures
+
+We implemented:
+
+- Smart caching that predicts what fields you'll query next
+- Progressive loading that shows the most relevant suggestions first
+- Query optimization that happens before we send anything to ClickHouse
+
+The result? An autocomplete that feels instant, even at scale.
+
+## The UX Debt We Finally Paid
+
+Because we were touching every part of the query experience, we could finally address years of accumulated UX issues.
+
+**Chronological ordering in logs:** Moved from a hidden dropdown to a prominent toggle. Same capability, much better discoverability.
+
+**[Time aggregation](https://signoz.io/docs/metrics-management/types-and-aggregation/) controls:** Previously buried in advanced settings, now directly visible. Users can switch from 1-minute to 5-second granularity with one click.
+
+**Interval selection:** Direct control over data granularity from 5 seconds to 1 hour. Why does this matter? During an incident, 30-second aggregation might smooth out the spike that's causing your problem. 5-second aggregation shows you exactly when things went wrong.
+
+These weren't query builder features, but fixing them was essential to delivering a coherent experience. When engineers are debugging production issues at 2 AM, they shouldn't hunt for basic controls.
+
+## The Validation: Users Replacing ClickHouse Queries
+
+We shipped v5 with a single changelog entry. No marketing campaign. No push to adopt it.
+
+Within three weeks, the feedback started coming in. The one that stood out: a user telling us they'd replaced all their ClickHouse queries with Query Builder queries.
+
+We didn't ask them to do this. They discovered that the query builder could now handle their complex cases, and they preferred it over raw SQL.
+
+Why? Because with Query Builder:
+
+- They don't need to learn ClickHouse SQL syntax
+- They don't need to update queries when we change schemas
+- They get autocomplete and validation
+- They can copy queries between different data types
+- They can share queries with team members who don't know SQL
+
+When users actively choose your abstraction over direct database access, you know you've built the right thing.
+
+## What We Couldn't Ship Yet: The Future of Cross-Signal Correlation
+
+### Subqueries: Correlating Across Signal Types
+
+Imagine investigating an incident where you see 500 errors. Your hypothesis: high CPU usage caused the failures. Today, you check traces for errors, then separately check metrics for CPU usage, then try to mentally correlate the timings.
+
+With subqueries (currently in development), you'll write:
+
+```
+Show traces where:
+status_code >= 500
+AND subquery(metrics: CPU_usage > 80% for same service)
+
+```
+
+This requires real-time joining of traces and metrics data. The architecture is designed, the UI patterns are established. Implementation is next.
+
+### Cross-Source Joins: Unified Debugging Experience
+
+Currently, logs and traces live in separate worlds. You can see that a trace has an error, and you can see related logs, but you can't query them together.
+
+With joins (in design phase), you'll write:
+
+```
+Show logs where:
+JOIN traces ON trace_id
+WHERE traces.duration > 500ms
+
+```
+
+This unlocks debugging workflows that are impossible today. Find all logs related to slow traces. Show logs where the parent span had an error. Correlate log patterns with trace characteristics.
+
+## The Engineering Lesson: Technical Elegance Without Discoverability Is Worthless
+
+After four years working on this product, countless support calls, and watching experienced engineers struggle with features I thought were obvious, the lesson is clear:
+
+Your technical solution can be elegant. Your features can be powerful. But if users can't find and use them, they might as well not exist.
+
+We could have the most sophisticated query engine in the world. But if an engineer investigating a production incident can't immediately figure out how to use it, we've failed.
+
+Query Builder v5 isn't just about adding OR support or fixing bugs. It's about recognizing that during an incident, engineers shouldn't have to think about query syntax. They should think about their problem.
+
+## Where We Go From Here
+
+We closed 80 issues with v5. We have 50+ more in the backlog.
+
+But we're not planning a v6 mega-release. We designed v5's architecture to be extensible. The abstractions are correct. The patterns are established. Now we can ship incremental improvements without breaking changes.
+
+Subqueries, joins, and the remaining enhancements will roll out as they're ready. No more two-year gaps between major improvements.
+
+The query builder is no longer just a UI component. It's how engineers interact with their observability data. And for the first time, it's powerful enough that users are choosing it over writing raw SQL.
+
+That's not just a technical achievement. That's validation that we finally understood the problem we were trying to solve.
+
+Query Builder v5 is live in the latest release. [Check the documentation](https://signoz.io/docs/userguide/query-builder-v5/) for detailed examples and capabilities.

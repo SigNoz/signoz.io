@@ -1,5 +1,7 @@
 'use client'
 
+import '../css/post.css'
+
 import { ReactNode, useRef, useState, useEffect } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'

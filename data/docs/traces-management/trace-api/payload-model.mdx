@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 title: Trace API Payload Model
+tags : [SigNoz Cloud, Self-Host]
 id: payload-model
 ---
 
@@ -14,9 +15,9 @@ The top-level of the payload model has the following fields:
 |---|---|
 |start| Epoch timestamp marking the start of the query range (in milliseconds) |
 |end | Epoch timestamp marking the end of the query range (in milliseconds) |
-|step | Aggregation interval for the query, specified in seconds |
-|variables| Map of variables used in the query |
+|requestType | Type of response expected (e.g., time_series, scalar, raw, trace) |
 |compositeQuery | This contains the [**compositeQuery**](#composite-query) which is explained below |
+|variables| Map of variables used in the query (optional) |
 
 ### Composite Query
 
@@ -24,41 +25,54 @@ The `compositeQuery` field consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
-|queryType| Type of query (e.g., builder, clickhouse, prometheus).Scope of this documentation is limited to **builder** type|
-|panelType| Type of panel (e.g., list, graph, table, trace, value) |
-|builderQueries | Map of [**builderQuery**](#builder-query) |
-|chQueries | Map of [**chQuery**](#ch-query) |
+|queries | Array of [**query envelopes**](#query-envelope) |
+
+### Query Envelope
+
+Each query in the `queries` array consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|type | Type of query (e.g., builder_query, clickhouse_sql, promql). Scope of this documentation is limited to **builder_query** and **clickhouse_sql** types |
+|spec | Query specification based on type - contains the [**builderQuery**](#builder-query) for builder_query type or [**chQuery**](#ch-query) for clickhouse_sql type |
 
 ### Builder Query
 
-A `builderQuery` consists of:
+A `builderQuery` spec consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
+|name | Name of the query (e.g., A, B, C) |
+|signal | Source of data (e.g., traces) |
 |stepInterval| Aggregation interval for query in seconds |
-|queryName| Name of the query, should match the key to this map value | 
-|dataSource| Source of data, e.g., traces |
-|aggregateOperator| Type of aggregation - noop, count, count_distinct, sum, avg, min, max, p05, p10, p20, p25, p50, p75, p90, p95, p99, rate, rate_sum, rate_avg, rate_min, rate_max|
-|aggregateAttribute| The [**attribute**](#attribute) against which the aggregateOperator is applied |
-|filters| Array of [**filter**](#filter) used for filtering data|
-|selectColumns| Array of [**attribute**](#attribute) which is used in list panelType to fetch columns/attributes of list|
-|groupBy| Array  of [**attribute**](#attribute) used for groupBy|
-|orderBy| Array of [**orderBy**](#order-by) used for ordering data|
-|having| Array of [**having**](#having) used for filtering data after aggregation|
-|expression| Will be same as query name but different in case of formulas|
+|aggregations | Array of [**aggregation**](#aggregation) expressions |
+|filter | [**filter**](#filter) expression for filtering data |
+|selectFields| Array of [**selectField**](#select-field) which is used in raw/trace requestType to fetch columns/attributes |
+|groupBy| Array of [**groupByKey**](#groupby-key) used for groupBy |
+|order | Array of [**orderBy**](#order-by) used for ordering data |
+|having | [**having**](#having) expression used for filtering data after aggregation |
 |disabled| Specifies if the query is disabled |
 |limit| Limit number of results |
 |offset| Offset used in pagination |
-|pageSize| Number of results per page |
 
 ### Ch Query
 
-A `chQuery` consists of:
+A `chQuery` spec consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
+|name | Name of the query (e.g., A, B, C) |
 |query| Clickhouse query |
+|disabled | Whether the query is disabled |
 
+### Aggregation
+
+An `aggregation` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|expression | Aggregation expression - count(), count_distinct(field), sum(field), avg(field), min(field), max(field), p50(field), p75(field), p90(field), p95(field), p99(field), rate(field) |
+|alias | Optional alias for the aggregation result |
 
 ### Filter
 
@@ -66,33 +80,27 @@ A `filter` consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
-|items| Array of [**filterItem**](#filter-item)|
-|op| Operator defining how filter items are joined (e.g., AND).
+|expression | Filter expression string using operators like `=, !=, >, >=, <, <=, IN, NOT IN, CONTAINS, NOT CONTAINS, REGEXP, NOT REGEXP, EXISTS, NOT EXISTS` |
 
-### Filter Item
+### Select Field
 
-The `filterItem` includes:
-
-|  NAME  | DESCRIPTION  |
-|---|---|
-|key | Corresponding [**attribute**](#attribute) |
-|op| Operators -  =, !=, >, >=, \<, \<=, in, nin, contains, ncontains, regex, nregex, like, nlike, exists, nexists |
-|value | Value for the filter, can be empty for some **op** like `exists` and `nexists` |
-
-<Admonition>
-The `value` parameter will be empty for `exists` and `nexists`.
-</Admonition>
-
-### Attribute
-
-An `attribute` consists of:
+A `selectField` consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
-|key| Name of the key |
-|type| Type of the key, i.e., tag/resource. It is empty for top level fields. (e.g., tag = method, resource = k8s_deployment_name, (empty) = trace_id) |
-|dataType| Data type of the key (e.g., string, int64, float64, bool) |
-|isColumn| Indicates if it's column, i.e., it would be faster to query using this attribute |
+|name | Name of the field |
+|fieldDataType | Data type of the field (e.g., string, int64, float64, bool) |
+|fieldContext | Type of the field, i.e., attribute/resource. |
+
+### GroupBy Key
+
+The `groupByKey` includes:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|name | Name of the field |
+|fieldDataType | Data type of the field (e.g., string, int64, float64, bool) |
+|fieldContext | Type of the field, i.e., attribute/resource |
 
 ### Order By
 
@@ -100,8 +108,8 @@ An `orderBy` consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
-|columnName| Name of the attribute/key |
-|order| Order of the column (e.g., asc, desc) |
+|key | Object containing the field name to order by |
+|direction | Sort direction (asc, desc) |
 
 ### Having
 
@@ -109,76 +117,55 @@ A `having` consists of:
 
 |  NAME  | DESCRIPTION  |
 |---|---|
-|columnName| Name of the attribute/key along with aggregate operator (e.g., COUNT(httpMethod)) |
-|op| Operators -  =, !=, >, >=, \<, \<= |
-|value| Value for the filter |
+|expression | Having expression (e.g., "count() > 100", "avg_duration > 1000") |
 
 ## Sample Payload 
 
-### For builderQuery with table panelType
+### For builderQuery with table requestType
 
-This sample payload contains the different fields that we looked at above. It queries the SigNoz Trace API and illustrates how to count distinct `hasError` values and group them by `serviceName` where `hasError` is `true`.
+This sample payload contains the different fields that we looked at above. It queries the SigNoz Trace API and illustrates how to count errors and group them by `serviceName` where `hasError` is `true`.
 
 ```json
 {
     "start": 1702007766000,
     "end": 1702009566000,
-    "step": 60,
+    "requestType": "time_series",
     "variables": {},
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "table",
-        "builderQueries": {
-            "A": {
-                "dataSource": "traces",
-                "queryName": "A",
-                "aggregateOperator": "count",
-                "aggregateAttribute": {
-                    "key": "hasError",
-                    "dataType": "bool",
-                    "type": "tag",
-                    "isColumn": true
-                },
-                "filters": {
-                    "items": [
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "traces",
+                    "stepInterval": 60,
+                    "aggregations": [
                         {
-                            "key": {
-                                "key": "hasError",
-                                "dataType": "bool",
-                                "type": "tag",
-                                "isColumn": true
-                            },
-                            "op": "=",
-                            "value": "true"
+                            "expression": "count()",
+                            "alias": "error_count"
                         }
                     ],
-                    "op": "AND"
-                },
-                "expression": "A",
-                "disabled": false,
-                "having": [],
-                "stepInterval": 60,
-                "limit": null,
-                "orderBy": [
-                    {
-                        "columnName": "timestamp",
-                        "order": "desc"
-                    }
-                ],
-                "groupBy": [
-                    {
-                        "key": "serviceName",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true
-                    }
-                ],
-                "legend": "",
-                "reduceTo": "sum"
+                    "filter": {
+                        "expression": "hasError = true"
+                    },
+                    "groupBy": [
+                        {
+                            "name": "serviceName",
+                        }
+                    ],
+                    "order": [
+                        {
+                            "key": {
+                                "name": "error_count"
+                            },
+                            "direction": "desc"
+                        }
+                    ],
+                    "disabled": false
+                }
             }
-        }
-    },
-    "dataSource": "traces"
+        ]
+    }
 }
 
 ```
@@ -190,14 +177,18 @@ This sample payload contains the different fields that we looked at above. It qu
 {
     "start": 1723644761000,
     "end": 1723646561000,
+    "requestType": "scalar",
     "compositeQuery": {
-        "queryType": "clickhouse_sql",
-        "panelType": "table",
-        "chQueries": {
-            "A": {
-                "query": "SELECT resource_string_service$$name AS `service.name`, toFloat64(avg(durationNano)) AS value FROM signoz_traces.distributed_signoz_index_v3 WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} GROUP BY (`service.name`) order by (`service.name`) ASC;"
+        "queries": [
+            {
+                "type": "clickhouse_sql",
+                "spec": {
+                    "name": "A",
+                    "query": "SELECT resource_string_service$$name AS `service.name`, toFloat64(avg(durationNano)) AS value FROM signoz_traces.distributed_signoz_index_v3 WHERE timestamp BETWEEN $start_datetime AND $end_datetime AND ts_bucket_start BETWEEN $start_timestamp - 1800 AND $end_timestamp GROUP BY (`service.name`) order by (`service.name`) ASC;",
+                    "disabled": false
+                }
             }
-        }
+        ]
     }
 }
 ```

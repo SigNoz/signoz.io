@@ -1,6 +1,3 @@
-import { BackwardIcon } from '@heroicons/react/24/outline'
-import { ArrowBigLeftIcon, ArrowLeft, MoveLeft } from 'lucide-react'
-import Link from 'next/link'
 import * as React from 'react'
 import AuthorInfo from '../AuthorInfo'
 import { format, parseISO } from 'date-fns'
@@ -21,21 +18,6 @@ export interface AuthorProps {
   name: string
   avatarUrl?: string
 }
-
-function Author({ name, avatarUrl }: AuthorProps) {
-  return (
-    <div className="mt-2 flex gap-2.5">
-      <img
-        loading="lazy"
-        src={avatarUrl}
-        alt={`${name}'s avatar`}
-        className="my-auto aspect-square w-5 shrink-0"
-      />
-      <div>{name}</div>
-    </div>
-  )
-}
-
 interface BlogHeaderProps {
   tags: string[]
   title: string

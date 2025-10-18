@@ -40,7 +40,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -48,7 +48,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     >
       <div className="relative mx-4 h-[80vh] w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
         {/* Chat iframe content */}
-        <div className="flex h-full w-full flex-col bg-white">
+        <div className="flex h-full w-full flex-col bg-signoz_slate-500">
           <div className="flex-1">
             <iframe
               src="https://www.chatbase.co/chatbot-iframe/ZXMN63dnzm9r1LEY0He6U"
@@ -60,8 +60,8 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
             />
           </div>
           {/* Disclaimer */}
-          <div className="border-t border-gray-100 bg-gray-50/80 px-4 py-3">
-            <p className="m-0 p-0 text-xs text-gray-600">
+          <div className="border-t border-white/10 bg-signoz_slate-500 px-4 py-3">
+            <p className="m-0 p-0 text-xs text-white/60">
               This is a custom LLM for SigNoz with full access to our docs. Keep in mind that
               responses are AI-generated and might not be 100% accurate, so please verify before you
               act.

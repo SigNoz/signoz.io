@@ -246,7 +246,7 @@ export default function TopNav() {
   }, [])
 
   // Hide TopNav on teams page or if source is onboarding
-  if (isSignupRoute|| isWordleRoute || source === ONBOARDING_SOURCE) {
+  if (isSignupRoute || isWordleRoute || source === ONBOARDING_SOURCE) {
     return null
   }
 

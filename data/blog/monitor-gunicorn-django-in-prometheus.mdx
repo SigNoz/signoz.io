@@ -10,7 +10,7 @@ hide_table_of_contents: false
 keywords: [Prometheus,Grafana,kubernetes,Application Monitoring,python monitoring]
 ---
 
-In this blog, I will discuss about how to set up Prometheus and Grafana in EKS and how to monitor Python based applications using Prometheus.
+In this blog, I will discuss about how to set up Prometheus and Grafana in EKS and how to [monitor Python](https://signoz.io/blog/python-application-monitoring/) based applications using Prometheus.
 
 ![Cover Image](/img/blog/2019/08/Python-Prometheus-2.webp)
 
@@ -142,7 +142,7 @@ In a naive deployment of the Prometheus  [Python client](https://github.com/pro
 
 #### Statsd Exporter
 
-Instead of Prometheus scraping our Python web application directly, we will let each worker process push its metrics to a certain “bridge” application, which will then convert these individual data points into aggregated metrics. These aggregated metrics will then be converted into Prometheus metrics when Prometheus queries the bridge. This “bridge” application here is the  [statsd exporter](https://github.com/prometheus/statsd_exporter).
+Instead of Prometheus scraping our Python web application directly, we will let each worker process push its metrics to a certain “bridge” application, which will then convert these individual data points into [aggregated metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/). These aggregated metrics will then be converted into [Prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/) when Prometheus queries the bridge. This “bridge” application here is the  [statsd exporter](https://github.com/prometheus/statsd_exporter).
 
 **Multi Process Mode of python client**[Link](https://github.com/prometheus/client_python#multiprocess-mode-gunicorn)
 The prometheus python client has a multi-processing mode which essentially creates a shared prometheus registry and shares it among all the processes and hence the [aggregation](https://github.com/prometheus/client_python/blob/master/prometheus_client/multiprocess.py) happens at the application level. When, prometheus scrapes the application instance, no matter which worker responds to the scraping request, the metrics reported back describes the application’s behaviour, rather than the worker responding.

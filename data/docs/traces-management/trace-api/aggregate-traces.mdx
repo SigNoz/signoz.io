@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 title: Aggregate Traces
+tags : [SigNoz Cloud, Self-Host]
 id: aggregate-traces
 ---
 
@@ -25,50 +26,38 @@ This is the JSON payload for the example query.
 {
     "start": 1702019380000,
     "end": 1702021180000,
-    "step": 60,
+    "requestType": "scalar",
     "variables": {},
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "table",
-        "builderQueries": {
-            "A": {
-                "dataSource": "traces",
-                "queryName": "A",
-                "aggregateOperator": "count",
-                "aggregateAttribute": {
-                    "key": "customer",
-                    "dataType": "string",
-                    "type": "tag",
-                    "isColumn": false
-                },
-                "filters": {
-                    "items": [],
-                    "op": "AND"
-                },
-                "expression": "A",
-                "disabled": false,
-                "having": [],
-                "stepInterval": 60,
-                "limit": null,
-                "orderBy": [
-                    {
-                        "columnName": "timestamp",
-                        "order": "desc"
-                    }
-                ],
-                "groupBy": [
-                    {
-                        "key": "serviceName",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true
-                    }
-                ],
-                "legend": "",
-                "reduceTo": "sum"
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "traces",
+                    "aggregations": [
+                        {
+                            "expression": "count(customer)",
+                            "alias": "customer_count"
+                        }
+                    ],
+                    "groupBy": [
+                        {
+                            "name": "serviceName",
+                        }
+                    ],
+                    "order": [
+                        {
+                            "key": {
+                                "name": "customer_count"
+                            },
+                            "direction": "desc"
+                        }
+                    ],
+                    "disabled": false
+                }
             }
-        }
-    },
-    "dataSource": "traces"
+        ]
+    }
 }
 ```

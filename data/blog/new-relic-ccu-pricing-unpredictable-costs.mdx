@@ -1,0 +1,182 @@
+---
+
+title: New Relic's CCU-based pricing is creating unpredictable costs, pushing teams to sample heavily
+slug: new-relic-ccu-pricing-unpredictable-costs
+date: 2025-09-23
+tags: [Pricing, OpenTelemetry]
+authors: [anushka_karmakar, connor]
+description: Analysis of New Relic's CCU pricing model reveals how it forces engineering teams into heavy sampling. Learn how unpublished CCU costs and complex pricing tiers create budget uncertainty and limit observability.
+image: /img/blog/2025/09/new-relic-pricing.webp
+keywords: [new relic pricing, CCU pricing, observability costs, trace sampling, new relic alternatives, observability pricing comparison, compute capacity units, engineering team budgets, new relic vs signoz]
+
+---
+
+We talked to 7 companies in August 2025 who were looking to switch from New Relic. One engineering director said they're paying \$1,000 a month and only ingesting 10% of their traces. 
+
+Teams are defaulting to aggressive sampling, some at 1%, others at 10%, to manage costs.
+
+<Figure src="/img/blog/2025/09/new-relic-pricing.webp" alt="New Relic's pricing forces heavy sampling " />
+
+## The per-seat pricing structure
+
+New Relic charges \$99/user/month for full platform access according to their pricing page.
+
+For a 50-person engineering team, that's \$4,950/month in user licenses alone. A 100-person team pays \$9,900/month. This is before any data ingestion.
+
+Companies respond by limiting who gets access. Junior developers often don't get accounts. Support engineers get read-only dashboards. SREs share logins.
+
+This creates downstream work. Someone has to build and maintain custom dashboards for the people without licenses. Someone has to export data for people who can't access it directly. Engineering time gets spent on access management instead of solving problems.
+
+## Why teams sample at 1-10%
+
+New Relic's Data Plus plan charges $0.50 per GB ingested. Let's calculate what full tracing costs. 
+
+A typical microservice handling 1 million requests daily with 10KB traces generates 10GB of trace data per day. That's 300GB monthly, or $150/month for one service.
+
+A modest setup with 20 services would generate 6TB monthly. At \$0.50/GB, that's \$3,000/month just for trace ingestion. This doesn't include logs, metrics, or custom events.
+
+So teams sample. At 10% sampling, that 6TB becomes 600GB (\$300/month). At 1% sampling, it's 60GB (\$30/month).
+
+But sampling has statistical implications. If you're tracking an error that occurs in 2% of requests and you're sampling at 1%, you'll only see that error in 0.02% of your total traffic. Some hours, you won't see it at all.
+
+When an incident happens, you're troubleshooting with incomplete data. The specific request that caused a customer complaint probably wasn't sampled. The trace showing why a transaction was slow likely doesn't exist.
+
+## How CCUs make costs unpredictable
+
+New Relic offers two pricing models: user-based (per-seat + data) or CCU-based (compute + data). With CCU pricing, you don't pay per user, you pay for Compute Capacity Units instead.
+
+CCUs get consumed by everything. Queries consume CCUs. Dashboard refreshes consume CCUs. Alerts consume CCUs.
+
+A typical dashboard with 10 panels refreshing every 60 seconds runs 14,400 queries per day (10 panels × 60 refreshes/hour × 24 hours). An alert checking every minute runs 1,440 queries daily.
+
+A mid-size team might have:
+
+- 50 dashboards (720,000 queries/day)
+- 200 alerts (288,000 queries/day)
+- Ad-hoc troubleshooting queries (varies widely)
+
+That's over 1 million queries per day from normal operations.
+
+New Relic's pricing page doesn't list CCU costs. You need to contact sales to learn what CCUs cost and how many your workload will consume. Their pricing calculator asks you to estimate CCU usage without explaining how CCUs are calculated.
+
+But the deeper problem is that even after customers know the CCU price, they still can't predict costs. The documentation doesn't clearly explain how many CCUs each operation consumes. You don't know if a complex query uses 10x more CCUs than a simple one. You can't calculate if adding a new dashboard will increase your bill by \$50 or \$500.
+
+This means you can't evaluate costs without going through a sales process, and even after purchasing, you can't predict next month's bill.
+
+## The multi-layered pricing model
+
+New Relic offers two pricing models, each with different components:
+
+### User-based pricing
+
+1. User licenses: $99/user/month for full platform access
+2. Data ingestion: $0.50/GB for logs and traces
+3. Data retention: Additional costs beyond 30 days
+4. Add-ons: Synthetic monitoring, browser monitoring, etc.
+
+### CCU-based pricing
+
+1. Compute (CCUs): Undisclosed rate for all queries and processing
+2. Data ingestion: $0.50/GB for logs and traces
+3. Data retention: Additional costs beyond 30 days
+4. Add-ons: Same as user-based model
+
+Having to choose between models adds another layer of complexity. Do you restrict user access to save money? Or do you give everyone access but live with unpredictable CCU costs?
+
+Neither model solves the core problems. User-based pricing limits access. CCU-based pricing makes costs unpredictable. Both models charge high rates for data ingestion, forcing teams to sample heavily.
+
+Several customers mentioned they track their New Relic costs in spreadsheets because the bill is too complex to understand otherwise.
+
+## The support tier gap
+
+New Relic is a proprietary platform. It uses its own agents, its own query language (NRQL), and its own data models. When something doesn't work as expected, you need specialized knowledge to fix it.
+
+According to discussions with customers, companies spending over $100K/year typically get dedicated support with faster response times and direct access to engineers.
+
+Companies spending less, which includes most organizations paying $5K-50K/month, get standard support. This typically means:
+
+- Community forums
+- Documentation
+- Slower ticket response times
+- No dedicated technical account manager
+
+A $30K/month customer is running business-critical observability but getting the same support tier as someone on a free trial. When their alerts stop working or their agents crash, they're largely on their own.
+
+## What it costs in practice
+
+Let's model costs for a typical 50-person engineering organization under both pricing models:
+
+**User-based pricing model:**
+
+- User licenses: 50 × \$99/month = \$4,950/month
+- Data ingestion (20 services, 10% sampling): 600GB × \$0.50 = \$300/month
+- No CCU charges
+- Monthly total: ~\$5,250 for 10% trace visibility
+
+**CCU-based pricing model:**
+
+- No user license fees
+- Data ingestion (20 services, 10% sampling): 600GB × \$0.50 = \$300/month
+- CCU consumption: Unknown (pricing not public)
+- Monthly total: $300 + **???** CCUs
+
+The CCU model appears cheaper until you add compute costs. But since CCU pricing isn't public and consumption isn't predictable, you can't actually compare the models before talking to sales.
+
+If either team wanted 100% trace visibility:
+
+- Data ingestion jumps to 6TB/month = $3,000
+- User-based model: \$4,950 + \$3,000 = \$7,950/month
+- CCU-based model: $3,000 + significantly more CCUs (processing 10x more data)
+
+## The compound effect
+
+The pricing model shapes how teams use the product, often in ways that defeat the purpose of observability. Because these pricing decisions compound.
+
+1. High per-seat costs lead to restricted access
+2. Restricted access means building workarounds
+3. High ingestion costs force sampling
+4. Sampling means incomplete visibility
+5. Incomplete visibility makes debugging harder
+6. Harder debugging means incidents take longer to resolve
+7. Longer incidents impact customer experience and engineering productivity
+
+## What teams actually need
+
+Modern engineering teams operate differently than they did a decade ago.
+
+### 1. Universal access to production data
+
+In distributed systems, problems cross team boundaries. Frontend engineers need to see if their calls cause backend latency. Backend developers need to trace requests to the browser. DevOps engineers need to understand application behavior.
+
+When only senior engineers have access, junior developers can't see how their code performs in production. They miss to learn from patterns or understand their impact.
+
+### 2. Complete data, not statistical samples
+
+Sampling works for trends, but does it work for debugging?
+
+If a customer reports an error at 3:47 PM, you need that exact trace. With 10% sampling, you have a 90% chance of missing any specific event. Modern systems are already complex enough without adding probability to the equation.
+
+### 3. Predictable costs aligned with scaling
+
+Infrastructure costs should scale with your business. More traffic means more customers. More engineers means more features.
+
+But when costs increase because engineers are debugging or checking dashboards, that's a tax on operational excellence. And the more your team uses observability to improve quality, the more you pay.
+
+### 4. Transparent pricing that enables decision-making
+
+Engineering teams need quick decisions. Should we add more tracing? Increase retention? Give support team access?
+
+Without public pricing, you need sales approval for each change. Complex pricing means calculating costs for every decision. Both create friction that slows teams down.
+
+## The alternative approach
+
+At SigNoz, we took a different path:
+
+- No per-seat pricing. Your entire team gets access.
+- Simple usage-based pricing. Pay for what you ingest.
+- Transparent costs. You know exactly what you'll pay.
+- Open-source core with cloud and self-hosted options. No vendor lock-in.
+
+Lastly, observability pricing shouldn't force these trade-offs. Teams shouldn't have to choose between visibility and affordability. This has been our north star since day zero.
+
+You can see a detailed comparison at [signoz.io/product-comparison/signoz-vs-newrelic](https://signoz.io/product-comparison/signoz-vs-newrelic/)

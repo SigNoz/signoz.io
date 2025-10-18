@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 title: Search Logs
+tags : [SigNoz Cloud, Self-Host]
 id: search-logs
 ---
 This section provides example of how to search logs using the SigNoz Logs API. The example demonstrates querying logs with specific attributes and using pagination to navigate through the results.
@@ -17,69 +18,37 @@ This is the JSON payload for the example query described above for Searching Log
 {
     "start": 1700733979000,
     "end": 1700737579000,
-    "step": 60,
+    "requestType": "raw",
     "variables": {},
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "list",
-        "builderQueries": {
-            "A": {
-                "dataSource": "logs",
-                "queryName": "A",
-                "aggregateOperator": "noop",
-                "aggregateAttribute": {},
-                "filters": {
-                    "items": [
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "logs",
+                    "filter": {
+                        "expression": "deployment_name = 'hotrod' AND method = 'get' AND severity_text = 'info'"
+                    },
+                    "order": [
                         {
                             "key": {
-                                "key": "deployment_name",
-                                "dataType": "string",
-                                "type": "resource",
-                                "isColumn": false
+                                "name": "timestamp"
                             },
-                            "op": "=",
-                            "value": "hotrod"
+                            "direction": "desc"
                         },
                         {
                             "key": {
-                                "key": "method",
-                                "dataType": "string",
-                                "type": "tag",
-                                "isColumn": false
+                                "name": "id"
                             },
-                            "op": "=",
-                            "value": "get"
-                        },
-                        {
-                            "key": {
-                                "key": "severity_text",
-                                "dataType": "string",
-                                "type": "",
-                                "isColumn": true
-                            },
-                            "op": "=",
-                            "value": "info"
+                            "direction": "desc"
                         }
                     ],
-                    "op": "AND"
-                },
-                "expression": "A",
-                "disabled": false,
-                "stepInterval": 60,
-                "orderBy": [
-                    {
-                        "columnName": "timestamp",
-                        "order": "desc"
-                    },
-                    {
-                        "columnName": "id",
-                        "order": "desc"
-                    }
-                ],
-                "offset": 0,
-                "pageSize": 100
+                    "offset": 0,
+                    "limit": 100
+                }
             }
-        }
+        ]
     }
 }
 ```
@@ -89,47 +58,45 @@ Below are examples demonstrating how to implement pagination in your log search 
 
 ### Ordering by Timestamp
 
-If we are ordering by `timestamp`, then we will use `offset` and `pageSize` for pagination. We will also include `id` in the orderby with the same order as timestamp.
+If we are ordering by `timestamp`, then we will use `offset` and `limit` for pagination. We will also include `id` in the orderby with the same order as timestamp.
 
 #### Fetching the Latest 10 logs
-To retrieve the most recent 10 logs, you set the `pageSize` to 10, `offset` to 0 and order the results by `timestamp` and `id` in descending order. This ensures that you get the latest logs first.
+To retrieve the most recent 10 logs, you set the `limit` to 10, `offset` to 0 and order the results by `timestamp` and `id` in descending order. This ensures that you get the latest logs first.
 
 ```json
 {
     "start": 1700734490000,
     "end": 1700738090000,
-    "step": 60,
-    "dataSource": "logs",
+    "requestType": "raw",
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "list",
-        "builderQueries": {
-            "A": {
-                "queryName": "A",
-                "dataSource": "logs",
-                "aggregateOperator": "noop",
-                "expression": "A",
-                "disabled": false,
-                "offset": 0,
-                "pageSize": 10,
-                "stepInterval": 60,
-                "filters": {
-                    "items": [
-                    ],
-                    "op": "AND"
-                },
-                "orderBy": [
-                    {
-                        "columnName": "timestamp",
-                        "order": "desc"
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "logs",
+                    "filter": {
+                        "expression": ""
                     },
-                    {
-                        "columnName": "id",
-                        "order": "desc"
-                    }
-                ]
+                    "order": [
+                        {
+                            "key": {
+                                "name": "timestamp"
+                            },
+                            "direction": "desc"
+                        },
+                        {
+                            "key": {
+                                "name": "id"
+                            },
+                            "direction": "desc"
+                        }
+                    ],
+                    "offset": 0,
+                    "limit": 10
+                }
             }
-        }
+        ]
     }
 }
 ```
@@ -141,37 +108,36 @@ To fetch the 10 logs preceding the most recent batch, add `offset` as 10 to skip
 {
     "start": 1700734490000,
     "end": 1700738090000,
-    "step": 60,
-    "dataSource": "logs",
+    "requestType": "raw",
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "list",
-        "builderQueries": {
-            "A": {
-                "queryName": "A",
-                "dataSource": "logs",
-                "aggregateOperator": "noop",
-                "expression": "A",
-                "disabled": false,
-                "offset": 10,
-                "pageSize": 10,
-                "filters": {
-                    "items": [
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "logs",
+                    "filter": {
+                        "expression": ""
+                    },
+                    "order": [
+                        {
+                            "key": {
+                                "name": "timestamp"
+                            },
+                            "direction": "desc"
+                        },
+                        {
+                            "key": {
+                                "name": "id"
+                            },
+                            "direction": "desc"
+                        }
                     ],
-                    "op": "AND"
-                },
-                "orderBy": [
-                    {
-                        "columnName": "timestamp",
-                        "order": "desc"
-                    }
-                    {
-                        "columnName": "id",
-                        "order": "desc"
-                    }
-                ]
+                    "offset": 10,
+                    "limit": 10
+                }
             }
-        }
+        ]
     }
 }
 ```
@@ -181,40 +147,36 @@ To fetch the 10 logs preceding the most recent batch, add `offset` as 10 to skip
 In addition to fetching logs based on timestamps, the SigNoz Logs API allows you to paginate through logs using other keys. This method can be faster or slower depending on the key used.
 #### Fetching the Latest 10 logs
 
-To fetch the latest 10 logs based on a specific key (e.g., `response_time`), set the pageSize to 10 and order by that key in descending order. This retrieves the most recent logs according to the specified key.
+To fetch the latest 10 logs based on a specific key (e.g., `response_time`), set the limit to 10 and order by that key in descending order. This retrieves the most recent logs according to the specified key.
 
 ```json
 {
     "start": 1700734490000,
     "end": 1700738090000,
-    "step": 60,
-    "dataSource": "logs",
+    "requestType": "raw",
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "list",
-        "builderQueries": {
-            "A": {
-                "queryName": "A",
-                "dataSource": "logs",
-                "aggregateOperator": "noop",
-                "expression": "A",
-                "disabled": false,
-                "pageSize": 10,
-                "offset": 0,
-                "limit": 100,
-                "filters": {
-                    "items": [
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "logs",
+                    "filter": {
+                        "expression": ""
+                    },
+                    "order": [
+                        {
+                            "key": {
+                                "name": "response_time"
+                            },
+                            "direction": "desc"
+                        }
                     ],
-                    "op": "AND"
-                },
-                "orderBy": [
-                    {
-                        "columnName": "response_time",
-                        "order": "desc"
-                    }
-                ]
+                    "offset": 0,
+                    "limit": 10
+                }
             }
-        }
+        ]
     }
 }
 ```
@@ -227,34 +189,30 @@ To fetch the previous 10 logs, you can use the `offset` parameter. For example, 
 {
     "start": 1700734490000,
     "end": 1700738090000,
-    "step": 60,
-    "dataSource": "logs",
+    "requestType": "raw",
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "list",
-        "builderQueries": {
-            "A": {
-                "queryName": "A",
-                "dataSource": "logs",
-                "aggregateOperator": "noop",
-                "expression": "A",
-                "disabled": false,
-                "pageSize": 10,
-                "offset": 10,
-                "limit": 100,
-                "filters": {
-                    "items": [
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "logs",
+                    "filter": {
+                        "expression": ""
+                    },
+                    "order": [
+                        {
+                            "key": {
+                                "name": "response_time"
+                            },
+                            "direction": "desc"
+                        }
                     ],
-                    "op": "AND"
-                },
-                "orderBy": [
-                    {
-                        "columnName": "response_time",
-                        "order": "desc"
-                    }
-                ]
+                    "offset": 10,
+                    "limit": 10
+                }
             }
-        }
+        ]
     }
 }
 ```

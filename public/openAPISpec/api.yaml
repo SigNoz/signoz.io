@@ -18,8 +18,10 @@ info:
   termsOfService: 'https://signoz.io/terms-of-service/'
   contact:
     name: API Support
-    email: dev@signoz.io
+    email: support@signoz.io
     url: https://signoz.io
+servers:
+  - url: 'https://your-workspace-url'
 tags:
   - name: alerts
     description: Alerts API
@@ -33,6 +35,8 @@ tags:
     x-displayName: The Dashboards Model
     description: |
       <SchemaDefinition schemaRef="#/components/schemas/Dashboard" />
+  - name: fields
+    description: Fields of Logs, Traces
 x-tagGroups:
   - name: General
     tags:
@@ -43,6 +47,84 @@ x-tagGroups:
       - alerts_model
       - dashboards_model
 paths:
+  '/api/v1/logs/fields':
+    post:
+      tags:
+        - fields
+      summary: Convert a log field to a selected field
+      description: Convert a log field to a selected field
+      operationId: updateLogField
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '400':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/Field'
+    get:
+      tags:
+        - fields
+      summary: Get all log fields
+      description: ''
+      operationId: getLogFields
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+  '/api/v2/traces/fields':
+    post:
+      tags:
+        - fields
+      summary: Convert a trace field to a selected field
+      description: Convert a trace field to a selected field
+      operationId: updateTraceField
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '400':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/Field'
+    get:
+      tags:
+        - fields
+      summary: Get all trace fields
+      description: ''
+      operationId: getTraceFields
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
   '/api/v1/rules':
     post:
       tags:
@@ -286,8 +368,10 @@ paths:
     post:
       tags:
         - query_range
-      summary: Query metrics, logs, or traces over a time range
+      summary: v4 - Query metrics, logs, or traces over a time range
       description: |
+        ***Note**: This API is planned to be deprecated. Please use `/api/v5/query_range` instead.*
+        
         Provides a unified interface to query metrics, logs, and traces data with different query types.
         Supports three query types:
         * `builder` - Query builder for logs, traces, and metrics
@@ -319,8 +403,68 @@ paths:
         '500':
           description: Internal server error
 
+  '/api/v5/query_range':
+    post:
+      tags:
+        - query_range
+      summary: v5 - Query metrics, logs, or traces over a time range
+      description: |
+        Provides a unified interface to query metrics, logs, and traces data with different query types.
+        Supports multiple query types:
+        * `builder_query` - Query builder query representation for logs, traces, and metrics
+        * `builder_formula` - Formula expressions combining multiple queries
+        * `builder_trace_operator` - Trace-specific operators for span relationships
+        * `clickhouse_sql` - Raw SQL queries (use only when needed for complex queries)
+        * `promql` - PromQL queries (uses Prometheus remote read, slower than query builder)
+
+        See examples;
+
+        Logs - https://signoz.io/docs/logs-management/logs-api/payload-model/
+
+        Traces - https://signoz.io/docs/traces-management/trace-api/payload-model/
+
+        Metrics - https://signoz.io/docs/metrics-management/query-range-api/
+      operationId: queryRangeV5
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRangeRequestV5'
+      responses:
+        '200':
+          description: Query results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryRangeResponseV5'
+        '400':
+          description: Bad request parameters
+        '500':
+          description: Internal server error
+
 components:
   schemas:
+    Field:
+      type: object
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+        type:
+          type: string
+          enum: ["static"]
+        selected:
+          type: boolean
+          enum: [true]
     ApiResponse:
       type: object
       properties:
@@ -1402,7 +1546,810 @@ components:
           description: Data for the row
           additionalProperties: true
 
+    QueryRangeRequestV5:
+      type: object
+      required:
+        - start
+        - end
+        - requestType
+        - compositeQuery
+      properties:
+        start:
+          type: integer
+          format: int64
+          description: Start time in epoch milliseconds
+          example: 1742602572000
+        end:
+          type: integer
+          format: int64
+          description: End time in epoch milliseconds
+          example: 1742604372000
+        requestType:
+          type: string
+          description: |
+            Specify
+            - "time_series" for aggregated data over time intervals in series format (ex - line/bar chart)
+            - "scalar" for a single aggregated value across the entire time range (table/number panel)
+            - "raw" for unprocessed data (list of log entries)
+            - "trace" for the traces explorer view
+          enum:
+            - 'time_series'
+            - 'scalar'
+            - 'raw'
+            - 'trace'
+          example: 'time_series'
+        compositeQuery:
+          $ref: '#/components/schemas/CompositeQueryV5'
+        variables:
+          type: object
+          description: Variables for the query. Useful when using templated queries
+          additionalProperties:
+            $ref: '#/components/schemas/VariableItem'
+        noCache:
+          type: boolean
+          description: Whether to bypass cache for this query
+          default: false
+        formatOptions:
+          $ref: '#/components/schemas/FormatOptionsV5'
+
+    CompositeQueryV5:
+      type: object
+      required:
+        - queries
+      properties:
+        queries:
+          type: array
+          minItems: 1
+          description: Array of queries to execute
+          items:
+            $ref: '#/components/schemas/QueryEnvelope'
+
+    QueryEnvelope:
+      type: object
+      required:
+        - type
+        - spec
+      properties:
+        type:
+          type: string
+          description: Type of the query
+          enum:
+            - 'builder_query'
+            - 'builder_formula'
+            - 'builder_trace_operator'
+            - 'clickhouse_sql'
+            - 'promql'
+        spec:
+          description: Query specification based on type
+          oneOf:
+            - $ref: '#/components/schemas/BuilderQueryV5'
+            - $ref: '#/components/schemas/BuilderFormula'
+            - $ref: '#/components/schemas/TraceOperator'
+            - $ref: '#/components/schemas/ClickHouseQueryV5'
+            - $ref: '#/components/schemas/PromQueryV5'
+      discriminator:
+        propertyName: type
+
+    BuilderQueryV5:
+      type: object
+      required:
+        - name
+        - signal
+      properties:
+        name:
+          type: string
+          description: Name of the query (e.g., A, B, C)
+          example: "A"
+        signal:
+          type: string
+          description: Signal type to query
+          enum:
+            - 'metrics'
+            - 'logs'
+            - 'traces'
+        stepInterval:
+          type: number
+          description: Step/aggregation interval in seconds
+          example: 60
+        aggregations:
+          type: array
+          description: Aggregations to apply
+          minItems: 1
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/MetricAggregation'
+              - $ref: '#/components/schemas/LogAggregation'
+              - $ref: '#/components/schemas/TraceAggregation'
+        filter:
+          $ref: '#/components/schemas/FilterV5'
+        groupBy:
+          type: array
+          description: Fields to group by
+          items:
+            $ref: '#/components/schemas/TelemetryFieldKey'
+        having:
+          $ref: '#/components/schemas/HavingV5'
+        order:
+          type: array
+          description: Order by clauses
+          items:
+            $ref: '#/components/schemas/OrderByV5'
+        limit:
+          type: integer
+          description: Maximum number of results to return
+          minimum: 0
+          maximum: 10000
+          default: 10
+        offset:
+          type: integer
+          description: Number of results to skip
+          minimum: 0
+        cursor:
+          type: string
+          description: Cursor for pagination
+        disabled:
+          type: boolean
+          description: Whether the query is disabled
+          default: false
+        selectFields:
+          type: array
+          description: Fields to select (for raw queries)
+          items:
+            $ref: '#/components/schemas/TelemetryFieldKey'
+        # secondaryAggregations:
+        #   type: array
+        #   description: Secondary aggregations to apply
+        #   items:
+        #     $ref: '#/components/schemas/SecondaryAggregation'
+        functions:
+          type: array
+          description: Functions to apply to results
+          items:
+            $ref: '#/components/schemas/FunctionV5'
+        legend:
+          type: string
+          description: Legend for the query
+
+    MetricAggregation:
+      type: object
+      required:
+        - metricName
+        - temporality
+        - timeAggregation
+        - spaceAggregation
+      properties:
+        metricName:
+          type: string
+          description: Name of the metric to query
+          example: "system.cpu.time"
+        temporality:
+          type: string
+          description: Temporality of the metric
+          enum:
+            - 'Cumulative'
+            - 'Delta'
+            - 'Unspecified'
+        timeAggregation:
+          type: string
+          description: Time aggregation function
+          enum:
+            - 'rate'
+            - 'latest'
+            - 'sum'
+            - 'avg'
+            - 'min'
+            - 'max'
+            - 'count'
+            - 'count_distinct'
+            - 'increase'
+        spaceAggregation:
+          type: string
+          description: Space aggregation function
+          enum:
+            - 'sum'
+            - 'avg'
+            - 'min'
+            - 'max'
+            - 'count'
+            - 'p50'
+            - 'p75'
+            - 'p90'
+            - 'p95'
+            - 'p99'
+        reduceTo:
+          type: string
+          description: Reduce time series to single value
+          enum:
+            - 'last'
+            - 'sum'
+            - 'avg'
+            - 'min'
+            - 'max'
+            - 'count'
+            - 'median'
+
+    LogAggregation:
+      type: object
+      required:
+        - expression
+      properties:
+        expression:
+          type: string
+          description: Aggregation expression (e.g., count(), sum(duration))
+          example: "count()"
+        alias:
+          type: string
+          description: Alias for the aggregation result
+
+    TraceAggregation:
+      type: object
+      required:
+        - expression
+      properties:
+        expression:
+          type: string
+          description: Aggregation expression (e.g., count(), avg(duration))
+          example: "avg(duration)"
+        alias:
+          type: string
+          description: Alias for the aggregation result
+
+    FilterV5:
+      type: object
+      required:
+        - expression
+      properties:
+        expression:
+          type: string
+          description: Filter expression following the filter syntax
+          example: 'service.name = "frontend"'
+
+    HavingV5:
+      type: object
+      required:
+        - expression
+      properties:
+        expression:
+          type: string
+          description: Having clause expression
+          example: 'count() > 100'
+
+    OrderByV5:
+      type: object
+      required:
+        - key
+        - direction
+      properties:
+        key:
+          $ref: '#/components/schemas/TelemetryFieldKey'
+        direction:
+          type: string
+          enum:
+            - 'asc'
+            - 'desc'
+
+    SecondaryAggregation:
+      type: object
+      required:
+        - expression
+      properties:
+        stepInterval:
+          type: number
+          description: Step interval for this aggregation (optional)
+        expression:
+          type: string
+          description: Aggregation expression
+        alias:
+          type: string
+          description: Alias for the result
+        groupBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/TelemetryFieldKey'
+        order:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderBy'
+        limit:
+          type: integer
+          minimum: 0
+        limitBy:
+          $ref: '#/components/schemas/LimitBy'
+
+    LimitBy:
+      type: object
+      required:
+        - keys
+        - value
+      properties:
+        keys:
+          type: array
+          items:
+            type: string
+        value:
+          type: string
+
+    FunctionV5:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Function name
+          enum:
+            - 'cutOffMin'
+            - 'cutOffMax'
+            - 'clampMin'
+            - 'clampMax'
+            - 'absolute'
+            - 'runningDiff'
+            - 'log2'
+            - 'log10'
+            - 'cumulativeSum'
+            - 'ewma3'
+            - 'ewma5'
+            - 'ewma7'
+            - 'median3'
+            - 'median5'
+            - 'median7'
+            - 'timeShift'
+            - 'anomaly'
+            - 'fillZero'
+        args:
+          type: array
+          description: Function arguments
+          items:
+            $ref: '#/components/schemas/FunctionArg'
+
+    FunctionArg:
+      type: object
+      required:
+        - value
+      properties:
+        name:
+          type: string
+          description: Argument name (optional)
+        value:
+          description: Argument value (can be string, number, etc.)
+
+    BuilderFormula:
+      type: object
+      required:
+        - name
+        - expression
+      properties:
+        name:
+          type: string
+          description: Name of the formula
+        expression:
+          type: string
+          description: Formula expression (e.g., "A / B * 100")
+          example: "A / B * 100"
+        disabled:
+          type: boolean
+          default: false
+        order:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderByV5'
+        limit:
+          type: integer
+          minimum: 0
+        having:
+          $ref: '#/components/schemas/HavingV5'
+        functions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionV5'
+        legend:
+          type: string
+
+    TraceOperator:
+      type: object
+      required:
+        - name
+        - expression
+      properties:
+        name:
+          type: string
+          description: Name of the trace operator
+        disabled:
+          type: boolean
+          default: false
+        expression:
+          type: string
+          description: Trace operator expression (e.g., "A => B", "A && B")
+          example: "A => B && C"
+        filter:
+          $ref: '#/components/schemas/FilterV5'
+        returnSpansFrom:
+          type: string
+          description: Which query's spans to return
+        order:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceOrderBy'
+        aggregations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceAggregation'
+        stepInterval:
+          type: number
+          minimum: 0
+        groupBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/TelemetryFieldKey'
+        having:
+          $ref: '#/components/schemas/HavingV5'
+        limit:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        offset:
+          type: integer
+          minimum: 0
+        cursor:
+          type: string
+        legend:
+          type: string
+        selectFields:
+          type: array
+          items:
+            $ref: '#/components/schemas/TelemetryFieldKey'
+        functions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FunctionV5'
+
+    TraceOrderBy:
+      type: object
+      required:
+        - key
+        - direction
+      properties:
+        key:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              enum:
+                - 'span_count'
+                - 'trace_duration'
+        direction:
+          type: string
+          enum:
+            - 'asc'
+            - 'desc'
+
+    ClickHouseQueryV5:
+      type: object
+      required:
+        - name
+        - query
+      properties:
+        name:
+          type: string
+          description: Name of the query
+        query:
+          type: string
+          description: ClickHouse SQL query
+        disabled:
+          type: boolean
+          default: false
+        legend:
+          type: string
+
+    PromQueryV5:
+      type: object
+      required:
+        - name
+        - query
+      properties:
+        name:
+          type: string
+          description: Name of the query
+        query:
+          type: string
+          description: PromQL expression
+        disabled:
+          type: boolean
+          default: false
+        step:
+          type: number
+          description: Step interval in seconds
+        stats:
+          type: boolean
+          description: Whether to include query stats
+          default: false
+        legend:
+          type: string
+
+    TelemetryFieldKey:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Field name
+          example: service.name
+        fieldDataType:
+          $ref: '#/components/schemas/FieldDataType'
+        fieldContext:
+          type: string
+          enum:
+            - 'resource'
+            - 'attribute'
+            - 'scope'
+            - 'span'
+            - 'log'
+
+    FieldDataType:
+      type: string
+      enum:
+        - 'string'
+        - 'int64'
+        - 'float64'
+        - 'bool'
+        - 'array(string)'
+        - 'array(int64)'
+        - 'array(float64)'
+        - 'array(bool)'
+
+    VariableItem:
+      type: object
+      required:
+        - type
+        - value
+      properties:
+        type:
+          type: string
+          enum:
+            - 'query'
+            - 'dynamic'
+            - 'custom'
+            - 'text'
+        value:
+          description: Variable value
+
+    FormatOptionsV5:
+      type: object
+      properties:
+        fillGaps:
+          type: boolean
+          description: Whether to fill gaps in time series data
+          default: false
+        formatTableResultForUI:
+          type: boolean
+          description: Whether to format table results for UI display
+          default: false
+
+    QueryRangeResponseV5:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the response
+          enum:
+            - 'time_series'
+            - 'scalar'
+            - 'raw'
+            - 'trace'
+            - 'distribution'
+        data:
+          $ref: '#/components/schemas/QueryData'
+        meta:
+          $ref: '#/components/schemas/ExecStats'
+        warning:
+          $ref: '#/components/schemas/QueryWarnData'
+
+    QueryData:
+      type: object
+      properties:
+        results:
+          type: array
+          description: Array of results based on request type
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/TimeSeriesData'
+              - $ref: '#/components/schemas/ScalarData'
+              - $ref: '#/components/schemas/RawData'
+
+    TimeSeriesData:
+      type: object
+      properties:
+        queryName:
+          type: string
+          description: Name of the query this data belongs to
+        aggregations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AggregationBucket'
+
+    AggregationBucket:
+      type: object
+      properties:
+        index:
+          type: integer
+          description: Aggregation index
+        alias:
+          type: string
+          description: Aggregation alias
+        meta:
+          type: object
+          properties:
+            unit:
+              type: string
+              description: Unit for the values
+        series:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeSeries'
+        predictedSeries:
+          type: array
+          description: Predicted series (for anomaly detection)
+          items:
+            $ref: '#/components/schemas/TimeSeries'
+        upperBoundSeries:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeSeries'
+        lowerBoundSeries:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeSeries'
+        anomalyScores:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeSeries'
+
+    TimeSeries:
+      type: object
+      properties:
+        labels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Label'
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeSeriesValue'
+
+    Label:
+      type: object
+      properties:
+        key:
+          $ref: '#/components/schemas/TelemetryFieldKey'
+        value:
+          description: Label value
+
+    TimeSeriesValue:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+          description: Timestamp in milliseconds
+        value:
+          type: number
+          format: double
+        partial:
+          type: boolean
+          description: Whether this value is partial (doesn't cover complete interval)
+        values:
+          type: array
+          description: For heatmap type charts
+          items:
+            type: number
+        bucket:
+          type: object
+          properties:
+            step:
+              type: number
+
+    ScalarData:
+      type: object
+      properties:
+        queryName:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ColumnDescriptor'
+        data:
+          type: array
+          items:
+            type: array
+
+    ColumnDescriptor:
+      type: object
+      properties:
+        name:
+          type: string
+        dataType:
+          $ref: '#/components/schemas/FieldDataType'
+        type:
+          type: string
+        queryName:
+          type: string
+        aggregationIndex:
+          type: integer
+        meta:
+          type: object
+          properties:
+            unit:
+              type: string
+        columnType:
+          type: string
+          enum:
+            - 'group'
+            - 'aggregation'
+
+    RawData:
+      type: object
+      properties:
+        queryName:
+          type: string
+        nextCursor:
+          type: string
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RawRow'
+
+    RawRow:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          additionalProperties: true
+
+    ExecStats:
+      type: object
+      properties:
+        rowsScanned:
+          type: integer
+          format: int64
+        bytesScanned:
+          type: integer
+          format: int64
+        durationMs:
+          type: integer
+          format: int64
+
+    QueryWarnData:
+      type: object
+      properties:
+        message:
+          type: string
+        url:
+          type: string
+        warnings:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+
   requestBodies:
+    Field:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - description: Field object that needs to be added to the system
+                title: Field
+              - $ref: '#/components/schemas/Field'
+      description: Field object that needs to be added to the system
+      required: true
     Alert:
       content:
         application/json:
