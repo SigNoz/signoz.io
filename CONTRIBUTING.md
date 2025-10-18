@@ -236,7 +236,7 @@ Follow the steps below to create and submit either a blog post or a documentatio
 
 ### Step 1: Fork the Repository
 
-1. Go to the [SigNoz GitHub repository](https://github.com/SigNoz/signoz.io).
+1. Go to the [signoz.io GitHub repository](https://github.com/SigNoz/signoz.io).
 2. Click on the "Fork" button at the top-right corner of the page. This will create a copy of the repository under your GitHub account.
 
 ### Step 2: Clone Your Forked Repository
