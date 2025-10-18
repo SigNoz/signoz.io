@@ -1,4 +1,4 @@
-# Contributing to SigNoz Docs
+# Contributing to SigNoz Docs and Blog
 
 Thanks for helping improve SigNoz documentation. Clear, complete docs are critical for adoption of SigNoz and for the broader OpenTelemetry ecosystem. This guide explains how to contribute and the standards we follow.
 
@@ -6,6 +6,36 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Development setup and local preview are in `README.md`.
 - A blog contribution workflow is included later for convenience, but the content/style rules in this guide are specific to docs (not blogs).
 - For questions or clarifications, open a draft PR early and ask for feedback.
+
+## Table of Contents
+
+- [Workflow](#workflow)
+- [General Guidelines](#general-guidelines)
+- [Content Structure](#content-structure)
+  - [Patterns and components](#patterns-and-components)
+  - [Link references to keep handy](#link-references-to-keep-handy)
+- [Doc Type–Specific Guidelines](#doc-type–specific-guidelines)
+  - [Product docs (features, UI flows)](#product-docs-features-ui-flows)
+  - [Send Data docs (instrumentation and pipelines)](#send-data-docs-instrumentation-and-pipelines)
+  - [Troubleshooting docs](#troubleshooting-docs)
+  - [User guides (how-to, tasks)](#user-guides-how-to-tasks)
+  - [Sample apps](#sample-apps)
+- [PR Checklist (copy into your PR)](#pr-checklist-copy-into-your-pr)
+- [Contribute a Doc or Blog Post](#contribute-a-doc-or-blog-post)
+  - [Step 1: Fork the Repository](#step-1-fork-the-repository)
+  - [Step 2: Clone Your Forked Repository](#step-2-clone-your-forked-repository)
+  - [Step 3: Set Up the Upstream Repository](#step-3-set-up-the-upstream-repository)
+  - [Step 4: Create a New Branch](#step-4-create-a-new-branch)
+  - [Step 5: Create Your Content (Blog or Docs)](#step-5-create-your-content-blog-or-docs)
+  - [Step 6: Add Images](#step-6-add-images)
+  - [Step 7: Add Doc to Sidebar (Docs only)](#step-7-add-doc-to-sidebar-docs-only)
+  - [Step 8: Add and Commit Your Changes](#step-8-add-and-commit-your-changes)
+  - [Step 9: Fetch and Merge Upstream Changes](#step-9-fetch-and-merge-upstream-changes)
+  - [Step 10: Push Your Changes](#step-10-push-your-changes)
+  - [Step 11: Test Your Changes Locally](#step-11-test-your-changes-locally)
+  - [Step 12: Create a Pull Request](#step-12-create-a-pull-request)
+  - [Blog Notes](#blog-notes)
+  - [Docs Notes](#docs-notes)
 
 ## Workflow
 
@@ -200,7 +230,7 @@ Every doc should be skimmable and actionable.
 
 - [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.
 
-## Contributing a blog/doc to SigNoz
+## Contribute a Doc or Blog Post
 
 Follow the steps below to create and submit either a blog post or a documentation page. Where the flow differs, look for the Blog vs Docs notes.
 
