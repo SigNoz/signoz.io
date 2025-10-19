@@ -27,6 +27,7 @@ import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import TestimonialCards from '@/shared/components/molecules/FeaturePages/TestimonialCard'
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
+import CarouselCards from '@/shared/components/molecules/FeaturePages/CarouselCards'
 
 // Main Component Sections
 const Header: React.FC = () => {
@@ -211,109 +212,6 @@ const LogProcessingSection: React.FC = () => {
   )
 }
 
-const CorrelationCarousel: React.FC = () => {
-  const [activeIndex, setActiveIndex] = React.useState(0)
-  const [isTransitioning, setIsTransitioning] = React.useState(false)
-
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setIsTransitioning(true)
-      setTimeout(() => {
-        setActiveIndex((prev) => (prev + 1) % CORRELATION_CAROUSEL_DATA.length)
-        setIsTransitioning(false)
-      }, 300)
-    }, 4000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  const handleCardClick = (index: number) => {
-    if (index !== activeIndex && !isTransitioning) {
-      setIsTransitioning(true)
-      setTimeout(() => {
-        setActiveIndex(index)
-        setIsTransitioning(false)
-      }, 300)
-    }
-  }
-
-  return (
-    <div className="bg-signoz_ink-500 pb-16 px-6">
-      <GridLayout variant="split" className="gap-12 items-center">
-        <div className="flex flex-col">
-          <Button 
-            variant="secondary" 
-            rounded="full"
-            className="flex items-center gap-2 w-fit mb-12"
-            to="/blog/traces-without-limits/"
-          >
-            Read Blog
-            <ArrowRight size={14} />
-          </Button>
-          
-          <div className="space-y-4">
-            {CORRELATION_CAROUSEL_DATA.map((item, index) => (
-              <div
-                key={item.id}
-                onClick={() => handleCardClick(index)}
-                className={`cursor-pointer transition-all duration-500 ease-in-out transform ${
-                  activeIndex === index 
-                    ? 'bg-signoz_robin-500/10 border-signoz_robin-500/10 shadow-lg' 
-                    : 'bg-signoz_ink-400 border-signoz_slate-400 hover:bg-signoz_ink-300'
-                } border rounded-lg p-4 relative overflow-hidden`}
-              >
-                <div className="flex gap-2 h-fit">
-                  <div className="flex h-11 w-0.5 flex-shrink-0 items-center justify-center mr-2">
-                    <div className={`h-full w-full rounded-full ${
-                      activeIndex === index ? 'bg-signoz_robin-600/60' : 'bg-signoz_slate-200/80'
-                    }`}></div>
-                  </div>
-                  <div>
-                    <h3 className={`text-sm font-semibold mb-2 transition-colors duration-300 ${
-                      activeIndex === index ? 'text-signoz_robin-600' : 'text-signoz_vanilla-100'
-                    }`}>
-                      {item.title}
-                    </h3>
-                    <p className={`m-0 text-xs transition-colors duration-300 ${
-                      activeIndex === index ? 'text-signoz_robin-200' : 'text-signoz_vanilla-100'
-                    }`}>
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="relative">
-          <div className="relative overflow-hidden rounded-lg h-96">
-            <div 
-              className="transition-all duration-500 ease-in-out flex flex-col"
-              style={{
-                transform: `translateY(-${activeIndex * (100 / CORRELATION_CAROUSEL_DATA.length)}%)`,
-                height: `${CORRELATION_CAROUSEL_DATA.length * 100}%`
-              }}
-            >
-              {CORRELATION_CAROUSEL_DATA.map((item) => (
-                <div
-                  key={item.id}
-                  className="h-full flex-shrink-0 relative"
-                  style={{ height: `${100 / CORRELATION_CAROUSEL_DATA.length}%` }}
-                >
-                  <div className="h-full flex items-center justify-center">
-                    <Image src={item.image} alt={item.title} width={10000} height={10000} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </GridLayout>
-    </div>
-  )
-}
-
 const VisualQueryBuilder: React.FC = () => {
   return (
     <>
@@ -451,16 +349,16 @@ const DistributedTracing: React.FC = () => {
         <SectionLayout variant="bordered" className="!px-0">
           <LogProcessingSection />
           
-          <div className="px-6 pt-6 !w-[80vw] !mx-auto">
+          <SectionLayout variant="full-width" className="px-6 pt-6">
             <h2 className="text-signoz_vanilla-100 mb-6">
               Load traces with million spans without browser crashes
             </h2>
             <p className="text-signoz_vanilla-400 mb-2 leading-relaxed">
               Virtualized rendering and progressive loading handle traces with 1M+ spans without UI degradation. Synchronized flame graph and waterfall views update together as you navigate, with span events appearing as timeline indicators. Hierarchical flame graphs provide topology overview while detailed waterfall views show exact timing. Scroll and drill down with instant response times. 
             </p>
-          </div>
+          </SectionLayout>
           
-          <CorrelationCarousel />
+          <CarouselCards cards={CORRELATION_CAROUSEL_DATA} buttonLink="/opentelemetry/correlating-traces-logs-metrics-nodejs/" buttonText="Read Blog" />
           <VisualQueryBuilder />
           <StorageSection />
         </SectionLayout>

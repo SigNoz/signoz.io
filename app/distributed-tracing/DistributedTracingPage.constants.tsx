@@ -12,6 +12,7 @@ import {
 } from 'react-icons/si'
 import { BiLogoPostgresql } from "react-icons/bi";
 import { GrMysql } from "react-icons/gr";
+import { CarouselCard } from "@/shared/components/molecules/FeaturePages/CarouselCards";
 
 
 export const CLOUD_ICONS = [
@@ -100,7 +101,7 @@ export const FILTER_AND_ANALYZE_CARDS = [
   }
 ];
 
-export const CORRELATION_CAROUSEL_DATA = [
+export const CORRELATION_CAROUSEL_DATA: Array<CarouselCard> = [
   {
     id: 0,
     title: "Handle massive traces",
