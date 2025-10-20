@@ -14,6 +14,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - [Content Structure](#content-structure)
   - [Patterns and components](#patterns-and-components)
   - [Link references to keep handy](#link-references-to-keep-handy)
+  - [URLs and redirects](#urls-and-redirects)
 - [Doc Type–Specific Guidelines](#doc-type–specific-guidelines)
   - [Product docs (features, UI flows)](#product-docs-features-ui-flows)
   - [Send Data docs (instrumentation and pipelines)](#send-data-docs-instrumentation-and-pipelines)
@@ -162,6 +163,29 @@ Every doc should be skimmable and actionable.
 - OpenTelemetry Collector docs: link the specific receiver/exporter you use.
  - OTel Collector configuration guide: `https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/`
 
+
+### URLs and redirects
+
+- URL derives from file path and name:
+  - Docs: `data/docs/<section>/<slug>.mdx` renders at `/docs/<section>/<slug>/`.
+  - Blog: `data/blog/<slug>.mdx` renders at `/blog/<slug>/`.
+- Avoid changing URLs of live content. If you must rename or move a page, add a permanent redirect from the old path to the new path so existing links don’t break and SEO is preserved.
+- Add redirects in `next.config.js` under `async redirects()` using `permanent: true`:
+
+  ```js
+  // next.config.js
+  async redirects() {
+    return [
+      {
+        source: '/docs/instrumentation/opentelemetry-cloudflare/',
+        destination: '/docs/instrumentation/cloudflare-workers/',
+        permanent: true, // permanent redirect (search engines treat like 301/308)
+      },
+    ]
+  }
+  ```
+- Keep trailing slashes consistent (this repo sets `trailingSlash: true`).
+- Update internal links and the sidebar entry in `constants/docsSideNav.ts` when a doc path changes.
 
 ## Doc Type–Specific Guidelines
 
@@ -388,5 +412,6 @@ Open `http://localhost:3000` and review your blog/doc page.
 - Images go under `public/img/docs/`.
 - Add the page to `constants/docsSideNav.ts` so it appears in the left sidebar.
 - If you add new tags, define tooltips in `constants/tagDefinitions.ts`.
+-. If you change a live doc’s URL (rename or move), add a permanent (301/308) redirect in `next.config.js` `redirects()` from the old path to the new one and update any internal links.
 
 Thanks again for contributing to SigNoz!
