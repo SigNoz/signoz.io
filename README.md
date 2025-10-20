@@ -9,11 +9,13 @@
 ## Setting Up Your Development Environment
 
 1. Install NVM if you haven't already:
+
    ```bash
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
    ```
 
 2. Install and use the correct Node.js version by running the following commands in the project directory:
+
    ```bash
    nvm install
    nvm use
@@ -24,13 +26,21 @@
    yarn install
    ```
 
+### Git Hooks
+
+- Husky installs Git hooks on `yarn install` via the `prepare` script. The `pre-commit` hook runs `lint-staged` and verifies docs redirects when relevant files change.
+- The repo uses `core.hooksPath=.husky` (Husky v9 default). If you had an older local setup pointing to `.husky/_`, run `git config core.hooksPath .husky` or re-run `yarn install` to refresh hooks.
+
 4. Build the project to ensure there are no errors:
+
    ```bash
    yarn build
    ```
+
    This will create a `build` directory with the production build of the website. Check the output for any errors.
 
 5. Start the development server:
+
    ```bash
    yarn dev
    ```
@@ -51,134 +61,132 @@ We appreciate your interest in contributing to the SigNoz blog! Follow the steps
 1. On your GitHub account, navigate to the forked repository.
 2. Click the "Code" button and copy the URL.
 3. Open your terminal and run the following command to clone the repository:
-    
-    ```bash
-    git clone <https://github.com/your-username/signoz-web.git>
-    
-    ```
-    
+
+   ```bash
+   git clone <https://github.com/your-username/signoz-web.git>
+
+   ```
+
 4. Navigate into the cloned directory:
-    
-    ```bash
-    cd signoz-web
-    ```
-    
+
+   ```bash
+   cd signoz-web
+   ```
 
 ## Step 3: Set Up the Upstream Repository
 
 Setting up the upstream repository allows you to fetch changes from the original repository and keep your fork in sync.
 
 1. Add the original repository as the upstream remote:
-    
-    ```bash
-    git remote add upstream https://github.com/SigNoz/signoz-web.git
-    ```
-    
+
+   ```bash
+   git remote add upstream https://github.com/SigNoz/signoz-web.git
+   ```
+
 2. Verify the new remote named `upstream`:
-    
-    ```bash
-    git remote -v
-    ```
-    
+
+   ```bash
+   git remote -v
+   ```
 
 ## Step 4: Create a New Branch
 
 It's good practice to create a new branch for your changes. This helps in organizing and managing the contributions.
 
 1. Create a new branch:
-    
-    ```bash
-    git checkout -b add-new-blog
-    ```
-    
+
+   ```bash
+   git checkout -b add-new-blog
+   ```
 
 ## Step 5: Create Your Blog Post
 
 1. Navigate to the `data/blog` directory:
-    
-    ```bash
-    cd data/blog
-    ```
-    
+
+   ```bash
+   cd data/blog
+   ```
+
 2. Create a new `.mdx` file. The file name should correspond to the URL of the blog post. For example, if your blog post URL is `https://signoz.io/blog/opentelemetry-spring-boot/`, the file name should be `opentelemetry-spring-boot.mdx`.
-  
+
 3. Add the content for your blog post in the `.mdx` file. Refer to previous blog posts in the `data/blog` directory for the format. Ensure your file includes the following:
-    - **Cover Image**: Add a relevant cover image for your blog post.
-    - **Metadata**: Include necessary metadata such as title, date, author, tags, etc.
-    - **Canonical Links**: Set up canonical links to ensure proper SEO.
+   - **Cover Image**: Add a relevant cover image for your blog post.
+   - **Metadata**: Include necessary metadata such as title, date, author, tags, etc.
+   - **Canonical Links**: Set up canonical links to ensure proper SEO.
 
 ## Step 6: Add Images
 
 1. Navigate to the `public/img/blog` directory:
-    
-    ```bash
-    cd public/img/blog
-    
-    ```
-    
+
+   ```bash
+   cd public/img/blog
+
+   ```
+
 2. Create a new folder for the current month (if it doesn't already exist). For example, if you are writing the blog in May 2024, create a folder named `2024-05`.
 3. Add your images to the folder you just created.
 
 ## Step 7: Add and Commit Your Changes
 
 1. Add your changes:
-    
-    ```bash
-    git add .
-    
-    ```
-    
+
+   ```bash
+   git add .
+
+   ```
+
 2. Commit your changes:
-    
-    ```bash
-    git commit -m "Added new blog post: [your blog post title]"
-    
-    ```
-    
+
+   ```bash
+   git commit -m "Added new blog post: [your blog post title]"
+
+   ```
 
 ## Step 8: Fetch and Merge Upstream Changes
 
 Before pushing your changes, it's a good idea to fetch and merge any changes from the upstream repository to ensure your fork is up-to-date.
 
 1. Fetch the latest changes from the upstream repository:
-    
-    ```bash
-    git fetch upstream
-    
-    ```
-    
+
+   ```bash
+   git fetch upstream
+
+   ```
+
 2. Merge the changes into your current branch:
-    
-    ```bash
-    git merge upstream/main
-    
-    ```
-    
+
+   ```bash
+   git merge upstream/main
+
+   ```
 
 ## Step 9: Push Your Changes
 
 1. Push your branch to your forked repository:
-    
-    ```bash
-    git push origin add-new-blog
-    
-    ```
+
+   ```bash
+   git push origin add-new-blog
+
+   ```
 
 ## Step 10: Test Your Changes
 
 After setting up your development environment (see [Development Setup](#development-setup) section above), make sure to:
 
 1. Install the project dependencies:
+
    ```bash
    yarn install
    ```
 
 2. Build the project to ensure there are no errors:
+
    ```bash
    yarn build
    ```
 
 3. Start the development server:
+
    ```bash
    yarn dev
    ```
@@ -227,7 +235,7 @@ You can do the same for a Category. For example, if you're adding a new category
     type: 'category',
     className: 'new-doc',
     items: [
-      { 
+      {
         ...
       },
     ],
