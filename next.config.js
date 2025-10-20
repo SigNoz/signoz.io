@@ -618,7 +618,7 @@ module.exports = () => {
         {
           source: "/docs/operate/0.75.0/query-service/user-invitation-smtp",
           destination: "/docs/manage/administrator-guide/configuration/smtp-email-invitations/#versions-less-than-or-equal-to-084x",
-          permanent:  true
+          permanent: true
         },
         {
           source: "/docs/operate/0.75.0/query-service/reset-admin-password",
@@ -628,7 +628,7 @@ module.exports = () => {
         {
           source: "/docs/operate/0.75.0/configuration",
           destination: "/docs/operate/configuration",
-          permanent: true 
+          permanent: true
         },
         {
           source: "/docs/operate/docker-standalone/#upgrade",
@@ -667,7 +667,7 @@ module.exports = () => {
         },
         {
           source: "/docs/llm/opentelemetry-openai-monitoring/",
-          destination: "/docs/opentelemetry-openai-monitoring/",
+          destination: "/docs/openai-monitoring/",
           permanent: true
         },
         {
@@ -677,12 +677,43 @@ module.exports = () => {
         },
         {
           source: "/docs/llm/vercel-ai-sdk-monitoring/",
-          destination: "/docs/vercel-ai-sdk-monitoring/",
+          destination: "/docs/vercel-ai-sdk-observability/",
           permanent: true
         },
         {
           source: "/docs/llm/llamaindex-monitoring/",
-          destination: "/docs/llamaindex-monitoring/",
+          destination: "/docs/llamaindex-observability/",
+          permanent: true
+        },
+        // Redirects for renamed LLM observability docs (SEO edits #2090)
+        {
+          source: "/docs/opentelemetry-openai-monitoring/",
+          destination: "/docs/openai-monitoring/",
+          permanent: true
+        },
+        {
+          source: "/docs/crewai-monitoring/",
+          destination: "/docs/crewai-observability/",
+          permanent: true
+        },
+        {
+          source: "/docs/langchain-monitoring/",
+          destination: "/docs/langchain-observability/",
+          permanent: true
+        },
+        {
+          source: "/docs/llamaindex-monitoring/",
+          destination: "/docs/llamaindex-observability/",
+          permanent: true
+        },
+        {
+          source: "/docs/mastra-monitoring/",
+          destination: "/docs/mastra-observability/",
+          permanent: true
+        },
+        {
+          source: "/docs/vercel-ai-sdk-monitoring/",
+          destination: "/docs/vercel-ai-sdk-observability/",
           permanent: true
         },
         {
