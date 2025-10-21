@@ -88,7 +88,7 @@ const LLMMonitoringData: IconCardData[] = [
    {
     name: 'Pydantic AI',
     href: '/docs/pydantic-ai-monitoring',
-    icon: <SiPydantic className="h-7 w-7 text-pink" />,
+    icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
     clickName: 'Pydantic AI Monitoring',
   },
   {
