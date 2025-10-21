@@ -41,7 +41,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 ## Workflow
 
 - Fork and clone the repo, then create a feature branch.
-- Set up and run the site locally per `README.md` (Node/Yarn, `yarn dev`).
+- Set up and run the site locally as per `README.md` (Node/Yarn, `yarn dev`).
 - Make focused changes with meaningful commit messages.
 - Build locally (`yarn build`) to catch MDX/TypeScript/Contentlayer errors.
 - Open a PR with a clear title, context, screenshots (if relevant), and a checklist (see below).
