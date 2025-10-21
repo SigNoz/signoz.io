@@ -100,9 +100,9 @@ const productDropdownItems = [
   },
   {
     key: 'messaging-queues',
-    // url: '/blog/introducing-ingest-guard-feature/',
+    url: '/docs/messaging-queues/overview/',
     icon: <Logs className="text-signoz_robin-400" size={20} />,
-    description: 'Monitor Kafka, Celery lag & throughput (Coming soon)',
+    description: 'Monitor Kafka, Celery lag & throughput',
     name: 'Messaging Queues',
     order: 11,
   },
@@ -124,9 +124,9 @@ const productDropdownItems = [
   },
   {
     key: 'llm-observability',
-    // url: '/blog/introducing-ingest-guard-feature/',
+    url: '/docs/llm-observability/',
     icon: <Brain className="text-signoz_robin-400" size={20} />,
-    description: 'Monitor AI and LLM workflows (Coming soon)',
+    description: 'Monitor AI and LLM workflows',
     name: 'LLM Observability',
     order: 12,
   },
