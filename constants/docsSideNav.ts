@@ -489,6 +489,27 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'category',
+            label: 'SSO',
+            route: '/docs/manage/administrator-guide/sso',
+            isExpanded: false,
+            items: [
+              {
+                type: 'category',
+                label: 'User Guides',
+                route: '/docs/manage/administrator-guide/sso/user-guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/saml-jumpcloud',
+                    label: 'SAML Authentication with JumpCloud',
+                  }
+                ],
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/telemetry',
             label: 'Statistics Reporting',
