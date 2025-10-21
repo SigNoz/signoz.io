@@ -35,7 +35,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
 
 export const TestimonialCardGrid: React.FC = () => {
   return (
-    <GridLayout cols={2} className="px-20 gap-8">
+    <GridLayout cols={2} className="md:px-20 px-0 gap-8">
       {TESTIMONIALS.map((testimonial, index) => (
         <TestimonialCard key={index} {...testimonial} />
       ))}
