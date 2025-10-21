@@ -2189,8 +2189,8 @@ const docsSideNav = [
         type: 'doc',
       },
       {
-        route: '/docs/pydantic-ai-monitoring',
-        label: 'Pydantic AI Monitoring',
+        route: '/docs/pydantic-ai-observability',
+        label: 'Pydantic AI',
         type: 'doc',
       },
       {
