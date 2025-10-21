@@ -12,7 +12,6 @@ This guide walks you through setting up SAML (Security Assertion Markup Language
 **What you'll accomplish:**
 - Configure JumpCloud as an identity provider (IdP) for SigNoz
 - Enable your team to access SigNoz using their existing JumpCloud accounts
-- Centralize user management through JumpCloud
 
 ## Prerequisites
 
@@ -44,18 +43,13 @@ In the SAML application configuration:
 
 2. **ACS URL**: Enter your SigNoz instance URL (e.g., `https://signoz.example.com`)
    - This is where JumpCloud will send authentication responses
-   - Should match your SigNoz instance URL
+   - Should match your SigNoz instance URL with the path `/api/v1/complete/saml` appended to it. For instance, if your SigNoz instance URL is `https://signoz.example.com`, then the ACS URL should be `https://signoz.example.com/api/v1/complete/saml`.
 
 ### Step 3: Configure Additional Settings
 
 Ensure the following settings match the configuration shown in the image below:
 
 ![JumpCloud SAML Application Configuration 2](/img/docs/jumpcloud-02.png)
-
-**Important settings to verify:**
-- **Name ID Format**: Set to "Email" or "Unspecified"
-- **Signing Certificate**: Use the default certificate
-- **Encryption**: Disabled (unless specifically required)
 
 ### Step 4: Save Configuration
 
@@ -127,7 +121,7 @@ Now you'll configure SigNoz to accept authentication from JumpCloud:
 
 1. **Log out** of SigNoz if you're currently logged in
 2. **Navigate** to your SigNoz login page
-3. **Click** the SSO/SAML login option (if available) or try logging in with a JumpCloud user email
+3. **Try** logging in with a JumpCloud user email
 4. **Verify** that you're redirected to JumpCloud for authentication
 5. **Complete** the JumpCloud login process
 6. **Confirm** you're successfully logged into SigNoz
@@ -139,15 +133,4 @@ Now you'll configure SigNoz to accept authentication from JumpCloud:
 - **"Invalid certificate" error**: Ensure you copied the complete certificate from the metadata file
 - **"Entity ID mismatch" error**: Verify the Entity ID matches exactly between JumpCloud and SigNoz
 - **Users can't access SigNoz**: Check that their email domain matches the configured domain in SigNoz
-- **Redirect loops**: Verify the ACS URL in JumpCloud matches your SigNoz instance URL
-
-## Next Steps
-
-After successful configuration:
-- Assign users to the SAML application in JumpCloud
-- Test with different user accounts
-- Configure user role mappings if needed
-- Set up additional security policies in JumpCloud if required
-
-
 
