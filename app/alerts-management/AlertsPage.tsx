@@ -79,7 +79,7 @@ const Header: React.FC = () => {
 
 const ManageAlertsAsCode: React.FC = () => {
   return (
-    <div className="bg-signoz_ink-500 py-10 mt-12 border-y-1 border-signoz_slate-400 border-dashed">
+    <div className="bg-signoz_ink-500 py-6">
       <GridLayout variant="split">
 
         {/* Left Column */}
@@ -114,15 +114,14 @@ const ManageAlertsAsCode: React.FC = () => {
 const CreateAlertsAndDefineConditions: React.FC = () => {
     return (
       <>
-      <div className="bg-signoz_ink-500 p-6 border-t-1 border-signoz_slate-400 border-dashed">
-        <HeroCards cards={ALERTS_MANAGEMENT_CARDS} layoutVariant={'no-border'} variant="default" cols={2} className="-mt-6" />
+      <div className="bg-signoz_ink-500 px-6 pt-6 border-t-1 border-signoz_slate-400 border-dashed">
+        <HeroCards cards={ALERTS_MANAGEMENT_CARDS} layoutVariant={'no-border'} variant="default" cols={2} className="-mt-6 !-ml-6" />
   
         <Image 
           src="/img/alerts-management/create-alerts.png" 
           alt="Create alerts" 
           width={10000} 
-          height={10000} 
-          className="mb-8"
+          height={10000}
         />
       </div>
       </>
@@ -358,7 +357,7 @@ const AlertsManagement: React.FC = () => {
           <StopAlertFatigueBanner />
         </SectionLayout>
         
-        <UsageBasedPricing show={["traces"]} />
+        <UsageBasedPricing show={["traces", "metrics", "logs"]} />
         <SigNozStats />
         <CustomerStories />
       </div>
