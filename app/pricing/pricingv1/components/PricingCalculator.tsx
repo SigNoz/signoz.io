@@ -351,7 +351,8 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768)
+      if (!embedded) setIsMobile(window.innerWidth <= 768)
+      else setIsMobile(window.innerWidth <= 1280)
     }
 
     // Set initial value
@@ -589,8 +590,9 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                       type="number"
                       value={inputTracesValue}
                       onChange={(e) => handleInputTracesChange(e.target.value)}
-                      className="mr-2 w-20 border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                      className=" w-full border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
                       min="0"
+                      max={MAX_VALUE.toString()}
                     />
                     <span className="text-base text-signoz_vanilla-400">GB</span>
                   </div>
@@ -651,8 +653,9 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                       type="number"
                       value={inputLogsValue}
                       onChange={(e) => handleInputLogsChange(e.target.value)}
-                      className="mr-2 w-20 border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                      className=" w-full border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
                       min="0"
+                      max={MAX_VALUE.toString()}
                     />
                     <span className="text-base text-signoz_vanilla-400">GB</span>
                   </div>
@@ -713,8 +716,9 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                       type="number"
                       value={inputMetricsValue}
                       onChange={(e) => handleInputMetricsChange(e.target.value)}
-                      className="mr-2 w-20 border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                      className="w-full border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
                       min="0"
+                      max={MAX_VALUE.toString()}
                     />
                     <span className="text-base text-signoz_vanilla-400">mn</span>
                   </div>
@@ -887,7 +891,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                 </div>
                 <div className="metrics-background col-start-3 flex items-center">
                   <select
-                    className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+                    className="block h-[28px] w-20 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
                     value={tracesRetentionPeriod}
                     onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
                   >
@@ -917,7 +921,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                       type="number"
                       value={inputTracesValue}
                       onChange={(e) => handleInputTracesChange(e.target.value)}
-                      className="mr-2 w-20 border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                      className="w-full ml-1 border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
                       min="0"
                     />
                     <span>GB</span>
@@ -942,7 +946,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                 </div>
                 <div className="metrics-background col-start-3 flex items-center">
                   <select
-                    className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+                    className="block h-[28px] w-20 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
                     value={logsRetentionPeriod}
                     onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
                   >
@@ -972,7 +976,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                       type="number"
                       value={inputLogsValue}
                       onChange={(e) => handleInputLogsChange(e.target.value)}
-                      className="mr-2 w-20 border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                      className="w-full ml-1 border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
                       min="0"
                     />
                     <span>GB</span>
@@ -997,7 +1001,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                 </div>
                 <div className="metrics-background col-start-3 flex items-center">
                   <select
-                    className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+                    className="block h-[28px] w-20 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
                     value={metricsRetentionPeriod}
                     onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
                   >
@@ -1027,7 +1031,7 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({ show, showHeader 
                       type="number"
                       value={inputMetricsValue}
                       onChange={(e) => handleInputMetricsChange(e.target.value)}
-                      className="mr-2 w-20 border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                      className="w-full ml-1 border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
                       min="0"
                     />
                     <span>mn</span>
