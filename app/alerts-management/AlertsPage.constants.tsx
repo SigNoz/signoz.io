@@ -1,5 +1,3 @@
-import { Atom } from "lucide-react";
-
 export const ALERTS_MANAGEMENT_CARDS = [
   {
     title: "Create alerts from metrics, logs, traces, and exceptions",
