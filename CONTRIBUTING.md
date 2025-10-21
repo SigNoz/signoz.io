@@ -204,7 +204,7 @@ Every doc should be skimmable and actionable.
 - Provide distinct instructions for SigNoz Cloud and Self-Host using tabs as mentioned in Content Structure.
 - Explain each code snippet: what it configures, where it lives, and how it works.
 - Provide validation steps in SigNoz (Traces/Logs/Metrics, etc. views) with screenshots where possible.
-- Add a verbose `## Troubleshooting` section with symptoms, causes, exact fixes, and verification.
+- Add a `## Troubleshooting` section with symptoms, causes, exact fixes, and verification. Provide as much context as possible to make it clear to readers where exactly the troubleshooting instructions are applicable
   - Include network/endpoint checks, auth/ingestion key pitfalls, TLS notes, and version mismatches.
   - Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO (e.g., "Why don’t I see traces for <service-name>?", or include the exact error message).
  - Don’t stop at “data sent.” Close the loop with next steps: link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
