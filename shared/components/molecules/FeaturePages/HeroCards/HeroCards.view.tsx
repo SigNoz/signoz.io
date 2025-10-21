@@ -3,7 +3,7 @@ import GridLayout from "../GridLayout"
 import FeatureCard from "../FeatureCard"
 import { SectionLayoutProps } from "../SectionLayout"
 
-const HeroCards: React.FC<{ cards: { icon: React.ReactNode, title: string, description: string }[]; variant?: 'default' | 'combined'; layoutVariant?: SectionLayoutProps['variant'], cols?: number, className?: string }> = ({ 
+const HeroCards: React.FC<{ cards: { icon?: React.ReactNode, title: string, description: string }[]; variant?: 'default' | 'combined'; layoutVariant?: SectionLayoutProps['variant'], cols?: number, className?: string }> = ({ 
   cards, 
   variant = 'default',
   layoutVariant = 'border-x' as SectionLayoutProps['variant'],
