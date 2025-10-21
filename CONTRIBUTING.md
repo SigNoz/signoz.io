@@ -44,7 +44,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Set up and run the site locally as per `README.md` (Node/Yarn, `yarn dev`).
 - Make focused changes with meaningful commit messages.
 - Build locally (`yarn build`) to catch MDX/TypeScript/Contentlayer errors.
-- Open a PR with a clear title, context, screenshots (if relevant), and a checklist (see below).
+- Open a PR as Draft by default with a clear title, context, screenshots (if relevant), and a checklist (see below). Mark it "Ready for review" when content and checks are complete.
 
 ## General Guidelines
 
@@ -96,6 +96,7 @@ Every doc should be skimmable and actionable.
   - Before each command, explain what it does and where to run it (local shell, container, Kubernetes, CI, etc.).
   - After commands, note expected results and what happens next if relevant.
   - For code/config blocks, annotate with language and filename to improve context:
+    ```markdown
     ```yaml:/deploy/docker/otel-collector-config.yaml
     receivers:
       otlp:
@@ -105,6 +106,7 @@ Every doc should be skimmable and actionable.
     ```
   - Highlight specific lines to focus attention using braces after the language identifier. Example: highlight line 4 in a YAML block:
     
+    ```markdown
     ```yaml {4}
     service:
         ....
@@ -116,6 +118,22 @@ Every doc should be skimmable and actionable.
     This renders as:    
     ![Highlighted line example](public/img/docs/guidelines/code-highlight-example.png)
   - Immediately below, explain each critical field and placeholder.
+  - Example with placeholders and explanations:
+    ```yaml:/deploy/docker/otel-collector-config.yaml
+    exporters:
+      otlphttp:
+        endpoint: https://ingest.<region>.signoz.cloud:443
+        headers:
+          signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+    service:
+      pipelines:
+        traces:
+          exporters: [otlphttp]
+    ```
+    This configures the OTel Collector to export traces to SigNoz Cloud using the OTLP/HTTP protocol. Read more about OTel Collector configuration [here](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/).
+    Replace the following placeholders:
+    - `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
+    - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
 - Hyperlinks
   - Prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
   - External links should open in a new tab and preserve security attributes:
@@ -141,6 +159,7 @@ Every doc should be skimmable and actionable.
   - Store images under `public/img/docs/<topic>/...` and reference as `/img/docs/<topic>/...`.
   - Use the `Figure` component with descriptive `alt` and a concise `caption`.
   - Keep images small and readable; crop UI screenshots to the relevant area.
+  - Use WebP format (`.webp`) for all images. See [Creating WebP images doc](https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74) for tips and tools
 - Discoverability and SEO
   - Put primary keywords in `title`, `description`, `url`, and the first paragraph.
   - Use natural variants/synonyms in headings and body.
@@ -238,7 +257,7 @@ Every doc should be skimmable and actionable.
 - Keep versions and instructions in sync across docs, sample apps, and blogs.
 - Provide a “Validate in SigNoz” section that shows where the data will appear.
 
-## PR Checklist (copy into your PR)
+## PR Checklist
 
 - [ ] Frontmatter includes `date`, `id`, `title`, `description`, and appropriate `tags`.
 - [ ] Cloud/Self-Host instructions are clearly distinguished (tabs when needed).
@@ -336,9 +355,11 @@ git checkout -b add-new-content
 
 - Blog images
   - Place under `public/img/blog/<YYYY-MM>/` (create the monthly folder if needed).
+  - Use WebP format (`.webp`) whenever possible. Conversion tips: https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74
 
 - Docs images
   - Place under `public/img/docs/` and, when possible, follow the existing folder organization for the topic/feature.
+  - Use WebP format (`.webp`) whenever possible. Conversion tips: https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74
 
 ### Step 7: Add Doc to Sidebar (Docs only)
 
@@ -398,7 +419,8 @@ Open `http://localhost:3000` and review your blog/doc page.
 1. Navigate to your fork on GitHub.
 2. Click "Compare & pull request".
 3. Add a succinct title and description.
-4. Submit the PR.
+4. Submit the PR as a Draft (default).
+5. When the page builds cleanly and vercel preview is ready, click "Ready for review".
 
 ### Blog Notes
 
@@ -412,6 +434,6 @@ Open `http://localhost:3000` and review your blog/doc page.
 - Images go under `public/img/docs/`.
 - Add the page to `constants/docsSideNav.ts` so it appears in the left sidebar.
 - If you add new tags, define tooltips in `constants/tagDefinitions.ts`.
--. If you change a live doc’s URL (rename or move), add a permanent (301/308) redirect in `next.config.js` `redirects()` from the old path to the new one and update any internal links.
+- If you change a live doc’s URL (rename or move), add a permanent (301/308) redirect in `next.config.js` `redirects()` from the old path to the new one and update any internal links.
 
 Thanks again for contributing to SigNoz!
