@@ -145,27 +145,20 @@ For more complex authentication, you can follow the same sequence of steps as we
 
 ```yaml
 extensions:
-  # --- Extension 1: AWS SigV4 Authentication ---
-  # Used by exporters that need AWS-style request signing (e.g., OpenSearch, Managed Service).
-  sigv4auth:
     region: “us-east-1”
-    service: “aoss”  # Example: Amazon OpenSearch Service
+    service: “aoss”  
 
 exporters:
-  # --- Exporter 1: Simple API Key Authentication (Most Common) ---
-  # Sends telemetry to SigNoz Cloud using a static ingestion key.
   otlp:
     endpoint: “ingest.us.signoz.cloud:443”
     headers:
-      # The secret key is loaded from an environment variable for security.
       signoz-ingestion-key: “${SIGNOZ_API_KEY}”
 
-  # --- Exporter 2: Advanced Authentication using an Extension ---
-  # Sends data to an AWS service using SigV4 signing.
+
   otlphttp/aws:
     endpoint: “https://my-opensearch-domain.us-east1.aoss.amazonaws.com”
     auth:
-      # This tells the exporter to use the ‘sigv4auth’ extension defined above.
+     
       authenticator: sigv4auth
 
  --- Example Service Configuration ---
@@ -173,12 +166,12 @@ exporters:
  Uncomment and modify as needed.
 
  service:
-   extensions: [sigv4auth]  # Enable the SigV4 extension (if used)
+   extensions: [sigv4auth]  
    pipelines:
      traces:
        receivers: [otlp]
        processors: [batch]
-       exporters: [otlp]  # or [otlphttp/aws]
+       exporters: [otlp]  
 ```
 
 In summary, for most backends that use a simple API key, the static headers setting is all you need. For more complex scenarios involving cloud provider IAM roles or OAuth2, we use Collector’s auth extensions.
