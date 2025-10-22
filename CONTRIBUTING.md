@@ -10,6 +10,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 ## Table of Contents
 
 - [Workflow](#workflow)
+- [Git Hooks and Checks](#git-hooks-and-checks)
 - [General Guidelines](#general-guidelines)
 - [Content Structure](#content-structure)
   - [Patterns and components](#patterns-and-components)
@@ -45,6 +46,31 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Make focused changes with meaningful commit messages.
 - Build locally (`yarn build`) to catch MDX/TypeScript/Contentlayer errors.
 - Open a PR as Draft by default with a clear title, context, screenshots (if relevant), and a checklist (see below). Mark it "Ready for review" when content and checks are complete.
+
+## Git Hooks and Checks
+
+- Husky installs Git hooks automatically on `yarn install` via the `prepare` script in `package.json`.
+- Pre-commit behavior
+  - Runs `lint-staged` on staged files. ESLint and Prettier fix typical JS/TS/MD/MDX formatting and lint issues.
+  - When changes include docs or redirect-related files (`data/docs/**/*.mdx`, `next.config.js`, or `scripts/check-doc-redirects.js`), it runs `yarn check:doc-redirects` to ensure renamed/moved docs have permanent redirects.
+- Fixing failures
+  - Lint/format: run `yarn lint` or re-stage after auto-fixes from Prettier/ESLint.
+  - Redirects: run `yarn check:doc-redirects` locally to see missing entries, then add a permanent redirect in `next.config.js` under `async redirects()`. Re-stage and commit.
+  - Optional: `yarn test:doc-redirects` runs a small test for redirect rules.
+- Hooks path
+  - The repo uses Husky v9 defaults (`core.hooksPath=.husky`). If your local Git still points elsewhere (e.g., `.husky/_` from older setups), run `git config core.hooksPath .husky` or re-run `yarn install` to refresh hooks.
+- Bypass (rare)
+  - In emergencies you can use `git commit --no-verify`, but please fix issues instead of bypassing checks in normal workflows.
+
+### CI checks (GitHub Actions)
+
+- Docs Redirect Guard
+  - Triggers on PRs that touch `data/docs/**`, `next.config.js`, `scripts/check-doc-redirects.js`, tests, or `package.json`.
+  - Runs `yarn test:doc-redirects` and `yarn check:doc-redirects`.
+  - Fails if redirects are missing or tests fail. Fix by adding permanent redirects in `next.config.js` and re-running locally.
+- Add to Onboarding (label-driven)
+  - When a PR is labeled `add-to-onboarding`, this job checks that the PR includes docs changes. If none are found, the job fails with a message.
+  - If docs are present, it auto-creates an onboarding issue listing changed docs and comments on the PR with a link.
 
 ## General Guidelines
 

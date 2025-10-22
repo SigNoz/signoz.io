@@ -22,14 +22,10 @@
    ```
 
 3. Install dependencies:
+
    ```bash
    yarn install
    ```
-
-### Git Hooks
-
-- Husky installs Git hooks on `yarn install` via the `prepare` script. The `pre-commit` hook runs `lint-staged` and verifies docs redirects when relevant files change.
-- The repo uses `core.hooksPath=.husky` (Husky v9 default). If you had an older local setup pointing to `.husky/_`, run `git config core.hooksPath .husky` or re-run `yarn install` to refresh hooks.
 
 4. Build the project to ensure there are no errors:
 
@@ -46,6 +42,10 @@
    ```
 
 6. Open your browser and navigate to `http://localhost:3000` to view the website locally.
+
+### Git Hooks
+
+- We use Husky for pre-commit checks. See details in [CONTRIBUTING.md#git-hooks-and-checks](CONTRIBUTING.md#git-hooks-and-checks).
 
 # Contributing
 
