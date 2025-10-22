@@ -32,15 +32,15 @@ const MerchandiseSection: React.FC<MerchandiseSectionProps> = ({
   products = merchandise.products,
 }) => {
   return (
-    <div className="py-10 px-36">
-      <div className="flex items-center justify-between gap-4">
+    <div className="py-10 px-8 border-t border-dashed border-signoz_slate-500">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex flex-col items-start">
           <h2 className="mb-0">{title}</h2>
           <h2 className="mb-0">{subtitle}</h2>
           <h2 className="mb-0">{tagline}</h2>
         </div>
         
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap justify-center gap-4">
           {products.map((product, index) => (
               <Image
                 key={index}
