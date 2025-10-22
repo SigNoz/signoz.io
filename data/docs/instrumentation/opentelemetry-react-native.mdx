@@ -9,10 +9,6 @@ hide_table_of_contents: true
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your React Native Applications and view your application traces in SigNoz.
 
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-### Send traces directly to SigNoz cloud
-
 <Admonition type="warning">
 The JS OTel packages are supported for node and web environments. While they work for React Native as well, they are not explicitly supported for that environment, where they might break compatibility with minor version updates or require workarounds. Building JS OTel package support for React Native is an area of active development.
 </Admonition>
@@ -92,7 +88,10 @@ const Tracer = async () => {
     spanProcessors: [
       new BatchSpanProcessor(
         new OTLPTraceExporter({
+          // For SigNoz Self-Hosted, use the IP Address of the Self-Hosted SigNoz
           url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+
+          // Comment the next line if using SigNoz Self-Hosted. You don't need Headers for that
           headers: {
             'signoz-access-token': '<your-ingestion-key>',
           },
@@ -181,9 +180,6 @@ const { loaded: tracerLoaded } = useTracer();
 ```
 
 **Step 4.** You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
-
-</TabItem>
-</Tabs>
 
 
 ## Validating instrumentation by checking for traces
