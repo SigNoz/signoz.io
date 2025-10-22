@@ -32,7 +32,7 @@ const Accordion = ({ topic, subtopics, onLinkClick }) => {
               onClick={() => onLinkClick && onLinkClick()}
             >
               {subtopic.icon && (
-                <img src={subtopic.icon} alt={`${subtopic.name} icon`} className="h-5 w-5" />
+                typeof subtopic.icon === 'string' ? <img src={subtopic.icon} alt={`${subtopic.name} icon`} className="h-5 w-5" /> : subtopic.icon
               )}
               <div className="flex flex-col">
                 <span className="font-medium">{subtopic.name}</span>
