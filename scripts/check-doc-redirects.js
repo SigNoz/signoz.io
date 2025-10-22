@@ -170,4 +170,13 @@ function main() {
   console.log('Doc redirect check passed')
 }
 
-main()
+module.exports = {
+  docPathToRoute,
+  readRedirects,
+  collectDocMoves,
+  main,
+}
+
+if (require.main === module) {
+  main()
+}
