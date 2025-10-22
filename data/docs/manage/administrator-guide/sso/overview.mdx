@@ -1,0 +1,46 @@
+---
+date: 2025-10-21
+id: sso-overview
+tags : [SigNoz Cloud, Self-Host]
+title: Single Sign on | Overview
+---
+
+SigNoz supports single sign-on (SSO), allowing your users to authenticate through an external identity provider (IdP) instead of maintaining SigNoz-specific passwords.
+
+## What’s supported
+
+- **SAML 2.0**: Available on `SigNoz Cloud` and `Enterprise Self-Hosted`
+- **OIDC**: Available on `SigNoz Cloud` and `Enterprise Self-Hosted`
+- **Google Workspace (OAuth2)**: Available on `Community Edition`, `Teams`, `Enterprise` (self-hosted)
+
+## How SSO works in SigNoz
+
+At a high level, you connect your organization’s email domain to an IdP, and SigNoz defers authentication to that IdP.
+
+1. **Authenticated Domain**: You register a domain like `example.com` under `Settings → Organization Settings → Authenticated Domains`.
+2. **Choose Method**: For that domain, select SAML, OIDC, or Google (for Workspace) and provide the IdP details.
+3. **Just‑in‑Time access**: Users with emails on that domain can sign in via your IdP without a prior invite. Role assignment can then be managed inside SigNoz by admins.
+5. **SP‑initiated**: User goes to your SigNoz login page, enters email, and is redirected to the IdP. IdP initiated flow is not supported yet.
+
+## Setup at a glance
+
+- Go to `Settings → Organization Settings → Authenticated Domains`
+- Add your organization’s email domain (e.g., `example.com`)
+- Click **Configure SSO** and choose a method:
+  - SAML: Provide IdP Metadata or Entity ID, X.509 certificate, and SSO URL
+  - OIDC: Provide Issuer, Client ID, Client Secret, Redirect URI
+  - Google: Provide Client ID and Client Secret, use redirect `https://${SIGNOZ_BASEURL}/api/v1/complete/google`
+- Save and test from an incognito window
+- Optionally toggle **Enforce SSO** for that domain
+
+**Admin locked out**: Temporarily use password auth by appending `?password=Y` to the login URL, e.g. `https://${SIGNOZ_BASEURL}/login?password=Y`.
+
+## Next steps
+
+Looking for step-by-step setup? See the user guides below:
+
+- [Google Workspace](/docs/manage/administrator-guide/sso/user-guides/sso-google.mdx)
+- [SAML with Microsoft Entra ID](/docs/manage/administrator-guide/sso/user-guides/saml-microsoft-entra.mdx)
+- [SAML with Okta](/docs/manage/administrator-guide/sso/user-guides/saml-okta.mdx)
+- [SAML with AWS IAM Identity Center (AWS SSO)](/docs/manage/administrator-guide/sso/user-guides/saml-awsso.mdx)
+- [SAML with JumpCloud](/docs/manage/administrator-guide/sso/user-guides/saml-jumpcloud.mdx)
