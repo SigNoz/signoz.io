@@ -92,6 +92,12 @@ function Footer() {
                     Newsletter
                   </Link>
                 </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                  <Link href="/events/kubecon-cloudnativecon-north-america-2025/" target="_blank">
+                    KubeCon, Atlanta 2025
+                  </Link>
+                  <ArrowUpRight size={16} />
+                </div>
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">

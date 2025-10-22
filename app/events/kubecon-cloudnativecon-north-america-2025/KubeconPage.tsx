@@ -3,6 +3,7 @@ import TalksLayout from './TalksLayout';
 import { Card } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { ArrowRight } from 'lucide-react';
+import MerchandiseSection from './MerchandiseSection';
 import CTASection from './CTASection';
 
 const talks = {
@@ -97,7 +98,9 @@ const KubeConPage: React.FC = () => {
           ))}
         </div>
       </TalksLayout>
-      {/* //////////////////////// */ }
+      
+      <MerchandiseSection />
+      
       <CTASection />
     </div>
   );
