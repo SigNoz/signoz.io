@@ -489,6 +489,30 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'category',
+            label: 'SSO',
+            isExpanded: false,
+            items: [
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/saml-jumpcloud',
+                    label: 'SAML Authentication with JumpCloud',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/saml-awsso',
+                    label: 'SAML Authentication with AWS SSO',
+                  }
+                ],
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/telemetry',
             label: 'Statistics Reporting',
