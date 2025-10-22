@@ -602,6 +602,18 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/opentelemetry-collection-agents/k8s/serverless/configure',
               },
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/k8s-cluster',
+                    label: 'Monitor K8S Clusters in EKS Fargate',
+                  },
+                ]
+              }
             ],
           },
           {
@@ -708,6 +720,18 @@ const docsSideNav = [
                 label: 'Configure',
                 route: '/docs/opentelemetry-collection-agents/ecs/ec2/configure',
               },
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started',
+                    label: 'Monitor ECS EC2 Workloads',
+                  },
+                ]
+              }
             ],
           },
           {
@@ -730,6 +754,18 @@ const docsSideNav = [
                 label: 'Configure',
                 route: '/docs/opentelemetry-collection-agents/ecs/sidecar/configure',
               },
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started',
+                    label: 'Monitor ECS Fargate Workloads',
+                  },
+                ]
+              }
             ],
           },
         ],
