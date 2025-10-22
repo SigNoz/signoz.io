@@ -277,7 +277,7 @@ const ExternalApis: React.FC = () => {
           <ReadyToMonitorYourExternalApisBanner />
         </SectionLayout>
         
-        <UsageBasedPricing show={["traces"]} />
+        <UsageBasedPricing show={["traces", "metrics", "logs"]} />
         <SigNozStats />
         <CustomerStories />
       </div>
