@@ -570,8 +570,13 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
+                    route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cluster',
+                    label: 'Monitor K8S Clusters with K8s-infra',
+                  },
+                  {
+                    type: 'doc',
                     route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
-                    label: 'Monitor Multiple K8SClusters',
+                    label: 'Monitor Multiple K8S Clusters',
                   },
                 ]
               }
