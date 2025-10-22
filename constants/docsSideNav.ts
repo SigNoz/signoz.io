@@ -571,7 +571,7 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cluster',
-                    label: 'Monitor K8S Clusters with K8s-infra',
+                    label: 'Monitoring Kubernetes Clusters using Opentelemetry Collection Agents',
                   },
                   {
                     type: 'doc',
@@ -610,7 +610,7 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route: '/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/k8s-cluster',
-                    label: 'Monitor K8S Clusters in EKS Fargate',
+                    label: 'Monitoring Kubernetes Clusters in EKS Fargate using Opentelemetry Collection Agents',
                   },
                 ]
               }
@@ -728,7 +728,7 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route: '/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started',
-                    label: 'Monitor ECS EC2 Workloads',
+                    label: 'Monitoring ECS EC2 using Opentelemetry Collection Agentss',
                   },
                 ]
               }
@@ -762,7 +762,7 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route: '/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started',
-                    label: 'Monitor ECS Fargate Workloads',
+                    label: 'Monitoring ECS Fargate using Opentelemetry Collection Agents',
                   },
                 ]
               }
