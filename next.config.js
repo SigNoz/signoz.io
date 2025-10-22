@@ -522,12 +522,12 @@ module.exports = () => {
         },
         {
           source: "/docs/tutorial/kubernetes-infra-metrics/",
-          destination: "/docs/collection-agents/k8s/k8s-infra/install-k8s-infra/",
+          destination: "/docs/opentelemetery-collection-agents/k8s/k8s-infra/install-k8s-infra/",
           permanent: true
         },
         {
           source: "/docs/metrics-management/k8s-infra-otel-config/",
-          destination: "/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra/",
+          destination: "/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/",
           permanent: true
         },
         {
@@ -607,12 +607,12 @@ module.exports = () => {
         },
         {
           source: "/docs/userguide/collecting-ecs-logs-and-metrics",
-          destination: "/docs/collection-agents/ecs/ec2/overview/",
+          destination: "/docs/opentelemtry-collection-agents/ecs/ec2/overview/",
           permanent: true
         },
         {
           source: "/docs/userguide/collecting-ecs-sidecar-infra",
-          destination: "/docs/collection-agents/ecs/sidecar/overview",
+          destination: "/docs/opentelemetry-collection-agents/ecs/sidecar/overview",
           permanent: true
         },
         {
@@ -662,7 +662,7 @@ module.exports = () => {
         },
         {
           source: "/docs/tutorial/opentelemetry-operator-usage/",
-          destination: "/docs/collection-agents/k8s/otel-operator/overview",
+          destination: "/docs/opentelemetry-collection-agents/k8s/otel-operator/overview",
           permanent: true
         },
         {
@@ -730,7 +730,118 @@ module.exports = () => {
           source: "/docs/tutorial/instrumenting-angular-frontend/",
           destination: "/docs/instrumentation/opentelemetry-angular/",
           permanent: true
+        },
+        {
+          source: "/docs/collection-agents/get-started",
+          destination: "/docs/opentelemetry-collection-agents/get-started",
+          permanent: true
+        },
+        // Docker Collection Agent redirects
+        {
+          source: "/docs/collection-agents/docker/install",
+          destination: "/docs/opentelemetry-collection-agents/docker/install",
+          permanent: true
+        },
+        // Docker Swarm Collection Agent redirects
+        {
+          source: "/docs/collection-agents/docker-swarm/configure",
+          destination: "/docs/opentelemetry-collection-agents/docker-swarm/configure",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/docker-swarm/install",
+          destination: "/docs/opentelemetry-collection-agents/docker-swarm/install",
+          permanent: true
+        },
+        // ECS Collection Agent redirects
+        {
+          source: "/docs/collection-agents/ecs/ec2/overview",
+          destination: "/docs/opentelemetry-collection-agents/ecs/ec2/overview",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/ecs/ec2/install",
+          destination: "/docs/opentelemetry-collection-agents/ecs/ec2/install",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/ecs/ec2/configure",
+          destination: "/docs/opentelemetry-collection-agents/ecs/ec2/configure",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/ecs/sidecar/overview",
+          destination: "/docs/opentelemetry-collection-agents/ecs/sidecar/overview",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/ecs/sidecar/install",
+          destination: "/docs/opentelemetry-collection-agents/ecs/sidecar/install",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/ecs/sidecar/configure",
+          destination: "/docs/opentelemetry-collection-agents/ecs/sidecar/configure",
+          permanent: true
+        },
+        // Kubernetes Collection Agent redirects
+        {
+          source: "/docs/collection-agents/k8s/k8s-infra/overview",
+          destination: "/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/k8s/k8s-infra/install-k8s-infra",
+          destination: "/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra",
+          destination: "/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster",
+          destination: "/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/k8s/otel-operator/overview",
+          destination: "/docs/opentelemetry-collection-agents/k8s/otel-operator/overview",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/k8s/otel-operator/install",
+          destination: "/docs/opentelemetry-collection-agents/k8s/otel-operator/install",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/k8s/otel-operator/configure",
+          destination: "/docs/opentelemetry-collection-agents/k8s/otel-operator/configure",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/k8s/serverless/overview",
+          destination: "/docs/opentelemetry-collection-agents/k8s/serverless/overview",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/k8s/serverless/install",
+          destination: "/docs/opentelemetry-collection-agents/k8s/serverless/install",
+          permanent: true
+        },
+        {
+          source: "/docs/collection-agents/k8s/serverless/configure",
+          destination: "/docs/opentelemetry-collection-agents/k8s/serverless/configure",
+          permanent: true
+        },
+        // OpenTelemetry Collector redirects
+        {
+          source: "/docs/collection-agents/opentelemetry-collector/configuration",
+          destination: "/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration",
+          permanent: true
         }
+
       ]
     },
     webpack: (config, options) => {

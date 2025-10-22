@@ -1,0 +1,66 @@
+---
+date: 2025-10-22
+title: Monitoring ECS EC2 using Opentelemetry Collection Agents
+tags : [SigNoz Cloud, Self-Host]
+id: get-started
+---
+
+This guide explains how to monitor Amazon ECS on EC2 using OpenTelemetry and SigNoz. You'll deploy an OpenTelemetry Collector as a daemon service on each EC2 host to collect infrastructure metrics, container logs, and application telemetry.
+
+## What is ECS EC2 Monitoring with OpenTelemetry?
+
+With the EC2 launch type, your tasks run on EC2 instances that you manage. Running the OpenTelemetry Collector as a daemon on each host enables:
+
+- Host and container metrics collection
+- Container log tailing and processing
+- Receiving OTLP telemetry from your applications
+- Forwarding telemetry to SigNoz for analysis and dashboards
+
+Learn the concepts in the [ECS EC2 - Overview](/docs/collection-agents/ecs/ec2/overview).
+
+## Prerequisites
+
+- SigNoz backend (SigNoz Cloud or self-hosted)
+- ECS cluster using EC2 launch type
+- AWS CLI with appropriate permissions
+- Ability to deploy CloudFormation stacks and set SSM Parameter Store values
+
+## How It Works
+
+1. Deploy the OpenTelemetry Collector as a daemon service (one per EC2 host)
+2. Configure the collector to collect host/container data and receive app OTLP
+3. Point your instrumented applications to the daemon service OTLP endpoint
+4. Data is enriched and sent to SigNoz
+
+## Step 1: Install the Daemon Service
+
+Use the CloudFormation-based setup to deploy the collector as a daemon across your EC2 hosts.
+
+- Follow [ECS EC2 - Install](/docs/collection-agents/ecs/ec2/install)
+
+## Step 2: Configure the Collector and Applications
+
+- Tune the collector configuration (receivers, processors, exporters)
+- Set app `OTEL_EXPORTER_OTLP_ENDPOINT` to the daemon service
+- Add `OTEL_RESOURCE_ATTRIBUTES` with `service.name=<your-service>`
+
+- Follow [ECS EC2 - Configure](/docs/collection-agents/ecs/ec2/configure)
+
+## What Data Can You Collect?
+
+- Host metrics (CPU, memory, disk, network)
+- ECS container/task metrics (awsecscontainermetrics)
+- Container and application logs (filelog)
+- Application traces and custom metrics (OTLP)
+
+## Visualize in SigNoz
+
+- Build dashboards for cluster and service-level views
+- Filter by cluster/service/task attributes
+- Investigate traces and logs for faster troubleshooting
+
+## Next Steps
+
+1. [ECS EC2 - Overview](/docs/collection-agents/ecs/ec2/overview)
+2. [ECS EC2 - Install](/docs/collection-agents/ecs/ec2/install)
+3. [ECS EC2 - Configure](/docs/collection-agents/ecs/ec2/configure)

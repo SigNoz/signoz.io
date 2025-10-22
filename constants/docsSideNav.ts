@@ -556,11 +556,11 @@ const docsSideNav = [
       },
     ],
   },
-  {
+  { 
     label: 'Collection Agents',
     type: 'category',
     isExpanded: false,
-    route: '/docs/collection-agents/get-started',
+    route: '/docs/opentelemetry-collection-agents/get-started',
     items: [
       {
         type: 'category',
@@ -575,17 +575,17 @@ const docsSideNav = [
               {
                 label: 'Overview',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/k8s-infra/overview',
+                route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview',
               },
               {
                 label: 'Install K8s Infra',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/k8s-infra/install-k8s-infra',
+                route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra',
               },
               {
                 label: 'Configure K8s Infra',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra',
+                route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra',
               },
               {
                 type: 'category',
@@ -594,8 +594,13 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
-                    label: 'Monitor Multiple K8SClusters',
+                    route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cluster',
+                    label: 'Monitoring Kubernetes Clusters using Opentelemetry Collection Agents',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
+                    label: 'Monitor Multiple K8S Clusters',
                   },
                 ]
               }
@@ -609,18 +614,30 @@ const docsSideNav = [
               {
                 label: 'Overview',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/serverless/overview',
+                route: '/docs/opentelemetry-collection-agents/k8s/serverless/overview',
               },
               {
                 label: 'Install',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/serverless/install',
+                route: '/docs/opentelemetry-collection-agents/k8s/serverless/install',
               },
                {
                 label: 'Configure',
                 type: 'doc',
-                route: '/docs/collection-agents/k8s/serverless/configure',
+                route: '/docs/opentelemetry-collection-agents/k8s/serverless/configure',
               },
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/k8s-cluster',
+                    label: 'Monitoring Kubernetes Clusters in EKS Fargate using Opentelemetry Collection Agents',
+                  },
+                ]
+              }
             ],
           },
           {
@@ -631,17 +648,17 @@ const docsSideNav = [
               {
                 type: 'doc',
                 label: 'Overview',
-                route: '/docs/collection-agents/k8s/otel-operator/overview'
+                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/overview'
               },
               {
                 type: 'doc',
                 label: 'Install',
-                route: '/docs/collection-agents/k8s/otel-operator/install'
+                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/install'
               },
               {
                 type: 'doc',
                 label: 'Configure',
-                route: '/docs/collection-agents/k8s/otel-operator/configure'
+                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/configure'
               }
             ]
           }
@@ -677,7 +694,7 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
-                route: '/docs/collection-agents/docker/install',
+                route: '/docs/opentelemetry-collection-agents/docker/install',
                 type: 'doc',
                 label: 'Install',
               },
@@ -689,12 +706,12 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
-                route: '/docs/collection-agents/docker-swarm/install',
+                route: '/docs/opentelemetry-collection-agents/docker-swarm/install',
                 type: 'doc',
                 label: 'Install',
               },
               {
-                route: '/docs/collection-agents/docker-swarm/configure',
+                route: '/docs/opentelemetry-collection-agents/docker-swarm/configure',
                 type: 'doc',
                 label: 'Configure',
               },
@@ -715,18 +732,30 @@ const docsSideNav = [
               {
                 type: 'doc',
                 label: 'Overview',
-                route: '/docs/collection-agents/ecs/ec2/overview',
+                route: '/docs/opentelemetry-collection-agents/ecs/ec2/overview',
               },
               {
                 type: 'doc',
                 label: 'Install',
-                route: '/docs/collection-agents/ecs/ec2/install',
+                route: '/docs/opentelemetry-collection-agents/ecs/ec2/install',
               },
               {
                 type: 'doc',
                 label: 'Configure',
-                route: '/docs/collection-agents/ecs/ec2/configure',
+                route: '/docs/opentelemetry-collection-agents/ecs/ec2/configure',
               },
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started',
+                    label: 'Monitoring ECS EC2 using Opentelemetry Collection Agentss',
+                  },
+                ]
+              }
             ],
           },
           {
@@ -737,18 +766,30 @@ const docsSideNav = [
               {
                 type: 'doc',
                 label: 'Overview',
-                route: '/docs/collection-agents/ecs/sidecar/overview',
+                route: '/docs/opentelemetry-collection-agents/ecs/sidecar/overview',
               },
               {
                 type: 'doc',
                 label: 'Install',
-                route: '/docs/collection-agents/ecs/sidecar/install',
+                route: '/docs/opentelemetry-collection-agents/ecs/sidecar/install',
               },
               {
                 type: 'doc',
                 label: 'Configure',
-                route: '/docs/collection-agents/ecs/sidecar/configure',
+                route: '/docs/opentelemetry-collection-agents/ecs/sidecar/configure',
               },
+              {
+                type: 'category',
+                label: 'User Guides',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started',
+                    label: 'Monitoring ECS Fargate using Opentelemetry Collection Agents',
+                  },
+                ]
+              }
             ],
           },
         ],
@@ -761,7 +802,7 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Configuration Components',
-            route: '/docs/collection-agents/opentelemetry-collector/configuration'
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration'
           },
         ]
       },
