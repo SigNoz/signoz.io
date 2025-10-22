@@ -467,11 +467,8 @@ FROM quay.io/wildfly/wildfly:27.0.1.Final-jdk11
 # Switch to root for installation
 USER root
 
-# Install required tools
-RUN yum install -y wget && yum clean all
-
 # -------- Step 1: Download OpenTelemetry Java Agent --------
-RUN wget -O /opt/jboss/opentelemetry-javaagent.jar \
+RUN curl -L -o /opt/jboss/opentelemetry-javaagent.jar \
     https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 
 # -------- Step 2: Deploy Application --------
@@ -532,12 +529,10 @@ FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
 # -------- Stage 2: Build JBoss EAP App Image --------
 FROM quay.io/wildfly/wildfly:27.0.1.Final-jdk11
 
-# Install required tools
 USER root
-RUN yum install -y wget && yum clean all
 
 # Download OpenTelemetry Java Agent
-RUN wget -O /opt/jboss/opentelemetry-javaagent.jar \
+RUN curl -L -o /opt/jboss/opentelemetry-javaagent.jar \
     https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 
 # Copy your application EAR/WAR file into deployments
