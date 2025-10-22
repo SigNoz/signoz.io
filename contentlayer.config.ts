@@ -597,7 +597,7 @@ export default makeSource({
     ],
   },
   onSuccess: async (importData) => {
-    const { allDocuments } = await importData()
-    createTagCount(allDocuments)
+    const { allBlogs } = await importData()
+    createTagCount(allBlogs)
   },
 })
