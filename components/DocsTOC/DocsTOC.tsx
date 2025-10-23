@@ -111,6 +111,103 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
     const container = tocItemsRef.current
     if (!container) return
 
+    const updateHash = (hash: string) => {
+      if (typeof window === 'undefined') return
+      const normalizedHash = hash.startsWith('#') ? hash : `#${hash}`
+      if (window.location.hash === normalizedHash) return
+      try {
+        window.history.replaceState(window.history.state, '', normalizedHash)
+      } catch (err) {
+        window.location.hash = normalizedHash
+      }
+    }
+
+    const activateTabsForElement = (element: HTMLElement) => {
+      const roots: HTMLElement[] = []
+      let current: HTMLElement | null = element
+
+      while (current) {
+        const root = current.closest('[data-tabs-root]') as HTMLElement | null
+        if (!root || roots.includes(root)) break
+        roots.push(root)
+        current = root.parentElement as HTMLElement | null
+      }
+
+      // Activate from outermost to innermost so parent panels are visible first
+      roots
+        .slice()
+        .reverse()
+        .forEach((root) => {
+          let panel: HTMLElement | null = element
+          while (panel && panel !== root) {
+            if (
+              panel.hasAttribute('data-tab-value') &&
+              panel.closest('[data-tabs-root]') === root
+            ) {
+              break
+            }
+            panel = panel.parentElement as HTMLElement | null
+          }
+
+          if (!panel || panel === root) return
+
+          const panelTabValue = panel.getAttribute('data-tab-value')
+          if (!panelTabValue) return
+
+          const button = root.querySelector(
+            `button[data-tab-value="${panelTabValue}"]`
+          ) as HTMLButtonElement | null
+          if (!button) return
+
+          const isAlreadyActive = !panel.hasAttribute('hidden')
+          if (!isAlreadyActive) {
+            button.click()
+          }
+        })
+    }
+
+    const focusHeading = (
+      hash: string,
+      options: { behavior?: ScrollBehavior; updateHash?: boolean } = {}
+    ) => {
+      if (!hash) return false
+      const normalizedHash = hash.startsWith('#') ? hash : `#${hash}`
+      const rawId = normalizedHash.slice(1)
+      const normalizedId = rawId.replace(/-+$/g, '')
+      const el = document.getElementById(rawId) || document.getElementById(normalizedId)
+      if (!el) return false
+
+      activateTabsForElement(el)
+
+      const scrollBehavior = options.behavior ?? 'smooth'
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: scrollBehavior, block: 'start' })
+        const finalId = el.getAttribute('id') || normalizedId || rawId
+        const finalHash = `#${finalId}`
+        setActiveSection(finalHash)
+        if (options.updateHash !== false) {
+          updateHash(finalHash)
+        }
+      }, 0)
+
+      return true
+    }
+
+    const focusHeadingWithRetry = (
+      hash: string,
+      options: { behavior?: ScrollBehavior; updateHash?: boolean } = {}
+    ) => {
+      let attempts = 0
+      const maxAttempts = 10
+      const attemptFocus = () => {
+        const didFocus = focusHeading(hash, options)
+        if (didFocus || attempts >= maxAttempts) return
+        attempts += 1
+        setTimeout(attemptFocus, 100)
+      }
+      attemptFocus()
+    }
+
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       const anchor = target.closest('a') as HTMLAnchorElement | null
@@ -118,44 +215,33 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
 
       e.preventDefault()
       const hash = anchor.getAttribute('href') || ''
-      const rawId = hash.replace('#', '')
-      const normalizedId = rawId.replace(/-+$/g, '')
-      const el = document.getElementById(rawId) || document.getElementById(normalizedId)
-      if (!el) return
+      focusHeadingWithRetry(hash)
+    }
 
-      // Activate all ancestor tabs (handles nested Tabs inside Tabs)
-      const originalEl = el
-      let searchStart: HTMLElement | null = originalEl
-      while (searchStart) {
-        const tabsRoot = searchStart.closest('[data-tabs-root]') as HTMLElement | null
-        if (!tabsRoot) break
-        // Find the panel in this tabsRoot that contains the original element
-        let panel = originalEl.closest('[data-tab-value]') as HTMLElement | null
-        while (panel && !tabsRoot.contains(panel)) {
-          panel = panel.parentElement?.closest('[data-tab-value]') as HTMLElement | null
-        }
-        const panelTabValue = panel?.getAttribute('data-tab-value')
-        if (panelTabValue) {
-          const button = tabsRoot.querySelector(
-            `button[data-tab-value="${panelTabValue}"]`
-          ) as HTMLButtonElement | null
-          if (button) button.click()
-        }
-        // Move up to find parent tabs group
-        searchStart = tabsRoot.parentElement
+    const syncToHash = () => {
+      if (typeof window === 'undefined') return
+      const currentHash = window.location.hash
+      if (!currentHash) return
+      focusHeadingWithRetry(currentHash, { behavior: 'auto', updateHash: false })
+    }
+
+    if (typeof window !== 'undefined') {
+      // Handle deep links where the hash points to content inside a hidden tab
+      if (window.location.hash) {
+        setTimeout(() => {
+          syncToHash()
+        }, 0)
       }
-
-      // Smooth scroll to the target after switching
-      setTimeout(() => {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        // Set active section using the element's id to avoid slug mismatches
-        const finalId = el.getAttribute('id') || normalizedId || rawId
-        setActiveSection(`#${finalId}`)
-      }, 0)
+      window.addEventListener('hashchange', syncToHash)
     }
 
     container.addEventListener('click', handleClick, { capture: true })
-    return () => container.removeEventListener('click', handleClick, { capture: true } as any)
+    return () => {
+      container.removeEventListener('click', handleClick, { capture: true } as any)
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('hashchange', syncToHash)
+      }
+    }
   }, [])
 
   if (
