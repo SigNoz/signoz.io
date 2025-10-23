@@ -58,30 +58,6 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'category',
-        label: 'Breaking Changes',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            label: 'Breaking Changes in v0.76',
-            route: '/docs/overview/breaking-changes/breaking-changes-0.76',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        label: "What's New",
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            label: 'Changelog of v0.76',
-            route: '/docs/overview/whats-new/changelog-0.76',
-          },
-        ],
-      },
-      {
         type: 'doc',
         label: "What's Coming",
         route: '/docs/roadmap',
@@ -507,7 +483,7 @@ const docsSideNav = [
                     type: 'doc',
                     route: '/docs/manage/administrator-guide/sso/user-guides/saml-awsso',
                     label: 'SAML Authentication with AWS SSO',
-                  }
+                  },
                 ],
               },
             ],
@@ -556,7 +532,7 @@ const docsSideNav = [
       },
     ],
   },
-  { 
+  {
     label: 'Collection Agents',
     type: 'category',
     isExpanded: false,
@@ -594,16 +570,18 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cluster',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cluster',
                     label: 'Monitoring Kubernetes Clusters using Opentelemetry Collection Agents',
                   },
                   {
                     type: 'doc',
-                    route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
                     label: 'Monitor Multiple K8S Clusters',
                   },
-                ]
-              }
+                ],
+              },
             ],
           },
           {
@@ -621,7 +599,7 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/opentelemetry-collection-agents/k8s/serverless/install',
               },
-               {
+              {
                 label: 'Configure',
                 type: 'doc',
                 route: '/docs/opentelemetry-collection-agents/k8s/serverless/configure',
@@ -633,11 +611,13 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/k8s-cluster',
-                    label: 'Monitoring Kubernetes Clusters in EKS Fargate using Opentelemetry Collection Agents',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/k8s-cluster',
+                    label:
+                      'Monitoring Kubernetes Clusters in EKS Fargate using Opentelemetry Collection Agents',
                   },
-                ]
-              }
+                ],
+              },
             ],
           },
           {
@@ -648,20 +628,20 @@ const docsSideNav = [
               {
                 type: 'doc',
                 label: 'Overview',
-                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/overview'
+                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/overview',
               },
               {
                 type: 'doc',
                 label: 'Install',
-                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/install'
+                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/install',
               },
               {
                 type: 'doc',
                 label: 'Configure',
-                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/configure'
-              }
-            ]
-          }
+                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/configure',
+              },
+            ],
+          },
         ],
       },
       {
@@ -754,8 +734,8 @@ const docsSideNav = [
                     route: '/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started',
                     label: 'Monitoring ECS EC2 using Opentelemetry Collection Agentss',
                   },
-                ]
-              }
+                ],
+              },
             ],
           },
           {
@@ -785,11 +765,12 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started',
+                    route:
+                      '/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started',
                     label: 'Monitoring ECS Fargate using Opentelemetry Collection Agents',
                   },
-                ]
-              }
+                ],
+              },
             ],
           },
         ],
@@ -802,9 +783,9 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Configuration Components',
-            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration'
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration',
           },
-        ]
+        ],
       },
     ],
   },
@@ -1032,7 +1013,7 @@ const docsSideNav = [
                     route: '/docs/instrumentation/manual-instrumentation/java/annotations',
                     label: 'Using Annotations',
                   },
-                ]
+                ],
               },
               {
                 type: 'category',
@@ -1052,7 +1033,8 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     label: 'Enable/disable Instrumentation',
-                    route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation'
+                    route:
+                      '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation',
                   },
                 ],
               },
@@ -1147,7 +1129,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/traces-management/guides/pii-scrubbing/',
-            label: 'PII Scrubbing'
+            label: 'PII Scrubbing',
           },
           {
             type: 'doc',
@@ -2115,7 +2097,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'How to Configure Alerts for Missing Data',
-          }
+          },
         ],
       },
       {
@@ -2192,7 +2174,7 @@ const docsSideNav = [
     route: '/docs/llm-observability',
     label: 'LLM Observability',
 
-    items: [ 
+    items: [
       {
         route: '/docs/llm-community-integrations',
         label: 'LLM Community Integrations',
@@ -2265,11 +2247,11 @@ const docsSideNav = [
     isExpanded: false,
     label: 'SigNoz MCP',
 
-    items: [ 
+    items: [
       {
-          type: 'doc',
-          route: '/docs/signoz-mcp-server',
-          label: 'SigNoz MCP Server',
+        type: 'doc',
+        route: '/docs/signoz-mcp-server',
+        label: 'SigNoz MCP Server',
       },
     ],
   },
@@ -2391,8 +2373,8 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/integrations/nomad',
-        label: 'Nomad'
-      }
+        label: 'Nomad',
+      },
     ],
   },
   {
@@ -2587,6 +2569,18 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/ingestion/signoz-cloud/troubleshooting/troubleshooting',
             label: 'Troubleshooting',
+          },
+        ],
+      },
+      {
+        label: 'Self-Host SigNoz',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/ingestion/self-hosted/overview',
+            label: 'Overview',
           },
         ],
       },
