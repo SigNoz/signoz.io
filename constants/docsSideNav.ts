@@ -2593,6 +2593,11 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        type: 'doc',
+        route: '/docs/ingestion/cloud-vs-self-hosted',
+        label: 'Cloud vs Self-Hosted',
+      },
     ],
   },
   {
