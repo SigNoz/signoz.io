@@ -1,7 +1,7 @@
 ---
 date: 2025-10-21
 id: saml-okta
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: SAML Authentication with Okta
 ---
 
@@ -10,6 +10,7 @@ title: SAML Authentication with Okta
 This guide walks you through setting up SAML (Security Assertion Markup Language) authentication between Okta and SigNoz.
 
 **What you'll accomplish:**
+
 - Configure Okta as an identity provider (IdP) for SigNoz
 - Enable your team to access SigNoz using their existing Okta accounts
 
@@ -42,6 +43,7 @@ Before starting, ensure you have:
 1. Visit the **Metadata URL** in Okta to get the following information:
 
 The metadata file contains important configuration details like:
+
 - Okta's signing certificate
 - Single Sign-On service URLs
 - Entity identifiers
@@ -79,25 +81,29 @@ The metadata file contains important configuration details like:
 Now you'll configure SigNoz to accept authentication from Okta:
 
 1. **Navigate to SigNoz Settings:**
+
    - Go to your SigNoz dashboard
    - Click on **Settings** in the left sidebar
    - Navigate to **Organization Settings**
    - Click on **Authenticated Domains**
 
 2. **Add New Domain:**
+
    - Click **Add Domain**
    - Enter the domain that your users would login with (e.g., if your user emails are in format `john@example.com`, enter `example.com`)
 
 3. **Enter Configuration Details:**
+
    ```
    Domain: example.com
    SAML ACS URL/SAML IDP URL: <idp-url>
    SAML X.509 Certificate: <some-certificate-data>
    SAML Entity ID: <entity-id>
-   Skip AuthN Requests Signed: True
+   Skip AuthN Requests Signed: False
    ```
 
    **Where to find these values:**
+
    - **Domain**: The email domain for users who should use SSO (e.g., `example.com` for users with `@example.com` emails)
    - **SAML ACS URL/SAML IDP URL**: The ACS URL from the metadata file (between `<md:SingleSignOnService Location="...">` tags)
    - **SAML X.509 Certificate**: The certificate content from the metadata file (between `<ds:X509Certificate>` tags)
