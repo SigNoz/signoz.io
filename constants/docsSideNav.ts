@@ -444,17 +444,6 @@ const docsSideNav = [
                 route: '/docs/userguide/authentication',
                 label: 'Authentication',
               },
-              {
-                type: 'doc',
-                route: '/docs/userguide/sso-authentication',
-                label: 'SSO',
-              },
-              {
-                type: 'doc',
-                route:
-                  '/docs/manage/administrator-guide/security-and-compliance/saml-authentication',
-                label: 'SAML',
-              },
             ],
           },
           {
@@ -494,6 +483,11 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/sso/overview',
+                label: 'Overview',
+              },
+              {
                 type: 'category',
                 label: 'User Guides',
                 isExpanded: false,
@@ -501,13 +495,28 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route: '/docs/manage/administrator-guide/sso/user-guides/saml-jumpcloud',
-                    label: 'SAML Authentication with JumpCloud',
+                    label: 'JumpCloud - SAML Authentication',
                   },
                   {
                     type: 'doc',
                     route: '/docs/manage/administrator-guide/sso/user-guides/saml-awsso',
-                    label: 'SAML Authentication with AWS SSO',
-                  }
+                    label: 'AWS SSO - SAML Authentication',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/saml-okta',
+                    label: 'Okta - SAML Authentication',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/saml-microsoft-entra',
+                    label: 'Microsoft Entra ID - SAML Authentication',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/sso/user-guides/sso-google',
+                    label: 'Google Workspace - Single Sign-on Authentication',
+                  },
                 ],
               },
             ],
@@ -556,7 +565,7 @@ const docsSideNav = [
       },
     ],
   },
-  { 
+  {
     label: 'Collection Agents',
     type: 'category',
     isExpanded: false,
@@ -594,16 +603,18 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cluster',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-cluster',
                     label: 'Monitoring Kubernetes Clusters using Opentelemetry Collection Agents',
                   },
                   {
                     type: 'doc',
-                    route: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
                     label: 'Monitor Multiple K8S Clusters',
                   },
-                ]
-              }
+                ],
+              },
             ],
           },
           {
@@ -621,7 +632,7 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/opentelemetry-collection-agents/k8s/serverless/install',
               },
-               {
+              {
                 label: 'Configure',
                 type: 'doc',
                 route: '/docs/opentelemetry-collection-agents/k8s/serverless/configure',
@@ -633,11 +644,13 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/k8s-cluster',
-                    label: 'Monitoring Kubernetes Clusters in EKS Fargate using Opentelemetry Collection Agents',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/serverless/user-guides/k8s-cluster',
+                    label:
+                      'Monitoring Kubernetes Clusters in EKS Fargate using Opentelemetry Collection Agents',
                   },
-                ]
-              }
+                ],
+              },
             ],
           },
           {
@@ -648,20 +661,20 @@ const docsSideNav = [
               {
                 type: 'doc',
                 label: 'Overview',
-                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/overview'
+                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/overview',
               },
               {
                 type: 'doc',
                 label: 'Install',
-                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/install'
+                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/install',
               },
               {
                 type: 'doc',
                 label: 'Configure',
-                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/configure'
-              }
-            ]
-          }
+                route: '/docs/opentelemetry-collection-agents/k8s/otel-operator/configure',
+              },
+            ],
+          },
         ],
       },
       {
@@ -754,8 +767,8 @@ const docsSideNav = [
                     route: '/docs/opentelemetry-collection-agents/ecs/ec2/user-guides/get-started',
                     label: 'Monitoring ECS EC2 using Opentelemetry Collection Agentss',
                   },
-                ]
-              }
+                ],
+              },
             ],
           },
           {
@@ -785,11 +798,12 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started',
+                    route:
+                      '/docs/opentelemetry-collection-agents/ecs/sidecar/user-guides/get-started',
                     label: 'Monitoring ECS Fargate using Opentelemetry Collection Agents',
                   },
-                ]
-              }
+                ],
+              },
             ],
           },
         ],
@@ -802,9 +816,9 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Configuration Components',
-            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration'
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration',
           },
-        ]
+        ],
       },
     ],
   },
@@ -1032,7 +1046,7 @@ const docsSideNav = [
                     route: '/docs/instrumentation/manual-instrumentation/java/annotations',
                     label: 'Using Annotations',
                   },
-                ]
+                ],
               },
               {
                 type: 'category',
@@ -1052,7 +1066,8 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     label: 'Enable/disable Instrumentation',
-                    route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation'
+                    route:
+                      '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation',
                   },
                 ],
               },
@@ -1147,7 +1162,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/traces-management/guides/pii-scrubbing/',
-            label: 'PII Scrubbing'
+            label: 'PII Scrubbing',
           },
           {
             type: 'doc',
@@ -2115,7 +2130,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/user-guides/how-to-configure-alerts-for-missing-data',
             label: 'How to Configure Alerts for Missing Data',
-          }
+          },
         ],
       },
       {
@@ -2192,7 +2207,7 @@ const docsSideNav = [
     route: '/docs/llm-observability',
     label: 'LLM Observability',
 
-    items: [ 
+    items: [
       {
         route: '/docs/llm-community-integrations',
         label: 'LLM Community Integrations',
@@ -2265,11 +2280,11 @@ const docsSideNav = [
     isExpanded: false,
     label: 'SigNoz MCP',
 
-    items: [ 
+    items: [
       {
-          type: 'doc',
-          route: '/docs/signoz-mcp-server',
-          label: 'SigNoz MCP Server',
+        type: 'doc',
+        route: '/docs/signoz-mcp-server',
+        label: 'SigNoz MCP Server',
       },
     ],
   },
@@ -2391,8 +2406,8 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/integrations/nomad',
-        label: 'Nomad'
-      }
+        label: 'Nomad',
+      },
     ],
   },
   {
