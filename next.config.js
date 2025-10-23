@@ -840,6 +840,17 @@ module.exports = () => {
           source: "/docs/collection-agents/opentelemetry-collector/configuration",
           destination: "/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration",
           permanent: true
+        },
+        // SSO redirects
+        {
+          source: "/docs/manage/administrator-guide/security-and-compliance/saml-authentication/",
+          destination: "/docs/manage/administrator-guide/sso/overview/",
+          permanent: true
+        },
+        {
+          source: "/docs/userguide/sso-authentication/",
+          destination: "/docs/manage/administrator-guide/sso/overview/",
+          permanent: true
         }
 
       ]
