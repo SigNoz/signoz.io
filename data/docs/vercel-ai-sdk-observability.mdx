@@ -1,14 +1,14 @@
 ---
 date: 2025-07-21
 id: vercel-ai-sdk-observability-with-opentelemetry
-tags : [SigNoz Cloud, Vercel AI SDK, Observability, Monitoring, OpenTelemetry]
+tags: [SigNoz Cloud, Self-Host]
 title: Vercel AI SDK Observability with SigNoz
 description: Enable observability and monitoring in your Vercel AI application with OpenTelemetry to send traces, logs, and metrics to SigNoz
 ---
 
 ## Overview
 
-This guide walks you through enabling observability and monitoring in the Vercel AI SDK and streaming that data to SigNoz Cloud using OpenTelemetry. By the end of this setup, you'll be able to monitor AI-related function calls like generateText() or generateStream()—including request durations, inputs, outputs, and custom metadata—directly within SigNoz.
+This guide walks you through enabling observability and monitoring in the Vercel AI SDK and streaming that data to SigNoz using OpenTelemetry. By the end of this setup, you'll be able to monitor AI-related function calls like generateText() or generateStream()—including request durations, inputs, outputs, and custom metadata—directly within SigNoz.
 
 Instrumenting your AI workflows with telemetry helps you observe performance, debug latency, and trace AI interactions end-to-end across your Next.js application. This is especially valuable when building production-grade AI features where visibility into model behavior and user interactions is critical.
 
@@ -18,8 +18,10 @@ You can explore our example Vercel AI SDK chatbot, which includes observability/
 
 - Next.js app
 - Vercel AI SDK integrated into the app
-- [SigNoz Cloud Account](https://signoz.io/teams/)
-- SigNoz Ingestion Key
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
+- Network access from your app to the chosen SigNoz endpoint
 
 ## Instrument your Next.js application
 
@@ -36,36 +38,34 @@ npm install @vercel/otel @opentelemetry/api
 **Step 2.** Update **`next.config.mjs`** to include instrumentationHook
 
 > This step is only needed when using NextJs 14 and below
-> 
 
 ```jsx
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	// include instrumentationHook experimental feature
-	experimental: {
-		instrumentationHook: true,
-	},
-};
-export default nextConfig;
+  // include instrumentationHook experimental feature
+  experimental: {
+    instrumentationHook: true,
+  },
+}
+export default nextConfig
 ```
 
 **Step 3.** Create **`instrumentation.ts`** file(in root project directory)
 
 ```jsx
-import { registerOTel, OTLPHttpJsonTraceExporter } from '@vercel/otel';
+import { registerOTel, OTLPHttpJsonTraceExporter } from '@vercel/otel'
 // Add otel logging
-import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api'
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR) // set diaglog level to DEBUG when debugging
 export function register() {
   registerOTel({
     serviceName: '<service_name>',
     traceExporter: new OTLPHttpJsonTraceExporter({
-        url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
-        headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
+      url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+      headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
     }),
-  });
+  })
 }
-
 ```
 
 - **`<service_name>`** is the name of your service
@@ -73,7 +73,12 @@ export function register() {
 - Replace **`<your-ingestion-key>`** with your SigNoz [**ingestion key**](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 > The instrumentation file should be in the root of your project and not inside the app or pages directory. If you're using the src folder, then place the file inside src alongside pages and app.
-> 
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
 
 Your Next.js app should be properly instrumented now.
 
@@ -85,17 +90,22 @@ Run your Next.js application in development mode:
 npm run dev
 ```
 
-In your terminal, you should see output from OpenTelemetry when the application starts, confirming that the instrumentation.ts file was loaded correctly. 
+In your terminal, you should see output from OpenTelemetry when the application starts, confirming that the instrumentation.ts file was loaded correctly.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/vercel/vercel-run-output.webp" alt="Terminal output showing OpenTelemetry initialization"/>
-    <figcaption><i>Output showing OpenTelemetry initialization when running your application</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/llm/vercel/vercel-run-output.webp"
+    alt="Terminal output showing OpenTelemetry initialization"
+  />
+  <figcaption>
+    <i>Output showing OpenTelemetry initialization when running your application</i>
+  </figcaption>
 </figure>
 
 To see detailed trace export logs, you can temporarily set the DiagLogLevel to DEBUG in instrumentation.ts:
 
 ```jsx
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG)
 ```
 
 ## Enable Telemetry for Vercel AI SDK
@@ -113,7 +123,7 @@ const result = await generateText({
   model: openai('gpt-4-turbo'),
   prompt: 'Write a short story about a cat.',
   experimental_telemetry: { isEnabled: true },
-});
+})
 ```
 
 When telemetry is enabled, you can also control whether you want to record the input values and the output values for the function. By default, both are enabled. You can disable them by setting the `recordInputs` and `recordOutputs` options to `false`.
@@ -140,7 +150,7 @@ const result = await generateText({
       someOtherThing: 'other-value',
     },
   },
-});
+})
 ```
 
 ## Custom Tracer
@@ -148,7 +158,7 @@ const result = await generateText({
 You may provide a `tracer` which must return an OpenTelemetry `Tracer`. This is useful in situations where you want your traces to use a `TracerProvider` other than the one provided by the `@opentelemetry/api` singleton.
 
 ```jsx
-const tracerProvider = new NodeTracerProvider();
+const tracerProvider = new NodeTracerProvider()
 const result = await generateText({
   model: openai('gpt-4-turbo'),
   prompt: 'Write a short story about a cat.',
@@ -156,31 +166,39 @@ const result = await generateText({
     isEnabled: true,
     tracer: tracerProvider.getTracer('ai'),
   },
-});
+})
 ```
 
-Your Vercel AI SDK commands should now automatically emit traces, spans, and events. You can find more details on the types of spans and events generated [here](https://ai-sdk.dev/docs/ai-sdk-core/telemetry#collected-data). 
+Your Vercel AI SDK commands should now automatically emit traces, spans, and events. You can find more details on the types of spans and events generated [here](https://ai-sdk.dev/docs/ai-sdk-core/telemetry#collected-data).
 
-Finally, you should be able to view this data in Signoz Cloud under the traces tab:
+Finally, you should be able to view this data in SigNoz under the traces tab:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/vercel/vercel-traces-view.webp" alt="Traces View"/>
-    <figcaption><i>Traces of your Vercel AI Application</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/vercel/vercel-traces-view.webp" alt="Traces View" />
+  <figcaption>
+    <i>Traces of your Vercel AI Application</i>
+  </figcaption>
 </figure>
 
 If you click on any span, you can see the detailed trace of which it is a part of.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/vercel/vercel-traces-detailed-view.webp" alt="Detailed Traces View"/>
-    <figcaption><i>Detailed Trace view of your Vercel AI Application</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/vercel/vercel-traces-detailed-view.webp" alt="Detailed Traces View" />
+  <figcaption>
+    <i>Detailed Trace view of your Vercel AI Application</i>
+  </figcaption>
 </figure>
-
 
 ## Dashboard
 
 You can also check out our custom Vercel AI SDK dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard/) which provides specialized visualizations for monitoring your AI applications. The dashboard includes pre-built charts and metrics specifically tailored for Vercel AI SDK telemetry data, along with import instructions to get started quickly.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard.webp" alt="Vercel AI SDK Dashboard"/>
-    <figcaption><i>Vercel AI SDK Dashboard</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard.webp"
+    alt="Vercel AI SDK Dashboard"
+  />
+  <figcaption>
+    <i>Vercel AI SDK Dashboard</i>
+  </figcaption>
 </figure>

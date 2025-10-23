@@ -58,30 +58,6 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'category',
-        label: 'Breaking Changes',
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            label: 'Breaking Changes in v0.76',
-            route: '/docs/overview/breaking-changes/breaking-changes-0.76',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        label: "What's New",
-        isExpanded: false,
-        items: [
-          {
-            type: 'doc',
-            label: 'Changelog of v0.76',
-            route: '/docs/overview/whats-new/changelog-0.76',
-          },
-        ],
-      },
-      {
         type: 'doc',
         label: "What's Coming",
         route: '/docs/roadmap',
@@ -2604,6 +2580,23 @@ const docsSideNav = [
             label: 'Troubleshooting',
           },
         ],
+      },
+      {
+        label: 'Self-Host SigNoz',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/ingestion/self-hosted/overview',
+            label: 'Overview',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/ingestion/cloud-vs-self-hosted',
+        label: 'Cloud vs Self-Hosted',
       },
     ],
   },
