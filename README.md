@@ -9,33 +9,43 @@
 ## Setting Up Your Development Environment
 
 1. Install NVM if you haven't already:
+
    ```bash
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
    ```
 
 2. Install and use the correct Node.js version by running the following commands in the project directory:
+
    ```bash
    nvm install
    nvm use
    ```
 
 3. Install dependencies:
+
    ```bash
    yarn install
    ```
 
 4. Build the project to ensure there are no errors:
+
    ```bash
    yarn build
    ```
+
    This will create a `build` directory with the production build of the website. Check the output for any errors.
 
 5. Start the development server:
+
    ```bash
    yarn dev
    ```
 
 6. Open your browser and navigate to `http://localhost:3000` to view the website locally.
+
+### Git Hooks
+
+- We use Husky for pre-commit checks. See details in [CONTRIBUTING.md#git-hooks-and-checks](CONTRIBUTING.md#git-hooks-and-checks).
 
 # Contributing
 
@@ -68,7 +78,7 @@ You can do the same for a Category. For example, if you're adding a new category
     type: 'category',
     className: 'new-doc',
     items: [
-      { 
+      {
         ...
       },
     ],
