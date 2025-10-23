@@ -3,8 +3,7 @@ module.exports = {
   async redirects() {
     return [
       { source: '/docs/guide/', destination: '/docs/guides/getting-started/' },
-      { source: '/docs/keep-me/', destination: '/docs/keep-me/' }, // unrelated
+      { source: '/blogs/keep-me/', destination: '/blogs/keep-me-new/' }, // unrelated
     ]
   },
 }
-

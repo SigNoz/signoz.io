@@ -14,6 +14,14 @@ function run(command) {
   }
 }
 
+function normalizeRoute(route) {
+  if (typeof route !== 'string') return route
+  const trimmed = route.trim()
+  if (!trimmed.startsWith('/')) return trimmed
+  const compacted = trimmed.replace(/\/+/g, '/')
+  return compacted.endsWith('/') ? compacted : `${compacted}/`
+}
+
 // Translate docs file path to the corresponding route slug
 function docPathToRoute(docPath) {
   const withoutPrefix = docPath.replace(/^data\/docs\//, '').replace(/\.mdx$/, '')
@@ -34,6 +42,87 @@ function readRedirects() {
     entries.push({ source: match[1], destination: match[2] })
   }
   return entries
+}
+
+function candidateDocPathsFromRoute(route) {
+  // route is normalized and starts with /docs
+  const base = route.split('#')[0].split('?')[0]
+  const slug = base.replace(/^\/docs\/?/, '').replace(/\/$/, '')
+  const file = path.join('data', 'docs', `${slug}.mdx`)
+  const index = path.join('data', 'docs', slug, 'index.mdx')
+  return [file, index]
+}
+
+function docRouteExists(route) {
+  const candidates = candidateDocPathsFromRoute(route)
+  return candidates.some((p) => fs.existsSync(p))
+}
+
+function collectAppRoutes() {
+  const appDir = path.join(process.cwd(), 'app')
+  const staticRoutes = new Set()
+  const dynamicPatterns = []
+
+  function toRouteFromPage(filePath) {
+    const rel = path.relative(appDir, filePath)
+    const parts = rel.split(path.sep)
+    // remove filename
+    parts.pop()
+    // filter out grouping segments like (marketing)
+    const segments = parts.filter((seg) => seg && !(seg.startsWith('(') && seg.endsWith(')')))
+    const route = '/' + segments.join('/') + '/'
+    return normalizeRoute(route)
+  }
+
+  function segmentToRegex(seg) {
+    if (/^\[\[\.\.\.[^\]]+\]\]$/.test(seg)) {
+      return '(?:/.*)?'
+    }
+    if (/^\[\.\.\.[^\]]+\]$/.test(seg)) {
+      return '/.+'
+    }
+    if (/^\[[^\]]+\]$/.test(seg)) {
+      return '/[^/]+'
+    }
+    return '/' + seg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+
+  function toRegexFromRoute(route) {
+    const trimmed = route.replace(/(^\/|\/$)/g, '')
+    if (!trimmed) return new RegExp('^/$')
+    const segs = trimmed.split('/')
+    const pattern = '^' + segs.map(segmentToRegex).join('') + '/$'
+    return new RegExp(pattern)
+  }
+
+  function walk(dir) {
+    if (!fs.existsSync(dir)) return
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name)
+      if (entry.isDirectory()) {
+        walk(full)
+        continue
+      }
+      if (/page\.(tsx?|jsx?|mdx)$/.test(entry.name)) {
+        const route = toRouteFromPage(full)
+        if (/\[(?:\.\.\.)?[^\]]+\]/.test(route)) {
+          dynamicPatterns.push(toRegexFromRoute(route))
+        } else {
+          staticRoutes.add(route)
+        }
+      }
+    }
+  }
+
+  walk(appDir)
+  return { staticRoutes, dynamicPatterns }
+}
+
+function appRouteExists(route, appRoutes) {
+  const { staticRoutes, dynamicPatterns } = appRoutes
+  if (staticRoutes.has(route)) return true
+  return dynamicPatterns.some((re) => re.test(route))
 }
 
 function collectDocMoves(baseRef) {
@@ -121,10 +210,23 @@ function main() {
 
   const redirects = readRedirects()
   const redirectMap = new Map(redirects.map((entry) => [entry.source, entry.destination]))
+  const internalRedirectMap = new Map(
+    redirects
+      .filter(
+        (r) =>
+          typeof r.source === 'string' &&
+          r.source.startsWith('/') &&
+          typeof r.destination === 'string' &&
+          r.destination.startsWith('/')
+      )
+      .map((r) => [normalizeRoute(r.source), normalizeRoute(r.destination)])
+  )
   const { renames, deletions } = collectDocMoves(baseBranch)
 
   const failures = []
   const warnings = []
+  const CHECK_APP_ROUTES = process.env.CHECK_APP_ROUTES === 'true'
+  const appRoutes = CHECK_APP_ROUTES ? collectAppRoutes() : null
 
   renames.forEach(({ oldPath, newPath }) => {
     const oldRoute = docPathToRoute(oldPath)
@@ -143,6 +245,48 @@ function main() {
         `Redirect for '${oldRoute}' points to '${destination}', expected '${newRoute}'. ` +
           'Confirm this is intentional.'
       )
+    }
+  })
+
+  // Validate destination existence for internal redirects
+  redirects.forEach(({ source, destination }) => {
+    if (!destination || typeof destination !== 'string') return
+    const dest = normalizeRoute(destination)
+    if (!dest.startsWith('/')) return // external URL; skip
+    if (dest.startsWith('/docs')) {
+      if (docRouteExists(dest)) return
+      // Follow redirect chains for internal routes (up to 10 hops)
+      const visited = new Set()
+      let current = dest
+      let hop = 0
+      let resolved = false
+      while (hop < 10 && internalRedirectMap.has(current)) {
+        const next = internalRedirectMap.get(current)
+        if (visited.has(next)) {
+          // cycle detected; treat as failure for existence check
+          break
+        }
+        visited.add(next)
+        if (next.startsWith('/docs') && docRouteExists(next)) {
+          resolved = true
+          break
+        }
+        current = next
+        hop += 1
+      }
+      if (!resolved) {
+        failures.push(
+          `Redirect destination not found for '${source}' -> '${dest}' (missing docs file)`
+        )
+      }
+      return
+    }
+    if (CHECK_APP_ROUTES) {
+      if (!appRouteExists(dest, appRoutes)) {
+        failures.push(
+          `Redirect destination not found for '${source}' -> '${dest}' (no matching app route)`
+        )
+      }
     }
   })
 
