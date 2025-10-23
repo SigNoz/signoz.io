@@ -7,8 +7,7 @@ const cp = require('child_process')
 const scriptModulePath = path.join(__dirname, '..', 'scripts', 'check-doc-redirects.js')
 const originalExecSync = cp.execSync
 const originalExit = process.exit
-const RENAME_DIFF =
-  'R100\0data/docs/guide/index.mdx\0data/docs/guides/getting-started.mdx\0'
+const RENAME_DIFF = 'R100\0data/docs/guide/index.mdx\0data/docs/guides/getting-started.mdx\0'
 const DELETE_DIFF = 'D\0data/docs/old-deleted.mdx\0'
 
 function loadScript() {
@@ -257,6 +256,123 @@ test('deletion without redirect exits with failure', (t) => {
   )
 })
 
+test('redirect pointing to missing doc exits with failure', (t) => {
+  const restoreExec = stubExecSync((cmd) => {
+    if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
+      return ''
+    }
+    if (cmd.startsWith('git diff --name-status -z --find-renames HEAD')) {
+      return ''
+    }
+    throw new Error(`Unexpected command: ${cmd}`)
+  })
+  t.after(restoreExec)
+
+  const exitStub = stubProcessExit()
+  t.after(exitStub.restore)
+
+  const restoreEnv = withEnv('GITHUB_BASE_REF', undefined)
+  t.after(restoreEnv)
+
+  const restoreCwd = enterFixture('redirects-missing-destination')
+  t.after(restoreCwd)
+
+  const { main } = loadScript()
+  let thrown
+  assert.throws(() => {
+    try {
+      captureConsole(() => main())
+    } catch (err) {
+      thrown = err
+      throw err
+    }
+  }, /process.exit 1/)
+  assert.ok(thrown)
+  assert.equal(exitStub.wasCalled(), true)
+  assert.equal(exitStub.code(), 1)
+  assert.ok(
+    thrown.capturedLogs.error.some((line) =>
+      line.includes(
+        "Redirect destination not found for '/docs/broken/' -> '/docs/missing-target/' (missing docs file)"
+      )
+    )
+  )
+})
+
+test('chained redirect ending with missing doc exits with failure', (t) => {
+  const restoreExec = stubExecSync((cmd) => {
+    if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
+      return ''
+    }
+    if (cmd.startsWith('git diff --name-status -z --find-renames HEAD')) {
+      return ''
+    }
+    throw new Error(`Unexpected command: ${cmd}`)
+  })
+  t.after(restoreExec)
+
+  const exitStub = stubProcessExit()
+  t.after(exitStub.restore)
+
+  const restoreEnv = withEnv('GITHUB_BASE_REF', undefined)
+  t.after(restoreEnv)
+
+  const restoreCwd = enterFixture('redirects-missing-destination-chain')
+  t.after(restoreCwd)
+
+  const { main } = loadScript()
+  let thrown
+  assert.throws(() => {
+    try {
+      captureConsole(() => main())
+    } catch (err) {
+      thrown = err
+      throw err
+    }
+  }, /process.exit 1/)
+  assert.ok(thrown)
+  assert.equal(exitStub.wasCalled(), true)
+  assert.equal(exitStub.code(), 1)
+  assert.ok(
+    thrown.capturedLogs.error.some((line) =>
+      line.includes(
+        "Redirect destination not found for '/docs/chain-source/' -> '/docs/intermediate/' (missing docs file)"
+      )
+    )
+  )
+})
+
+test('chained redirect resolving to doc passes', (t) => {
+  const restoreExec = stubExecSync((cmd) => {
+    if (cmd.startsWith('git merge-base ')) return 'abc123'
+    if (cmd.startsWith('git diff --name-status -z --find-renames abc123')) {
+      return ''
+    }
+    if (cmd.startsWith('git diff --name-status -z --find-renames HEAD')) {
+      return ''
+    }
+    throw new Error(`Unexpected command: ${cmd}`)
+  })
+  t.after(restoreExec)
+
+  const exitStub = stubProcessExit()
+  t.after(exitStub.restore)
+
+  const restoreEnv = withEnv('GITHUB_BASE_REF', undefined)
+  t.after(restoreEnv)
+
+  const restoreCwd = enterFixture('redirects-chain-resolves')
+  t.after(restoreCwd)
+
+  const { main } = loadScript()
+  const logs = captureConsole(() => main())
+  assert.equal(exitStub.wasCalled(), false)
+  assert.equal(logs.error.length, 0)
+  assert.ok(logs.log.some((line) => line.includes('Doc redirect check passed')))
+})
+
 test('rename with redirect mismatch logs warning but passes', (t) => {
   const restoreExec = stubExecSync((cmd) => {
     if (cmd.startsWith('git merge-base ')) return 'abc123'
@@ -288,9 +404,7 @@ test('rename with redirect mismatch logs warning but passes', (t) => {
       line.includes("Redirect for '/docs/guide/' points to '/docs/legacy/getting-started/'")
     )
   )
-  assert.ok(
-    logs.warn.some((line) => line.includes("expected '/docs/guides/getting-started/'"))
-  )
+  assert.ok(logs.warn.some((line) => line.includes("expected '/docs/guides/getting-started/'")))
   assert.ok(logs.log.some((line) => line.includes('Doc redirect check passed')))
 })
 
