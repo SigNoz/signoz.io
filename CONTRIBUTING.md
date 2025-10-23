@@ -94,7 +94,6 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
   - Use angle-bracket placeholders like `<service-name>`, `<region>`, `<SIGNOZ_INGESTION_KEY>`.
   - Immediately below the snippet, explain what each placeholder means.
 
-
 ## Content Structure
 
 Every doc should be skimmable and actionable.
@@ -103,11 +102,11 @@ Every doc should be skimmable and actionable.
   - Always include and keep current:
     ```yaml
     ---
-    date: 2025-01-15           # YYYY-MM-DD
+    date: 2025-01-15 # YYYY-MM-DD
     id: <unique-id-or-slug>
     title: <Title in Sentence Case>
     description: <1–2 line summary with key terms>
-    tags: [SigNoz Cloud, Self-Host]   # choose both if applicable
+    tags: [SigNoz Cloud, Self-Host] # choose both if applicable
     ---
     ```
   - Use `id` as a stable unique slug (no spaces); update links if it changes.
@@ -116,13 +115,13 @@ Every doc should be skimmable and actionable.
   - `## Overview` – what the doc covers and when to use it.
   - `## Prerequisites` – versions, accounts, keys, cluster access, etc. Include links.
   - `## Steps` or specific setup sections – ordered, with subheadings for clarity.
-  - `## Validate`  – how to confirm it worked (UI path, endpoint, example output).
+  - `## Validate` – how to confirm it worked (UI path, endpoint, example output).
   - `## Troubleshooting` – common issues and fixes (more details below).
 - Explaining commands and code
   - Before each command, explain what it does and where to run it (local shell, container, Kubernetes, CI, etc.).
   - After commands, note expected results and what happens next if relevant.
   - For code/config blocks, annotate with language and filename to improve context:
-    ```markdown
+    ````markdown
     ```yaml:/deploy/docker/otel-collector-config.yaml
     receivers:
       otlp:
@@ -130,9 +129,10 @@ Every doc should be skimmable and actionable.
           http:
             endpoint: 0.0.0.0:4318
     ```
+    ````
   - Highlight specific lines to focus attention using braces after the language identifier. Example: highlight line 4 in a YAML block:
-    
-    ```markdown
+
+    ````markdown
     ```yaml {4}
     service:
         ....
@@ -141,8 +141,11 @@ Every doc should be skimmable and actionable.
             processors: [batch]
             exporters: [otlp]
     ```
-    This renders as:    
+    ````
+
+    This renders as:  
     ![Highlighted line example](public/img/docs/guidelines/code-highlight-example.png)
+
   - Immediately below, explain each critical field and placeholder.
   - Example with placeholders and explanations:
     ```yaml:/deploy/docker/otel-collector-config.yaml
@@ -164,23 +167,40 @@ Every doc should be skimmable and actionable.
   - Prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
   - External links should open in a new tab and preserve security attributes:
     ```mdx
-    <a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">Example</a>
+    <a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">
+      Example
+    </a>
     ```
   - Internal links typically open in the same tab unless the link switches product/app context or interrupts an in-progress task.
   - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
 - Cloud vs Self-Host
   - Add the relevant tags in frontmatter.
-  - Use tabs for divergent instructions:
-    ```mdx
-    <Tabs entityName="plans">
-      <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-      ...
-      </TabItem>
-      <TabItem value="self-host" label="Self-Host">
-      ...
-      </TabItem>
-    </Tabs>
-    ```
+  - Prefer a single flow and include a small info note that links to the comparison page instead of duplicating with tabs.
+  - Use the Cloud vs Self-Hosted comparison doc when a guide only shows one environment and the other only differs by endpoint/auth/TLS: https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud
+  - Drop-in snippets you can copy into guides:
+    - For Cloud-only guides:
+      ```mdx
+      <Admonition type="info">
+        Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint
+        and remove the ingestion key header as shown in
+        <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted">
+          Cloud → Self-Hosted
+        </a>
+        .
+      </Admonition>
+      ```
+    - For Self-Hosted-only guides:
+      ```mdx
+      <Admonition type="info">
+        Using SigNoz Cloud? Most steps are identical. To adapt this guide, point to the Cloud
+        endpoint and add the ingestion key header as shown in
+        <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud">
+          Self-Hosted → Cloud
+        </a>
+        .
+      </Admonition>
+      ```
+  - Only use tabs if instructions materially diverge (e.g., different components/flows), not for small endpoint/header differences.
 - Images and media
   - Store images under `public/img/docs/<topic>/...` and reference as `/img/docs/<topic>/...`.
   - Use the `Figure` component with descriptive `alt` and a concise `caption`.
@@ -197,7 +217,7 @@ Every doc should be skimmable and actionable.
   ```mdx
   <Admonition type="info">Short, actionable note.</Admonition>
   ```
-- Use `Tabs`/`TabItem` to branch by platform, OS, environment, or plan.
+- Use `Tabs`/`TabItem` to branch by platform, OS, or materially different flows. For Cloud vs Self-Host, prefer the drop-in snippet + comparison page.
 - Use numbered steps for procedures and bullets for reference content.
 - Keep headings short and meaningful. Prefer H2 for main sections.
 
@@ -205,9 +225,9 @@ Every doc should be skimmable and actionable.
 
 - Ingestion to SigNoz Cloud endpoints: `https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint`
 - Ingestion keys for SigNoz Cloud: `https://signoz.io/docs/ingestion/signoz-cloud/keys/`
+- Cloud → Self-Hosted anchor: `https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted`
 - OpenTelemetry Collector docs: link the specific receiver/exporter you use.
- - OTel Collector configuration guide: `https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/`
-
+- OTel Collector configuration guide: `https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/`
 
 ### URLs and redirects
 
@@ -229,6 +249,7 @@ Every doc should be skimmable and actionable.
     ]
   }
   ```
+
 - Keep trailing slashes consistent (this repo sets `trailingSlash: true`).
 - Update internal links and the sidebar entry in `constants/docsSideNav.ts` when a doc path changes.
 
@@ -252,7 +273,7 @@ Every doc should be skimmable and actionable.
 - Add a `## Troubleshooting` section with symptoms, causes, exact fixes, and verification. Provide as much context as possible to make it clear to readers where exactly the troubleshooting instructions are applicable
   - Include network/endpoint checks, auth/ingestion key pitfalls, TLS notes, and version mismatches.
   - Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO (e.g., "Why don’t I see traces for <service-name>?", or include the exact error message).
- - Don’t stop at “data sent.” Close the loop with next steps: link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
+- Don’t stop at “data sent.” Close the loop with next steps: link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
 
 ### Troubleshooting docs
 
@@ -264,7 +285,7 @@ Every doc should be skimmable and actionable.
   - Verification (what success looks like)
 - Include logs/commands snippets and known edge cases.
 - Provide links to relevant product docs and Send Data docs.
- - Titles and headings: use question-style titles or include the exact error/topic to improve search and SEO. Prefer exact error strings and component names (SDK/receiver/exporter) in headings.
+- Titles and headings: use question-style titles or include the exact error/topic to improve search and SEO. Prefer exact error strings and component names (SDK/receiver/exporter) in headings.
 
 ### User guides (how-to, tasks)
 
@@ -286,7 +307,7 @@ Every doc should be skimmable and actionable.
 ## PR Checklist
 
 - [ ] Frontmatter includes `date`, `id`, `title`, `description`, and appropriate `tags`.
-- [ ] Cloud/Self-Host instructions are clearly distinguished (tabs when needed).
+- [ ] If the guide is Cloud-only or Self-Hosted-only, include the Cloud vs Self-Hosted drop-in snippet linking to the comparison page; use tabs only if steps materially diverge.
 - [ ] Commands explain what they do and where to run them.
 - [ ] Code/config snippets are annotated and explained; placeholders are defined.
 - [ ] Links: internal use absolute `https://signoz.io/...`; external open in a new tab with proper attributes.
@@ -351,6 +372,7 @@ git checkout -b add-new-content
 ### Step 5: Create Your Content (Blog or Docs)
 
 - Blog
+
   1. Navigate to `data/blog`:
      ```bash
      cd data/blog
@@ -380,6 +402,7 @@ git checkout -b add-new-content
 ### Step 6: Add Images
 
 - Blog images
+
   - Place under `public/img/blog/<YYYY-MM>/` (create the monthly folder if needed).
   - Use WebP format (`.webp`) whenever possible. Conversion tips: https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74
 
