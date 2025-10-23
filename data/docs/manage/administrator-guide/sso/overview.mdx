@@ -1,0 +1,43 @@
+---
+date: 2025-10-21
+id: sso-overview
+tags: [SigNoz Cloud, Self-Host]
+title: Single Sign on (SSO) - Overview
+---
+
+SigNoz supports single sign-on (SSO), allowing users to authenticate through an external identity provider (IdP) instead of maintaining SigNoz-specific passwords.
+
+## What’s supported
+
+- **SAML 2.0**: Available on `SigNoz Cloud` and `Enterprise Self-Hosted`
+- **OIDC**: Available on `SigNoz Cloud` and `Enterprise Self-Hosted`
+- **Google Workspace (OAuth2)**: Available on `Community Edition`, `SigNoz Cloud` and `Enterprise Self-Hosted`
+
+## How SSO works in SigNoz
+
+At a high level, you connect your organization’s email domain to an IdP, and SigNoz defers authentication to that IdP.
+
+1. **Authenticated Domain**: You register a domain like `example.com` under `Settings → Organization Settings → Authenticated Domains`.
+2. **Choose Method**: For that domain, select SAML, OIDC, or Google (for Workspace) and provide the IdP details.
+3. **Just‑in‑Time access**: Users with emails on that domain can sign in via your IdP without a prior invite. Role assignment can then be managed inside SigNoz by admins.
+4. **SP‑initiated**: User goes to SigNoz login page (`<your-instance-url>/login`), enters email, and is redirected to the IdP.
+5. **IdP‑initiated**: This is not supported yet.
+
+## Setup at a glance
+
+- Go to `Settings → Organization Settings → Authenticated Domains`
+- Add your organization’s email domain (e.g., `example.com`)
+- Click **Configure SSO** and choose a method
+- Save and test from an incognito window
+- Optionally toggle **Enforce SSO** for that domain
+- If you encounter any issues, you can temporarily use password authentication by appending `?password=Y` to the login URL, e.g. `<your-instance-url>/login?password=Y`.
+
+## Next steps
+
+Looking for step-by-step setup? See the user guides below:
+
+- [Google Workspace](/docs/manage/administrator-guide/sso/user-guides/sso-google)
+- [SAML with Microsoft Entra ID](/docs/manage/administrator-guide/sso/user-guides/saml-microsoft-entra)
+- [SAML with Okta](/docs/manage/administrator-guide/sso/user-guides/saml-okta)
+- [SAML with AWS IAM Identity Center (AWS SSO)](/docs/manage/administrator-guide/sso/user-guides/saml-awsso)
+- [SAML with JumpCloud](/docs/manage/administrator-guide/sso/user-guides/saml-jumpcloud)
