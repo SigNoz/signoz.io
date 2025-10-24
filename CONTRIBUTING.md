@@ -163,6 +163,7 @@ Every doc should be skimmable and actionable.
     Replace the following placeholders:
     - `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
     - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
+
 - Hyperlinks
   - Prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
   - External links should open in a new tab and preserve security attributes:
@@ -372,7 +373,6 @@ git checkout -b add-new-content
 ### Step 5: Create Your Content (Blog or Docs)
 
 - Blog
-
   1. Navigate to `data/blog`:
      ```bash
      cd data/blog
@@ -402,7 +402,6 @@ git checkout -b add-new-content
 ### Step 6: Add Images
 
 - Blog images
-
   - Place under `public/img/blog/<YYYY-MM>/` (create the monthly folder if needed).
   - Use WebP format (`.webp`) whenever possible. Conversion tips: https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74
 
