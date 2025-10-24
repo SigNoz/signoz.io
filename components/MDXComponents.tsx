@@ -57,6 +57,7 @@ import DashboardActions from './Dashboards/DashboardActions'
 import KubernetesDashboardsListicle from './Dashboards/KubernetesDashboardsListicle'
 import APMDashboardsListicle from './Dashboards/APMDashboardsListicle'
 import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsListicle'
+import ProductFeatureShowcase from './ProductFeatureShowcase/ProductFeatureShowcase'
 
 import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
 import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
@@ -124,4 +125,5 @@ export const components: MDXComponents = {
   OtelCollectorFlow,
   CollectionAgentsListicle,
   ResponseTimeVisualizer,
+  ProductFeatureShowcase,
 }

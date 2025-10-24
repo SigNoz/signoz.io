@@ -11,17 +11,37 @@ interface FigureProps {
   caption: string
   link?: string
   sourceText?: string
+  className?: string
+  figureClassName?: string
+  captionClassName?: string
 }
 
-export default function Figure({ src, alt, caption, link, sourceText }: FigureProps) {
+export default function Figure({
+  src,
+  alt,
+  caption,
+  link,
+  sourceText,
+  className,
+  figureClassName,
+  captionClassName,
+}: FigureProps) {
   return (
     <Zoom>
-      <figure>
-        <img src={src} alt={alt} />
-          <figcaption>
-              <i>{caption} {link && sourceText && (
-                <> Source: <a href={link} target="_blank" rel="noopener noreferrer">{sourceText}</a></>
-              )}</i>
+      <figure className={figureClassName}>
+        <img src={src} alt={alt} className={className} />
+        <figcaption className={captionClassName}>
+          <i>
+            {caption}{' '}
+            {link && sourceText && (
+              <>
+                Source:{' '}
+                <a href={link} target="_blank" rel="noopener noreferrer">
+                  {sourceText}
+                </a>
+              </>
+            )}
+          </i>
         </figcaption>
       </figure>
     </Zoom>
