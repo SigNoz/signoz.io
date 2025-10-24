@@ -152,15 +152,19 @@ Every doc should be skimmable and actionable.
     - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
 
 - Hyperlinks
+
   - Prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
   - External links should open in a new tab and preserve security attributes:
+
     ```mdx
     <a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">
       Example
     </a>
     ```
+
   - Internal links typically open in the same tab unless the link switches product/app context or interrupts an in-progress task.
   - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
+
 - Cloud vs Self-Host
   - Add the relevant tags in frontmatter.
   - Prefer a single flow and include a small info note that links to the comparison page instead of duplicating with tabs.
