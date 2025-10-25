@@ -6,7 +6,7 @@ title: Express OpenTelemetry Instrumentation
 description: Send events from your Express application to SigNoz
 hide_table_of_contents: true
 ---
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
+
 import VersionPin from '@/components/shared/nodejs-version-pin.mdx'
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your express applications and view your application traces in SigNoz.
@@ -1290,16 +1290,19 @@ Validate your traces in SigNoz:
 2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
 3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
 
-{/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
-{/* 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/express_application_services_list.webp" alt="Nestjs Application in the list of services being monitored in SigNoz"/>
-    <figcaption><i>Express Application in the list of services being monitored in SigNoz</i></figcaption>
-</figure> */}
 
+## Collecting Logs from Your Node.js Application
 
-{/* If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide. */}
+Express doesn’t include structured logging out of the box, but popular libraries like Winston and Pino make it easy to add structured logging.
 
+To forward your logs to SigNoz, follow these guides:
+
+- [Send Pino logs to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs/)
+- [Send Winston logs to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/)
+
+## Correlate Traces with Logs
+
+Checkout this guide on [correlating traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/).
 
 ### Using a specific auto-instrumentation library
 
@@ -1313,78 +1316,6 @@ npm install --save @opentelemetry/instrumentation-express
 In the above case, you will have to install packages for all the components that you want to instrument with OpenTelemetry individually. You can find detailed instructions [here](https://signoz.io/docs/instrumentation/javascript/#using-a-specific-auto-instrumentation-library).
 </Admonition>
 
-{/* ## Instrumentation Modules for Databases
-
-The `@opentelemetry/auto-instrumentations-node` can inititialize instrumentation for popular databases. Hence it’s recommended to [get started](#using-the-all-in-one-auto-instrumentation-library) with it.
-
-But if you are using [specific auto-instrumentation packages](#using-a-specific-auto-instrumentation-library), here’s a list of packages for popular databases.
-
-### MongoDB instrumentation
-
-<Admonition>
-If you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific modules for your database.
-</Admonition>
-
-**Supported Versions**
-
-• `>=3.3 <5`
-
-Module that provides automatic instrumentation for MongoDB:
-
-```jsx
-npm install --save @opentelemetry/instrumentation-mongodb
-```
-
-<Admonition>
-Refer here for sample [NodeJs express application with MongoDB.](https://github.com/SigNoz/sample-nodejs-app/tree/mongodb)
-</Admonition>
-
-### Redis Instrumentation
-<Admonition>
-If you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific modules for your database.
-</Admonition>
-
-**Supported Versions**
-
-This package supports `redis@^2.6.0` and `redis@^3.0.0`
-For version `redis@^4.0.0`, please use `@opentelemetry/instrumentation-redis-4`
-
-```jsx
-npm install --save @opentelemetry/instrumentation-redis
-```
-
-### MySQL Instrumentation
-
-<Admonition>
-If you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific modules for your database.
-</Admonition>
-
-**Supported Versions**
-
-• `2.x`
-
-Module that provides automatic instrumentation for MySQL:
-
-```jsx
-npm install --save @opentelemetry/instrumentation-mysql
-```
-
-### Memcached Instrumentation
-
-<Admonition>
-If you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific modules for your database.
-</Admonition>
-
-**Supported Versions**
-
-- `>=2.2`
-
-Module that provides automatic instrumentation for Memcached:
-
-```jsx
-npm install --save @opentelemetry/instrumentation-memcached
-``` 
-*/}
 
 ## Troubleshooting your installation
 
