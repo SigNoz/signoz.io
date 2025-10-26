@@ -74,18 +74,26 @@ Let us now proceed to the OTel Collector installation:
 Step 1: Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.135.0/otelcol-contrib_0.135.0_linux_amd64.tar.gz
 ```
 
 Step 2: Extract otel-collector tar.gz to the otelcol-contrib folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.135.0_linux_amd64.tar.gz -C otelcol-contrib
 ```
 
 Step 3: Create `config.yaml` in the folder `otelcol-contrib` with the below content in it. Replace `<region>` with the appropriate SigNoz Cloud region. Replace `SIGNOZ_INGESTION_KEY` with what is provided by SigNoz:
 
+<Admonition type="note">
+Note: The googlecloudpubsub receiver’s encoding was updated from the deprecated raw_text to
+text_encoding. This configuration has been tested and works with otelcol-contrib v0.135.0.
+</Admonition>
+
 ```yaml
+extensions:
+  text_encoding:
+    encoding: utf-8
 receivers:
   otlp:
     protocols:
@@ -96,7 +104,7 @@ receivers:
   googlecloudpubsub:
     project: <gcp-project-id>
     subscription: projects/<gcp-project-id>/subscriptions/<pubsub-topic's-subscription>
-    encoding: raw_text
+    encoding: text_encoding
 processors:
   batch: {}
   resource/env:
@@ -112,6 +120,7 @@ exporters:
     headers:
       "signoz-ingestion-key": "<SigNoz-Key>"
 service:
+  extensions: [text_encoding]
   pipelines:
     traces:
       receivers: [otlp]
@@ -234,18 +243,26 @@ Let us now proceed to the OTel Collector installation:
 Step 1: Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.135.0/otelcol-contrib_0.135.0_linux_amd64.tar.gz
 ```
 
 Step 2: Extract otel-collector tar.gz to the otelcol-contrib folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.135.0_linux_amd64.tar.gz -C otelcol-contrib
 ```
 
 Step 3: Create `config.yaml` in the folder `otelcol-contrib` with the below content in it. We are using the `clickhouselogsexporter` in this case.
 
+<Admonition type="note">
+Note: The googlecloudpubsub receiver’s encoding was updated from the deprecated raw_text to
+text_encoding. This configuration has been tested and works with otelcol-contrib v0.135.0.
+</Admonition>
+
 ```yaml
+extensions:
+  text_encoding:
+    encoding: utf-8
 receivers:
   otlp:
     protocols:
@@ -256,7 +273,7 @@ receivers:
   googlecloudpubsub:
     project: <gcp-project-id>
     subscription: projects/<gcp-project-id>/subscriptions/<pubsub-topic's-subscription>
-    encoding: raw_text
+    encoding: text_encoding
 processors:
   batch: {}
   resource/env:
@@ -276,6 +293,7 @@ exporters:
       max_interval: 30s
       max_elapsed_time: 300s
 service:
+  extensions: [text_encoding]
   pipelines:
     logs:
       receivers: [otlp, googlecloudpubsub]
