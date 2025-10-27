@@ -1,0 +1,255 @@
+---
+date: 2025-10-27
+id: meter-alerts
+tags: [SigNoz Cloud, Self-Host]
+title: Meter Alerts
+description: Proactively set up alerts on observability costs and ingestion limits in SigNoz Cost Meter. Avoid surprises and stay in control of your budgets for logs, metrics, and traces.
+---
+
+Meter Alerts enable you to monitor and manage your observability costs by creating alert rules for total spend, per-signal spend, or limits by dimensions such as service, environment, or ingestion key. This proactive approach helps you maintain control over your observability budget and identify unexpected cost spikes before they impact your organization.
+
+---
+
+## Why Set Up Meter Alerts?
+
+- **Prevent Budget Overruns:** Receive notifications when costs approach or exceed your budgeted values for a month or specific time window
+- **Monitor Signal Breakdown:** Stay informed about which signals (logs, traces, metrics) or services are driving increased spend
+- **Ensure Fair Usage:** Prevent specific teams, services, or ingestion keys from consuming more than their allocated cost share
+- **Proactive Cost Management:** Take action before costs spiral out of control
+
+---
+
+## Common Use Cases
+
+- **Total Observability Spend Alert:** Get an alert when your monthly or quarterly observability spend approaches or exceeds your planned budget
+- **Signal-Specific Spend Alert:** Trigger alerts for individual signals when they cross defined thresholds (e.g., log ingestion costs exceeding $X)
+- **Service/Environment Spend Alert:** Monitor spend on a per-service or per-environment basis (e.g., alert if 'payment-service' exceeds $X this month)
+- **Ingestion Key Limit Alert:** Receive notifications when an ingestion key approaches its allocated quota
+
+---
+
+## How Meter Alerts Work
+
+SigNoz Meter Alerts leverage the same flexible alerting engine used for other monitoring signals in SigNoz. Alerts are triggered when a meter metric crosses a specific threshold over a configured evaluation window.
+
+### Alert-Compatible Metrics
+
+You can set up alerts on any of the following meter metrics:
+
+| **Metric**                            | **Description**                         |
+| ------------------------------------- | --------------------------------------- |
+| `signoz.meter.log.count`              | Total number of log records ingested    |
+| `signoz.meter.log.size`               | Total size of logs ingested (in bytes)  |
+| `signoz.meter.span.count`             | Total number of spans ingested          |
+| `signoz.meter.span.size`              | Total size of spans ingested (in bytes) |
+| `signoz.meter.metric.datapoint.count` | Number of metric datapoints ingested    |
+
+Metrics can be filtered or grouped by labels including `service.name`, `deployment.environment`, `host.name`, and `signoz.workspace.key.id` for granular and targeted alerting.
+
+---
+
+## Setting Up a Meter Alert
+
+1. **Go to Alerts:**
+
+   - Navigate to the **Alerts** section in your SigNoz UI.
+   - Click on `New Alert` and then select `Try the new experience`.
+   - Click on `Metric Based Alerts`.
+
+2. **Build Your Query:**
+
+   - In the query builder, select the source as `meter` under `Metrics` signal type.
+   - Then select the relevant meter metric (for example, `signoz.meter.log.size`).
+   - (Optional) Add filters by `service.name`, `environment`, or any label to scope your alert.
+
+3. **Set Thresholds and Conditions:**
+
+   - Specify the threshold (absolute value, rate, or percent change).
+   - Select the threshold to be `In Total` as we want to sum usage over the last X window.
+   - Select the evaluation window as `Cumulative` and then `Current Day` or `Current Month` depending on the timeframe of interest.
+
+4. **Configure Notifications:**
+
+   - Attach your preferred notification channels (email, Slack, PagerDuty, etc.)
+   - Craft a generic or customized notification message.
+
+5. **Review and Save:**
+   - Give the alert a descriptive name, Example: “Monthly Log Ingestion Limit”.
+   - Save and enable the alert.
+
+---
+
+## Examples
+
+### Example 1: Alert on Monthly Log Costs Exceeding $500
+
+• Find the per-GB logs price according to your retention settings by navigating to the billing section
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/alerts/usecase-1.1.png"
+    alt="Per GB logs price from billing page"
+  />
+  <figcaption>
+    <i>Fetch the price of logs (per GB) from billing page</i>
+  </figcaption>
+</figure>
+
+• Select the `signoz.meter.log.size` meter metric with `timeAggregation` as `Increase`
+• Add a formula to calculate cost: `(A / 1e9) * (cost per GB)`
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/alerts/usecase-1.2.png"
+    alt="Query for logs ingestion size with formula for calculating the price"
+  />
+  <figcaption>
+    <i>Query for logs ingestion size with formula for calculating the price</i>
+  </figcaption>
+</figure>
+
+• Select the formula in the threshold condition with `In Total`
+• Select `Cumulative` Window alert with timerange as `Current Month`
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/alerts/usecase-1.3.png"
+    alt="Threshold condition for monthly log billing"
+  />
+  <figcaption>
+    <i>Threshold condition for monthly log billing</i>
+  </figcaption>
+</figure>
+
+• Select the notification channel and save the alert
+
+### Example 2: Alert on Monthly Total Costs Exceeding $1000
+
+• Find the per-GB price for logs and spans, and per-million data point price for metrics on the billing page
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/alerts/usecase-2.1.png"
+    alt="Per GB price for logs and spans, per million data point price for metrics from billing page"
+  />
+  <figcaption>
+    <i>
+      Per GB price for logs and spans, per million data point price for metrics from billing page
+    </i>
+  </figcaption>
+</figure>
+
+• Select `signoz.meter.log.size` with `timeAggregation` as `Increase`
+• Repeat for `signoz.meter.span.size` and `signoz.meter.metric.datapoint.count`
+• Add a formula to calculate total cost:
+
+- Logs: `(A / 1e9) * (cost per GB of logs)`
+- Spans: `(B / 1e9) * (cost per GB of spans)`
+- Metrics: `(C / 1e6) * (cost per million data points)`
+- Total: Sum all three components
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/alerts/usecase-2.2.png"
+    alt="Query for total ingestion with formula for calculating the price"
+  />
+  <figcaption>
+    <i>Query for total ingestion with formula for calculating the price</i>
+  </figcaption>
+</figure>
+
+• Select the formula in the threshold condition with `In Total`
+• Select `Cumulative` Window alert with timerange as `Current Month`
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/alerts/usecase-2.3.png"
+    alt="Threshold condition for monthly billing"
+  />
+  <figcaption>
+    <i>Threshold condition for monthly billing</i>
+  </figcaption>
+</figure>
+
+• Select the notification channel and save the alert
+
+### Example 3: Alert on Ingestion Key Approaching Daily Quota
+
+• Navigate to the ingestion keys page and expand the ingestion key of interest
+• Click the `bell` icon next to the daily limit for the signal you want to monitor
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/cost-meter/alerts/usecase-3.1.png" alt="Ingestion Keys Page for alerting" />
+  <figcaption>
+    <i>Ingestion Keys Page for alerting</i>
+  </figcaption>
+</figure>
+
+• You'll be navigated to the alerts page with the query pre-filled with all necessary details
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/alerts/usecase-3.2.png"
+    alt="Query for ingestion key limits based alert"
+  />
+  <figcaption>
+    <i>Query for ingestion key limits based alert</i>
+  </figcaption>
+</figure>
+
+• Set a descriptive name for the alert, configure your notification channel, and save
+
+### Example 4: Alert if Any Service Ingests Over 1 Million Spans in a Day
+
+• Select `signoz.meter.span.count` metric and group by `service.name`
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/cost-meter/alerts/usecase-4.1png" alt="Query for span count per service" />
+  <figcaption>
+    <i>Query for span count per service</i>
+  </figcaption>
+</figure>
+
+• Set threshold to 1,000,000 with `In Total` aggregation
+• Configure evaluation window as `Cumulative` with `Current Day`
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/cost-meter/alerts/usecase-4.2.png"
+    alt="Threshold for any service exceeding 1M spans ina day"
+  />
+  <figcaption>
+    <i>Threshold for any service exceeding 1M spans ina day</i>
+  </figcaption>
+</figure>
+
+• Set up notifications and save
+
+---
+
+## Best Practices
+
+- **Align Alerts with Budgets:** Set alert thresholds just below your actual budget limit to allow time for action.
+- **Review Regularly:** Periodically review and adjust alert thresholds and conditions based on changing usage patterns.
+
+---
+
+## Troubleshooting
+
+- **No Meter Data Shown:** Ensure your query time range is larger than 1 hour. Meter data is aggregated hourly.
+- **No Alert Triggered:** Confirm your condition and threshold accurately reflect the underlying metric’s scale (bytes, records, spans, etc.).
+- **Too Many Alerts:** Refine filters and consider moving from absolute to relative (% change) thresholds.
+
+---
+
+## Additional Resources
+
+- [Cost Meter Overview](https://signoz.io/docs/cost-meter/overview/)
+- [Meter Explorer Guide](https://signoz.io/docs/cost-meter/meter-explorer/)
+- [Alerting in SigNoz](https://signoz.io/docs/alerts/)
+
+---
+
+For support, reach out on our [community forum](https://github.com/SigNoz/signoz/discussions) or join the [SigNoz Slack](https://signoz.io/slack/).
+
+**Remember:** Be proactive, not reactive—use Meter Alerts to stay in control of your observability spend!
