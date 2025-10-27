@@ -119,6 +119,11 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
 }
 ```
 
+#### Key Observations
+
+- Fields like `message` and `timestamp` are now accessible in `attributes.parsed_body`.
+- The original `body` field still has the raw JSON string.
+
 ## Step 2: Move Processor - Extract the Message Field to body
 
 Now that the message is available at `attributes.parsed_body.message`, we can move it to the top-level body to clearly indicate that this is the main log message. This is an optional step and you can skip it if you want.
@@ -187,6 +192,11 @@ Now that the message is available at `attributes.parsed_body.message`, we can mo
 }
 ```
 
+#### Key Observations
+
+- The main log message is now in `body`.
+- `attributes.parsed_body.message` has been removed because Move transfers data rather than copying.
+
 ## Step 3: Timestamp Parser - Extract and Map Timestamp Information
 
 Now, we'll use the timestamp parser to extract the timestamp information from the `attributes.parsed_body.timestamp` field.
@@ -235,7 +245,7 @@ The format `%Y-%m-%dT%H:%M:%SZ` uses strptime directives to match the timestamp 
 - `%S` - 2-digit second (00-59)
 - `Z` - Literal character 'Z' indicating UTC timezone
 
-For the example timestamp 2025-10-27T05:30:17Z, this format tells SigNoz to parse:
+For the example timestamp `2025-10-27T05:30:17Z`, this format parses to:
 
 - Year: 2025
 - Month: 10 (October)
@@ -280,6 +290,10 @@ You can learn more about timestamp strptime format in the [strptime format guide
   "trace_flags": 0
 }
 ```
+
+#### Key Observations:
+
+- `timestamp` field has been updated with the parsed value from `attributes.parsed_body.timestamp`.
 
 ## Step 4 (Optional): Clean Up - Organize Final Structure
 
