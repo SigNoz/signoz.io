@@ -1,8 +1,8 @@
-import React from 'react';
-import Button from '@/components/ui/Button';
-import { BookOpen } from 'lucide-react';
-import { ArrowRight } from 'lucide-react';
-import Image from 'next/image';
+import React from 'react'
+import Button from '@/components/ui/Button'
+import { BookOpen } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 
 const CTASection = () => {
   return (
@@ -13,17 +13,17 @@ const CTASection = () => {
           <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-250px)] bg-no-repeat">
             <div className="flex flex-col gap-16">
               <div className="flex flex-col gap-12">
-                <p className="mb-0 mt-20 text-center text-4xl font-bold">
+                <h2 className="mb-0 mt-20 text-center font-bold">
                   Get started with <br /> SigNoz Cloud today
-                </p>
+                </h2>
                 <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                  <Button to="/teams/" variant={"default"} rounded={"full"}>
+                  <Button to="/teams/" variant={'default'} rounded={'full'}>
                     <span className="flex-center">
                       Sign up for SigNoz
                       <ArrowRight size={14} />
                     </span>
                   </Button>
-                  <Button to="/docs/introduction/" variant="secondary" rounded={"full"}>
+                  <Button to="/docs/introduction/" variant="secondary" rounded={'full'}>
                     <span className="flex-center">
                       <BookOpen size={14} />
                       Read Documentation
@@ -45,7 +45,7 @@ const CTASection = () => {
         </section>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CTASection;
+export default CTASection
