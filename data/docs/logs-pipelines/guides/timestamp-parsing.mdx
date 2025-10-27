@@ -3,6 +3,7 @@ date: 2025-10-26
 id: log-pipelines-timestamp-parsing
 tags: [SigNoz Cloud, Self-Host]
 title: Parse Timestamp Information from Your Logs
+description: Learn how to extract and parse timestamp data from logs using SigNoz Logs Pipelines. Step-by-step guide to convert timestamps into standard OpenTelemetry format with JSON parser, timestamp parser, and strptime format configuration.
 ---
 
 ## Overview
@@ -11,7 +12,7 @@ Logs often contain timestamps in various formats, sometimes embedded within the 
 
 ## Example Log
 
-Throughout this guide, we'll reference the following example raw log entry, where the timestamp is part of the `timestamp` field:
+Throughout this guide, we'll reference the following example raw log entry, which includes a `timestamp` field:
 
 ```json
 {
@@ -57,13 +58,13 @@ Here's how the log should look after we apply our pipelines.
 
 ## Steps to Parse JSON and Extract Timestamp
 
-We'll use two processors in SigNoz Logs Pipeline to transform the example log in desired format:
+We'll use three processors in the SigNoz Logs Pipeline to transform the example log into the desired format:
 
 1. **JSON Parser:** Convert the JSON in `body` into structured fields in `attributes`.
 2. **Move Processor:** Move the `message` field from the parsed JSON into `body`.
 3. **Timestamp Parser:** Extract and map timestamp information from the `timestamp` field.
 
-## Step 1: JSON Parser
+## Step 1: JSON Parser - Convert JSON in body to Structured Attributes
 
 Our first step is to parse the raw JSON string residing in the `body` field so we can work with its fields directly (e.g., `message`, `timestamp`) under `attributes`.
 
@@ -118,7 +119,7 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
 }
 ```
 
-## Step 2: Move Processor
+## Step 2: Move Processor - Extract the Message Field to body
 
 Now that the message is available at `attributes.parsed_body.message`, we can move it to the top-level body to clearly indicate that this is the main log message. This is an optional step and you can skip it if you want.
 
@@ -186,7 +187,7 @@ Now that the message is available at `attributes.parsed_body.message`, we can mo
 }
 ```
 
-## Step 3: Timestamp Parser
+## Step 3: Timestamp Parser - Extract and Map Timestamp Information
 
 Now, we'll use the timestamp parser to extract the timestamp information from the `attributes.parsed_body.timestamp` field.
 
@@ -221,7 +222,30 @@ Now, we'll use the timestamp parser to extract the timestamp information from th
 - **Timestamp Format Type:** `strptime Format`
 - **Timestamp Format:** `%Y-%m-%dT%H:%M:%SZ`
 
-You can learn more about timestamp strptime format [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/types/timestamp.md#strptime-and-gotime).
+### Understanding the Timestamp Format
+
+The format `%Y-%m-%dT%H:%M:%SZ` uses strptime directives to match the timestamp pattern. Here's the breakdown for each component:
+
+- `%Y` - 4-digit year (e.g., 2025)
+- `%m` - 2-digit month (01-12)
+- `%d` - 2-digit day of the month (01-31)
+- `T` - Literal character 'T' (separator between date and time)
+- `%H` - 2-digit hour in 24-hour format (00-23)
+- `%M` - 2-digit minute (00-59)
+- `%S` - 2-digit second (00-59)
+- `Z` - Literal character 'Z' indicating UTC timezone
+
+For the example timestamp 2025-10-27T05:30:17Z, this format tells SigNoz to parse:
+
+- Year: 2025
+- Month: 10 (October)
+- Day: 27
+- Hour: 05
+- Minute: 30
+- Second: 17
+- Timezone: UTC (Z)
+
+You can learn more about timestamp strptime format in the [strptime format guide](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/types/timestamp.md#strptime-and-gotime).
 
 <figure data-zoomable align="center">
   <img
@@ -257,9 +281,9 @@ You can learn more about timestamp strptime format [here](https://github.com/ope
 }
 ```
 
-## Step 4 (Optional): Clean Up
+## Step 4 (Optional): Clean Up - Organize Final Structure
 
-Finally let's remove the redundant `timestamp` from `attributes.parsed_body` field.
+Finally, let's remove the redundant `timestamp` from `attributes.parsed_body` field.
 
 ### Before Cleanup
 
@@ -328,7 +352,7 @@ Finally let's remove the redundant `timestamp` from `attributes.parsed_body` fie
 
 ## Final Outcome
 
-After applying these three processors in sequence, your log now has:
+After applying these processors in sequence, your log now has:
 
 - The main log message clearly displayed in `body`.
 - Properly mapped timestamp at the top level for filtering and alerting.

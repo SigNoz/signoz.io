@@ -1400,7 +1400,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/timestamp-parsing',
-                label: 'Parse Timestamp Information',
+                label: 'Parse Timestamp',
               },
             ],
           },
