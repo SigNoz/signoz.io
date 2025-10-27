@@ -1,12 +1,12 @@
 ---
 date: 2025-07-05
 id: openai-monitoring
-tags : [SigNoz Cloud, OpenAI, Monitoring, Observability, OpenTelemetry]
+tags: [SigNoz Cloud, Self-Host]
 title: OpenAI Monitoring with SigNoz
 description: Monitoring adn observability for your OpenAI applications with OpenTelemetry to send traces, logs, and metrics to SigNoz
 ---
 
-This document contains instructions on how to set up OpenTelemetry instrumentation for monitoring and observability of your OpenAI applications and view your application traces, logs, and metrics 
+This document contains instructions on how to set up OpenTelemetry instrumentation for monitoring and observability of your OpenAI applications and view your application traces, logs, and metrics
 in SigNoz.
 
 <Tabs>
@@ -17,6 +17,9 @@ in SigNoz.
 - Python 3.8 or newer
 - OpenAI Python library (`openai >= 1.0.0`)
 - Valid OpenAI API key
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
 
 ## Setup
 
@@ -41,9 +44,6 @@ pip install opentelemetry-instrumentation-openai-v2
 opentelemetry-bootstrap --action=install
 ```
 
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-
 ### Step 4. Run your application
 
 ```bash
@@ -67,8 +67,11 @@ opentelemetry-instrument <your_run_command>
 - Replace `<service-name>` with the name of your service
 - Replace `<your-openai-key>` with your OpenAI API key
 
-</TabItem>
-</Tabs>
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
 
 </TabItem>
 <TabItem value="java" label="Java" default>
@@ -81,6 +84,9 @@ opentelemetry-instrument <your_run_command>
 - Java 8 or newer
 - OpenAI Java SDK (`openai-java >= 1.1.0`)
 - Valid OpenAI API key
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
 
 ## Setup
 
@@ -230,9 +236,16 @@ SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
             .addSpanProcessor(BatchSpanProcessor.builder(otlpSpanExporter).build())
             .build();
 ```
+
 - **`<service_name>`** is the name of your service
 - **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
 
 ### Step 4. Setup Logs
 
@@ -242,7 +255,7 @@ import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
 import io.opentelemetry.exporter.otlp.http.logs.OtlpHttpLogRecordExporter;
 
 OtlpHttpLogRecordExporter otlpLogExporter = OtlpHttpLogRecordExporter.builder()
-            .setEndpoint(System.getenv("OTEL_EXPORTER_LOGS_ENDPOINT")) 
+            .setEndpoint(System.getenv("OTEL_EXPORTER_LOGS_ENDPOINT"))
             .addHeader("signoz-ingestion-key", System.getenv("SIGNOZ_INGESTION_KEY"))
             .build();
 
@@ -251,8 +264,15 @@ SdkLoggerProvider loggerProvider = SdkLoggerProvider.builder()
             .addLogRecordProcessor(BatchLogRecordProcessor.builder(otlpLogExporter).build())
             .build();
 ```
+
 - **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
 
 ### Step 5. Setup Metrics
 
@@ -262,7 +282,7 @@ import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 
 OtlpHttpMetricExporter otlpMetricExporter = OtlpHttpMetricExporter.builder()
-            .setEndpoint(System.getenv("OTEL_EXPORTER_METRICS_ENDPOINT")) 
+            .setEndpoint(System.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"))
             .addHeader("signoz-ingestion-key", System.getenv("SIGNOZ_INGESTION_KEY"))
             .build();
 
@@ -271,8 +291,15 @@ SdkMeterProvider meterProvider = SdkMeterProvider.builder()
             .registerMetricReader(PeriodicMetricReader.builder(otlpMetricExporter).build())
             .build();
 ```
+
 - **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
 
 ### Step 6. Setup OpenTelemetry SDK with your created providers
 
@@ -317,10 +344,10 @@ sdk.getSdkLoggerProvider().forceFlush().join(10, java.util.concurrent.TimeUnit.S
 
 sdk.getSdkTracerProvider().shutdown();
 sdk.getSdkMeterProvider().shutdown();
-sdk.getSdkLoggerProvider().shutdown(); 
+sdk.getSdkLoggerProvider().shutdown();
 ```
+
 > 📌 Note: Before running this code, ensure that you have set the environment variable or .env file `OPENAI_API_KEY` with your generated API key.
-> 
 
 </TabItem>
 
@@ -332,6 +359,9 @@ sdk.getSdkLoggerProvider().shutdown();
 - OpenAI Java SDK (`openai-java >= 1.1.0`)
 - Valid OpenAI API key
 - OpenTelemetry Java agent (if not already installed)
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
 
 ## Setup with Auto-Instrumentation
 
@@ -427,6 +457,12 @@ java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - Replace `<my-app>` with your application JAR file name
 
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
+
 > 📌 **Note:** This approach uses `GlobalOpenTelemetry.get()` to retrieve the OpenTelemetry instance configured by the Java agent. This ensures that OpenAI traces are properly correlated with traces from auto-instrumented components (HTTP servers, databases, etc.).
 
 > 📌 **Note:** Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
@@ -446,31 +482,36 @@ java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
 This instrumentation captures comprehensive telemetry data for your OpenAI applications:
 
 ### Traces
+
 - **Spans** for each OpenAI API call with timing information
 - **Operation details** like model name, max tokens etc.
 - **Token usage** including input and output
 - **Request and response metadata** such as finish reason and model used
 
-### Logs  
+### Logs
+
 - **Structured logs** for each API call when `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true` is set
 - **Message content logs** (prompts and completions) when `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true` is enabled
 - **Error logs** for failed API calls with detailed error information and stack traces
 - **Performance logs** showing request duration and timing information
 
 **Log Levels and Content:**
+
 - `INFO` level logs for successful API calls with metadata
 - `ERROR` level logs for failed requests with error details
 - `DEBUG` level logs for detailed request/response information (when debug logging is enabled)
 
 ### Metrics
+
 - **Duration metrics** showing how long OpenAI calls take
-- **Token usage metrics** tracking consumption over time  
+- **Token usage metrics** tracking consumption over time
 - **Request rate metrics** showing API call frequency
 - **Error rate metrics** for monitoring API failures
 
 More details about the metrics can be found [here](https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-metrics/).
 
 ## Validating instrumentation
+
 **Validate your traces, logs, and metrics in SigNoz:**
 
 - Trigger OpenAI API calls in your app. Make several API calls to generate some data. Then, wait for some time.
@@ -479,19 +520,25 @@ More details about the metrics can be found [here](https://opentelemetry.io/docs
 - Check the `Logs` tab to see captured logs from your OpenAI calls.
 - Visit the `Metrics` tab to view token usage and performance metrics.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/openai/openai-traces.webp" alt="Traces of your OpenAI Application"/>
-    <figcaption><i>Traces of your OpenAI Application</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/openai/openai-traces.webp" alt="Traces of your OpenAI Application" />
+  <figcaption>
+    <i>Traces of your OpenAI Application</i>
+  </figcaption>
 </figure>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/openai/openai-logs.webp" alt="Logs of your OpenAI Application"/>
-    <figcaption><i>Logs of your OpenAI Application</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/openai/openai-logs.webp" alt="Logs of your OpenAI Application" />
+  <figcaption>
+    <i>Logs of your OpenAI Application</i>
+  </figcaption>
 </figure>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/openai/openai-metrics.webp" alt="Metrics of your OpenAI Application"/>
-    <figcaption><i>Metrics of your OpenAI Application</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/openai/openai-metrics.webp" alt="Metrics of your OpenAI Application" />
+  <figcaption>
+    <i>Metrics of your OpenAI Application</i>
+  </figcaption>
 </figure>
 
 ## Capturing Message Content (Optional)
@@ -554,6 +601,6 @@ You should see trace data in your console output that looks like:
 If you don't see your telemetry data:
 
 1. **Check your OpenAI API key** - Make sure `OPENAI_API_KEY` environment variable is set
-2. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints  
+2. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
 3. **Check ingestion key** - Verify your SigNoz ingestion key is correct
 4. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls

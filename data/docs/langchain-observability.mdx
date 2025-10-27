@@ -1,7 +1,7 @@
 ---
 date: 2025-08-19
 id: langchain-observability-with-opentelemetry
-tags: [SigNoz Cloud, LangChain, LangGraph, Observability, Monitoring, OpenTelemetry]
+tags: [SigNoz Cloud, Self-Host]
 title: LangChain/LangGraph Observability with SigNoz
 description: Enable observability and monitoring in your LangChain and LangGraph application with OpenTelemetry to send traces, logs, and metrics to SigNoz
 ---
@@ -14,17 +14,19 @@ Instrumenting your agent workflows with telemetry enables full observability acr
 
 To get started, check out our example LangChain trip planner agent with OpenTelemetry-based observability/monitoring (via OpenInference). View the full repository [here](https://github.com/SigNoz/langchain-monitoring-demo).
 
-You can also check out our LangChain SigNoz MCP agent [here](https://github.com/SigNoz/signoz-mcp-demo). 
+You can also check out our LangChain SigNoz MCP agent [here](https://github.com/SigNoz/signoz-mcp-demo).
 
 ## Prerequisites
 
 - A Python application using **Python 3.8+**
 - LangChain/LangGraph integrated into your app
 - Basic understanding of AI Agents and tool calling workflow
-- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
 - `pip` installed for managing Python packages
 - Internet access to send telemetry data to SigNoz Cloud
-- *(Optional but recommended)* A Python virtual environment to isolate dependencies
+- _(Optional but recommended)_ A Python virtual environment to isolate dependencies
 
 ## Instrument your LangChain Python application
 
@@ -32,12 +34,105 @@ To capture detailed telemetry from LangChain/LangGraph without modifying your co
 
 Check out detailed instructions on how to set up OpenInference instrumentation in your LangChain application over [here](https://pypi.org/project/openinference-instrumentation-langchain/).
 
+<Tabs>
+<TabItem value="No Code" label="No Code(Recommended)" default>
+
+No-code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries.
+
+**Step 1:** Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  opentelemetry-distro \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  langgraph \
+  langchain \
+  openinference-instrumentation-langchain
+```
+
+**Step 2:** Add Automatic Instrumentation
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+
+**Step 3:** Configure logging level
+
+To ensure logs are properly captured and exported, configure the root logger to emit logs at the INFO level or higher:
+
+```python
+import logging
+
+logging.getLogger().setLevel(logging.INFO)
+```
+
+This sets the minimum log level for the root logger to INFO, which ensures that `logger.info()` calls and higher severity logs (WARNING, ERROR, CRITICAL) are captured by the OpenTelemetry logging auto-instrumentation and sent to SigNoz.
+
+**Step 4:** Run an example
+
+```python
+from langchain.agents import create_agent
+
+def add_numbers(a: int, b: int) -> int:
+    """Add two numbers together and return the result."""
+    return a + b
+
+agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=[add_numbers],
+    system_prompt="You are a helpful math tutor who can do calculations using the provided tools.",
+)
+
+# Run the agent
+agent.invoke(
+    {"messages": [{"role": "user", "content": "what is 42 + 58?"}]},
+)
+```
+
+> 📌 Note: Ensure that the `OPENAI_API_KEY` environment variable is properly defined with your API key before running the code.
+
+**Step 5:** Run your application with auto-instrumentation
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your_ingestion_key>" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_METRICS_EXPORTER=otlp \
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_PYTHON_LOG_CORRELATION=true \
+OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
+opentelemetry-instrument <your_run_command>
+```
+
+- **`<service_name>`** is the name of your service
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your_ingestion_key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Replace `<your_run_command>` with the actual command you would use to run your application. For example: `python main.py`
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
+
+</TabItem>
+
+<TabItem value="Code" label="Code" default>
+
+Code-based instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
+
 **Step 1:** Install OpenInference and OpenTelemetry related packages
 
 ```bash
 pip install openinference-instrumentation-langchain \
 opentelemetry-exporter-otlp \
-opentelemetry-sdk
+opentelemetry-sdk \
+langgraph \
+langchain
 ```
 
 **Step 2:** Import the necessary modules in your Python application
@@ -66,6 +161,12 @@ provider.add_span_processor(BatchSpanProcessor(span_exporter))
 - Set the **`<region>`** to match your SigNoz Cloud [**region**](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace **`<your-ingestion-key>`** with your SigNoz [**ingestion key**](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
+
 **Step 4:** Instrument LangChain using OpenInference
 
 Use the `LangChainInstrumentor` from OpenInference to automatically trace LangChain operations with your OpenTelemetry setup:
@@ -74,25 +175,53 @@ Use the `LangChainInstrumentor` from OpenInference to automatically trace LangCh
 LangChainInstrumentor().instrument()
 ```
 
-> 📌 Important:  Place this code at the start of your application logic — before any LangChain/LangGraph functions are called or used — to ensure telemetry is correctly captured.
-> 
+> 📌 Important: Place this code at the start of your application logic — before any LangChain/LangGraph functions are called or used — to ensure telemetry is correctly captured.
+
+**Step 5:** Run an example
+
+```python
+from langchain.agents import create_agent
+
+def add_numbers(a: int, b: int) -> int:
+    """Add two numbers together and return the result."""
+    return a + b
+
+agent = create_agent(
+    model="openai:gpt-5-mini",
+    tools=[add_numbers],
+    system_prompt="You are a helpful math tutor who can do calculations using the provided tools.",
+)
+
+# Run the agent
+agent.invoke(
+    {"messages": [{"role": "user", "content": "what is 42 + 58?"}]},
+)
+```
+
+> 📌 Note: Ensure that the `OPENAI_API_KEY` environment variable is properly defined with your API key before running the code.
+
+</TabItem>
+</Tabs>
 
 Your LangChain/LangGraph commands should now automatically emit traces, spans, and attributes.
 
 Finally, you should be able to view this data in Signoz Cloud under the traces tab:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/langchain/langchain-trace.webp" alt="Traces View"/>
-    <figcaption><i>Traces of your LangChain Application</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/langchain/langchain-trace.webp" alt="Traces View" />
+  <figcaption>
+    <i>Traces of your LangChain Application</i>
+  </figcaption>
 </figure>
 
 When you click on a trace ID in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/langchain/langchain-detailed-trace.webp" alt="Detailed Traces View"/>
-    <figcaption><i>Detailed traces view of your LangChain Application</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/langchain/langchain-detailed-trace.webp" alt="Detailed Traces View" />
+  <figcaption>
+    <i>Detailed traces view of your LangChain Application</i>
+  </figcaption>
 </figure>
-
 
 ## Instrumenting LangChain Applications in JavaScript
 

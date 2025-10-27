@@ -1,7 +1,7 @@
 ---
 date: 2025-08-1
 id: claude-code-monitoring-with-opentelemetry
-tags : [SigNoz Cloud, Claude Code, OpenTelemetry, Monitor]
+tags: [SigNoz Cloud, Self-Host]
 title: Monitoring Claude Code Activity with SigNoz
 description: Enable monitoring and observability in your Claude Code usage with OpenTelemetry and send logs and metrics to SigNoz
 ---
@@ -14,13 +14,15 @@ Instrumenting Claude Code with telemetry provides full observability into how co
 
 ## Prerequisites
 
-- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
 - Internet access to send telemetry data to SigNoz Cloud
 - [Claude Code](https://www.anthropic.com/claude-code) installed and running on your system
 
 ## Monitoring Claude Code
 
-Check out detailed instructions on how to set up OpenTelemetry instrumentation for your Claude Code usage over [here](https://docs.anthropic.com/en/docs/claude-code/monitoring-usage). 
+Check out detailed instructions on how to set up OpenTelemetry instrumentation for your Claude Code usage over [here](https://docs.anthropic.com/en/docs/claude-code/monitoring-usage).
 
 ### Option 1 (VSCode)
 
@@ -40,6 +42,12 @@ code .
 
 - Set the **`<region>`** to match your SigNoz Cloud [**region**](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace **`<your-ingestion-key>`** with your SigNoz [**ingestion key**](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
 
 This will open VSCode with the required environment variables already configured. From here, any Claude Code activity will automatically generate telemetry and export logs to your SigNoz Cloud instance.
 
@@ -63,6 +71,12 @@ claude
 
 - Set the **`<region>`** to match your SigNoz Cloud [**region**](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace **`<your-ingestion-key>`** with your SigNoz [**ingestion key**](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
 
 This will launch Claude Code with telemetry enabled. Any Claude Code activity in the terminal session will automatically generate and export logs and metrics to your SigNoz Cloud instance.
 
@@ -94,7 +108,6 @@ Example managed settings configuration:
 ```
 
 > Managed settings can be distributed via MDM (Mobile Device Management) or other device management solutions. Environment variables defined in the managed settings file have high precedence and cannot be overridden by users.
-> 
 
 ### Example Configurations
 
@@ -145,53 +158,71 @@ Your Claude Code activity should now automatically emit logs and metrics.
 
 Finally, you should be able to view logs in Signoz Cloud under the logs tab:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/claude/claude-logs-view.webp" alt="Logs View"/>
-    <figcaption><i>Logs View of your Claude Code Activity</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/claude/claude-logs-view.webp" alt="Logs View" />
+  <figcaption>
+    <i>Logs View of your Claude Code Activity</i>
+  </figcaption>
 </figure>
 
 When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/claude/claude-logs-detailed-4.webp" alt="Detailed Logs View 1"/>
-    <figcaption><i>Detailed Logs View of claude_code.user_prompt</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/claude/claude-logs-detailed-4.webp" alt="Detailed Logs View 1" />
+  <figcaption>
+    <i>Detailed Logs View of claude_code.user_prompt</i>
+  </figcaption>
 </figure>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/claude/claude-logs-detailed-1.webp" alt="Detailed Logs View 2"/>
-    <figcaption><i>Detailed Logs View of claude_code.api_request</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/claude/claude-logs-detailed-1.webp" alt="Detailed Logs View 2" />
+  <figcaption>
+    <i>Detailed Logs View of claude_code.api_request</i>
+  </figcaption>
 </figure>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/claude/claude-logs-detailed-2.webp" alt="Detailed Logs View 3"/>
-    <figcaption><i>Detailed Logs View of claude_code.tool_decision</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/claude/claude-logs-detailed-2.webp" alt="Detailed Logs View 3" />
+  <figcaption>
+    <i>Detailed Logs View of claude_code.tool_decision</i>
+  </figcaption>
 </figure>
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/claude/claude-logs-detailed-3.webp" alt="Detailed Logs View 4"/>
-    <figcaption><i>Detailed Logs View of claude_code.tool_result</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/claude/claude-logs-detailed-3.webp" alt="Detailed Logs View 4" />
+  <figcaption>
+    <i>Detailed Logs View of claude_code.tool_result</i>
+  </figcaption>
 </figure>
 
 You should be able to see Claude Code related metrics in Signoz Cloud under the metrics tab:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/claude/claude-metrics.webp" alt="Metrics View"/>
-    <figcaption><i>Metrics View of your Claude Code Activity</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/claude/claude-metrics.webp" alt="Metrics View" />
+  <figcaption>
+    <i>Metrics View of your Claude Code Activity</i>
+  </figcaption>
 </figure>
 
 When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/claude/claude-metrics-detailed.webp" alt="Detailed Metrics View"/>
-    <figcaption><i>Detailed Metrics View of your Claude Code Activity</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/claude/claude-metrics-detailed.webp" alt="Detailed Metrics View" />
+  <figcaption>
+    <i>Detailed Metrics View of your Claude Code Activity</i>
+  </figcaption>
 </figure>
 
 ## Dashboard
 
 You can also check out our custom Claude Code dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/claude-code-dashboard/) which provides specialized visualizations for monitoring your Claude Code usage. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/dashboards/dashboard-templates/claude-code-dashboard.webp" alt="Claude Code Dashboard"/>
-    <figcaption><i>Claude Code Dashboard</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/dashboards/dashboard-templates/claude-code-dashboard.webp"
+    alt="Claude Code Dashboard"
+  />
+  <figcaption>
+    <i>Claude Code Dashboard</i>
+  </figcaption>
 </figure>
-

@@ -1,9 +1,9 @@
 ---
 date: 2025-09-05
 id: google-gemini-monitoring-with-opentelemetry
-tags : [SigNoz Cloud, Google Gemini, Monitoring, Observability, OpenTelemetry]
+tags: [SigNoz Cloud, Self-Host]
 title: Monitoring Google Gemini API with SigNoz
-description: Monitoring adn observability for Google Gemini API performance and usage with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
+description: Monitoring and observability for Google Gemini API performance and usage with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
 ---
 
 ## Overview
@@ -14,16 +14,101 @@ Instrumenting Gemini in your LLM applications with telemetry ensures full observ
 
 ## Prerequisites
 
-- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
 - Internet access to send telemetry data to SigNoz Cloud
 - A [Google Gemini](https://ai.google.dev/gemini-api/docs/libraries) API account with a working API Key
 - `pip` installed for managing Python packages
-- *(Optional but recommended)* A Python virtual environment to isolate dependencies
+- _(Optional but recommended)_ A Python virtual environment to isolate dependencies
 
 ## Monitoring Google Gemini
 
 <Tabs>
 <TabItem value="python" label="Python" default>
+
+<Tabs>
+<TabItem value="No Code" label="No Code(Recommended)" default>
+
+No-code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries.
+
+**Step 1:** Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  opentelemetry-distro \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  google-genai \
+  openinference-instrumentation-google-genai
+```
+
+**Step 2:** Add Automatic Instrumentation
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+
+**Step 3:** Configure logging level
+
+To ensure logs are properly captured and exported, configure the root logger to emit logs at the INFO level or higher:
+
+```python
+import logging
+
+logging.getLogger().setLevel(logging.INFO)
+```
+
+This sets the minimum log level for the root logger to INFO, which ensures that `logger.info()` calls and higher severity logs (WARNING, ERROR, CRITICAL) are captured by the OpenTelemetry logging auto-instrumentation and sent to SigNoz.
+
+**Step 4:** Run an example
+
+```python
+from google import genai
+
+client = genai.Client()
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="What is SigNoz?",
+)
+print(response.text)
+```
+
+> 📌 Note: Ensure that the `GEMINI_API_KEY` environment variable is properly defined with your API key before running the code.
+
+**Step 5:** Run your application with auto-instrumentation
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your_ingestion_key>" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_METRICS_EXPORTER=otlp \
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_PYTHON_LOG_CORRELATION=true \
+OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
+opentelemetry-instrument <your_run_command>
+```
+
+- **`<service_name>`** is the name of your service
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your_ingestion_key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Replace `<your_run_command>` with the actual command you would use to run your application. For example: `python main.py`
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
+
+</TabItem>
+
+<TabItem value="Code" label="Code" default>
+
+Code-based instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
 
 **Step 1:** Install the necessary packages in your Python environment.
 
@@ -97,6 +182,12 @@ trace.set_tracer_provider(provider)
 - **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
+
 **Step 4:** Instrument Google Gemini using `GoogleGenAIInstrumentor` and the configured Tracer Provider
 
 ```python
@@ -105,8 +196,7 @@ from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
 GoogleGenAIInstrumentor().instrument(tracer_provider=provider)
 ```
 
-> 📌 Important:  Place this code at the start of your application logic — before any Gemini functions are called or used — to ensure telemetry is correctly captured.
-> 
+> 📌 Important: Place this code at the start of your application logic — before any Gemini functions are called or used — to ensure telemetry is correctly captured.
 
 **Step 5**: Setup Logs
 
@@ -138,6 +228,12 @@ logger = logging.getLogger(__name__)
 - **`<service_name>`** is the name of your service
 - **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud logs endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
 
 **Step 6**: Setup Metrics
 
@@ -171,63 +267,103 @@ HTTPXClientInstrumentor().instrument()
 - **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud metrics endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. These are not Gemini-specific metrics. Gemini does not expose metrics as part of their SDK. If you want to add custom metrics to your Gemini application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/). 
+> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. These are not Gemini-specific metrics. Gemini does not expose metrics as part of their SDK. If you want to add custom metrics to your Gemini application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
 
 **Step 7:** Run an example
 
 ```python
 from google import genai
- 
+
 client = genai.Client()
- 
+
 response = client.models.generate_content(
     model="gemini-2.5-flash",
     contents="What is SigNoz?",
 )
 print(response.text)
 ```
+
 > 📌 Note: Ensure that the `GEMINI_API_KEY` environment variable is properly defined with your API key before running the code.
 
+</TabItem>
+</Tabs>
 
 </TabItem>
 </Tabs>
 
 ## View Traces, Logs, and Metrics in SigNoz
 
-Your Google Gemini commands should now automatically emit traces, logs, and metrics. 
+Your Google Gemini commands should now automatically emit traces, logs, and metrics.
 
 You should be able to view traces in Signoz Cloud under the traces tab:
 
-<Figure src="/img/docs/llm/gemini/gemini-trace-view.webp" alt="Gemini trace view" caption="Gemini trace view in SigNoz" />
+<Figure
+  src="/img/docs/llm/gemini/gemini-trace-view.webp"
+  alt="Gemini trace view"
+  caption="Gemini trace view in SigNoz"
+/>
 
 When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
 
-<Figure src="/img/docs/llm/gemini/gemini-detailed-trace-view.webp" alt="Gemini detailed trace view" caption="Detailed trace view for Gemini" />
+<Figure
+  src="/img/docs/llm/gemini/gemini-detailed-trace-view.webp"
+  alt="Gemini detailed trace view"
+  caption="Detailed trace view for Gemini"
+/>
 
 You can view logs by clicking on the “Related Logs” button in the trace view to see correlated logs for a given trace:
-<figure data-zoomable align='center'>
-    <img src="/img/docs/llm/gemini/related-logs.webp" alt="Related logs" width="300"/>
-    <figcaption><i>Related logs button</i></figcaption>
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/gemini/related-logs.webp" alt="Related logs" width="300" />
+  <figcaption>
+    <i>Related logs button</i>
+  </figcaption>
 </figure>
 
 You should also be able to view logs in Signoz Cloud under the logs tab:
-<Figure src="/img/docs/llm/gemini/gemini-logs-view.webp" alt="Gemini logs view" caption="Gemini logs view in SigNoz" />
+
+<Figure
+  src="/img/docs/llm/gemini/gemini-logs-view.webp"
+  alt="Gemini logs view"
+  caption="Gemini logs view in SigNoz"
+/>
 
 When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
 
-<Figure src="/img/docs/llm/gemini/gemini-log-1.webp" alt="Gemini log details" caption="Detailed log view" />
+<Figure
+  src="/img/docs/llm/gemini/gemini-log-1.webp"
+  alt="Gemini log details"
+  caption="Detailed log view"
+/>
 
 You should be able to see Gemini metrics in Signoz Cloud under the metrics tab:
 
-<Figure src="/img/docs/llm/gemini/gemini-metrics.webp" alt="Gemini metrics" caption="Gemini metrics in SigNoz" />
+<Figure
+  src="/img/docs/llm/gemini/gemini-metrics.webp"
+  alt="Gemini metrics"
+  caption="Gemini metrics in SigNoz"
+/>
 
 When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
 
-<Figure src="/img/docs/llm/gemini/gemini-detailed-metric.webp" alt="Gemini detailed metric" caption="Detailed metric view for Gemini" />
+<Figure
+  src="/img/docs/llm/gemini/gemini-detailed-metric.webp"
+  alt="Gemini detailed metric"
+  caption="Detailed metric view for Gemini"
+/>
 
 ## Dashboard
 
 You can also check out our custom Google Gemini dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/google-gemini-dashboard/) which provides specialized visualizations for monitoring your Gemini API usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
 
-
-<Figure src="/img/docs/llm/gemini/gemini-dashboard.webp" alt="Gemini Dashboard" caption="Google Gemini Dashboard Template" />
+<Figure
+  src="/img/docs/llm/gemini/gemini-dashboard.webp"
+  alt="Gemini Dashboard"
+  caption="Google Gemini Dashboard Template"
+/>
