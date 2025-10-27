@@ -1,35 +1,48 @@
 ---
 date: 2025-08-26
 title: General FAQs
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 id: general-faqs
 ---
 
 ### Q. How to setup SigNoz across different environments?
 
+A. Tag your telemetry with the `deployment.environment` resource attribute (e.g., production/staging/development) via SDK env vars or the Collector’s Resource processor, then filter and alert by environment in SigNoz.
+
 <details>
 
-<summary> Toggle for answer </summary>
+<summary> Toggle for detailed answer </summary>
 
-You can ingest data from across your environments just by adding `deployment.environment` resource attribute
+You can ingest data from across your environments and tag your telemetry with the `deployment.environment` resource attribute (for example: `production`, `staging`, `development`). This lets you filter, compare, and alert per environment in the UI.
 
-On SDK level you can add it though environment variable
-`OTEL_RESOURCE_ATTRIBUTES=deployment.environment=prod`
+- SDK (all languages)
 
-On collector level you can add it through a [resource](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourceprocessor/README.md) processor.
-```yaml
-processors:
-  resource/env:
-    attributes:
-    - key: deployment.environment
-      value: prod
-      action: upsert
-...
-service:
-  pipelines:
-    logs:
-      processors: [resource/env, batch]
-```
+  - Set via environment variables when starting your app:
+    ```bash
+    OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+    ```
+
+- OpenTelemetry Collector (agent or gateway)
+  - Upsert the attribute with the Resource processor so all signals include it:
+    ```yaml
+    processors:
+      resource/env:
+        attributes:
+          - key: deployment.environment
+            value: production
+            action: upsert
+    service:
+      pipelines:
+        traces:
+          processors: [resource/env, batch]
+        metrics:
+          processors: [resource/env, batch]
+        logs:
+          processors: [resource/env, batch]
+    ```
+  - Refer to [OpenTelemetry Collector Configuration reference](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor) for more details on the Resource processor.
+  - Guide on setting resource attributes for logs (applies similarly to traces/metrics): [here](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs).
+
 </details>
 
 ### Q. How Do I cancel my subscription ?
@@ -63,7 +76,8 @@ You can use this Address - **SigNoz Inc - 2261 Market Street #4496, San Francisc
 A. DataSource is the service, db or any instance which generates telemetry data (Traces, Logs and Metrics).
 
 ### Q. How do I change data retention periods in SigNoz?
-A. For self‑hosted, change retention in Settings → General (applies only to newly ingested data). 
+
+A. For self‑hosted, change retention in Settings → General (applies only to newly ingested data).
 For SigNoz Cloud, contact support to request retention changes (affects pricing).
 
 <details>

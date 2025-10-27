@@ -24,20 +24,6 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
   - [Sample apps](#sample-apps)
 - [PR Checklist (copy into your PR)](#pr-checklist-copy-into-your-pr)
 - [Contribute a Doc or Blog Post](#contribute-a-doc-or-blog-post)
-  - [Step 1: Fork the Repository](#step-1-fork-the-repository)
-  - [Step 2: Clone Your Forked Repository](#step-2-clone-your-forked-repository)
-  - [Step 3: Set Up the Upstream Repository](#step-3-set-up-the-upstream-repository)
-  - [Step 4: Create a New Branch](#step-4-create-a-new-branch)
-  - [Step 5: Create Your Content (Blog or Docs)](#step-5-create-your-content-blog-or-docs)
-  - [Step 6: Add Images](#step-6-add-images)
-  - [Step 7: Add Doc to Sidebar (Docs only)](#step-7-add-doc-to-sidebar-docs-only)
-  - [Step 8: Add and Commit Your Changes](#step-8-add-and-commit-your-changes)
-  - [Step 9: Fetch and Merge Upstream Changes](#step-9-fetch-and-merge-upstream-changes)
-  - [Step 10: Push Your Changes](#step-10-push-your-changes)
-  - [Step 11: Test Your Changes Locally](#step-11-test-your-changes-locally)
-  - [Step 12: Create a Pull Request](#step-12-create-a-pull-request)
-  - [Blog Notes](#blog-notes)
-  - [Docs Notes](#docs-notes)
 
 ## Workflow
 
@@ -67,7 +53,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Docs Redirect Guard
   - Triggers on PRs that touch `data/docs/**`, `next.config.js`, `scripts/check-doc-redirects.js`, tests, or `package.json`.
   - Runs `yarn test:doc-redirects` and `yarn check:doc-redirects`.
-  - Fails if redirects are missing or tests fail. Fix by adding permanent redirects in `next.config.js` and re-running locally.
+  - Fails if redirects are missing/invalid or tests fail. Fix by adding permanent redirects in `next.config.js` and re-running locally.
 - Add to Onboarding (label-driven)
   - When a PR is labeled `add-to-onboarding`, this job checks that the PR includes docs changes. If none are found, the job fails with a message.
   - If docs are present, it auto-creates an onboarding issue listing changed docs and comments on the PR with a link.
@@ -77,7 +63,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Be complete and practical
   - Cover end-to-end use cases. Link to related topics: ingestion, dashboard templates, alerts, query builder, and relevant features.
   - Do not assume prior knowledge. Add brief context when needed and define terms on first use.
-  - Cross-link existing SigNoz docs instead of duplicating content. For example, when describing OTel Collector receivers or pipelines, reference the configuration guide: https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/
+  - Cross-link existing SigNoz docs instead of duplicating content. For example, when describing OTel Collector receivers or pipelines, reference the [configuration guide](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/)
 - Be concise and direct
   - Avoid filler and marketing fluff. Get to the point.
   - Avoid generic intros like “In today’s digital landscape…” and adjectives like “powerful,” “robust,” “seamless.”
@@ -118,6 +104,7 @@ Every doc should be skimmable and actionable.
   - `## Validate` – how to confirm it worked (UI path, endpoint, example output).
   - `## Troubleshooting` – common issues and fixes (more details below).
 - Explaining commands and code
+
   - Before each command, explain what it does and where to run it (local shell, container, Kubernetes, CI, etc.).
   - After commands, note expected results and what happens next if relevant.
   - For code/config blocks, annotate with language and filename to improve context:
@@ -165,15 +152,19 @@ Every doc should be skimmable and actionable.
     - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
 
 - Hyperlinks
+
   - Prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
   - External links should open in a new tab and preserve security attributes:
+
     ```mdx
     <a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">
       Example
     </a>
     ```
+
   - Internal links typically open in the same tab unless the link switches product/app context or interrupts an in-progress task.
   - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
+
 - Cloud vs Self-Host
   - Add the relevant tags in frontmatter.
   - Prefer a single flow and include a small info note that links to the comparison page instead of duplicating with tabs.
@@ -183,22 +174,16 @@ Every doc should be skimmable and actionable.
       ```mdx
       <Admonition type="info">
         Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint
-        and remove the ingestion key header as shown in
-        <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted">
-          Cloud → Self-Hosted
-        </a>
-        .
+        and remove the ingestion key header as shown in [Cloud →
+        Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
       </Admonition>
       ```
     - For Self-Hosted-only guides:
       ```mdx
       <Admonition type="info">
         Using SigNoz Cloud? Most steps are identical. To adapt this guide, point to the Cloud
-        endpoint and add the ingestion key header as shown in
-        <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud">
-          Self-Hosted → Cloud
-        </a>
-        .
+        endpoint and add the ingestion key header as shown in [Self-Hosted →
+        Cloud](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud).
       </Admonition>
       ```
   - Only use tabs if instructions materially diverge (e.g., different components/flows), not for small endpoint/header differences.
@@ -224,11 +209,11 @@ Every doc should be skimmable and actionable.
 
 ### Link references to keep handy
 
-- Ingestion to SigNoz Cloud endpoints: `https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint`
-- Ingestion keys for SigNoz Cloud: `https://signoz.io/docs/ingestion/signoz-cloud/keys/`
-- Cloud → Self-Hosted anchor: `https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted`
+- Ingestion to SigNoz Cloud endpoints: <https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint>
+- Ingestion keys for SigNoz Cloud: <https://signoz.io/docs/ingestion/signoz-cloud/keys/>
+- Cloud → Self-Hosted anchor: <https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted>
 - OpenTelemetry Collector docs: link the specific receiver/exporter you use.
-- OTel Collector configuration guide: `https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/`
+- OTel Collector configuration guide: <https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/>
 
 ### URLs and redirects
 
@@ -268,13 +253,13 @@ Every doc should be skimmable and actionable.
 - Explicitly mention OpenTelemetry in the URL/slug, title, and overview.
   - Example slug and file name: `data/docs/instrumentation/<tech>/opentelemetry-<tech>.mdx`.
 - Specify the tested versions of SDKs/agents/collectors up front.
-- Provide distinct instructions for SigNoz Cloud and Self-Host using tabs as mentioned in Content Structure.
+- Prefer a single flow; add a brief Cloud vs Self-Hosted note linking to the comparison doc. Use tabs only if steps materially diverge (not for minor endpoint/header differences).
 - Explain each code snippet: what it configures, where it lives, and how it works.
 - Provide validation steps in SigNoz (Traces/Logs/Metrics, etc. views) with screenshots where possible.
 - Add a `## Troubleshooting` section with symptoms, causes, exact fixes, and verification. Provide as much context as possible to make it clear to readers where exactly the troubleshooting instructions are applicable
   - Include network/endpoint checks, auth/ingestion key pitfalls, TLS notes, and version mismatches.
   - Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO (e.g., "Why don’t I see traces for <service-name>?", or include the exact error message).
-- Don’t stop at “data sent.” Close the loop with next steps: link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
+- Don’t stop at “Data Sent”. Close the loop with next steps: Link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
 
 ### Troubleshooting docs
 
@@ -287,6 +272,7 @@ Every doc should be skimmable and actionable.
 - Include logs/commands snippets and known edge cases.
 - Provide links to relevant product docs and Send Data docs.
 - Titles and headings: use question-style titles or include the exact error/topic to improve search and SEO. Prefer exact error strings and component names (SDK/receiver/exporter) in headings.
+- For minor, frequently asked Q&A, add/update a concise FAQ page. Keep answers short and point to deeper guides when needed.
 
 ### User guides (how-to, tasks)
 
@@ -297,29 +283,31 @@ Every doc should be skimmable and actionable.
 
 ### Sample apps
 
-- Use the correct endpoints:
-  - Cloud: `https://ingest.<region>.signoz.cloud:443` with `signoz-ingestion-key`.
-  - Self-Host: `http://<otel-collector-host>:4318` or `:4317` (OTLP/HTTP vs OTLP/gRPC).
+- Use the correct endpoints and link ingestion docs:
+  - Cloud: `https://ingest.<region>.signoz.cloud:443` with `signoz-ingestion-key`. Also link to the Cloud ingestion references: [endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and [keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+  - Self-Host: `http://<otel-collector-host>:4318` or `:4317` (OTLP/HTTP vs OTLP/gRPC). Also link to the Cloud → Self-Hosted adaptation guidance: [cloud to self-hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted)
 - Document how to configure and run locally and in Docker/Kubernetes.
 - Include a `README.md` with a link to the relevant docs page.
 - Keep versions and instructions in sync across docs, sample apps, and blogs.
 - Provide a “Validate in SigNoz” section that shows where the data will appear.
 
-## PR Checklist
+## Docs PR Checklist
 
 - [ ] Frontmatter includes `date`, `id`, `title`, `description`, and appropriate `tags`.
+- [ ] SEO: primary keywords appear in `title`, `description`, URL/slug, and the first paragraph. For Send Data docs, include "OpenTelemetry" in slug/title.
 - [ ] If the guide is Cloud-only or Self-Hosted-only, include the Cloud vs Self-Hosted drop-in snippet linking to the comparison page; use tabs only if steps materially diverge.
 - [ ] Commands explain what they do and where to run them.
 - [ ] Code/config snippets are annotated and explained; placeholders are defined.
-- [ ] Links: internal use absolute `https://signoz.io/...`; external open in a new tab with proper attributes.
-- [ ] Cross-link existing SigNoz docs. For OTel Collector changes, link the config guide.
-- [ ] Images have alt text, captions, and live under `public/img/docs/...`.
 - [ ] “Validate” section shows how to confirm success.
 - [ ] Troubleshooting covers common failures with concrete fixes.
-- [ ] Built locally (`yarn build`) and reviewed the page at `http://localhost:3000`.
-- [ ] If you introduced a new tag, add its tooltip definition in `constants/tagDefinitions.ts`.
-
+- [ ] Included a short “Next steps” section linking to adjacent features or deeper guides when applicable.
 - [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.
+- [ ] Links: internal use absolute `https://signoz.io/...`; external open in a new tab with proper attributes.
+- [ ] Cross-link existing SigNoz docs. For OTel Collector changes, link the config guide.
+- [ ] Images use WebP format, have alt text and captions via the `Figure` component, are cropped/readable, and live under `public/img/docs/...`.
+- [ ] Added the page to the sidebar (`constants/docsSideNav.ts`) with the correct route/label.
+- [ ] If you renamed or moved a doc: added a permanent redirect in `next.config.js`, updated internal links and the sidebar, and verified with `yarn check:doc-redirects`.
+- [ ] Built locally (`yarn build`) and reviewed the page at `http://localhost:3000`.
 
 ## Contribute a Doc or Blog Post
 
@@ -373,6 +361,7 @@ git checkout -b add-new-content
 ### Step 5: Create Your Content (Blog or Docs)
 
 - Blog
+
   1. Navigate to `data/blog`:
      ```bash
      cd data/blog
@@ -402,6 +391,7 @@ git checkout -b add-new-content
 ### Step 6: Add Images
 
 - Blog images
+
   - Place under `public/img/blog/<YYYY-MM>/` (create the monthly folder if needed).
   - Use WebP format (`.webp`) whenever possible. Conversion tips: https://signoz.notion.site/Creating-webp-images-7c27a266c4ae4ea49a76a2d3ba3296a5?pvs=74
 

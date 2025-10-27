@@ -1,15 +1,17 @@
 ---
 date: 2024-08-02
-tags : [SigNoz Cloud]
+tags: [SigNoz Cloud]
 title: Web Vitals Monitoring
 id: web-vitals
 ---
 
-
 This documentation provides a step-by-step guide to setting up web vitals monitoring using SigNoz and OpenTelemetry.
+In short, you’ll capture Core Web Vitals from real users—a RUM (Real User Monitoring)–style approach—so you can analyze field performance in SigNoz.
 
 ## Overview
+
 Web vitals are essential metrics to measure the user experience on your website. SigNoz allows you to monitor these vitals seamlessly using OpenTelemetry. The key web vitals are:
+
 - Largest Contentful Paint (LCP)
 - First Input Delay (FID) / Interaction to Next Paint (INP)
 - Cumulative Layout Shift (CLS)
@@ -17,12 +19,14 @@ Web vitals are essential metrics to measure the user experience on your website.
 - Total Blocking Time (TBT)
 
 ## Prerequisites
+
 - [SigNoz Cloud](https://signoz.io/teams/) account
 - A web application where you want to monitor web vitals
 
 ## Setup
 
 ### Step 1: Setup OTel Collector
+
 Install Otel collector binary using [these instructions](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
 ### Step 2: Install dependencies
@@ -44,36 +48,37 @@ npm install @opentelemetry/semantic-conventions
 This file (e.g., `instrument.ts`) is needed to setup the `MeterProvider` which is used to create custom metrics.
 
 ```ts
-import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
-import { resourceFromAttributes } from '@opentelemetry/resources';
-import { metrics } from '@opentelemetry/api';
+import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http'
+import { resourceFromAttributes } from '@opentelemetry/resources'
+import { metrics } from '@opentelemetry/api'
 
 // Define your resource, e.g., service name, environment.
 const resource = resourceFromAttributes({
-'service.name': 'yourServiceName',
-});
+  'service.name': 'yourServiceName',
+})
 
 // Create a metric reader with OTLP exporter configured to send metrics to a local collector.
 const metricReader = new PeriodicExportingMetricReader({
-exporter: new OTLPMetricExporter({
+  exporter: new OTLPMetricExporter({
     url: 'http://127.0.0.1:4318/v1/metrics',
-}),
-exportIntervalMillis: 10000, // Export metrics every 10 seconds.
-});
+  }),
+  exportIntervalMillis: 10000, // Export metrics every 10 seconds.
+})
 
 // Initialize a MeterProvider with the above configurations.
 const myServiceMeterProvider = new MeterProvider({
-resource,
-readers: [metricReader],
-});
+  resource,
+  readers: [metricReader],
+})
 
 // Set the initialized MeterProvider as global to enable metric collection across the app.
-metrics.setGlobalMeterProvider(myServiceMeterProvider);
-
+metrics.setGlobalMeterProvider(myServiceMeterProvider)
 ```
+
 ### Step 4: Capture Web Vitals
-Use the web-vitals library to capture key performance metrics like CLS, FID, LCP, TTFB, and FCP. 
+
+Use the web-vitals library to capture key performance metrics like CLS, FID, LCP, TTFB, and FCP.
 These metrics are captured through callback functions that you define.
 
 <Tabs groupId="web-vitals-version">
@@ -114,7 +119,8 @@ These metrics are captured through callback functions that you define.
 </Tabs>
 
 ### Step 5: Export Web Vitals
-Using OpenTelemetry, create Observable Async Gauges to periodically observe and export these metrics. 
+
+Using OpenTelemetry, create Observable Async Gauges to periodically observe and export these metrics.
 This ensures that the captured web vitals are correctly recorded and sent to SigNoz for monitoring.
 
 <Tabs groupId="web-vitals-export">
@@ -165,7 +171,8 @@ This ensures that the captured web vitals are correctly recorded and sent to Sig
     onLCP(sendToAnalytics);
     onTTFB(sendToAnalytics);
     onFCP(sendToAnalytics);
-```
+
+````
 </TabItem>
 <TabItem value="legacy" label="Legacy Web Vitals (< v5)">
 ```ts
@@ -215,32 +222,42 @@ This ensures that the captured web vitals are correctly recorded and sent to Sig
   onTTFB(sendToAnalytics);
   onFCP(sendToAnalytics);
 ````
+
   </TabItem>
 </Tabs>
 
-This code captures web vitals (LCP, CLS, FID, TTFB, FCP) using the web-vitals library and logs these metrics, 
-setting up observable gauges with OpenTelemetry to record the values for each metric. It defines a callback function, 
+This code captures web vitals (LCP, CLS, FID, TTFB, FCP) using the web-vitals library and logs these metrics,
+setting up observable gauges with OpenTelemetry to record the values for each metric. It defines a callback function,
 sendToAnalytics, that processes and observes each metric value, ensuring they are monitored appropriately.
 
-To better understand how this is used, you can check out [this GitHub link](https://github.com/SigNoz/signoz/pull/4579/files#diff-f8c6adf20de182a86841534a8c156a960598635717c63b17a4be45ec8d340193) which shows how web-vitals are used 
+To better understand how this is used, you can check out [this GitHub link](https://github.com/SigNoz/signoz/pull/4579/files#diff-f8c6adf20de182a86841534a8c156a960598635717c63b17a4be45ec8d340193) which shows how web-vitals are used
 for monitoring SigNoz.
 
 ### Step 6: Setup Dashboard and alerts
+
 You can create a [custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard) and [set alerts](https://signoz.io/docs/setup-alerts-notification/)
 to monitor your core web-vitals and be notified about anything critical.
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/events/launch-week-1/web-vitals.webp" alt="Core Web Vitals Monitoring in SigNoz"/>
-<figcaption><i>Core Web Vitals Monitoring in SigNoz </i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/events/launch-week-1/web-vitals.webp"
+    alt="Core Web Vitals Monitoring in SigNoz"
+  />
+  <figcaption>
+    <i>Core Web Vitals Monitoring in SigNoz </i>
+  </figcaption>
 </figure>
 
 One of the cool feature of SigNoz charts is that you can create thresholds in the chart with different color coding. For example, in the below graph there are three thresholds for `good`, `needs improvement`, and `critical` level.
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/events/launch-week-1/thresholds-chart.webp" alt="Thresholds in SigNoz"/>
-<figcaption><i>Thresholds provide a visual cue about your application's performance </i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/events/launch-week-1/thresholds-chart.webp"
+    alt="Thresholds in SigNoz"
+  />
+  <figcaption>
+    <i>Thresholds provide a visual cue about your application's performance </i>
+  </figcaption>
 </figure>
-
-
-
-
