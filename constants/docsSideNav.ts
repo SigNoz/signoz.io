@@ -1583,6 +1583,11 @@ const docsSideNav = [
         route: '/docs/cost-meter/meter-explorer',
         label: 'Meter Explorer',
       },
+      {
+        type: 'doc',
+        route: '/docs/cost-meter/alerts',
+        label: 'Alerts',
+      },
     ],
   },
   {
