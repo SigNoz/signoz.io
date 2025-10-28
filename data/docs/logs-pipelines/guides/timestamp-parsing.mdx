@@ -27,6 +27,37 @@ Throughout this guide, we'll reference the following example raw log entry, whic
 - The `timestamp` field contains the timestamp `2025-10-27T05:30:17Z`.
 - We need to extract this timestamp and convert it into a proper `timestamp` field for SigNoz.
 
+## Desired Outcome
+
+By the end of this guide, we want to:
+
+- Parse the JSON string in `body` into structured fields under `attributes.parsed_body`.
+- Extract the timestamp information from the `timestamp` field.
+- Map the timestamp value to standard OpenTelemetry timestamp fields.
+
+Here's how the log should look after we apply our pipelines.
+
+```json
+{
+  "body": "Database connection established",
+  "id": "0iNztmsRoLqPNTa7qIA4TlpHNQQ",
+  "timestamp": 1761543017000,
+  "attributes": {
+    "log.file.name": "test.log",
+    "parsed_body": "{\"level\":\"INFO\",\"timestamp\":\"2025-10-27T05:30:17Z\"}"
+  },
+  "resources": {
+    "service.name": "sample-logs"
+  },
+  "scope": {},
+  "severity_text": "",
+  "severity_number": 0,
+  "trace_id": "",
+  "span_id": "",
+  "trace_flags": 0
+}
+```
+
 ## Creating the Pipeline
 
 Before we can parse timestamps, we need to create a pipeline that will filter out logs.
@@ -106,37 +137,6 @@ In SigNoz, go to **Logs** → **Pipelines**
   </figure>
 
 - Press the **"Create"** button to create the pipeline.
-
-## Desired Outcome
-
-By the end of this guide, we want to:
-
-- Parse the JSON string in `body` into structured fields under `attributes.parsed_body`.
-- Extract the timestamp information from the `timestamp` field.
-- Map the timestamp value to standard OpenTelemetry timestamp fields.
-
-Here's how the log should look after we apply our pipelines.
-
-```json
-{
-  "body": "Database connection established",
-  "id": "0iNztmsRoLqPNTa7qIA4TlpHNQQ",
-  "timestamp": 1761543017000,
-  "attributes": {
-    "log.file.name": "test.log",
-    "parsed_body": "{\"level\":\"INFO\",\"timestamp\":\"2025-10-27T05:30:17Z\"}"
-  },
-  "resources": {
-    "service.name": "sample-logs"
-  },
-  "scope": {},
-  "severity_text": "",
-  "severity_number": 0,
-  "trace_id": "",
-  "span_id": "",
-  "trace_flags": 0
-}
-```
 
 ## Steps to Parse JSON and Extract Timestamp
 
