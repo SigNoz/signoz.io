@@ -50,57 +50,81 @@ Metrics can be filtered or grouped by labels including `service.name`, `deployme
 
 ## Setting Up a Meter Alert
 
-1. **Go to Alerts:**
+Setting up a Meter Alert in SigNoz is straightforward and designed for flexibility. Follow these step-by-step instructions to ensure your alerts are robust and actionable:
 
-   - Navigate to the **Alerts** section in your SigNoz UI.
-   - Click on `New Alert` and then select `Try the new experience`.
+### 1. Navigate to the Alerts Section
 
-   <Figure
-     src="/img/docs/cost-meter/alerts/navigate-1.png"
-     alt="Create alerts (try new experience)"
-     caption="Create alerts (try new experience)"
-   />
+- Open your SigNoz UI and click on the **Alerts** tab from the sidebar.
+- Click the `New Alert` button.
+- Select **Try the new experience** to use the enhanced alert creation workflow.
 
-   - Click on `Metric Based Alerts`.
+  <Figure
+    src="/img/docs/cost-meter/alerts/navigate-1.png"
+    alt="Create alerts (try new experience)"
+    caption="Start by creating a new alert in SigNoz"
+  />
 
-2. **Build Your Query:**
+- Choose **Metric Based Alerts** as the alert type.
 
-   - In the query builder, select the source as `meter` under `Metrics` signal type.
+### 2. Select Meter as Your Data Source
 
-   <Figure
-     src="/img/docs/cost-meter/alerts/navigate-2.png"
-     alt="Select Meter source in the dropdown"
-     caption="Select Meter source in the dropdown"
-   />
+- In the signal or metric source dropdown, select `meter` under the **Metrics** signal type.
+- From the metrics list, pick the relevant meter metric you want to monitor (such as `signoz.meter.log.size` for total log size, or `signoz.meter.span.count` for span counts).
 
-   - Then select the relevant meter metric (for example, `signoz.meter.log.size`).
-   - (Optional) Add filters by `service.name`, `environment`, or any label to scope your alert.
+  <Figure
+    src="/img/docs/cost-meter/alerts/navigate-2.png"
+    alt="Select Meter source in the dropdown"
+    caption="Choose 'meter' under Metrics to see cost-related metrics"
+  />
 
-3. **Set Thresholds and Conditions:**
+- _(Optional)_ Add filters or groupings using available labels (`service.name`, `deployment.environment`, `signoz.workspace.key.id`, etc.) for targeted alerting at the service, environment, or workspace level.
 
-   - Specify the threshold (absolute value, rate, or percent change).
-   - Select the threshold to be `In Total` as we want to sum usage over the last X window.
-   - Select the evaluation window as `Cumulative` and then `Current Day` or `Current Month` depending on the timeframe of interest.
+  <ul>
+    <li>
+      Examples:
+      <ul>
+        <li>
+          Monitor costs for a specific service: Add <code>service.name: payment-service</code>
+        </li>
+        <li>
+          Watch ingestion associated with an environment: Add{' '}
+          <code>deployment.environment: production</code>
+        </li>
+      </ul>
+    </li>
+  </ul>
 
-   <Admonition type="info">
-     **Note:** Billing calculations are performed in the UTC timezone. Make sure to select your
-     evaluation window accordingly when creating alerts.
-   </Admonition>
+### 3. Configure Alert Thresholds & Evaluation Window
 
-   <Figure
-     src="/img/docs/cost-meter/alerts/navigate-3.png"
-     alt="Select cumulative window alerts"
-     caption="Select cumulative window alerts"
-   />
+- Define the **condition** for when the alert should trigger:
+  - Set a **threshold** (such as a cumulative log size over 1 GB).
+  - Choose the aggregation: For most cost/usage monitoring, select **In Total** to aggregate all values within the window.
+- Set the **evaluation window**:
 
-4. **Configure Notifications:**
+  - Select **Cumulative** to monitor total usage for the chosen period.
+  - Choose a suitable window (e.g., **Current Day** for daily alerts, **Current Month** for monthly budget limits).
 
-   - Attach your preferred notification channels (email, Slack, PagerDuty, etc.).
-   - Craft a generic or customized notification message.
+  <Admonition type="info">
+    **Tip:** Meter and billing data in SigNoz always use the UTC timezone. Align your alert windows
+    with your organization’s billing/reporting cycle, or use 'Current Month' for monthly quotas.
+  </Admonition>
 
-5. **Review and Save:**
-   - Give the alert a descriptive name (e.g., "Monthly Log Ingestion Limit").
-   - Save and enable the alert.
+  <Figure
+    src="/img/docs/cost-meter/alerts/navigate-3.png"
+    alt="Select cumulative window alerts"
+    caption="Set up a cumulative window for billing-aligned alerts"
+  />
+
+### 4. Configure Notification Channels
+
+- Attach notification channels of your choice (e.g., Email, Slack, PagerDuty) to receive real-time alerts.
+- (Optional) Customize the notification message to provide clear guidance when the alert fires (include context like the service/environment and recommended action).
+
+### 5. Review & Finalize Your Alert
+
+- Give your alert a clear and descriptive name (e.g., "Daily Log Data Budget", "Prod Ingestion Key Quota Exceeded").
+- Double-check your query conditions, filters, and notification preferences.
+- Click **Save** to activate the alert.
 
 ---
 
