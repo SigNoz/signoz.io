@@ -162,6 +162,10 @@ Every doc should be skimmable and actionable.
     </a>
     ```
 
+  - Use descriptive anchor text that makes the link destination clear. Avoid generic phrases like "here" or "link" and do not paste raw URLs into the body text.
+    - ✅ `Learn from the [Temporal Golang sample repository](https://github.com/SigNoz/temporal-golang-opentelemetry/tree/main)`
+    - ❌ `See (link)` or `Refer to https://github.com/...`
+
   - Internal links typically open in the same tab unless the link switches product/app context or interrupts an in-progress task.
   - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
 
