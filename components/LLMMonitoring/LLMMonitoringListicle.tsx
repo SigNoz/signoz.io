@@ -7,7 +7,8 @@ import {
   SiClaude,
   SiGooglegemini,
   SiAnthropic,
-  SiAmazonwebservices
+  SiAmazonwebservices,
+  SiPydantic
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -83,6 +84,12 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/openai-monitoring',
     icon: <SiOpenai className="h-7 w-7 text-green-400" />,
     clickName: 'OpenAI Monitoring',
+  },
+   {
+    name: 'Pydantic AI',
+    href: '/docs/pydantic-ai-observability',
+    icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
+    clickName: 'Pydantic AI Monitoring',
   },
   {
     name: 'Vercel AI SDK',
