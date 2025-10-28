@@ -1824,6 +1824,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/pydantic-ai-dashboard',
+            label: 'Pydantic AI',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/rabbitmq',
             label: 'RabbitMQ',
           },
