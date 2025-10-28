@@ -54,11 +54,25 @@ Metrics can be filtered or grouped by labels including `service.name`, `deployme
 
    - Navigate to the **Alerts** section in your SigNoz UI.
    - Click on `New Alert` and then select `Try the new experience`.
+
+   <Figure
+     src="/img/docs/cost-meter/alerts/navigate-1.png"
+     alt="Create alerts (try new experience)"
+     caption="Create alerts (try new experience)"
+   />
+
    - Click on `Metric Based Alerts`.
 
 2. **Build Your Query:**
 
    - In the query builder, select the source as `meter` under `Metrics` signal type.
+
+   <Figure
+     src="/img/docs/cost-meter/alerts/navigate-2.png"
+     alt="Select Meter source in the dropdown"
+     caption="Select Meter source in the dropdown"
+   />
+
    - Then select the relevant meter metric (for example, `signoz.meter.log.size`).
    - (Optional) Add filters by `service.name`, `environment`, or any label to scope your alert.
 
@@ -67,6 +81,17 @@ Metrics can be filtered or grouped by labels including `service.name`, `deployme
    - Specify the threshold (absolute value, rate, or percent change).
    - Select the threshold to be `In Total` as we want to sum usage over the last X window.
    - Select the evaluation window as `Cumulative` and then `Current Day` or `Current Month` depending on the timeframe of interest.
+
+   <Admonition type="info">
+     **Note:** Billing calculations are performed in the UTC timezone. Make sure to select your
+     evaluation window accordingly when creating alerts.
+   </Admonition>
+
+   <Figure
+     src="/img/docs/cost-meter/alerts/navigate-3.png"
+     alt="Select cumulative window alerts"
+     caption="Select cumulative window alerts"
+   />
 
 4. **Configure Notifications:**
 
@@ -85,62 +110,45 @@ Metrics can be filtered or grouped by labels including `service.name`, `deployme
 
 • Find the per-GB logs price according to your retention settings by navigating to the billing section
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/alerts/usecase-1.1.png"
-    alt="Per GB logs price from billing page"
-  />
-  <figcaption>
-    <i>Fetch the price of logs (per GB) from billing page</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-1.1.png"
+  alt="Per GB logs price from billing page"
+  caption="Fetch the price of logs (per GB) from billing page"
+/>
 
-• Select the `signoz.meter.log.size` meter metric with `timeAggregation` as `Increase`
-• Add a formula to calculate cost: `(A / 1e9) * (cost per GB)`
+• Select the `signoz.meter.log.size` meter metric with `timeAggregation` as `Increase`.
+• Add a formula to calculate cost: `(A / 1e9) * (cost per GB)`.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/alerts/usecase-1.2.png"
-    alt="Query for logs ingestion size with formula for calculating the price"
-  />
-  <figcaption>
-    <i>Query for logs ingestion size with formula for calculating the price</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-1.2.png"
+  alt="Query for logs ingestion size with formula for calculating the price"
+  caption="Query for logs ingestion size with formula for calculating the price"
+/>
 
-• Select the formula in the threshold condition with `In Total`
-• Select `Cumulative` Window alert with timerange as `Current Month`
+• Select the formula in the threshold condition with `In Total`.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/alerts/usecase-1.3.png"
-    alt="Threshold condition for monthly log billing"
-  />
-  <figcaption>
-    <i>Threshold condition for monthly log billing</i>
-  </figcaption>
-</figure>
+• Select `Cumulative` Window alert with timerange as `Current Month`.
 
-• Select the notification channel and save the alert
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-1.3.png"
+  alt="Threshold condition for monthly log billing"
+  caption="Threshold condition for monthly log billing"
+/>
+
+• Select the notification channel and save the alert.
 
 ### Example 2: Alert on Monthly Total Costs Exceeding $1000
 
-• Find the per-GB price for logs and spans, and per-million data point price for metrics on the billing page
+• Find the per-GB price for logs and spans, and per-million data point price for metrics on the billing page.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/alerts/usecase-2.1.png"
-    alt="Per GB price for logs and spans, per million data point price for metrics from billing page"
-  />
-  <figcaption>
-    <i>
-      Per GB price for logs and spans, per million data point price for metrics from billing page
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-2.1.png"
+  alt="Per GB price for logs and spans, per million data point price for metrics from billing page"
+  caption="Per GB price for logs and spans, per million data point price for metrics from billing page"
+/>
 
-• Select `signoz.meter.log.size` with `timeAggregation` as `Increase`
-• Repeat for `signoz.meter.span.size` and `signoz.meter.metric.datapoint.count`
+• Select `signoz.meter.log.size` with `timeAggregation` as `Increase`.
+• Repeat for `signoz.meter.span.size` and `signoz.meter.metric.datapoint.count`.
 • Add a formula to calculate total cost:
 
 - Logs: `(A / 1e9) * (cost per GB of logs)`
@@ -148,80 +156,62 @@ Metrics can be filtered or grouped by labels including `service.name`, `deployme
 - Metrics: `(C / 1e6) * (cost per million data points)`
 - Total: Sum all three components
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/alerts/usecase-2.2.png"
-    alt="Query for total ingestion with formula for calculating the price"
-  />
-  <figcaption>
-    <i>Query for total ingestion with formula for calculating the price</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-2.2.png"
+  alt="Query for total ingestion with formula for calculating the price"
+  caption="Query for total ingestion with formula for calculating the price"
+/>
 
-• Select the formula in the threshold condition with `In Total`
-• Select `Cumulative` Window alert with timerange as `Current Month`
+• Select the formula in the threshold condition with `In Total`.
+• Select `Cumulative` Window alert with timerange as `Current Month`.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/alerts/usecase-2.3.png"
-    alt="Threshold condition for monthly billing"
-  />
-  <figcaption>
-    <i>Threshold condition for monthly billing</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-2.3.png"
+  alt="Threshold condition for monthly billing"
+  caption="Threshold condition for monthly billing"
+/>
 
-• Select the notification channel and save the alert
+• Select the notification channel and save the alert.
 
 ### Example 3: Alert on Ingestion Key Approaching Daily Quota
 
-• Navigate to the ingestion keys page and expand the ingestion key of interest
-• Click the `bell` icon next to the daily limit for the signal you want to monitor
+• Navigate to the ingestion keys page and expand the ingestion key of interest.
+• Click the `bell` icon next to the daily limit for the signal you want to monitor.
 
-<figure data-zoomable align="center">
-  <img src="/img/docs/cost-meter/alerts/usecase-3.1.png" alt="Ingestion Keys Page for alerting" />
-  <figcaption>
-    <i>Ingestion Keys Page for alerting</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-3.1.png"
+  alt="Ingestion Keys Page for alerting"
+  caption="Ingestion Keys Page for alerting"
+/>
 
-• You'll be navigated to the alerts page with the query pre-filled with all necessary details
+• You'll be navigated to the alerts page with the query pre-filled with all necessary details.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/alerts/usecase-3.2.png"
-    alt="Query for ingestion key limits based alert"
-  />
-  <figcaption>
-    <i>Query for ingestion key limits based alert</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-3.2.png"
+  alt="Query for ingestion key limits based alert"
+  caption="Query for ingestion key limits based alert"
+/>
 
-• Set a descriptive name for the alert, configure your notification channel, and save
+• Set a descriptive name for the alert, configure your notification channel, and save the alert.
 
 ### Example 4: Alert if Any Service Ingests Over 1 Million Spans in a Day
 
 • Select `signoz.meter.span.count` metric and group by `service.name`
 
-<figure data-zoomable align="center">
-  <img src="/img/docs/cost-meter/alerts/usecase-4.1.png" alt="Query for span count per service" />
-  <figcaption>
-    <i>Query for span count per service</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-4.1.png"
+  alt="Query for span count per service"
+  caption="Query for span count per service"
+/>
 
-• Set threshold to 1,000,000 with `In Total` aggregation
-• Configure evaluation window as `Cumulative` with `Current Day`
+• Set threshold to 1,000,000 with `In Total` aggregation.
+• Configure evaluation window as `Cumulative` with `Current Day`.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/cost-meter/alerts/usecase-4.2.png"
-    alt="Threshold for any service exceeding 1M spans ina day"
-  />
-  <figcaption>
-    <i>Threshold for any service exceeding 1M spans ina day</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/cost-meter/alerts/usecase-4.2.png"
+  alt="Threshold for any service exceeding 1M spans ina day"
+  caption="Threshold for any service exceeding 1M spans ina day"
+/>
 
 • Set up notifications and save
 
