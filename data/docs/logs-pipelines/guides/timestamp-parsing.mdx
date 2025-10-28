@@ -10,7 +10,7 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-Logs often contain timestamps in various formats, sometimes embedded within the log message itself or in a non-standard field. To effectively analyze and filter logs in SigNoz, it's important to parse the timestamp information into the standard OpenTelemetry `timestamp` field. This guide will show you how to extract and parse timestamp data using SigNoz Logs Pipelines.
+If your logs include timestamps in non-standard fields or embedded within the message, this guide will show you how to extract and parse the timestamp information into the standard OpenTelemetry `timestamp` field using SigNoz Logs [Pipelines](https://signoz.io/docs/logs-pipelines/concepts/#pipelines).
 
 ## Example Log
 
@@ -26,6 +26,86 @@ Throughout this guide, we'll reference the following example raw log entry, whic
 
 - The `timestamp` field contains the timestamp `2025-10-27T05:30:17Z`.
 - We need to extract this timestamp and convert it into a proper `timestamp` field for SigNoz.
+
+## Creating the Pipeline
+
+Before we can parse timestamps, we need to create a pipeline that will filter out logs.
+
+### Step 1: Navigate to Pipelines Page
+
+In SigNoz, go to **Logs** → **Pipelines**
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/docs/logs-management/logs-pipelines/timestamp-guide-pipeline-step1.webp"
+    alt="Navigate to Log Pipelines"
+  />
+  <figcaption>
+    <i>Navigate to Log Pipelines</i>
+  </figcaption>
+</figure>
+
+### Step 2: Create a new Pipeline
+
+- Open the "Create New Pipeline" dialog.
+
+  - If you do not have existing pipelines, press the **"New Pipeline"** button.
+
+  <figure data-zoomable align="center">
+    <img
+      className="box-shadowed-image"
+      src="/img/docs/logs-management/logs-pipelines/timestamp-guide-pipeline-step2.webp"
+      alt="New Pipeline Button"
+    />
+    <figcaption>
+      <i>New Pipeline Button</i>
+    </figcaption>
+  </figure>
+
+  - If you already have some pipelines, press the **"Enter Edit Mode"** button and then click the **"Add a New Pipeline"** button at the bottom of the list of pipelines.
+
+  <figure data-zoomable align="center">
+    <img
+      className="box-shadowed-image"
+      src="/img/docs/logs-management/logs-pipelines/timestamp-guide-pipeline-step3.webp"
+      alt="Enter Edit Mode button"
+    />
+    <figcaption>
+      <i>Enter Edit Mode button</i>
+    </figcaption>
+  </figure>
+
+  <figure data-zoomable align="center">
+    <img
+      className="box-shadowed-image"
+      src="/img/docs/logs-management/logs-pipelines/timestamp-guide-pipeline-step4.webp"
+      alt="Add a New Pipeline button"
+    />
+    <figcaption>
+      <i>Add a New Pipeline button</i>
+    </figcaption>
+  </figure>
+
+- Provide details about the pipeline in the Create Pipeline Dialog.
+
+  - **Name:** Provide a pipeline name.
+  - **Description:** Add a detailed description for your pipeline (optional).
+  - **Filter:** Use the filter field to select the logs you want to process with the pipeline. For example `log.file.name = test.log`.
+  - **Filtered Logs Preview:** Use it to verify that the logs you want to process will be selected by the pipeline.
+
+  <figure data-zoomable align="center">
+    <img
+      className="box-shadowed-image"
+      src="/img/docs/logs-management/logs-pipelines/timestamp-guide-pipeline-step5.webp"
+      alt="Create New Pipeline dialog"
+    />
+    <figcaption>
+      <i>Create New Pipeline dialog</i>
+    </figcaption>
+  </figure>
+
+- Press the **"Create"** button to create the pipeline.
 
 ## Desired Outcome
 
@@ -87,6 +167,30 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
 - **Parse From**: `body`
 - **Parse To**: `attributes.parsed_body`
 
+  <figure data-zoomable align="center">
+    <img
+      className="box-shadowed-image"
+      src="/img/docs/logs-management/logs-pipelines/timestamp-guide-pipeline-step6.webp"
+      alt="Expand Pipeline to access Processors"
+    />
+    <figcaption>
+      <i>Expand Pipeline to access Processors</i>
+    </figcaption>
+  </figure>
+
+  - Click the **Add Processor** Button to bring up the Dialog for adding a new processor.
+
+  <figure data-zoomable align="center">
+    <img
+      className="box-shadowed-image"
+      src="/img/docs/logs-management/logs-pipelines/timestamp-guide-pipeline-step7.webp"
+      alt="Add Processors Button"
+    />
+    <figcaption>
+      <i>Add Processors Button</i>
+    </figcaption>
+  </figure>
+
 <figure data-zoomable align="center">
   <img
     className="box-shadowed-image"
@@ -97,6 +201,8 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
     <i>Converting to Structured Attributes</i>
   </figcaption>
 </figure>
+
+- Press the **"Create"** button to create the Processor.
 
 ### After Parsing
 
@@ -370,6 +476,77 @@ Finally, let's remove the redundant `timestamp` from `attributes.parsed_body` fi
 
 - The redundant timestamp field has been removed from `attributes.parsed_body`.
 - Only the `level` field remains in the parsed body, keeping the structure clean.
+
+## Step 5: Preview and Validate Pipeline Processing
+
+After adding all the processors, the final pipeline should look like this:
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/docs/logs-management/logs-pipelines/timestamp-guide-step5.webp"
+    alt="Pipeline with all the processors"
+  />
+  <figcaption>
+    <i>Pipeline with all the processors</i>
+  </figcaption>
+</figure>
+
+Before you save and deploy the pipeline, check the simulation of pipeline processing on some sample logs to validate that the pipeline works as intended. Click the "eye" icon in the actions column for the pipeline to bring up the **Pipeline Preview Dialog**.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/docs/logs-management/logs-pipelines/timestamp-guide-step6.webp"
+    alt="Pipeline Preview with Sample Logs"
+  />
+  <figcaption>
+    <i>Pipeline Preview with Sample Logs</i>
+  </figcaption>
+</figure>
+
+The Preview Dialog will pull sample logs queries. To simulate pipeline processing, press the **Simulate Processing** button in the bottom section of the Pipeline Preview Dialog. This will simulate pipeline processing on the sample logs and show the output.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/docs/logs-management/logs-pipelines/timestamp-guide-step7.webp"
+    alt="Pipeline Preview with Processed Output"
+  />
+  <figcaption>
+    <i>Pipeline Preview with Processed Output</i>
+  </figcaption>
+</figure>
+
+You can click on the expand icon on the right end of each processed log to open the detailed view for that log entry.
+
+## Step 6: Save Pipelines and Verify
+
+After verifying the simulated logs in Pipeline Preview Dialog, to save the pipeline, press the **Save Configuration** button at the bottom of the pipelines list to save pipelines. This will store the latest state of your pipelines and will deploy them for pre-processing.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/docs/logs-management/logs-pipelines/timestamp-guide-step8.webp"
+    alt="Save Configuration Button"
+  />
+  <figcaption>
+    <i>Save Configuration Button</i>
+  </figcaption>
+</figure>
+
+You can track the deployment status of your pipelines using the **Change History** tab at the top of pipelines.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/docs/logs-management/logs-pipelines/timestamp-guide-step8.webp"
+    alt="Pipelines Change History"
+  />
+  <figcaption>
+    <i>Pipelines Change History</i>
+  </figcaption>
+</figure>
 
 ## Final Outcome
 
