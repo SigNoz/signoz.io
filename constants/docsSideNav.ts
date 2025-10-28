@@ -1397,6 +1397,11 @@ const docsSideNav = [
                 route: '/docs/logs-pipelines/guides/severity-parsing',
                 label: 'Severity Parsing',
               },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/timestamp-parsing',
+                label: 'Parse Timestamp',
+              },
             ],
           },
         ],
