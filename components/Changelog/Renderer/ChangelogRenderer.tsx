@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { sluggify } from '@/utils/common'
 import { SupportedImageTypes, SupportedVideoTypes } from '@/utils/strapi'
 import ChangelogTitle from '@/components/Changelog/Title/ChangelogTitle'
+import Link from 'next/link'
 
 function renderMarkdown(markdownContent: string) {
   return <ReactMarkdown>{markdownContent}</ReactMarkdown>
@@ -65,7 +66,16 @@ const ChangelogRenderer: React.FC<ChangelogRendererProps> = ({ changelog }) => {
       key={changelog.id}
       className={`relative flex flex-col px-4 pb-28 md:px-8 ${Styles['changelog-container']}`}
     >
-      <span className="mb-5 text-sm text-signoz_vanilla-400">{formattedDate}</span>
+      <div className="mb-5 flex flex-col gap-2">
+        <Link
+          target="_blank"
+          href={`https://github.com/signoz/signoz/releases/tag/${changelog.version}`}
+          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-signoz_slate-400 bg-signoz_ink-500 px-2 py-1 text-xs !text-signoz_vanilla-100 !no-underline  transition-colors hover:bg-signoz_ink-300 active:bg-signoz_slate-400"
+        >
+          {changelog.version}
+        </Link>
+        <span className="text-sm text-signoz_vanilla-400">{formattedDate}</span>
+      </div>
       <div className="absolute -bottom-16 left-0 top-1.5 hidden w-px bg-signoz_slate-400 lg:block">
         <div className="absolute left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-signoz_robin-500" />
       </div>
