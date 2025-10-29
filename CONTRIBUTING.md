@@ -39,9 +39,11 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Pre-commit behavior
   - Runs `lint-staged` on staged files. ESLint and Prettier fix typical JS/TS/MD/MDX formatting and lint issues.
   - When changes include docs or redirect-related files (`data/docs/**/*.mdx`, `next.config.js`, or `scripts/check-doc-redirects.js`), it runs `yarn check:doc-redirects` to ensure renamed/moved docs have permanent redirects.
+  - When changes include docs (`data/docs/**/*.mdx`), it runs `yarn check:docs-metadata` to ensure metadata such as date, tag, title is complete and correct.
 - Fixing failures
   - Lint/format: run `yarn lint` or re-stage after auto-fixes from Prettier/ESLint.
   - Redirects: run `yarn check:doc-redirects` locally to see missing entries, then add a permanent redirect in `next.config.js` under `async redirects()`. Re-stage and commit.
+  - Metadata: run `yarn check:docs-metadata` locally to see missing/invalid entries, then update the metadata in the `.mdx` file. Re-stage and commit.
   - Optional: `yarn test:doc-redirects` runs a small test for redirect rules.
 - Hooks path
   - The repo uses Husky v9 defaults (`core.hooksPath=.husky`). If your local Git still points elsewhere (e.g., `.husky/_` from older setups), run `git config core.hooksPath .husky` or re-run `yarn install` to refresh hooks.
@@ -163,6 +165,7 @@ Every doc should be skimmable and actionable.
     ```
 
   - Use descriptive anchor text that makes the link destination clear. Avoid generic phrases like "here" or "link" and do not paste raw URLs into the body text.
+
     - ✅ `Learn from the [Temporal Golang sample repository](https://github.com/SigNoz/temporal-golang-opentelemetry/tree/main)`
     - ❌ `See (link)` or `Refer to https://github.com/...`
 
