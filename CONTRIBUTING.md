@@ -56,6 +56,10 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
   - Triggers on PRs that touch `data/docs/**`, `next.config.js`, `scripts/check-doc-redirects.js`, tests, or `package.json`.
   - Runs `yarn test:doc-redirects` and `yarn check:doc-redirects`.
   - Fails if redirects are missing/invalid or tests fail. Fix by adding permanent redirects in `next.config.js` and re-running locally.
+- Docs Metadata Guard
+  - Triggers on PRs that touch `data/docs/**`, `next.config.js`, `scripts/check-docs-metadata.js`, tests, or `package.json`.
+  - Runs `yarn test:docs-metadata` and `yarn check:docs-metadata`.
+  - Fails if title, date, description are missing/invalid, and warns if tags are missing from MDX files. Fix by adding relevant metadata in MDX file and re-running locally.
 - Add to Onboarding (label-driven)
   - When a PR is labeled `add-to-onboarding`, this job checks that the PR includes docs changes. If none are found, the job fails with a message.
   - If docs are present, it auto-creates an onboarding issue listing changed docs and comments on the PR with a link.

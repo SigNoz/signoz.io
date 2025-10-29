@@ -187,7 +187,7 @@ function validateMetadata(filePath) {
     }
   }
 
-  // New validation: Compare frontmatter date with git commit date
+  // Compare frontmatter date with git commit date
   if (fieldMap.has('date')) {
     const frontmatterDate = fieldMap.get('date').replace(/['"]/g, '').trim()
     const gitDate = getGitAuthorDate(filePath)
@@ -211,6 +211,16 @@ function validateMetadata(filePath) {
     const titleValue = fieldMap.get('title').trim()
     if (!titleValue || titleValue === '""' || titleValue === "''") {
       errors.push('title cannot be empty')
+    }
+  }
+
+  // Validate description field (required)
+  if (!fieldMap.has('description')) {
+    errors.push('missing description')
+  } else {
+    const descriptionValue = fieldMap.get('description').trim()
+    if (!descriptionValue || descriptionValue === '""' || descriptionValue === "''") {
+      errors.push('description cannot be empty')
     }
   }
 
@@ -275,11 +285,13 @@ function main() {
     console.error('\nRequired fields:')
     console.error('  - date: Date in YYYY-MM-DD format')
     console.error('  - title: Non-empty title field')
+    console.error('  - description: Non-empty description field')
     console.error('  - tags: Array of tags (recommended)')
     console.error('\nExample:')
     console.error('---')
     console.error('title: My Documentation Page')
     console.error(`date: ${new Date().toISOString().split('T')[0]}`)
+    console.error('description: A brief description of this page for SEO')
     console.error('tags: ["SigNoz Cloud", "Self-Host"]')
     console.error('---\n')
     process.exit(1)

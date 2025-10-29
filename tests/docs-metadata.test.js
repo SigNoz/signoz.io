@@ -29,6 +29,7 @@ describe('check-docs-metadata', () => {
       const content = `---
 title: Test Document
 date: 2024-01-15
+description: A test document for validation
 tags: ["test", "example"]
 ---
 
@@ -39,6 +40,7 @@ tags: ["test", "example"]
 
       assert.ok(frontmatter.includes('title: Test Document'))
       assert.ok(frontmatter.includes('date: 2024-01-15'))
+      assert.ok(frontmatter.includes('description: A test document for validation'))
       assert.ok(frontmatter.includes('tags: ["test", "example"]'))
     })
 
@@ -61,6 +63,7 @@ tags: ["test", "example"]
       const content = `---
 title: Valid Document
 date: 2024-01-15
+description: A valid document with all required fields
 tags: ["SigNoz Cloud", "Self-Host"]
 ---
 
@@ -77,6 +80,7 @@ tags: ["SigNoz Cloud", "Self-Host"]
       const content = `---
 title: No Tags Document
 date: 2024-01-15
+description: A document without tags
 ---
 
 # Content
@@ -91,6 +95,7 @@ date: 2024-01-15
     it('should error when date is missing', () => {
       const content = `---
 title: No Date Document
+description: A document without a date
 tags: ["test"]
 ---
 
@@ -105,6 +110,7 @@ tags: ["test"]
     it('should error when title is missing', () => {
       const content = `---
 date: 2024-01-15
+description: A document without a title
 tags: ["test"]
 ---
 
@@ -116,10 +122,42 @@ tags: ["test"]
       assert.ok(errors.includes('missing title'))
     })
 
+    it('should error when description is missing', () => {
+      const content = `---
+title: No Description Document
+date: 2024-01-15
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('no-description.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.ok(errors.includes('missing description'))
+    })
+
+    it('should error when description is empty', () => {
+      const content = `---
+title: Empty Description Document
+date: 2024-01-15
+description: ""
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('empty-description.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.ok(errors.includes('description cannot be empty'))
+    })
+
     it('should error for invalid date format', () => {
       const content = `---
 title: Invalid Date Format
 date: 01/15/2024
+description: A document with invalid date format
 tags: ["test"]
 ---
 
@@ -139,6 +177,7 @@ tags: ["test"]
       const content = `---
 title: Future Date Document
 date: ${futureDateStr}
+description: A document with a future date
 tags: ["test"]
 ---
 
@@ -158,9 +197,9 @@ tags: ["test"]
       const content = `---
 title: Near Future Date Document
 date: ${futureDateStr}
+description: A document with a near future date
 tags: ["test"]
 ---
-
 
 # Content
 `
@@ -175,6 +214,7 @@ tags: ["test"]
       const content = `---
 title: Wrong Tags Format
 date: 2024-01-15
+description: A document with wrong tags format
 tags: test
 ---
 
@@ -191,6 +231,7 @@ tags: test
       const content = `---
 title: Empty Tags
 date: 2024-01-15
+description: A document with empty tags array
 tags: []
 ---
 
@@ -211,6 +252,7 @@ tags: []
       assert.ok(errors.length > 0)
       assert.ok(errors.includes('missing date'))
       assert.ok(errors.includes('missing title'))
+      assert.ok(errors.includes('missing description'))
     })
 
     it('should error for non-existent file', () => {
@@ -232,6 +274,7 @@ date: invalid-date
       assert.ok(errors.length > 1)
       assert.ok(warnings.includes('missing tags'))
       assert.ok(errors.includes('missing title'))
+      assert.ok(errors.includes('missing description'))
       assert.ok(errors.includes('invalid date format - use YYYY-MM-DD'))
     })
   })
