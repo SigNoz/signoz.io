@@ -1,0 +1,35 @@
+name: Docs Metadata Guard
+
+on:
+  pull_request:
+    paths:
+      - "data/docs/**"
+      - "next.config.js"
+      - "scripts/check-docs-metadata.js"
+      - "tests/docs-metadata.test.js"
+      - "tests/fixtures/**"
+      - "package.json"
+      - ".github/workflows/docs-metadata-guard.yml"
+
+jobs:
+  check-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive
+
+      - name: Run docs metadata tests
+        run: yarn test:docs-metadata
+
+      - name: Validate docs metadata
+        run: yarn check:docs-metadata
