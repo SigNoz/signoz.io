@@ -218,7 +218,7 @@ const docsSideNav = [
             items: [
               {
                 type: 'category',
-                label: 'Community Edition',
+                label: 'Community',
                 isExpanded: false,
                 items: [
                   {
