@@ -271,25 +271,25 @@ jobs:
                 if (relationConfig.filterKey && relationConfig.matchValue) {
                   // Special case for tags: check key contains 'faq'/'faqs' AND value matches
                   matched = entities.find(entity => {
-                    const keyMatch = entity.attributes.key && 
-                      (entity.attributes.key.toLowerCase().includes('faq') || 
-                       entity.attributes.key.toLowerCase().includes('faqs'));
+                    const keyMatch = entity?.key && 
+                      (entity?.key.toLowerCase().includes('faq') || 
+                       entity?.key.toLowerCase().includes('faqs'));
                     
-                    const valueMatch = entity.attributes.value && 
-                      entity.attributes.value.toLowerCase() === value.toLowerCase();
+                    const valueMatch = entity?.value && 
+                      entity?.value.toLowerCase() === value.toLowerCase();
                     
                     return keyMatch && valueMatch;
                   });
                 } else if (relationConfig.matchValue) {
                   // Match against value field (case insensitive)
                   matched = entities.find(entity => 
-                    entity.attributes.value && 
-                    entity.attributes.value.toLowerCase() === value.toLowerCase()
+                    entity?.value && 
+                    entity?.value.toLowerCase() === value.toLowerCase()
                   );
                 } else {
                   // Match against specified field (exact match)
                   matched = entities.find(entity => 
-                    entity.attributes[relationConfig.matchField] === value
+                    entity?.[relationConfig.matchField] === value
                   );
                 }
                 
