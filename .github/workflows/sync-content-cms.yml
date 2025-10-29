@@ -405,11 +405,11 @@ jobs:
           }
           
           // Helper: Update entry in Strapi
-          async function updateEntry(folderName, entryId, data) {
+          async function updateEntry(folderName, documentId, data) {
             const schema = COLLECTION_SCHEMAS[folderName];
             try {
               const response = await axios.put(
-                `${CMS_API_URL}/api/${schema.endpoint}/${entryId}`,
+                `${CMS_API_URL}/api/${schema.endpoint}/${documentId}`,
                 { data },
                 {
                   headers: {
@@ -510,7 +510,7 @@ jobs:
                   
                   if (existingEntry) {
                     console.log(`🔄 Updating in CMS: ${pathField}`);
-                    await updateEntry(folderName, existingEntry.id, strapiData);
+                    await updateEntry(folderName, existingEntry.documentId, strapiData);
                     console.log(`✅ Updated successfully`);
                     results.updated.push(filePath);
                   } else {
