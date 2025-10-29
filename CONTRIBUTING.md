@@ -39,7 +39,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Pre-commit behavior
   - Runs `lint-staged` on staged files. ESLint and Prettier fix typical JS/TS/MD/MDX formatting and lint issues.
   - When changes include docs or redirect-related files (`data/docs/**/*.mdx`, `next.config.js`, or `scripts/check-doc-redirects.js`), it runs `yarn check:doc-redirects` to ensure renamed/moved docs have permanent redirects.
-  - When changes include docs (`data/docs/**/*.mdx`), it runs `yarn check:docs-metadata` to ensure metadata such as date, tag, title is complete and correct.
+  - When changes include docs (`data/docs/**/*.mdx`), it runs `yarn check:docs-metadata` to ensure metadata such as date, description, tag, title is complete and correct.
 - Fixing failures
   - Lint/format: run `yarn lint` or re-stage after auto-fixes from Prettier/ESLint.
   - Redirects: run `yarn check:doc-redirects` locally to see missing entries, then add a permanent redirect in `next.config.js` under `async redirects()`. Re-stage and commit.
