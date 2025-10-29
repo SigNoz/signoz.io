@@ -61,6 +61,17 @@ function getChangedDocFiles(baseRef) {
   return Array.from(changedFiles).filter(Boolean)
 }
 
+function getGitAuthorDate(filePath) {
+  try {
+    const dateString = execSync(`git log -2 --pretty=format:%as -- ${filePath}`, {
+      encoding: 'utf8',
+    }).trim()
+    return dateString || null
+  } catch (error) {
+    return null
+  }
+}
+
 function getStagedDocFiles() {
   try {
     const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACMR', {
@@ -162,12 +173,33 @@ function validateMetadata(filePath) {
       if (isNaN(date.getTime())) {
         errors.push('invalid date value')
       } else {
-        // Check if date is in the future
+        // Allow dates up to 7 days in the future
         const today = new Date()
         today.setHours(0, 0, 0, 0)
-        if (date > today) {
-          errors.push('date cannot be in the future')
+
+        const maxFutureDate = new Date(today)
+        maxFutureDate.setDate(maxFutureDate.getDate() + 7)
+
+        if (date > maxFutureDate) {
+          errors.push('date cannot be more than 7 days in the future')
         }
+      }
+    }
+  }
+
+  // New validation: Compare frontmatter date with git commit date
+  if (fieldMap.has('date')) {
+    const frontmatterDate = fieldMap.get('date').replace(/['"]/g, '').trim()
+    const gitDate = getGitAuthorDate(filePath)
+
+    if (gitDate) {
+      const frontDate = new Date(frontmatterDate)
+      const commitDate = new Date(gitDate)
+
+      if (frontDate < commitDate) {
+        warnings.push(
+          `frontmatter date (${frontmatterDate}) is before git commit date (${gitDate})`
+        )
       }
     }
   }
