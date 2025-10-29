@@ -176,7 +176,22 @@ jobs:
                   frontmatterField: 'related_faqs'  // Array of FAQ paths in frontmatter
                 }
               }
-            }
+            },
+            authors: {
+              apiPath: 'api::author.author',
+              endpoint: 'authors',
+              fields: ['key', 'name', 'title', 'url', 'image_url'],
+            },
+            tags: {
+              apiPath: 'api::tag.tag',
+              endpoint: 'tags',
+              fields: ['value', 'key', 'description'],
+            },
+            keywords: {
+              apiPath: 'api::keyword.keyword',
+              endpoint: 'keywords',
+              fields: ['value', 'key', 'description'],
+            },
           };
           
           // Helper: Extract folder name from file path
@@ -294,8 +309,8 @@ jobs:
                 }
                 
                 if (matched) {
-                  matchedIds.push(matched.id);
-                  console.log(`    ✅ Matched "${value}" → ID: ${matched.id}`);
+                  matchedIds.push(matched.documentId);
+                  console.log(`    ✅ Matched "${value}" → ID: ${matched.documentId}`);
                 } else {
                   console.warn(`    ⚠️ No match found for "${value}" in ${relationConfig.endpoint}`);
                 }
