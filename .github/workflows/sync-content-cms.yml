@@ -29,7 +29,7 @@ env:
   
   # Revalidation Configuration
   NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
-  REVALIDATION_SECRET_KEY: ${{ secrets.REVALIDATION_SECRET_KEY }}
+  REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
   
   # Branch Configuration
   PRODUCTION_BRANCH: 'test/cms-with-isr'
@@ -576,7 +576,7 @@ jobs:
             --data "{
               \"revalidateAll\": true,
               \"clearCache\": true,
-              \"secret\": \"${{ env.REVALIDATION_SECRET_KEY }}\"
+              \"secret\": \"${{ env.REVALIDATE_SECRET }}\"
             }")
           
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
