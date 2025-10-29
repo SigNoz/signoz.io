@@ -97,7 +97,7 @@ tags: ["test"]
 # Content
 `
       const filePath = createTestFile('no-date.mdx', content)
-      const { errors, warnings } = validateMetadata(filePath)
+      const { errors } = validateMetadata(filePath)
 
       assert.ok(errors.includes('missing date'))
     })
@@ -111,7 +111,7 @@ tags: ["test"]
 # Content
 `
       const filePath = createTestFile('no-title.mdx', content)
-      const { errors, warnings } = validateMetadata(filePath)
+      const { errors } = validateMetadata(filePath)
 
       assert.ok(errors.includes('missing title'))
     })
@@ -126,14 +126,14 @@ tags: ["test"]
 # Content
 `
       const filePath = createTestFile('invalid-date.mdx', content)
-      const { errors, warnings } = validateMetadata(filePath)
+      const { errors } = validateMetadata(filePath)
 
       assert.ok(errors.includes('invalid date format - use YYYY-MM-DD'))
     })
 
-    it('should error for future dates', () => {
+    it('should error for dates more than 7 days in the future', () => {
       const futureDate = new Date()
-      futureDate.setFullYear(futureDate.getFullYear() + 1)
+      futureDate.setDate(futureDate.getDate() + 10) // 10 days in the future
       const futureDateStr = futureDate.toISOString().split('T')[0]
 
       const content = `---
@@ -145,9 +145,30 @@ tags: ["test"]
 # Content
 `
       const filePath = createTestFile('future-date.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.ok(errors.includes('date cannot be more than 7 days in the future'))
+    })
+
+    it('should allow dates up to 7 days in the future', () => {
+      const futureDate = new Date()
+      futureDate.setDate(futureDate.getDate() + 5) // 5 days in the future
+      const futureDateStr = futureDate.toISOString().split('T')[0]
+
+      const content = `---
+title: Near Future Date Document
+date: ${futureDateStr}
+tags: ["test"]
+---
+
+
+# Content
+`
+      const filePath = createTestFile('near-future-date.mdx', content)
       const { errors, warnings } = validateMetadata(filePath)
 
-      assert.ok(errors.includes('date cannot be in the future'))
+      assert.strictEqual(errors.length, 0)
+      assert.strictEqual(warnings.length, 0)
     })
 
     it('should warn when tags is not an array', () => {
@@ -185,7 +206,7 @@ tags: []
     it('should handle files with no frontmatter', () => {
       const content = `# Just content`
       const filePath = createTestFile('no-frontmatter.mdx', content)
-      const { errors, warnings } = validateMetadata(filePath)
+      const { errors } = validateMetadata(filePath)
 
       assert.ok(errors.length > 0)
       assert.ok(errors.includes('missing date'))
@@ -193,7 +214,7 @@ tags: []
     })
 
     it('should error for non-existent file', () => {
-      const { errors, warnings } = validateMetadata('/non/existent/file.mdx')
+      const { errors } = validateMetadata('/non/existent/file.mdx')
 
       assert.ok(errors.includes('file not found'))
     })
