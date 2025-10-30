@@ -1,5 +1,4 @@
 const fs = require('fs')
-const path = require('path')
 const matter = require('gray-matter')
 const axios = require('axios')
 
@@ -225,7 +224,7 @@ async function findEntryByPath(folderName, pathField) {
   try {
     const response = await axios.get(`${CMS_API_URL}/api/${schema.endpoint}`, {
       params: {
-        filters: { path: { $eq: pathField } },
+        filters: { path: { $eq: pathField }, deployment_status: { $eq: DEPLOYMENT_STATUS } },
         pagination: { limit: 1 },
       },
       headers: {
