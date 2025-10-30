@@ -20,13 +20,13 @@ However, DNS resolution of node hostnames can fail or be unreliable, particularl
 
 </Admonition>
 
-## What is the kubeletstats receiver and why might you need to override the endpoint?
+## Configure kubeletMetrics Endpoint for IPv6 or Custom Networking
 
 The `kubeletstats` receiver connects to the Kubelet API on each node to collect essential metrics. Using the node IP works well for most standard clusters. However, in **IPv6-only**, **dual-stack**, or some cloud/provider environments (like EKS/IPv6), you may need to configure the endpoint to use the node name for reliable connectivity.
 
-## Step 1: Update kubeletMetrics Endpoint for IPv6 or Custom Networking
+### Step 1: Update kubeletMetrics Endpoint
 
-Edit your `values.yaml` and under `presets.kubeletMetrics` set:
+Update your `values.yaml` for [presets.kubeletMetrics](https://github.com/SigNoz/charts/blob/9ee23874aa122317fdcbd99d712a63b0ab07248d/charts/k8s-infra/values.yaml#L354):
 
 ```yaml
 presets:
@@ -42,15 +42,11 @@ This allows the receiver to reach the kubelet using node name addressing, which 
 
 Other kubeletMetrics settings (authType, collectionInterval, etc.) can remain at defaults unless you have specific requirements.
 
-## Step 2: Apply and Validate Configuration
+### Step 2: Apply and Validate Configuration
 
 1. Apply your config via Helm upgrade or your deployment method for SigNoz.
 2. Verify that node and pod metrics show up in the SigNoz dashboard.
 3. If you want to revert for IPv4 clusters, restore the default:
-
-```yaml
-endpoint: '${env:K8S_HOST_IP}:10250'
-```
 
 ## Next Steps
 
