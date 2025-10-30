@@ -1,0 +1,188 @@
+---
+date: 2025-10-30
+title: Fly.io Metrics
+id: fly-metrics
+tags : [SigNoz Cloud, Self-Host]
+---
+
+This document explains how to monitor Fly.io application metrics in SigNoz by scraping Fly’s Prometheus federation endpoint with the OpenTelemetry Collector.
+
+## Pre-requisites
+
+- A `SigNoz Cloud` (or self-hosted) workspace 
+- `Fly CLI installed` and a Fly.io account
+- Your Fly.io organization slug (e.g., personal)
+- A sample Fly app to generate test traffic
+
+## Setup
+
+### Step 1: Install & log in to Fly.io
+
+**macOS:**
+
+```bash
+brew install flyctl
+fly auth signup     # or: fly auth login
+```
+
+**Linux:**
+
+```bash
+curl -L https://fly.io/install.sh | sh
+~/.fly/bin/flyctl auth signup   # or: ~/.fly/bin/flyctl auth login
+```
+
+Verify organizations:
+
+```bash
+fly orgs list
+```
+
+Sample output:
+
+```
+Name           Slug              Type
+----           ----              ----
+Your Org       <your-org-slug>   PERSONAL
+Team Alpha     team-alpha-123    SHARED
+Another Team   team-alpha-456    SHARED
+```
+
+### Step 2: Create a test app
+
+```bash
+fly launch --name <your-app-name> --org <your-org-slug> --image flyio/hellofly --now
+# Deploys a minimal Hello World app
+```
+
+### Step 3: Create an org metrics token (for federation)
+
+Generate a token at the org scope:
+
+```bash
+fly tokens create org --org <your-org-slug>
+```
+
+This prints a value beginning with FlyV1 .... Save only the raw part after FlyV1 to a file (do not include the prefix in the file):
+
+```bash
+# Save the raw token (without the "FlyV1 " prefix)
+echo '<RAW_TOKEN_AFTER_FlyV1>' > fly_federate_token
+```
+
+### Step 4: Configure the OpenTelemetry Collector
+
+Create `otel.yaml` to scrape Fly’s federation endpoint and export to SigNoz.
+
+```yaml:otel.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: fly-federate
+          scheme: https
+          metrics_path: /prometheus/<your-org-slug>/federate   # e.g., /prometheus/personal/federate
+          params:
+            match[]: ['{__name__=~"fly_.*"}']                  # only Fly metrics
+          static_configs:
+            - targets: ["api.fly.io"]
+          authorization:
+            type: FlyV1
+            credentials_file: /etc/otel/secret/fly_federate_token
+```
+
+<Tabs entityName="plans">
+
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```yaml:otel.yaml
+exporters:
+  otlphttp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    headers:
+      signoz-access-token: <YOUR_SIGNOZ_API_KEY>
+```
+
+You would need to replace `{region}` with the [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) of your SigNoz Cloud environment and `<YOUR_SIGNOZ_API_KEY>` with your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="self-host" label="Self-Host">
+
+```yaml:otel.yaml
+exporters:
+  otlphttp:
+    endpoint: "{signoz-instance}:4317"
+    tls:
+      insecure: true
+```
+You would need to replace `{signoz-instance}` with the IP address or FQDN of your self-hosted SigNoz server.
+
+</TabItem>
+
+</Tabs>
+
+```yaml:otel.yaml
+processors:
+  batch: {}
+
+service:
+  telemetry:
+    logs:
+      level: debug
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlphttp]
+```
+
+### Step 5: Run the Collector (Docker)
+
+```bash
+docker run --rm -it \
+  -v "$(pwd)/otel.yaml:/etc/otel/config.yaml" \
+  -v "$(pwd)/fly_federate_token:/etc/otel/secret/fly_federate_token:ro" \
+  otel/opentelemetry-collector:latest \
+  --config /etc/otel/config.yaml
+```
+
+You should see logs indicating the collector started and is sending metrics to the SigNoz ingest endpoint.
+If you see “failed to scrape” or auth errors, re-check the token step.
+
+### Step 6: Manually verify the federation endpoint
+
+Generate a bit of traffic to your app:
+
+```bash
+for i in {1..30}; do curl -sS https://<your-app-name>.fly.dev >/dev/null; done
+```
+
+Then confirm metrics are returned:
+
+```bash
+curl -sS -i -G \
+  -H "Authorization: FlyV1 $(cat fly_federate_token)" \
+  --data-urlencode 'match[]={__name__=~"fly_.*"}' \
+  https://api.fly.io/prometheus/<your-org-slug>/federate | head -n 40
+```
+
+You should see lines like `fly_instance_cpu_user_seconds_total`, `fly_instance_memory_resident`, etc.
+
+## Visualizing Fly.io Metrics
+
+Once you have configured the OTel Collector to send Fly.io metrics to SigNoz, you can start visualizing the metrics in the SigNoz UI.
+
+You can use the pre-configured dashboard for Docker metrics or [create your own custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard). To use the pre-configured dashboard, download the dashboard JSON from [here](https://github.com/SigNoz/dashboards/blob/main/container-metrics/docker/container-metrics-by-host.json) and import it to SigNoz by clicking Dashboards → New dashboard → Import JSON:
+
+<figure data-zoomable align='center'>
+  <img src="/img/docs/dashboards/dashboard-templates/fly-dashboard.webp" alt="Fly.io Dashboard"/>
+  <figcaption><i>Fly.io Dashboard</i></figcaption>
+</figure>
+
+<div className="flex justify-center">
+  <DashboardActions 
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/flyio/fly-prometheus-v1.json"
+    dashboardName="Fly.io (Prometheus)"
+  />
+</div>

@@ -1545,6 +1545,12 @@ const docsSideNav = [
             route: '/docs/metrics-management/mysql-metrics',
             label: 'MySQL metrics',
           },
+          {
+            type: 'doc',
+            className: 'new-doc',
+            route: '/docs/metrics-management/fly-metrics',
+            label: 'Fly.io metrics',
+          },
         ],
       },
       {
