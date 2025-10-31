@@ -2271,6 +2271,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/litellm-observability',
+        label: 'LiteLLM',
+        type: 'doc',
+      },
+      {
         route: '/docs/llamaindex-observability',
         label: 'LlamaIndex',
         type: 'doc',
