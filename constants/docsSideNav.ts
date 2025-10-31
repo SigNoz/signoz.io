@@ -1824,6 +1824,24 @@ const docsSideNav = [
             label: 'Key Operations',
           },
           {
+            label: 'LiteLLM',
+            type: 'category',
+            isExpanded: false,
+            route: '/docs/dashboards/dashboard-templates/litellm-dashboards',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-sdk-dashboard',
+                label: 'LiteLLM SDK',
+              },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/litellm-proxy-dashboard',
+                label: 'LiteLLM Proxy',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/mastra-dashboard',
             label: 'Mastra',

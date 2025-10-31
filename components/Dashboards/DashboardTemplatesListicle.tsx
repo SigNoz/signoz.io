@@ -18,14 +18,14 @@ import {
   SiGooglegemini,
   SiAnthropic,
   SiAmazonwebservices,
-  SiPydantic
+  SiPydantic,
 } from 'react-icons/si'
-import { 
-  Monitor, 
-  Database, 
-  Server, 
-  MessageSquare, 
-  Activity, 
+import {
+  Monitor,
+  Database,
+  Server,
+  MessageSquare,
+  Activity,
   Cloud,
   BarChart3,
   Settings,
@@ -42,7 +42,7 @@ import {
   Eye,
   Target,
   Clock,
-  Award
+  Award,
 } from 'lucide-react'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -105,7 +105,13 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Azure OpenAI API',
     href: '/docs/dashboards/dashboard-templates/azure-openai-dashboard',
-    icon: <img src="/svgs/icons/LLMMonitoring/azure-logo.webp" alt="Azure OpenAI Icon" className="h-7 w-7" />,
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/azure-logo.webp"
+        alt="Azure OpenAI Icon"
+        className="h-7 w-7"
+      />
+    ),
     clickName: 'Azure OpenAI API Dashboard Template',
   },
   {
@@ -135,13 +141,21 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Crew AI',
     href: '/docs/dashboards/dashboard-templates/crewai-dashboard',
-    icon: <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />
+    ),
     clickName: 'Crew AI Dashboard Template',
   },
   {
     name: 'DeepSeek API',
     href: '/docs/dashboards/dashboard-templates/deepseek-dashboard',
-    icon: <img src="/svgs/icons/LLMMonitoring/deepseek-icon.svg" alt="DeepSeek Icon" className="h-7 w-7" />,
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/deepseek-icon.svg"
+        alt="DeepSeek Icon"
+        className="h-7 w-7"
+      />
+    ),
     clickName: 'DeepSeek API Dashboard Template',
   },
   {
@@ -229,6 +243,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Key Operations Dashboard Template',
   },
   {
+    name: 'LiteLLM',
+    href: '/docs/dashboards/dashboard-templates/litellm-dashboards',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/litellm-logo.webp"
+        alt="LiteLLM Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'LiteLLM Dashboard Template',
+  },
+  {
     name: 'LLM Observability',
     href: 'https://github.com/SigNoz/dashboards/tree/main/llm-observability',
     icon: <Brain className="h-7 w-7 text-purple-600" />,
@@ -237,7 +263,9 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Mastra',
     href: '/docs/dashboards/dashboard-templates/mastra-dashboard',
-    icon: <img src="/svgs/icons/LLMMonitoring/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />
+    ),
     clickName: 'Mastra Dashboard Template',
   },
   {
@@ -315,7 +343,7 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Vercel AI SDK',
     href: 'https://github.com/SigNoz/dashboards/tree/main/vercel-ai-sdk',
-    icon: <SiVercel className="h-7 w-7 text-black-600" />,
+    icon: <SiVercel className="text-black-600 h-7 w-7" />,
     clickName: 'Vercel AI SDK Dashboard Template',
   },
 ]

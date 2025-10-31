@@ -57,6 +57,7 @@ import DashboardActions from './Dashboards/DashboardActions'
 import KubernetesDashboardsListicle from './Dashboards/KubernetesDashboardsListicle'
 import APMDashboardsListicle from './Dashboards/APMDashboardsListicle'
 import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsListicle'
+import LiteLLMDashboardsListicle from './Dashboards/LiteLLMDashboardsListicle'
 import ProductFeatureShowcase from './ProductFeatureShowcase/ProductFeatureShowcase'
 
 import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
@@ -120,6 +121,7 @@ export const components: MDXComponents = {
   KubernetesDashboardsListicle,
   APMDashboardsListicle,
   HostMetricsDashboardsListicle,
+  LiteLLMDashboardsListicle,
   MarketplaceInstallationListicle,
   LLMMonitoringListicle,
   OtelCollectorFlow,
