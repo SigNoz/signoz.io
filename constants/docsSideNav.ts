@@ -606,7 +606,14 @@ const docsSideNav = [
                     type: 'doc',
                     route:
                       '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster',
-                    label: 'Monitor Multiple K8S Clusters',
+                    label: 'Monitor Multiple Kubernetes Clusters',
+                  },
+                  {
+                    type: 'doc',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-endpoint',
+                    label:
+                      'Configuring Kubernetes Metrics Collection for IPv6 and Non-Standard Clusters',
                   },
                 ],
               },
