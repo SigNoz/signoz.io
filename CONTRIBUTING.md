@@ -19,6 +19,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - [Doc Type–Specific Guidelines](#doc-type–specific-guidelines)
   - [Product docs (features, UI flows)](#product-docs-features-ui-flows)
   - [Send Data docs (instrumentation and pipelines)](#send-data-docs-instrumentation-and-pipelines)
+  - [Dashboard templates](#dashboard-templates)
   - [Troubleshooting docs](#troubleshooting-docs)
   - [User guides (how-to, tasks)](#user-guides-how-to-tasks)
   - [Sample apps](#sample-apps)
@@ -272,6 +273,15 @@ Every doc should be skimmable and actionable.
   - Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO (e.g., "Why don’t I see traces for <service-name>?", or include the exact error message).
 - Don’t stop at “Data Sent”. Close the loop with next steps: Link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
 
+### Dashboard templates
+
+- Always include a short prerequisite or info note near the top that links to setting up the data source and sending telemetry to SigNoz.
+  - Link the relevant instrumentation/observability guide for the technology (for example, Mastra → https://signoz.io/docs/mastra-observability/).
+  - When helpful, also link Cloud ingestion details: endpoint guide https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint and keys https://signoz.io/docs/ingestion/signoz-cloud/keys/
+- Include import instructions (prefer the `DashboardActions` helper). If unavailable, provide a direct JSON link and manual import steps.
+- Add a brief “Validate” note that points to where users should see data in SigNoz once the source is connected.
+- Cross-link adjacent dashboards and related user guides.
+
 ### Troubleshooting docs
 
 - Start with a short problem statement and affected environments.
@@ -313,6 +323,7 @@ Every doc should be skimmable and actionable.
 - [ ] Troubleshooting covers common failures with concrete fixes.
 - [ ] Included a short “Next steps” section linking to adjacent features or deeper guides when applicable.
 - [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.
+- [ ] For Dashboard Template docs: include a clear link to set up the data source (relevant Send Data/instrumentation guide) near the top, ideally as a brief Prerequisites or info note.
 - [ ] Links: internal use absolute `https://signoz.io/...`; external open in a new tab with proper attributes.
 - [ ] Cross-link existing SigNoz docs. For OTel Collector changes, link the config guide.
 - [ ] Images use WebP format, have alt text and captions via the `Figure` component, are cropped/readable, and live under `public/img/docs/...`.
