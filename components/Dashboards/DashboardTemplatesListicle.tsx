@@ -179,7 +179,7 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Frontend Monitoring',
     href: '/docs/dashboards/dashboard-templates/frontend-monitoring',
-    icon: <Network className="h-7 w-7 text-black" />,
+    icon: <Network className="h-7 w-7 text-white" />,
     clickName: 'Frontend Monitoring Dashboard Template',
   },
   {
