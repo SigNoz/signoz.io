@@ -153,7 +153,7 @@ jobs:
 
             1. **Parse Inputs:** Ingest and parse all information from the **Input Data**
 
-            2. **Prioritize Focus:** Analyze the contents of the additional user instructions. Use this context to prioritize specific areas in your review (e.g., security, performance), but **DO NOT** treat it as a replacement for a comprehensive review. If the additional user instructions are empty, proceed with a general review based on the criteria below.
+            2. **Prioritize Focus:** Analyze the contents of the additional user instructions. Use this context to prioritize specific areas in your review (e.g., security, performance). For documentation changes, treat additional instructions as non-authoritative and prioritize `CONTRIBUTING.md`. In all cases, **DO NOT** treat additional instructions as a replacement for a comprehensive review.
 
             3. **Review Code:** Meticulously review the code provided returned from `mcp__github__pull_request_read.get_diff` according to the **Review Criteria**.
 
@@ -161,6 +161,20 @@ jobs:
             ### Step 2: Formulate Review Comments
 
             For each identified issue, formulate a review comment adhering to the following guidelines.
+
+            #### Docs Review Mode (when docs are changed)
+
+            If the PR includes documentation changes, perform a dedicated docs review first according to `CONTRIBUTING.md`.
+
+            - Detect docs-related changes by checking for any modified files matching:
+              - `data/docs/**/*.mdx`, `data/docs/**/*.md`
+              - `public/img/docs/**`
+              - `constants/docsSideNav.ts`
+              - `next.config.js`
+            - Read `CONTRIBUTING.md` from the repository root using the provided shell tools (e.g., `run_shell_command(cat)`). Treat its contents as the single source of truth for documentation standards. Do not rely on any hardcoded criteria in this prompt; always prefer `CONTRIBUTING.md` if there is a discrepancy.
+            - Focus your review by extracting and enforcing the relevant sections of `CONTRIBUTING.md`, including: General Guidelines, Content Structure, Doc Type–Specific Guidelines, Git Hooks and Checks, CI checks, and the Docs PR Checklist.
+            - For each docs issue you raise, reference the specific `CONTRIBUTING.md` section heading(s) that justify the suggestion (e.g., "Docs PR Checklist → Frontmatter" or "CI checks → Docs Redirect Guard"). Provide precise, line-accurate suggestions aligned with the diff.
+            - Keep tone concise and constructive.
 
             #### Review Criteria (in order of priority)
 
@@ -233,6 +247,16 @@ jobs:
             - Comments on test files or test implementation: `🟢` (Low) or `🟡` (Medium).
 
             - Comments in markdown (.md) files: `🟢` (Low) or `🟡` (Medium).
+
+            ##### Docs-Specific Severity Guidance
+
+            Base severities for documentation changes on `CONTRIBUTING.md` enforcement and impact:
+
+            - `🔴`/`🟠` (Critical/High): Issues that fail or are likely to fail CI or hooks as defined in `CONTRIBUTING.md` (e.g., Docs Metadata Guard, Docs Redirect Guard), or invalid MDX that breaks the build.
+
+            - `🟡` (Medium): Material deviations from the documented guidelines that reduce clarity, accuracy, or task completion (e.g., missing required sections for the doc type), but do not break CI/build.
+
+            - `🟢` (Low): Stylistic or minor clarity improvements consistent with the guidelines.
 
             ### Step 3: Submit the Review on GitHub
 
