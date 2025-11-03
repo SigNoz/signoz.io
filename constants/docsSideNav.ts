@@ -615,6 +615,12 @@ const docsSideNav = [
                     label:
                       'Configuring Kubernetes Metrics Collection for IPv6 and Non-Standard Clusters',
                   },
+                  {
+                    type: 'doc',
+                    route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-autogke',
+                    label: 'Configuring Kubernetes Metrics Collection for GKE Autopilot',
+                  },
                 ],
               },
             ],
@@ -1824,24 +1830,6 @@ const docsSideNav = [
             label: 'Key Operations',
           },
           {
-            label: 'LiteLLM',
-            type: 'category',
-            isExpanded: false,
-            route: '/docs/dashboards/dashboard-templates/litellm-dashboards',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/litellm-sdk-dashboard',
-                label: 'LiteLLM SDK',
-              },
-              {
-                type: 'doc',
-                route: '/docs/dashboards/dashboard-templates/litellm-proxy-dashboard',
-                label: 'LiteLLM Proxy',
-              },
-            ],
-          },
-          {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/mastra-dashboard',
             label: 'Mastra',
@@ -2286,11 +2274,6 @@ const docsSideNav = [
       {
         route: '/docs/langchain-observability',
         label: 'LangChain/LangGraph',
-        type: 'doc',
-      },
-      {
-        route: '/docs/litellm-observability',
-        label: 'LiteLLM',
         type: 'doc',
       },
       {
