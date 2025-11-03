@@ -22,11 +22,11 @@ The `k8s-infra` collection agent includes a `kubeletMetrics` preset that uses th
 
 ## Understanding GKE Autopilot Limitations
 
-GKE Autopilot blocks access to the `nodes/proxy` RBAC resource as part of its security model. The platform [disables the insecure kubelet read-only port](https://cloud.google.com/kubernetes-engine/docs/how-to/disable-kubelet-readonly-port) in favor of the more secure, authenticated port 10250, and restricts related proxy access.
+GKE Autopilot blocks access to the `nodes/proxy` RBAC resource under its security model. It disables the insecure kubelet read-only port in favor of the more secure, authenticated port 10250 and restricts related proxy access.
 
-Because the kubeletstats receiver requires `get` permissions for `nodes/proxy` resources to scrape `extra_metadata_labels` and `{request|limit}_utilization` metrics (see the [kubeletstats receiver RBAC requirements](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kubeletstatsreceiver#role-based-access-control)), so for these metrics scraping cannot function on GKE Autopilot. When left enabled, the `otel-agent` DaemonSet crashes repeatedly with privilege errors, disrupting metrics collection.
+Since the kubeletstats receiver needs `get` permissions for `nodes/proxy` resources to scrape `extra_metadata_labels` and `{request|limit}_utilization` metrics (refer to the [kubeletstats receiver RBAC requirements](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kubeletstatsreceiver#role-based-access-control)), these metrics cannot be scraped on GKE Autopilot. When enabled, the `otel-agent` DaemonSet crashes repeatedly due to privilege errors, disrupting metrics collection.
 
-By disabling these metrics, we can align the agent configuration with GKE Autopilot's security model while preserving the collection of core kubelet metrics—node metrics, pod metrics, container metrics, and volume metrics.
+Disabling these metrics allows us to match the agent configuration to GKE Autopilot's security policies while still collecting essential kubelet metrics such as node, pod, container, and volume metrics.
 
 ## Configure Kubelet Metrics Collection for GKE Autopilot
 
@@ -34,7 +34,7 @@ By disabling these metrics, we can align the agent configuration with GKE Autopi
 
 Our Helm chart for `k8s-infra` automatically handles GKE Autopilot restrictions. When deploying to GKE Autopilot, the chart disables `extra_metadata_labels` and `{request|limit}_utilization` metrics by default.
 
-### Step 1: Set the Cloud Provider
+#### Step 1: Set the Cloud Provider
 
 To override the default and set the cloud provider to GKE Autopilot, update your `values.yaml` for [global.cloud](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml#L3):
 
@@ -43,7 +43,7 @@ global:
   cloud: gcp/autogke
 ```
 
-### Step 2: Apply the Configuration
+#### Step 2: Apply the Configuration
 
 Apply your configuration changes to the k8s-infra Helm release:
 
@@ -55,19 +55,13 @@ helm upgrade <RELEASE_NAME> signoz/k8s-infra \
 
 ### Manual Configuration
 
-If you manage your own OpenTelemetry Collector configuration, you must explicitly disable the problematic features:
-
-1. **Disable `extra_metadata_labels`** in the `kubeletstats` receiver
-2. **Disable utilization metrics** that depend on `nodes/proxy` access
+If you manage your own OpenTelemetry Collector configuration, you must explicitly disable the problematic metrics:
 
 Update your `values.yaml` or collector configuration:
 
 ```yaml
 receivers:
   kubeletstats:
-    collection_interval: 60s
-    auth_type: serviceAccount
-    endpoint: 'https://${env:K8S_NODE_NAME}:10250'
     # Disable extra metadata labels that require nodes/proxy access
     extra_metadata_labels: []
     # Disable metrics that require nodes/proxy permissions
