@@ -10,6 +10,16 @@ on:
   pull_request:
     types:
       - 'opened'
+      - 'synchronize'
+      - 'reopened'
+      - 'ready_for_review'
+    paths:
+      - 'data/docs/**'
+      - 'public/img/docs/**'
+      - 'constants/docsSideNav.ts'
+      - 'next.config.js'
+      - 'scripts/check-doc-redirects.js'
+      - 'scripts/check-docs-metadata.js'
   issues:
     types:
       - 'opened'
@@ -93,7 +103,14 @@ jobs:
             const request = process.env.REQUEST;
             core.setOutput('request', request);
 
-            if (eventType === 'pull_request.opened') {
+            const prAutoReviewEvents = new Set([
+              'pull_request.opened',
+              'pull_request.synchronize',
+              'pull_request.reopened',
+              'pull_request.ready_for_review',
+            ]);
+
+            if (prAutoReviewEvents.has(eventType)) {
               core.setOutput('command', 'review');
             } else if (request.startsWith("@gemini-cli /review")) {
               core.setOutput('command', 'review');

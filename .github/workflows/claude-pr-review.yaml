@@ -9,9 +9,24 @@ on:
       - 'next.config.js'
       - 'scripts/check-doc-redirects.js'
       - 'scripts/check-docs-metadata.js'
+  issue_comment:
+    types: [created]
 
 jobs:
   review:
+    # Run on PR events as before, or when a new PR comment contains "@claude /review"
+    if: >-
+      github.event_name == 'pull_request' ||
+      (
+        github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request != null &&
+        contains(github.event.comment.body, '@claude /review') &&
+        (
+          github.event.comment.author_association == 'OWNER' ||
+          github.event.comment.author_association == 'MEMBER' ||
+          github.event.comment.author_association == 'COLLABORATOR'
+        )
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,12 +38,14 @@ jobs:
           fetch-depth: 1
 
       - uses: anthropics/claude-code-action@v1
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           track_progress: true # ✨ Enables tracking comments
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR NUMBER: ${{ env.PR_NUMBER }}
             Review only documentation-related changes.
             Use CONTRIBUTING.md at the repo root as the single source of truth for what to check and how to comment. Do not restate rules; apply them.
             Provide inline comments for specific issues and one summary comment referencing the PR Checklist in CONTRIBUTING.md.
