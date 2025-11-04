@@ -122,6 +122,18 @@ const docsSideNav = [
                 label: 'Docker SELinux',
                 route: '/docs/install/docker-selinux',
               },
+              {
+                type: 'category',
+                isExpanded: false,
+                label: 'Troubleshooting',
+                items: [
+                  {
+                    type: 'doc',
+                    label: 'General FAQs',
+                    route: '/docs/setup/docker/troubleshooting/faq',
+                  },
+                ],
+              },
             ],
           },
           {
@@ -205,11 +217,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/install/uninstall',
             label: 'Uninstall',
-          },
-          {
-            type: 'doc',
-            label: 'Troubleshooting',
-            route: '/docs/install/troubleshooting',
           },
           {
             type: 'category',

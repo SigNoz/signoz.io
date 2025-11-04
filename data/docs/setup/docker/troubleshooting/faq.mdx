@@ -1,0 +1,46 @@
+---
+date: 2025-11-04
+id: faq
+tags: [Self-Host]
+title: Troubleshooting
+description: Instructions that should resolve most SigNoz installations issues in Docker
+---
+
+This troubleshooting guide includes step-by-step instructions that should resolve most SigNoz installation issues in Docker.
+
+## ClickHouse container fails to start
+
+If the ClickHouse container fails to start, try these steps before recreating it:
+
+1. In the `deploy/docker` folder, run the following command to see more detailed logs for the ClickHouse container. This will show you the status of all containers, including ClickHouse.
+
+```bash
+sudo docker-compose ps -a
+```
+
+This will show you the status of all containers, including ClickHouse.
+
+- **Verify system resources:** Ensure your system has enough resources (CPU, memory, disk space) to run the ClickHouse container.
+
+- **Check permissions:** Make sure you have the necessary permissions to run Docker containers. Try running the installation script with sudo privileges.
+
+- **Review Docker configuration:** Ensure your Docker installation is up-to-date and properly configured.
+
+2. If the logs mention a `Permission denied` error, it is likely due to the correct permissions not set for the container.
+3. Use the `chown` command to change the ownership for the files that clickhouse container is unable to access.
+
+## Container signoz-init-clickhouse Hangs Forever
+
+After installation, you might sometimes see the `signoz-init-clickhouse` container getting stuck. The logs will show::
+
+```bash
+docker logs signoz-init-clickhouse
+# Fetching histogram-binary for linux/amd64
+# Connecting to github.com (20.205.243.166:443)
+```
+
+This indicates the helper binary wasn’t fetched from GitHub. For these issues, restart the SigNoz containers and allow time for the helper binary to download:
+
+```bash
+docker compose restart
+```
