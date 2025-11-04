@@ -8,17 +8,17 @@ const CTASection = () => {
   return (
     <div className="relative bg-[url('/img/background_blur/Rectangle_959.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
       <div className="bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-        <div className="absolute top-[40%] z-50 w-1/3 md:left-[5%] md:top-[15%]">
-          <Image
-            src="/img/events/kubecon-2025/edited-photo.png"
-            alt="Mascot Olly"
-            width={600}
-            height={600}
-            className="object-contain"
-            priority
-          />
-        </div>
         <section className="!mx-auto !w-[100vw] border-t border-dashed border-signoz_slate-400 md:!w-[80vw]">
+          <div className="mx-10 -mb-10 mt-10 md:absolute md:left-[5%] md:top-[15%] md:z-50 md:mx-0 md:-mb-0 md:mt-0 md:w-1/3">
+            <Image
+              src="/img/events/kubecon-2025/edited-photo.png"
+              alt="Mascot Olly"
+              width={600}
+              height={600}
+              className="object-contain"
+              priority
+            />
+          </div>
           <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-250px)] bg-no-repeat">
             <div className="flex flex-col gap-16">
               <div className="flex flex-col gap-12">
