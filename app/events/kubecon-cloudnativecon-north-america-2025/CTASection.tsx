@@ -8,7 +8,7 @@ const CTASection = () => {
   return (
     <div className="relative bg-[url('/img/background_blur/Rectangle_959.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
       <div className="bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:68%] bg-[center_top_-20rem] sm:bg-no-repeat">
-        <div className="absolute z-50 w-1/3 md:left-[5%] md:top-[15%]">
+        <div className="absolute top-[40%] z-50 w-1/3 md:left-[5%] md:top-[15%]">
           <Image
             src="/img/events/kubecon-2025/edited-photo.png"
             alt="Mascot Olly"
