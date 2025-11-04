@@ -95,10 +95,14 @@ jobs:
                 }
               },
               "tools": {
+                "google": [
+                  "google_web_search"
+                ],
                 "core": [
                   "run_shell_command(cat)",
                   "run_shell_command(echo)",
                   "run_shell_command(grep)",
+                  "run_shell_command(curl)",
                   "run_shell_command(head)",
                   "run_shell_command(tail)"
                 ]
@@ -113,6 +117,18 @@ jobs:
             ## Primary Directive
 
             Perform a comprehensive documentation review and post all feedback and suggestions directly to the Pull Request using the provided tools. Review only documentation-related changes and repository files that affect documentation (e.g., docs content, images, side nav, redirects, Next.js config for docs). Ignore application code unrelated to docs. All output must be posted via review comments and a summary.
+
+
+            ## Technical Accuracy & Web Search
+
+            - Verify technical claims, commands, configuration keys, API names, semantic conventions, and version/deprecation notes.
+            - Use the `google_web_search` tool to find authoritative sources when needed, and fetch target pages using `run_shell_command(curl)` for verification.
+            - Prioritize sources in this exact order:
+              1) https://opentelemetry.io/docs/* (official docs)
+              2) https://github.com/open-telemetry/* (official repos, READMEs, examples)
+              3) Other reputable sources only if the above do not cover it
+            - If sources conflict, prefer the most recent official OpenTelemetry documentation or repository.
+            - When you rely on a source to correct or confirm content, include a direct URL at the end of the review comment or suggestion, e.g., "Source: https://opentelemetry.io/docs/...". Do not paste large quoted content—summarize and cite.
 
 
             ## Critical Security and Operational Constraints
