@@ -177,6 +177,9 @@ function validateMetadata(filePath) {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
+        const dateToCheck = new Date(date)
+        dateToCheck.setHours(0, 0, 0, 0)
+
         // Allow dates up to 7 days in the future
         const maxFutureDate = new Date(today)
         maxFutureDate.setDate(maxFutureDate.getDate() + 7)
@@ -185,9 +188,9 @@ function validateMetadata(filePath) {
         const minPastDate = new Date(today)
         minPastDate.setDate(minPastDate.getDate() - 7)
 
-        if (date > maxFutureDate) {
+        if (dateToCheck > maxFutureDate) {
           errors.push('date cannot be more than 7 days in the future')
-        } else if (date < minPastDate) {
+        } else if (dateToCheck < minPastDate) {
           errors.push('date cannot be more than 7 days in the past')
         }
       }
