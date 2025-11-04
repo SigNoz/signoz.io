@@ -42,14 +42,30 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          web_search: enabled
           track_progress: true # ✨ Enables tracking comments
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ env.PR_NUMBER }}
-            Scope: Review only documentation-related changes.
-            Source of truth: Use CONTRIBUTING.md at the repo root as the only basis for evaluation.
-            Provide concise inline comments for specific issues.
+            Review only documentation-related changes.
+            Use CONTRIBUTING.md at the repo root as the single source of truth for what to check and how to comment. Do not restate rules; apply them.
+            Provide inline comments for specific issues and one summary comment referencing the PR Checklist in CONTRIBUTING.md.
             Do not mention things that are correct. Do not praise or restate compliant items.
-            
+            Check technical accuracy of documentation changes. When in doubt, verify facts using web lookups.
+
+            Technical accuracy and sources:
+            - Prefer official OpenTelemetry sources in this strict order when verifying claims:
+              1) https://opentelemetry.io/docs/* (official docs)
+              2) https://github.com/open-telemetry/* (official repos, READMEs, examples)
+              3) Other reputable sources only if the above do not cover it
+            - When you verify or correct content based on a source, include a short inline citation with the URL at the end of the comment or suggestion, e.g. "Source: https://opentelemetry.io/docs/...". Do not add footnotes—just paste the link.
+            - Prioritize accuracy for: configuration keys, receiver/exporter names, environment variables, CLI flags, API names, semantic conventions, version compatibility and deprecations.
+            - If sources conflict, prefer the most recent official OpenTelemetry documentation/repository over blogs or third-party articles.
+
+            Web lookup usage:
+            - Prefer the Claude web search tool to discover sources. Use targeted queries (e.g., "site:opentelemetry.io <topic>") to find canonical references.
+            - You may fetch pages via curl to inspect authoritative docs when needed. Keep requests minimal and targeted to the specific topic.
+            - Do not paste large fetched content into comments; instead summarize and cite the canonical link.
+
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(cat:*)"
+            --allowedTools "web_search,mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(cat:*),Bash(curl:*),Bash(grep:*),Bash(head:*),Bash(tail:*)"
