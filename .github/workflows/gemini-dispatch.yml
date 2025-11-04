@@ -20,10 +20,6 @@ on:
       - 'next.config.js'
       - 'scripts/check-doc-redirects.js'
       - 'scripts/check-docs-metadata.js'
-  issues:
-    types:
-      - 'opened'
-      - 'reopened'
   issue_comment:
     types:
       - 'created'
@@ -54,15 +50,11 @@ jobs:
 
   dispatch:
     # For PRs: only if not from a fork
-    # For issues: only on open/reopen
     # For comments: only if user types @gemini-cli and is OWNER/MEMBER/COLLABORATOR
     if: |-
       (
         github.event_name == 'pull_request' &&
         github.event.pull_request.head.repo.fork == false
-      ) || (
-        github.event_name == 'issues' &&
-        contains(fromJSON('["opened", "reopened"]'), github.event.action)
       ) || (
         github.event.sender.type == 'User' &&
         startsWith(github.event.comment.body || github.event.review.body || github.event.issue.body, '@gemini-cli') &&
