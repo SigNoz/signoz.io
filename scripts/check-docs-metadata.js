@@ -173,15 +173,22 @@ function validateMetadata(filePath) {
       if (isNaN(date.getTime())) {
         errors.push('invalid date value')
       } else {
-        // Allow dates up to 7 days in the future
+        // Set up date boundaries
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
+        // Allow dates up to 7 days in the future
         const maxFutureDate = new Date(today)
         maxFutureDate.setDate(maxFutureDate.getDate() + 7)
 
+        // Allow dates up to 7 days in the past
+        const minPastDate = new Date(today)
+        minPastDate.setDate(minPastDate.getDate() - 7)
+
         if (date > maxFutureDate) {
           errors.push('date cannot be more than 7 days in the future')
+        } else if (date < minPastDate) {
+          errors.push('date cannot be more than 7 days in the past')
         }
       }
     }
