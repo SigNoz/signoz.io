@@ -2,7 +2,7 @@
 date: 2024-08-02
 title: Web Vitals Monitoring with Metrics
 id: web-vitals-with-metrics
-description: Set up up web vitals monitoring with metrics using SigNoz and OpenTelemetry
+description: Set up web vitals monitoring with metrics using SigNoz and OpenTelemetry
 tags: [SigNoz Cloud, Self-Host]
 ---
 
@@ -57,16 +57,16 @@ The instrumentation file is required to setup the `MeterProvider` which is used 
 
     // Define your resource, e.g., service name, environment.
     const resource = resourceFromAttributes({
-      'service.name': '<<SERVICE_NAME>>',
+      'service.name': '<SERVICE_NAME>',
     });
 
     // Create a metric reader with OTLP exporter configured to send metrics to a local collector.
     const metricReader = new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({
         // For the self-hosted version, please use the collector url instead.
-        url: `https://ingest.<<INGESTION_REGION>>.signoz.cloud:443/v1/metrics`,
+        url: `https://ingest.<INGESTION_REGION>.signoz.cloud:443/v1/metrics`,
         headers: {
-          'signoz-ingestion-key': <<INGESTION_KEY>>,
+          'signoz-ingestion-key': <INGESTION_KEY>,
         },
       }),
       exportIntervalMillis: 10000, // Export metrics every 10 seconds.
@@ -82,9 +82,9 @@ The instrumentation file is required to setup the `MeterProvider` which is used 
     metrics.setGlobalMeterProvider(myServiceMeterProvider);
     ```
 
-    - Set the `<<INGESTION_REGION>>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-    - Replace `<<INGESTION_KEY>>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-    - `<<SERVICE_NAME>>` is the name of your service
+    - Set the `<INGESTION_REGION>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - Replace `<INGESTION_KEY>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+    - `<SERVICE_NAME>` is the name of your service
 
   </TabItem>
   <TabItem value="js" label="JavaScript">
@@ -99,16 +99,16 @@ The instrumentation file is required to setup the `MeterProvider` which is used 
 
     // Define your resource, e.g., service name, environment.
     const resource = resourceFromAttributes({
-      'service.name': '<<SERVICE_NAME>>',
+      'service.name': '<SERVICE_NAME>',
     });
 
     // Create a metric reader with OTLP exporter configured to send metrics to a local collector.
     const metricReader = new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({
         // For the self-hosted version, please use the collector url instead.
-        url: `https://ingest.<<INGESTION_REGION>>.signoz.cloud:443/v1/metrics`,
+        url: `https://ingest.<INGESTION_REGION>.signoz.cloud:443/v1/metrics`,
         headers: {
-          'signoz-ingestion-key': <<INGESTION_KEY>>,
+          'signoz-ingestion-key': <INGESTION_KEY>,
         },
       }),
       exportIntervalMillis: 10000, // Export metrics every 10 seconds.
@@ -124,16 +124,19 @@ The instrumentation file is required to setup the `MeterProvider` which is used 
     metrics.setGlobalMeterProvider(myServiceMeterProvider);
     ```
 
-    - `<<SERVICE_NAME>>` is the name of your service
-    - `<<SIGNOZ_COLLECTOR_URL>>` is the url where your collector is running
+    - Set the `<INGESTION_REGION>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - Replace `<INGESTION_KEY>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+    - `<SERVICE_NAME>` is the name of your service
 
   </TabItem>
 </Tabs>
 
-**Note:** Please make sure to whitelist your frontend domain when using the [self-hosted](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) version.
-This is required to allow Cross-Origin Resource Sharing (CORS) requests from your frontend application to the OpenTelemetry collector.
+<Admonition type="info">
+  For self-hosted deployments, add the following CORS configuration to your OpenTelemetry Collector
+  config file to allow browser requests from your frontend domain:
+</Admonition>
 
-```sh
+```yaml
 receivers:
   otlp:
     protocols:
@@ -143,7 +146,7 @@ receivers:
         endpoint: 0.0.0.0:4318
         cors:
           allowed_origins:
-            - <<YOUR_FRONTEND_URL>>
+            - <YOUR_FRONTEND_URL>
           allowed_headers: ['*']
 ```
 
