@@ -6,6 +6,8 @@ description: Set up web vitals monitoring with metrics using SigNoz and OpenTele
 tags: [SigNoz Cloud, Self-Host]
 ---
 
+## Overview
+
 This documentation provides a step-by-step guide to setting up web vitals monitoring with metrics using SigNoz and OpenTelemetry.
 
 ## Prerequisites
@@ -33,11 +35,14 @@ This documentation provides a step-by-step guide to setting up web vitals monito
 <details>
   <summary> Read more about the dependencies </summary>- **`web-vitals`**: Core library for
   measuring and reporting web vitals metrics (LCP, INP, CLS, TTFB, FCP) - **`@opentelemetry/api`**:
-  Provides the core OpenTelemetry API for creating metrics and meters -
-  **`@opentelemetry/exporter-metrics-otlp-http`**: Exports metrics to OpenTelemetry Protocol (OTLP)
-  over HTTP - **`@opentelemetry/sdk-metrics`**: Provides the OpenTelemetry metrics SDK
-  implementation - **`@opentelemetry/resources`**: Defines service metadata and attributes for your
-  application
+  Provides the core OpenTelemetry API for creating traces and spans -
+  **`@opentelemetry/sdk-trace-web`**: Web-specific implementation of OpenTelemetry tracing for
+  browser environments - **`@opentelemetry/instrumentation`**: Base package for OpenTelemetry
+  instrumentation capabilities - **`@opentelemetry/exporter-trace-otlp-http`**: Exports traces to
+  OpenTelemetry Protocol (OTLP) over HTTP - **`@opentelemetry/context-zone`**: Manages context
+  propagation using browser's Zone.js for async operations - **`@opentelemetry/resources`**: Defines
+  service metadata and attributes for your application - **`ua-parser-js`**: Parses user agent
+  strings to extract browser, device, and OS information for RUM features
 </details>
 
 ### Step 2: Create an instrumentation file
@@ -152,7 +157,7 @@ receivers:
 
 ### Step 3: Capture and export Web Vitals
 
-Use the `web-vitals` library to capture key performance metrics like CLS, FID, LCP, TTFB, and FCP.
+Use the `web-vitals` library to capture key performance metrics like CLS, INP, LCP, TTFB, and FCP.
 These are captured through callback functions that you define and exported as metrics.
 
 <Tabs entityName="plans">
@@ -447,6 +452,8 @@ You can enrich web vitals with additional metadata like browser type, user ID, p
   </TabItem>
 </Tabs>
 
+## Next Steps
+
 ### Setup Dashboard and alerts
 
 <figure data-zoomable align="center">
@@ -460,7 +467,7 @@ You can enrich web vitals with additional metadata like browser type, user ID, p
   </figcaption>
 </figure>
 
-One of the cool feature of SigNoz charts is that you can create thresholds in the chart with different color coding. For example, in the below graph there are three thresholds for `good`, `needs improvement`, and `critical` level.
+SigNoz charts support thresholds with color coding. For example, the graph below shows three thresholds for `good`, `needs improvement`, and `critical` levels.
 
 <figure data-zoomable align="center">
   <img
