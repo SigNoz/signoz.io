@@ -89,6 +89,13 @@ const COLLECTION_SCHEMAS = {
         matchField: 'key', // Match against author.key
         frontmatterField: 'authors', // Array of author keys in frontmatter
       },
+      keywords: {
+        endpoint: 'keywords',
+        matchField: 'key', // Match against keyword.key
+        frontmatterField: 'keywords', // Array of keyword values in frontmatter
+        filterKey: true, // Also check if keyword.key contains 'comparison' or 'comparisons'
+        matchValue: true, // Match against keyword.value (case insensitive)
+      },
       tags: {
         endpoint: 'tags',
         matchField: 'key', // Match against tag.key
