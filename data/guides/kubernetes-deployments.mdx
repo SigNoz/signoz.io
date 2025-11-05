@@ -1,15 +1,13 @@
 ---
-
 title: Kubernetes Deployments - A Comprehensive Guide
-slug: kubernetes-deployments
 date: 2024-06-14
 tags: [kubernetes]
 authors: [daniel]
 description: Managing the lifecycle of containerized applications across a distributed environment can be a complex, and error-prone process due to the manual processes involved. Kubernetes Deployments address this challenge by…
 image: /img/blog/2024/06/kubernetes-deployments-cover.webp
-keywords: [kubernetes,deployments]
-
+keywords: [kubernetes, deployments]
 ---
+
 Managing the lifecycle of containerized applications across a distributed environment can be a complex, inconsistent and error-prone process due to the manual process of deploying, scaling, and updating applications across multiple nodes.
 
 Kubernetes Deployments address this challenge by providing a declarative and automated approach to releasing, updating, and scaling applications, ensuring that the desired state of your system is consistently maintained.
@@ -28,7 +26,12 @@ Kubernetes Deployments manage the lifecycle of your applications within a cluste
 
 A Kubernetes Deployment does not directly by itself create the desired number of pods you declared, it achieves this through the use of <a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/" rel="noopener noreferrer nofollow" target="_blank">ReplicaSets</a>. A ReplicaSet is a Kubernetes object that ensures a specified number of pod replicas are running at any given time. They can be used independently, but they are primarily utilized by Deployments to orchestrate the creation, deletion, and updates of Pods. Once a Deployment is created, the Deployment creates a ReplicaSet, and the ReplicaSet creates the Pods.
 
-<Figure src="/img/guides/2024/06/deployment.webp" alt="How a Deployment works" caption="How a Deployment works" /><br></br>
+<Figure
+  src="/img/guides/2024/06/deployment.webp"
+  alt="How a Deployment works"
+  caption="How a Deployment works"
+/>
+<br></br>
 
 ### Benefits of Kubernetes Deployment
 
@@ -52,7 +55,7 @@ Two different approaches can be taken in creating Deployments. They are;
 1. Imperative approach
 2. Declarative approach
 
-1. Imperative Approach
+3. Imperative Approach
 
 In the imperative approach, you use direct commands through the `kubectl` command-line tool to instruct Kubernetes on exactly how to create the Deployment and its associated resources.
 
@@ -161,7 +164,7 @@ To roll back a Deployment, identify the deployment you want to roll back:
 kubectl get deployments
 ```
 
-This command lists all available deployments in your cluster. 
+This command lists all available deployments in your cluster.
 
 Let’s assume we have a deployment named `my-app` using the `nginx:latest` image, which is working fine. To simulate a scenario where you need to roll back, update the deployment image to a non-existent version:
 
@@ -213,7 +216,7 @@ my-app-fb5d5dc59-kg2vm              0/1     ImagePullBackOff   0       2m29s
 my-app-fb5d5dc59-q48k8              0/1     ImagePullBackOff   0       2m28s
 ```
 
-The image update was unsuccessful because the image version `1.260` does not exist. 
+The image update was unsuccessful because the image version `1.260` does not exist.
 
 To roll back to the previous version (revision 1):
 
@@ -279,7 +282,7 @@ Syntax:
 kubectl edit deployment/<deployment-name>
 ```
 
- If you already have a YAML file defining your Deployment, you can directly edit the `replicas` field within it to your desired number. 
+If you already have a YAML file defining your Deployment, you can directly edit the `replicas` field within it to your desired number.
 
 Once you have modified the number of replicas you want, run the below command:
 
@@ -320,7 +323,12 @@ Different deployment strategies can be employed for managing application deploym
 
 The Recreate deployment strategy is a method of updating applications running in a Kubernetes cluster. This approach is straightforward: it stops all the old versions of the application before starting the new ones. This causes downtime, once the upgrade is triggered, all existing pods will be immediately terminated and replaced by new pods with a new version. Recreate deployment strategy is provided out of the box in Kubernetes.
 
-<Figure src="/img/guides/2024/06/Recreate.webp" alt="Recreate deployment strategy" caption="Recreate deployment strategy" /><br></br>Example:
+<Figure
+  src="/img/guides/2024/06/Recreate.webp"
+  alt="Recreate deployment strategy"
+  caption="Recreate deployment strategy"
+/>
+<br></br>Example:
 
 ```bash
 apiVersion: apps/v1
@@ -365,7 +373,12 @@ This is one of the most common deployment strategies that comes out of the box i
 
 If issues arise during the rollout of the new pods, Kubernetes allows you to easily roll back to the previous version.
 
-<Figure src="/img/guides/2024/06/rolling-update.webp" alt="Rolling update deployment strategy" caption="Rolling update deployment strategy" /><br></br>Example:
+<Figure
+  src="/img/guides/2024/06/rolling-update.webp"
+  alt="Rolling update deployment strategy"
+  caption="Rolling update deployment strategy"
+/>
+<br></br>Example:
 
 ```bash
 apiVersion: apps/v1
@@ -405,11 +418,11 @@ From the above, during the initial creation, Kubernetes will create 5 pods of yo
 Note: If the strategy section is not configured for the Deployment object, Kubernetes uses the default settings for the deployment strategy which are;
 
 1. Deployment Strategy: RollingUpdate
-    - Kubernetes will replace the old pods with new ones in a rolling fashion, ensuring that the application remains available during the update process.
+   - Kubernetes will replace the old pods with new ones in a rolling fashion, ensuring that the application remains available during the update process.
 2. MaxUnavailable: 25%
-    - By default, up to 25% of the desired number of pods can be unavailable during the update. This means if you have a deployment with 4 replicas, at most 1 pod can be unavailable during the rolling update.
+   - By default, up to 25% of the desired number of pods can be unavailable during the update. This means if you have a deployment with 4 replicas, at most 1 pod can be unavailable during the rolling update.
 3. MaxSurge: 25%
-    - By default, up to 25% more than the desired number of pods can be created during the update process. This means if you have a deployment with 4 replicas, at most 1 additional pod can be created during the rolling update.
+   - By default, up to 25% more than the desired number of pods can be created during the update process. This means if you have a deployment with 4 replicas, at most 1 additional pod can be created during the rolling update.
 
 ```bash
 spec:
@@ -447,9 +460,14 @@ Blue/Green deployment is a release management strategy that reduces downtime and
 
 In this deployment strategy, you deploy the new version of the application to the Green environment while the Blue environment continues to serve traffic. Once the Green environment is fully tested and confirmed to be stable, switch the traffic from the Blue environment to the Green environment. The Blue environment then becomes idle and can be kept as a backup or used for the next deployment.
 
-<Figure src="/img/guides/2024/06/blue-green.webp" alt="Blue/Green deployment strategy" caption="Blue/Green deployment strategy" /><br></br>Example:
+<Figure
+  src="/img/guides/2024/06/blue-green.webp"
+  alt="Blue/Green deployment strategy"
+  caption="Blue/Green deployment strategy"
+/>
+<br></br>Example:
 
-You start by deploying the current version of your application (Blue). 
+You start by deploying the current version of your application (Blue).
 
 ```bash
 apiVersion: apps/v1
@@ -530,7 +548,7 @@ metadata:
 spec:
   selector:
     app: my-app
-    environment: green 
+    environment: green
   ports:
     - protocol: TCP
       port: 8080
@@ -553,7 +571,12 @@ When Not to Use the Blue/Green Deployments Strategy
 
 Canary deployment is another strategy used to reduce the risk of introducing a new software version into production. It involves gradually rolling out the new version to a small subset of users before rolling it out to the entire user base. This allows you to monitor the new version for issues on a smaller scale and make adjustments before a full rollout.
 
-<Figure src="/img/guides/2024/06/canary.webp" alt="Canary deployment strategy" caption="Canary deployment strategy" /><br></br>Example:
+<Figure
+  src="/img/guides/2024/06/canary.webp"
+  alt="Canary deployment strategy"
+  caption="Canary deployment strategy"
+/>
+<br></br>Example:
 
 Using Kubernetes native objects, we will see how canary deployments can be carried out in Kubernetes. For the initial version of your application, create a deployment and a service:
 
@@ -650,7 +673,7 @@ Choosing the right deployment strategy for your application in Kubernetes involv
 
 ## Monitoring Kubernetes Deployments in SigNoz
 
-SigNoz is an open-source observability platform that provides real-time insights into your applications and infrastructure. SigNoz is built on OpenTelemetry, an emerging standard for generating telemetry data. It seamlessly integrates metrics, logs, and traces within a unified interface. 
+SigNoz is an open-source observability platform that provides real-time insights into your applications and infrastructure. SigNoz is built on OpenTelemetry, an emerging standard for generating telemetry data. It seamlessly integrates metrics, logs, and traces within a unified interface.
 
 With SigNoz, you can monitor your Kubernetes Deployments. By leveraging its integration capabilities with OpenTelemetry, SigNoz allows you to collect and visualize metrics, logs and traces directly from your Kubernetes environments. This comprehensive view ensures that you can quickly identify and troubleshoot issues, optimize performance, and ensure the reliability of your applications running on Kubernetes.
 

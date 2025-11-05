@@ -1,13 +1,19 @@
 ---
-
 title: How to Implement Moving Averages in Grafana Dashboards
-slug: is-there-a-way-to-have-a-moving-average-in-grafana
 date: 2024-10-22
 tags: [faq, grafana]
 authors: [simran_kumari]
 description: Learn how to implement moving averages in Grafana dashboards. This guide covers built-in features, transformations, and advanced techniques for data analysis.
-keywords: [Grafana, moving averages, data visualization, dashboards, time series analysis, data smoothing, trend analysis]
-
+keywords:
+  [
+    Grafana,
+    moving averages,
+    data visualization,
+    dashboards,
+    time series analysis,
+    data smoothing,
+    trend analysis,
+  ]
 ---
 
 Grafana dashboards offer powerful visualization capabilities for time series data, but can you effectively implement moving averages to smooth out fluctuations and identify trends? The answer is a resounding yes. Grafana provides multiple methods to calculate and display moving averages, enhancing your ability to analyze data patterns and make informed decisions. This comprehensive guide will walk you through the process of implementing moving averages in Grafana, from basic concepts to advanced techniques.
@@ -35,7 +41,7 @@ Moving averages are a valuable tool in Grafana dashboards, helping to reveal mea
 
 ### Common Use Cases for Moving Averages in Data Visualization
 
-Here are some common use cases where moving averages can enhance data insights:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+Here are some common use cases where moving averages can enhance data insights:
 
 - IT Operations: Monitoring server response times or resource utilization
 - Finance: Analyzing stock prices or trading volumes
@@ -47,27 +53,32 @@ Here are some common use cases where moving averages can enhance data insights:
 Grafana offers native support for moving averages through its query language and built-in functions. Here's how to implement a simple moving average:
 
 1. Open your Grafana dashboard and edit the panel where you want to add a moving average.
-    
-    <Figure src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image.webp" alt="Editing panels in Grafana Dashboard" caption="Editing panels in Grafana Dashboard" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image.webp"
+     alt="Editing panels in Grafana Dashboard"
+     caption="Editing panels in Grafana Dashboard"
+   />
+
 2. In the query editor, use the `moving_average()` function. The basic syntax is:
-    
-    ```
-    moving_average(metric, windowSize)
-    ```
-    
-    Replace `metric` with your data source and `windowSize` with the number of data points to include in the average.
-    
-    For example, to calculate a 7-day moving average of daily sales:
-    
-    ```
-    moving_average(sales_daily, 7)
-    ```
-    
-    Note: 
-    
-    - The above query holds true only with InfluxDB as the data source, you can find the details in further sections for moving averages in other data sources.
-    - The moving average function needs to be used with the InfluxDB query to get the desired output, above example is just a part of it.
+
+   ```
+   moving_average(metric, windowSize)
+   ```
+
+   Replace `metric` with your data source and `windowSize` with the number of data points to include in the average.
+
+   For example, to calculate a 7-day moving average of daily sales:
+
+   ```
+   moving_average(sales_daily, 7)
+   ```
+
+   Note:
+
+   - The above query holds true only with InfluxDB as the data source, you can find the details in further sections for moving averages in other data sources.
+   - The moving average function needs to be used with the InfluxDB query to get the desired output, above example is just a part of it.
+
 3. Adjust the time range and refresh rate of your panel to ensure you have enough data points for meaningful averages.
 
 ### Best Practices for Optimizing Moving Average Performance in Grafana
@@ -92,13 +103,17 @@ Here's how you can implement a moving average in Prometheus:
 
 The `avg_over_time()` function calculates the average value of a time series over a specified window of time.
 
-Example: 5-minute moving average for HTTP requests 
+Example: 5-minute moving average for HTTP requests
 
 ```
 avg_over_time(rate(app_requests_total[1m])[5m:])
 ```
 
-<Figure src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%201.webp" alt="Moving average with Prometheus as data source" caption="Moving average with Prometheus as data source" />
+<Figure
+  src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%201.webp"
+  alt="Moving average with Prometheus as data source"
+  caption="Moving average with Prometheus as data source"
+/>
 
 Limitations
 
@@ -112,9 +127,9 @@ InfluxDB provides native functions like `moving_average()` and `exponential_movi
 Simple Moving Average (SMA) in InfluxDB
 
 ```sql
-SELECT moving_average(mean("co"), 5) 
-FROM "airSensors" 
-WHERE time > now() - 1h 
+SELECT moving_average(mean("co"), 5)
+FROM "airSensors"
+WHERE time > now() - 1h
 GROUP BY time(1m)
 ```
 
@@ -126,14 +141,18 @@ Query Explanation:
 
 This smooths out fluctuations in CO levels, providing a clearer trend over time.
 
-<Figure src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%202.webp" alt="Moving Averages with InfluxDB in Grafana" caption="Moving Averages with InfluxDB in Grafana" />
+<Figure
+  src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%202.webp"
+  alt="Moving Averages with InfluxDB in Grafana"
+  caption="Moving Averages with InfluxDB in Grafana"
+/>
 
 Exponential Moving Average (EMA) in InfluxDB
 
 ```sql
-SELECT exponential_moving_average(mean("co"), 10) 
-FROM "airSensors" 
-WHERE time > now() - 1h 
+SELECT exponential_moving_average(mean("co"), 10)
+FROM "airSensors"
+WHERE time > now() - 1h
 GROUP BY time(1m)
 ```
 
@@ -146,7 +165,11 @@ Query Explanation:
 
 This query will provide a smoother trend that gives more weight to recent data points, making it more sensitive to recent changes.
 
-<Figure src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%203.webp" alt="Exponential Moving Average (EMA) with InfluxDB in Grafana dashboard" caption="Exponential Moving Average (EMA) with InfluxDB in Grafana dashboard" />
+<Figure
+  src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%203.webp"
+  alt="Exponential Moving Average (EMA) with InfluxDB in Grafana dashboard"
+  caption="Exponential Moving Average (EMA) with InfluxDB in Grafana dashboard"
+/>
 
 Weighted Moving Average (WMA)
 
@@ -160,7 +183,7 @@ Simple Moving Average (SMA) in MySQL
 
 In MySQL, functions like `moving_average()` and `exponential_moving_average()` are not in-built. You need to write complex SQL Queries to calculate them.
 
-Example: To calculate a 5-point moving average of the mean CO levels from the airSensors table in SQL, assuming the table has columns such as _value (representing CO levels), _time (timestamp), and sensor_id for identifying sensors, you can use a window function to compute the moving average over a rolling window of 5 points.
+Example: To calculate a 5-point moving average of the mean CO levels from the airSensors table in SQL, assuming the table has columns such as \_value (representing CO levels), \_time (timestamp), and sensor_id for identifying sensors, you can use a window function to compute the moving average over a rolling window of 5 points.
 
 ```sql
 SELECT
@@ -178,15 +201,19 @@ ORDER BY
 Query Explanation:
 
 - SELECT Clause:
-    - `_time`: Displays timestamps of measurements.
-    - `_value`: Shows carbon monoxide levels.
-    - `AVG(_value) OVER (...) AS moving_avg_co`: Calculates a 5-point moving average of `_value`.
+  - `_time`: Displays timestamps of measurements.
+  - `_value`: Shows carbon monoxide levels.
+  - `AVG(_value) OVER (...) AS moving_avg_co`: Calculates a 5-point moving average of `_value`.
 - Window Function - `AVG(_value) OVER (ORDER BY _time ROWS BETWEEN 4 PRECEDING AND CURRENT ROW)`: Computes the average of the current value and the four preceding values.
 - `FROM airSensors`: The data source is the `airSensors` table.
 - `WHERE _field = 'co'`: Filters results to include only carbon monoxide readings.
 - `ORDER BY _time`: Results are sorted chronologically.
 
-<Figure src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%204.webp" alt="Moving Averages with MySQL" caption="Moving Averages with MySQL" />
+<Figure
+  src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%204.webp"
+  alt="Moving Averages with MySQL"
+  caption="Moving Averages with MySQL"
+/>
 
 Exponential Moving Average (EMA) in MySQL
 
@@ -228,51 +255,50 @@ LIMIT 1;  -- Only insert the first row for initialization
 Step 4: Calculate the EMA for Subsequent Values
 
 1. Use a Cursor for Iteration
-    
-    First, we need to define a procedure that handles EMA calculation using a cursor. This is a more efficient way to process row-by-row without reopening the temporary table.
-    
-    ```sql
-    DELIMITER //
-    
-    CREATE PROCEDURE CalculateEMA()
-    BEGIN
-        DECLARE done INT DEFAULT FALSE;
-        DECLARE current_time DATETIME;
-        DECLARE current_value FLOAT;
-        DECLARE current_ema FLOAT DEFAULT NULL;
-    
-        DECLARE cur CURSOR FOR
-            SELECT _time, _value FROM airSensors WHERE _field = 'co' ORDER BY _time;
-    
-        DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-    
-        OPEN cur;
-    
-        read_loop: LOOP
-            FETCH cur INTO current_time, current_value;
-            IF done THEN
-                LEAVE read_loop;
-            END IF;
-    
-            -- Calculate EMA
-            SET current_ema = IF(current_ema IS NULL, current_value, (@alpha * current_value + (1 - @alpha) * current_ema));
-    
-            -- Insert into temporary table
-            INSERT INTO temp_ema (_time, _value, ema) VALUES (current_time, current_value, current_ema);
-        END LOOP;
-    
-        CLOSE cur;
-    END //
-    
-    DELIMITER ;
-    ```
-    
+
+   First, we need to define a procedure that handles EMA calculation using a cursor. This is a more efficient way to process row-by-row without reopening the temporary table.
+
+   ```sql
+   DELIMITER //
+
+   CREATE PROCEDURE CalculateEMA()
+   BEGIN
+       DECLARE done INT DEFAULT FALSE;
+       DECLARE current_time DATETIME;
+       DECLARE current_value FLOAT;
+       DECLARE current_ema FLOAT DEFAULT NULL;
+
+       DECLARE cur CURSOR FOR
+           SELECT _time, _value FROM airSensors WHERE _field = 'co' ORDER BY _time;
+
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+       OPEN cur;
+
+       read_loop: LOOP
+           FETCH cur INTO current_time, current_value;
+           IF done THEN
+               LEAVE read_loop;
+           END IF;
+
+           -- Calculate EMA
+           SET current_ema = IF(current_ema IS NULL, current_value, (@alpha * current_value + (1 - @alpha) * current_ema));
+
+           -- Insert into temporary table
+           INSERT INTO temp_ema (_time, _value, ema) VALUES (current_time, current_value, current_ema);
+       END LOOP;
+
+       CLOSE cur;
+   END //
+
+   DELIMITER ;
+   ```
+
 2. Call the Procedure to Calculate EMA
-    
-    ```sql
-    CALL CalculateEMA()
-    ```
-    
+
+   ```sql
+   CALL CalculateEMA()
+   ```
 
 Step 5: Retrieve the Results
 
@@ -280,7 +306,11 @@ Step 5: Retrieve the Results
 SELECT * FROM temp_ema ORDER BY _time;
 ```
 
-<Figure src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%205.webp" alt="Exponential Moving Average (EMA) in MySQL" caption="Exponential Moving Average (EMA) in MySQL" />
+<Figure
+  src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%205.webp"
+  alt="Exponential Moving Average (EMA) in MySQL"
+  caption="Exponential Moving Average (EMA) in MySQL"
+/>
 
 Limitations
 
@@ -297,19 +327,19 @@ Limitations
 
 To make your moving average visualizations more effective:
 
-1. Select appropriate chart types: 
-    
-    Line charts work well for most moving averages, while area charts can highlight the difference between raw data and smoothed trends.
-    
+1. Select appropriate chart types:
+
+   Line charts work well for most moving averages, while area charts can highlight the difference between raw data and smoothed trends.
+
 2. Adjust color schemes and line styles:
-    - Use contrasting colors for raw data and moving averages
-    - Make moving average lines thicker or dashed for easy differentiation
+   - Use contrasting colors for raw data and moving averages
+   - Make moving average lines thicker or dashed for easy differentiation
 3. Add annotations and alerts:
-    - Set up alerts when moving averages cross certain thresholds
-    - Use annotations to mark significant events that may impact trends
+   - Set up alerts when moving averages cross certain thresholds
+   - Use annotations to mark significant events that may impact trends
 4. Combine moving averages with other metrics:
-    - Display multiple moving averages with different time windows on the same graph
-    - Show volume or other related metrics below price charts for comprehensive analysis
+   - Display multiple moving averages with different time windows on the same graph
+   - Show volume or other related metrics below price charts for comprehensive analysis
 
 ## Enhancing Observability with SigNoz and Moving Averages
 
@@ -334,33 +364,37 @@ SigNoz provides built-in support for moving averages in its dashboards, allowing
 To take your moving average analysis to the next level:
 
 1. Implement dynamic time windows:
-    
-    Use variables in Grafana to allow users to adjust the moving average window size on the fly:
-    
-    ```
-    moving_average(metric, $window_size)
-    ```
-    
-    Note: The above query works only with InfluxDB as the data source. 
-    
+
+   Use variables in Grafana to allow users to adjust the moving average window size on the fly:
+
+   ```
+   moving_average(metric, $window_size)
+   ```
+
+   Note: The above query works only with InfluxDB as the data source.
+
 2. Combining Moving Averages with Statistical Functions:
-    
-    Grafana allows you to combine moving averages with other statistical functions. For example;
-    
-    You can calculate the moving average and analyze its variability by adding standard deviation. This can help you understand the volatility around the average values:
-    
-    ```arduino
-    SELECT moving_average(mean("co"), 5), stddev("co") 
-    FROM "airSensors" 
-    GROUP BY time(1m)
-    ```
-    
-    This query will return both the moving average of the `co` sensor data and the standard deviation over time. You can visualize both metrics on the same graph for comparison.
-    
-    <Figure src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%206.webp" alt="Combining Moving Averages with Statistical Functions" caption="Combining Moving Averages with Statistical Functions" />
-    
+
+   Grafana allows you to combine moving averages with other statistical functions. For example;
+
+   You can calculate the moving average and analyze its variability by adding standard deviation. This can help you understand the volatility around the average values:
+
+   ```arduino
+   SELECT moving_average(mean("co"), 5), stddev("co")
+   FROM "airSensors"
+   GROUP BY time(1m)
+   ```
+
+   This query will return both the moving average of the `co` sensor data and the standard deviation over time. You can visualize both metrics on the same graph for comparison.
+
+   <Figure
+     src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%206.webp"
+     alt="Combining Moving Averages with Statistical Functions"
+     caption="Combining Moving Averages with Statistical Functions"
+   />
+
 3. Create custom panels for specialized visualizations:
-Develop plugins that offer unique ways to display moving averages, such as ribbon charts or multi-timeframe overlays.
+   Develop plugins that offer unique ways to display moving averages, such as ribbon charts or multi-timeframe overlays.
 
 ## Key Takeaways
 
@@ -387,4 +421,8 @@ Simple moving averages (SMA) give equal weight to all data points in the window.
 
 Use Grafana's CSV export feature to download panel data, including moving averages. For more complex needs, consider using Grafana's API to programmatically extract data or integrate with external analysis tools.
 
-<Figure src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%207.webp" alt="Export Grafana moving average calculations for further analysis" caption="Export Grafana moving average calculations for further analysis" />
+<Figure
+  src="/img/guides/2024/10/is-there-a-way-to-have-a-moving-average-in-grafana-image%207.webp"
+  alt="Export Grafana moving average calculations for further analysis"
+  caption="Export Grafana moving average calculations for further analysis"
+/>

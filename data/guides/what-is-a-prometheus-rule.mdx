@@ -1,13 +1,19 @@
 ---
-
 title: What is a Prometheus rule? - A Comprehensive Guide
-slug: what-is-a-prometheus-rule
 date: 2024-08-01
 tags: [faq, prometheus]
 authors: [yuvraj]
 description: Discover Prometheus rules - essential for efficient monitoring and alerting. Learn about recording and alerting rules, configuration, and best practices.
-keywords: [Prometheus rules, recording rules, alerting rules, monitoring, PromQL, Prometheus configuration, alert management]
-
+keywords:
+  [
+    Prometheus rules,
+    recording rules,
+    alerting rules,
+    monitoring,
+    PromQL,
+    Prometheus configuration,
+    alert management,
+  ]
 ---
 
 Prometheus rules are powerful configuration elements that enhance the capabilities of the [Prometheus monitoring system](https://signoz.io/guides/what-is-prometheus-for-monitoring/). These rules allow you to precompute complex queries and define alert conditions, making your monitoring more efficient and responsive. In this comprehensive guide, you'll learn about the two main types of Prometheus rules: recording rules and alerting rules. We'll explore their importance, configuration, and best practices to help you optimize your monitoring setup.
@@ -36,7 +42,6 @@ The syntax of a recording rule is straightforward:
 ```yaml
 - record: <new_metric_name>
   expr: <PromQL_expression>
-
 ```
 
 Here's an example of a recording rule that calculates the average CPU usage across all instances:
@@ -44,7 +49,6 @@ Here's an example of a recording rule that calculates the average CPU usage acro
 ```yaml
 - record: job:node_cpu_utilization:avg_rate5m
   expr: avg(rate(node_cpu_seconds_total{mode="user"}[5m])) by (job)
-
 ```
 
 This rule computes the 5-minute average CPU utilization rate and stores it under a new metric name.
@@ -72,17 +76,15 @@ To set up recording rules in Prometheus, follow these steps:
 groups:
   - name: cpu_utilization
     rules:
-    - record: job:node_cpu_utilization:avg_rate5m
-      expr: avg(rate(node_cpu_seconds_total{mode="user"}[5m])) by (job)
-
+      - record: job:node_cpu_utilization:avg_rate5m
+        expr: avg(rate(node_cpu_seconds_total{mode="user"}[5m])) by (job)
 ```
 
 1. Add the rule file to your [Prometheus configuration](https://signoz.io/guides/what-is-prometheus-target/):
 
 ```yaml
 rule_files:
-  - "recording_rules.yml"
-
+  - 'recording_rules.yml'
 ```
 
 1. Restart Prometheus to apply the changes.
@@ -111,7 +113,6 @@ The anatomy of an alerting rule includes:
     <label_key>: <label_value>
   annotations:
     <annotation_key>: <annotation_value>
-
 ```
 
 Here's an example of an alerting rule that triggers when CPU usage is above 90% for 5 minutes:
@@ -123,9 +124,8 @@ Here's an example of an alerting rule that triggers when CPU usage is above 90% 
   labels:
     severity: critical
   annotations:
-    summary: "High CPU usage detected on {{ $labels.instance }}"
-    description: "CPU usage is above 90% for 5 minutes on {{ $labels.instance }}"
-
+    summary: 'High CPU usage detected on {{ $labels.instance }}'
+    description: 'CPU usage is above 90% for 5 minutes on {{ $labels.instance }}'
 ```
 
 Prometheus evaluates alerting rules at regular intervals. When an alert condition is met, it generates an alert and sends it to configured notification systems like Alertmanager.
@@ -139,7 +139,6 @@ To create more sophisticated alerting rules:
 ```yaml
 - alert: ServiceDown
   expr: up{job=~"important-service|critical-app"} == 0
-
 ```
 
 1. Implement multi-condition alerts:
@@ -147,7 +146,6 @@ To create more sophisticated alerting rules:
 ```yaml
 - alert: HighErrorRateAndLatency
   expr: (rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])) > 0.05 and http_request_duration_seconds{quantile="0.9"} > 1
-
 ```
 
 1. Reduce alert noise by using the `for` clause and grouping related alerts:
@@ -156,7 +154,6 @@ To create more sophisticated alerting rules:
 - alert: PersistentHighCPU
   expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
   for: 15m
-
 ```
 
 1. Integrate with Alertmanager for advanced notification routing and grouping.

@@ -1,164 +1,166 @@
 ---
-
-title: Zerolog Golang - Complete Guide to Logging 
-slug: zerolog-golang
+title: Zerolog Golang - Complete Guide to Logging
 date: 2024-07-11
 tags: [logging]
 authors: [eromosele]
 description: The article guides on using Zerolog, a high-performance Go logging library. It covers installation, usage, log levels, context, prettifying logs, sampling, and integration with web apps.
 keywords: [log, logging, golang, zap, zerolog, sampling, pretty logging]
-
 ---
 
 <head>
-<script
+  <script
     type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Zerolog Golang - Complete Guide to Logging",
-  "alternativeHeadline": "Master Golang logging with Zerolog - Learn setup, configuration, and advanced features for efficient, structured logging",
-  "author": {
-    "@type": "Person",
-    "name": "Eromosele"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2024-07-11T00:00:00Z",
-  "dateModified": "2024-07-11T00:00:00Z",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/guides/zerolog-golang/"
-  },
-  "description": "The article guides on using Zerolog, a high-performance Go logging library. It covers installation, usage, log levels, context, prettifying logs, sampling, and integration with web apps.",
-  "keywords": "log, logging, golang, zap, zerolog, sampling, pretty logging",
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "Zerolog",
-      "description": "A high-performance, zero-allocation logging library for Go"
-    },
-    {
-      "@type": "Thing",
-      "name": "Golang",
-      "description": "A statically typed, compiled programming language developed by Google"
-    },
-    {
-      "@type": "Thing",
-      "name": "Structured Logging",
-      "description": "A logging approach that treats log entries as data structures rather than plain text"
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "Zerolog",
-      "applicationCategory": "Logging Library"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "SigNoz",
-      "applicationCategory": "Observability Platform"
-    }
-  ],
-  "mainEntity": {
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What is Zerolog?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Zerolog is a high-performance, structured logging library for Go. It is designed to provide efficient and fast logging by using a simple interface and outputting logs in JSON format. Zerolog's focus on performance makes it suitable for applications requiring minimal overhead in their logging operations."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is Structured Logging?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Structured logging refers to the practice of logging data in a consistent, structured format, usually in JSON. This format allows logs to be easily parsed and analyzed by various tools, facilitating better monitoring, debugging, and analysis. Structured logs include key-value pairs that provide more context and are machine-readable, making automated processing and querying more effective."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is the Difference Between Zerolog and Zap Logger?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Both Zerolog and Zap Logger are popular logging libraries in the Go ecosystem, but they have key differences. Zerolog is known for its zero-allocation logging, making it extremely fast and efficient. It has a simpler, more minimalistic API focused on ease of use and minimal overhead. Zap offers more configurability and flexibility with features like structured logging and logging levels, and provides more advanced features out-of-the-box."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Which Logger is Best in Golang?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "The 'best' logger in Golang depends on the specific requirements of your project. For performance, Zerolog is typically preferred for its zero-allocation and high-performance characteristics, making it ideal for applications where logging overhead needs to be minimized. For flexibility and features, Zap Logger is a strong choice if you need a more feature-rich logging library with advanced capabilities and configurability."
-        }
-      }
-    ]
-  },
-  "tutorial": {
-    "@type": "HowTo",
-    "name": "How to Use Zerolog in Golang",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Install Zerolog",
-        "text": "Install Zerolog using go get -u github.com/rs/zerolog"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Import Zerolog",
-        "text": "Import Zerolog in your Go code: import 'github.com/rs/zerolog/log'"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Initialize Logger",
-        "text": "Initialize a Zerolog logger with desired configuration"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Set Log Levels",
-        "text": "Configure log levels to control the verbosity of logs"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Add Context to Logs",
-        "text": "Use methods like With() to add context to your logs"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Implement Log Sampling",
-        "text": "Use Zerolog's sampling features to control log volume"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Integrate with SigNoz",
-        "text": "Set up SigNoz and configure Zerolog to send logs to SigNoz for centralized monitoring"
-      }
-    ]
-  }
-}) }}
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'Zerolog Golang - Complete Guide to Logging',
+        alternativeHeadline:
+          'Master Golang logging with Zerolog - Learn setup, configuration, and advanced features for efficient, structured logging',
+        author: {
+          '@type': 'Person',
+          name: 'Eromosele',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
+        datePublished: '2024-07-11T00:00:00Z',
+        dateModified: '2024-07-11T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/zerolog-golang/',
+        },
+        description:
+          'The article guides on using Zerolog, a high-performance Go logging library. It covers installation, usage, log levels, context, prettifying logs, sampling, and integration with web apps.',
+        keywords: 'log, logging, golang, zap, zerolog, sampling, pretty logging',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
+        },
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Zerolog',
+            description: 'A high-performance, zero-allocation logging library for Go',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Golang',
+            description: 'A statically typed, compiled programming language developed by Google',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Structured Logging',
+            description:
+              'A logging approach that treats log entries as data structures rather than plain text',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Zerolog',
+            applicationCategory: 'Logging Library',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What is Zerolog?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "Zerolog is a high-performance, structured logging library for Go. It is designed to provide efficient and fast logging by using a simple interface and outputting logs in JSON format. Zerolog's focus on performance makes it suitable for applications requiring minimal overhead in their logging operations.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What is Structured Logging?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Structured logging refers to the practice of logging data in a consistent, structured format, usually in JSON. This format allows logs to be easily parsed and analyzed by various tools, facilitating better monitoring, debugging, and analysis. Structured logs include key-value pairs that provide more context and are machine-readable, making automated processing and querying more effective.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What is the Difference Between Zerolog and Zap Logger?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Both Zerolog and Zap Logger are popular logging libraries in the Go ecosystem, but they have key differences. Zerolog is known for its zero-allocation logging, making it extremely fast and efficient. It has a simpler, more minimalistic API focused on ease of use and minimal overhead. Zap offers more configurability and flexibility with features like structured logging and logging levels, and provides more advanced features out-of-the-box.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Which Logger is Best in Golang?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "The 'best' logger in Golang depends on the specific requirements of your project. For performance, Zerolog is typically preferred for its zero-allocation and high-performance characteristics, making it ideal for applications where logging overhead needs to be minimized. For flexibility and features, Zap Logger is a strong choice if you need a more feature-rich logging library with advanced capabilities and configurability.",
+              },
+            },
+          ],
+        },
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'How to Use Zerolog in Golang',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Install Zerolog',
+              text: 'Install Zerolog using go get -u github.com/rs/zerolog',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Import Zerolog',
+              text: "Import Zerolog in your Go code: import 'github.com/rs/zerolog/log'",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Initialize Logger',
+              text: 'Initialize a Zerolog logger with desired configuration',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Set Log Levels',
+              text: 'Configure log levels to control the verbosity of logs',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Add Context to Logs',
+              text: 'Use methods like With() to add context to your logs',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Implement Log Sampling',
+              text: "Use Zerolog's sampling features to control log volume",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Integrate with SigNoz',
+              text: 'Set up SigNoz and configure Zerolog to send logs to SigNoz for centralized monitoring',
+            },
+          ],
+        },
+      }),
+    }}
   />
 </head>
 
 Logging is the practice of recording or storing information and messages that provide insights into the behavior and execution of a program.
 
-Zerolog is a high-performance, zero-allocation logging library tailored for the Go programming language. Engineered for speed and efficiency, it is particularly suited for latency-sensitive applications where minimizing garbage collection is crucial. 
+Zerolog is a high-performance, zero-allocation logging library tailored for the Go programming language. Engineered for speed and efficiency, it is particularly suited for latency-sensitive applications where minimizing garbage collection is crucial.
 
 Zerolog empowers developers with [structured logging](https://signoz.io/blog/structured-logs/) capabilities, enabling detailed and organized logs with minimal performance overhead. This guide delves into using the Zerolog package for logging, explores its key features, and provides insights into integrating Zerolog seamlessly with web applications.
 
@@ -177,7 +179,7 @@ To use `zerolog` in your Go application, you need to install it using `go get` 
 go get -u github.com/rs/zerolog
 ```
 
-After installation,  import `zerolog` into your Go code (if there is an error run `go mod tidy`):
+After installation, import `zerolog` into your Go code (if there is an error run `go mod tidy`):
 
 ```go
 import (
@@ -235,33 +237,19 @@ Understanding Log Levels
 Log levels in Zerolog and other logging frameworks typically consist of standard levels, each representing varying severity levels of events alongside their corresponding integer priority values:
 
 - TRACE(-1): The most detailed level. Used for tracing the flow through the application, providing fine-grained details. Typically not enabled in production due to its verbosity.
-    
-    Use Case: Trace code and explain behavior, frequently with step-by-step execution.
-    
+  Use Case: Trace code and explain behavior, frequently with step-by-step execution.
 - DEBUG(0): Used for debugging information that is useful during development but may not be needed in production. This level often includes detailed information about the application's state.
-    
-    Use Case: Diagnosing a complex issue by logging detailed information about the application's state.
-    
+  Use Case: Diagnosing a complex issue by logging detailed information about the application's state.
 - INFO(1): Provides information messages that highlight the progress of the application at a higher level. This level is often used to record major lifecycle events or significant state changes.
-    
-    Use Case: Log significant events like service starts, user logins, and transactions.
-    
+  Use Case: Log significant events like service starts, user logins, and transactions.
 - WARN(2): Indicates potential issues or anomalies that are not necessarily errors but might require attention. It alerts developers to situations that may lead to problems if not addressed.
-    
-    Use Case: Log anomalies that might need attention but are not errors, like slow responses or deprecated API use.
-    
+  Use Case: Log anomalies that might need attention but are not errors, like slow responses or deprecated API use.
 - ERROR(3): Logs errors that occurred during the execution of the application. These messages indicate problems that need immediate attention but do not necessarily stop the application from functioning.
-    
-    Use Case: Log errors that need immediate attention but don't stop the application, such as failed operations.
-    
+  Use Case: Log errors that need immediate attention but don't stop the application, such as failed operations.
 - FATAL(4): The highest severity level, indicating critical errors that cause the application to terminate abruptly. These errors typically require immediate intervention.
-    
-    Use Case: Log critical errors that cause the application to terminate.
-    
+  Use Case: Log critical errors that cause the application to terminate.
 - PANIC(5): Logs indicate a critical and unexpected situation where the program cannot safely continue, leading to a panic. These logs capture the application's state just before termination, crucial for debugging the issue.
-    
-    Use Case: Log the state just before a panic for post-mortem analysis.
-    
+  Use Case: Log the state just before a panic for post-mortem analysis.
 
 You can set the minimum log level for a custom Logger using the `Level()` method. You can either use the integer values (e.g., -1 for TRACE, 0 for DEBUG) or the predefined constants from the zerolog package (e.g., `zerolog.TraceLevel`, `zerolog.DebugLevel`).
 
@@ -305,7 +293,7 @@ exit status 1
 
 ### Logger
 
-A logger is a tool used to record and manage log messages throughout the execution of an application. 
+A logger is a tool used to record and manage log messages throughout the execution of an application.
 
 The `github.com/rs/zerolog/log` package offers a preconfigured and universally accessible logger that can be imported and utilized. By default, this global logger logs to standard error and is initially set to log at the TRACE level. However, you can adjust the minimum logging level using the `SetGlobalLevel()` function from the main `zerolog` package.
 
@@ -442,7 +430,7 @@ func main() {
         Str("app_version", "1.0.0").
         Str("environment", "production").
         Logger()
-    
+
     // Replace the global logger with the new logger that has global context
     log.Logger = logger
 
@@ -485,7 +473,12 @@ func main() {
 Output:
 
 ```json
-{"level":"warn","Environment":"Production","time":"2024-07-05T16:41:49+01:00","message":"Excessive disk usage"}
+{
+  "level": "warn",
+  "Environment": "Production",
+  "time": "2024-07-05T16:41:49+01:00",
+  "message": "Excessive disk usage"
+}
 ```
 
 `.With` is used during logger initialization to establish static context fields, while`.UpdateContext` is employed to adjust or add context fields dynamically throughout the application's lifecycle.
@@ -529,8 +522,11 @@ func main() {
 
 Output
 
-<Figure src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-05_at_17.10.30.webp" alt="Output of the application" caption="Output of the application" />
-
+<Figure
+  src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-05_at_17.10.30.webp"
+  alt="Output of the application"
+  caption="Output of the application"
+/>
 
 Using `ConsoleWriter`, you can also customize the appearance of the output:
 
@@ -598,7 +594,7 @@ NOTE: It's important to note that `ConsoleWriter` is primarily intended for deve
 
 ### Log Sampling
 
-Logging in applications can generate a significant volume of data, especially in high-traffic environments. Log sampling involves selecting a subset of log messages to record based on predefined criteria such as time intervals, random selection, or specific conditions. 
+Logging in applications can generate a significant volume of data, especially in high-traffic environments. Log sampling involves selecting a subset of log messages to record based on predefined criteria such as time intervals, random selection, or specific conditions.
 
 - Basic Sampler: Basic Sampling allows you to log only a fixed percentage of events. This is useful when you want to reduce the amount of log data but still retain a representative sample. With basic sampling, you specify the frequency with which log messages should be recorded. For example, if you set `N` to 2, only one out of every 2 log messages will be recorded.
 
@@ -684,7 +680,7 @@ The logger is configured with a `BurstSampler` that logs 5 messages in a burst
 
 Running this code will result in 5 messages being logged immediately, then a 10-second pause, and then another 5 messages being logged.
 
-- Level Sampler:  The Level Sampler allows you to specify different sampling rates for different log levels. This is useful when you want to have detailed logging at lower levels (like DEBUG) but less frequent logging at higher levels (like INFO or WARN).
+- Level Sampler: The Level Sampler allows you to specify different sampling rates for different log levels. This is useful when you want to have detailed logging at lower levels (like DEBUG) but less frequent logging at higher levels (like INFO or WARN).
 
 ```go
 package main
@@ -900,7 +896,7 @@ Here's an example using `lumberjack` to implement log rotation:
 package main
 
 import (
- 
+
 
     "github.com/natefinch/lumberjack"
     "github.com/rs/zerolog"
@@ -936,7 +932,7 @@ Output(`app.log` ):
 
 Implementing logging in your Golang application with zerolog is just the first step. To truly leverage the power of logs, sending them to an observability platform like SigNoz can provide numerous benefits, let’s see how to setup SigNoz:
 
-### Using the  Zerolog Package to Send Logs to Signoz:
+### Using the Zerolog Package to Send Logs to Signoz:
 
 Step 1: Setting up Signoz in your Environment:
 
@@ -1017,8 +1013,11 @@ This Go code sets up a basic HTTP server that logs events to a file (`applicatio
 
 After running your application you should see the following output on `localhost:8080/`:
 
-<Figure src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-01_at_14.15.51.webp" alt="Output after running the Go Application" caption="Output after running the Go Application" />
-
+<Figure
+  src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-01_at_14.15.51.webp"
+  alt="Output after running the Go Application"
+  caption="Output after running the Go Application"
+/>
 
 Step 3: Setting up the Logs Pipeline in Otel Collector
 
@@ -1059,7 +1058,7 @@ receivers:
             - targets:
               # - localhost:8888
   filelog/app:
-    include: [ <path-to-log-file> ] #include the full path to your log file
+    include: [<path-to-log-file>] #include the full path to your log file
     start_at: end
 processors:
   batch:
@@ -1077,11 +1076,11 @@ extensions:
   zpages: {}
 exporters:
   otlp:
-    endpoint: "<https://ingest>.{region}.signoz.cloud:443"
+    endpoint: '<https://ingest>.{region}.signoz.cloud:443'
     tls:
       insecure: false
     headers:
-      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
+      'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>'
   debug:
     verbosity: normal
 service:
@@ -1100,21 +1099,24 @@ Step 4: Viewing Logs in SigNoz
 
 After running the above application and making the correct configurations, you can navigate to the [SigNoz](https://signoz.io/docs/introduction/) logs dashboard to see all the logs sent to SigNoz.
 
-<Figure src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-06_at_02.29.06.webp" alt="Signoz Log Output" caption="Signoz Log Output" />
- 
+<Figure
+  src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-06_at_02.29.06.webp"
+  alt="Signoz Log Output"
+  caption="Signoz Log Output"
+/>
 
 ## Conclusion
 
 - Zerolog Overview and Prerequisites: Zerolog provides a highly performant logging solution with minimal overhead, suitable for high-throughput applications. Before getting started, ensure you have the required tools, including Go installed on your system.
 - Getting Started with Zerolog: Installing and setting up Zerolog is straightforward. Basic usage involves simple installation commands and initializing the logger for immediate use.
 - Core Features of Zerolog:
-    - Logger Initialization and Configuration: Properly initializing and configuring the global logger is crucial for maintaining consistent logging behavior across your application.
-    - Log Levels: Understanding and setting log levels allows you to control the verbosity of your logs, ensuring that only relevant information is logged.
-    - Adding Context to Logs: Adding context to your logs, whether through event-specific context or global context, provides more detailed and meaningful log messages.
-    - Prettifying Logs: Using the ConsoleWriter for prettier log output during development can improve readability and debugging efficiency.
-    - Log Sampling: Implementing log sampling techniques, including basic, burst, and advanced sampling, helps manage log volume and performance.
-    - Zerolog Hooks: Hooks offer a way to extend logging functionality, allowing for custom actions to be triggered on log events.
-    - Customizing Log Output: Configuring Zerolog to write logs to files or external systems and implementing rotating log files ensures persistent and organized log storage.
+  - Logger Initialization and Configuration: Properly initializing and configuring the global logger is crucial for maintaining consistent logging behavior across your application.
+  - Log Levels: Understanding and setting log levels allows you to control the verbosity of your logs, ensuring that only relevant information is logged.
+  - Adding Context to Logs: Adding context to your logs, whether through event-specific context or global context, provides more detailed and meaningful log messages.
+  - Prettifying Logs: Using the ConsoleWriter for prettier log output during development can improve readability and debugging efficiency.
+  - Log Sampling: Implementing log sampling techniques, including basic, burst, and advanced sampling, helps manage log volume and performance.
+  - Zerolog Hooks: Hooks offer a way to extend logging functionality, allowing for custom actions to be triggered on log events.
+  - Customizing Log Output: Configuring Zerolog to write logs to files or external systems and implementing rotating log files ensures persistent and organized log storage.
 - Integration with Web Applications: Zerolog seamlessly integrates with web applications, enhancing logging capabilities in a web context.
 - Tracking Logs Using SigNoz: SigNoz provides an efficient solution for tracking and analyzing logs. Integrating Zerolog with SigNoz involves setting up the environment, configuring the logging package, and sending logs for comprehensive monitoring and analysis.
 

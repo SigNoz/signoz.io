@@ -1,13 +1,19 @@
 ---
-
 title: How to Limit Apache Access Log Size and Archives - A Quick Guide
-slug: how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps
 date: 2024-10-14
 tags: [faq]
 authors: [niyati_thakkar]
 description: Learn how to effectively manage Apache access logs by limiting their size and controlling archives. Optimize server performance and storage with this guide.
-keywords: [Apache access logs, log rotation, log management, server performance, rotatelogs, logrotate, SigNoz]
-
+keywords:
+  [
+    Apache access logs,
+    log rotation,
+    log management,
+    server performance,
+    rotatelogs,
+    logrotate,
+    SigNoz,
+  ]
 ---
 
 Apache access logs are essential for monitoring website traffic, identifying security threats, and troubleshooting performance issues. However, large access logs can consume significant disk space and impact server performance. Effective management of access logs is crucial for maintaining a healthy and efficient web server.
@@ -104,24 +110,23 @@ sudo systemctl restart apache2
 
 To ensure that your log rotation settings are working correctly, follow these steps:
 
-1. Generate traffic: Use a tool like `curl` or browse your website to generate some traffic, which will be written to the Apache logs. For example, 
-    
-    ```bash
-    for i in {1..10000}; do
-        curl http://localhost > /dev/null 2>&1
-    done
-    ```
-    
-    This will generate 10,000 requests to your server, quickly filling up the log files and triggering a rotation based on your size limits.
-    
+1. Generate traffic: Use a tool like `curl` or browse your website to generate some traffic, which will be written to the Apache logs. For example,
+
+   ```bash
+   for i in {1..10000}; do
+       curl http://localhost > /dev/null 2>&1
+   done
+   ```
+
+   This will generate 10,000 requests to your server, quickly filling up the log files and triggering a rotation based on your size limits.
+
 2. Monitor log files: Check the `/var/log/apache2/` directory for new log files using the command:
-    
-    ```bash
-    ls -lh /var/log/apache2/
-    ```
-    
-    You should see the log files following the naming pattern with the date (e.g., `access_log.2023-09-27`).
-    
+
+   ```bash
+   ls -lh /var/log/apache2/
+   ```
+
+   You should see the log files following the naming pattern with the date (e.g., `access_log.2023-09-27`).
 
 3. Check log file sizes: Ensure that the log files are being rotated when they exceed 1 MB in size. You can simulate high traffic using a loop to quickly generate enough logs for rotation:
 
@@ -136,18 +141,14 @@ While the `rotatelogs` utility efficiently handles log rotation based on size or
 If `logrotate` is not already installed on your system, you can easily install it using your package manager. Run the following commands based on your Linux distribution:
 
 - Ubuntu/Debian:
-    
-    ```bash
-    sudo apt-get update
-    sudo apt-get install logrotate
-    ```
-    
+  ```bash
+  sudo apt-get update
+  sudo apt-get install logrotate
+  ```
 - Once installed, you can verify the installation with:
-    
-    ```bash
-    logrotate --version
-    ```
-    
+  ```bash
+  logrotate --version
+  ```
 
 ### Step 2: Configure `logrotate` for Apache Logs
 
@@ -200,7 +201,17 @@ Example:
 
 For the above configuration for test purpose, below is the output:
 
-<Figure src="/img/guides/2024/10/how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps-image.webp" alt="" caption="" />The output from the `logrotate` command shows that log rotation for the application logs in `/var/log/myapp/*.log` is functioning correctly. It indicates that the log file `my_app.log` has exceeded the 10 MB size limit, triggering a rotation. Old logs are renamed sequentially (e.g., `my_app.log.4` becomes `my_app.log.5`), while a new log file (`my_app.log.1`) is created with the appropriate permissions (0644). The process also removes any empty log files, confirming that the log rotation setup operates as intended for efficient log management.
+<Figure
+  src="/img/guides/2024/10/how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps-image.webp"
+  alt=""
+  caption=""
+/>
+The output from the `logrotate` command shows that log rotation for the application logs in
+`/var/log/myapp/*.log` is functioning correctly. It indicates that the log file `my_app.log` has
+exceeded the 10 MB size limit, triggering a rotation. Old logs are renamed sequentially (e.g.,
+`my_app.log.4` becomes `my_app.log.5`), while a new log file (`my_app.log.1`) is created with the
+appropriate permissions (0644). The process also removes any empty log files, confirming that the
+log rotation setup operates as intended for efficient log management.
 
 ### Step 4: Apply the Logrotate Configuration
 
@@ -214,9 +225,17 @@ This command will read the configuration file at `/etc/logrotate.d/apache2` and 
 
 When the command is run without `-d` single log file is divided into multiple log files as shown below:
 
-<Figure src="/img/guides/2024/10/how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps-image_(5).webp" alt="" caption="" />
+<Figure
+  src="/img/guides/2024/10/how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps-image_(5).webp"
+  alt=""
+  caption=""
+/>
 
-<Figure src="/img/guides/2024/10/how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps-Screenshot_2024-10-05_231748.webp" alt="" caption="" />
+<Figure
+  src="/img/guides/2024/10/how-can-i-limit-the-size-of-apache-access-log-and-limit-the-number-of-archived-logs-it-keeps-Screenshot_2024-10-05_231748.webp"
+  alt=""
+  caption=""
+/>
 
 ## Advanced Configuration: Managing Logs for Virtual Hosts
 
@@ -319,21 +338,18 @@ While Apache's built-in tools are effective for basic log management, modern obs
 
 To get started with SigNoz for Apache log management:
 
-1. Sign Up for SigNoz Cloud:
-Start by signing up for [SigNoz Cloud](https://signoz.io/teams/). This cloud-based service provides a hassle-free setup and management experience, eliminating the need for infrastructure management.
-    
-    <GetStartedSigNoz />
-    
-2. Configure Apache to Send Logs to SigNoz:
-Once installed, configure the log forwarder to connect to your SigNoz Cloud instance. This typically involves providing the SigNoz Cloud endpoint and your API token. Refer to the [SigNoz documentation](https://signoz.io/guides/apache-log/) for specific instructions.
-3. Access the SigNoz Cloud Dashboard:
-After setting up your logs, access the SigNoz Cloud Dashboard via your web browser. This intuitive interface allows you to view and analyze your Apache logs alongside other observability data.
-    
-    SigNoz Cloud enhances your experience by providing:
-    
-    - Scalability: Easily scale your observability as your infrastructure grows without the complexities of managing on-premises solutions.
-    - Maintenance-Free Operation: With SigNoz Cloud, you don’t need to worry about updates, server maintenance, or scaling challenges.
-    - Integrated Insights: Leverage built-in analytics to gain insights into application performance, log trends, and potential issues across your systems.
+1.  Sign Up for SigNoz Cloud:
+    Start by signing up for [SigNoz Cloud](https://signoz.io/teams/). This cloud-based service provides a hassle-free setup and management experience, eliminating the need for infrastructure management.
+        <GetStartedSigNoz />
+2.  Configure Apache to Send Logs to SigNoz:
+    Once installed, configure the log forwarder to connect to your SigNoz Cloud instance. This typically involves providing the SigNoz Cloud endpoint and your API token. Refer to the [SigNoz documentation](https://signoz.io/guides/apache-log/) for specific instructions.
+3.  Access the SigNoz Cloud Dashboard:
+    After setting up your logs, access the SigNoz Cloud Dashboard via your web browser. This intuitive interface allows you to view and analyze your Apache logs alongside other observability data.
+        SigNoz Cloud enhances your experience by providing:
+
+        - Scalability: Easily scale your observability as your infrastructure grows without the complexities of managing on-premises solutions.
+        - Maintenance-Free Operation: With SigNoz Cloud, you don’t need to worry about updates, server maintenance, or scaling challenges.
+        - Integrated Insights: Leverage built-in analytics to gain insights into application performance, log trends, and potential issues across your systems.
 
 By leveraging SigNoz Cloud, you not only enhance your log management but also improve the overall observability of your Apache server. This integration allows for quicker identification and resolution of issues compared to traditional log analysis methods, making it a valuable addition to your logging strategy. With SigNoz Cloud, enjoy the advantages of a robust observability platform without the overhead of managing the infrastructure, allowing your team to focus on building and improving applications.
 

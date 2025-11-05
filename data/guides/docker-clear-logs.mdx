@@ -1,11 +1,24 @@
 ---
-title: "How to Clear Docker Container Logs Safely (5+ Methods and Automation)"
-slug: "docker-clear-logs"
-date: "2025-07-24"
+title: 'How to Clear Docker Container Logs Safely (5+ Methods and Automation)'
+date: '2025-07-24'
 tags: [Docker, Logging]
 authors: [nitin_gouda]
-description: "Learn 5+ safe methods to clear Docker container logs and prevent disk space issues. Includes log rotation setup, truncation commands, automation techniques, and monitoring integration."
-keywords: [Docker logs, clear Docker logs, Docker logging, truncate Docker logs, delete Docker logs, Docker log management, Docker log rotation, Docker logging drivers, automate Docker logs, Docker performance maintenance, disk space cleanup, container logs]
+description: 'Learn 5+ safe methods to clear Docker container logs and prevent disk space issues. Includes log rotation setup, truncation commands, automation techniques, and monitoring integration.'
+keywords:
+  [
+    Docker logs,
+    clear Docker logs,
+    Docker logging,
+    truncate Docker logs,
+    delete Docker logs,
+    Docker log management,
+    Docker log rotation,
+    Docker logging drivers,
+    automate Docker logs,
+    Docker performance maintenance,
+    disk space cleanup,
+    container logs,
+  ]
 ---
 
 [Docker container logs](https://signoz.io/guides/docker-view-logs/) can consume disk space rapidly and impact system performance when unmanaged. A single long-running container can generate gigabytes of log data, leading to **"No Space Left on Device"** errors that bring entire systems to a halt. This guide covers proven methods to safely clear Docker logs, implement automated rotation, and prevent future disk space issues.
@@ -16,7 +29,11 @@ Whether you're dealing with emergency disk space situations or implementing proa
 
 Docker captures all output from containerized applications through `stdout` and `stderr` streams. By default, Docker uses the `json-file` logging driver, storing logs as JSON-formatted files in `/var/lib/docker/containers/<container_id>/<container_id>-json.log` on the host system.
 
-<Figure src="/img/guides/2024/07/docker-clear-logs-Screenshot_2024-07-16_at_5.01.07_AM.webp" alt="Docker logs" caption="Docker logs growing over time can consume significant disk space" />
+<Figure
+  src="/img/guides/2024/07/docker-clear-logs-Screenshot_2024-07-16_at_5.01.07_AM.webp"
+  alt="Docker logs"
+  caption="Docker logs growing over time can consume significant disk space"
+/>
 
 ### The Problem: Uncontrolled Log Growth
 
@@ -85,23 +102,23 @@ docker run -d \
 Implement log rotation in your `docker-compose.yml` files:
 
 ```yaml
-version: "3.8"
+version: '3.8'
 services:
   web:
     image: nginx:latest
     logging:
-      driver: "local"
+      driver: 'local'
       options:
-        max-size: "10m"
-        max-file: "3"
-  
+        max-size: '10m'
+        max-file: '3'
+
   database:
     image: postgres:13
     logging:
-      driver: "local"
+      driver: 'local'
       options:
-        max-size: "20m"
-        max-file: "5"
+        max-size: '20m'
+        max-file: '5'
 ```
 
 This approach ensures consistent log management across your entire application stack.
@@ -161,21 +178,25 @@ For scenarios requiring complete log removal, deletion provides thorough cleanup
 ### Safe Deletion Process
 
 1. **Stop the container** (recommended for safety):
+
 ```bash
 docker stop container_name
 ```
 
 2. **Delete the log file**:
+
 ```bash
 rm /var/lib/docker/containers/<container_id>/<container_id>-json.log
 ```
 
 3. **Restart Docker daemon** (to recreate log file structure):
+
 ```bash
 sudo systemctl restart docker
 ```
 
 4. **Start the container**:
+
 ```bash
 docker start container_name
 ```
@@ -369,16 +390,16 @@ cleanup_large_logs() {
     find "$LOG_DIR" -name "*-json.log" -size +$MAX_SIZE -exec bash -c '
         container_id=$(basename $(dirname "$1"))
         container_name=$(docker inspect --format="{{.Name}}" "$container_id" 2>/dev/null | sed "s/^///")
-        
+
         if [ -n "$container_name" ]; then
             echo "Cleaning logs for container: $container_name ($container_id)"
-            
+
             # Create backup before cleanup
             cp "$1" "'"$BACKUP_DIR"'/$(date +%Y%m%d-%H%M%S)-$container_name.log"
-            
+
             # Truncate the log file
             truncate -s 0 "$1"
-            
+
             echo "Cleaned: $1 ($(du -h "$1" | cut -f1))"
         fi
     ' bash {} \;
@@ -424,9 +445,9 @@ check_log_sizes() {
         container_id=$(basename $(dirname "$1"))
         container_name=$(docker inspect --format="{{.Name}}" "$container_id" 2>/dev/null | sed "s/^///")
         size=$(du -h "$1" | cut -f1)
-        
+
         echo "ALERT: Container $container_name has log file size: $size"
-        
+
         # Optional: Send email alert
         # echo "Container $container_name log size exceeded threshold: $size" | mail -s "Docker Log Alert" $EMAIL
     ' bash {} \;
@@ -493,6 +514,7 @@ fi
 ### "No Space Left on Device" Errors
 
 **Immediate Solution:**
+
 ```bash
 # Quick space recovery
 sudo truncate -s 0 /var/lib/docker/containers/*/*-json.log
@@ -502,6 +524,7 @@ docker system prune -a -f
 ```
 
 **Root Cause Prevention:**
+
 - Implement log rotation configuration
 - Set up disk usage monitoring
 - Create automated cleanup scripts
@@ -511,6 +534,7 @@ docker system prune -a -f
 **Problem**: Many expect `docker restart` to clear logs, but logs persist across container restarts.
 
 **Solution**: Logs are only cleared when containers are removed and recreated:
+
 ```bash
 # This DOES NOT clear logs
 docker restart container_name
@@ -523,6 +547,7 @@ docker run [original_options] image_name
 ### Log Rotation Not Working
 
 **Verification Steps:**
+
 ```bash
 # Check Docker daemon configuration
 cat /etc/docker/daemon.json
@@ -538,12 +563,12 @@ docker run -d --log-opt max-size=1m --log-opt max-file=2 busybox sh -c 'while tr
 
 ### Log Clearing Methods Comparison
 
-| Method | Speed | Safety | Downtime | Use Case |
-|--------|-------|---------|----------|-----------|
-| Truncation | Fast | High | None | Running containers |
-| Deletion | Fast | Medium | Required | Maintenance windows |
-| Rotation | Automated | High | None | Preventive measure |
-| Driver Config | Automated | High | None | New deployments |
+| Method        | Speed     | Safety | Downtime | Use Case            |
+| ------------- | --------- | ------ | -------- | ------------------- |
+| Truncation    | Fast      | High   | None     | Running containers  |
+| Deletion      | Fast      | Medium | Required | Maintenance windows |
+| Rotation      | Automated | High   | None     | Preventive measure  |
+| Driver Config | Automated | High   | None     | New deployments     |
 
 ### Disk Space Recovery Results
 
@@ -558,11 +583,15 @@ Based on real-world implementations:
 
 SigNoz provides comprehensive [observability for Docker environments](https://signoz.io/docs/userguide/collect_docker_logs/) through advanced log management capabilities integrated with OpenTelemetry. The platform features Docker-specific log collection with automatic service detection, enhanced log processing through logspout-signoz, and real-time log analysis with correlation across metrics, logs, and traces.
 
-<Figure src="/img/guides/2025/07/docker-clear-logs-signoz-logs.webp" alt="Docker container logs in SigNoz" caption="Docker container logs in SigNoz" />
+<Figure
+  src="/img/guides/2025/07/docker-clear-logs-signoz-logs.webp"
+  alt="Docker container logs in SigNoz"
+  caption="Docker container logs in SigNoz"
+/>
 
 SigNoz offers an [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)-based approach for Docker log collection, featuring pre-configured setups for seamless integration. The platform's logspout-signoz router automatically detects service names and metadata from Docker containers, enriching logs with context for better filtering and querying capabilities.
 
-You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features. 
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
 
 Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
 
@@ -579,7 +608,7 @@ Effective Docker log management requires a multi-layered approach combining prev
 1. **Prevention First**: Configure log rotation using Docker's built-in drivers or docker-compose settings
 2. **Safe Cleaning**: Use truncation for running containers, deletion only during maintenance windows
 3. **Automation**: Implement scheduled cleanup scripts and monitoring alerts
-4. **Integration**: Leverage centralized logging solutions like [SigNoz](https://signoz.io/docs/introduction/) for comprehensive observability  
+4. **Integration**: Leverage centralized logging solutions like [SigNoz](https://signoz.io/docs/introduction/) for comprehensive observability
 5. **Best Practices**: Establish clear retention policies, implement structured logging, and maintain security protocols
 
 By following these practices and implementing the methods outlined in this guide, you'll maintain optimal Docker performance while ensuring log data remains available for troubleshooting and analysis when needed.

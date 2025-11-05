@@ -1,13 +1,18 @@
 ---
-
 title: Database Monitoring 101 - Essential Guide for Performance
-slug: database-monitoring
 date: 2024-08-07
 tags: [monitoring]
 authors: [eromosele]
 description: Learn essential database monitoring strategies to optimize performance, prevent issues, and ensure business continuity. Discover key metrics and tools for effective monitoring.
-keywords: [database monitoring,performance optimization,database metrics,monitoring tools, query analysis,proactive monitoring]
-
+keywords:
+  [
+    database monitoring,
+    performance optimization,
+    database metrics,
+    monitoring tools,
+    query analysis,
+    proactive monitoring,
+  ]
 ---
 
 Database performance can make or break your application. Slow queries, resource bottlenecks, and unexpected downtime can frustrate users and impact your bottom line. How do you ensure your databases run smoothly and efficiently? The answer lies in effective database monitoring.
@@ -41,52 +46,56 @@ Understanding common performance problems is key to effective monitoring. Here a
 To maintain optimal performance and ensure your database operates efficiently, it's crucial to focus on these critical metrics:
 
 1. Query Response Time:
-    
-    The time it takes for a database to execute a query and return results.
-    
-    - Importance: Directly impacts user experience and application performance.
-    - Measurement: Usually in milliseconds (ms) or seconds (s).
-    - Example: If a query typically takes 100ms but suddenly spikes to 500ms, it could indicate an issue.
-    - Action items: Optimize slow queries, index frequently accessed data, or upgrade hardware if necessary.
+
+   The time it takes for a database to execute a query and return results.
+
+   - Importance: Directly impacts user experience and application performance.
+   - Measurement: Usually in milliseconds (ms) or seconds (s).
+   - Example: If a query typically takes 100ms but suddenly spikes to 500ms, it could indicate an issue.
+   - Action items: Optimize slow queries, index frequently accessed data, or upgrade hardware if necessary.
+
 2. Throughput:
-    
-    The number of queries or transactions the database can process in a given time period.
-    
-    - Importance: Indicates the database's capacity to handle workload.
-    - Measurement: Often expressed as queries per second (QPS) or transactions per second (TPS).
-    - Example: A system handling 1000 QPS during peak hours but struggling at 1200 QPS might need optimization.
-    - Action items: Load balancing, query optimization, or scaling resources to handle increased demand.
+
+   The number of queries or transactions the database can process in a given time period.
+
+   - Importance: Indicates the database's capacity to handle workload.
+   - Measurement: Often expressed as queries per second (QPS) or transactions per second (TPS).
+   - Example: A system handling 1000 QPS during peak hours but struggling at 1200 QPS might need optimization.
+   - Action items: Load balancing, query optimization, or scaling resources to handle increased demand.
+
 3. Resource Usage:
-    
-    The utilization of system resources like CPU, memory, and disk I/O.
-    
-    - Importance: Helps identify bottlenecks and capacity issues.
-    - Measurement:
-        - CPU: Percentage of utilization
-        - Memory: Amount used vs. total available
-        - Disk I/O: Read/write operations per second
-    - Example: Consistently high CPU usage (e.g., >80%) might indicate the need for query optimization or hardware upgrades.
-    - Action items: Optimize resource-intensive queries, add more RAM, or upgrade to faster storage solutions.
+
+   The utilization of system resources like CPU, memory, and disk I/O.
+
+   - Importance: Helps identify bottlenecks and capacity issues.
+   - Measurement:
+     - CPU: Percentage of utilization
+     - Memory: Amount used vs. total available
+     - Disk I/O: Read/write operations per second
+   - Example: Consistently high CPU usage (e.g., >80%) might indicate the need for query optimization or hardware upgrades.
+   - Action items: Optimize resource-intensive queries, add more RAM, or upgrade to faster storage solutions.
+
 4. Cache Performance:
-    
-    Efficiency of the database's caching mechanisms.
-    
-    - Importance: Good caching reduces disk I/O and improves query performance.
-    - Measurement:
-        - Cache hit ratio: Percentage of requests served from cache
-        - Buffer pool efficiency: How effectively memory is used for caching
-    - Example: A cache hit ratio of 95% is generally good; if it drops to 70%, investigate the cause.
-    - Action items: Adjust cache size, optimize query patterns to improve cache utilization.
+
+   Efficiency of the database's caching mechanisms.
+
+   - Importance: Good caching reduces disk I/O and improves query performance.
+   - Measurement:
+     - Cache hit ratio: Percentage of requests served from cache
+     - Buffer pool efficiency: How effectively memory is used for caching
+   - Example: A cache hit ratio of 95% is generally good; if it drops to 70%, investigate the cause.
+   - Action items: Adjust cache size, optimize query patterns to improve cache utilization.
+
 5. Transaction Logs:
-    
-    Records of database transactions and changes.
-    
-    - Importance: Critical for data integrity, recovery, and replication.
-    - Measurement:
-        - Log growth rate: How quickly transaction logs are filling up
-        - Replication lag: Delay between primary and secondary servers in replicated setups
-    - Example: If log growth suddenly increases from 1GB/hour to 5GB/hour, it could indicate unusual activity or issues.
-    - Action items: Monitor log space, optimize log backup frequency, investigate causes of increased log activity.
+
+   Records of database transactions and changes.
+
+   - Importance: Critical for data integrity, recovery, and replication.
+   - Measurement:
+     - Log growth rate: How quickly transaction logs are filling up
+     - Replication lag: Delay between primary and secondary servers in replicated setups
+   - Example: If log growth suddenly increases from 1GB/hour to 5GB/hour, it could indicate unusual activity or issues.
+   - Action items: Monitor log space, optimize log backup frequency, investigate causes of increased log activity.
 
 By consistently monitoring these metrics, you can:
 
@@ -129,7 +138,7 @@ It involves examining the execution plans of database queries to identify ineffi
 
 ### Trend Analysis and Predictive Monitoring Techniques
 
-Trend analysis involves examining historical performance data to identify patterns and predict future behavior. 
+Trend analysis involves examining historical performance data to identify patterns and predict future behavior.
 
 - Historical Data Analysis: By reviewing past performance metrics, you can identify trends that indicate normal operation and deviations that may signal emerging problems.
 - Forecasting Future Performance: Predictive models can project future performance based on historical data, helping you anticipate and mitigate issues before they impact users.
@@ -164,36 +173,25 @@ Keeping your databases performing well is crucial for any data-driven business. 
 To configure metrics and logs collection for a Postgres server, you need the following:
 
 - Ensure that the Postgres server is running a supported version
-    
-    Postgres versions 9.6+ are supported.
-    
-    You can use the following SQL statement to determine the server version
-    
-    ```bash
-    SELECT version();
-    ```
-    
+  Postgres versions 9.6+ are supported.
+  You can use the following SQL statement to determine the server version
+  ```bash
+  SELECT version();
+  ```
 - If collecting metrics, ensure that there is a Postgres user with the required permissions
-    
-    To create a monitoring user for Postgres versions 10+, run:
-    
-    ```bash
-    create user monitoring with password '<PASSWORD>';
-    grant pg_monitor to monitoring;
-    grant SELECT ON pg_stat_database to monitoring;
-    ```
-    
-    To create a monitoring user for Postgres versions >= 9.6 and \<10, run:
-    
-    ```bash
-    create user monitoring with password '<PASSWORD>';
-    grant SELECT ON pg_stat_database to monitoring;
-    ```
-    
+  To create a monitoring user for Postgres versions 10+, run:
+  ```bash
+  create user monitoring with password '<PASSWORD>';
+  grant pg_monitor to monitoring;
+  grant SELECT ON pg_stat_database to monitoring;
+  ```
+  To create a monitoring user for Postgres versions >= 9.6 and \<10, run:
+  ```bash
+  create user monitoring with password '<PASSWORD>';
+  grant SELECT ON pg_stat_database to monitoring;
+  ```
 - Ensure that an [OTEL collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) is running in your deployment environment
-    
-    If needed, please [install an OTEL Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/), if already installed, ensure that the collector version is v0.116.0 or newer.
-    
+  If needed, please [install an OTEL Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/), if already installed, ensure that the collector version is v0.116.0 or newer.
 
 ### Collect Postgres Metrics
 
@@ -215,7 +213,7 @@ receivers:
     # The password used to access the postgres instance
     password: ${env:POSTGRESQL_PASSWORD}
     # The list of databases for which the receiver will attempt to collect statistics. If an empty list is provided, the receiver will attempt to collect statistics for all non-template databases
-    databases: 
+    databases:
       - <YOUR DATABASE 1>
       - <YOUR DATABASE 2>
     # # Defines the network to use for connecting to the server. Valid Values are `tcp` or `unix`
@@ -239,18 +237,18 @@ processors:
   # see https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor#resource-detection-processor
   resourcedetection/system:
     # add additional detectors if needed
-    detectors: ["system"]
+    detectors: ['system']
     system:
-      hostname_sources: ["os"]
+      hostname_sources: ['os']
 
 exporters:
   # export to SigNoz cloud
   otlp/postgres:
-    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    endpoint: '${env:OTLP_DESTINATION_ENDPOINT}'
     tls:
       insecure: false
     headers:
-      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+      'signoz-ingestion-key': '${env:SIGNOZ_INGESTION_KEY}'
 
   # export to local collector
   # otlp/postgres:
@@ -291,7 +289,11 @@ export SIGNOZ_INGESTION_KEY="<your-signoz-ingestion-key>"
 
 Replace `{region}` with the region where you have your SigNoz cloud account and `<your-signoz-ingestion-key>` with your account ingestion key. You can find these values in your SigNoz account. Go to Settings > Ingestion Settings.
 
-<Figure src="/img/guides/2024/08/database-monitoring-Untitled.webp" alt="You can find ingestion details in the SigNoz dashboard" caption="You can find ingestion details in the SigNoz dashboard" />
+<Figure
+  src="/img/guides/2024/08/database-monitoring-Untitled.webp"
+  alt="You can find ingestion details in the SigNoz dashboard"
+  caption="You can find ingestion details in the SigNoz dashboard"
+/>
 
 Step 3: Start the Collector
 
@@ -307,13 +309,21 @@ Once the above setup is done, you will be able to access the metrics in the SigN
 
 PostgreSQL Metrics
 
-<Figure src="/img/guides/2024/08/database-monitoring-Untitled%201.webp" alt="SigNoz Panel PostgreSQL Metrics to add on Dashboard" caption="SigNoz Panel PostgreSQL Metrics to add on Dashboard" />
+<Figure
+  src="/img/guides/2024/08/database-monitoring-Untitled%201.webp"
+  alt="SigNoz Panel PostgreSQL Metrics to add on Dashboard"
+  caption="SigNoz Panel PostgreSQL Metrics to add on Dashboard"
+/>
 
 If you want to [get started](https://signoz.io/docs/userguide/hostmetrics/) quickly with PostgreSQL monitoring, you can [load](https://github.com/SigNoz/dashboards/tree/main/postgresql) this JSON  dashboard config in the SigNoz dashboard UI.
 
 PostgreSQL Basic Metrics Dashboard
 
-<Figure src="/img/guides/2024/08/database-monitoring-Untitled%202.webp" alt="SigNoz PostgreSQL Dashboard" caption="SigNoz PostgreSQL Dashboard" />
+<Figure
+  src="/img/guides/2024/08/database-monitoring-Untitled%202.webp"
+  alt="SigNoz PostgreSQL Dashboard"
+  caption="SigNoz PostgreSQL Dashboard"
+/>
 
 You can also create alerts on any metric. Learn how to create alerts [here](https://signoz.io/docs/userguide/alerts-management/).
 

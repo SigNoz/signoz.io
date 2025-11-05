@@ -1,15 +1,13 @@
 ---
-
 title: How to Monitor Kubernetes Clusters using Prometheus
-slug: kubernetes-monitoring-prometheus
 date: 2024-06-17
 tags: [kubernetes]
 authors: [daniel]
 description: Prometheus collects and analyzes metrics from your Kubernetes cluster to understand its behavior and enables proactive identification of issues to….
 image: /img/blog/2024/06/kubernetes-monitoring-prometheus-cover.webp
-keywords: [kubernetes,monitoring,prometheus]
-
+keywords: [kubernetes, monitoring, prometheus]
 ---
+
 Prometheus is a powerful open-source monitoring tool for keeping tabs on the health and performance of your Kubernetes cluster. It can collect and analyze metrics from your cluster for understanding cluster behavior, enable proactive identification of issues, and optimize resource utilization to ensure the efficient operation of your cluster.
 
 In this tutorial, you will learn to setup Prometheus for cluster monitoring and how to export the metrics collected to SigNoz for visualization.
@@ -49,8 +47,17 @@ In this section, we will walk through the process of setting up Prometheus to mo
 ### Prerequistes
 
 - A Kubernetes Cluster - <a href="https://www.docker.com/resources/kubernetes-and-docker/" rel="noopener noreferrer nofollow" target="_blank">Docker Desktop</a>, <a href="https://minikube.sigs.k8s.io/docs/start/?arch=%2Fmacos%2Fx86-64%2Fstable%2Fbinary+download" rel="noopener noreferrer nofollow" target="_blank">Minikube</a>, <a href="https://kind.sigs.k8s.io/" rel="noopener noreferrer nofollow" target="_blank">Kind</a>, or any local cluster of choice.
-- <a href="https://kubernetes.io/docs/tasks/tools/" rel="noopener noreferrer nofollow" target="_blank">Kubectl</a>.
-- <a href="https://helm.sh/" rel="noopener noreferrer nofollow" target="_blank">Helm</a> installed.
+- <a
+    href="https://kubernetes.io/docs/tasks/tools/"
+    rel="noopener noreferrer nofollow"
+    target="_blank"
+  >
+    Kubectl
+  </a>
+  .
+- <a href="https://helm.sh/" rel="noopener noreferrer nofollow" target="_blank">
+    Helm
+  </a> installed.
 - A [SigNoz cloud](https://signoz.io/teams/) account.
 
 ### Installing Prometheus in the cluster
@@ -81,7 +88,7 @@ You can then view the newly added charts:
 helm search repo prometheus-community
 ```
 
-From the just added  `prometheus-community/kube-prometheus-stack` chart, install Prometheus:
+From the just added `prometheus-community/kube-prometheus-stack` chart, install Prometheus:
 
 ```bash
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack --wait
@@ -143,13 +150,25 @@ kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090 -n defa
 
 On your browser, navigate to [localhost:9090](http://localhost:9090) to see the Prometheus UI:
 
-<Figure src="/img/guides/2024/06/prometheus_UI.webp" alt="Prometheus UI" caption="Prometheus UI" /><br></br>Prometheus has been configured to automatically scrape cluster metrics. To verify this, click on Status > Targets to see the Targets to see the Targets that are being monitored. 
+<Figure src="/img/guides/2024/06/prometheus_UI.webp" alt="Prometheus UI" caption="Prometheus UI" />
+<br></br>Prometheus has been configured to automatically scrape cluster metrics. To verify this,
+click on Status > Targets to see the Targets to see the Targets that are being monitored.{' '}
 
 You should see a list of endpoints that Prometheus is currently scraping for metrics.
 
-<Figure src="/img/guides/2024/06/prometheus-targets.webp" alt="Prometheus Targets" caption="Prometheus Targets" /><br></br>You can see all the target endpoints being monitored by Prometheus:
+<Figure
+  src="/img/guides/2024/06/prometheus-targets.webp"
+  alt="Prometheus Targets"
+  caption="Prometheus Targets"
+/>
+<br></br>You can see all the target endpoints being monitored by Prometheus:
 
-<Figure src="/img/guides/2024/06/target-endpoints.webp" alt="Target endpoints Prometheus scrapes metrics from" caption="Target endpoints Prometheus scrapes metrics from" /><br></br>
+<Figure
+  src="/img/guides/2024/06/target-endpoints.webp"
+  alt="Target endpoints Prometheus scrapes metrics from"
+  caption="Target endpoints Prometheus scrapes metrics from"
+/>
+<br></br>
 
 ### Configure Prometheus to Send Metrics to SigNoz
 
@@ -163,11 +182,11 @@ You can sign up [here](https://signoz.io/teams/) for a free account and get 30
 
 Create Service Account
 
-After your SigNoz cloud account has been set up, you can now set up cluster resources to collect metrics from Prometheus. The first will be a Service Account. 
+After your SigNoz cloud account has been set up, you can now set up cluster resources to collect metrics from Prometheus. The first will be a Service Account.
 
 A <a href="https://kubernetes.io/docs/concepts/security/service-accounts/" rel="noopener noreferrer nofollow" target="_blank">Service Account</a> is a special type of account that provides an identity for processes that run in a pod and enables them to authenticate to the Kubernetes API and other services. Each Service Account is associated with a set of permissions, allowing it to perform specific actions within the cluster.
 
-Create a file named `serviceaccount.yaml`  and paste the following YAML definition in that file:
+Create a file named `serviceaccount.yaml` and paste the following YAML definition in that file:
 
 ```bash
 apiVersion: v1
@@ -259,7 +278,7 @@ rules:
 Apply the ClusterRole definition:
 
 ```bash
-kubectl apply -f clusterrole.yml  
+kubectl apply -f clusterrole.yml
 ```
 
 Bind Service Account to Cluster Role
@@ -293,7 +312,7 @@ kubectl apply -f clusterrolebinding.yml
 
 Configure the Config Map
 
-A ConfigMap is a Kubernetes object used to store non-confidential configuration data, command-line arguments, environment variables, or any other configuration data needed by applications running in Kubernetes in key-value pairs.  
+A ConfigMap is a Kubernetes object used to store non-confidential configuration data, command-line arguments, environment variables, or any other configuration data needed by applications running in Kubernetes in key-value pairs.
 
 Create a file named `configmap.yaml` and paste the following YAML definition in that file:
 
@@ -341,15 +360,29 @@ To get the ingestion key for your SigNoz cloud account, go to settings > Ingesti
 
 Also, take note of the ingestion url. There are currently 2 regions available, EU (Europe) and IN (India). Copy the region where you have your account deployed in and paste in the config map.
 
-<Figure src="/img/guides/2024/06/Ingestion-Key.webp" alt="Ingestion key" caption="Ingestion key" /><br></br>Apply the config map:
+<Figure src="/img/guides/2024/06/Ingestion-Key.webp" alt="Ingestion key" caption="Ingestion key" />
+<br></br>Apply the config map:
 
 ```bash
-kubectl apply -f configmap.yml 
+kubectl apply -f configmap.yml
 ```
 
 Deploy OpenTelemetry Collector
 
-<a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is an open-source framework that provides APIs and SDKs for instrumenting applications to generate telemetry data. The <a href="https://opentelemetry.io/docs/collector/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector</a> is a specific component within the OpenTelemetry ecosystem that facilitates the collection, processing, and exporting of telemetry data. It is designed to sit between the instrumentation points in your application and your observability backend (like SigNoz). The Collector receives data from various sources, process it (for example, adding tags or annotations), and then export it to one or more destinations in a standardized format.
+<a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">
+  OpenTelemetry
+</a> is an open-source framework that provides APIs and SDKs for instrumenting applications to
+generate telemetry data. The <a
+  href="https://opentelemetry.io/docs/collector/"
+  rel="noopener noreferrer nofollow"
+  target="_blank"
+>
+  OpenTelemetry Collector
+</a> is a specific component within the OpenTelemetry ecosystem that facilitates the collection,
+processing, and exporting of telemetry data. It is designed to sit between the instrumentation
+points in your application and your observability backend (like SigNoz). The Collector receives data
+from various sources, process it (for example, adding tags or annotations), and then export it to
+one or more destinations in a standardized format.
 
 SigNoz is built on OpenTelemetry which is why it relies on the OpenTelemetry Collector to receive metrics data collected from Prometheus. The OpenTelemetry Collector will be deployed in the cluster as a Deployment.
 
@@ -391,7 +424,7 @@ spec:
 The above Deployment runs a single replica (pod) of the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector Contrib</a> using the assigned Service Account. The Service Account's permissions as defined earlier in the ClusterRole config determine what actions the pod can perform (including reading the ConfigMap). The Deployment mounts the "otelcontribcol" ConfigMap into the pod as a volume, making the configuration file available to the OpenTelemetry Collector. The Collector uses the configuration file to guide its data collection, processing, and exporting activities.
 
 ```bash
-kubectl apply -f deployment.yml  
+kubectl apply -f deployment.yml
 ```
 
 Verify that the OpenTelemetry Collector is receiving metrics data:
@@ -425,21 +458,62 @@ Expected output:
 
 To visualize the metrics being sent to SigNoz, navigate to your SigNoz cloud account. Click on Dashboards > New dashboard:
 
-<Figure src="/img/guides/2024/06/Create_Dashboard.webp" alt="Creating a dashboard in SigNoz" caption="Creating a dashboard in SigNoz" /><br></br>Click on Configure your new dashboard:
+<Figure
+  src="/img/guides/2024/06/Create_Dashboard.webp"
+  alt="Creating a dashboard in SigNoz"
+  caption="Creating a dashboard in SigNoz"
+/>
+<br></br>Click on Configure your new dashboard:
 
-<Figure src="/img/guides/2024/06/configure_dashboard.webp" alt="Dashboard configuration" caption="Dashboard configuration" /><br></br>Give the dashboard a name, description, and tag (optional), then save it.
+<Figure
+  src="/img/guides/2024/06/configure_dashboard.webp"
+  alt="Dashboard configuration"
+  caption="Dashboard configuration"
+/>
+<br></br>Give the dashboard a name, description, and tag (optional), then save it.
 
-<Figure src="/img/guides/2024/06/dashboard-naming.webp" alt="Dashboard naming" caption="Dashboard naming" /><br></br>After the dashboard has been created, panels can be set up. Click on Add Panels > New Panel, to start creating visualizations in the dashboard:
+<Figure
+  src="/img/guides/2024/06/dashboard-naming.webp"
+  alt="Dashboard naming"
+  caption="Dashboard naming"
+/>
+<br></br>After the dashboard has been created, panels can be set up. Click on Add Panels > New
+Panel, to start creating visualizations in the dashboard:
 
-<Figure src="/img/guides/2024/06/dashboard-panel.webp" alt="Adding panels in the SigNoz dashboard" caption="Adding panels in the SigNoz dashboard" /><br></br>For the visualization option, select “Time Series”:
+<Figure
+  src="/img/guides/2024/06/dashboard-panel.webp"
+  alt="Adding panels in the SigNoz dashboard"
+  caption="Adding panels in the SigNoz dashboard"
+/>
+<br></br>For the visualization option, select “Time Series”:
 
-<Figure src="/img/guides/2024/06/Time_Series.webp" alt="Visualization options" caption="Visualization options" /><br></br>You will be redirected to the query builder where you can run different queries against the metrics coming in using the time series visualization.
+<Figure
+  src="/img/guides/2024/06/Time_Series.webp"
+  alt="Visualization options"
+  caption="Visualization options"
+/>
+<br></br>You will be redirected to the query builder where you can run different queries against the
+metrics coming in using the time series visualization.
 
 In the query builder, type in “kube” to see Kubernetes metrics being exported to SigNoz:
 
-<Figure src="/img/guides/2024/06/query-builder.webp" alt="Kubernetes metrics exported to SigNoz" caption="Kubernetes metrics exported to SigNoz" /><br></br>For your first metrics query, type `kube_pod_container_status_running` then click on the stage and run query button:
+<Figure
+  src="/img/guides/2024/06/query-builder.webp"
+  alt="Kubernetes metrics exported to SigNoz"
+  caption="Kubernetes metrics exported to SigNoz"
+/>
+<br></br>For your first metrics query, type `kube_pod_container_status_running` then click on the
+stage and run query button:
 
-<Figure src="/img/guides/2024/06/run-queries.webp" alt="Kubernetes metrics being queried in SigNoz dashboard" caption="Kubernetes metrics being queried in SigNoz dashboard" /><br></br>The `kube_pod_container_status_running` metric is a Prometheus metric exposed by the kube-state-metrics service. This metric indicates whether containers within pods in your Kubernetes cluster is currently in a running state. It's a gauge metric, meaning it represents a value at a particular point in time.
+<Figure
+  src="/img/guides/2024/06/run-queries.webp"
+  alt="Kubernetes metrics being queried in SigNoz dashboard"
+  caption="Kubernetes metrics being queried in SigNoz dashboard"
+/>
+<br></br>The `kube_pod_container_status_running` metric is a Prometheus metric exposed by the
+kube-state-metrics service. This metric indicates whether containers within pods in your Kubernetes
+cluster is currently in a running state. It's a gauge metric, meaning it represents a value at a
+particular point in time.
 
 When you get a value of `1` for the `kube_pod_container_status_running` metric in Prometheus as shown above, it typically means that the condition "running" is met for the containers being monitored. In other words, all the containers targeted by the query are currently in the "running" state within their respective pods.
 
@@ -447,7 +521,12 @@ For this kind of metric, you can also decide to use the “value” visualizatio
 
 Give the panel a name and description, then select Save Changes. The panel will be automatically saved in your dashboard:
 
-<Figure src="/img/guides/2024/06/signoz-dashboard.webp" alt="Saved SigNoz dashboard" caption="Saved SigNoz dashboard" /><br></br>You can proceed to run more queries against metrics of your choice.
+<Figure
+  src="/img/guides/2024/06/signoz-dashboard.webp"
+  alt="Saved SigNoz dashboard"
+  caption="Saved SigNoz dashboard"
+/>
+<br></br>You can proceed to run more queries against metrics of your choice.
 
 ## Conclusion
 

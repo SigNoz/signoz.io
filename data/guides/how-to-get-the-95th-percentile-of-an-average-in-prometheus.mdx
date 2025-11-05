@@ -1,13 +1,20 @@
 ---
-
 title: How to Calculate 95th Percentile of an average in Prometheus - A Step-by-Step Guide
-slug: how-to-get-the-95th-percentile-of-an-average-in-prometheus
 date: 2024-10-03
 tags: [faq, prometheus, grafana]
 authors: [simran_kumari]
 description: Learn how to calculate the 95th percentile of an average in Prometheus with this comprehensive guide. Master advanced techniques and visualization.
-keywords: [Prometheus, 95th percentile, data analysis, performance monitoring, histograms, summaries, Grafana, SigNoz]
-
+keywords:
+  [
+    Prometheus,
+    95th percentile,
+    data analysis,
+    performance monitoring,
+    histograms,
+    summaries,
+    Grafana,
+    SigNoz,
+  ]
 ---
 
 When monitoring system performance, the 95th percentile is a powerful metric, often preferred over averages for highlighting performance for the vast majority of users, while minimizing the impact of extreme outliers. But what if you want to focus on both? This guide will walk you through calculating this metric using Prometheus and PromQL, specifically focusing on how to find the 95th percentile of an average—such as the average HTTP response time experienced by 95% of your users.
@@ -18,7 +25,7 @@ A percentile is a way to understand how a value compares to other values in a se
 
 For example, if you score in the 90th percentile on a test, it means you did better than 90% of the people who took the test, and only 10% scored higher than you. Percentiles divide data into 100 equal parts, so each percentile represents 1% of the data.
 
-In simpler terms, the N-th percentile is the value below which N% of the data falls.  In the context of Prometheus, percentiles help you understand the distribution of your data and identify outliers.
+In simpler terms, the N-th percentile is the value below which N% of the data falls. In the context of Prometheus, percentiles help you understand the distribution of your data and identify outliers.
 
 ### Average vs Percentile
 
@@ -29,19 +36,12 @@ Response Times:
 `100ms, 110ms, 120ms, 130ms, 140ms, 150ms, 500ms, 1000ms, 1500ms, 2000ms`
 
 - Average (Mean):
-    
-    The average response time is calculated by summing all the times and dividing by the number of requests:
-    
-    `(100 + 110 + 120 + 130 + 140 + 150 + 500 + 1000 + 1500 + 2000) / 10 = 575ms`
-    
+  The average response time is calculated by summing all the times and dividing by the number of requests:
+  `(100 + 110 + 120 + 130 + 140 + 150 + 500 + 1000 + 1500 + 2000) / 10 = 575ms`
 - 95th Percentile:
-    
-    The 95th percentile is calculated by sorting the response times in ascending order and finding the value below which 95% of the requests fall.
-    
-    `100ms, 110ms, 120ms, 130ms, 140ms, 150ms, 500ms, 1000ms, 1500ms, 2000ms`
-    
-    With 10 data points, we calculate the 95th percentile as 0.95 * 10 = 9.5, which rounds down to the 9th value for percentile calculations. Therefore, the 95th percentile is 1500ms, meaning 95% of the requests have a response time at or below 1500ms.
-    
+  The 95th percentile is calculated by sorting the response times in ascending order and finding the value below which 95% of the requests fall.
+  `100ms, 110ms, 120ms, 130ms, 140ms, 150ms, 500ms, 1000ms, 1500ms, 2000ms`
+  With 10 data points, we calculate the 95th percentile as 0.95 \* 10 = 9.5, which rounds down to the 9th value for percentile calculations. Therefore, the 95th percentile is 1500ms, meaning 95% of the requests have a response time at or below 1500ms.
 
 Key Difference:
 
@@ -70,11 +70,11 @@ Histograms vs. Summaries in Prometheus
 In Prometheus, calculating the 95th percentile of an average is valuable because it provides a more balanced view of system performance than averages alone. Here’s why this approach matters:
 
 - Outlier Detection:
-    - Averages can hide spikes or outliers in performance data, making your system seem more stable than it is.
-    - The 95th percentile focuses on the upper limit of your most common performance, highlighting performance issues that affect a smaller percentage of users, such as the slowest requests or the highest resource consumption.
+  - Averages can hide spikes or outliers in performance data, making your system seem more stable than it is.
+  - The 95th percentile focuses on the upper limit of your most common performance, highlighting performance issues that affect a smaller percentage of users, such as the slowest requests or the highest resource consumption.
 - Balancing Trends with Exceptions:
-    - By combining the 95th percentile with the average (like response times), you can track long-term trends while also monitoring worst-case scenarios for most users.
-    - For example, rather than just looking at average HTTP response times, using the 95th percentile allows you to see where the slowest 5% of responses fall, giving you more actionable data.
+  - By combining the 95th percentile with the average (like response times), you can track long-term trends while also monitoring worst-case scenarios for most users.
+  - For example, rather than just looking at average HTTP response times, using the 95th percentile allows you to see where the slowest 5% of responses fall, giving you more actionable data.
 - SLA Compliance: Many service-level agreements (SLAs) are based on percentiles like the 95th or 99th percentile to ensure that most users have a good experience, even though some small percentage might experience slower performance.
 - Detecting Performance Degradation: Calculating the 95th percentile of an average metric, such as response time or memory usage, allows you to detect gradual performance degradation in the worst-performing parts of your system. This makes it easier to take proactive steps before larger problems arise.
 
@@ -89,25 +89,31 @@ Before calculating the 95th percentile, ensure that your application is exposing
 ### 1. Using the `quantile()` Function for Percentile Calculation
 
 - Summaries: If you’re using summaries, retrieving the 95th percentile is straightforward:
-    
-    ```
-    quantile(0.95, http_requests_total)
-    ```
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image.webp" alt="Using quantile()" caption="Using quantile()" />
-    
+  ```
+  quantile(0.95, http_requests_total)
+  ```
+  {' '}
+  <Figure
+    src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image.webp"
+    alt="Using quantile()"
+    caption="Using quantile()"
+  />
 - Histograms: For histograms, you can use the `histogram_quantile()` function. This function estimates the desired quantiles based on the bucket counts:
-    
-    ```
-    histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
-    ```
-    
-    This query calculates the 95th percentile of HTTP request durations over the last 5 minutes.
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%201.webp" alt="Using histogram_quantile() in table view" caption="Using histogram_quantile() in table view" />
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%202.webp" alt="Using histogram_quantile() in graph view" caption="Using histogram_quantile() in graph view" />
-    
+  ```
+  histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+  ```
+  This query calculates the 95th percentile of HTTP request durations over the last 5 minutes.
+  {' '}
+  <Figure
+    src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%201.webp"
+    alt="Using histogram_quantile() in table view"
+    caption="Using histogram_quantile() in table view"
+  />
+  <Figure
+    src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%202.webp"
+    alt="Using histogram_quantile() in graph view"
+    caption="Using histogram_quantile() in graph view"
+  />
 
 ### 2. Combining `avg()` and `quantile()` Functions for Average Percentiles
 
@@ -124,26 +130,30 @@ Here’s a breakdown of the query:
 
 This query provides insights into how response times vary across different web identifiers, helping you identify potential performance issues.
 
-<Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%203.webp" alt="Combining `avg()` and `quantile()` in prometheus" caption="Combining `avg()` and `quantile()` in prometheus" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%203.webp"
+  alt="Combining `avg()` and `quantile()` in prometheus"
+  caption="Combining `avg()` and `quantile()` in prometheus"
+/>
 
 ### 3. Handling Time Ranges and Aggregation in Your Queries
 
 Prometheus allows you to apply percentile calculations over specific time ranges, providing flexibility in your analysis. For example:
 
 - 5-Minute Window:
-    
-    ```
-    histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
-    ```
-    
+  ```
+  histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+  ```
 - 1-Hour Window:
-    
-    ```
-    histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[1h])) 
-    ```
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%204.webp" alt="Handling Time Ranges and Aggregation" caption="Handling Time Ranges and Aggregation" />
-    
+  ```
+  histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[1h]))
+  ```
+  {' '}
+  <Figure
+    src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%204.webp"
+    alt="Handling Time Ranges and Aggregation"
+    caption="Handling Time Ranges and Aggregation"
+  />
 
 ### Optimizing Query Performance for Large Datasets
 
@@ -167,39 +177,68 @@ Clear naming conventions and effective labeling are essential for successful mon
 Grafana is an excellent tool for visualizing Prometheus data, including percentiles. Here's how to create effective dashboards:
 
 1. Connect Grafana to your [Prometheus data](https://signoz.io/guides/how-does-grafana-get-data-from-prometheus/) source.
-    - In Grafana, visit the “Data sources” section, and click on the `+ Add new data source` button
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%205.webp" alt="Create new data souce in Grafana" caption="Create new data souce in Grafana" />
-    
-    - Select `Prometheus` as the data source
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%206.webp" alt="Selecting Prometheus as the data source" caption="Selecting Prometheus as the data source" />
-    
-    - Update the name and URL and save the data source.
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%207.webp" alt="Specifying data source details" caption="Specifying data source details" />
-    
+
+   - In Grafana, visit the “Data sources” section, and click on the `+ Add new data source` button
+
+   <Figure
+     src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%205.webp"
+     alt="Create new data souce in Grafana"
+     caption="Create new data souce in Grafana"
+   />
+
+   - Select `Prometheus` as the data source
+
+   <Figure
+     src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%206.webp"
+     alt="Selecting Prometheus as the data source"
+     caption="Selecting Prometheus as the data source"
+   />
+
+   - Update the name and URL and save the data source.
+
+   <Figure
+     src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%207.webp"
+     alt="Specifying data source details"
+     caption="Specifying data source details"
+   />
+
 2. Create a new dashboard and add a panel.
-    - Visit the `Dashboards` section and click on the `New` button.
-        
-        <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%208.webp" alt="Creating new dashboards" caption="Creating new dashboards" />
-        
-    - Add `New Dashboard` and click the `Add visualization` button.
-        
-        <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%209.webp" alt="Adding visualization" caption="Adding visualization" />
-        
-    - Select the data source created
-        
-        <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%2010.webp" alt="Selecting the datasource" caption="Selecting the datasource" />
-        
+   - Visit the `Dashboards` section and click on the `New` button.
+     {' '}
+     <Figure
+       src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%208.webp"
+       alt="Creating new dashboards"
+       caption="Creating new dashboards"
+     />
+   - Add `New Dashboard` and click the `Add visualization` button.
+     {' '}
+     <Figure
+       src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%209.webp"
+       alt="Adding visualization"
+       caption="Adding visualization"
+     />
+   - Select the data source created
+     {' '}
+     <Figure
+       src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%2010.webp"
+       alt="Selecting the datasource"
+       caption="Selecting the datasource"
+     />
 3. Use PromQL to query your average of 95th percentile data.
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%2011.webp" alt="Using PromQL to query average of 95th percentile data." caption="Using PromQL to query average of 95th percentile data." />
-    
+
+   <Figure
+     src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%2011.webp"
+     alt="Using PromQL to query average of 95th percentile data."
+     caption="Using PromQL to query average of 95th percentile data."
+   />
+
 4. Choose appropriate visualization types—line charts or gauge work well for tracking average of percentiles over time.
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%2012.webp" alt="Choosing appropriate visualization type" caption="Choosing appropriate visualization type" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%2012.webp"
+     alt="Choosing appropriate visualization type"
+     caption="Choosing appropriate visualization type"
+   />
 
 ## Common Challenges and Troubleshooting
 
@@ -217,16 +256,19 @@ To optimize resource usage:
 - Use recording rules for complex calculations
 - Adjust your scrape interval and retention period as needed
 - Consider using query federation for large-scale deployments
-</aside>
+  </aside>
 
 ## Enhancing Observability with SigNoz
 
 While Prometheus is powerful, tools like SigNoz can simplify percentile calculations and visualization. SigNoz offers:
 
 - Built-in Advanced Percentile Calculations: SigNoz effortlessly calculates and displays various percentile metrics, such as p50, p90, and p99.
-    
-    <Figure src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%2013.webp" alt="SigNoz Built-in percentile calculations" caption="SigNoz Built-in percentile calculations" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/10/how-to-get-the-95th-percentile-of-an-average-in-prometheus-image%2013.webp"
+    alt="SigNoz Built-in percentile calculations"
+    caption="SigNoz Built-in percentile calculations"
+  />
 - User-Friendly Dashboards: Visualize performance metrics with intuitive dashboards that make data interpretation straightforward.
 - Integration with Tracing Data: Gain deeper insights through the integration of tracing data, allowing for more comprehensive performance analysis.
 

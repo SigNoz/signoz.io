@@ -1,11 +1,19 @@
 ---
-title: "Fixing Upstream Connect Errors (Docker, Kubernetes, Spring Boot & More)"
-slug: "upstream-connect-error"
-date: "2025-09-08"
+title: 'Fixing Upstream Connect Errors (Docker, Kubernetes, Spring Boot & More)'
+date: '2025-09-08'
 tags: [devops]
-authors: ["niyati_thakkar"]
-description: "Fix upstream connect errors in 5 minutes. Complete guide with copy-paste solutions for Docker, Kubernetes, Spring Boot, Nginx. Includes troubleshooting flowchart and real examples."
-keywords: [upstream connect error, 502 bad gateway nginx upstream, 503 service unavailable kubernetes, connection refused while connecting to upstream, upstream connect error spring boot, java 11 networking, docker nginx upstream connection failed]
+authors: ['niyati_thakkar']
+description: 'Fix upstream connect errors in 5 minutes. Complete guide with copy-paste solutions for Docker, Kubernetes, Spring Boot, Nginx. Includes troubleshooting flowchart and real examples.'
+keywords:
+  [
+    upstream connect error,
+    502 bad gateway nginx upstream,
+    503 service unavailable kubernetes,
+    connection refused while connecting to upstream,
+    upstream connect error spring boot,
+    java 11 networking,
+    docker nginx upstream connection failed,
+  ]
 ---
 
 ## What Are Upstream Connect Errors?
@@ -13,8 +21,9 @@ keywords: [upstream connect error, 502 bad gateway nginx upstream, 503 service u
 An upstream connect error occurs when a reverse proxy or load balancer cannot establish a TCP connection to the backend service it's trying to reach. Think of it like a postal service scenario: you hand your letter to the local post office (proxy), but they can't reach the destination post office (upstream server) to deliver it. The connection never even gets established.
 
 These errors typically manifest as:
+
 - **502 Bad Gateway**: The proxy received an invalid response from the upstream server
-- **503 Service Unavailable**: The upstream service is temporarily unavailable  
+- **503 Service Unavailable**: The upstream service is temporarily unavailable
 - **Connection refused**: The upstream service rejected the connection attempt
 
 The error sits in the critical path of your request flow: Client → Reverse Proxy → [ERROR HERE] → Backend Service. Unlike timeout errors where a connection is established but the response is slow, upstream connect errors mean the TCP handshake never completes.
@@ -26,27 +35,32 @@ Different platforms and technologies report upstream connect errors in unique wa
 ### Common Error Messages by Platform
 
 **Docker**
+
 ```
 nginx: [error] connect() failed (111: Connection refused) while connecting to upstream
 ```
 
 **Kubernetes with Istio**
+
 ```
 upstream connect error or disconnect/reset before headers. reset reason: connection failure, transport failure reason: delayed connect error: 111
 ```
 
 **AWS Application Load Balancer**
+
 ```
 502 Bad Gateway - The server was acting as a gateway or proxy and received an invalid response from the upstream server
 ```
 
 **Traditional Nginx**
+
 ```
 upstream timed out (110: Connection timed out) while connecting to upstream
 no live upstreams while connecting to upstream
 ```
 
 **Spring Boot Applications**
+
 ```
 java.net.ConnectException: Connection refused (Connection refused)
 org.springframework.web.client.ResourceAccessException: I/O error on GET request: Connection refused
@@ -84,6 +98,7 @@ This is how Docker networking should work:
 Docker's internal DNS automatically resolves container names to their IP addresses, enabling seamless communication between containers on the same network.
 
 Other Docker-specific causes include:
+
 - Containers running in different Docker networks that can't communicate
 - Port mapping confusion between internal and external ports
 - Container startup order issues where the proxy starts before the backend
@@ -104,12 +119,14 @@ Here's how service discovery works in Kubernetes:
 />
 
 The service discovery flow works like this:
+
 1. Client Pod makes a request to a Service (ClusterIP)
 2. Service uses selectors to find matching Pods
 3. If no Pods match, no Endpoints are created
 4. Request fails with 503 Service Unavailable
 
 Additional Kubernetes-specific causes:
+
 - DNS resolution failures within the cluster
 - Network policies blocking traffic between namespaces
 - Readiness probes failing, removing Pods from service rotation
@@ -117,7 +134,7 @@ Additional Kubernetes-specific causes:
 
 ### Cloud Load Balancers: Security and Health Checks
 
-Cloud providers add their own layer of complexity through security groups, health checks, and target configurations. 
+Cloud providers add their own layer of complexity through security groups, health checks, and target configurations.
 
 #### Load Balancer Architecture
 
@@ -128,25 +145,28 @@ Here's how cloud load balancers manage traffic:
   alt="Load balancer architecture and health checks"
   caption="Cloud load balancers continuously monitor target health and only route traffic to healthy instances"
 />
-The load balancer continuously monitors target health and only routes traffic to healthy instances. 
-When health checks fail, the load balancer removes instances from rotation. If ALL
-instances fail health checks (even if they're actually running), the load balancer has no upstream
-targets to connect to, causing upstream connect errors
+The load balancer continuously monitors target health and only routes traffic to healthy instances.
+When health checks fail, the load balancer removes instances from rotation. If ALL instances fail
+health checks (even if they're actually running), the load balancer has no upstream targets to
+connect to, causing upstream connect errors
 
 Common issues include:
 
 **AWS ALB/NLB**:
+
 - Security groups not allowing traffic from the load balancer to targets
 - Target health checks failing due to incorrect paths or expected status codes
 - Timeout misalignment between ALB (default 60s) and backend services
 - Wrong target type (instance vs IP vs Lambda)
 
 **Azure Application Gateway**:
+
 - Backend pool misconfiguration with incorrect IP addresses
 - Health probe settings too aggressive, marking healthy instances as unhealthy
 - NSG rules blocking traffic from the gateway subnet
 
 **Google Cloud Load Balancing**:
+
 - Firewall rules blocking health check IP ranges
 - Backend service capacity settings too restrictive
 - Connection draining timeout too short during deployments
@@ -156,7 +176,7 @@ Common issues include:
 Even in traditional deployments with nginx, Apache, or HAProxy, upstream errors occur due to:
 
 - SELinux blocking network connections (especially on RHEL/CentOS)
-- Firewall rules preventing proxy-to-backend communication  
+- Firewall rules preventing proxy-to-backend communication
 - Backend services binding to wrong network interfaces (only listening on localhost)
 - File descriptor limits preventing new connections
 - Connection pool exhaustion
@@ -245,12 +265,14 @@ If DNS resolution fails, check your `/etc/resolv.conf` or equivalent DNS configu
 Review your proxy configuration for common mistakes. Each proxy has its own configuration syntax and requirements.
 
 For nginx, test the configuration syntax:
+
 ```bash
 nginx -t
 # nginx: configuration file /etc/nginx/nginx.conf test is successful
 ```
 
 Look for these common configuration issues:
+
 - Using `localhost` instead of service names in containerized environments
 - Incorrect port numbers (using external ports instead of internal container ports)
 - Missing timeout configurations causing premature connection drops
@@ -276,6 +298,7 @@ tail -f /var/log/myapp/application.log | grep -E "ERROR|WARN.*connection"
 ```
 
 Look for patterns like:
+
 - Errors occurring immediately vs after a delay (connection refused vs timeout)
 - Errors affecting all requests vs intermittent failures
 - Correlation with deployment times or traffic spikes
@@ -308,15 +331,15 @@ upstream backend {
 
 server {
     listen 80;
-    
+
     location / {
         proxy_pass http://backend;
-        
+
         # Important: Set appropriate timeouts to prevent premature connection drops
         proxy_connect_timeout 10s;   # Time to establish TCP connection
         proxy_send_timeout 60s;       # Time to send request to backend
         proxy_read_timeout 60s;       # Time to wait for backend response
-        
+
         # Handle connection failures gracefully
         proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;
         proxy_next_upstream_tries 3;
@@ -339,12 +362,12 @@ services:
     image: nginx:alpine
     container_name: nginx-proxy
     ports:
-      - "80:80"  # Map host port 80 to container port 80
+      - '80:80' # Map host port 80 to container port 80
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       backend:
-        condition: service_healthy  # Wait for backend to be healthy
+        condition: service_healthy # Wait for backend to be healthy
     networks:
       - app-network
 
@@ -356,16 +379,16 @@ services:
       - ./app:/app
     command: node server.js
     expose:
-      - "3000"  # Only exposed to other containers, not host
+      - '3000' # Only exposed to other containers, not host
     networks:
       - app-network
     # Health check ensures the service is ready before nginx starts using it
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 40s  # Give the app time to start
+      start_period: 40s # Give the app time to start
 
 networks:
   app-network:
@@ -381,6 +404,7 @@ The `depends_on` with `condition: service_healthy` ensures nginx only starts aft
 Kubernetes uses Services to provide stable network endpoints for Pods. The most common upstream error occurs when Service selectors don't match Pod labels.
 
 **How Service discovery works:**
+
 1. Service defines selectors (e.g., `app: backend`)
 2. Kubernetes finds all Pods with matching labels
 3. These Pods become the Service's Endpoints
@@ -398,35 +422,35 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: backend        # Deployment selector
+      app: backend # Deployment selector
       version: v1
   template:
     metadata:
       labels:
-        app: backend      # Pod labels must match
+        app: backend # Pod labels must match
         version: v1
     spec:
       containers:
-      - name: backend
-        image: myapp:latest
-        ports:
-        - containerPort: 3000  # Container listens on this port
-        # Readiness probe prevents routing traffic to unready pods
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          failureThreshold: 3
-        # Liveness probe restarts unhealthy pods
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          failureThreshold: 3
+        - name: backend
+          image: myapp:latest
+          ports:
+            - containerPort: 3000 # Container listens on this port
+          # Readiness probe prevents routing traffic to unready pods
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          # Liveness probe restarts unhealthy pods
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
 
 ---
 # Service that discovers pods using selectors
@@ -436,12 +460,12 @@ metadata:
   name: backend-service
 spec:
   selector:
-    app: backend          # Must match pod labels exactly
-    version: v1           # All selectors must match
+    app: backend # Must match pod labels exactly
+    version: v1 # All selectors must match
   ports:
-  - port: 80             # Service port (what other pods use)
-    targetPort: 3000     # Pod port (must match containerPort)
-    protocol: TCP
+    - port: 80 # Service port (what other pods use)
+      targetPort: 3000 # Pod port (must match containerPort)
+      protocol: TCP
   type: ClusterIP
 ```
 
@@ -492,7 +516,7 @@ metadata:
   namespace: production
 spec:
   mtls:
-    mode: PERMISSIVE  # Accepts both encrypted and plain text
+    mode: PERMISSIVE # Accepts both encrypted and plain text
 ```
 
 PERMISSIVE mode allows gradual migration to mTLS. Services with sidecars communicate securely while legacy services without sidecars still work, preventing upstream errors during transition.
@@ -515,11 +539,11 @@ spec:
         http2MaxRequests: 100
     # Circuit breaker configuration
     outlierDetection:
-      consecutive5xxErrors: 5      # Errors before ejection
-      interval: 30s                # Analysis interval
-      baseEjectionTime: 30s        # How long to eject
-      maxEjectionPercent: 50       # Max % of backends to eject
-      minHealthPercent: 30         # Panic threshold
+      consecutive5xxErrors: 5 # Errors before ejection
+      interval: 30s # Analysis interval
+      baseEjectionTime: 30s # How long to eject
+      maxEjectionPercent: 50 # Max % of backends to eject
+      minHealthPercent: 30 # Panic threshold
 ```
 
 The outlier detection acts as a circuit breaker, automatically removing unhealthy instances from the load balancing pool. This prevents cascading failures when backend services become unreliable.
@@ -560,6 +584,7 @@ Note: Early Java 11 versions had HTTP/2 connection issues (JDK-8211806) fixed in
 ### Spring Boot Application Architecture Context
 
 In a typical Spring Boot microservices architecture, upstream errors commonly occur at these points:
+
 - RestTemplate or WebClient calls to other services
 - Feign client interactions
 - Database connection pools (HikariCP)
@@ -570,38 +595,49 @@ In a typical Spring Boot microservices architecture, upstream errors commonly oc
 When diagnosing upstream errors in Spring Boot applications, follow this systematic approach:
 
 1. **Check Application Health**:
+
 ```bash
 curl http://localhost:8080/actuator/health | jq .
 ```
+
 The health endpoint aggregates all component statuses. A DOWN status in any dependency (database, message broker) often causes upstream errors.
 
 2. **Review Connection Pool Metrics**:
+
 ```bash
 curl http://localhost:8080/actuator/metrics/hikaricp.connections.active | jq .
 ```
+
 Connection pool exhaustion is a common cause of upstream errors. If active connections equal max pool size, requests queue and eventually timeout.
 
 3. **Analyze Thread Dump for Blocked Threads**:
+
 ```bash
 curl http://localhost:8080/actuator/threaddump | jq '.threads[] | select(.threadState == "BLOCKED")'
 ```
+
 Blocked threads waiting for connections indicate pool exhaustion or deadlocks. Multiple blocked HTTP client threads suggest upstream services are slow or unresponsive.
 
 4. **Check Circuit Breaker Status**:
+
 ```bash
 curl http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.state | jq .
 ```
+
 An OPEN circuit breaker stops calling failing services, preventing upstream errors from cascading. Check if breakers are open unexpectedly.
 
 5. **Enable HTTP Client Debug Logging**:
+
 ```bash
 # Add to application.properties
 logging.level.org.apache.http.wire=DEBUG
 logging.level.org.apache.http.headers=DEBUG
 ```
+
 Wire-level logging reveals exactly what's happening during HTTP communication, including connection establishment, TLS handshakes, and request/response details.
 
 6. **Monitor JVM Network Connections**:
+
 ```bash
 # Check established connections
 netstat -an | grep ESTABLISHED | grep <port>
@@ -609,6 +645,7 @@ netstat -an | grep ESTABLISHED | grep <port>
 # Monitor connection states
 watch -n 1 'netstat -an | grep <port> | awk "{print \$6}" | sort | uniq -c'
 ```
+
 Real-time connection monitoring reveals patterns like connection leaks (growing ESTABLISHED count) or exhaustion (many TIME_WAIT states), helping identify the root cause of upstream errors.
 
 ## Monitoring with SigNoz
@@ -618,6 +655,7 @@ While traditional monitoring can identify upstream errors after they occur, mode
 ### Why Observability Matters for Upstream Errors
 
 Upstream errors rarely occur in isolation. They're often symptoms of deeper issues like:
+
 - Cascading failures from dependent services
 - Resource exhaustion under load
 - Network latency spikes
@@ -639,7 +677,7 @@ services:
       - OTEL_SERVICE_NAME=backend-service
       - OTEL_TRACES_EXPORTER=otlp
       - OTEL_METRICS_EXPORTER=otlp
-      
+
   spring-boot-app:
     image: spring-app:latest
     environment:
@@ -665,6 +703,7 @@ For Spring Boot applications, add [OpenTelemetry](https://signoz.io/blog/what-is
 ```
 
 With [SigNoz](https://signoz.io/docs/introduction/), you can:
+
 - Track error rates across all services in real-time
 - View distributed traces showing exactly where connections fail
 - Set up intelligent alerts based on error patterns
@@ -680,7 +719,11 @@ Build dashboards that show the health of your entire request pipeline:
 4. **Connection Pool Metrics**: Monitor connection usage and exhaustion
 5. **JVM Metrics**: For Spring Boot apps, track heap usage, GC activity, and thread pools
 
-<Figure src="/img/docs/dashboards/dashboard-templates/jvm-metrics.webp" alt="JVM metrics dashboard" caption="JVM metrics dashboard" />
+<Figure
+  src="/img/docs/dashboards/dashboard-templates/jvm-metrics.webp"
+  alt="JVM metrics dashboard"
+  caption="JVM metrics dashboard"
+/>
 
 ## Get Started with SigNoz
 
@@ -695,6 +738,7 @@ Those who have the expertise to manage SigNoz themselves or just want to start w
 Upstream connect errors are symptoms of connectivity issues between your proxy and backend services. While the error message itself is generic, the root causes follow predictable patterns based on your platform.
 
 The key to quick resolution is understanding:
+
 1. **Your platform's networking model** - How Docker, Kubernetes, Spring Boot, or cloud providers handle network connections
 2. **Common misconfiguration patterns** - Like using localhost in containers, mismatched selectors in Kubernetes, or exhausted connection pools in Spring Boot
 3. **Systematic debugging approach** - Following a methodical process rather than random troubleshooting
@@ -706,6 +750,7 @@ Most upstream errors stem from simple misconfigurations that can be fixed quickl
 When facing an [upstream error](https://signoz.io/guides/upstream-connect-error-or-disconnect-reset-before-headers-reset-reason-connection-failure-spring-boot-and-java-11/), check these items in order:
 
 **Immediate checks:**
+
 - [ ] Is the backend service actually running?
 - [ ] Can you connect to the backend directly (bypassing the proxy)?
 - [ ] Does DNS resolution work for the backend hostname?
@@ -713,6 +758,7 @@ When facing an [upstream error](https://signoz.io/guides/upstream-connect-error-
 - [ ] Do the ports match between proxy configuration and backend service?
 
 **Platform-specific checks:**
+
 - [ ] Docker: Are containers on the same network?
 - [ ] Kubernetes: Do service selectors match pod labels?
 - [ ] Cloud: Are security groups/firewall rules allowing traffic?
@@ -721,6 +767,7 @@ When facing an [upstream error](https://signoz.io/guides/upstream-connect-error-
 - [ ] Java 11: Are there TLS or HTTP/2 compatibility issues?
 
 **Configuration checks:**
+
 - [ ] Are timeout values properly aligned across the stack?
 - [ ] Do health checks use valid endpoints and expect correct responses?
 - [ ] Is the proxy configuration syntax valid?

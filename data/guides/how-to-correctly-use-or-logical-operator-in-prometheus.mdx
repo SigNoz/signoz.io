@@ -1,154 +1,157 @@
 ---
-
 title: How to Use the OR Operator in Prometheus PromQL Queries
-slug: how-to-correctly-use-or-logical-operator-in-prometheus
 date: 2024-07-24
 tags: [prometheus, faq]
 authors: [ankit_anand]
 description: Learn how to implement OR logic in Prometheus PromQL queries using regex, vector selectors, and advanced techniques for efficient data querying.
 keywords: [Prometheus, PromQL, OR operator, vector selectors, regex, query optimization]
-
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to Use the OR Operator in Prometheus PromQL Queries",
-    "alternativeHeadline": "Mastering OR Logic in Prometheus PromQL Queries",
-    "author": {
-      "@type": "Person",
-      "name": "Ankit Anand"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-24T00:00:00Z",
-    "dateModified": "2024-07-24T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/how-to-correctly-use-or-logical-operator-in-prometheus/"
-    },
-    "description": "Learn how to implement OR logic in Prometheus PromQL queries using regex, vector selectors, and advanced techniques for efficient data querying.",
-    "keywords": "Prometheus, PromQL, OR operator, vector selectors, regex, query optimization",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Prometheus",
-        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-      },
-      {
-        "@type": "Thing",
-        "name": "PromQL",
-        "description": "Prometheus Query Language used to query and analyze metrics."
-      },
-      {
-        "@type": "Thing",
-        "name": "OR Operator",
-        "description": "Logical operator used to combine multiple conditions in Prometheus queries."
-      },
-      {
-        "@type": "Thing",
-        "name": "Regex",
-        "description": "A sequence of characters that define a search pattern, often used for string matching within Prometheus queries."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Why doesn't Prometheus have a direct OR operator?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Prometheus prioritizes performance and simplicity in its query language. The regex-based approach offers flexibility without adding complexity to the core language."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Use the OR Operator in Prometheus PromQL Queries',
+        alternativeHeadline: 'Mastering OR Logic in Prometheus PromQL Queries',
+        author: {
+          '@type': 'Person',
+          name: 'Ankit Anand',
         },
-        {
-          "@type": "Question",
-          "name": "How does regex performance compare to other query methods in Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Regex can be slower, especially with complex patterns or large datasets. For simple OR conditions, the performance impact is usually negligible. However, for high-cardinality data or frequent queries, consider alternative approaches or query optimization."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "Can I use OR logic across different metrics in Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, you can use OR logic across different metrics using binary operators or functions like `or` and `unless`. However, ensure that the resulting time series are compatible for the operation you're performing."
-          }
+        datePublished: '2024-07-24T00:00:00Z',
+        dateModified: '2024-07-24T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/how-to-correctly-use-or-logical-operator-in-prometheus/',
         },
-        {
-          "@type": "Question",
-          "name": "Are there any limitations to using regex for OR operations in large-scale deployments?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "In large-scale deployments, complex regex patterns can lead to increased query execution time and resource usage. Consider using recording rules, federation, or alternative query structures for frequently used complex OR logic in high-volume environments."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Using the OR Operator in Prometheus PromQL Queries",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Use Regex for OR Logic",
-          "text": "Implement OR logic using regex within vector selectors. Example: `{job=~\"job1|job2\"}`."
+        description:
+          'Learn how to implement OR logic in Prometheus PromQL queries using regex, vector selectors, and advanced techniques for efficient data querying.',
+        keywords: 'Prometheus, PromQL, OR operator, vector selectors, regex, query optimization',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Combine Multiple Label Values",
-          "text": "Extend the regex pattern to combine multiple label values. Example: `{environment=~\"production|staging\", instance=~\"server1|server2\"}`."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'PromQL',
+            description: 'Prometheus Query Language used to query and analyze metrics.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'OR Operator',
+            description:
+              'Logical operator used to combine multiple conditions in Prometheus queries.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Regex',
+            description:
+              'A sequence of characters that define a search pattern, often used for string matching within Prometheus queries.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: "Why doesn't Prometheus have a direct OR operator?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Prometheus prioritizes performance and simplicity in its query language. The regex-based approach offers flexibility without adding complexity to the core language.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How does regex performance compare to other query methods in Prometheus?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Regex can be slower, especially with complex patterns or large datasets. For simple OR conditions, the performance impact is usually negligible. However, for high-cardinality data or frequent queries, consider alternative approaches or query optimization.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I use OR logic across different metrics in Prometheus?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "Yes, you can use OR logic across different metrics using binary operators or functions like `or` and `unless`. However, ensure that the resulting time series are compatible for the operation you're performing.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Are there any limitations to using regex for OR operations in large-scale deployments?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'In large-scale deployments, complex regex patterns can lead to increased query execution time and resource usage. Consider using recording rules, federation, or alternative query structures for frequently used complex OR logic in high-volume environments.',
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Use Advanced Techniques",
-          "text": "Employ the `unless` operator, scalar comparisons, and subqueries for more complex scenarios."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Using the OR Operator in Prometheus PromQL Queries',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Use Regex for OR Logic',
+              text: 'Implement OR logic using regex within vector selectors. Example: `{job=~"job1|job2"}`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Combine Multiple Label Values',
+              text: 'Extend the regex pattern to combine multiple label values. Example: `{environment=~"production|staging", instance=~"server1|server2"}`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Use Advanced Techniques',
+              text: 'Employ the `unless` operator, scalar comparisons, and subqueries for more complex scenarios.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Optimize Queries',
+              text: 'Optimize queries by starting with specific conditions, using regex sparingly, and avoiding overcomplicated queries.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Troubleshoot OR Queries',
+              text: 'Address common issues by ensuring proper regex syntax, verifying label names and values, and analyzing query execution time.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Optimize Queries",
-          "text": "Optimize queries by starting with specific conditions, using regex sparingly, and avoiding overcomplicated queries."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Troubleshoot OR Queries",
-          "text": "Address common issues by ensuring proper regex syntax, verifying label names and values, and analyzing query execution time."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 [Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/) (PromQL) is a powerful tool for querying time-series data, but it lacks a direct OR operator. This limitation often confuses users seeking to combine multiple conditions in their queries. Fear not—there are effective ways to implement OR logic in Prometheus. Let's explore how to achieve this functionality and optimize your PromQL queries.
@@ -265,6 +268,7 @@ While Prometheus offers powerful monitoring capabilities, managing retention and
 <GetStartedSigNoz />
 
 With [SigNoz](https://signoz.io/docs/introduction/), you can:
+
 - Scale your monitoring infrastructure effortlessly
 - Access advanced querying and visualization capabilities
 - Benefit from integrated tracing and logging alongside metrics.

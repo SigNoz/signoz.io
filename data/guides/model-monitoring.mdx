@@ -1,13 +1,18 @@
 ---
-
 title: A Comprehensive Guide to Model Monitoring in ML Production
-slug: model-monitoring
 date: 2024-08-07
 tags: [monitoring]
 authors: [sushant_gaurav]
 description: Learn essential strategies for effective model monitoring in machine learning production environments to ensure optimal performance and reliability.
-keywords: [model monitoring, machine learning, ML production, data drift, model performance, AI observability]
-
+keywords:
+  [
+    model monitoring,
+    machine learning,
+    ML production,
+    data drift,
+    model performance,
+    AI observability,
+  ]
 ---
 
 In machine learning, ensuring that your models remain reliable and precise is just as important as keeping a well-oiled machine. Consider a self-driving automobile that gradually begins to incorrectly interpret road signs when traffic patterns or weather conditions change. Consider an e-commerce recommendation system that is unable to keep up with changing user preferences, resulting in irrelevant suggestions. Your machine learning models, like these systems, require regular maintenance to function properly.
@@ -36,12 +41,12 @@ Track computational resources, such as CPU and memory usage, as well as latency 
 
 Model monitoring differs from general system monitoring as it specifically focuses on ML model behaviour and performance rather than just infrastructure health. This distinction is a must-know for maintaining the integrity and reliability of ML systems in production.
 
-|  | Model Monitoring | Generic Monitoring |
-| --- | --- | --- |
-| Focus | - ML model behavior and performance | - Infrastructure health and performance |
-| Key Metrics | - Prediction accuracy<br />- Drift detection<br />- Latency in prediction<br />- Feature importance changes<br />- Model explainability | - CPU usage<br />- Memory usage<br />- Network traffic<br />- Disk I/O<br />- Uptime/downtime |
-| Examples | - Monitoring fraud detection model<br />- Tracking the distribution of input features over time | - Monitoring CPU and memory usage of a web server<br />- Tracking network traffic to identify bottlenecks |
-| Tools | - SigNoz with Custom Metrics <br /> - Prometheus with custom metrics<br />- Seldon Core<br />- Evidently AI<br />- WhyLogs | - SigNoz <br /> - Prometheus<br />- Grafana<br />- Nagios<br />- New Relic |
+|             | Model Monitoring                                                                                                                        | Generic Monitoring                                                                                        |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Focus       | - ML model behavior and performance                                                                                                     | - Infrastructure health and performance                                                                   |
+| Key Metrics | - Prediction accuracy<br />- Drift detection<br />- Latency in prediction<br />- Feature importance changes<br />- Model explainability | - CPU usage<br />- Memory usage<br />- Network traffic<br />- Disk I/O<br />- Uptime/downtime             |
+| Examples    | - Monitoring fraud detection model<br />- Tracking the distribution of input features over time                                         | - Monitoring CPU and memory usage of a web server<br />- Tracking network traffic to identify bottlenecks |
+| Tools       | - SigNoz with Custom Metrics <br /> - Prometheus with custom metrics<br />- Seldon Core<br />- Evidently AI<br />- WhyLogs              | - SigNoz <br /> - Prometheus<br />- Grafana<br />- Nagios<br />- New Relic                                |
 
 ### Example: Implementing Basic Model Monitoring
 
@@ -123,7 +128,11 @@ In our code, we have logged accuracy metrics which helps in understanding how we
 
 Sample Output:
 
-<Figure src="/img/guides/2024/08/model-monitoring-Untitled.webp" alt="Output Example" caption="Output Example" />
+<Figure
+  src="/img/guides/2024/08/model-monitoring-Untitled.webp"
+  alt="Output Example"
+  caption="Output Example"
+/>
 
 The above example shows how to set a basic monitoring framework that logs accuracy and checks data for quality issues. It is just a foundational step towards more complex monitoring in production environments. This output indicates that the model's predictions are 48% accurate which means that the model has correctly predicted 48% of the labels in the test data. Since, the model is making random predictions, an accuracy close to 50% is expected in a binary classification problem, as random guessing would ideally result in an accuracy of around 50%.
 
@@ -145,23 +154,23 @@ import numpy as np
 from scipy.stats import ks_2samp
 
 # Generate simulated training data
-X_train = np.random.rand(1000, 10)  
+X_train = np.random.rand(1000, 10)
 # 1000 samples, each with 10 features
 
 # Generate simulated test data with slight drift introduced
-X_test = np.random.rand(1000, 10) * 1.1  
+X_test = np.random.rand(1000, 10) * 1.1
 # Scaling to introduce slight drift
 
 # Function to detect data drift using the Kolmogorov-Smirnov (KS) test
 def detect_data_drift(X_train, X_test):
-    p_values = []  
+    p_values = []
     # List to store p-values for each feature
     for i in range(X_train.shape[1]):
         # Perform KS test for each feature in the training and test datasets
         _, p_value = ks_2samp(X_train[:, i], X_test[:, i])
-        p_values.append(p_value)  
+        p_values.append(p_value)
         # Append the p-value to the list
-    return np.array(p_values)  
+    return np.array(p_values)
     # Return the list of p-values as a numpy array
 
 # Detecting data drift by comparing the training and test data distributions
@@ -193,226 +202,231 @@ Data drift detected
 This example demonstrates how statistical tests can be used to monitor data drift, which is important for maintaining model performance. By identifying the features where data drift occurs, you can take necessary actions such as retraining the model or adjusting data preprocessing steps to ensure the model remains effective and accurate over time. In this example, the distributions of each feature in the training and test datasets are compared using the Kolmogorov-Smirnov (KS) test. Data drift is identified if substantial differences are discovered (shown by p-values less than 0.05). If the p-value for a feature is less than 0.05 the distribution of that feature has significantly changed between the training and test datasets. This suggests data drift, which could impact model performance. On the other hand, if the p-value is greater than or equal to 0.05, it suggests that there is no significant change in the distribution of that feature, indicating no data drift.
 
 - Note
-    
-    The Kolmogorov-Smirnov (KS) test is a non-parametric test which is used to compare the distributions of two independent samples. This test evaluates the null hypothesis that the two samples are drawn from the same distribution. 
-    
+  The Kolmogorov-Smirnov (KS) test is a non-parametric test which is used to compare the distributions of two independent samples. This test evaluates the null hypothesis that the two samples are drawn from the same distribution.
 
 ## How to Implement Effective Model Monitoring Strategies
 
 To set up robust model monitoring, follow these steps:
 
 1. Establish Baseline Metrics: Set performance thresholds based on the initial model validation. This covers measurements like accuracy, precision, recall, and F1 score. Baseline measurements serve as a reference point for detecting deviations in model performance.
-    
-    Example:
-    
-    ```python
-    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-    
-    def calculate_baseline_metrics(y_true, y_pred):
-        """
-        Calculate baseline metrics for model evaluation.
-    
-        y_true (list or array): True labels.
-        y_pred (list or array): Predicted labels.
-    
-        Returns a dictionary containing accuracy, precision, recall, f1_score
-        """
-        metrics = {
-            'accuracy': accuracy_score(y_true, y_pred),
-            'precision': precision_score(y_true, y_pred, average='weighted'),
-            'recall': recall_score(y_true, y_pred, average='weighted'),
-            'f1_score': f1_score(y_true, y_pred, average='weighted')
-        }
-        return metrics
-    
-    # Sample data for true labels and predictions
-    y_true = [0, 1, 2, 2, 1, 0]  # True labels
-    y_pred = [0, 0, 2, 2, 1, 1]  # Predicted labels
-    
-    # Calculate baseline metrics
-    baseline_metrics = calculate_baseline_metrics(y_true, y_pred)
-    
-    # Print the calculated metrics
-    print(baseline_metrics)
-    ```
-    
-    Explanation:
-    
-    - Importing the required Libraries: `accuracy_score`, `precision_score`, `recall_score`, and `f1_score` from `sklearn.metrics`.
-    - The `calculate_baseline_metrics` function takes `y_true` (true labels) and `y_pred` (predicted labels) as inputs. It calculates four evaluation metrics: accuracy, precision, recall, and F1 score. Finally, it returns these metrics in a dictionary.
-    
-    Sample Output:
-    
-    ```bash
-    {
-        'accuracy': 0.6666666666666666,
-        'precision': 0.7333333333333333,
-        'recall': 0.6666666666666666,
-        'f1_score': 0.6333333333333333
-    }
-    ```
-    
-2. Implement Data Quality Checks: Set up automated tests to ensure data integrity and consistency. Ensuring that the input data fulfils the requirements is critical for model performance. 
-    
-    Example:
-    
-    ```python
-    import pandas as pd
-    
-    def check_data_quality(data):
-    	  # .values converts the DataFrame to a NumPy array
-    	  # data.dtypes returns a Series with the data type of each column.
-        assert not data.isnull().values.any(), "Data contains null values"
-        assert data.dtypes.isin([int, float]).all(), "Data types are not consistent"
-        print("Data quality checks passed")
-    
-    # Assuming df is your DataFrame
-    df = pd.DataFrame({
-        'feature1': [1, 2, 3],
-        'feature2': [4.0, 5.0, 6.0]
-    })
-    check_data_quality(df)
-    ```
-    
-    Sample Output:
-    
-    ```bash
-    Data quality checks passed
-    ```
-    
-3. Monitor Model Inputs and Outputs: Track feature distributions and prediction trends to identify anomalies. Monitoring both inputs and outputs aids in detecting issues like data drift and model performance decline.
-    
-    Example:
-    
-    ```python
-    import numpy as np
-    import matplotlib.pyplot as plt
-    
-    def monitor_feature_distribution(data):
-        """
-        Plot the distribution of a feature
-        data (array-like): The feature data to plot
-        """
-        # Plot histogram of the data with 30 bins
-        plt.hist(data, bins=30)
-        plt.title("Feature Distribution")
-        plt.xlabel("Feature Values")
-        plt.ylabel("Frequency")
-        plt.show()
-    
-    # Generate sample feature data
-    feature_data = np.random.randn(1000)  
-    # Normally distributed data
-    # Monitor the feature distribution
-    monitor_feature_distribution(feature_data)
-    
-    def monitor_predictions(predictions):
-        """
-        Plot the distribution of predictions
-        predictions (array-like): The predictions to plot
-        """
-        # Plot histogram of the predictions with 30 bins
-        plt.hist(predictions, bins=30)
-        plt.title("Predictions Distribution")
-        plt.xlabel("Prediction Values")
-        plt.ylabel("Frequency")
-        plt.show()
-    
-    # Generate sample predictions data
-    predictions = np.random.randint(0, 2, size=1000)  
-    # Binary predictions
-    # Monitor the predictions distribution
-    monitor_predictions(predictions)
-    ```
-    
-    Explanation:
-    
-    - Importing the required libraries: `numpy` for generating sample data and `matplotlib.pyplot` for plotting histograms.
-    - The `monitor_feature_distribution(data)` and `monitor_predictions(predictions)` function plots a histogram of the provided feature data.
-    - The `feature_data` has normally distributed data with 1000 samples.
-    - The `predictions` contain binary predictions (0 or 1) with 1000 samples.
-    - Calling the `monitor_feature_distribution` with the generated feature data to plot its distribution.
-    - Calling `monitor_predictions` with the generated predictions to plot their distribution.
-    
-    Sample Output:
-    
-    Two histograms will be displayed according to your data set:
-    
-    Histogram of `feature_data`
-    
-    <Figure src="/img/guides/2024/08/model-monitoring-Untitled%201.webp" alt="Histogram of feature_data" caption="Histogram of feature_data" />
-    
-    Histogram of `predictions`
-    
-    <Figure src="/img/guides/2024/08/model-monitoring-Untitled%202.webp" alt="Histogram of predictions" caption="Histogram of predictions" />
-    
 
-1. Set Up Alerting Mechanisms: Generate automated warnings for performance degradation or anomalies. Alerts ensure that you are instantly aware of significant changes in model performance. You can use Python’s `email.mime` for this purpose. For more details, please refer to the official Python documentation.
+   Example:
+
+   ```python
+   from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+   def calculate_baseline_metrics(y_true, y_pred):
+       """
+       Calculate baseline metrics for model evaluation.
+
+       y_true (list or array): True labels.
+       y_pred (list or array): Predicted labels.
+
+       Returns a dictionary containing accuracy, precision, recall, f1_score
+       """
+       metrics = {
+           'accuracy': accuracy_score(y_true, y_pred),
+           'precision': precision_score(y_true, y_pred, average='weighted'),
+           'recall': recall_score(y_true, y_pred, average='weighted'),
+           'f1_score': f1_score(y_true, y_pred, average='weighted')
+       }
+       return metrics
+
+   # Sample data for true labels and predictions
+   y_true = [0, 1, 2, 2, 1, 0]  # True labels
+   y_pred = [0, 0, 2, 2, 1, 1]  # Predicted labels
+
+   # Calculate baseline metrics
+   baseline_metrics = calculate_baseline_metrics(y_true, y_pred)
+
+   # Print the calculated metrics
+   print(baseline_metrics)
+   ```
+
+   Explanation:
+
+   - Importing the required Libraries: `accuracy_score`, `precision_score`, `recall_score`, and `f1_score` from `sklearn.metrics`.
+   - The `calculate_baseline_metrics` function takes `y_true` (true labels) and `y_pred` (predicted labels) as inputs. It calculates four evaluation metrics: accuracy, precision, recall, and F1 score. Finally, it returns these metrics in a dictionary.
+
+   Sample Output:
+
+   ```bash
+   {
+       'accuracy': 0.6666666666666666,
+       'precision': 0.7333333333333333,
+       'recall': 0.6666666666666666,
+       'f1_score': 0.6333333333333333
+   }
+   ```
+
+2. Implement Data Quality Checks: Set up automated tests to ensure data integrity and consistency. Ensuring that the input data fulfils the requirements is critical for model performance.
+
+   Example:
+
+   ```python
+   import pandas as pd
+
+   def check_data_quality(data):
+   	  # .values converts the DataFrame to a NumPy array
+   	  # data.dtypes returns a Series with the data type of each column.
+       assert not data.isnull().values.any(), "Data contains null values"
+       assert data.dtypes.isin([int, float]).all(), "Data types are not consistent"
+       print("Data quality checks passed")
+
+   # Assuming df is your DataFrame
+   df = pd.DataFrame({
+       'feature1': [1, 2, 3],
+       'feature2': [4.0, 5.0, 6.0]
+   })
+   check_data_quality(df)
+   ```
+
+   Sample Output:
+
+   ```bash
+   Data quality checks passed
+   ```
+
+3. Monitor Model Inputs and Outputs: Track feature distributions and prediction trends to identify anomalies. Monitoring both inputs and outputs aids in detecting issues like data drift and model performance decline.
+
+   Example:
+
+   ```python
+   import numpy as np
+   import matplotlib.pyplot as plt
+
+   def monitor_feature_distribution(data):
+       """
+       Plot the distribution of a feature
+       data (array-like): The feature data to plot
+       """
+       # Plot histogram of the data with 30 bins
+       plt.hist(data, bins=30)
+       plt.title("Feature Distribution")
+       plt.xlabel("Feature Values")
+       plt.ylabel("Frequency")
+       plt.show()
+
+   # Generate sample feature data
+   feature_data = np.random.randn(1000)
+   # Normally distributed data
+   # Monitor the feature distribution
+   monitor_feature_distribution(feature_data)
+
+   def monitor_predictions(predictions):
+       """
+       Plot the distribution of predictions
+       predictions (array-like): The predictions to plot
+       """
+       # Plot histogram of the predictions with 30 bins
+       plt.hist(predictions, bins=30)
+       plt.title("Predictions Distribution")
+       plt.xlabel("Prediction Values")
+       plt.ylabel("Frequency")
+       plt.show()
+
+   # Generate sample predictions data
+   predictions = np.random.randint(0, 2, size=1000)
+   # Binary predictions
+   # Monitor the predictions distribution
+   monitor_predictions(predictions)
+   ```
+
+   Explanation:
+
+   - Importing the required libraries: `numpy` for generating sample data and `matplotlib.pyplot` for plotting histograms.
+   - The `monitor_feature_distribution(data)` and `monitor_predictions(predictions)` function plots a histogram of the provided feature data.
+   - The `feature_data` has normally distributed data with 1000 samples.
+   - The `predictions` contain binary predictions (0 or 1) with 1000 samples.
+   - Calling the `monitor_feature_distribution` with the generated feature data to plot its distribution.
+   - Calling `monitor_predictions` with the generated predictions to plot their distribution.
+
+   Sample Output:
+
+   Two histograms will be displayed according to your data set:
+
+   Histogram of `feature_data`
+
+   <Figure
+     src="/img/guides/2024/08/model-monitoring-Untitled%201.webp"
+     alt="Histogram of feature_data"
+     caption="Histogram of feature_data"
+   />
+
+   Histogram of `predictions`
+
+   <Figure
+     src="/img/guides/2024/08/model-monitoring-Untitled%202.webp"
+     alt="Histogram of predictions"
+     caption="Histogram of predictions"
+   />
+
+4. Set Up Alerting Mechanisms: Generate automated warnings for performance degradation or anomalies. Alerts ensure that you are instantly aware of significant changes in model performance. You can use Python’s `email.mime` for this purpose. For more details, please refer to the official Python documentation.
 
 ### Common Challenges in ML Model Monitoring
 
 Implementing effective model monitoring comes with its share of challenges:
 
 1. High-dimensional data: Completely monitoring complex models with a large number of features might be challenging. So, to prevent the overload of information (features) in the data, it can be necessary to use advanced approaches while monitoring all features and their interactions. Information overload can occur when the number of features is so large that it becomes difficult to identify which ones are most important to monitor.
-    
-    Sample Solution: To concentrate on the most important components, apply dimensionality reduction strategies such as Principal Component Analysis (PCA). PCA helps by transforming the data into a set of principal components, retaining the most significant information while reducing the number of features.
-    
-    ```python
-    from sklearn.decomposition import PCA
-    import numpy as np
-    
-    # Assuming X is your high-dimensional dataset
-    X = np.random.rand(100, 50)  
-    # High-dimensional data example
-    pca = PCA(n_components=2)
-    X_reduced = pca.fit_transform(X)
-    print(X_reduced)
-    ```
-    
-    Explanation:
-    
-    By applying PCA, we reduce the dimensionality of the dataset from 50 features to 2 principal components. This reduction helps in focusing on the most important components and thus it lowered the risk of information overload.
-    
-    Sample Output:
-    
-    ```bash
-    [[-0.09784562 -0.05306694]
-     [-0.15915395  0.08565201]
-     [ 0.03284712 -0.22509111]
-     ...
-     [ 0.09221238 -0.14241958]
-     [ 0.12828239 -0.11862985]
-     [ 0.18943509 -0.04983527]]
-    ```
-    
-2. Delayed feedback: The lack of instant access to ground truth labels in some applications makes it challenging to evaluate model performance in real time. Ground truth labels are the actual correct outputs used to train and validate the model. In real-time applications, obtaining these labels immediately may not be possible which can lead to delays in performance evaluation. 
+
+   Sample Solution: To concentrate on the most important components, apply dimensionality reduction strategies such as Principal Component Analysis (PCA). PCA helps by transforming the data into a set of principal components, retaining the most significant information while reducing the number of features.
+
+   ```python
+   from sklearn.decomposition import PCA
+   import numpy as np
+
+   # Assuming X is your high-dimensional dataset
+   X = np.random.rand(100, 50)
+   # High-dimensional data example
+   pca = PCA(n_components=2)
+   X_reduced = pca.fit_transform(X)
+   print(X_reduced)
+   ```
+
+   Explanation:
+
+   By applying PCA, we reduce the dimensionality of the dataset from 50 features to 2 principal components. This reduction helps in focusing on the most important components and thus it lowered the risk of information overload.
+
+   Sample Output:
+
+   ```bash
+   [[-0.09784562 -0.05306694]
+    [-0.15915395  0.08565201]
+    [ 0.03284712 -0.22509111]
+    ...
+    [ 0.09221238 -0.14241958]
+    [ 0.12828239 -0.11862985]
+    [ 0.18943509 -0.04983527]]
+   ```
+
+2. Delayed feedback: The lack of instant access to ground truth labels in some applications makes it challenging to evaluate model performance in real time. Ground truth labels are the actual correct outputs used to train and validate the model. In real-time applications, obtaining these labels immediately may not be possible which can lead to delays in performance evaluation.
 
 Proxy Metrics are alternative metrics that are used to estimate performance when ground truth labels are not available. They can provide a quick, though less accurate, indication of model performance. Delayed Batch Evaluations involve collecting a batch of predictions and their corresponding delayed ground truth labels to evaluate the model's performance after some time.
-    
-    Example Solution: Let’s implement proxy metrics or use delayed batch evaluations to approximate real-time performance. 
-    
+
+    Example Solution: Let’s implement proxy metrics or use delayed batch evaluations to approximate real-time performance.
+
     ```python
     # Example of using delayed feedback with a proxy metric
     def calculate_proxy_metric(predictions, true_labels):
         proxy_metric = sum(predictions == true_labels) / len(true_labels)
         return proxy_metric
-    
+
     # Simulated delayed feedback
     delayed_true_labels = [0, 1, 0, 1, 1]
     predictions = [0, 1, 1, 1, 0]
     proxy_metric = calculate_proxy_metric(predictions, delayed_true_labels)
     print(f'Proxy Metric: {proxy_metric}')
     ```
-    
+
     Explanation:
     We simulate delayed feedback by calculating a proxy metric, which is the accuracy of the model's predictions compared to the delayed true labels. Although this does not provide real-time evaluation, it approximates the model's performance, helping to maintain oversight.
-    
+
     Sample Output:
-    
+
     ```bash
     Proxy Metric: 0.6
     ```
-    
+
 3. Scalability issues: With the growth in the production number of models in, monitoring systems must scale accordingly. This requires robust infrastructure and efficient algorithms to handle increased load.
 
 ### Key Metrics for Model Monitoring
@@ -421,85 +435,83 @@ Focus on these key variables to assess model health and guarantee consistent per
 
 1. Predictive Performance: Monitor standard performance indicators to determine how well the model predicts. These are accuracy, F1-score, AUC-ROC, precision, and recall. The F1-score is a measure of the accuracy of a model. It considers both precision and recall. The F1-score is the harmonic mean of precision and recall thus it provides a balance between the two metrics. AUC-ROC stands for the Area Under the Receiver Operating Characteristic Curve. The ROC curve is a graphical representation of a model's diagnostic ability, plotting the true positive rate (recall) against the false positive rate (1-specificity).
 
-    
-    Example:
-    
-    ```python
-    from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
-    import numpy as np
-    
-    def calculate_performance_metrics(y_true, y_pred, y_prob):
-        """
-        Calculates the performance metrics for the model.
-    
-        y_true (array-like): True labels.
-        y_pred (array-like): Predicted labels.
-        y_prob (array-like): Predicted probabilities for the positive class.
-        
-        Returns a dictionary containing accuracy, F1-score, and AUC-ROC.
-        """
-        metrics = {
-            'accuracy': accuracy_score(y_true, y_pred),
-            'f1_score': f1_score(y_true, y_pred, average='weighted'),
-            'auc_roc': roc_auc_score(y_true, y_prob)
-        }
-        return metrics
-    
-    # Generate sample data for demonstration
-    np.random.seed(0)
-    y_true = np.random.randint(0, 2, size=100)  # True labels
-    y_pred = np.random.randint(0, 2, size=100)  # Predicted labels
-    y_prob = np.random.rand(100)  
-    # Predicted probabilities for the positive class
-    
-    # Calculate performance metrics
-    performance_metrics = calculate_performance_metrics(y_true, y_pred, y_prob)
-    print(performance_metrics)
-    ```
-    
-    Explanation:
-    
-    - Importing the necessary functions `accuracy_score`, `f1_score`, and `roc_auc_score` are imported from `sklearn.metrics`.
-    - The `calculate_performance_metrics` function takes three arguments: `y_true` (true labels), `y_pred` (predicted labels), and `y_prob`. Inside the function, a dictionary `metrics` is created to store the computed metrics:
-        - `accuracy` is calculated using `accuracy_score`.
-        - `f1_score` is calculated using `f1_score` with a weighted average to account for class imbalance.
-        - `auc_roc` is calculated using `roc_auc_score`.
-    - The function `calculate_performance_metrics` is called with the sample data, and the resulting metrics are printed.
-    
-    Sample Output:
-    
-    ```bash
-    {
-        'accuracy': 0.44,
-        'f1_score': 0.457209104928158,
-        'auc_roc': 0.5654444444444444
-    }
-    ```
-    
+   Example:
+
+   ```python
+   from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+   import numpy as np
+
+   def calculate_performance_metrics(y_true, y_pred, y_prob):
+       """
+       Calculates the performance metrics for the model.
+
+       y_true (array-like): True labels.
+       y_pred (array-like): Predicted labels.
+       y_prob (array-like): Predicted probabilities for the positive class.
+
+       Returns a dictionary containing accuracy, F1-score, and AUC-ROC.
+       """
+       metrics = {
+           'accuracy': accuracy_score(y_true, y_pred),
+           'f1_score': f1_score(y_true, y_pred, average='weighted'),
+           'auc_roc': roc_auc_score(y_true, y_prob)
+       }
+       return metrics
+
+   # Generate sample data for demonstration
+   np.random.seed(0)
+   y_true = np.random.randint(0, 2, size=100)  # True labels
+   y_pred = np.random.randint(0, 2, size=100)  # Predicted labels
+   y_prob = np.random.rand(100)
+   # Predicted probabilities for the positive class
+
+   # Calculate performance metrics
+   performance_metrics = calculate_performance_metrics(y_true, y_pred, y_prob)
+   print(performance_metrics)
+   ```
+
+   Explanation:
+
+   - Importing the necessary functions `accuracy_score`, `f1_score`, and `roc_auc_score` are imported from `sklearn.metrics`.
+   - The `calculate_performance_metrics` function takes three arguments: `y_true` (true labels), `y_pred` (predicted labels), and `y_prob`. Inside the function, a dictionary `metrics` is created to store the computed metrics:
+     - `accuracy` is calculated using `accuracy_score`.
+     - `f1_score` is calculated using `f1_score` with a weighted average to account for class imbalance.
+     - `auc_roc` is calculated using `roc_auc_score`.
+   - The function `calculate_performance_metrics` is called with the sample data, and the resulting metrics are printed.
+
+   Sample Output:
+
+   ```bash
+   {
+       'accuracy': 0.44,
+       'f1_score': 0.457209104928158,
+       'auc_roc': 0.5654444444444444
+   }
+   ```
+
 2. Business Impact Metrics: Assess the impact of your model on business-specific KPIs such as conversion rates, client retention, and revenue. These measurements let you understand your model's real-world effectiveness.
-    
-    Example:
-    
-    ```python
-    def calculate_conversion_rate(predictions, actuals):
-        conversions = sum((predictions == 1) & (actuals == 1))
-        total_positives = sum(actuals == 1)
-        conversion_rate = conversions / total_positives if total_positives > 0 else 0
-        return conversion_rate
-    
-    # Assuming predictions and actuals are your model's predictions and actual outcomes
-    predictions = [1, 0, 1, 1]
-    actuals = [1, 1, 1, 0]
-    conversion_rate = calculate_conversion_rate(predictions, actuals)
-    print(f'Conversion Rate: {conversion_rate:.2%}')
-    ```
-    
-    Sample Output:
-    
-    ```bash
-    Conversion Rate: 66.67%
-    ```
-    
+
+   Example:
+
+   ```python
+   def calculate_conversion_rate(predictions, actuals):
+       conversions = sum((predictions == 1) & (actuals == 1))
+       total_positives = sum(actuals == 1)
+       conversion_rate = conversions / total_positives if total_positives > 0 else 0
+       return conversion_rate
+
+   # Assuming predictions and actuals are your model's predictions and actual outcomes
+   predictions = [1, 0, 1, 1]
+   actuals = [1, 1, 1, 0]
+   conversion_rate = calculate_conversion_rate(predictions, actuals)
+   print(f'Conversion Rate: {conversion_rate:.2%}')
+   ```
+
+   Sample Output:
+
+   ```bash
+   Conversion Rate: 66.67%
+   ```
 
 ## Monitoring Unstructured Data Models
 
@@ -546,11 +558,11 @@ Example:
 from sklearn.metrics import accuracy_score
 
 # True labels for the test images
-ground_truth = [1, 0, 1, 1]  
+ground_truth = [1, 0, 1, 1]
 # 1 for cat, 0 for dog
 
 # Model's predictions for the test images
-predictions = [1, 0, 1, 0]  
+predictions = [1, 0, 1, 0]
 # Example predictions from the model
 
 # Calculate and print accuracy
@@ -576,7 +588,7 @@ Example:
 import numpy as np
 
 # Sample user engagement data in seconds
-view_durations = [120, 90, 150, 200]  
+view_durations = [120, 90, 150, 200]
 
 # Calculate average view duration
 average_duration = np.mean(view_durations)
@@ -720,8 +732,8 @@ Explanation: By continuously retraining the model with new data, you can ensure 
 ### 3. Implement Comprehensive Monitoring
 
 - Monitor at both functional and operational levels:
-    - Functional: Input data, model performance, and output predictions
-    - Operational: System performance, pipelines, and costs
+  - Functional: Input data, model performance, and output predictions
+  - Operational: System performance, pipelines, and costs
 - Use a combination of tools to cover all aspects (e.g., Prometheus, Grafana, Evidently AI).
 
 ### 4. Set Up Automated Alerts

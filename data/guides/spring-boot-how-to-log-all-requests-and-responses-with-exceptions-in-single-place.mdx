@@ -1,13 +1,19 @@
 ---
-
 title: How to Log All Spring Boot Requests and Responses - A Guide
-slug: spring-boot-how-to-log-all-requests-and-responses-with-exceptions-in-single-place
 date: 2024-09-11
 tags: [faq]
 authors: [nilesh_sinha]
 description: Learn how to implement comprehensive logging for all requests, responses, and exceptions in Spring Boot applications. A step-by-step guide with advanced techniques.
-keywords: [Spring Boot logging, request logging, response logging, exception handling, centralized logging, observability, SigNoz integration]
-
+keywords:
+  [
+    Spring Boot logging,
+    request logging,
+    response logging,
+    exception handling,
+    centralized logging,
+    observability,
+    SigNoz integration,
+  ]
 ---
 
 Logging is a critical aspect of any robust Spring Boot application. It provides invaluable insights into application behavior, aids in debugging, and enhances overall system observability. But how do you effectively log all requests, responses, and exceptions in a single place? This guide walks you through the process, from basic setup to advanced techniques, ensuring you have a comprehensive logging strategy for your Spring Boot application.
@@ -147,7 +153,7 @@ To log all requests and responses, create a custom interceptor:
 public class LoggingInterceptor implements HandlerInterceptor {
 
 // Logger for this class
-    private static final Logger logger = LoggerFactory.getLogger(LoggingInterceptor.class);  
+    private static final Logger logger = LoggerFactory.getLogger(LoggingInterceptor.class);
 
     @Override
     // Logs HTTP method and URI before the request is handled
@@ -162,7 +168,7 @@ public class LoggingInterceptor implements HandlerInterceptor {
         logger.info("Response: {} {}", response.getStatus(), request.getRequestURI());
         if (ex != null) {
         // Logs any exception
-            logger.error("Exception: ", ex); 
+            logger.error("Exception: ", ex);
         }
     }
 }
@@ -207,11 +213,11 @@ public class LoggingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
+
         // Log request details before processing the request.
-        logger.info("Request: Method={}, URI={}, Headers={}", 
-                    request.getMethod(), 
-                    request.getRequestURI(), 
+        logger.info("Request: Method={}, URI={}, Headers={}",
+                    request.getMethod(),
+                    request.getRequestURI(),
                     getRequestHeaders(request));
 
         long startTime = System.currentTimeMillis();  // Capture the start time to measure processing duration.
@@ -222,15 +228,15 @@ public class LoggingFilter extends OncePerRequestFilter {
             long duration = System.currentTimeMillis() - startTime;  // Calculate how long the request took.
 
             // Log response details after request processing.
-            logger.info("Response: Status={}, URI={}, Duration={}ms, Headers={}", 
-                        response.getStatus(), 
-                        request.getRequestURI(), 
+            logger.info("Response: Status={}, URI={}, Duration={}ms, Headers={}",
+                        response.getStatus(),
+                        request.getRequestURI(),
                         duration,
                         getResponseHeaders(response));
 
             // Log any exceptions that occurred during processing.
             if (request.getAttribute("javax.servlet.error.exception") != null) {
-                logger.error("Exception during request processing", 
+                logger.error("Exception during request processing",
                              (Exception) request.getAttribute("javax.servlet.error.exception"));
             }
         }
@@ -424,7 +430,7 @@ public class LoggingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
+
         try {
             filterChain.doFilter(request, response);
         } finally {
@@ -472,26 +478,25 @@ logger.info("Response time: {} ms", executionTime);
 
 Handling Streaming Responses and Partial Content
 
-1. Streaming Responses:
+1.  Streaming Responses:
+
     - Log Initial Response Information: Log basic details like status and URI before the stream starts.
-    - Track Streaming Progress:  For long-running streams, consider logging periodic updates to track progress. However, be cautious about how often you log these updates, as excessive logging can degrade performance. Rate-limiting your logging (e.g., every few seconds or after certain data thresholds) can help balance the need for information with performance. It has been explained later in the upcoming section how you can ensure logging updates are done in a better way.
-    
+    - Track Streaming Progress: For long-running streams, consider logging periodic updates to track progress. However, be cautious about how often you log these updates, as excessive logging can degrade performance. Rate-limiting your logging (e.g., every few seconds or after certain data thresholds) can help balance the need for information with performance. It has been explained later in the upcoming section how you can ensure logging updates are done in a better way.
+
     ```java
     logger.info("Streaming response started: Status={}, URI={}", response.getStatus(), request.getRequestURI());
     ```
-    
-2. Partial Content:
-When serving partial content (e.g., large file downloads or video streaming), the HTTP 206 status code is used, often accompanied by the `Content-Range` header. Logging this information is crucial for understanding what portion of the content was delivered, especially in case of errors or interruptions.
-    
-    ```java
-    String contentRange = response.getHeader("Content-Range");
-    if (contentRange != null) {
-        logger.info("Partial Content: Range={}", contentRange);
-    }
-    ```
-    
-     Logging partial content is particularly important in scenarios like large file transfers or video streaming, where only a portion of the content is sent at a time. This helps in debugging issues related to incomplete or interrupted content delivery.
-    
+
+2.  Partial Content:
+    When serving partial content (e.g., large file downloads or video streaming), the HTTP 206 status code is used, often accompanied by the `Content-Range` header. Logging this information is crucial for understanding what portion of the content was delivered, especially in case of errors or interruptions.
+        ```java
+        String contentRange = response.getHeader("Content-Range");
+        if (contentRange != null) {
+            logger.info("Partial Content: Range={}", contentRange);
+        }
+        ```
+
+         Logging partial content is particularly important in scenarios like large file transfers or video streaming, where only a portion of the content is sent at a time. This helps in debugging issues related to incomplete or interrupted content delivery.
 
 ## Exception Handling and Logging
 
@@ -515,7 +520,7 @@ public class GlobalExceptionHandler {
 }
 ```
 
-As in the above example, using a `GlobalExceptionHandler`  ensures that all exceptions are handled uniformly, improving the maintainability and reliability of your application.
+As in the above example, using a `GlobalExceptionHandler` ensures that all exceptions are handled uniformly, improving the maintainability and reliability of your application.
 
 ### Logging Stack Traces and Custom Error Messages:
 
@@ -620,7 +625,7 @@ It is important to enhance your logging strategy to improve traceability, perfor
 
 AOP is a programming paradigm that allows you to separate cross-cutting concerns, such as logging, from your main business logic. It helps in applying the same behavior (like logging or security) across multiple methods or classes without duplicating code.
 
-AOP allows you to add logging behavior to your methods without modifying their code. Here’s an example for it where we have used `ProceedingJoinPoint` interface that extends `JoinPoint` . 
+AOP allows you to add logging behavior to your methods without modifying their code. Here’s an example for it where we have used `ProceedingJoinPoint` interface that extends `JoinPoint` .
 A `JoinPoint` is a specific point in the execution of a program where an aspect's advice can be applied. `ProceedingJoinPoint` is a key object in Aspect-Oriented Programming (AOP) used in Spring. It provides access to the method that is being advised and allows you to control its execution.
 
 ```java
@@ -729,91 +734,89 @@ The pattern `%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n` formats log 
 ## Performance Considerations and Optimization
 
 1. Balancing Logging Detail with Application Performance: Maintain the right balance between the amount of logging detail and application performance is crucial. Excessive logging can degrade performance due to increased I/O operations and processing overhead.
-For instance, logging every method entry and exit might slow down the application, especially in high-throughput systems. To optimize, log only essential information and use appropriate logging levels (e.g., `INFO`, `DEBUG`, `ERROR`).
+   For instance, logging every method entry and exit might slow down the application, especially in high-throughput systems. To optimize, log only essential information and use appropriate logging levels (e.g., `INFO`, `DEBUG`, `ERROR`).
 2. Implementing Log Sampling for High-Traffic Applications: To handle high traffic without overloading your logging system, you can log a small percentage of events. Here's how you can do it:
-    
-    ```java
-    // Log sampling example: 1% of events
-    import java.util.Random;
-    
-    public class LogSampler {
-        private static final double SAMPLING_RATE = 0.01; // 1% chance
-        private static final Random RANDOM = new Random();
-        private static final Logger logger = LoggerFactory.getLogger(LogSampler.class);
-    
-        public void handleRequest(String requestData) {
-            if (RANDOM.nextDouble() < SAMPLING_RATE) {
-                logger.info("Sampled request: {}", requestData);
-            }
-        }
-    }
-    ```
-    
-    Here, `RANDOM.nextDouble()` checks if a request should be logged based on a 1% probability. This approach helps keep the log volume manageable while still capturing important events.
-    
-3. Using Buffered Logging to Reduce I/O Overhead: Buffered logging boosts performance by temporarily storing log entries in memory and writing them to disk in chunks. This reduces the number of I/O operations, which can slow down your application. 
-    
-    Here’s how you can set it up in Logback:
-    
-    ```xml
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/myapp.log</file>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-        <bufferSize>8192</bufferSize> <!-- 8KB buffer -->
-    </appender>
-    ```
-    
-    This configuration uses an 8KB buffer to collect logs before writing them to disk, improving overall performance.
-    
+
+   ```java
+   // Log sampling example: 1% of events
+   import java.util.Random;
+
+   public class LogSampler {
+       private static final double SAMPLING_RATE = 0.01; // 1% chance
+       private static final Random RANDOM = new Random();
+       private static final Logger logger = LoggerFactory.getLogger(LogSampler.class);
+
+       public void handleRequest(String requestData) {
+           if (RANDOM.nextDouble() < SAMPLING_RATE) {
+               logger.info("Sampled request: {}", requestData);
+           }
+       }
+   }
+   ```
+
+   Here, `RANDOM.nextDouble()` checks if a request should be logged based on a 1% probability. This approach helps keep the log volume manageable while still capturing important events.
+
+3. Using Buffered Logging to Reduce I/O Overhead: Buffered logging boosts performance by temporarily storing log entries in memory and writing them to disk in chunks. This reduces the number of I/O operations, which can slow down your application.
+
+   Here’s how you can set it up in Logback:
+
+   ```xml
+   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+       <file>logs/myapp.log</file>
+       <encoder>
+           <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+       </encoder>
+       <bufferSize>8192</bufferSize> <!-- 8KB buffer -->
+   </appender>
+   ```
+
+   This configuration uses an 8KB buffer to collect logs before writing them to disk, improving overall performance.
+
 4. Optimizing Log Storage and Retrieval: In order to keep your logs manageable, you should use tools that support efficient indexing and querying. Regularly archive old logs and ensure your system handles your log volume and access needs. Using structured formats like JSON makes logs easier to search and analyze.
 
 ## Security and Compliance in Logging
 
-1. Mask Sensitive Data: Always mask or redact personally identifiable information (PII), passwords, tokens, and other sensitive data before logging to prevent exposure.
-Let’s consider an example of a `request` that represents an instance of `HttpServletRequest`, which is provided by the servlet container in a Java web application. It encapsulates all the information related to an HTTP request made by the client.
-    
-    Here’s how you can mask sensitive data while logging:
-    
-    ```java
-    // Mask sensitive data before logging
-    String password = request.getParameter("password");
-    String maskedPassword = password != null ? "**" : null;
-    
-    // Log the request with the masked password
-    logger.info("User login attempt: username={}, password={}", username, maskedPassword);
-    ```
-    
-    The `password` is masked by replacing it with asterisks (`**`) before logging.
-    
-2. Implementing Log Encryption: Encrypt logs in transit and at rest in sensitive areas to prevent unwanted access and guarantee data integrity.
-    
+1.  Mask Sensitive Data: Always mask or redact personally identifiable information (PII), passwords, tokens, and other sensitive data before logging to prevent exposure.
+    Let’s consider an example of a `request` that represents an instance of `HttpServletRequest`, which is provided by the servlet container in a Java web application. It encapsulates all the information related to an HTTP request made by the client.
+        Here’s how you can mask sensitive data while logging:
+
+        ```java
+        // Mask sensitive data before logging
+        String password = request.getParameter("password");
+        String maskedPassword = password != null ? "**" : null;
+
+        // Log the request with the masked password
+        logger.info("User login attempt: username={}, password={}", username, maskedPassword);
+        ```
+
+        The `password` is masked by replacing it with asterisks (`**`) before logging.
+2.  Implementing Log Encryption: Encrypt logs in transit and at rest in sensitive areas to prevent unwanted access and guarantee data integrity.
+
     Here’s a simple example using Base64 encoding to simulate encryption. However, in a real application, you would require a stronger encryption method.
-    
+
     ```java
     // Encrypt the log message before logging
     String logMessage = "Sensitive data to log";
     String encryptedMessage = Base64.getEncoder().encodeToString(logMessage.getBytes());
-    
+
     // Log the encrypted message
     logger.info("Encrypted log: {}", encryptedMessage);
     ```
-    
+
     The method `Base64.getEncoder().encodeToString(logMessage.getBytes())` is used to encode a string into its Base64 representation.
     Output:
-    
+
     ```java
     U2Vuc2l0aXZlIGRhdGEgdG8gbG9n
     ```
-    
+
     The encrypted message is logged, ensuring sensitive data is protected.
-    
-3. Making Sure There’s Compliance: Adhere to GDPR, HIPAA, and other relevant regulations by limiting the data logged, obtaining necessary consent, and providing the ability to delete logs containing personal data if required.
-4. Log Retention Policies: Establish clear log retention policies that define how long logs are stored, ensuring they are securely archived and eventually purged according to compliance requirements.
-    
+
+3.  Making Sure There’s Compliance: Adhere to GDPR, HIPAA, and other relevant regulations by limiting the data logged, obtaining necessary consent, and providing the ability to delete logs containing personal data if required.
+4.  Log Retention Policies: Establish clear log retention policies that define how long logs are stored, ensuring they are securely archived and eventually purged according to compliance requirements.
+
     Here’s a way to establish [log retention](https://signoz.io/guides/log-retention/) policies using `Logback` in `logback-spring.xml` :
-    
+
     ```xml
     <configuration>
         <appender name="FILE" class="ch.qos.logback.core.FileAppender">
@@ -827,17 +830,16 @@ Let’s consider an example of a `request` that represents an instance of `HttpS
                 <totalSizeCap>5GB</totalSizeCap> <!-- Maximum size of log files -->
             </rollingPolicy>
         </appender>
-    
+
         <root level="INFO">
             <appender-ref ref="FILE"/>
         </root>
     </configuration>
     ```
-    
+
     This configuration ensures that logs are rolled daily and retains them for 30 days, with a total size cap of 5GB.
     The `<maxHistory>` setting ensures that only the logs from the past 30 days are retained. Logs older than 30 days will be automatically deleted.
     The `<totalSizeCap>` setting limits the combined size of all log files. If the total exceeds 5GB, older logs will be purged to stay within this limit.
-    
 
 ## Key Takeaways
 

@@ -1,26 +1,23 @@
 ---
-
 title: Building Your Observability Stack - A Practical Guide
-slug: observability-stack
 date: 2025-01-07
 tags: [observability, monitoring, DevOps, microservices]
 authors: [manjunath_irukulla]
 description: Learn how to build a robust observability stack for your software systems. This guide covers key components, implementation strategies, and best practices.
 keywords: [observability stack, monitoring, logs, metrics, traces, OpenTelemetry, DevOps]
-
 ---
 
-Modern software systems are inherently complex, distributed, and dynamic. Managing this complexity requires more than just traditional monitoring it demands a robust observability stack. Observability goes beyond simply tracking metrics, logs, and traces. It integrates these signals to provide actionable insights into system behavior. 
+Modern software systems are inherently complex, distributed, and dynamic. Managing this complexity requires more than just traditional monitoring it demands a robust observability stack. Observability goes beyond simply tracking metrics, logs, and traces. It integrates these signals to provide actionable insights into system behavior.
 
-This guide explores how to build an effective observability stack, detailing its core components, advanced analytics, and strategies to address the challenges of modern software environments. By the end, you’ll understand  how to achieve seamless visibility and faster resolution of issues in your systems. 
+This guide explores how to build an effective observability stack, detailing its core components, advanced analytics, and strategies to address the challenges of modern software environments. By the end, you’ll understand how to achieve seamless visibility and faster resolution of issues in your systems.
 
 ## What Is an Observability Stack and Why Do You Need One?
 
-An observability stack is a suite of tools and practices with comprehensive insights into the behavior and performance of software systems. Unlike traditional monitoring, which focuses on predefined metrics, observability offers a deeper understanding by correlating data from diverse sources to reveal the underlying state of your systems.  
+An observability stack is a suite of tools and practices with comprehensive insights into the behavior and performance of software systems. Unlike traditional monitoring, which focuses on predefined metrics, observability offers a deeper understanding by correlating data from diverse sources to reveal the underlying state of your systems.
 
 ### Understanding Observability and Its Significance
 
-Observability refers to the ability to infer the internal state of a system based on its external outputs. In today’s complex, distributed systems, achieving observability is critical for several reasons: 
+Observability refers to the ability to infer the internal state of a system based on its external outputs. In today’s complex, distributed systems, achieving observability is critical for several reasons:
 
 - Faster Issue Resolution: Pinpoint and address problems quickly to minimize downtime.
 - Enhanced System Reliability: Maintain optimal performance by identifying potential failures early.
@@ -28,20 +25,24 @@ Observability refers to the ability to infer the internal state of a system base
 
 ### Core Components of an Observability Stack
 
-An effective observability stack is built on four key pillars, each contributing unique insights: 
+An effective observability stack is built on four key pillars, each contributing unique insights:
 
 - Logs: Sequential records that capture system events, aiding in detailed troubleshooting.
 - Metrics: Quantitative data points, such as CPU usage or response times, offer a snapshot of system health.
 - Traces: End-to-end details of requests as they traverse across distributed systems, illuminating bottlenecks and failures.
 - Events: Contextual information about significant system occurrences, such as deployments or configuration changes.
 
-These components provide a holistic view of system operations, enabling teams to identify issues and effectively uncover trends. 
+These components provide a holistic view of system operations, enabling teams to identify issues and effectively uncover trends.
 
 ### Why Your Organization Needs an Observability Stack
 
-Implementing a robust observability stack delivers tangible benefits that go beyond traditional monitoring: 
+Implementing a robust observability stack delivers tangible benefits that go beyond traditional monitoring:
 
-<Figure src="/img/guides/2025/01/observability-stack-Observability_Stack__Importance.webp" alt="Advantages of an Observability Stack" caption="Advantages of an Observability Stack" />
+<Figure
+  src="/img/guides/2025/01/observability-stack-Observability_Stack__Importance.webp"
+  alt="Advantages of an Observability Stack"
+  caption="Advantages of an Observability Stack"
+/>
 
 - Proactive Issue Resolution: Detect and address anomalies before they impact end users.
 - Comprehensive System Insights: Gain a unified perspective of performance across applications, infrastructure, and services.
@@ -51,13 +52,14 @@ Implementing a robust observability stack delivers tangible benefits that go bey
 
 To build a robust observability stack, you must understand how the different telemetry signals logs, metrics, traces, and events. Traditionally described as "pillars”, at SigNoz, you can view these signals as a tightly woven mesh rather than isolated components. We've covered this topic in greater detail in our blog - [Not 3 pillars but a single whole to help customers solve issues faster.](https://signoz.io/blog/observability-net/)
 
-<Figure src="/img/guides/2025/01/observability-stack-o11y-net-trans.webp" alt="" caption="" />*A better model where all signals come together to give insights to users*
+<Figure src="/img/guides/2025/01/observability-stack-o11y-net-trans.webp" alt="" caption="" />
+*A better model where all signals come together to give insights to users*
 
 ### Logs
 
-Logs record detailed events and state changes within your system, answering the “what” and “why” behind behaviors. 
+Logs record detailed events and state changes within your system, answering the “what” and “why” behind behaviors.
 
-Best Practices for Log Management: 
+Best Practices for Log Management:
 
 - [structured logging](https://signoz.io/blog/structured-logs/): Use formats like JSON for easier parsing.
 - Field Standardization: Include consistent fields like timestamps and severity levels.
@@ -65,9 +67,9 @@ Best Practices for Log Management:
 
 ### Metrics
 
-Metrics measure the health and performance of your system over time, helping identify trends and anomalies. 
+Metrics measure the health and performance of your system over time, helping identify trends and anomalies.
 
-Key Considerations: 
+Key Considerations:
 
 - Relevant KPIs: Focus on actionable metrics like latency and throughput.
 - Avoid Over-Collection: Prevent data overload by prioritizing key indicators.
@@ -75,9 +77,9 @@ Key Considerations:
 
 ### Traces
 
-Traces map the lifecycle of requests, providing end-to-end visibility in distributed systems. 
+Traces map the lifecycle of requests, providing end-to-end visibility in distributed systems.
 
-Important Aspects: 
+Important Aspects:
 
 - Unique Identifiers: Use TraceID and SpanID for correlation across microservices.
 - Sampling: Collect representative subsets to manage high trace volumes.
@@ -85,31 +87,31 @@ Important Aspects:
 
 ### Events
 
-Events capture significant occurrences, such as deployments and configuration changes, offering critical context for interpreting other signals. 
+Events capture significant occurrences, such as deployments and configuration changes, offering critical context for interpreting other signals.
 
-Effectiveness Event Management: 
+Effectiveness Event Management:
 
 - CI/CD Integration: Track deployments to correlate with system behaviour.
 - Annotate Data: Use events to enrich logs and metrics for deeper insights.
 - Standardized Schema: Ensure uniformity for seamless integration.
 
-The traditional model of observability as three or four independent pillars creates a false dichotomy. In reality, these signals overlap and enrich one another, forming a mesh of correlated insights. 
+The traditional model of observability as three or four independent pillars creates a false dichotomy. In reality, these signals overlap and enrich one another, forming a mesh of correlated insights.
 
-For instance: 
+For instance:
 
 - Metrics from Traces: Use trace span data to generate latency and error rate metrics.
 - Logs in Traces: Add log entries to specific spans for deeper context.
 - Events with Metrics: Annotate metrics with deployment events for faster issue resolution.
 
-Imagine a web application where users report slow checkout processes. Metrics like latency and error rates help identify that the payment service is slower than usual. Logs provide context, showing repeated timeout errors from a third-party API. Traces then pinpoint the exact step in the request lifecycle where delays occur, revealing that the issue lies with API response times. 
+Imagine a web application where users report slow checkout processes. Metrics like latency and error rates help identify that the payment service is slower than usual. Logs provide context, showing repeated timeout errors from a third-party API. Traces then pinpoint the exact step in the request lifecycle where delays occur, revealing that the issue lies with API response times.
 
 SigNoz uses this interconnected approach by leveraging a single data store for seamless correlation across signals. Observability isn't just about monitoring dashboards; it's about asking precise questions and getting answers quickly, enabling faster resolution of complex system issues.
 
-By thinking of observability as a mesh, you gain the flexibility and depth needed to pinpoint issues in complex systems efficiently. 
+By thinking of observability as a mesh, you gain the flexibility and depth needed to pinpoint issues in complex systems efficiently.
 
 ## Choosing the Right Tools for Each Pillar
 
-Building an effective observability stack starts with selecting the right tools. Here are key considerations to guide your decision-making process: 
+Building an effective observability stack starts with selecting the right tools. Here are key considerations to guide your decision-making process:
 
 ### Key Factors to Consider
 
@@ -119,36 +121,40 @@ Building an effective observability stack starts with selecting the right tools.
 
 ### Open-Source vs. Commercial Solutions
 
-Both open-source and commercial tools bring unique advantages to the table: 
+Both open-source and commercial tools bring unique advantages to the table:
 
 - Open-source tools
-    - Offer flexibility, transparency, and access to community support.
-    - Typically requires in-house expertise for setup, customization, and maintenance.
-    - Ideal for organizations seeking cost-effective, customizable solutions.
+  - Offer flexibility, transparency, and access to community support.
+  - Typically requires in-house expertise for setup, customization, and maintenance.
+  - Ideal for organizations seeking cost-effective, customizable solutions.
 - Commercial Solutions
-    - Provide enterprise-grade features, professional support, and robust documentation.
-    - Come at a higher cost but reduces the need for internal expertise.
-    - Best suited for organizations prioritization fast deployment and ongoing vendor support.
+  - Provide enterprise-grade features, professional support, and robust documentation.
+  - Come at a higher cost but reduces the need for internal expertise.
+  - Best suited for organizations prioritization fast deployment and ongoing vendor support.
 
 Choose the Right Fit: Assess your team's skillset, budget, and operational needs to balance flexibility and support.
 
 ### Integration and Compatibility
 
-To build a cohesive observability stack, ensure your tools work together seamlessly. Look for: 
+To build a cohesive observability stack, ensure your tools work together seamlessly. Look for:
 
 - Consistent Data Formats: Select tools that produce and consume compatible data formats across logs, metrics, traces, and events.
 - APIs and Plugins: Ensure the tools offer robust APIs or plugins for easy integration with other components in your stack.
 - Support for Standard Protocols: Favor solutions that adhere to open standards like OpenTelemetry for interoperability and future-proofing.
 
-<Figure src="/img/guides/2025/01/observability-stack-CleanShot_2025-01-03_at_15.50.332x.webp" alt="Popular Observability stacks and it’s comparisons." caption="Popular Observability stacks and it’s comparisons." /> 
+<Figure
+  src="/img/guides/2025/01/observability-stack-CleanShot_2025-01-03_at_15.50.332x.webp"
+  alt="Popular Observability stacks and it’s comparisons."
+  caption="Popular Observability stacks and it’s comparisons."
+/>{' '}
 
 ## How to Design Your Observability Stack Architecture
 
-Creating an effective observability stack architecture involves strategic planning to address your system’s unique requirements. Follow these steps to design a robust and scalable stack: 
+Creating an effective observability stack architecture involves strategic planning to address your system’s unique requirements. Follow these steps to design a robust and scalable stack:
 
 ### 1. Defining Goals and Requirements
 
-Establish clear objectives to align your observability stack with business and operational needs: 
+Establish clear objectives to align your observability stack with business and operational needs:
 
 - Service Level Agreements (SLAs): Identifying key performance and availability metrics you must meet.
 - Data Retention Needs: Determine how long historical data should be stored for analysis and compliance.
@@ -156,7 +162,7 @@ Establish clear objectives to align your observability stack with business and o
 
 ### 2. Map Data Flow and Collection Points
 
-Understand the lifecycle of your observability data to design an efficient flow: 
+Understand the lifecycle of your observability data to design an efficient flow:
 
 - Data Collection Points: Define where you’ll gather data, such as application code, infrastructure, and network layers.
 - Collection Methods: Choose suitable methods like agents, exporters, or sidecars for data collection.
@@ -164,7 +170,7 @@ Understand the lifecycle of your observability data to design an efficient flow:
 
 ### 3. Scalability and Performance Considerations
 
-Design your architecture to handle current workloads and future growth: 
+Design your architecture to handle current workloads and future growth:
 
 - Data Partitioning and Sharding: Distribute data across nodes for efficient storage and retrieval in high-volume scenarios.
 - Horizontal Scaling: Use multi-node clusters and load balancers to scale out your stack as demand increases.
@@ -172,7 +178,7 @@ Design your architecture to handle current workloads and future growth:
 
 ### 4. Security and Compliance
 
-Protect sensitive observability data and meet regulatory standards: 
+Protect sensitive observability data and meet regulatory standards:
 
 - Data Encryption: Secure data in transit and at rest using robust encryption protocols.
 - Role-Based Access Control (RBAC): Restrict data access to authorized users and systems.
@@ -182,11 +188,16 @@ Protect sensitive observability data and meet regulatory standards:
 
 Once you’ve designed your observability stack, it’s time to bring it to life with a structured implementation plan.
 
-<Figure src="/img/guides/2025/01/observability-stack-CleanShot_2025-01-03_at_15.41.062x.webp" alt="" caption="" />Follow these steps for a seamless setup: 
+<Figure
+  src="/img/guides/2025/01/observability-stack-CleanShot_2025-01-03_at_15.41.062x.webp"
+  alt=""
+  caption=""
+/>
+Follow these steps for a seamless setup:{' '}
 
 ### Instrumentation of Applications and Infrastructure
 
-Instrumentation is the foundation of your observability stack. Here’s how to approach it: 
+Instrumentation is the foundation of your observability stack. Here’s how to approach it:
 
 - Select Compatible Libraries: Use instrumentation libraries tailored to your tech stack (e.g., OpenTelemetry for polyglot environments).
 - Leverage Auto-Instrumentation: Automate where possible to minimize manual effort and reduce human error.
@@ -196,27 +207,27 @@ Pro Tip: Start with critical services and gradually expand instrumentation to th
 
 ### Set Up Data Collection and Storage
 
-Efficient data collection and storage are essential for long-term observability. 
+Efficient data collection and storage are essential for long-term observability.
 
 - Deploy Collection Agents: Install agents or exporters on your systems to gather telemetry data.
 - Configure Ingestion Pipelines: Use scalable solutions like Kafka for high-volume scenarios or direct ingestion for smaller setups.
-- Select Storage Solutions: Opt for robust tools like [SigNoz](https://signoz.io/docs/introduction/), which combines metrics, logs, and traces in one platform, or specialized databases such as Prometheus for time-series data and Elsaticsearch for logs. 
+- Select Storage Solutions: Opt for robust tools like [SigNoz](https://signoz.io/docs/introduction/), which combines metrics, logs, and traces in one platform, or specialized databases such as Prometheus for time-series data and Elsaticsearch for logs.
 
-Pro Tip: Plan for storage scalability early to avoid bottlenecks as data volumes grow. 
+Pro Tip: Plan for storage scalability early to avoid bottlenecks as data volumes grow.
 
 ### Implement Visualization and Alerting Tools
 
-Visualization and alerting bring your observability data to life, enabling [proactive monitoring](https://signoz.io/guides/proactive-monitoring/). 
+Visualization and alerting bring your observability data to life, enabling [proactive monitoring](https://signoz.io/guides/proactive-monitoring/).
 
 - Create Interactive Dashboards: Leverage tools like SigNoz, Grafana, or Kibana to visualize metrics, logs, and traces effectively.
 - Set Up Intelligent Alerts: Configure alerts in platforms like SigNoz based on key metrics and thresholds to reduce noise and improve incident response.
 - Integrate with Incident Management: Connect with tools like PagerDuty or OpsGenie for streamlined escalation and resolution workflows.
 
-Pro Tip: Focus on creating actionable dashboards, and avoid overwhelming teams with unnecessary data. 
+Pro Tip: Focus on creating actionable dashboards, and avoid overwhelming teams with unnecessary data.
 
 ### Establish Baseline Metrics and Thresholds
 
-Defining baselines ensures your alerting system reflects real-world conditions. 
+Defining baselines ensures your alerting system reflects real-world conditions.
 
 - Monitor to Determine Baselines: Observe normal system behaviour over a defined period to establish benchmarks.
 - Set Initial Thresholds: Use baseline data to define thresholds for alerts, ensuring they’re neither too sensitive nor too lax.
@@ -224,92 +235,92 @@ Defining baselines ensures your alerting system reflects real-world conditions.
 
 ## Best Practices for Data Collection and Instrumentation
 
-Ensuring the quality of observability data begins with effective data collection and instrumentation. The following best practices will help you create a robust foundation for monitoring and analyzing your systems. 
+Ensuring the quality of observability data begins with effective data collection and instrumentation. The following best practices will help you create a robust foundation for monitoring and analyzing your systems.
 
 ### 1. Leverage Automated Instrumentation
 
-Automated instrumentation simplifies collecting telemetry data and ensures consistency across your stack. use frameworks like [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/), a vendor-neutral standard that provides libraries and agents to instrument your applications seamlessly. 
+Automated instrumentation simplifies collecting telemetry data and ensures consistency across your stack. use frameworks like [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/), a vendor-neutral standard that provides libraries and agents to instrument your applications seamlessly.
 
 - Why it’s important: Manual instrumentation is error-prone and time-consuming. Automating it ensures all critical events are captured.
 - How to implement: Integrate OpenTelemetry SDKs into your applications and configure them to export data to your observability platform.
 
 ### 2. Balance Data Granularity
 
-Collecting too much data can overwhelm your storage and slow down analysis, while too little data may leave you blind to critical issues. 
+Collecting too much data can overwhelm your storage and slow down analysis, while too little data may leave you blind to critical issues.
 
 - Optimal granularity: Focus on capturing detailed data for key services using sampling techniques for less critical components.
 
-Pro Tip: Start by monitoring critical paths, like request-response times for user-facing APIs, and adjust granularity as needed. 
+Pro Tip: Start by monitoring critical paths, like request-response times for user-facing APIs, and adjust granularity as needed.
 
 ### 3. Ensure Minimal Overhead with Lightweight Instrumentation
 
-Instrumentation should not significantly impact your application’s performance. 
+Instrumentation should not significantly impact your application’s performance.
 
 - Use efficient libraries and avoid excessive logging at high verbosity levels (e.g., DEBUG).
 - Implement sampling and rate limiting to reduce the load on storage and processing systems.
 
 ### 4. Prioritize High-Value Metrics and Traces
 
-Focus your data collection efforts on key metrics and spans that provide actionable insights. 
+Focus your data collection efforts on key metrics and spans that provide actionable insights.
 
 - Example: Instead of collecting all HTTP requests, prioritize failed requests, latency spikes, or high-volume endpoints.
 - Use dynamic filters to adjust what you monitor based on real-time conditions.
 
-SigNoz simplifies this process by enabling targeted data collection and dynamic filtering. Its powerful querying and visualization capabilities help teams focus on high-value metrics and traces without being overwhelmed by unnecessary data. 
+SigNoz simplifies this process by enabling targeted data collection and dynamic filtering. Its powerful querying and visualization capabilities help teams focus on high-value metrics and traces without being overwhelmed by unnecessary data.
 
-By correlating signals in a single data store, SigNoz ensures faster root cause analysis, reducing time to resolution and improving system reliability. 
+By correlating signals in a single data store, SigNoz ensures faster root cause analysis, reducing time to resolution and improving system reliability.
 
 ### 5. Enable Context Propagation Across Services
 
-Tracing requires propagating context information across distributed systems. Ensure that context headers are forwarded correctly to connect related spans. 
+Tracing requires propagating context information across distributed systems. Ensure that context headers are forwarded correctly to connect related spans.
 
 - Use trace IDs and span IDs for seamless request tracing across microservices.
 - Validate integration points regularly to prevent broken trace chains.
 
-SigNoz ensures smooth [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/) by standardizing trace ID and [span ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/) handling across your distributed architecture. With its robust instrumentation and seamless integrations, SigNoz helps you maintain uninterrupted trace chains. 
+SigNoz ensures smooth [context propagation](https://signoz.io/blog/opentelemetry-context-propagation/) by standardizing trace ID and [span ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/) handling across your distributed architecture. With its robust instrumentation and seamless integrations, SigNoz helps you maintain uninterrupted trace chains.
 
-This helps for accurate correlation of events, making it easier to identify bottlenecks and optimize system performance effectively. 
+This helps for accurate correlation of events, making it easier to identify bottlenecks and optimize system performance effectively.
 
 ### 6. Incorporate Real-Time Data Validation
 
-Ensure the accuracy of collected data with validation mechanisms during ingestion. 
+Ensure the accuracy of collected data with validation mechanisms during ingestion.
 
 - Use schema validators to confirm that logs, metrics, and traces adhere to expected formats.
 - Monitor data pipelines to detect and resolve issues, such as missing fields or incorrect values.
 
 ### 7. Integrate Observability with CI/CD Pipelines
 
-Automate the validation of telemetry during deployments to catch potential issues early. 
+Automate the validation of telemetry during deployments to catch potential issues early.
 
 - Add smoke tests for critical observability signals in your CI/CD pipeline.
 - Example: After deploying a new service, ensure telemetry data from the service is being ingested correctly.
 
 ## Leveraging OpenTelemetry for a Unified Observability Approach
 
-OpenTelemetry standardizes telemetry data collection and export with key components: 
+OpenTelemetry standardizes telemetry data collection and export with key components:
 
 - SDKs for code instrumentation.
 - Collector for vendor-neutral data processing.
 - Protocols for standardized data transmission.
 
-Implementation Tips: 
+Implementation Tips:
 
 - Start small with a single service or data type (gradual migration).
 - Adopt OpenTelemetry for new projects (greenfield approach).
 
-Tool Integration: 
+Tool Integration:
 
-Export telemetry to popular backends like SigNoz, Prometheus, Jaeger, or Elasticsearch. SigNoz, in particular, stands out for its unified observability approach, enabling developers to monitor metrics, logs, and traces in a single interface. By centralizing observablity, SigNoz simplifies troubleshooting, accelerates debugging, and enhances overall system performance. 
+Export telemetry to popular backends like SigNoz, Prometheus, Jaeger, or Elasticsearch. SigNoz, in particular, stands out for its unified observability approach, enabling developers to monitor metrics, logs, and traces in a single interface. By centralizing observablity, SigNoz simplifies troubleshooting, accelerates debugging, and enhances overall system performance.
 
-Ready to streamline your observability? Explore how SigNoz’s [unified observability](https://signoz.io/unified-observability/) platform can transform your monitoring strategy. 
+Ready to streamline your observability? Explore how SigNoz’s [unified observability](https://signoz.io/unified-observability/) platform can transform your monitoring strategy.
 
 ## Visualizing and Analyzing Telemetry Data
 
-In observability, effective visualization transforms raw telemetry data into actionable insights, empowering teams to monitor performance, detect anomalies, and troubleshoot issues efficiently. 
+In observability, effective visualization transforms raw telemetry data into actionable insights, empowering teams to monitor performance, detect anomalies, and troubleshoot issues efficiently.
 
 ### Effective Visualization Techniques
 
-The choice of visualization can significantly impact how well the data is understood: 
+The choice of visualization can significantly impact how well the data is understood:
 
 - Heat Maps: Best suited for latency distributions, helping identify performance bottlenecks and patterns.
 - Line Charts: Ideal for tracking time-series metrics, such as CPU usage, memory consumption, or request rates over time.
@@ -317,7 +328,7 @@ The choice of visualization can significantly impact how well the data is unders
 
 ### Dashboard and Reporting
 
-Dashboards are essential for tailoring observability data to the needs of diverse stakeholders: 
+Dashboards are essential for tailoring observability data to the needs of diverse stakeholders:
 
 - Execute Overview: Highlight key performance indicators (KPIs), trends, and SLA adherence. Focus on summary metrics such as uptime, error rates, and cost optimization.
 - Operational Dashboards: Provide detailed, real-time metrics for ongoing monitoring and alerting. Include alerts and event logs to assist operations teams with immediate responses.
@@ -325,7 +336,7 @@ Dashboards are essential for tailoring observability data to the needs of divers
 
 ### Advanced Analytics and Anomaly Detection
 
-Modern observability systems leverage analytics and machine learning to enhance visibility: 
+Modern observability systems leverage analytics and machine learning to enhance visibility:
 
 - Anomaly Detection Algorithms: Identify derivations from normal patterns using statistical models (e.g., Z-Score) or ML techniques (e.g., Isolation Forests).
 - Correlation Analysis: Detect interdependencies between metrics, such as how CPU spikes correlate with increased API calls.
@@ -333,7 +344,7 @@ Modern observability systems leverage analytics and machine learning to enhance 
 
 ### Cross-Pillar Correlation
 
-Integrating data from metrics, logs, and traces creates a unified observability framework. 
+Integrating data from metrics, logs, and traces creates a unified observability framework.
 
 - Link Trace IDs in Logs: Provide context by mapping logs to corresponding traces, enabling a complete view of request flows.
 - Annotate Metrics with Events: Mark metrics with deployment times, configuring changes, or incidents for better context.
@@ -341,37 +352,37 @@ Integrating data from metrics, logs, and traces creates a unified observability 
 
 ## Observability in Action: Real-World Use Cases
 
-Observability is not just about monitoring, it’s about solving real-world challenges with actionable insights. Here’s how an observability stack can address common problems effectively. 
+Observability is not just about monitoring, it’s about solving real-world challenges with actionable insights. Here’s how an observability stack can address common problems effectively.
 
 ### Microservices Troubleshooting
 
-Scenario: Users report slow response times in your e-commerce app. 
+Scenario: Users report slow response times in your e-commerce app.
 
-Solution: 
+Solution:
 
 - [Distributed Tracing](https://signoz.io/distributed-tracing/): Use SigNoz to trace the full transaction path and pinpoint the slow-performing microservice. Its intuitive UI makes it easy to visualize request latencies across services.
 - Metrics Analysis: Dive into service-specific metrics like CPU, memory, and network usage using SigNoz’s built-in dashboards. Quickly identify resource bottlenecks affecting performance.
 - Log Review: Centralize logs within SigNoz to search for errors or warnings associated with the impacted service. This reduces context-switching between tools.
 - Event Correlation: Leverage SigNoz to correlate performance issues with recent deployment changes or configuration updates.
 
-Result: SigNoz reveals that a database query bottleneck caused by inefficient indexing was introduced in the latest release. With this insight, you swiftly optimize the query and restore system performance. 
+Result: SigNoz reveals that a database query bottleneck caused by inefficient indexing was introduced in the latest release. With this insight, you swiftly optimize the query and restore system performance.
 
 ### Cloud Resource Optimization
 
-Scenario: Your cloud costs are rising disproportionately to user growth. 
+Scenario: Your cloud costs are rising disproportionately to user growth.
 
-Solution: 
+Solution:
 
 - Utilization Metrics: Track resource usage trends (CPU, Memory, Storage) over time.
 - Load Correlation: Map resource consumption to user activity and application load.
 - Scaling Policy Review: Examine scaling events for inefficiencies in configuration.
 - Resource Assessment: Detect over-provisioned or idle instances and resize or terminate them.
 
-Result: By fine-tuning auto-scaling and rightsizing instances, you can achieve up to a 25% reduction in cloud costs without impacting performance. 
+Result: By fine-tuning auto-scaling and rightsizing instances, you can achieve up to a 25% reduction in cloud costs without impacting performance.
 
 ### Enhanced Security Posture
 
-Scenario: You need to strengthen threat detection and response capabilities. 
+Scenario: You need to strengthen threat detection and response capabilities.
 
 Solution:
 
@@ -379,11 +390,11 @@ Solution:
 - Proactive Alerts: Set up alerts for suspicious patterns, such as multiple failed login attempts or unauthorized access to sensitive resources.
 - Tracing user Actions: Connect security incidents with system metrics, logs, and recent changes for better context.
 
-Result: A coordinated view across logs, metrics, and traces allows you to detect and thwart a potential data exfiltration attempt within minutes. 
+Result: A coordinated view across logs, metrics, and traces allows you to detect and thwart a potential data exfiltration attempt within minutes.
 
 ### User Experience Improvements
 
-Scenario: You aim to reduce cart abandonment rates in your e-commerce application. 
+Scenario: You aim to reduce cart abandonment rates in your e-commerce application.
 
 Solution:
 
@@ -392,11 +403,11 @@ Solution:
 - Behaviour Correlation: Link performance metrics to user behaviour, such as drop-off rates at specific stages.
 - Component Optimization: Address bottlenecks like slow-loading components or high-latency API endpoints.
 
-Result: By reducing the average checkout time by 40%, you can achieve up to a 15% drop in cart abandonment, directly booting sales.  
+Result: By reducing the average checkout time by 40%, you can achieve up to a 15% drop in cart abandonment, directly booting sales.
 
 ## Overcoming Common Challenges in Observability Implementation
 
-Implementing an observability stack involves several hurdles. Here’s how to address them efficiently: 
+Implementing an observability stack involves several hurdles. Here’s how to address them efficiently:
 
 ### Managing Data Volume and Storage Costs
 
@@ -454,7 +465,7 @@ Stay ahead of the curve by keeping an eye on these emerging trends:
 
 SigNoz is an open-source, full-stack observability platform that can simplify your observability journey.
 
-SigNoz offers a unified platform for logs, metrics, and traces, delivering: 
+SigNoz offers a unified platform for logs, metrics, and traces, delivering:
 
 - A scalable backend for efficient data storage and processing.
 - An intuitive user interface for visualization and analysis.
@@ -464,20 +475,27 @@ SigNoz offers a unified platform for logs, metrics, and traces, delivering:
 
 - Unified dashboards for correlated insights across logs, metrics, and traces.
 
-<Figure src="/img/guides/2025/01/observability-stack-hostmetrics-dashboards.webp" alt="" caption="" />- Built-in alerting and anomaly detection to stay ahead of issues.
+<Figure
+  src="/img/guides/2025/01/observability-stack-hostmetrics-dashboards.webp"
+  alt=""
+  caption=""
+/>
+- Built-in alerting and anomaly detection to stay ahead of issues.
 
-<Figure src="/img/guides/2025/01/observability-stack-image.webp" alt="" caption="" />- Advanced analysis with a custom query language.
+<Figure src="/img/guides/2025/01/observability-stack-image.webp" alt="" caption="" />- Advanced
+analysis with a custom query language.
 
-<Figure src="/img/guides/2025/01/observability-stack-Query_Builder_SigNoz.webp" alt="" caption="" />- Role-based access control to enhance collaboration and security.
+<Figure src="/img/guides/2025/01/observability-stack-Query_Builder_SigNoz.webp" alt="" caption="" />
+- Role-based access control to enhance collaboration and security.
 
 ### Getting Started with SigNoz
 
 To begin using SigNoz:
 
-1. Deploy SigNoz using Docker Compose or Kubernetes (Helm). 
+1. Deploy SigNoz using Docker Compose or Kubernetes (Helm).
 2. Instrument your applications using OpenTelemetry SDKs.
 3. Configure the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) to route data to SigNoz.
-4. Access the SigNoz UI to visualize and analyze data. 
+4. Access the SigNoz UI to visualize and analyze data.
 
 ### Cloud vs. Open-Source
 
@@ -486,11 +504,11 @@ SigNoz offers both cloud-hosted and self-hosted options:
 - SigNoz Cloud: Managed solution with automatic updates and scaling.
 - Open-Source: Self-hosted for complete control and on-premise deployment.
 
-Select the option that best suits your expertise, budget, and compliance needs. 
+Select the option that best suits your expertise, budget, and compliance needs.
 
 ## Key Takeaways
 
-Creating an effective observability stack is essential for managing the complexities of modern software systems. Here are the core principles to guide your approach. 
+Creating an effective observability stack is essential for managing the complexities of modern software systems. Here are the core principles to guide your approach.
 
 - Ensure your stack incorporates all four pillars: Logs, metrics, traces, and events, for holistic system visibility.
 - Opt for tools that seamlessly integrate and scale with your evolving needs while avoiding tool sprawl.
@@ -500,7 +518,7 @@ Creating an effective observability stack is essential for managing the complexi
 - Address challenges like high data volumes and integration complexity with strategies such as intelligent sampling, tiered storage, and centralized platforms.
 - Keep pace with advancements like AI-driven analytics, eBPF-based tracing, and observability-driven development practices.
 
-By implementing these strategies, you’ll build an observability stack that delivers deep insights, accelerates troubleshooting, enhances performance, and supports strategic decision-making for modern, distributed systems. 
+By implementing these strategies, you’ll build an observability stack that delivers deep insights, accelerates troubleshooting, enhances performance, and supports strategic decision-making for modern, distributed systems.
 
 ## FAQs
 
@@ -517,20 +535,20 @@ Your decision depends on your unique needs:
 - Support Needs: Commercial tools provide dedicated customer support, open-source tools rely on community support.
 - Integration: Ensure the tool fits seamlessly into your existing tech stack.
 
-Evaluate your team’s skills, budget, and system requirements to make the right choice.  
+Evaluate your team’s skills, budget, and system requirements to make the right choice.
 
 ### Can I Implement an Observability Stack in a Legacy System?
 
-Yes, implementing observability in legacy systems is possible, but it may require extra effort. Steps to get started: 
+Yes, implementing observability in legacy systems is possible, but it may require extra effort. Steps to get started:
 
-1. Start Small: Begin with basic log analysis and [infrastructure monitoring](https://signoz.io/guides/infrastructure-monitoring/). 
-2. Gradual Instrumentation: Introduce metrics and tracing incrementally. 
-3. Standardization: Use OpenTelemetry libraries to collect consistent telemetry data across components. 
+1. Start Small: Begin with basic log analysis and [infrastructure monitoring](https://signoz.io/guides/infrastructure-monitoring/).
+2. Gradual Instrumentation: Introduce metrics and tracing incrementally.
+3. Standardization: Use OpenTelemetry libraries to collect consistent telemetry data across components.
 4. Use Sidecars or Agents: For systems that can’t be directly instrumented, leverage external helpers like Sidecars.
 
 ### How Does Observability Impact DevOps Practices?
 
-Observability is a game-changer for DevOps, enhancing key workflows: 
+Observability is a game-changer for DevOps, enhancing key workflows:
 
 - Faster Incident Response: Quickly detect, diagnose, and resolve issues.
 - Improved Collaboration: Foster shared visibility and understanding across development and operations teams.

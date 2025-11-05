@@ -1,13 +1,19 @@
 ---
-
 title: Mastering PromQL - How to Use If-Else Expressions
-slug: promql-if-else-like-expression
 date: 2024-10-30
 tags: [prometheus]
 authors: [simran_kumari]
 description: Learn how to implement if-else like expressions in PromQL for advanced Prometheus monitoring. Master conditional logic and optimize your queries.
-keywords: [PromQL, if-else expressions, Prometheus monitoring, conditional logic, time-series data, alerting, vector matching]
-
+keywords:
+  [
+    PromQL,
+    if-else expressions,
+    Prometheus monitoring,
+    conditional logic,
+    time-series data,
+    alerting,
+    vector matching,
+  ]
 ---
 
 Prometheus is a powerful monitoring tool, and PromQL ([Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/)) is its heart. However, one thing you may quickly realize is that PromQL doesn’t support traditional if-else statements. So, how do you implement conditional logic? In this guide, we’ll dive into the ways PromQL can simulate if-else behavior using its powerful set of operators and show you how to build dynamic queries to monitor your systems effectively.
@@ -66,7 +72,11 @@ The query will return results only when both conditions are true (mimicking the 
 - The Prometheus service is up (`up == 1`).
 - The scrape duration is less than 0.5 seconds.
 
-<Figure src="/img/guides/2024/10/promql-if-else-like-expression-image.webp" alt="Using the and Operator" caption="Using the and Operator" />
+<Figure
+  src="/img/guides/2024/10/promql-if-else-like-expression-image.webp"
+  alt="Using the and Operator"
+  caption="Using the and Operator"
+/>
 
 ### Using the `or` Operator
 
@@ -76,14 +86,22 @@ The `or` operator provides a fallback option. For example, if you want to monito
 http_requests_total{status="500"} or up{job="prometheus"} == 0
 ```
 
-This returns results if either of the conditions is true, like an "else if" clause. 
+This returns results if either of the conditions is true, like an "else if" clause.
 It checks for HTTP requests with a status of 500 (indicating server errors) or checks if the [Prometheus service](https://signoz.io/guides/cannot-start-prometheus-by-using-systemd/) is down (`up == 0`).
 
-<Figure src="/img/guides/2024/10/promql-if-else-like-expression-image%201.webp" alt="Using the or Operator" caption="Using the or Operator" />
+<Figure
+  src="/img/guides/2024/10/promql-if-else-like-expression-image%201.webp"
+  alt="Using the or Operator"
+  caption="Using the or Operator"
+/>
 
 The query `http_requests_total{status="500"} or up == 0` checks for the total number of HTTP requests with a 500 status code, or if any targets are down (`up == 0`), returning results if either condition is true.
 
-<Figure src="/img/guides/2024/10/promql-if-else-like-expression-image%202.webp" alt="Using the or Operator in PromQL query" caption="Using the or Operator in PromQL query" />
+<Figure
+  src="/img/guides/2024/10/promql-if-else-like-expression-image%202.webp"
+  alt="Using the or Operator in PromQL query"
+  caption="Using the or Operator in PromQL query"
+/>
 
 ### Combining `and` and `or` for Complex Logic
 
@@ -94,10 +112,14 @@ By combining these operators, you can handle more sophisticated conditions. For 
 ```
 
 - The query will return true if either of the following is true:
-    - The `python-job` is down and its scrape duration was fast (less than 0.5 seconds), OR
-    - The `prometheus` job is down and its scrape duration was fast (less than 0.5 seconds).
+  - The `python-job` is down and its scrape duration was fast (less than 0.5 seconds), OR
+  - The `prometheus` job is down and its scrape duration was fast (less than 0.5 seconds).
 
-<Figure src="/img/guides/2024/10/promql-if-else-like-expression-image%203.webp" alt="Combining and and or for Complex Logic" caption="Combining and and or for Complex Logic" />
+<Figure
+  src="/img/guides/2024/10/promql-if-else-like-expression-image%203.webp"
+  alt="Combining and and or for Complex Logic"
+  caption="Combining and and or for Complex Logic"
+/>
 
 In summary, this query helps detect when either of the two jobs (`python-job` or `prometheus`) is down, while highlighting that their last scrape duration was quick, possibly indicating that the job went down right after a successful scrape.
 
@@ -109,25 +131,32 @@ A common use case for if-else logic in PromQL is setting up conditional alerts. 
 up{job="prometheus"} == 1 or up{job="python-job"} == 1
 ```
 
-The above query returns the value 2 if both the services are operational, so you can set the threshold as a value below 2 and trigger alerts. If any one of the services is non-operational, the count will go below 2. 
+The above query returns the value 2 if both the services are operational, so you can set the threshold as a value below 2 and trigger alerts. If any one of the services is non-operational, the count will go below 2.
 
 Steps for setting up alerts in Grafana:
 
 - Add Prometheus as the data source in your Grafana server.
 - Go to Alerting → Alert Rules → New alert rule button.
 - Provide details like:
-    - Alert rule name: Any meaningful name of your choice.
-    - Select the data source
-    - Add in the query based on the result of which alert needs to be triggered. Set the threshold for the same.
-        
-        <Figure src="/img/guides/2024/10/promql-if-else-like-expression-image%204.webp" alt="Setting alert rule in Grafana" caption="Setting alert rule in Grafana" />
-        
-    - Click on `Set as alert condition`
+  - Alert rule name: Any meaningful name of your choice.
+  - Select the data source
+  - Add in the query based on the result of which alert needs to be triggered. Set the threshold for the same.
+    {' '}
+    <Figure
+      src="/img/guides/2024/10/promql-if-else-like-expression-image%204.webp"
+      alt="Setting alert rule in Grafana"
+      caption="Setting alert rule in Grafana"
+    />
+  - Click on `Set as alert condition`
 - Next, save the rule and exit.
 
 Your alerts will get fired if the specified condition is met.
 
-<Figure src="/img/guides/2024/10/promql-if-else-like-expression-image%205.webp" alt="Firing alerts using Grafana" caption="Firing alerts using Grafana" />
+<Figure
+  src="/img/guides/2024/10/promql-if-else-like-expression-image%205.webp"
+  alt="Firing alerts using Grafana"
+  caption="Firing alerts using Grafana"
+/>
 
 Handling Multiple Conditions
 
@@ -143,13 +172,13 @@ Multiple conditions can be handled using nested `and` and `or` operators:
 This query evaluates multiple conditions related to the HTTP requests for the `python-job` and the status of the `prometheus` job:
 
 1. Condition 1: `(sum(prometheus_http_requests_total{job="python-job"}) > 1000 and up{job="prometheus"} == 1)`
-    - This checks if the total HTTP requests for the `python-job` exceed `1000` and the `prometheus` job is up. If both conditions are true, you may want to take action or trigger an alert.
+   - This checks if the total HTTP requests for the `python-job` exceed `1000` and the `prometheus` job is up. If both conditions are true, you may want to take action or trigger an alert.
 2. Condition 2: `(sum(prometheus_http_requests_total{job="python-job"}) <= 1000 and up{job="python-job"} == 1)`
-    - This checks if the total HTTP requests for the `python-job` are `1000` or fewer while ensuring that the `python-job` is operational. This may indicate that the service is underutilized.
+   - This checks if the total HTTP requests for the `python-job` are `1000` or fewer while ensuring that the `python-job` is operational. This may indicate that the service is underutilized.
 3. Condition 3: `(up{job="prometheus"} == 0)`
-    - This condition checks if the `prometheus` job is down. If true, it may trigger alerts regardless of request counts.
+   - This condition checks if the `prometheus` job is down. If true, it may trigger alerts regardless of request counts.
 4. Condition 4: `(up{job="python-job"} == 0)`
-    - This checks if the `python-job` is down, indicating an issue that should trigger an alert.
+   - This checks if the `python-job` is down, indicating an issue that should trigger an alert.
 
 Dealing with Edge Cases and Potential Pitfalls
 
@@ -175,7 +204,11 @@ sum(prometheus_http_requests_total) unless up{job="prometheus"} == 0
 
 This query returns the total number of HTTP requests unless the Prometheus service is down.
 
-<Figure src="/img/guides/2024/10/promql-if-else-like-expression-image%206.webp" alt="Using the unless Operator" caption="Using the unless Operator" />
+<Figure
+  src="/img/guides/2024/10/promql-if-else-like-expression-image%206.webp"
+  alt="Using the unless Operator"
+  caption="Using the unless Operator"
+/>
 
 ### Ternary-Like Operations with Vector Matching
 
@@ -191,9 +224,17 @@ PromQL can handle ternary-like behavior using vector matching. For example, to g
 sum(prometheus_http_requests_total{job="prometheus"}) > 1000 or vector(0)
 ```
 
-<Figure src="/img/guides/2024/10/promql-if-else-like-expression-image%207.webp" alt="Ternary-like behavior using vector matching- Satisfying if condition" caption="Ternary-like behavior using vector matching- Satisfying if condition" />
+<Figure
+  src="/img/guides/2024/10/promql-if-else-like-expression-image%207.webp"
+  alt="Ternary-like behavior using vector matching- Satisfying if condition"
+  caption="Ternary-like behavior using vector matching- Satisfying if condition"
+/>
 
-<Figure src="/img/guides/2024/10/promql-if-else-like-expression-image%208.webp" alt="Ternary-like behavior using vector matching - Satisfying else condition" caption="Ternary-like behavior using vector matching - Satisfying else condition" />
+<Figure
+  src="/img/guides/2024/10/promql-if-else-like-expression-image%208.webp"
+  alt="Ternary-like behavior using vector matching - Satisfying else condition"
+  caption="Ternary-like behavior using vector matching - Satisfying else condition"
+/>
 
 This allows you to simulate ternary logic with metrics, returning different values depending on the condition.
 
@@ -232,7 +273,7 @@ Let's explore some practical applications of conditional logic in PromQL:
 In certain environments, you may want to avoid triggering alerts on specific holidays when systems are expected to operate under different conditions.
 
 ```
-high_cpu_usage and on(day) (day_of_week != 6 and day_of_week != 0) 
+high_cpu_usage and on(day) (day_of_week != 6 and day_of_week != 0)
 unless on(date) holiday_calendar == 1
 ```
 
@@ -284,9 +325,12 @@ SigNoz extends PromQL capabilities by:
 1. Offering a more user-friendly interface for building complex queries
 2. Providing advanced visualization options for conditional data
 3. Integrating traces and logs with metrics for comprehensive observability
-    
-    <Figure src="/img/guides/2024/10/promql-if-else-like-expression-image%209.webp" alt="Integrating traces and logs with metrics for comprehensive observability" caption="Integrating traces and logs with metrics for comprehensive observability" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/promql-if-else-like-expression-image%209.webp"
+     alt="Integrating traces and logs with metrics for comprehensive observability"
+     caption="Integrating traces and logs with metrics for comprehensive observability"
+   />
 
 <GetStartedSigNoz />
 

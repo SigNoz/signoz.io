@@ -1,13 +1,10 @@
 ---
-
 title: Essential PromQL Cheat Sheet - Master Prometheus Queries
-slug: promql-cheat-sheet
 date: 2024-11-29
 tags: [prometheus]
 authors: [simran_kumari]
 description: Master Prometheus queries with our comprehensive PromQL cheat sheet. Learn syntax, functions, and advanced techniques for effective monitoring and troubleshooting.
 keywords: [PromQL, Prometheus, monitoring, queries, cheat sheet, DevOps, metrics, observability]
-
 ---
 
 Prometheus Query Language (PromQL) is a powerful tool for extracting insights from Prometheus metrics. Whether you're diagnosing system performance, setting up alerts, or analyzing historical trends, PromQL enables precise data querying and visualization. This comprehensive cheat sheet will guide you from the basics to advanced techniques, with practical examples and tips for performance optimization.
@@ -111,44 +108,42 @@ PromQL includes a wide range of functions that simplify tasks like rate calculat
 ### Rate Calculations
 
 1. `rate()`: Calculate per-second average rate of increase
-    
-    ```
-    rate(http_requests_total[5m])
-    ```
-    
+
+   ```
+   rate(http_requests_total[5m])
+   ```
+
 2. `irate()`: Calculate instant rate of increase
-    
-    ```
-    irate(http_requests_total[5m])
-    ```
-    
+
+   ```
+   irate(http_requests_total[5m])
+   ```
 
 ### Aggregation Functions
 
 1. `sum()`: Add values
-    
-    ```
-    sum(http_requests_total) by (status)
-    ```
-    
+
+   ```
+   sum(http_requests_total) by (status)
+   ```
+
 2. `avg()`: Calculate average
-    
-    ```
-    avg(node_cpu_utilization) by (instance)
-    ```
-    
+
+   ```
+   avg(node_cpu_utilization) by (instance)
+   ```
+
 3. `max()` and `min()`: Find maximum and minimum values
-    
-    ```
-    max(http_request_duration_seconds) by (endpoint)
-    ```
-    
+
+   ```
+   max(http_request_duration_seconds) by (endpoint)
+   ```
+
 4. `increase()`: Calculates the total increase over a time window.
-    
-    ```
-    increase(http_requests_total[5m])
-    ```
-    
+
+   ```
+   increase(http_requests_total[5m])
+   ```
 
 ### Histogram Analysis
 
@@ -161,17 +156,16 @@ histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
 ### Absence Detection
 
 1. `absent()`: Check if a metric is missing
-    
-    ```
-    absent(up{job="important-service"})
-    ```
-    
+
+   ```
+   absent(up{job="important-service"})
+   ```
+
 2. `absent_over_time()`: Check if a metric was absent for a time range
-    
-    ```
-    absent_over_time(up{job="important-service"}[1h])
-    ```
-    
+
+   ```
+   absent_over_time(up{job="important-service"}[1h])
+   ```
 
 ## Mastering Time Series Selection in PromQL
 
@@ -219,29 +213,27 @@ This computes the maximum rate of `http_requests_total` over each 1-hour interva
 
 ## Advanced PromQL Techniques for Performance Optimization
 
-As your infrastructure grows, writing efficient PromQL queries becomes increasingly critical to ensure smooth performance and quick responses. 
+As your infrastructure grows, writing efficient PromQL queries becomes increasingly critical to ensure smooth performance and quick responses.
 
 Here are some best practices and advanced techniques to optimize your PromQL queries for large-scale deployments and complex monitoring scenarios.
 
 1. Use label matching efficiently:
-    - Avoid using `{__name__=~".*"}` which selects all metrics
-    - Be specific with label matches to reduce the query scope
+   - Avoid using `{__name__=~".*"}` which selects all metrics
+   - Be specific with label matches to reduce the query scope
 2. Leverage pre-recorded rules:
-    - Create recording rules for frequently used queries
-    - Example rule:
-        
-        ```yaml
-        - record: job:http_requests_total:rate5m
-          expr: rate(http_requests_total[5m])
-        ```
-        
+   - Create recording rules for frequently used queries
+   - Example rule:
+     ```yaml
+     - record: job:http_requests_total:rate5m
+       expr: rate(http_requests_total[5m])
+     ```
 3. Optimize aggregation operations:
-    - Aggregate metrics at collection time when possible
-    - Use `without` instead of `by` for excluding specific labels
+   - Aggregate metrics at collection time when possible
+   - Use `without` instead of `by` for excluding specific labels
 4. Best practices for performant queries:
-    - Avoid using `group_left` and `group_right` for large datasets
-    - Use time-bounded range vectors (e.g., `[5m]` instead of `[1h]`)
-    - Limit the use of regex in label matches
+   - Avoid using `group_left` and `group_right` for large datasets
+   - Use time-bounded range vectors (e.g., `[5m]` instead of `[1h]`)
+   - Limit the use of regex in label matches
 
 ## Real-World PromQL Examples for Common Monitoring Scenarios
 
@@ -346,23 +338,43 @@ This query returns 0 for any missing data points in `http_requests_total`.
 [SigNoz](https://signoz.io) is a comprehensive open-source [APM and observability](https://signoz.io/guides/apm-vs-observability/) platform that complements Prometheus and extends PromQL capabilities. It provides:
 
 1. Run PromQL Queries Directly in SigNoz: Use the built-in Metrics Explorer in SigNoz to run PromQL queries and visualize results instantly. You can craft, debug, and iterate on PromQL queries.
-    
-    <Figure src="/img/guides/2024/11/promql-cheat-sheet-image.webp" alt="Built-in Functions in SigNoz" caption="Built-in Functions in SigNoz" />
-    
-    <Figure src="/img/guides/2024/11/promql-cheat-sheet-image%201.webp" alt="Query Builder SigNoz" caption="Query Builder SigNoz" />
-    
+
+   <Figure
+     src="/img/guides/2024/11/promql-cheat-sheet-image.webp"
+     alt="Built-in Functions in SigNoz"
+     caption="Built-in Functions in SigNoz"
+   />
+
+   <Figure
+     src="/img/guides/2024/11/promql-cheat-sheet-image%201.webp"
+     alt="Query Builder SigNoz"
+     caption="Query Builder SigNoz"
+   />
+
 2. Enhanced visualization: SigNoz offers advanced dashboards and charts for PromQL queries.
-    
-    <Figure src="/img/guides/2024/11/promql-cheat-sheet-image%202.webp" alt="Custom Dashboards in SigNoz" caption="Custom Dashboards in SigNoz" />
-    
+
+   <Figure
+     src="/img/guides/2024/11/promql-cheat-sheet-image%202.webp"
+     alt="Custom Dashboards in SigNoz"
+     caption="Custom Dashboards in SigNoz"
+   />
+
 3. Trace correlation: Link PromQL query metrics to distributed traces within SigNoz to uncover root causes of performance bottlenecks. For example, trace high CPU utilization to specific services or requests.
-    
-    <Figure src="/img/guides/2024/11/promql-cheat-sheet-image%203.webp" alt="Distributed Tracing in SigNoz" caption="Distributed Tracing in SigNoz" />
-    
+
+   <Figure
+     src="/img/guides/2024/11/promql-cheat-sheet-image%203.webp"
+     alt="Distributed Tracing in SigNoz"
+     caption="Distributed Tracing in SigNoz"
+   />
+
 4. Long-term storage: While Prometheus has limited retention periods, SigNoz ensures you can analyze PromQL query results over extended durations, which is ideal for historical trends and capacity planning.
-    
-    <Figure src="/img/guides/2024/11/promql-cheat-sheet-image%204.webp" alt="Retention Period in  SigNoz" caption="Retention Period in  SigNoz" />
-    
+
+   <Figure
+     src="/img/guides/2024/11/promql-cheat-sheet-image%204.webp"
+     alt="Retention Period in  SigNoz"
+     caption="Retention Period in  SigNoz"
+   />
+
 5. Custom functions: Leverage SigNoz-specific functions and aggregations to perform deeper analysis that complements PromQL’s native capabilities.
 
 <GetStartedSigNoz />

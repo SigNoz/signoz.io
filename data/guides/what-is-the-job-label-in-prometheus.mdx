@@ -1,13 +1,10 @@
 ---
-
 title: What is the Job Label in Prometheus
-slug: what-is-the-job-label-in-prometheus
 date: 2024-08-01
 tags: [faq, prometheus]
 authors: [ankit_anand]
 description: Discover the crucial role of job labels in Prometheus, their configuration, and best practices for effective monitoring and metric organization.
 keywords: [Prometheus, job label, monitoring, metrics, service discovery, PromQL, alerting]
-
 ---
 
 The job label in Prometheus is a crucial identifier for scraped targets. It automatically assigns a name to a group of targets that share the same purpose or function. This label plays a vital role in organizing metrics, facilitating service discovery, and enabling effective querying and alerting in [Prometheus monitoring](https://signoz.io/guides/what-is-prometheus-for-monitoring/) systems.
@@ -29,9 +26,9 @@ Job labels follow a specific structure in Prometheus:
 
 - **Format**: `job="<job_name>"`
 - **Examples**:
-    - `job="mysql"`
-    - `job="nginx"`
-    - `job="kubernetes-nodes"`
+  - `job="mysql"`
+  - `job="nginx"`
+  - `job="kubernetes-nodes"`
 
 Unlike other automatically generated labels, job labels provide a higher-level categorization. While an `instance` label might identify a specific server (`10.0.0.1:8080`), the job label groups all servers performing the same function (`web-server`).
 
@@ -63,7 +60,6 @@ scrape_configs:
   - job_name: 'api-servers'
     static_configs:
       - targets: ['localhost:8080', 'localhost:8081']
-
 ```
 
 1. **Overriding**: You can override default job labels for specific targets:
@@ -75,7 +71,6 @@ scrape_configs:
       - targets: ['localhost:9100']
         labels:
           job: 'custom-job-name'
-
 ```
 
 1. **Relabeling**: Use relabeling to modify job labels based on target metadata:
@@ -88,7 +83,6 @@ scrape_configs:
     relabel_configs:
       - source_labels: [__meta_kubernetes_pod_label_app]
         target_label: job
-
 ```
 
 1. **Granularity**: Strike a balance between too broad and too specific job labels. `web-server` might be better than `server`, but `nginx-web-server-us-east` might be too granular.
@@ -107,28 +101,27 @@ Job labels adapt to various monitoring environments:
 Job labels unlock powerful capabilities in Prometheus:
 
 1. **PromQL Queries**: Use job labels in complex queries:
-    
-    ```
-    sum(rate(http_requests_total{job=~".*api.*"}[5m])) by (job)
-    
-    ```
-    
+
+   ```
+   sum(rate(http_requests_total{job=~".*api.*"}[5m])) by (job)
+
+   ```
+
 2. **Grafana Dashboards**: Create dynamic dashboards using job label variables:
-    
-    ```
-    sum(rate(http_requests_total{job="$job"}[5m]))
-    
-    ```
-    
+
+   ```
+   sum(rate(http_requests_total{job="$job"}[5m]))
+
+   ```
+
 3. **Alerting Strategies**: Implement job-based alerts:
-    
-    ```yaml
-    alert: HighErrorRate
-    expr: sum(rate(http_errors_total{job="web-server"}[5m])) / sum(rate(http_requests_total{job="web-server"}[5m])) > 0.1
-    for: 5m
-    
-    ```
-    
+
+   ```yaml
+   alert: HighErrorRate
+   expr: sum(rate(http_errors_total{job="web-server"}[5m])) / sum(rate(http_requests_total{job="web-server"}[5m])) > 0.1
+   for: 5m
+   ```
+
 4. **Metadata Export**: Use the [Prometheus API](https://signoz.io/guides/how-do-i-monitor-api-in-prometheus/) to export job label metadata for external systems.
 
 ## Key Takeaways

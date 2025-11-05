@@ -1,11 +1,18 @@
 ---
-title: "Docker Logs Location: Where are Docker Logs Stored?"
-slug: "docker-logs-location"
-date: "2025-09-03"
+title: 'Docker Logs Location: Where are Docker Logs Stored?'
+date: '2025-09-03'
 tags: [docker, logging]
 authors: [daniel]
 description: "The command 'docker logs <container-name>' works across all platforms. Docker logs are stored in /var/lib/docker/containers/<container-id>/<container-id>-json.log on Linux and ..."
-keywords: [docker logs location, docker container logs, var lib docker containers, docker logs command, docker log files, container logging]
+keywords:
+  [
+    docker logs location,
+    docker container logs,
+    var lib docker containers,
+    docker logs command,
+    docker log files,
+    container logging,
+  ]
 ---
 
 When your Docker container crashes at 3 AM, you need to find its logs quickly. No time for guesswork or hunting through documentation—you need the exact path to those log files.
@@ -13,7 +20,7 @@ When your Docker container crashes at 3 AM, you need to find its logs quickly. N
 **Here's what you need to know immediately:**
 
 - **Linux**: `/var/lib/docker/containers/<container-id>/<container-id>-json.log`
-- **Windows**: `C:\ProgramData\docker\containers\<container-id>\<container-id>-json.log`  
+- **Windows**: `C:\ProgramData\docker\containers\<container-id>\<container-id>-json.log`
 - **macOS**: Within Docker Desktop VM, accessible via `docker logs` command
 - **Universal command**: `docker logs <container-name>` works across all platforms
 
@@ -42,12 +49,14 @@ docker inspect --format='{{.Id}}' <container-name>
 Docker generates two distinct types of logs:
 
 **Container Logs** capture your application's stdout/stderr output:
+
 - Application messages and errors
-- Debug information  
+- Debug information
 - Runtime events
 - Performance metrics
 
 **Daemon Logs** record Docker engine events:
+
 - Container lifecycle operations
 - Image management activities
 - Network configuration changes
@@ -114,7 +123,7 @@ With Docker Desktop using WSL2, logs are actually within the WSL2 VM:
 
 **Daemon Logs:** Available in Windows Event Viewer under Applications and Services Logs → Docker.
 
-### macOS Systems  
+### macOS Systems
 
 Docker Desktop runs containers inside a Linux VM. Logs are within:
 
@@ -128,7 +137,7 @@ Docker Desktop runs containers inside a Linux VM. Logs are within:
 # Docker daemon logs
 tail -f ~/Library/Containers/com.docker.docker/Data/log/vm/dockerd.log
 
-# Container runtime logs  
+# Container runtime logs
 tail -f ~/Library/Containers/com.docker.docker/Data/log/vm/containerd.log
 ```
 
@@ -210,11 +219,11 @@ services:
   web:
     image: nginx
     logging:
-      driver: "json-file"
+      driver: 'json-file'
       options:
-        max-size: "10m"
-        max-file: "3"
-        compress: "true"
+        max-size: '10m'
+        max-file: '3'
+        compress: 'true'
 ```
 
 ### Emergency Cleanup
@@ -225,7 +234,7 @@ When logs have already consumed too much space:
 # Find largest log files
 find /var/lib/docker/containers/ -name "*json.log" -exec du -h {} \; | sort -hr
 
-# Truncate logs for running containers (use carefully)  
+# Truncate logs for running containers (use carefully)
 sudo truncate -s 0 /var/lib/docker/containers/*/*-json.log
 
 # Remove logs for stopped containers
@@ -265,7 +274,7 @@ Integrate with systemd journal:
 
 ```json
 {
-  "log-driver": "journald", 
+  "log-driver": "journald",
   "log-opts": {
     "tag": "{{.ImageName}}/{{.Name}}"
   }
@@ -345,15 +354,17 @@ While direct log access works for debugging, production environments need scalab
   caption="SigNoz Dashboard provides comprehensive log management capabilities"
 />
 
-**Integration Benefits**: 
+**Integration Benefits**:
+
 - Pre-configured setup with ready-to-use `docker-compose.yaml` files
 - Enhanced log organization using logspout-[signoz](https://signoz.io/docs/introduction/) for automatic service labeling
 - Correlation with metrics and traces for complete [container observability](https://signoz.io/guides/container-monitoring/)
 - Efficient storage using ClickHouse columnar database
 
 **Production Features**:
+
 - Live tail logging across multiple containers
-- Custom dashboards for Docker log analytics  
+- Custom dashboards for Docker log analytics
 - Anomaly detection for proactive issue identification
 - Advanced retention and archiving policies
 
@@ -376,7 +387,7 @@ While direct log access works for debugging, production environments need scalab
 SigNoz simplifies Docker log collection through:
 
 1. **Environment configuration** with `OTEL_COLLECTOR_ENDPOINT` and ingestion keys
-2. **Automated collection** via OpenTelemetry receivers 
+2. **Automated collection** via OpenTelemetry receivers
 3. **Enhanced metadata** through logspout-signoz integration
 
 You can get started by following the [Docker logs collection guide](https://signoz.io/docs/userguide/collect_docker_logs/) in the SigNoz documentation.

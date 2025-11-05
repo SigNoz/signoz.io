@@ -1,39 +1,47 @@
 ---
-
 title: Sentry Observability - Fantastic for Errors, But Is It Enough for Modern DevOps?
-slug: sentry-observability
 date: 2025-03-04
 tags: [observability]
 authors: [soumya_gupta]
 description: Explore Sentry's observability capabilities in modern DevOps. Learn its strengths, limitations, and how to augment it for comprehensive monitoring.
-keywords: [sentry observability, error tracking, devops monitoring, distributed tracing, application performance]
-
+keywords:
+  [
+    sentry observability,
+    error tracking,
+    devops monitoring,
+    distributed tracing,
+    application performance,
+  ]
 ---
 
-DevOps teams need deep visibility into their software, from frontend performance metrics to backend infrastructure health. Sentry has gained popularity for its robust error tracking and real-time notifications, but does it provide the complete observability modern teams require? 
+DevOps teams need deep visibility into their software, from frontend performance metrics to backend infrastructure health. Sentry has gained popularity for its robust error tracking and real-time notifications, but does it provide the complete observability modern teams require?
 
 In this article, we will dissect Sentry's observability offerings, highlight its strengths and limitations, and explore how to augment Sentry with complementary solutions for a more comprehensive DevOps toolchain.
 
 ## Quick Guide: Sentry Observability at a Glance
 
 1. **Sentry's Core Strength**
-    - Excellent for **application-level error tracking**, debugging, and performance monitoring.
-    - Provides **rich context** with stack traces, user sessions, and release tracking.
+   - Excellent for **application-level error tracking**, debugging, and performance monitoring.
+   - Provides **rich context** with stack traces, user sessions, and release tracking.
 2. **Major Gaps in Full-Stack Observability**
-    - Limited capabilities for **[infrastructure monitoring](https://signoz.io/guides/infrastructure-monitoring/)**, **log aggregation**, and **network insights**.
-    - **Distributed tracing** support is present but not as robust for large microservice landscapes.
+   - Limited capabilities for **[infrastructure monitoring](https://signoz.io/guides/infrastructure-monitoring/)**, **log aggregation**, and **network insights**.
+   - **Distributed tracing** support is present but not as robust for large microservice landscapes.
 3. **Combining Sentry with Other Tools**
-    - Integrate with **log management** (e.g., ELK) and **metrics tools** (e.g., Prometheus, Grafana) to gain deeper visibility.
-    - For complete end-to-end **distributed tracing**, consider specialized solutions or open-source platforms like **SigNoz**.
+   - Integrate with **log management** (e.g., ELK) and **metrics tools** (e.g., Prometheus, Grafana) to gain deeper visibility.
+   - For complete end-to-end **distributed tracing**, consider specialized solutions or open-source platforms like **SigNoz**.
 4. **Final Verdict**
-    - Sentry excels at error tracking and application monitoring but isn't a complete observability solution.
-    - For comprehensive DevOps observability, combine Sentry with specialized tools for infrastructure monitoring, log management, and advanced distributed tracing.
+   - Sentry excels at error tracking and application monitoring but isn't a complete observability solution.
+   - For comprehensive DevOps observability, combine Sentry with specialized tools for infrastructure monitoring, log management, and advanced distributed tracing.
 
 ## What is Sentry Observability and How Does It Work?
 
 Sentry is an application monitoring platform that focuses on error reporting and performance monitoring. It captures and aggregates exceptions, stack traces, and user feedback to streamline debugging and root-cause analysis.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%203.webp" alt="Sentry Dashboard" caption="Sentry Dashboard" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%203.webp"
+  alt="Sentry Dashboard"
+  caption="Sentry Dashboard"
+/>
 
 ### Core Features of Sentry
 
@@ -50,7 +58,11 @@ In summary, Sentry’s feature set centers on observing application behavior –
 
 ## Key Components of Sentry's Observability Offering
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%201.webp" alt="Key Components of Sentry's Observability Offering" caption="Key Components of Sentry's Observability Offering" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%201.webp"
+  alt="Key Components of Sentry's Observability Offering"
+  caption="Key Components of Sentry's Observability Offering"
+/>
 
 ### Error Tracking
 
@@ -81,18 +93,30 @@ This will send the captured exception to Sentry.
 
 Next, navigate to Sentry’s dashboard to view the captured issue.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%202.webp" alt="Issues on Sentry" caption="Issues on Sentry" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%202.webp"
+  alt="Issues on Sentry"
+  caption="Issues on Sentry"
+/>
 
 Click on the error to explore detailed insights, including stack traces, affected environments, and additional debugging information.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%203.webp" alt="Detailed Issues tab" caption="Detailed Issues tab" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%203.webp"
+  alt="Detailed Issues tab"
+  caption="Detailed Issues tab"
+/>
 
 2. **Groups similar errors to avoid alert fatigue**
 
-Sentry prevents [alert fatigue](https://signoz.io/blog/alert-fatigue/) by intelligently grouping similar errors using **fingerprints**. A fingerprint is a 
+Sentry prevents [alert fatigue](https://signoz.io/blog/alert-fatigue/) by intelligently grouping similar errors using **fingerprints**. A fingerprint is a
 way to uniquely identify an event, and all events have one. Events with the same fingerprint are grouped together into an issue.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%204.webp" alt="Fingerprinting on sentry" caption="Fingerprinting on sentry" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%204.webp"
+  alt="Fingerprinting on sentry"
+  caption="Fingerprinting on sentry"
+/>
 
 You can set up custom grouping rules under **[Project] > Settings > Issue Grouping > Fingerprint Rules**. Sentry reviews all stack trace frames and applies the fingerprint if an event matches the rule's conditions.
 
@@ -116,11 +140,11 @@ sentry_sdk.init(
 
 def set_feature_flag_tag(user):
     # Tagging the 'show_widget' feature flag to track its state
-    show_widget = user.get("showWidget", False)  
+    show_widget = user.get("showWidget", False)
     set_tag("show_widget", show_widget)
-    
+
 # Simulating a user and checking their feature flag status
-user = {"id": 123, "username": "test_user", "showWidget": True}  
+user = {"id": 123, "username": "test_user", "showWidget": True}
 
 set_feature_flag_tag(user)
 
@@ -136,11 +160,19 @@ You can filter issues or transactions based on tags. For example, you can filter
 
 Let’s head to sentry’s dashboard in trace view
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%208.webp" alt="Trace View Sentry" caption="Trace View Sentry" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%208.webp"
+  alt="Trace View Sentry"
+  caption="Trace View Sentry"
+/>
 
 Similarly, you can also view it on the Transactions Summary page
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%209.webp" alt="Transaction Summary Sentry" caption="Transaction Summary Sentry" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%209.webp"
+  alt="Transaction Summary Sentry"
+  caption="Transaction Summary Sentry"
+/>
 
 By using the feature flag in tags, you can answer questions like:
 
@@ -152,21 +184,37 @@ This allows you to isolate the root cause of an issue based on the specific feat
 
 ### Crash Reporting
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2010.webp" alt="Feedback collected via the Crash-Report Modal" caption="Feedback collected via the Crash-Report Modal" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2010.webp"
+  alt="Feedback collected via the Crash-Report Modal"
+  caption="Feedback collected via the Crash-Report Modal"
+/>
 
 Sentry's Crash-Report Modal lets users submit feedback after they encounter errors. The modal collects the user's name, email address, and a description of what occurred, pairing this feedback with the original event for additional insights.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2011.webp" alt="User Feedback: Crash Reporting Modal" caption="User Feedback: Crash Reporting Modal" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2011.webp"
+  alt="User Feedback: Crash Reporting Modal"
+  caption="User Feedback: Crash Reporting Modal"
+/>
 
 ### Performance Monitoring
 
 While error tracking shows what went wrong, performance monitoring reveals why it happened and how it affects users. Sentry tracks slowdowns, measuring metrics like throughput and latency while mapping error impact across services. It also captures **[distributed traces](https://signoz.io/blog/distributed-tracing/)** to analyze service performance in depth.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2012.webp" alt="Performance Tab in Sentry" caption="Performance Tab in Sentry" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2012.webp"
+  alt="Performance Tab in Sentry"
+  caption="Performance Tab in Sentry"
+/>
 
 Using this information, you can trace issues back through services to identify poorly performing code, determine whether application performance is improving or degrading, and compare release performance over time.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2013.webp" alt="Sentry Performance Transactions Summary (Credit: Sentry)" caption="Sentry Performance Transactions Summary (Credit: Sentry)" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2013.webp"
+  alt="Sentry Performance Transactions Summary (Credit: Sentry)"
+  caption="Sentry Performance Transactions Summary (Credit: Sentry)"
+/>
 
 ### Tracing
 
@@ -188,7 +236,11 @@ with start_transaction(op="task", name="my_task"):
         print("Subtask 2 is being executed...")
 ```
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2015.webp" alt="Trace View Page" caption="Trace View Page" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2015.webp"
+  alt="Trace View Page"
+  caption="Trace View Page"
+/>
 
 The Trace View allows you to drill down into a single trace to visualize transactions and spans, making debugging slow services and identifying bottlenecks faster and easier.
 
@@ -207,7 +259,11 @@ Sentry provides two primary methods for collecting user feedback:
 
 Using **Session Replay** alongside the **User Feedback Widget** provides a visual representation of what the user experienced before submitting their feedback.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2018.webp" alt="User Feedback in Sentry (Credit: Sentry)" caption="User Feedback in Sentry (Credit: Sentry)" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2018.webp"
+  alt="User Feedback in Sentry (Credit: Sentry)"
+  caption="User Feedback in Sentry (Credit: Sentry)"
+/>
 
 **Compatibility and Integration**
 
@@ -223,11 +279,15 @@ The Sentry SDK injects the **User Feedback Widget** directly into the client’s
 
 Sentry excels in several areas that are crucial for modern DevOps teams:
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2019.webp" alt="Strengths of Sentry in Modern DevOps Practices" caption="Strengths of Sentry in Modern DevOps Practices" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2019.webp"
+  alt="Strengths of Sentry in Modern DevOps Practices"
+  caption="Strengths of Sentry in Modern DevOps Practices"
+/>
 
 ### Real-Time Visibility
 
-Sentry provides immediate error notifications, helping teams respond quickly to production issues and minimize mean time to detection (MTTD). 
+Sentry provides immediate error notifications, helping teams respond quickly to production issues and minimize mean time to detection (MTTD).
 
 If you have Sentry's default issue alert i.e. `Alert me on every new issue` turned on for the project(s) with user feedback set up, then you should automatically get alerted every time new user feedback comes in via the User Feedback Widget.
 
@@ -235,15 +295,27 @@ If you don't have Sentry's default issue alert turned on, follow these steps to 
 
 **Step 1:** Create a New Alert Rule in Sentry.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2020.webp" alt="Sentry Alert" caption="Sentry Alert" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2020.webp"
+  alt="Sentry Alert"
+  caption="Sentry Alert"
+/>
 
 **Step 2:** Scroll to the "Set conditions" section, set the "IF" filter to your required condition, and choose which actions to perform in the “THEN” filter.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2021.webp" alt="Sentry New Alert Rule" caption="Sentry New Alert Rule" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2021.webp"
+  alt="Sentry New Alert Rule"
+  caption="Sentry New Alert Rule"
+/>
 
 **Step 3:** Add an alert name and owner. To get notifications when crash-report feedback comes in, make sure to turn on `Enable Crash Report Notifications` in Settings > Projects > [Your Project Name] > User Feedback.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2022.webp" alt="Sentry User Feedback" caption="Sentry User Feedback" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2022.webp"
+  alt="Sentry User Feedback"
+  caption="Sentry User Feedback"
+/>
 
 ### Detailed Debugging Context
 
@@ -257,17 +329,29 @@ sentry_sdk.add_breadcrumb(
 )
 ```
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2023.webp" alt="Sentry Breadcrumb section" caption="Sentry Breadcrumb section" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2023.webp"
+  alt="Sentry Breadcrumb section"
+  caption="Sentry Breadcrumb section"
+/>
 
 Trace context delivers crucial details that allow Sentry to link multiple transactions, spans, and errors into a unified trace.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2024.webp" alt="Trace View in Sentry" caption="Trace View in Sentry" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2024.webp"
+  alt="Trace View in Sentry"
+  caption="Trace View in Sentry"
+/>
 
 ### Cross-Platform Support
 
 Sentry provides robust SDKs for both front-end frameworks and back-end languages, along with mobile support. With code-level observability, Sentry simplifies diagnosing issues while offering continuous insights into your application's code health.
 
-<Figure src="/img/guides/2025/03/sentry-observability-image%2026.webp" alt="SKDs supported by sentry" caption="SKDs supported by sentry" />
+<Figure
+  src="/img/guides/2025/03/sentry-observability-image%2026.webp"
+  alt="SKDs supported by sentry"
+  caption="SKDs supported by sentry"
+/>
 
 ### Integration with DevOps Toolchains
 
@@ -283,56 +367,55 @@ By integrating Sentry into your DevOps toolchain, you gain full visibility into 
 While Sentry excels in error tracking and application performance monitoring, it has certain limitations in providing comprehensive observability across complex, distributed systems:
 
 1. **No Native Log Aggregation**
-    
-    Sentry lacks native log aggregation features, which are essential for analyzing large volumes of logs across various services. This necessitates the integration of dedicated log management solutions, such as the Elastic Stack or Loki, to achieve comprehensive log analysis and correlation
-    
+
+   Sentry lacks native log aggregation features, which are essential for analyzing large volumes of logs across various services. This necessitates the integration of dedicated log management solutions, such as the Elastic Stack or Loki, to achieve comprehensive log analysis and correlation
+
 2. **Primary Focus on Error Tracking and Application Performance**
-    
-    Sentry primarily concentrates on error tracking and application performance monitoring, without extending to infrastructure-level metrics like CPU, memory, or network usage. It also lacks built-in host monitoring capabilities for container orchestration platforms, such as Kubernetes node metrics, which are vital for maintaining the health and performance of the underlying infrastructure
-    
-3. **Limited Distributed Tracing:** 
-    
-    Sentry's distributed tracing capabilities are relatively basic compared to specialized tools like Jaeger or SigNoz. In intricate microservice architectures, this can hinder the ability to trace requests seamlessly across multiple services, making it challenging to diagnose performance bottlenecks and latency issues effectively.
+
+   Sentry primarily concentrates on error tracking and application performance monitoring, without extending to infrastructure-level metrics like CPU, memory, or network usage. It also lacks built-in host monitoring capabilities for container orchestration platforms, such as Kubernetes node metrics, which are vital for maintaining the health and performance of the underlying infrastructure
+
+3. **Limited Distributed Tracing:**
+
+   Sentry's distributed tracing capabilities are relatively basic compared to specialized tools like Jaeger or SigNoz. In intricate microservice architectures, this can hinder the ability to trace requests seamlessly across multiple services, making it challenging to diagnose performance bottlenecks and latency issues effectively.
 
 4. **Potential Over-Reliance on Client-Side Instrumentation**
-    
-    Implementing Sentry requires adding its SDKs to each service or client within the application. This approach can lead to potential gaps in monitoring if the instrumentation is incorrectly configured or omitted, resulting in missed critical data and incomplete observability
-    
+
+   Implementing Sentry requires adding its SDKs to each service or client within the application. This approach can lead to potential gaps in monitoring if the instrumentation is incorrectly configured or omitted, resulting in missed critical data and incomplete observability
 
 <KeyPointCallout title="Final Verdict">
 In short, Sentry’s limitations mean that **by itself** it provides an incomplete picture. It covers the application layer superbly but doesn’t give the birds-eye view of the entire system’s health. DevOps professionals often need to know not just that an error happened (which Sentry tells you), but also why – which might involve looking at database load, memory pressure, or a spike in user traffic, none of which Sentry tracks. Thus, Sentry is typically one piece of an observability suite, not the whole.
 
-To achieve full-stack observability, it's often necessary to complement Sentry with other specialized tools that offer advanced distributed tracing, log aggregation, and infrastructure monitoring capabilities. 
+To achieve full-stack observability, it's often necessary to complement Sentry with other specialized tools that offer advanced distributed tracing, log aggregation, and infrastructure monitoring capabilities.
+
 </KeyPointCallout>
 
 ## Comparing Sentry to Full-Stack Observability Solutions
 
 Sentry is a robust application monitoring tool that excels in error tracking and performance monitoring. To understand its position within the observability landscape, let's compare it to full-stack observability solutions:
 
-| **Feature** | **Sentry** | **Full-Stack Solutions (SigNoz, New Relic, Datadog, etc.)** |
-| --- | --- | --- |
-| Scope | Focuses on application-level error tracking and performance monitoring. | Provides end-to-end monitoring, including infrastructure, logs, and APM. |
-| Cost Model | Event-based pricing; cost-effective for small to mid-sized teams. | New Relic scales with data ingestion/users; advanced features can be costly. <br /> Datadog charges per host and feature usage; costs rise with infrastructure growth. <br /> SigNoz offers usage based [pricing](/pricing).|
-| Metrics | Limited to application-level performance data. | Collects system-wide, container, and infrastructure metrics. |
-| Logs | Captures exceptions but lacks full log management. | Provides centralized log aggregation and analysis. |
-| Tracing | Effective for app-level traces but not ideal for large, distributed systems. | Full distributed tracing across services and infrastructure. |
-| Extensibility | Can integrate with external tools like Prometheus, Grafana, or ELK for broader observability. | Built-in integrations for logs, traces, and metrics, reducing dependency on external tools. |
+| **Feature**   | **Sentry**                                                                                    | **Full-Stack Solutions (SigNoz, New Relic, Datadog, etc.)**                                                                                                                                                                  |
+| ------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scope         | Focuses on application-level error tracking and performance monitoring.                       | Provides end-to-end monitoring, including infrastructure, logs, and APM.                                                                                                                                                     |
+| Cost Model    | Event-based pricing; cost-effective for small to mid-sized teams.                             | New Relic scales with data ingestion/users; advanced features can be costly. <br /> Datadog charges per host and feature usage; costs rise with infrastructure growth. <br /> SigNoz offers usage based [pricing](/pricing). |
+| Metrics       | Limited to application-level performance data.                                                | Collects system-wide, container, and infrastructure metrics.                                                                                                                                                                 |
+| Logs          | Captures exceptions but lacks full log management.                                            | Provides centralized log aggregation and analysis.                                                                                                                                                                           |
+| Tracing       | Effective for app-level traces but not ideal for large, distributed systems.                  | Full distributed tracing across services and infrastructure.                                                                                                                                                                 |
+| Extensibility | Can integrate with external tools like Prometheus, Grafana, or ELK for broader observability. | Built-in integrations for logs, traces, and metrics, reducing dependency on external tools.                                                                                                                                  |
 
 ## Exploring SigNoz as a Complementary Solution
 
 [SigNoz](https://signoz.io/) offers a [unified observability](https://signoz.io/unified-observability/) platform that complements Sentry's capabilities, providing comprehensive monitoring across all three [pillars of observability](https://signoz.io/blog/three-pillars-of-observability/):
 
 <div className="overflow-hidden rounded-xl shadow-2xl">
-    <video autoPlay muted loop className="lg:w-[120%]">
+  <video autoPlay muted loop className="lg:w-[120%]">
     <source src="/img/unified-observability/showcase.mp4" type="video/mp4" />
     Your browser does not support the video tag.
-    </video>
+  </video>
 </div>
 
 ### Key Features of SigNoz
 
 - **Unified Telemetry**: Collects metrics, traces, and logs in one platform, eliminating the need to switch between multiple tools when debugging issues
-  
 - **[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)-Native**: Built on the open-source OpenTelemetry standard, making it vendor-agnostic and compatible with various languages and frameworks
 
 - **Advanced Distributed Tracing**: Visualizes request flows across microservices with flamegraphs and Gantt charts, enabling deep performance analysis
@@ -359,15 +442,19 @@ In summary, Sentry vs SigNoz features can be thought of as depth vs breadth. Sen
 ## FAQs
 
 ### Is Sentry sufficient for all observability needs in DevOps?
+
 No. Sentry excels in error detection and performance tracing for your applications but lacks native capabilities for host-level metrics, log aggregation, and deep network insights. You'll typically need complementary tools for full-stack observability.
 
 ### How does Sentry compare to full-stack observability platforms?
+
 Sentry focuses on application errors and performance, while full-stack solutions like Datadog or New Relic include infrastructure monitoring, log management, and distributed tracing in a single platform. Sentry is often more cost-effective for error tracking but is less comprehensive overall.
 
 ### Can Sentry be integrated with other monitoring and observability tools?
+
 Absolutely. Sentry works well alongside log management (e.g., ELK Stack), metrics systems (e.g., Prometheus), and distributed tracing solutions (e.g., Jaeger, SigNoz). This combination yields a more holistic view of your system.
 
 ### What are the key considerations when choosing between Sentry and alternative solutions?
+
 Consider the following factors:
 
 - **Scope of Monitoring**: Do you need host-level metrics, logs, or just error tracking?

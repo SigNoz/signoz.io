@@ -1,13 +1,19 @@
 ---
-
 title: How to Query Data by Time Period - A Step-by-Step Guide
-slug: how-to-use-selected-period-of-time-in-query
 date: 2024-11-20
 tags: [prometheus, faq]
 authors: [simran_kumari]
 description: Learn how to query data by time period with practical examples. Master time-based queries for effective data analysis and monitoring.
-keywords: [time period query, time series data, database querying, time-based analysis, data monitoring, timestamp queries, time range filters]
-
+keywords:
+  [
+    time period query,
+    time series data,
+    database querying,
+    time-based analysis,
+    data monitoring,
+    timestamp queries,
+    time range filters,
+  ]
 ---
 
 Time-based querying is a powerful approach to monitoring and analyzing data trends over time, especially in real-time data platforms like Grafana. This guide will walk you through essential steps, from understanding time-based queries to building advanced time-based visualizations for insights in Grafana.
@@ -27,13 +33,20 @@ With Grafana and Prometheus, you can dynamically query time-series data from you
 In Grafana, you can define time periods in your queries using two main types:
 
 1. Absolute Time Periods: Absolute periods specify exact start and end times, such as `"2023-01-01T00:00:00"` to `"2023-12-31T23:59:59"`. Absolute periods allow you to analyze a fixed timeframe, ideal for detailed reports or historical data snapshots.
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image.webp" alt="Absolute Time Periods" caption="Absolute Time Periods" />
-    
+
+   <Figure
+     src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image.webp"
+     alt="Absolute Time Periods"
+     caption="Absolute Time Periods"
+   />
+
 2. Relative Time Periods: Relative periods use expressions like “last week,” `now-24h` (last 24 hours) or `now-7d` (last seven days), based on the current time. Relative periods are great for dashboards, as they automatically update to reflect the latest data without manual adjustment.
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%201.webp" alt="Relative Time Periods" caption="Relative Time Periods" />
-    
+
+   <Figure
+     src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%201.webp"
+     alt="Relative Time Periods"
+     caption="Relative Time Periods"
+   />
 
 Grafana makes it easy to switch between these periods using its built-in time selector, allowing you to customize your view with just a few clicks.
 
@@ -76,9 +89,9 @@ When using Prometheus in Grafana, you’ll typically see time-selection patterns
 Selecting the right time range format is essential for effective time-based querying in Grafana with Prometheus. Here’s a breakdown of commonly used formats:
 
 1. Relative Time Expressions: Grafana’s relative time options allow for dynamically changing time ranges based on the current time. For example:
-    - `last 24h`: Shows the last 24 hours from the current time.
-    - `past week`: Displays data from the last seven days.
-    - `now-1h` to `now`: Custom expressions like `now-1h` to `now` are also available, letting you fine-tune time ranges based on specific requirements.
+   - `last 24h`: Shows the last 24 hours from the current time.
+   - `past week`: Displays data from the last seven days.
+   - `now-1h` to `now`: Custom expressions like `now-1h` to `now` are also available, letting you fine-tune time ranges based on specific requirements.
 2. Custom Date-Time Patterns: In Grafana, you can specify custom date ranges in the dashboard’s time range selector, allowing for non-standard intervals that aren’t covered by the default options. For instance, if you need to look at data from `"2023-05-15 09:00"` to `"2023-05-15 17:00"`, you can set these manually.
 3. Time Zone Considerations: Grafana allows you to set a time zone per dashboard, ensuring consistent data display for users across different regions. When using Prometheus with Grafana, it’s crucial to confirm that your time zones align to avoid discrepancies, especially if the data originates from geographically dispersed sources.
 
@@ -86,65 +99,73 @@ Selecting the right time range format is essential for effective time-based quer
 
 Constructing time-based queries in Grafana with Prometheus involves setting up filters, applying functions, and using operators to retrieve data effectively. Here’s how to do it step-by-step:
 
-### 1.  Building Basic Time Range Filters
+### 1. Building Basic Time Range Filters
 
-In Grafana, you select the time range for your data from the dashboard’s time picker. Prometheus handles the selected range automatically, filtering results to only include data within that time frame. 
+In Grafana, you select the time range for your data from the dashboard’s time picker. Prometheus handles the selected range automatically, filtering results to only include data within that time frame.
 
 Example:
 
 If you select “Last 1 hour” in Grafana, Prometheus applies this range to the data it queries, so metrics will only display values from the last hour.
 
-<Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%202.webp" alt="Basic Time Range Filters" caption="Basic Time Range Filters" />
+<Figure
+  src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%202.webp"
+  alt="Basic Time Range Filters"
+  caption="Basic Time Range Filters"
+/>
 
 ### 2. Time Functions
 
 Prometheus’s PromQL provides several time functions and operators that allow for precise control over time ranges and metrics:
 
 - rate(): The `rate()` function calculates the average per-second rate of increase over a specified time interval. Ideal for metrics like network requests or CPU usage.
-    
-    ```sql
-    rate(prometheus_http_requests_total[5m])
-    ```
-    
-    This query returns the rate of HTTP requests per second over the last five minutes.
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%203.webp" alt="rate() function" caption="rate() function" />
-    
+  ```sql
+  rate(prometheus_http_requests_total[5m])
+  ```
+  This query returns the rate of HTTP requests per second over the last five minutes.
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%203.webp"
+    alt="rate() function"
+    caption="rate() function"
+  />
 - increase(): Calculates the cumulative increase over a given period, useful for counters.
-    
-    ```sql
-    increase(http_requests_total[1h])
-    ```
-    
-    Here, `increase()` shows the total increase in HTTP requests in the last hour.
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%204.webp" alt="increase() function" caption="increase() function" />
-    
+  ```sql
+  increase(http_requests_total[1h])
+  ```
+  Here, `increase()` shows the total increase in HTTP requests in the last hour.
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%204.webp"
+    alt="increase() function"
+    caption="increase() function"
+  />
 
 ### 3. Time Aggregations
 
 Aggregating data over specific time intervals is essential for meaningful summaries. In PromQL, you can use functions like `avg_over_time` and `sum_over_time` for this purpose.
 
 - sum_over_time(): Returns the total value over a specified interval, which is useful for aggregating metrics like total bytes transferred.
-    
-    ```
-    sum_over_time(prometheus_http_requests_total[1h])
-    ```
-    
-    This query aggregates HTTP requests in the last hour.
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%205.webp" alt="sum_over_time() - Time aggregation" caption="sum_over_time() - Time aggregation" />
-    
+  ```
+  sum_over_time(prometheus_http_requests_total[1h])
+  ```
+  This query aggregates HTTP requests in the last hour.
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%205.webp"
+    alt="sum_over_time() - Time aggregation"
+    caption="sum_over_time() - Time aggregation"
+  />
 - avg_over_time(): Calculates the average value over a given interval. For instance:
-    
-    ```
-    avg_over_time(prometheus_http_requests_total[1h])
-    ```
-    
-    This query computes the average HTTP requests received over the last 1 hour.
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%206.webp" alt="avg_over_time() - Time aggregation" caption="avg_over_time() - Time aggregation" />
-    
+  ```
+  avg_over_time(prometheus_http_requests_total[1h])
+  ```
+  This query computes the average HTTP requests received over the last 1 hour.
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%206.webp"
+    alt="avg_over_time() - Time aggregation"
+    caption="avg_over_time() - Time aggregation"
+  />
 - max_over_time() and min_over_time(): These return the maximum or minimum values within a specified range, ideal for identifying peaks or minimum usage patterns.
 
 ## Advanced Time Query Techniques
@@ -162,7 +183,11 @@ For a high-level correlation, you might create two queries for metrics like `cpu
 
 These can be placed on the same graph or separate panels in Grafana to visually compare trends over time.
 
-<Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%207.webp" alt="Time-Based Joins and Correlations" caption="Time-Based Joins and Correlations" />
+<Figure
+  src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%207.webp"
+  alt="Time-Based Joins and Correlations"
+  caption="Time-Based Joins and Correlations"
+/>
 
 ### Handling Missing Time Intervals
 
@@ -174,7 +199,7 @@ In Prometheus, you can sometimes manage missing data using expressions that defa
 rate(http_requests_total[5m]) or 0
 ```
 
-This expression returns zero if there’s no data for `http_requests_total` over the last five minutes. 
+This expression returns zero if there’s no data for `http_requests_total` over the last five minutes.
 
 ### Performance Optimization Tips
 
@@ -189,17 +214,26 @@ Here are some performance optimization tips for working with time-based queries 
 [SigNoz](https://signoz.io) provides powerful capabilities for monitoring and analyzing time series data, making it a compelling alternative to traditional tools like Grafana, especially when integrated with observability standards like [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/). Here's how SigNoz stands out:
 
 - Real-Time Querying Capabilities: SigNoz allows for fast, real-time querying of time series data, enabling you to track and troubleshoot issues as they arise. SigNoz streamlines the process with its intuitive interface and seamless integration with [observability pipelines](https://signoz.io/guides/observability-pipeline/).
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%208.webp" alt="Real-time querying capabilities" caption="Real-time querying capabilities" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%208.webp"
+    alt="Real-time querying capabilities"
+    caption="Real-time querying capabilities"
+  />
 - Built-In Time Range Selectors: With SigNoz, users can easily adjust time ranges within dashboards to pinpoint the exact moment events occurred. This built-in functionality eliminates the need for manual configurations, offering a more streamlined experience.
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-b7c63af8-2a57-4089-a31b-2f04539bc53e.webp" alt="Built-in time range selectors in SigNoz" caption="Built-in time range selectors in SigNoz" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-b7c63af8-2a57-4089-a31b-2f04539bc53e.webp"
+    alt="Built-in time range selectors in SigNoz"
+    caption="Built-in time range selectors in SigNoz"
+  />
 - Custom Dashboard Creation: SigNoz simplifies the creation of customized dashboards tailored to your unique monitoring needs. While Grafana provides extensive customization options, SigNoz focuses on reducing complexity and offering a user-friendly design that integrates out-of-the-box observability features. This makes it a great option for teams looking to quickly set up and scale their monitoring systems.
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%209.webp" alt="Custom dashboard creation" caption="Custom dashboard creation" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%209.webp"
+    alt="Custom dashboard creation"
+    caption="Custom dashboard creation"
+  />
 
 <GetStartedSigNoz />
 
@@ -208,42 +242,47 @@ Here are some performance optimization tips for working with time-based queries 
 In Grafana, time series data is often analyzed using queries tailored to various time-based patterns. Here are common time query patterns that you can use in Grafana for better insights into your data:
 
 - Daily Aggregation Queries: Aggregate the `http_requests_total` metric by day to track daily traffic.
-    
-    Example:
-    
-    ```
-    avg_over_time(prometheus_http_requests_total[1d])
-    ```
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%2010.webp" alt="Daily aggregation queries" caption="Daily aggregation queries" />
-    
+  Example:
+  ```
+  avg_over_time(prometheus_http_requests_total[1d])
+  ```
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%2010.webp"
+    alt="Daily aggregation queries"
+    caption="Daily aggregation queries"
+  />
 - Business Hours Filtering: Filter `http_requests_total` for data during business hours (9 AM - 5 PM).
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%2011.webp" alt="Business hours filtering" caption="Business hours filtering" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%2011.webp"
+    alt="Business hours filtering"
+    caption="Business hours filtering"
+  />
 - Time-Based Comparisons: Compare `http_requests_total` from different time periods, such as this week vs. last week.
-    
-    Example:
-    
-    ```
-    rate(prometheus_http_requests_total[1w] offset 1w) #last week
-    rate(prometheus_http_requests_total[1w] #current week
-    ```
-    
-    The `offset` modifier takes a time duration as an argument, such as `1w` (1 week), `1d` (1 day), `5h` (5 hours), etc. This allows you to look at data as it was at a specific time in the past.
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%2012.webp" alt="Time-based comparisons" caption="Time-based comparisons" />
-    
+  Example:
+  ```
+  rate(prometheus_http_requests_total[1w] offset 1w) #last week
+  rate(prometheus_http_requests_total[1w] #current week
+  ```
+  The `offset` modifier takes a time duration as an argument, such as `1w` (1 week), `1d` (1 day), `5h` (5 hours), etc. This allows you to look at data as it was at a specific time in the past.
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%2012.webp"
+    alt="Time-based comparisons"
+    caption="Time-based comparisons"
+  />
 - Seasonal Analysis Queries: Analyze seasonal trends in `http_requests_total`, like yearly or monthly totals.
-    
-    Example:
-    
-    ```
-    avg_over_time(prometheus_http_requests_total[1y])
-    ```
-    
-    <Figure src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%2013.webp" alt="Seasonal analysis queries" caption="Seasonal analysis queries" />
-    
+  Example:
+  ```
+  avg_over_time(prometheus_http_requests_total[1y])
+  ```
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/how-to-use-selected-period-of-time-in-query-image%2013.webp"
+    alt="Seasonal analysis queries"
+    caption="Seasonal analysis queries"
+  />
 
 ## Key Takeaways
 

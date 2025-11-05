@@ -1,15 +1,13 @@
 ---
-
 title: Kubernetes CronJobs - How to Create and Monitor CronJobs in SigNoz
-slug: kubernetes-cronjobs
 date: 2024-06-17
 tags: [kubernetes]
 authors: [daniel]
-description: Kubernetes CronJobs automates the execution of containerized tasks at specified times or any repetitive task that needs to be performed on a recurring schedule. 
+description: Kubernetes CronJobs automates the execution of containerized tasks at specified times or any repetitive task that needs to be performed on a recurring schedule.
 image: /img/blog/2024/06/kubernetes-cronjobs.webp
-keywords: [kubernetes,monitoring,cronjobs]
-
+keywords: [kubernetes, monitoring, cronjobs]
 ---
+
 Kubernetes CronJobs are designed to schedule and automate repetitive tasks within your cluster. Whether you're managing routine system maintenance, orchestrating complex data pipelines, or handling application-specific operations, CronJobs provides a reliable and efficient way to streamline your workflows.
 
 <Figure src="/img/guides/2024/06/kubernetes-cron-job-monitoring-cover.webp" alt="" caption="" />
@@ -30,11 +28,11 @@ For example, if you want to run a script that cleans up old log files every day 
 
 The table below shows a rough outline of their differences:
 
-| Feature | Job | CronJob |
-| --- | --- | --- |
-| Execution | One-time execution | Repeating execution on a schedule |
-| Use Cases | One-off tasks, batch processing | Periodic tasks, scheduled maintenance |
-| Schedule | Not applicable | Defined using cron syntax |
+| Feature     | Job                                       | CronJob                               |
+| ----------- | ----------------------------------------- | ------------------------------------- |
+| Execution   | One-time execution                        | Repeating execution on a schedule     |
+| Use Cases   | One-off tasks, batch processing           | Periodic tasks, scheduled maintenance |
+| Schedule    | Not applicable                            | Defined using cron syntax             |
 | Termination | Automatically terminates after completion | Manages multiple executions over time |
 
 ### How do CronJobs Work (Lifecycle)?
@@ -44,14 +42,15 @@ In this section, we will walk through the Lifecycle of CronJobs, from creation t
 1. YAML Definition: CronJobs are defined in YAML manifests. These manifests contain all the necessary details to define and run a job, including the schedule, job template, and other specifications.
 2. Scheduling: Kubernetes uses the cron `schedule` specified in the CronJob manifest to determine when to create Job objects. The CronJob <a href="https://kubernetes.io/docs/concepts/architecture/controller/" rel="noopener noreferrer nofollow" target="_blank">controller</a> continuously monitors all CronJobs in your cluster and handles the lifecycle of CronJobs. When the specified schedule time matches the current time, the controller triggers the CronJob.
 3. Job Creation: Upon triggering, the CronJob controller creates a Job object based on the `jobTemplate` specified in the CronJob manifest. This Job object is a standard Kubernetes Job, which is responsible for managing the execution of your task within Pods (containers).
-    
-    If a previous Job triggered by the same CronJob is still running, the behavior depends on the `concurrencyPolicy`:
-    
-    - Allow: A new Job will be created and run concurrently with the existing one.
-    - Forbid: The new Job will be skipped, and the schedule will be considered missed.
-    - Replace: The existing Job will be terminated, and a new one will be created in its place.
+
+   If a previous Job triggered by the same CronJob is still running, the behavior depends on the `concurrencyPolicy`:
+
+   - Allow: A new Job will be created and run concurrently with the existing one.
+   - Forbid: The new Job will be skipped, and the schedule will be considered missed.
+   - Replace: The existing Job will be terminated, and a new one will be created in its place.
+
 4. Pod Creation and Execution: The Job created by the CronJob then creates one or more Pods, depending on your Job's configuration (e.g. parallel execution). Inside these Pods, your specified Docker image is pulled from a registry, and the command you defined is executed. The Job controller manages the lifecycle of the Pods, including restarts if failures occur.
-5. Completion and Cleanup: Once the Pods successfully complete the task or reach a specified termination condition, the Job is considered finished. By default, Kubernetes doesn't keep any history. The number of completed Jobs retained in history is configurable using `successfulJobsHistoryLimit` and `failedJobsHistoryLimit`. 
+5. Completion and Cleanup: Once the Pods successfully complete the task or reach a specified termination condition, the Job is considered finished. By default, Kubernetes doesn't keep any history. The number of completed Jobs retained in history is configurable using `successfulJobsHistoryLimit` and `failedJobsHistoryLimit`.
 
 ### Common Use Cases for CronJobs
 
@@ -98,7 +97,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - date; echo "Kubernetes cronjob completed" 
+                - date; echo "Kubernetes cronjob completed"
           restartPolicy: OnFailure
 ```
 
@@ -106,7 +105,7 @@ Let's walk through what the configuration does:
 
 - `apiVersion` and `kind` specify the object type (CronJob) and the Kubernetes API version to use.
 - `metadata.name` is the name you give to your CronJob.
-- `spec.schedule`: This is a Cron expression that defines when the CronJob should run. In the provided example, it's set to "* * * * *" which means every minute. You can customize this to match your desired schedule.
+- `spec.schedule`: This is a Cron expression that defines when the CronJob should run. In the provided example, it's set to "\* \* \* \* \*" which means every minute. You can customize this to match your desired schedule.
 - `spec.successfulJobsHistoryLimit`: This setting determines how many completed Jobs the CronJob will keep in its history for reference (defaults to 3).
 - `JobTemplate`: This is the core of the CronJob. It acts as a blueprint for the Jobs that the CronJob creates each time the schedule triggers.
 - `spec.template.spec.containers`: Defines the container(s) that will run within the Job's Pods. In this case, a busy box image that prints the current date/time and a completion message.
@@ -261,7 +260,7 @@ kubectl apply -f clusterrole.yaml
 
 Create a ClusterRoleBinding
 
-A ClusterRoleBinding is a Kubernetes resource that associates a ClusterRole (a set of cluster-wide permissions) with one or more subjects (users, groups, or service accounts). It acts as the "glue" that connects the permissions defined in a ClusterRole with the entities that need those permissions to perform actions on resources within the Kubernetes cluster. 
+A ClusterRoleBinding is a Kubernetes resource that associates a ClusterRole (a set of cluster-wide permissions) with one or more subjects (users, groups, or service accounts). It acts as the "glue" that connects the permissions defined in a ClusterRole with the entities that need those permissions to perform actions on resources within the Kubernetes cluster.
 
 In your text editor, create a file called `clusterrolebinding.yaml` and paste in the below configuration:
 
@@ -329,11 +328,14 @@ From the above configuration;
 
 - The `k8s_events` receiver is configured to collect Kubernetes events only from the `default` namespace. You can modify this list to include other namespaces if needed.
 - The `otlp` exporter is set up to send the collected event data to SigNoz at the specified endpoint. Replace `{region}` with your selected region when creating your SigNoz cloud account and replace `<SIGNOZ-INGESTION-KEY>` with the ingestion key for your cloud account.
-    
-    To get your region and ingestion key, navigate to your SigNoz account URL > settings > ingestion settings and copy them.
-    
+  To get your region and ingestion key, navigate to your SigNoz account URL > settings > ingestion settings and copy them.
 
-<Figure src="/img/guides/2024/06/Ingestion_Key.webp" alt="Ingestion settings" caption="Ingestion settings" /><br></br>To create the ConfigMap:
+<Figure
+  src="/img/guides/2024/06/Ingestion_Key.webp"
+  alt="Ingestion settings"
+  caption="Ingestion settings"
+/>
+<br></br>To create the ConfigMap:
 
 ```bash
 kubectl apply -f configmap.yaml
@@ -377,7 +379,7 @@ spec:
             name: otelcontribcol
 ```
 
-The above Deployment manifest deploys a single instance of a Pod (`otelcontribcol`) based on the `otel/opentelemetry-collector-contrib` Docker image. The Pod is configured to use a specific `ConfigMap` (`otelcontribcol`) to provide configuration files (`config.yaml`) mounted at `/etc/config` inside the container. 
+The above Deployment manifest deploys a single instance of a Pod (`otelcontribcol`) based on the `otel/opentelemetry-collector-contrib` Docker image. The Pod is configured to use a specific `ConfigMap` (`otelcontribcol`) to provide configuration files (`config.yaml`) mounted at `/etc/config` inside the container.
 
 This setup ensures that the OpenTelemetry Collector Contrib component (`otelcontribcol`) runs with the specified configuration in a Kubernetes environment.
 
@@ -433,17 +435,35 @@ Output:
 
 Navigate to your SigNoz cloud account to see the logs coming in from your cluster, most especially logs from the CronJobs.
 
-<Figure src="/img/guides/2024/06/log-monitoring.webp" alt="Log monitoring in SigNoz" caption="Log monitoring in SigNoz" /><br></br>With SigNoz, you can create custom dashboards tailored to your specific monitoring and observability needs.
+<Figure
+  src="/img/guides/2024/06/log-monitoring.webp"
+  alt="Log monitoring in SigNoz"
+  caption="Log monitoring in SigNoz"
+/>
+<br></br>With SigNoz, you can create custom dashboards tailored to your specific monitoring and
+observability needs.
 
 To create a custom dashboard for CronJob visualization, click on Dashboards > New Dashboard > Create Dashboard > Configure > Save > New Panel.
 
 Here, you have the flexibility to choose the visualization type that best suits your needs, whether it's a time series graph, a simple value display, a bar chart for comparison, or even a table for detailed data presentation.
 
-Within the query builder, craft and execute queries targeting your CronJobs to gain insights into their performance. 
+Within the query builder, craft and execute queries targeting your CronJobs to gain insights into their performance.
 
-<Figure src="/img/guides/2024/06/query-builder.webp" alt="Running queries in the query builder" caption="Running queries in the query builder" /><br></br>The above query `k8s_cronjob_active_jobs` set to `k8s_cronjob_name = my-cron-job` returns the number of active jobs for the CronJob named "my-cronjob".
+<Figure
+  src="/img/guides/2024/06/query-builder.webp"
+  alt="Running queries in the query builder"
+  caption="Running queries in the query builder"
+/>
+<br></br>The above query `k8s_cronjob_active_jobs` set to `k8s_cronjob_name = my-cron-job` returns
+the number of active jobs for the CronJob named "my-cronjob".
 
-<Figure src="/img/guides/2024/06/cronjob-dashboard.webp" alt="CronJob monitoring dashboard" caption="CronJob monitoring dashboard" /><br></br>You can execute additional queries and create more visualization in your dashboard as needed.
+<Figure
+  src="/img/guides/2024/06/cronjob-dashboard.webp"
+  alt="CronJob monitoring dashboard"
+  caption="CronJob monitoring dashboard"
+/>
+<br></br>You can execute additional queries and create more visualization in your dashboard as
+needed.
 
 ## Getting Started with SigNoz
 

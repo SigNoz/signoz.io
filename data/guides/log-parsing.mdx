@@ -1,13 +1,20 @@
 ---
-
 title: Log Parsing 101 - A Beginner's Guide to Structured Data
-slug: log-parsing
 date: 2024-07-26
 tags: [logging]
 authors: [nitin_gouda]
 description: Master log parsing techniques to transform unstructured data into actionable insights. Learn key concepts, tools, and best practices for effective log management.
-keywords: [log parsing, structured data, log analysis, system monitoring, data extraction, log management, log formats, parsing tools]
-
+keywords:
+  [
+    log parsing,
+    structured data,
+    log analysis,
+    system monitoring,
+    data extraction,
+    log management,
+    log formats,
+    parsing tools,
+  ]
 ---
 
 Logs are invaluable sources of information to provide insights into system operations, user activities, and application performance. Log parsing is the process of analyzing these logs to extract meaningful data, enabling organizations to monitor, troubleshoot, and optimize their systems effectively. This guide will explore the fundamentals of log parsing, common log formats, how log parsers work, popular tools, and best practices to help you harness the power of your log data.
@@ -27,31 +34,23 @@ The main aspects of log parsing, includes handling common log formats like plain
 
 Logs can come in various formats, depending on the source system or application generating them. Understanding these common log formats is essential for effective log parsing and analysis. Here are some of the most frequently encountered log formats:
 
-1. **Plaintext**: Plaintext logs are simple text files where each log entry is a line of text. They are the most basic form of logs and are easy to read and write. Often used in web server logs and application logs. 
-Example: 
-    
-    ```bash
-    2024-07-23 15:43:21 INFO User login successful - UserID: 7890, SessionID: abc123
-    ```
-    
-    `2024-07-23 15:43:21` is the timestamp, `INFO` is the log level, `User login successful - UserID: 7890, SessionID: abc123` is the message describing the event.
-    
-2. **JSON (JavaScript Object Notation)**: [JSON logs](https://signoz.io/blog/json-logs/) are structured logs that use key-value pairs, making them easily parsable and readable. JSON logs are commonly used in modern web applications, micro-services, and APIs due to their structured nature and compatibility with various data processing tools.
-Example: 
-    
-    <Figure src="/img/guides/2024/07/log-parsing-Untitled.webp" alt="Logs formatted as JSON logs" caption="Logs formatted as JSON logs" />
-    
-3. **XML (Extensible Markup Language)**:  XML logs use a markup language that is both human and machine-readable. Although XML is more verbose than JSON, it is nevertheless frequently used to describe structured data. Web services (SOAP), configuration files, and enterprise applications all frequently use XML logs.
-Example: 
-    
-    <Figure src="/img/guides/2024/07/log-parsing-Untitled%201.webp" alt="XML Logs view" caption="XML Logs view" />
-    
-4. **CSV (Comma-Separated Values)**: CSV logs use a simple text format where each log entry is a line and values are separated by commas. CSV logs are commonly used for exporting and importing data between applications, especially in spreadsheets and databases. 
-Example: 
-    
-    <Figure src="/img/guides/2024/07/log-parsing-Untitled%202.webp" alt="CSV Logs" caption="CSV Logs" />
-    
-5. **Windows Event Log**:  Windows Event Log is a proprietary [logging format](https://signoz.io/guides/what-is-pythons-default-logging-formatter/) used by the Microsoft Windows operating system. It records events related to the operating system, application software, and hardware. Windows Event Logs are used for recording system, security, and application events on Windows operating systems. To know more about Windows Logs you can checkout [Window Event Logs](https://signoz.io/guides/windows-logs/).
+1.  **Plaintext**: Plaintext logs are simple text files where each log entry is a line of text. They are the most basic form of logs and are easy to read and write. Often used in web server logs and application logs.
+    Example:
+        ```bash
+        2024-07-23 15:43:21 INFO User login successful - UserID: 7890, SessionID: abc123
+        ```
+
+        `2024-07-23 15:43:21` is the timestamp, `INFO` is the log level, `User login successful - UserID: 7890, SessionID: abc123` is the message describing the event.
+2.  **JSON (JavaScript Object Notation)**: [JSON logs](https://signoz.io/blog/json-logs/) are structured logs that use key-value pairs, making them easily parsable and readable. JSON logs are commonly used in modern web applications, micro-services, and APIs due to their structured nature and compatibility with various data processing tools.
+    Example:
+        <Figure src="/img/guides/2024/07/log-parsing-Untitled.webp" alt="Logs formatted as JSON logs" caption="Logs formatted as JSON logs" />
+3.  **XML (Extensible Markup Language)**: XML logs use a markup language that is both human and machine-readable. Although XML is more verbose than JSON, it is nevertheless frequently used to describe structured data. Web services (SOAP), configuration files, and enterprise applications all frequently use XML logs.
+    Example:
+        <Figure src="/img/guides/2024/07/log-parsing-Untitled%201.webp" alt="XML Logs view" caption="XML Logs view" />
+4.  **CSV (Comma-Separated Values)**: CSV logs use a simple text format where each log entry is a line and values are separated by commas. CSV logs are commonly used for exporting and importing data between applications, especially in spreadsheets and databases.
+    Example:
+        <Figure src="/img/guides/2024/07/log-parsing-Untitled%202.webp" alt="CSV Logs" caption="CSV Logs" />
+5.  **Windows Event Log**: Windows Event Log is a proprietary [logging format](https://signoz.io/guides/what-is-pythons-default-logging-formatter/) used by the Microsoft Windows operating system. It records events related to the operating system, application software, and hardware. Windows Event Logs are used for recording system, security, and application events on Windows operating systems. To know more about Windows Logs you can checkout [Window Event Logs](https://signoz.io/guides/windows-logs/).
 
 Understanding these common log formats and their appropriate use cases is crucial for effective log management and analysis. By choosing the right format and leveraging the appropriate tools, organisations can streamline their log parsing and gain valuable insights from their log data. The choice of log format depends on several factors, including the complexity of the data, ease of parsing, readability, and the tools available.
 
@@ -88,57 +87,46 @@ The core functionality of a log parser is to read log entries and extract meanin
 Log Parsing Techniques
 
 - Regular Expressions (Regex) Regular expressions are used to identify patterns within log entries. They are powerful and flexible, allowing the parser to match complex patterns and extract specific fields.
-Example: Consider the log entry:
-    
-    ```sql
-    2024-07-25 12:34:56,789 INFO [UserService] User 123 logged in from IP 192.168.1.1
-    ```
-    
-    Using the regex pattern: 
-    
-    ```bash
-    (?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) (?P<log_level>INFO|ERROR|DEBUG) \[(?P<source>[^\]]+)\] (?P<message>.*?) from IP (?P<ip>\d+\.\d+\.\d+\.\d+)
-    ```
-    
-    The named groups `timestamp`, `log_level`, `source`, `message`, and `ip` will capture:
-    
-    - Timestamp: `2024-07-25 12:34:56,789`Log level: `INFO`Source: `UserService`Message: `User 123 logged in`IP Address: `192.168.1.1`
+  Example: Consider the log entry:
+      ```sql
+      2024-07-25 12:34:56,789 INFO [UserService] User 123 logged in from IP 192.168.1.1
+      ```
+
+      Using the regex pattern:
+
+      ```bash
+      (?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) (?P<log_level>INFO|ERROR|DEBUG) \[(?P<source>[^\]]+)\] (?P<message>.*?) from IP (?P<ip>\d+\.\d+\.\d+\.\d+)
+      ```
+
+      The named groups `timestamp`, `log_level`, `source`, `message`, and `ip` will capture:
+
+      - Timestamp: `2024-07-25 12:34:56,789`Log level: `INFO`Source: `UserService`Message: `User 123 logged in`IP Address: `192.168.1.1`
 - Tokenisation Tokenisation involves splitting log entries into smaller units (tokens) based on predefined delimiters (e.g., spaces, commas). Each token is then assigned to a specific field.
-Example: Consider the log entry:
-    
-    ```bash
-    2024-07-25,12:34:56,INFO,UserService,User 123 logged in,192.168.1.1
-    ```
-    
+  Example: Consider the log entry:
+      ```bash
+      2024-07-25,12:34:56,INFO,UserService,User 123 logged in,192.168.1.1
+      ```
 - These tokens can then be mapped to fields:
-    - Date: `2024-07-25` , Time: `12:34:56`, Log level: `INFO`, Source: `UserService`, Message: `User 123 logged in`, IP Address: `192.168.1.1`
+  - Date: `2024-07-25` , Time: `12:34:56`, Log level: `INFO`, Source: `UserService`, Message: `User 123 logged in`, IP Address: `192.168.1.1`
 - Structured [Log Parsing](https://signoz.io/guides/log-parsing/#popular-log-parsing-tools) For logs in structured formats like JSON or XML, parsers can directly map the log fields to the corresponding data structures.
-    
-    Example: Consider the JSON log entry:
-    
-    ```json
-    {
-      "timestamp": "2024-07-25T12:34:56.789Z",
-      "level": "INFO",
-      "source": "UserService",
-      "message": "User 123 logged in",
-      "ip": "192.168.1.1"
-    }
-    ```
-    
-    Using a JSON parser, you can directly access and see what you need.
-    
+  Example: Consider the JSON log entry:
+  ```json
+  {
+    "timestamp": "2024-07-25T12:34:56.789Z",
+    "level": "INFO",
+    "source": "UserService",
+    "message": "User 123 logged in",
+    "ip": "192.168.1.1"
+  }
+  ```
+  Using a JSON parser, you can directly access and see what you need.
 - Unstructured Log Parsing For unstructured logs, the parser uses advanced techniques like machine learning to identify and extract relevant information.
-    
-    Example: Consider the unstructured log entry:
-    
-    ```bash
-    User 123 logged in on 2024-07-25 at 12:34:56 from IP 192.168.1.1
-    ```
-    
-    Using machine learning models trained on similar log patterns, the parser can identify and extract User ID: `123`, Action: `logged in`, Date: `2024-07-25` , Time: `12:34:56`, 
-    IP Address: `192.168.1.1`
-    
+  Example: Consider the unstructured log entry:
+  ```bash
+  User 123 logged in on 2024-07-25 at 12:34:56 from IP 192.168.1.1
+  ```
+  Using machine learning models trained on similar log patterns, the parser can identify and extract User ID: `123`, Action: `logged in`, Date: `2024-07-25` , Time: `12:34:56`,
+  IP Address: `192.168.1.1`
 
 ### Data Transformation
 
@@ -179,18 +167,16 @@ The final step involves analysing the structured log data to gain insights. This
 ## Popular Log Parsing Tools
 
 - [SigNoz](https://signoz.io/docs/introduction/) <br />
-An open-source observability platform that helps you monitor and troubleshoot your applications. It provides comprehensive insights by integrating metrics, traces, and logs into a single platform.
-    
-    <GetStartedSigNoz />
-    
-- Logstash  <br />
-Logstash is a free and open-source utility for gathering, processing, and archiving logs for later use. It integrates easily with Kibana and Elasticsearch and is a component of the Elastic Stack.
-- Fluentd  <br />
-An open-source data collector that unifies data collection and consumption. It's known for its flexibility and support for a wide range of output destinations.
-- [Graylog](https://signoz.io/comparisons/graylog-vs-splunk/)  <br />
-Graylog is a strong log management solution that gives you real-time search, analysis, and visualisation capabilities over your log data. Its great performance and scalability are designed in.
-- Splunk  <br />
-A leading platform for searching, monitoring, and analysing machine-generated big data via a web-style interface. It can handle a vast amount of data and is widely used in enterprise environments.
+  An open-source observability platform that helps you monitor and troubleshoot your applications. It provides comprehensive insights by integrating metrics, traces, and logs into a single platform.
+      <GetStartedSigNoz />
+- Logstash <br />
+  Logstash is a free and open-source utility for gathering, processing, and archiving logs for later use. It integrates easily with Kibana and Elasticsearch and is a component of the Elastic Stack.
+- Fluentd <br />
+  An open-source data collector that unifies data collection and consumption. It's known for its flexibility and support for a wide range of output destinations.
+- [Graylog](https://signoz.io/comparisons/graylog-vs-splunk/) <br />
+  Graylog is a strong log management solution that gives you real-time search, analysis, and visualisation capabilities over your log data. Its great performance and scalability are designed in.
+- Splunk <br />
+  A leading platform for searching, monitoring, and analysing machine-generated big data via a web-style interface. It can handle a vast amount of data and is widely used in enterprise environments.
 
 ## Advanced Log Parsing Techniques
 

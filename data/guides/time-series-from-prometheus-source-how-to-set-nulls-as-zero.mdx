@@ -1,13 +1,11 @@
 ---
-
 title: How to Handle Null Values in Prometheus Time Series Data
-slug: time-series-from-prometheus-source-how-to-set-nulls-as-zero
 date: 2024-10-14
-tags: [prometheus,missing values, time-series]
+tags: [prometheus, missing values, time-series]
 authors: [simran_kumari]
 description: Learn how to handle null values in Prometheus time series data. Discover methods to set nulls as zero, improve data visualization, and enhance analysis accuracy.
-keywords: [Prometheus, null values, time series data, PromQL, Grafana, data visualization, SigNoz, metrics]
-
+keywords:
+  [Prometheus, null values, time series data, PromQL, Grafana, data visualization, SigNoz, metrics]
 ---
 
 When working with Prometheus time series data, encountering gaps or missing data points can be frustrating. These absences can disrupt visualizations and skew your analysis. However, setting these missing data points (or gaps) to zero can help maintain continuity in your dashboards, though it’s essential to understand when to apply this solution to avoid misleading interpretations.
@@ -18,7 +16,11 @@ In this article, we’ll explore why gaps occur in [Prometheus data](https://sig
 
 In Prometheus, a "null value" doesn’t exist in the typical database sense. Instead, when we talk about missing data, we mean the absence of a data point at a specific time. This absence shows up as a gap in your time series graphs.
 
-<Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image.webp" alt="Gaps in Prometheus Data" caption="Gaps in Prometheus Data" />
+<Figure
+  src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image.webp"
+  alt="Gaps in Prometheus Data"
+  caption="Gaps in Prometheus Data"
+/>
 
 ### Common Causes of Missing Data:
 
@@ -72,7 +74,7 @@ Filling in missing data with zero isn’t always the right solution. For certain
 - Counter metrics: Zero might imply a reset or sudden drop, which could skew your understanding of system behavior.
 - Sporadic metrics: For metrics that are emitted only under specific conditions, setting missing points to zero can distort the truth, making it seem like nothing happened when the data should just remain absent.
 
-For example, if you look back to the previous scenario where missing data points existed for CPU usage data.  Without proper handling, you might configure the graph to default missing data to zero. Now, your graph looks like this:
+For example, if you look back to the previous scenario where missing data points existed for CPU usage data. Without proper handling, you might configure the graph to default missing data to zero. Now, your graph looks like this:
 
 ```sql
 Time:   |--------|--------|--------|--------|--------|--------|
@@ -88,81 +90,99 @@ Handling missing data points in Prometheus is crucial for ensuring accurate visu
 ### Basic Methods for Handling Missing Data
 
 1. Using `or vector(0)`
-    - This technique allows you to replace missing values with zero.
-    
-    ```
-    custom_metric or vector(0)
-    ```
-    
-    - Explanation: This query returns the value of `custom_metric`, and if it’s absent, it defaults to `0`.
-    
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%201.webp" alt="Handling missing data using vector(0)" caption="Handling missing data using vector(0)" />
-    
-    Use Case: Imagine monitoring server CPU usage. If the server goes offline, rather than seeing a confusing gap, you can treat the missing data as `0`, indicating that the server wasn’t active.
-    
+
+   - This technique allows you to replace missing values with zero.
+
+   ```
+   custom_metric or vector(0)
+   ```
+
+   - Explanation: This query returns the value of `custom_metric`, and if it’s absent, it defaults to `0`.
+
+   <Figure
+     src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%201.webp"
+     alt="Handling missing data using vector(0)"
+     caption="Handling missing data using vector(0)"
+   />
+
+   Use Case: Imagine monitoring server CPU usage. If the server goes offline, rather than seeing a confusing gap, you can treat the missing data as `0`, indicating that the server wasn’t active.
+
 2. Utilizing the `absent()` Function
-    - The `absent()` function helps identify completely missing metrics.
-    
-    ```
-    absent(custom_metric)
-    ```
-    
-    - Explanation: This query returns a value when `custom_metric` is not present, useful for alerting on missing metrics.
-    
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%202.webp" alt="Handling missing data using absent()" caption="Handling missing data using absent()" />
-    
-    Use Case: In a microservices architecture, you'll want to know if a service’s health metric stops being scraped. `absent()` can alert you that the service may be down or unreachable, helping to detect system failures early.
-    
-    Note: It returns an empty vector if the vector passed to it has any elements and a 1-element vector with the value 1 if the vector passed to it has no elements.
-    
+
+   - The `absent()` function helps identify completely missing metrics.
+
+   ```
+   absent(custom_metric)
+   ```
+
+   - Explanation: This query returns a value when `custom_metric` is not present, useful for alerting on missing metrics.
+
+   <Figure
+     src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%202.webp"
+     alt="Handling missing data using absent()"
+     caption="Handling missing data using absent()"
+   />
+
+   Use Case: In a microservices architecture, you'll want to know if a service’s health metric stops being scraped. `absent()` can alert you that the service may be down or unreachable, helping to detect system failures early.
+
+   Note: It returns an empty vector if the vector passed to it has any elements and a 1-element vector with the value 1 if the vector passed to it has no elements.
 
 ### Advanced PromQL Techniques for Null Handling
 
 1. Applying `group_left` and `group_right` for Label Matching
-    - Scenario: You have two metrics: one for system resource usage (e.g., CPU) and another for error rates. The second metric (`error_rate`) doesn’t always have data for every instance, leading to missing information when you attempt to join the two.
-    - Solution: Use `group_left` or `group_right` depending on the label relationship to include all relevant data, even if some metrics are missing values.
-    
-    Syntax:
-    
-    ```python
-    # for left join
-    metric_a * on(label) group_left(label_value) metric_b or vector(0) 
-    # for right join 
-    metric_a * on(label) group_right(label_value) metric_b or vector(0)   
-    ```
-    
-    Query examples:
-    
-    ```python
-    # Left join example
-    system_resource_usage * on(instance,exported_instance) group_left error_rate or vector(0) 
-    
-    # Right join example
-    error_rate * on(instance,system_resource_usage) group_right or vector(0)
-    ```
-    
-    ### Explanation:
-    
-    - `group_left`: Matches `system_resource_usage` with `error_rate` for each instance and exported instance, ensuring that missing error values are filled with `0`.
-    - `group_right`: Ensures all error rates are preserved even if the resource usage data is missing for some instances.
-    - `or vector(0)`: Fills missing values with `0` for better visualization.
-    
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%203.webp" alt="Handling missing data using group_left()" caption="Handling missing data using group_left()" />
-    
-    Use Case: You’re monitoring CPU usage per instance alongside error rates. By using `group_left`, you ensure that even if there are no errors for certain instances, the CPU usage is still included in your visualizations, and errors are treated as zero instead of missing. Alternatively, use `group_right` if you prioritize error rate data over system resource metrics.
-    
+
+   - Scenario: You have two metrics: one for system resource usage (e.g., CPU) and another for error rates. The second metric (`error_rate`) doesn’t always have data for every instance, leading to missing information when you attempt to join the two.
+   - Solution: Use `group_left` or `group_right` depending on the label relationship to include all relevant data, even if some metrics are missing values.
+
+   Syntax:
+
+   ```python
+   # for left join
+   metric_a * on(label) group_left(label_value) metric_b or vector(0)
+   # for right join
+   metric_a * on(label) group_right(label_value) metric_b or vector(0)
+   ```
+
+   Query examples:
+
+   ```python
+   # Left join example
+   system_resource_usage * on(instance,exported_instance) group_left error_rate or vector(0)
+
+   # Right join example
+   error_rate * on(instance,system_resource_usage) group_right or vector(0)
+   ```
+
+   ### Explanation:
+
+   - `group_left`: Matches `system_resource_usage` with `error_rate` for each instance and exported instance, ensuring that missing error values are filled with `0`.
+   - `group_right`: Ensures all error rates are preserved even if the resource usage data is missing for some instances.
+   - `or vector(0)`: Fills missing values with `0` for better visualization.
+
+   <Figure
+     src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%203.webp"
+     alt="Handling missing data using group_left()"
+     caption="Handling missing data using group_left()"
+   />
+
+   Use Case: You’re monitoring CPU usage per instance alongside error rates. By using `group_left`, you ensure that even if there are no errors for certain instances, the CPU usage is still included in your visualizations, and errors are treated as zero instead of missing. Alternatively, use `group_right` if you prioritize error rate data over system resource metrics.
+
 2. Using `absent_over_time()` for Detecting Long-Term Absences
-    - Scenario: You’re monitoring a critical metric over time and want to detect if it has stopped reporting for an extended period, indicating a problem with the service or the metric’s availability.
-    - Solution: Use `absent_over_time()` to monitor whether a metric has been missing for a defined period.
-    
-    ```
-    absent_over_time(custom_metric[1m])
-    ```
-    
-    Explanation: This function returns a value if `custom_metric` has been absent for the last 1 minute, useful for identifying metrics that are not being scraped over extended periods.
-    
-    <Figure src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%204.webp" alt="Handling missing data using absent_over_time()" caption="Handling missing data using absent_over_time()" />
-    
+
+   - Scenario: You’re monitoring a critical metric over time and want to detect if it has stopped reporting for an extended period, indicating a problem with the service or the metric’s availability.
+   - Solution: Use `absent_over_time()` to monitor whether a metric has been missing for a defined period.
+
+   ```
+   absent_over_time(custom_metric[1m])
+   ```
+
+   Explanation: This function returns a value if `custom_metric` has been absent for the last 1 minute, useful for identifying metrics that are not being scraped over extended periods.
+
+   <Figure
+     src="/img/guides/2024/10/time-series-from-prometheus-source-how-to-set-nulls-as-zero-image%204.webp"
+     alt="Handling missing data using absent_over_time()"
+     caption="Handling missing data using absent_over_time()"
+   />
 
 ## Best Practices for Handling Null/Missing Values in Time Series Data
 
@@ -178,9 +198,9 @@ To effectively manage null values in the Prometheus time series:
 SigNoz is a powerful observability tool that allows you to track missing data points more effectively, helping you avoid blind spots in your monitoring. SigNoz can help you in:
 
 - Detecting Missing Data with SigNoz
-SigNoz can alert you to missing data automatically by configuring rules for your most critical metrics. This means you won’t have to rely on visually spotting gaps in your Grafana dashboards; instead, SigNoz can proactively notify you.
+  SigNoz can alert you to missing data automatically by configuring rules for your most critical metrics. This means you won’t have to rely on visually spotting gaps in your Grafana dashboards; instead, SigNoz can proactively notify you.
 - Visualizing Data Gaps in SigNoz Dashboards
-SigNoz provides advanced visualizations for analyzing patterns in missing data. This can help you see trends where certain metrics go missing frequently, helping you dig into root causes and improve data collection reliability.
+  SigNoz provides advanced visualizations for analyzing patterns in missing data. This can help you see trends where certain metrics go missing frequently, helping you dig into root causes and improve data collection reliability.
 
 <GetStartedSigNoz />
 

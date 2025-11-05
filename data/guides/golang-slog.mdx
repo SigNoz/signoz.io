@@ -1,121 +1,124 @@
 ---
-
 title: Complete Guide to Logging in Golang with slog
-slug: golang-slog
 date: 2024-09-26
 tags: [logging]
 authors: [aayush_sharma]
 description: Learn how to use Go's slog package for structured logging in your projects. This comprehensive guide covers setup, implementation, and best practices.
-keywords: [slog, logging, logging slog, golang, opentelemetry, opentelemetry golang, opentelemetry slog]
-
+keywords:
+  [slog, logging, logging slog, golang, opentelemetry, opentelemetry golang, opentelemetry slog]
 ---
 
 <head>
-<script
-type="application/ld+json"
-dangerouslySetInnerHTML={{ __html: JSON.stringify({
-"@context": "[https://schema.org](https://schema.org/)",
-"@type": "TechArticle",
-"headline": "Complete Guide to Logging in Golang with slog",
-"alternativeHeadline": "A comprehensive guide to implementing structured logging in Golang using slog",
-"author": {
-"@type": "Person",
-"name": "Aayush Sharma"
-},
-"publisher": {
-"@type": "Organization",
-"name": "SigNoz",
-"logo": {
-"@type": "ImageObject",
-"url": "https://signoz.io/img/SigNozLogo-orange.svg"
-}
-},
-"datePublished": "2024-07-01T00:00:00Z",
-"dateModified": "2024-07-01T00:00:00Z",
-"mainEntityOfPage": {
-"@type": "WebPage",
-"@id": "https://signoz.io/guides/golang-slog/"
-},
-"description": "In this tutorial, we will discover Golang slog and some of the best practices provided by slog for implementing structured logging in Golang applications. We will set up the Golang application and practice different logging formats slog provides.",
-"keywords": "slog, logging, logging slog, golang, opentelemetry, opentelemetry golang, opentelemetry slog",
-"articleSection": "Technology",
-"inLanguage": "en",
-"isPartOf": {
-"@type": "Blog",
-"name": "SigNoz Blog",
-"url": "https://signoz.io/blog/"
-},
-"about": [
-{
-"@type": "Thing",
-"name": "Go (Programming Language)",
-"description": "An open-source programming language developed by Google"
-},
-{
-"@type": "Thing",
-"name": "slog",
-"description": "A structured logging package for Go"
-},
-{
-"@type": "Thing",
-"name": "OpenTelemetry",
-"description": "An observability framework for cloud-native software"
-}
-],
-"mentions": [
-{
-"@type": "SoftwareApplication",
-"name": "SigNoz",
-"applicationCategory": "Observability Platform"
-}
-],
-"mainEntity": {
-"@type": "FAQPage",
-"mainEntity": [
-{
-"@type": "Question",
-"name": "What are the features of slog?",
-"acceptedAnswer": {
-"@type": "Answer",
-"text": "The slog package in Go offers enhanced logging capabilities with features like multiple output destinations, allowing logs to be sent to various handlers simultaneously. It provides robust filtering control, enabling developers to filter logs by level, and message content. Additionally, slog-envlogger acts as a port of env_logger, facilitating environment-based log filtering."
-}
-},
-{
-"@type": "Question",
-"name": "What are the levels of slog logging?",
-"acceptedAnswer": {
-"@type": "Answer",
-"text": "The log/slog package provides four log levels by default, with each one associated with an integer value: DEBUG (-4), INFO (0), WARN (4), and ERROR (8)."
-}
-},
-{
-"@type": "Question",
-"name": "Where to place the logger when logging with slog?",
-"acceptedAnswer": {
-"@type": "Answer",
-"text": "In Go, using the slog library, you can handle logger placement based on your application's complexity. For simple setups, a global logger initialized in the main or an init function is effective. For more complex applications, dependency injection is recommended, where the logger is passed as a dependency to maintain clean architecture and ease testing."
-}
-},
-{
-"@type": "Question",
-"name": "What are the benefits of using slog over log?",
-"acceptedAnswer": {
-"@type": "Answer",
-"text": "slog provides structured logging, which is beneficial for querying and analyzing logs, especially in microservices architectures or distributed systems where logs are critical for debugging."
-}
-},
-{
-"@type": "Question",
-"name": "Can slog integrate with external logging systems?",
-"acceptedAnswer": {
-"@type": "Answer",
-"text": "Yes, slog can integrate with systems like SigNoz, ELK, Splunk, or any other logging infrastructure that supports structured log data. This is often done through custom handlers that format and transmit log data."
-}
-}
-]
-}
-}) }}
-/>
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': '[https://schema.org](https://schema.org/)',
+        '@type': 'TechArticle',
+        headline: 'Complete Guide to Logging in Golang with slog',
+        alternativeHeadline:
+          'A comprehensive guide to implementing structured logging in Golang using slog',
+        author: {
+          '@type': 'Person',
+          name: 'Aayush Sharma',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
+        datePublished: '2024-07-01T00:00:00Z',
+        dateModified: '2024-07-01T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/golang-slog/',
+        },
+        description:
+          'In this tutorial, we will discover Golang slog and some of the best practices provided by slog for implementing structured logging in Golang applications. We will set up the Golang application and practice different logging formats slog provides.',
+        keywords:
+          'slog, logging, logging slog, golang, opentelemetry, opentelemetry golang, opentelemetry slog',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
+        },
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Go (Programming Language)',
+            description: 'An open-source programming language developed by Google',
+          },
+          {
+            '@type': 'Thing',
+            name: 'slog',
+            description: 'A structured logging package for Go',
+          },
+          {
+            '@type': 'Thing',
+            name: 'OpenTelemetry',
+            description: 'An observability framework for cloud-native software',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What are the features of slog?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'The slog package in Go offers enhanced logging capabilities with features like multiple output destinations, allowing logs to be sent to various handlers simultaneously. It provides robust filtering control, enabling developers to filter logs by level, and message content. Additionally, slog-envlogger acts as a port of env_logger, facilitating environment-based log filtering.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What are the levels of slog logging?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'The log/slog package provides four log levels by default, with each one associated with an integer value: DEBUG (-4), INFO (0), WARN (4), and ERROR (8).',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Where to place the logger when logging with slog?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "In Go, using the slog library, you can handle logger placement based on your application's complexity. For simple setups, a global logger initialized in the main or an init function is effective. For more complex applications, dependency injection is recommended, where the logger is passed as a dependency to maintain clean architecture and ease testing.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What are the benefits of using slog over log?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'slog provides structured logging, which is beneficial for querying and analyzing logs, especially in microservices architectures or distributed systems where logs are critical for debugging.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can slog integrate with external logging systems?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, slog can integrate with systems like SigNoz, ELK, Splunk, or any other logging infrastructure that supports structured log data. This is often done through custom handlers that format and transmit log data.',
+              },
+            },
+          ],
+        },
+      }),
+    }}
+  />
 </head>
 
 Logging is the record of events that occur in an application, providing critical insights into its behavior, performance, and potential problems. In Golang, the built-in log package helps monitor and debug applications.
@@ -124,7 +127,9 @@ However, for more advanced logging needs, Golang offers slog, a powerful package
 
 ## Prerequisites
 
-- <a href="https://go.dev/doc/install" rel="noopener noreferrer nofollow" target="_blank">Golang Installed in your system</a>
+- <a href="https://go.dev/doc/install" rel="noopener noreferrer nofollow" target="_blank">
+    Golang Installed in your system
+  </a>
 - Familiarity with Logging in Golang
 
 ## Quick Guide: How to use slog in Golang?
@@ -196,7 +201,6 @@ Example of structured logging:
     "Item3": 7914595825068479671
   }
 }
-
 ```
 
 The above structured logging output, when converted into text-based logging, looks like the example below:
@@ -223,13 +227,13 @@ We will discuss more on this in the later part of the article.
 In slog, logging levels are used to describe the severity of logs. These levels help determine which logs are emitted based on their importance, which can be critical in both development and production environments. Here's a breakdown of the typical logging levels provided by slog, which are similar to those in many other logging libraries:
 
 - Debug: This level is used for detailed information, primarily useful for diagnosing problems. Debug logging is usually enabled only in development settings.
-Use Case: Diagnosing a complex issue by logging detailed information about the application's state.
+  Use Case: Diagnosing a complex issue by logging detailed information about the application's state.
 - Info: Provides general information about the application's operations, offering insights into its normal functioning.
-Use Case: Logging the successful completion of an operation or regular status updates.
+  Use Case: Logging the successful completion of an operation or regular status updates.
 - Warn: Indicates that something unexpected happened or there might be a potential issue (e.g., 'disk space low'). The application continues to work as expected.
-Use Case: Alerting about deprecated API usage or low disk space warnings.
+  Use Case: Alerting about deprecated API usage or low disk space warnings.
 - Error: Represents serious issues where the application has encountered a problem and cannot perform some functions.
-Use Case: Logging errors that prevent a function from executing properly, such as database connection failures.
+  Use Case: Logging errors that prevent a function from executing properly, such as database connection failures.
 
 slog is designed to be modular and extensible, allowing users to create custom levels as needed. Logging levels help control log output based on the severity of the information, which is especially useful in production environments to avoid log flooding while maintaining clear and informative logs.
 
@@ -320,7 +324,6 @@ Example Output:
   "msg": "SigNoz",
   "Content": "Golang slog is best for structured logging"
 }
-
 ```
 
 This handler is perfect for logs that must be consumed by log management systems, examined by automated programs, or sent via network protocols that benefit from standardized, structured data formats. It is frequently utilized in production settings where logs are gathered and examined by platforms such as SigNoz, Splunk, the ELK stack, or others.
@@ -596,7 +599,6 @@ Output:
     "Item3": 7503774366427698219
   }
 }
-
 ```
 
 ### Context Integration
@@ -651,7 +653,6 @@ The `ctx` variable receives a `serial_id`, which is then supplied to the `InfoCo
     "Item3": 224524224166418815
   }
 }
-
 ```
 
 ## Monitoring Logs with an Observability Tool
@@ -678,9 +679,9 @@ SigNoz is a full-stack open-source application performance monitoring and obser
 Key architecture features:
 
 - Logs, Metrics, and traces under a single dashboard
-SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
+  SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
 - Native OpenTelemetry support
-SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the world standard to generate and manage telemetry data.
+  SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the world standard to generate and manage telemetry data.
 
 ## Tracking Logs Using Signoz
 
@@ -856,7 +857,6 @@ service:
       receivers: [otlp, filelog/app]
       processors: [batch]
       exporters: [otlp]
-
 ```
 
 ### Step 4: Viewing Logs in SigNoz
@@ -864,16 +864,16 @@ service:
 After running the above application and making the correct configurations, you can navigate to the SigNoz logs dashboard to see all the logs sent to SigNoz.
 
 <Figure
-src="/img/guides/2024/07/golangslog-1.webp"
-alt="SigNoz localhost showcasing the log output of the above application."
-caption="SigNoz localhost showcasing the log output of the above application."
+  src="/img/guides/2024/07/golangslog-1.webp"
+  alt="SigNoz localhost showcasing the log output of the above application."
+  caption="SigNoz localhost showcasing the log output of the above application."
 />
 
 ## Advantages of using slog
 
 - Structured Logging: slog supports structured logging, which is advantageous for producing logs that are simple to interpret and filter. This is especially helpful for contemporary logging systems that compile and examine log information. Key-value pairs represent log data. As a result, logs are more straightforward to search, process, and analyze than unstructured logs that contain free-form text. Because structured logs are machine-readable, integrating them with log analysis tools is made simpler.
 - Contextual Logging: Contextual data, such as requests or user IDs, may be easily appended to your log entries using slog. With this extra information, the logs are enhanced and become much more useful for troubleshooting and comprehending complicated systems. Each log entry may include rich structured data that facilitates more efficient debugging and application flow tracing.
-Integration: slog is easily integrated with the standard library's log package. This implies that you may take advantage of slog's structured logging features in addition to using the existing log mechanisms.
+  Integration: slog is easily integrated with the standard library's log package. This implies that you may take advantage of slog's structured logging features in addition to using the existing log mechanisms.
 - Flexibility: slog enables developers to customize logging to meet the requirements of various contexts (development, staging, and production) by supporting various output formats (such as JSON) and destinations. It provides an excellent level of personalization. Because of its adaptability, you may customize your logging to meet your requirements.
 
 ## Conclusion

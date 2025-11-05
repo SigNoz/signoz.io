@@ -1,22 +1,31 @@
 ---
-
 title: How to embed Grafana dashboards into web applications
-slug: embedding-a-website-in-a-grafana-dashboard
 date: 2024-10-22
 tags: [grafana, faq]
 authors: [simran_kumari]
 description: Learn how to seamlessly integrate Grafana dashboards into your web applications. Explore embedding methods, security considerations, and best practices.
-keywords: [Grafana, dashboard embedding, web applications, data visualization, SigNoz, application monitoring]
-
+keywords:
+  [
+    Grafana,
+    dashboard embedding,
+    web applications,
+    data visualization,
+    SigNoz,
+    application monitoring,
+  ]
 ---
 
 Embedding Grafana dashboards into web applications is a powerful way to deliver real-time data visualization to users without requiring them to log into Grafana itself. Whether you are looking to share key metrics with your team or provide external stakeholders with crucial insights, embedding a dashboard ensures seamless integration with your existing web application. This guide will walk you through the process of embedding Grafana dashboards, covering various methods, security considerations, and best practices.
 
 ## Understanding Grafana Dashboard Embedding
 
-Grafana dashboards are web-based interfaces that display data from various sources in a visually appealing and interactive format. They're essential for monitoring system performance, analyzing trends, and making data-driven decisions. 
+Grafana dashboards are web-based interfaces that display data from various sources in a visually appealing and interactive format. They're essential for monitoring system performance, analyzing trends, and making data-driven decisions.
 
-<Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image.webp" alt="Grafana dashboard" caption="Grafana dashboard" />
+<Figure
+  src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image.webp"
+  alt="Grafana dashboard"
+  caption="Grafana dashboard"
+/>
 
 Embedding these dashboards into your web applications allows you to:
 
@@ -46,77 +55,94 @@ Grafana allows users to create public snapshots of dashboards, which can then be
 - Advantages: Quick and easy method to share a dashboard.
 - Disadvantages: The data in the snapshot is static, and the dashboard is publicly accessible.
 
-Follow the given steps to embed the static version of your Grafana dashboard: 
+Follow the given steps to embed the static version of your Grafana dashboard:
 
-1. Open the dashboard you want to share.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%201.webp" alt="Open the dashboard" caption="Open the dashboard" />
-    
-2. Click on the share icon in the top navigation bar.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%202.webp" alt="Find share icon in the top navigation bar" caption="Find share icon in the top navigation bar" />
-    
-3. Select the "Snapshot" tab.
-4. Click "Publish to [snapshot.raintank.io](http://snapshot.raintank.io/)" to create a public snapshot.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%203.webp" alt="Create a public snapshot" caption="Create a public snapshot" />
-    
+1.  Open the dashboard you want to share.
+
+    <Figure
+      src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%201.webp"
+      alt="Open the dashboard"
+      caption="Open the dashboard"
+    />
+
+2.  Click on the share icon in the top navigation bar.
+
+    <Figure
+      src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%202.webp"
+      alt="Find share icon in the top navigation bar"
+      caption="Find share icon in the top navigation bar"
+    />
+
+3.  Select the "Snapshot" tab.
+4.  Click "Publish to [snapshot.raintank.io](http://snapshot.raintank.io/)" to create a public snapshot.
+
+    <Figure
+      src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%203.webp"
+      alt="Create a public snapshot"
+      caption="Create a public snapshot"
+    />
+
     You will get the Snapshot URL.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%204.webp" alt="Fetch the Snapshot URL" caption="Fetch the Snapshot URL" />
-    
-5. After creating a snapshot of your Grafana dashboard, you can easily embed it into any web application or website using an iframe. 
-    
+
+    <Figure
+      src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%204.webp"
+      alt="Fetch the Snapshot URL"
+      caption="Fetch the Snapshot URL"
+    />
+
+5.  After creating a snapshot of your Grafana dashboard, you can easily embed it into any web application or website using an iframe.
+
     ### Embedding using Iframe
-    
+
     An `iframe` (short for "inline frame") allows you to display content from one webpage inside another, such as embedding your Grafana dashboard into a separate web page or application.
-    
+
     Here’s how you can do it:
-    
-    1. Copy the Embed Code:
-    Use the following code snippet, and replace `your-snapshot-id` with the actual snapshot ID from your Grafana instance:
-        
-        ```html
-        <iframe src="https://snapshot.raintank.io/dashboard/snapshot/your-snapshot-id" width="800" height="600" frameborder="0"></iframe>
-        ```
-        
-        In this example:
-        
-        - The `src` attribute contains the link to your Grafana snapshot.
-        - The `width` and `height` attributes control the size of the embedded dashboard. You can modify these values based on how large or small you want the dashboard to appear.
-        - `frameborder="0"` removes the border around the iframe for a cleaner look.
-    2. Where to Paste It:
-    You can paste this code directly into the HTML of any web page or application that supports HTML, such as a web app, content management system, or even a simple HTML file. When the page loads, the Grafana snapshot will display within the specified area.
-        
-        Example HTML File
-        
-        ```sql
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Embedded Grafana Dashboard</title>
-        </head>
-        <body>
-            <h1>My Grafana Dashboard</h1>
-            <p>Here is a live snapshot of my Grafana dashboard:</p>
-        
-            <!-- Embed Grafana Snapshot -->
-            <iframe src="https://snapshot.raintank.io/dashboard/snapshot/your-snapshot-id" 
-                    width="800" height="600" frameborder="0"></iframe>
-        
-            <p>Dashboard embedded using an iframe.</p>
-        </body>
-        </html>
-        ```
-        
-    3. Adjust the Settings:
+
+    1.  Copy the Embed Code:
+        Use the following code snippet, and replace `your-snapshot-id` with the actual snapshot ID from your Grafana instance:
+            ```html
+            <iframe src="https://snapshot.raintank.io/dashboard/snapshot/your-snapshot-id" width="800" height="600" frameborder="0"></iframe>
+            ```
+
+            In this example:
+
+            - The `src` attribute contains the link to your Grafana snapshot.
+            - The `width` and `height` attributes control the size of the embedded dashboard. You can modify these values based on how large or small you want the dashboard to appear.
+            - `frameborder="0"` removes the border around the iframe for a cleaner look.
+    2.  Where to Paste It:
+        You can paste this code directly into the HTML of any web page or application that supports HTML, such as a web app, content management system, or even a simple HTML file. When the page loads, the Grafana snapshot will display within the specified area.
+            Example HTML File
+
+            ```sql
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Embedded Grafana Dashboard</title>
+            </head>
+            <body>
+                <h1>My Grafana Dashboard</h1>
+                <p>Here is a live snapshot of my Grafana dashboard:</p>
+
+                <!-- Embed Grafana Snapshot -->
+                <iframe src="https://snapshot.raintank.io/dashboard/snapshot/your-snapshot-id"
+                        width="800" height="600" frameborder="0"></iframe>
+
+                <p>Dashboard embedded using an iframe.</p>
+            </body>
+            </html>
+            ```
+    3.  Adjust the Settings:
+
         - Width and Height: You can adjust the width and height parameters to fit the size of your page or app. For example, `width="100%"` will make it span the full width of the page.
         - Scrolling: By default, if the embedded dashboard is too large, users may need to scroll within the iframe. If needed, you can enable or disable scrolling using the `scrolling="yes"` or `scrolling="no"` attributes.
-        
-        <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%205.webp" alt="Embedded Grafana Dashboard" caption="Embedded Grafana Dashboard" />
-        
+
+        <Figure
+          src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%205.webp"
+          alt="Embedded Grafana Dashboard"
+          caption="Embedded Grafana Dashboard"
+        />
 
 ### 2. Public Dashboards Feature
 
@@ -130,13 +156,21 @@ Grafana's public dashboard feature allows you to share entire dashboards without
 1. Navigate to the dashboard you want to make public.
 2. Click the "Share" button and select "Public dashboard".
 3. Toggle the "Public dashboard" switch to enable it.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%206.webp" alt="Public Dashboards Feature" caption="Public Dashboards Feature" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%206.webp"
+     alt="Public Dashboards Feature"
+     caption="Public Dashboards Feature"
+   />
+
 4. Copy the provided URL and iframe code to embed the dashboard.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%207.webp" alt="Dashboard URL using Public Dashboards Feature" caption="Dashboard URL using Public Dashboards Feature" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%207.webp"
+     alt="Dashboard URL using Public Dashboards Feature"
+     caption="Dashboard URL using Public Dashboards Feature"
+   />
+
 5. Once you have the dashboard URL you can use an `iframe` as described before to embed it in the web page.
 
 ### 3. Grafana API Embedding
@@ -148,86 +182,111 @@ For more advanced use cases, you can use the Grafana API to embed dashboards dyn
 
 Steps for Embedding Grafana Dashboards Using the API
 
-1. Login to Grafana as an admin. 
+1. Login to Grafana as an admin.
 2. Go to Administration → Users and access → Service accounts, and click on `Add service account` button.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%208.webp" alt="Adding service account in Grafana" caption="Adding service account in Grafana" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%208.webp"
+     alt="Adding service account in Grafana"
+     caption="Adding service account in Grafana"
+   />
+
 3. Add the display name for the service account, choose the corresponding role, and click on the `Create` button.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%209.webp" alt="Creating service account in Grafana" caption="Creating service account in Grafana" />
-    
-4. Next, click on the `Add Service account token` 
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2010.webp" alt="Add service account token" caption="Add service account token" />
-    
-    Generate a token, you can also set an expiration date if you want. The token will be used for access.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2011.webp" alt="Generate token for service account" caption="Generate token for service account" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%209.webp"
+     alt="Creating service account in Grafana"
+     caption="Creating service account in Grafana"
+   />
+
+4. Next, click on the `Add Service account token`
+
+   <Figure
+     src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2010.webp"
+     alt="Add service account token"
+     caption="Add service account token"
+   />
+
+   Generate a token, you can also set an expiration date if you want. The token will be used for access.
+
+   <Figure
+     src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2011.webp"
+     alt="Generate token for service account"
+     caption="Generate token for service account"
+   />
+
 5. Fetch the Dashboard UUID: Once you are in the dashboard you want to embed check the URL to get the dashboard UUID.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2012.webp" alt="Fetch the Dashboard UUID" caption="Fetch the Dashboard UUID" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2012.webp"
+     alt="Fetch the Dashboard UUID"
+     caption="Fetch the Dashboard UUID"
+   />
+
 6. Fetch Dashboard Data
-    
-    Use Grafana's API to retrieve the dashboard JSON using the dashboard link:
-    
-    ```bash
-    curl -H "Authorization: Bearer <Service_account_token>" \
-         -H "Content-Type: application/json" \
-         https://your-grafana-instance/api/dashboards/uid/<UID>
-    ```
-    
-    Replace `<UID>` with the dashboard's UID from the URL.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2013.webp" alt="Test the URL" caption="Test the URL" />
-    
+
+   Use Grafana's API to retrieve the dashboard JSON using the dashboard link:
+
+   ```bash
+   curl -H "Authorization: Bearer <Service_account_token>" \
+        -H "Content-Type: application/json" \
+        https://your-grafana-instance/api/dashboards/uid/<UID>
+   ```
+
+   Replace `<UID>` with the dashboard's UID from the URL.
+
+   <Figure
+     src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2013.webp"
+     alt="Test the URL"
+     caption="Test the URL"
+   />
+
 7. Embed in Your Web Application
-    
-    To dynamically fetch and render the Grafana dashboard in your web application, you can use JavaScript. Instead of simply embedding the iframe, you can programmatically retrieve the dashboard data from Grafana's API and render it within your application.
-    
-    Here’s how to fetch the dashboard data using JavaScript:
-    
-    ```jsx
-    const dashboardUrl = 'https://your-grafana-instance/api/dashboards/uid/your-dashboard-uid';
-    const serviceAccountToken = 'your-service-account-token';
-    
-    fetch(dashboardUrl, {
-      headers: { 'Authorization': `Bearer ${serviceAccountToken}` }
-    })
-      .then(response => response.json())
-      .then(data => renderDashboard(data.dashboard.panels))
-      .catch(error => console.error('Error fetching the dashboard:', error));
-    ```
-    
-    Explanation: 
-    
-    - `dashboardUrl`: This is the API endpoint for fetching your Grafana dashboard. Replace `'your-dashboard-uid'` with the actual UID of your dashboard.
-    - `serviceAccountToken`: Grafana requires an API token (usually from a service account) to access the dashboard data. Ensure you replace `'your-service-account-token'` with a valid API token.
-    - `renderDashboard(data.dashboard.panels)`: This function would contain logic to render the dashboard data (e.g., charts, graphs, panels) into your web application.
-    
-    Example of rendering function (a basic idea to start):
-    
-    ```jsx
-    function renderDashboard(panels) {
-      const dashboardContainer = document.getElementById('dashboard');
-      panels.forEach(panel => {
-        const panelElement = document.createElement('div');
-        panelElement.className = 'panel';
-        panelElement.innerHTML = `
-          <h2>${panel.title}</h2>
-          <img src="${panel.url}" alt="${panel.title}" />
-        `;
-        dashboardContainer.appendChild(panelElement);
-      });
-    }
-    ```
-    
-    In this example:
-    
-    - Each panel's title and image (or content) are dynamically rendered within the HTML element with the ID `dashboard`.
-    - You can modify `renderDashboard` based on your requirements, whether to display charts, panels, or other components.
+
+   To dynamically fetch and render the Grafana dashboard in your web application, you can use JavaScript. Instead of simply embedding the iframe, you can programmatically retrieve the dashboard data from Grafana's API and render it within your application.
+
+   Here’s how to fetch the dashboard data using JavaScript:
+
+   ```jsx
+   const dashboardUrl = 'https://your-grafana-instance/api/dashboards/uid/your-dashboard-uid'
+   const serviceAccountToken = 'your-service-account-token'
+
+   fetch(dashboardUrl, {
+     headers: { Authorization: `Bearer ${serviceAccountToken}` },
+   })
+     .then((response) => response.json())
+     .then((data) => renderDashboard(data.dashboard.panels))
+     .catch((error) => console.error('Error fetching the dashboard:', error))
+   ```
+
+   Explanation:
+
+   - `dashboardUrl`: This is the API endpoint for fetching your Grafana dashboard. Replace `'your-dashboard-uid'` with the actual UID of your dashboard.
+   - `serviceAccountToken`: Grafana requires an API token (usually from a service account) to access the dashboard data. Ensure you replace `'your-service-account-token'` with a valid API token.
+   - `renderDashboard(data.dashboard.panels)`: This function would contain logic to render the dashboard data (e.g., charts, graphs, panels) into your web application.
+
+   Example of rendering function (a basic idea to start):
+
+   ```jsx
+   function renderDashboard(panels) {
+     const dashboardContainer = document.getElementById('dashboard')
+     panels.forEach((panel) => {
+       const panelElement = document.createElement('div')
+       panelElement.className = 'panel'
+       panelElement.innerHTML = `
+         <h2>${panel.title}</h2>
+         <img src="${panel.url}" alt="${panel.title}" />
+       `
+       dashboardContainer.appendChild(panelElement)
+     })
+   }
+   ```
+
+   In this example:
+
+   - Each panel's title and image (or content) are dynamically rendered within the HTML element with the ID `dashboard`.
+   - You can modify `renderDashboard` based on your requirements, whether to display charts, panels, or other components.
+
 8. Handle CORS: Enable embedding by setting `allow_embedding = true` in Grafana's `grafana.ini` under `[security]`.
 
 ## Security Considerations for Embedding
@@ -269,45 +328,47 @@ If you’re using the Grafana API for embedding, ensure your API access is prope
 When embedding Grafana dashboards, you might encounter some challenges:
 
 1. Cross-Origin Resource Sharing (CORS) Issues:
-    - Enable CORS in your Grafana configuration:
-        
-        ```
-        allow_embedding = true
-        cookie_samesite = none
-        ```
-        
-    - Set appropriate CORS headers on your web server
+   - Enable CORS in your Grafana configuration:
+     ```
+     allow_embedding = true
+     cookie_samesite = none
+     ```
+   - Set appropriate CORS headers on your web server
 2. Authentication Challenges:
-    - Use API tokens for server-side requests to Grafana
-    - Implement OAuth or SAML for seamless user authentication
+   - Use API tokens for server-side requests to Grafana
+   - Implement OAuth or SAML for seamless user authentication
 3. Performance Optimization:
-    - Limit the number of panels in embedded dashboards
-    - Use efficient queries and appropriate time ranges
-    - Consider using Grafana's caching features
+   - Limit the number of panels in embedded dashboards
+   - Use efficient queries and appropriate time ranges
+   - Consider using Grafana's caching features
 4. Responsive Design:
-    - Make sure that your embedded dashboard is responsive to various screen sizes by adjusting the iframe size or using CSS media queries.
-        
-        ```html
-        <div style="position: relative; padding-bottom: 56.25%; height: 0;">
-          <iframe src="..." style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
-        </div>
-        ```
-        
+   - Make sure that your embedded dashboard is responsive to various screen sizes by adjusting the iframe size or using CSS media queries.
+     ```html
+     <div style="position: relative; padding-bottom: 56.25%; height: 0;">
+       <iframe
+         src="..."
+         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+       ></iframe>
+     </div>
+     ```
 
 ## Alternatives to Grafana for Dashboard Embedding
 
 While Grafana is a popular choice for dashboard embedding, alternatives like [SigNoz](https://signoz.io) offer modern solutions for application monitoring and dashboard creation. SigNoz provides:
 
 - Easy-to-Embed Dashboards:
-    - Through its [simple API](https://signoz.io/api-reference/#/operations/getDashboards), developers can seamlessly integrate real-time dashboards into any application with minimal configuration.
-    - Whether it's embedding live metrics or visualizing performance data, SigNoz makes it easy to customize and tailor dashboards to specific needs.
+  - Through its [simple API](https://signoz.io/api-reference/#/operations/getDashboards), developers can seamlessly integrate real-time dashboards into any application with minimal configuration.
+  - Whether it's embedding live metrics or visualizing performance data, SigNoz makes it easy to customize and tailor dashboards to specific needs.
 - Built-in Application Performance Monitoring (APM):
-    - Unlike Grafana, which often requires external APM solutions, SigNoz offers native APM capabilities. This provides deep visibility into application performance, including [distributed tracing](https://signoz.io/distributed-tracing/), error tracking, and resource utilization—all without needing additional tools.
-    - The integration of monitoring and dashboards in one platform eliminates the complexity of managing multiple systems.
+  - Unlike Grafana, which often requires external APM solutions, SigNoz offers native APM capabilities. This provides deep visibility into application performance, including [distributed tracing](https://signoz.io/distributed-tracing/), error tracking, and resource utilization—all without needing additional tools.
+  - The integration of monitoring and dashboards in one platform eliminates the complexity of managing multiple systems.
 - Open-Source Flexibility: Enjoy a user-friendly interface while leveraging the benefits of open-source software.
-    
-    <Figure src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2014.webp" alt="User-friendly SigNoz Interface" caption="User-friendly SigNoz Interface" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/10/embedding-a-website-in-a-grafana-dashboard-image%2014.webp"
+    alt="User-friendly SigNoz Interface"
+    caption="User-friendly SigNoz Interface"
+  />
 
 SigNoz can be particularly beneficial for teams looking for an all-in-one solution that combines monitoring, tracing, and dashboard embedding.
 

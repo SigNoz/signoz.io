@@ -1,22 +1,19 @@
 ---
-
 title: How to Omit Labels in PromQL Series Results
-slug: omit-labels-from-series-results-promql
 date: 2024-11-29
 tags: [prometheus, faq]
 authors: [simran_kumari]
 description: Learn how to effectively omit labels from PromQL series results to optimize query performance and simplify data visualization in Prometheus monitoring.
 keywords: [PromQL, labels, Prometheus, monitoring, data visualization, query optimization, SigNoz]
-
 ---
 
-PromQL, Prometheus’s query language, uses labels to identify time series data. While labels are crucial for data organization, there are scenarios where you need to omit certain labels from your query results. This process can significantly improve query performance and simplify data visualization. 
+PromQL, Prometheus’s query language, uses labels to identify time series data. While labels are crucial for data organization, there are scenarios where you need to omit certain labels from your query results. This process can significantly improve query performance and simplify data visualization.
 
 In this guide, you'll learn various techniques to omit labels in PromQL, optimize your Grafana dashboards, and explore how modern monitoring solutions like SigNoz can streamline label management.
 
 ## Understanding PromQL Labels and their Importance
 
-PromQL ([Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/)) is the powerful query language used in Prometheus, a popular open-source monitoring and alerting system. At the heart of PromQL are labels—key-value pairs that uniquely identify time series. Labels in PromQL are key-value pairs attached to time series data. 
+PromQL ([Prometheus Query Language](https://signoz.io/guides/promql-cheat-sheet/)) is the powerful query language used in Prometheus, a popular open-source monitoring and alerting system. At the heart of PromQL are labels—key-value pairs that uniquely identify time series. Labels in PromQL are key-value pairs attached to time series data.
 
 For example:
 
@@ -67,9 +64,17 @@ sum without (instance,job) (prometheus_http_requests_total)
 
 This query sums up all HTTP requests but removes the `instance` and `job` labels from the result.
 
-<Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image.webp" alt="General metric filtering in PromQL" caption="General metric filtering in PromQL" />
+<Figure
+  src="/img/guides/2024/11/omit-labels-from-series-results-promql-image.webp"
+  alt="General metric filtering in PromQL"
+  caption="General metric filtering in PromQL"
+/>
 
-<Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%201.webp" alt="Using without clause to remove labels" caption="Using without clause to remove labels" />
+<Figure
+  src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%201.webp"
+  alt="Using without clause to remove labels"
+  caption="Using without clause to remove labels"
+/>
 
 ### Leveraging the `by` Clause
 
@@ -89,7 +94,11 @@ sum by (code,handler) (prometheus_http_requests_total)
 
 This query retains only the `method` and `status_code` labels, effectively omitting all others.
 
-<Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%202.webp" alt="Using by clause to keep labels" caption="Using by clause to keep labels" />
+<Figure
+  src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%202.webp"
+  alt="Using by clause to keep labels"
+  caption="Using by clause to keep labels"
+/>
 
 ### Manipulating Labels with `label_replace`
 
@@ -118,16 +127,24 @@ What it does:
 - `up` - The input vector/metric to be modified
 - `"new_label"` - This specifies the name of the new label to be created (or replaced if it already exists)
 - `"$1"` - The value to assign to the `new_label`. Here, `$1` refers to the first (and only) captured group in the regular expression
-- `"instance"` -  The existing/source label from which the value is extracted. The operation looks at the `instance` label in the `up` metric for matching
+- `"instance"` - The existing/source label from which the value is extracted. The operation looks at the `instance` label in the `up` metric for matching
 - `"(.*)”` - A regular expression pattern used to match the value of the `instance` label
-    - `.*` matches the entire value of the label
-    - The parentheses `()` define a capture group, so the entire matched value becomes the first group (`$1`), which is used as the replacement value for `new_label`
+  - `.*` matches the entire value of the label
+  - The parentheses `()` define a capture group, so the entire matched value becomes the first group (`$1`), which is used as the replacement value for `new_label`
 
-<Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%203.webp" alt="Query result without label replacement" caption="Query result without label replacement" />
+<Figure
+  src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%203.webp"
+  alt="Query result without label replacement"
+  caption="Query result without label replacement"
+/>
 
-<Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%204.webp" alt="Query result with new result" caption="Query result with new result" />
+<Figure
+  src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%204.webp"
+  alt="Query result with new result"
+  caption="Query result with new result"
+/>
 
-Note: By default, `label_replace` adds a new label without removing the old one. 
+Note: By default, `label_replace` adds a new label without removing the old one.
 
 To remove the old label (`instance` in this example) after using `label_replace`, you can pair it with the `without` or `by` clauses to exclude unwanted labels.
 
@@ -140,7 +157,12 @@ sum without (instance) (label_replace(up, "new_label", "$1", "instance", "(.*)")
 - `label_replace(up, "new_label", "$1", "instance", "(.*)")`: Creates the new label `new_label` by copying the value from the `instance` label
 - `without (instance)`: Excludes the original `instance` label from the result
 
-<Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%205.webp" alt="" caption="" />### Example: Omitting Instance and Pod Labels
+<Figure
+  src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%205.webp"
+  alt=""
+  caption=""
+/>
+### Example: Omitting Instance and Pod Labels
 
 Let's walk through a practical example of omitting `instance` and `pod` labels from a Kubernetes deployment metric:
 
@@ -170,7 +192,11 @@ sum without (instance) (prometheus_http_requests_total{handler=~"/api/.*"})
 
 This query sums up HTTP requests for all handlers starting with "/api" and removes the `instance` label.
 
-<Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%206.webp" alt="Regex-based Label Selection" caption="Regex-based Label Selection" />
+<Figure
+  src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%206.webp"
+  alt="Regex-based Label Selection"
+  caption="Regex-based Label Selection"
+/>
 
 ### Label Joins for Combining labels
 
@@ -195,7 +221,11 @@ label_join(prometheus_http_requests_total, "endpoint", "/", "instance", "handler
 
 This query combines the `instance` and `handler` labels into a new `endpoint` label, separated by a `/`.
 
-<Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%207.webp" alt="Label Joins for Complex Data Relationships" caption="Label Joins for Complex Data Relationships" />
+<Figure
+  src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%207.webp"
+  alt="Label Joins for Complex Data Relationships"
+  caption="Label Joins for Complex Data Relationships"
+/>
 
 ### Best Practices for Label Omission
 
@@ -211,23 +241,34 @@ When omitting labels, keep these best practices in mind:
 Grafana, a popular visualization tool often used with Prometheus, can benefit greatly from strategic label omission:
 
 1. Streamline Legend Entries: Use PromQL to omit unnecessary labels, resulting in cleaner legends:
-    
-    ```
-    sum by (code) (rate(prometheus_http_requests_total[5m]))
-    ```
-    
-    This query shows request rates by status code, omitting other labels for a concise legend.
-    
-    <Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%208.webp" alt="Streamline Legend Entries" caption="Streamline Legend Entries" />
-    
+
+   ```
+   sum by (code) (rate(prometheus_http_requests_total[5m]))
+   ```
+
+   This query shows request rates by status code, omitting other labels for a concise legend.
+
+   <Figure
+     src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%208.webp"
+     alt="Streamline Legend Entries"
+     caption="Streamline Legend Entries"
+   />
+
 2. Utilize Grafana's Label Filters: Complement PromQL label omission with Grafana's built-in label filters for dynamic visualizations.
-    
-    <Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%209.webp" alt="Utilize Grafana's Label Filters" caption="Utilize Grafana's Label Filters" />
-    
-3. Create Template Variables: Use Grafana template variables to allow users to select which label values to include or exclude dynamically. Check out the <a href="https://grafana.com/docs/grafana/latest/dashboards/variables/" rel="noopener noreferrer nofollow" target="_blank">steps for creating a template variable in Grafana.</a>  
-    
-    <Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%2010.webp" alt="Create Template Variables" caption="Create Template Variables" />
-    
+
+   <Figure
+     src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%209.webp"
+     alt="Utilize Grafana's Label Filters"
+     caption="Utilize Grafana's Label Filters"
+   />
+
+3. Create Template Variables: Use Grafana template variables to allow users to select which label values to include or exclude dynamically. Check out the <a href="https://grafana.com/docs/grafana/latest/dashboards/variables/" rel="noopener noreferrer nofollow" target="_blank">steps for creating a template variable in Grafana.</a>
+
+   <Figure
+     src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%2010.webp"
+     alt="Create Template Variables"
+     caption="Create Template Variables"
+   />
 
 ### Tips for Creating Clear and Concise Visualizations
 
@@ -239,21 +280,28 @@ When creating visualizations, the goal is to present data in a way that is both 
 
 ## Monitoring with SigNoz: Simplified Label Management
 
-In traditional monitoring setups, Prometheus and Grafana are commonly used for collecting metrics and visualizing data. However, for more complex, distributed systems, managing labels in Prometheus can become cumbersome, especially when you have many different metrics across microservices. 
+In traditional monitoring setups, Prometheus and Grafana are commonly used for collecting metrics and visualizing data. However, for more complex, distributed systems, managing labels in Prometheus can become cumbersome, especially when you have many different metrics across microservices.
 
 [SigNoz](https://signoz.io) offers a modern alternative that simplifies label management, aggregation, and visualization of metrics, traces, and logs, making it a great choice for teams looking to streamline their [observability stack](https://signoz.io/guides/observability-stack/).
 
 SigNoz, a modern open-source monitoring solution, offers enhanced capabilities for label management in distributed systems:
 
 1. Automatic [Context Propagation](https://signoz.io/blog/opentelemetry-context-propagation/): SigNoz automatically propagates relevant labels across services, reducing the need for manual label management.
-    
-    <Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%2011.webp" alt="Automatic Context Propagation: SigNoz" caption="Automatic Context Propagation: SigNoz" />
-    
-2. Intelligent Aggregation: SigNoz provides intelligent aggregation features by offering automatic grouping of metrics and traces based on common attributes (like service, region, etc.). 
+
+   <Figure
+     src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%2011.webp"
+     alt="Automatic Context Propagation: SigNoz"
+     caption="Automatic Context Propagation: SigNoz"
+   />
+
+2. Intelligent Aggregation: SigNoz provides intelligent aggregation features by offering automatic grouping of metrics and traces based on common attributes (like service, region, etc.).
 3. Custom Attribute Mapping: SigNoz allows you to map custom attributes to labels, giving you fine-grained control over what information is included in your metrics.
-    
-    <Figure src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%2012.webp" alt="Custom Attribute Mapping: SigNoz" caption="Custom Attribute Mapping: SigNoz" /> 
-    
+
+   <Figure
+     src="/img/guides/2024/11/omit-labels-from-series-results-promql-image%2012.webp"
+     alt="Custom Attribute Mapping: SigNoz"
+     caption="Custom Attribute Mapping: SigNoz"
+   />{' '}
 
 To get started with SigNoz and experience its simplified label management:
 

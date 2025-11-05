@@ -1,13 +1,20 @@
 ---
-
 title: How to Fix NoClassDefFoundError - org.apache.log4j.Logger
-slug: caused-by-java-lang-noclassdeffounderror-org-apache-log4j-logger
 date: 2024-09-18
 tags: [faq]
 authors: [nilesh_sinha]
 description: Learn how to fix NoClassDefFoundError for org.apache.log4j.Logger in Java applications. Discover causes, solutions, and prevention techniques.
-keywords: [NoClassDefFoundError, log4j.Logger, Java error, ClassNotFoundException, Debugging Java, Dependency management, Maven troubleshooting, Java classpath]
-
+keywords:
+  [
+    NoClassDefFoundError,
+    log4j.Logger,
+    Java error,
+    ClassNotFoundException,
+    Debugging Java,
+    Dependency management,
+    Maven troubleshooting,
+    Java classpath,
+  ]
 ---
 
 Java developers often encounter the dreaded `NoClassDefFoundError` — a runtime exception that can bring your application to a screeching halt. When this error involves the `org.apache.log4j.Logger` class, it's particularly frustrating as logging is crucial for debugging and monitoring. This comprehensive guide will help you understand, resolve, and prevent this error, ensuring your Java applications run smoothly.
@@ -57,12 +64,12 @@ log4j.appender.FILE.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
 
 - INFO: Only log messages at the INFO level or higher (WARN, ERROR).
 - Pattern Layout: Defines the format of log messages: date, thread, log level, logger name, and message. Let’s comprehend what the pattern `%d [%t] %-5p %c - %m%n` in the code example signifies:
-    - `%d`: Timestamp of the log event.
-    - `[%t]`: Name of the thread generating the log message, enclosed in square brackets.
-    - `%-5p`: Log level (e.g., INFO, ERROR), padded to 5 characters for alignment.
-    - `%c`: Logger name (usually the class name).
-    - `%m`: The actual log message.
-    - `%n`: Platform-specific newline (ensures each log entry is on a new line).
+  - `%d`: Timestamp of the log event.
+  - `[%t]`: Name of the thread generating the log message, enclosed in square brackets.
+  - `%-5p`: Log level (e.g., INFO, ERROR), padded to 5 characters for alignment.
+  - `%c`: Logger name (usually the class name).
+  - `%m`: The actual log message.
+  - `%n`: Platform-specific newline (ensures each log entry is on a new line).
 
 Console and File Logging:
 
@@ -89,7 +96,7 @@ Let’s look at some of the common scenarios where this situation might arise:
 
 ### Missing or Incorrect Log4j Dependency in Classpath
 
-If the Log4j library is missing from the runtime classpath or incorrectly configured, the JVM will throw this error. This can happen if the Log4j JAR was accidentally removed or not specified properly in the build file. 
+If the Log4j library is missing from the runtime classpath or incorrectly configured, the JVM will throw this error. This can happen if the Log4j JAR was accidentally removed or not specified properly in the build file.
 
 Fix: Add the correct Log4j version to your project’s dependencies.
 
@@ -125,53 +132,45 @@ Trying these quick fixes would help you resolve the issue quickly before jumping
 
 ### Restart and clean:
 
-It’s always better to perform a simple task that doesn’t consume much of your time and fixes your issue as well. Perform a clean build and restart your IDE or application server. 
+It’s always better to perform a simple task that doesn’t consume much of your time and fixes your issue as well. Perform a clean build and restart your IDE or application server.
 
 A clean build and restart would clear cached files and rebuilds the project with the latest changes, resolving issues from stale configurations or dependency conflicts.
 
 ### Check dependencies:
 
-Ensure Log4j is correctly listed in your project dependencies.  You can check the missing Log4j dependency in your Maven project in the following ways:
+Ensure Log4j is correctly listed in your project dependencies. You can check the missing Log4j dependency in your Maven project in the following ways:
 
 - Check `pom.xml` File:
-    - Open your `pom.xml` and look for the Log4j dependency under the `<dependencies>` section.
-    - If it’s missing, you need to add it:
-    
-    ```xml
-    <dependency>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <version>1.2.17</version> <!-- Reference version indicated -->
-    </dependency>
-    ```
-    
+  - Open your `pom.xml` and look for the Log4j dependency under the `<dependencies>` section.
+  - If it’s missing, you need to add it:
+  ```xml
+  <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version> <!-- Reference version indicated -->
+  </dependency>
+  ```
 - Run Dependency Tree Command:
-    - Use the command to view the dependency tree and confirm that Log4j is included:
-    
-    ```
-    mvn dependency:tree | grep log4j
-    ```
-    
+  - Use the command to view the dependency tree and confirm that Log4j is included:
+  ```
+  mvn dependency:tree | grep log4j
+  ```
 
 You can also follow the same steps to ensure that the Log4j dependency is present in your Gradle project as well:
 
 - Check `build.gradle` File:
-    - Open your `build.gradle` file and look for the Log4j dependency in the `dependencies` section.
-    - If it’s missing, add it as follows:
-    
-    ```groovy
-    dependencies {
-        implementation 'log4j:log4j:1.2.17' // Reference version indicated
-    }
-    ```
-    
+  - Open your `build.gradle` file and look for the Log4j dependency in the `dependencies` section.
+  - If it’s missing, add it as follows:
+  ```groovy
+  dependencies {
+      implementation 'log4j:log4j:1.2.17' // Reference version indicated
+  }
+  ```
 - Run Dependency Tree Command:
-    - Use the command to view the dependency tree and confirm that Log4j is included:
-    
-    ```bash
-    gradle dependencies --configuration runtimeClasspath | grep log4j
-    ```
-    
+  - Use the command to view the dependency tree and confirm that Log4j is included:
+  ```bash
+  gradle dependencies --configuration runtimeClasspath | grep log4j
+  ```
 
 ### Verify classpath:
 
@@ -180,18 +179,14 @@ Verifying the classpath is essential to ensure that the necessary libraries, lik
 If you're running a Java application directly, you can print the classpath using the following methods:
 
 - Command Line:
-    - When running a Java application, you can print the classpath by including `verbose:class` in the JVM options. This will print out all classes loaded by the JVM, including their location.
-        
-        ```
-        java -verbose:class -cp classpath com.package.MainClass
-        ```
-        
-    - Alternatively, you can print the classpath using a simple Java command:
-        
-        ```
-        java -cp . -classpath "classpath/*" com.package.MainClass
-        ```
-        
+  - When running a Java application, you can print the classpath by including `verbose:class` in the JVM options. This will print out all classes loaded by the JVM, including their location.
+    ```
+    java -verbose:class -cp classpath com.package.MainClass
+    ```
+  - Alternatively, you can print the classpath using a simple Java command:
+    ```
+    java -cp . -classpath "classpath/*" com.package.MainClass
+    ```
 
 Note: For more complex scenarios, it’s better to use a debugger to inspect the classpath at runtime, which can help identify classloading issues and verify that all required libraries are correctly included.
 
@@ -241,45 +236,41 @@ Command Line Execution:
 
 - Place the `log4j.jar` file in a directory, say `lib/`.
 - When running your Java application, specify the classpath using the `cp` option:
-    
-    ```
-    java -cp .;lib/log4j.jar com.example.MainClass
-    ```
-    
-    - On Windows, use `;` as the separator, and on UNIX-based systems like Linux or macOS, use `:`.
-    
-    ```
-    java -cp .;lib/log4j.jar com.example.MainClass
-    ```
-    
+  ```
+  java -cp .;lib/log4j.jar com.example.MainClass
+  ```
+  - On Windows, use `;` as the separator, and on UNIX-based systems like Linux or macOS, use `:`.
+  ```
+  java -cp .;lib/log4j.jar com.example.MainClass
+  ```
 
 ### Configuring build path in IDEs like Eclipse and IntelliJ IDEA
 
 - Eclipse:
-    - Right-click on your project and select `Properties`.
-    - Go to `Java Build Path` > `Libraries`.
-    - Click `Add External JARs...` and navigate to the directory where `log4j.jar` is located.
-    - Add the JAR file, and it will appear under the `Libraries` section of the build path.
-    - Optional: Under `Order and Export`, ensure that `log4j.jar` is checked if you want it to be included in the runtime classpath.
+  - Right-click on your project and select `Properties`.
+  - Go to `Java Build Path` > `Libraries`.
+  - Click `Add External JARs...` and navigate to the directory where `log4j.jar` is located.
+  - Add the JAR file, and it will appear under the `Libraries` section of the build path.
+  - Optional: Under `Order and Export`, ensure that `log4j.jar` is checked if you want it to be included in the runtime classpath.
 - IntelliJ IDEA:
-    - Open the `Project Structure` dialog (`Ctrl+Alt+Shift+S` or `Cmd+;` on macOS).
-    - Go to `Modules` > `Dependencies`.
-    - Click on the `+` sign, select `JARs or directories...`, and add the `log4j.jar` file.
-    - Ensure the scope is set to `Compile` or `Runtime`, depending on your needs.
+  - Open the `Project Structure` dialog (`Ctrl+Alt+Shift+S` or `Cmd+;` on macOS).
+  - Go to `Modules` > `Dependencies`.
+  - Click on the `+` sign, select `JARs or directories...`, and add the `log4j.jar` file.
+  - Ensure the scope is set to `Compile` or `Runtime`, depending on your needs.
 
 ### Checking for conflicting log4j versions in the project structure
 
 - ClassPath Inspection :Print the classpath during runtime to check which version of Log4j is being used:`System.out.println(System.getProperty("java.class.path"));`
 - Handling Conflicts:
-    - If conflicts arise (e.g., `NoClassDefFoundError`), ensure that only the required version of Log4j is present by removing the conflicting versions from the classpath or IDE configuration.
-    - Consider using a dependency manager like Ant or Gradle to manage dependencies and avoid conflicts, even in non-Maven projects.
+  - If conflicts arise (e.g., `NoClassDefFoundError`), ensure that only the required version of Log4j is present by removing the conflicting versions from the classpath or IDE configuration.
+  - Consider using a dependency manager like Ant or Gradle to manage dependencies and avoid conflicts, even in non-Maven projects.
 
 ## Advanced Solutions for Persistent NoClassDefFoundError Issues
 
 If the error persists, try these advanced techniques:
 
-1. Use JClassLib: This bytecode viewer can help inspect class files and their dependencies. 
-Look at the `Constant Pool` and method references to see which class it tries to load. This can help identify the missing class.
+1. Use JClassLib: This bytecode viewer can help inspect class files and their dependencies.
+   Look at the `Constant Pool` and method references to see which class it tries to load. This can help identify the missing class.
 2. Implement custom ClassLoaders: Create a custom ClassLoader to diagnose loading issues:
 
 ```java
@@ -305,6 +296,7 @@ We can have the following commands due to their different purposes:
 - `Xbootclasspath`: Specifies the bootstrap classpath, useful for adding classes to the core Java runtime.
 - `Djava.class.path`: Sets the application classpath, ensuring all required libraries are included for the application.
 - `Xverify:none`: Disables bytecode verification (use with caution), which can sometimes bypass class loading issues caused by verification errors.
+
 1. Debug classpath issues: Use the java command with -cp option to explicitly set the classpath:
 
 ```bash

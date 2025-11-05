@@ -1,13 +1,10 @@
 ---
-
 title: How to Filter Loki JSON Logs in Grafana - A Step-by-Step Guide
-slug: loki-json-logs-filter-by-detected-fields-from-grafana
 date: 2024-10-03
 tags: [faq, grafana]
 authors: [simran_kumari]
 description: Learn how to filter Loki JSON logs using detected fields in Grafana. This comprehensive guide covers everything from basics to advanced techniques.
 keywords: [Loki, Grafana, JSON logs, log filtering, LogQL, log analysis, observability, SigNoz]
-
 ---
 
 As logs become more complex, especially with the rise of microservices and distributed systems, managing and analyzing them efficiently is critical. Loki and Grafana provide an effective log management and visualization solution, and when combined with JSON logs, they offer a powerful way to search, filter, and analyze log data. This guide will walk you through filtering Loki JSON logs in Grafana, from the basics to more advanced techniques.
@@ -39,7 +36,7 @@ Here's an example of a [JSON log](https://signoz.io/blog/json-logs/) entry that 
   },
   "transaction": {
     "id": "txn_456789",
-    "amount": 100.50,
+    "amount": 100.5,
     "currency": "USD"
   },
   "http": {
@@ -60,7 +57,11 @@ The combination of Loki's efficient log storage and Grafana's powerful querying 
 - Set up alerts based on log patterns or thresholds
 - Perform real-time log analysis
 
-<Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image.webp" alt="Grafana-Loki log analysis" caption="Grafana-Loki log analysis" />
+<Figure
+  src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image.webp"
+  alt="Grafana-Loki log analysis"
+  caption="Grafana-Loki log analysis"
+/>
 
 ## How Grafana Detects Fields in JSON Logs
 
@@ -71,7 +72,11 @@ Grafana automatically detects fields in JSON-formatted logs, simplifying the pro
 3. Data type inference: Grafana attempts to determine the data type of each field (e.g., string, number, boolean).
 4. Field mapping: Detected fields are mapped to queryable attributes in Grafana's interface.
 
-<Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%201.webp" alt="How Grafana Detects Fields in JSON Logs" caption="How Grafana Detects Fields in JSON Logs" />
+<Figure
+  src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%201.webp"
+  alt="How Grafana Detects Fields in JSON Logs"
+  caption="How Grafana Detects Fields in JSON Logs"
+/>
 
 Common types of fields detected in JSON logs include:
 
@@ -95,119 +100,148 @@ To begin filtering logs, you need to access the Explore section in Grafana. This
 
 1. In Grafana’s left-hand menu, click on Explore.
 2. Select Loki as your data source from the dropdown menu.
-    
-    <Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%202.webp" alt="Select Loki as your data source" caption="Select Loki as your data source" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%202.webp"
+     alt="Select Loki as your data source"
+     caption="Select Loki as your data source"
+   />
+
 3. Enter your basic query to retrieve logs (for example, `{job="your-job-name"}`).
-    
-    <Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%203.webp" alt="Retrieve logs" caption="Retrieve logs" />
-    
+
+   <Figure
+     src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%203.webp"
+     alt="Retrieve logs"
+     caption="Retrieve logs"
+   />
 
 ### Using LogQL for Advanced Filtering
 
 Once you’ve retrieved your logs, you can start using LogQL to filter specific fields from JSON logs.
 
 1. Extract JSON fields
-    
-    LogQL includes powerful filtering capabilities for JSON logs. A key operator for parsing JSON fields is the `| json` operator, which allows you to extract and filter fields from JSON logs.
-    
-    Example:
-    
-    ```arduino
-    {job="python-server"} | json
-    ```
-    
-    This command extracts all JSON fields from the logs for the selected job.
-    
-    <Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%204.webp" alt="Extract JSON fields using LogQL" caption="Extract JSON fields using LogQL" />
-    
+
+   LogQL includes powerful filtering capabilities for JSON logs. A key operator for parsing JSON fields is the `| json` operator, which allows you to extract and filter fields from JSON logs.
+
+   Example:
+
+   ```arduino
+   {job="python-server"} | json
+   ```
+
+   This command extracts all JSON fields from the logs for the selected job.
+
+   <Figure
+     src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%204.webp"
+     alt="Extract JSON fields using LogQL"
+     caption="Extract JSON fields using LogQL"
+   />
+
 2. Extracting Specific Fields
-    
-    To filter a specific field, you can modify the query as follows:
-    
-    ```arduino
-    {job="python-server"} | json | level="error"
-    ```
-    
-    In this example, the query filters logs with the `job="python-server"` label and extracts logs where the `level` field is set to `"error"`.
-    
-    <Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%205.webp" alt="Extract Specific Fields using LogQL" caption="Extract Specific Fields using LogQL" />
-    
+
+   To filter a specific field, you can modify the query as follows:
+
+   ```arduino
+   {job="python-server"} | json | level="error"
+   ```
+
+   In this example, the query filters logs with the `job="python-server"` label and extracts logs where the `level` field is set to `"error"`.
+
+   <Figure
+     src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%205.webp"
+     alt="Extract Specific Fields using LogQL"
+     caption="Extract Specific Fields using LogQL"
+   />
+
 3. Combining Multiple Filters
-    
-    For more advanced use cases, you can combine multiple filters to narrow down your results:
-    
-    ```sql
-    {job="python-server"} | json | level="error" | method="POST"
-    ```
-    
-    This query filters for logs where the `level` is `"error"` and the HTTP method is `POST`.
-    
-    <Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%206.webp" alt="Combining Multiple Filters on JSON fields" caption="Combining Multiple Filters on JSON fields" />
-    
+
+   For more advanced use cases, you can combine multiple filters to narrow down your results:
+
+   ```sql
+   {job="python-server"} | json | level="error" | method="POST"
+   ```
+
+   This query filters for logs where the `level` is `"error"` and the HTTP method is `POST`.
+
+   <Figure
+     src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%206.webp"
+     alt="Combining Multiple Filters on JSON fields"
+     caption="Combining Multiple Filters on JSON fields"
+   />
 
 ## Advanced Techniques for JSON Log Filtering
 
 Once you've mastered basic filtering techniques, you can explore more advanced methods to refine your log queries and work with complex structures.
 
 1. Using Regular Expressions for Flexible Field Matching
-    
-    Sometimes you may need to filter logs based on patterns in a specific field rather than exact values. In such cases, you can use regular expressions (regex) in LogQL to match fields dynamically.
-    
-    For example, to filter logs where the `message` field contains any log related to `Home` page, you can use the following query:
-    
-    ```arduino
-    {job="python-server"} | json | message =~ "Home.*"
-    ```
-    
-    The `=~` operator matches logs where the `message` field follows the given regex pattern, making it a flexible tool for complex log analysis.
-    
-    <Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%207.webp" alt="Using Regular Expressions for Flexible Field Matching" caption="Using Regular Expressions for Flexible Field Matching" /> 
-    
+
+   Sometimes you may need to filter logs based on patterns in a specific field rather than exact values. In such cases, you can use regular expressions (regex) in LogQL to match fields dynamically.
+
+   For example, to filter logs where the `message` field contains any log related to `Home` page, you can use the following query:
+
+   ```arduino
+   {job="python-server"} | json | message =~ "Home.*"
+   ```
+
+   The `=~` operator matches logs where the `message` field follows the given regex pattern, making it a flexible tool for complex log analysis.
+
+   <Figure
+     src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%207.webp"
+     alt="Using Regular Expressions for Flexible Field Matching"
+     caption="Using Regular Expressions for Flexible Field Matching"
+   />{' '}
+
 2. Implementing Dynamic Field Filtering with Variables
-    
-    Grafana provides the ability to define variables in dashboards, which can be used dynamically in log queries. This enables you to change the filtering criteria based on user input without modifying the query manually each time.
-    
-    Check the documentation <a href="https://grafana.com/docs/grafana/latest/dashboards/variables/add-template-variables/" rel="noopener noreferrer nofollow" target="_blank">here</a> to create variables in the Grafana Dashboard
-    
-    For example, you could create a variable to dynamically filter logs by the `method` field (e.g., `GET`, `POST`). After creating the variable in your dashboard, you can reference it in your LogQL query like this:
-    
-    ```bash
-    {job="python-server"} | json | method="$httpMethod"
-    ```
-    
-    Here, `$httpMethod` is the variable representing the selected HTTP method, allowing users to filter logs interactively via dropdowns or other UI controls.
-    
-    <Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%208.webp" alt="Implementing Dynamic Field Filtering with Variables" caption="Implementing Dynamic Field Filtering with Variables" />
-    
+
+   Grafana provides the ability to define variables in dashboards, which can be used dynamically in log queries. This enables you to change the filtering criteria based on user input without modifying the query manually each time.
+
+   Check the documentation <a href="https://grafana.com/docs/grafana/latest/dashboards/variables/add-template-variables/" rel="noopener noreferrer nofollow" target="_blank">here</a> to create variables in the Grafana Dashboard
+
+   For example, you could create a variable to dynamically filter logs by the `method` field (e.g., `GET`, `POST`). After creating the variable in your dashboard, you can reference it in your LogQL query like this:
+
+   ```bash
+   {job="python-server"} | json | method="$httpMethod"
+   ```
+
+   Here, `$httpMethod` is the variable representing the selected HTTP method, allowing users to filter logs interactively via dropdowns or other UI controls.
+
+   <Figure
+     src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%208.webp"
+     alt="Implementing Dynamic Field Filtering with Variables"
+     caption="Implementing Dynamic Field Filtering with Variables"
+   />
+
 3. Leveraging Derived Fields for Enhanced Filtering
-    
-    Derived fields allow you to enrich your log data by adding new fields based on the content of existing log messages. You can define custom parsing rules in Grafana to extract additional fields from your logs.
-    
-    For example, you can extract specific fields directly from your JSON logs with a simple query like this:
-    
-    ```json
-    {job="python-server"}
-    | json
-    | line_format "{{ .asctime }} | {{ .levelname }} | {{ .method }} | {{ .message }}"
-    ```
-    
-    Output Explanation:
-    
-    - `{{ .asctime }}`: Displays the timestamp of the log entry.
-    - `{{ .levelname }}`: Displays the log level (INFO, WARNING, etc.).
-    - `{{ .method }}`: Displays the HTTP method (GET, POST, etc.).
-    
-    Example Log Output:
-    
-    If you run the above query, you should see an output that looks something like this:
-    
-    ```sql
-    2024-09-25 20:37:44,275 | INFO | GET | Home page accessed .... 
-    ```
-    
-    <Figure src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%209.webp" alt="Leveraging Derived Fields for Enhanced Filtering" caption="Leveraging Derived Fields for Enhanced Filtering" />
-    
+
+   Derived fields allow you to enrich your log data by adding new fields based on the content of existing log messages. You can define custom parsing rules in Grafana to extract additional fields from your logs.
+
+   For example, you can extract specific fields directly from your JSON logs with a simple query like this:
+
+   ```json
+   {job="python-server"}
+   | json
+   | line_format "{{ .asctime }} | {{ .levelname }} | {{ .method }} | {{ .message }}"
+   ```
+
+   Output Explanation:
+
+   - `{{ .asctime }}`: Displays the timestamp of the log entry.
+   - `{{ .levelname }}`: Displays the log level (INFO, WARNING, etc.).
+   - `{{ .method }}`: Displays the HTTP method (GET, POST, etc.).
+
+   Example Log Output:
+
+   If you run the above query, you should see an output that looks something like this:
+
+   ```sql
+   2024-09-25 20:37:44,275 | INFO | GET | Home page accessed ....
+   ```
+
+   <Figure
+     src="/img/guides/2024/10/loki-json-logs-filter-by-detected-fields-from-grafana-image%209.webp"
+     alt="Leveraging Derived Fields for Enhanced Filtering"
+     caption="Leveraging Derived Fields for Enhanced Filtering"
+   />
 
 ## Best Practices for Efficient JSON Log Filtering in Grafana
 
@@ -224,17 +258,17 @@ When working with JSON logs in Loki and Grafana, you may encounter these common 
 
 1. Inconsistent JSON structures: Ensure all logs follow a consistent JSON format.
 2. Nested JSON objects: Use dot notation to access nested fields:
-    
-    ```arduino
-    {app="myapp"} | json | error.code == 500
-    ```
-    
+
+   ```arduino
+   {app="myapp"} | json | error.code == 500
+   ```
+
 3. Field detection issues: Verify JSON validity and use explicit parsing when needed:
-    
-    ```arduino
-    {app="myapp"} | json field="message"
-    ```
-    
+
+   ```arduino
+   {app="myapp"} | json field="message"
+   ```
+
 4. Slow query performance: Optimize queries by using appropriate label filters and time ranges.
 
 ## Enhancing Log Analysis with SigNoz

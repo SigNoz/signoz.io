@@ -1,13 +1,19 @@
 ---
-
 title: How to Use @Timed Metrics in Java with Codahale Metrics
-slug: codahale-metrics-using-timed-metrics-annotation-in-plain-java
 date: 2024-10-03
 tags: [faq]
 authors: [niyati_thakkar]
 description: Learn how to implement and optimize @Timed metrics in Java using Codahale Metrics. Boost your application's performance monitoring capabilities.
-keywords: [Codahale Metrics, Timed annotation, Java performance monitoring, MetricRegistry, Dropwizard Metrics, Java observability, SigNoz integration]
-
+keywords:
+  [
+    Codahale Metrics,
+    Timed annotation,
+    Java performance monitoring,
+    MetricRegistry,
+    Dropwizard Metrics,
+    Java observability,
+    SigNoz integration,
+  ]
 ---
 
 Performance monitoring is crucial for maintaining robust Java applications. Enter Codahale Metrics — a powerful library that simplifies the process of gathering and reporting performance data. At the heart of this toolkit lies the @Timed annotation, a simple yet effective way to measure method execution times. This article delves into the intricacies of using @Timed metrics in plain Java, providing the knowledge to enhance your application's observability.
@@ -16,7 +22,10 @@ Performance monitoring is crucial for maintaining robust Java applications. Ente
 
 Codahale Metrics, which is now maintained as part of [Dropwizard Metrics](https://signoz.io/guides/dropwizard-metrics-meters-vs-timers/), is a Java library designed to capture and report various application metrics. It offers a suite of annotations and classes that make performance monitoring a breeze.
 
-<a href="https://www.dropwizard.io/en/stable/" rel="noopener noreferrer nofollow" target="_blank">Dropwizard</a> is a framework built to provide production-ready features, such as application metrics, health checks, and configuration management, making it a robust solution for modern Java applications.
+<a href="https://www.dropwizard.io/en/stable/" rel="noopener noreferrer nofollow" target="_blank">
+  Dropwizard
+</a> is a framework built to provide production-ready features, such as application metrics, health
+checks, and configuration management, making it a robust solution for modern Java applications.
 
 The @Timed annotation is a key component of this library. When applied to a method, it automatically tracks:
 
@@ -41,35 +50,29 @@ Compared to other metric annotations:
 
 The true power of Codahale Metrics is in its ability to integrate with a variety of metric reporting systems, allowing you to visualize, log, and analyze these metrics in real time or periodically. Here's how `@Timed` metrics can be integrated with some popular reporting systems:
 
-1. JMX (Java Management Extensions):
-JMX is a built-in feature for monitoring Java applications. By exposing metrics through JMX, you can track method timings via tools like JConsole or VisualVM.
-    
-    ```java
-    JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).build();
-    reporter.start();
-    ```
-    
-2. SLF4J (Simple Logging Facade for Java):
-`@Timed` can integrate with SLF4J, allowing you to print timing data to your application logs at a specified interval.
-    
-    ```java
-    Slf4jReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
-        .outputTo(LoggerFactory.getLogger("metrics"))
-        .build();
-    reporter.start(1, TimeUnit.MINUTES);
-    ```
-    
-3. Graphite:
-For those looking to visualize metrics over time, Graphite is a popular choice. The `GraphiteReporter` class allows you to send timing metrics (collected via `@Timed`) to a Graphite server.
-    
-    ```java
-    final Graphite graphite = new Graphite(new InetSocketAddress("graphite.example.com", 2003));
-    final GraphiteReporter reporter = GraphiteReporter.forRegistry(metricRegistry)
-        .prefixedWith("myApp")
-        .build(graphite);
-    reporter.start(1, TimeUnit.MINUTES);
-    ```
-    
+1.  JMX (Java Management Extensions):
+    JMX is a built-in feature for monitoring Java applications. By exposing metrics through JMX, you can track method timings via tools like JConsole or VisualVM.
+        ```java
+        JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).build();
+        reporter.start();
+        ```
+2.  SLF4J (Simple Logging Facade for Java):
+    `@Timed` can integrate with SLF4J, allowing you to print timing data to your application logs at a specified interval.
+        ```java
+        Slf4jReporter reporter = Slf4jReporter.forRegistry(metricRegistry)
+            .outputTo(LoggerFactory.getLogger("metrics"))
+            .build();
+        reporter.start(1, TimeUnit.MINUTES);
+        ```
+3.  Graphite:
+    For those looking to visualize metrics over time, Graphite is a popular choice. The `GraphiteReporter` class allows you to send timing metrics (collected via `@Timed`) to a Graphite server.
+        ```java
+        final Graphite graphite = new Graphite(new InetSocketAddress("graphite.example.com", 2003));
+        final GraphiteReporter reporter = GraphiteReporter.forRegistry(metricRegistry)
+            .prefixedWith("myApp")
+            .build(graphite);
+        reporter.start(1, TimeUnit.MINUTES);
+        ```
 
 ## Implementing Timer in Plain Java
 
@@ -117,7 +120,7 @@ public class TimerExample {
             performTask();
         } finally {
 		        // Stop the timer
-            context.stop();  
+            context.stop();
         }
 
         wait5Seconds();
@@ -135,7 +138,7 @@ public class TimerExample {
         // Simulate some work with a sleep
         try {
 		        // Simulate task taking 2 seconds
-            Thread.sleep(2000);  
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -154,35 +157,37 @@ public class TimerExample {
 
 The above code returns the output as follows:
 
-<Figure src="/img/guides/2024/10/codahale-metrics-using-timed-metrics-annotation-in-plain-java-image.webp" alt="Measuring Method Execution Time with Timer" caption="Measuring Method Execution Time with Timer" />
+<Figure
+  src="/img/guides/2024/10/codahale-metrics-using-timed-metrics-annotation-in-plain-java-image.webp"
+  alt="Measuring Method Execution Time with Timer"
+  caption="Measuring Method Execution Time with Timer"
+/>
 
 ### Configuring the MetricRegistry
 
 The MetricRegistry is the central component that manages all your metrics. Here's how to set it up and use it effectively:
 
-1. Create a singleton MetricRegistry:
-Making the `MetricRegistry` a singleton ensures that all metrics are centralized and consistent across your application. This design prevents multiple instances of the registry from existing, which could lead to fragmented or inaccurate metrics.
-    
-    ```java
-    public class MetricRegistryHolder {
-        private static final MetricRegistry REGISTRY = new MetricRegistry();
-    
-        public static MetricRegistry getRegistry() {
-            return REGISTRY;
+1.  Create a singleton MetricRegistry:
+    Making the `MetricRegistry` a singleton ensures that all metrics are centralized and consistent across your application. This design prevents multiple instances of the registry from existing, which could lead to fragmented or inaccurate metrics.
+        ```java
+        public class MetricRegistryHolder {
+            private static final MetricRegistry REGISTRY = new MetricRegistry();
+
+            public static MetricRegistry getRegistry() {
+                return REGISTRY;
+            }
         }
-    }
-    
-    ```
-    
-2. Register metrics programmatically (useful for dynamic metrics):
-    
+
+        ```
+2.  Register metrics programmatically (useful for dynamic metrics):
+
     ```java
     Timer timer = MetricRegistryHolder.getRegistry().timer("processTime");
-    
+
     ```
-    
-3. Integrate with reporting systems:
-    
+
+3.  Integrate with reporting systems:
+
     ```java
     ConsoleReporter reporter = ConsoleReporter.forRegistry(MetricRegistryHolder.getRegistry())
         .convertRatesTo(TimeUnit.SECONDS)
@@ -190,11 +195,14 @@ Making the `MetricRegistry` a singleton ensures that all metrics are centralized
         .build();
     reporter.start(1, TimeUnit.MINUTES);
     ```
-    
 
 This setup prints metrics to the console every minute. Consider JMX, Graphite, or other more robust reporting options for production use.
 
-<Figure src="/img/guides/2024/10/codahale-metrics-using-timed-metrics-annotation-in-plain-java-image%201.webp" alt="Configuring MagicRegistry and integrating reporter" caption="Configuring MagicRegistry and integrating reporter" />
+<Figure
+  src="/img/guides/2024/10/codahale-metrics-using-timed-metrics-annotation-in-plain-java-image%201.webp"
+  alt="Configuring MagicRegistry and integrating reporter"
+  caption="Configuring MagicRegistry and integrating reporter"
+/>
 
 ## Usage of @Timed annotation in Spring Boot Application
 
@@ -321,94 +329,91 @@ public class MyService {
 }
 ```
 
-1. Testing Metrics with @Timed
-Unit tests can be written to verify that the `@Timed` annotation is properly capturing metrics. This can be done by asserting the number of times a method has been called and the time taken.
-    
-    ```java
-    @RunWith(SpringRunner.class)
-    @SpringBootTest
-    public class MyServiceTest {
-    	@Autowired
-    	private MetricRegistry metricRegistry;
-    	
-    	@Autowired
-    	private MyService myService;
-    	
-    	@Test
-    	public void testTimedAnnotation() {
-    	    Timer timer = metricRegistry.timer("myService.myMethod");
-    	
-    	    // Call the method
-    	    myService.myMethod();
-    	
-    	    // Assert that the method was timed
-    	    assertEquals(1, timer.getCount());
-    	
-    	    // Optionally, check that the timing is within a reasonable range
-    	    assertTrue(timer.getSnapshot().getMean() > 0);
-    	}
-    }
-    ```
-    
-    This test ensures that the `@Timed` annotation is functioning correctly, capturing the execution time and invocation count of the annotated method.
-    
+1.  Testing Metrics with @Timed
+    Unit tests can be written to verify that the `@Timed` annotation is properly capturing metrics. This can be done by asserting the number of times a method has been called and the time taken.
+        ```java
+        @RunWith(SpringRunner.class)
+        @SpringBootTest
+        public class MyServiceTest {
+        	@Autowired
+        	private MetricRegistry metricRegistry;
+
+        	@Autowired
+        	private MyService myService;
+
+        	@Test
+        	public void testTimedAnnotation() {
+        	    Timer timer = metricRegistry.timer("myService.myMethod");
+
+        	    // Call the method
+        	    myService.myMethod();
+
+        	    // Assert that the method was timed
+        	    assertEquals(1, timer.getCount());
+
+        	    // Optionally, check that the timing is within a reasonable range
+        	    assertTrue(timer.getSnapshot().getMean() > 0);
+        	}
+        }
+        ```
+
+        This test ensures that the `@Timed` annotation is functioning correctly, capturing the execution time and invocation count of the annotated method.
 
 ## Advanced Usage of @Timed Metrics
 
 To truly master @Timed metrics, explore these advanced techniques:
 
 1. Customize metric names and descriptions:
-    
-    ```java
-    @Timed(name = "processOrder", absolute = true, description = "Time taken to process an order")
-    public void processOrder(Order order) {
-        // Method implementation
-    }
-    ```
-    
-    The `absolute = true` flag in the `@Timed` annotation ensures the metric name is used exactly as provided, without including the class name as a prefix. This is helpful when you want concise, globally unique metric names, especially in large applications
-    
+
+   ```java
+   @Timed(name = "processOrder", absolute = true, description = "Time taken to process an order")
+   public void processOrder(Order order) {
+       // Method implementation
+   }
+   ```
+
+   The `absolute = true` flag in the `@Timed` annotation ensures the metric name is used exactly as provided, without including the class name as a prefix. This is helpful when you want concise, globally unique metric names, especially in large applications
+
 2. Apply @Timed to abstract classes:
-    
-    ```java
-    public abstract class BaseService {
-        @Timed(name = "baseOperation")
-        public abstract void performOperation();
-    }
-    
-    ```
-    
-    Concrete implementations will inherit this timed metric.
-    
+
+   ```java
+   public abstract class BaseService {
+       @Timed(name = "baseOperation")
+       public abstract void performOperation();
+   }
+
+   ```
+
+   Concrete implementations will inherit this timed metric.
+
 3. Use @Timed with RESTful services:
-    
-    ```java
-    @Path("/users")
-    public class UserResource {
-        @GET
-        @Path("/{id}")
-        @Timed(name = "getUserById")
-        public Response getUserById(@PathParam("id") String id) {
-            // Method implementation
-        }
-    }
-    
-    ```
-    
+
+   ```java
+   @Path("/users")
+   public class UserResource {
+       @GET
+       @Path("/{id}")
+       @Timed(name = "getUserById")
+       public Response getUserById(@PathParam("id") String id) {
+           // Method implementation
+       }
+   }
+
+   ```
+
 4. Combine @Timed with other metric types:
-    
-    ```java
-    public class OrderService {
-        @Timed
-        @Metered(name = "orderProcessingRate")
-        @ExceptionMetered(name = "orderProcessingExceptions")
-        public void processOrder(Order order) {
-            // Method implementation
-        }
-    }
-    
-    ```
-    
+
+   ```java
+   public class OrderService {
+       @Timed
+       @Metered(name = "orderProcessingRate")
+       @ExceptionMetered(name = "orderProcessingExceptions")
+       public void processOrder(Order order) {
+           // Method implementation
+       }
+   }
+
+   ```
 
 This approach provides a comprehensive view of the method's performance, throughput, and error rate.
 
@@ -417,16 +422,16 @@ This approach provides a comprehensive view of the method's performance, through
 @Timed metrics offer a wealth of data. Here's how to make sense of it:
 
 1. Key performance indicators:
-    - Mean execution time: Average performance
-    - 95th percentile: Insight into worst-case scenarios
-    - Throughput: Calls per second
+   - Mean execution time: Average performance
+   - 95th percentile: Insight into worst-case scenarios
+   - Throughput: Calls per second
 2. Visualization techniques:
-    - Histograms: Display distribution of execution times
-    - Time-series graphs: Show performance trends over time
+   - Histograms: Display distribution of execution times
+   - Time-series graphs: Show performance trends over time
 3. Making data-driven decisions:
-    - Identify performance bottlenecks by comparing @Timed metrics across different methods
-    - Set performance budgets based on 95th-percentile execution times
-    - Trigger alerts when execution times exceed predefined thresholds
+   - Identify performance bottlenecks by comparing @Timed metrics across different methods
+   - Set performance budgets based on 95th-percentile execution times
+   - Trigger alerts when execution times exceed predefined thresholds
 
 ## Enhancing Observability with SigNoz Cloud
 
@@ -504,17 +509,17 @@ By integrating your `@Timed` metrics with SigNoz Cloud, you gain:
 To get the most out of @Timed metrics in a production environment:
 
 1. Balance granularity and performance:
-    - Apply @Timed to key business operations and potential bottlenecks
-    - Avoid timing every method, which can lead to a metric explosion
+   - Apply @Timed to key business operations and potential bottlenecks
+   - Avoid timing every method, which can lead to a metric explosion
 2. Handle high-throughput scenarios:
-    - Use sampling to reduce the volume of timing data in high-traffic applications
-    - Consider using histograms with configurable reservoir sizes
+   - Use sampling to reduce the volume of timing data in high-traffic applications
+   - Consider using histograms with configurable reservoir sizes
 3. Implement alerting:
-    - Set up alerts for sudden increases in average execution time
-    - Use percentile-based alerting to catch performance degradation affecting a subset of users
+   - Set up alerts for sudden increases in average execution time
+   - Use percentile-based alerting to catch performance degradation affecting a subset of users
 4. Evolve your metrics strategy:
-    - Regularly review and update your @Timed metrics based on application changes
-    - Remove or consolidate metrics that no longer provide valuable insights
+   - Regularly review and update your @Timed metrics based on application changes
+   - Remove or consolidate metrics that no longer provide valuable insights
 
 By following these practices, you'll create a robust performance monitoring system that grows with your application.
 

@@ -1,13 +1,11 @@
 ---
-
 title: Complete Guide - How to Uninstall Grafana Step-by-Step
-slug: how-to-completely-uninstall-grafana
 date: 2024-10-22
 tags: [grafana, faq]
 authors: [simran_kumari]
 description: Learn how to completely uninstall Grafana from various operating systems with our comprehensive step-by-step guide. Ensure a clean removal and explore alternatives.
-keywords: [uninstall Grafana, remove Grafana, Grafana uninstallation, delete Grafana, clean Grafana removal]
-
+keywords:
+  [uninstall Grafana, remove Grafana, Grafana uninstallation, delete Grafana, clean Grafana removal]
 ---
 
 Grafana, a popular open-source platform for monitoring and visualization, sometimes needs to be removed from your system. Whether you're troubleshooting issues, upgrading to a new version, or simply cleaning up your system, knowing how to uninstall Grafana completely is crucial. This guide walks you through the process of removing Grafana from various operating systems, ensuring no leftover files or configurations remain.
@@ -106,168 +104,170 @@ Backup any important data before deletion.
 For Red Hat-based systems, including CentOS, follow these steps to uninstall Grafana:
 
 1. Stop the Grafana service:
-    
-    ```
-    sudo systemctl stop grafana-server
-    ```
-    
+
+   ```
+   sudo systemctl stop grafana-server
+   ```
+
 2. Remove Grafana packages:
-    
-    ```
-    # For systems using dnf
-    sudo dnf remove -y grafana
-    
-    # For systems using yum
-    sudo yum remove -y grafana
-    ```
-    
+
+   ```
+   # For systems using dnf
+   sudo dnf remove -y grafana
+
+   # For systems using yum
+   sudo yum remove -y grafana
+   ```
+
 3. Delete Grafana repository files:
-    
-    ```
-    sudo rm /etc/yum.repos.d/grafana.repo
-    ```
-    
+
+   ```
+   sudo rm /etc/yum.repos.d/grafana.repo
+   ```
+
 4. Clean up remaining configuration files and logs:
-    
-    ```
-    sudo rm -rf /var/lib/grafana
-    sudo rm -rf /var/log/grafana
-    sudo rm -rf /etc/grafana
-    ```
-    
+
+   ```
+   sudo rm -rf /var/lib/grafana
+   sudo rm -rf /var/log/grafana
+   sudo rm -rf /etc/grafana
+   ```
+
 5. Verify uninstallation using rpm queries:
-    
-    ```
-    rpm -qa | grep grafana
-    ```
-    
-    If the command returns no output, it indicates that Grafana has been successfully uninstalled. If it returns any lines, those packages are still installed.
-    
+
+   ```
+   rpm -qa | grep grafana
+   ```
+
+   If the command returns no output, it indicates that Grafana has been successfully uninstalled. If it returns any lines, those packages are still installed.
 
 ## How to Completely Remove Grafana from Windows
 
 Uninstalling Grafana from Windows involves using both the Control Panel and PowerShell commands:
 
 1. Uninstall Grafana using Windows Control Panel:
-    - Open Control Panel > Programs > Programs and Features
-    - Find Grafana in the list and click "Uninstall"
-    
-    <Figure src="/img/guides/2024/10/how-to-completely-uninstall-grafana-image.webp" alt="Uninstall Grafana using Windows Control Panel" caption="Uninstall Grafana using Windows Control Panel" />
-    
+
+   - Open Control Panel > Programs > Programs and Features
+   - Find Grafana in the list and click "Uninstall"
+
+   <Figure
+     src="/img/guides/2024/10/how-to-completely-uninstall-grafana-image.webp"
+     alt="Uninstall Grafana using Windows Control Panel"
+     caption="Uninstall Grafana using Windows Control Panel"
+   />
+
 2. Remove Grafana service using PowerShell:
-    
-    ```powershell
-    sc.exe delete Grafana
-    ```
-    
+
+   ```powershell
+   sc.exe delete Grafana
+   ```
+
 3. Delete the Grafana installation directory:
-    
-    ```powershell
-    Remove-Item -Path "C:\\Program Files\\GrafanaLabs\\grafana" -Recurse -Force
-    ```
-    
+
+   ```powershell
+   Remove-Item -Path "C:\\Program Files\\GrafanaLabs\\grafana" -Recurse -Force
+   ```
+
 4. Clean up registry entries (be cautious when modifying the registry):
-    
-    ```powershell
-    Remove-Item -Path "HKLM:\\SOFTWARE\\Grafana Labs" -Recurse -Force
-    ```
-    
-    Back up the registry before making any modifications. You can use the following command to create a backup:
-    
-    ```sql
-    reg export "HKLM\SOFTWARE\Grafana Labs" "C:\path\to\backup\grafana_backup.reg"
-    ```
-    
+
+   ```powershell
+   Remove-Item -Path "HKLM:\\SOFTWARE\\Grafana Labs" -Recurse -Force
+   ```
+
+   Back up the registry before making any modifications. You can use the following command to create a backup:
+
+   ```sql
+   reg export "HKLM\SOFTWARE\Grafana Labs" "C:\path\to\backup\grafana_backup.reg"
+   ```
+
 5. Remove any remaining data files and logs:
-    
-    ```powershell
-    Remove-Item -Path "C:\\ProgramData\\Grafana" -Recurse -Force
-    
-    ```
-    
+
+   ```powershell
+   Remove-Item -Path "C:\\ProgramData\\Grafana" -Recurse -Force
+
+   ```
 
 ## Uninstalling Grafana on macOS
 
 For macOS users, the uninstallation process depends on how Grafana was installed. If you used Homebrew, follow these steps:
 
 1. Stop the Grafana service:
-    
-    ```
-    brew services stop grafana
-    ```
-    
-    For non-Homebrew installations, you can stop the service with `launchctl` :
-    
-    ```sql
-    launchctl unload /Library/LaunchDaemons/com.grafana.grafana.plist
-    ```
-    
+
+   ```
+   brew services stop grafana
+   ```
+
+   For non-Homebrew installations, you can stop the service with `launchctl` :
+
+   ```sql
+   launchctl unload /Library/LaunchDaemons/com.grafana.grafana.plist
+   ```
+
 2. Uninstall Grafana using Homebrew:
-    
-    ```
-    brew uninstall grafana
-    ```
-    
+
+   ```
+   brew uninstall grafana
+   ```
+
 3. Manually remove Grafana files and directories:
-    
-    ```
-    sudo rm -rf /usr/local/var/lib/grafana
-    sudo rm -rf /usr/local/var/log/grafana
-    sudo rm -rf /usr/local/etc/grafana
-    ```
-    
-    Note: The actual installation paths might vary depending on the user's configuration. 
-    
-    With Homebrew installation, you are likely to find them at the following paths:
-    
-    ```sql
-    /opt/homebrew/etc/grafana
-    /opt/homebrew/var/lib/grafana/
-    /opt/homebrew/var/log/grafana/
-    ```
-    
-4. Grafana, like many other applications on macOS, stores user preferences, configuration files, and support files in the Application Support directory. 
-    
-    To remove them run the command:
-    
-    ```
-    rm -rf ~/Library/Application Support/Grafana
-    ```
-    
+
+   ```
+   sudo rm -rf /usr/local/var/lib/grafana
+   sudo rm -rf /usr/local/var/log/grafana
+   sudo rm -rf /usr/local/etc/grafana
+   ```
+
+   Note: The actual installation paths might vary depending on the user's configuration.
+
+   With Homebrew installation, you are likely to find them at the following paths:
+
+   ```sql
+   /opt/homebrew/etc/grafana
+   /opt/homebrew/var/lib/grafana/
+   /opt/homebrew/var/log/grafana/
+   ```
+
+4. Grafana, like many other applications on macOS, stores user preferences, configuration files, and support files in the Application Support directory.
+
+   To remove them run the command:
+
+   ```
+   rm -rf ~/Library/Application Support/Grafana
+   ```
+
 5. Verify complete removal using the find command:
-    
-    ```
-    sudo find / -name "*grafana*"
-    ```
-    
+
+   ```
+   sudo find / -name "*grafana*"
+   ```
 
 ## Post-Uninstallation Steps and Verification
 
 After uninstalling Grafana, take these additional steps to ensure a complete removal:
 
 1. Check for remaining processes:
-    
-    ```
-    # On Unix-based systems
-    ps aux | grep grafana
-    
-    # On Windows (PowerShell)
-    Get-Process | Where-Object {$_.Name -like "*grafana*"}
-    ```
-    
+
+   ```
+   # On Unix-based systems
+   ps aux | grep grafana
+
+   # On Windows (PowerShell)
+   Get-Process | Where-Object {$_.Name -like "*grafana*"}
+   ```
+
 2. Verify the removal of all Grafana-related files and directories:
-    
-    ```
-    # On Unix-based systems
-    sudo find / -name "*grafana*"
-    
-    # On Windows (PowerShell)
-    Get-ChildItem -Path C:\\ -Recurse -ErrorAction SilentlyContinue | Where-Object {$_.Name -like "*grafana*"}
-    ```
-    
+
+   ```
+   # On Unix-based systems
+   sudo find / -name "*grafana*"
+
+   # On Windows (PowerShell)
+   Get-ChildItem -Path C:\\ -Recurse -ErrorAction SilentlyContinue | Where-Object {$_.Name -like "*grafana*"}
+   ```
+
 3. Clean up environment variables and system paths:
-    - Check your system's environment variables for any Grafana-related entries
-    - Remove Grafana paths from your system's PATH variable if present
+   - Check your system's environment variables for any Grafana-related entries
+   - Remove Grafana paths from your system's PATH variable if present
 4. Reboot your system to ensure complete removal and clear any lingering processes or cached data.
 5. If you plan to reinstall Grafana, test with a fresh installation to confirm the previous version was completely removed.
 
@@ -276,35 +276,27 @@ After uninstalling Grafana, take these additional steps to ensure a complete rem
 In some cases, you might not need to completely uninstall Grafana. Consider these alternatives:
 
 - Temporarily disable the Grafana service:
-    
-    ```
-    sudo systemctl stop grafana-server
-    sudo systemctl disable grafana-server
-    ```
-    
+  ```
+  sudo systemctl stop grafana-server
+  sudo systemctl disable grafana-server
+  ```
 - If you installed Grafana using Docker, then you can use the following commands for easier management and removal:
-    
-    ```
-    docker stop grafana
-    docker rm grafana
-    ```
-    
+  ```
+  docker stop grafana
+  docker rm grafana
+  ```
 - Archive Grafana data for future reference:
-    
-    ```
-    tar -czf grafana_backup.tar.gz /var/lib/grafana
-    ```
-    
+  ```
+  tar -czf grafana_backup.tar.gz /var/lib/grafana
+  ```
 - Downgrade the Grafana version instead of complete removal:
-    
-    ```
-    sudo apt-get install grafana=<previous_version>
-    ```
-    
+  ```
+  sudo apt-get install grafana=<previous_version>
+  ```
 
 ## Monitoring Your System After Grafana Removal
 
-After uninstalling Grafana, it's crucial to continue monitoring your system and applications. 
+After uninstalling Grafana, it's crucial to continue monitoring your system and applications.
 Consider switching to SigNoz, a modern open-source alternative that supports both metrics and traces. [SigNoz](https://signoz.io/) is designed to provide comprehensive observability with a user-friendly interface and support for [distributed tracing](https://signoz.io/distributed-tracing/), making it a powerful replacement for Grafana. Here are some benefits of using SigNoz:
 
 - Open-source solution with a user-friendly interface

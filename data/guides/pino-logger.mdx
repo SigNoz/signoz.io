@@ -1,11 +1,24 @@
 ---
-title: "Pino Logger: Complete Node.js Guide with Examples [2025]"
-slug: "pino-logger"
-date: "2025-09-03"
+title: 'Pino Logger: Complete Node.js Guide with Examples [2025]'
+date: '2025-09-03'
 tags: [JavaScript, Logging]
 authors: [anubhav_omar]
-description: "Master Pino logging in Node.js. Learn installation, configuration, production setup, and advanced features with practical examples. 5x faster than alternatives."
-keywords: [pino logger, nodejs logging, structured logging, pino-pretty, pino-http, child loggers, asynchronous logging, log levels, nodejs debugging, application monitoring, json logging, high performance logging]
+description: 'Master Pino logging in Node.js. Learn installation, configuration, production setup, and advanced features with practical examples. 5x faster than alternatives.'
+keywords:
+  [
+    pino logger,
+    nodejs logging,
+    structured logging,
+    pino-pretty,
+    pino-http,
+    child loggers,
+    asynchronous logging,
+    log levels,
+    nodejs debugging,
+    application monitoring,
+    json logging,
+    high performance logging,
+  ]
 ---
 
 Your Node.js application logs are critical for debugging production issues, monitoring performance, and maintaining system health. But if your logging library becomes a bottleneck, it defeats the purpose.
@@ -13,7 +26,7 @@ Your Node.js application logs are critical for debugging production issues, moni
 Pino solves this with a fundamentally different approach to logging:
 
 - **5x faster than Winston** with minimal CPU overhead
-- **Structured JSON output** that's immediately machine-readable  
+- **Structured JSON output** that's immediately machine-readable
 - **Asynchronous by design** to prevent event loop blocking
 - **[Production-ready](https://signoz.io/guides/production-readiness-checklist/)** with built-in security and performance optimizations
 
@@ -24,6 +37,7 @@ This guide covers everything from basic setup to advanced production patterns, i
 Pino is built around a simple principle: logging should never slow down your application. Unlike traditional loggers that perform expensive formatting operations in the main thread, Pino takes a minimalist approach.
 
 **Core Design Principles:**
+
 - **JSON-first**: Every log is structured data, not formatted text
 - **Async transports**: Heavy operations happen in worker threads
 - **Minimal serialization**: Only essential data transformation
@@ -33,13 +47,14 @@ Pino is built around a simple principle: logging should never slow down your app
 
 Here's how Pino compares to popular alternatives in real-world scenarios:
 
-| Library | Logs/Second | CPU Usage | Memory Overhead |
-|---------|-------------|-----------|-----------------|
-| **Pino** | 50,000+ | 2-4% | ~45MB |
-| Winston | ~10,000 | 10-15% | ~180MB |
-| Bunyan | ~15,000 | 8-12% | ~150MB |
+| Library  | Logs/Second | CPU Usage | Memory Overhead |
+| -------- | ----------- | --------- | --------------- |
+| **Pino** | 50,000+     | 2-4%      | ~45MB           |
+| Winston  | ~10,000     | 10-15%    | ~180MB          |
+| Bunyan   | ~15,000     | 8-12%     | ~150MB          |
 
 These numbers translate to concrete benefits:
+
 - **Faster response times** under high load
 - **Lower infrastructure costs** through reduced resource usage
 - **Better application stability** with minimal logging overhead
@@ -71,13 +86,15 @@ logger.error('Database connection failed')
 ```
 
 Default output is structured JSON:
+
 ```json
 {"level":30,"time":1690747200000,"pid":12345,"hostname":"server-01","msg":"Application started"}
 {"level":50,"time":1690747201000,"pid":12345,"hostname":"server-01","msg":"Database connection failed"}
 ```
 
 Each log includes:
-- `level`: Numeric severity (30=info, 50=error)  
+
+- `level`: Numeric severity (30=info, 50=error)
 - `time`: High-precision timestamp
 - `pid`: Process ID for multi-process debugging
 - `hostname`: Server identification
@@ -97,25 +114,27 @@ function createLogger() {
 
   return pino({
     level: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
-    
+
     // Pretty output for development
-    transport: isDevelopment ? {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        ignore: 'pid,hostname',
-        translateTime: 'yyyy-mm-dd HH:MM:ss'
-      }
-    } : undefined,
-    
+    transport: isDevelopment
+      ? {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            ignore: 'pid,hostname',
+            translateTime: 'yyyy-mm-dd HH:MM:ss',
+          },
+        }
+      : undefined,
+
     // Disable in tests unless explicitly needed
     enabled: !isTest,
-    
+
     // Add application context
     base: {
       env: process.env.NODE_ENV,
-      version: process.env.APP_VERSION
-    }
+      version: process.env.APP_VERSION,
+    },
   })
 }
 
@@ -128,14 +147,14 @@ Pino uses numeric levels that correspond to severity. Understanding when to use 
 
 ### Standard Levels
 
-| Level | Numeric | Purpose | Example Use Cases |
-|-------|---------|---------|-------------------|
-| **fatal** | 60 | Application crash imminent | Database connection lost, critical service down |
-| **error** | 50 | Errors requiring investigation | API failures, validation errors, exceptions |
-| **warn** | 40 | Potential issues | Deprecated API usage, resource limits approaching |
-| **info** | 30 | Significant application events | User authentication, service starts, key operations |
-| **debug** | 20 | Detailed debugging information | Function entry/exit, variable states |
-| **trace** | 10 | Very detailed execution flow | Loop iterations, deep debugging |
+| Level     | Numeric | Purpose                        | Example Use Cases                                   |
+| --------- | ------- | ------------------------------ | --------------------------------------------------- |
+| **fatal** | 60      | Application crash imminent     | Database connection lost, critical service down     |
+| **error** | 50      | Errors requiring investigation | API failures, validation errors, exceptions         |
+| **warn**  | 40      | Potential issues               | Deprecated API usage, resource limits approaching   |
+| **info**  | 30      | Significant application events | User authentication, service starts, key operations |
+| **debug** | 20      | Detailed debugging information | Function entry/exit, variable states                |
+| **trace** | 10      | Very detailed execution flow   | Loop iterations, deep debugging                     |
 
 ### Level Configuration Strategy
 
@@ -165,18 +184,18 @@ const app = express()
 app.post('/admin/log-level', (req, res) => {
   const { level } = req.body
   const validLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
-  
+
   if (!validLevels.includes(level)) {
     return res.status(400).json({ error: 'Invalid log level' })
   }
-  
+
   logger.level = level
   logger.info({ newLevel: level }, 'Log level changed')
   res.json({ message: `Log level changed to ${level}` })
 })
 ```
 
-## Structured Logging for Observability  
+## Structured Logging for Observability
 
 Structured logging makes your logs immediately useful for monitoring, alerting, and debugging. Instead of parsing text strings, you get queryable data.
 
@@ -191,13 +210,16 @@ const logger = pino()
 logger.info(`User ${userId} completed order ${orderId} for ${amount}`)
 
 // Structured approach (better)
-logger.info({
-  userId: 'usr_123',
-  orderId: 'ord_456', 
-  amount: 99.99,
-  currency: 'USD',
-  paymentMethod: 'credit_card'
-}, 'Order completed successfully')
+logger.info(
+  {
+    userId: 'usr_123',
+    orderId: 'ord_456',
+    amount: 99.99,
+    currency: 'USD',
+    paymentMethod: 'credit_card',
+  },
+  'Order completed successfully'
+)
 ```
 
 ### Error Logging with Context
@@ -208,25 +230,31 @@ When logging errors, always include relevant context. This example shows how to 
 async function processPayment(orderId, userId) {
   try {
     const result = await paymentService.charge(orderId)
-    
-    logger.info({
-      orderId,
-      userId,
-      paymentId: result.id,
-      amount: result.amount,
-      duration: result.processingTime
-    }, 'Payment processed successfully')
-    
+
+    logger.info(
+      {
+        orderId,
+        userId,
+        paymentId: result.id,
+        amount: result.amount,
+        duration: result.processingTime,
+      },
+      'Payment processed successfully'
+    )
+
     return result
   } catch (error) {
-    logger.error({
-      err: error,
-      orderId,
-      userId,
-      operation: 'payment_processing',
-      paymentProvider: 'stripe'
-    }, 'Payment processing failed')
-    
+    logger.error(
+      {
+        err: error,
+        orderId,
+        userId,
+        operation: 'payment_processing',
+        paymentProvider: 'stripe',
+      },
+      'Payment processing failed'
+    )
+
     throw error
   }
 }
@@ -239,37 +267,43 @@ You can use structured logs to monitor application performance. This function me
 ```javascript
 async function performDatabaseQuery(query) {
   const startTime = process.hrtime.bigint()
-  
+
   try {
     const result = await db.query(query)
     const duration = Number(process.hrtime.bigint() - startTime) / 1000000 // Convert to ms
-    
-    logger.info({
-      operation: 'database_query',
-      table: query.table,
-      duration: Math.round(duration * 100) / 100,
-      recordCount: result.length,
-      performanceCategory: categorizePerformance(duration)
-    }, 'Database query completed')
-    
+
+    logger.info(
+      {
+        operation: 'database_query',
+        table: query.table,
+        duration: Math.round(duration * 100) / 100,
+        recordCount: result.length,
+        performanceCategory: categorizePerformance(duration),
+      },
+      'Database query completed'
+    )
+
     return result
   } catch (error) {
     const duration = Number(process.hrtime.bigint() - startTime) / 1000000
-    
-    logger.error({
-      err: error,
-      operation: 'database_query',
-      table: query.table,
-      duration: Math.round(duration * 100) / 100
-    }, 'Database query failed')
-    
+
+    logger.error(
+      {
+        err: error,
+        operation: 'database_query',
+        table: query.table,
+        duration: Math.round(duration * 100) / 100,
+      },
+      'Database query failed'
+    )
+
     throw error
   }
 }
 
 function categorizePerformance(ms) {
   if (ms < 100) return 'fast'
-  if (ms < 500) return 'normal'  
+  if (ms < 500) return 'normal'
   if (ms < 1000) return 'slow'
   return 'critical'
 }
@@ -293,15 +327,15 @@ const app = express()
 // Create request-scoped logger middleware
 app.use((req, res, next) => {
   const requestId = req.headers['x-request-id'] || uuidv4()
-  
+
   req.log = logger.child({
     requestId,
     method: req.method,
     path: req.path,
     userAgent: req.headers['user-agent'],
-    ip: req.ip
+    ip: req.ip,
   })
-  
+
   req.log.info('Request started')
   next()
 })
@@ -309,9 +343,9 @@ app.use((req, res, next) => {
 // Route handlers automatically have contextual logging
 app.get('/users/:id', async (req, res) => {
   const { id } = req.params
-  
+
   req.log.debug({ userId: id }, 'Fetching user data')
-  
+
   try {
     const user = await getUserById(id)
     req.log.info({ userId: id, fetchDuration: 45 }, 'User retrieved')
@@ -336,20 +370,20 @@ module.exports = {
   auth: baseLogger.child({ service: 'auth' }),
   database: baseLogger.child({ service: 'database' }),
   payment: baseLogger.child({ service: 'payment' }),
-  notification: baseLogger.child({ service: 'notification' })
+  notification: baseLogger.child({ service: 'notification' }),
 }
 ```
 
 Now, your authentication service can use its dedicated logger:
 
-```javascript  
+```javascript
 // auth-service.js
 const { auth: logger } = require('./logger')
 
 class AuthService {
   async authenticateUser(email, password) {
     logger.info({ email }, 'Authentication attempt')
-    
+
     try {
       const user = await this.validateCredentials(email, password)
       logger.info({ userId: user.id, email }, 'Authentication successful')
@@ -381,20 +415,20 @@ const logger = pino({
       email: user.email ? maskEmail(user.email) : undefined,
       role: user.role,
       // Never log password, apiKey, tokens, etc.
-      lastLogin: user.lastLogin
+      lastLogin: user.lastLogin,
     }),
-    
+
     request: (req) => {
       const safe = { ...req }
       if (safe.headers) {
         // Remove sensitive headers
         delete safe.headers.authorization
-        delete safe.headers['x-api-key'] 
+        delete safe.headers['x-api-key']
         delete safe.headers.cookie
       }
       return safe
     },
-    
+
     error: (err) => {
       const safeError = { ...err }
       // Sanitize error messages that might contain sensitive data
@@ -404,8 +438,8 @@ const logger = pino({
           .replace(/token=[\w-]+/gi, 'token=***')
       }
       return safeError
-    }
-  }
+    },
+  },
 })
 
 function maskEmail(email) {
@@ -423,28 +457,31 @@ const logger = pino({
   redact: {
     paths: [
       'password',
-      'token', 
+      'token',
       'apiKey',
       'creditCard.number',
       'ssn',
       '*.password',
       '*.token',
       'req.headers.authorization',
-      'req.headers.cookie'
+      'req.headers.cookie',
     ],
-    remove: true // Completely remove these fields
-  }
+    remove: true, // Completely remove these fields
+  },
 })
 
 // This will automatically remove sensitive fields
-logger.info({
-  user: {
-    id: 123,
-    email: 'user@example.com',
-    password: 'secret123', // This won't appear in logs
-    apiKey: 'sk_live_abc123' // This won't appear either
-  }
-}, 'User data processed')
+logger.info(
+  {
+    user: {
+      id: 123,
+      email: 'user@example.com',
+      password: 'secret123', // This won't appear in logs
+      apiKey: 'sk_live_abc123', // This won't appear either
+    },
+  },
+  'User data processed'
+)
 ```
 
 ## HTTP Request Logging
@@ -468,32 +505,34 @@ const logger = require('./logger')
 
 const app = express()
 
-app.use(pinoHttp({
-  logger,
-  
-  // Custom log levels based on response status
-  customLogLevel: (req, res, err) => {
-    if (res.statusCode >= 400 && res.statusCode < 500) return 'warn'
-    if (res.statusCode >= 500 || err) return 'error'
-    if (res.statusCode >= 300 && res.statusCode < 400) return 'silent'
-    return 'info'
-  },
-  
-  // Custom success message with timing
-  customSuccessMessage: (req, res) => {
-    return `${req.method} ${req.url} completed in ${res.responseTime}ms`
-  }
-}))
+app.use(
+  pinoHttp({
+    logger,
+
+    // Custom log levels based on response status
+    customLogLevel: (req, res, err) => {
+      if (res.statusCode >= 400 && res.statusCode < 500) return 'warn'
+      if (res.statusCode >= 500 || err) return 'error'
+      if (res.statusCode >= 300 && res.statusCode < 400) return 'silent'
+      return 'info'
+    },
+
+    // Custom success message with timing
+    customSuccessMessage: (req, res) => {
+      return `${req.method} ${req.url} completed in ${res.responseTime}ms`
+    },
+  })
+)
 
 app.get('/api/users/:id', async (req, res) => {
   // req.log is automatically available with request context
   req.log.info({ userId: req.params.id }, 'Processing user request')
-  
+
   try {
     const user = await getUserById(req.params.id)
     res.json(user)
   } catch (error) {
-    req.log.error({ err: error }, 'User retrieval failed') 
+    req.log.error({ err: error }, 'User retrieval failed')
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -508,27 +547,29 @@ const pinoHttp = require('pino-http')
 
 const httpLogger = pinoHttp({
   logger: pino({ level: 'info' }),
-  
+
   // Skip logging for health checks and static assets
   autoLogging: {
     ignore: (req) => {
-      return req.url === '/health' || 
-             req.url.startsWith('/static/') ||
-             req.url.match(/\.(css|js|png|jpg|ico)$/)
-    }
+      return (
+        req.url === '/health' ||
+        req.url.startsWith('/static/') ||
+        req.url.match(/\.(css|js|png|jpg|ico)$/)
+      )
+    },
   },
-  
+
   // Minimal serialization for performance
   serializers: {
     req: (req) => ({
       method: req.method,
       url: req.url,
-      id: req.id
+      id: req.id,
     }),
     res: (res) => ({
-      statusCode: res.statusCode
-    })
-  }
+      statusCode: res.statusCode,
+    }),
+  },
 })
 
 app.use(httpLogger)
@@ -551,7 +592,7 @@ This function demonstrates a robust, environment-aware logger configuration. It 
 function createProductionLogger() {
   const isDevelopment = process.env.NODE_ENV === 'development'
   const isProduction = process.env.NODE_ENV === 'production'
-  
+
   const config = {
     level: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
     formatters: {
@@ -560,24 +601,24 @@ function createProductionLogger() {
         pid: bindings.pid,
         hostname: bindings.hostname,
         env: process.env.NODE_ENV,
-        version: process.env.APP_VERSION
-      })
-    }
+        version: process.env.APP_VERSION,
+      }),
+    },
   }
-  
+
   if (isDevelopment) {
     config.transport = {
       target: 'pino-pretty',
-      options: { colorize: true, translateTime: 'yyyy-mm-dd HH:MM:ss' }
+      options: { colorize: true, translateTime: 'yyyy-mm-dd HH:MM:ss' },
     }
   } else if (isProduction) {
     // Production optimizations
     config.redact = {
       paths: ['password', 'token', 'apiKey', '*.password', '*.token'],
-      remove: true
+      remove: true,
     }
   }
-  
+
   return pino(config)
 }
 
@@ -597,13 +638,16 @@ const dest = new SonicBoom({
   dest: '/var/log/app/application.log',
   sync: false, // Async writes
   append: true,
-  mkdir: true
+  mkdir: true,
 })
 
-const logger = pino({
-  level: 'info',
-  timestamp: pino.stdTimeFunctions.epochTime, // Faster timestamps
-}, dest)
+const logger = pino(
+  {
+    level: 'info',
+    timestamp: pino.stdTimeFunctions.epochTime, // Faster timestamps
+  },
+  dest
+)
 
 // Graceful shutdown handling
 process.on('SIGTERM', () => {
@@ -627,7 +671,7 @@ process.on('uncaughtException', (error) => {
   process.exit(1)
 })
 
-// Handle unhandled promise rejections  
+// Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
   const finalLogger = pino.final(logger)
   finalLogger.fatal({ reason }, 'Unhandled promise rejection')
@@ -681,19 +725,23 @@ const logger = pino({
           resourceAttributes: {
             'service.name': 'nodejs-api',
             'service.version': process.env.APP_VERSION || '1.0.0',
-            'deployment.environment': process.env.NODE_ENV || 'development'
-          }
+            'deployment.environment': process.env.NODE_ENV || 'development',
+          },
         },
-        level: 'info'
+        level: 'info',
       },
       // Keep console output for development
-      ...(process.env.NODE_ENV === 'development' ? [{
-        target: 'pino-pretty',
-        level: 'debug',
-        options: { colorize: true }
-      }] : [])
-    ]
-  }
+      ...(process.env.NODE_ENV === 'development'
+        ? [
+            {
+              target: 'pino-pretty',
+              level: 'debug',
+              options: { colorize: true },
+            },
+          ]
+        : []),
+    ],
+  },
 })
 
 module.exports = logger
@@ -736,47 +784,56 @@ app.use(pinoHttp({ logger }))
 app.get('/api/users/:id', async (req, res) => {
   const { id } = req.params
   const startTime = Date.now()
-  
+
   req.log.info({ userId: id }, 'Fetching user data')
-  
+
   try {
     const user = await getUserById(id)
     const duration = Date.now() - startTime
-    
-    req.log.info({ 
-      userId: id,
-      userEmail: user.email,
-      fetchDuration: duration,
-      cacheHit: user.fromCache
-    }, 'User data retrieved')
-    
+
+    req.log.info(
+      {
+        userId: id,
+        userEmail: user.email,
+        fetchDuration: duration,
+        cacheHit: user.fromCache,
+      },
+      'User data retrieved'
+    )
+
     res.json(user)
   } catch (error) {
     const duration = Date.now() - startTime
-    
-    req.log.error({ 
-      err: error,
-      userId: id,
-      duration,
-      operation: 'user_fetch'
-    }, 'Failed to retrieve user data')
-    
+
+    req.log.error(
+      {
+        err: error,
+        userId: id,
+        duration,
+        operation: 'user_fetch',
+      },
+      'Failed to retrieve user data'
+    )
+
     res.status(500).json({ error: 'Internal server error' })
   }
 })
 
 app.listen(3000, () => {
-  logger.info({
-    port: 3000,
-    env: process.env.NODE_ENV,
-    version: process.env.APP_VERSION
-  }, 'Server started successfully')
+  logger.info(
+    {
+      port: 3000,
+      env: process.env.NODE_ENV,
+      version: process.env.APP_VERSION,
+    },
+    'Server started successfully'
+  )
 })
 ```
 
 ### Get Started with SigNoz
 
-You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features. 
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
 
 Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
 
@@ -806,7 +863,7 @@ if (!fs.existsSync(logDir)) {
 const dest = pino.destination({
   dest: './logs/app.log',
   sync: false,
-  mkdir: true
+  mkdir: true,
 })
 
 // Handle destination errors
@@ -831,7 +888,7 @@ const dest = new SonicBoom({
   dest: './app.log',
   sync: false,
   minLength: 4096, // Buffer before writing
-  maxWrite: 16384  // Maximum write size
+  maxWrite: 16384, // Maximum write size
 })
 
 // Monitor backpressure
@@ -858,9 +915,10 @@ process.on('SIGTERM', async () => {
 function createSafeLogger() {
   try {
     return pino({
-      transport: process.env.NODE_ENV === 'development' 
-        ? { target: 'pino-pretty', options: { colorize: true } }
-        : { target: 'pino/file', options: { destination: './logs/app.log' } }
+      transport:
+        process.env.NODE_ENV === 'development'
+          ? { target: 'pino-pretty', options: { colorize: true } }
+          : { target: 'pino/file', options: { destination: './logs/app.log' } },
     })
   } catch (error) {
     console.error('Logger creation failed, falling back to console:', error)
@@ -883,8 +941,8 @@ const logger = winston.createLogger({
   format: winston.format.json(),
   transports: [
     new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' })
-  ]
+    new winston.transports.File({ filename: 'combined.log' }),
+  ],
 })
 
 // Pino equivalent
@@ -894,16 +952,16 @@ const logger = pino({
   transport: {
     targets: [
       { target: 'pino/file', options: { destination: './combined.log' }, level: 'info' },
-      { target: 'pino/file', options: { destination: './error.log' }, level: 'error' }
-    ]
-  }
+      { target: 'pino/file', options: { destination: './error.log' }, level: 'error' },
+    ],
+  },
 })
 ```
 
 ### Migration Strategy
 
 1. **Replace logger creation** with Pino initialization
-2. **Convert string interpolation** to [structured logging](https://signoz.io/blog/structured-logs/)  
+2. **Convert string interpolation** to [structured logging](https://signoz.io/blog/structured-logs/)
 3. **Update [error logging](https://signoz.io/guides/error-log/)** to use Pino's error serializers
 4. **Test performance impact** and adjust configuration
 5. **Update monitoring configurations** to handle new log format
@@ -913,17 +971,20 @@ const logger = pino({
 Pino represents a fundamental shift in Node.js logging philosophy, prioritizing performance without sacrificing the structured data needed for modern observability.
 
 **Performance Benefits:**
+
 - 5x faster than traditional loggers with minimal CPU overhead
 - Asynchronous architecture prevents event loop blocking
 - Memory-efficient design maintains stability under load
 
 **Production Readiness:**
+
 - Structured JSON output enables powerful querying and analysis
 - Child loggers provide excellent context management
 - Built-in security features protect sensitive data
 
 **Modern Integration:**
-- Native OpenTelemetry support enables trace correlation  
+
+- Native OpenTelemetry support enables trace correlation
 - Seamless integration with observability platforms like SigNoz
 - Extensive ecosystem of transports and plugins
 

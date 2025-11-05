@@ -1,13 +1,19 @@
 ---
-
 title: How to Write to a File Using the Logging Python Module - A Step-by-Step Guide
-slug: how-to-write-to-a-file-using-the-logging-python-module
 date: 2024-08-28
 tags: [faq, logging]
 authors: [sushant_gaurav]
 description: Learn how to effectively write logs to files using Python's logging module. This guide covers basic setup, advanced techniques, and best practices for file-based logging.
-keywords: [Python logging, file logging, logging module, log files, Python debugging, log rotation, logging best practices]
-
+keywords:
+  [
+    Python logging,
+    file logging,
+    logging module,
+    log files,
+    Python debugging,
+    log rotation,
+    logging best practices,
+  ]
 ---
 
 Python's `logging` module is an important tool for event recording, problem debugging, and application debugging. Unlike basic `print` instructions, the logging module provides a reliable and flexible method for capturing and storing log data. In this article, you'll learn how to configure file-based logging, apply advanced approaches, and improve your logging procedures. Whether you're new to Python or an experienced developer, this guide will help you improve your logging approach in Python applications.
@@ -27,7 +33,11 @@ The logging module comprises four main components that work together to facilita
 - Formatters: Formatters control the layout and content of log messages. They govern how timestamps, log levels, and messages are shown in the logs.
 - Levels: Logging levels (such as `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`) help you to manage the logs in a better way. Setting a specified log level allows you to filter out less important messages and focus on what matters.
 
-<Figure src="/img/guides/2024/08/how-to-write-to-a-file-using-the-logging-python-module-image.webp" alt="four main components of logging module" caption="four main components of logging module" />
+<Figure
+  src="/img/guides/2024/08/how-to-write-to-a-file-using-the-logging-python-module-image.webp"
+  alt="four main components of logging module"
+  caption="four main components of logging module"
+/>
 
 To learn about logging in Python, different levels of logging, formatters, etc. in more detail, you can refer to this article [Python Logging - From Setup to Monitoring with Best Practices](https://signoz.io/guides/logging-in-python/). You can also check out [Python Logging Best Practices - Expert Tips with Practical Examples](https://signoz.io/guides/python-logging-best-practices/).
 
@@ -53,9 +63,9 @@ This simple Python script performs the following actions:
 
 1. Imports the logging module: Provides access to the logging functions.
 2. Configures the logger using `basicConfig()`:
-    - `filename='app.log'`: Specifies that logs should be written to the file `app.log`.
-    - `level=logging.INFO`: Sets the logging level to `INFO`, meaning all messages with a severity of `INFO` or higher will be logged.
-    - `format='%(asctime)s - %(levelname)s - %(message)s'`: Defines the log message format to include the timestamp, log level, and message content.
+   - `filename='app.log'`: Specifies that logs should be written to the file `app.log`.
+   - `level=logging.INFO`: Sets the logging level to `INFO`, meaning all messages with a severity of `INFO` or higher will be logged.
+   - `format='%(asctime)s - %(levelname)s - %(message)s'`: Defines the log message format to include the timestamp, log level, and message content.
 3. Writes a log message: The `logging.info()` function generates an informational log entry.
 
 After running this script, you'll find a file named `app.log` in your current working directory containing a log entry similar to this:
@@ -259,47 +269,48 @@ Sample Output:
 While logging is necessary for monitoring and debugging, it can impact your application's performance if handled incorrectly. So, here are some strategies to improve log performance:
 
 1. Use Appropriate Log Levels:
-    - Use `DEBUG` for detailed development logs, which can be turned off in production to reduce overhead. To disable `DEBUG` logging in production while keeping it enabled in development, you can configure the logging level dynamically based on the environment (can be managed through configuration settings).
-    - Reserve `INFO` for general tracking and `ERROR` for critical issues that require immediate attention.
+   - Use `DEBUG` for detailed development logs, which can be turned off in production to reduce overhead. To disable `DEBUG` logging in production while keeping it enabled in development, you can configure the logging level dynamically based on the environment (can be managed through configuration settings).
+   - Reserve `INFO` for general tracking and `ERROR` for critical issues that require immediate attention.
 2. Implement Lazy Logging:
-    - Lazy  logging is a technique which can be used to delay the creation and formatting of log messages until it is certain that the message will be logged. This approach is particularly useful for optimizing performance when logging messages involve expensive computations or operations that might not always be necessary.
-    - Lazu logging helps you to reduce the overhead associated with logging by avoiding unnecessary computations for log messages. This is crucial in high-performance applications where even minor delays can accumulate.
-    - Expensive operations such as database queries or complex calculations are only executed if the corresponding log level is enabled. This prevents wasting resources on operations that might be irrelevant if the log level is set higher (e.g., `INFO` or `WARNING` instead of `DEBUG`).
-    Example:
-    
-    ```python
-    # Example of lazy logging to avoid unnecessary computation
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(f"Complex calculation result: {expensive_function()}")
-    ```
-    
-    - Explanation: The `isEnabledFor(logging.DEBUG)` check ensures that `expensive_function()` is only called if `DEBUG` logging is enabled. This prevents unnecessary computation when `DEBUG` logs are not required.
+
+   - Lazy logging is a technique which can be used to delay the creation and formatting of log messages until it is certain that the message will be logged. This approach is particularly useful for optimizing performance when logging messages involve expensive computations or operations that might not always be necessary.
+   - Lazu logging helps you to reduce the overhead associated with logging by avoiding unnecessary computations for log messages. This is crucial in high-performance applications where even minor delays can accumulate.
+   - Expensive operations such as database queries or complex calculations are only executed if the corresponding log level is enabled. This prevents wasting resources on operations that might be irrelevant if the log level is set higher (e.g., `INFO` or `WARNING` instead of `DEBUG`).
+     Example:
+
+   ```python
+   # Example of lazy logging to avoid unnecessary computation
+   if logger.isEnabledFor(logging.DEBUG):
+       logger.debug(f"Complex calculation result: {expensive_function()}")
+   ```
+
+   - Explanation: The `isEnabledFor(logging.DEBUG)` check ensures that `expensive_function()` is only called if `DEBUG` logging is enabled. This prevents unnecessary computation when `DEBUG` logs are not required.
+
 3. Consider Asynchronous Logging:
+
 - Asynchronous logging can help yout to reduce the performance impact of logging by handling log messages in a separate thread or process. This approach minimizes the delay caused by I/O operations which ensures that logging does not interfere with the primary application flow.
 - It allows the main application to continue running smoothly by passing on the log processing to a background thread or process. So by offloading logging tasks, your application can handle more operations per second, which is crucial for high-performance or high-throughput systems.
 - You can use libraries such as `concurrent-log-handler` to implement asynchronous logging. You can install the `concurrent-log-handler` using the command: `pip install concurrent-log-handler` .
-Example:
-    
-    ```python
-    import logging
-    from concurrent_log_handler import ConcurrentRotatingFileHandler
-    
-    # Create a logger
-    logger = logging.getLogger('my_logger')
-    logger.setLevel(logging.DEBUG)
-    
-    # Set up an asynchronous file handler
-    handler = ConcurrentRotatingFileHandler('app.log', maxBytes=10485760, backupCount=5)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    
-    # Add the handler to the logger
-    logger.addHandler(handler)
-    
-    # Example log entry
-    logger.info('This is an informational message')
-    ```
-    
+  Example:
+      ```python
+      import logging
+      from concurrent_log_handler import ConcurrentRotatingFileHandler
+
+      # Create a logger
+      logger = logging.getLogger('my_logger')
+      logger.setLevel(logging.DEBUG)
+
+      # Set up an asynchronous file handler
+      handler = ConcurrentRotatingFileHandler('app.log', maxBytes=10485760, backupCount=5)
+      formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+      handler.setFormatter(formatter)
+
+      # Add the handler to the logger
+      logger.addHandler(handler)
+
+      # Example log entry
+      logger.info('This is an informational message')
+      ```
 
 ## Enhancing Observability with SigNoz
 
@@ -319,7 +330,11 @@ Here's how SigNoz can support your logging strategy:
 2. Trace Correlation: SigNoz allows you to connect logs and dispersed traces. This means you can track a given request as it moves through several services and correlate those traces with logs to get a complete picture of the request's lifecycle.
 3. Performance Metrics: In addition to logs, SigNoz gathers performance measures (such as CPU utilization and response times). By tracking these metrics alongside your logs, you can gain a more complete picture of your application's health and performance.
 
-<Figure src="/img/guides/2024/08/how-to-write-to-a-file-using-the-logging-python-module-image%201.webp" alt="image.webp" caption="image.webp" />
+<Figure
+  src="/img/guides/2024/08/how-to-write-to-a-file-using-the-logging-python-module-image%201.webp"
+  alt="image.webp"
+  caption="image.webp"
+/>
 
 ## Best Practices for File-Based Logging in Python
 
@@ -327,25 +342,21 @@ You should adhere to certain best practices to guarantee that your file-based lo
 
 1. Use appropriate log levels based on message severity (e.g., `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`). Properly categorizing log messages prevents you from missing key issues or becoming overwhelmed by less essential ones.
 2. Log messages with consistent structure are easier to read, search, and analyze. Including essential information in your log messages, such as user IDs, IP addresses, or transaction IDs, can significantly boost their utility.
-    - Example:
-        
-        ```python
-        logger.info("User %s logged in from IP %s", user_id, ip_address)
-        ```
-        
-    - You can use `%s` in log messages to pass variables as arguments here.
+   - Example:
+     ```python
+     logger.info("User %s logged in from IP %s", user_id, ip_address)
+     ```
+   - You can use `%s` in log messages to pass variables as arguments here.
 3. Large log files can consume disk space and become difficult to manage. Log rotation will automatically archive old log files and produce new ones, which helps to manage your log directory and prevents disk space difficulties.
 4. Logs frequently contain sensitive information, such as user data, authentication tokens, and system configurations. It is critical to encrypt your log files to prevent unauthorized access and to avoid logging sensitive information entirely.
-    - You can use proper file permissions to restrict log file access.
-    - Do not log sensitive data, such as passwords or personally identifiable information (PII). If necessary, disguise or encrypt this information before logging.
-    - Example:
-        
-        ```python
-        # Example of masking sensitive data
-        masked_email = re.sub(r'(\\w{2})\\w+(@\\w+)', r'\\1***\\2', user_email)
-        logger.info("User email: %s", masked_email)
-        ```
-        
+   - You can use proper file permissions to restrict log file access.
+   - Do not log sensitive data, such as passwords or personally identifiable information (PII). If necessary, disguise or encrypt this information before logging.
+   - Example:
+     ```python
+     # Example of masking sensitive data
+     masked_email = re.sub(r'(\\w{2})\\w+(@\\w+)', r'\\1***\\2', user_email)
+     logger.info("User email: %s", masked_email)
+     ```
 
 ## Key Takeaways
 

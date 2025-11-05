@@ -1,155 +1,177 @@
 ---
-
 title: Mastering Rails Logger - Tips for Effective Debugging
-slug: rails-logger
 date: 2024-07-22
 tags: [logging]
 authors: [vasu_bansal]
 description: Learn how to master Rails Logger for effective debugging. Discover setup tips, advanced techniques, and best practices to optimize your Rails applications.
-keywords: [Rails Logger, debugging, Ruby on Rails, logging, application development, troubleshooting, performance optimization]
-
+keywords:
+  [
+    Rails Logger,
+    debugging,
+    Ruby on Rails,
+    logging,
+    application development,
+    troubleshooting,
+    performance optimization,
+  ]
 ---
 
 <head>
-<script
+  <script
     type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Mastering Rails Logger - Tips for Effective Debugging",
-  "alternativeHeadline": "Learn how to master Rails Logger for effective debugging. Discover setup tips, advanced techniques, and best practices to optimize your Rails applications.",
-  "author": {
-    "@type": "Person",
-    "name": "Vasu Bansal"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2024-07-22T00:00:00Z",
-  "dateModified": "2024-07-22T00:00:00Z",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/guides/rails-logger/"
-  },
-  "description": "Learn how to master Rails Logger for effective debugging. Discover setup tips, advanced techniques, and best practices to optimize your Rails applications.",
-  "keywords": ["Rails Logger", "debugging", "Ruby on Rails", "logging", "application development", "troubleshooting", "performance optimization"],
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "Rails Logger",
-      "description": "The built-in logging tool in Ruby on Rails, designed to help developers track and understand the behavior of their applications."
-    },
-    {
-      "@type": "Thing",
-      "name": "Debugging",
-      "description": "The process of identifying, analyzing, and removing errors or bugs from software applications."
-    },
-    {
-      "@type": "Thing",
-      "name": "Performance Optimization",
-      "description": "Techniques and practices aimed at improving the efficiency and speed of a software application."
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "SigNoz",
-      "applicationCategory": "Observability Platform"
-    }
-  ],
-  "mainEntity": {
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What are the common log levels used in Rails Logger?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Rails Logger uses debug, info, warn, error, and fatal log levels to manage the severity and verbosity of log messages."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How can I change the log level in my Rails application?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Modify `config.log_level` in the environment-specific configuration file (`config/environments/development.rb`, `config/environments/production.rb`) to adjust the logging verbosity."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is the role of a log formatter in Rails Logger?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "A log formatter in Rails Logger formats log messages before they are written to define their structure, including timestamps, severity levels, and additional context."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How can I integrate external logging services with Rails?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Integrate external logging services like SigNoz by installing the corresponding client gem and configuring it with your service's API key."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What are some best practices for logging sensitive information?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Avoid logging sensitive data like passwords or personal information directly; instead, use masking or encryption techniques to protect sensitive information."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How can I troubleshoot logging issues in my Rails application?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "To troubleshoot logging issues, check `config.log_level` settings, logger configurations (`config.logger`), and review application and server logs for errors related to logging initialization or operation."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do I make Rails Logger output to the console during testing?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Add the following to your `config/environments/test.rb` file: \n```ruby\nRails.application.configure do\n  config.logger = ActiveSupport::Logger.new(STDOUT)\n  config.log_level = :debug\nend\n```"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What's the difference between Rails.logger and puts for debugging?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "`Rails.logger` is more flexible and configurable than `puts`. It allows you to set log levels, format output, and direct logs to various destinations. `puts` simply prints to the console and doesn't provide these advanced features."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How can I implement custom log formatting in Rails?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Create a custom formatter class and set it in your Rails configuration: \n```ruby\nclass CustomFormatter < ActiveSupport::Logger::SimpleFormatter\n  def call(severity, timestamp, progname, msg)\n    \"[#{timestamp}] #{severity}: #{msg}\\n\"\n  end\nend\n\nRails.application.configure do\n  config.logger.formatter = CustomFormatter.new\nend\n```"
-        }
-      }
-    ]
-  }
-}) }} />
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'Mastering Rails Logger - Tips for Effective Debugging',
+        alternativeHeadline:
+          'Learn how to master Rails Logger for effective debugging. Discover setup tips, advanced techniques, and best practices to optimize your Rails applications.',
+        author: {
+          '@type': 'Person',
+          name: 'Vasu Bansal',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
+        datePublished: '2024-07-22T00:00:00Z',
+        dateModified: '2024-07-22T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/rails-logger/',
+        },
+        description:
+          'Learn how to master Rails Logger for effective debugging. Discover setup tips, advanced techniques, and best practices to optimize your Rails applications.',
+        keywords: [
+          'Rails Logger',
+          'debugging',
+          'Ruby on Rails',
+          'logging',
+          'application development',
+          'troubleshooting',
+          'performance optimization',
+        ],
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
+        },
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Rails Logger',
+            description:
+              'The built-in logging tool in Ruby on Rails, designed to help developers track and understand the behavior of their applications.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Debugging',
+            description:
+              'The process of identifying, analyzing, and removing errors or bugs from software applications.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Performance Optimization',
+            description:
+              'Techniques and practices aimed at improving the efficiency and speed of a software application.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What are the common log levels used in Rails Logger?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Rails Logger uses debug, info, warn, error, and fatal log levels to manage the severity and verbosity of log messages.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How can I change the log level in my Rails application?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Modify `config.log_level` in the environment-specific configuration file (`config/environments/development.rb`, `config/environments/production.rb`) to adjust the logging verbosity.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What is the role of a log formatter in Rails Logger?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'A log formatter in Rails Logger formats log messages before they are written to define their structure, including timestamps, severity levels, and additional context.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How can I integrate external logging services with Rails?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "Integrate external logging services like SigNoz by installing the corresponding client gem and configuring it with your service's API key.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What are some best practices for logging sensitive information?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Avoid logging sensitive data like passwords or personal information directly; instead, use masking or encryption techniques to protect sensitive information.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How can I troubleshoot logging issues in my Rails application?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'To troubleshoot logging issues, check `config.log_level` settings, logger configurations (`config.logger`), and review application and server logs for errors related to logging initialization or operation.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I make Rails Logger output to the console during testing?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Add the following to your `config/environments/test.rb` file: \n```ruby\nRails.application.configure do\n  config.logger = ActiveSupport::Logger.new(STDOUT)\n  config.log_level = :debug\nend\n```',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: "What's the difference between Rails.logger and puts for debugging?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "`Rails.logger` is more flexible and configurable than `puts`. It allows you to set log levels, format output, and direct logs to various destinations. `puts` simply prints to the console and doesn't provide these advanced features.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How can I implement custom log formatting in Rails?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Create a custom formatter class and set it in your Rails configuration: \n```ruby\nclass CustomFormatter < ActiveSupport::Logger::SimpleFormatter\n  def call(severity, timestamp, progname, msg)\n    "[#{timestamp}] #{severity}: #{msg}\\n"\n  end\nend\n\nRails.application.configure do\n  config.logger.formatter = CustomFormatter.new\nend\n```',
+              },
+            },
+          ],
+        },
+      }),
+    }}
+  />
 </head>
 
-Logging is an essential part of building and maintaining any Rails application. It helps developers keep track of what’s happening under the hood, making it easier to spot and fix issues before they become serious problems. Rails Logger, the built-in logging tool in Ruby on Rails, is a powerful and flexible way to handle all your logging needs. 
+Logging is an essential part of building and maintaining any Rails application. It helps developers keep track of what’s happening under the hood, making it easier to spot and fix issues before they become serious problems. Rails Logger, the built-in logging tool in Ruby on Rails, is a powerful and flexible way to handle all your logging needs.
 
 In this guide, we’ll walk you through everything you need to know about Rails Logger - from setting it up and configuring it to using best practices and advanced techniques. We'll also show you how to send your logs to [SigNoz](https://signoz.io/docs/introduction/), an open-source observability platform that can help you get even more out of your logs by providing detailed monitoring and analysis.
 
@@ -250,69 +272,63 @@ Working:
 The `call` method in the `CustomLoggerFormatter` class is invoked internally by the `Logger` class whenever a log message is processed. Here’s a breakdown of how it works:
 
 - Initialization of Custom Formatter:
-    - The `CustomLoggerFormatter` class inherits from `Logger::Formatter`.
-    - It overrides the `call` method to define a custom format for log messages.
+  - The `CustomLoggerFormatter` class inherits from `Logger::Formatter`.
+  - It overrides the `call` method to define a custom format for log messages.
 - Assigning the Custom Formatter to Rails Logger:
-    - `config.logger.formatter = CustomLoggerFormatter.new` assigns an instance of the custom formatter to the Rails logger. This tells the logger to use this custom formatter when formatting log messages.
+  - `config.logger.formatter = CustomLoggerFormatter.new` assigns an instance of the custom formatter to the Rails logger. This tells the logger to use this custom formatter when formatting log messages.
 - Logging a Message:
-    - When a log message is generated, such as `Rails.logger.info('This is an info message.')`, the logger processes the log entry.
+  - When a log message is generated, such as `Rails.logger.info('This is an info message.')`, the logger processes the log entry.
 - Formatter Invocation:
-    - During the processing of the log entry, the logger invokes the `call` method of the assigned formatter.
-    - The `call` method is provided with the `severity`, `time`, `progname`, and `msg` parameters.
-    - The `call` method constructs and returns the formatted log message as a string.
+  - During the processing of the log entry, the logger invokes the `call` method of the assigned formatter.
+  - The `call` method is provided with the `severity`, `time`, `progname`, and `msg` parameters.
+  - The `call` method constructs and returns the formatted log message as a string.
 
 ### Example Flow
 
 Let's walk through an example to see this flow in action:
 
 1. Define the Custom Formatter:
-    
-    ```ruby
-    class CustomLoggerFormatter < Logger::Formatter
-      def call(severity, time, progname, msg)
-        "#{time.to_s(:db)} #{severity} #{msg}\n"
-      end
-    end
-    ```
-    
+
+   ```ruby
+   class CustomLoggerFormatter < Logger::Formatter
+     def call(severity, time, progname, msg)
+       "#{time.to_s(:db)} #{severity} #{msg}\n"
+     end
+   end
+   ```
+
 2. Configure the Logger:
-    
-    ```ruby
-    Rails.application.configure do
-      config.logger.formatter = CustomLoggerFormatter.new
-    end
-    ```
-    
+
+   ```ruby
+   Rails.application.configure do
+     config.logger.formatter = CustomLoggerFormatter.new
+   end
+   ```
+
 3. Generate a Log Message:
-    
-    ```ruby
-    Rails.logger.info('This is an info message.')
-    ```
-    
+
+   ```ruby
+   Rails.logger.info('This is an info message.')
+   ```
+
 4. Internal Logger Processing:
-    - The `Rails.logger.info` call creates a log entry with a severity of `INFO`, the current time, `nil` for `progname` (unless specified), and the message `'This is an info message.'`.
+   - The `Rails.logger.info` call creates a log entry with a severity of `INFO`, the current time, `nil` for `progname` (unless specified), and the message `'This is an info message.'`.
 5. Formatter Call:
-    - The logger calls the `call` method on the `CustomLoggerFormatter` instance:
-        
-        ```ruby
-        ustomLoggerFormatter.new.call('INFO', Time.now, nil, 'This is an info message.')
-        ```
-        
+   - The logger calls the `call` method on the `CustomLoggerFormatter` instance:
+     ```ruby
+     ustomLoggerFormatter.new.call('INFO', Time.now, nil, 'This is an info message.')
+     ```
 6. Formatted Log Message:
-    - The `call` method formats the log message:
-        
-        ```ruby
-        "#{time.to_s(:db)} #{severity} #{msg}\n"
-        ```
-        
-    - This might produce a log message like:
-        
-        ```
-        2024-07-07 12:34:56 INFO This is an info message.
-        ```
-        
+   - The `call` method formats the log message:
+     ```ruby
+     "#{time.to_s(:db)} #{severity} #{msg}\n"
+     ```
+   - This might produce a log message like:
+     ```
+     2024-07-07 12:34:56 INFO This is an info message.
+     ```
 7. Output:
-    - The formatted log message is then written to the log file or output destination.
+   - The formatted log message is then written to the log file or output destination.
 
 ### Rotating Log Files
 
@@ -356,15 +372,15 @@ Rails.application.configure do
   # info, warn, error, and fatal will be logged. Debug messages will be ignored.
   config.log_level = :info
 
-  # Use a different logger for distributed setups. This checks if the 
-  # RAILS_LOG_TO_STDOUT environment variable is set, which is useful for logging 
+  # Use a different logger for distributed setups. This checks if the
+  # RAILS_LOG_TO_STDOUT environment variable is set, which is useful for logging
   # to STDOUT in environments like Heroku where logs are captured from STDOUT.
   if ENV["RAILS_LOG_TO_STDOUT"].present?
     logger = ActiveSupport::Logger.new(STDOUT)
-    
+
     # Use the default log formatter for this logger.
     logger.formatter = config.log_formatter
-    
+
     # Wrap the logger in TaggedLogging to support adding tags to log messages.
     config.logger = ActiveSupport::TaggedLogging.new(logger)
   end
@@ -381,7 +397,7 @@ Rails.application.configure do
   # Apply the custom log formatter to the Rails logger.
   config.logger.formatter = CustomLoggerFormatter.new
 
-  # Configure log file rotation. This line sets up the logger to write to 
+  # Configure log file rotation. This line sets up the logger to write to
   # 'log/production.log', rotate the log file when it reaches 100 megabytes, and
   # keep up to 10 old log files.
   config.logger = Logger.new('log/production.log', 10, 100.megabytes)
@@ -410,7 +426,7 @@ class UsersController < ApplicationController
   def show
 	  # Controller logic
     @user = User.find(params[:id])
-    # Logging in controller 
+    # Logging in controller
     Rails.logger.info "User #{@user.id} viewed" # Logger is called in your controller class
   end
 end
@@ -487,34 +503,33 @@ In some cases, you may need to use custom loggers to handle specific logging req
 Here’s how to set up a custom logger:
 
 1. Create a Custom Logger Class:
-    
-    ```ruby
-    class CustomLogger < Logger
-      def initialize
-        super(Rails.root.join('log/custom.log'), 'daily')
-        self.formatter = proc do |severity, datetime, progname, msg|
-          "#{datetime.to_s(:db)} #{severity}: #{msg}\n"
-        end
-      end
-    end
-    ```
-    
-    This custom logger writes to a separate log file (`log/custom.log`) and rotates the log file daily. The log format is also customized.
-    
+
+   ```ruby
+   class CustomLogger < Logger
+     def initialize
+       super(Rails.root.join('log/custom.log'), 'daily')
+       self.formatter = proc do |severity, datetime, progname, msg|
+         "#{datetime.to_s(:db)} #{severity}: #{msg}\n"
+       end
+     end
+   end
+   ```
+
+   This custom logger writes to a separate log file (`log/custom.log`) and rotates the log file daily. The log format is also customized.
+
 2. Use the Custom Logger in Your Application:
-    
-    ```ruby
-    Rails.application.configure do
-      config.custom_logger = CustomLogger.new
-    end
-    ```
-    
-    Now, you can use the custom logger in your application:
-    
-    ```ruby
-    Rails.configuration.custom_logger.info "This is a custom log message."
-    ```
-    
+
+   ```ruby
+   Rails.application.configure do
+     config.custom_logger = CustomLogger.new
+   end
+   ```
+
+   Now, you can use the custom logger in your application:
+
+   ```ruby
+   Rails.configuration.custom_logger.info "This is a custom log message."
+   ```
 
 ### Tagging Logs
 
@@ -535,27 +550,26 @@ In this configuration, each log message will include the request ID and the remo
 Lograge is a popular gem that replaces the default Rails logging with a more concise and readable log format. It’s particularly useful for production environments.
 
 1. Add Lograge to Your Gemfile:
-    
-    ```ruby
-    gem 'lograge'
-    ```
-    
+
+   ```ruby
+   gem 'lograge'
+   ```
+
 2. Configure Lograge:
-    
-    ```ruby
-    # config/environments/production.rb
-    
-    Rails.application.configure do
-      config.lograge.enabled = true
-    
-      config.lograge.custom_options = lambda do |event|
-        { time: event.time, params: event.payload[:params] }
-      end
-    end
-    ```
-    
-    Lograge condenses the default Rails log output into a single line per request, making it easier to read and analyze.
-    
+
+   ```ruby
+   # config/environments/production.rb
+
+   Rails.application.configure do
+     config.lograge.enabled = true
+
+     config.lograge.custom_options = lambda do |event|
+       { time: event.time, params: event.payload[:params] }
+     end
+   end
+   ```
+
+   Lograge condenses the default Rails log output into a single line per request, making it easier to read and analyze.
 
 ### Asynchronous Logging
 
@@ -865,13 +879,9 @@ SigNoz is a full-stack open-source application performance monitoring and obser
 Key architecture features:
 
 - Logs, Metrics, and traces under a single dashboard
-    
-    SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
-    
+  SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
 - Native OpenTelemetry support
-    
-    SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the world standard for generating and managing telemetry data.
-    
+  SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the world standard for generating and managing telemetry data.
 
 ### Setup SigNoz
 

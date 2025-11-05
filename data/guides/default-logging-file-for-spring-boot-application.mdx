@@ -1,13 +1,19 @@
 ---
-
 title: How to Configure Default Log Files - Spring Boot Logging
-slug: default-logging-file-for-spring-boot-application
 date: 2024-08-30
 tags: [faq]
 authors: [niyati_thakkar]
 description: Learn how to configure default log files in Spring Boot applications. Explore logging best practices, file management, and advanced techniques for effective application monitoring.
-keywords: [Spring Boot logging, log file configuration, application monitoring, Java logging, DevOps, log management, SigNoz]
-
+keywords:
+  [
+    Spring Boot logging,
+    log file configuration,
+    application monitoring,
+    Java logging,
+    DevOps,
+    log management,
+    SigNoz,
+  ]
 ---
 
 Spring Boot's logging capabilities are essential for effective application monitoring and troubleshooting. However, many developers struggle with configuring log files properly, often relying on console output alone. This comprehensive guide will walk you through the process of setting up and managing default log files in your Spring Boot application, ensuring you have the tools necessary for robust application monitoring and maintenance.
@@ -41,7 +47,11 @@ public class DemoApplication {
 }
 ```
 
-<Figure src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-Screenshot_2024-08-25_132022.webp" alt="Understanding Spring Boot's Default Logging Behavior" caption="Understanding Spring Boot's Default Logging Behavior" />
+<Figure
+  src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-Screenshot_2024-08-25_132022.webp"
+  alt="Understanding Spring Boot's Default Logging Behavior"
+  caption="Understanding Spring Boot's Default Logging Behavior"
+/>
 
 Some of the observations that can be drawn are:
 
@@ -77,30 +87,37 @@ To move beyond default console-only logging, we can use configuration files to c
 To set up logging in a Spring Boot application, you can make use of the `application.properties` file. Here's a step-by-step guide:
 
 1. Open Your `application.properties` File:
-    - This file is typically located in the `src/main/resources` directory of your Spring Boot project.
+   - This file is typically located in the `src/main/resources` directory of your Spring Boot project.
 2. Add the Following Properties to configure the file name, location, and log level:
-    
-    ```
-    # Application name
-    spring.application.name=demo
-    
-    # Global log level
-    logging.level.root=ERROR
-    
-    # Base log file name
-    logging.file.name=./logs/demofile.log
-    ```
-    
-    <Figure src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-Screenshot_2024-08-28_220037.webp" alt="Console Output" caption="Console Output" />
-    
-    <Figure src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-image.webp" alt="This is the output we will get after running the application, in this `demofile.log`." caption="This is the output we will get after running the application, in this `demofile.log`." />
-    
-    - `spring.application.name=demo`: Sets the application name.
-    - `logging.file.name=./logs/demofile.log`: Creates a log file named `demofile.log` in the logs directory.
-    - `logging.level.root=ERROR`: Limits logs to errors only, reducing log clutter.
-    
-    After running the application, you’ll see `demofile.log` in the project directory, containing only error-level logs.
-    
+
+   ```
+   # Application name
+   spring.application.name=demo
+
+   # Global log level
+   logging.level.root=ERROR
+
+   # Base log file name
+   logging.file.name=./logs/demofile.log
+   ```
+
+   <Figure
+     src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-Screenshot_2024-08-28_220037.webp"
+     alt="Console Output"
+     caption="Console Output"
+   />
+
+   <Figure
+     src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-image.webp"
+     alt="This is the output we will get after running the application, in this `demofile.log`."
+     caption="This is the output we will get after running the application, in this `demofile.log`."
+   />
+
+   - `spring.application.name=demo`: Sets the application name.
+   - `logging.file.name=./logs/demofile.log`: Creates a log file named `demofile.log` in the logs directory.
+   - `logging.level.root=ERROR`: Limits logs to errors only, reducing log clutter.
+
+   After running the application, you’ll see `demofile.log` in the project directory, containing only error-level logs.
 
 ### Implementing Rolling File Appenders with Logback
 
@@ -132,13 +149,17 @@ Explanation of Configuration:
 
 - `logging.file.name`: Sets the base filename and location for log files (e.g., `demofile.log`).
 - `logging.logback.rollingpolicy`: Controls how log files are rotated:
-    - `file-name-pattern`: Defines the format for rolled file names (`%d{yyyy-MM-dd}` creates daily files).
-    - `max-file-size`: Maximum size for each log file (e.g., 10MB). A new file is created when reached.
-    - `total-size-cap`: Total size limit for all log files (e.g., 1GB). Older files are deleted if exceeded.
-    - `max-history`: Maximum number of log files to keep (e.g., 7 days). Older files were deleted to maintain this limit.
-    - `clean-history-on-start`: Clears old log files exceeding limits on application startup (disable in production!).
+  - `file-name-pattern`: Defines the format for rolled file names (`%d{yyyy-MM-dd}` creates daily files).
+  - `max-file-size`: Maximum size for each log file (e.g., 10MB). A new file is created when reached.
+  - `total-size-cap`: Total size limit for all log files (e.g., 1GB). Older files are deleted if exceeded.
+  - `max-history`: Maximum number of log files to keep (e.g., 7 days). Older files were deleted to maintain this limit.
+  - `clean-history-on-start`: Clears old log files exceeding limits on application startup (disable in production!).
 
-<Figure src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-5bb57452-de7f-4549-9f61-78bd101a9761.webp" alt="Implementing Rolling File Appenders with Logback" caption="Implementing Rolling File Appenders with Logback" />
+<Figure
+  src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-5bb57452-de7f-4549-9f61-78bd101a9761.webp"
+  alt="Implementing Rolling File Appenders with Logback"
+  caption="Implementing Rolling File Appenders with Logback"
+/>
 
 In the above example, we have set the log file rolling policy to create a new file every minute for demonstration.
 
@@ -152,7 +173,11 @@ logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread/%X{userId}] %-7leve
 
 This modified log pattern adds milliseconds to the timestamp, combines thread and user ID info, uses a wider log level field for alignment, shortens the logger name for compactness, and includes the filename and line number to trace log entries precisely.
 
-<Figure src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-image%201.webp" alt="Customizing Log Format and Patterns" caption="Customizing Log Format and Patterns" />
+<Figure
+  src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-image%201.webp"
+  alt="Customizing Log Format and Patterns"
+  caption="Customizing Log Format and Patterns"
+/>
 
 Consistent log formatting ensures that logs are easy to read, analyze, and parse, making debugging and monitoring more efficient.
 
@@ -248,163 +273,169 @@ Configuring Logging using `logback.xml`
 To set up logging in a Spring Boot application using `logback.xml`, follow these steps:
 
 1. Create a `logback.xml` File
-    - Place this file in the `src/main/resources` directory of your Spring Boot project.
+   - Place this file in the `src/main/resources` directory of your Spring Boot project.
 2. Add the Following Configuration:
-    
-    ```xml
-    <configuration>
-        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-            <file>myapp2.log</file>
-            <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
-            </encoder>
-        </appender>
-    
-        <root level="DEBUG">
-            <appender-ref ref="FILE" />
-        </root>
-    </configuration>
-    ```
-    
-    - `<file>myapp2.log</file>`: Specifies the log file name.
-    - `<root level="ERROR">`: Sets the root log level to `DEBUG`, so DEBUG and higher level logs are captured.
-    - The pattern for the file appender formats each log entry to include the date and time, log level, logger name (up to 36 characters), and the log message and ends with a newline for clarity and readability in the log file.
+
+   ```xml
+   <configuration>
+       <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+           <file>myapp2.log</file>
+           <encoder>
+               <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+           </encoder>
+       </appender>
+
+       <root level="DEBUG">
+           <appender-ref ref="FILE" />
+       </root>
+   </configuration>
+   ```
+
+   - `<file>myapp2.log</file>`: Specifies the log file name.
+   - `<root level="ERROR">`: Sets the root log level to `DEBUG`, so DEBUG and higher level logs are captured.
+   - The pattern for the file appender formats each log entry to include the date and time, log level, logger name (up to 36 characters), and the log message and ends with a newline for clarity and readability in the log file.
+
 3. Modify logging as follows:
-    
-    We will use slf4j to use Logback for logging.
-    
-    ```java
-    package com.example.demo;
-    
-    import org.slf4j.Logger;
-    import org.slf4j.LoggerFactory;
-    import org.springframework.boot.SpringApplication;
-    import org.springframework.boot.autoconfigure.SpringBootApplication;
-    
-    @SpringBootApplication
-    public class DemoApplication {
-    
-        private static final Logger logger = LoggerFactory.getLogger(DemoApplication.class);
-    
-        public static void main(String[] args) {
-            SpringApplication.run(DemoApplication.class, args);
-            
-            // Log messages using SLF4J
-            logger.error("error log");   
-            logger.warn("warning log");  
-            logger.info("info log");     
-            logger.debug("debug log");   
-            logger.trace("trace log");   
-        }
-    }
-    
-    ```
-    
-    <Figure src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-d1fc62b5-2feb-4840-89e4-da7f9b02d3a1.webp" alt="Configuring Logging using `logback.xml`" caption="Configuring Logging using `logback.xml`" />
-    
-    After running the application, `myapp2.log` will be created in the base directory, containing debug and higher-level logs in the specified format.
-    
+
+   We will use slf4j to use Logback for logging.
+
+   ```java
+   package com.example.demo;
+
+   import org.slf4j.Logger;
+   import org.slf4j.LoggerFactory;
+   import org.springframework.boot.SpringApplication;
+   import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+   @SpringBootApplication
+   public class DemoApplication {
+
+       private static final Logger logger = LoggerFactory.getLogger(DemoApplication.class);
+
+       public static void main(String[] args) {
+           SpringApplication.run(DemoApplication.class, args);
+
+           // Log messages using SLF4J
+           logger.error("error log");
+           logger.warn("warning log");
+           logger.info("info log");
+           logger.debug("debug log");
+           logger.trace("trace log");
+       }
+   }
+
+   ```
+
+   <Figure
+     src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-d1fc62b5-2feb-4840-89e4-da7f9b02d3a1.webp"
+     alt="Configuring Logging using `logback.xml`"
+     caption="Configuring Logging using `logback.xml`"
+   />
+
+   After running the application, `myapp2.log` will be created in the base directory, containing debug and higher-level logs in the specified format.
+
 4. Implementing Conditional Logging Based on Profiles
-    
-    We can configure Logback to apply different logging configurations based on the active Spring profile using the `<springProfile>` tag. This allows you to define separate logging behaviors for development, testing, and production environments.
-    
-    Example `logback-spring.xml`:
-    
-    ```xml
-    <configuration>
-    
-        <!-- Default profile: logs INFO level and higher to the console -->
-        <springProfile name="default">
-            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-                <encoder>
-                    <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
-                </encoder>
-            </appender>
-    
-            <root level="INFO">
-                <appender-ref ref="CONSOLE" />
-            </root>
-        </springProfile>
-    
-        <!-- Development profile: logs DEBUG level and higher to the console -->
-        <springProfile name="dev">
-            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-                <encoder>
-                    <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
-                </encoder>
-            </appender>
-    
-            <root level="DEBUG">
-                <appender-ref ref="CONSOLE" />
-            </root>
-        </springProfile>
-    
-        <!-- Production profile: logs WARN level and higher to a file -->
-        <springProfile name="prod">
-            <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-                <file>logs/app.log</file>
-                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                    <fileNamePattern>logs/app.%d{yyyy-MM-dd}.log</fileNamePattern>
-                    <maxHistory>30</maxHistory>
-                </rollingPolicy>
-                <encoder>
-                    <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
-                </encoder>
-            </appender>
-    
-            <root level="WARN">
-                <appender-ref ref="FILE" />
-            </root>
-        </springProfile>
-    
-    </configuration>
-    
-    ```
-    
-    Explanation:
-    
-    - Default Profile: Logs `INFO` level and above to the console.
-    - Development Profile (`dev`): Logs `DEBUG` level and above to the console, useful for detailed debugging during development.
-    - Production Profile (`prod`): Logs `WARN` level and above to a file, reducing verbosity and focusing on more critical issues in production.
+
+   We can configure Logback to apply different logging configurations based on the active Spring profile using the `<springProfile>` tag. This allows you to define separate logging behaviors for development, testing, and production environments.
+
+   Example `logback-spring.xml`:
+
+   ```xml
+   <configuration>
+
+       <!-- Default profile: logs INFO level and higher to the console -->
+       <springProfile name="default">
+           <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+               <encoder>
+                   <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+               </encoder>
+           </appender>
+
+           <root level="INFO">
+               <appender-ref ref="CONSOLE" />
+           </root>
+       </springProfile>
+
+       <!-- Development profile: logs DEBUG level and higher to the console -->
+       <springProfile name="dev">
+           <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+               <encoder>
+                   <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+               </encoder>
+           </appender>
+
+           <root level="DEBUG">
+               <appender-ref ref="CONSOLE" />
+           </root>
+       </springProfile>
+
+       <!-- Production profile: logs WARN level and higher to a file -->
+       <springProfile name="prod">
+           <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+               <file>logs/app.log</file>
+               <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                   <fileNamePattern>logs/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+                   <maxHistory>30</maxHistory>
+               </rollingPolicy>
+               <encoder>
+                   <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+               </encoder>
+           </appender>
+
+           <root level="WARN">
+               <appender-ref ref="FILE" />
+           </root>
+       </springProfile>
+
+   </configuration>
+
+   ```
+
+   Explanation:
+
+   - Default Profile: Logs `INFO` level and above to the console.
+   - Development Profile (`dev`): Logs `DEBUG` level and above to the console, useful for detailed debugging during development.
+   - Production Profile (`prod`): Logs `WARN` level and above to a file, reducing verbosity and focusing on more critical issues in production.
+
 5. Utilizing Logback's Built-In Filtering Mechanisms
-    
-    Logback allows you to apply filters to loggers or appenders to fine-tune what gets logged. For instance, you might want to exclude `DEBUG` level logs from being written to a file while still logging `INFO` and higher levels.
-    
-    Example `logback-spring.xml`:
-    
-    ```xml
-    <configuration>
-    
-        <!-- File Appender with a Level Filter -->
-        <appender name="FILTERED_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>logs/filtered-app.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>logs/filtered-app.%d{yyyy-MM-dd}.log</fileNamePattern>
-                <maxHistory>30</maxHistory>
-            </rollingPolicy>
-            <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
-            </encoder>
-    
-            <!-- Exclude DEBUG logs from being written to this file -->
-            <filter class="ch.qos.logback.classic.filter.LevelFilter">
-                <level>DEBUG</level>
-                <onMatch>DENY</onMatch>
-                <onMismatch>ACCEPT</onMismatch>
-            </filter>
-        </appender>
-    
-        <root level="DEBUG">
-            <appender-ref ref="FILTERED_FILE" />
-        </root>
-    </configuration>
-    
-    ```
-    
-    Explanation:
-    
-    - File Appender with Filtering: The appender writes logs to `logs/filtered-app.log`, but it excludes `DEBUG`-level logs.
-    - The filter is applied using `<filter class="ch.qos.logback.classic.filter.LevelFilter">`, where `onMatch="DENY"` prevents `DEBUG` logs from being recorded in the file.
+
+   Logback allows you to apply filters to loggers or appenders to fine-tune what gets logged. For instance, you might want to exclude `DEBUG` level logs from being written to a file while still logging `INFO` and higher levels.
+
+   Example `logback-spring.xml`:
+
+   ```xml
+   <configuration>
+
+       <!-- File Appender with a Level Filter -->
+       <appender name="FILTERED_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+           <file>logs/filtered-app.log</file>
+           <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+               <fileNamePattern>logs/filtered-app.%d{yyyy-MM-dd}.log</fileNamePattern>
+               <maxHistory>30</maxHistory>
+           </rollingPolicy>
+           <encoder>
+               <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+           </encoder>
+
+           <!-- Exclude DEBUG logs from being written to this file -->
+           <filter class="ch.qos.logback.classic.filter.LevelFilter">
+               <level>DEBUG</level>
+               <onMatch>DENY</onMatch>
+               <onMismatch>ACCEPT</onMismatch>
+           </filter>
+       </appender>
+
+       <root level="DEBUG">
+           <appender-ref ref="FILTERED_FILE" />
+       </root>
+   </configuration>
+
+   ```
+
+   Explanation:
+
+   - File Appender with Filtering: The appender writes logs to `logs/filtered-app.log`, but it excludes `DEBUG`-level logs.
+   - The filter is applied using `<filter class="ch.qos.logback.classic.filter.LevelFilter">`, where `onMatch="DENY"` prevents `DEBUG` logs from being recorded in the file.
 
 ### Implementing Multiple Log Files
 
@@ -579,31 +610,34 @@ To get started with SigNoz:
 Once [SigNoz](https://signoz.io/docs/introduction/) is set up, configure your Spring Boot application to send logs to SigNoz:
 
 1. Setting Up SigNoz
-    
-    We have two options: we can use SigNoz cloud or self-host SigNoz.
-    
-    <GetStartedSigNoz />
-    
+
+   We have two options: we can use SigNoz cloud or self-host SigNoz.
+
+   <GetStartedSigNoz />
+
 2. Downloading [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) Java Agent JAR
-    
-    ```
-    wget <https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar>
-    ```
-    
+
+   ```
+   wget <https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar>
+   ```
+
 3. Running the application with environment variable for collecting logs
-    
-    ```
-    OTEL_LOGS_EXPORTER=otlp \\
-    OTEL_RESOURCE_ATTRIBUTES=service.name=spring-boot-app
-    OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key="7XXXXX7-6XXxX-45ff-9XX1-3bXxXXf9cdc3" \\
-    OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.in.signoz.cloud:443 \\
-    java -javaagent:java-agent/opentelemetry-javaagent.jar -jar target/*.jar
-    ```
-    
+
+   ```
+   OTEL_LOGS_EXPORTER=otlp \\
+   OTEL_RESOURCE_ATTRIBUTES=service.name=spring-boot-app
+   OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key="7XXXXX7-6XXxX-45ff-9XX1-3bXxXXf9cdc3" \\
+   OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.in.signoz.cloud:443 \\
+   java -javaagent:java-agent/opentelemetry-javaagent.jar -jar target/*.jar
+   ```
 
 The Logs tab in SigNoz is used to see the logs of our Spring Boot application
 
-<Figure src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-opentelemetry-spring-boot-logs-apply-filter.webp" alt="Logs tab in SigNoz, Spring Boot Application" caption="Logs tab in SigNoz, Spring Boot Application" />
+<Figure
+  src="/img/guides/2024/08/default-logging-file-for-spring-boot-application-opentelemetry-spring-boot-logs-apply-filter.webp"
+  alt="Logs tab in SigNoz, Spring Boot Application"
+  caption="Logs tab in SigNoz, Spring Boot Application"
+/>
 
 With this setup, you can leverage SigNoz's powerful features for log analysis and correlation, enhancing your application's observability.
 
@@ -612,27 +646,27 @@ With this setup, you can leverage SigNoz's powerful features for log analysis an
 Even with proper configuration, you might encounter logging issues. Here are some common problems and their solutions:
 
 1. Missing log files:
-    - By default, Signoz logs only to the console, so no log files will be generated unless explicitly configured.
-    - Using the deprecated `logging.file` property instead of the correct current properties may prevent logs from being written to a file.
-    - Providing an incorrect or non-existent file path can lead to missing log files.
-    - Ensure the application has the necessary write permissions for the specified log directory.
-    - Verify that the application has enough available disk space to write the log files.
+   - By default, Signoz logs only to the console, so no log files will be generated unless explicitly configured.
+   - Using the deprecated `logging.file` property instead of the correct current properties may prevent logs from being written to a file.
+   - Providing an incorrect or non-existent file path can lead to missing log files.
+   - Ensure the application has the necessary write permissions for the specified log directory.
+   - Verify that the application has enough available disk space to write the log files.
 2. Incorrect log levels:
-    - Verify your logging configuration in `application.properties` or `logback-spring.xml`
-    - Setting `logging.level.root=DEBUG` increases the verbosity of all logs, even if other log levels are set lower. This ensures that all messages, including debug information, are captured for troubleshooting.
+   - Verify your logging configuration in `application.properties` or `logback-spring.xml`
+   - Setting `logging.level.root=DEBUG` increases the verbosity of all logs, even if other log levels are set lower. This ensures that all messages, including debug information, are captured for troubleshooting.
 3. Performance issues related to logging:
-    - Each log statement adds overhead, increasing latency and resource use in microservices.
-    - Large volumes of logs require efficient storage and can add network overhead in distributed systems.
-    - Inappropriate log levels and verbosity can degrade performance; adjust as needed.
-    - Benchmark, profile, and use distributed tracing to measure logging's impact and identify bottlenecks.
-    - Implement asynchronous logging to reduce the impact on response times.
-    - Use log aggregation, compression, and dynamic logging configuration to optimize performance and storage.
+   - Each log statement adds overhead, increasing latency and resource use in microservices.
+   - Large volumes of logs require efficient storage and can add network overhead in distributed systems.
+   - Inappropriate log levels and verbosity can degrade performance; adjust as needed.
+   - Benchmark, profile, and use distributed tracing to measure logging's impact and identify bottlenecks.
+   - Implement asynchronous logging to reduce the impact on response times.
+   - Use log aggregation, compression, and dynamic logging configuration to optimize performance and storage.
 4. Log file permission problems:
-    - If the issue occurs during testing, consider maintaining a separate configuration file specifically for testing. This allows you to generate a separate log file tailored for the testing environment.
-    - When running multiple modules on the same server, you can distinguish log files by including the process ID (PID) in the log file names. This ensures that each module logs separately.
-    - The issue might also stem from missing permissions or incorrect path specifications. Ensure the log file paths are correct and that the application has the necessary permissions to write to the specified locations. Use `chmod` to adjust file permissions if needed.
+   - If the issue occurs during testing, consider maintaining a separate configuration file specifically for testing. This allows you to generate a separate log file tailored for the testing environment.
+   - When running multiple modules on the same server, you can distinguish log files by including the process ID (PID) in the log file names. This ensures that each module logs separately.
+   - The issue might also stem from missing permissions or incorrect path specifications. Ensure the log file paths are correct and that the application has the necessary permissions to write to the specified locations. Use `chmod` to adjust file permissions if needed.
 
-By addressing these common issues, you can ensure your Spring Boot application's logging system operates smoothly and effectively. 
+By addressing these common issues, you can ensure your Spring Boot application's logging system operates smoothly and effectively.
 
 ## FAQs
 

@@ -1,13 +1,11 @@
 ---
-
 title: How to Check Pod Ports with kubectl - A Quick Guide
-slug: how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile
 date: 2024-09-04
 tags: [faq, kubernetes]
 authors: [bhavya_sachdeva]
 description: Learn how to check pod ports using kubectl without relying on Dockerfiles. This guide covers quick commands, advanced techniques, and best practices for Kubernetes port management.
-keywords: [kubectl, pod ports, Kubernetes, container orchestration, network debugging, port management]
-
+keywords:
+  [kubectl, pod ports, Kubernetes, container orchestration, network debugging, port management]
 ---
 
 Kubernetes has revolutionized container orchestration, but it can be challenging to navigate its complexities. One common task that often stumps developers is checking which port a pod is listening on, especially when you are not using Dockerfile, deployment file, or defining a port manually. This guide will show you how to use kubectl to quickly and efficiently check pod ports, enhancing your ability to troubleshoot and manage Kubernetes deployments.
@@ -28,25 +26,28 @@ Knowing which port a pod is listening on is crucial for:
 Here's how you can quickly check pod ports using kubectl:
 
 1. Use `kubectl describe pod`
-    
-    This command provides a detailed view of a specific pod's configuration and status. When you run `kubectl describe pod <pod-name>`, it gives you output about that particular port such as containers, images, ports that each container is configured to listen on, environment variables, volumes, and network settings.
-    
-    ```bash
-    kubectl describe pod <pod-name>
-    ```
-    
-     You can use this command to check for the port and for that, you need to replace `<pod-name>` with your actual pod. Let’s say you have nginx-pod running in your system. You want to check for its port by looking for the Containers section  in the output, you will be able to see a pod named nginx-pod and search for a port property like it is shown below: 
-    
-    <Figure src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_11.15.09_AM.webp" alt="Describe pod" caption="Describe pod" />
-    
-    Let’s say you need to check the port for the pod in any specific namespace, so for that you need  to use the below command:
-    
-    ```bash
-    Kubectl describe pod <pod-name> -n <namespace>
-    ```
-    
-    You can see the below output: 
-    
+
+   This command provides a detailed view of a specific pod's configuration and status. When you run `kubectl describe pod <pod-name>`, it gives you output about that particular port such as containers, images, ports that each container is configured to listen on, environment variables, volumes, and network settings.
+
+   ```bash
+   kubectl describe pod <pod-name>
+   ```
+
+   You can use this command to check for the port and for that, you need to replace `<pod-name>` with your actual pod. Let’s say you have nginx-pod running in your system. You want to check for its port by looking for the Containers section in the output, you will be able to see a pod named nginx-pod and search for a port property like it is shown below:
+
+   <Figure
+     src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_11.15.09_AM.webp"
+     alt="Describe pod"
+     caption="Describe pod"
+   />
+
+   Let’s say you need to check the port for the pod in any specific namespace, so for that you need to use the below command:
+
+   ```bash
+   Kubectl describe pod <pod-name> -n <namespace>
+   ```
+
+   You can see the below output:
 
 <Figure src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-29_at_9.30.07_AM.webp" alt="" caption="" />1.    Check container port mappings.
     
@@ -57,83 +58,110 @@ Here's how you can quickly check pod ports using kubectl:
     ```bash
     kubectl get pod <pod-name> -o yaml | grep ports: -A 5
     ```
-    
+
 
       You should see a similar output:
 
-<Figure src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_12.45.23_AM.webp" alt="Ports information using YAML" caption="Ports information using YAML" />
+<Figure
+  src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_12.45.23_AM.webp"
+  alt="Ports information using YAML"
+  caption="Ports information using YAML"
+/>
 
-1. Inspect running processes
-    
+1.  Inspect running processes
+
     To see which processes are listening on ports:
-    
+
     ```bash
     kubectl exec <pod-name> -- netstat -tulpn
     ```
-    
-    This command runs `netstat` inside the pod, showing active network connections and listening ports. The `-tulpn` options specify that it should show TCP and UDP connections, listening ports, process IDs, and numerical addresses. 
-    
-    Let’s say if you are running this command in your Macbook then you do need to install net-tools because it is supported in Linux only.
-    
-    <Figure src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_1.02.25_AM.webp" alt="Using Exec command" caption="Using Exec command" />
-    
 
-        
+    This command runs `netstat` inside the pod, showing active network connections and listening ports. The `-tulpn` options specify that it should show TCP and UDP connections, listening ports, process IDs, and numerical addresses.
+
+    Let’s say if you are running this command in your Macbook then you do need to install net-tools because it is supported in Linux only.
+
+    <Figure
+      src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_1.02.25_AM.webp"
+      alt="Using Exec command"
+      caption="Using Exec command"
+    />
 
         You should see a similar output below:
 
-<Figure src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_3.53.41_PM.webp" alt="Output" caption="Output" />
+<Figure
+  src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_3.53.41_PM.webp"
+  alt="Output"
+  caption="Output"
+/>
 
 ### Advanced Kubectl commands for Port Information
 
 When you need precise and detailed information about the ports that Kubernetes pods are using, some advanced kubectl commands can provide deeper insights. Here's how you can leverage these commands to get more specific port information:
 
 1. Use JSON output with jq
-    
-    To extract just the port information, you can use the `jq` tool, which is a powerful JSON processor. The command used for this is below:
-    
-    ```bash
-    kubectl get pod <pod-name> -o json | jq '.spec.containers[].ports'
-    ```
-    
-    This command filters the JSON output to show only the port configurations of the containers within the specified pod. It is incredibly useful for automation scripts or when you need to programmatically process port information across multiple containers and pods.
-    
-    <Figure src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_12.46.29_AM.webp" alt="Using jq tool" caption="Using jq tool" />
-    
+
+   To extract just the port information, you can use the `jq` tool, which is a powerful JSON processor. The command used for this is below:
+
+   ```bash
+   kubectl get pod <pod-name> -o json | jq '.spec.containers[].ports'
+   ```
+
+   This command filters the JSON output to show only the port configurations of the containers within the specified pod. It is incredibly useful for automation scripts or when you need to programmatically process port information across multiple containers and pods.
+
+   <Figure
+     src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_12.46.29_AM.webp"
+     alt="Using jq tool"
+     caption="Using jq tool"
+   />
+
 2. Checking Service Endpoints
-    
-    Kubernetes services abstract pod IP addresses and ports into a single access point. To find out where a service points and which ports it exposes, use:
-    
-    ```bash
-    kubectl get endpoints <service-name>
-    ```
-    
-    This command retrieves the endpoints associated with a service, showing IP addresses and ports that are available for communication. This is crucial for debugging service connectivity issues and ensuring that services are correctly linked to their underlying pods.
-    
+
+   Kubernetes services abstract pod IP addresses and ports into a single access point. To find out where a service points and which ports it exposes, use:
+
+   ```bash
+   kubectl get endpoints <service-name>
+   ```
+
+   This command retrieves the endpoints associated with a service, showing IP addresses and ports that are available for communication. This is crucial for debugging service connectivity issues and ensuring that services are correctly linked to their underlying pods.
+
 3. Custom Output Columns for Quick Reference
-    
-    When managing multiple pods, it can be helpful to have a concise view of their configurations, especially ports. The custom columns output feature of `kubectl` allows you to specify exactly which data to display:
-    
-    ```bash
-    kubectl get pods -o custom-columns="POD:.metadata.name,PORTS:.spec.containers[*].ports[*].containerPort"
-    ```
-    
-    This creates a table with pod names and their corresponding ports.
-    
-    <Figure src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_2.43.13_PM.webp" alt="" caption="" />4. Creating Command Aliases for Efficiency
-    
-    To simplify frequent checks, create an alias in your shell. Regularly used commands can be shortened by creating aliases in your shell. 
-    
-    ```bash
-    alias kports='kubectl get pods -o custom-columns="POD:.metadata.name,PORTS:.spec.containers[*].ports[*].containerPort"'
-    ```
-    
-    <Figure src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_12.48.23_AM.webp" alt="" caption="" />Now you can simply type `kports` to get a quick overview of pod ports. This saves time and reduces the chance of errors:
-    
-    <Figure src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_12.48.38_AM.webp" alt="alias in kubernetes" caption="alias in kubernetes" />
-    
-    Using these aliases, anyone in your team can quickly check port configurations by typing `kports` in the terminal, making it a handy tool for ongoing monitoring and troubleshooting.
-    
+
+   When managing multiple pods, it can be helpful to have a concise view of their configurations, especially ports. The custom columns output feature of `kubectl` allows you to specify exactly which data to display:
+
+   ```bash
+   kubectl get pods -o custom-columns="POD:.metadata.name,PORTS:.spec.containers[*].ports[*].containerPort"
+   ```
+
+   This creates a table with pod names and their corresponding ports.
+
+   <Figure
+     src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_2.43.13_PM.webp"
+     alt=""
+     caption=""
+   />
+   4. Creating Command Aliases for Efficiency
+
+   To simplify frequent checks, create an alias in your shell. Regularly used commands can be shortened by creating aliases in your shell.
+
+   ```bash
+   alias kports='kubectl get pods -o custom-columns="POD:.metadata.name,PORTS:.spec.containers[*].ports[*].containerPort"'
+   ```
+
+   <Figure
+     src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_12.48.23_AM.webp"
+     alt=""
+     caption=""
+   />
+   Now you can simply type `kports` to get a quick overview of pod ports. This saves time and
+   reduces the chance of errors:
+
+   <Figure
+     src="/img/guides/2024/09/how-to-check-what-port-a-pod-is-listening-on-with-kubectl-and-not-looking-at-the-dockerfile-Screenshot_2024-08-26_at_12.48.38_AM.webp"
+     alt="alias in kubernetes"
+     caption="alias in kubernetes"
+   />
+
+   Using these aliases, anyone in your team can quickly check port configurations by typing `kports` in the terminal, making it a handy tool for ongoing monitoring and troubleshooting.
 
 ## Why Not to Rely on Dockerfile for Port Information
 
@@ -157,7 +185,7 @@ Common port-related issues and their solutions:
 
 ## Monitoring Pod Network Activity with SigNoz
 
-For ongoing monitoring of pod network activity and port usage, consider using SigNoz. SigNoz is an open-source APM tool that provides detailed insights into your Kubernetes cluster's performance. You can check out the  SigNoz  [here](https://signoz.io/):
+For ongoing monitoring of pod network activity and port usage, consider using SigNoz. SigNoz is an open-source APM tool that provides detailed insights into your Kubernetes cluster's performance. You can check out the SigNoz [here](https://signoz.io/):
 
 With [SigNoz](https://signoz.io/docs/introduction/), you can:
 

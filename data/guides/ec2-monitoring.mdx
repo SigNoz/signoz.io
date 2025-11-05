@@ -1,16 +1,21 @@
 ---
-
 title: EC2 Monitoring - Essential Guide for AWS Users
-slug: ec2-monitoring
 date: 2024-10-03
 tags: [monitoring]
 authors: [sushant_gaurav]
 description: Master EC2 monitoring with our comprehensive guide. Learn key metrics, tools, and best practices to optimize your AWS infrastructure performance.
-keywords: [ec2 monitoring, aws monitoring, cloudwatch, performance optimization, devops, cloud infrastructure]
-
+keywords:
+  [
+    ec2 monitoring,
+    aws monitoring,
+    cloudwatch,
+    performance optimization,
+    devops,
+    cloud infrastructure,
+  ]
 ---
 
-Amazon EC2 (Elastic Compute Cloud) is the foundation of many AWS-powered services, offering scalable virtual servers in the cloud. For cloud engineers and DevOps specialists, ensuring these EC2 instances run smoothly is important. EC2 monitoring is critical for ensuring a dependable, high-performance AWS infrastructure. 
+Amazon EC2 (Elastic Compute Cloud) is the foundation of many AWS-powered services, offering scalable virtual servers in the cloud. For cloud engineers and DevOps specialists, ensuring these EC2 instances run smoothly is important. EC2 monitoring is critical for ensuring a dependable, high-performance AWS infrastructure.
 
 This article covers the fundamentals of EC2 monitoring, from basic concepts to advanced strategies.
 
@@ -127,24 +132,24 @@ You can enable EC2 Auto Recovery by setting up an Amazon CloudWatch alarm that t
 AWS provides a variety of useful tools for monitoring your EC2 instances, allowing you to measure performance, detect anomalies, and automate replies.
 
 - Amazon CloudWatch: CloudWatch is AWS' offers monitoring EC2 and other resources. It collects measurements, monitors log data, generates alerts, and provides real-time performance information. CloudWatch enables you to monitor the health of your instance and respond quickly to concerns. An example can be monitoring CPU use, disk I/O, and network traffic.
-    - An example use case:
-        - Setting up alarms to send notifications or perform scheduled tasks.
+  - An example use case:
+    - Setting up alarms to send notifications or perform scheduled tasks.
 - AWS CloudTrail: CloudTrail captures and tracks all API requests performed through your AWS account, including those involving EC2 instances. This logging helps trace changes to EC2 setups, which improves your security posture and assists with compliance and auditing requirements.
-    - Some example use cases:
-        - Detecting unauthorized changes to instance settings.
-        - Auditing activities performed by various AWS users or services.
+  - Some example use cases:
+    - Detecting unauthorized changes to instance settings.
+    - Auditing activities performed by various AWS users or services.
 - Amazon GuardDuty: GuardDuty is a threat detection service that detects suspicious activities throughout your AWS environment, including EC2 instances. It analyzes data from CloudTrail, VPC Flow Logs, and DNS logs to identify possible security concerns such as hacked instances or strange API requests.
-    - Some example use cases:
-        - Including detecting anomalous or illegal network activity.
-        - Detection of Bitcoin mining on EC2 instances.
+  - Some example use cases:
+    - Including detecting anomalous or illegal network activity.
+    - Detection of Bitcoin mining on EC2 instances.
 - AWS Systems Manager: Systems Manager provides a common interface for operational data from all AWS services, allowing you to manage and monitor EC2 fleets at scale. You can automate typical operations like patch management and get precise performance data.
-    - Some example use cases:
-        - Perform automatic patching and configuration upgrades.
-        - Monitor many EC2 instances from a single dashboard.
+  - Some example use cases:
+    - Perform automatic patching and configuration upgrades.
+    - Monitor many EC2 instances from a single dashboard.
 
 ## Best Practices for Effective EC2 Monitoring
 
-To achieve effective EC2 monitoring, follow a few best practices. These will assist you in proactively managing your resources, reducing expenditures, and detecting problems before they worsen. 
+To achieve effective EC2 monitoring, follow a few best practices. These will assist you in proactively managing your resources, reducing expenditures, and detecting problems before they worsen.
 
 - Set up custom CloudWatch dashboards: Organize all key EC2 metrics into CloudWatch dashboards to provide consolidated monitoring. These dashboards give a visual overview of your instances' performance, allowing you to identify patterns and abnormalities immediately. For example, create a real-time dashboard to monitor CPU, RAM, disk I/O, and network traffic.
 - Implement correct tagging: Tag EC2 instances by environment (e.g., dev, test, prod), application, or business unit. This makes it easy to organize resources, implement procedures, and evaluate metrics. For example, tagging instances with `Environment=Production` enables restricted monitoring of only production systems.
@@ -180,7 +185,7 @@ To enable detailed monitoring, follow these steps:
 CloudWatch collects essential EC2 instance metrics, such as:
 
 - CPU Utilization: Tracks the percentage of allocated EC2 compute units in use.
-- Disk Read/Write Operations: Measures the rate  data is being read/written from/to the disk.
+- Disk Read/Write Operations: Measures the rate data is being read/written from/to the disk.
 - Network In/Out: Monitors the volume of data transferred via network interfaces.
 
 To view [CloudWatch metric](https://signoz.io/blog/cloudwatch-metrics/), follow these steps:
@@ -194,41 +199,35 @@ To view [CloudWatch metric](https://signoz.io/blog/cloudwatch-metrics/), follow 
 CloudWatch alarms notify you when an EC2 instance metric crosses a specific threshold. This is essential for real-time monitoring and automation.
 
 - Example: Set an alarm to trigger if CPU utilization exceeds 80% for 5 minutes.
-    
-    ```bash
-    aws cloudwatch put-metric-alarm \\
-      --alarm-name "HighCPUUtilization" \\
-      --metric-name "CPUUtilization" \\
-      --namespace "AWS/EC2" \\
-      --statistic "Average" \\
-      --period 300 \\
-      --threshold 80 \\
-      --comparison-operator "GreaterThanThreshold" \\
-      --evaluation-periods 1 \\
-      --alarm-actions arn:aws:sns:your-topic-arn \\
-      --dimensions Name=InstanceId,Value=i-0123456789abcdef0
-    ```
-    
+  ```bash
+  aws cloudwatch put-metric-alarm \\
+    --alarm-name "HighCPUUtilization" \\
+    --metric-name "CPUUtilization" \\
+    --namespace "AWS/EC2" \\
+    --statistic "Average" \\
+    --period 300 \\
+    --threshold 80 \\
+    --comparison-operator "GreaterThanThreshold" \\
+    --evaluation-periods 1 \\
+    --alarm-actions arn:aws:sns:your-topic-arn \\
+    --dimensions Name=InstanceId,Value=i-0123456789abcdef0
+  ```
 
 ### 4. Install the CloudWatch Agent for Additional Metrics
 
 To collect more detailed information like memory usage, you need to install and configure the CloudWatch Agent.
 
 - Steps:
-    - SSH into your EC2 instance and install the CloudWatch Agent:
-        
-        ```bash
-        sudo yum install amazon-cloudwatch-agent
-        ```
-        
-    - Create a configuration file for the metrics you want to collect, including memory and disk utilization.
-    - Start the CloudWatch Agent:
-        
-        ```bash
-        sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \\
-          -a start
-        ```
-        
+  - SSH into your EC2 instance and install the CloudWatch Agent:
+    ```bash
+    sudo yum install amazon-cloudwatch-agent
+    ```
+  - Create a configuration file for the metrics you want to collect, including memory and disk utilization.
+  - Start the CloudWatch Agent:
+    ```bash
+    sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \\
+      -a start
+    ```
 
 For more detailed steps, refer to the <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-cloudwatch.html" rel="noopener noreferrer nofollow" target="_blank">AWS CloudWatch User Guide</a>.
 
@@ -245,61 +244,57 @@ While CloudWatch provides robust native monitoring capabilities, tools like [Sig
 
 ### Getting Started with SigNoz:
 
-1. Sign Up for a SigNoz account or deploy the open-source version.
-<GetStartedSigNoz />
-2. Install the SigNoz Agent on your EC2 instance to start collecting metrics.
-3. Configure EC2 to Send Metrics: 
-For EC2 instances (without Kubernetes): You need to install the OpenTelemetry agent directly on your EC2 instance. This will collect and send telemetry data (metrics, logs, and traces) to SigNoz. Here's how you can configure it:
-    - Install OpenTelemetry Collector (or agent) on your EC2 instance. This can be done by downloading the OpenTelemetry Collector binaries or using package managers, such as Yum or APT.
-    - Once installed, you can configure the agent to collect system metrics like CPU, memory, disk I/O, and network performance.
-    
-    An example to configure the OpenTelemetry agent (no Kubernetes involved) using a configuration file stored locally on the EC2 instance:
-    
-    ```yaml
-    receivers:
-      hostmetrics:
-        collection_interval: 60s
-        scrapers:
-          cpu:
-          memory:
-          disk:
-          network:
-    
-    processors:
-      batch:
-        timeout: 10s
-    
-    exporters:
-      otlp:
-        endpoint: <SigNoz-endpoint>
-        insecure: true
-    
-    service:
-      pipelines:
-        metrics:
-          receivers: [hostmetrics]
-          processors: [batch]
-          exporters: [otlp]
-    
-    ```
-    
-    - Save this YAML configuration file on your EC2 instance.
-    - Start the OpenTelemetry agent using the configuration file. The agent will send metrics to the SigNoz server over the OTLP (OpenTelemetry Protocol).
-    
-    For Kubernetes-based EC2 Instances:
-    If you're using EC2 instances as part of a Kubernetes cluster, you can apply the YAML configuration to your cluster. The provided YAML file is used to configure the OpenTelemetry Collector in Kubernetes environments to send data to SigNoz.
-    
-    An example uses the YAML file in Kubernetes:
-    
-    - Apply the YAML configuration to your Kubernetes cluster:
-    
-    ```bash
-    kubectl apply -f opentelemetry-config.yaml
-    ```
-    
-    This will set up the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) in the cluster to forward metrics from your EC2 instances (via Kubernetes) to SigNoz.
-    
-4. Set Up Dashboards: In the SigNoz UI, configure custom dashboards for EC2 metrics such as CPU usage, disk I/O, and network traffic. Create alerts for any critical thresholds, ensuring you stay ahead of potential issues.
+1.  Sign Up for a SigNoz account or deploy the open-source version.
+    <GetStartedSigNoz />
+2.  Install the SigNoz Agent on your EC2 instance to start collecting metrics.
+3.  Configure EC2 to Send Metrics:
+    For EC2 instances (without Kubernetes): You need to install the OpenTelemetry agent directly on your EC2 instance. This will collect and send telemetry data (metrics, logs, and traces) to SigNoz. Here's how you can configure it: - Install OpenTelemetry Collector (or agent) on your EC2 instance. This can be done by downloading the OpenTelemetry Collector binaries or using package managers, such as Yum or APT. - Once installed, you can configure the agent to collect system metrics like CPU, memory, disk I/O, and network performance.
+        An example to configure the OpenTelemetry agent (no Kubernetes involved) using a configuration file stored locally on the EC2 instance:
+
+        ```yaml
+        receivers:
+          hostmetrics:
+            collection_interval: 60s
+            scrapers:
+              cpu:
+              memory:
+              disk:
+              network:
+
+        processors:
+          batch:
+            timeout: 10s
+
+        exporters:
+          otlp:
+            endpoint: <SigNoz-endpoint>
+            insecure: true
+
+        service:
+          pipelines:
+            metrics:
+              receivers: [hostmetrics]
+              processors: [batch]
+              exporters: [otlp]
+
+        ```
+
+        - Save this YAML configuration file on your EC2 instance.
+        - Start the OpenTelemetry agent using the configuration file. The agent will send metrics to the SigNoz server over the OTLP (OpenTelemetry Protocol).
+
+        For Kubernetes-based EC2 Instances:
+        If you're using EC2 instances as part of a Kubernetes cluster, you can apply the YAML configuration to your cluster. The provided YAML file is used to configure the OpenTelemetry Collector in Kubernetes environments to send data to SigNoz.
+
+        An example uses the YAML file in Kubernetes:
+
+        - Apply the YAML configuration to your Kubernetes cluster:
+
+        ```bash
+        kubectl apply -f opentelemetry-config.yaml
+        ```
+
+        This will set up the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) in the cluster to forward metrics from your EC2 instances (via Kubernetes) to SigNoz.
+4.  Set Up Dashboards: In the SigNoz UI, configure custom dashboards for EC2 metrics such as CPU usage, disk I/O, and network traffic. Create alerts for any critical thresholds, ensuring you stay ahead of potential issues.
 
 To learn more, visit the [SigNoz Documentation](https://signoz.io/docs).
 

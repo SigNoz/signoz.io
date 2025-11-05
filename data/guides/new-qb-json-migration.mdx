@@ -1,6 +1,5 @@
 ---
 title: Query Builder Migration
-slug: new-qb-json-migration
 id: new-qb-json-migration
 date: 2025-08-14
 description: Guide to help in query builder migration
@@ -22,6 +21,7 @@ In v5, `aggregateOperator` and `aggregateAttribute` are combined with `expressio
 #### For Traces/Logs
 
 **Before (v4)**:
+
 ```json
 {
   "builder": {
@@ -29,7 +29,7 @@ In v5, `aggregateOperator` and `aggregateAttribute` are combined with `expressio
       {
         "aggregateOperator": "avg",
         "aggregateAttribute": {
-            "key": "duration_nano"
+          "key": "duration_nano"
         }
       }
     ]
@@ -38,14 +38,17 @@ In v5, `aggregateOperator` and `aggregateAttribute` are combined with `expressio
 ```
 
 **After (v5)**:
+
 ```json
 {
   "builder": {
     "queryData": [
       {
-        "aggregations": [{
-          "expression": "avg(duration_nano)"
-        }]
+        "aggregations": [
+          {
+            "expression": "avg(duration_nano)"
+          }
+        ]
       }
     ]
   }
@@ -59,6 +62,7 @@ Currently, calculating max, min, and avg values for numeric attributes in logs/t
 #### For Metrics
 
 **Before (v4)**:
+
 ```json
 {
   "aggregateOperator": "p99",
@@ -70,17 +74,21 @@ Currently, calculating max, min, and avg values for numeric attributes in logs/t
 ```
 
 **After (v5)**:
+
 ```json
 {
-  "aggregations": [{
-    "metricName": "signoz_latency.bucket",
-    "spaceAggregation": "p99",
-    "reduceTo": "avg"
-  }]
+  "aggregations": [
+    {
+      "metricName": "signoz_latency.bucket",
+      "spaceAggregation": "p99",
+      "reduceTo": "avg"
+    }
+  ]
 }
 ```
 
 **Before (v4)**:
+
 ```json
 {
   "aggregateOperator": "p99",
@@ -93,14 +101,17 @@ Currently, calculating max, min, and avg values for numeric attributes in logs/t
 ```
 
 **After (v5)**:
+
 ```json
 {
-  "aggregations": [{
-    "metricName": "signoz_calls_total",
-    "spaceAggregation": "sum",
-    "timeAggregation": "rate",
-    "reduceTo": "avg"
-  }]
+  "aggregations": [
+    {
+      "metricName": "signoz_calls_total",
+      "spaceAggregation": "sum",
+      "timeAggregation": "rate",
+      "reduceTo": "avg"
+    }
+  ]
 }
 ```
 
@@ -113,6 +124,7 @@ Currently, multiple aggregations are available only for traces and logs. Support
 Filters change from structured objects to SQL-like expression:
 
 **Before (v4)**:
+
 ```json
 {
   "filters": {
@@ -147,6 +159,7 @@ Filters change from structured objects to SQL-like expression:
 ```
 
 **After (v5)**:
+
 ```json
 {
   "filter": {
@@ -167,22 +180,28 @@ Remains unchanged for dashboards.
 ### 4. Order By Changes
 
 **Before (v4)**:
+
 ```json
 {
-  "orderBy": [{
-    "columnName": "#SIGNOZ_VALUE",
-    "order": "desc"
-  }]
+  "orderBy": [
+    {
+      "columnName": "#SIGNOZ_VALUE",
+      "order": "desc"
+    }
+  ]
 }
 ```
 
 **After (v5)**:
+
 ```json
 {
-  "orderBy": [{
-    "columnName": "count()",
-    "order": "desc"
-  }]
+  "orderBy": [
+    {
+      "columnName": "count()",
+      "order": "desc"
+    }
+  ]
 }
 ```
 
@@ -205,6 +224,7 @@ Single naming scheme to work with variables across the product
 The having clause transforms from an array of conditions to a expression:
 
 **Before (v4)**:
+
 ```json
 {
   "having": [
@@ -223,6 +243,7 @@ The having clause transforms from an array of conditions to a expression:
 ```
 
 **After (v5)**:
+
 ```json
 {
   "having": {
@@ -240,6 +261,7 @@ This cryptic placeholder is only understandable to the original developer. We're
 Functions now use named argument format:
 
 **Before (v4)**:
+
 ```json
 {
   "functions": [
@@ -252,14 +274,13 @@ Functions now use named argument format:
 ```
 
 **After (v5)**:
+
 ```json
 {
   "functions": [
     {
       "name": "cutOffMin",
-      "args": [
-        {"name": "threshold", "value": 2}
-      ]
+      "args": [{ "name": "threshold", "value": 2 }]
     }
   ]
 }
@@ -268,28 +289,31 @@ Functions now use named argument format:
 ### 8. Dashboard Widget Example
 
 **HTTP Endpoint Monitoring Widget - Before (v4)**:
+
 ```json
 {
   "query": {
     "builder": {
-      "queryData": [{
-        "aggregateOperator": "count",
-        "dataSource": "traces",
-        "filters": {
-          "items": [
-            {"key": {"key": "serviceName"}, "op": "=", "value": "{{.service.name}}"},
-            {"key": {"key": "httpMethod"}, "op": "exists"},
-            {"key": {"key": "spanKind"}, "op": "=", "value": "Server"}
+      "queryData": [
+        {
+          "aggregateOperator": "count",
+          "dataSource": "traces",
+          "filters": {
+            "items": [
+              { "key": { "key": "serviceName" }, "op": "=", "value": "{{.service.name}}" },
+              { "key": { "key": "httpMethod" }, "op": "exists" },
+              { "key": { "key": "spanKind" }, "op": "=", "value": "Server" }
+            ],
+            "op": "AND"
+          },
+          "groupBy": [
+            { "key": "httpRoute", "type": "tag" },
+            { "key": "httpMethod", "type": "tag" }
           ],
-          "op": "AND"
-        },
-        "groupBy": [
-          {"key": "httpRoute", "type": "tag"},
-          {"key": "httpMethod", "type": "tag"}
-        ],
-        "orderBy": [{"columnName": "#SIGNOZ_VALUE", "order": "desc"}],
-        "queryName": "A"
-      }]
+          "orderBy": [{ "columnName": "#SIGNOZ_VALUE", "order": "desc" }],
+          "queryName": "A"
+        }
+      ]
     },
     "queryType": "builder"
   }
@@ -297,23 +321,23 @@ Functions now use named argument format:
 ```
 
 **After (v5)**:
+
 ```json
 {
   "query": {
     "builder": {
-      "queryData": [{
-        "aggregations": [{"expression": "count()"}],
-        "dataSource": "traces",
-        "filter": {
-          "expression": "(serviceName = $service.name AND httpMethod EXISTS AND spanKind = 'Server')"
-        },
-        "groupBy": [
-          {"key": "httpRoute"},
-          {"key": "httpMethod"}
-        ],
-        "orderBy": [{"columnName": "count()", "order": "desc"}],
-        "queryName": "A"
-      }]
+      "queryData": [
+        {
+          "aggregations": [{ "expression": "count()" }],
+          "dataSource": "traces",
+          "filter": {
+            "expression": "(serviceName = $service.name AND httpMethod EXISTS AND spanKind = 'Server')"
+          },
+          "groupBy": [{ "key": "httpRoute" }, { "key": "httpMethod" }],
+          "orderBy": [{ "columnName": "count()", "order": "desc" }],
+          "queryName": "A"
+        }
+      ]
     },
     "queryType": "builder"
   }
@@ -338,7 +362,7 @@ resource "signoz_alert" "error_rate_alert" {
   # All other fields remain unchanged
   ...
   version            = "v5"  # Required for v5 migration
-  
+
   # Only the condition field changes - use the new v5 format
   condition = jsonencode({
     "compositeQuery": {
@@ -380,7 +404,7 @@ resource "signoz_alert" "error_rate_alert" {
     "matchType": "1",
     "selectedQueryName": "F1"
   })
-  
+
   # All other fields remain unchanged
   ...
 }
@@ -393,12 +417,14 @@ resource "signoz_alert" "error_rate_alert" {
 The alerts is moving from separate query type objects to a unified `queries` array:
 
 #### Fields Removed in v5
+
 - `aggregateOperator` and `aggregateAttribute`
 - `filters` (replaced by `filter.expression`)
 - `builderQueries`, `promQueries`, `chQueries` (unified into `queries`)
 - `temporality`, `timeAggregation`, `spaceAggregation` (moved into aggregations for metrics)
 
 #### New Fields in v5
+
 - `queries` array containing all query types
 - `type` field to identify query type
 - `spec` object containing query specification
@@ -406,6 +432,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
 - `filter.expression` for SQL-like filter syntax
 
 **Before (v4)**:
+
 ```json
 {
   "condition": {
@@ -438,6 +465,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
 ```
 
 **After (v5)**:
+
 ```json
 {
   "condition": {
@@ -448,7 +476,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
           "spec": {
             "name": "A",
             "signal": "traces",
-            "aggregations": [{"expression": "count()"}],
+            "aggregations": [{ "expression": "count()" }],
             "filter": {}
           }
         },
@@ -457,7 +485,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
           "spec": {
             "name": "B",
             "signal": "traces",
-            "aggregations": [{"expression": "avg(durationNano)"}],
+            "aggregations": [{ "expression": "avg(durationNano)" }],
             "filter": {}
           }
         },
@@ -477,6 +505,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
 ### 2. Error Rate Alert Example
 
 **Before (v4)**:
+
 ```json
 {
   "condition": {
@@ -487,8 +516,8 @@ The alerts is moving from separate query type objects to a unified `queries` arr
           "dataSource": "traces",
           "filters": {
             "items": [
-              {"key": {"key": "serviceName"}, "op": "=", "value": "redis"},
-              {"key": {"key": "statusCode"}, "op": "=", "value": "STATUS_CODE_ERROR"}
+              { "key": { "key": "serviceName" }, "op": "=", "value": "redis" },
+              { "key": { "key": "statusCode" }, "op": "=", "value": "STATUS_CODE_ERROR" }
             ],
             "op": "AND"
           }
@@ -497,9 +526,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
           "aggregateOperator": "count",
           "dataSource": "traces",
           "filters": {
-            "items": [
-              {"key": {"key": "serviceName"}, "op": "=", "value": "redis"}
-            ]
+            "items": [{ "key": { "key": "serviceName" }, "op": "=", "value": "redis" }]
           }
         }
       },
@@ -515,6 +542,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
 ```
 
 **After (v5)**:
+
 ```json
 {
   "condition": {
@@ -525,7 +553,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
           "spec": {
             "name": "A",
             "signal": "traces",
-            "aggregations": [{"expression": "count()"}],
+            "aggregations": [{ "expression": "count()" }],
             "filter": {
               "expression": "serviceName = 'redis' AND statusCode = 'STATUS_CODE_ERROR'"
             }
@@ -536,7 +564,7 @@ The alerts is moving from separate query type objects to a unified `queries` arr
           "spec": {
             "name": "B",
             "signal": "traces",
-            "aggregations": [{"expression": "count()"}],
+            "aggregations": [{ "expression": "count()" }],
             "filter": {
               "expression": "serviceName = 'redis'"
             }

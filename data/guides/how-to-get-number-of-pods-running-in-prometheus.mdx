@@ -1,13 +1,20 @@
 ---
-
 title: How to Monitor Pod Count in Prometheus - A Quick Guide
-slug: how-to-get-number-of-pods-running-in-prometheus
 date: 2024-10-30
 tags: [prometheus]
 authors: [nitin_gouda]
 description: Learn how to monitor and query pod count in Kubernetes using Prometheus. Discover PromQL queries, best practices, and troubleshooting tips for effective pod management.
-keywords: [pod count monitoring, Prometheus, Kubernetes, PromQL queries, pod metrics, cluster health, Grafana visualization, SigNoz]
-
+keywords:
+  [
+    pod count monitoring,
+    Prometheus,
+    Kubernetes,
+    PromQL queries,
+    pod metrics,
+    cluster health,
+    Grafana visualization,
+    SigNoz,
+  ]
 ---
 
 Monitoring pod count in Kubernetes is crucial for maintaining a healthy and efficient cluster. Prometheus, a popular open-source monitoring system, provides powerful tools to track and analyze pod metrics. This guide will show you how to get the number of pods running in Prometheus and leverage this information for effective cluster management.
@@ -21,17 +28,17 @@ Pod count monitoring in Kubernetes refers to the process of tracking the number 
 Monitoring pod count is vital for maintaining the health and stability of your Kubernetes cluster. The number of running pods directly affects how efficiently your resources are being used and whether your applications are running smoothly. Here are some key reasons why monitoring pod count is important:
 
 1. Resource Optimization
-Monitoring pod count helps ensure that your system is using resources efficiently. By keeping track of how many pods are running, you can make sure you're not overusing or underusing your CPU, memory, or storage resources. If too many pods are running, you may be wasting resources; if too few are running, your applications may not perform optimally.
+   Monitoring pod count helps ensure that your system is using resources efficiently. By keeping track of how many pods are running, you can make sure you're not overusing or underusing your CPU, memory, or storage resources. If too many pods are running, you may be wasting resources; if too few are running, your applications may not perform optimally.
 2. Scaling Decisions
-In a dynamic environment like Kubernetes, where workloads can change frequently, you need to know when to scale your applications up (add more pods) or down (reduce the number of pods). Pod count trends over time can show you when demand is increasing, helping you decide when to automatically scale up or when to scale down to save on resources.
+   In a dynamic environment like Kubernetes, where workloads can change frequently, you need to know when to scale your applications up (add more pods) or down (reduce the number of pods). Pod count trends over time can show you when demand is increasing, helping you decide when to automatically scale up or when to scale down to save on resources.
 3. Troubleshooting
-Changes in pod count that are unexpected—like sudden spikes or drops—can be a sign of problems in your cluster. For example, if pods are frequently being restarted or terminated, it could indicate an issue like a failed deployment, resource constraints (e.g., running out of memory), or a misconfiguration in your Kubernetes setup. Monitoring pod count helps you catch these problems early so you can resolve them quickly.
+   Changes in pod count that are unexpected—like sudden spikes or drops—can be a sign of problems in your cluster. For example, if pods are frequently being restarted or terminated, it could indicate an issue like a failed deployment, resource constraints (e.g., running out of memory), or a misconfiguration in your Kubernetes setup. Monitoring pod count helps you catch these problems early so you can resolve them quickly.
 
 ### Role of Prometheus in Kubernetes Monitoring
 
 Prometheus plays a crucial role in Kubernetes monitoring due to its powerful integration with the Kubernetes ecosystem. Its native support for service discovery allows Prometheus to automatically discover new pods and services as they are deployed, without requiring manual intervention. This automatic discovery ensures that your monitoring adapts in real-time, maintaining visibility over the dynamically changing environment in Kubernetes clusters.
 
-Moreover, Prometheus is designed to efficiently scrape metrics from various Kubernetes components, such as nodes, pods, and services. It monitors resource usage like CPU, memory, and network bandwidth, and provides insights into the overall health of the cluster. 
+Moreover, Prometheus is designed to efficiently scrape metrics from various Kubernetes components, such as nodes, pods, and services. It monitors resource usage like CPU, memory, and network bandwidth, and provides insights into the overall health of the cluster.
 
 Some important roles Prometheus plays in Kubernetes monitoring include:
 
@@ -62,7 +69,11 @@ count(kube_pod_info)
 
 This query gives you a snapshot of how many pods are running in your cluster at the moment. It’s a good starting point for understanding the overall scale of your applications.
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_10.46.56_PM.webp" alt="Count all pods" caption="Count all pods" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_10.46.56_PM.webp"
+  alt="Count all pods"
+  caption="Count all pods"
+/>
 
 1. Count Running Pods
 
@@ -74,7 +85,11 @@ count(kube_pod_status_phase{phase="Running"})
 
 This is useful when you need to ensure that your applications are actively running, as pods in other phases (e.g., "Pending" or "Failed") may indicate issues.
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_10.47.52_PM.webp" alt="Count pods which are in running state" caption="Count pods which are in running state" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_10.47.52_PM.webp"
+  alt="Count pods which are in running state"
+  caption="Count pods which are in running state"
+/>
 
 1. Count Pods by Namespace
 
@@ -86,7 +101,11 @@ count(kube_pod_info) by (namespace)
 
 This query gives you a clearer picture of how pods are distributed across different namespaces, helping you understand resource allocation at a more granular level.
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.09.26_PM.webp" alt="Count kube from a specific namespace" caption="Count kube from a specific namespace" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.09.26_PM.webp"
+  alt="Count kube from a specific namespace"
+  caption="Count kube from a specific namespace"
+/>
 
 ### Advanced Pod Count Queries
 
@@ -102,7 +121,11 @@ rate(kube_pod_start_time[1h])
 
 This query shows the rate of pod creation over the last hour, helping you understand how your cluster scales and responds to workload changes.
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.08.24_PM.webp" alt="Number of pods changing over 1 hour" caption="Number of pods changing over 1 hour" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.08.24_PM.webp"
+  alt="Number of pods changing over 1 hour"
+  caption="Number of pods changing over 1 hour"
+/>
 
 1. Detect Abnormal Pod Count Fluctuations
 
@@ -114,7 +137,11 @@ abs(delta(count(kube_pod_info)[1h:5m]))
 
 This query tracks changes in the number of pods over the last hour (sampled every 5 minutes) and returns the magnitude of the change (ignoring whether it increased or decreased). This is useful for spotting unexpected behavior that might need investigation.
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-22_at_1.07.21_AM.webp" alt="Checking any abnormalities during a time range" caption="Checking any abnormalities during a time range" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-22_at_1.07.21_AM.webp"
+  alt="Checking any abnormalities during a time range"
+  caption="Checking any abnormalities during a time range"
+/>
 
 As there is no fluctuation and the pods are running well, the query returns a zero value.
 
@@ -133,7 +160,7 @@ Integrating Grafana with Prometheus unlocks powerful visualization capabilities 
 
 ### Creating Dashboards for Pod Count Metrics
 
-A well-structured Grafana dashboard helps you consolidate pod count data and other relevant metrics into a single view. To create a dashboard in Grafana, refer to [this guide](https://signoz.io/guides/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count/#connect-prometheus-to-grafana). 
+A well-structured Grafana dashboard helps you consolidate pod count data and other relevant metrics into a single view. To create a dashboard in Grafana, refer to [this guide](https://signoz.io/guides/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count/#connect-prometheus-to-grafana).
 
 When designing your dashboard for pod count metrics, consider adding these key metrics to ensure comprehensive visibility and insights into your Kubernetes environment:
 
@@ -147,7 +174,11 @@ count(kube_pod_info)
 
 This will display the overall pod count across all namespaces, helping you track the scale of your applications at a glance.
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.49.23_PM.webp" alt="Count pods in grafana" caption="Count pods in grafana" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.49.23_PM.webp"
+  alt="Count pods in grafana"
+  caption="Count pods in grafana"
+/>
 
 1. Pod Count by Namespace
 
@@ -159,7 +190,11 @@ count(kube_pod_info) by (namespace)
 
 This query groups the pod count by namespace, giving you visibility into which parts of your cluster are consuming the most resources.
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.50.28_PM.webp" alt="Count pods by namespace in grafana" caption="Count pods by namespace in grafana" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.50.28_PM.webp"
+  alt="Count pods by namespace in grafana"
+  caption="Count pods by namespace in grafana"
+/>
 
 1. Pod Count Trends Over Time
 
@@ -169,7 +204,11 @@ Understanding how your pod count changes over time is critical for identifying p
 count(kube_pod_info)
 ```
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.49.23_PM.webp" alt="Count pods in Grafana" caption="Count pods in Grafana" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-06_at_11.49.23_PM.webp"
+  alt="Count pods in Grafana"
+  caption="Count pods in Grafana"
+/>
 
 Then, apply a time range in the Grafana panel to display how the number of pods has fluctuated. This is particularly useful for spotting anomalies like sudden increases or decreases in the number of running pods.
 
@@ -178,29 +217,27 @@ Then, apply a time range in the Grafana panel to display how the number of pods 
 To monitor the health of your pods effectively, it’s essential to track the distribution of pods across different statuses—such as Running, Pending, and Failed. This can quickly show if any pods are stuck in an undesired state. Use the following queries for the different statuses:
 
 - For running pods:
-    
-    ```
-    count(kube_pod_status_phase{phase="Running"})
-    ```
-    
+  ```
+  count(kube_pod_status_phase{phase="Running"})
+  ```
 - For pending pods:
-    
-    ```
-    count(kube_pod_status_phase{phase="Pending"})
-    ```
-    
+  ```
+  count(kube_pod_status_phase{phase="Pending"})
+  ```
 - For failed pods:
-    
-    ```
-    count(kube_pod_status_phase{phase="Failed"})
-    ```
-    
+  ```
+  count(kube_pod_status_phase{phase="Failed"})
+  ```
 
-These queries will give you the counts of pods in each phase. 
+These queries will give you the counts of pods in each phase.
 
 Visualizing this data as a pie chart or stacked bar chart in Grafana provides a clear view of the overall pod health.
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-22_at_12.42.07_AM.webp" alt="Pie chart for pods running, pending and failed" caption="Pie chart for pods running, pending and failed" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-22_at_12.42.07_AM.webp"
+  alt="Pie chart for pods running, pending and failed"
+  caption="Pie chart for pods running, pending and failed"
+/>
 
 ### Setting Up Time-Based Pod Count Graphs
 
@@ -210,7 +247,11 @@ Understanding how your pod count changes over time is critical for identifying p
 count(kube_pod_info)
 ```
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-22_at_1.06.03_AM.webp" alt="Pod count graph for 24 hours range" caption="Pod count graph for 24 hours range" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-22_at_1.06.03_AM.webp"
+  alt="Pod count graph for 24 hours range"
+  caption="Pod count graph for 24 hours range"
+/>
 
 Apply a time range in the Grafana panel to display how the number of pods has fluctuated. This is particularly useful for spotting anomalies like sudden increases or decreases in the number of running pods.
 
@@ -220,9 +261,17 @@ Grafana allows you to create drill-down views for detailed information on specif
 
 For example, you can use Grafana variables to create dynamic dashboards that filter metrics based on the selected pod or namespace. This level of interactivity enhances your ability to troubleshoot issues in real-time.
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-120f8dd1-1ae7-4a7f-86f6-df6d37934572.webp" alt="Setting up variable" caption="Setting up variable" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-120f8dd1-1ae7-4a7f-86f6-df6d37934572.webp"
+  alt="Setting up variable"
+  caption="Setting up variable"
+/>
 
-<Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-22_at_12.34.57_AM.webp" alt="Using variable name instead of using the query" caption="Using variable name instead of using the query" />
+<Figure
+  src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-22_at_12.34.57_AM.webp"
+  alt="Using variable name instead of using the query"
+  caption="Using variable name instead of using the query"
+/>
 
 ## Troubleshooting Common Pod Count Issues
 
@@ -234,18 +283,25 @@ Sometimes, pods fail to be scheduled on nodes due to various reasons, such as re
 
 - Use the command `kubectl describe pod <pod-name>` to get detailed information about the pod.
 - Look for messages in the Events section of the output, which may indicate why the pod couldn’t be scheduled (e.g., insufficient CPU, memory, or unavailable nodes).
-    
-    <Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-07_at_5.39.13_PM.webp" alt="Kubernetes pod description" caption="Kubernetes pod description" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-07_at_5.39.13_PM.webp"
+    alt="Kubernetes pod description"
+    caption="Kubernetes pod description"
+  />
+
 1. Review Resource Constraints
 
 A common reason for failed pods or fluctuating pod counts is that the nodes in your cluster don’t have enough resources (CPU, memory, etc.) to handle the scheduled pods. To ensure this isn’t the issue:
 
 - Check the resource requests and limits for your pods using the command `kubectl get pod <pod-name> -o yaml`.
 - Make sure your nodes have sufficient available resources by using `kubectl describe nodes` or `kubectl top nodes` to check the current resource usage on each node.
-    
-    <Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-07_at_6.49.41_PM.webp" alt="Kubernetes pod description in yaml format" caption="Kubernetes pod description in yaml format" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-07_at_6.49.41_PM.webp"
+    alt="Kubernetes pod description in yaml format"
+    caption="Kubernetes pod description in yaml format"
+  />
 
 If your nodes are running low on resources, you may need to either increase the number of nodes in your cluster or optimize the resource requests and limits for your pods.
 
@@ -255,9 +311,12 @@ If a pod is crashing or failing to start, it’s essential to look at the logs t
 
 - Use the command `kubectl logs <pod-name>` to retrieve the logs from the pod.
 - If the pod contains multiple containers, specify the container name like this: `kubectl logs <pod-name> -c <container-name>`.
-    
-    <Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-07_at_6.50.38_PM.webp" alt="Pod logs" caption="Pod logs" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-07_at_6.50.38_PM.webp"
+    alt="Pod logs"
+    caption="Pod logs"
+  />
 
 Look through the logs for errors or exceptions that may explain the pod’s failure. Common issues include application crashes, misconfigurations, or missing dependencies.
 
@@ -267,9 +326,12 @@ Sometimes, recent changes in your Kubernetes Deployments can cause pod count flu
 
 - Use `kubectl get deployment <deployment-name>` to see the current status of your deployments.
 - Check for any recent deployment updates or changes to scaling rules by using `kubectl describe deployment <deployment-name>`.
-    
-    <Figure src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-07_at_6.51.41_PM.webp" alt="More info about pod deployment" caption="More info about pod deployment" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/10/how-to-get-number-of-pods-running-in-prometheus-Screenshot_2024-10-07_at_6.51.41_PM.webp"
+    alt="More info about pod deployment"
+    caption="More info about pod deployment"
+  />
 
 Rolling updates or changes in replica counts can cause a temporary increase or decrease in pod count. If the pod count changes unexpectedly after a deployment, review the deployment's update strategy and replica settings.
 

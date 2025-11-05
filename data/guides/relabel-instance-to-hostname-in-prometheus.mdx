@@ -1,13 +1,20 @@
 ---
-
 title: How to Relabel Instance to Hostname in Prometheus
-slug: relabel-instance-to-hostname-in-prometheus
 date: 2024-09-24
 tags: [faq, prometheus]
 authors: [simran_kumari]
 description: Learn how to relabel instance to hostname in Prometheus for improved monitoring clarity. Discover methods, best practices, and advanced techniques.
-keywords: [Prometheus, relabeling, instance labels, hostname, monitoring, metrics, service discovery, SigNoz]
-
+keywords:
+  [
+    Prometheus,
+    relabeling,
+    instance labels,
+    hostname,
+    monitoring,
+    metrics,
+    service discovery,
+    SigNoz,
+  ]
 ---
 
 Prometheus, a powerful open-source monitoring system, uses labels to identify and organize metrics. One crucial label is the "instance" label, which typically contains the IP address of the target being monitored. However, IP addresses can be challenging to read and interpret, especially in large-scale environments. This is where relabeling instances to hostnames comes in handy. By replacing IP addresses with more human-readable hostnames, you can significantly improve your monitoring experience and make troubleshooting easier.
@@ -16,7 +23,11 @@ Prometheus, a powerful open-source monitoring system, uses labels to identify an
 
 Labels are key-value pairs in Prometheus that provide metadata about metrics. The `instance` label, by default, refers to the IP address and port of a target, but in complex environments, IPs alone can be cryptic. Using hostnames instead of IPs makes monitoring more intuitive and debugging faster, especially when correlating with logs or other monitoring tools.
 
-<Figure src="/img/guides/2024/09/relabel-instance-to-hostname-in-prometheus-image.webp" alt="Default instance label in Prometheus" caption="Default instance label in Prometheus" />
+<Figure
+  src="/img/guides/2024/09/relabel-instance-to-hostname-in-prometheus-image.webp"
+  alt="Default instance label in Prometheus"
+  caption="Default instance label in Prometheus"
+/>
 
 While IP addresses serve their purpose, they present several challenges:
 
@@ -69,7 +80,11 @@ Explanation:
 
 In other words, it simply ov
 
-<Figure src="/img/guides/2024/09/relabel-instance-to-hostname-in-prometheus-image%201.webp" alt="Relabeling instance with relabel_configs" caption="Relabeling instance with relabel_configs" /> 
+<Figure
+  src="/img/guides/2024/09/relabel-instance-to-hostname-in-prometheus-image%201.webp"
+  alt="Relabeling instance with relabel_configs"
+  caption="Relabeling instance with relabel_configs"
+/>{' '}
 
 <aside>
 💡
@@ -105,9 +120,9 @@ scrape_configs:
     dns_sd_configs:
       - names:
           - 'service.example.com'
-        type: 'A'  # Specify the type of DNS query
-        port: 9090  # Port to use for non-SRV records
-        refresh_interval: 30s  # Refresh interval for querying DNS
+        type: 'A' # Specify the type of DNS query
+        port: 9090 # Port to use for non-SRV records
+        refresh_interval: 30s # Refresh interval for querying DNS
 ```
 
 Instance Relabeling
@@ -133,11 +148,11 @@ You can check out the documentation <a href="https://prometheus.io/docs/promethe
 For environments without DNS, file-based service discovery is an alternative. Create a JSON or YAML file with your targets and hostnames, and point Prometheus to this file:
 
 ```yaml
-- targets: ["localhost:9090"] # replace with ip and port of required server
+- targets: ['localhost:9090'] # replace with ip and port of required server
   labels:
-    region: "India"
-    team: "Testing"
-    platform: "AWS"
+    region: 'India'
+    team: 'Testing'
+    platform: 'AWS'
     instance: 'backend-1' # labelling can be specified here or in the prometheus.yml file using relabel_configs
 ```
 
@@ -153,7 +168,11 @@ scrape_configs:
 
 Prometheus will use the labels from the file for instance relabeling.
 
-<Figure src="/img/guides/2024/09/relabel-instance-to-hostname-in-prometheus-image%202.webp" alt="Labelling instance with hostname using File-based Service discovery" caption="Labelling instance with hostname using File-based Service discovery" />
+<Figure
+  src="/img/guides/2024/09/relabel-instance-to-hostname-in-prometheus-image%202.webp"
+  alt="Labelling instance with hostname using File-based Service discovery"
+  caption="Labelling instance with hostname using File-based Service discovery"
+/>
 
 ## Advanced Techniques for Instance Relabeling
 
@@ -161,17 +180,15 @@ If your environment is more complex, you may need advanced techniques for relabe
 
 - Meta labels: Use meta labels like `__meta_kubernetes_node_name` in Kubernetes to automatically relabel instances based on node names or other metadata.
 - Multi-stage relabeling: You can apply multiple `relabel_configs` for more granular control. For instance, first map an IP to a hostname, and then apply further transformations based on service or location.
-    
-    ```yaml
-    relabel_configs:
-      - source_labels: [__meta_kubernetes_node_name]
-        target_label: instance
-      - source_labels: [instance]
-        regex: 'node-(.*)'
-        target_label: region
-        replacement: 'us-east-$1'
-    ```
-    
+  ```yaml
+  relabel_configs:
+    - source_labels: [__meta_kubernetes_node_name]
+      target_label: instance
+    - source_labels: [instance]
+      regex: 'node-(.*)'
+      target_label: region
+      replacement: 'us-east-$1'
+  ```
 
 ### Handling Edge Cases
 

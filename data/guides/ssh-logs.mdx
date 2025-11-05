@@ -1,11 +1,21 @@
 ---
-title: "SSH Logs: Complete Guide to Security Monitoring and Analysis in 2025"
-slug: "ssh-logs"
-date: "2025-07-23"
+title: 'SSH Logs: Complete Guide to Security Monitoring and Analysis in 2025'
+date: '2025-07-23'
 tags: [ssh, logging]
 authors: [nilesh_sinha]
-description: "Master SSH log monitoring with this comprehensive guide covering log locations, analysis techniques, security threat detection, and modern tools for effective SSH access management."
-keywords: [ssh logs, sshd logs, ssh log monitoring, ssh security, authentication logs, brute force detection, journalctl ssh, ssh log analysis, linux security monitoring]
+description: 'Master SSH log monitoring with this comprehensive guide covering log locations, analysis techniques, security threat detection, and modern tools for effective SSH access management.'
+keywords:
+  [
+    ssh logs,
+    sshd logs,
+    ssh log monitoring,
+    ssh security,
+    authentication logs,
+    brute force detection,
+    journalctl ssh,
+    ssh log analysis,
+    linux security monitoring,
+  ]
 ---
 
 SSH logs are critical for detecting unauthorized access attempts and maintaining system security. If you're managing servers, you know how proper SSH log monitoring can mean the difference between catching a breach early and discovering it weeks later.
@@ -30,8 +40,9 @@ Jan 23 14:30:15 server01 sshd[12345]: Accepted publickey for admin from 192.168.
 ```
 
 Breaking this down:
+
 - **Timestamp**: `Jan 23 14:30:15`
-- **Hostname**: `server01` 
+- **Hostname**: `server01`
 - **Process**: `sshd[12345]` (daemon with PID)
 - **Event**: `Accepted publickey`
 - **User**: `admin`
@@ -45,6 +56,7 @@ Finding SSH logs depends on your OS and logging setup:
 ### Linux Systems
 
 **Debian/Ubuntu:**
+
 ```bash
 # Primary location
 tail -f /var/log/auth.log
@@ -54,8 +66,9 @@ journalctl -u ssh -f
 ```
 
 **RHEL/CentOS/Rocky:**
+
 ```bash
-# Primary location  
+# Primary location
 tail -f /var/log/secure
 
 # Using systemd journal
@@ -63,6 +76,7 @@ journalctl -u sshd -f
 ```
 
 **Arch Linux:**
+
 ```bash
 # Primarily systemd journal
 journalctl -u sshd.service -f
@@ -74,11 +88,13 @@ tail -f /var/log/auth.log
 ### Other Platforms
 
 **macOS:**
+
 ```bash
 tail -f /var/log/system.log | grep ssh
 ```
 
 **FreeBSD:**
+
 ```bash
 tail -f /var/log/auth.log
 ```
@@ -110,7 +126,8 @@ LogLevel VERBOSE
 ```
 
 **Recommendations:**
-- **Production**: `INFO` or `VERBOSE` 
+
+- **Production**: `INFO` or `VERBOSE`
 - **Security monitoring**: `VERBOSE`
 - **Troubleshooting**: `DEBUG` (temporarily)
 
@@ -126,6 +143,7 @@ SyslogFacility AUTHPRIV
 ```
 
 Restart SSH after changes:
+
 ```bash
 systemctl restart sshd
 ```
@@ -159,12 +177,14 @@ journalctl -u ssh.service -o short-iso
 ### Identifying Brute Force Attacks
 
 Find IPs with multiple failed attempts:
+
 ```bash
 grep "Failed password" /var/log/auth.log | \
 awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | head -10
 ```
 
 Show recent failed attempts:
+
 ```bash
 grep "Failed password" /var/log/auth.log | \
 grep "$(date --date='1 day ago' '+%b %d')\|$(date '+%b %d')"
@@ -173,12 +193,14 @@ grep "$(date --date='1 day ago' '+%b %d')\|$(date '+%b %d')"
 ### Detecting Unusual Patterns
 
 Check off-hours access:
+
 ```bash
 grep "Accepted" /var/log/auth.log | \
 awk '$3 < "09:00:00" || $3 > "17:00:00" {print}'
 ```
 
 Monitor direct root logins (should be disabled):
+
 ```bash
 grep "root" /var/log/auth.log | grep "Accepted"
 ```
@@ -186,6 +208,7 @@ grep "root" /var/log/auth.log | grep "Accepted"
 ### Privilege Escalation Monitoring
 
 Track sudo usage after SSH login:
+
 ```bash
 grep -E "(Accepted|sudo)" /var/log/auth.log | grep -A5 -B5 "sudo"
 ```
@@ -253,17 +276,20 @@ journalctl -u fail2ban -f
 ### Missing Log Files
 
 Check SSH service status:
+
 ```bash
 systemctl status sshd
 journalctl -u sshd --no-pager
 ```
 
 Verify logging configuration:
+
 ```bash
 grep -E "^(SyslogFacility|LogLevel)" /etc/ssh/sshd_config
 ```
 
 Test with verbose SSH:
+
 ```bash
 ssh -v user@localhost
 ```
@@ -271,6 +297,7 @@ ssh -v user@localhost
 ### Permission Issues
 
 Check log file permissions:
+
 ```bash
 ls -la /var/log/auth.log
 
@@ -282,6 +309,7 @@ sudo usermod -a -G wheel username  # RHEL/CentOS
 ### High Log Volume
 
 Configure size-based rotation:
+
 ```bash
 # /etc/logrotate.d/ssh-size
 /var/log/ssh.log {
@@ -293,6 +321,7 @@ Configure size-based rotation:
 ```
 
 Reduce verbosity:
+
 ```bash
 sed -i 's/LogLevel VERBOSE/LogLevel INFO/' /etc/ssh/sshd_config
 systemctl restart sshd
@@ -311,8 +340,8 @@ SigNoz provides comprehensive SSH log monitoring through [OpenTelemetry](https:/
 receivers:
   filelog:
     include:
-      - /var/log/auth.log    # Ubuntu/Debian
-      - /var/log/secure      # RHEL/CentOS
+      - /var/log/auth.log # Ubuntu/Debian
+      - /var/log/secure # RHEL/CentOS
     operators:
       - type: regex_parser
         regex: '^(?P<timestamp>\w+\s+\d+\s+\d+:\d+:\d+)\s+(?P<hostname>\S+)\s+(?P<process>\S+?)(\[(?P<pid>\d+)\])?:\s+(?P<message>.*)$'
@@ -325,9 +354,9 @@ processors:
 
 exporters:
   otlp:
-    endpoint: "https://ingest.{region}.signoz.cloud:443"
+    endpoint: 'https://ingest.{region}.signoz.cloud:443'
     headers:
-      "signoz-ingestion-key": "{SIGNOZ_INGESTION_KEY}"
+      'signoz-ingestion-key': '{SIGNOZ_INGESTION_KEY}'
 
 service:
   pipelines:
@@ -341,7 +370,7 @@ service:
 
 - **Real-time analysis**: Monitor authentication patterns instantly
 - **Advanced queries**: Filter by IP, user, timeframe with powerful query builder
-- **Automated alerting**: Set up alerts for brute force attempts or anomalous behavior  
+- **Automated alerting**: Set up alerts for brute force attempts or anomalous behavior
 - **Correlation**: Connect SSH events with system metrics and traces
 - **Compliance**: Long-term storage for audit requirements
 
@@ -411,23 +440,25 @@ iptables -A INPUT -p tcp --dport 2222 -m recent --name ssh --rcheck --seconds 60
 
 [SigNoz](https://signoz.io/docs/introduction/) provides real-time log analysis, intelligent alerting, and correlation with system metrics - perfect for modern infrastructure security.
 
-
-<figure data-zoomable align='center'>
-    <video 
-        className="box-shadowed-image" 
-        src="/img/docs/logs-management/signoz-log-management-overview.mp4" 
-        controls={false}
-        width="100%" 
-        autoPlay 
-        muted 
-        loop
-    >
-        Your browser does not support the video tag.
-    </video>
-    <figcaption><i>SigNoz Logs Management Overview</i></figcaption>
+<figure data-zoomable align="center">
+  <video
+    className="box-shadowed-image"
+    src="/img/docs/logs-management/signoz-log-management-overview.mp4"
+    controls={false}
+    width="100%"
+    autoPlay
+    muted
+    loop
+  >
+    Your browser does not support the video tag.
+  </video>
+  <figcaption>
+    <i>SigNoz Logs Management Overview</i>
+  </figcaption>
 </figure>
 
 Key SSH monitoring features:
+
 - **Centralized collection** from multiple servers with efficient storage
 - **Real-time alerting** for brute force attacks and anomalous patterns
 - **Advanced filtering** for forensic analysis and compliance reporting

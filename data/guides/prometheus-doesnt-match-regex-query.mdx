@@ -1,13 +1,10 @@
 ---
-
 title: How to Fix Prometheus Regex Query Mismatches - A Quick Guide
-slug: prometheus-doesnt-match-regex-query
 date: 2024-09-11
 tags: [faq, prometheus]
 authors: [simran_kumari]
 description: Learn how to troubleshoot and fix Prometheus regex query mismatches. This guide covers common issues, advanced techniques, and best practices for optimal monitoring.
 keywords: [Prometheus, regex query, monitoring, troubleshooting, query optimization, SigNoz]
-
 ---
 
 Prometheus, a powerful open-source monitoring system, relies heavily on regex queries to fetch and [analyze metrics](https://signoz.io/blog/metrics-explorer/). Regex queries in Prometheus can be powerful, but they can also trip you up. If your queries aren’t returning the expected results, it’s likely due to syntax errors or label mismatches. This guide will walk you through troubleshooting regex query mismatches in Prometheus and provide tips to optimize query performance.
@@ -30,52 +27,39 @@ These mismatches can significantly impact your monitoring and alerting systems, 
 To quickly address [Prometheus regex](https://signoz.io/guides/a-regex-in-query-in-grafana/) query mismatches:
 
 - Check Your Label Names and Values
-    
-    Make sure the label names and values used in your queries are correct. One common mistake is referencing a non-existent label.
-    
-    Example:
-    
-    ```java
-    {job="myapp", status=~"2.."} //Ensure `status` is a valid label for `myapp`.
-    ```
-    
+  Make sure the label names and values used in your queries are correct. One common mistake is referencing a non-existent label.
+  Example:
+  ```java
+  {job="myapp", status=~"2.."} //Ensure `status` is a valid label for `myapp`.
+  ```
 - Verify Your Regex Pattern
-    
-    Test your regex pattern to ensure it behaves as expected. Use online regex testing tools to confirm.
-    
-    Example:
-    If you're trying to match all HTTP 4xx and 5xx status codes, ensure your pattern is correct:
-    
-    ```java
-    {status_code=~"4..|5.."}
-    ```
-    
+  Test your regex pattern to ensure it behaves as expected. Use online regex testing tools to confirm.
+  Example:
+  If you're trying to match all HTTP 4xx and 5xx status codes, ensure your pattern is correct:
+  ```java
+  {status_code=~"4..|5.."}
+  ```
 - Watch Special Characters
-    
-    In regex, special characters like `.` and `*` need to be escaped if you intend to match them literally.
-    
-    Example:
-    If you want to match the literal string `1.2.3` as a version number:
-    
-    ```java
-    {version=~"1\.2\.3"}
-    ```
-    
+  In regex, special characters like `.` and `*` need to be escaped if you intend to match them literally.
+  Example:
+  If you want to match the literal string `1.2.3` as a version number:
+  ```java
+  {version=~"1\.2\.3"}
+  ```
 - Quotes and Escapes Matter
-    
-    Prometheus is sensitive to how you escape special characters and use quotation marks in queries.
-    
-    Example:
-    To match a label containing double quotes (`"`), ensure the quote is properly escaped:
-    
-    ```java
-    {label=~"\"value\""}
-    ```
-    
+  Prometheus is sensitive to how you escape special characters and use quotation marks in queries.
+  Example:
+  To match a label containing double quotes (`"`), ensure the quote is properly escaped:
+  ```java
+  {label=~"\"value\""}
+  ```
 - Test in expression browser: Use Prometheus' built-in expression browser to validate your queries.
-    
-    <Figure src="/img/guides/2024/09/prometheus-doesnt-match-regex-query-image.webp" alt="Validating Queries in Prometheus Built-in expression browser" caption="Validating Queries in Prometheus Built-in expression browser" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/09/prometheus-doesnt-match-regex-query-image.webp"
+    alt="Validating Queries in Prometheus Built-in expression browser"
+    caption="Validating Queries in Prometheus Built-in expression browser"
+  />
 
 ### Common Regex Patterns for Prometheus Queries
 
@@ -84,13 +68,13 @@ Once you've addressed regex query mismatches, it's helpful to understand how to 
 1. Matching Specific Prefixes or Suffixes: Use `^` to match prefixes and `$` to match suffixes.
 
 - To match labels that start with "app": `{job=~"^app"}`
-- To match labels that end with "service":  `{job=~"service$"}`
+- To match labels that end with "service": `{job=~"service$"}`
 
 2. Excluding Certain Patterns: You can use a negative character class (`[^]`) to exclude patterns, but for more complex exclusions, you may need to rethink your query since RE2 doesn't support lookaheads or lookbehinds.
 
-You can also exclude certain patterns using the negated regex pattern by using the `!~`  operator, but it must be applied to a valid metric with at least one non-empty label matcher. For example;
+You can also exclude certain patterns using the negated regex pattern by using the `!~` operator, but it must be applied to a valid metric with at least one non-empty label matcher. For example;
 
-- To match `job` labels that do *not* contain the string"test": `{job!~"test"}`
+- To match `job` labels that do _not_ contain the string"test": `{job!~"test"}`
 
 ```jsx
 flask_http_request_duration_seconds_bucket{job!~"test"}
@@ -103,13 +87,13 @@ flask_http_request_duration_seconds_bucket{job!~"test"}
 4. Using Quantifiers Effectively: Quantifiers help define how many times a character or group should appear.
 
 - `*`: Match 0 or more times
-    - To match any label that starts with "env" followed by zero or more characters: `{env=~"env.*"}`
+  - To match any label that starts with "env" followed by zero or more characters: `{env=~"env.*"}`
 - `+`: Match 1 or more times
-    - To match labels with a version number like "v1.2.3": `{version=~"v[0-9]+\.[0-9]+\.[0-9]+"}`
+  - To match labels with a version number like "v1.2.3": `{version=~"v[0-9]+\.[0-9]+\.[0-9]+"}`
 - `?`: Match 0 or 1 time
-    - To match an optional "prod" in a label, like "env" or "env-prod": `{env=~"env(-prod)?"}`
+  - To match an optional "prod" in a label, like "env" or "env-prod": `{env=~"env(-prod)?"}`
 - `{n}`: Match exactly `n` times
-    - To match any two-digit number: `{code=~"[0-9]{2}"}`
+  - To match any two-digit number: `{code=~"[0-9]{2}"}`
 
 Using these patterns can significantly refine your Prometheus queries for better performance and more accurate results.
 
@@ -118,56 +102,57 @@ Using these patterns can significantly refine your Prometheus queries for better
 For more complex scenarios, consider these advanced techniques:
 
 1. Label Matching Operators: Use `=` for exact matches and `=~` for regex matches.
-    
-    ```
-    {environment="production", instance=~"10\\.0\\.0\\..*"}
-    ```
-    
+
+   ```
+   {environment="production", instance=~"10\\.0\\.0\\..*"}
+   ```
+
 2. Metric Relabeling: Metric relabeling is a powerful feature in Prometheus that allows you to modify metrics before they are stored or queried. Use relabeling to handle complex scenarios where regex alone isn't sufficient.
-    
-    Example: To exclude certain labels from metrics:
-    
-    ```yaml
-    metric_relabel_configs:
-      - source_labels: [__name__]
-        regex: 'http_requests_total'
-        action: drop
-    ```
-    
-    You can refer to metric relabeling documentation <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config" rel="noopener noreferrer nofollow" target="_blank">here</a>.
-    
-    How It Helps?
-    
-    - By removing unnecessary or irrelevant labels through relabeling, you can simplify queries and reduce the risk of mismatches.
-    - Prevent mismatches caused by inconsistent or non-standardized labels.
+
+   Example: To exclude certain labels from metrics:
+
+   ```yaml
+   metric_relabel_configs:
+     - source_labels: [__name__]
+       regex: 'http_requests_total'
+       action: drop
+   ```
+
+   You can refer to metric relabeling documentation <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config" rel="noopener noreferrer nofollow" target="_blank">here</a>.
+
+   How It Helps?
+
+   - By removing unnecessary or irrelevant labels through relabeling, you can simplify queries and reduce the risk of mismatches.
+   - Prevent mismatches caused by inconsistent or non-standardized labels.
+
 3. Query Optimization: Optimizing your queries can help avoid performance bottlenecks and improve query results. Consider the following strategies:
-    - Limit Regex Complexity: Simplify regex patterns to reduce processing time.
-    - Use Label Matching First: Apply exact label matches before regex to reduce the dataset size.
-    - Avoid Wildcards: Minimize the use of wildcards `(*)` as they can lead to inefficiencies.
-    
-    Example: Instead of using a complex regex pattern, use specific label matches where possible:
-    
-    ```
-    {instance="server1", job="app"}
-    ```
-    
-    How It Helps?
-    
-    - Reduces Processing Time: Less complex patterns are faster to evaluate.
-    - Decreases Ambiguity: Simpler patterns are less likely to cause confusion or match unintended data.
+
+   - Limit Regex Complexity: Simplify regex patterns to reduce processing time.
+   - Use Label Matching First: Apply exact label matches before regex to reduce the dataset size.
+   - Avoid Wildcards: Minimize the use of wildcards `(*)` as they can lead to inefficiencies.
+
+   Example: Instead of using a complex regex pattern, use specific label matches where possible:
+
+   ```
+   {instance="server1", job="app"}
+   ```
+
+   How It Helps?
+
+   - Reduces Processing Time: Less complex patterns are faster to evaluate.
+   - Decreases Ambiguity: Simpler patterns are less likely to cause confusion or match unintended data.
+
 4. Prometheus' HTTP API provides endpoints for debugging and troubleshooting queries. Utilize these endpoints to gain insights into your query performance and behavior. Check the documentation here for specific details: <a href="https://prometheus.io/docs/prometheus/latest/querying/api/#querying-target-metadata" rel="noopener noreferrer nofollow" target="_blank">Querying Target Metadata using HTTP API</a>
-    
-    Example Use Case: If your query is not returning expected results, you might want to check if the target has the labels you’re querying for and their current values.
-    
-    How to Use:
-    
-    - Fetch Metadata: Use the API to fetch the metadata for the target to verify the labels and their values.
-        
-        ```bash
-        curl -g 'http://localhost:9090/api/v1/targets/metadata'
-        ```
-        
-    - Verify Labels: Compare the returned metadata with your query to ensure that the labels and values align with your expectations.
+
+   Example Use Case: If your query is not returning expected results, you might want to check if the target has the labels you’re querying for and their current values.
+
+   How to Use:
+
+   - Fetch Metadata: Use the API to fetch the metadata for the target to verify the labels and their values.
+     ```bash
+     curl -g 'http://localhost:9090/api/v1/targets/metadata'
+     ```
+   - Verify Labels: Compare the returned metadata with your query to ensure that the labels and values align with your expectations.
 
 ## Best Practices for Writing Prometheus Regex Queries
 
@@ -183,16 +168,19 @@ Follow these best practices to minimize regex query mismatches:
 
 ## Leveraging SigNoz to Overcome Prometheus Query Mismatches
 
-When dealing with Prometheus query mismatches, pinpointing the root cause can be challenging. Standard Prometheus tools provide foundational debugging capabilities, but they may not always offer the depth of insight required for complex issues. [SigNoz](https://signoz.io/), an open-source observability platform, simplifies the debugging process by offering enhanced monitoring capabilities. 
+When dealing with Prometheus query mismatches, pinpointing the root cause can be challenging. Standard Prometheus tools provide foundational debugging capabilities, but they may not always offer the depth of insight required for complex issues. [SigNoz](https://signoz.io/), an open-source observability platform, simplifies the debugging process by offering enhanced monitoring capabilities.
 
 SigNoz is designed to enhance monitoring and debugging across distributed systems. It integrates metrics, logs, and traces, providing a unified view of system performance and behavior.
 
 ### How can SigNoz help?
 
 - Simplified Querying: Writing complex regex queries in Prometheus can be challenging. SigNoz's built-in functions in the [Query Builder](https://signoz.io/docs/userguide/query-builder/) allow you to construct efficient queries without needing to manually craft regex, saving time and effort.
-    
-    <Figure src="/img/guides/2024/09/prometheus-doesnt-match-regex-query-image%201.webp" alt="SigNoz Query Builder" caption="SigNoz Query Builder" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/09/prometheus-doesnt-match-regex-query-image%201.webp"
+    alt="SigNoz Query Builder"
+    caption="SigNoz Query Builder"
+  />
 - Performance Optimization: Prometheus queries can experience performance bottlenecks, especially with large data sets. SigNoz is optimized for fast query processing, ensuring quicker insights even when dealing with high data volumes.
 - [Unified Observability](https://signoz.io/unified-observability/): SigNoz provides a single platform that combines metrics, logs, and traces, allowing you to diagnose issues across multiple dimensions. Unlike Prometheus, which focuses solely on metrics, SigNoz gives a holistic view of your system’s performance.
 

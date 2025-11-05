@@ -1,13 +1,20 @@
 ---
-
 title: How to Sort Legends by Series Name in Prometheus and Grafana
-slug: how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana
 date: 2024-09-24
 tags: [faq, prometheus, grafana]
 authors: [simran_kumari]
 description: Learn how to sort legends by series name in Prometheus and Grafana for improved data visualization and analysis. Discover step-by-step methods and best practices.
-keywords: [legend sorting, Prometheus, Grafana, time series data, data visualization, PromQL, observability, SigNoz]
-
+keywords:
+  [
+    legend sorting,
+    Prometheus,
+    Grafana,
+    time series data,
+    data visualization,
+    PromQL,
+    observability,
+    SigNoz,
+  ]
 ---
 
 In the world of data analysis, getting quick, clear insights is key. When your graphs are cluttered with disorganized legends, spotting trends or comparing time series becomes a headache. This guide will walk you through sorting legends in Prometheus and Grafana, improving your data visualization workflow. We’ll cover everything from built-in options to advanced PromQL techniques.
@@ -16,15 +23,19 @@ In the world of data analysis, getting quick, clear insights is key. When your g
 
 Legends in data visualization serve as keys to interpreting the information displayed in graphs or charts. In the context of Prometheus and Grafana, legends are essential for decoding time series data. They provide context to the plotted lines, helping you distinguish between different metrics or dimensions of your data.
 
-<Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image.webp" alt="Legends in Grafana dashboard based on data collected from Prometheus" caption="Legends in Grafana dashboard based on data collected from Prometheus" />
+<Figure
+  src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image.webp"
+  alt="Legends in Grafana dashboard based on data collected from Prometheus"
+  caption="Legends in Grafana dashboard based on data collected from Prometheus"
+/>
 
 Prometheus generates legends based on the metric names and labels associated with the data it collects. When visualized in Grafana, these legends become critical for interpreting complex, multi-dimensional datasets. A well-organized legend can significantly enhance your ability to analyze trends, spot anomalies, and draw insights from your time series data.
 
-Having understood legends, next thing which comes into mind is `series name`. 
+Having understood legends, next thing which comes into mind is `series name`.
 
 ### What is `Series Name` ?
 
-In the context of Prometheus and Grafana, a series name refers to the unique identifier for a specific set of time series data. 
+In the context of Prometheus and Grafana, a series name refers to the unique identifier for a specific set of time series data.
 
 It typically includes the metric name and a combination of its associated labels. Here's a breakdown:
 
@@ -32,17 +43,17 @@ Components of a Series Name
 
 1. Metric Name: This is the primary identifier for the metric being tracked. For example, `http_requests_total` is a metric name that counts the total number of HTTP requests.
 2. Labels: Labels are key-value pairs that provide additional context for the metric. They help differentiate between different instances of the same metric.
-    
-    For instance, a series might look like:
-    
-    ```lua
-    http_requests_total{method="GET", status="200"}
-    ```
-    
-    In this example:
-    
-    - `http_requests_total` is the metric name
-    - `method="GET"` and `status="200"` are labels
+
+   For instance, a series might look like:
+
+   ```lua
+   http_requests_total{method="GET", status="200"}
+   ```
+
+   In this example:
+
+   - `http_requests_total` is the metric name
+   - `method="GET"` and `status="200"` are labels
 
 Example
 
@@ -78,36 +89,63 @@ There are several methods to sort legends by series name in Grafana:
 
 Grafana 7 and later versions offer built-in options for legend sorting:
 
-1. In the Grafana Dashboard go to `Dashboards` section and select the dashboard for which you want to edit the panel. 
-    
-    <Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%201.webp" alt="Selecting dashboards in Grafana" caption="Selecting dashboards in Grafana" />
-    
+1. In the Grafana Dashboard go to `Dashboards` section and select the dashboard for which you want to edit the panel.
+
+   <Figure
+     src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%201.webp"
+     alt="Selecting dashboards in Grafana"
+     caption="Selecting dashboards in Grafana"
+   />
+
 2. Select the panel you want to work with within the dashboard and click the `Edit` option.
-    
-    <Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%202.webp" alt="Selecting Panel in Grafana Dashboard" caption="Selecting Panel in Grafana Dashboard" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%202.webp"
+     alt="Selecting Panel in Grafana Dashboard"
+     caption="Selecting Panel in Grafana Dashboard"
+   />
+
 3. Navigate to the "Legend" tab in the panel settings.
-    
-    <Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%203.webp" alt="Navigating to Legends tab in Panel settings" caption="Navigating to Legends tab in Panel settings" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%203.webp"
+     alt="Navigating to Legends tab in Panel settings"
+     caption="Navigating to Legends tab in Panel settings"
+   />
+
 4. Under Mode, select Table.
-    
-    <Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%204.webp" alt="Selecting Legend Mode" caption="Selecting Legend Mode" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%204.webp"
+     alt="Selecting Legend Mode"
+     caption="Selecting Legend Mode"
+   />
+
 5. Under Values, select the value or calculation that you want to show. The legend table now displays values.
-    
-    <Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%205.webp" alt="Selecting Legend Values" caption="Selecting Legend Values" />
-    
-    <Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-Screenshot_2024-09-19_212729.webp" alt="Values get added to the Legend table" caption="Values get added to the Legend table" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%205.webp"
+     alt="Selecting Legend Values"
+     caption="Selecting Legend Values"
+   />
+
+   <Figure
+     src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-Screenshot_2024-09-19_212729.webp"
+     alt="Values get added to the Legend table"
+     caption="Values get added to the Legend table"
+   />
+
 6. Click the calculation name header in the legend table to sort the values in the table in ascending or descending order.
-    
-    <Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%206.webp" alt="Sorting Legend table based on Values" caption="Sorting Legend table based on Values" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%206.webp"
+     alt="Sorting Legend table based on Values"
+     caption="Sorting Legend table based on Values"
+   />
 
 ### 2. Leveraging Prometheus Query Functions
 
-While Prometheus doesn't have direct sorting functions, you can use label manipulation to influence legend order. 
+While Prometheus doesn't have direct sorting functions, you can use label manipulation to influence legend order.
 
 To use `sort_by_label()` or `sort_by_label_desc()`, you must enable the experimental feature in Prometheus by passing the feature flag:
 
@@ -115,26 +153,34 @@ To use `sort_by_label()` or `sort_by_label_desc()`, you must enable the experime
 --enable-feature=promql-experimental-function
 ```
 
-<Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%207.webp" alt="Enabling experimental feature on Prometheus" caption="Enabling experimental feature on Prometheus" />
+<Figure
+  src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%207.webp"
+  alt="Enabling experimental feature on Prometheus"
+  caption="Enabling experimental feature on Prometheus"
+/>
 
 After enabling the flag, you can sort by label values directly. For example:
 
 - Ascending order by label value (`generation` in this case):
-    
-    ```
-    sort_by_label(python_gc_objects_collected_total, "generation")
-    ```
-    
-    <Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-c21d717b-09a3-4a6b-8136-bf5b03ad29b0.webp" alt="Running PromQL to sort legends in ascending order" caption="Running PromQL to sort legends in ascending order" />
-    
+  ```
+  sort_by_label(python_gc_objects_collected_total, "generation")
+  ```
+  {' '}
+  <Figure
+    src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-c21d717b-09a3-4a6b-8136-bf5b03ad29b0.webp"
+    alt="Running PromQL to sort legends in ascending order"
+    caption="Running PromQL to sort legends in ascending order"
+  />
 - Descending order by label value (`generation`):
-    
-    ```
-    sort_by_label_desc(python_gc_objects_collected_total, "generation")
-    ```
-    
-    <Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-1f17fa86-4142-43cc-9d27-19c8adf727fb.webp" alt="Running PromQL to sort legends in descending order" caption="Running PromQL to sort legends in descending order" />
-    
+  ```
+  sort_by_label_desc(python_gc_objects_collected_total, "generation")
+  ```
+  {' '}
+  <Figure
+    src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-1f17fa86-4142-43cc-9d27-19c8adf727fb.webp"
+    alt="Running PromQL to sort legends in descending order"
+    caption="Running PromQL to sort legends in descending order"
+  />
 
 ## Best Practices for Legend Management in Time Series Visualizations
 
@@ -143,7 +189,11 @@ Follow these best practices to make the most of your legend sorting efforts:
 - Consistent Naming: Use clear and uniform names for series to enhance readability.
 - Color Selection: Choose contrasting colors for better visibility, considering color blindness.
 
-<Figure src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%208.webp" alt="Consistent naming and Color selection in Grafana Time-series visualization" caption="Consistent naming and Color selection in Grafana Time-series visualization" />
+<Figure
+  src="/img/guides/2024/09/how-can-i-sort-the-legend-by-series-name-in-prometheus-grafana-image%208.webp"
+  alt="Consistent naming and Color selection in Grafana Time-series visualization"
+  caption="Consistent naming and Color selection in Grafana Time-series visualization"
+/>
 
 - Limit Series: Avoid overcrowding the legend; focus on key metrics to maintain clarity.
 - Grouping: Group-related metrics to improve intuitive understanding.

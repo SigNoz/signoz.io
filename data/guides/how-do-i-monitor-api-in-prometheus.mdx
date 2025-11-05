@@ -1,204 +1,210 @@
 ---
-
 title: How to Monitor REST APIs with Prometheus - A Step-by-Step Guide
-slug: how-do-i-monitor-api-in-prometheus
 date: 2024-07-30
 tags: [faq, prometheus]
 authors: [yuvraj]
 description: Learn how to effectively monitor REST APIs using Prometheus. This comprehensive guide covers setup, instrumentation, health checks, and advanced techniques.
-keywords: [API monitoring, Prometheus, REST APIs, API metrics, Grafana, health checks, API performance]
-
+keywords:
+  [API monitoring, Prometheus, REST APIs, API metrics, Grafana, health checks, API performance]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to Monitor REST APIs with Prometheus - A Step-by-Step Guide",
-    "alternativeHeadline": "A Comprehensive Guide to Monitoring REST APIs with Prometheus",
-    "author": {
-      "@type": "Person",
-      "name": "Yuvraj"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-30T00:00:00Z",
-    "dateModified": "2024-07-30T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/how-do-i-monitor-api-in-prometheus/"
-    },
-    "description": "Learn how to effectively monitor REST APIs using Prometheus. This comprehensive guide covers setup, instrumentation, health checks, and advanced techniques.",
-    "keywords": "API monitoring, Prometheus, REST APIs, API metrics, Grafana, health checks, API performance",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "API Monitoring",
-        "description": "The process of tracking and analyzing the performance of APIs to ensure they are running optimally."
-      },
-      {
-        "@type": "Thing",
-        "name": "Prometheus",
-        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-      },
-      {
-        "@type": "Thing",
-        "name": "REST APIs",
-        "description": "Application programming interfaces that use HTTP requests to GET, PUT, POST, and DELETE data."
-      },
-      {
-        "@type": "Thing",
-        "name": "API Metrics",
-        "description": "Key performance indicators that provide insights into API performance, including request rate, response time, and error rate."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Grafana",
-        "applicationCategory": "Visualization Tool"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What are the key metrics to monitor for REST APIs?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Key metrics include request rate, response time, error rate, and resource utilization. These provide a comprehensive view of your API's performance and health."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Monitor REST APIs with Prometheus - A Step-by-Step Guide',
+        alternativeHeadline: 'A Comprehensive Guide to Monitoring REST APIs with Prometheus',
+        author: {
+          '@type': 'Person',
+          name: 'Yuvraj',
         },
-        {
-          "@type": "Question",
-          "name": "How often should Prometheus scrape API metrics?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The optimal scrape interval depends on your specific needs. A common practice is to start with 15-30 seconds and adjust based on your API's traffic and performance characteristics."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "Can Prometheus monitor APIs across different environments?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, Prometheus can monitor APIs in various environments — development, staging, and production. Configure separate scrape jobs for each environment in your Prometheus configuration."
-          }
+        datePublished: '2024-07-30T00:00:00Z',
+        dateModified: '2024-07-30T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/how-do-i-monitor-api-in-prometheus/',
         },
-        {
-          "@type": "Question",
-          "name": "How do I set up alerts for API issues in Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Define alert rules in Prometheus using PromQL expressions. Specify conditions that trigger alerts, such as high error rates or slow response times. Use Alertmanager to route these alerts to appropriate notification channels."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Monitoring REST APIs with Prometheus",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install Prometheus",
-          "text": "Download the latest release from the Prometheus website, extract the files, and navigate to the Prometheus directory."
+        description:
+          'Learn how to effectively monitor REST APIs using Prometheus. This comprehensive guide covers setup, instrumentation, health checks, and advanced techniques.',
+        keywords:
+          'API monitoring, Prometheus, REST APIs, API metrics, Grafana, health checks, API performance',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Configure Prometheus",
-          "text": "Create a prometheus.yml file with your API's configuration and set the scrape interval to 15 seconds."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'API Monitoring',
+            description:
+              'The process of tracking and analyzing the performance of APIs to ensure they are running optimally.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'REST APIs',
+            description:
+              'Application programming interfaces that use HTTP requests to GET, PUT, POST, and DELETE data.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'API Metrics',
+            description:
+              'Key performance indicators that provide insights into API performance, including request rate, response time, and error rate.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Grafana',
+            applicationCategory: 'Visualization Tool',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What are the key metrics to monitor for REST APIs?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "Key metrics include request rate, response time, error rate, and resource utilization. These provide a comprehensive view of your API's performance and health.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How often should Prometheus scrape API metrics?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "The optimal scrape interval depends on your specific needs. A common practice is to start with 15-30 seconds and adjust based on your API's traffic and performance characteristics.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can Prometheus monitor APIs across different environments?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, Prometheus can monitor APIs in various environments — development, staging, and production. Configure separate scrape jobs for each environment in your Prometheus configuration.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I set up alerts for API issues in Prometheus?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Define alert rules in Prometheus using PromQL expressions. Specify conditions that trigger alerts, such as high error rates or slow response times. Use Alertmanager to route these alerts to appropriate notification channels.',
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Start Prometheus",
-          "text": "Run the command './prometheus --config.file=prometheus.yml' to start Prometheus."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Monitoring REST APIs with Prometheus',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Install Prometheus',
+              text: 'Download the latest release from the Prometheus website, extract the files, and navigate to the Prometheus directory.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Configure Prometheus',
+              text: "Create a prometheus.yml file with your API's configuration and set the scrape interval to 15 seconds.",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Start Prometheus',
+              text: "Run the command './prometheus --config.file=prometheus.yml' to start Prometheus.",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Integrate with your API',
+              text: 'Modify your API code to expose a /metrics endpoint that Prometheus can scrape.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Add Prometheus client library',
+              text: "Install the appropriate library for your programming language, e.g., 'pip install prometheus_client' for Python.",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Define custom metrics',
+              text: 'Create metrics relevant to your API, such as request count and request latency.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Expose metrics endpoint',
+              text: 'Set up a route in your API to expose the metrics.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Use metrics in your code',
+              text: 'Instrument your API endpoints with the defined metrics.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create a health check endpoint',
+              text: 'Add a /health route to your API that returns the overall status.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Configure Prometheus to monitor health',
+              text: 'Add the health check to your prometheus.yml file.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Set up alerting',
+              text: 'Create an alert rule in Prometheus to notify you of failed health checks.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Install Grafana',
+              text: 'Follow the instructions on the Grafana website to install Grafana.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Configure Prometheus data source',
+              text: 'In Grafana, add Prometheus as a new data source and enter your Prometheus server URL.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create API monitoring dashboard',
+              text: 'Create a new dashboard in Grafana and add panels for key metrics like request rate, latency, and error rate.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Integrate with your API",
-          "text": "Modify your API code to expose a /metrics endpoint that Prometheus can scrape."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Add Prometheus client library",
-          "text": "Install the appropriate library for your programming language, e.g., 'pip install prometheus_client' for Python."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Define custom metrics",
-          "text": "Create metrics relevant to your API, such as request count and request latency."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Expose metrics endpoint",
-          "text": "Set up a route in your API to expose the metrics."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Use metrics in your code",
-          "text": "Instrument your API endpoints with the defined metrics."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Create a health check endpoint",
-          "text": "Add a /health route to your API that returns the overall status."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Configure Prometheus to monitor health",
-          "text": "Add the health check to your prometheus.yml file."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Set up alerting",
-          "text": "Create an alert rule in Prometheus to notify you of failed health checks."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Install Grafana",
-          "text": "Follow the instructions on the Grafana website to install Grafana."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Configure Prometheus data source",
-          "text": "In Grafana, add Prometheus as a new data source and enter your Prometheus server URL."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Create API monitoring dashboard",
-          "text": "Create a new dashboard in Grafana and add panels for key metrics like request rate, latency, and error rate."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Monitoring REST APIs with Prometheus is essential for maintaining high-performance, reliable web services. This guide walks you through the process of setting up Prometheus, instrumenting your API, and implementing advanced monitoring techniques. You'll learn how to track key metrics, set up health checks, and visualize your data for optimal API performance.
@@ -225,120 +231,104 @@ When monitoring REST APIs, focus on these key metrics:
 
 To start monitoring your API with Prometheus, follow these steps:
 
-1. **Install Prometheus**:
+1.  **Install Prometheus**:
     - Download the latest release from the [Prometheus website](https://prometheus.io/download/).
     - Extract the files and navigate to the Prometheus directory.
-2. **Configure Prometheus**:
-Create a `prometheus.yml` file with the following content:
-    
-    ```yaml
-    global:
-      scrape_interval: 15s
-    
-    scrape_configs:
-      - job_name: 'api'
-        static_configs:
-          - targets: ['localhost:8080']
-    
-    ```
-    
-    This configuration tells Prometheus to scrape metrics from your API every 15 seconds.
-    
-3. **Start Prometheus**:
-Run the following command:
-    
-    ```
-    ./prometheus --config.file=prometheus.yml
-    
-    ```
-    
-4. **Integrate with your API**:
-Modify your API code to expose a `/metrics` endpoint that Prometheus can scrape.
+2.  **Configure Prometheus**:
+    Create a `prometheus.yml` file with the following content:
+        ```yaml
+        global:
+          scrape_interval: 15s
+
+        scrape_configs:
+          - job_name: 'api'
+            static_configs:
+              - targets: ['localhost:8080']
+
+        ```
+
+        This configuration tells Prometheus to scrape metrics from your API every 15 seconds.
+3.  **Start Prometheus**:
+    Run the following command:
+        ```
+        ./prometheus --config.file=prometheus.yml
+
+        ```
+4.  **Integrate with your API**:
+    Modify your API code to expose a `/metrics` endpoint that Prometheus can scrape.
 
 ## Instrumenting Your API for Prometheus
 
 To collect meaningful data, you need to instrument your API code:
 
-1. **Add Prometheus client library**:
-Install the appropriate library for your programming language. For example, in Python:
-    
-    ```
-    pip install prometheus_client
-    
-    ```
-    
-2. **Define custom metrics**:
-Create metrics that are relevant to your API:
-    
-    ```python
-    from prometheus_client import Counter, Histogram
-    
-    REQUEST_COUNT = Counter('api_requests_total', 'Total API requests')
-    REQUEST_LATENCY = Histogram('api_request_latency_seconds', 'API request latency')
-    
-    ```
-    
-3. **Expose metrics endpoint**:
-Set up a route in your API to expose the metrics:
-    
-    ```python
-    from prometheus_client import generate_latest
-    
-    @app.route('/metrics')
-    def metrics():
-        return generate_latest()
-    
-    ```
-    
-4. **Use metrics in your code**:
-Instrument your API endpoints:
-    
-    ```python
-    @app.route('/api/data')
-    @REQUEST_LATENCY.time()
-    def get_data():
-        REQUEST_COUNT.inc()
-        # Your API logic here
-    
-    ```
-    
+1.  **Add Prometheus client library**:
+    Install the appropriate library for your programming language. For example, in Python:
+        ```
+        pip install prometheus_client
+
+        ```
+2.  **Define custom metrics**:
+    Create metrics that are relevant to your API:
+        ```python
+        from prometheus_client import Counter, Histogram
+
+        REQUEST_COUNT = Counter('api_requests_total', 'Total API requests')
+        REQUEST_LATENCY = Histogram('api_request_latency_seconds', 'API request latency')
+
+        ```
+3.  **Expose metrics endpoint**:
+    Set up a route in your API to expose the metrics:
+        ```python
+        from prometheus_client import generate_latest
+
+        @app.route('/metrics')
+        def metrics():
+            return generate_latest()
+
+        ```
+4.  **Use metrics in your code**:
+    Instrument your API endpoints:
+        ```python
+        @app.route('/api/data')
+        @REQUEST_LATENCY.time()
+        def get_data():
+            REQUEST_COUNT.inc()
+            # Your API logic here
+
+        ```
 
 ## Implementing API Health Checks with Prometheus
 
 Health checks ensure your API is functioning correctly. Here's how to set them up:
 
-1. **Create a health check endpoint**:
-Add a `/health` route to your API that returns the overall status.
-2. **Configure Prometheus to monitor health**:
-Add the health check to your `prometheus.yml`:
-    
-    ```yaml
-    scrape_configs:
-      - job_name: 'api_health'
-        metrics_path: '/health'
-        static_configs:
-          - targets: ['localhost:8080']
-    
-    ```
-    
-3. **Set up alerting**:
-Create an alert rule in Prometheus to notify you of failed health checks:
-    
-    ```yaml
-    groups:
-    - name: api_alerts
-      rules:
-      - alert: APIHealthCheckFailed
-        expr: up{job="api_health"} == 0
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: "API health check failed"
-          description: "The API health check has been failing for 5 minutes."
-    
-    ```
-    
+1.  **Create a health check endpoint**:
+    Add a `/health` route to your API that returns the overall status.
+2.  **Configure Prometheus to monitor health**:
+    Add the health check to your `prometheus.yml`:
+        ```yaml
+        scrape_configs:
+          - job_name: 'api_health'
+            metrics_path: '/health'
+            static_configs:
+              - targets: ['localhost:8080']
+
+        ```
+3.  **Set up alerting**:
+    Create an alert rule in Prometheus to notify you of failed health checks:
+        ```yaml
+        groups:
+        - name: api_alerts
+          rules:
+          - alert: APIHealthCheckFailed
+            expr: up{job="api_health"} == 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "API health check failed"
+              description: "The API health check has been failing for 5 minutes."
+
+        ```
 
 ## Advanced API Monitoring Techniques
 
@@ -355,17 +345,17 @@ Grafana enhances your monitoring setup by providing powerful visualization capab
 
 1. **Install Grafana**: Follow the instructions on the [Grafana website](https://grafana.com/docs/grafana/latest/installation/).
 2. **Configure Prometheus data source**:
-    - In Grafana, go to Configuration > Data Sources.
-    - Add Prometheus as a new data source.
-    - Enter your Prometheus server URL.
+   - In Grafana, go to Configuration > Data Sources.
+   - Add Prometheus as a new data source.
+   - Enter your Prometheus server URL.
 3. **Create API monitoring dashboard**:
-    - Create a new dashboard.
-    - Add panels for key metrics like request rate, latency, and error rate.
-    - Use PromQL queries to fetch and display data.
+   - Create a new dashboard.
+   - Add panels for key metrics like request rate, latency, and error rate.
+   - Use PromQL queries to fetch and display data.
 4. **Design effective dashboards**:
-    - Group related metrics together.
-    - Use appropriate visualization types (graphs, gauges, tables).
-    - Set up alerting thresholds directly in Grafana.
+   - Group related metrics together.
+   - Use appropriate visualization types (graphs, gauges, tables).
+   - Set up alerting thresholds directly in Grafana.
 
 ## SigNoz: A Comprehensive Alternative
 

@@ -1,164 +1,179 @@
 ---
-
 title: How to Implement Jaeger? - A Step-by-Step Guide for Developers
-slug: how-to-implement-jaeger
 date: 2024-07-30
 tags: [faq, jaeger]
 authors: [daniel]
 description: Learn how to implement Jaeger, the open-source distributed tracing system, with this comprehensive guide for developers. Master setup, instrumentation, and best practices.
-keywords: [Jaeger, distributed tracing, microservices, OpenTelemetry, instrumentation, monitoring, troubleshooting, observability]
-
+keywords:
+  [
+    Jaeger,
+    distributed tracing,
+    microservices,
+    OpenTelemetry,
+    instrumentation,
+    monitoring,
+    troubleshooting,
+    observability,
+  ]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to implement Jaeger? - A Step-by-Step Guide for Developers",
-    "alternativeHeadline": "Master Jaeger Implementation: Setup, Instrumentation, and Best Practices for Developers",
-    "author": {
-      "@type": "Person",
-      "name": "Daniel"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-30T00:00:00Z",
-    "dateModified": "2024-07-30T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/how-to-implement-jaeger/"
-    },
-    "description": "Learn how to implement Jaeger, the open-source distributed tracing system, with this comprehensive guide for developers. Master setup, instrumentation, and best practices.",
-    "keywords": "Jaeger, distributed tracing, microservices, OpenTelemetry, instrumentation, monitoring, troubleshooting, observability",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Jaeger",
-        "description": "An open-source, end-to-end distributed tracing system."
-      },
-      {
-        "@type": "Thing",
-        "name": "OpenTelemetry",
-        "description": "A collection of tools, APIs, and SDKs for instrumenting, generating, collecting, and exporting telemetry data such as metrics, logs, and traces."
-      },
-      {
-        "@type": "Thing",
-        "name": "Distributed Tracing",
-        "description": "A method used to monitor applications built on a microservices architecture."
-      },
-      {
-        "@type": "Thing",
-        "name": "Microservices",
-        "description": "An architectural style that structures an application as a collection of loosely coupled services."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Jaeger",
-        "applicationCategory": "Distributed Tracing"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "OpenTelemetry",
-        "applicationCategory": "Observability Framework"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What's the difference between Jaeger and other tracing systems like Zipkin?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Jaeger and Zipkin are both open-source distributed tracing systems, but Jaeger offers more advanced features like adaptive sampling and a more scalable architecture. Jaeger also has better support for OpenTelemetry, making it more future-proof."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to implement Jaeger? - A Step-by-Step Guide for Developers',
+        alternativeHeadline:
+          'Master Jaeger Implementation: Setup, Instrumentation, and Best Practices for Developers',
+        author: {
+          '@type': 'Person',
+          name: 'Daniel',
         },
-        {
-          "@type": "Question",
-          "name": "How does Jaeger handle data retention and storage?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Jaeger allows you to configure data retention policies based on your needs. When using Elasticsearch or Cassandra as a backend, you can set up index rotation and deletion to manage data volume and retention periods."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "Can Jaeger be used with applications not written in Java?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, Jaeger supports multiple programming languages. It offers client libraries for Java, Go, Python, Node.js, C++, and C#. Additionally, its compatibility with OpenTelemetry expands its language support even further."
-          }
+        datePublished: '2024-07-30T00:00:00Z',
+        dateModified: '2024-07-30T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/how-to-implement-jaeger/',
         },
-        {
-          "@type": "Question",
-          "name": "How does Jaeger impact application performance?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "While Jaeger does add some overhead to your application, it's designed to be lightweight. The impact can be minimized through proper sampling strategies and configuration. In most cases, the performance impact is negligible compared to the benefits of distributed tracing."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Implementing Jaeger for Distributed Tracing",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install Docker",
-          "text": "Install Docker on your system if you haven't already."
+        description:
+          'Learn how to implement Jaeger, the open-source distributed tracing system, with this comprehensive guide for developers. Master setup, instrumentation, and best practices.',
+        keywords:
+          'Jaeger, distributed tracing, microservices, OpenTelemetry, instrumentation, monitoring, troubleshooting, observability',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Run Jaeger All-in-One Container",
-          "text": "Run the Jaeger All-in-One container using the command: `docker run -d --name jaeger -e COLLECTOR_ZIPKIN_HOST_PORT=:9411 -p 5775:5775/udp -p 6831:6831/udp -p 6832:6832/udp -p 5778:5778 -p 16686:16686 -p 14250:14250 -p 14268:14268 -p 14269:14269 -p 9411:9411 jaegertracing/all-in-one:1.59`."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Jaeger',
+            description: 'An open-source, end-to-end distributed tracing system.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'OpenTelemetry',
+            description:
+              'A collection of tools, APIs, and SDKs for instrumenting, generating, collecting, and exporting telemetry data such as metrics, logs, and traces.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Distributed Tracing',
+            description:
+              'A method used to monitor applications built on a microservices architecture.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Microservices',
+            description:
+              'An architectural style that structures an application as a collection of loosely coupled services.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Jaeger',
+            applicationCategory: 'Distributed Tracing',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'OpenTelemetry',
+            applicationCategory: 'Observability Framework',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: "What's the difference between Jaeger and other tracing systems like Zipkin?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Jaeger and Zipkin are both open-source distributed tracing systems, but Jaeger offers more advanced features like adaptive sampling and a more scalable architecture. Jaeger also has better support for OpenTelemetry, making it more future-proof.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How does Jaeger handle data retention and storage?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Jaeger allows you to configure data retention policies based on your needs. When using Elasticsearch or Cassandra as a backend, you can set up index rotation and deletion to manage data volume and retention periods.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can Jaeger be used with applications not written in Java?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, Jaeger supports multiple programming languages. It offers client libraries for Java, Go, Python, Node.js, C++, and C#. Additionally, its compatibility with OpenTelemetry expands its language support even further.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How does Jaeger impact application performance?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "While Jaeger does add some overhead to your application, it's designed to be lightweight. The impact can be minimized through proper sampling strategies and configuration. In most cases, the performance impact is negligible compared to the benefits of distributed tracing.",
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Access Jaeger UI",
-          "text": "Open a web browser and navigate to `http://localhost:16686` to access the Jaeger UI."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Implementing Jaeger for Distributed Tracing',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Install Docker',
+              text: "Install Docker on your system if you haven't already.",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Run Jaeger All-in-One Container',
+              text: 'Run the Jaeger All-in-One container using the command: `docker run -d --name jaeger -e COLLECTOR_ZIPKIN_HOST_PORT=:9411 -p 5775:5775/udp -p 6831:6831/udp -p 6832:6832/udp -p 5778:5778 -p 16686:16686 -p 14250:14250 -p 14268:14268 -p 14269:14269 -p 9411:9411 jaegertracing/all-in-one:1.59`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Access Jaeger UI',
+              text: 'Open a web browser and navigate to `http://localhost:16686` to access the Jaeger UI.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Verify Installation',
+              text: 'Verify the installation by sending test spans using Jaeger client libraries or OpenTelemetry SDK.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Instrument Your Application',
+              text: "Use Jaeger's native client libraries or the OpenTelemetry SDK to instrument your application code and generate traces.",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Analyze Traces',
+              text: 'Use the Jaeger UI to search for and analyze traces to understand the performance and behavior of your distributed system.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Verify Installation",
-          "text": "Verify the installation by sending test spans using Jaeger client libraries or OpenTelemetry SDK."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Instrument Your Application",
-          "text": "Use Jaeger's native client libraries or the OpenTelemetry SDK to instrument your application code and generate traces."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Analyze Traces",
-          "text": "Use the Jaeger UI to search for and analyze traces to understand the performance and behavior of your distributed system."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Distributed tracing has become essential for developers working with microservices architectures. Jaeger, an open-source distributed tracing system, offers a powerful solution for monitoring and troubleshooting complex distributed systems. This guide will walk you through the process of implementing Jaeger, from setup to advanced usage.

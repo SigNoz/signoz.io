@@ -1,6 +1,5 @@
 ---
 title: Complete Guide to VPC Flow Logs
-slug: vpc-flow-logs
 date: 2024-07-03
 tags: [logging]
 authors: [daniel]
@@ -9,166 +8,172 @@ keywords: [logs, log monitoring, vpc, signoz]
 ---
 
 <head>
-<script
+  <script
     type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Complete Guide to VPC Flow Logs",
-  "alternativeHeadline": "Understanding, Implementing, and Analyzing VPC Flow Logs for Network Monitoring and Security",
-  "author": {
-    "@type": "Person",
-    "name": "Daniel"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2024-07-03",
-  "dateModified": "2024-07-03",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/guides/vpc-flow-logs/"
-  },
-  "description": "VPC flow logs are a network monitoring feature that captures detailed information about the IP traffic entering and leaving your Virtual Private Cloud (VPC). This includes details such as source/destination IP addresses, ports, protocols, and data volume.",
-  "keywords": "logs, log monitoring, vpc, signoz",
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "VPC Flow Logs",
-      "description": "A feature that captures information about IP traffic going to and from network interfaces in a VPC"
-    },
-    {
-      "@type": "Thing",
-      "name": "Network Monitoring",
-      "description": "The practice of overseeing and analyzing network traffic and performance"
-    },
-    {
-      "@type": "Thing",
-      "name": "Cloud Security",
-      "description": "Measures and controls that protect data, applications, and infrastructure associated with cloud computing"
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "Amazon Web Services",
-      "applicationCategory": "Cloud Computing Platform"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "SigNoz",
-      "applicationCategory": "Observability Platform"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "AWS Lambda",
-      "applicationCategory": "Serverless Computing Service"
-    }
-  ],
-  "mainEntity": {
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What are VPC flow logs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "They are detailed network traffic records in your Virtual Private Cloud (VPC)."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Where to view VPC flow logs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "In the configured log destination (CloudWatch Logs, S3, or Data Firehose for AWS)."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do you create AWS VPC flow logs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "In the Amazon VPC console, select your VPC or subnet, then choose 'Create flow log' from the Actions menu. You can also do this with the AWS CLI."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is VPC flow log free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "No, you are charged for the storage and data transfer of logs."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What does VPC stand for?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Virtual Private Cloud."
-        }
-      }
-    ]
-  },
-  "tutorial": {
-    "@type": "HowTo",
-    "name": "How to Create and Forward VPC Flow Logs to SigNoz",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Create/Configure the S3 Bucket",
-        "text": "Create an S3 bucket in AWS to store your VPC flow logs."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create the VPC",
-        "text": "Set up a Virtual Private Cloud (VPC) in AWS if you don't already have one."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create the VPC Flow Logs",
-        "text": "Enable VPC flow logs for your VPC, configuring them to be stored in your S3 bucket."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create a Lambda Function",
-        "text": "Set up an AWS Lambda function to process the VPC flow logs."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Configure Policies for the Function",
-        "text": "Grant the necessary permissions to your Lambda function to access the S3 bucket."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Trigger the Function",
-        "text": "Set up a trigger for the Lambda function to process new log files in the S3 bucket."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Write the Lambda Function",
-        "text": "Implement the Lambda function to process the VPC flow logs and forward them to SigNoz."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Visualize the VPC Flow Logs in SigNoz",
-        "text": "Access and explore the forwarded VPC flow logs in the SigNoz dashboard."
-      }
-    ]
-  }
-}) }}
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'Complete Guide to VPC Flow Logs',
+        alternativeHeadline:
+          'Understanding, Implementing, and Analyzing VPC Flow Logs for Network Monitoring and Security',
+        author: {
+          '@type': 'Person',
+          name: 'Daniel',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
+        datePublished: '2024-07-03',
+        dateModified: '2024-07-03',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/vpc-flow-logs/',
+        },
+        description:
+          'VPC flow logs are a network monitoring feature that captures detailed information about the IP traffic entering and leaving your Virtual Private Cloud (VPC). This includes details such as source/destination IP addresses, ports, protocols, and data volume.',
+        keywords: 'logs, log monitoring, vpc, signoz',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
+        },
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'VPC Flow Logs',
+            description:
+              'A feature that captures information about IP traffic going to and from network interfaces in a VPC',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Network Monitoring',
+            description: 'The practice of overseeing and analyzing network traffic and performance',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Cloud Security',
+            description:
+              'Measures and controls that protect data, applications, and infrastructure associated with cloud computing',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Amazon Web Services',
+            applicationCategory: 'Cloud Computing Platform',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'AWS Lambda',
+            applicationCategory: 'Serverless Computing Service',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What are VPC flow logs?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'They are detailed network traffic records in your Virtual Private Cloud (VPC).',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Where to view VPC flow logs?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'In the configured log destination (CloudWatch Logs, S3, or Data Firehose for AWS).',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do you create AWS VPC flow logs?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "In the Amazon VPC console, select your VPC or subnet, then choose 'Create flow log' from the Actions menu. You can also do this with the AWS CLI.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Is VPC flow log free?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'No, you are charged for the storage and data transfer of logs.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What does VPC stand for?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Virtual Private Cloud.',
+              },
+            },
+          ],
+        },
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'How to Create and Forward VPC Flow Logs to SigNoz',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Create/Configure the S3 Bucket',
+              text: 'Create an S3 bucket in AWS to store your VPC flow logs.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create the VPC',
+              text: "Set up a Virtual Private Cloud (VPC) in AWS if you don't already have one.",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create the VPC Flow Logs',
+              text: 'Enable VPC flow logs for your VPC, configuring them to be stored in your S3 bucket.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create a Lambda Function',
+              text: 'Set up an AWS Lambda function to process the VPC flow logs.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Configure Policies for the Function',
+              text: 'Grant the necessary permissions to your Lambda function to access the S3 bucket.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Trigger the Function',
+              text: 'Set up a trigger for the Lambda function to process new log files in the S3 bucket.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Write the Lambda Function',
+              text: 'Implement the Lambda function to process the VPC flow logs and forward them to SigNoz.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Visualize the VPC Flow Logs in SigNoz',
+              text: 'Access and explore the forwarded VPC flow logs in the SigNoz dashboard.',
+            },
+          ],
+        },
+      }),
+    }}
   />
 </head>
 

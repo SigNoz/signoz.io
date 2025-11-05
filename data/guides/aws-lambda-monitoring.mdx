@@ -1,13 +1,11 @@
 ---
-
 title: Essential Guide to AWS Lambda Monitoring - Best Practices
-slug: aws-lambda-monitoring
 date: 2024-10-14
 tags: [aws, monitoring, aws lambda]
 authors: [sushant_gaurav]
 description: Master AWS Lambda monitoring with this comprehensive guide. Learn key metrics, best practices, and tools to optimize performance and costs.
-keywords: [AWS Lambda, serverless monitoring, CloudWatch, performance optimization, cost management, SigNoz]
-
+keywords:
+  [AWS Lambda, serverless monitoring, CloudWatch, performance optimization, cost management, SigNoz]
 ---
 
 AWS Lambda has transformed how developers build and deploy apps by providing a serverless computing platform that automatically maintains infrastructure. However, with great power comes great responsibility—specifically, the requirement for effective supervision. AWS Lambda monitoring is important as it guarantees peak performance, cost management, and serverless application uptime. In this article, you learn AWS lambda monitoring in detail.
@@ -37,72 +35,60 @@ If you want to effectively monitor Lambda functions you should consider several 
 ### Invocation Count and Duration
 
 - Invocation count: This indicates how frequently your function is called. High invocation counts may indicate increased demand, necessitating the scalability of downstream services or changing concurrency constraints.
-    
-    Example CloudWatch Insight query for invocation count:
-    
-    ```python
-    stats = client.get_metric_statistics(
-        Namespace='AWS/Lambda',
-        MetricName='Invocations',
-        Dimensions=[{'Name': 'FunctionName', 'Value': 'my-function'}],
-        StartTime=datetime.utcnow() - timedelta(hours=1),
-        EndTime=datetime.utcnow(),
-        Period=60,
-        Statistics=['Sum']
-    )
-    
-    ```
-    
+  Example CloudWatch Insight query for invocation count:
+  ```python
+  stats = client.get_metric_statistics(
+      Namespace='AWS/Lambda',
+      MetricName='Invocations',
+      Dimensions=[{'Name': 'FunctionName', 'Value': 'my-function'}],
+      StartTime=datetime.utcnow() - timedelta(hours=1),
+      EndTime=datetime.utcnow(),
+      Period=60,
+      Statistics=['Sum']
+  )
+
+  ```
 - Duration: It shows how long your function takes to execute. Monitoring duration helps identify performance bottlenecks and ensures you’re not paying for inefficient executions.
-    
-    Example query for duration:
-    
-    ```python
-    stats = client.get_metric_statistics(
-        Namespace='AWS/Lambda',
-        MetricName='Duration',
-        Dimensions=[{'Name': 'FunctionName', 'Value': 'my-function'}],
-        StartTime=datetime.utcnow() - timedelta(hours=1),
-        EndTime=datetime.utcnow(),
-        Period=60,
-        Statistics=['Average', 'Maximum']
-    )
-    
-    ```
-    
+  Example query for duration:
+  ```python
+  stats = client.get_metric_statistics(
+      Namespace='AWS/Lambda',
+      MetricName='Duration',
+      Dimensions=[{'Name': 'FunctionName', 'Value': 'my-function'}],
+      StartTime=datetime.utcnow() - timedelta(hours=1),
+      EndTime=datetime.utcnow(),
+      Period=60,
+      Statistics=['Average', 'Maximum']
+  )
+
+  ```
 
 ### Error Rate and Types
 
 Monitoring error rates is important for discovering faults in your function. Errors can occur from a variety of causes, including code errors, timeouts, permission issues, or unsuccessful integrations with external services. CloudWatch logs and metrics contain useful information for diagnosing these issues.
 
 - Error types: Timeout, out-of-memory, and permission failures should be documented and monitored to ensure speedy debugging.
-    
-    Error metric example:
-    
-    ```bash
-    aws cloudwatch get-metric-statistics \\
-        --namespace AWS/Lambda --metric-name Errors \\
-        --dimensions Name=FunctionName,Value=my-function \\
-        --start-time 2023-09-01T00:00:00Z --end-time 2023-09-01T23:59:59Z \\
-        --period 60 --statistics Maximum
-    ```
-    
+  Error metric example:
+  ```bash
+  aws cloudwatch get-metric-statistics \\
+      --namespace AWS/Lambda --metric-name Errors \\
+      --dimensions Name=FunctionName,Value=my-function \\
+      --start-time 2023-09-01T00:00:00Z --end-time 2023-09-01T23:59:59Z \\
+      --period 60 --statistics Maximum
+  ```
 
 ### Throttles and Concurrent Executions
 
 - Throttles happen when the number of invocations exceeds the concurrent limit of your AWS account or the function. Monitoring throttles can help you set these limitations.
 - Concurrent executions monitor the number of function instances running concurrently to control the load.
-    
-    Example Query for concurrency metrics:
-    
-    ```bash
-    aws cloudwatch get-metric-statistics \\
-        --namespace AWS/Lambda --metric-name ConcurrentExecutions \\
-        --dimensions Name=FunctionName,Value=my-function \\
-        --start-time 2023-09-01T00:00:00Z --end-time 2023-09-01T23:59:59Z \\
-        --period 60 --statistics Average
-    ```
-    
+  Example Query for concurrency metrics:
+  ```bash
+  aws cloudwatch get-metric-statistics \\
+      --namespace AWS/Lambda --metric-name ConcurrentExecutions \\
+      --dimensions Name=FunctionName,Value=my-function \\
+      --start-time 2023-09-01T00:00:00Z --end-time 2023-09-01T23:59:59Z \\
+      --period 60 --statistics Average
+  ```
 
 ### Cold Starts
 
@@ -120,27 +106,30 @@ Memory allocation has a direct impact on Lambda performance and cost. Monitoring
 
 ```yaml
 {
-  "widgets": [
-    {
-      "type": "metric",
-      "x": 0,
-      "y": 0,
-      "width": 6,
-      "height": 6,
-      "properties": {
-        "metrics": [
-          ["AWS/Lambda", "MemorySize", "FunctionName", "my-function"],
-          [ ".", "Duration", ".", ".", { "stat": "Average" }],
-          [ ".", "Invocations", ".", ".", { "stat": "Sum" }]
-        ],
-        "view": "timeSeries",
-        "stacked": false,
-        "region": "us-east-1",
-        "title": "Lambda Monitoring Dashboard",
-        "period": 60
-      }
-    }
-  ]
+  'widgets':
+    [
+      {
+        'type': 'metric',
+        'x': 0,
+        'y': 0,
+        'width': 6,
+        'height': 6,
+        'properties':
+          {
+            'metrics':
+              [
+                ['AWS/Lambda', 'MemorySize', 'FunctionName', 'my-function'],
+                ['.', 'Duration', '.', '.', { 'stat': 'Average' }],
+                ['.', 'Invocations', '.', '.', { 'stat': 'Sum' }],
+              ],
+            'view': 'timeSeries',
+            'stacked': false,
+            'region': 'us-east-1',
+            'title': 'Lambda Monitoring Dashboard',
+            'period': 60,
+          },
+      },
+    ],
 }
 ```
 
@@ -167,38 +156,35 @@ Some tools that can be used for tracking:
 AWS CloudWatch is the native monitoring solution for AWS Lambda. It provides a strong platform for monitoring and managing Lambda functions. Let's have a look at the step-by-step guide for setting it up.
 
 1. Enable CloudWatch Logs:
-    - CloudWatch Logs are usually enabled by default for all Lambda functions. However, make sure your function's execution role (`AWSLambdaBasicExecutionRole`) has permissions to write logs to CloudWatch.
-    - CloudWatch collects data such as invocation requests, errors, and execution time, providing insight into your function's behaviour.
+   - CloudWatch Logs are usually enabled by default for all Lambda functions. However, make sure your function's execution role (`AWSLambdaBasicExecutionRole`) has permissions to write logs to CloudWatch.
+   - CloudWatch collects data such as invocation requests, errors, and execution time, providing insight into your function's behaviour.
 2. Create Custom Metrics:
-    - Lambda generates default metrics (like invocations, errors, and duration), but for more granular monitoring, you can create custom metrics.
-    - Example command to create a custom error metric via AWS CLI:
-        
-        ```bash
-        aws cloudwatch put-metric-data --namespace "MyLambdaMetrics" --metric-name "FunctionErrors" --value 1 --unit "Count"
-        ```
-        
-    - Custom metrics can help you track application-specific data, such as user signups or processing rates.
+   - Lambda generates default metrics (like invocations, errors, and duration), but for more granular monitoring, you can create custom metrics.
+   - Example command to create a custom error metric via AWS CLI:
+     ```bash
+     aws cloudwatch put-metric-data --namespace "MyLambdaMetrics" --metric-name "FunctionErrors" --value 1 --unit "Count"
+     ```
+   - Custom metrics can help you track application-specific data, such as user signups or processing rates.
 3. Set Up Alarms:
-    - You can configure alarms on critical metrics like error rates, throttles, or memory usage. This ensures you're immediately notified of any potential issues.
-    - In the CloudWatch console, navigate to "Alarms", select "Create Alarm", choose the metric to monitor, and set thresholds. For example, you can set an alarm to trigger if your Lambda error rate exceeds 5%.
-    
-    Example command to set an alarm:
-    
-    ```bash
-    aws cloudwatch put-metric-alarm --alarm-name "HighErrorRate" --metric-name Errors --namespace AWS/Lambda --statistic Sum --period 300 --threshold 5 --comparison-operator GreaterThanThreshold --evaluation-periods 1 --alarm-actions arn:aws:sns:us-east-1:123456789012:my-sns-topic
-    ```
-    
+
+   - You can configure alarms on critical metrics like error rates, throttles, or memory usage. This ensures you're immediately notified of any potential issues.
+   - In the CloudWatch console, navigate to "Alarms", select "Create Alarm", choose the metric to monitor, and set thresholds. For example, you can set an alarm to trigger if your Lambda error rate exceeds 5%.
+
+   Example command to set an alarm:
+
+   ```bash
+   aws cloudwatch put-metric-alarm --alarm-name "HighErrorRate" --metric-name Errors --namespace AWS/Lambda --statistic Sum --period 300 --threshold 5 --comparison-operator GreaterThanThreshold --evaluation-periods 1 --alarm-actions arn:aws:sns:us-east-1:123456789012:my-sns-topic
+   ```
+
 4. Use CloudWatch Logs Insights:
-    - CloudWatch Logs Insights allows you to analyze logs in real-time, helping you extract meaningful data from your Lambda logs. It's particularly useful for tracking performance trends and debugging.
-    - An example query to find the average duration of your function:
-        
-        ```sql
-        filter @type = "REPORT"
-        | stats avg(@duration) as avgDuration
-        
-        ```
-        
-    - You can set up more sophisticated queries, like tracking the frequency of specific errors or analyzing memory usage patterns over time.
+   - CloudWatch Logs Insights allows you to analyze logs in real-time, helping you extract meaningful data from your Lambda logs. It's particularly useful for tracking performance trends and debugging.
+   - An example query to find the average duration of your function:
+     ```sql
+     filter @type = "REPORT"
+     | stats avg(@duration) as avgDuration
+
+     ```
+   - You can set up more sophisticated queries, like tracking the frequency of specific errors or analyzing memory usage patterns over time.
 
 ### Custom CloudWatch Dashboard for AWS Lambda
 
@@ -206,27 +192,30 @@ Setting up a custom CloudWatch dashboard is a best practice for better visualiza
 
 ```yaml
 {
-  "widgets": [
-    {
-      "type": "metric",
-      "x": 0,
-      "y": 0,
-      "width": 6,
-      "height": 6,
-      "properties": {
-        "metrics": [
-          ["AWS/Lambda", "MemorySize", "FunctionName", "my-function"],
-          [ ".", "Duration", ".", ".", { "stat": "Average" }],
-          [ ".", "Invocations", ".", ".", { "stat": "Sum" }]
-        ],
-        "view": "timeSeries",
-        "stacked": false,
-        "region": "us-east-1",
-        "title": "Lambda Monitoring Dashboard",
-        "period": 60
-      }
-    }
-  ]
+  'widgets':
+    [
+      {
+        'type': 'metric',
+        'x': 0,
+        'y': 0,
+        'width': 6,
+        'height': 6,
+        'properties':
+          {
+            'metrics':
+              [
+                ['AWS/Lambda', 'MemorySize', 'FunctionName', 'my-function'],
+                ['.', 'Duration', '.', '.', { 'stat': 'Average' }],
+                ['.', 'Invocations', '.', '.', { 'stat': 'Sum' }],
+              ],
+            'view': 'timeSeries',
+            'stacked': false,
+            'region': 'us-east-1',
+            'title': 'Lambda Monitoring Dashboard',
+            'period': 60,
+          },
+      },
+    ],
 }
 ```
 
@@ -238,23 +227,23 @@ After you've set up basic monitoring, a few advanced techniques can improve your
 
 AWS X-Ray allows you to trace requests as they flow across multiple services, including Lambda. This allows access to a request's complete execution route, making it easier to discover performance bottlenecks or problems.
 
-To enable [X-Ray tracing](https://signoz.io/comparisons/opentelemetry-vs-xray/) in your Lambda function, 
+To enable [X-Ray tracing](https://signoz.io/comparisons/opentelemetry-vs-xray/) in your Lambda function,
 
 1. Go to the Configuration tab in the Lambda interface and select Active Tracing.
 2. Include the AWS X-Ray SDK in your Lambda function code to capture extra traces.
-    
-    ```python
-    from aws_xray_sdk.core import xray_recorder
-    from aws_xray_sdk.core import patch_all
-    
-    patch_all()
-    
-    def lambda_handler(event, context):
-        with xray_recorder.in_segment('Lambda Function'):
-            # Function logic here
-            return {"statusCode": 200, "body": "X-Ray enabled!"}
-    ```
-    
+
+   ```python
+   from aws_xray_sdk.core import xray_recorder
+   from aws_xray_sdk.core import patch_all
+
+   patch_all()
+
+   def lambda_handler(event, context):
+       with xray_recorder.in_segment('Lambda Function'):
+           # Function logic here
+           return {"statusCode": 200, "body": "X-Ray enabled!"}
+   ```
+
 3. Add the required X-Ray permissions to your Lambda execution role.
 
 ### Custom Metrics for Application-Specific Monitoring
@@ -297,13 +286,10 @@ To get a holistic view of your application performance, integrate Lambda monitor
 Setting up immediate alert alerts is critical for real-time monitoring and prompt repair. Let's see how you can set up effective alerts:
 
 - SNS Notifications: Use Amazon SNS to provide real-time alerts when important thresholds are exceeded. You are notified by email if your error rate exceeds a certain threshold.
-    
-    Example CLI command to set up a notification:
-    
-    ```bash
-    aws sns publish --topic-arn arn:aws:sns:us-east-1:123456789012:my-sns-topic --message "Lambda error rate too high!"
-    ```
-    
+  Example CLI command to set up a notification:
+  ```bash
+  aws sns publish --topic-arn arn:aws:sns:us-east-1:123456789012:my-sns-topic --message "Lambda error rate too high!"
+  ```
 - Integration with Incident Management Tools: For more sophisticated alerting, integrate with tools like PagerDuty or Opsgenie to manage incident response and escalation.
 
 ## Optimizing Lambda Performance Through Monitoring
@@ -311,97 +297,100 @@ Setting up immediate alert alerts is critical for real-time monitoring and promp
 Monitoring your AWS Lambda functions is more than just recording metrics; it's an important method for improving performance. You can fine-tune your Lambda functions for faster and more cost-effective performance by employing monitoring tool data.
 
 1. Analyze Cold Start Times:
-    - Cold starts occur when a new instance of your Lambda function is initialized, which might cause latency.
-    - Use CloudWatch Logs or X-Ray to identify functions with high cold start times, particularly those are activated infrequently.
-    - Provisioned Concurrency is an efficient way to reduce cold start times in important functions. It maintains function instances warm, avoiding the initialization delay.
-    
-    Example CLI command to enable provisioned concurrency:
-    
-    ```bash
-    aws lambda put-provisioned-concurrency-config \\
-        --function-name my-function \\
-        --provisioned-concurrent-executions 5
-    ```
-    
+
+   - Cold starts occur when a new instance of your Lambda function is initialized, which might cause latency.
+   - Use CloudWatch Logs or X-Ray to identify functions with high cold start times, particularly those are activated infrequently.
+   - Provisioned Concurrency is an efficient way to reduce cold start times in important functions. It maintains function instances warm, avoiding the initialization delay.
+
+   Example CLI command to enable provisioned concurrency:
+
+   ```bash
+   aws lambda put-provisioned-concurrency-config \\
+       --function-name my-function \\
+       --provisioned-concurrent-executions 5
+   ```
+
 2. Fine-Tune Memory Allocation:
-    - AWS Lambda allocates CPU power in proportion to the memory you choose. This means that adding memory can occasionally increase speed, even shortening execution times sufficiently to reduce overall costs.
-    - Monitor memory usage with CloudWatch to achieve the best combination of performance and cost.
-    - Use the Lambda Power Tuning tool to automatically test alternative memory settings.
+   - AWS Lambda allocates CPU power in proportion to the memory you choose. This means that adding memory can occasionally increase speed, even shortening execution times sufficiently to reduce overall costs.
+   - Monitor memory usage with CloudWatch to achieve the best combination of performance and cost.
+   - Use the Lambda Power Tuning tool to automatically test alternative memory settings.
 3. Identify and Resolve Bottlenecks:
-    - Use AWS X-Ray to trace request flow and identify bottlenecks in Lambda code. This could include sluggish-performing code parts, wasteful database queries, or slow external API requests.
-    - You may optimize these locations by studying comprehensive traces for speedier execution and a better user experience.
-    
-    Example of slow database call optimization:
-    
-    ```python
-    # Before optimization: Single database query per request
-    results = db.query("SELECT * FROM users WHERE id = %s", user_id)
-    
-    # After optimization: Use batch queries
-    results = db.query("SELECT * FROM users WHERE id IN (%s)", batch_of_user_ids)
-    ```
-    
+
+   - Use AWS X-Ray to trace request flow and identify bottlenecks in Lambda code. This could include sluggish-performing code parts, wasteful database queries, or slow external API requests.
+   - You may optimize these locations by studying comprehensive traces for speedier execution and a better user experience.
+
+   Example of slow database call optimization:
+
+   ```python
+   # Before optimization: Single database query per request
+   results = db.query("SELECT * FROM users WHERE id = %s", user_id)
+
+   # After optimization: Use batch queries
+   results = db.query("SELECT * FROM users WHERE id IN (%s)", batch_of_user_ids)
+   ```
+
 4. Implement Caching Strategies:
-    - Lambda Layers can store dependencies like libraries across several Lambda functions, lowering load times and boosting performance.
-    - Application-level caching, using services such as Amazon ElastiCache or AWS Lambda@Edge, can cache frequently requested data, eliminating the need to query databases or repeatedly perform API calls.
-    
-    Example of using Amazon ElastiCache for caching:
-    
-    ```python
-    import redis
-    redis_client = redis.StrictRedis(host='my-redis-cluster', port=6379, db=0)
-    
-    def lambda_handler(event, context):
-        cache_key = "some-key"
-        cached_value = redis_client.get(cache_key)
-    
-        if cached_value:
-            return cached_value
-        else:
-            # Fetch from the source, then cache the result
-            result = fetch_from_database()
-            redis_client.set(cache_key, result)
-            return result
-    ```
-    
+
+   - Lambda Layers can store dependencies like libraries across several Lambda functions, lowering load times and boosting performance.
+   - Application-level caching, using services such as Amazon ElastiCache or AWS Lambda@Edge, can cache frequently requested data, eliminating the need to query databases or repeatedly perform API calls.
+
+   Example of using Amazon ElastiCache for caching:
+
+   ```python
+   import redis
+   redis_client = redis.StrictRedis(host='my-redis-cluster', port=6379, db=0)
+
+   def lambda_handler(event, context):
+       cache_key = "some-key"
+       cached_value = redis_client.get(cache_key)
+
+       if cached_value:
+           return cached_value
+       else:
+           # Fetch from the source, then cache the result
+           result = fetch_from_database()
+           redis_client.set(cache_key, result)
+           return result
+   ```
 
 ## Cost Optimization Through Effective Lambda Monitoring
 
 Monitoring not only helps maximize performance but it also plays an important part in cost management. Here's how you can use monitoring data to reduce Lambda expenses.
 
 1. Understand the Cost-Metrics Relationship:
-    - The length and memory allocation of your Lambda functions directly impact your AWS account. Monitoring these parameters allows you to balance performance and cost.
-    - By monitoring duration with CloudWatch Logs Insights, you may minimize execution time and ultimately reduce Lambda expenses.
+   - The length and memory allocation of your Lambda functions directly impact your AWS account. Monitoring these parameters allows you to balance performance and cost.
+   - By monitoring duration with CloudWatch Logs Insights, you may minimize execution time and ultimately reduce Lambda expenses.
 2. Remove Unused or Inefficient Functions:
-    - Some Lambda functions may receive infrequent calls or perform poorly.
-    - Use CloudWatch analytics to detect underutilized functions and consider deactivating or redesigning them to reduce expenses.
-    
-    CloudWatch Query to Identify Low-Utilization Functions:
-    
-    ```sql
-    filter @type = "REPORT"
-    | stats count() as invocationCount by @logStream
-    | filter invocationCount < 10
-    ```
-    
+
+   - Some Lambda functions may receive infrequent calls or perform poorly.
+   - Use CloudWatch analytics to detect underutilized functions and consider deactivating or redesigning them to reduce expenses.
+
+   CloudWatch Query to Identify Low-Utilization Functions:
+
+   ```sql
+   filter @type = "REPORT"
+   | stats count() as invocationCount by @logStream
+   | filter invocationCount < 10
+   ```
+
 3. Optimize Function Duration:
-    - The shorter your function runs, the less you'll pay. Use monitoring tools such as X-Ray to discover long-running functions and determine why they are taking so long.
-    - For example, slow database calls or external API requests can frequently be improved to minimize execution time and cost.
+   - The shorter your function runs, the less you'll pay. Use monitoring tools such as X-Ray to discover long-running functions and determine why they are taking so long.
+   - For example, slow database calls or external API requests can frequently be improved to minimize execution time and cost.
 4. Implement Auto-Scaling Policies:
-    - CloudWatch Alarms can trigger scaling actions when specific thresholds are hit, guaranteeing adequate concurrency without overpaying.
-    - You can utilize Provisioned Concurrency for predictable workloads and auto-scaling for demand spikes.
-    
-    Example Auto-Scaling Command for Provisioned Concurrency:
-    
-    ```bash
-    aws application-autoscaling register-scalable-target \\
-        --service-namespace lambda \\
-        --resource-id function:my-function \\
-        --scalable-dimension lambda:function:ProvisionedConcurrency \\
-        --min-capacity 1 \\
-        --max-capacity 10
-    ```
-    
+
+   - CloudWatch Alarms can trigger scaling actions when specific thresholds are hit, guaranteeing adequate concurrency without overpaying.
+   - You can utilize Provisioned Concurrency for predictable workloads and auto-scaling for demand spikes.
+
+   Example Auto-Scaling Command for Provisioned Concurrency:
+
+   ```bash
+   aws application-autoscaling register-scalable-target \\
+       --service-namespace lambda \\
+       --resource-id function:my-function \\
+       --scalable-dimension lambda:function:ProvisionedConcurrency \\
+       --min-capacity 1 \\
+       --max-capacity 10
+   ```
 
 ## Enhancing Lambda Monitoring with SigNoz
 
@@ -424,44 +413,40 @@ While AWS has powerful built-in monitoring capabilities, third-party solutions s
 Effective AWS Lambda monitoring is critical for ensuring application performance, reducing costs, and swiftly resolving issues. Here are some best practices to help you build a comprehensive and efficient monitoring strategy:
 
 - Use a Multi-Layer Approach:
-    - Relying on a single tool is insufficient. Combine CloudWatch for metric monitoring, AWS X-Ray for tracing, and third-party solutions like SigNoz to gain advanced insights.
-    - Example: Utilize X-Ray to monitor a user's request across several AWS services (like Lambda, API Gateway, and DynamoDB), and CloudWatch to monitor Lambda-specific metrics like duration and memory usage.
+  - Relying on a single tool is insufficient. Combine CloudWatch for metric monitoring, AWS X-Ray for tracing, and third-party solutions like SigNoz to gain advanced insights.
+  - Example: Utilize X-Ray to monitor a user's request across several AWS services (like Lambda, API Gateway, and DynamoDB), and CloudWatch to monitor Lambda-specific metrics like duration and memory usage.
 - Set Up Meaningful Alerts:
-    - Avoid [alert fatigue](https://signoz.io/blog/alert-fatigue/) by setting thresholds that matter. Focus on critical metrics such as error rates, duration, and throttle rates.
-    - Example: Set up a CloudWatch Alarm to notify you when function errors exceed 5%:
-    
-    ```bash
-    aws cloudwatch put-metric-alarm --alarm-name "HighErrorRate" \\
-        --metric-name Errors --namespace AWS/Lambda --statistic Sum \\
-        --period 60 --threshold 5 --comparison-operator GreaterThanThreshold \\
-        --dimensions Name=FunctionName,Value=your-function-name \\
-        --evaluation-periods 1 --alarm-actions arn:aws:sns:region:account-id:your-sns-topic
-    ```
-    
+  - Avoid [alert fatigue](https://signoz.io/blog/alert-fatigue/) by setting thresholds that matter. Focus on critical metrics such as error rates, duration, and throttle rates.
+  - Example: Set up a CloudWatch Alarm to notify you when function errors exceed 5%:
+  ```bash
+  aws cloudwatch put-metric-alarm --alarm-name "HighErrorRate" \\
+      --metric-name Errors --namespace AWS/Lambda --statistic Sum \\
+      --period 60 --threshold 5 --comparison-operator GreaterThanThreshold \\
+      --dimensions Name=FunctionName,Value=your-function-name \\
+      --evaluation-periods 1 --alarm-actions arn:aws:sns:region:account-id:your-sns-topic
+  ```
 - Regularly Review and Update Strategies:
-    - As your application grows and new features are added, your monitoring method should develop. Perform frequent audits on your CloudWatch Logs, custom metrics, and alerts.
-    - Monitor for new types of failures or performance bottlenecks caused by new functionalities.
+  - As your application grows and new features are added, your monitoring method should develop. Perform frequent audits on your CloudWatch Logs, custom metrics, and alerts.
+  - Monitor for new types of failures or performance bottlenecks caused by new functionalities.
 - Incorporate Monitoring into Development:
-    - Monitoring should be an integral part of the development process rather than an afterthought. When creating new Lambda functions, include custom CloudWatch metrics and full X-Ray traces.
-    - Example: Developers can utilize logging and custom metrics to track key events like successful user logins or signups.
-    
-    ```python
-    import boto3
-    cloudwatch = boto3.client('cloudwatch')
-    
-    def lambda_handler(event, context):
-        # Custom metric: User signups
-        cloudwatch.put_metric_data(
-            Namespace='MyApp',
-            MetricData=[{
-                'MetricName': 'UserSignups',
-                'Value': 1,
-                'Unit': 'Count'
-            }]
-        )
-        # Continue with the rest of the Lambda function logic
-    ```
-    
+  - Monitoring should be an integral part of the development process rather than an afterthought. When creating new Lambda functions, include custom CloudWatch metrics and full X-Ray traces.
+  - Example: Developers can utilize logging and custom metrics to track key events like successful user logins or signups.
+  ```python
+  import boto3
+  cloudwatch = boto3.client('cloudwatch')
+
+  def lambda_handler(event, context):
+      # Custom metric: User signups
+      cloudwatch.put_metric_data(
+          Namespace='MyApp',
+          MetricData=[{
+              'MetricName': 'UserSignups',
+              'Value': 1,
+              'Unit': 'Count'
+          }]
+      )
+      # Continue with the rest of the Lambda function logic
+  ```
 
 ## FAQs
 

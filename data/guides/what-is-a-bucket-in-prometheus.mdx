@@ -1,154 +1,169 @@
 ---
-
 title: What is a Bucket in Prometheus - A Beginner's Guide
-slug: what-is-a-bucket-in-prometheus
 date: 2024-07-30
 tags: [faq, prometheus]
 authors: [ankit_anand]
 description: Discover what buckets are in Prometheus, how they work with histogram metrics, and their crucial role in data aggregation and analysis for effective monitoring.
-keywords: [Prometheus, buckets, histogram metrics, monitoring, data aggregation, metric types, custom configurations]
-
+keywords:
+  [
+    Prometheus,
+    buckets,
+    histogram metrics,
+    monitoring,
+    data aggregation,
+    metric types,
+    custom configurations,
+  ]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "What is a bucket in Prometheus - A Beginner's Guide",
-    "alternativeHeadline": "Understanding Buckets in Prometheus and Their Role in Histogram Metrics",
-    "author": {
-      "@type": "Person",
-      "name": "Ankit Anand"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-30T00:00:00Z",
-    "dateModified": "2024-07-30T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/what-is-a-bucket-in-prometheus/"
-    },
-    "description": "Discover what buckets are in Prometheus, how they work with histogram metrics, and their crucial role in data aggregation and analysis for effective monitoring.",
-    "keywords": "Prometheus, buckets, histogram metrics, monitoring, data aggregation, metric types, custom configurations",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Prometheus Buckets",
-        "description": "Predefined ranges of values used to categorize and count observations in histogram metrics for efficient data aggregation and analysis."
-      },
-      {
-        "@type": "Thing",
-        "name": "Histogram Metrics",
-        "description": "Metrics that sample observations and count them in configurable buckets to understand the distribution of values."
-      },
-      {
-        "@type": "Thing",
-        "name": "Data Aggregation",
-        "description": "The process of collecting and summarizing data to provide insights and facilitate analysis."
-      },
-      {
-        "@type": "Thing",
-        "name": "Monitoring",
-        "description": "The practice of observing and checking the performance and health of systems over time."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What's the difference between Prometheus histograms and summaries?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Histograms use predefined buckets to track value distributions, while summaries calculate quantiles over a sliding time window. Histograms are more efficient for aggregation across multiple instances, but summaries provide more accurate quantiles for a single instance."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: "What is a bucket in Prometheus - A Beginner's Guide",
+        alternativeHeadline:
+          'Understanding Buckets in Prometheus and Their Role in Histogram Metrics',
+        author: {
+          '@type': 'Person',
+          name: 'Ankit Anand',
         },
-        {
-          "@type": "Question",
-          "name": "How do I choose the right bucket boundaries for my use case?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Consider your metric's expected range and the level of detail needed. Start with a broad range and refine based on observed data. Focus on critical thresholds relevant to your application's performance or SLAs."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "Can I change bucket configurations after metrics have been collected?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "You can change bucket configurations, but it will only affect new data. Existing data will remain in the old bucket structure. For significant changes, consider creating a new metric with the updated configuration."
-          }
+        datePublished: '2024-07-30T00:00:00Z',
+        dateModified: '2024-07-30T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/what-is-a-bucket-in-prometheus/',
         },
-        {
-          "@type": "Question",
-          "name": "How do Prometheus buckets impact storage and query performance?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "More buckets increase storage requirements and can slow down queries. However, they also provide finer granularity for analysis. Strike a balance between precision and performance based on your specific monitoring needs."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Using Buckets in Prometheus Histograms",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Understand the Basics",
-          "text": "Learn the key concepts of buckets in Prometheus and how they are used in histogram metrics."
+        description:
+          'Discover what buckets are in Prometheus, how they work with histogram metrics, and their crucial role in data aggregation and analysis for effective monitoring.',
+        keywords:
+          'Prometheus, buckets, histogram metrics, monitoring, data aggregation, metric types, custom configurations',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Configure Custom Buckets",
-          "text": "Define custom bucket configurations to better suit your specific use case, focusing on critical value ranges."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Prometheus Buckets',
+            description:
+              'Predefined ranges of values used to categorize and count observations in histogram metrics for efficient data aggregation and analysis.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Histogram Metrics',
+            description:
+              'Metrics that sample observations and count them in configurable buckets to understand the distribution of values.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Data Aggregation',
+            description:
+              'The process of collecting and summarizing data to provide insights and facilitate analysis.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Monitoring',
+            description:
+              'The practice of observing and checking the performance and health of systems over time.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: "What's the difference between Prometheus histograms and summaries?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Histograms use predefined buckets to track value distributions, while summaries calculate quantiles over a sliding time window. Histograms are more efficient for aggregation across multiple instances, but summaries provide more accurate quantiles for a single instance.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I choose the right bucket boundaries for my use case?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "Consider your metric's expected range and the level of detail needed. Start with a broad range and refine based on observed data. Focus on critical thresholds relevant to your application's performance or SLAs.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I change bucket configurations after metrics have been collected?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'You can change bucket configurations, but it will only affect new data. Existing data will remain in the old bucket structure. For significant changes, consider creating a new metric with the updated configuration.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do Prometheus buckets impact storage and query performance?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'More buckets increase storage requirements and can slow down queries. However, they also provide finer granularity for analysis. Strike a balance between precision and performance based on your specific monitoring needs.',
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Implement Practical Applications",
-          "text": "Apply buckets to measure request latencies, monitor system resource utilization, calculate Apdex scores, and aid in capacity planning."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Using Buckets in Prometheus Histograms',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Understand the Basics',
+              text: 'Learn the key concepts of buckets in Prometheus and how they are used in histogram metrics.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Configure Custom Buckets',
+              text: 'Define custom bucket configurations to better suit your specific use case, focusing on critical value ranges.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Implement Practical Applications',
+              text: 'Apply buckets to measure request latencies, monitor system resource utilization, calculate Apdex scores, and aid in capacity planning.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Analyze Bucket Data',
+              text: 'Use the cumulative frequency distributions provided by buckets to gain insights into the performance and behavior of your systems.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Optimize Performance',
+              text: 'Balance the number of buckets to achieve the right level of granularity while managing storage and query performance effectively.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Analyze Bucket Data",
-          "text": "Use the cumulative frequency distributions provided by buckets to gain insights into the performance and behavior of your systems."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Optimize Performance",
-          "text": "Balance the number of buckets to achieve the right level of granularity while managing storage and query performance effectively."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Prometheus, an open-source monitoring system, uses buckets as a fundamental concept in its data aggregation and analysis. These buckets play a crucial role in histogram metrics, allowing for efficient storage and querying of observed values. This guide explains what buckets are in Prometheus, how they function, and why they're essential for effective monitoring.

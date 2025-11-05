@@ -1,13 +1,17 @@
 ---
-
 title: How to Log Effectively When Using Multiprocessing in Python - A Guide
-slug: how-should-i-log-while-using-multiprocessing-in-python
 date: 2024-08-30
 tags: [faq]
 authors: [soumya_gupta]
 description: Learn how to implement effective logging in Python multiprocessing applications. Discover best practices, advanced techniques, and solutions to common challenges.
-keywords: [Python multiprocessing logging, thread-safe logging, logging performance, multiprocessing challenges, Python logging best practices]
-
+keywords:
+  [
+    Python multiprocessing logging,
+    thread-safe logging,
+    logging performance,
+    multiprocessing challenges,
+    Python logging best practices,
+  ]
 ---
 
 Logging in Python multiprocessing applications presents unique challenges that can trip up even experienced developers. You might find your logs jumbled, incomplete, or worse—corrupted. How do you ensure your logs remain accurate and useful when your code runs across multiple processes? This guide will walk you through the complexities of logging in Python multiprocessing environments, from basic setup to advanced techniques.
@@ -46,10 +50,10 @@ def worker_process(name):
 if __name__ == "__main__":
     # Set up logging for the main process
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(processName)s - %(levelname)s - %(message)s')]
-    
+
     # Set up multiprocessing logging
     multiprocessing.log_to_stderr(logging.INFO)
-    
+
     processes = []
     for i in range(3):
         p = multiprocessing.Process(target=worker_process, args=(f"Worker-{i}",))
@@ -86,7 +90,7 @@ All processes have completed.
 [INFO/MainProcess] process shutting down
 ```
 
-Case 2: Parallel Multi-Process Logging 
+Case 2: Parallel Multi-Process Logging
 
 ```python
 import multiprocessing
@@ -105,7 +109,7 @@ def worker_process(name):
 if __name__ == "__main__":
     # Set up logging for the main process
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(processName)s - %(levelname)s - %(message)s')
-    
+
     # Set up multiprocessing logging
     multiprocessing.log_to_stderr(logging.INFO)
 
@@ -143,7 +147,7 @@ All processes have completed.
 [INFO/MainProcess] process shutting down
 ```
 
-   In both the cases, the `worker_process` function logs the start and finish times along with the duration of each process. For sequential execution, processes are started one by one and completed before the next starts, ensuring no overlap, while in parallel execution, processes start concurrently, showing overlapping log timestamps. Logging is configured using `logging.basicConfig` and `multiprocessing.log_to_stderr` to handle output from multiple processes. Sequential execution waits for each process to finish using `p.join()`, while parallel execution allows all processes to run simultaneously, with logs indicating their concurrent operation. This approach leverages the built-in capabilities of the multiprocessing module to ensure that logging is handled correctly across multiple processes. 
+In both the cases, the `worker_process` function logs the start and finish times along with the duration of each process. For sequential execution, processes are started one by one and completed before the next starts, ensuring no overlap, while in parallel execution, processes start concurrently, showing overlapping log timestamps. Logging is configured using `logging.basicConfig` and `multiprocessing.log_to_stderr` to handle output from multiple processes. Sequential execution waits for each process to finish using `p.join()`, while parallel execution allows all processes to run simultaneously, with logs indicating their concurrent operation. This approach leverages the built-in capabilities of the multiprocessing module to ensure that logging is handled correctly across multiple processes.
 
 Best Practices for Basic Multiprocessing Logging:
 
@@ -154,7 +158,7 @@ Best Practices for Basic Multiprocessing Logging:
 
 ## Deep Dive: Advanced Logging Techniques for Multiprocessing
 
-A queue-based logging system makes things run smoother, especially in more complex scenarios. Unlike the direct logging approach, we just read about in the previous section, where each process logs its messages independently. This can lead to logging conflicts and inefficiencies, the queue-based method centralizes everything. 
+A queue-based logging system makes things run smoother, especially in more complex scenarios. Unlike the direct logging approach, we just read about in the previous section, where each process logs its messages independently. This can lead to logging conflicts and inefficiencies, the queue-based method centralizes everything.
 
 Each worker process sends its log messages to a shared queue. Then, a dedicated logging thread or process takes care of pulling messages from the queue and writing them out. This setup avoids the chaos of multiple processes trying to log at the same time and improves efficiency by separating the generation of logs from their actual writing. In contrast to the multi-threading approach, where log writing can still cause problems if multiple threads are logging simultaneously, the queue-based system ensures orderly and efficient log handling by managing all logs through a single channel.
 
@@ -231,7 +235,7 @@ if __name__ == "__main__":
 
 ```
 
-This setup uses a `QueueHandler` to send log records to a separate logging process. The logging process receives records from the queue and writes them to the desired output. 
+This setup uses a `QueueHandler` to send log records to a separate logging process. The logging process receives records from the queue and writes them to the desired output.
 
 ### Configuring Formatters and Handlers for Multiprocessing Logs
 
@@ -275,142 +279,140 @@ When working with multiprocessing logging, you might encounter several common is
 
 1. Log Message Overlap: Use a queue-based logging system to centralize log writing and prevent overlap.
 2. Missing Log Entries: Ensure that all processes are properly closing their log handlers before exiting.
-    
-    ```python
-    try:
-        # Your processing logic
-    finally:
-        logger.handlers.clear()  # Close and flush handlers
-    ```
-    
+
+   ```python
+   try:
+       # Your processing logic
+   finally:
+       logger.handlers.clear()  # Close and flush handlers
+   ```
+
 3. Performance Bottlenecks: If logging slows down your application, consider using asynchronous logging or reducing log verbosity.
-    
-    ```python
-    # Asynchronous logging
-    queue_handler = QueueHandler(log_queue)
-    logger.addHandler(queue_handler)
-    
-    # Reducing verbosity
-    logger.setLevel(logging.WARNING)  # Adjust level to reduce logging overhead
-    ```
-    
+
+   ```python
+   # Asynchronous logging
+   queue_handler = QueueHandler(log_queue)
+   logger.addHandler(queue_handler)
+
+   # Reducing verbosity
+   logger.setLevel(logging.WARNING)  # Adjust level to reduce logging overhead
+   ```
+
 4. Logging Failures in Child Processes: Implement error handling in your logging code to catch and report any logging-related exceptions.
-    
-    ```python
-    try:
-        logger.info("Processing data")
-    except Exception as e:
-        logger.error(f"Logging failed: {e}")
-    ```
-    
+
+   ```python
+   try:
+       logger.info("Processing data")
+   except Exception as e:
+       logger.error(f"Logging failed: {e}")
+   ```
 
 To debug logging issues:
 
 1. Temporarily increase log verbosity to capture more details. This helps in diagnosing issues by providing more context around the operations leading to the problem. In production, it's best to configure your logging system to exclude debug logs as it can lead to several problems such as performance overhead, security risks and increase log storage. To exclude debug logs set the log level to `INFO` or higher.
-    
-    ```python
-    logger.setLevel(logging.DEBUG)
-    ```
-    
+
+   ```python
+   logger.setLevel(logging.DEBUG)
+   ```
+
 2. Use process and thread IDs in log messages to trace the source of problematic logs. This is especially useful when logs from multiple processes are being handled by a centralized logger, as it allows you to trace back the source of problematic logs.
-    
-    ```python
-    formatter = logging.Formatter('%(asctime)s - %(process)d - %(thread)d - %(message)s')
-    handler.setFormatter(formatter)
-    ```
-    
+
+   ```python
+   formatter = logging.Formatter('%(asctime)s - %(process)d - %(thread)d - %(message)s')
+   handler.setFormatter(formatter)
+   ```
+
 3. Implement a try-except block around logging calls to catch and report any logging exceptions. This can help prevent your application from crashing due to logging failures and ensures that you are aware of any issues that might be affecting log generation.
-    
-    ```python
-    try:
-        logger.debug("Debugging message")
-    except Exception as e:
-        print(f"Logging error: {e}")
-    ```
-    
+
+   ```python
+   try:
+       logger.debug("Debugging message")
+   except Exception as e:
+       print(f"Logging error: {e}")
+   ```
+
 4. Monitor Resource Usage during logging. Excessive logging can lead to increased CPU and memory usage, which might impact the performance of your application.
-    
-    ```python
-    import psutil
-    
-    memory_usage = psutil.Process().memory_info().rss
-    cpu_usage = psutil.cpu_percent()
-    logger.debug(f"Memory usage: {memory_usage}, CPU usage: {cpu_usage}%")
-    ```
-    
+
+   ```python
+   import psutil
+
+   memory_usage = psutil.Process().memory_info().rss
+   cpu_usage = psutil.cpu_percent()
+   logger.debug(f"Memory usage: {memory_usage}, CPU usage: {cpu_usage}%")
+   ```
+
 5. Test in Isolated Environments by running minimal processes for easier debugging. This can make it easier to replicate and identify issues without the noise of a fully operational system.
-    
-    ```python
-    # For Example: To run only 2 processes for isolated testing
-    for i in range(2):
-        p = multiprocessing.Process(target=your_function)
-        p.start()
-    ```
-    
+
+   ```python
+   # For Example: To run only 2 processes for isolated testing
+   for i in range(2):
+       p = multiprocessing.Process(target=your_function)
+       p.start()
+   ```
 
 ## Optimizing Logging Performance in Multiprocessing Applications
 
 Logging can significantly impact the performance of your multiprocessing application. Here are some strategies to optimize logging performance:
 
-1. Use Asynchronous Logging: Implement a separate logging process to handle log writing asynchronously. This decouples logging from your main processing tasks, reducing the impact on performance. Let’s take an example: 
-    
-    ```python
-    import logging
-    import concurrent.futures
-    import time
-    import queue
-    
-    # Create a logger
-    logger = logging.getLogger('AsyncLogger')
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    
-    # Console handler for the logger
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-    
-    # Queue to hold log messages
-    log_queue = queue.Queue()
-    
-    # Thread function to write log messages from the queue
-    def log_writer():
-        while True:
-            message = log_queue.get()
-            if message is None:  # Sentinel value to shut down the thread
-                break
-            logger.log(message['level'], message['msg'])
-    
-    # Function to add a log message to the queue
-    def async_log(level, msg):
-        log_queue.put({'level': level, 'msg': msg})
-    
-    # Start the log writer thread
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(log_writer)
-    
-        # Main application code
-        for i in range(5):
-            async_log(logging.INFO, f'Log message {i}')
-            time.sleep(0.1)  # Simulate some work
-    
-        # Shutdown the log writer
-        log_queue.put(None)  # Send shutdown signal
-        future.result()  # Wait for the log writer thread to finish
-    ```
-    
-    Output: 
-    
-    ```python
-    2024-08-28 12:40:46,762 - AsyncLogger - INFO - Log message 0
-    2024-08-28 12:40:46,862 - AsyncLogger - INFO - Log message 1
-    2024-08-28 12:40:46,963 - AsyncLogger - INFO - Log message 2
-    2024-08-28 12:40:47,064 - AsyncLogger - INFO - Log message 3
-    2024-08-28 12:40:47,165 - AsyncLogger - INFO - Log message 4
-    ```
-    
-    This example uses Python's `concurrent.futures` and queue for efficient asynchronous logging. The `async_log` function adds messages to a queue, acting as a buffer between main tasks and logging. A separate thread, managed by `ThreadPoolExecutor`, runs the `log_writer` function, which continuously processes messages from the queue and writes them using the logger. The future object ensures that all log messages are processed before the application exits, with `future.result()` used to wait for the logging thread to complete after receiving a shutdown signal `(None)`. This setup keeps the main loop unblocked by logging operations, ensuring smooth application performance.
-    
+1. Use Asynchronous Logging: Implement a separate logging process to handle log writing asynchronously. This decouples logging from your main processing tasks, reducing the impact on performance. Let’s take an example:
+
+   ```python
+   import logging
+   import concurrent.futures
+   import time
+   import queue
+
+   # Create a logger
+   logger = logging.getLogger('AsyncLogger')
+   logger.setLevel(logging.DEBUG)
+   formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+   # Console handler for the logger
+   console_handler = logging.StreamHandler()
+   console_handler.setFormatter(formatter)
+   logger.addHandler(console_handler)
+
+   # Queue to hold log messages
+   log_queue = queue.Queue()
+
+   # Thread function to write log messages from the queue
+   def log_writer():
+       while True:
+           message = log_queue.get()
+           if message is None:  # Sentinel value to shut down the thread
+               break
+           logger.log(message['level'], message['msg'])
+
+   # Function to add a log message to the queue
+   def async_log(level, msg):
+       log_queue.put({'level': level, 'msg': msg})
+
+   # Start the log writer thread
+   with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+       future = executor.submit(log_writer)
+
+       # Main application code
+       for i in range(5):
+           async_log(logging.INFO, f'Log message {i}')
+           time.sleep(0.1)  # Simulate some work
+
+       # Shutdown the log writer
+       log_queue.put(None)  # Send shutdown signal
+       future.result()  # Wait for the log writer thread to finish
+   ```
+
+   Output:
+
+   ```python
+   2024-08-28 12:40:46,762 - AsyncLogger - INFO - Log message 0
+   2024-08-28 12:40:46,862 - AsyncLogger - INFO - Log message 1
+   2024-08-28 12:40:46,963 - AsyncLogger - INFO - Log message 2
+   2024-08-28 12:40:47,064 - AsyncLogger - INFO - Log message 3
+   2024-08-28 12:40:47,165 - AsyncLogger - INFO - Log message 4
+   ```
+
+   This example uses Python's `concurrent.futures` and queue for efficient asynchronous logging. The `async_log` function adds messages to a queue, acting as a buffer between main tasks and logging. A separate thread, managed by `ThreadPoolExecutor`, runs the `log_writer` function, which continuously processes messages from the queue and writes them using the logger. The future object ensures that all log messages are processed before the application exits, with `future.result()` used to wait for the logging thread to complete after receiving a shutdown signal `(None)`. This setup keeps the main loop unblocked by logging operations, ensuring smooth application performance.
+
 2. Batch Log Messages: Instead of writing each log message immediately, batch multiple messages and write them together. It reduces the number of I/O operations by writing multiple log messages at once instead of individually.
 3. Implement Log Levels: Use appropriate log levels to control the amount of information logged in production environments. This helps to minimize the performance impact of logging by avoiding unnecessary log entries.
 4. Use Memory Handlers: For high-throughput scenarios, consider using `MemoryHandler` to buffer log records in memory before flushing to disk. This can significantly reduce the frequency of I/O operations, improving performance.
@@ -514,11 +516,11 @@ app = Flask(__name__)
 def worker_process(worker_id):
     logger = logging.getLogger(f"Worker-{worker_id}")
     logger.info(f"Worker {worker_id} started")
-    
+
     for _ in range(5):
         time.sleep(random.uniform(0.5, 2))
         logger.info(f"Worker {worker_id} is processing")
-    
+
     logger.info(f"Worker {worker_id} finished")
 
 @app.route('/')
@@ -529,10 +531,10 @@ def trigger_workers():
         p = multiprocessing.Process(target=worker_process, args=(i,))
         processes.append(p)
         p.start()
-    
+
     for p in processes:
         p.join()
-    
+
     return "Workers completed their tasks. Check the logs!"
 
 if __name__ == '__main__':
@@ -570,10 +572,20 @@ Viewing Logs
 After running your application and generating some logs:
 
 1. Check your terminal to see the logs printed to the console.
-    
-    <Figure src="/img/guides/2024/08/how-should-i-log-while-using-multiprocessing-in-python-CleanShot_2024-08-30_at_14.28.512x.webp" alt="" caption="" />2. Log in to your SigNoz dashboard to view the logs sent to SigNoz.
-    
-    <Figure src="/img/guides/2024/08/how-should-i-log-while-using-multiprocessing-in-python-CleanShot_2024-08-30_at_14.29.482x.webp" alt="" caption="" />You should now see your application logs both in the terminal and in the SigNoz dashboard.
+
+   <Figure
+     src="/img/guides/2024/08/how-should-i-log-while-using-multiprocessing-in-python-CleanShot_2024-08-30_at_14.28.512x.webp"
+     alt=""
+     caption=""
+   />
+   2. Log in to your SigNoz dashboard to view the logs sent to SigNoz.
+
+   <Figure
+     src="/img/guides/2024/08/how-should-i-log-while-using-multiprocessing-in-python-CleanShot_2024-08-30_at_14.29.482x.webp"
+     alt=""
+     caption=""
+   />
+   You should now see your application logs both in the terminal and in the SigNoz dashboard.
 
 ## Key Takeaways
 

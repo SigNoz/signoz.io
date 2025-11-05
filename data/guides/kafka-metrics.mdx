@@ -1,16 +1,22 @@
 ---
-
 title: Mastering Kafka Metrics - A Comprehensive Guide
-slug: kafka-metrics
 date: 2024-12-05
 tags: [monitoring]
 authors: [bhavya_sachdeva]
 description: Dive deep into Kafka metrics with our comprehensive guide. Learn essential broker, producer, consumer, and ZooKeeper metrics for optimal performance monitoring.
-keywords: [Kafka metrics, performance monitoring, broker metrics, consumer metrics, producer metrics, ZooKeeper metrics, Kafka optimization]
-
+keywords:
+  [
+    Kafka metrics,
+    performance monitoring,
+    broker metrics,
+    consumer metrics,
+    producer metrics,
+    ZooKeeper metrics,
+    Kafka optimization,
+  ]
 ---
 
-Apache Kafka is a cornerstone of modern data streaming architectures, acting as the backbone for real-time analytics, event-driven systems, and data pipelines. But even the most robust systems require diligent monitoring to perform at their best, and Kafka is no exception. To ensure smooth operations, Kafka metrics are like the health check for your Kafka cluster. They keep track of how everything is running, spotting any issues early so you can fix them before they become bigger problems. 
+Apache Kafka is a cornerstone of modern data streaming architectures, acting as the backbone for real-time analytics, event-driven systems, and data pipelines. But even the most robust systems require diligent monitoring to perform at their best, and Kafka is no exception. To ensure smooth operations, Kafka metrics are like the health check for your Kafka cluster. They keep track of how everything is running, spotting any issues early so you can fix them before they become bigger problems.
 
 This guide explores Kafka metrics in detail, their importance, and how they can be leveraged to maintain optimal cluster management. Think of Kafka metrics as the dashboard indicators in a car—they keep you informed about engine health, fuel levels, and performance, allowing you to act before a problem stalls the journey.
 
@@ -21,21 +27,20 @@ Kafka metrics are quantitative indicators that offer a real-time view of how you
 ### Why Do Kafka Metrics Matter?
 
 1. Monitoring Cluster Health
-    
-    Imagine running a manufacturing plant—machines must be checked regularly to avoid sudden breakdowns. Kafka metrics allow you to monitor your cluster's "machines" (brokers, producers, consumers) to detect and resolve issues before they disrupt operations.
-    
+
+   Imagine running a manufacturing plant—machines must be checked regularly to avoid sudden breakdowns. Kafka metrics allow you to monitor your cluster's "machines" (brokers, producers, consumers) to detect and resolve issues before they disrupt operations.
+
 2. Optimizing Performance
-    
-    Performance tuning is like fine-tuning a musical instrument; every adjustment affects the harmony. Kafka metrics help identify bottlenecks or inefficiencies, allowing you to optimize configurations for smoother performance and better throughput.
-    
+
+   Performance tuning is like fine-tuning a musical instrument; every adjustment affects the harmony. Kafka metrics help identify bottlenecks or inefficiencies, allowing you to optimize configurations for smoother performance and better throughput.
+
 3. Capacity Planning
-    
-    Think of Kafka metrics as the load gauge on a bridge. They help you understand current usage and predict when additional capacity will be needed to handle increased loads. This proactive approach ensures your cluster can scale seamlessly as demands grow.
-    
+
+   Think of Kafka metrics as the load gauge on a bridge. They help you understand current usage and predict when additional capacity will be needed to handle increased loads. This proactive approach ensures your cluster can scale seamlessly as demands grow.
+
 4. Efficient Troubleshooting
-    
-    When issues arise, metrics act as the breadcrumbs leading to the root cause. Just as a mechanic uses diagnostic codes to identify car issues, Kafka metrics pinpoint where a problem lies, reducing downtime and simplifying fixes.
-    
+
+   When issues arise, metrics act as the breadcrumbs leading to the root cause. Just as a mechanic uses diagnostic codes to identify car issues, Kafka metrics pinpoint where a problem lies, reducing downtime and simplifying fixes.
 
 Kafka metrics fall into four main categories:
 
@@ -53,13 +58,13 @@ This metric represents the total number of active brokers in the Kafka cluster.
 ### Why Monitor This Metric?
 
 1. Cluster Stability:
-    - A drop in the broker count indicates that one or more brokers have become unresponsive or gone offline.
-    - It is crucial to maintain the expected broker count to ensure data availability and fault tolerance.
+   - A drop in the broker count indicates that one or more brokers have become unresponsive or gone offline.
+   - It is crucial to maintain the expected broker count to ensure data availability and fault tolerance.
 2. Replication and Partition Distribution:
-    - A decrease in brokers impacts partition replication and may lead to an increase in under-replicated partitions.
-    - Uneven partition distribution can arise when brokers go offline, affecting performance.
+   - A decrease in brokers impacts partition replication and may lead to an increase in under-replicated partitions.
+   - Uneven partition distribution can arise when brokers go offline, affecting performance.
 3. Detect Failures Early:
-    - Monitoring this metric helps detect and address broker crashes or connectivity failures.
+   - Monitoring this metric helps detect and address broker crashes or connectivity failures.
 
 ### Recommended Actions:
 
@@ -74,17 +79,17 @@ This metric measures the time taken to handle requests in the Kafka cluster.
 ### Why Monitor This Metric?
 
 1. Identify Latency Issues:
-    - High request times indicate delays in processing producer, consumer, or admin requests, which could lead to bottlenecks.
+   - High request times indicate delays in processing producer, consumer, or admin requests, which could lead to bottlenecks.
 2. Detect Resource Constraints:
-    - Spikes in request times might suggest insufficient broker resources (CPU, memory, disk I/O).
+   - Spikes in request times might suggest insufficient broker resources (CPU, memory, disk I/O).
 3. Monitor Cluster Performance:
-    - Persistent high request times may result in delayed message delivery, affecting downstream systems.
+   - Persistent high request times may result in delayed message delivery, affecting downstream systems.
 
 ### No Data Scenario:
 
 - If no data is shown for request times, it may mean that either:
-    - No significant requests were made during the monitoring period.
-    - The monitoring system might not be capturing this metric due to misconfiguration.
+  - No significant requests were made during the monitoring period.
+  - The monitoring system might not be capturing this metric due to misconfiguration.
 
 ### Recommended Actions:
 
@@ -99,14 +104,14 @@ These metrics represent the rate of incoming and outgoing network traffic in byt
 ### Why Are These Metrics Important?
 
 1. Cluster Throughput Assessment:
-    - BytesInPerSec reflects the amount of data being produced to the cluster.
-    - BytesOutPerSec indicates the data consumed from the cluster.
-    - Together, they provide a measure of the cluster's throughput, helping you evaluate whether the brokers can handle the current workload.
+   - BytesInPerSec reflects the amount of data being produced to the cluster.
+   - BytesOutPerSec indicates the data consumed from the cluster.
+   - Together, they provide a measure of the cluster's throughput, helping you evaluate whether the brokers can handle the current workload.
 2. Identify Network Bottlenecks:
-    - Sudden spikes in traffic can overwhelm network interfaces, leading to message delivery delays or dropped messages.
-    - A persistent high value may suggest the need to optimize the network setup or upgrade bandwidth.
+   - Sudden spikes in traffic can overwhelm network interfaces, leading to message delivery delays or dropped messages.
+   - A persistent high value may suggest the need to optimize the network setup or upgrade bandwidth.
 3. Capacity Planning:
-    - Monitoring these metrics over time enables proactive planning for network upgrades to accommodate future traffic growth.
+   - Monitoring these metrics over time enables proactive planning for network upgrades to accommodate future traffic growth.
 
 ### Recommended Actions:
 
@@ -121,13 +126,13 @@ This metric tracks the number of messages produced to the cluster per second.
 ### Why Is This Metric Important?
 
 1. Understand Processing Capacity:
-    - Monitoring MessagesInPerSec helps gauge your cluster's ability to handle the current load of incoming messages.
-    - A consistently high rate could indicate the need to scale up resources.
+   - Monitoring MessagesInPerSec helps gauge your cluster's ability to handle the current load of incoming messages.
+   - A consistently high rate could indicate the need to scale up resources.
 2. Identify Traffic Anomalies:
-    - A sudden spike might indicate a new producer sending excessive messages, while a drop could signal producer issues or reduced application activity.
+   - A sudden spike might indicate a new producer sending excessive messages, while a drop could signal producer issues or reduced application activity.
 3. Correlate with Other Metrics:
-    - When analyzed alongside BytesInPerSec, it provides insights into the size of incoming messages.
-    - A high MessagesInPerSec with low BytesInPerSec might mean smaller message payloads, while the reverse indicates larger payloads.
+   - When analyzed alongside BytesInPerSec, it provides insights into the size of incoming messages.
+   - A high MessagesInPerSec with low BytesInPerSec might mean smaller message payloads, while the reverse indicates larger payloads.
 
 ### Recommended Actions:
 
@@ -152,18 +157,18 @@ This metric indicates the number of active controllers in the Kafka cluster. Kaf
 ### Why It Matters:
 
 1. Cluster Coordination:
-    - The controller manages the cluster's metadata and ensures synchronization between brokers.
-    - Multiple active controllers can lead to split-brain scenarios, where conflicting states arise between brokers.
+   - The controller manages the cluster's metadata and ensures synchronization between brokers.
+   - Multiple active controllers can lead to split-brain scenarios, where conflicting states arise between brokers.
 2. Cluster Availability:
-    - If no active controller exists, Kafka cannot handle partition leadership changes or other administrative tasks, which can cause outages.
+   - If no active controller exists, Kafka cannot handle partition leadership changes or other administrative tasks, which can cause outages.
 3. High Availability:
-    - An active controller ensures that leader elections and partition assignments are performed efficiently during broker failures.
+   - An active controller ensures that leader elections and partition assignments are performed efficiently during broker failures.
 
 ### Recommended Actions:
 
 - If ActiveControllerCount is not 1, check:
-    - The health of ZooKeeper (or KRaft, if used) as it manages controller elections.
-    - Broker logs for errors indicating controller election failures.
+  - The health of ZooKeeper (or KRaft, if used) as it manages controller elections.
+  - Broker logs for errors indicating controller election failures.
 - Configure proper timeouts for controller elections in Kafka settings (`zookeeper.session.timeout.ms`).
 
 ### 2. OfflinePartitionsCount
@@ -179,17 +184,17 @@ This metric tracks the number of partitions that are unavailable for reads or wr
 ### Why It Matters:
 
 1. Data Availability:
-    - Offline partitions cannot process messages, causing disruptions for producers and consumers.
+   - Offline partitions cannot process messages, causing disruptions for producers and consumers.
 2. Risk of Data Loss:
-    - Persistent offline partitions can lead to message loss if the cluster cannot replicate the missing data.
+   - Persistent offline partitions can lead to message loss if the cluster cannot replicate the missing data.
 3. Cluster Imbalance:
-    - Offline partitions often indicate broker failures or issues with partition replication.
+   - Offline partitions often indicate broker failures or issues with partition replication.
 
 ### Recommended Actions:
 
 - Investigate the cause of offline partitions:
-    - Check broker logs for errors related to storage, memory, or network failures.
-    - Ensure that brokers hosting the partitions are online and reachable.
+  - Check broker logs for errors related to storage, memory, or network failures.
+  - Ensure that brokers hosting the partitions are online and reachable.
 - Review replication factors and ensure that critical topics have sufficient redundancy.
 - Set up alerts for non-zero OfflinePartitionsCount to address issues promptly.
 
@@ -206,17 +211,17 @@ This metric shows the frequency of leadership changes for partitions in the Kafk
 ### Why It Matters:
 
 1. Cluster Stability:
-    - Frequent leader elections indicate instability caused by broker failures, high network latency, or misconfigurations.
+   - Frequent leader elections indicate instability caused by broker failures, high network latency, or misconfigurations.
 2. Performance Impact:
-    - Leadership changes disrupt partition processing temporarily, increasing producer and consumer latencies.
+   - Leadership changes disrupt partition processing temporarily, increasing producer and consumer latencies.
 3. Configuration Issues:
-    - Misconfigured timeout settings can lead to premature leader elections, even when brokers are healthy.
+   - Misconfigured timeout settings can lead to premature leader elections, even when brokers are healthy.
 
 ### Recommended Actions:
 
 - Identify and resolve causes of frequent leader elections:
-    - Check broker logs for errors indicating failures or network connectivity issues.
-    - Review timeout settings (`session.timeout.ms` and `heartbeat.interval.ms`) to prevent unnecessary leader changes.
+  - Check broker logs for errors indicating failures or network connectivity issues.
+  - Review timeout settings (`session.timeout.ms` and `heartbeat.interval.ms`) to prevent unnecessary leader changes.
 - Scale the cluster if frequent elections occur due to resource contention.
 
 ### 4. UncleanLeaderElectionsPerSec
@@ -232,18 +237,18 @@ This metric tracks the rate of unclean leader elections in the cluster. An uncle
 ### Why It Matters:
 
 1. Data Consistency:
-    - An unclean leader election can result in data loss because the new leader may not have the latest data.
+   - An unclean leader election can result in data loss because the new leader may not have the latest data.
 2. Cluster Reliability:
-    - Frequent unclean elections indicate serious issues with replication, such as insufficient ISRs or slow replica recovery.
+   - Frequent unclean elections indicate serious issues with replication, such as insufficient ISRs or slow replica recovery.
 3. Replication Settings:
-    - Misconfigured replication settings (e.g., low replication factors or incorrect `min.insync.replicas`) increase the risk of unclean elections.
+   - Misconfigured replication settings (e.g., low replication factors or incorrect `min.insync.replicas`) increase the risk of unclean elections.
 
 ### Recommended Actions:
 
 - Prevent unclean elections:
-    - Set `unclean.leader.election.enable=false` to disable unclean elections entirely.
-    - Increase replication factors for critical topics to ensure more ISRs are available.
-    - Ensure brokers have sufficient resources (CPU, memory, disk I/O) to handle replication efficiently.
+  - Set `unclean.leader.election.enable=false` to disable unclean elections entirely.
+  - Increase replication factors for critical topics to ensure more ISRs are available.
+  - Ensure brokers have sufficient resources (CPU, memory, disk I/O) to handle replication efficiently.
 - Monitor replication lag and troubleshoot brokers with slow replicas.
 
 ## Critical Kafka Producer Metrics for Optimal Performance
@@ -349,21 +354,20 @@ This metric shows the total number of znodes in your ZooKeeper ensemble. Monitor
 Effective monitoring requires proper collection and visualization of Kafka metrics. Here's how you can set it up:
 
 1. Use JMX for Kafka Metrics
-    
-    Kafka exposes metrics via JMX (Java Management Extensions) by default. Ensure your Kafka brokers are configured to enable remote JMX connections.
-    
+
+   Kafka exposes metrics via JMX (Java Management Extensions) by default. Ensure your Kafka brokers are configured to enable remote JMX connections.
+
 2. Collect Metrics with SigNoz
-    
-    SigNoz provides built-in support for collecting Kafka metrics seamlessly. Set up SigNoz to ingest these metrics through its [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)-based architecture.
-    
+
+   SigNoz provides built-in support for collecting Kafka metrics seamlessly. Set up SigNoz to ingest these metrics through its [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)-based architecture.
+
 3. Visualize Metrics in SigNoz
-    
-    Leverage SigNoz's intuitive dashboards to monitor Kafka metrics in real-time. These dashboards are customizable, allowing you to focus on the metrics most critical to your operations.
-    
+
+   Leverage SigNoz's intuitive dashboards to monitor Kafka metrics in real-time. These dashboards are customizable, allowing you to focus on the metrics most critical to your operations.
+
 4. Configure Alerts in SigNoz
-    
-    Set up intelligent alerts in SigNoz to notify your team when key Kafka metrics exceed predefined thresholds. This ensures proactive identification and resolution of potential issues.
-    
+
+   Set up intelligent alerts in SigNoz to notify your team when key Kafka metrics exceed predefined thresholds. This ensures proactive identification and resolution of potential issues.
 
 By using SigNoz for Kafka monitoring, you gain a unified solution that combines metric collection, visualization, and alerting with advanced observability capabilities.
 
@@ -383,104 +387,112 @@ To monitor Kafka, ensure your Kafka instance is up and running with proper confi
 ### Kafka Installation:
 
 1. Download Kafka:
-    
-    Obtain the latest <a href="https://kafka.apache.org/downloads" rel="noopener noreferrer nofollow" target="_blank">Kafka release</a> and extract it:
-    
-    ```bash
-    tar -xzf kafka-3.9.0-src.tgz
-    cd kafka-3.9.0-src
-    ```
-    
+
+   Obtain the latest <a href="https://kafka.apache.org/downloads" rel="noopener noreferrer nofollow" target="_blank">Kafka release</a> and extract it:
+
+   ```bash
+   tar -xzf kafka-3.9.0-src.tgz
+   cd kafka-3.9.0-src
+   ```
+
 2. Start ZooKeeper (if not using KRaft):
-    
-    Kafka requires ZooKeeper for managing brokers:
-    
-    ```bash
-    bin/zookeeper-server-start.sh config/zookeeper.properties
-    
-    ```
-    
-    <Figure src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-26_at_8.12.25_AM.webp" alt="" caption="" />3. Configure and Start Two Kafka Brokers:
+
+   Kafka requires ZooKeeper for managing brokers:
+
+   ```bash
+   bin/zookeeper-server-start.sh config/zookeeper.properties
+
+   ```
+
+   <Figure
+     src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-26_at_8.12.25_AM.webp"
+     alt=""
+     caption=""
+   />
+   3. Configure and Start Two Kafka Brokers:
+
 - Copy the default server configuration file and customize it:
-    
-    ```bash
-    cp config/server.properties config/s1.properties
-    
-    ```
-    
+  ```bash
+  cp config/server.properties config/s1.properties
+
+  ```
 - Edit `s1.properties` to set the following:
-    
-    ```
-    broker.id=0
-    listeners=PLAINTEXT://localhost:9092
-    logs.dirs=/tmp/kafka-logs-1
-    zookeeper.connect=localhost:2181
-    ```
-    
+  ```
+  broker.id=0
+  listeners=PLAINTEXT://localhost:9092
+  logs.dirs=/tmp/kafka-logs-1
+  zookeeper.connect=localhost:2181
+  ```
 - Repeat for the second broker (`s2.properties`) with:
-    
-    ```
-    broker.id=1
-    listeners=PLAINTEXT://localhost:9093
-    logs.dirs=/tmp/kafka-logs-2
-    zookeeper.connect=localhost:2181
-    
-    ```
-    
+  ```
+  broker.id=1
+  listeners=PLAINTEXT://localhost:9093
+  logs.dirs=/tmp/kafka-logs-2
+  zookeeper.connect=localhost:2181
+
+  ```
 - Start both brokers in separate terminals:
-    
-    ```bash
-    JMX_PORT=2020 bin/kafka-server-start.sh config/s1.properties
-    JMX_PORT=2021 bin/kafka-server-start.sh config/s2.properties
-    
-    ```
-    
+  ```bash
+  JMX_PORT=2020 bin/kafka-server-start.sh config/s1.properties
+  JMX_PORT=2021 bin/kafka-server-start.sh config/s2.properties
+
+  ```
+
 1.  Create Kafka Topics:
-    
+
     ```bash
     bin/kafka-topics.sh --create --topic topic1 --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2
     bin/kafka-topics.sh --create --topic topic2 --bootstrap-server localhost:9092 --replication-factor 2 --partitions 1
-    
+
     ```
-    
-    <Figure src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-26_at_3.41.20_PM.webp" alt="" caption="" />Verify the setup:
-    
+
+    <Figure
+      src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-26_at_3.41.20_PM.webp"
+      alt=""
+      caption=""
+    />
+    Verify the setup:
+
     ```bash
     bin/kafka-topics.sh --describe --topic topic1 --bootstrap-server localhost:9092
     bin/kafka-topics.sh --describe --topic topic2 --bootstrap-server localhost:9092
     ```
-    
-2. Test Kafka Setup:
-    
+
+2.  Test Kafka Setup:
+
     Produce and consume messages:
-    
+
     ```bash
     bin/kafka-console-producer.sh --topic topic1 --bootstrap-server localhost:9092
     # (Write some messages)
     bin/kafka-console-consumer.sh --topic topic1 --from-beginning --bootstrap-server localhost:9092
-    
+
     ```
-    
-    <Figure src="/img/guides/2024/12/kafka-metrics-f563e248-c0a2-4397-bee5-e9998393c3bb.webp" alt="" caption="" />### Step 2: Install OpenTelemetry Java Agent
+
+    <Figure
+      src="/img/guides/2024/12/kafka-metrics-f563e248-c0a2-4397-bee5-e9998393c3bb.webp"
+      alt=""
+      caption=""
+    />
+    ### Step 2: Install OpenTelemetry Java Agent
 
 Instrument your Kafka clients with OpenTelemetry for traces and metrics.
 
 1. Verify the Java Agent:
-    
-    Ensure the agent file exists:
-    
-    ```bash
-    cd kafka-opentelemetry-instrumentation/opentelemetry-javagent
-    ls | grep opentelemetry-javaagent.jar
-    
-    ```
-    
+
+   Ensure the agent file exists:
+
+   ```bash
+   cd kafka-opentelemetry-instrumentation/opentelemetry-javagent
+   ls | grep opentelemetry-javaagent.jar
+
+   ```
+
 2. (Optional) Download the Latest Agent:
-    
-    ```bash
-    curl -L -o opentelemetry-javaagent.jar https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
-    ```
-    
+
+   ```bash
+   curl -L -o opentelemetry-javaagent.jar https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+   ```
 
 ---
 
@@ -489,125 +501,143 @@ Instrument your Kafka clients with OpenTelemetry for traces and metrics.
 Run the producer and consumer apps with OpenTelemetry instrumentation.
 
 1. Start the Producer App:
-    
-    ```bash
-    java -javaagent:${PWD}/opentelemetry-javagent/opentelemetry-javaagent.jar \
-         -Dotel.service.name=producer-svc \
-         -Dotel.traces.exporter=otlp \
-         -Dotel.metrics.exporter=otlp \
-         -Dotel.logs.exporter=otlp \
-         -jar ${PWD}/kafka-app-otel/kafka-producer/target/kafka-producer-1.0-SNAPSHOT-jar-with-dependencies.jar
-    
-    ```
-    
+
+   ```bash
+   java -javaagent:${PWD}/opentelemetry-javagent/opentelemetry-javaagent.jar \
+        -Dotel.service.name=producer-svc \
+        -Dotel.traces.exporter=otlp \
+        -Dotel.metrics.exporter=otlp \
+        -Dotel.logs.exporter=otlp \
+        -jar ${PWD}/kafka-app-otel/kafka-producer/target/kafka-producer-1.0-SNAPSHOT-jar-with-dependencies.jar
+
+   ```
+
 2. Start the Consumer App:
-    
-    ```bash
-    java -javaagent:${PWD}/opentelemetry-javagent/opentelemetry-javaagent.jar \
-         -Dotel.service.name=consumer-svc \
-         -Dotel.traces.exporter=otlp \
-         -Dotel.metrics.exporter=otlp \
-         -Dotel.logs.exporter=otlp \
-         -Dotel.instrumentation.kafka.producer-propagation.enabled=true \
-         -Dotel.instrumentation.kafka.experimental-span-attributes=true \
-         -Dotel.instrumentation.kafka.metric-reporter.enabled=true \
-         -jar ${PWD}/kafka-app-otel/kafka-consumer/target/kafka-consumer.-1.0-SNAPSHOT-jar-with-dependencies.jar
-    
-    ```
-    
+
+   ```bash
+   java -javaagent:${PWD}/opentelemetry-javagent/opentelemetry-javaagent.jar \
+        -Dotel.service.name=consumer-svc \
+        -Dotel.traces.exporter=otlp \
+        -Dotel.metrics.exporter=otlp \
+        -Dotel.logs.exporter=otlp \
+        -Dotel.instrumentation.kafka.producer-propagation.enabled=true \
+        -Dotel.instrumentation.kafka.experimental-span-attributes=true \
+        -Dotel.instrumentation.kafka.metric-reporter.enabled=true \
+        -jar ${PWD}/kafka-app-otel/kafka-consumer/target/kafka-consumer.-1.0-SNAPSHOT-jar-with-dependencies.jar
+
+   ```
 
 ### Step 4: Install SigNoz
 
 Choose between SigNoz Cloud or a self-hosted deployment for observability.
 
 1. Install SigNoz:
-    
-    Follow the instructions from the [SigNoz documentation](https://signoz.io/docs/install/).
-    
+
+   Follow the instructions from the [SigNoz documentation](https://signoz.io/docs/install/).
+
 2. Configure Kafka Metrics Collection:
-    
-    Set up the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) to push Kafka metrics to SigNoz.
-    
+
+   Set up the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) to push Kafka metrics to SigNoz.
 
 ### Step 5: OpenTelemetry Collector Setup
 
 1. Download the OpenTelemetry Collector:
-    
-    Install the `otelcol-contrib` collector in the root directory of the project kafka-opentelemetry-instrumentation:
-    
-    ```bash
-    wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.114.0/otelcol-contrib_0.114.0_darwin_arm64.tar.gz
-    tar -xzf  otelcol-contrib_0.114.0_darwin_arm64.tar.gz                                                                                         
-    
-    ```
-    
+
+   Install the `otelcol-contrib` collector in the root directory of the project kafka-opentelemetry-instrumentation:
+
+   ```bash
+   wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.114.0/otelcol-contrib_0.114.0_darwin_arm64.tar.gz
+   tar -xzf  otelcol-contrib_0.114.0_darwin_arm64.tar.gz
+
+   ```
+
 2. Use the Provided Configuration:
-    
-    Save the configuration file (`collector/collector-contrib-config.yaml`) to the root directory.
-    
-    Make sure to modify the collector-contrib-config.yaml if you are using SigNoz Cloud:
-    
-    ```jsx
-    receivers:
-      # Read more about kafka metrics receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md
-      kafkametrics:
-        brokers:
-          - localhost:9092
-          - localhost:9093
-          - localhost:9094
-        protocol_version: 2.0.0
-        scrapers:
-          - brokers
-          - topics
-          - consumers
-      # Read more about jmx receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/README.md
-      jmx/1:
-        # configure the path where you installed opentelemetry-jmx-metrics jar
-        jar_path: /Users/bhavyasachdeva/desktop/kafka-opentelemetry-instrumentation/collector/opentelemetry-jmx-metrics.jar #change this to the path to you opentelemetry-jmx-metrics jar file you downloaded above
-        endpoint: service:jmx:rmi:///jndi/rmi://localhost:9991/jmxrmi
-        target_system: jvm,kafka,kafka-consumer,kafka-producer
-        collection_interval: 10s
-        log_level: info
-        resource_attributes:
-          broker.name: broker1
-      jmx/2:
-        jar_path: /Users/bhavyasachdeva/desktop/kafka-opentelemetry-instrumentation/collector/opentelemetry-jmx-metrics.jar
-        endpoint: service:jmx:rmi:///jndi/rmi://localhost:9992/jmxrmi
-        target_system: jvm,kafka,kafka-consumer,kafka-producer
-        collection_interval: 10s
-        log_level: info
-        resource_attributes:
-          broker.name: broker2
-    exporters:
-      otlp:
-        endpoint: "ingest.{region}.signoz.cloud:443"
-        tls:
-          insecure: false
-        headers:
-          "signoz-ingestion-key": "<ingestion-key>"
-      debug:
-        verbosity: detailed
-    
-    service:
-      pipelines:
-        metrics:
-          receivers: [kafkametrics, jmx/1, jmx/2]
-          exporters: [otlp]
-    ```
-    
+
+   Save the configuration file (`collector/collector-contrib-config.yaml`) to the root directory.
+
+   Make sure to modify the collector-contrib-config.yaml if you are using SigNoz Cloud:
+
+   ```jsx
+   receivers:
+     # Read more about kafka metrics receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md
+     kafkametrics:
+       brokers:
+         - localhost:9092
+         - localhost:9093
+         - localhost:9094
+       protocol_version: 2.0.0
+       scrapers:
+         - brokers
+         - topics
+         - consumers
+     # Read more about jmx receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/README.md
+     jmx/1:
+       # configure the path where you installed opentelemetry-jmx-metrics jar
+       jar_path: /Users/bhavyasachdeva/desktop/kafka-opentelemetry-instrumentation/collector/opentelemetry-jmx-metrics.jar #change this to the path to you opentelemetry-jmx-metrics jar file you downloaded above
+       endpoint: service:jmx:rmi:///jndi/rmi://localhost:9991/jmxrmi
+       target_system: jvm,kafka,kafka-consumer,kafka-producer
+       collection_interval: 10s
+       log_level: info
+       resource_attributes:
+         broker.name: broker1
+     jmx/2:
+       jar_path: /Users/bhavyasachdeva/desktop/kafka-opentelemetry-instrumentation/collector/opentelemetry-jmx-metrics.jar
+       endpoint: service:jmx:rmi:///jndi/rmi://localhost:9992/jmxrmi
+       target_system: jvm,kafka,kafka-consumer,kafka-producer
+       collection_interval: 10s
+       log_level: info
+       resource_attributes:
+         broker.name: broker2
+   exporters:
+     otlp:
+       endpoint: "ingest.{region}.signoz.cloud:443"
+       tls:
+         insecure: false
+       headers:
+         "signoz-ingestion-key": "<ingestion-key>"
+     debug:
+       verbosity: detailed
+
+   service:
+     pipelines:
+       metrics:
+         receivers: [kafkametrics, jmx/1, jmx/2]
+         exporters: [otlp]
+   ```
+
 3. Start the Collector:
-    
-    ```bash
-    ./otelcol-contrib --config ${PWD}/collector/collector-contrib-config.yaml
-    ```
-    
-    <Figure src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-28_at_8.33.07_AM.webp" alt="" caption="" />---
+
+   ```bash
+   ./otelcol-contrib --config ${PWD}/collector/collector-contrib-config.yaml
+   ```
+
+   <Figure
+     src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-28_at_8.33.07_AM.webp"
+     alt=""
+     caption=""
+   />
+   ---
 
 ### Step 6: Monitor Kafka in SigNoz
 
 Once you have completed setting up the Kafka environment, configured the OpenTelemetry Collector, and run the producer and consumer applications, it's time to monitor and visualize Kafka metrics in SigNoz.
 
-<Figure src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-26_at_3.38.23_PM.webp" alt="" caption="" /><Figure src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-26_at_3.39.23_PM.webp" alt="" caption="" /><Figure src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-28_at_8.37.53_AM.webp" alt="" caption="" />You can also create alerts based on critical Kafka metrics for proactive issue resolution.
+<Figure
+  src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-26_at_3.38.23_PM.webp"
+  alt=""
+  caption=""
+/>
+<Figure
+  src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-26_at_3.39.23_PM.webp"
+  alt=""
+  caption=""
+/>
+<Figure
+  src="/img/guides/2024/12/kafka-metrics-Screenshot_2024-11-28_at_8.37.53_AM.webp"
+  alt=""
+  caption=""
+/>
+You can also create alerts based on critical Kafka metrics for proactive issue resolution.
 
 SigNoz provides several advantages for Kafka monitoring:
 

@@ -1,13 +1,18 @@
 ---
-
 title: How to Resolve "LoggerFactory.getLogger" Error in Java
-slug: loggerFactory-getLogger-cannot-be-resolved-to-a-type
 date: 2024-09-24
 tags: [logging]
 authors: [sushant_gaurav]
 description: Learn how to fix the "LoggerFactory.getLogger cannot be resolved to a type" error in Java. Comprehensive guide with step-by-step solutions and best practices.
-keywords: [LoggerFactory.getLogger error, Java logging, SLF4J, error resolution, IDE troubleshooting, distributed tracing]
-
+keywords:
+  [
+    LoggerFactory.getLogger error,
+    Java logging,
+    SLF4J,
+    error resolution,
+    IDE troubleshooting,
+    distributed tracing,
+  ]
 ---
 
 Java developers frequently run into the "LoggerFactory.getLogger cannot be resolved to a type" problem while working with logging frameworks, particularly `SLF4J` (Simple Logging Facade for Java). This error might be annoying and interrupt progress due to compilation concerns. To keep your development process on track, you must first analyze the core problems and then implement appropriate remedies. This article includes a thorough description of the error, step-by-step troubleshooting procedures, and recommended practices for Java logging configuration.
@@ -76,27 +81,28 @@ In this example, `LoggerFactory.getLogger` initializes a logger that tags each m
 ### Additional Content to Consider
 
 1. Incorrect Build Settings or Classpaths: Misconfigurations in your project's build file or classpath might cause this issue. For example, in a Maven project, if `slf4j-api` or its implementation (`slf4j-simple` or `logback-classic`) is absent, the project will fail to identify `LoggerFactory`. In Gradle, ensuring that dependencies are properly defined in `build.gradle` is important.
-    
-    Example (Maven `pom.xml`):
-    
-    ```xml
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.7.30</version> <!-- Ensure correct version -->
-    </dependency>
-    <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version><!-- Refer to Maven Central for the latest version --></version>
-    </dependency>
-    ```
-    
-    Steps to find the correct version:
-    
-    1. Visit Maven Central Repository: Go to <a href="https://search.maven.org/" rel="noopener noreferrer nofollow" target="_blank">search.maven.org</a> and search for `logback-classic`.
-    2. Official Documentation: The <a href="https://logback.qos.ch/" rel="noopener noreferrer nofollow" target="_blank">Logback official site</a> also lists the recommended versions for your project.
-    3. Check Compatibility: Ensure the version of `logback-classic` you choose is compatible with the version of `slf4j-api` you are using.
+
+   Example (Maven `pom.xml`):
+
+   ```xml
+   <dependency>
+       <groupId>org.slf4j</groupId>
+       <artifactId>slf4j-api</artifactId>
+       <version>1.7.30</version> <!-- Ensure correct version -->
+   </dependency>
+   <dependency>
+       <groupId>ch.qos.logback</groupId>
+       <artifactId>logback-classic</artifactId>
+       <version><!-- Refer to Maven Central for the latest version --></version>
+   </dependency>
+   ```
+
+   Steps to find the correct version:
+
+   1. Visit Maven Central Repository: Go to <a href="https://search.maven.org/" rel="noopener noreferrer nofollow" target="_blank">search.maven.org</a> and search for `logback-classic`.
+   2. Official Documentation: The <a href="https://logback.qos.ch/" rel="noopener noreferrer nofollow" target="_blank">Logback official site</a> also lists the recommended versions for your project.
+   3. Check Compatibility: Ensure the version of `logback-classic` you choose is compatible with the version of `slf4j-api` you are using.
+
 2. Explanation of Conflicting Frameworks: If you use other logging frameworks, such as `Log4j` or `java.util.logging`, they may conflict with `SLF4j`. The most common reason is having two logging implementations on the classpath (e.g., `Log4j` and `SLF4J` both enabled). This might result in runtime errors in which log messages are duplicated or altogether absent.
 
 ## Common Reasons for the "LoggerFactory.getLogger cannot be resolved to a type" Error
@@ -135,21 +141,17 @@ implementation 'org.slf4j:slf4j-api:1.7.32'
 ### Additional Notes:
 
 - Ensure that you also include an implementation of SLF4J, like Logback:
-    
-    ```xml
-    <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>1.2.3</version> <!-- Ensure compatibility with SLF4J API version -->
-    </dependency>
-    ```
-    
+  ```xml
+  <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version> <!-- Ensure compatibility with SLF4J API version -->
+  </dependency>
+  ```
 - In Gradle, this would look like:
-    
-    ```groovy
-    implementation 'ch.qos.logback:logback-classic:1.2.3'
-    ```
-    
+  ```groovy
+  implementation 'ch.qos.logback:logback-classic:1.2.3'
+  ```
 
 ### 2. Check Import Statements
 
@@ -198,36 +200,92 @@ Different Integrated Development Environments (IDEs) require different approache
 In Eclipse:
 
 1. Right-click on your project and select "Properties".
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image.webp" alt="" caption="" />2. Go to "Java Build Path" and select the "Libraries" tab.
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%201.webp" alt="" caption="" />3. Ensure that the `SLF4J` libraries are listed under the classpath. If not:
-    - Click "Add External JARs" and navigate to the location of the SLF4J JAR file.
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%202.webp" alt="" caption="" />4. Apply the changes and rebuild the project.
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image.webp"
+     alt=""
+     caption=""
+   />
+   2. Go to "Java Build Path" and select the "Libraries" tab.
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%201.webp"
+     alt=""
+     caption=""
+   />
+   3. Ensure that the `SLF4J` libraries are listed under the classpath. If not: - Click "Add
+   External JARs" and navigate to the location of the SLF4J JAR file.
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%202.webp"
+     alt=""
+     caption=""
+   />
+   4. Apply the changes and rebuild the project.
 
 In IntelliJ IDEA:
 
 1. Navigate to "File" > "Project Structure".
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%203.webp" alt="" caption="" />2. Select "Modules" > Your Module > "Dependencies" tab.
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%204.webp" alt="" caption="" />3. Check if `SLF4J` is listed under the dependencies. If missing:
-    - Click the "+" icon, and add the `SLF4J` dependency from Maven or Gradle.
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%205.webp" alt="" caption="" />4. Rebuild your project by selecting "Build" > "Rebuild Project".
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%206.webp" alt="" caption="" />In NetBeans:
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%203.webp"
+     alt=""
+     caption=""
+   />
+   2. Select "Modules" > Your Module > "Dependencies" tab.
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%204.webp"
+     alt=""
+     caption=""
+   />
+   3. Check if `SLF4J` is listed under the dependencies. If missing: - Click the "+" icon, and add
+   the `SLF4J` dependency from Maven or Gradle.
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%205.webp"
+     alt=""
+     caption=""
+   />
+   4. Rebuild your project by selecting "Build" > "Rebuild Project".
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%206.webp"
+     alt=""
+     caption=""
+   />
+   In NetBeans:
 
 1. Right-click your project and choose "Properties".
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%207.webp" alt="" caption="" />2. Under "Libraries", check if the `SLF4J` JAR is included.
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%208.webp" alt="" caption="" />3. If not, click "Add JAR/Folder" and locate the `SLF4J` JAR file.
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%209.webp" alt="" caption="" />4. Save the changes and clean/build your project by selecting "Clean and Build" from the project menu.
-    
-    <Figure src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%2010.webp" alt="" caption="" />## Best Practices for Java Logging Configuration
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%207.webp"
+     alt=""
+     caption=""
+   />
+   2. Under "Libraries", check if the `SLF4J` JAR is included.
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%208.webp"
+     alt=""
+     caption=""
+   />
+   3. If not, click "Add JAR/Folder" and locate the `SLF4J` JAR file.
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%209.webp"
+     alt=""
+     caption=""
+   />
+   4. Save the changes and clean/build your project by selecting "Clean and Build" from the project
+   menu.
+
+   <Figure
+     src="/img/guides/2024/09/loggerFactory-getLogger-cannot-be-resolved-to-a-type-image%2010.webp"
+     alt=""
+     caption=""
+   />
+   ## Best Practices for Java Logging Configuration
 
 To avoid future complications with logging, it is important to adopt specific best practices:
 

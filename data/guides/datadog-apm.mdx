@@ -1,20 +1,27 @@
 ---
-title: "Datadog APM: A Deep Dive on Limitations and an Open Source Alternative"
-slug: datadog-apm
+title: 'Datadog APM: A Deep Dive on Limitations and an Open Source Alternative'
 date: 2025-10-09
 tags: [apm, datadog]
 authors: [yuvraj]
 description: "Explore Datadog APM's pricing, trace sampling, and vendor lock-in challenges, and discover how an open-source alternative like SigNoz with OpenTelemetry offers a better solution."
-keywords: [datadog apm, datadog pricing, opentelemetry, signoz, application performance monitoring, datadog alternative]
+keywords:
+  [
+    datadog apm,
+    datadog pricing,
+    opentelemetry,
+    signoz,
+    application performance monitoring,
+    datadog alternative,
+  ]
 ---
 
 Datadog APM is one of the most well-known solutions on the market. With its polished UI, extensive auto-instrumentation capabilities, and tightly integrated alerting and SLO features, it's a common choice for teams looking for a powerful, all-in-one platform. It promises deep visibility into your services, helping you trace requests across distributed systems and pinpoint bottlenecks.
 
 However, as applications scale and teams mature, many engineers start asking critical questions:
 
-* _Why is our Datadog bill so unpredictable and high?_
-* _Are we missing important data because of trace sampling?_
-* _Are we locked into a proprietary agent that limits our flexibility?_
+- _Why is our Datadog bill so unpredictable and high?_
+- _Are we missing important data because of trace sampling?_
+- _Are we locked into a proprietary agent that limits our flexibility?_
 
 If these questions sound familiar, you're not alone. In this guide, we'll do a deep dive into <a href="https://www.datadoghq.com/product/apm/" rel="noreferrer nofollow" target="_blank">Datadog APM</a>, exploring its key challenges and how you can achieve the same, or better, results with OpenTelemetry and SigNoz, an open-source alternative available as a fully-managed cloud service.
 
@@ -30,7 +37,11 @@ As costs scale with volume, a medium-sized environment with around 100 hosts can
 
 A quick search for 'Datadog billing' on Reddit reveals numerous threads from developers frustrated with its pricing:
 
-<Figure src="/img/guides/2025/10/datadog-apm-datadog-pricing-reddit.webp" alt="Datadog pricing posts on Reddit" caption="Datadog pricing posts on Reddit" />
+<Figure
+  src="/img/guides/2025/10/datadog-apm-datadog-pricing-reddit.webp"
+  alt="Datadog pricing posts on Reddit"
+  caption="Datadog pricing posts on Reddit"
+/>
 
 ### Challenge #2: The Sampling Dilemma
 
@@ -42,8 +53,11 @@ This becomes particularly painful during incident response. When you're hunting 
 
 In the datadog UI below, you can see the controls where teams are asked to set sampling rates, effectively deciding which data they are willing to lose to manage their bill:
 
-<Figure src="/img/guides/2025/10/datadog-apm-datadog-sampling.webp" alt="Datadog sampling controls" caption="Datadog sampling controls (source: Datadog)" />
-
+<Figure
+  src="/img/guides/2025/10/datadog-apm-datadog-sampling.webp"
+  alt="Datadog sampling controls"
+  caption="Datadog sampling controls (source: Datadog)"
+/>
 
 ### Challenge #3: Datadog's Proprietary Agent & Vendor Lock-In
 
@@ -77,9 +91,9 @@ This is precisely the gap that an OpenTelemetry-native APM like SigNoz is built 
 
 [SigNoz](https://signoz.io/application-performance-monitoring/) is an all-in-one observability platform built to work natively with OpenTelemetry. Here’s how it directly solves the challenges of both proprietary tools and a complex DIY setup:
 
-* **Solution to Cost:** Because SigNoz is open-source, you avoid expensive licensing fees. You have full control over your resources and predictable pricing based on the data you choose to store. For those who don't want to self-host can use [SigNoz cloud which can bring 70-80% pricing reduction in observability costs](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/).
-* **Solution to Sampling:** SigNoz is built to handle high volumes of data, allowing you to capture 100% of your traces without aggressive sampling. You get the full context needed to troubleshoot any issue.
-* **Solution to Lock-In:** SigNoz is OpenTelemetry-native. You instrument your code once with open-source libraries, giving you the freedom to send your data to any backend, now or in the future.
+- **Solution to Cost:** Because SigNoz is open-source, you avoid expensive licensing fees. You have full control over your resources and predictable pricing based on the data you choose to store. For those who don't want to self-host can use [SigNoz cloud which can bring 70-80% pricing reduction in observability costs](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/).
+- **Solution to Sampling:** SigNoz is built to handle high volumes of data, allowing you to capture 100% of your traces without aggressive sampling. You get the full context needed to troubleshoot any issue.
+- **Solution to Lock-In:** SigNoz is OpenTelemetry-native. You instrument your code once with open-source libraries, giving you the freedom to send your data to any backend, now or in the future.
 
 ### 5-Minute Tutorial: Instrumenting a Node.js App with OpenTelemetry & SigNoz
 
@@ -90,7 +104,6 @@ Here’s how you can instrument a simple Node.js Express application to send dat
 #### Step 1: Install Dependencies
 
 First, install the necessary OpenTelemetry packages in your project directory.
-
 
 ```bash
 npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
@@ -124,9 +137,14 @@ You'll need to replace the following placeholders:
 
 That's it! With your application running, generate some traffic by hitting its API endpoints a few times. After a moment, navigate to your SigNoz UI. You'll see your service appear in the **Services** tab, and you can explore 100% of your traces in the **Traces** tab, complete with RED metrics and detailed flamegraphs.
 
-<Figure src="/img/guides/2025/10/datadog-apm-signoz-apm.webp" alt="SigNoz APM" caption="SigNoz APM" />
+<Figure
+  src="/img/guides/2025/10/datadog-apm-signoz-apm.webp"
+  alt="SigNoz APM"
+  caption="SigNoz APM"
+/>
 
 Beyond APM and Tracing that you've just enabled, SigNoz is a full-stack observability platform. You can also send **logs** and **infrastructure metrics**, and even set up specialized monitoring for **APIs**, **message queues**, and **LLM-powered applications**, giving you a unified view of your entire system.
+
 ## Get Started with SigNoz
 
 You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a [30-day free trial account](https://signoz.io/pricing/) with access to all features.
@@ -137,7 +155,7 @@ Those who have the expertise to manage SigNoz themselves or just want to start w
 
 ### Ready to Make the Switch?
 
-Moving from Datadog to an OpenTelemetry-native platform gives you full control over your data while cutting costs. To make the transition as seamless as possible, we've created a comprehensive migration guide. 
+Moving from Datadog to an OpenTelemetry-native platform gives you full control over your data while cutting costs. To make the transition as seamless as possible, we've created a comprehensive migration guide.
 
 It provides a step-by-step plan for transitioning all your key signals—metrics, traces, and logs—with practical instructions for handling custom DogStatsD metrics and importing pre-built dashboards.
 

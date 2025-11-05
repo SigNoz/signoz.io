@@ -1,13 +1,18 @@
 ---
-
 title: How to Monitor Kubernetes CronJobs with Prometheus - A Guide
-slug: is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus
 date: 2024-11-29
 tags: [prometheus, faq]
 authors: [simran_kumari]
 description: Learn how to monitor Kubernetes CronJobs using Prometheus with step-by-step setup, best practices, and advanced monitoring techniques.
-keywords: [kubernetes cronjobs, prometheus monitoring, kubernetes monitoring, cronjob metrics, prometheus setup, kubernetes observability]
-
+keywords:
+  [
+    kubernetes cronjobs,
+    prometheus monitoring,
+    kubernetes monitoring,
+    cronjob metrics,
+    prometheus setup,
+    kubernetes observability,
+  ]
 ---
 
 Monitoring Kubernetes CronJobs can be challenging because they execute at scheduled times and often lack persistent metrics for Prometheus to scrape reliably. However, tools like the PushGateway, combined with custom metrics and effective configuration, can enable Prometheus to monitor these jobs effectively.
@@ -41,25 +46,29 @@ To monitor Kubernetes CronJobs effectively, you need to configure Prometheus to 
 
 The monitoring setup:
 
-<Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image.webp" alt="Setting Up Prometheus for Kubernetes CronJob Monitoring" caption="Setting Up Prometheus for Kubernetes CronJob Monitoring" />
+<Figure
+  src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image.webp"
+  alt="Setting Up Prometheus for Kubernetes CronJob Monitoring"
+  caption="Setting Up Prometheus for Kubernetes CronJob Monitoring"
+/>
 
 ### Prerequisites for Prometheus Setup
 
 - Kubernetes Cluster: Ensure you have a running Kubernetes cluster.
 - Helm Installed: Helm is useful for installing and managing Prometheus in Kubernetes.
 - Prometheus and PushGateway: Install Prometheus and PushGateway. They can be installed using Helm or other tools, as long as they are configured to communicate within the cluster.
-    
-    ```sql
-    helm install prometheus prometheus-community/kube-prometheus-stack 
-    helm install pushgateway prometheus-community/prometheus-pushgateway
-    ```
-    
-    Verify the installation using the command `kubectl get pods`.
-    
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%201.webp" alt="Prometheus and PushGateway Installation Verification" caption="Prometheus and PushGateway Installation Verification" />
-    
-    The `-n monitoring` filters out the list of pods in the namespace name `monitoring`. 
-    
+  ```sql
+  helm install prometheus prometheus-community/kube-prometheus-stack
+  helm install pushgateway prometheus-community/prometheus-pushgateway
+  ```
+  Verify the installation using the command `kubectl get pods`.
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%201.webp"
+    alt="Prometheus and PushGateway Installation Verification"
+    caption="Prometheus and PushGateway Installation Verification"
+  />
+  The `-n monitoring` filters out the list of pods in the namespace name `monitoring`.
 
 Note: By default, PushGateway exposes metrics at the `/metrics` endpoint, so you don’t need to specify this path explicitly in the Prometheus configuration. Prometheus will look for it automatically.
 
@@ -78,24 +87,24 @@ metadata:
   name: test-cronjob
   namespace: default
 spec:
-  schedule: "*/1 * * * *"  # Runs every 1 minute
+  schedule: '*/1 * * * *' # Runs every 1 minute
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: test-cronjob
-            image: curlimages/curl:latest
-            args:
-              - /bin/sh
-              - -c
-              - |
-                echo "new: Pushing metrics to PushGateway"
-                # Push a simulated metric to the PushGateway
-                echo 'example_metric{job="test-cronjob"} 1' | curl --data-binary @- http://pushgateway-prometheus-pushgateway.monitoring.svc.cluster.local:9091/metrics/job/test_cronjob
-            env:
-              - name: PUSHGATEWAY_URL
-                value: "pushgateway-prometheus-pushgateway.monitoring.svc.cluster.local:9091"
+            - name: test-cronjob
+              image: curlimages/curl:latest
+              args:
+                - /bin/sh
+                - -c
+                - |
+                  echo "new: Pushing metrics to PushGateway"
+                  # Push a simulated metric to the PushGateway
+                  echo 'example_metric{job="test-cronjob"} 1' | curl --data-binary @- http://pushgateway-prometheus-pushgateway.monitoring.svc.cluster.local:9091/metrics/job/test_cronjob
+              env:
+                - name: PUSHGATEWAY_URL
+                  value: 'pushgateway-prometheus-pushgateway.monitoring.svc.cluster.local:9091'
           restartPolicy: OnFailure
 ```
 
@@ -111,7 +120,11 @@ This CronJob will attempt to push a metric named `example_metric` to PushGateway
 
 Check if your cronjob is configured properly by running the command `kubectl get jobs`:
 
-<Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%202.webp" alt="CronJob Running" caption="CronJob Running" />
+<Figure
+  src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%202.webp"
+  alt="CronJob Running"
+  caption="CronJob Running"
+/>
 
 ### 2. Create a Secret for Scraping Metrics from PushGateway
 
@@ -147,30 +160,38 @@ kubectl apply -f additional-scrape-configs.yaml
 The next step is to configure the Prometheus Custom Resource (CR) to reference this Secret, which will enable Prometheus to scrape metrics from PushGateway.
 
 1. Find the Prometheus Custom Resource in your cluster:
-    
-    ```bash
-    kubectl get prometheus -n monitoring
-    ```
-    
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%203.webp" alt="Find the Prometheus Custom Resource" caption="Find the Prometheus Custom Resource" /> 
-    
+
+   ```bash
+   kubectl get prometheus -n monitoring
+   ```
+
+   <Figure
+     src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%203.webp"
+     alt="Find the Prometheus Custom Resource"
+     caption="Find the Prometheus Custom Resource"
+   />{' '}
+
 2. Once you’ve identified the name of your Prometheus CR, edit it:
-    
-    ```bash
-    kubectl edit prometheus <your-prometheus-cr-name> -n monitoring
-    ```
-    
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%204.webp" alt="Editing the Custom Resource" caption="Editing the Custom Resource" />
-    
+
+   ```bash
+   kubectl edit prometheus <your-prometheus-cr-name> -n monitoring
+   ```
+
+   <Figure
+     src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%204.webp"
+     alt="Editing the Custom Resource"
+     caption="Editing the Custom Resource"
+   />
+
 3. In the `spec` section of the Prometheus CR, add a reference to the new Secret you just created:
-    
-    ```yaml
-    spec:
-      additionalScrapeConfigs:
-        name: additional-scrape-configs
-        key: additional-scrape-configs.yaml
-    ```
-    
+
+   ```yaml
+   spec:
+     additionalScrapeConfigs:
+       name: additional-scrape-configs
+       key: additional-scrape-configs.yaml
+   ```
+
 4. Save and exit the editor. The Prometheus Operator will automatically detect and apply the additional scrape configurations.
 
 Tip: The `/metrics` endpoint on PushGateway is the default for Prometheus to scrape metrics, so you don’t need additional configuration for the path unless you are using a custom endpoint.
@@ -182,7 +203,11 @@ To confirm that Prometheus is now scraping metrics from PushGateway, check the P
 1. Open the Prometheus UI in your browser.
 2. Go to Status > Targets and verify if the PushGateway target is listed and actively being scraped.
 
-<Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%205.webp" alt="Prometheus is scraping metrics from PushGateway" caption="Prometheus is scraping metrics from PushGateway" />
+<Figure
+  src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%205.webp"
+  alt="Prometheus is scraping metrics from PushGateway"
+  caption="Prometheus is scraping metrics from PushGateway"
+/>
 
 By completing these steps, Prometheus will now collect metrics from the PushGateway, allowing you to monitor your CronJob's metrics effectively.
 
@@ -205,11 +230,11 @@ spec:
     matchLabels:
       app: pushgateway
   endpoints:
-  - port: web
-    interval: 15s
+    - port: web
+      interval: 15s
   namespaceSelector:
     matchNames:
-    - monitoring
+      - monitoring
 ```
 
 - `selector.matchLabels`: Ensures that the ServiceMonitor matches the correct PushGateway service using its labels.
@@ -244,26 +269,26 @@ Label selection is crucial for ensuring that your [Prometheus metrics](https://s
 Steps to Define Label Selection:
 
 1. Job Names and Identifiers:
-    - Include a label for the CronJob name to uniquely identify each CronJob in your metrics.
-    - Example: `job_name="<your_cronjob_name>"`.
+   - Include a label for the CronJob name to uniquely identify each CronJob in your metrics.
+   - Example: `job_name="<your_cronjob_name>"`.
 2. Namespace:
-    - Add a label for the namespace in which the CronJob is running, especially if you’re managing multiple environments.
-    - Example: `namespace="<namespace>"`.
+   - Add a label for the namespace in which the CronJob is running, especially if you’re managing multiple environments.
+   - Example: `namespace="<namespace>"`.
 3. Status:
-    - Track job statuses such as `success` or `failure` with specific labels like `status="<success/failure>"`.
+   - Track job statuses such as `success` or `failure` with specific labels like `status="<success/failure>"`.
 4. Instance or Pod Information:
-    - For detailed monitoring, include pod name or instance as a label for identifying which pod is being monitored in case of failures or issues.
-    - Example: `instance="<pod_name>"`.
+   - For detailed monitoring, include pod name or instance as a label for identifying which pod is being monitored in case of failures or issues.
+   - Example: `instance="<pod_name>"`.
 5. Custom Labels:
-    - If needed, you can also use additional labels such as priority or job type to filter and aggregate your metrics more effectively based on your monitoring needs.
+   - If needed, you can also use additional labels such as priority or job type to filter and aggregate your metrics more effectively based on your monitoring needs.
 
 Example Label Definition:
 
 ```yaml
-job_name: "example-cronjob"
-namespace: "default"
-status: "success"
-instance: "example-cronjob-pod-1234"
+job_name: 'example-cronjob'
+namespace: 'default'
+status: 'success'
+instance: 'example-cronjob-pod-1234'
 ```
 
 ## Configuring Job Metrics
@@ -297,7 +322,7 @@ Example Metric for Job Duration:
 
 ```yaml
 # Job Duration Metric
-job_duration_seconds{job="example-cronjob"} 45.2  # CronJob took 45.2 seconds
+job_duration_seconds{job="example-cronjob"} 45.2 # CronJob took 45.2 seconds
 ```
 
 - job_duration_seconds: This metric captures the execution duration in seconds.
@@ -310,115 +335,114 @@ Note: You can add these metrics by updating the cronjob scripts.
 To stay informed of any issues with your CronJobs, set up alerting rules based on the metrics you’ve collected.
 
 1. Alert for CronJob Failures:
-    - An alert rule that fires when any CronJob fails more than a specified number of times within a given period.
-    
-    Example Alert Rule:
-    
-    ```yaml
-    groups:
-    - name: cronjob_alerts
-      rules:
-      - alert: CronJobFailed
-        expr: job_error{job_name="example-cronjob", status="failure"} > 3
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: "CronJob example-cronjob has failed 3 times in the last 5 minutes"
-    ```
-    
+
+   - An alert rule that fires when any CronJob fails more than a specified number of times within a given period.
+
+   Example Alert Rule:
+
+   ```yaml
+   groups:
+     - name: cronjob_alerts
+       rules:
+         - alert: CronJobFailed
+           expr: job_error{job_name="example-cronjob", status="failure"} > 3
+           for: 5m
+           labels:
+             severity: critical
+           annotations:
+             summary: 'CronJob example-cronjob has failed 3 times in the last 5 minutes'
+   ```
+
 2. Alert for Long-Running CronJobs:
-    - You can also set up an alert rule to notify you if a CronJob runs longer than expected.
-    
-    Example Alert Rule:
-    
-    ```yaml
-    groups:
-    - name: cronjob_alerts
-      rules:
-      - alert: CronJobDurationTooLong
-        expr: job_duration_seconds{job_name="example-cronjob", status="success"} > 300
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "CronJob example-cronjob took longer than expected"
-    ```
-    
-    Note: The alert updates need to be added to the [Prometheus configuration](https://signoz.io/guides/what-is-prometheus-target/) file
-    
-    To verify if the alerts are firing:
-    
-    - Access Prometheus Alerting Page: Go to the Prometheus UI (`http://<prometheus-server>:9090/alerts`).
-    - Check Alerts: You should see the alerts like `CronJobFailed` and `CronJobDurationTooLong` if your simulated conditions met the threshold.
-    
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%206.webp" alt="Configuring Alerting Rules for K8s CronJob" caption="Configuring Alerting Rules for K8s CronJob" /> 
-    
+
+   - You can also set up an alert rule to notify you if a CronJob runs longer than expected.
+
+   Example Alert Rule:
+
+   ```yaml
+   groups:
+     - name: cronjob_alerts
+       rules:
+         - alert: CronJobDurationTooLong
+           expr: job_duration_seconds{job_name="example-cronjob", status="success"} > 300
+           for: 5m
+           labels:
+             severity: warning
+           annotations:
+             summary: 'CronJob example-cronjob took longer than expected'
+   ```
+
+   Note: The alert updates need to be added to the [Prometheus configuration](https://signoz.io/guides/what-is-prometheus-target/) file
+
+   To verify if the alerts are firing:
+
+   - Access Prometheus Alerting Page: Go to the Prometheus UI (`http://<prometheus-server>:9090/alerts`).
+   - Check Alerts: You should see the alerts like `CronJobFailed` and `CronJobDurationTooLong` if your simulated conditions met the threshold.
+
+   <Figure
+     src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%206.webp"
+     alt="Configuring Alerting Rules for K8s CronJob"
+     caption="Configuring Alerting Rules for K8s CronJob"
+   />{' '}
 
 ## Implementing Monitoring Best Practices
 
 To ensure your CronJobs are properly monitored and perform efficiently, follow these best practices:
 
 - Using Custom [Metric Labels](https://signoz.io/guides/what-are-prometheus-labels/): Customize your metric labels for better granularity and filtering. For example, include labels like `job_name`, `status`, `environment`, and `schedule` to categorize CronJob executions and easily filter metrics in Prometheus or Grafana. This helps with better visibility and tracking of different job states (e.g., `job_success`, `job_failure`).
-    
-    Example:
-    
-    ```yaml
-    job_success{job="example-cronjob", status="success", environment="production"} 1
-    ```
-    
+  Example:
+  ```yaml
+  job_success{job="example-cronjob", status="success", environment="production"} 1
+  ```
 - Setting Up Meaningful Alerts: Configure alerts based on job failures, durations, or other key metrics. Set severity levels for alerts (e.g., `critical`, `warning`) and ensure that annotations provide context for troubleshooting. For example, alert when a job exceeds a set duration or fails more than a specified number of times.
-    
-    Example Alert for Failures:
-    
-    ```yaml
-    groups:
+  Example Alert for Failures:
+  ```yaml
+  groups:
     - name: cronjob_alerts
       rules:
-      - alert: CronJobFailed
-        expr: job_error{job_name="example-cronjob", status="failure"} > 3
-        for: 5m
-        labels:
-          severity: critical
-    ```
-    
+        - alert: CronJobFailed
+          expr: job_error{job_name="example-cronjob", status="failure"} > 3
+          for: 5m
+          labels:
+            severity: critical
+  ```
 - Handling Job Timeouts: Set reasonable timeouts for your CronJobs to prevent them from running indefinitely. If a job exceeds the time limit, consider aborting it to free up resources. Use Kubernetes' `timeoutSeconds` or implement timeouts within the job itself.
-    
-    Example Timeout in CronJob YAML:
-    
-    ```yaml
-    containers:
+  Example Timeout in CronJob YAML:
+  ```yaml
+  containers:
     - name: cronjob-container
       image: your-cronjob-image
       args:
-      - /bin/bash
-      - -c
-      - "timeout 300s your-script.sh"  # Timeout after 5 minutes
-    ```
-    
+        - /bin/bash
+        - -c
+        - 'timeout 300s your-script.sh' # Timeout after 5 minutes
+  ```
 - Implementing Retry Mechanisms: Use retries to handle temporary failures due to issues like resource contention or transient errors. Set a backoff policy for retries and a maximum retry limit to avoid infinite retry loops.
-    
-    Example Retry in CronJob YAML:
-    
-    ```yaml
-    restartPolicy: OnFailure
-    backoffLimit: 3  # Retry up to 3 times
-    ```
-    
+  Example Retry in CronJob YAML:
+  ```yaml
+  restartPolicy: OnFailure
+  backoffLimit: 3 # Retry up to 3 times
+  ```
 
 ## Advanced Monitoring with SigNoz
 
-[SigNoz](https://signoz.io) is an open-source observability platform that provides comprehensive monitoring for your CronJobs. 
+[SigNoz](https://signoz.io) is an open-source observability platform that provides comprehensive monitoring for your CronJobs.
 
 - It helps track key performance metrics, such as job success rates, execution durations, and failure counts, all in real time.
 - SigNoz's ability to collect and visualize these [metrics in intuitive dashboards](https://signoz.io/metrics-and-dashboards/) allows you to quickly identify issues, optimize job performance, and ensure that your CronJobs run smoothly.
-    
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%207.webp" alt="SigNoz: metrics and dashboards" caption="SigNoz: metrics and dashboards" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%207.webp"
+    alt="SigNoz: metrics and dashboards"
+    caption="SigNoz: metrics and dashboards"
+  />
 - With advanced [alerting capabilities](https://signoz.io/alerts-management/), SigNoz can notify you of critical failures or performance bottlenecks, making it an essential tool for [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) and faster troubleshooting.
-    
-    <Figure src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%208.webp" alt="SigNoz: Alerting Capabilities" caption="SigNoz: Alerting Capabilities" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%208.webp"
+    alt="SigNoz: Alerting Capabilities"
+    caption="SigNoz: Alerting Capabilities"
+  />
 
 <GetStartedSigNoz />
 
@@ -434,18 +458,18 @@ By utilizing SigNoz's cloud offering, built-in dashboards, and powerful alerting
 When building dashboards to monitor your CronJobs, it’s important to focus on essential metrics and organize them for clarity and usability.
 
 - Essential Metrics to Display:
-    - Job Success/Failure: Track the success and failure of CronJobs.
-    - Job Duration: Visualize the execution time to spot performance issues.
-    - Job Error Rate: Monitor failures over time to ensure system health.
+  - Job Success/Failure: Track the success and failure of CronJobs.
+  - Job Duration: Visualize the execution time to spot performance issues.
+  - Job Error Rate: Monitor failures over time to ensure system health.
 - Dashboard Organization Tips:
-    - Group related metrics, such as success rate and failure rate, in a single panel for easy comparison.
-    - Prioritize high-impact metrics like failure rates or long-running jobs at the top of the dashboard for immediate visibility.
+  - Group related metrics, such as success rate and failure rate, in a single panel for easy comparison.
+  - Prioritize high-impact metrics like failure rates or long-running jobs at the top of the dashboard for immediate visibility.
 - Visualization Best Practices:
-    - Use line graphs to show trends in job success and duration over time.
-    - Opt for heat maps or bar charts to highlight failure rates or anomalies.
+  - Use line graphs to show trends in job success and duration over time.
+  - Opt for heat maps or bar charts to highlight failure rates or anomalies.
 - Alert Correlation Setup:
-    - Link alerts to specific [dashboard panels](https://signoz.io/docs/userguide/manage-panels/) to make it easier to investigate issues immediately when an alert is triggered.
-    - Use annotations or color coding on graphs to highlight time periods when alerts were fired, aiding quicker troubleshooting.
+  - Link alerts to specific [dashboard panels](https://signoz.io/docs/userguide/manage-panels/) to make it easier to investigate issues immediately when an alert is triggered.
+  - Use annotations or color coding on graphs to highlight time periods when alerts were fired, aiding quicker troubleshooting.
 
 ## Key Takeaways
 

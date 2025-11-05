@@ -1,13 +1,19 @@
 ---
-
 title: How to Access and Understand Docker Daemon Logs
-slug: docker-daemon-logs
 date: 2024-07-31
 tags: [logging]
 authors: [aayush_sharma]
 description: Learn how to access, understand, and leverage Docker daemon logs for troubleshooting, security, and optimizing your container infrastructure.
-keywords: [docker daemon logs, container management, troubleshooting, log analysis, debugging, docker security, performance optimization]
-
+keywords:
+  [
+    docker daemon logs,
+    container management,
+    troubleshooting,
+    log analysis,
+    debugging,
+    docker security,
+    performance optimization,
+  ]
 ---
 
 Docker has revolutionized application deployment and management. At its core, the Docker daemon orchestrates container operations. Understanding [Docker daemon logs](https://signoz.io/guides/docker-daemon-logs/#reading-and-interpreting-docker-daemon-logs) is crucial for effective troubleshooting and maintaining a healthy Docker environment. This guide will walk you through accessing, interpreting, and leveraging Docker daemon logs to optimize your container infrastructure.
@@ -31,11 +37,11 @@ Docker daemon logs differ from container logs. While container logs focus on app
 
 ## Locating Docker Daemon Logs on Different Systems
 
-The location of Docker daemon logs varies depending on your operating system and Docker installation method. 
+The location of Docker daemon logs varies depending on your operating system and Docker installation method.
 
 ### Linux Systems
 
-On older Docker versions and Linux hosts, Docker daemon logs are located at the `/var/log/syslog` or `/var/log/messages` directories. For modern Linux distributions and recent Docker versions, Docker logs are stored in the journal files under `/var/log/journal`. This is because, on most modern Linux distributions using `systemd`, Docker uses the default logging settings, which typically log to the system journal managed by `systemd` (i.e., `journald`). 
+On older Docker versions and Linux hosts, Docker daemon logs are located at the `/var/log/syslog` or `/var/log/messages` directories. For modern Linux distributions and recent Docker versions, Docker logs are stored in the journal files under `/var/log/journal`. This is because, on most modern Linux distributions using `systemd`, Docker uses the default logging settings, which typically log to the system journal managed by `systemd` (i.e., `journald`).
 
 On most Linux distributions using systemd, you can access the Docker daemon logs using:
 
@@ -49,7 +55,7 @@ For systems not using systemd, check:
 /var/log/docker.log
 ```
 
-Older systems using SysVinit: 
+Older systems using SysVinit:
 
 ```bash
 /var/log/upstart/docker.log
@@ -61,17 +67,21 @@ Common Docker Daemon Log Locations on Different Linux Flavours
 - CentOS: `/var/log/messages`
 - Fedora: `/var/log/daemon.log`
 
-To identify the location where [Docker logs](https://signoz.io/guides/docker-logs-location/) are stored on your Linux system, you need to check the Docker service file. The Docker service file contains configuration details about how the Docker daemon is started and managed. On systems using `systemd`, this file is typically located at `/lib/systemd/system/docker.service`. 
+To identify the location where [Docker logs](https://signoz.io/guides/docker-logs-location/) are stored on your Linux system, you need to check the Docker service file. The Docker service file contains configuration details about how the Docker daemon is started and managed. On systems using `systemd`, this file is typically located at `/lib/systemd/system/docker.service`.
 
 To see the Docker service file content:
 
 ```jsx
-cat /lib/systemd/system/docker.service
+cat / lib / systemd / system / docker.service
 ```
 
 Look for the `ExecStart` line to see how the Docker daemon is being started.
 
-<Figure src="/img/guides/2024/07/docker-daemon-logs-Untitled.webp" alt="Docker Service Details" caption="Docker Service Details" />
+<Figure
+  src="/img/guides/2024/07/docker-daemon-logs-Untitled.webp"
+  alt="Docker Service Details"
+  caption="Docker Service Details"
+/>
 
 From the above screenshot, the `ExecStart` line in the Docker service unit file, specifically `/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock`, indicates that Docker is set up to use socket activation with `systemd`. In this setup, the Docker daemon communicates with `systemd` via the file descriptor passed (`fd://`), and `systemd` handles the activation and monitoring of the Docker service.
 
@@ -85,7 +95,11 @@ journalctl -xu docker.service
 
 The above command displays and filters the `systemd` journal logs for messages related to the Docker service, including errors.
 
-<Figure src="/img/guides/2024/07/docker-daemon-logs-Untitled%201.webp" alt="Docker daemon logs" caption="Docker daemon logs" />
+<Figure
+  src="/img/guides/2024/07/docker-daemon-logs-Untitled%201.webp"
+  alt="Docker daemon logs"
+  caption="Docker daemon logs"
+/>
 
 Non-standard installations might use different locations. Check your Docker configuration file (`/etc/docker/daemon.json`) for custom log paths.
 
@@ -99,7 +113,7 @@ Docker daemon (dockerd) logs are stored within the filesystem of the WSL2 VM tha
 
 ### macOS
 
-On macOS, the Docker Engine itself is not directly supported. However, you can use Docker on macOS through Docker Desktop. 
+On macOS, the Docker Engine itself is not directly supported. However, you can use Docker on macOS through Docker Desktop.
 
 The Docker daemon logs, tagged as dockerd on macOS, are stored at:
 
@@ -167,7 +181,11 @@ sudo dockerd --debug
 
 After running the above command you will get daemon debug logs as output, example logs:
 
-<Figure src="/img/guides/2024/07/docker-daemon-logs-Untitled%202.webp" alt="Untitled" caption="Docker Logs" />
+<Figure
+  src="/img/guides/2024/07/docker-daemon-logs-Untitled%202.webp"
+  alt="Untitled"
+  caption="Docker Logs"
+/>
 
 Note: Ensure docker is not running while fetching the daemon logs or it will throw this error:
 
@@ -209,32 +227,32 @@ The Docker daemon logs messages at various levels that indicate the severity or 
 ## Troubleshooting Common Issues Using Daemon Logs
 
 1. Container startup failures:
-    - Look for "level=error" messages related to the container ID
-    - Check for resource constraints or missing dependencies
+   - Look for "level=error" messages related to the container ID
+   - Check for resource constraints or missing dependencies
 2. Network connectivity problems:
-    - Search for "network" or "connectivity" in log messages
-    - Verify Docker network configurations and firewall rules
+   - Search for "network" or "connectivity" in log messages
+   - Verify Docker network configurations and firewall rules
 3. Resource constraints:
-    - Monitor for "out of memory" or "CPU throttling" messages
-    - Adjust container resource limits or host system resources
+   - Monitor for "out of memory" or "CPU throttling" messages
+   - Adjust container resource limits or host system resources
 4. Security events:
-    - Watch for "unauthorized" or "permission denied" messages
-    - Review access controls and user permissions
+   - Watch for "unauthorized" or "permission denied" messages
+   - Review access controls and user permissions
 
 ## Best Practices for Docker Daemon Logging
 
 1. Implement log rotation to manage file sizes:
-    - Use [logrotate](https://signoz.io/guides/logrotate-linux/) on Linux systems
-    - Configure Docker to use json-file logging driver with max-size and max-file options
+   - Use [logrotate](https://signoz.io/guides/logrotate-linux/) on Linux systems
+   - Configure Docker to use json-file logging driver with max-size and max-file options
 2. Secure log files:
-    - Set appropriate file permissions (e.g., `chmod 640 /var/log/docker.log`)
-    - Use [log management tools](https://signoz.io/blog/open-source-log-management/) with access controls
+   - Set appropriate file permissions (e.g., `chmod 640 /var/log/docker.log`)
+   - Use [log management tools](https://signoz.io/blog/open-source-log-management/) with access controls
 3. Integrate with monitoring systems:
-    - Set up alerts for critical events (e.g., daemon crashes, resource exhaustion)
-    - Use tools like [SigNoz](https://signoz.io/docs/introduction/) for visualization.
+   - Set up alerts for critical events (e.g., daemon crashes, resource exhaustion)
+   - Use tools like [SigNoz](https://signoz.io/docs/introduction/) for visualization.
 4. Regularly review logs:
-    - Schedule routine log audits
-    - Look for patterns indicating potential issues or optimization opportunities
+   - Schedule routine log audits
+   - Look for patterns indicating potential issues or optimization opportunities
 
 ## Key Takeaways
 

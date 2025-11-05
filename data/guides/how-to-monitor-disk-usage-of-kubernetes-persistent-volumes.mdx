@@ -1,143 +1,156 @@
 ---
-
 title: How to Monitor Disk Usage in Kubernetes Persistent Volumes
-slug: how-to-monitor-disk-usage-of-kubernetes-persistent-volumes
 date: 2024-07-25
 tags: [prometheus, faq]
 authors: [yuvraj]
 description: Learn effective methods to monitor disk usage of Kubernetes persistent volumes. Discover tools and best practices for optimal storage management.
 keywords: [Kubernetes, persistent volumes, disk usage, monitoring, storage management, PV, PVC]
-
 ---
 
 <head>
- <script
+  <script
     type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "How to Monitor Disk Usage in Kubernetes Persistent Volumes",
-  "alternativeHeadline": "Effective Methods to Monitor Disk Usage of Kubernetes Persistent Volumes",
-  "author": {
-    "@type": "Person",
-    "name": "Ankit Anand"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2024-07-25",
-  "dateModified": "2024-07-25",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/guides/how-to-monitor-disk-usage-of-kubernetes-persistent-volumes/"
-  },
-  "description": "Learn effective methods to monitor disk usage of Kubernetes persistent volumes. Discover tools and best practices for optimal storage management.",
-  "keywords": ["Kubernetes", "persistent volumes", "disk usage", "monitoring", "storage management", "PV", "PVC"],
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "Kubernetes",
-      "description": "An open-source container orchestration platform for automating deployment, scaling, and management of containerized applications."
-    },
-    {
-      "@type": "Thing",
-      "name": "Persistent Volumes",
-      "description": "Storage resources in Kubernetes that exist independently of pods and provide data persistence."
-    },
-    {
-      "@type": "Thing",
-      "name": "Prometheus",
-      "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "Prometheus",
-      "applicationCategory": "Monitoring Tool"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "SigNoz",
-      "applicationCategory": "Observability Platform"
-    }
-  ],
-  "mainEntity": {
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "How often should I check disk usage in Kubernetes PVs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Check disk usage at least daily for critical applications. For less critical systems, weekly checks may suffice. Automated monitoring solutions can provide real-time insights."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I automate PV disk usage monitoring in Kubernetes?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, automation is possible and recommended. Use tools like Prometheus with Alertmanager or custom scripts integrated with your monitoring stack for automated checks and alerts."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What are the signs of a PV nearing capacity in Kubernetes?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Signs include high percentage of used space (e.g., >80%), increased I/O wait times, application performance degradation, and failed writes due to insufficient space."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do I expand a PV when it's running out of space?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "To expand a PV, ensure your storage class supports volume expansion, edit the PVC to request more storage, apply the changes using kubectl apply -f pvc.yaml, and verify the expansion with kubectl get pv. Note that not all storage providers support online expansion, and some may require downtime."
-        }
-      }
-    ]
-  },
-  "tutorial": {
-    "@type": "HowTo",
-    "name": "Monitoring Disk Usage of Kubernetes Persistent Volumes",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Using kubectl Commands",
-        "text": "Use kubectl exec to run the df command in pods, kubectl describe to get detailed PV and PVC information, and kubectl top for an overview of resource usage."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Leveraging Prometheus Metrics",
-        "text": "Set up Prometheus in your Kubernetes cluster, configure it to scrape kubelet_volume_stats metrics, create custom dashboards using Grafana, and set up alerts based on PV usage thresholds."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Implementing Custom Monitoring Solutions",
-        "text": "Create debugging pods to access and report PV data, develop scripts that regularly check disk usage, and integrate your own metrics with existing monitoring stacks."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Best Practices for PV Disk Usage Monitoring",
-        "text": "Establish baselines, implement automated alerts, regularly audit PVs and PVCs, and maintain clear procedures for monitoring and responding to disk usage issues."
-      }
-    ]
-  }
-}) }}
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Monitor Disk Usage in Kubernetes Persistent Volumes',
+        alternativeHeadline:
+          'Effective Methods to Monitor Disk Usage of Kubernetes Persistent Volumes',
+        author: {
+          '@type': 'Person',
+          name: 'Ankit Anand',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
+        datePublished: '2024-07-25',
+        dateModified: '2024-07-25',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id':
+            'https://signoz.io/guides/how-to-monitor-disk-usage-of-kubernetes-persistent-volumes/',
+        },
+        description:
+          'Learn effective methods to monitor disk usage of Kubernetes persistent volumes. Discover tools and best practices for optimal storage management.',
+        keywords: [
+          'Kubernetes',
+          'persistent volumes',
+          'disk usage',
+          'monitoring',
+          'storage management',
+          'PV',
+          'PVC',
+        ],
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
+        },
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Kubernetes',
+            description:
+              'An open-source container orchestration platform for automating deployment, scaling, and management of containerized applications.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Persistent Volumes',
+            description:
+              'Storage resources in Kubernetes that exist independently of pods and provide data persistence.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'How often should I check disk usage in Kubernetes PVs?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Check disk usage at least daily for critical applications. For less critical systems, weekly checks may suffice. Automated monitoring solutions can provide real-time insights.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I automate PV disk usage monitoring in Kubernetes?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, automation is possible and recommended. Use tools like Prometheus with Alertmanager or custom scripts integrated with your monitoring stack for automated checks and alerts.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What are the signs of a PV nearing capacity in Kubernetes?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Signs include high percentage of used space (e.g., >80%), increased I/O wait times, application performance degradation, and failed writes due to insufficient space.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: "How do I expand a PV when it's running out of space?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'To expand a PV, ensure your storage class supports volume expansion, edit the PVC to request more storage, apply the changes using kubectl apply -f pvc.yaml, and verify the expansion with kubectl get pv. Note that not all storage providers support online expansion, and some may require downtime.',
+              },
+            },
+          ],
+        },
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Monitoring Disk Usage of Kubernetes Persistent Volumes',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Using kubectl Commands',
+              text: 'Use kubectl exec to run the df command in pods, kubectl describe to get detailed PV and PVC information, and kubectl top for an overview of resource usage.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Leveraging Prometheus Metrics',
+              text: 'Set up Prometheus in your Kubernetes cluster, configure it to scrape kubelet_volume_stats metrics, create custom dashboards using Grafana, and set up alerts based on PV usage thresholds.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Implementing Custom Monitoring Solutions',
+              text: 'Create debugging pods to access and report PV data, develop scripts that regularly check disk usage, and integrate your own metrics with existing monitoring stacks.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Best Practices for PV Disk Usage Monitoring',
+              text: 'Establish baselines, implement automated alerts, regularly audit PVs and PVCs, and maintain clear procedures for monitoring and responding to disk usage issues.',
+            },
+          ],
+        },
+      }),
+    }}
   />
 </head>
 
@@ -161,27 +174,26 @@ Common challenges in tracking PV storage utilization include dynamic provisionin
 The `kubectl` command-line tool provides several ways to check PV usage:
 
 1. **df command in pods**: Execute the `df` command in pods using PVCs to get disk usage information.
-    
-    ```bash
-    kubectl exec -it <pod-name> -- df -h /path/to/mount
-    
-    ```
-    
+
+   ```bash
+   kubectl exec -it <pod-name> -- df -h /path/to/mount
+
+   ```
+
 2. **kubectl describe**: Use this command to get detailed information about PVs and PVCs.
-    
-    ```bash
-    kubectl describe pv <pv-name>
-    kubectl describe pvc <pvc-name>
-    
-    ```
-    
+
+   ```bash
+   kubectl describe pv <pv-name>
+   kubectl describe pvc <pvc-name>
+
+   ```
+
 3. **[kubectl top](https://signoz.io/blog/kubectl-top/#tracking-pod-resource-consumption-with-kubectl-top-pod)**: While primarily for CPU and memory, it can provide an overview of resource usage.
-    
-    ```bash
-    kubectl top pods
-    
-    ```
-    
+
+   ```bash
+   kubectl top pods
+
+   ```
 
 **Best practice**: Use these commands judiciously in production environments to avoid performance impact.
 

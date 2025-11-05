@@ -1,16 +1,15 @@
 ---
-title: "Understanding Dynatrace Pricing: How Much Does It Really Cost?"
-slug: "dynatrace-pricing"
-date: "2025-09-11"
+title: 'Understanding Dynatrace Pricing: How Much Does It Really Cost?'
+date: '2025-09-11'
 tags: [observability, dynatrace]
-authors: ["yuvraj"]
-image: "/img/guides/2025/09/dynatrace-pricing-dynatrace-dashboard.webp"
+authors: ['yuvraj']
+image: '/img/guides/2025/09/dynatrace-pricing-dynatrace-dashboard.webp'
 description: "A clear guide to understanding Dynatrace's pricing model — DPS today vs Classic (DDU) licensing — with real calculations and cost scenarios"
-keywords: [dynatrace pricing, dynatrace cost, DPS, DDU, application monitoring pricing, observability costs]
+keywords:
+  [dynatrace pricing, dynatrace cost, DPS, DDU, application monitoring pricing, observability costs]
 ---
 
 Dynatrace pricing can feel like trying to solve a puzzle without all the pieces. You see the advertised rates on their website, but when you actually talk to sales, suddenly there's an annual minimum commitment that wasn't mentioned anywhere. The confusion is real, and it's something many teams discover only after investing significant time in evaluation.
-
 
 Let's break down how Dynatrace pricing actually works, what you'll really pay, and what factors can affect your bill.
 
@@ -25,11 +24,11 @@ Think of it like a prepaid phone plan. You commit to spending a certain amount a
 **Dynatrace Platform Subscription (DPS)** is your annual commitment. This is the minimum amount you agree to spend with Dynatrace each year. Dynatrace confirms there is a minimum annual commitment under DPS (amount not published on their pricing pages). Some users report ~\$2,000/month minimums in practice; your terms will vary by contract and discounts ([pricing](https://www.dynatrace.com/pricing/), [Reddit anecdote](https://www.reddit.com/r/devops/comments/16umdhn/most_affordable_monitoring_platform_dynatrace_is/)).
 
 **Rate Cards** determine how much each service costs. These are the per-unit prices for different capabilities. For example:
+
 - Full-Stack Monitoring: \$0.01 per GiB-hour
 - [Infrastructure Monitoring](https://signoz.io/guides/infrastructure-monitoring/): \$0.04 per host-hour
 - Real User Monitoring: \$0.00225 per session
 - Log Management: \$0.20 per GiB ingested
-
 
 ### What's a GiB-Hour?
 
@@ -46,6 +45,7 @@ Let's look at what different scenarios actually cost, based on the rate card fro
 ### Small Environment Example
 
 Say you have:
+
 - 2 servers (8 GiB RAM each) running Kubernetes
 - 1 Kubernetes cluster with 10 pods
 - Basic log ingestion (50 GiB/month)
@@ -53,35 +53,36 @@ Say you have:
 
 Here's the monthly breakdown:
 
-| Component | Calculation | Monthly Cost |
-|-----------|------------|--------------|
-| Full-Stack Monitoring | 2 servers × 8 GiB × 730 hours × \$0.01 | \$116.80 |
-| Kubernetes Monitoring | Included in Full-Stack | \$0.00 |
-| Log Ingestion | 50 GiB × \$0.20 | \$10.00 |
-| Log Retention (30 days) | 50 GiB × 30 days × \$0.02 | \$30.00 |
-| Real User Monitoring | 10,000 sessions × \$0.00225 | \$22.50 |
-| **Total** | | **\$179.30** |
+| Component               | Calculation                            | Monthly Cost |
+| ----------------------- | -------------------------------------- | ------------ |
+| Full-Stack Monitoring   | 2 servers × 8 GiB × 730 hours × \$0.01 | \$116.80     |
+| Kubernetes Monitoring   | Included in Full-Stack                 | \$0.00       |
+| Log Ingestion           | 50 GiB × \$0.20                        | \$10.00      |
+| Log Retention (30 days) | 50 GiB × 30 days × \$0.02              | \$30.00      |
+| Real User Monitoring    | 10,000 sessions × \$0.00225            | \$22.50      |
+| **Total**               |                                        | **\$179.30** |
 
 That's about \$2,152 annually. However, based on user reports, Dynatrace often requires minimum annual commitments that can be significantly higher than actual usage for small deployments.
 
 ### Medium Environment Example
 
 For a more typical setup:
+
 - 10 servers (16 GiB RAM average) running Kubernetes
 - 3 Kubernetes clusters with 50 pods total
 - Log ingestion (500 GiB/month)
 - 100,000 user sessions per month
 - Synthetic monitoring (50,000 checks/month)
 
-| Component | Calculation | Monthly Cost |
-|-----------|------------|--------------|
-| Full-Stack Monitoring | 10 servers × 16 GiB × 730 hours × \$0.01 | \$1,168.00 |
-| Kubernetes Monitoring | Included in Full-Stack |  \$0.00 |
-| Log Ingestion | 500 GiB × \$0.20 | \$100.00 |
-| Log Retention (30 days) | 500 GiB × 30 days × \$0.02 | \$300.00 |
-| Real User Monitoring | 100,000 sessions × \$0.00225 | \$225.00 |
-| Synthetic Monitoring (HTTP monitors or third-party API ingestion at \$0.001 per request) | 50,000 requests × \$0.001 | \$50.00 |
-| **Total** | | **$1,843.00** |
+| Component                                                                                | Calculation                              | Monthly Cost  |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------- | ------------- |
+| Full-Stack Monitoring                                                                    | 10 servers × 16 GiB × 730 hours × \$0.01 | \$1,168.00    |
+| Kubernetes Monitoring                                                                    | Included in Full-Stack                   | \$0.00        |
+| Log Ingestion                                                                            | 500 GiB × \$0.20                         | \$100.00      |
+| Log Retention (30 days)                                                                  | 500 GiB × 30 days × \$0.02               | \$300.00      |
+| Real User Monitoring                                                                     | 100,000 sessions × \$0.00225             | \$225.00      |
+| Synthetic Monitoring (HTTP monitors or third-party API ingestion at \$0.001 per request) | 50,000 requests × \$0.001                | \$50.00       |
+| **Total**                                                                                |                                          | **$1,843.00** |
 
 Note: Browser clickpaths are priced at \$0.0045 per synthetic action, which would cost more for multi-step flows.
 
@@ -94,6 +95,7 @@ That's about \$22,116 annually.
 One Reddit user shared their frustration: "We have a single host (PHP application), a SQL server instance, and an Android and iOS app." For this minimal setup, they were quoted \$20,000 annually ([source](https://www.reddit.com/r/devops/comments/16umdhn/most_affordable_monitoring_platform_dynatrace_is/)).
 
 Using the rate card, their actual consumption would be:
+
 - 1 server (8 GiB assumed): \$58.40/month (8 GiB × 730 h × \$0.01/GiB-h)
 - Mobile app monitoring: Variable based on sessions
 
@@ -104,9 +106,11 @@ The gap between actual usage and minimum commitment is substantial for small dep
 Dynatrace's hourly pricing model works well for dynamic cloud environments. If you spin up a container for 15 minutes, you're billed for 15 minutes (rounded up from any usage). This is different from some competitors who charge for the full hour or day.
 
 For auto-scaling environments, costs can vary significantly:
+
 - Baseline: 5 hosts, always on
 - Peak: add 15 hosts for 4 hours/day
 - Price used: Full-Stack Monitoring = \$0.01 per GiB-hour; each host is 16 GiB → \$0.16 per host-hour
+
 ```
 Baseline: 5 hosts × 730 h/month × $0.16 ≈ $584/month
 Peak add-on: 15 hosts × 4 h/day × 30 days × $0.16 ≈ $288/month
@@ -122,6 +126,7 @@ Log costs include both ingestion and retention. A moderately active application 
 **Total:** \$2,400/month for logs alone
 
 You can choose between two retention models:
+
 - **Retain with Included Queries:** \$0.02 per GiB-day (queries included) - simpler but more expensive
 - **Usage-based:** \$0.0007 per GiB-day retention + \$0.0035 per GiB scanned - cheaper if you query selectively
 
@@ -164,6 +169,7 @@ For teams not needing full APM capabilities, Infrastructure Monitoring at \$0.04
 ## Making Sense of It All
 
 Dynatrace's pricing model makes sense for organizations that:
+
 - Have substantial monitoring needs across multiple capabilities
 - Want flexibility to shift between different monitoring types
 - Operate in dynamic cloud environments with variable workloads
@@ -173,17 +179,22 @@ For smaller teams or simpler monitoring needs, the minimum commitment can be a s
 
 The platform provides comprehensive monitoring capabilities, and the hourly billing model offers genuine flexibility for cloud-native workloads. However, understanding the true cost requires looking beyond the rate card to factor in minimum commitments and your actual usage patterns.
 
-
 ## SigNoz - An Alternative to Dynatrace with Transparent Pricing
+
 If the complexity of Dynatrace's pricing model and minimum commitments have you looking for alternatives, [SigNoz](https://signoz.io/docs/introduction/) offers a different approach to observability pricing that many teams find refreshing.
 
 SigNoz is built on [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) from the ground up, not retrofitted to support it. This means you're working with industry-standard instrumentation that won't lock you into a proprietary agent. Your telemetry data remains portable, and you can switch vendors or run multiple backends without changing your instrumentation.
 
-<Figure src="/img/guides/2025/09/dynatrace-pricing-signoz-logging-dashboard.webp" alt="SigNoz logging dashboard" caption="SigNoz logging dashboard"/>
+<Figure
+  src="/img/guides/2025/09/dynatrace-pricing-signoz-logging-dashboard.webp"
+  alt="SigNoz logging dashboard"
+  caption="SigNoz logging dashboard"
+/>
 
 ### A Simpler Pricing Model
 
 SigNoz uses straightforward usage-based pricing without hidden minimums. You start at \$49/month (which includes \$49 worth of usage), then pay only for what you consume:
+
 - Logs and traces: \$0.30 per GB ingested
 - Metrics: \$0.10 per million samples
 

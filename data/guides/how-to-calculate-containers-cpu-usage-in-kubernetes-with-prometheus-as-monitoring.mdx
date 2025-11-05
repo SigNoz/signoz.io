@@ -1,169 +1,177 @@
 ---
-
 title: How to Monitor Kubernetes CPU Usage with Prometheus - A Guide
-slug: how-to-calculate-containers-cpu-usage-in-kubernetes-with-prometheus-as-monitoring
 date: 2024-07-24
 tags: [faq, prometheus]
 authors: [ankit_anand]
 description: Learn how to monitor and calculate container CPU usage in Kubernetes using Prometheus. Explore key metrics, PromQL queries, and optimization strategies.
-keywords: [Kubernetes, CPU usage, Prometheus, container monitoring, PromQL, Grafana, resource optimization]
-
+keywords:
+  [Kubernetes, CPU usage, Prometheus, container monitoring, PromQL, Grafana, resource optimization]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to Monitor Kubernetes CPU Usage with Prometheus: A Guide",
-    "alternativeHeadline": "Calculate Container CPU Usage in Kubernetes with Prometheus Monitoring",
-    "author": {
-      "@type": "Person",
-      "name": "Ankit Anand"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-24T00:00:00Z",
-    "dateModified": "2024-07-24T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/how-to-calculate-containers-cpu-usage-in-kubernetes-with-prometheus-as-monitoring/"
-    },
-    "description": "Learn how to monitor and calculate container CPU usage in Kubernetes using Prometheus. Explore key metrics, PromQL queries, and optimization strategies.",
-    "keywords": "Kubernetes, CPU usage, Prometheus, container monitoring, PromQL, Grafana, resource optimization",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Kubernetes",
-        "description": "An open-source container orchestration platform designed to automate deploying, scaling, and operating application containers."
-      },
-      {
-        "@type": "Thing",
-        "name": "Prometheus",
-        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-      },
-      {
-        "@type": "Thing",
-        "name": "CPU Usage",
-        "description": "A measure of the amount of computational power used by processes in a computing environment."
-      },
-      {
-        "@type": "Thing",
-        "name": "PromQL",
-        "description": "Prometheus Query Language used to query and analyze metrics."
-      },
-      {
-        "@type": "Thing",
-        "name": "Grafana",
-        "description": "An open-source platform for monitoring and observability, used for visualizing time series data."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is the difference between CPU requests and limits in Kubernetes?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "CPU requests guarantee a minimum amount of CPU resources, while limits cap the maximum CPU a container can use. Requests help with scheduling, ensuring nodes have enough resources. Limits prevent containers from consuming excessive CPU."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Monitor Kubernetes CPU Usage with Prometheus: A Guide',
+        alternativeHeadline:
+          'Calculate Container CPU Usage in Kubernetes with Prometheus Monitoring',
+        author: {
+          '@type': 'Person',
+          name: 'Ankit Anand',
         },
-        {
-          "@type": "Question",
-          "name": "How often should I collect CPU metrics in a Kubernetes environment?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Collect CPU metrics every 15-30 seconds for real-time monitoring. For long-term analysis, aggregate data over longer intervals (e.g., 5 minutes) to reduce storage requirements while maintaining useful insights."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "Can Prometheus monitor CPU usage of individual containers within a pod?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, Prometheus can monitor CPU usage of individual containers within a pod. Use the `container` label in your queries to differentiate between containers in the same pod."
-          }
+        datePublished: '2024-07-24T00:00:00Z',
+        dateModified: '2024-07-24T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id':
+            'https://signoz.io/guides/how-to-calculate-containers-cpu-usage-in-kubernetes-with-prometheus-as-monitoring/',
         },
-        {
-          "@type": "Question",
-          "name": "How do I handle CPU usage spikes in my Kubernetes cluster?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "To handle CPU usage spikes: 1. Set up alerts for sudden increases in CPU usage 2. Implement Horizontal Pod Autoscaling to automatically scale during high load 3. Use Vertical Pod Autoscaling to adjust resource requests and limits 4. Analyze the cause of spikes and optimize application code if necessary."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Monitoring Kubernetes CPU Usage with Prometheus",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Deploy Prometheus",
-          "text": "Deploy Prometheus in your Kubernetes cluster using the provided YAML file."
+        description:
+          'Learn how to monitor and calculate container CPU usage in Kubernetes using Prometheus. Explore key metrics, PromQL queries, and optimization strategies.',
+        keywords:
+          'Kubernetes, CPU usage, Prometheus, container monitoring, PromQL, Grafana, resource optimization',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Configure Prometheus",
-          "text": "Configure Prometheus to scrape Kubernetes CPU metrics by applying the provided configuration file."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Kubernetes',
+            description:
+              'An open-source container orchestration platform designed to automate deploying, scaling, and operating application containers.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'CPU Usage',
+            description:
+              'A measure of the amount of computational power used by processes in a computing environment.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'PromQL',
+            description: 'Prometheus Query Language used to query and analyze metrics.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Grafana',
+            description:
+              'An open-source platform for monitoring and observability, used for visualizing time series data.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What is the difference between CPU requests and limits in Kubernetes?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'CPU requests guarantee a minimum amount of CPU resources, while limits cap the maximum CPU a container can use. Requests help with scheduling, ensuring nodes have enough resources. Limits prevent containers from consuming excessive CPU.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How often should I collect CPU metrics in a Kubernetes environment?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Collect CPU metrics every 15-30 seconds for real-time monitoring. For long-term analysis, aggregate data over longer intervals (e.g., 5 minutes) to reduce storage requirements while maintaining useful insights.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can Prometheus monitor CPU usage of individual containers within a pod?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, Prometheus can monitor CPU usage of individual containers within a pod. Use the `container` label in your queries to differentiate between containers in the same pod.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I handle CPU usage spikes in my Kubernetes cluster?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'To handle CPU usage spikes: 1. Set up alerts for sudden increases in CPU usage 2. Implement Horizontal Pod Autoscaling to automatically scale during high load 3. Use Vertical Pod Autoscaling to adjust resource requests and limits 4. Analyze the cause of spikes and optimize application code if necessary.',
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Calculate CPU Usage",
-          "text": "Use the `rate()` function with the `container_cpu_usage_seconds_total` metric to calculate CPU usage."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Monitoring Kubernetes CPU Usage with Prometheus',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Deploy Prometheus',
+              text: 'Deploy Prometheus in your Kubernetes cluster using the provided YAML file.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Configure Prometheus',
+              text: 'Configure Prometheus to scrape Kubernetes CPU metrics by applying the provided configuration file.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Calculate CPU Usage',
+              text: 'Use the `rate()` function with the `container_cpu_usage_seconds_total` metric to calculate CPU usage.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Use PromQL Queries',
+              text: 'Implement useful PromQL queries to gain insights into CPU usage, such as overall cluster CPU utilization, top CPU-consuming pods, and detecting CPU throttling.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Visualize with Grafana',
+              text: 'Integrate Grafana with Prometheus and create dashboards to visualize CPU usage metrics.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Visualize with SigNoz',
+              text: 'Integrate SigNoz with your Kubernetes cluster, create dashboards, and set up alerts for CPU usage thresholds.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Optimize Kubernetes Deployments',
+              text: 'Analyze CPU usage patterns to right-size container resources and implement Horizontal Pod Autoscaling based on CPU metrics.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Use PromQL Queries",
-          "text": "Implement useful PromQL queries to gain insights into CPU usage, such as overall cluster CPU utilization, top CPU-consuming pods, and detecting CPU throttling."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Visualize with Grafana",
-          "text": "Integrate Grafana with Prometheus and create dashboards to visualize CPU usage metrics."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Visualize with SigNoz",
-          "text": "Integrate SigNoz with your Kubernetes cluster, create dashboards, and set up alerts for CPU usage thresholds."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Optimize Kubernetes Deployments",
-          "text": "Analyze CPU usage patterns to right-size container resources and implement Horizontal Pod Autoscaling based on CPU metrics."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Kubernetes has revolutionized container orchestration, but managing resources like CPU usage in a dynamic environment can be challenging. This guide shows you how to calculate and monitor container CPU usage in Kubernetes using Prometheus.
@@ -204,41 +212,38 @@ Monitoring at container, pod, and cluster levels provides a comprehensive view o
 To set up Prometheus for Kubernetes CPU monitoring:
 
 1. Deploy Prometheus in your Kubernetes cluster:
-    
-    ```yaml
-    kubectl apply -f <https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml>
-    
-    ```
-    
+
+   ```yaml
+   kubectl apply -f <https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml>
+   ```
+
 2. Configure Prometheus to scrape Kubernetes CPU metrics:
-    
-    ```yaml
-    apiVersion: monitoring.coreos.com/v1
-    kind: Prometheus
-    metadata:
-      name: prometheus
-      namespace: monitoring
-    spec:
-      serviceAccountName: prometheus
-      serviceMonitorSelector:
-        matchLabels:
-          team: frontend
-      ruleSelector:
-        matchLabels:
-          team: frontend
-      resources:
-        requests:
-          memory: 400Mi
-    
-    ```
-    
+
+   ```yaml
+   apiVersion: monitoring.coreos.com/v1
+   kind: Prometheus
+   metadata:
+     name: prometheus
+     namespace: monitoring
+   spec:
+     serviceAccountName: prometheus
+     serviceMonitorSelector:
+       matchLabels:
+         team: frontend
+     ruleSelector:
+       matchLabels:
+         team: frontend
+     resources:
+       requests:
+         memory: 400Mi
+   ```
+
 3. Apply the configuration:
-    
-    ```
-    kubectl apply -f prometheus-config.yaml
-    
-    ```
-    
+
+   ```
+   kubectl apply -f prometheus-config.yaml
+
+   ```
 
 Best practices for Prometheus deployment in production:
 
@@ -275,66 +280,65 @@ To convert raw CPU usage to a percentage of available resources:
 Here are some useful PromQL queries for CPU usage insights:
 
 1. Overall cluster CPU utilization:
-    
-    ```
-    sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) / sum(machine_cpu_cores) * 100
-    
-    ```
-    
+
+   ```
+   sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) / sum(machine_cpu_cores) * 100
+
+   ```
+
 2. Top CPU-consuming pods:
-    
-    ```
-    topk(10, sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod))
-    
-    ```
-    
+
+   ```
+   topk(10, sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod))
+
+   ```
+
 3. CPU usage vs. requests:
-    
-    ```
-    sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod) / sum(kube_pod_container_resource_requests_cpu_cores) by (pod)
-    
-    ```
-    
+
+   ```
+   sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod) / sum(kube_pod_container_resource_requests_cpu_cores) by (pod)
+
+   ```
+
 4. Detecting CPU throttling:
-    
-    ```
-    sum(rate(container_cpu_cfs_throttled_seconds_total{}[5m])) by (pod) > 0
-    
-    ```
-    
+
+   ```
+   sum(rate(container_cpu_cfs_throttled_seconds_total{}[5m])) by (pod) > 0
+
+   ```
 
 ## Visualizing CPU Usage with Grafana
 
 To visualize CPU usage with Grafana:
 
 1. Integrate Grafana with Prometheus:
-    - Add Prometheus as a data source in Grafana
-    - Configure the Prometheus server URL
+   - Add Prometheus as a data source in Grafana
+   - Configure the Prometheus server URL
 2. Create CPU usage dashboards:
-    - Use the queries mentioned above
-    - Add time series graphs, gauges, and tables
+   - Use the queries mentioned above
+   - Add time series graphs, gauges, and tables
 3. Set up alerts for CPU usage thresholds:
-    - Define alert rules based on CPU utilization percentages
-    - Configure notification channels (email, Slack, etc.)
+   - Define alert rules based on CPU utilization percentages
+   - Configure notification channels (email, Slack, etc.)
 
 ## Visualizing CPU Usage with SigNoz
 
 To visualize CPU usage with SigNoz:
 
 1. SetUp SigNoz
-    
-    <GetStartedSigNoz />
-    
+
+   <GetStartedSigNoz />
+
 2. Integrate [SigNoz](https://signoz.io/docs/introduction/) with your Kubernetes cluster:
-    - Deploy SigNoz using Helm or Kubernetes manifests
-    - Configure SigNoz to scrape Prometheus metrics from your cluster
+   - Deploy SigNoz using Helm or Kubernetes manifests
+   - Configure SigNoz to scrape Prometheus metrics from your cluster
 3. Create CPU usage dashboards:
-    - Use the PromQL queries mentioned earlier
-    - Add various visualization types such as time series graphs, gauges, and tables
-    - Leverage SigNoz's built-in Kubernetes dashboards for quick insights
+   - Use the PromQL queries mentioned earlier
+   - Add various visualization types such as time series graphs, gauges, and tables
+   - Leverage SigNoz's built-in Kubernetes dashboards for quick insights
 4. Set up alerts for CPU usage thresholds:
-    - Define alert rules based on CPU utilization percentages
-    - Configure notification channels (email, Slack, PagerDuty, etc.)
+   - Define alert rules based on CPU utilization percentages
+   - Configure notification channels (email, Slack, PagerDuty, etc.)
 
 SigNoz offers several advantages for Kubernetes CPU monitoring:
 
@@ -366,11 +370,10 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      targetAverageUtilization: 50
-
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 50
 ```
 
 To identify and resolve CPU bottlenecks:
@@ -421,6 +424,7 @@ While Prometheus offers powerful monitoring capabilities, managing retention and
 <GetStartedSigNoz />
 
 With SigNoz, you can:
+
 - Scale your monitoring infrastructure effortlessly
 - Access advanced querying and visualization capabilities
 - Benefit from integrated tracing and logging alongside metrics.
@@ -428,5 +432,6 @@ With SigNoz, you can:
 - Take advantage of SigNoz's exceptional exception monitoring capabilities
 
 ## Resources
+
 - [How to Monitor Kubernetes Clusters using Prometheus](https://signoz.io/guides/kubernetes-monitoring-prometheus/)
 - [Kubernetes Monitoring - 8 Best Practices for Effective Cluster Monitoring](https://signoz.io/guides/kubernetes-monitoring-best-practices/)

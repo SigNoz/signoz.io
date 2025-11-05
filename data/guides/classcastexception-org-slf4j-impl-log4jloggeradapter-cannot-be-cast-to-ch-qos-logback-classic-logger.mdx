@@ -1,13 +1,19 @@
 ---
-
 title: How to Fix ClassCastException - SLF4J to Logback Conversion
-slug: classcastexception-org-slf4j-impl-log4jloggeradapter-cannot-be-cast-to-ch-qos-logback-classic-logger
 date: 2024-10-03
 tags: [logging, faq]
 authors: [niyati_thakkar]
 description: Learn how to diagnose and fix the ClassCastException when converting from SLF4J to Logback in Java projects. Step-by-step guide with best practices.
-keywords: [ClassCastException, SLF4J, Logback, Java logging, dependency conflicts, classpath configuration, logging frameworks]
-
+keywords:
+  [
+    ClassCastException,
+    SLF4J,
+    Logback,
+    Java logging,
+    dependency conflicts,
+    classpath configuration,
+    logging frameworks,
+  ]
 ---
 
 Java developers often encounter unexpected exceptions that can bring their applications to a halt. One such perplexing error is the ClassCastException when converting from SLF4J to Logback. This issue typically manifests as "org.slf4j.impl.Log4jLoggerAdapter cannot be cast to ch.qos.logback.classic.Logger". It's a common stumbling block that can frustrate even seasoned programmers. In this comprehensive guide, we'll unravel the mystery behind this exception, explore its root causes, and provide you with practical solutions to resolve it effectively.
@@ -44,21 +50,19 @@ Solution:
 
 - Inspect Dependencies: Use tools like `mvn dependency:tree` (for Maven) or `gradle dependencies` (for Gradle) to identify conflicting dependencies.
 - Exclude Conflicting Libraries: In your `pom.xml` (Maven) or `build.gradle` (Gradle), exclude older or conflicting versions. For example, in Maven:
-    
-    ```xml
-    <dependency>
-        <groupId>some.group</groupId>
-        <artifactId>some-artifact</artifactId>
-        <exclusions>
-            <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-        </exclusions>
-    </dependency>
-    
-    ```
-    
+  ```xml
+  <dependency>
+      <groupId>some.group</groupId>
+      <artifactId>some-artifact</artifactId>
+      <exclusions>
+          <exclusion>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-log4j12</artifactId>
+          </exclusion>
+      </exclusions>
+  </dependency>
+
+  ```
 - Ensure Correct Versions: After excluding conflicts, ensure you are using compatible versions of SLF4J and Logback.
 
 ### Version Mismatch:
@@ -71,21 +75,19 @@ Solution:
 
 - Check Version Compatibility: Ensure that SLF4J and Logback versions are compatible by checking their <a href="https://www.slf4j.org/manual.html" rel="noopener noreferrer nofollow" target="_blank">documentation or release notes</a>. For instance, SLF4J 1.7.x is compatible with Logback 1.2.x.
 - Update Dependencies: If needed, update your `pom.xml` or `build.gradle` to use compatible versions:
-    
-    ```xml
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.7.36</version> <!-- Compatible version -->
-    </dependency>
-    <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>1.2.11</version> <!-- Compatible version -->
-    </dependency>
-    
-    ```
-    
+  ```xml
+  <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.36</version> <!-- Compatible version -->
+  </dependency>
+  <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.11</version> <!-- Compatible version -->
+  </dependency>
+
+  ```
 
 ### Multiple SLF4J Bindings:
 
@@ -96,46 +98,37 @@ Having multiple SLF4J bindings in your classpath (e.g., `slf4j-log4j12.jar` and 
 Solution:
 
 - Identify Multiple Bindings: Check for multiple SLF4J bindings in your project. You can search for SLF4J-related JARs in your build path or run `mvn dependency:tree` or `gradle dependencies` to identify all SLF4J bindings.
-SLF4J will issue a runtime warning if multiple bindings are detected. Check the console output for messages like:
-    
-    ```
-    SLF4J: Class path contains multiple SLF4J bindings.
-    ```
-    
+  SLF4J will issue a runtime warning if multiple bindings are detected. Check the console output for messages like:
+      ```
+      SLF4J: Class path contains multiple SLF4J bindings.
+      ```
 - Remove Unnecessary Bindings: Exclude the unwanted SLF4J binding (such as `slf4j-log4j12`) from your dependencies. For example, in Maven:
-    - In Maven, you can use the following to exclude or limit the scope of conflicting bindings, 
+  - In Maven, you can use the following to exclude or limit the scope of conflicting bindings,
     If you want to keep a dependency for development but not package it in production, you can use the `provided` scope:
-        
         ```xml
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <scope>provided</scope> <!-- This keeps it available only for specific environments like containers, or testing -->
         </dependency>
-        
+
         ```
-        
-    - If the binding is not required at all, it's better to exclude it entirely from your project using an exclusion rule like this:
-        
-        ```xml
-        <dependency>
-            <groupId>some.library</groupId>
-            <artifactId>some-library-dependency</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId> <!-- Exclude the conflicting SLF4J binding -->
-                </exclusion>
-            </exclusions>
-        </dependency>
-        
-        ```
-        
-        This approach ensures that only the correct SLF4J binding (`logback-classic.jar`) is retained, preventing runtime conflicts.
-        
-    
-    You should only keep the `logback-classic.jar` binding for Logback.
-    
+  - If the binding is not required at all, it's better to exclude it entirely from your project using an exclusion rule like this:
+    ```xml
+    <dependency>
+        <groupId>some.library</groupId>
+        <artifactId>some-library-dependency</artifactId>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId> <!-- Exclude the conflicting SLF4J binding -->
+            </exclusion>
+        </exclusions>
+    </dependency>
+
+    ```
+    This approach ensures that only the correct SLF4J binding (`logback-classic.jar`) is retained, preventing runtime conflicts.
+  You should only keep the `logback-classic.jar` binding for Logback.
 
 ### Incorrect Configuration:
 
@@ -147,51 +140,42 @@ Solution:
 
 - Check for proper configuration files: Ensure you have a valid `logback.xml` or `logback-test.xml` in your classpath. This file should define your loggers, appenders, and log levels.
 - Review your SLF4J binding: Verify that SLF4J is properly bound to Logback by confirming that only `logback-classic.jar` is present and correctly configured.
-    
-    To verify SLF4J is bound to Logback:
-    
-    1. Check for `logback-classic.jar` in your classpath (e.g., in Maven/Gradle dependencies dependencies `(pom.xml/build.gradle)`)for the following:
-        - Maven:
-            
-            ```xml
-            <dependency>
-              <groupId>ch.qos.logback</groupId>
-              <artifactId>logback-classic</artifactId>
-              <version>VERSION</version>
-            </dependency>
-            ```
-            
-        - Gradle:
-            
-            ```
-            implementation 'ch.qos.logback:logback-classic:VERSION'
-            ```
-            
-    2. Look for SLF4J binding confirmation at startup. You should see:
-        
-        ```makefile
-        SLF4J: Found binding in [logback-classic.jar]
-        ```
-        
-    3. Ensure no conflicting bindings (e.g., `slf4j-simple`, `slf4j-log4j`) are in the classpath.
+  To verify SLF4J is bound to Logback:
+  1. Check for `logback-classic.jar` in your classpath (e.g., in Maven/Gradle dependencies dependencies `(pom.xml/build.gradle)`)for the following:
+     - Maven:
+       ```xml
+       <dependency>
+         <groupId>ch.qos.logback</groupId>
+         <artifactId>logback-classic</artifactId>
+         <version>VERSION</version>
+       </dependency>
+       ```
+     - Gradle:
+       ```
+       implementation 'ch.qos.logback:logback-classic:VERSION'
+       ```
+  2. Look for SLF4J binding confirmation at startup. You should see:
+
+     ```makefile
+     SLF4J: Found binding in [logback-classic.jar]
+     ```
+
+  3. Ensure no conflicting bindings (e.g., `slf4j-simple`, `slf4j-log4j`) are in the classpath.
 - Sample `logback.xml` configuration:
-    
-    ```xml
-    <configuration>
-      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-          <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-      </appender>
-    
-      <root level="debug">
-        <appender-ref ref="STDOUT" />
-      </root>
-    </configuration>
-    ```
-    
-    The pattern `%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n` formats the log output by displaying the timestamp, log level (padded to 5 characters), logger name (up to 36 characters), and the actual log message, followed by a new line. This ensures a clean and readable log structure.
-    
+  ```xml
+  <configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+      </encoder>
+    </appender>
+
+    <root level="debug">
+      <appender-ref ref="STDOUT" />
+    </root>
+  </configuration>
+  ```
+  The pattern `%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n` formats the log output by displaying the timestamp, log level (padded to 5 characters), logger name (up to 36 characters), and the actual log message, followed by a new line. This ensures a clean and readable log structure.
 
 ## Step-by-Step Guide to Diagnose the ClassCastException
 
@@ -218,17 +202,15 @@ Exception in thread "main" java.lang.ClassCastException: org.slf4j.impl.Log4jLog
 Multiple logging libraries or bindings in your classpath can cause conflicts. Use Maven or Gradle to inspect your dependencies:
 
 - List your project’s dependencies: This will help you see if multiple logging implementations are included (e.g., `slf4j-log4j12.jar` alongside `logback-classic.jar`).
-    
-    ```bash
-    
-    # For Maven
-    mvn dependency:tree
-    
-    # For Gradle
-    gradle dependencies
-    
-    ```
-    
+  ```bash
+
+  # For Maven
+  mvn dependency:tree
+
+  # For Gradle
+  gradle dependencies
+
+  ```
 - Check for multiple SLF4J bindings: The output should show if both `slf4j-log4j12` (Log4j binding for SLF4J) and `logback-classic` are present. You should only have one SLF4J binding.
 
 Example Maven Output:
@@ -248,54 +230,48 @@ When a transitive dependency brings in a different version of SLF4J or Logback, 
 
 - Verify versions: Ensure that the versions of SLF4J and Logback are compatible. SLF4J 1.7.x should be used with Logback 1.2.x for most applications. Mismatched versions can cause runtime issues.
 - Enforce versioning with dependency management: Use Maven or Gradle’s dependency management features to enforce consistent versions across your project.
-    - In Gradle, using `strict version constraints` or `resolutionStrategy` ensures a specific version is used, avoiding conflicts.
-        
-        Example: Enforcing Versions in Gradle
-        
-        ```
-        gradle
-        Copy code
-        dependencies {
-            implementation('ch.qos.logback:logback-classic:1.2.3') {
-                because 'Ensuring version compatibility with SLF4J'
-            }
-            implementation('org.slf4j:slf4j-api:1.7.30') {
-                because 'Compatible with Logback 1.2.x'
-            }
+  - In Gradle, using `strict version constraints` or `resolutionStrategy` ensures a specific version is used, avoiding conflicts.
+    Example: Enforcing Versions in Gradle
+    ```
+    gradle
+    Copy code
+    dependencies {
+        implementation('ch.qos.logback:logback-classic:1.2.3') {
+            because 'Ensuring version compatibility with SLF4J'
         }
-        
-        configurations.all {
-            resolutionStrategy {
-                force 'ch.qos.logback:logback-classic:1.2.3'
-                force 'org.slf4j:slf4j-api:1.7.30'
-            }
+        implementation('org.slf4j:slf4j-api:1.7.30') {
+            because 'Compatible with Logback 1.2.x'
         }
-        
-        ```
-        
-    - In Maven, the `dependencyManagement` section allows you to enforce consistent versions across all modules, overriding any transitive dependencies.
-        
-        Example: Enforcing Versions in Maven
-        
-        ```xml
-        <dependencyManagement>
-          <dependencies>
-            <dependency>
-              <groupId>ch.qos.logback</groupId>
-              <artifactId>logback-classic</artifactId>
-              <version>1.2.3</version>
-            </dependency>
-            <dependency>
-              <groupId>org.slf4j</groupId>
-              <artifactId>slf4j-api</artifactId>
-              <version>1.7.30</version>
-            </dependency>
-          </dependencies>
-        </dependencyManagement>
-        ```
-        
+    }
 
-To find the latest compatible versions of <a href="https://www.slf4j.org/" rel="noopener noreferrer nofollow" target="_blank">SLF4J</a> and <a href="https://logback.qos.ch/" rel="noopener noreferrer nofollow" target="_blank">Logback</a> refer to other official websites. 
+    configurations.all {
+        resolutionStrategy {
+            force 'ch.qos.logback:logback-classic:1.2.3'
+            force 'org.slf4j:slf4j-api:1.7.30'
+        }
+    }
+
+    ```
+  - In Maven, the `dependencyManagement` section allows you to enforce consistent versions across all modules, overriding any transitive dependencies.
+    Example: Enforcing Versions in Maven
+    ```xml
+    <dependencyManagement>
+      <dependencies>
+        <dependency>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+          <version>1.2.3</version>
+        </dependency>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>1.7.30</version>
+        </dependency>
+      </dependencies>
+    </dependencyManagement>
+    ```
+
+To find the latest compatible versions of <a href="https://www.slf4j.org/" rel="noopener noreferrer nofollow" target="_blank">SLF4J</a> and <a href="https://logback.qos.ch/" rel="noopener noreferrer nofollow" target="_blank">Logback</a> refer to other official websites.
 
 ### Verify the Classpath
 
@@ -352,96 +328,95 @@ Example of Temporary Debug Configuration in `logback.xml`:
 Once you've identified the cause, here's how to fix it:
 
 1. Update Versions: Ensure you're using compatible versions of SLF4J and Logback. For example:
-    
-    ```xml
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.7.32</version>
-    </dependency>
-    <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>1.2.6</version>
-    </dependency>
-    
-    ```
-    
+
+   ```xml
+   <dependency>
+       <groupId>org.slf4j</groupId>
+       <artifactId>slf4j-api</artifactId>
+       <version>1.7.32</version>
+   </dependency>
+   <dependency>
+       <groupId>ch.qos.logback</groupId>
+       <artifactId>logback-classic</artifactId>
+       <version>1.2.6</version>
+   </dependency>
+
+   ```
+
 2. Remove Conflicts: Eliminate conflicting logging implementations from your classpath. For instance, exclude log4j if you're using Logback:
-    
-    ```xml
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter</artifactId>
-        <exclusions>
-            <exclusion>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-logging</artifactId>
-            </exclusion>
-        </exclusions>
-    </dependency>
-    
-    ```
-    
+
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter</artifactId>
+       <exclusions>
+           <exclusion>
+               <groupId>org.springframework.boot</groupId>
+               <artifactId>spring-boot-starter-logging</artifactId>
+           </exclusion>
+       </exclusions>
+   </dependency>
+
+   ```
+
 3. Configure SLF4J Binding: Ensure you have the correct SLF4J binding for Logback in your classpath. For example, SLF4J 1.0.7 is compatible with Logback 1.3.0-alpha5.
-    
-    ```xml
-    <dependencies>
-            <!-- SLF4J API -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>1.0.7</version>
-            </dependency>
-    
-            <!-- Logback Classic (SLF4J binding) -->
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>1.3.0-alpha5</version>
-            </dependency>
-        </dependencies>
-    ```
-    
+
+   ```xml
+   <dependencies>
+           <!-- SLF4J API -->
+           <dependency>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-api</artifactId>
+               <version>1.0.7</version>
+           </dependency>
+
+           <!-- Logback Classic (SLF4J binding) -->
+           <dependency>
+               <groupId>ch.qos.logback</groupId>
+               <artifactId>logback-classic</artifactId>
+               <version>1.3.0-alpha5</version>
+           </dependency>
+       </dependencies>
+   ```
+
 4. Implement Exclusions: Use build file exclusions to prevent conflicting dependencies:
-    
-    ```xml
-    <dependency>
-        <groupId>com.example</groupId>
-        <artifactId>example-library</artifactId>
-        <version>1.0.0</version>
-        <exclusions>
-            <exclusion>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-            </exclusion>
-        </exclusions>
-    </dependency>
-    
-    ```
-    
+
+   ```xml
+   <dependency>
+       <groupId>com.example</groupId>
+       <artifactId>example-library</artifactId>
+       <version>1.0.0</version>
+       <exclusions>
+           <exclusion>
+               <groupId>org.slf4j</groupId>
+               <artifactId>slf4j-log4j12</artifactId>
+           </exclusion>
+       </exclusions>
+   </dependency>
+
+   ```
 
 ### Configuring Logback Correctly
 
 Proper configuration of Logback is crucial. Here's a basic setup:
 
 1. Create a `logback.xml` file in your `src/main/resources` directory:
-    
-    ```xml
-    <configuration>
-        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder>
-                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-            </encoder>
-        </appender>
-    
-        <root level="INFO">
-            <appender-ref ref="CONSOLE" />
-        </root>
-    </configuration>
-    
-    ```
-    
+
+   ```xml
+   <configuration>
+       <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+           <encoder>
+               <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+           </encoder>
+       </appender>
+
+       <root level="INFO">
+           <appender-ref ref="CONSOLE" />
+       </root>
+   </configuration>
+
+   ```
+
 2. Set up appenders and loggers as needed.
 3. Specify desired log levels for different packages.
 4. Test your configuration to ensure proper logging behavior.

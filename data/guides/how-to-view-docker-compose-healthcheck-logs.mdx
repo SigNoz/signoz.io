@@ -1,13 +1,17 @@
 ---
-
 title: How to View Docker-Compose Healthcheck Logs - A Quick Guide
-slug: how-to-view-docker-compose-healthcheck-logs
 date: 2024-08-28
 tags: [faq, docker]
 authors: [nitin_gouda]
 description: Learn how to view and analyze Docker-Compose healthcheck logs with this comprehensive guide. Troubleshoot, optimize, and monitor your containerized applications effectively.
-keywords: [docker-compose healthcheck logs, container monitoring, docker inspect, docker logs, healthcheck troubleshooting]
-
+keywords:
+  [
+    docker-compose healthcheck logs,
+    container monitoring,
+    docker inspect,
+    docker logs,
+    healthcheck troubleshooting,
+  ]
 ---
 
 Docker-Compose healthchecks play a crucial role in maintaining the reliability and performance of containerized applications. As a developer or system administrator, you need to know how to view and interpret these logs to ensure your containers are running smoothly. This guide will walk you through the process of accessing Docker-Compose healthcheck logs, provide advanced techniques for log analysis, and offer best practices for implementing effective healthchecks.
@@ -27,81 +31,79 @@ Docker-Compose healthchecks are an essential tool for maintaining the operationa
 
 To effectively monitor and troubleshoot your Docker-Compose services, it's important to know how to access and interpret healthcheck logs. Here’s a step-by-step guide:
 
-1. Use the `docker inspect` command: This command allows you to retrieve detailed information about a container, including its health status.
-    
+1.  Use the `docker inspect` command: This command allows you to retrieve detailed information about a container, including its health status.
+
     ```docker
     docker inspect --format='{{json .State.Health}}' <container_name> | jq
     ```
-    
-    > *Replace `<container_name>` with the container-id or container-name.*
-    
+
+    > _Replace `<container_name>` with the container-id or container-name._
+
     The command returns a JSON object that includes the current health status of the container and the results of recent healthchecks. This is useful for quickly checking the health of your container and seeing a history of its healthcheck results. If you have raw JSON output, `jq` can format it in a more readable way.
-    
-    <Figure src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-08-27_at_11.32.49_PM.webp" alt="docker inspect logs" caption="docker inspect logs" />
-    
-2. Check the `Health` section in the inspect output: 
-The `docker inspect` output contains a `Health` section where you can find the current status of the container’s healthcheck. 
-    
-    <Figure src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-08-27_at_11.35.01_PM.webp" alt="docker inspect - health status" caption="docker inspect - health status" />
-    
-    - `Status`: Indicates whether the container is "starting", "healthy", or "unhealthy".
-    - `Log`: Contains entries of recent healthchecks, including the output of the check command and its exit status.
-    
-    This section helps you understand the current health state of your container and identify any recent failures or successes in the healthcheck process.
-    
-3. Use the `docker logs` command for detailed logs:
-While `docker inspect` gives a summary of the health status, `docker logs` provides a more detailed view by showing the container’s standard output (stdout) and standard error (stderr), where healthcheck results may be logged.
-    
-    ```docker
-    docker logs <container_name>
-    ```
-    
-    This command shows the container's stdout and stderr, which often include healthcheck results.
-    
-    <Figure src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-08-27_at_11.37.21_PM.webp" alt="docker logs" caption="docker logs" />
-    
-4. Interpret healthcheck status and results:
+
+    <Figure
+      src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-08-27_at_11.32.49_PM.webp"
+      alt="docker inspect logs"
+      caption="docker inspect logs"
+    />
+
+2.  Check the `Health` section in the inspect output:
+    The `docker inspect` output contains a `Health` section where you can find the current status of the container’s healthcheck.
+        <Figure src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-08-27_at_11.35.01_PM.webp" alt="docker inspect - health status" caption="docker inspect - health status" />
+
+        - `Status`: Indicates whether the container is "starting", "healthy", or "unhealthy".
+        - `Log`: Contains entries of recent healthchecks, including the output of the check command and its exit status.
+
+        This section helps you understand the current health state of your container and identify any recent failures or successes in the healthcheck process.
+3.  Use the `docker logs` command for detailed logs:
+    While `docker inspect` gives a summary of the health status, `docker logs` provides a more detailed view by showing the container’s standard output (stdout) and standard error (stderr), where healthcheck results may be logged.
+        ```docker
+        docker logs <container_name>
+        ```
+
+        This command shows the container's stdout and stderr, which often include healthcheck results.
+
+        <Figure src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-08-27_at_11.37.21_PM.webp" alt="docker logs" caption="docker logs" />
+4.  Interpret healthcheck status and results:
+
     - "starting": Indicates that the container is still within its startup period, and healthchecks are not yet determining the overall health status.
     - "healthy": The container has passed its most recent healthcheck, indicating it is functioning as expected.
     - "unhealthy": The container has failed its healthcheck, signaling a potential problem that may require attention.
-    
+
     Understanding these statuses helps you quickly assess whether a container is operating normally or if there are issues that need to be addressed.
-    
 
 ## Advanced Techniques for Healthcheck Log Analysis
 
 For more comprehensive Docker-Compose healthcheck logs, you can leverage several advanced techniques. These methods can help you gain deeper insights into the health and performance of your containers, manage log data efficiently, and monitor service health more effectively.
 
-1. Utilize `docker service ps` for swarm mode services: 
-In Docker Swarm mode, `docker service ps` provides an overview of the tasks (containers) associated with a service, including their health status.
-    
-    ```docker
-    docker service ps --format "{{.Name}}: {{.CurrentState}}" service_name
-    ```
-    
+1.  Utilize `docker service ps` for swarm mode services:
+    In Docker Swarm mode, `docker service ps` provides an overview of the tasks (containers) associated with a service, including their health status.
+        ```docker
+        docker service ps --format "{{.Name}}: {{.CurrentState}}" service_name
+        ```
+
 - `-format "{{.Name}}: {{.CurrentState}}"`: Customizes the output to show the name of each task and its current state.
 - `service_name`: Replace with the name of your service.
 
 This command shows the current state of all tasks in a service, including healthcheck status.
 
-1. Implement custom logging drivers: 
-Custom logging drivers can centralize and manage healthcheck logs more effectively. You can configure a logging driver like Fluentd or Logstash to collect and centralize healthcheck logs.
-2. Use third-party monitoring tools:
-Tools like Prometheus with Grafana can provide visual insights into your healthcheck statuses over time. Third-party monitoring tools can offer advanced features for visualizing and analyzing healthcheck data.
-3. Set up log rotation: 
-Docker provides built-in options for configuring log rotation for containers using the `json-file` logging driver. Log rotation helps manage log file sizes and retention periods, preventing disk space issues. Here’s how you can set it up in your `docker-compose.yml` file:
-    
-    ```yaml
-    services:
-      my_service:
-        image: <image>
-        logging:
-          driver: "json-file"
-          options:
-            max-size: "10m"
-            max-file: "3"
-    ```
-    
+1.  Implement custom logging drivers:
+    Custom logging drivers can centralize and manage healthcheck logs more effectively. You can configure a logging driver like Fluentd or Logstash to collect and centralize healthcheck logs.
+2.  Use third-party monitoring tools:
+    Tools like Prometheus with Grafana can provide visual insights into your healthcheck statuses over time. Third-party monitoring tools can offer advanced features for visualizing and analyzing healthcheck data.
+3.  Set up log rotation:
+    Docker provides built-in options for configuring log rotation for containers using the `json-file` logging driver. Log rotation helps manage log file sizes and retention periods, preventing disk space issues. Here’s how you can set it up in your `docker-compose.yml` file:
+        ```yaml
+        services:
+          my_service:
+            image: <image>
+            logging:
+              driver: "json-file"
+              options:
+                max-size: "10m"
+                max-file: "3"
+        ```
+
 - `driver`: Specifies the logging driver to use. For log rotation, the `json-file` driver is commonly used.
 - `max-size`: Defines the maximum size of each log file before it gets rotated. For example, `"10m"` limits log files to 10 megabytes. Once this size is reached, the log file will be rotated.
 - `max-file`: Specifies the number of rotated log files to keep. For instance, `"3"` keeps the latest three log files. Older files are deleted after reaching this limit.
@@ -110,83 +112,76 @@ Docker provides built-in options for configuring log rotation for containers usi
 
 When dealing with healthcheck failures, consider these troubleshooting steps:
 
-1. Identify failed healthchecks:
-Use the `docker events` command to observe healthcheck events as they occur. This command helps you track changes in container health status, enabling you to quickly pinpoint when and where issues arise.
-    
-    ```docker
-    docker events --filter 'event=health_status'
-    ```
-    
-    This command filters Docker events to display only those related to health status changes. You'll see real-time updates whenever a container's health status transitions, such as from "healthy" to "unhealthy." 
-    
-2. Debug timing-related problems:
-Timing-related issues are common in Docker healthchecks, especially when the services inside your containers require more time to start up or respond than the healthcheck parameters allow. Misconfigured timing can lead to unnecessary healthcheck failures, causing containers to be marked as unhealthy or even restarted prematurely.
-    
-    ```yaml
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
-      interval: 1m30s  
-      timeout: 10s
-      retries: 3 
-      start_period: 40s 
-    ```
-    
-    - Adjust the `interval` Parameter:
-    The `interval` parameter defines how often the healthcheck is run. If your service takes longer to stabilize after startup or under heavy load, a short interval might cause the healthcheck to fail frequently.
-    - Evaluate `retries` Count:
-    The `retries` parameter determines how many consecutive failures Docker should tolerate before marking the container as unhealthy. If your service has intermittent issues, increasing the `retries` count can prevent it from being prematurely flagged as unhealthy.
-    - Use the `start_period` Parameter:
-    The `start_period` parameter defines a grace period after the container starts, during which Docker ignores failed healthchecks. This is particularly useful for services that require a long startup time before they can respond to healthcheck requests.
-3. Handle network-related failures: 
-Network-related failures in Docker healthchecks can occur due to various factors like network latency, temporary outages, or unstable network connections. If not properly managed, these issues can cause your containers to be marked as unhealthy, even when the service itself is functioning correctly.
-    1. Design Healthchecks to Be Resilient to Network Fluctuations:
-    Ensure that your healthcheck commands can handle brief network interruptions or latency. For example, if your healthcheck involves making an HTTP request, use tools that can retry the request or include built-in timeout handling.
-    2. Use Graceful Failures in Healthcheck Commands:
-    Implement error handling in your healthcheck scripts or commands to deal with network-related issues. For example, you could script a healthcheck that returns a temporary "warning" state instead of an immediate failure if a network call fails.
-        
-        ```bash
-        #!/bin/sh
-        if curl -f http://localhost/health; then
-          exit 0
-        else
-          # Log the failure for further analysis
-          echo "Healthcheck warning: Network issue detected" >> /var/log/healthcheck.log
-          exit 1
-        fi
+1.  Identify failed healthchecks:
+    Use the `docker events` command to observe healthcheck events as they occur. This command helps you track changes in container health status, enabling you to quickly pinpoint when and where issues arise.
+        ```docker
+        docker events --filter 'event=health_status'
         ```
-        
-    3. Monitor and Adjust Based on Network Conditions:
-    Regularly monitor the performance of your healthchecks in relation to network conditions. If you notice frequent network-related failures, consider further adjustments to the `interval`, `timeout`, or even the nature of the healthcheck itself.
-        
+
+        This command filters Docker events to display only those related to health status changes. You'll see real-time updates whenever a container's health status transitions, such as from "healthy" to "unhealthy."
+2.  Debug timing-related problems:
+    Timing-related issues are common in Docker healthchecks, especially when the services inside your containers require more time to start up or respond than the healthcheck parameters allow. Misconfigured timing can lead to unnecessary healthcheck failures, causing containers to be marked as unhealthy or even restarted prematurely.
         ```yaml
-        healthcheck:  
-        	test: ["CMD", "curl", "-f", "http://localhost/health"]  
-        	interval: 1m30s  
-        	timeout: 30s  
-        	retries: 5  
-        	start_period: 1m
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost/health"]
+          interval: 1m30s
+          timeout: 10s
+          retries: 3
+          start_period: 40s
         ```
-        
-4. Optimize healthcheck performance:
-Optimizing the performance of healthchecks is crucial to ensuring that they accurately monitor the health of your Docker containers without introducing unnecessary overhead or consuming excessive resources. Poorly designed healthchecks can lead to performance bottlenecks, increased resource usage, and even false positives, where healthy containers are marked as unhealthy.
-    
-    ```yaml
-    healthcheck:  
-    	test: ["CMD", "curl", "-f", "http://localhost/health"]  
-    	interval: 30s  
-    	timeout: 5s  
-    	retries: 3  
-    	start_period: 10s
-    ```
-    
-    - Use Lightweight Commands:
-    The commands used in healthchecks should be as lightweight as possible. Avoid complex scripts or commands that require significant CPU, memory, or I/O operations, as these can degrade the overall performance of the container. eg. CMD, curl etc.
-    - Reduce Healthcheck Frequency:
-    Set the healthcheck `interval` to a reasonable value that balances responsiveness with performance. Too frequent checks can overwhelm the container and host system, especially if the check itself is resource-intensive.
-    - Adjust Timeout and Retry Settings:
-    Fine-tune the `timeout` and `retries` settings to prevent the healthcheck from running too long or retrying excessively. If the healthcheck takes too long, it can consume resources that could otherwise be used by the application itself.
-    - Limit the Scope of Healthchecks:
-    Focus your healthchecks on critical aspects of the service rather than testing every possible condition. For instance, checking if a web server is responding may be sufficient, without needing to check every endpoint or perform extensive database queries.
+
+        - Adjust the `interval` Parameter:
+        The `interval` parameter defines how often the healthcheck is run. If your service takes longer to stabilize after startup or under heavy load, a short interval might cause the healthcheck to fail frequently.
+        - Evaluate `retries` Count:
+        The `retries` parameter determines how many consecutive failures Docker should tolerate before marking the container as unhealthy. If your service has intermittent issues, increasing the `retries` count can prevent it from being prematurely flagged as unhealthy.
+        - Use the `start_period` Parameter:
+        The `start_period` parameter defines a grace period after the container starts, during which Docker ignores failed healthchecks. This is particularly useful for services that require a long startup time before they can respond to healthcheck requests.
+3.  Handle network-related failures:
+    Network-related failures in Docker healthchecks can occur due to various factors like network latency, temporary outages, or unstable network connections. If not properly managed, these issues can cause your containers to be marked as unhealthy, even when the service itself is functioning correctly. 1. Design Healthchecks to Be Resilient to Network Fluctuations:
+    Ensure that your healthcheck commands can handle brief network interruptions or latency. For example, if your healthcheck involves making an HTTP request, use tools that can retry the request or include built-in timeout handling. 2. Use Graceful Failures in Healthcheck Commands:
+    Implement error handling in your healthcheck scripts or commands to deal with network-related issues. For example, you could script a healthcheck that returns a temporary "warning" state instead of an immediate failure if a network call fails.
+            ```bash
+            #!/bin/sh
+            if curl -f http://localhost/health; then
+              exit 0
+            else
+              # Log the failure for further analysis
+              echo "Healthcheck warning: Network issue detected" >> /var/log/healthcheck.log
+              exit 1
+            fi
+            ```
+
+        3. Monitor and Adjust Based on Network Conditions:
+        Regularly monitor the performance of your healthchecks in relation to network conditions. If you notice frequent network-related failures, consider further adjustments to the `interval`, `timeout`, or even the nature of the healthcheck itself.
+
+            ```yaml
+            healthcheck:
+            	test: ["CMD", "curl", "-f", "http://localhost/health"]
+            	interval: 1m30s
+            	timeout: 30s
+            	retries: 5
+            	start_period: 1m
+            ```
+
+4.  Optimize healthcheck performance:
+    Optimizing the performance of healthchecks is crucial to ensuring that they accurately monitor the health of your Docker containers without introducing unnecessary overhead or consuming excessive resources. Poorly designed healthchecks can lead to performance bottlenecks, increased resource usage, and even false positives, where healthy containers are marked as unhealthy.
+        ```yaml
+        healthcheck:
+        	test: ["CMD", "curl", "-f", "http://localhost/health"]
+        	interval: 30s
+        	timeout: 5s
+        	retries: 3
+        	start_period: 10s
+        ```
+
+        - Use Lightweight Commands:
+        The commands used in healthchecks should be as lightweight as possible. Avoid complex scripts or commands that require significant CPU, memory, or I/O operations, as these can degrade the overall performance of the container. eg. CMD, curl etc.
+        - Reduce Healthcheck Frequency:
+        Set the healthcheck `interval` to a reasonable value that balances responsiveness with performance. Too frequent checks can overwhelm the container and host system, especially if the check itself is resource-intensive.
+        - Adjust Timeout and Retry Settings:
+        Fine-tune the `timeout` and `retries` settings to prevent the healthcheck from running too long or retrying excessively. If the healthcheck takes too long, it can consume resources that could otherwise be used by the application itself.
+        - Limit the Scope of Healthchecks:
+        Focus your healthchecks on critical aspects of the service rather than testing every possible condition. For instance, checking if a web server is responding may be sufficient, without needing to check every endpoint or perform extensive database queries.
 
 ## Customizing Healthchecks in Docker-Compose
 
@@ -197,12 +192,11 @@ services:
   web:
     image: nginx
     healthcheck:
-      test: ["CMD", "curl", "-f", "<http://localhost>"]
+      test: ['CMD', 'curl', '-f', '<http://localhost>']
       interval: 1m30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
 ```
 
 - `test`: The `test` parameter defines the command that Docker will execute inside the container to check its health. This command should return a zero exit code if the container is healthy. In this example, `curl -f http://localhost` checks if the Nginx server is responding to requests. The `-f` option ensures that `curl` will return an error code if the HTTP response code is 400 or greater, indicating that the web server is not functioning correctly.
@@ -219,12 +213,12 @@ Follow these best practices to maximize the effectiveness of your healthchecks:
 2. Keep checks lightweight: Healthchecks should be lightweight and fast. Heavy or resource-intensive checks can negatively impact the performance of your container, especially if they are run frequently. Use basic commands like `curl` or simple scripts that complete quickly to ensure minimal disruption to the container's operation.
 3. Set appropriate intervals: The interval between healthchecks should be set based on the criticality of the service. For high-availability services, a shorter interval may be necessary to detect and respond to issues quickly. However, running checks too frequently can strain system resources, especially in environments with many containers. Typically, an interval of 30 seconds to 2 minutes is sufficient for most services..
 4. Use environment variables: To enhance flexibility and adaptability, use environment variables in your healthcheck commands. This allows you to modify healthcheck behavior without changing the code. For example:
-    
-    ```yaml
-    healthcheck:  
-    	test: ["CMD", "curl", "-f", "http://${HOST:-localhost}:${PORT:-80}/health"]
-    ```
-    
+
+   ```yaml
+   healthcheck:
+   	test: ["CMD", "curl", "-f", "http://${HOST:-localhost}:${PORT:-80}/health"]
+   ```
+
 5. Implement graceful shutdowns: Ensure that your application can handle `SIGTERM` signals, which are sent by Docker when stopping a container. Properly handling these signals allows your application to clean up resources and shut down gracefully.
 
 ## Monitoring Docker-Compose Healthchecks with SigNoz
@@ -253,7 +247,11 @@ Note: Replace `{region}` with your SigNoz region and `SIGNOZ_INGESTION_KEY` with
 
 To obtain the SigNoz ingestion key and region, navigate to the “Settings” page in your SigNoz dashboard. You will find the ingestion key and region under the “Ingestion Settings” tab or if not present you can create for yourself by clicking on “New Ingestion key”.
 
-<Figure src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-08-28_at_9.04.01_AM.webp" alt="SigNoz Ingestion Settings" caption="SigNoz Ingestion Settings" />
+<Figure
+  src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-08-28_at_9.04.01_AM.webp"
+  alt="SigNoz Ingestion Settings"
+  caption="SigNoz Ingestion Settings"
+/>
 
 1. Set Up the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)Config
 
@@ -264,7 +262,7 @@ In the root of your project folder, create a file `otel-collector-config.yaml` a
 ```yaml
 receivers:
   tcplog/docker:
-    listen_address: "0.0.0.0:2255"
+    listen_address: '0.0.0.0:2255'
     operators:
       - type: regex_parser
         regex: '^<([0-9]+)>[0-9]+ (?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?) (?P<container_id>\\S+) (?P<container_name>\\S+) [0-9]+ - -( (?P<body>.*))?'
@@ -292,7 +290,7 @@ exporters:
     tls:
       insecure: false
     headers:
-      "signoz-ingestion-key": ${env:SIGNOZ_INGESTION_KEY}
+      'signoz-ingestion-key': ${env:SIGNOZ_INGESTION_KEY}
 
 service:
   pipelines:
@@ -339,31 +337,36 @@ In your Docker Compose file, add the below configuration:
     command: syslog+tcp://otel-collector:2255
     depends_on:
       - otel-collector
-    restart: on-failure 
+    restart: on-failure
 ```
 
 The above Docker Compose configuration sets up two services:
 
 - `otel-collector`:
-    - Uses the Signoz [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) image.
-    - Mounts the `otel-collector-config.yaml` file into the container.
-    - Uses environment variables from the `.env` file for configuration.
-    - Exposes ports `4317` (OTLP gRPC receiver) and `4318` (OTLP HTTP receiver).
+  - Uses the Signoz [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) image.
+  - Mounts the `otel-collector-config.yaml` file into the container.
+  - Uses environment variables from the `.env` file for configuration.
+  - Exposes ports `4317` (OTLP gRPC receiver) and `4318` (OTLP HTTP receiver).
 - `logspout`:
-    - Uses the `gliderlabs/logspout` image to collect logs from other Docker containers.
-    - Forwards logs to the `otel-collector` service on port `2255`.
-    - Depends on the `otel-collector` service, ensuring it starts first so it can forward the logs to it.
+  - Uses the `gliderlabs/logspout` image to collect logs from other Docker containers.
+  - Forwards logs to the `otel-collector` service on port `2255`.
+  - Depends on the `otel-collector` service, ensuring it starts first so it can forward the logs to it.
+
 1.  Start the Docker Compose file
 
 Run the below command in your terminal to start the containers:
 
 ```docker
-docker compose up -d 
+docker compose up -d
 ```
 
 If it runs without any error, navigate to your SigNoz Cloud. Under the “Logs” tab, you should see the incoming logs.
 
-<Figure src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-07-17_at_4.08.17_PM.webp" alt="Docker logs sent to SigNoz" caption="Docker logs sent to SigNoz" />
+<Figure
+  src="/img/guides/2024/08/how-to-view-docker-compose-healthcheck-logs-Screenshot_2024-07-17_at_4.08.17_PM.webp"
+  alt="Docker logs sent to SigNoz"
+  caption="Docker logs sent to SigNoz"
+/>
 
 ## Key Takeaways
 
@@ -391,40 +394,40 @@ The `HEALTHCHECK` instruction in a Dockerfile and the `healthcheck` configuratio
 
 Implementing multi-stage healthchecks is an effective strategy for ensuring that complex applications are thoroughly monitored.
 
-1. Using a script: You can create a script that runs multiple checks in sequence, with each check focusing on a different part of the application. 
-    
-    ```bash
-    #!/bin/sh
-    if curl -f http://localhost/health/db; then
-      if curl -f http://localhost/health/cache; then
-        exit 0
-      fi
-    fi
-    exit 1
-    ```
-    
-    This script first checks the database health, then the cache. If both are healthy, the script exits with a status code 0 (indicating success). If any check fails, it exits with a non-zero code (indicating failure).
-    
+1. Using a script: You can create a script that runs multiple checks in sequence, with each check focusing on a different part of the application.
+
+   ```bash
+   #!/bin/sh
+   if curl -f http://localhost/health/db; then
+     if curl -f http://localhost/health/cache; then
+       exit 0
+     fi
+   fi
+   exit 1
+   ```
+
+   This script first checks the database health, then the cache. If both are healthy, the script exits with a status code 0 (indicating success). If any check fails, it exits with a non-zero code (indicating failure).
+
 2. Implementing different healthcheck commands: In Docker-Compose, you can define individual healthchecks for different services or components of your application.
-    
-    ```docker
-    services:
-      web:
-        image: myapp
-        healthcheck:
-          test: ["CMD", "curl", "-f", "http://localhost/health/web"]
-          interval: 1m
-          timeout: 10s
-          retries: 3
-      db:
-        image: mydb
-        healthcheck:
-          test: ["CMD", "pg_isready"]
-          interval: 30s
-          timeout: 5s
-          retries: 3
-    ```
-    
-    In this example, the `web` service is monitored by checking its web interface, while the `db` service uses a database-specific healthcheck. Each service is monitored according to its specific needs.
-    
+
+   ```docker
+   services:
+     web:
+       image: myapp
+       healthcheck:
+         test: ["CMD", "curl", "-f", "http://localhost/health/web"]
+         interval: 1m
+         timeout: 10s
+         retries: 3
+     db:
+       image: mydb
+       healthcheck:
+         test: ["CMD", "pg_isready"]
+         interval: 30s
+         timeout: 5s
+         retries: 3
+   ```
+
+   In this example, the `web` service is monitored by checking its web interface, while the `db` service uses a database-specific healthcheck. Each service is monitored according to its specific needs.
+
 3. Utilizing external health checking services: External checks can often be integrated with [monitoring and alerting tools](https://signoz.io/comparisons/infrastructure-monitoring-tools/), such as SigNoz or Prometheus, allowing you to track healthcheck results over time, generate alerts on failures, and correlate healthcheck data with other application metrics.

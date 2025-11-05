@@ -1,13 +1,20 @@
 ---
-
 title: Azure Application Insights - How to Monitor
-slug: azure-app-insights
 date: 2024-08-21
 tags: [monitoring]
 authors: [simran_kumari]
 description: Learn how to effectively monitor your applications using Azure Application Insights. Discover setup, key metrics, troubleshooting, and best practices.
-keywords: [azure application insights, app monitoring, performance tracking, web analytics, cloud monitoring, application performance management, azure monitor, telemetry]
-
+keywords:
+  [
+    azure application insights,
+    app monitoring,
+    performance tracking,
+    web analytics,
+    cloud monitoring,
+    application performance management,
+    azure monitor,
+    telemetry,
+  ]
 ---
 
 Azure Application Insights is a powerful monitoring service that helps you keep your applications running smoothly. It provides real-time insights into your application's performance, user behaviour, and potential issues. This comprehensive guide will walk you through the essentials of Azure App Insights, from setup to advanced usage.
@@ -21,7 +28,11 @@ Azure Application Insights is a comprehensive application performance management
 3. Detect and diagnose issues quickly
 4. Make data-driven decisions for improvements
 
-<Figure src="/img/guides/2024/08/azure-app-insights-image.webp" alt="Working of Azure App Insights" caption="Working of Azure App Insights" /> 
+<Figure
+  src="/img/guides/2024/08/azure-app-insights-image.webp"
+  alt="Working of Azure App Insights"
+  caption="Working of Azure App Insights"
+/>{' '}
 
 This service supports a wide range of web, mobile, desktop, and even IoT applications. It's part of the broader Azure Monitor platform, which provides a complete solution for collecting, analyzing, and acting on telemetry from your cloud and on-premises environments.
 
@@ -42,116 +53,158 @@ Setting up Application Insights is straightforward. Here's a step-by-step guide:
 
 1. Log in to the Azure Portal: Go to the <a href="https://portal.azure.com/" rel="noopener noreferrer nofollow" target="_blank">Azure Portal</a> and sign in with your Azure account credentials.
 2. Create a New Resource: In the Azure Portal, click on the “Create a resource” button in the left-hand menu.
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-image%201.webp" alt="Creating a new Resource" caption="Creating a new Resource" />
-    
+
+   <Figure
+     src="/img/guides/2024/08/azure-app-insights-image%201.webp"
+     alt="Creating a new Resource"
+     caption="Creating a new Resource"
+   />
+
 3. Search for Application Insights: In the search bar, type “Application Insights” and select it from the list.
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-image%202.webp" alt="Search for Application Insights in Azure Portal" caption="Search for Application Insights in Azure Portal" />
-    
+
+   <Figure
+     src="/img/guides/2024/08/azure-app-insights-image%202.webp"
+     alt="Search for Application Insights in Azure Portal"
+     caption="Search for Application Insights in Azure Portal"
+   />
+
 4. Configure Your Resource: Click on “Create” and fill out the required details such as Subscription, Resource Group, and Name. You can also choose your preferred Region and the type of application you want to monitor.
-    
-    Here's a brief summary of what to fill:
-    
-    - Subscription: Choose the billing account.
-    - Resource Group: Select or create a logical container for related resources.
-    - Name: Enter a unique and descriptive resource name.
-    - Region: Pick a geographical location for the resource.
-    - Type of Application: Select the application type you want to monitor (e.g., web, mobile).
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-image%203.webp" alt="Creating an Application Insights in Azure" caption="Creating an Application Insights in Azure" />
-    
+
+   Here's a brief summary of what to fill:
+
+   - Subscription: Choose the billing account.
+   - Resource Group: Select or create a logical container for related resources.
+   - Name: Enter a unique and descriptive resource name.
+   - Region: Pick a geographical location for the resource.
+   - Type of Application: Select the application type you want to monitor (e.g., web, mobile).
+
+   <Figure
+     src="/img/guides/2024/08/azure-app-insights-image%203.webp"
+     alt="Creating an Application Insights in Azure"
+     caption="Creating an Application Insights in Azure"
+   />
+
 5. Review and Create: Review your configuration and click “Create” to provision your Application Insights resource.
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-image%204.webp" alt="Azure Application Insights deployment in progress" caption="Azure Application Insights deployment in progress" />
-    
+
+   <Figure
+     src="/img/guides/2024/08/azure-app-insights-image%204.webp"
+     alt="Azure Application Insights deployment in progress"
+     caption="Azure Application Insights deployment in progress"
+   />
 
 ### Obtaining the Connection String
 
 1. Navigate to Your Application Insights Resource: Once your resource is created, go to the resource overview page in the Azure Portal.
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-image%205.webp" alt="Navigating to Application Insights Resource" caption="Navigating to Application Insights Resource" />
-    
+
+   <Figure
+     src="/img/guides/2024/08/azure-app-insights-image%205.webp"
+     alt="Navigating to Application Insights Resource"
+     caption="Navigating to Application Insights Resource"
+   />
+
 2. Copy the Connection String: Under the “Overview” tab, you’ll find the Connection String. Copy this string as it will be needed to configure your application for telemetry data.
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-image%206.webp" alt="Fetching the Connection String" caption="Fetching the Connection String" />
-    
+
+   <Figure
+     src="/img/guides/2024/08/azure-app-insights-image%206.webp"
+     alt="Fetching the Connection String"
+     caption="Fetching the Connection String"
+   />
 
 ### Integrating Application Insights SDK into Your Application
 
 1. Add the SDK to Your Application: Depending on your application’s technology stack, install the appropriate Application Insights SDK. For example:
-    - .NET: Use NuGet to install `Microsoft.ApplicationInsights.AspNetCore` package.
-    - Java: Add `applicationinsights-core` dependency in your `pom.xml` or `build.gradle`.
-    - Node.js: Use npm to install the `applicationinsights` package.
-2. Initialize the SDK: In your application’s startup code, initialize the Application Insights SDK by providing the `Connection String`you obtained earlier. For example, in a Node.js application: 
-    - Before initializing application insights SDK:
-    
-    ```jsx
-    const express = require('express');
-    const app = express();
-    const port = 3000;
-    
-    app.get('/', (req, res) => {
-      res.send('Hello World!');
-    });
-    
-    app.listen(port, () => {
-      console.log(`App listening at http://localhost:${port}`);
-    });
-    ```
-    
-    - After initializing application insights SDK:
-    
-    ```jsx
-    const express = require('express');
-    const app = express();
-    const port = 3000;
-    const appInsights = require('applicationinsights');
-    
-    // Initialize Application Insights with your Instrumentation Key
-    appInsights.setup('YOUR_CONNECTION_STRING')
-      .setAutoCollectConsole(true, true)
-      .setAutoCollectExceptions(true)
-      .setAutoCollectRequests(true)
-      .start();
-    
-    // Create a default client
-    const client = appInsights.defaultClient;
-    
-    app.get('/', (req, res) => {
-      client.trackEvent({ name: "Homepage accessed" }); // Track a custom event
-      res.send('Hello World!');
-    });
-    
-    app.listen(port, () => {
-      console.log(`App listening at http://localhost:${port}`);
-    });
-    ```
-    
+   - .NET: Use NuGet to install `Microsoft.ApplicationInsights.AspNetCore` package.
+   - Java: Add `applicationinsights-core` dependency in your `pom.xml` or `build.gradle`.
+   - Node.js: Use npm to install the `applicationinsights` package.
+2. Initialize the SDK: In your application’s startup code, initialize the Application Insights SDK by providing the `Connection String`you obtained earlier. For example, in a Node.js application:
+
+   - Before initializing application insights SDK:
+
+   ```jsx
+   const express = require('express')
+   const app = express()
+   const port = 3000
+
+   app.get('/', (req, res) => {
+     res.send('Hello World!')
+   })
+
+   app.listen(port, () => {
+     console.log(`App listening at http://localhost:${port}`)
+   })
+   ```
+
+   - After initializing application insights SDK:
+
+   ```jsx
+   const express = require('express')
+   const app = express()
+   const port = 3000
+   const appInsights = require('applicationinsights')
+
+   // Initialize Application Insights with your Instrumentation Key
+   appInsights
+     .setup('YOUR_CONNECTION_STRING')
+     .setAutoCollectConsole(true, true)
+     .setAutoCollectExceptions(true)
+     .setAutoCollectRequests(true)
+     .start()
+
+   // Create a default client
+   const client = appInsights.defaultClient
+
+   app.get('/', (req, res) => {
+     client.trackEvent({ name: 'Homepage accessed' }) // Track a custom event
+     res.send('Hello World!')
+   })
+
+   app.listen(port, () => {
+     console.log(`App listening at http://localhost:${port}`)
+   })
+   ```
+
 3. Verify the Integration: Start your application and ensure that the Application Insights SDK is correctly initialized and sending telemetry data to Azure.
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-image%207.webp" alt="Visualizing Request trace data" caption="Visualizing Request trace data" />
-    
+
+   <Figure
+     src="/img/guides/2024/08/azure-app-insights-image%207.webp"
+     alt="Visualizing Request trace data"
+     caption="Visualizing Request trace data"
+   />
 
 ### Configuring Data Collection and Sampling Options
 
 1. Access the Configuration Settings: In the Azure Portal, navigate to your Application Insights resource and go to the “Configure” section.
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-image%208.webp" alt="Configuring Data Collection and Sampling Options" caption="Configuring Data Collection and Sampling Options" />
-    
+
+   <Figure
+     src="/img/guides/2024/08/azure-app-insights-image%208.webp"
+     alt="Configuring Data Collection and Sampling Options"
+     caption="Configuring Data Collection and Sampling Options"
+   />
+
 2. Adjust Sampling Settings: Configure sampling settings to control the volume of data sent to Application Insights. This helps in reducing data storage costs and avoiding noise from unimportant telemetry. To configure data sampling, under the Configure section go to `Usage and Estimated Costs` click on `Data Sampling`, and adjust the data volume accordingly.
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-image%209.webp" alt="Data sampling in Azure app insights" caption="Data sampling in Azure app insights" />
-    
-3. Set Up Data Collection: 
-    1. Move to Monitoring section, under that select the `Diagnostic settings` and click on the `Add diagnostic setting` option. 
-        
-        <Figure src="/img/guides/2024/08/azure-app-insights-image%2010.webp" alt="image.webp" caption="image.webp" />
-        
-    2. Here, you can choose what kind of telemetry you want to collect, such as requests, exceptions, traces, custom events, and metrics.  If you want to collect all types of data, we can select `allLogs` checkbox.
-        
-        <Figure src="/img/guides/2024/08/azure-app-insights-image%2011.webp" alt="Data collection configuration in Azure application insights" caption="Data collection configuration in Azure application insights" />
-        
+
+   <Figure
+     src="/img/guides/2024/08/azure-app-insights-image%209.webp"
+     alt="Data sampling in Azure app insights"
+     caption="Data sampling in Azure app insights"
+   />
+
+3. Set Up Data Collection:
+   1. Move to Monitoring section, under that select the `Diagnostic settings` and click on the `Add diagnostic setting` option.
+
+      <Figure
+        src="/img/guides/2024/08/azure-app-insights-image%2010.webp"
+        alt="image.webp"
+        caption="image.webp"
+      />
+
+   2. Here, you can choose what kind of telemetry you want to collect, such as requests, exceptions, traces, custom events, and metrics. If you want to collect all types of data, we can select `allLogs` checkbox.
+
+      <Figure
+        src="/img/guides/2024/08/azure-app-insights-image%2011.webp"
+        alt="Data collection configuration in Azure application insights"
+        caption="Data collection configuration in Azure application insights"
+      />
 4. Save and Apply Settings: Save your settings once you have configured the data collection and sampling options. Your application is now set up with Azure Application Insights, and you can start monitoring its performance and usage in real-time.
 
 By following these steps, you can effectively set up Azure Application Insights to gain deep insights into your application’s health and usage, enabling you to make data-driven decisions to enhance performance and reliability.
@@ -209,72 +262,79 @@ Performance counters and resource utilization metrics provide insights into the 
 - Memory Usage: Tracks the amount of memory used by your application. Monitoring memory usage helps identify memory leaks and optimize resource allocation.
 - Disk I/O: Measures the read and write operations on the disk. High disk I/O can impact application performance and indicate the need for optimization.
 
-<Figure src="/img/guides/2024/08/azure-app-insights-image%2012.webp" alt="Key Monitoring Metrics in Azure Application Insights: Summary" caption="Key Monitoring Metrics in Azure Application Insights: Summary" />
+<Figure
+  src="/img/guides/2024/08/azure-app-insights-image%2012.webp"
+  alt="Key Monitoring Metrics in Azure Application Insights: Summary"
+  caption="Key Monitoring Metrics in Azure Application Insights: Summary"
+/>
 
 ## How to Use Application Insights for Troubleshooting
 
 Application Insights shines when it comes to troubleshooting. Here's how to leverage its features:
 
 1. Analyze application logs and traces:
-    - Use the Logs feature to query your telemetry data.
-    - Look for patterns or anomalies in your logs.
-    - Example: If you notice a spike in specific error messages, it can indicate a recurring issue that needs addressing.
-2. Identify performance bottlenecks: 
-    - Use the Performance blade to see end-to-end transaction details.
-    - Drill down into slow requests or dependencies.
-    - Example: If the Application Map shows a delay in a particular microservice, you can investigate that service’s performance and optimize its efficiency.
+   - Use the Logs feature to query your telemetry data.
+   - Look for patterns or anomalies in your logs.
+   - Example: If you notice a spike in specific error messages, it can indicate a recurring issue that needs addressing.
+2. Identify performance bottlenecks:
+   - Use the Performance blade to see end-to-end transaction details.
+   - Drill down into slow requests or dependencies.
+   - Example: If the Application Map shows a delay in a particular microservice, you can investigate that service’s performance and optimize its efficiency.
 3. Debug exceptions and failures:
-    - The Failures blade provides detailed stack traces for exceptions.
-    - Correlate failures with other metrics to understand root causes.
-    - Example: By analyzing a stack trace for an uncaught exception, you might find that an unexpected null reference caused the issue, leading to a code fix.
+   - The Failures blade provides detailed stack traces for exceptions.
+   - Correlate failures with other metrics to understand root causes.
+   - Example: By analyzing a stack trace for an uncaught exception, you might find that an unexpected null reference caused the issue, leading to a code fix.
 4. Correlate issues across distributed systems:
-    - Correlation IDs: Implement correlation IDs to trace the flow of a request through different services.
-        - Neglecting to use correlation IDs, making it difficult to connect related logs and telemetry from different services.
-        
-        <Figure src="/img/guides/2024/08/azure-app-insights-image%2013.webp" alt="Using Correlation IDs" caption="Using Correlation IDs" />
-        
+   - Correlation IDs: Implement correlation IDs to trace the flow of a request through different services.
+     - Neglecting to use correlation IDs, making it difficult to connect related logs and telemetry from different services.
+     {' '}
+     <Figure
+       src="/img/guides/2024/08/azure-app-insights-image%2013.webp"
+       alt="Using Correlation IDs"
+       caption="Using Correlation IDs"
+     />
 
 ## Best Practices for Azure Application Insights
 
 Tips to Enhance Troubleshooting Experience:
 
 - Implementing Proper Sampling Techniques to Manage Data Volume: Sampling helps manage the volume of data collected and processed, preventing data overload and reducing costs while still capturing representative performance insights.
-    - Example: Set up dynamic sampling in Application Insights to collect data from 10% of high-traffic requests, ensuring you capture enough data to analyze performance trends without exceeding data limits.
+  - Example: Set up dynamic sampling in Application Insights to collect data from 10% of high-traffic requests, ensuring you capture enough data to analyze performance trends without exceeding data limits.
 - Setting Up Meaningful Alerts and Action Groups: Alerts and action groups help you respond proactively to issues by notifying the right people and automating responses based on predefined conditions.
-    - Example: Configure an alert to trigger if the error rate exceeds 5% and send notifications to the on-call support team via SMS and email.
+  - Example: Configure an alert to trigger if the error rate exceeds 5% and send notifications to the on-call support team via SMS and email.
 - Using Application Map for Visualizing Application Dependencies: Application Map visually represents the relationships and dependencies between different components of your application, making it easier to identify issues and bottlenecks.
-    
-    <Figure src="/img/guides/2024/08/azure-app-insights-4bb9a52a-e36f-4f90-a5ff-558aab58290a.webp" alt="Using Application Map in Azure App Insights for Visualizing Application Dependencies" caption="Using Application Map in Azure App Insights for Visualizing Application Dependencies" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/08/azure-app-insights-4bb9a52a-e36f-4f90-a5ff-558aab58290a.webp"
+    alt="Using Application Map in Azure App Insights for Visualizing Application Dependencies"
+    caption="Using Application Map in Azure App Insights for Visualizing Application Dependencies"
+  />
 - Leverage Log Analytics with Kusto Query Language (KQL): KQL allows you to perform advanced querying on your telemetry data, providing deeper insights into application behavior and issues.
-    - Example: A KQL query might look like this:
-    
-    ```bash
-    requests
-    | where resultCode != "200"
-    | summarize count() by resultCode, bin(timestamp, 1h)
-    | order by count_ desc
-    ```
-    
-    This query counts failed requests by result code and shows trends over time.
-    
+  - Example: A KQL query might look like this:
+  ```bash
+  requests
+  | where resultCode != "200"
+  | summarize count() by resultCode, bin(timestamp, 1h)
+  | order by count_ desc
+  ```
+  This query counts failed requests by result code and shows trends over time.
 
 ## Cost Optimization Strategies for Application Insights
 
 While Application Insights is powerful, it's important to manage costs. Here are some strategies:
 
 1. Understand the pricing model:
-    - Costs are based on data ingestion and retention
-    - Plan your budget based on expected application usage
+   - Costs are based on data ingestion and retention
+   - Plan your budget based on expected application usage
 2. Implement intelligent data sampling:
-    - Use adaptive sampling to automatically adjust sampling rates
-    - Configure fixed-rate sampling for consistent data reduction
+   - Use adaptive sampling to automatically adjust sampling rates
+   - Configure fixed-rate sampling for consistent data reduction
 3. Utilize data retention policies:
-    - Set appropriate retention periods for your data
-    - Archive important data for long-term storage
+   - Set appropriate retention periods for your data
+   - Archive important data for long-term storage
 4. Monitor and adjust data caps:
-    - Set daily data volume caps to prevent unexpected charges
-    - Regularly review and adjust caps based on your needs
+   - Set daily data volume caps to prevent unexpected charges
+   - Regularly review and adjust caps based on your needs
 
 ## Limitations of Azure Application Insights
 

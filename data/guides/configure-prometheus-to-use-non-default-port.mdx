@@ -1,13 +1,20 @@
 ---
-
 title: How to Change Prometheus Port - A Step-by-Step Guide
-slug: configure-prometheus-to-use-non-default-port
 date: 2024-12-05
 tags: [prometheus, faq]
 authors: [simran_kumari]
 description: Learn how to configure Prometheus to use a non-default port with this comprehensive guide. Enhance security and resolve conflicts step-by-step.
-keywords: [Prometheus, port configuration, monitoring, security, DevOps, system administration, network setup, observability]
-
+keywords:
+  [
+    Prometheus,
+    port configuration,
+    monitoring,
+    security,
+    DevOps,
+    system administration,
+    network setup,
+    observability,
+  ]
 ---
 
 Prometheus, a powerful open-source monitoring and alerting toolkit, plays a crucial role in modern DevOps practices. By default, Prometheus operates on port 9090, but there are compelling reasons to change this setting. Whether you're aiming to enhance security, comply with organizational policies, or resolve port conflicts, this guide will walk you through the process of configuring Prometheus to use a non-default port.
@@ -16,7 +23,11 @@ Prometheus, a powerful open-source monitoring and alerting toolkit, plays a cruc
 
 Prometheus serves as a robust monitoring solution, collecting and storing time series data as metrics. It scrapes metrics from configured targets at given intervals, evaluates rule expressions, displays results, and can trigger alerts when specified conditions are met.
 
-<Figure src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image.webp" alt="Default Prometheus port in 9090" caption="Default Prometheus port in 9090" />
+<Figure
+  src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image.webp"
+  alt="Default Prometheus port in 9090"
+  caption="Default Prometheus port in 9090"
+/>
 
 By default, Prometheus listens on port 9090 for incoming connections. This port is where you access the web interface and where other services connect to scrape metrics. However, using the default port can pose security risks and may conflict with other applications in your infrastructure.
 
@@ -79,19 +90,22 @@ prometheus --config.file=prometheus.yml --web.listen-address=0.0.0.0:8080
 To ensure the port change was successful:
 
 1. Use `netstat` or `ss` to check the listening port:
-    
-    ```bash
-    sudo netstat -tuln | grep prometheus
-    ```
-    
-2. Access the Prometheus web interface using the new port:
-    
-    ```
-    <http://your-server-ip:8080>
-    ```
-    
 
-<Figure src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image%201.webp" alt="Changing Prometheus port" caption="Changing Prometheus port" />
+   ```bash
+   sudo netstat -tuln | grep prometheus
+   ```
+
+2. Access the Prometheus web interface using the new port:
+
+   ```
+   <http://your-server-ip:8080>
+   ```
+
+<Figure
+  src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image%201.webp"
+  alt="Changing Prometheus port"
+  caption="Changing Prometheus port"
+/>
 
 If you encounter issues, check the Prometheus logs:
 
@@ -105,30 +119,29 @@ When Prometheus or its monitored services operate on non-default ports, you need
 
 1. Open `prometheus.yml` and locate the `scrape_configs` section.
 2. Update target ports as needed:
-    
-    ```yaml
-    scrape_configs:
-      - job_name: 'node_exporter'
-        static_configs:
-          - targets: ['localhost:9100']
-      - job_name: 'custom_service'
-        static_configs:
-          - targets: ['service-host:8000']
-    ```
-    
+
+   ```yaml
+   scrape_configs:
+     - job_name: 'node_exporter'
+       static_configs:
+         - targets: ['localhost:9100']
+     - job_name: 'custom_service'
+       static_configs:
+         - targets: ['service-host:8000']
+   ```
+
 3. For secured endpoints, add authentication:
-    
-    ```yaml
-    scrape_configs:
-      - job_name: 'secure_service'
-        scheme: https
-        basic_auth:
-          username: 'user'
-          password: 'password'
-        static_configs:
-          - targets: ['secure-service:8443']
-    ```
-    
+
+   ```yaml
+   scrape_configs:
+     - job_name: 'secure_service'
+       scheme: https
+       basic_auth:
+         username: 'user'
+         password: 'password'
+       static_configs:
+         - targets: ['secure-service:8443']
+   ```
 
 ## Impact on Prometheus Ecosystem
 
@@ -137,9 +150,9 @@ Changing Prometheus's default port impacts its integration with other tools and 
 1. Update Grafana: Grafana relies on Prometheus as a data source. After changing the Prometheus port, update the Grafana configuration to point to the new port:
 2. Adjust Alertmanager: If Alertmanager is configured to communicate with Prometheus, update its configuration.
 3. Review custom scripts: Custom scripts or tools that [query Prometheus](https://signoz.io/guides/how-to-get-all-the-metrics-of-an-instance-with-prometheus-api/) using its old port need to be updated. These may include:
-    - Automation scripts fetching metrics.
-    - Applications using Prometheus APIs.
-    - CI/CD pipelines with Prometheus integrations.
+   - Automation scripts fetching metrics.
+   - Applications using Prometheus APIs.
+   - CI/CD pipelines with Prometheus integrations.
 4. Update documentation: A port change affects everyone using Prometheus. Clear communication and updated documentation are crucial.
 
 ## Monitoring Prometheus with SigNoz
@@ -154,13 +167,21 @@ While Prometheus is a powerful tool for time-series data collection and monitori
 
 1. Unified Observability: SigNoz provides a centralized platform for monitoring metrics, logs, and traces, giving you a holistic view of your systems alongside Prometheus data.
 2. Enhanced Troubleshooting: With distributed tracing and log correlation, SigNoz helps to troubleshoot issues quickly by linking metrics with the corresponding logs and traces, making root cause analysis more efficient.
-    
-    <Figure src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image%202.webp" alt="Enhanced Troubleshooting with distributed tracing and log correlation" caption="Enhanced Troubleshooting with distributed tracing and log correlation" />
-    
+
+   <Figure
+     src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image%202.webp"
+     alt="Enhanced Troubleshooting with distributed tracing and log correlation"
+     caption="Enhanced Troubleshooting with distributed tracing and log correlation"
+   />
+
 3. Real-Time Alerting and Dashboards: SigNoz offers powerful real-time alerting and custom dashboards, allowing you to set up complex alerting rules that notify you about system anomalies, complementing the capabilities of Prometheus.
-    
-    <Figure src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image%203.webp" alt="Custom Dashboards in SigNoz" caption="Custom Dashboards in SigNoz" />
-    
+
+   <Figure
+     src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image%203.webp"
+     alt="Custom Dashboards in SigNoz"
+     caption="Custom Dashboards in SigNoz"
+   />
+
 4. Open-Source and Extensible: SigNoz is fully open-source, providing flexibility to integrate it with other tools and customize it to fit your monitoring needs, all while avoiding the vendor lock-in.
 
 ### Configuring SigNoz Cloud to Monitor Prometheus on a New Port
@@ -168,65 +189,65 @@ While Prometheus is a powerful tool for time-series data collection and monitori
 To monitor Prometheus in SigNoz Cloud, you need to install the [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) and configure it to scrape Prometheus metrics. Follow these steps:
 
 1. Install the OpenTelemetry Collector
-    
-    If you haven’t already set up the OpenTelemetry Collector, refer to the [guide on installing the OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/). Ensure that it is installed and connected to your SigNoz Cloud instance.
-    
+
+   If you haven’t already set up the OpenTelemetry Collector, refer to the [guide on installing the OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/). Ensure that it is installed and connected to your SigNoz Cloud instance.
+
 2. Set Up the Prometheus Receiver
-    
-    Once the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) is installed, configure it to scrape Prometheus metrics. Edit your `otel-collector-config.yaml` file and add a Prometheus receiver configuration:
-    
-    - New Job:
-        
-        ```yaml
-        receivers:
-          prometheus:
-            config:
-              scrape_configs:
-                - job_name: 'prometheus'
-                  static_configs:
-                    - targets: ['localhost:8080'] #update your port here
-        ```
-        
-    - Existing Job:
-        
-        ```yaml
-        - job_name: "otel-collector"
-          scrape_interval: 30s
-          static_configs:
-            - targets: ["otel-collector:8889", "localhost:31000"] #update the prometheus port 
-        ```
-        
+
+   Once the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) is installed, configure it to scrape Prometheus metrics. Edit your `otel-collector-config.yaml` file and add a Prometheus receiver configuration:
+
+   - New Job:
+     ```yaml
+     receivers:
+       prometheus:
+         config:
+           scrape_configs:
+             - job_name: 'prometheus'
+               static_configs:
+                 - targets: ['localhost:8080'] #update your port here
+     ```
+   - Existing Job:
+     ```yaml
+     - job_name: 'otel-collector'
+       scrape_interval: 30s
+       static_configs:
+         - targets: ['otel-collector:8889', 'localhost:31000'] #update the prometheus port
+     ```
+
 3. Connect to SigNoz Cloud
-    
-    Update the exporter section of the configuration to send metrics to your SigNoz Cloud endpoint. Replace `<cloud-instance-url>` and `<SIGNOZ_INGESTION_KEY>` with your SigNoz Cloud details:
-    
-    ```yaml
-    exporters:
-      otlp:
-        endpoint: <cloud-instance-url>
-        tls:
-          insecure: false
-        headers:
-          "signoz-ingestion-key": <SIGNOZ_INGESTION_KEY>
-          
-    service:
-      pipelines:
-        metrics:
-          receivers: [prometheus]
-          processors: [batch, resourcedetection]
-          exporters: [otlp] 
-    ```
-    
+
+   Update the exporter section of the configuration to send metrics to your SigNoz Cloud endpoint. Replace `<cloud-instance-url>` and `<SIGNOZ_INGESTION_KEY>` with your SigNoz Cloud details:
+
+   ```yaml
+   exporters:
+     otlp:
+       endpoint: <cloud-instance-url>
+       tls:
+         insecure: false
+       headers:
+         'signoz-ingestion-key': <SIGNOZ_INGESTION_KEY>
+
+   service:
+     pipelines:
+       metrics:
+         receivers: [prometheus]
+         processors: [batch, resourcedetection]
+         exporters: [otlp]
+   ```
+
 4. Apply Changes
-    
-    Restart the OpenTelemetry Collector to apply the new configuration
-    
+
+   Restart the OpenTelemetry Collector to apply the new configuration
+
 5. Verify Configuration in SigNoz Cloud
-    
-    Log in to your SigNoz Cloud dashboard and check for Prometheus metrics to ensure the metrics are being scraped and sent successfully.
-    
-    <Figure src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image%204.webp" alt="Verify Configuration in SigNoz Cloud" caption="Verify Configuration in SigNoz Cloud" />
-    
+
+   Log in to your SigNoz Cloud dashboard and check for Prometheus metrics to ensure the metrics are being scraped and sent successfully.
+
+   <Figure
+     src="/img/guides/2024/12/configure-prometheus-to-use-non-default-port-image%204.webp"
+     alt="Verify Configuration in SigNoz Cloud"
+     caption="Verify Configuration in SigNoz Cloud"
+   />
 
 By combining Prometheus with SigNoz, you can elevate your monitoring and observability strategy, ensuring better performance, security, and reliability for your systems.
 

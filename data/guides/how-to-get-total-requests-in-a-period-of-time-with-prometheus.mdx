@@ -1,159 +1,172 @@
 ---
-
 title: How to Measure Total Requests with Prometheus - A Time-Based Guide
-slug: how-to-get-total-requests-in-a-period-of-time-with-prometheus
 date: 2024-07-25
 tags: [faq, prometheus]
 authors: [yuvraj]
 description: Learn how to measure total requests over time using Prometheus. This guide covers PromQL, time-based metrics, and best practices for accurate request tracking.
-keywords: [Prometheus, request tracking, PromQL, time-series data, metrics, monitoring, Grafana, data visualization]
-
+keywords:
+  [
+    Prometheus,
+    request tracking,
+    PromQL,
+    time-series data,
+    metrics,
+    monitoring,
+    Grafana,
+    data visualization,
+  ]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to Measure Total Requests with Prometheus: A Time-Based Guide",
-    "alternativeHeadline": "Track Total Requests Over Time Using Prometheus",
-    "author": {
-      "@type": "Person",
-      "name": "Yuvraj"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-25T00:00:00Z",
-    "dateModified": "2024-07-25T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/how-to-get-total-requests-in-a-period-of-time-with-prometheus/"
-    },
-    "description": "Learn how to measure total requests over time using Prometheus. This guide covers PromQL, time-based metrics, and best practices for accurate request tracking.",
-    "keywords": "Prometheus, request tracking, PromQL, time-series data, metrics, monitoring, Grafana, data visualization",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Prometheus",
-        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-      },
-      {
-        "@type": "Thing",
-        "name": "PromQL",
-        "description": "Prometheus Query Language used to select and aggregate time-series data."
-      },
-      {
-        "@type": "Thing",
-        "name": "Grafana",
-        "description": "An open-source platform for monitoring and observability."
-      },
-      {
-        "@type": "Thing",
-        "name": "Metrics",
-        "description": "Numerical data points associated with specific timestamps."
-      },
-      {
-        "@type": "Thing",
-        "name": "Time-Series Data",
-        "description": "Data points collected or recorded at regular time intervals."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Grafana",
-        "applicationCategory": "Visualization Tool"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "How often should I scrape request metrics in Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "For most web applications, a 15-30 second scrape interval provides a good balance between accuracy and performance."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Measure Total Requests with Prometheus: A Time-Based Guide',
+        alternativeHeadline: 'Track Total Requests Over Time Using Prometheus',
+        author: {
+          '@type': 'Person',
+          name: 'Yuvraj',
         },
-        {
-          "@type": "Question",
-          "name": "Can I track requests by specific endpoints or user types?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, use labels in your counter metrics to track requests by various dimensions such as endpoints, user types, or status codes."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "What's the difference between `rate()` and `increase()` for request counting?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "`rate()` calculates the per-second average over a time range, while `increase()` gives the total increase. Use `rate()` for longer periods and `increase()` for shorter intervals."
-          }
+        datePublished: '2024-07-25T00:00:00Z',
+        dateModified: '2024-07-25T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id':
+            'https://signoz.io/guides/how-to-get-total-requests-in-a-period-of-time-with-prometheus/',
         },
-        {
-          "@type": "Question",
-          "name": "How do I handle counter resets when measuring total requests?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Use `increase()` or `rate()` functions in your queries, as they automatically account for counter resets when calculating values over a time range."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Tracking Total Requests with Prometheus",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Set up a counter metric for requests",
-          "text": "Create a counter metric in your code to track total HTTP requests."
+        description:
+          'Learn how to measure total requests over time using Prometheus. This guide covers PromQL, time-based metrics, and best practices for accurate request tracking.',
+        keywords:
+          'Prometheus, request tracking, PromQL, time-series data, metrics, monitoring, Grafana, data visualization',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Calculate total requests using `increase()`",
-          "text": "Use the `increase()` function in PromQL to calculate the total requests over a specific time range."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'PromQL',
+            description: 'Prometheus Query Language used to select and aggregate time-series data.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Grafana',
+            description: 'An open-source platform for monitoring and observability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Metrics',
+            description: 'Numerical data points associated with specific timestamps.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Time-Series Data',
+            description: 'Data points collected or recorded at regular time intervals.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Grafana',
+            applicationCategory: 'Visualization Tool',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'How often should I scrape request metrics in Prometheus?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'For most web applications, a 15-30 second scrape interval provides a good balance between accuracy and performance.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I track requests by specific endpoints or user types?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, use labels in your counter metrics to track requests by various dimensions such as endpoints, user types, or status codes.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: "What's the difference between `rate()` and `increase()` for request counting?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: '`rate()` calculates the per-second average over a time range, while `increase()` gives the total increase. Use `rate()` for longer periods and `increase()` for shorter intervals.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I handle counter resets when measuring total requests?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Use `increase()` or `rate()` functions in your queries, as they automatically account for counter resets when calculating values over a time range.',
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Aggregate requests across instances",
-          "text": "Use the `sum()` function to aggregate request counts across all monitored instances."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Tracking Total Requests with Prometheus',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Set up a counter metric for requests',
+              text: 'Create a counter metric in your code to track total HTTP requests.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Calculate total requests using `increase()`',
+              text: 'Use the `increase()` function in PromQL to calculate the total requests over a specific time range.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Aggregate requests across instances',
+              text: 'Use the `sum()` function to aggregate request counts across all monitored instances.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Visualize request data in Grafana',
+              text: 'Create dashboards in Grafana to visualize total requests over time using PromQL queries.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Visualize request data in Grafana",
-          "text": "Create dashboards in Grafana to visualize total requests over time using PromQL queries."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Prometheus offers powerful tools to track total requests over specific time periods. This guide will walk you through the process of setting up, querying, and analyzing request data using Prometheus and its query language, PromQL. You'll learn how to leverage time-series data for accurate request tracking and gain insights into your system's performance.

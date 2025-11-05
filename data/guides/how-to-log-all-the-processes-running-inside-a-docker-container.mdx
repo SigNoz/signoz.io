@@ -1,13 +1,18 @@
 ---
-
 title: How to log all the processes running inside a Docker container - Step by Step Guide
-slug: how-to-log-all-the-processes-running-inside-a-docker-container
 date: 2024-09-24
 tags: [logging]
 authors: [nitin_gouda]
 description: Learn how to effectively log and monitor processes in Docker containers. This guide covers methods, best practices, and tools for comprehensive process logging.
-keywords: [Docker container processes, process logging, container monitoring, Docker logging, SigNoz, container management]
-
+keywords:
+  [
+    Docker container processes,
+    process logging,
+    container monitoring,
+    Docker logging,
+    SigNoz,
+    container management,
+  ]
 ---
 
 Docker containers have revolutionized application deployment and management. However, understanding what's happening inside these containers can be challenging. One crucial aspect of container management is logging processes — but how do you effectively track all the processes running inside a Docker container?
@@ -22,8 +27,8 @@ Key differences include:
 
 - Namespace isolation: One of the core features of Docker containers is their use of namespaces to isolate processes. Namespaces provide each container with its own isolated view of the system, meaning that processes running inside a container cannot directly interact with processes or resources outside of it.
 - Resource constraints: In addition to isolation, Docker containers allow for precise control over system resource usage, such as CPU, memory, disk I/O, and network bandwidth. This is achieved through cgroups (control groups), which allow Docker to set limits on CPU, memory, disk I/O, and network bandwidth by allocating specific portions of system resources to each container, ensuring they do not exceed predefined thresholds.
-- Process hierarchy: In Docker, each container typically runs a main process, also referred to as the init process, which is assigned a PID (Process ID) of 1. This main process is critical because, in Docker’s process model, when the main process (PID 1) exits, the entire container stops. While Docker containers are often associated with running a single main process, it’s important to note that this process can spawn multiple subprocesses within the container. 
-These subprocesses have their own unique PIDs but remain dependent on the lifecycle of the main process. If the main process exits, all its subprocesses are also terminated, and the container shuts down.
+- Process hierarchy: In Docker, each container typically runs a main process, also referred to as the init process, which is assigned a PID (Process ID) of 1. This main process is critical because, in Docker’s process model, when the main process (PID 1) exits, the entire container stops. While Docker containers are often associated with running a single main process, it’s important to note that this process can spawn multiple subprocesses within the container.
+  These subprocesses have their own unique PIDs but remain dependent on the lifecycle of the main process. If the main process exits, all its subprocesses are also terminated, and the container shuts down.
 
 Understanding these differences is vital for effective monitoring and logging of container processes.
 
@@ -31,24 +36,17 @@ Understanding these differences is vital for effective monitoring and logging of
 
 Logging processes inside Docker containers is a crucial practice for ensuring your applications' reliability, performance, and security. Containers are often used to deploy services in dynamic environments, making them lightweight and portable. However, the isolated nature of containers presents unique challenges in monitoring and managing the processes running inside them. By logging and tracking container processes, you can gain valuable insights into how your applications behave, troubleshoot issues efficiently, and optimize resource usage.
 
-1. Enhanced visibility
-Docker containers encapsulate processes, creating an isolated environment where applications run independently from the host system. While this isolation benefits security and consistency, it can also obscure visibility into what’s happening inside the container. Without proper logging, it’s difficult to know how your application performs or if anything is going wrong. Process logging provides a clear view of all the activities happening within the container. 
-By capturing detailed logs, you can:
-    - See which processes are running at any given time.
-    - Monitor process start times, resource consumption, and completion.
-    - Understand the sequence of operations within the container.
-    
-    This visibility is particularly useful in complex environments where multiple containers run different services. Process logs give you a window into the behaviour of each container, allowing you to identify potential bottlenecks or issues early.
-    
-2. Troubleshooting
-Process logs are one of the first places to look for clues when something goes wrong in a containerised application. Because containers are often ephemeral (i.e., they can be spun up, scaled, or removed quickly), tracking down the root cause of a problem can be challenging without logs.
-Logging processes help in several ways during troubleshooting:
-    - Identifying abnormal process behaviour: If a process consumes too much memory, uses excessive CPU, or behaves unpredictably, process logs can help pinpoint when and why it happened.
-    - Diagnosing container crashes: Since containers stop when the main process exits, logs can reveal whether the process exited due to an error, a resource limitation, or other issues.
-    - Tracking failed operations: Logs can capture details about failed operations or tasks within the container, providing context for debugging and recovery.
-3. Performance optimization
-One of the main advantages of utilising Docker containers is efficient resource utilisation. To guarantee peak performance, it's crucial to continuously check resource utilisation in production settings. You can gauge the CPU, memory, disk I/O, and network bandwidth each process consumes by tracking metrics rather than relying on logs.
-With this information, you can:
+1.  Enhanced visibility
+    Docker containers encapsulate processes, creating an isolated environment where applications run independently from the host system. While this isolation benefits security and consistency, it can also obscure visibility into what’s happening inside the container. Without proper logging, it’s difficult to know how your application performs or if anything is going wrong. Process logging provides a clear view of all the activities happening within the container.
+    By capturing detailed logs, you can: - See which processes are running at any given time. - Monitor process start times, resource consumption, and completion. - Understand the sequence of operations within the container.
+        This visibility is particularly useful in complex environments where multiple containers run different services. Process logs give you a window into the behaviour of each container, allowing you to identify potential bottlenecks or issues early.
+2.  Troubleshooting
+    Process logs are one of the first places to look for clues when something goes wrong in a containerised application. Because containers are often ephemeral (i.e., they can be spun up, scaled, or removed quickly), tracking down the root cause of a problem can be challenging without logs.
+    Logging processes help in several ways during troubleshooting: - Identifying abnormal process behaviour: If a process consumes too much memory, uses excessive CPU, or behaves unpredictably, process logs can help pinpoint when and why it happened. - Diagnosing container crashes: Since containers stop when the main process exits, logs can reveal whether the process exited due to an error, a resource limitation, or other issues. - Tracking failed operations: Logs can capture details about failed operations or tasks within the container, providing context for debugging and recovery.
+3.  Performance optimization
+    One of the main advantages of utilising Docker containers is efficient resource utilisation. To guarantee peak performance, it's crucial to continuously check resource utilisation in production settings. You can gauge the CPU, memory, disk I/O, and network bandwidth each process consumes by tracking metrics rather than relying on logs.
+    With this information, you can:
+
 - Optimize resource allocation: If a process consistently consumes more resources than expected, you can adjust the container's resource limits (using cgroups) to ensure better performance across the entire system.
 - Identify inefficient processes: Process logs can reveal processes that may be hogging resources, running inefficiently, or causing performance bottlenecks. For example, if a background process uses too much CPU, you can optimize or scale it accordingly.
 - Plan for scaling: By tracking resource consumption over time, you can predict when additional containers or resources will be needed to handle increasing workloads. This helps in scaling your applications effectively while maintaining performance standards.
@@ -76,24 +74,20 @@ There are several approaches to logging processes in [Docker containers](https:/
 
 One of the simplest and most widely used methods to view running processes in a Docker container is by using the `ps` command. This command provides a snapshot of the current processes running within the container.
 
-1. Access the container's shell:
-To enter a container and execute commands, use `docker exec.`
-    
-    ```docker
-    docker exec -it <container_name> /bin/bash
-    ```
-    
-    <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-c19803cc-03d2-4707-afe7-f6e8c85e20af.webp" alt="" caption="" />`/bin/bash` provides an interactive shell interface and script execution environment within Docker containers, enabling command execution and process control.
-    
-2. Run the 'ps' command:
-Once inside the container, execute the following:
-    
-    ```bash
-    ps -eaf
-    ```
-    
-    <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-11_at_11.26.01_AM.webp" alt="" caption="" />The `ps -eaf` command provides a comprehensive view of all processes running inside the Docker container, including detailed process information, which aids in monitoring and performance optimization.
-    
+1.  Access the container's shell:
+    To enter a container and execute commands, use `docker exec.`
+        ```docker
+        docker exec -it <container_name> /bin/bash
+        ```
+
+        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-c19803cc-03d2-4707-afe7-f6e8c85e20af.webp" alt="" caption="" />`/bin/bash` provides an interactive shell interface and script execution environment within Docker containers, enabling command execution and process control.
+2.  Run the 'ps' command:
+    Once inside the container, execute the following:
+        ```bash
+        ps -eaf
+        ```
+
+        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-11_at_11.26.01_AM.webp" alt="" caption="" />The `ps -eaf` command provides a comprehensive view of all processes running inside the Docker container, including detailed process information, which aids in monitoring and performance optimization.
 
 This will list all active processes within the container, including important details such as:
 
@@ -115,37 +109,31 @@ Limitations:
 
 Docker's built-in logging drivers automatically capture logs from containers, streamlining the process of collecting output without requiring manual intervention. Commonly used logging drivers like `json-file` or `syslog` can store and manage logs, but they focus primarily on capturing the standard output and error streams of the running containerized processes.
 
-1. Configure [Docker logging driver](https://signoz.io/blog/docker-logging/):
-When starting a container or globally, you can configure a specific logging driver through the [Docker daemon](https://signoz.io/guides/docker-daemon-logs/) configuration file (`/etc/docker/daemon.json`). For example, to use the `json-file` logging driver with rotation options:
-    
-    ```json
-    {
-      "log-driver": "json-file",
-      "log-opts": {
-        "max-size": "10m",
-        "max-file": "3"
-      }
-    }
-    ```
-    
-2. Restart Docker daemon:
-After modifying the configuration, restart the Docker service to apply the changes:
-    
-    ```bash
-    sudo systemctl restart docker
-    ```
-    
-    This ensures that all new containers will log their output according to the new driver and options.
-    
-3. View logs:
-To view the logs from a running container, use the `docker logs` command:
-    
-    ```docker
-    docker logs <container_name>
-    ```
-    
-    <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-11_at_11.28.29_AM.webp" alt="" caption="" />This command will display the logs from the container’s standard output and standard error streams.
-    
+1.  Configure [Docker logging driver](https://signoz.io/blog/docker-logging/):
+    When starting a container or globally, you can configure a specific logging driver through the [Docker daemon](https://signoz.io/guides/docker-daemon-logs/) configuration file (`/etc/docker/daemon.json`). For example, to use the `json-file` logging driver with rotation options:
+        ```json
+        {
+          "log-driver": "json-file",
+          "log-opts": {
+            "max-size": "10m",
+            "max-file": "3"
+          }
+        }
+        ```
+2.  Restart Docker daemon:
+    After modifying the configuration, restart the Docker service to apply the changes:
+        ```bash
+        sudo systemctl restart docker
+        ```
+
+        This ensures that all new containers will log their output according to the new driver and options.
+3.  View logs:
+    To view the logs from a running container, use the `docker logs` command:
+        ```docker
+        docker logs <container_name>
+        ```
+
+        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-11_at_11.28.29_AM.webp" alt="" caption="" />This command will display the logs from the container’s standard output and standard error streams.
 
 Key Considerations:
 
@@ -159,75 +147,67 @@ Docker's native logging is ideal for basic application monitoring but may need t
 
 Implementing a comprehensive logging solution for processes running in a Docker container can provide continuous insights into container activity. Below is a simple, customizable approach to logging processes using a wrapper script that logs process information regularly.
 
-1. Create a wrapper script:
-This script will run your main application and log the container's active processes to a file.
-    
-    ```bash
-    #!/bin/bash
-    
-    # Log initial processes
-    echo "Initial processes:" >> /var/log/container_processes.log
-    ps -eaf >> /var/log/container_processes.log
-    
-    # Start your main application
-    /path/to/your/app &
-    
-    # Continuously log processes every minute
-    while true; do
-      echo "$(date): Current processes:" >> /var/log/container_processes.log
-      ps -eaf >> /var/log/container_processes.log
-      sleep 60  # Log every minute
-    done
-    ```
-    
-2. Modify your Dockerfile: 
-Next, update your Dockerfile to include the wrapper script and ensure it's executable.
-    
-    ```docker
-    # Replace "your-base-image" with the actual image you need.
-    FROM your-base-image
-    
-    # Copy the wrapper script into the container
-    COPY wrapper.sh /wrapper.sh
-    
-    # Make the wrapper script executable
-    # The chmod command changes file permissions; 
-    # +x makes the file executable.
-    RUN chmod +x /wrapper.sh
-    
-    # Set the default command to run the wrapper script
-    CMD ["/wrapper.sh"]
-    ```
-    
-3. Build and run your container:
-Now that the Dockerfile is set up, build and run your container.
-    - Build the Docker image:
-    This command is used to build an image from a Dockerfile in the current directory `(.)`. The `-t` flag tags the image with a name. Here, `<my-logging-container>` is a placeholder for the image name.
-        
-        ```docker
-        docker build -t <my-logging-container> .
-        ```
-        
-    - Run the container in detached mode:
-        
-        ```
-        docker run -d <my-logging-container>
-        ```
-        
-4. Accessing the Logs
-The container logs processes every minute into the `/var/log/container_processes.log` file. To access the log file:
-    1. Enter the container’s shell:
-        
-        ```docker
-        docker exec -it <container_name> /bin/bash
-        ```
-        
-    2. View the log file:
-        
+1.  Create a wrapper script:
+    This script will run your main application and log the container's active processes to a file.
         ```bash
-        cat /var/log/container_processes.log
+        #!/bin/bash
+
+        # Log initial processes
+        echo "Initial processes:" >> /var/log/container_processes.log
+        ps -eaf >> /var/log/container_processes.log
+
+        # Start your main application
+        /path/to/your/app &
+
+        # Continuously log processes every minute
+        while true; do
+          echo "$(date): Current processes:" >> /var/log/container_processes.log
+          ps -eaf >> /var/log/container_processes.log
+          sleep 60  # Log every minute
+        done
         ```
-        
+2.  Modify your Dockerfile:
+    Next, update your Dockerfile to include the wrapper script and ensure it's executable.
+        ```docker
+        # Replace "your-base-image" with the actual image you need.
+        FROM your-base-image
+
+        # Copy the wrapper script into the container
+        COPY wrapper.sh /wrapper.sh
+
+        # Make the wrapper script executable
+        # The chmod command changes file permissions;
+        # +x makes the file executable.
+        RUN chmod +x /wrapper.sh
+
+        # Set the default command to run the wrapper script
+        CMD ["/wrapper.sh"]
+        ```
+3.  Build and run your container:
+    Now that the Dockerfile is set up, build and run your container. - Build the Docker image:
+    This command is used to build an image from a Dockerfile in the current directory `(.)`. The `-t` flag tags the image with a name. Here, `<my-logging-container>` is a placeholder for the image name.
+            ```docker
+            docker build -t <my-logging-container> .
+            ```
+
+        - Run the container in detached mode:
+
+            ```
+            docker run -d <my-logging-container>
+            ```
+
+4.  Accessing the Logs
+    The container logs processes every minute into the `/var/log/container_processes.log` file. To access the log file: 1. Enter the container’s shell:
+            ```docker
+            docker exec -it <container_name> /bin/bash
+            ```
+
+        2. View the log file:
+
+            ```bash
+            cat /var/log/container_processes.log
+            ```
+
 
 This setup allows you to log and monitor all active processes running in your container over time, offering a more detailed view than a simple snapshot with a single `ps` command.The log file `container_processes.log` will update automatically without concurrency issues as long as only one process writes to it; for multiple processes, file locking should be implemented to avoid conflicts.
 
@@ -235,244 +215,234 @@ This setup allows you to log and monitor all active processes running in your co
 
 Basic logging is essential for monitoring, but advanced strategies can offer deeper insights, more control, and greater efficiency in managing your containerized applications. Below are some advanced techniques that can enhance your process logging efforts:
 
-1. Use process managers: 
-In more complex container environments, managing multiple processes efficiently is critical. While Docker containers typically run a single process, there are situations where you may need to run multiple processes inside the same container. You can use a process manager like Supervisor to manage these processes effectively.
-Supervisor is a powerful tool for controlling and monitoring multiple processes within a container. It allows you to:
-    - Automatically restart failed processes: If a process inside the container crashes, Supervisor can detect the failure and restart it automatically, ensuring high availability.
-        
-        Eg. In your `supervisord.conf` file, you can configure the process to restart automatically with the following directives:
-        
-        ```bash
-        # Starts the process when Supervisor starts
-        autostart=true
-        # Automatically restarts the process if it crashes
-        autorestart=true
-        ```
-        
-    - Log process output: Supervisor provides built-in logging features, capturing each managed process's standard output and [error logs](https://signoz.io/guides/error-log/), which you can use for troubleshooting and performance analysis.
-        
-        Eg. You can configure the log files for each process in the `supervisord.conf` file:
-        
-        ```bash
-        # Logs standard output
-        stdout_logfile=/var/log/supervisor/my_app.out.log 
-        # Logs error output
-        stderr_logfile=/var/log/supervisor/my_app.err.log  
-        ```
-        
-        Supervisor is better than `ps -eaf` because it actively manages processes by automatically restarting them if they fail and provides detailed logs for troubleshooting, while `ps -eaf` only lists processes without offering control or monitoring capabilities.
-        
-    - Control process lifecycle: You can configure Supervisor to start, stop, or restart processes based on predefined rules, helping you maintain control over container behavior.
-        
-        ```bash
-        # Start automatically when Supervisor starts
-        autostart=true                                    
-        # Restart automatically if the process crashes
-        autorestart=true                                  
-        # Number of attempts to restart the process
-        startretries=3                                    
-        # Consider the process started after 5 seconds
-        startsecs=5                     
-        ```
-        
-    
-    Let's walk through an example of using Supervisor to manage processes inside a Docker container.
-    
-    1. Clone the Sample Application Repository: 
-    First, clone a sample Python application:
-        
-        ```bash
-        git clone https://github.com/SigNoz/sample-flask-app
-        ```
-        
-    2. Update the Dockerfile: 
-    Modify the `Dockerfile` to include Supervisor and configure it to manage your application:
-        
-        ```bash
-        # install Supervisor
-        RUN apt-get update && apt-get install -y supervisor
-        
-        # Create Supervisor directory for logs
-        RUN mkdir -p /var/log/supervisor
-        
-        # Copy Supervisor config file
-        COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-        
-        # expose the application's port
-        EXPOSE 5002
-        
-        # Set the entry point to run Supervisor (which will manage your app)
-        CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
-        ```
-        
-    3. Create a Supervisor Configuration File: 
-    Create a `supervisord.conf` file in the same directory as your Dockerfile to configure Supervisor to manage your Python app.
-        
-        ```bash
-        [supervisord]
-        nodaemon=true 
-        [program:python_app]
-        command=opentelemetry-instrument python ./app.py
-        autostart=true
-        autorestart=true
-        stderr_logfile=/var/log/supervisor/python_app.err.log
-        stdout_logfile=/var/log/supervisor/python_app.out.log
-        startretries=3                                    
-        startsecs=5                     
-        ```
-        
-    4. Build and Run the Docker Container
-        - Build the Docker image:
-        
-        ```bash
-        docker build -t python-supervisor-app .
-        ```
-        
-        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_11.45.40_AM.webp" alt="" caption="" />- Run the Docker container:
-        
-        ```bash
-        docker run -d python-supervisor-app
-        ```
-        
-        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_11.47.03_AM.webp" alt="" caption="" />5. Where to See Supervisor Logs: 
-    You can access Supervisor logs directly within the container:
-        1. Application logs:
-            
+1.  Use process managers:
+    In more complex container environments, managing multiple processes efficiently is critical. While Docker containers typically run a single process, there are situations where you may need to run multiple processes inside the same container. You can use a process manager like Supervisor to manage these processes effectively.
+    Supervisor is a powerful tool for controlling and monitoring multiple processes within a container. It allows you to: - Automatically restart failed processes: If a process inside the container crashes, Supervisor can detect the failure and restart it automatically, ensuring high availability.
+            Eg. In your `supervisord.conf` file, you can configure the process to restart automatically with the following directives:
+
             ```bash
-            docker exec -it <container_id> cat /var/log/supervisor/python_app.out.log
+            # Starts the process when Supervisor starts
+            autostart=true
+            # Automatically restarts the process if it crashes
+            autorestart=true
             ```
-            
-            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_12.17.41_PM.webp" alt="" caption="" />2. Process status:
-            
+
+        - Log process output: Supervisor provides built-in logging features, capturing each managed process's standard output and [error logs](https://signoz.io/guides/error-log/), which you can use for troubleshooting and performance analysis.
+
+            Eg. You can configure the log files for each process in the `supervisord.conf` file:
+
             ```bash
-            docker exec -it <container_id> supervisorctl status
+            # Logs standard output
+            stdout_logfile=/var/log/supervisor/my_app.out.log
+            # Logs error output
+            stderr_logfile=/var/log/supervisor/my_app.err.log
             ```
-            
-            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_12.19.32_PM.webp" alt="" caption="" />Using a process manager like Supervisor is particularly useful in environments requiring high reliability and more granular control over process execution within containers.
-    
-2. Implement custom logging libraries:
-While Docker provides basic logging mechanisms, integrating custom logging libraries into your application code can give you more detailed and tailored process logging. By adding logging directly into your application, you gain several benefits:
-    - Granular logging: Custom logging allows you to log specific events, variables, and process states that are important for your application. This can include detailed logs about internal operations, performance metrics, or application-specific errors.
-    - [structured logging](https://signoz.io/blog/structured-logs/): Libraries like [Logrus](https://signoz.io/guides/golang-logrus/) (for Go) or Winston (for Node.js) allow you to create structured logs, which are easier to parse and analyze. Structured logs can include key-value pairs, timestamps, and contextual information that make troubleshooting much faster.
-    - Enhanced log formats: With custom libraries, you can log in formats like JSON, making integrating with [log management tools](https://signoz.io/blog/open-source-log-management/) or dashboards easier.
-    - Application-level insights: By embedding logging into your code, you can capture information unavailable through system-level logging. For example, you can track specific user actions, API calls, or business logic execution paths.
-    
-    Sample:
-    
-    Let's walk through an example of integrating a custom logging library to handle log management. 
-    
-    1. Clone the Sample Application Repository: 
-    First, clone a sample Python application:
-        
-        ```bash
-        git clone https://github.com/SigNoz/sample-flask-app
-        ```
-        
-    2. Choose a Custom Logging Library: 
-    For this example, we'll use `loguru`, a popular logging library that offers a more flexible and user-friendly setup than Python's built-in `logging` module.
-    3. Update Your Application Code:
-    Integrate the custom logging library into your application code. For this example, we will add it to our `app.py` file.
-        1. Install `loguru:`  Ensure `loguru` is installed via pip:
-            
+
+            Supervisor is better than `ps -eaf` because it actively manages processes by automatically restarting them if they fail and provides detailed logs for troubleshooting, while `ps -eaf` only lists processes without offering control or monitoring capabilities.
+
+        - Control process lifecycle: You can configure Supervisor to start, stop, or restart processes based on predefined rules, helping you maintain control over container behavior.
+
             ```bash
-            pip install loguru
+            # Start automatically when Supervisor starts
+            autostart=true
+            # Restart automatically if the process crashes
+            autorestart=true
+            # Number of attempts to restart the process
+            startretries=3
+            # Consider the process started after 5 seconds
+            startsecs=5
             ```
-            
-        2. Update Your `app.py`
-            - Add the following imports:
-            
-            ```python
-            from loguru import logger
+
+
+        Let's walk through an example of using Supervisor to manage processes inside a Docker container.
+
+        1. Clone the Sample Application Repository:
+        First, clone a sample Python application:
+
+            ```bash
+            git clone https://github.com/SigNoz/sample-flask-app
             ```
-            
-            - Configure `loguru` at the top of your file:
-            
-            ```python
-            # Configure loguru
-            logger.add("logs/app.log", rotation="1 week", level="DEBUG", retention="1 month")
+
+        2. Update the Dockerfile:
+        Modify the `Dockerfile` to include Supervisor and configure it to manage your application:
+
+            ```bash
+            # install Supervisor
+            RUN apt-get update && apt-get install -y supervisor
+
+            # Create Supervisor directory for logs
+            RUN mkdir -p /var/log/supervisor
+
+            # Copy Supervisor config file
+            COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+            # expose the application's port
+            EXPOSE 5002
+
+            # Set the entry point to run Supervisor (which will manage your app)
+            CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
             ```
-            
-            Add logging statements to your existing routes and functions:
-            
-            - Log request information and exceptions:
-                
-                ```python
-                @app.route("/list")
-                def lists():
-                    logger.info("Request to /list endpoint")
-                    try:
-                        # Your existing code...
-                    except requests.RequestException as e:
-                        logger.error(f"Request failed: {e}")
+
+        3. Create a Supervisor Configuration File:
+        Create a `supervisord.conf` file in the same directory as your Dockerfile to configure Supervisor to manage your Python app.
+
+            ```bash
+            [supervisord]
+            nodaemon=true
+            [program:python_app]
+            command=opentelemetry-instrument python ./app.py
+            autostart=true
+            autorestart=true
+            stderr_logfile=/var/log/supervisor/python_app.err.log
+            stdout_logfile=/var/log/supervisor/python_app.out.log
+            startretries=3
+            startsecs=5
+            ```
+
+        4. Build and Run the Docker Container
+            - Build the Docker image:
+
+            ```bash
+            docker build -t python-supervisor-app .
+            ```
+
+            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_11.45.40_AM.webp" alt="" caption="" />- Run the Docker container:
+
+            ```bash
+            docker run -d python-supervisor-app
+            ```
+
+            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_11.47.03_AM.webp" alt="" caption="" />5. Where to See Supervisor Logs:
+        You can access Supervisor logs directly within the container:
+            1. Application logs:
+
+                ```bash
+                docker exec -it <container_id> cat /var/log/supervisor/python_app.out.log
                 ```
-                
-            - Update other routes similarly to log information and errors:
-                
-                ```python
-                @app.route("/done")
-                def done():
-                    logger.info("Request to /done endpoint")
-                    try:
-                        # Your existing code...
-                    except Exception as e:
-                        logger.error(f"Error updating task: {e}")
+
+                <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_12.17.41_PM.webp" alt="" caption="" />2. Process status:
+
+                ```bash
+                docker exec -it <container_id> supervisorctl status
                 ```
-                
-                Ensure the application start is logged:
-                
-                ```python
-                if __name__ == "__main__":
-                    logger.info("Starting Flask application")
-                    app.run(host='0.0.0.0', port=5002, debug=True)
+
+                <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_12.19.32_PM.webp" alt="" caption="" />Using a process manager like Supervisor is particularly useful in environments requiring high reliability and more granular control over process execution within containers.
+2.  Implement custom logging libraries:
+    While Docker provides basic logging mechanisms, integrating custom logging libraries into your application code can give you more detailed and tailored process logging. By adding logging directly into your application, you gain several benefits: - Granular logging: Custom logging allows you to log specific events, variables, and process states that are important for your application. This can include detailed logs about internal operations, performance metrics, or application-specific errors. - [structured logging](https://signoz.io/blog/structured-logs/): Libraries like [Logrus](https://signoz.io/guides/golang-logrus/) (for Go) or Winston (for Node.js) allow you to create structured logs, which are easier to parse and analyze. Structured logs can include key-value pairs, timestamps, and contextual information that make troubleshooting much faster. - Enhanced log formats: With custom libraries, you can log in formats like JSON, making integrating with [log management tools](https://signoz.io/blog/open-source-log-management/) or dashboards easier. - Application-level insights: By embedding logging into your code, you can capture information unavailable through system-level logging. For example, you can track specific user actions, API calls, or business logic execution paths.
+        Sample:
+
+        Let's walk through an example of integrating a custom logging library to handle log management.
+
+        1. Clone the Sample Application Repository:
+        First, clone a sample Python application:
+
+            ```bash
+            git clone https://github.com/SigNoz/sample-flask-app
+            ```
+
+        2. Choose a Custom Logging Library:
+        For this example, we'll use `loguru`, a popular logging library that offers a more flexible and user-friendly setup than Python's built-in `logging` module.
+        3. Update Your Application Code:
+        Integrate the custom logging library into your application code. For this example, we will add it to our `app.py` file.
+            1. Install `loguru:`  Ensure `loguru` is installed via pip:
+
+                ```bash
+                pip install loguru
                 ```
-                
-    
-    4. Update `requirements.txt` :
-    
-    Ensure your `requirements.txt` includes `loguru`
-    
-    ```
-    flask
-    loguru # add this
-    opentelemetry-api
-    opentelemetry-sdk
-    opentelemetry-instrumentation-flask
-    ```
-    
-    1. Update Your Dockerfile: 
-    Modify your Dockerfile to include the custom logging library and update your application to use it.
-        
-        ```docker
-        # Install loguru library
-        RUN pip install loguru
+
+            2. Update Your `app.py`
+                - Add the following imports:
+
+                ```python
+                from loguru import logger
+                ```
+
+                - Configure `loguru` at the top of your file:
+
+                ```python
+                # Configure loguru
+                logger.add("logs/app.log", rotation="1 week", level="DEBUG", retention="1 month")
+                ```
+
+                Add logging statements to your existing routes and functions:
+
+                - Log request information and exceptions:
+
+                    ```python
+                    @app.route("/list")
+                    def lists():
+                        logger.info("Request to /list endpoint")
+                        try:
+                            # Your existing code...
+                        except requests.RequestException as e:
+                            logger.error(f"Request failed: {e}")
+                    ```
+
+                - Update other routes similarly to log information and errors:
+
+                    ```python
+                    @app.route("/done")
+                    def done():
+                        logger.info("Request to /done endpoint")
+                        try:
+                            # Your existing code...
+                        except Exception as e:
+                            logger.error(f"Error updating task: {e}")
+                    ```
+
+                    Ensure the application start is logged:
+
+                    ```python
+                    if __name__ == "__main__":
+                        logger.info("Starting Flask application")
+                        app.run(host='0.0.0.0', port=5002, debug=True)
+                    ```
+
+
+        4. Update `requirements.txt` :
+
+        Ensure your `requirements.txt` includes `loguru`
+
         ```
-        
-    2. Build and Run the Docker Container: 
-    Rebuild your Docker image and run the container:
-        
-        ```docker
-        docker build -t python-loguru-app .
-        docker run -d -p 5002:5002 python-loguru-app
+        flask
+        loguru # add this
+        opentelemetry-api
+        opentelemetry-sdk
+        opentelemetry-instrumentation-flask
         ```
-        
-        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_1.14.41_PM.webp" alt="" caption="" />1. Accessing Logs: 
-    To view the logs generated by `loguru`, Access container logs: 
-        
-        ```bash
-        docker exec -it <container_id> cat /code/logs/app.log
-        ```
-        
-        <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_1.23.26_PM.webp" alt="" caption="" />Integrating logging libraries into your applications is a good approach for teams that need precise control over their logs and want to capture application-specific data.
-    
-3. Leverage container orchestration
-Managing and logging processes manually in large-scale deployments with multiple containers can quickly become overwhelming. This is where container orchestration platforms like Kubernetes come into play. Kubernetes offers advanced features for managing and monitoring containerized environments, including robust logging capabilities.
-    
-    Key advantages of using Kubernetes for process logging include:
-    
-    - [Centralized logging](https://signoz.io/blog/centralized-logging/): Kubernetes can centralize the logs from all containers across your cluster, making monitoring and analysing logs from a single location easier. This is achieved through integrations with logging solutions like ELK Stack (Elasticsearch, Logstash, Kibana) or Fluentd.
-    - Advanced monitoring: Kubernetes works smoothly with monitoring tools such as Prometheus and Grafana, allowing you to gather, visualise, and analyse process information. You can configure alerts based on resource use, process failures, and other relevant data.
-    - Automatic log rotation: Kubernetes helps manage logs by automatically rotating them to prevent containers from running out of disk space. This ensures that logging doesn’t become a burden on container performance.
-    - Scalability: Kubernetes excels at managing containerized applications at scale. Its logging and monitoring features can scale as your deployment grows, ensuring consistent visibility across all your containers.
+
+        1. Update Your Dockerfile:
+        Modify your Dockerfile to include the custom logging library and update your application to use it.
+
+            ```docker
+            # Install loguru library
+            RUN pip install loguru
+            ```
+
+        2. Build and Run the Docker Container:
+        Rebuild your Docker image and run the container:
+
+            ```docker
+            docker build -t python-loguru-app .
+            docker run -d -p 5002:5002 python-loguru-app
+            ```
+
+            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_1.14.41_PM.webp" alt="" caption="" />1. Accessing Logs:
+        To view the logs generated by `loguru`, Access container logs:
+
+            ```bash
+            docker exec -it <container_id> cat /code/logs/app.log
+            ```
+
+            <Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-09-19_at_1.23.26_PM.webp" alt="" caption="" />Integrating logging libraries into your applications is a good approach for teams that need precise control over their logs and want to capture application-specific data.
+3.  Leverage container orchestration
+    Managing and logging processes manually in large-scale deployments with multiple containers can quickly become overwhelming. This is where container orchestration platforms like Kubernetes come into play. Kubernetes offers advanced features for managing and monitoring containerized environments, including robust logging capabilities.
+        Key advantages of using Kubernetes for process logging include:
+
+        - [Centralized logging](https://signoz.io/blog/centralized-logging/): Kubernetes can centralize the logs from all containers across your cluster, making monitoring and analysing logs from a single location easier. This is achieved through integrations with logging solutions like ELK Stack (Elasticsearch, Logstash, Kibana) or Fluentd.
+        - Advanced monitoring: Kubernetes works smoothly with monitoring tools such as Prometheus and Grafana, allowing you to gather, visualise, and analyse process information. You can configure alerts based on resource use, process failures, and other relevant data.
+        - Automatic log rotation: Kubernetes helps manage logs by automatically rotating them to prevent containers from running out of disk space. This ensures that logging doesn’t become a burden on container performance.
+        - Scalability: Kubernetes excels at managing containerized applications at scale. Its logging and monitoring features can scale as your deployment grows, ensuring consistent visibility across all your containers.
 
 ## Monitoring Docker Container Processes with SigNoz
 
@@ -489,9 +459,13 @@ git clone https://github.com/dockersamples/example-voting-app
 cd example-voting-app
 ```
 
-<Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-07-09_at_9.47.11_PM.webp" alt="Git commands to clone the repo" caption="Git commands to clone the repo" />
+<Figure
+  src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-07-09_at_9.47.11_PM.webp"
+  alt="Git commands to clone the repo"
+  caption="Git commands to clone the repo"
+/>
 
-*Git commands to clone the repo*
+_Git commands to clone the repo_
 
 Note: Skip this step if you have your own running Docker containers and Docker Compose configuration.
 
@@ -515,7 +489,11 @@ Note: Replace `{region}` with your SigNoz region and `SIGNOZ_INGESTION_KEY` with
 
 To obtain the SigNoz ingestion key and region, navigate to the “Settings” page in your SigNoz dashboard. The ingestion key and region are under the “Ingestion Settings” tab.
 
-<Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-08-28_at_9.04.01_AM.webp" alt="SigNoz Ingestion Settings" caption="SigNoz Ingestion Settings" />
+<Figure
+  src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-08-28_at_9.04.01_AM.webp"
+  alt="SigNoz Ingestion Settings"
+  caption="SigNoz Ingestion Settings"
+/>
 
 1. Set Up the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)Config
 
@@ -526,7 +504,7 @@ In the root of your project folder, create a file `otel-collector-config.yaml` a
 ```yaml
 receivers:
   tcplog/docker:
-    listen_address: "0.0.0.0:2255"
+    listen_address: '0.0.0.0:2255'
     operators:
       - type: regex_parser
         regex: '^<([0-9]+)>[0-9]+ (?P<timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?) (?P<container_id>\\S+) (?P<container_name>\\S+) [0-9]+ - -( (?P<body>.*))?'
@@ -554,7 +532,7 @@ exporters:
     tls:
       insecure: false
     headers:
-      "signoz-ingestion-key": ${env:SIGNOZ_INGESTION_KEY}
+      'signoz-ingestion-key': ${env:SIGNOZ_INGESTION_KEY}
 
 service:
   pipelines:
@@ -601,102 +579,103 @@ In your existing Docker Compose file, add the below configuration:
     command: syslog+tcp://otel-collector:2255
     depends_on:
       - otel-collector
-    restart: on-failure 
+    restart: on-failure
 ```
 
 The above Docker Compose configuration sets up two services:
 
 - `otel-collector`:
-    - Uses the Signoz [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) image.
-    - Mounts the `otel-collector-config.yaml` file into the container.
-    - Uses environment variables from the `.env` file for configuration.
-    - Exposes ports `4317` (OTLP gRPC receiver) and `4318` (OTLP HTTP receiver).
+  - Uses the Signoz [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) image.
+  - Mounts the `otel-collector-config.yaml` file into the container.
+  - Uses environment variables from the `.env` file for configuration.
+  - Exposes ports `4317` (OTLP gRPC receiver) and `4318` (OTLP HTTP receiver).
 - `logspout`:
-    - Uses the `gliderlabs/logspout` image to collect logs from other Docker containers.
-    - Forwards logs to the `otel-collector` service on port `2255`.
-    - Depends on the `otel-collector` service, ensuring it starts first so it can forward the logs to it.
+  - Uses the `gliderlabs/logspout` image to collect logs from other Docker containers.
+  - Forwards logs to the `otel-collector` service on port `2255`.
+  - Depends on the `otel-collector` service, ensuring it starts first so it can forward the logs to it.
+
 1. Start the Docker Compose file
 
 Run the below command in your terminal to start the containers:
 
 ```docker
-docker compose up -d 
+docker compose up -d
 ```
 
 If it runs without any error, navigate to your SigNoz Cloud. Under the “Logs” tab, you should see the incoming logs.
 
-<Figure src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-07-09_at_11.05.54_PM.webp" alt="SigNoz cloud dashboard to view logs" caption="SigNoz cloud dashboard to view logs" />
+<Figure
+  src="/img/guides/2024/09/how-to-log-all-the-processes-running-inside-a-docker-container-Screenshot_2024-07-09_at_11.05.54_PM.webp"
+  alt="SigNoz cloud dashboard to view logs"
+  caption="SigNoz cloud dashboard to view logs"
+/>
 
 ## Best Practices for Docker Container Process Logging
 
 Effective process logging in Docker containers is key to ensuring your applications run smoothly and securely. However, to get the most out of your logging setup, following certain best practices is essential. These guidelines will help you balance the need for detailed information with maintaining performance and security.
 
-- Balance Detail and Performance: 
-When logging processes in Docker containers, capturing all relevant information is crucial without compromising system performance. Logging too much detail can generate excessive noise and slow down your application, while too little detail may make it difficult to troubleshoot issues. A balanced approach ensures that logs are informative but do not overwhelm the system or complicate analysis. 
-Define clear logging levels (e.g., debug, info, error) and use them appropriately to control the verbosity of your logs based on your environment (e.g., development vs. production).
-- Implement log rotation: 
-Continuous logging can cause log files to grow significantly over time, which may result in excessive disk usage or even out-of-space errors. Log rotation helps mitigate this by regularly archiving or deleting older log files.
-Configure log rotation policies in Docker using the `max-size` and `max-file` options for `json-file` logging driver or use external logging solutions like `syslog`
+- Balance Detail and Performance:
+  When logging processes in Docker containers, capturing all relevant information is crucial without compromising system performance. Logging too much detail can generate excessive noise and slow down your application, while too little detail may make it difficult to troubleshoot issues. A balanced approach ensures that logs are informative but do not overwhelm the system or complicate analysis.
+  Define clear logging levels (e.g., debug, info, error) and use them appropriately to control the verbosity of your logs based on your environment (e.g., development vs. production).
+- Implement log rotation:
+  Continuous logging can cause log files to grow significantly over time, which may result in excessive disk usage or even out-of-space errors. Log rotation helps mitigate this by regularly archiving or deleting older log files.
+  Configure log rotation policies in Docker using the `max-size` and `max-file` options for `json-file` logging driver or use external logging solutions like `syslog`
 - Secure sensitive data
-Logs can unintentionally expose sensitive information such as credentials, tokens, or personal data. Ensure that your logging strategy is designed to avoid logging sensitive information or sanitize logs before they are stored or transmitted.
-Use environment variables and secrets management tools (e.g., Docker secrets, AWS Secrets Manager) to ensure that sensitive data is not logged, and enforce redaction rules if necessary.
+  Logs can unintentionally expose sensitive information such as credentials, tokens, or personal data. Ensure that your logging strategy is designed to avoid logging sensitive information or sanitize logs before they are stored or transmitted.
+  Use environment variables and secrets management tools (e.g., Docker secrets, AWS Secrets Manager) to ensure that sensitive data is not logged, and enforce redaction rules if necessary.
 - Standardize logging
-Consistent logging across all containers makes it easier to aggregate and analyze logs. Establish a standardized format that includes timestamps, severity levels, service identifiers, and other relevant metadata. This consistency ensures seamless integration with [monitoring and alerting tools](https://signoz.io/comparisons/infrastructure-monitoring-tools/). 
-Adopt structured logging formats such as JSON, which enables more sophisticated querying and log management across distributed systems.
-- Centralized Log Management: 
-In multi-container environments, having each container manage its own logs can become chaotic. Implement a [centralized log management solution](https://signoz.io/blog/centralized-logging/#what-is-centralized-logging) like [SigNoz](http://signoz.io) to collect logs from all containers in a single location, making it easier to monitor, analyze, and troubleshoot system-wide events.
+  Consistent logging across all containers makes it easier to aggregate and analyze logs. Establish a standardized format that includes timestamps, severity levels, service identifiers, and other relevant metadata. This consistency ensures seamless integration with [monitoring and alerting tools](https://signoz.io/comparisons/infrastructure-monitoring-tools/).
+  Adopt structured logging formats such as JSON, which enables more sophisticated querying and log management across distributed systems.
+- Centralized Log Management:
+  In multi-container environments, having each container manage its own logs can become chaotic. Implement a [centralized log management solution](https://signoz.io/blog/centralized-logging/#what-is-centralized-logging) like [SigNoz](http://signoz.io) to collect logs from all containers in a single location, making it easier to monitor, analyze, and troubleshoot system-wide events.
 - Monitor and Alert on Logs:
-Logging should not be passive; actively monitor logs for errors, warnings, or other significant events. Set up automated alerts to notify you of critical issues in real time. Use log monitoring tools to create alerts based on patterns or specific events, ensuring that you can respond quickly to operational issues or security incidents.
+  Logging should not be passive; actively monitor logs for errors, warnings, or other significant events. Set up automated alerts to notify you of critical issues in real time. Use log monitoring tools to create alerts based on patterns or specific events, ensuring that you can respond quickly to operational issues or security incidents.
 
 ## Troubleshooting Common Issues
 
 While implementing process logging in Docker containers is essential for monitoring and troubleshooting, several common issues can arise. Understanding these challenges and knowing how to resolve them ensures that your logging setup remains reliable, efficient, and secure.
 
 - High log volume
-One of the most common problems in Docker container logging is the generation of large log volumes. This can occur due to excessive logging of minor events, high traffic, or long-running processes. Large log files can overwhelm your storage and degrade system performance if not properly managed.
-    
-    How to Manage High Log Volume:
-    
-    - Log Rotation: As mentioned earlier, implementing log rotation prevents individual log files from growing too large. Docker provides built-in options for rotating logs based on size and number of files. Configuring these options ensures that your logs remain manageable:
-        
-        ```docker
-        docker run --log-opt max-size=10m --log-opt max-file=5 <my-container> 
-        ```
-        
-        This command limits each log file to 10 MB and retains a maximum of 5 log files per container, automatically archiving older logs. Reducing log volume ensures that logging remains sustainable and doesn’t affect your system’s performance.
-        
-    - Log Compression: Compressing older log files can significantly reduce the amount of storage used by archived logs. Many log rotation tools offer compression options, where old log files are compressed into formats like `.gz` to save space.
-    - Filter Logs: Another approach to reducing log volume is to filter out non-essential log entries. You can achieve this by setting appropriate logging levels (e.g., ERROR, WARNING, INFO) and filtering out DEBUG or INFO-level logs in production environments, where they might not be necessary.
+  One of the most common problems in Docker container logging is the generation of large log volumes. This can occur due to excessive logging of minor events, high traffic, or long-running processes. Large log files can overwhelm your storage and degrade system performance if not properly managed.
+      How to Manage High Log Volume:
+
+      - Log Rotation: As mentioned earlier, implementing log rotation prevents individual log files from growing too large. Docker provides built-in options for rotating logs based on size and number of files. Configuring these options ensures that your logs remain manageable:
+
+          ```docker
+          docker run --log-opt max-size=10m --log-opt max-file=5 <my-container>
+          ```
+
+          This command limits each log file to 10 MB and retains a maximum of 5 log files per container, automatically archiving older logs. Reducing log volume ensures that logging remains sustainable and doesn’t affect your system’s performance.
+
+      - Log Compression: Compressing older log files can significantly reduce the amount of storage used by archived logs. Many log rotation tools offer compression options, where old log files are compressed into formats like `.gz` to save space.
+      - Filter Logs: Another approach to reducing log volume is to filter out non-essential log entries. You can achieve this by setting appropriate logging levels (e.g., ERROR, WARNING, INFO) and filtering out DEBUG or INFO-level logs in production environments, where they might not be necessary.
 
 Reducing log volume ensures that logging remains sustainable and doesn’t affect your system’s performance.
 
-- Permission issues: 
-In some cases, logging processes within a container might encounter permission issues. These issues typically arise when the container’s logging process or the user running the container does not have the required permissions to write to specific directories or log files.
-How to Resolve Permission Issues:
-    - Container User Permissions: Make sure the process responsible for writing logs inside the container has the correct user permissions. By default, many containers run as the `root` user, but for security reasons, you may want to run processes as non-root users. Ensure that the user or process inside the container has write permissions for the designated logging directory.
-        
-        You can adjust user permissions with the `USER` directive in your Dockerfile:
-        
-        ```docker
-        USER myuser
-        ```
-        
-    - Bind Mount Permissions: If you’re using bind mounts to store logs on the host machine, ensure that the directory on the host system has the correct permissions. The container may not be able to write logs if the directory is read-only or if the container’s user lacks the necessary access rights. You can adjust the permissions by modifying the file system’s permissions on the host or using the correct `chmod` command.
-- Resource constraints: 
-Logging, while valuable, consumes resources such as CPU, memory, and disk I/O. If the logging process is too resource-intensive, it can negatively impact the performance of your containerized application. This is especially concerning in resource-constrained environments or when running multiple containers on the same host.
-    
-    How to Address Resource Constraints:
-    
-    - Monitor Resource Usage: Use monitoring tools like Docker’s built-in stats (`docker stats`) or external monitoring solutions to track how much CPU, memory, and disk I/O the logging process is consuming. This can help you identify bottlenecks and determine whether the logging process is impacting your container’s performance.
-    - Optimize Log Frequency and Detail: Adjust the level of logging detail and the frequency of logs to minimize resource usage. For example, reduce the log verbosity (e.g., avoid DEBUG-level logs in production), or log only significant events rather than every small operation.
-    - Limit CPU and Memory: You can restrict the CPU and memory usage of your container by setting resource limits in the Docker run command or in your container orchestration tool (like Kubernetes). This ensures that even if the logging process consumes resources, it won’t affect the overall performance of the application.
-        
-        ```bash
-        docker run --memory=256m --cpus="1.0" <my-container>
-        ```
-        
-        This limits the container to 256 MB of memory and one CPU core, preventing it from using excessive resources for logging or other tasks.
-        
+- Permission issues:
+  In some cases, logging processes within a container might encounter permission issues. These issues typically arise when the container’s logging process or the user running the container does not have the required permissions to write to specific directories or log files.
+  How to Resolve Permission Issues: - Container User Permissions: Make sure the process responsible for writing logs inside the container has the correct user permissions. By default, many containers run as the `root` user, but for security reasons, you may want to run processes as non-root users. Ensure that the user or process inside the container has write permissions for the designated logging directory.
+          You can adjust user permissions with the `USER` directive in your Dockerfile:
+
+          ```docker
+          USER myuser
+          ```
+
+      - Bind Mount Permissions: If you’re using bind mounts to store logs on the host machine, ensure that the directory on the host system has the correct permissions. The container may not be able to write logs if the directory is read-only or if the container’s user lacks the necessary access rights. You can adjust the permissions by modifying the file system’s permissions on the host or using the correct `chmod` command.
+- Resource constraints:
+  Logging, while valuable, consumes resources such as CPU, memory, and disk I/O. If the logging process is too resource-intensive, it can negatively impact the performance of your containerized application. This is especially concerning in resource-constrained environments or when running multiple containers on the same host.
+      How to Address Resource Constraints:
+
+      - Monitor Resource Usage: Use monitoring tools like Docker’s built-in stats (`docker stats`) or external monitoring solutions to track how much CPU, memory, and disk I/O the logging process is consuming. This can help you identify bottlenecks and determine whether the logging process is impacting your container’s performance.
+      - Optimize Log Frequency and Detail: Adjust the level of logging detail and the frequency of logs to minimize resource usage. For example, reduce the log verbosity (e.g., avoid DEBUG-level logs in production), or log only significant events rather than every small operation.
+      - Limit CPU and Memory: You can restrict the CPU and memory usage of your container by setting resource limits in the Docker run command or in your container orchestration tool (like Kubernetes). This ensures that even if the logging process consumes resources, it won’t affect the overall performance of the application.
+
+          ```bash
+          docker run --memory=256m --cpus="1.0" <my-container>
+          ```
+
+          This limits the container to 256 MB of memory and one CPU core, preventing it from using excessive resources for logging or other tasks.
+
 
 By following these best practices and troubleshooting recommendations, you can keep your Docker containers' process logging system running smoothly.
 

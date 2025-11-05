@@ -1,13 +1,11 @@
 ---
-
 title: Grafana Guide - How to Graph HTTP Requests per Minute
-slug: grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count
 date: 2024-10-14
 tags: [Grafana, faq]
 authors: [nitin_gouda]
 description: Learn how to use Grafana to graph HTTP requests per minute using http_server_requests_seconds_count. Step-by-step guide for setup, querying, and analysis.
-keywords: [Grafana, HTTP requests, Prometheus, PromQL, monitoring, visualization, performance analysis]
-
+keywords:
+  [Grafana, HTTP requests, Prometheus, PromQL, monitoring, visualization, performance analysis]
 ---
 
 Monitoring HTTP requests is crucial for understanding your web application's performance and user experience. Grafana, a powerful open-source visualization tool, combined with Prometheus, offers an effective way to track and analyze HTTP request rates. This guide will walk you through graphing HTTP requests per minute in Grafana using the `http_server_requests_seconds_count` metric.
@@ -28,8 +26,12 @@ This section walks you through setting up Grafana and Prometheus to monitor HTTP
 
 ### Prerequisite
 
-- <a href="https://grafana.com/grafana/download" rel="noopener noreferrer nofollow" target="_blank">Grafana Installed</a>
-- <a href="https://prometheus.io/download/" rel="noopener noreferrer nofollow" target="_blank">Prometheus Installed</a>
+- <a href="https://grafana.com/grafana/download" rel="noopener noreferrer nofollow" target="_blank">
+    Grafana Installed
+  </a>
+- <a href="https://prometheus.io/download/" rel="noopener noreferrer nofollow" target="_blank">
+    Prometheus Installed
+  </a>
 
 ### Expose Metrics from Your Application
 
@@ -37,192 +39,233 @@ To monitor your application's performance with Prometheus, the application must 
 
 For Java-based applications, libraries like Micrometer and the Prometheus Java Client are commonly used to expose metrics. A sample [Java application](https://signoz.io/guides/monitoring-java-applications/#signoz-a-modern-approach-to-java-application-monitoring) has been provided. Follow the steps below to expose metrics for the application. If you have an existing application already exposing metrics in Prometheus format, skip this step and move on to configuring Prometheus.
 
-1. Add the Micrometer Dependency
-For a Spring Boot application, you’ll need to add the Micrometer dependency to your project. This will allow your app to export its metrics in a format that Prometheus understands.
-    
-    If you're using Maven, add this to your `pom.xml` file:
-    
-    ```xml
-    <dependency>
-        <groupId>io.micrometer</groupId>
-        <artifactId>micrometer-registry-prometheus</artifactId>
-    </dependency>
-    ```
-    
-2. Configure your Application
-Configure the application to expose the Prometheus metrics by enabling the Actuator endpoints in your `application.properties` file located at `src/main/resources`:
-    
-    ```
-    management.endpoints.web.exposure.include=prometheus
-    management.endpoint.prometheus.enabled=true
-    ```
-    
-3. Access the Prometheus Endpoint
-    
+1.  Add the Micrometer Dependency
+    For a Spring Boot application, you’ll need to add the Micrometer dependency to your project. This will allow your app to export its metrics in a format that Prometheus understands.
+        If you're using Maven, add this to your `pom.xml` file:
+
+        ```xml
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        ```
+2.  Configure your Application
+    Configure the application to expose the Prometheus metrics by enabling the Actuator endpoints in your `application.properties` file located at `src/main/resources`:
+        ```
+        management.endpoints.web.exposure.include=prometheus
+        management.endpoint.prometheus.enabled=true
+        ```
+3.  Access the Prometheus Endpoint
+
     Once your application is running, the Prometheus metrics will be available at `http://localhost:8090/actuator/prometheus`
     Open the URL in your browser or use a tool like `curl` to check if the metrics are being exposed properly.
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-05_at_11.17.10_AM.webp" alt="Exposed metrics from Java application in Prometheus format" caption="Exposed metrics from Java application in Prometheus format" />
-    
+
+    <Figure
+      src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-05_at_11.17.10_AM.webp"
+      alt="Exposed metrics from Java application in Prometheus format"
+      caption="Exposed metrics from Java application in Prometheus format"
+    />
 
 ### Set up Prometheus to scrape metrics
 
 Now that your application is exposing metrics, you need to configure Prometheus to collect those metrics. Prometheus does this by periodically checking the endpoint where your metrics are exposed (this process is called scraping).
 
 1. Modify the [Prometheus Configuration](https://signoz.io/guides/what-is-prometheus-target/) File
-    
-    Modify the `prometheus.yml` configuration file to specify the targets Prometheus should scrape metrics from. Add the endpoint of your application under the `scrape_configs` section:
-    
-    ```yaml
-    scrape_configs:
-      - job_name: 'my_application'
-        static_configs:
-          - targets: ['localhost:8080']
-    ```
-    
+
+   Modify the `prometheus.yml` configuration file to specify the targets Prometheus should scrape metrics from. Add the endpoint of your application under the `scrape_configs` section:
+
+   ```yaml
+   scrape_configs:
+     - job_name: 'my_application'
+       static_configs:
+         - targets: ['localhost:8080']
+   ```
+
 2. Start Prometheus
-    
-    To start Prometheus, use the appropriate command based on your installation. For example, If you’ve manually downloaded the Prometheus binary, you can start Prometheus with this command on Linux:
-    
-    ```bash
-    ./prometheus --config.file=prometheus.yml
-    ```
-    
+
+   To start Prometheus, use the appropriate command based on your installation. For example, If you’ve manually downloaded the Prometheus binary, you can start Prometheus with this command on Linux:
+
+   ```bash
+   ./prometheus --config.file=prometheus.yml
+   ```
+
 3. Confirm Prometheus is Scraping Your Application’s Metrics
-    
-    Open Prometheus in the browser by navigating to `http://localhost:9090`. Click on Status > Targets to check if your application’s target is in the UP state.
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-03_at_8.50.12_AM.webp" alt="Prometheus targets page" caption="Prometheus targets page" />
-    
-    To confirm Prometheus is collecting metrics from your application, click on Graph and run a query like `http_server_requests_seconds_count` :
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-03_at_8.53.27_AM.webp" alt="Application metrics being served" caption="Application metrics being served" />
-    
+
+   Open Prometheus in the browser by navigating to `http://localhost:9090`. Click on Status > Targets to check if your application’s target is in the UP state.
+
+   <Figure
+     src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-03_at_8.50.12_AM.webp"
+     alt="Prometheus targets page"
+     caption="Prometheus targets page"
+   />
+
+   To confirm Prometheus is collecting metrics from your application, click on Graph and run a query like `http_server_requests_seconds_count` :
+
+   <Figure
+     src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-03_at_8.53.27_AM.webp"
+     alt="Application metrics being served"
+     caption="Application metrics being served"
+   />
 
 ### Connect Prometheus to Grafana
 
 After configuring Prometheus to collect metrics from your application, you can visualize those metrics in Grafana. Follow these steps:
 
 1. Log into Grafana
-    
-    Open Grafana in your browser and log in (default credentials: username `admin`, password `admin`).
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-27_at_8.29.28_PM.webp" alt="Grafana landing page" caption="Grafana landing page" />
-    
+
+   Open Grafana in your browser and log in (default credentials: username `admin`, password `admin`).
+
+   <Figure
+     src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-27_at_8.29.28_PM.webp"
+     alt="Grafana landing page"
+     caption="Grafana landing page"
+   />
+
 2. Add Prometheus as a Data Source
-    
-    From the left-hand menu, click Configuration, then select Data Sources.
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-28_at_10.13.48_PM.webp" alt="Add data source" caption="Add data source" />
-    
-    Click Add data source, then choose Prometheus from the list.
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-28_at_10.15.11_PM.webp" alt="Add Prometheus as data source" caption="Add Prometheus as data source" />
-    
-     Enter the URL where Prometheus is running (e.g., `http://localhost:9090`).
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-28_at_10.16.29_PM.webp" alt="Prometheus data source page" caption="Prometheus data source page" />
-    
+
+   From the left-hand menu, click Configuration, then select Data Sources.
+
+   <Figure
+     src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-28_at_10.13.48_PM.webp"
+     alt="Add data source"
+     caption="Add data source"
+   />
+
+   Click Add data source, then choose Prometheus from the list.
+
+   <Figure
+     src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-28_at_10.15.11_PM.webp"
+     alt="Add Prometheus as data source"
+     caption="Add Prometheus as data source"
+   />
+
+   Enter the URL where Prometheus is running (e.g., `http://localhost:9090`).
+
+   <Figure
+     src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-28_at_10.16.29_PM.webp"
+     alt="Prometheus data source page"
+     caption="Prometheus data source page"
+   />
+
 3. Save the Configuration
-    
-    Click Save & Test to verify that Grafana can successfully connect to Prometheus.
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-28_at_10.18.37_PM.webp" alt="Prometheus successfully connected with Grafana" caption="Prometheus successfully connected with Grafana" />
-    
+
+   Click Save & Test to verify that Grafana can successfully connect to Prometheus.
+
+   <Figure
+     src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-28_at_10.18.37_PM.webp"
+     alt="Prometheus successfully connected with Grafana"
+     caption="Prometheus successfully connected with Grafana"
+   />
 
 ### Tips for Ensuring Proper Integration Between Your Application, Prometheus, and Grafana
 
 Integrating Prometheus and Grafana with your application can significantly enhance your monitoring and observability capabilities. To ensure a seamless experience, consider the following best practices:
 
 1. Use Clear Metric Names
-Always give your metrics meaningful names, so it’s easy to understand what they measure. For example, instead of using `request_count`, use `http_requests_total` for clarity.
+   Always give your metrics meaningful names, so it’s easy to understand what they measure. For example, instead of using `request_count`, use `http_requests_total` for clarity.
 2. Make the Most of Labels
-Labels help categorize and filter your data. Use them to add context like status codes (`status_code="200"`) or response times. This makes analysis in Grafana easier.
+   Labels help categorize and filter your data. Use them to add context like status codes (`status_code="200"`) or response times. This makes analysis in Grafana easier.
 3. Set the Right Scraping Interval
-Adjust how often Prometheus collects data based on your app’s traffic. A typical interval is 15 seconds, but don’t set it too low, or it might slow down your system.
+   Adjust how often Prometheus collects data based on your app’s traffic. A typical interval is 15 seconds, but don’t set it too low, or it might slow down your system.
 4. Check Your Metrics Endpoint
-Before launching, use tools like `curl` or Postman to ensure your app’s metrics endpoint works and displays data in Prometheus format. Catching issues early can save you headaches later.
+   Before launching, use tools like `curl` or Postman to ensure your app’s metrics endpoint works and displays data in Prometheus format. Catching issues early can save you headaches later.
 5. Keep an Eye on Prometheus’ Performance
-As your app grows, Prometheus might get bogged down. Monitor its CPU, memory, and disk usage, and adjust settings like retention periods if needed.
+   As your app grows, Prometheus might get bogged down. Monitor its CPU, memory, and disk usage, and adjust settings like retention periods if needed.
 6. Document Everything
-Keep notes on what each metric means, either in your code or a separate file. This helps everyone on your team understand your monitoring setup.
+   Keep notes on what each metric means, either in your code or a separate file. This helps everyone on your team understand your monitoring setup.
 7. Update Dashboards and Alerts
-Regularly check your Grafana dashboards and alerts to make sure they’re still relevant. Remove outdated metrics and add new ones as your app changes.
+   Regularly check your Grafana dashboards and alerts to make sure they’re still relevant. Remove outdated metrics and add new ones as your app changes.
 
 ## Creating a Dashboard for HTTP Requests per Minute
 
 With Prometheus now scraping your application's metrics, follow these steps to create a Grafana dashboard to visualize HTTP requests per minute:
 
-1. Create New Dashboard
-    
+1.  Create New Dashboard
+
     In the left-hand menu, select Dashboards and click the Create dashboard button.
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-04_at_11.42.37.webp" alt="Create dashboard" caption="Create dashboard" />
-    
+
+    <Figure
+      src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-04_at_11.42.37.webp"
+      alt="Create dashboard"
+      caption="Create dashboard"
+    />
+
     Click the Add visualization button
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-fec50360-ee07-4569-ab85-8794820adb6d.webp" alt="Adding visualization" caption="Adding visualization" />
-    
+
+    <Figure
+      src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-fec50360-ee07-4569-ab85-8794820adb6d.webp"
+      alt="Adding visualization"
+      caption="Adding visualization"
+    />
+
     Select Prometheus as the data source
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-093fbf6f-d2be-4924-8991-4961ca31fff0.webp" alt="Select datasource" caption="Select datasource" />
-    
-2. Use PromQL to Run Queries
-    
+
+    <Figure
+      src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-093fbf6f-d2be-4924-8991-4961ca31fff0.webp"
+      alt="Select datasource"
+      caption="Select datasource"
+    />
+
+2.  Use PromQL to Run Queries
+
     To query the HTTP request metrics from the application, in the panel's query editor, enter the following PromQL query to calculate the rate of HTTP requests over the last minute:
-    
+
     ```json
     rate(http_server_requests_seconds_count{}[1m])
     ```
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_12.12.25_PM.webp" alt="Querying HTTP request rate over the last minute" caption="Querying HTTP request rate over the last minute" />
-    
+
+    <Figure
+      src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_12.12.25_PM.webp"
+      alt="Querying HTTP request rate over the last minute"
+      caption="Querying HTTP request rate over the last minute"
+    />
+
     This query retrieves the per-second rate of HTTP requests based on the `http_server_requests_seconds_count` metric. It calculates how many requests are happening every second, averaged over a one-minute window. This is useful for monitoring real-time traffic patterns and understanding how request volume changes over time.
-    
-3. Set the Unit to Requests Per Minute
-After running the query, you’ll want to format the result to show requests per minute instead of per second. In the Panel settings on the right, scroll to the Standard options section. Here, you can set the Unit dropdown to display the rate in seconds, which represents the requests per second.
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-03_at_9.21.33_AM.webp" alt="Unit response set to seconds" caption="Unit response set to seconds" />
-    
-    Since Grafana doesn’t have a built-in option to display requests per minute, you will need to manually convert the per-second rate by multiplying it by 60, which leads us to the next step.
-    
-4. Multiply by 60:
-    
+
+3.  Set the Unit to Requests Per Minute
+    After running the query, you’ll want to format the result to show requests per minute instead of per second. In the Panel settings on the right, scroll to the Standard options section. Here, you can set the Unit dropdown to display the rate in seconds, which represents the requests per second.
+        <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-03_at_9.21.33_AM.webp" alt="Unit response set to seconds" caption="Unit response set to seconds" />
+
+        Since Grafana doesn’t have a built-in option to display requests per minute, you will need to manually convert the per-second rate by multiplying it by 60, which leads us to the next step.
+4.  Multiply by 60:
+
     To calculate requests per minute, modify your query to multiply the per-second rate by 60. This will convert the requests-per-second data into requests-per-minute. Update your PromQL query like this:
-    
+
     ```
     rate(http_server_requests_seconds_count[1m]) * 60
     ```
-    
+
     This adjusted query takes the per-second rate over the last minute and multiplies it by 60 to show the total number of requests made each minute.
-    
-    <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_1.18.04_PM.webp" alt="http_server_requests_seconds_count dashboard" caption="http_server_requests_seconds_count dashboard" />
-    
-5. Customize the Panel
-To improve the readability and relevance of your dashboard, it's helpful to customize the panel:
-    1. Set the panel title: In the General tab, rename the panel to something more descriptive, such as "`HTTP Requests per Minute`." This makes it easier to understand the panel’s purpose at a glance.
-        
-        <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_1.18.04_PM%201.webp" alt="changing the name of the panel tile" caption="changing the name of the panel tile" />
-        
-    2. Customize as per needs: 
-    You can configure the Y-axis to automatically adjust to the scale of incoming request rates or set a custom range based on your expected traffic volume. In the Display settings, you can also fine-tune the legend to provide more context about the data shown on the dashboard.
-    3. Apply the changes:
-    Once you’ve customized the panel to meet your needs, click Apply to save your settings and add the panel to the dashboard.
-        
-        <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_1.32.56_PM.webp" alt="Dashboard overview" caption="Dashboard overview" />
-        
-    4. `Optional` - Set Up Alerts
-    To stay informed of significant changes in HTTP request rates, you can configure alerts in Grafana. Alerts will notify you when specific conditions are met, such as sudden spikes or drops in traffic.
-        1. Add alerts:
-        Go to the Alert tab in the panel configuration, where you can define thresholds for high or low request rates that will trigger notifications. This can be useful for early detection of performance issues or traffic anomalies.
-        To know more about Setting up the Alerts you follow the official docs <a href="https://grafana.com/docs/grafana/latest/alerting/" rel="noopener noreferrer nofollow" target="_blank">here</a>. 
-            
-            <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_1.35.19_PM.webp" alt="Alerts tab" caption="Alerts tab" />
-            
-            Once configured, your dashboard should give you real-time insight into your HTTP request patterns, enabling [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) of your application’s performance.
-            
-            <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-03_at_9.31.53_AM.webp" alt="Final dashboard" caption="Final dashboard" />
-            
+
+    <Figure
+      src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_1.18.04_PM.webp"
+      alt="http_server_requests_seconds_count dashboard"
+      caption="http_server_requests_seconds_count dashboard"
+    />
+
+5.  Customize the Panel
+    To improve the readability and relevance of your dashboard, it's helpful to customize the panel: 1. Set the panel title: In the General tab, rename the panel to something more descriptive, such as "`HTTP Requests per Minute`." This makes it easier to understand the panel’s purpose at a glance.
+            <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_1.18.04_PM%201.webp" alt="changing the name of the panel tile" caption="changing the name of the panel tile" />
+
+        2. Customize as per needs:
+        You can configure the Y-axis to automatically adjust to the scale of incoming request rates or set a custom range based on your expected traffic volume. In the Display settings, you can also fine-tune the legend to provide more context about the data shown on the dashboard.
+        3. Apply the changes:
+        Once you’ve customized the panel to meet your needs, click Apply to save your settings and add the panel to the dashboard.
+
+            <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_1.32.56_PM.webp" alt="Dashboard overview" caption="Dashboard overview" />
+
+        4. `Optional` - Set Up Alerts
+        To stay informed of significant changes in HTTP request rates, you can configure alerts in Grafana. Alerts will notify you when specific conditions are met, such as sudden spikes or drops in traffic.
+            1. Add alerts:
+            Go to the Alert tab in the panel configuration, where you can define thresholds for high or low request rates that will trigger notifications. This can be useful for early detection of performance issues or traffic anomalies.
+            To know more about Setting up the Alerts you follow the official docs <a href="https://grafana.com/docs/grafana/latest/alerting/" rel="noopener noreferrer nofollow" target="_blank">here</a>.
+
+                <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-09-29_at_1.35.19_PM.webp" alt="Alerts tab" caption="Alerts tab" />
+
+                Once configured, your dashboard should give you real-time insight into your HTTP request patterns, enabling [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) of your application’s performance.
+
+                <Figure src="/img/guides/2024/10/grafana-graphing-http-requests-per-minute-with-http-server-requests-seconds-count-Screenshot_2024-10-03_at_9.31.53_AM.webp" alt="Final dashboard" caption="Final dashboard" />
+
 
 ### Crafting the Perfect PromQL Query
 
@@ -231,41 +274,35 @@ PromQL (Prometheus Query Language) is essential for extracting and analyzing met
 Understanding the Query Components
 
 1. Metric Selection:
-`http_server_requests_seconds_count{}`: This part of the query selects all the time series associated with the metric `http_server_requests_seconds_count`, which tracks the number of HTTP requests over time. The empty `{}` allows you to filter further using labels (such as status codes or URIs) if needed.
+   `http_server_requests_seconds_count{}`: This part of the query selects all the time series associated with the metric `http_server_requests_seconds_count`, which tracks the number of HTTP requests over time. The empty `{}` allows you to filter further using labels (such as status codes or URIs) if needed.
 2. Time Range:
-`[1m]`: This specifies the time frame during which the rate is calculated—in this example, a 1-minute window. You may change this depending on your analytical requirements, such as tracking trends over shorter or longer intervals.
+   `[1m]`: This specifies the time frame during which the rate is calculated—in this example, a 1-minute window. You may change this depending on your analytical requirements, such as tracking trends over shorter or longer intervals.
 3. Rate Calculation:
-`rate()`: The `rate()` function computes the average per-second rate of increase for the metric within the specified time range. It helps you understand how fast HTTP requests are being received by the server.
+   `rate()`: The `rate()` function computes the average per-second rate of increase for the metric within the specified time range. It helps you understand how fast HTTP requests are being received by the server.
 
 ### Practical Adjustments for Different Scenarios
 
-1. Hourly Request Rates:
-If you want to calculate the request rate per hour instead of per second, you can adjust the time range and multiply by the number of seconds in an hour:
-    
-    ```lua
-    rate(http_server_requests_seconds_count{}[1h]) * 3600
-    ```
-    
-    This query calculates the per-second rate over the past hour and multiplies it by 3600 (the number of seconds in an hour) to give you requests per hour.
-    
-2. Filtering by Specific Endpoint:
-If you're interested in monitoring requests to a particular endpoint, you can filter the metric by its URI label:
-    
-    ```lua
-    rate(http_server_requests_seconds_count{uri="/api/users"}[1m]) * 60
-    ```
-    
-    This query monitors only the requests to the `/api/users` endpoint over a 1-minute period, multiplied by 60 to get the requests per minute.
-    
-3. Grouping by Status Code:
-To analyze request patterns by status codes (e.g., 200, 404), you can use the `sum by (status)` clause to group requests based on their HTTP status:
-    
-    ```lua
-    sum by (status) (rate(http_server_requests_seconds_count{}[1m])) * 60
-    ```
-    
-    This query calculates the request rate for each status code and aggregates them, showing you the number of requests per minute, broken down by their status (e.g., success, errors).
-    
+1.  Hourly Request Rates:
+    If you want to calculate the request rate per hour instead of per second, you can adjust the time range and multiply by the number of seconds in an hour:
+        ```lua
+        rate(http_server_requests_seconds_count{}[1h]) * 3600
+        ```
+
+        This query calculates the per-second rate over the past hour and multiplies it by 3600 (the number of seconds in an hour) to give you requests per hour.
+2.  Filtering by Specific Endpoint:
+    If you're interested in monitoring requests to a particular endpoint, you can filter the metric by its URI label:
+        ```lua
+        rate(http_server_requests_seconds_count{uri="/api/users"}[1m]) * 60
+        ```
+
+        This query monitors only the requests to the `/api/users` endpoint over a 1-minute period, multiplied by 60 to get the requests per minute.
+3.  Grouping by Status Code:
+    To analyze request patterns by status codes (e.g., 200, 404), you can use the `sum by (status)` clause to group requests based on their HTTP status:
+        ```lua
+        sum by (status) (rate(http_server_requests_seconds_count{}[1m])) * 60
+        ```
+
+        This query calculates the request rate for each status code and aggregates them, showing you the number of requests per minute, broken down by their status (e.g., success, errors).
 
 ## Interpreting and Analyzing HTTP Request Graphs
 
@@ -296,13 +333,13 @@ By analyzing HTTP request graphs in Grafana, you can make informed decisions to 
 
 To effectively monitor your applications and systems, leveraging an advanced observability platform like [SigNoz](https://signoz.io/) can elevate your monitoring strategy. [SigNoz](https://signoz.io/) is an open-source observability tool that provides end-to-end monitoring, troubleshooting, and alerting capabilities across your entire application stack.
 
-Built on [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)—the emerging industry standard for telemetry data—SigNoz integrates seamlessly with your existing Prometheus and Grafana setup. This [unified observability](https://signoz.io/unified-observability/) solution enhances your ability to monitor HTTP requests per minute alongside deep traces, giving you a comprehensive view of your application's performance. 
+Built on [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)—the emerging industry standard for telemetry data—SigNoz integrates seamlessly with your existing Prometheus and Grafana setup. This [unified observability](https://signoz.io/unified-observability/) solution enhances your ability to monitor HTTP requests per minute alongside deep traces, giving you a comprehensive view of your application's performance.
 
 SigNoz complements this setup by offering additional monitoring features:
 
 1. Extend [Prometheus Monitoring](https://signoz.io/guides/what-is-prometheus-for-monitoring/): Retain your existing Prometheus setup while enhancing it with tracing and logging capabilities.
 2. Faster Troubleshooting: Correlate metrics with traces and logs to quickly identify and resolve performance issues.
-3. Flexible Data Analysis: Use both PromQL and SigNoz's advanced [query builder](https://signoz.io/blog/query-builder-v5/) for versatile data exploration and analysis. 
+3. Flexible Data Analysis: Use both PromQL and SigNoz's advanced [query builder](https://signoz.io/blog/query-builder-v5/) for versatile data exploration and analysis.
 4. Unified Dashboards: Build custom dashboards that bring together metrics, traces, and logs, helping you monitor key performance indicators and identify trends effectively.
 
 To get started with HTTP request monitoring of your application with SigNoz, follow the steps in this [section](https://signoz.io/guides/monitoring-java-applications/#signoz-a-modern-approach-to-java-application-monitoring).

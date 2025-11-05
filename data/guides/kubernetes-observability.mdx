@@ -1,16 +1,13 @@
 ---
-
 title: Mastering Kubernetes Observability - A Practical Guide
-slug: kubernetes-observability
 date: 2024-10-14
 tags: [observability]
 authors: [bhavya_sachdeva]
 description: Learn how to implement and master Kubernetes observability for enhanced system performance, security, and reliability in cloud-native architectures.
 keywords: [kubernetes observability, monitoring, logs, metrics, traces, cloud-native, microservices]
-
 ---
 
-Kubernetes has changed how we manage containers, but it can be hard to figure out how the system works and performs.  Kubernetes observability is an important way to keep cloud-based applications running smoothly and securely. In this guide, I will cover the basics of Kubernetes observability and how to put it into practice. You'll discover how to monitor your Kubernetes clusters, solve problems more quickly, and improve your applications for better performance.
+Kubernetes has changed how we manage containers, but it can be hard to figure out how the system works and performs. Kubernetes observability is an important way to keep cloud-based applications running smoothly and securely. In this guide, I will cover the basics of Kubernetes observability and how to put it into practice. You'll discover how to monitor your Kubernetes clusters, solve problems more quickly, and improve your applications for better performance.
 
 ## What is Kubernetes Observability?
 
@@ -162,23 +159,17 @@ Start by defining what you aim to achieve with observability in your Kubernetes 
 For metrics, logs, and traces, choose tools that best fit your needs:
 
 - Metrics: Use Prometheus for gathering and querying time-series data.
-    
-    ```bash
-    helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace
-    ```
-    
+  ```bash
+  helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace
+  ```
 - Logs: Deploy Fluentd to aggregate and forward logs to a central store.
-    
-    ```bash
-    helm install fluentd fluent/fluentd --namespace logging --create-namespace
-    ```
-    
+  ```bash
+  helm install fluentd fluent/fluentd --namespace logging --create-namespace
+  ```
 - Traces: Implement Jaeger for [distributed tracing](https://signoz.io/distributed-tracing/) to follow the path requests take through your microservices.
-    
-    ```bash
-    helm install jaeger jaegertracing/jaeger --namespace tracing --create-namespace
-    ```
-    
+  ```bash
+  helm install jaeger jaegertracing/jaeger --namespace tracing --create-namespace
+  ```
 
 For a centralized observability solution, consider [SigNoz](https://signoz.io/), which offers a unified platform for viewing metrics, logs, and traces.
 
@@ -187,88 +178,72 @@ For a centralized observability solution, consider [SigNoz](https://signoz.io/),
 Implement a robust logging system:
 
 - Deploy Fluentd as a DaemonSet to ensure it runs on every node, collecting logs from all pods. Here’s an example of a Fluentd DaemonSet configuration:
-    
-    fluentd-daemonset.yaml
-    
-    ```yaml
-    apiVersion: apps/v1
-    kind: DaemonSet
-    metadata:
-      name: fluentd
-      namespace: logging
-    spec:
-      selector:
-        matchLabels:
+  fluentd-daemonset.yaml
+  ```yaml
+  apiVersion: apps/v1
+  kind: DaemonSet
+  metadata:
+    name: fluentd
+    namespace: logging
+  spec:
+    selector:
+      matchLabels:
+        name: fluentd
+    template:
+      metadata:
+        labels:
           name: fluentd
-      template:
-        metadata:
-          labels:
-            name: fluentd
-        spec:
-          containers:
+      spec:
+        containers:
           - name: fluentd
             image: fluent/fluentd-kubernetes-daemonset:v1
             env:
-            - name: FLUENT_ELASTICSEARCH_HOST
-              value: "elasticsearch.logging.svc.cluster.local"
-            - name: FLUENT_ELASTICSEARCH_PORT
-              value: "9200"
+              - name: FLUENT_ELASTICSEARCH_HOST
+                value: 'elasticsearch.logging.svc.cluster.local'
+              - name: FLUENT_ELASTICSEARCH_PORT
+                value: '9200'
             resources:
               limits:
                 memory: 200Mi
               requests:
                 cpu: 100m
                 memory: 200Mi
-    
-    ```
-    
+  ```
 - Store logs in Elasticsearch, allowing for powerful searching capabilities.
-    
-    ```bash
-    helm install elasticsearch elastic/elasticsearch --namespace logging
-    ```
-    
+  ```bash
+  helm install elasticsearch elastic/elasticsearch --namespace logging
+  ```
 - Visualize logs with Kibana, providing insights into the operational state of your applications and infrastructure.
-    
-    ```bash
-    helm install kibana elastic/kibana --namespace logging
-    ```
-    
+  ```bash
+  helm install kibana elastic/kibana --namespace logging
+  ```
 
 4. Metrics Collection
 
 Set up metrics collection to monitor the health of your services:
 
 - Install Prometheus to collect and store metrics from your Kubernetes environment.
-    
-    ```bash
-    helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace
-    ```
-    
+  ```bash
+  helm install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace
+  ```
 - Use Grafana to create visualizations and dashboards that help you understand metrics data, such as CPU load, memory usage, and network IO.
-    
-    ```bash
-    helm install grafana grafana/grafana --namespace monitoring --create-namespace
-    ```
-    
+  ```bash
+  helm install grafana grafana/grafana --namespace monitoring --create-namespace
+  ```
 
 5. Tracing Implementation
 
 Enhance system observability with tracing:
 
 - Use OpenTelemetry for consistent, high-quality telemetry data collection across services.
-    
-    ```bash
-    # Example command for setting up OpenTelemetry Collector
-    helm install opentelemetry-collector open-telemetry/opentelemetry-collector --namespace tracing --create-namespace
-    ```
-    
+  ```bash
+  # Example command for setting up OpenTelemetry Collector
+  helm install opentelemetry-collector open-telemetry/opentelemetry-collector --namespace tracing --create-namespace
+  ```
 - Set up Jaeger to analyze and visualize trace data, helping you understand the flow of requests through your applications.
-    
-    ```bash
-    helm install jaeger jaegertracing/jaeger --namespace tracing --create-namespace
-    ```
-    
+  ```bash
+  helm install jaeger jaegertracing/jaeger --namespace tracing --create-namespace
+  ```
 
 6. Integrate with CI/CD
 
@@ -316,9 +291,9 @@ helm repo add signoz <https://charts.signoz.io>
 helm install my-release signoz/signoz
 ```
 
- 2.  Instrument your applications using SigNoz's auto-instrumentation libraries
+2.  Instrument your applications using SigNoz's auto-instrumentation libraries
 
-1. Access the SigNoz UI to start exploring your observability data.
+1.  Access the SigNoz UI to start exploring your observability data.
 
 SigNoz offers both a cloud-hosted version and a self-hosted open-source version, catering to different deployment preferences and compliance requirements. Learn more about setting it up in this guide on [using SigNoz to monitor your Kubernetes cluster](https://signoz.io/blog/using-signoz-to-monitor-your-kubernetes-cluster/)
 

@@ -1,199 +1,208 @@
 ---
-
 title: Django Logging - Complete Guide to Python Django Logging
-slug: django-logging
 date: 2024-07-22
 tags: [logging]
 authors: [sushant_gaurav]
 description: Learn how to set up and optimize logging in Django applications. Discover configurations, best practices, and advanced techniques for effective logging and monitoring.
-keywords: [django logging, django logging example, django logging best practices, django logging to file, django logging formatter]
-
+keywords:
+  [
+    django logging,
+    django logging example,
+    django logging best practices,
+    django logging to file,
+    django logging formatter,
+  ]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "Django Logging - Complete Guide to Python Django Logging",
-    "alternativeHeadline": "Master Django logging - Learn setup, configuration, and advanced features for efficient, structured logging",
-    "author": {
-      "@type": "Person",
-      "name": "Sushant Gaurav"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-22T00:00:00Z",
-    "dateModified": "2024-07-22T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/django-logging/"
-    },
-    "description": "Learn how to set up and optimize logging in Django applications. Discover configurations, best practices, and advanced techniques for effective logging and monitoring.",
-    "keywords": "django logging, django logging example, django logging best practices, django logging to file, django logging formatter",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Django Logging",
-        "description": "A comprehensive guide to logging in Django applications"
-      },
-      {
-        "@type": "Thing",
-        "name": "Python",
-        "description": "A high-level programming language"
-      },
-      {
-        "@type": "Thing",
-        "name": "Logging",
-        "description": "The process of recording application events and errors"
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Django",
-        "applicationCategory": "Web Framework"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is Django Logging?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Django Logging is a mechanism provided by the Django module to record events and errors during the execution of a web application."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'Django Logging - Complete Guide to Python Django Logging',
+        alternativeHeadline:
+          'Master Django logging - Learn setup, configuration, and advanced features for efficient, structured logging',
+        author: {
+          '@type': 'Person',
+          name: 'Sushant Gaurav',
         },
-        {
-          "@type": "Question",
-          "name": "How do I log messages at different severity levels in Django?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We can use logger methods like logger.debug(), logger.info(), logger.warning(), logger.error(), and logger.critical() to log different severity levels in Django."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "How do I set up different logging handlers in Django?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Define handlers in the LOGGING configuration in settings.py and assign them to loggers."
-          }
+        datePublished: '2024-07-22T00:00:00Z',
+        dateModified: '2024-07-22T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/django-logging/',
         },
-        {
-          "@type": "Question",
-          "name": "How do I log database queries in Django?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We can enable the Django django.db.backends logger in the LOGGING configuration to log database queries in the Django application."
-          }
+        description:
+          'Learn how to set up and optimize logging in Django applications. Discover configurations, best practices, and advanced techniques for effective logging and monitoring.',
+        keywords:
+          'django logging, django logging example, django logging best practices, django logging to file, django logging formatter',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "Question",
-          "name": "How do I log errors and exceptions in Django?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We can use the logger.error() and logger.exception() methods to capture and log exceptions in the Django application."
-          }
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Django Logging',
+            description: 'A comprehensive guide to logging in Django applications',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Python',
+            description: 'A high-level programming language',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Logging',
+            description: 'The process of recording application events and errors',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Django',
+            applicationCategory: 'Web Framework',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What is Django Logging?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Django Logging is a mechanism provided by the Django module to record events and errors during the execution of a web application.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I log messages at different severity levels in Django?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'We can use logger methods like logger.debug(), logger.info(), logger.warning(), logger.error(), and logger.critical() to log different severity levels in Django.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I set up different logging handlers in Django?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Define handlers in the LOGGING configuration in settings.py and assign them to loggers.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I log database queries in Django?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'We can enable the Django django.db.backends logger in the LOGGING configuration to log database queries in the Django application.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I log errors and exceptions in Django?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'We can use the logger.error() and logger.exception() methods to capture and log exceptions in the Django application.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I filter logs by severity or other criteria in Django?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'We can use the logging filters in the LOGGING configuration to include or exclude specific log messages.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I use Django logging with third-party libraries?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'We can configure logging for third-party libraries by including their loggers in the LOGGING configuration.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I benchmark the performance of logging in Django?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'We can use performance logging middleware and third-party tools like SigNoz to measure and analyze the impact of logging in our application.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Where can I find the documentation and examples for Django logging?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Refer to the official Django documentation and various online guides, articles, and tutorials for good examples and explanations.',
+              },
+            },
+          ],
         },
-        {
-          "@type": "Question",
-          "name": "How do I filter logs by severity or other criteria in Django?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We can use the logging filters in the LOGGING configuration to include or exclude specific log messages."
-          }
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'How to Use Django Logging',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Install Django',
+              text: 'Install Django using pip: pip install django',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create a Django Project',
+              text: 'Create a new Django project using django-admin startproject myproject',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Configure Logging in settings.py',
+              text: 'Update the LOGGING configuration in settings.py to set up logging',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Import and Use Logging',
+              text: 'Import the logging module and use it in your Django views or models',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Set Up File Handlers',
+              text: 'Configure file handlers in settings.py to direct logs to files',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Implement Rotating File Handlers',
+              text: 'Use RotatingFileHandler to manage log file sizes and backups',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Log Requests and Responses in Middleware',
+              text: 'Create custom middleware to log request and response data',
+            },
+          ],
         },
-        {
-          "@type": "Question",
-          "name": "How do I use Django logging with third-party libraries?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We can configure logging for third-party libraries by including their loggers in the LOGGING configuration."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do I benchmark the performance of logging in Django?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "We can use performance logging middleware and third-party tools like SigNoz to measure and analyze the impact of logging in our application."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Where can I find the documentation and examples for Django logging?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Refer to the official Django documentation and various online guides, articles, and tutorials for good examples and explanations."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "How to Use Django Logging",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install Django",
-          "text": "Install Django using pip: pip install django"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Create a Django Project",
-          "text": "Create a new Django project using django-admin startproject myproject"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Configure Logging in settings.py",
-          "text": "Update the LOGGING configuration in settings.py to set up logging"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Import and Use Logging",
-          "text": "Import the logging module and use it in your Django views or models"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Set Up File Handlers",
-          "text": "Configure file handlers in settings.py to direct logs to files"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Implement Rotating File Handlers",
-          "text": "Use RotatingFileHandler to manage log file sizes and backups"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Log Requests and Responses in Middleware",
-          "text": "Create custom middleware to log request and response data"
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 In web applications, logging is quite important as it helps in monitoring and debugging our application. Django is a popular web framework of Python that provides us with a lot of robust logging capabilities which can help the developers to keep track of application behaviour and issues.
@@ -264,8 +273,8 @@ Explanation:
 - `disable_existing_loggers`: It keeps the existing loggers enabled (hence set to `False`).
 - `handlers`: Handlers are used to define how log messages are handled. The `console` handler directs messages to the console with a logging level of `DEBUG` and uses `logging.StreamHandler` to stream the logs. We can change the logging level here as well according to the use case.
 - `loggers`: It specifies the loggers. The Django logger:
-    - It uses the `console` handler which is defined earlier.
-    - It sets its logging level to the value of the `DJANGO_LOG_LEVEL` environment variable, with the default value of `DEBUG` if the variable is not set.
+  - It uses the `console` handler which is defined earlier.
+  - It sets its logging level to the value of the `DJANGO_LOG_LEVEL` environment variable, with the default value of `DEBUG` if the variable is not set.
 
 This simple yet effective setup ensures that all log messages from our Django application are sent to the console.
 
@@ -337,13 +346,13 @@ LOGGING = {
 Explanation:
 
 - `formatters`: Here we are defining the format of log messages.
-    - `verbose`: The `verbose` Django [logging formatter](https://signoz.io/guides/what-is-pythons-default-logging-formatter/#example-of-a-simple-logging-formatter) includes detailed information in the log messages. Detailed information includes the log level, timestamp, module name, and the actual log message. This format is specified using the string formatting style of Python.
-    - `simple`: The `simple` Django logging formatter is more straightforward and includes only the log level and the log message.
+  - `verbose`: The `verbose` Django [logging formatter](https://signoz.io/guides/what-is-pythons-default-logging-formatter/#example-of-a-simple-logging-formatter) includes detailed information in the log messages. Detailed information includes the log level, timestamp, module name, and the actual log message. This format is specified using the string formatting style of Python.
+  - `simple`: The `simple` Django logging formatter is more straightforward and includes only the log level and the log message.
 - `handlers`: Handlers are used to determine where the log messages are to be displayed or stored.
-    - `file`: The `file` handler writes the log messages to a file named `debug.log`. It captures all messages with a `DEBUG` level or higher and formats them using the `verbose` formatter. The `class` is set here to `logging.FileHandler`, which directs the generated logs to a file.
-    - `console`: The `console` handler streams log messages to the console. It uses the `simple` Django logging formatter and the `logging.StreamHandler` class to output logs to the standard output stream.
+  - `file`: The `file` handler writes the log messages to a file named `debug.log`. It captures all messages with a `DEBUG` level or higher and formats them using the `verbose` formatter. The `class` is set here to `logging.FileHandler`, which directs the generated logs to a file.
+  - `console`: The `console` handler streams log messages to the console. It uses the `simple` Django logging formatter and the `logging.StreamHandler` class to output logs to the standard output stream.
 - `loggers`: The `loggers` section defines the loggers for the application.
-    - `django`: Here the `django` logger is configured to use both the `file` and `console` handlers. It will capture all messages at the `DEBUG` level or higher. So, every log message from Django will be written to both the `debug.log` file and to the console.
+  - `django`: Here the `django` logger is configured to use both the `file` and `console` handlers. It will capture all messages at the `DEBUG` level or higher. So, every log message from Django will be written to both the `debug.log` file and to the console.
 
 Example:
 
@@ -393,9 +402,7 @@ INFO 2024-07-01 12:34:56.789 views Custom logging view was called
 ```
 
 - Note:
-    
-    This is a sample code, you can utilize it in your project as per your use case.
-    
+  This is a sample code, you can utilize it in your project as per your use case.
 
 ### Logging to Files
 
@@ -466,9 +473,7 @@ DEBUG 2024-07-01 12:34:56.789 views File logging view was called
 ```
 
 - Note:
-    
-    This is a sample code, you can utilize it in your project as per your use case. 
-    
+  This is a sample code, you can utilize it in your project as per your use case.
 
 Rotating File Handlers for Log File Management
 
@@ -561,9 +566,7 @@ DEBUG Console logging view was called
 ```
 
 - Note:
-    
-    This is a sample code, you can utilize it in your project as per your use case. 
-    
+  This is a sample code, you can utilize it in your project as per your use case.
 
 ### Sending Logs to Monitoring Services
 
@@ -753,11 +756,11 @@ Explanation:
 - `post_save`: It is a built-in Django signal that is sent at the end of the save method of a model.
 - `receiver`: `receiver` is a decorator that is used to register a function as a signal receiver.
 - `@receiver(post_save, sender='myapp.MyModel')`: The `receiver` decorator registers the `log_model_save` function as a receiver for `post_save` signals from the `MyModel` model in the `myapp` application.
-- `def log_model_save(sender, instance, created, kwargs)`**: It defines the function that will be called when the signal is sent.
-    - `sender`: It is the model class that sends the signal.
-    - `instance`: The actual instance of the model that was saved.
-    - `created`: A boolean indicating whether a new record was created (True) or an existing record was updated (False).
-    - `*kwargs`: Additional keyword arguments.
+- `def log_model_save(sender, instance, created, kwargs)`\*\*: It defines the function that will be called when the signal is sent.
+  - `sender`: It is the model class that sends the signal.
+  - `instance`: The actual instance of the model that was saved.
+  - `created`: A boolean indicating whether a new record was created (True) or an existing record was updated (False).
+  - `*kwargs`: Additional keyword arguments.
 
 ### Exception Logging
 
@@ -845,7 +848,7 @@ Here are the key reasons why [monitoring logs](https://signoz.io/blog/log-monito
 7. Proactive maintenance
 8. Support and customer service
 
-To cover all the above major components, you can make use of tools like [SigNoz](https://signoz.io/). 
+To cover all the above major components, you can make use of tools like [SigNoz](https://signoz.io/).
 
 StructLog is easily connected with a variety of monitoring systems to improve observability. This allows you to better understand your application's behaviour and performance.
 
@@ -856,13 +859,9 @@ SigNoz is a full-stack open-source application performance monitoring and obser
 Key architecture features:
 
 - Logs, Metrics, and traces under a single dashboard
-    
-    SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
-    
+  SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
 - Native OpenTelemetry support
-    
-    SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the world standard for generating and managing telemetry data.
-    
+  SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the world standard for generating and managing telemetry data.
 
 ### Setup SigNoz
 
@@ -921,7 +920,7 @@ We can use the `logger.error()` and `logger.exception()` methods to capture and 
 
 We can use the logging filters in the `LOGGING` configuration to include or exclude specific log messages.
 
-### How do I use Django logging with third-party libraries?**
+### How do I use Django logging with third-party libraries?\*\*
 
 We can configure logging for third-party libraries by including their loggers in the `LOGGING` configuration.
 

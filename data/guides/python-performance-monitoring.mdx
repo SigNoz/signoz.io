@@ -1,20 +1,27 @@
 ---
-
 title: Python Performance Monitoring - Implementation, Tools and Best Practices
-slug: python-performance-monitoring
 date: 2024-07-26
 tags: [apm]
 authors: [bhavya_sachdeva]
 description: Discover essential tools and best practices for Python performance monitoring. Learn how to optimize your applications and boost efficiency.
-keywords: [Python performance, application monitoring, APM tools, performance optimization, Python profiling, monitoring best practices, Python metrics, application efficiency]
-
+keywords:
+  [
+    Python performance,
+    application monitoring,
+    APM tools,
+    performance optimization,
+    Python profiling,
+    monitoring best practices,
+    Python metrics,
+    application efficiency,
+  ]
 ---
 
-Python performance monitoring is a critical aspect of maintaining efficient and reliable applications. It involves tracking key metrics, identifying bottlenecks, and optimizing code to ensure your Python programs run smoothly. 
+Python performance monitoring is a critical aspect of maintaining efficient and reliable applications. It involves tracking key metrics, identifying bottlenecks, and optimizing code to ensure your Python programs run smoothly.
 
 Imagine launching a new feature that slows down your application or causes crashes. Such issues can frustrate users and harm your reputation. Real-time performance monitoring acts as a safeguard to detect and address problems before they escalate.
 
-In this guide, we will understand Python performance monitoring, discuss popular python performance montioring tools, and how to implement with native python libraries like py-spy and memory_profiler and full-scale APM solutions like SigNoz. 
+In this guide, we will understand Python performance monitoring, discuss popular python performance montioring tools, and how to implement with native python libraries like py-spy and memory_profiler and full-scale APM solutions like SigNoz.
 
 ## What is Python Performance Monitoring?
 
@@ -64,16 +71,15 @@ Python applications often face several performance challenges:
 Several tools can help you monitor and optimize your Python applications:
 
 - Open-source Options: Prometheus, Grafana, and SigNoz offer powerful monitoring capabilities for Python applications.
-    
-    <GetStartedSigNoz />
-    
+  {' '}
+  <GetStartedSigNoz />
 - Cloud-native Solutions: AWS CloudWatch and Google Cloud Monitoring provide integrated monitoring for cloud-based Python apps.
 - Comprehensive APM Platforms: New Relic and Datadog offer extensive monitoring features with Python SDK integration but often comes with hefty billing charges.
 - Python-specific Libraries: Tools like py-spy and memory_profiler allow for targeted performance analysis.
 
 ## Key Metrics for Python Performance Monitoring
 
-Understanding the metrics to keep an eye on is essential to maintaining the optimal performance of your Python applications.  We can track various performance metrics using SigNoz. It is an open-source application performance monitoring tool that helps you track various performance metrics for your Python applications. Here are examples of how to monitor key metrics using SigNoz, with details on how each metric is derived from span data:
+Understanding the metrics to keep an eye on is essential to maintaining the optimal performance of your Python applications. We can track various performance metrics using SigNoz. It is an open-source application performance monitoring tool that helps you track various performance metrics for your Python applications. Here are examples of how to monitor key metrics using SigNoz, with details on how each metric is derived from span data:
 
 - Response Time is the amount of time it takes for a program to reply to a user's request. Faster responses result in a better user experience. SigNoz tracks response time using latency metrics derived from spans. The `signoz_latency_bucket`, `signoz_latency_sum`, and `signoz_latency_count` metrics help in monitoring response times. You can set up alerts if the latency exceeds a certain threshold, indicating potential performance bottlenecks.
 
@@ -122,7 +128,7 @@ signoz_db_latency_count{operation="/dbQuery", service_name="databaseservice", sp
 
 ## Monitoring Python Application Performance with Monitoring Tool
 
-Using Python application monitoring tools is similar to having an advanced health check system. To do this, we can use observability tool like SigNoz. SigNoz helps identify areas requiring development by giving developers real-time data on how well your application is doing.  It is an [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)-based, robust, and easily navigable open-source observability tool alternative to DataDog and New Relic.
+Using Python application monitoring tools is similar to having an advanced health check system. To do this, we can use observability tool like SigNoz. SigNoz helps identify areas requiring development by giving developers real-time data on how well your application is doing. It is an [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)-based, robust, and easily navigable open-source observability tool alternative to DataDog and New Relic.
 
 Python application monitoring is made more accessible with SigNoz, as it provides a uniform platform for visualizing application traces and data. Full-fledged [distributed tracing](https://signoz.io/distributed-tracing/) is supported, which aids in identifying the underlying reasons for failures or performance bottlenecks in a microservices architecture.
 
@@ -155,8 +161,9 @@ We can build any Python application to monitor. This could be a basic API using 
 In this guide, we are using a flask-based application.
 
 Prerequisites:
+
 - Having Git installed in your system
-- Docker Installed to interact with MongoDB 
+- Docker Installed to interact with MongoDB
 
 Clone sample Flask app repository
 
@@ -178,7 +185,7 @@ source .venv/bin/activate
 
 Install dependencies to run the app:
 
-After you cloned the repo, you have seen the requirements.txt file to install the dependencies we need to run this particular application. 
+After you cloned the repo, you have seen the requirements.txt file to install the dependencies we need to run this particular application.
 
 ```
 pip install -r requirements.txt
@@ -190,13 +197,20 @@ Run your flask based Application
 python3 app.py
 ```
 
-<Figure src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-16_at_4.45.35_PM.webp" alt="Screenshot 2024-07-16 at 4.45.35 PM.webp" caption="Run your flask application" />
+<Figure
+  src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-16_at_4.45.35_PM.webp"
+  alt="Screenshot 2024-07-16 at 4.45.35 PM.webp"
+  caption="Run your flask application"
+/>
 
-This application is running on  `http://localhost:5002` 
+This application is running on `http://localhost:5002`
 
-<Figure src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-25_at_12.16.32_AM.webp" alt="Screenshot 2024-07-25 at 12.16.32 AM.webp" />
+<Figure
+  src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-25_at_12.16.32_AM.webp"
+  alt="Screenshot 2024-07-25 at 12.16.32 AM.webp"
+/>
 
-But we haven’t installed instrumentation packages yet. We will do this in the next step make sure to stop your application and kill the process as well. 
+But we haven’t installed instrumentation packages yet. We will do this in the next step make sure to stop your application and kill the process as well.
 
 To find out which process is using port `5002`, use the `lsof` command with the `-i` flag:
 
@@ -205,7 +219,7 @@ To find out which process is using port `5002`, use the `lsof` command with the 
 - `lsof`: Lists open files and network connections.
 - `i :5002`: Filters the results to show only processes using port `5002`.
 
-As we are running the Flask app on `http://localhost:5002`, this command helps you check if another process is already using this port.  If you see that `http://localhost:5002` is occupied, killing the process releases the port so you can run your application on it. Identify the Process ID (PID) from the `lsof` output, you need to stop this process to free up the port using `sudo kill -9 <process-id>`
+As we are running the Flask app on `http://localhost:5002`, this command helps you check if another process is already using this port. If you see that `http://localhost:5002` is occupied, killing the process releases the port so you can run your application on it. Identify the Process ID (PID) from the `lsof` output, you need to stop this process to free up the port using `sudo kill -9 <process-id>`
 
 Ensuring `http://localhost:5002` is available is crucial before starting your application or installing new monitoring tools. This avoids conflicts and ensures smooth operation.
 
@@ -213,9 +227,12 @@ Ensuring `http://localhost:5002` is available is crucial before starting your ap
 
 In your Python Flask application, Install the instrumentation packages using this command :
 
-`opentelemetry-bootstrap --action=install` 
+`opentelemetry-bootstrap --action=install`
 
-<Figure src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-25_at_12.18.37_AM.webp" alt="Screenshot 2024-07-25 at 12.18.37 AM.webp" />
+<Figure
+  src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-25_at_12.18.37_AM.webp"
+  alt="Screenshot 2024-07-25 at 12.18.37 AM.webp"
+/>
 
 After installing the open telemetry package, you just need to configure a few environment variables for your OTLP exporters. Environment variables that need to be configured:
 
@@ -232,11 +249,14 @@ OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument python3 app.py
 ```
 
-<Figure src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-25_at_12.20.32_AM.webp" alt="Screenshot 2024-07-25 at 12.20.32 AM.webp"  />
+<Figure
+  src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-25_at_12.20.32_AM.webp"
+  alt="Screenshot 2024-07-25 at 12.20.32 AM.webp"
+/>
 
 But you haven’t seen anything in the SigNoz Cloud. There are two ways to send data to SigNoz Cloud. You can read that from here. In this guide, we are using the [Send traces via OTel Collector binary](https://signoz.io/docs/instrumentation/python/#send-traces-via-otel-collector-binary), which is also recommended one as well.
 
-OpenTelemetry-instrumented applications in a VM can send data to the `otel-binary` agent running in the same VM. The [OTel agent](https://signoz.io/comparisons/opentelemetry-collector-vs-agent/) can then be configured to send data to the SigNoz cloud. Refer to this [documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to download according to your platform and operating system. 
+OpenTelemetry-instrumented applications in a VM can send data to the `otel-binary` agent running in the same VM. The [OTel agent](https://signoz.io/comparisons/opentelemetry-collector-vs-agent/) can then be configured to send data to the SigNoz cloud. Refer to this [documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to download according to your platform and operating system.
 
 Here are the steps to set up OpenTelemetry binary as an agent.
 
@@ -255,9 +275,9 @@ receivers:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
-         cors:
-            allowed_origins:
-               - http://localhost:5002       
+        cors:
+          allowed_origins:
+            - http://localhost:5002
   hostmetrics:
     collection_interval: 60s
     scrapers:
@@ -298,11 +318,11 @@ extensions:
   zpages: {}
 exporters:
   otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
+    endpoint: 'ingest.{region}.signoz.cloud:443'
     tls:
       insecure: false
     headers:
-      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
+      'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>'
   debug:
     verbosity: normal
 service:
@@ -331,11 +351,12 @@ service:
 
 Depending on the choice of your region for the SigNoz cloud, the otlp endpoint will vary according to this table.
 
-| Region | Endpoint |
-| --- | --- |
-| US | ingest.us.signoz.cloud:443 |
-| IN | ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+| Region | Endpoint                   |
+| ------ | -------------------------- |
+| US     | ingest.us.signoz.cloud:443 |
+| IN     | ingest.in.signoz.cloud:443 |
+| EU     | ingest.eu.signoz.cloud:443 |
+
 1. Once we are done with the above configurations, we can now run the collector service with the following command:
 
 From the `otelcol-contrib`, run the following command:
@@ -348,11 +369,20 @@ From the `otelcol-contrib`, run the following command:
 
 After running the above application and making the correct configurations, you can navigate to the SigNoz services and traces to check that.
 
-<Figure src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-16_at_4.32.02_PM.webp" alt="Screenshot 2024-07-16 at 4.32.02 PM.webp" />
+<Figure
+  src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-16_at_4.32.02_PM.webp"
+  alt="Screenshot 2024-07-16 at 4.32.02 PM.webp"
+/>
 
-<Figure src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-16_at_4.40.09_PM.webp" alt="Screenshot 2024-07-16 at 4.40.09 PM.webp" />
+<Figure
+  src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-16_at_4.40.09_PM.webp"
+  alt="Screenshot 2024-07-16 at 4.40.09 PM.webp"
+/>
 
-<Figure src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-16_at_4.33.39_PM.webp" alt="Screenshot 2024-07-16 at 4.33.39 PM.webp" />
+<Figure
+  src="/img/guides/2024/07/python-performance-monitoring-Screenshot_2024-07-16_at_4.33.39_PM.webp"
+  alt="Screenshot 2024-07-16 at 4.33.39 PM.webp"
+/>
 
 ## Best Practices for Implementing Python Performance Monitoring
 
@@ -369,54 +399,53 @@ To get the most out of your monitoring efforts:
 While comprehensive APM platforms offer broad monitoring capabilities, Python-specific libraries provide targeted performance analysis tools that can be invaluable for developers looking to optimize their code. Two notable examples are py-spy and memory_profiler:
 
 1. py-spy
-    
-    py-spy is a sampling profiler for Python programs. It lets you visualize what your Python program is spending time on without restarting the program or modifying the code in any way.
-    
-    Key features:
-    
-    - Low-overhead profiling
-    - Works with Python 2 and 3
-    - Doesn't require modifying your Python code
-    - Can profile Python programs that are already running
-    
-    Example usage:
-    
-    ```bash
-    py-spy record -o profile.svg --pid 12345
-    
-    ```
-    
-    This command generates a [flame graph](https://signoz.io/blog/flamegraphs/) of the running Python process with PID 12345.
-    
+
+   py-spy is a sampling profiler for Python programs. It lets you visualize what your Python program is spending time on without restarting the program or modifying the code in any way.
+
+   Key features:
+
+   - Low-overhead profiling
+   - Works with Python 2 and 3
+   - Doesn't require modifying your Python code
+   - Can profile Python programs that are already running
+
+   Example usage:
+
+   ```bash
+   py-spy record -o profile.svg --pid 12345
+
+   ```
+
+   This command generates a [flame graph](https://signoz.io/blog/flamegraphs/) of the running Python process with PID 12345.
+
 2. memory_profiler
-    
-    memory_profiler is a Python module for monitoring memory consumption of a process as well as line-by-line analysis of memory consumption for Python programs.
-    
-    Key features:
-    
-    - Line-by-line memory usage information
-    - Memory usage over time with mprof
-    - Works with Jupiter notebooks
-    
-    Example usage:
-    
-    ```python
-    from memory_profiler import profile
-    
-    @profile
-    def my_func():
-        a = [1] * (10 ** 6)
-        b = [2] * (2 * 10 ** 7)
-        del b
-        return a
-    
-    if __name__ == '__main__':
-        my_func()
-    
-    ```
-    
-    Running this script with `python -m memory_profiler example.py` will output the memory usage for each line in the `my_func` function.
-    
+
+   memory_profiler is a Python module for monitoring memory consumption of a process as well as line-by-line analysis of memory consumption for Python programs.
+
+   Key features:
+
+   - Line-by-line memory usage information
+   - Memory usage over time with mprof
+   - Works with Jupiter notebooks
+
+   Example usage:
+
+   ```python
+   from memory_profiler import profile
+
+   @profile
+   def my_func():
+       a = [1] * (10 ** 6)
+       b = [2] * (2 * 10 ** 7)
+       del b
+       return a
+
+   if __name__ == '__main__':
+       my_func()
+
+   ```
+
+   Running this script with `python -m memory_profiler example.py` will output the memory usage for each line in the `my_func` function.
 
 These Python-specific tools complement broader APM solutions by providing deep, code-level insights that can be crucial for optimizing performance in Python applications. They're particularly useful during the development and debugging phases, allowing developers to identify memory leaks, excessive memory usage, and performance bottlenecks at a granular level.
 

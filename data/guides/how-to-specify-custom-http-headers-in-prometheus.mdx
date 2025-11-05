@@ -1,159 +1,172 @@
 ---
-
 title: How to Add Custom HTTP Headers in Prometheus - A Guide
-slug: how-to-specify-custom-http-headers-in-prometheus
 date: 2024-07-25
 tags: [faq, prometheus]
 authors: [daniel]
 description: Learn how to add custom HTTP headers in Prometheus for enhanced security and access to protected metrics. Explore methods like reverse proxies and custom exporters.
-keywords: [Prometheus, custom HTTP headers, metrics collection, authentication, reverse proxy, custom exporter, Grafana integration]
-
+keywords:
+  [
+    Prometheus,
+    custom HTTP headers,
+    metrics collection,
+    authentication,
+    reverse proxy,
+    custom exporter,
+    Grafana integration,
+  ]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to Add Custom HTTP Headers in Prometheus: A Guide",
-    "alternativeHeadline": "Implementing Custom HTTP Headers in Prometheus for Enhanced Security and Access",
-    "author": {
-      "@type": "Person",
-      "name": "Daniel"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-25T00:00:00Z",
-    "dateModified": "2024-07-25T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/how-to-specify-custom-http-headers-in-prometheus/"
-    },
-    "description": "Learn how to add custom HTTP headers in Prometheus for enhanced security and access to protected metrics. Explore methods like reverse proxies and custom exporters.",
-    "keywords": "Prometheus, custom HTTP headers, metrics collection, authentication, reverse proxy, custom exporter, Grafana integration",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Prometheus",
-        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-      },
-      {
-        "@type": "Thing",
-        "name": "Metrics Collection",
-        "description": "The process of gathering and storing performance data for analysis."
-      },
-      {
-        "@type": "Thing",
-        "name": "Authentication",
-        "description": "The process of verifying the identity of a user or process."
-      },
-      {
-        "@type": "Thing",
-        "name": "Reverse Proxy",
-        "description": "A server that forwards client requests to other servers."
-      },
-      {
-        "@type": "Thing",
-        "name": "Custom Exporter",
-        "description": "A custom-built application to export metrics with additional functionality."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Grafana",
-        "applicationCategory": "Visualization Tool"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Can Prometheus natively support custom HTTP headers?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No, Prometheus does not natively support custom HTTP headers. You need to use external methods like reverse proxies or custom exporters to add this functionality."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Add Custom HTTP Headers in Prometheus: A Guide',
+        alternativeHeadline:
+          'Implementing Custom HTTP Headers in Prometheus for Enhanced Security and Access',
+        author: {
+          '@type': 'Person',
+          name: 'Daniel',
         },
-        {
-          "@type": "Question",
-          "name": "How do custom headers affect Prometheus' performance?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The impact is generally minimal, but it depends on the implementation method. Reverse proxies may add a slight latency, while custom exporters could increase resource usage."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "Are there security risks associated with using custom HTTP headers?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, improper handling of custom headers can lead to security vulnerabilities. Always follow best practices, such as using encryption for sensitive data and regularly rotating credentials."
-          }
+        datePublished: '2024-07-25T00:00:00Z',
+        dateModified: '2024-07-25T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/how-to-specify-custom-http-headers-in-prometheus/',
         },
-        {
-          "@type": "Question",
-          "name": "Can I use custom headers with other Prometheus integrations?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, custom headers can be used with various Prometheus integrations, but the implementation method may vary depending on the specific integration and your infrastructure setup."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Adding Custom HTTP Headers in Prometheus",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Using a Reverse Proxy",
-          "text": "Install Nginx, create a new configuration file to set up a reverse proxy with custom headers, and update Prometheus configuration to scrape from the proxy."
+        description:
+          'Learn how to add custom HTTP headers in Prometheus for enhanced security and access to protected metrics. Explore methods like reverse proxies and custom exporters.',
+        keywords:
+          'Prometheus, custom HTTP headers, metrics collection, authentication, reverse proxy, custom exporter, Grafana integration',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Creating a Custom Exporter",
-          "text": "Develop a custom exporter in Python or another language to add headers programmatically and fetch metrics from the endpoint."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Metrics Collection',
+            description: 'The process of gathering and storing performance data for analysis.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Authentication',
+            description: 'The process of verifying the identity of a user or process.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Reverse Proxy',
+            description: 'A server that forwards client requests to other servers.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Custom Exporter',
+            description:
+              'A custom-built application to export metrics with additional functionality.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Grafana',
+            applicationCategory: 'Visualization Tool',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'Can Prometheus natively support custom HTTP headers?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'No, Prometheus does not natively support custom HTTP headers. You need to use external methods like reverse proxies or custom exporters to add this functionality.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: "How do custom headers affect Prometheus' performance?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'The impact is generally minimal, but it depends on the implementation method. Reverse proxies may add a slight latency, while custom exporters could increase resource usage.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Are there security risks associated with using custom HTTP headers?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, improper handling of custom headers can lead to security vulnerabilities. Always follow best practices, such as using encryption for sensitive data and regularly rotating credentials.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I use custom headers with other Prometheus integrations?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, custom headers can be used with various Prometheus integrations, but the implementation method may vary depending on the specific integration and your infrastructure setup.',
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Configuring Grafana",
-          "text": "Add Prometheus as a data source in Grafana and configure custom HTTP headers for secure access."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Adding Custom HTTP Headers in Prometheus',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Using a Reverse Proxy',
+              text: 'Install Nginx, create a new configuration file to set up a reverse proxy with custom headers, and update Prometheus configuration to scrape from the proxy.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Creating a Custom Exporter',
+              text: 'Develop a custom exporter in Python or another language to add headers programmatically and fetch metrics from the endpoint.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Configuring Grafana',
+              text: 'Add Prometheus as a data source in Grafana and configure custom HTTP headers for secure access.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Using SigNoz for Simplified Monitoring',
+              text: 'Set up SigNoz for an integrated monitoring solution with built-in support for custom headers and enhanced security features.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Using SigNoz for Simplified Monitoring",
-          "text": "Set up SigNoz for an integrated monitoring solution with built-in support for custom headers and enhanced security features."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Prometheus, a powerful open-source monitoring system, doesn't natively support custom HTTP headers. This limitation can be a roadblock when you need to access protected metrics endpoints or implement authentication mechanisms. But don't worry — you can still add custom HTTP headers to Prometheus with a few clever techniques.

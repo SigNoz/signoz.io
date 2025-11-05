@@ -1,13 +1,10 @@
 ---
-
 title: How Do I Add Alerts to Prometheus - Step-by-Step Guide
-slug: how-do-i-add-alerts-to-prometheus
 date: 2024-08-01
 tags: [faq, prometheus]
 authors: [yuvraj]
 description: Learn how to add alerts to Prometheus with this comprehensive guide. Set up Alertmanager, create rules, and configure notifications for effective monitoring.
 keywords: [Prometheus alerts, Alertmanager, monitoring, PromQL, notification channels, alert rules]
-
 ---
 
 Prometheus, a powerful open-source monitoring system, allows you to set up alerts to stay informed about critical issues in your infrastructure. This guide walks you through the process of adding alerts to Prometheus, from understanding the basics to implementing best practices.
@@ -37,10 +34,9 @@ route:
   receiver: 'email-notifications'
 
 receivers:
-- name: 'email-notifications'
-  email_configs:
-  - to: 'your-email@example.com'
-
+  - name: 'email-notifications'
+    email_configs:
+      - to: 'your-email@example.com'
 ```
 
 1. Start Alertmanager with the configuration file:
@@ -58,17 +54,16 @@ Alerting rules in Prometheus define the conditions that trigger alerts. Here's a
 
 ```yaml
 groups:
-- name: example
-  rules:
-  - alert: HighCPUUsage
-    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "High CPU usage detected"
-      description: "CPU usage is above 80% on {{ $labels.instance }}"
-
+  - name: example
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High CPU usage detected'
+          description: 'CPU usage is above 80% on {{ $labels.instance }}'
 ```
 
 This rule alerts when CPU usage exceeds 80% for 5 minutes. To implement alerting rules:
@@ -78,8 +73,7 @@ This rule alerts when CPU usage exceeds 80% for 5 minutes. To implement alerting
 
 ```yaml
 rule_files:
-  - "alert.rules.yml"
-
+  - 'alert.rules.yml'
 ```
 
 1. Reload Prometheus to apply the new rules:
@@ -124,11 +118,10 @@ Add this to your Alertmanager configuration:
 
 ```yaml
 receivers:
-- name: 'slack-notifications'
-  slack_configs:
-  - api_url: '<https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX>'
-    channel: '#alerts'
-
+  - name: 'slack-notifications'
+    slack_configs:
+      - api_url: '<https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX>'
+        channel: '#alerts'
 ```
 
 ### PagerDuty Integration
@@ -137,10 +130,9 @@ For critical alerts, configure PagerDuty:
 
 ```yaml
 receivers:
-- name: 'pagerduty-notifications'
-  pagerduty_configs:
-  - service_key: '<your-pagerduty-service-key>'
-
+  - name: 'pagerduty-notifications'
+    pagerduty_configs:
+      - service_key: '<your-pagerduty-service-key>'
 ```
 
 ### Email Alerts
@@ -149,15 +141,14 @@ Set up email notifications using Gmail:
 
 ```yaml
 receivers:
-- name: 'email-notifications'
-  email_configs:
-  - to: 'your-email@example.com'
-    from: 'alertmanager@example.com'
-    smarthost: 'smtp.gmail.com:587'
-    auth_username: 'your-gmail-username@gmail.com'
-    auth_identity: 'your-gmail-username@gmail.com'
-    auth_password: 'your-gmail-password'
-
+  - name: 'email-notifications'
+    email_configs:
+      - to: 'your-email@example.com'
+        from: 'alertmanager@example.com'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: 'your-gmail-username@gmail.com'
+        auth_identity: 'your-gmail-username@gmail.com'
+        auth_password: 'your-gmail-password'
 ```
 
 ## Best Practices for Prometheus Alerting
@@ -193,7 +184,6 @@ Yes, Alertmanager supports Go templating for customizing alert notifications. Th
 ### How do I silence or inhibit alerts in Prometheus?
 
 You can silence alerts through the Alertmanager UI or API. Inhibition rules in Alertmanager allow you to suppress certain alerts if others are already firing.
-
 
 ## Enhance Your Monitoring with SigNoz
 

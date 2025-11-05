@@ -1,13 +1,20 @@
 ---
-
 title: What is Application Dependency Mapping - A Complete Guide
-slug: application-dependency-map
 date: 2024-11-20
 tags: [monitoring, faq]
 authors: [sushant_gaurav]
 description: Learn how application dependency mapping helps visualize relationships between applications, services, and infrastructure components for better system management and troubleshooting.
-keywords: [application dependency map, dependency mapping, application monitoring, service dependencies, infrastructure mapping, system topology, distributed tracing, application observability]
-
+keywords:
+  [
+    application dependency map,
+    dependency mapping,
+    application monitoring,
+    service dependencies,
+    infrastructure mapping,
+    system topology,
+    distributed tracing,
+    application observability,
+  ]
 ---
 
 Application Dependency Mapping (ADM) is a process that enables a user to create a detailed visual representation of how various components in an individual’s IT infrastructure interact and connect. It outlines the relationships between applications, services, databases, and other infrastructure elements. Consider it a GPS for your application architecture - it enables you to navigate complex systems and understand the minute effects of changes in one component on the others.
@@ -134,7 +141,7 @@ ADM is more than simply a visualization tool; it is a realistic framework for ad
 
 ### Faster Problem Resolution
 
-ADM enables IT teams to identify the cause of problems and their possible consequences. 
+ADM enables IT teams to identify the cause of problems and their possible consequences.
 
 Example: Assume a service interruption happens in an online booking system. Visualizing dependencies allows you to rapidly identify the source of the problem, such as a misconfigured database or a sluggish API.
 
@@ -183,21 +190,21 @@ Application Dependency Mapping (ADM) takes a systematic method that begins with 
 ### Discovery Methods
 
 - Agent-based Discovery: This strategy involves installing specialized agents on servers or services to get precise information about dependencies.
-    - Advantages:
-        - Very accurate and thorough data.
-        - Details about runtime settings, resource use, and direct service calls.
-    - Challenges:
-        - Requires software installation and maintenance.
-        - This may influence system performance in high-load scenarios.
-    - Example Use Case: A financial services company uses agent-based tools like Dynatrace to monitor its microservices dependencies and detect anomalies in real-time
+  - Advantages:
+    - Very accurate and thorough data.
+    - Details about runtime settings, resource use, and direct service calls.
+  - Challenges:
+    - Requires software installation and maintenance.
+    - This may influence system performance in high-load scenarios.
+  - Example Use Case: A financial services company uses agent-based tools like Dynatrace to monitor its microservices dependencies and detect anomalies in real-time
 - Agentless Discovery: This method analyzes network traffic and logs to infer dependencies without installing additional software.
-    - Advantages:
-        - Non-intrusive and easy to implement.
-        - Ideal for environments with strict security policies.
-    - Challenges:
-        - Deeper runtime dependencies refer to the intricate relationships and interactions within the application that occur during its execution. For example, agentless methods might fail to capture how specific functions, libraries, or frameworks interact under certain conditions, such as database query optimizations, dynamic API calls, or runtime-generated code paths. This lack of detail can lead to gaps in understanding performance bottlenecks or diagnosing critical issues.
-        - Agentless discovery primarily relies on external observations like network traffic and log analysis, which provide surface-level insights. It cannot directly inspect the inner workings of the application, such as thread-level operations, resource allocation patterns, or application-specific logic flow, which are critical for comprehensive dependency mapping in complex systems.
-    - Example Use Case: A company preparing for a cloud migration uses AWS Application Discovery Service to identify its network-level dependencies without disturbing its current environment.
+  - Advantages:
+    - Non-intrusive and easy to implement.
+    - Ideal for environments with strict security policies.
+  - Challenges:
+    - Deeper runtime dependencies refer to the intricate relationships and interactions within the application that occur during its execution. For example, agentless methods might fail to capture how specific functions, libraries, or frameworks interact under certain conditions, such as database query optimizations, dynamic API calls, or runtime-generated code paths. This lack of detail can lead to gaps in understanding performance bottlenecks or diagnosing critical issues.
+    - Agentless discovery primarily relies on external observations like network traffic and log analysis, which provide surface-level insights. It cannot directly inspect the inner workings of the application, such as thread-level operations, resource allocation patterns, or application-specific logic flow, which are critical for comprehensive dependency mapping in complex systems.
+  - Example Use Case: A company preparing for a cloud migration uses AWS Application Discovery Service to identify its network-level dependencies without disturbing its current environment.
 
 ### Data Collection Process
 
@@ -315,24 +322,20 @@ Once SigNoz is set up, the next step is instrumenting your applications using Op
 
 - Adding Instrumentation: Inject [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) libraries into your application to capture trace data.
 - Example: Instrumenting a Python application:
-    
-    ```bash
-    opentelemetry-bootstrap -a install
-    opentelemetry-instrument \\
-        --traces_exporter otlp \\
-        --service_name=my-service \\
-        python app.py
-    ```
-    
+  ```bash
+  opentelemetry-bootstrap -a install
+  opentelemetry-instrument \\
+      --traces_exporter otlp \\
+      --service_name=my-service \\
+      python app.py
+  ```
 - Set Sampling Rates: Configure how much trace data to sample to balance performance with observability.
-    - Example configuration snippet for a tracing YAML:
-        
-        ```yaml
-        otel:
-          sampling:
-            rate: 0.5  # Sample 50% of traces
-        ```
-        
+  - Example configuration snippet for a tracing YAML:
+    ```yaml
+    otel:
+      sampling:
+        rate: 0.5 # Sample 50% of traces
+    ```
 - Define Service Names: Ensure each service in your system has a unique, descriptive name to improve map readability.
 
 ### 3. View Dependencies

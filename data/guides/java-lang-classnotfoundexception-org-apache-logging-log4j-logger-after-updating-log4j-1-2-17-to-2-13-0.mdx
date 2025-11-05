@@ -1,13 +1,18 @@
 ---
-
 title: How to Fix Log4j ClassNotFoundException After Upgrade to 2.x
-slug: java-lang-classnotfoundexception-org-apache-logging-log4j-logger-after-updating-log4j-1-2-17-to-2-13-0
 date: 2024-10-03
 tags: [logging, faq]
 authors: [nilesh_sinha]
 description: Learn how to fix the Log4j ClassNotFoundException error when upgrading from 1.x to 2.x. Step-by-step guide to resolve dependency issues and update your code.
-keywords: [Log4j ClassNotFoundException, Log4j upgrade, Java logging, Error resolution, Dependency management, Log4j 2.x migration]
-
+keywords:
+  [
+    Log4j ClassNotFoundException,
+    Log4j upgrade,
+    Java logging,
+    Error resolution,
+    Dependency management,
+    Log4j 2.x migration,
+  ]
 ---
 
 Upgrading logging frameworks is a critical task for Java developers, but it often comes with unexpected challenges. One common issue that arises when moving from Log4j 1.x to 2.x is the `java.lang.ClassNotFoundException: org.apache.logging.log4j.Logger` error. This error can halt your application's functionality and disrupt your logging capabilities. In this comprehensive guide, we'll explore the root causes of this error and provide you with practical solutions to resolve it efficiently.
@@ -19,158 +24,125 @@ The `java.lang.ClassNotFoundException: org.apache.logging.log4j.Logger` error ty
 Common scenarios where this error surfaces include:
 
 - Incomplete dependency updates in your project's build file:
-    
-    It could be possible if you're upgrading to Log4j 2.x but haven't updated all related dependencies, the application may still look for Log4j 1.x classes.
-    
-    In Maven, here’s what it looks like in the case of incomplete dependency:
-    
-    ```xml
-    <!-- Incorrect or incomplete dependency configuration (still using Log4j 1.x) -->
-    <dependency>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <version>1.2.17</version>
-    </dependency>
-    
-    <!-- Missing Log4j 2.x API dependency -->
-    ```
-    
-    This is how you can fix it:
-    
-    ```xml
-    <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-api</artifactId>
-        <version>2.17.1</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
-        <version>2.17.1</version>
-    </dependency>
-    ```
-    
-    For Gradle, add this to your `build.gradle`:
-    
-    ```groovy
-    dependencies {
-      implementation 'org.apache.logging.log4j:log4j-api:2.13.0'
-      implementation 'org.apache.logging.log4j:log4j-core:2.13.0'
-    }
-    ```
-    
+  It could be possible if you're upgrading to Log4j 2.x but haven't updated all related dependencies, the application may still look for Log4j 1.x classes.
+  In Maven, here’s what it looks like in the case of incomplete dependency:
+  ```xml
+  <!-- Incorrect or incomplete dependency configuration (still using Log4j 1.x) -->
+  <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+  </dependency>
+
+  <!-- Missing Log4j 2.x API dependency -->
+  ```
+  This is how you can fix it:
+  ```xml
+  <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.17.1</version>
+  </dependency>
+
+  <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.17.1</version>
+  </dependency>
+  ```
+  For Gradle, add this to your `build.gradle`:
+  ```groovy
+  dependencies {
+    implementation 'org.apache.logging.log4j:log4j-api:2.13.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.13.0'
+  }
+  ```
 - Mixing Log4j 1.x and 2.x dependencies:
-    
-    Mixing both Log4j 1.x and Log4j 2.x dependencies can lead to `ClassNotFoundException`, especially when Log4j 2.x classes like `org.apache.logging.log4j.Logger` are referenced, but Log4j 1.x dependencies are still in the classpath.
-    
-    ```xml
-    <!-- Log4j 1.x dependency still present, it should be removed when Log4j 2.x is in use -->
-    <dependency>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <version>1.2.17</version>
-    </dependency>
-    
-    <!-- Log4j 2.x API dependency -->
-    <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-api</artifactId>
-        <version>2.17.1</version>
-    </dependency>
-    ```
-    
+  Mixing both Log4j 1.x and Log4j 2.x dependencies can lead to `ClassNotFoundException`, especially when Log4j 2.x classes like `org.apache.logging.log4j.Logger` are referenced, but Log4j 1.x dependencies are still in the classpath.
+  ```xml
+  <!-- Log4j 1.x dependency still present, it should be removed when Log4j 2.x is in use -->
+  <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+  </dependency>
+
+  <!-- Log4j 2.x API dependency -->
+  <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.17.1</version>
+  </dependency>
+  ```
 - Incorrect classpath configuration:
-    
-    If your classpath does not correctly point to the Log4j 2.x JARs, the `ClassNotFoundException` will occur even if the dependencies are specified in the build file.
-    
-    If youever come across `ClassNotFoundException`, the scenario could be due to the incorrect classpath as shown here:
-    
-    ```bash
-    java -cp /path/to/wrong/log4j1.jar:. MainClass
-    ```
-    
-    Fix: Correct the classpath to point to the Log4j 2.x JARs.
-    
-    ```bash
-    java -cp /path/to/log4j-api-2.17.1.jar:/path/to/log4j-core-2.17.1.jar:. MainClass
-    ```
-    
+  If your classpath does not correctly point to the Log4j 2.x JARs, the `ClassNotFoundException` will occur even if the dependencies are specified in the build file.
+  If youever come across `ClassNotFoundException`, the scenario could be due to the incorrect classpath as shown here:
+  ```bash
+  java -cp /path/to/wrong/log4j1.jar:. MainClass
+  ```
+  Fix: Correct the classpath to point to the Log4j 2.x JARs.
+  ```bash
+  java -cp /path/to/log4j-api-2.17.1.jar:/path/to/log4j-core-2.17.1.jar:. MainClass
+  ```
 - Outdated import statements in your Java code:
-If your project has upgraded to Log4j 2.x, but your code still imports Log4j 1.x classes, this will cause `ClassNotFoundException` when the application looks for Log4j 2.x classes at runtime.
-    
-    Here’s how your trouble would look like when the import statements are outdated:
-    
-    ```java
-    // Still using Log4j 1.x imports
-    import org.apache.log4j.Logger;
-    
-    public class MainClass {
-        private static final Logger logger = Logger.getLogger(MainClass.class);
-    
-        public static void main(String[] args) {
-            logger.info("Logging with Log4j 1.x");
-        }
-    }
-    ```
-    
-    The above code imports `org.apache.log4j.Logger`, which is from the Log4j 1.x package. This will only work if Log4j 1.x is included in the classpath.
-    
-    Fix: Update your import statements to use Log4j 2.x classes.
-    
-    ```java
-    // Use Log4j 2.x imports
-    import org.apache.logging.log4j.LogManager;
-    import org.apache.logging.log4j.Logger;
-    
-    public class MainClass {
-        private static final Logger logger = LogManager.getLogger(MainClass.class);
-    
-        public static void main(String[] args) {
-            logger.info("Logging with Log4j 2.x");
-        }
-    }
-    ```
-    
-    The corrected code imports `org.apache.logging.log4j.Logger`, which is from the Log4j 2.x package. This requires Log4j 2.x libraries in the classpath.
-    
+  If your project has upgraded to Log4j 2.x, but your code still imports Log4j 1.x classes, this will cause `ClassNotFoundException` when the application looks for Log4j 2.x classes at runtime.
+      Here’s how your trouble would look like when the import statements are outdated:
+
+      ```java
+      // Still using Log4j 1.x imports
+      import org.apache.log4j.Logger;
+
+      public class MainClass {
+          private static final Logger logger = Logger.getLogger(MainClass.class);
+
+          public static void main(String[] args) {
+              logger.info("Logging with Log4j 1.x");
+          }
+      }
+      ```
+
+      The above code imports `org.apache.log4j.Logger`, which is from the Log4j 1.x package. This will only work if Log4j 1.x is included in the classpath.
+
+      Fix: Update your import statements to use Log4j 2.x classes.
+
+      ```java
+      // Use Log4j 2.x imports
+      import org.apache.logging.log4j.LogManager;
+      import org.apache.logging.log4j.Logger;
+
+      public class MainClass {
+          private static final Logger logger = LogManager.getLogger(MainClass.class);
+
+          public static void main(String[] args) {
+              logger.info("Logging with Log4j 2.x");
+          }
+      }
+      ```
+
+      The corrected code imports `org.apache.logging.log4j.Logger`, which is from the Log4j 2.x package. This requires Log4j 2.x libraries in the classpath.
 
 The impact of this error can be severe, potentially preventing your application from starting or causing critical logging failures. To resolve this issue, you need to understand the key differences between Log4j 1.x and 2.x and make the necessary adjustments to your project configuration and code.
 
 ## Key Differences Between Log4j 1.x and 2.x
 
-Log4j 1.x is outdated and no longer maintained, which means it’s a sitting duck for security risks. After the whole Log4Shell fiasco, which caused major issues in Log4j 2.x, it became even clearer that sticking with older versions is risky. While Log4j 1.x wasn’t hit by Log4Shell directly, it’s still not getting any new security patches or features, leaving your app vulnerable. Upgrading to Log4j 2.x not only keeps you safe but also gives you better performance and modern logging features. 
+Log4j 1.x is outdated and no longer maintained, which means it’s a sitting duck for security risks. After the whole Log4Shell fiasco, which caused major issues in Log4j 2.x, it became even clearer that sticking with older versions is risky. While Log4j 1.x wasn’t hit by Log4Shell directly, it’s still not getting any new security patches or features, leaving your app vulnerable. Upgrading to Log4j 2.x not only keeps you safe but also gives you better performance and modern logging features.
 
 Log4j 2.x introduced significant changes compared to its predecessor. Now, the real question is why we need the change and not just stick with its predecessor. Let's have an overview of the major changes in Log4j 2.x and also consider the improvements that justify this upgrade.
 
 - API and Package Structure:
-    
-    Log4j 1.x uses `org.apache.log4j`, while Log4j 2.x uses `org.apache.logging.log4j`. This reflects a more modern and modular design in Log4j 2.x.
-    
+  Log4j 1.x uses `org.apache.log4j`, while Log4j 2.x uses `org.apache.logging.log4j`. This reflects a more modern and modular design in Log4j 2.x.
 - Asynchronous Logging:
-    
-    Log4j 2.x introduces asynchronous logging by default, using the LMAX Disruptor for high performance. This improves efficiency, especially in high-throughput applications.
-    
+  Log4j 2.x introduces asynchronous logging by default, using the LMAX Disruptor for high performance. This improves efficiency, especially in high-throughput applications.
 - Configuration Changes:
-    
-    Log4j 1.x uses `log4j.properties` or `log4j.xml` for configuration. Log4j 2.x supports configurations in `XML`, `JSON`, `YAML`, or `Properties` format, providing greater flexibility.
-    
+  Log4j 1.x uses `log4j.properties` or `log4j.xml` for configuration. Log4j 2.x supports configurations in `XML`, `JSON`, `YAML`, or `Properties` format, providing greater flexibility.
 - Better Performance:
-    
-    Log4j 2.x is built with performance in mind, especially in multi-threaded environments. Its asynchronous capabilities and efficient use of resources make it more suitable for modern applications.
-    
+  Log4j 2.x is built with performance in mind, especially in multi-threaded environments. Its asynchronous capabilities and efficient use of resources make it more suitable for modern applications.
 - Plugin System:
-    
-    Log4j 2.x has a plugin-based architecture, allowing developers to extend functionality easily (e.g., custom appenders or filters).
-    
+  Log4j 2.x has a plugin-based architecture, allowing developers to extend functionality easily (e.g., custom appenders or filters).
 - SLF4J Compatibility:
-    
-    Log4j 2.x provides better integration with SLF4J, a popular logging facade, by offering adapters that allow it to be used seamlessly with existing SLF4J-based projects.
-    
+  Log4j 2.x provides better integration with SLF4J, a popular logging facade, by offering adapters that allow it to be used seamlessly with existing SLF4J-based projects.
 - Garbage-Free Logging:
-    
-    Log4j 2.x is designed to be garbage-free (no object allocation) during normal operations, significantly reducing GC overhead in high-throughput systems.
-    
+  Log4j 2.x is designed to be garbage-free (no object allocation) during normal operations, significantly reducing GC overhead in high-throughput systems.
 
 ### Compatibility Issues When Migrating from Log4j 1.x to 2.x:
 
@@ -189,85 +161,69 @@ These changes justify the upgrade but also contribute to compatibility issues wh
 
 When dealing with legacy code that still uses Log4j 1.x, consider these strategies:
 
-1. Use the Log4j 1.x bridge:
-The Log4j 1.x bridge is a compatibility layer that allows old code written for Log4j 1.x to work with the newer Log4j 2.x framework. It acts like a translator, so you don’t have to rewrite all your logging code when upgrading to Log4j 2.x.
-    
-    Add the log4j-1.2-api dependency to maintain compatibility with older code.
-    
-    ```xml
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-1.2-api</artifactId>
-      <version>2.13.0</version>
-    </dependency>
-    ```
-    
-    The log4j-1.2-api dependency works as a bridge that mimics the Log4j 1.x API using Log4j 2.x under the hood. It intercepts calls from your old code that still uses Log4j 1.x classes and methods (like `org.apache.log4j.Logger`) and redirects them to Log4j 2.x
-    
-2. Gradually migrate your codebase:
-    
+1.  Use the Log4j 1.x bridge:
+    The Log4j 1.x bridge is a compatibility layer that allows old code written for Log4j 1.x to work with the newer Log4j 2.x framework. It acts like a translator, so you don’t have to rewrite all your logging code when upgrading to Log4j 2.x.
+        Add the log4j-1.2-api dependency to maintain compatibility with older code.
+
+        ```xml
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-1.2-api</artifactId>
+          <version>2.13.0</version>
+        </dependency>
+        ```
+
+        The log4j-1.2-api dependency works as a bridge that mimics the Log4j 1.x API using Log4j 2.x under the hood. It intercepts calls from your old code that still uses Log4j 1.x classes and methods (like `org.apache.log4j.Logger`) and redirects them to Log4j 2.x
+2.  Gradually migrate your codebase:
+
     Identify modules or packages still using Log4j 1.x. Update them one at a time, starting with the least dependent modules. Use the bridge as a temporary solution while migrating.
-    
-3. Update third-party libraries:
-    
+
+3.  Update third-party libraries:
+
     Check for updates of libraries that depend on Log4j 1.x. If updates are not available, consider using the Log4j 1.x bridge or finding alternative libraries.
-    
 
 The log4j-1.2-api bridge allows legacy applications using Log4j 1.x APIs to run on Log4j 2.x without major code changes. This bridge mimics the Log4j 1.x API while using Log4j 2.x under the hood, ensuring compatibility with older code.
 
 1. Add the Bridge Dependency:
-    
-    Add log4j-1.2-api to your project to support old Log4j 1.x code.
-    
-    ```xml
-    <dependency>
-       <groupId>org.apache.logging.log4j</groupId>
-       <artifactId>log4j-1.2-api</artifactId>
-       <version>2.x.x</version>
-    </dependency>
-    ```
-    
+
+   Add log4j-1.2-api to your project to support old Log4j 1.x code.
+
+   ```xml
+   <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-1.2-api</artifactId>
+      <version>2.x.x</version>
+   </dependency>
+   ```
+
 2. Keep Using Log4j 1.x APIs:
-    
-    Your existing code (e.g., `Logger.getLogger()`) continues to work while running on the Log4j 2.x infrastructure.
-    
+
+   Your existing code (e.g., `Logger.getLogger()`) continues to work while running on the Log4j 2.x infrastructure.
+
 3. Gradual Migration:
-    
-    You can gradually refactor the code to use Log4j 2.x classes (`LogManager.getLogger()`), reducing technical debt over time.
-    
+
+   You can gradually refactor the code to use Log4j 2.x classes (`LogManager.getLogger()`), reducing technical debt over time.
 
 Identifying and updating third-party libraries that use older Log4j versions ensures that all dependencies in your project are compatible with Log4j 2.x, preventing conflicts and leveraging improved features and security fixes.
 
 - Identify Older Log4j Dependencies:
-    
-    Use dependency analysis tools (e.g., Maven's `dependency:tree` or Gradle's `dependencies` task) to check if any third-party libraries rely on Log4j 1.x.
-    
-    Example (Maven):
-    
-    ```bash
-    mvn dependency:tree | grep log4j
-    ```
-    
-    Example (Gradle):
-    
-    ```bash
-    ./gradlew dependencies | grep log4j
-    ```
-    
+  Use dependency analysis tools (e.g., Maven's `dependency:tree` or Gradle's `dependencies` task) to check if any third-party libraries rely on Log4j 1.x.
+  Example (Maven):
+  ```bash
+  mvn dependency:tree | grep log4j
+  ```
+  Example (Gradle):
+  ```bash
+  ./gradlew dependencies | grep log4j
+  ```
 - Update Library Versions:
-    
-    Check if newer versions of these libraries support Log4j 2.x. Update the libraries to the latest version in your `pom.xml` or `build.gradle`.
-    
+  Check if newer versions of these libraries support Log4j 2.x. Update the libraries to the latest version in your `pom.xml` or `build.gradle`.
 - Use the log4j-1.2-api Bridge:
-    
-    If no update is available, use the log4j-1.2-api bridge to maintain compatibility between third-party libraries still using Log4j 1.x and your Log4j 2.x codebase.
-    
+  If no update is available, use the log4j-1.2-api bridge to maintain compatibility between third-party libraries still using Log4j 1.x and your Log4j 2.x codebase.
 - Monitor for Security Issues:
-    
-    Regularly review third-party library updates for critical fixes, especially security vulnerabilities related to Log4j.
-    
+  Regularly review third-party library updates for critical fixes, especially security vulnerabilities related to Log4j.
 
-Gradual migration helps ensure a smooth transition from Log4j 1.x to Log4j 2.x by minimizing disruptions and allowing for thorough testing and adjustments in a large codebase. 
+Gradual migration helps ensure a smooth transition from Log4j 1.x to Log4j 2.x by minimizing disruptions and allowing for thorough testing and adjustments in a large codebase.
 
 - Plan Incrementally, Break the Migration: Divide the migration into manageable phases. Start with core modules and then move to less critical areas.
 - Use the Log4j 1.x Bridge: Add the log4j-1.2-api bridge to support existing Log4j 1.x code while transitioning to Log4j 2.x.
@@ -291,78 +247,77 @@ Troubleshooting persistent `ClassNotFoundException` involves using specific tool
 If you're still encountering the `ClassNotFoundException` after following the steps above, try these troubleshooting techniques:
 
 1. Using Maven Dependency Plugin:
-    
-    The Maven Dependency Plugin helps you view and troubleshoot your project's dependency tree.
-    
-    Example:
-    
-    ```bash
-    mvn dependency:tree
-    ```
-    
-    Output:
-    
-    ```bash
-    [INFO] com.example:myapp:jar:1.0
-    [INFO] +- log4j:log4j:jar:1.2.17:compile
-    [INFO] \- org.apache.commons:commons-lang:jar:2.6:compile
-    ```
-    
-    Check for version conflicts or missing dependencies. If Log4j is missing, add it to your `pom.xml`.
-    
+
+   The Maven Dependency Plugin helps you view and troubleshoot your project's dependency tree.
+
+   Example:
+
+   ```bash
+   mvn dependency:tree
+   ```
+
+   Output:
+
+   ```bash
+   [INFO] com.example:myapp:jar:1.0
+   [INFO] +- log4j:log4j:jar:1.2.17:compile
+   [INFO] \- org.apache.commons:commons-lang:jar:2.6:compile
+   ```
+
+   Check for version conflicts or missing dependencies. If Log4j is missing, add it to your `pom.xml`.
+
 2. Debugging Classpath Issues:
-    
-    Use your IDE's classpath configuration features to ensure all required libraries are included. Use `verbose:class` to trace which classes are being loaded and from where.
-    
-    Example:
-    
-    ```bash
-    java -verbose:class -cp /path/to/classes com.example.Main
-    ```
-    
-    Output:
-    
-    ```bash
-    [Loaded com.example.Main from file:/path/to/classes/com/example/Main.class]
-    [Loaded org.apache.log4j.Logger from file:/path/to/log4j.jar]
-    ```
-    
-    Ensure all required classes are loaded from the expected locations.
-    
+
+   Use your IDE's classpath configuration features to ensure all required libraries are included. Use `verbose:class` to trace which classes are being loaded and from where.
+
+   Example:
+
+   ```bash
+   java -verbose:class -cp /path/to/classes com.example.Main
+   ```
+
+   Output:
+
+   ```bash
+   [Loaded com.example.Main from file:/path/to/classes/com/example/Main.class]
+   [Loaded org.apache.log4j.Logger from file:/path/to/log4j.jar]
+   ```
+
+   Ensure all required classes are loaded from the expected locations.
+
 3. Leveraging Logging Frameworks' Debug Output:
-    
-    Enable debug output in your logging framework to see detailed information about its configuration.
-    
-    Example:
-    
-    For Log4j 2.x, add the following to your `log4j2.xml`:
-    
-    ```xml
-    <Configuration status="DEBUG">
-        <!-- your configuration here -->
-    </Configuration>
-    ```
-    
-    Review the logs for configuration errors or missing files.
-    
+
+   Enable debug output in your logging framework to see detailed information about its configuration.
+
+   Example:
+
+   For Log4j 2.x, add the following to your `log4j2.xml`:
+
+   ```xml
+   <Configuration status="DEBUG">
+       <!-- your configuration here -->
+   </Configuration>
+   ```
+
+   Review the logs for configuration errors or missing files.
+
 4. Strategies for Isolating Problems in Multi-Module Projects:
-    
-    Test each module independently to identify which module is causing the issue.
-    
-    Example:
-    
-    If `ModuleA` depends on `ModuleB`, ensure `ModuleB` is correctly included in the classpath of `ModuleA`. Check `ModuleA`'s build configuration for missing or incorrect dependencies:
-    
-    ```xml
-    <dependency>
-        <groupId>com.example</groupId>
-        <artifactId>moduleB</artifactId>
-        <version>1.0</version>
-    </dependency>
-    ```
-    
-    Isolate the problem by verifying each module’s dependencies and classpath setup.
-    
+
+   Test each module independently to identify which module is causing the issue.
+
+   Example:
+
+   If `ModuleA` depends on `ModuleB`, ensure `ModuleB` is correctly included in the classpath of `ModuleA`. Check `ModuleA`'s build configuration for missing or incorrect dependencies:
+
+   ```xml
+   <dependency>
+       <groupId>com.example</groupId>
+       <artifactId>moduleB</artifactId>
+       <version>1.0</version>
+   </dependency>
+   ```
+
+   Isolate the problem by verifying each module’s dependencies and classpath setup.
 
 ## Optimizing Logging Performance with SigNoz
 
@@ -381,76 +336,75 @@ To configure Log4j 2.x with SigNoz:
 Following best practices for Log4j 2.x ensures optimal performance, security, and effective log management in your applications.
 
 1. Leveraging Asynchronous Logging:
-    
-    Use Log4j 2.x's asynchronous logging to boost performance by offloading logging to a separate thread, reducing the impact on application performance.
-    
-    Example:
-    
-    ```xml
-    <Configuration>
-        <Appenders>
-            <Async name="AsyncAppender">
-                <AppenderRef ref="Console"/>
-            </Async>
-            <Console name="Console" target="SYSTEM_OUT">
-                <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5p %c - %m%n"/>
-            </Console>
-        </Appenders>
-        <Loggers>
-            <Root level="info">
-                <AppenderRef ref="AsyncAppender"/>
-            </Root>
-        </Loggers>
-    </Configuration>
-    ```
-    
-    This configuration uses an asynchronous appender to handle log messages, which improves performance by decoupling logging from the main application thread.
-    
+
+   Use Log4j 2.x's asynchronous logging to boost performance by offloading logging to a separate thread, reducing the impact on application performance.
+
+   Example:
+
+   ```xml
+   <Configuration>
+       <Appenders>
+           <Async name="AsyncAppender">
+               <AppenderRef ref="Console"/>
+           </Async>
+           <Console name="Console" target="SYSTEM_OUT">
+               <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5p %c - %m%n"/>
+           </Console>
+       </Appenders>
+       <Loggers>
+           <Root level="info">
+               <AppenderRef ref="AsyncAppender"/>
+           </Root>
+       </Loggers>
+   </Configuration>
+   ```
+
+   This configuration uses an asynchronous appender to handle log messages, which improves performance by decoupling logging from the main application thread.
+
 2. Implementing Proper Log Levels and Categories:
-    
-    Use appropriate log levels (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`) and categories to capture relevant information and facilitate debugging.
-    
-    Example:
-    
-    ```xml
-    <Logger name="com.example.service" level="debug" additivity="false">
-        <AppenderRef ref="Console"/>
-    </Logger>
-    ```
-    
-    This setup configures a specific logger for the `com.example.service` package at the `DEBUG` level, helping to filter and control the amount of log output based on the desired level of detail.
-    
+
+   Use appropriate log levels (`TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`) and categories to capture relevant information and facilitate debugging.
+
+   Example:
+
+   ```xml
+   <Logger name="com.example.service" level="debug" additivity="false">
+       <AppenderRef ref="Console"/>
+   </Logger>
+   ```
+
+   This setup configures a specific logger for the `com.example.service` package at the `DEBUG` level, helping to filter and control the amount of log output based on the desired level of detail.
+
 3. Utilizing Built-in Security Features:
-    
-    Take advantage of Log4j 2.x's security features, such as `ConfigurationFactory` to prevent attacks related to log injection and external configuration.
-    
-    Example:
-    
-    ```xml
-    <Configuration status="ERROR">
-        <!-- Configuration to prevent external attacks -->
-    </Configuration>
-    ```
-    
-    This example ensures that the configuration setup includes security measures to mitigate risks related to log data and configuration files.
-    
+
+   Take advantage of Log4j 2.x's security features, such as `ConfigurationFactory` to prevent attacks related to log injection and external configuration.
+
+   Example:
+
+   ```xml
+   <Configuration status="ERROR">
+       <!-- Configuration to prevent external attacks -->
+   </Configuration>
+   ```
+
+   This example ensures that the configuration setup includes security measures to mitigate risks related to log data and configuration files.
+
 4. Strategies for Log Rotation and Archiving:
-    
-    Implement log rotation and archiving to handle log file size and maintain manageable log files.
-    
-    Example:
-    
-    ```xml
-    <RollingFile name="RollingFile" fileName="logs/app.log" filePattern="logs/app-%d{yyyy-MM-dd}.log">
-        <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5p %c - %m%n"/>
-        <Policies>
-            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-        </Policies>
-    </RollingFile>
-    ```
-    
-    This configuration rotates log files daily and archives them, ensuring that log files do not grow indefinitely and are manageable over time.
-    
+
+   Implement log rotation and archiving to handle log file size and maintain manageable log files.
+
+   Example:
+
+   ```xml
+   <RollingFile name="RollingFile" fileName="logs/app.log" filePattern="logs/app-%d{yyyy-MM-dd}.log">
+       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5p %c - %m%n"/>
+       <Policies>
+           <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+       </Policies>
+   </RollingFile>
+   ```
+
+   This configuration rotates log files daily and archives them, ensuring that log files do not grow indefinitely and are manageable over time.
 
 ## Key Takeaways
 

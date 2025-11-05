@@ -1,159 +1,166 @@
 ---
-
 title: What are the 4 Types of Metrics in Prometheus - Understanding the Core Metric Types
-slug: what-are-the-4-types-of-metrics-in-prometheus
 date: 2024-07-30
 tags: [faq, prometheus]
 authors: [yuvraj]
 description: Discover the 4 core metric types in Prometheus - counters, gauges, histograms, and summaries. Learn their characteristics, use cases, and implementation best practices.
 keywords: [Prometheus metrics, monitoring, observability, counters, gauges, histograms, summaries]
-
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "What are the 4 types of metrics in Prometheus - Understanding the Core Metric Types",
-    "alternativeHeadline": "Exploring Counters, Gauges, Histograms, and Summaries in Prometheus",
-    "author": {
-      "@type": "Person",
-      "name": "Yuvraj"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-30T00:00:00Z",
-    "dateModified": "2024-07-30T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/"
-    },
-    "description": "Discover the 4 core metric types in Prometheus: counters, gauges, histograms, and summaries. Learn their characteristics, use cases, and implementation best practices.",
-    "keywords": "Prometheus metrics, monitoring, observability, counters, gauges, histograms, summaries",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Prometheus Metrics",
-        "description": "Numerical measurements collected at regular intervals to monitor the health, performance, and behavior of systems and applications."
-      },
-      {
-        "@type": "Thing",
-        "name": "Counters",
-        "description": "Metrics that represent cumulative values that only increase over time, ideal for tracking events, requests, or occurrences."
-      },
-      {
-        "@type": "Thing",
-        "name": "Gauges",
-        "description": "Metrics representing single numerical values that can arbitrarily go up and down, useful for measuring current states or values that fluctuate."
-      },
-      {
-        "@type": "Thing",
-        "name": "Histograms",
-        "description": "Metrics that measure the distribution of values across predefined buckets, valuable for understanding the spread and concentration of data points."
-      },
-      {
-        "@type": "Thing",
-        "name": "Summaries",
-        "description": "Metrics that calculate streaming φ-quantiles (percentiles) over a sliding time window, useful for precise percentile calculations."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What's the difference between a histogram and a summary in Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Histograms and summaries both measure distributions, but they differ in how they calculate and store data. Histograms use predefined buckets and allow for flexible querying and aggregation. Summaries calculate precise percentiles but offer less query flexibility."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline:
+          'What are the 4 types of metrics in Prometheus - Understanding the Core Metric Types',
+        alternativeHeadline: 'Exploring Counters, Gauges, Histograms, and Summaries in Prometheus',
+        author: {
+          '@type': 'Person',
+          name: 'Yuvraj',
         },
-        {
-          "@type": "Question",
-          "name": "Can I convert one metric type to another in Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No, you cannot directly convert between metric types in Prometheus. Each type stores data differently, so conversion isn't possible. Choose the appropriate metric type based on your monitoring needs from the start."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "How do Prometheus metric types affect performance and storage?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Different metric types have varying impacts on performance and storage. Counters and gauges are lightweight, while histograms and summaries consume more resources due to their additional data points. Consider the trade-offs between granularity and resource usage when selecting metric types."
-          }
+        datePublished: '2024-07-30T00:00:00Z',
+        dateModified: '2024-07-30T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/',
         },
-        {
-          "@type": "Question",
-          "name": "Are there any limitations to the number of metrics I can use in Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Prometheus can handle millions of time series, but practical limits depend on your hardware resources. High cardinality (many unique label combinations) can impact performance more than the total number of metrics. Monitor Prometheus' resource usage and optimize your metrics accordingly."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Implementing Prometheus Metrics",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Understand the Basics",
-          "text": "Learn the key characteristics and use cases of the four core metric types in Prometheus: counters, gauges, histograms, and summaries."
+        description:
+          'Discover the 4 core metric types in Prometheus: counters, gauges, histograms, and summaries. Learn their characteristics, use cases, and implementation best practices.',
+        keywords:
+          'Prometheus metrics, monitoring, observability, counters, gauges, histograms, summaries',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Choose the Right Metric Type",
-          "text": "Select the appropriate metric type based on the nature of your data and analysis requirements."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Prometheus Metrics',
+            description:
+              'Numerical measurements collected at regular intervals to monitor the health, performance, and behavior of systems and applications.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Counters',
+            description:
+              'Metrics that represent cumulative values that only increase over time, ideal for tracking events, requests, or occurrences.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Gauges',
+            description:
+              'Metrics representing single numerical values that can arbitrarily go up and down, useful for measuring current states or values that fluctuate.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Histograms',
+            description:
+              'Metrics that measure the distribution of values across predefined buckets, valuable for understanding the spread and concentration of data points.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Summaries',
+            description:
+              'Metrics that calculate streaming φ-quantiles (percentiles) over a sliding time window, useful for precise percentile calculations.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: "What's the difference between a histogram and a summary in Prometheus?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Histograms and summaries both measure distributions, but they differ in how they calculate and store data. Histograms use predefined buckets and allow for flexible querying and aggregation. Summaries calculate precise percentiles but offer less query flexibility.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I convert one metric type to another in Prometheus?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "No, you cannot directly convert between metric types in Prometheus. Each type stores data differently, so conversion isn't possible. Choose the appropriate metric type based on your monitoring needs from the start.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do Prometheus metric types affect performance and storage?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Different metric types have varying impacts on performance and storage. Counters and gauges are lightweight, while histograms and summaries consume more resources due to their additional data points. Consider the trade-offs between granularity and resource usage when selecting metric types.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Are there any limitations to the number of metrics I can use in Prometheus?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "Prometheus can handle millions of time series, but practical limits depend on your hardware resources. High cardinality (many unique label combinations) can impact performance more than the total number of metrics. Monitor Prometheus' resource usage and optimize your metrics accordingly.",
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Implement Metrics",
-          "text": "Use Prometheus client libraries to define and implement the chosen metric types in your application code."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Implementing Prometheus Metrics',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Understand the Basics',
+              text: 'Learn the key characteristics and use cases of the four core metric types in Prometheus: counters, gauges, histograms, and summaries.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Choose the Right Metric Type',
+              text: 'Select the appropriate metric type based on the nature of your data and analysis requirements.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Implement Metrics',
+              text: 'Use Prometheus client libraries to define and implement the chosen metric types in your application code.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Monitor and Analyze',
+              text: 'Set up Prometheus to collect and store your metrics, and use PromQL queries to analyze the data and gain insights.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Optimize Performance',
+              text: 'Monitor metric cardinality and resource usage, and optimize your metrics for efficient performance and storage.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Monitor and Analyze",
-          "text": "Set up Prometheus to collect and store your metrics, and use PromQL queries to analyze the data and gain insights."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Optimize Performance",
-          "text": "Monitor metric cardinality and resource usage, and optimize your metrics for efficient performance and storage."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Prometheus, a powerful open-source monitoring system, uses four core metric types to collect and analyze data. These metric types — counters, gauges, histograms, and summaries — form the foundation of effective system monitoring and observability. Understanding these metric types is crucial for developers and system administrators who want to gain insights into their applications and infrastructure.

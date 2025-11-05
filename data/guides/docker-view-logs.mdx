@@ -1,11 +1,20 @@
 ---
-title: "How to View Docker Container Logs - A Complete Step-by-Step Guide"
-slug: "docker-view-logs"
-date: "2025-09-02"
+title: 'How to View Docker Container Logs - A Complete Step-by-Step Guide'
+date: '2025-09-02'
 tags: [docker, logging]
 authors: [bhavya_sachdeva]
 description: "The most basic command retrieves all available logs: 'docker logs test-nginx'. You can use either container names or IDs."
-keywords: [docker logs, container logging, docker troubleshooting, log analysis, docker commands, container monitoring, log rotation, docker logging drivers]
+keywords:
+  [
+    docker logs,
+    container logging,
+    docker troubleshooting,
+    log analysis,
+    docker commands,
+    container monitoring,
+    log rotation,
+    docker logging drivers,
+  ]
 ---
 
 Docker containers generate critical telemetry data through their logs, but accessing and analyzing this information efficiently can be challenging without the right approach. Whether you're debugging a failing deployment, monitoring application performance, or investigating security incidents, understanding Docker's logging capabilities is fundamental to maintaining healthy containerized systems.
@@ -42,7 +51,11 @@ The most basic command retrieves all available logs:
 docker logs test-nginx
 ```
 
-<Figure src="/img/guides/2025/07/docker-view-logs-view-all-container-logs.webp" alt="Docker Logs Command" caption="View all container logs" />
+<Figure
+  src="/img/guides/2025/07/docker-view-logs-view-all-container-logs.webp"
+  alt="Docker Logs Command"
+  caption="View all container logs"
+/>
 
 You can use either container names or IDs:
 
@@ -58,7 +71,11 @@ For active monitoring, use the `--follow` flag to stream logs as they're generat
 docker logs --follow test-nginx
 ```
 
-<Figure src="/img/guides/2025/07/docker-view-logs-live-logs.webp" alt="Docker Logs Command" caption="Real-time log streaming" />
+<Figure
+  src="/img/guides/2025/07/docker-view-logs-live-logs.webp"
+  alt="Docker Logs Command"
+  caption="Real-time log streaming"
+/>
 
 This is essential for troubleshooting active issues or monitoring deployments. Press Ctrl+C to stop streaming.
 
@@ -252,9 +269,9 @@ services:
     logging:
       driver: local
       options:
-        max-size: "15m"
-        max-file: "7"
-        compress: "true"
+        max-size: '15m'
+        max-file: '7'
+        compress: 'true'
 ```
 
 ## Production Best Practices
@@ -301,14 +318,16 @@ Configure appropriate rotation balancing retention needs with storage:
 
 ```javascript
 // Example structured logging
-console.log(JSON.stringify({
-  timestamp: new Date().toISOString(),
-  level: 'info',
-  service: 'web-api',
-  message: 'User authentication successful',
-  userId: 'user123',
-  requestId: 'req-456'
-}));
+console.log(
+  JSON.stringify({
+    timestamp: new Date().toISOString(),
+    level: 'info',
+    service: 'web-api',
+    message: 'User authentication successful',
+    userId: 'user123',
+    requestId: 'req-456',
+  })
+)
 ```
 
 **Implement correlation**: Use correlation IDs to connect related log entries across containers.
@@ -332,24 +351,31 @@ SigNoz offers comprehensive log management built on OpenTelemetry standards, pro
 SigNoz collects [Docker logs](https://signoz.io/guides/docker-logs-location/) through a pre-configured setup using the OpenTelemetry Collector:
 
 1. **Clone the repository**:
+
 ```bash
 git clone https://github.com/SigNoz/docker-container-logs
 ```
 
 2. **Configure environment variables** in the `.env` file:
+
 ```
 OTEL_COLLECTOR_ENDPOINT=ingest.<region>.signoz.cloud:443
 SIGNOZ_INGESTION_KEY=<your-ingestion-key>
 ```
 
 3. **Start the collector**:
+
 ```bash
 docker compose up -d
 ```
 
 This setup automatically forwards all Docker container logs to SigNoz with minimal configuration changes to your existing deployments.
 
-<Figure src="/img/guides/2025/07/docker-view-logs-signoz.webp" alt="Docker Logs Command" caption="Docker container logs in SigNoz" />
+<Figure
+  src="/img/guides/2025/07/docker-view-logs-signoz.webp"
+  alt="Docker Logs Command"
+  caption="Docker container logs in SigNoz"
+/>
 
 ### Advanced Capabilities
 
@@ -362,7 +388,7 @@ This setup automatically forwards all Docker container logs to SigNoz with minim
 
 SigNoz provides comprehensive [log management capabilities](https://signoz.io/log-management/) with its advanced [query builder](https://signoz.io/docs/userguide/query-builder/) for Docker environments. The platform offers fast log ingestion, correlation with metrics and traces, and powerful visualization features.
 
-You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features. 
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
 
 Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
 

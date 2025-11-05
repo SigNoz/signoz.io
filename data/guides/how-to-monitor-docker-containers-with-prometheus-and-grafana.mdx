@@ -1,13 +1,11 @@
 ---
-
 title: Docker Monitoring - Prometheus and Grafana Setup Guide
-slug: how-to-monitor-docker-containers-with-prometheus-and-grafana
 date: 2024-08-01
 tags: [prometheus]
 authors: [daniel]
 description: Learn how to monitor Docker containers using Prometheus and Grafana. This comprehensive guide covers setup, configuration, and best practices for effective container monitoring.
-keywords: [Docker monitoring, Prometheus, Grafana, container metrics, cAdvisor, Loki, Docker Compose]
-
+keywords:
+  [Docker monitoring, Prometheus, Grafana, container metrics, cAdvisor, Loki, Docker Compose]
 ---
 
 Docker containers have revolutionized application deployment, but they've also introduced new challenges in monitoring and performance management. This guide will walk you through the process of setting up Prometheus and Grafana to monitor your Docker containers, offering insights into performance metrics and helping you maintain a healthy containerized environment.
@@ -41,7 +39,6 @@ scrape_configs:
   - job_name: 'docker'
     static_configs:
       - targets: ['172.17.0.1:9323']
-
 ```
 
 1. Run Prometheus in a Docker container:
@@ -84,7 +81,6 @@ scrape_configs:
   - job_name: 'cadvisor'
     static_configs:
       - targets: ['172.17.0.1:8080']
-
 ```
 
 Restart Prometheus to apply the changes. Now, Prometheus will collect detailed metrics from your Docker containers via cAdvisor.
@@ -104,14 +100,14 @@ docker run -d --name grafana \\
 
 1. Access Grafana at [http://localhost:3000](http://localhost:3000/) (default credentials: admin/admin).
 2. Add Prometheus as a data source:
-    - Go to Configuration > Data Sources
-    - Click "Add data source" and select Prometheus
-    - Set the URL to [http://172.17.0.1:9090](http://172.17.0.1:9090/) (Docker host IP)
-    - Click "Save & Test"
+   - Go to Configuration > Data Sources
+   - Click "Add data source" and select Prometheus
+   - Set the URL to [http://172.17.0.1:9090](http://172.17.0.1:9090/) (Docker host IP)
+   - Click "Save & Test"
 3. Create a new dashboard:
-    - Click the "+" icon in the sidebar and select "Dashboard"
-    - Add a new panel
-    - In the query editor, you can now use PromQL to visualize Docker metrics
+   - Click the "+" icon in the sidebar and select "Dashboard"
+   - Add a new panel
+   - In the query editor, you can now use PromQL to visualize Docker metrics
 
 Here's a simple PromQL query to get you started:
 
@@ -127,15 +123,15 @@ This query shows CPU usage for all containers.
 To create more dynamic and useful dashboards:
 
 1. Use variables for flexibility:
-    - Create a variable for container names
-    - Use this variable in your queries to easily switch between containers
+   - Create a variable for container names
+   - Use this variable in your queries to easily switch between containers
 2. Set up alerting:
-    - Define thresholds for important metrics
-    - Configure Grafana to send notifications when these thresholds are breached
+   - Define thresholds for important metrics
+   - Configure Grafana to send notifications when these thresholds are breached
 3. Organize your dashboards:
-    - Group related panels together
-    - Use consistent naming conventions
-    - Share dashboards with your team for collaborative monitoring
+   - Group related panels together
+   - Use consistent naming conventions
+   - Share dashboards with your team for collaborative monitoring
 
 ## Monitoring Docker Container Logs with Loki
 
@@ -151,8 +147,8 @@ docker run -d --name loki \\
 ```
 
 1. Configure Docker to send logs to Loki:
-    - Update your [Docker daemon](https://signoz.io/guides/docker-daemon-logs/) configuration to use the Loki logging driver
-    - Restart the Docker daemon to apply changes
+   - Update your [Docker daemon](https://signoz.io/guides/docker-daemon-logs/) configuration to use the Loki logging driver
+   - Restart the Docker daemon to apply changes
 2. In Grafana, add Loki as a data source and create log visualization panels alongside your metric panels for comprehensive monitoring.
 
 ## Automating the Setup Process
@@ -167,12 +163,12 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090"
+      - '9090:9090'
 
   grafana:
     image: grafana/grafana
     ports:
-      - "3000:3000"
+      - '3000:3000'
 
   cadvisor:
     image: google/cadvisor
@@ -183,13 +179,12 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     ports:
-      - "8080:8080"
+      - '8080:8080'
 
   loki:
     image: grafana/loki
     ports:
-      - "3100:3100"
-
+      - '3100:3100'
 ```
 
 Run the entire stack with:

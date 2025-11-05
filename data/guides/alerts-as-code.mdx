@@ -1,16 +1,13 @@
 ---
-
 title: Implementing Alerts as Code - Best Practices for DevOps
-slug: alerts-as-code
 date: 2024-12-19
-tags: [alerts,devops,signoz,monitoring]
+tags: [alerts, devops, signoz, monitoring]
 authors: [simran_kumari]
 description: Learn how to implement Alerts as Code in DevOps. Discover best practices, tools, and benefits for efficient incident management and improved reliability.
 keywords: [alerts as code, DevOps, incident management, monitoring, observability, automation, SRE]
-
 ---
 
-Modern DevOps practices thrive on automation, consistency, and reliability. One key aspect of achieving this is "Alerts as Code" (AaC), a practice that treats alert definitions as version-controlled, reusable configurations. Alerts as Code (AaC) is transforming how DevOps teams manage and respond to incidents. By implementing AaC, you can significantly reduce manual errors, improve collaboration, and enhance your incident response capabilities. 
+Modern DevOps practices thrive on automation, consistency, and reliability. One key aspect of achieving this is "Alerts as Code" (AaC), a practice that treats alert definitions as version-controlled, reusable configurations. Alerts as Code (AaC) is transforming how DevOps teams manage and respond to incidents. By implementing AaC, you can significantly reduce manual errors, improve collaboration, and enhance your incident response capabilities.
 
 This guide walks you through understanding, implementing, and excelling at Alerts as Code, equipping your team to improve monitoring processes and incident response.
 
@@ -24,41 +21,44 @@ Alerts as Code is a methodology that applies software development principles to 
 2. Thresholds: Specify the acceptable limits for metrics, ensuring alerts are triggered only when necessary.
 3. Notification Channels: Determine how alerts are delivered, such as via email, Slack, PagerDuty, or custom integrations.
 
-<Figure src="/img/guides/2024/12/alerts-as-code-08701358-8f4a-4c21-a407-fba0319c6a13.webp" alt="Alert Configuration Management Process" caption="Alert Configuration Management Process" />
+<Figure
+  src="/img/guides/2024/12/alerts-as-code-08701358-8f4a-4c21-a407-fba0319c6a13.webp"
+  alt="Alert Configuration Management Process"
+  caption="Alert Configuration Management Process"
+/>
 
 AaC is closely related to Infrastructure as Code (IaC) and Monitoring as Code (MaC). While IaC focuses on provisioning and managing infrastructure, and MaC deals with defining monitoring configurations, AaC specifically addresses the alerting aspect of your [observability stack](https://signoz.io/guides/observability-stack/).
 
 ### Key Benefits of Alerts as Code
 
 1. Consistency: Ensure uniform alert configurations across environments.
-    - Example: Imagine deploying a new service in production, but QA missed critical alert thresholds. With AaC, you ensure uniform alert configurations across dev, staging, and production, avoiding such gaps.
+   - Example: Imagine deploying a new service in production, but QA missed critical alert thresholds. With AaC, you ensure uniform alert configurations across dev, staging, and production, avoiding such gaps.
 2. Version control: Track changes and roll back when needed
-    - Example: A team accidentally lowers an alert threshold, flooding your ops team with false positives. With AaC, you can track changes in Git and quickly roll back to the previous, stable configuration.
+   - Example: A team accidentally lowers an alert threshold, flooding your ops team with false positives. With AaC, you can track changes in Git and quickly roll back to the previous, stable configuration.
 3. Automation: Integrate alert management into CI/CD pipelines
-    - Example: A new microservice is added to your architecture. By integrating AaC into your CI/CD pipeline, you can automatically deploy alerts for the service alongside its code, ensuring instant monitoring.
+   - Example: A new microservice is added to your architecture. By integrating AaC into your CI/CD pipeline, you can automatically deploy alerts for the service alongside its code, ensuring instant monitoring.
 4. Collaboration: Improve teamwork between development and operations
-    - Example: A developer adds a feature that could cause memory spikes. By managing alerts as code, they can work directly with ops to define memory usage alerts in the same repository, improving communication.
+   - Example: A developer adds a feature that could cause memory spikes. By managing alerts as code, they can work directly with ops to define memory usage alerts in the same repository, improving communication.
 
 ## Why Adopt Alerts as Code?
 
 Alerts as Code isn’t just a trend—it’s a game-changer for modern DevOps workflows. Here’s why adopting it can elevate your alerting process:
 
 1. Improved Collaboration Between Development and Operations Teams
-    
-    When developers and operations teams work with the same version-controlled alert configurations, they can collaborate seamlessly. For example, a developer pushing a new feature can define alert thresholds directly in the same repo, ensuring shared responsibility for monitoring.
-    
+
+   When developers and operations teams work with the same version-controlled alert configurations, they can collaborate seamlessly. For example, a developer pushing a new feature can define alert thresholds directly in the same repo, ensuring shared responsibility for monitoring.
+
 2. Reduced Manual Errors and Configuration Drift
-    
-    Manual changes in alert settings across environments often lead to inconsistencies and missed alerts. With Alerts as Code, these configurations are automated and version-controlled, eliminating the risk of misaligned settings during deployments.
-    
+
+   Manual changes in alert settings across environments often lead to inconsistencies and missed alerts. With Alerts as Code, these configurations are automated and version-controlled, eliminating the risk of misaligned settings during deployments.
+
 3. Enhanced Scalability and Reusability Across Projects
-    
-    Managing alerts for a single service is easy, but scaling that to dozens of microservices is not. That’s where reusable alert templates shine. Alerts as Code allows you to define modular, reusable configurations that can be applied consistently across projects.
-    
+
+   Managing alerts for a single service is easy, but scaling that to dozens of microservices is not. That’s where reusable alert templates shine. Alerts as Code allows you to define modular, reusable configurations that can be applied consistently across projects.
+
 4. Faster Incident Response and Reduced Mean Time to Resolve (MTTR)
-    
-    Codified alerts come with detailed context, such as runbooks and incident response playbooks, right in the alert definition. This ensures your team can act swiftly and precisely, cutting down MTTR during incidents.
-    
+
+   Codified alerts come with detailed context, such as runbooks and incident response playbooks, right in the alert definition. This ensures your team can act swiftly and precisely, cutting down MTTR during incidents.
 
 ## Essential Tools for Implementing Alerts as Code
 
@@ -70,7 +70,11 @@ To successfully implement Alerts as Code, you'll need a combination of tools tha
 4. CI/CD pipelines: Jenkins, GitLab CI, or GitHub Actions can automate the deployment of alert configurations.
 5. Configuration management tools: Puppet, Chef, or Ansible can help manage alert configurations across different environments.
 
-<Figure src="/img/guides/2024/12/alerts-as-code-image.webp" alt="Essential Tools for Implementing Alerts as Code" caption="Essential Tools for Implementing Alerts as Code" />
+<Figure
+  src="/img/guides/2024/12/alerts-as-code-image.webp"
+  alt="Essential Tools for Implementing Alerts as Code"
+  caption="Essential Tools for Implementing Alerts as Code"
+/>
 
 ## Best Practices for Alerts as Code Implementation
 
@@ -83,9 +87,9 @@ Establish a consistent naming scheme for your alert configurations. This makes i
 ```yaml
 alerts:
   - name: high_cpu_usage
-    description: "CPU usage exceeds 90% for 5 minutes"
+    description: 'CPU usage exceeds 90% for 5 minutes'
     severity: warning
-    query: "avg(cpu_usage_percent) > 90"
+    query: 'avg(cpu_usage_percent) > 90'
     for: 5m
 ```
 
@@ -97,10 +101,10 @@ Create reusable alert patterns to maintain consistency and reduce duplication. F
 
 ```yaml
 resource_alert_template:
-  - name: "${resource}_high_usage"
-    description: "${resource} usage exceeds ${threshold}% for ${duration}"
+  - name: '${resource}_high_usage'
+    description: '${resource} usage exceeds ${threshold}% for ${duration}'
     severity: ${severity}
-    query: "avg(${resource}_usage_percent) > ${threshold}"
+    query: 'avg(${resource}_usage_percent) > ${threshold}'
     for: ${duration}
 ```
 
@@ -124,18 +128,18 @@ When defining alerts, consider the following practices:
 
 1. Base thresholds on SLOs: Align your alert thresholds with your service level objectives to ensure meaningful alerting.
 2. Implement multi-stage alerting: Use different severity levels for escalating issues. For example:
-    
-    ```yaml
-    alerts:
-      - name: api_error_rate
-        warning:
-          threshold: 1%
-          duration: 5m
-        critical:
-          threshold: 5%
-          duration: 1m
-    ```
-    
+
+   ```yaml
+   alerts:
+     - name: api_error_rate
+       warning:
+         threshold: 1%
+         duration: 5m
+       critical:
+         threshold: 5%
+         duration: 1m
+   ```
+
 3. Use dynamic thresholds: Implement adaptive thresholding to account for normal fluctuations in system behavior.
 4. Include context and runbooks: Provide detailed information and troubleshooting steps in your alert definitions to speed up resolution.
 
@@ -187,27 +191,31 @@ The diagram highlights how metrics and traces flow between components:
 3. OpenTelemetry Collector: Sends traces to SigNoz Cloud for visualization and analytics.
 4. Prometheus Alertmanager: Sends alerts triggered by conditions defined in your alerting rules.
 
-<Figure src="/img/guides/2024/12/alerts-as-code-image%201.webp" alt="Architecture for Implementing Alerts as Code with SigNoz" caption="Architecture for Implementing Alerts as Code with SigNoz" />
+<Figure
+  src="/img/guides/2024/12/alerts-as-code-image%201.webp"
+  alt="Architecture for Implementing Alerts as Code with SigNoz"
+  caption="Architecture for Implementing Alerts as Code with SigNoz"
+/>
 
 Achieving Alerts as Code
 
 The concept of Alerts as Code means defining and managing alerting configurations in code files (like YAML), allowing for better control, consistency, and automation. Here's how this setup enables Alerts as Code:
 
 1. Declarative Configuration:
-    - Alerting rules (`alerts.yml`), Prometheus settings (`prometheus.yml`), and [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) configurations are written in declarative YAML files.
-    - These files describe the desired state of the system, making them easy to read, modify, and share.
+   - Alerting rules (`alerts.yml`), Prometheus settings (`prometheus.yml`), and [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) configurations are written in declarative YAML files.
+   - These files describe the desired state of the system, making them easy to read, modify, and share.
 2. Version Control:
-    - Store all configuration files in a Git repository.
-    - This ensures every change to your alerting setup is tracked, auditable, and reversible. For example, you can roll back to a previous configuration if a new alerting rule causes unexpected issues.
+   - Store all configuration files in a Git repository.
+   - This ensures every change to your alerting setup is tracked, auditable, and reversible. For example, you can roll back to a previous configuration if a new alerting rule causes unexpected issues.
 3. Reusability Across Environments:
-    - The same configuration files can be reused across environments (e.g., development, staging, production) with minor modifications (like endpoint URLs).
-    - This ensures that all environments follow the same alerting standards.
+   - The same configuration files can be reused across environments (e.g., development, staging, production) with minor modifications (like endpoint URLs).
+   - This ensures that all environments follow the same alerting standards.
 4. Automation in CI/CD Pipelines:
-    - Integrate the configuration files into your CI/CD pipelines.
-    - For instance, whenever changes are merged into the repository, the updated configurations can be deployed automatically to Prometheus, OpenTelemetry Collector, and Alertmanager.
+   - Integrate the configuration files into your CI/CD pipelines.
+   - For instance, whenever changes are merged into the repository, the updated configurations can be deployed automatically to Prometheus, OpenTelemetry Collector, and Alertmanager.
 5. Scalability and Consistency:
-    - Managing alerts as code ensures consistent alert definitions across all systems.
-    - As your infrastructure scales, you can easily update or extend your alerting rules by modifying the configuration files.
+   - Managing alerts as code ensures consistent alert definitions across all systems.
+   - As your infrastructure scales, you can easily update or extend your alerting rules by modifying the configuration files.
 
 Prerequisite
 
@@ -221,44 +229,43 @@ Step 1: Flask App with Prometheus Metrics
 First, a Flask app needs to be set up to expose metrics for Prometheus to scrape:
 
 1. Install Flask and the Prometheus client:
-    
-    ```bash
-    pip install Flask prometheus_client
-    ```
-    
+
+   ```bash
+   pip install Flask prometheus_client
+   ```
+
 2. Create a file named `flask_app.py` with the following content:
-    
-    ```python
-    from flask import Flask
-    from flask import request
-    from prometheus_client import Counter, generate_latest, REGISTRY
-    from prometheus_client.exposition import basic_auth_handler
-    
-    app = Flask(__name__)
-    
-    # Define a counter metric
-    http_requests_total = Counter('http_requests_total', 'Total HTTP Requests', ['method', 'endpoint'])
-    
-    # Increment the counter on each request
-    @app.before_request
-    def before_request():
-        http_requests_total.labels(method=request.method, endpoint=request.path).inc()
-    
-    # Expose metrics at /metrics endpoint
-    @app.route('/metrics')
-    def metrics():
-        return generate_latest(REGISTRY)
-    
-    if __name__ == "__main__":
-        app.run(debug=True)
-    ```
-    
+
+   ```python
+   from flask import Flask
+   from flask import request
+   from prometheus_client import Counter, generate_latest, REGISTRY
+   from prometheus_client.exposition import basic_auth_handler
+
+   app = Flask(__name__)
+
+   # Define a counter metric
+   http_requests_total = Counter('http_requests_total', 'Total HTTP Requests', ['method', 'endpoint'])
+
+   # Increment the counter on each request
+   @app.before_request
+   def before_request():
+       http_requests_total.labels(method=request.method, endpoint=request.path).inc()
+
+   # Expose metrics at /metrics endpoint
+   @app.route('/metrics')
+   def metrics():
+       return generate_latest(REGISTRY)
+
+   if __name__ == "__main__":
+       app.run(debug=True)
+   ```
+
 3. Run the Flask app:
-    
-    ```bash
-    python flask_app.py
-    ```
-    
+
+   ```bash
+   python flask_app.py
+   ```
 
 The Flask app will now be running on `http://localhost:5000/` and exposing metrics at `http://localhost:5000/metrics`.
 
@@ -269,105 +276,109 @@ Step 2: Set Up Prometheus to Scrape Metrics
 Next, Prometheus needs to be configured to scrape metrics from the Flask app:
 
 1. Create a `prometheus.yml` configuration file to scrape metrics from the Flask app:
-    
-    ```yaml
-    global:
-      scrape_interval: 10s
-    
-    scrape_configs:
-      - job_name: 'flask-app'
-        static_configs:
-          - targets: ['localhost:5000']  # Flask app metrics endpoint
-    ```
-    
+
+   ```yaml
+   global:
+     scrape_interval: 10s
+
+   scrape_configs:
+     - job_name: 'flask-app'
+       static_configs:
+         - targets: ['localhost:5000'] # Flask app metrics endpoint
+   ```
+
 2. Start Prometheus with the configuration:
-    
-    ```bash
-    prometheus --config.file=prometheus.yml
-    ```
-    
-    Prometheus will now scrape the Flask app’s metrics every 10 seconds.
-    
-    <Figure src="/img/guides/2024/12/alerts-as-code-image%202.webp" alt="Prometheus Scraping" caption="Prometheus Scraping" />
-    
+
+   ```bash
+   prometheus --config.file=prometheus.yml
+   ```
+
+   Prometheus will now scrape the Flask app’s metrics every 10 seconds.
+
+   <Figure
+     src="/img/guides/2024/12/alerts-as-code-image%202.webp"
+     alt="Prometheus Scraping"
+     caption="Prometheus Scraping"
+   />
 
 Step 3: Configuring Alert as Code with [Prometheus Alert Manager](https://signoz.io/guides/how-do-i-add-alerts-to-prometheus/)
 
-Next, update the Prometheus config file to include alert configuration. 
+Next, update the Prometheus config file to include alert configuration.
 
-1. Create an alert file named `alerts.yml` with alert condition and threshold. 
-    
-    ```sql
-    groups:
-      - name: flask-app-alerts
-        rules:
-          - alert: HighHTTPRequestCount
-            expr: http_requests_total{method="GET", endpoint="/"} > 250
-            for: 5m  # Trigger alert if condition holds for 5 minutes
-            labels:
-              severity: critical
-            annotations:
-              description: "High HTTP request count detected for endpoint /"
-    ```
-    
+1. Create an alert file named `alerts.yml` with alert condition and threshold.
+
+   ```sql
+   groups:
+     - name: flask-app-alerts
+       rules:
+         - alert: HighHTTPRequestCount
+           expr: http_requests_total{method="GET", endpoint="/"} > 250
+           for: 5m  # Trigger alert if condition holds for 5 minutes
+           labels:
+             severity: critical
+           annotations:
+             description: "High HTTP request count detected for endpoint /"
+   ```
+
 2. In the [Prometheus configuration](https://signoz.io/guides/what-is-prometheus-target/) file add the reference to the alert rule:
-    
-    ```sql
-    rule_files:
-      - "alerts.yml"
-    ```
-    
-3. Restart the Prometheus server, and check the alerts section to see it the alert is listed. 
-    
-    <Figure src="/img/guides/2024/12/alerts-as-code-image%203.webp" alt="Prometheus Alerts" caption="Prometheus Alerts" /> 
-    
+
+   ```sql
+   rule_files:
+     - "alerts.yml"
+   ```
+
+3. Restart the Prometheus server, and check the alerts section to see it the alert is listed.
+
+   <Figure
+     src="/img/guides/2024/12/alerts-as-code-image%203.webp"
+     alt="Prometheus Alerts"
+     caption="Prometheus Alerts"
+   />{' '}
 
 Step 3: Configure OpenTelemetry Collector
 
 The OpenTelemetry Collector will be used to process the Prometheus metrics and forward them to SigNoz.
 
 1. Create an `otel-collector-config.yaml` configuration file for the OpenTelemetry Collector:
-    
-    ```yaml
-    
-    receivers:
-      prometheus:
-        config:
-          scrape_configs:
-            - job_name: 'flask-app'
-              static_configs:
-                - targets: ['localhost:5000']
-    
-    processors:
-      batch:
-        send_batch_size: 1000
-        timeout: 10s
-      resourcedetection:
-        detectors: [env, system]
-        timeout: 2s
-    
-    exporters:
-      otlp:
-        endpoint: "ingest.in.signoz.cloud:443"  # SigNoz endpoint
-        tls:
-          insecure: false
-        headers:
-          "signoz-ingestion-key": "<your_signoz_ingestion_key>"
-    
-    service:
-      pipelines:
-        metrics:
-          receivers: [prometheus]
-          processors: [batch, resourcedetection]
-          exporters: [otlp]
-    ```
-    
+
+   ```yaml
+   receivers:
+     prometheus:
+       config:
+         scrape_configs:
+           - job_name: 'flask-app'
+             static_configs:
+               - targets: ['localhost:5000']
+
+   processors:
+     batch:
+       send_batch_size: 1000
+       timeout: 10s
+     resourcedetection:
+       detectors: [env, system]
+       timeout: 2s
+
+   exporters:
+     otlp:
+       endpoint: 'ingest.in.signoz.cloud:443' # SigNoz endpoint
+       tls:
+         insecure: false
+       headers:
+         'signoz-ingestion-key': '<your_signoz_ingestion_key>'
+
+   service:
+     pipelines:
+       metrics:
+         receivers: [prometheus]
+         processors: [batch, resourcedetection]
+         exporters: [otlp]
+   ```
+
 2. Run the OpenTelemetry Collector:
-    
-    ```bash
-    ./otelcol-contrib --config otel-collector-config.yaml
-    ```
-    
+
+   ```bash
+   ./otelcol-contrib --config otel-collector-config.yaml
+   ```
 
 Now, the OpenTelemetry Collector will scrape Prometheus metrics, process them, and send them to SigNoz.
 
@@ -377,13 +388,21 @@ Step 4: Visualize Metrics in SigNoz
 2. Navigate to the Metrics dashboard to view the Flask app metrics (from OpenTelemetry Collector).
 3. Create custom dashboards to visualize metrics like request counts, latency, and more.
 
-Say you receive an alert that the HTTP request count exceeded the set threshold. 
+Say you receive an alert that the HTTP request count exceeded the set threshold.
 
-<Figure src="/img/guides/2024/12/alerts-as-code-image%204.webp" alt="Alerts Triggered in Prometheus" caption="Alerts Triggered in Prometheus" />
+<Figure
+  src="/img/guides/2024/12/alerts-as-code-image%204.webp"
+  alt="Alerts Triggered in Prometheus"
+  caption="Alerts Triggered in Prometheus"
+/>
 
-You can visualize the metric in the dashboard and see if there was a sudden spike, or there has been a constant increase. 
+You can visualize the metric in the dashboard and see if there was a sudden spike, or there has been a constant increase.
 
-<Figure src="/img/guides/2024/12/alerts-as-code-image%205.webp" alt="Visualizing Metrics in SigNoz" caption="Visualizing Metrics in SigNoz" />
+<Figure
+  src="/img/guides/2024/12/alerts-as-code-image%205.webp"
+  alt="Visualizing Metrics in SigNoz"
+  caption="Visualizing Metrics in SigNoz"
+/>
 
 ### Best Practices for Integrating SigNoz Alerts into Your IaC Workflow
 

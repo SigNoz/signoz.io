@@ -1,13 +1,18 @@
 ---
-
 title: AI Observability - Enhancing ML Model Performance and Insights
-slug: ai-observability
 date: 2024-08-14
 tags: [observability]
 authors: [sushant_gaurav]
 description: Explore AI observability's role in enhancing ML model performance. Learn key components, best practices, and implementation strategies for robust AI systems.
-keywords: [AI observability, machine learning, model performance, data quality, system health, responsible AI]
-
+keywords:
+  [
+    AI observability,
+    machine learning,
+    model performance,
+    data quality,
+    system health,
+    responsible AI,
+  ]
 ---
 
 AI observability is increasingly becoming an important component of the machine learning lifecycle. Comprehensive monitoring and insights become a must-do task as AI systems become more advanced and widespread. Today we will go through the importance of AI observability, including its major components and practical implementation methodologies. You will learn how AI observability improves ML model performance and delivers vital insights for building effective, dependable AI systems.
@@ -63,389 +68,394 @@ The Evolution from ML Monitoring to AI Observability
 AI observability consists of several important components that work together to provide a comprehensive view of your AI systems:
 
 1. Model performance metrics:
-    - Accuracy: Overall correctness of predictions.
-    - Precision: Proportion of true positive predictions.
-    - Recall: Proportion of actual positives correctly identified.
-    - F1 score: Harmonic mean of precision and recall.
-    
-    To run this example on your system, you need to have Python installed on your system. Also, if you don’t have Scikit-learn on your system, you can install it using the command: `pip install scikit-learn` .
-    
-    ```python
-    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-    
-    # Example predictions and ground truth labels
-    y_true = [0, 1, 0, 1, 1]
-    y_pred = [0, 1, 0, 0, 1]
-    
-    # Calculating performance metrics
-    accuracy = accuracy_score(y_true, y_pred)
-    precision = precision_score(y_true, y_pred)
-    recall = recall_score(y_true, y_pred)
-    f1 = f1_score(y_true, y_pred)
-    
-    print(f"Accuracy: {accuracy}")
-    print(f"Precision: {precision}")
-    print(f"Recall: {recall}")
-    print(f"F1 Score: {f1}")
-    ```
-    
-    Sample Output:
-    
-    ```
-    Accuracy: 0.8
-    Precision: 1.0
-    Recall: 0.6666666666666666
-    F1 Score: 0.8
-    ```
-    
+
+   - Accuracy: Overall correctness of predictions.
+   - Precision: Proportion of true positive predictions.
+   - Recall: Proportion of actual positives correctly identified.
+   - F1 score: Harmonic mean of precision and recall.
+
+   To run this example on your system, you need to have Python installed on your system. Also, if you don’t have Scikit-learn on your system, you can install it using the command: `pip install scikit-learn` .
+
+   ```python
+   from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+   # Example predictions and ground truth labels
+   y_true = [0, 1, 0, 1, 1]
+   y_pred = [0, 1, 0, 0, 1]
+
+   # Calculating performance metrics
+   accuracy = accuracy_score(y_true, y_pred)
+   precision = precision_score(y_true, y_pred)
+   recall = recall_score(y_true, y_pred)
+   f1 = f1_score(y_true, y_pred)
+
+   print(f"Accuracy: {accuracy}")
+   print(f"Precision: {precision}")
+   print(f"Recall: {recall}")
+   print(f"F1 Score: {f1}")
+   ```
+
+   Sample Output:
+
+   ```
+   Accuracy: 0.8
+   Precision: 1.0
+   Recall: 0.6666666666666666
+   F1 Score: 0.8
+   ```
+
 2. Data quality indicators:
-    - Drift detection: Identifying changes in input data distributions.
-    - Outlier identification: Spotting unusual or anomalous data points.
-    - Data integrity: Ensuring consistency and completeness of data.
-    
-    ```python
-    import numpy as np
-    from sklearn.ensemble import IsolationForest
-    
-    # Example dataset
-    X = np.array([[1, 2], [2, 3], [3, 4], [4, 5], [100, 200]])
-    
-    # Identifying outliers using Isolation Forest
-    iso_forest = IsolationForest(contamination=0.2)
-    outliers = iso_forest.fit_predict(X)
-    
-    print(f"Outliers: {outliers}")
-    ```
-    
-    Sample Output:
-    
-    ```
-    Outliers: [ 1  1  1  1 -1]
-    ```
-    
-    - Note
-        
-        The `IsolationForest` library is an algorithm used to detect unusual data points (anomalies) by isolating them in a tree structure. It's efficient for spotting outliers in large datasets.
-        
+
+   - Drift detection: Identifying changes in input data distributions.
+   - Outlier identification: Spotting unusual or anomalous data points.
+   - Data integrity: Ensuring consistency and completeness of data.
+
+   ```python
+   import numpy as np
+   from sklearn.ensemble import IsolationForest
+
+   # Example dataset
+   X = np.array([[1, 2], [2, 3], [3, 4], [4, 5], [100, 200]])
+
+   # Identifying outliers using Isolation Forest
+   iso_forest = IsolationForest(contamination=0.2)
+   outliers = iso_forest.fit_predict(X)
+
+   print(f"Outliers: {outliers}")
+   ```
+
+   Sample Output:
+
+   ```
+   Outliers: [ 1  1  1  1 -1]
+   ```
+
+   - Note
+     The `IsolationForest` library is an algorithm used to detect unusual data points (anomalies) by isolating them in a tree structure. It's efficient for spotting outliers in large datasets.
+
 3. System health monitoring:
-    - Resource utilization: Monitoring CPU, memory, and storage usage.
-    - Latency: Measuring response time for model predictions.
-    - Throughput: Counting the number of predictions processed per unit time.
+   - Resource utilization: Monitoring CPU, memory, and storage usage.
+   - Latency: Measuring response time for model predictions.
+   - Throughput: Counting the number of predictions processed per unit time.
 4. Explainability and interpretability tools:
-    - SHAP (SHapley Additive exPlanations) values: Provide insights into individual predictions. SHAP values are a game-theoretic approach to explain the output of any machine learning model. It breaks down a prediction into the contribution of each feature to that prediction.
-    - LIME (Local Interpretable Model-agnostic Explanations): Explains predictions by perturbing inputs and observing changes. LIME is an algorithm that explains the predictions of any machine learning classifier by approximating it locally with an interpretable model. It's model-agnostic, meaning it can be used to interpret predictions from any black-box model.
-    - Feature importance rankings: Highlight the most influential features in the model's decision-making process.
-    
-    <Figure src="/img/guides/2024/08/ai-observability-image.webp" alt="image.webp" caption="image.webp" />
-    
+
+   - SHAP (SHapley Additive exPlanations) values: Provide insights into individual predictions. SHAP values are a game-theoretic approach to explain the output of any machine learning model. It breaks down a prediction into the contribution of each feature to that prediction.
+   - LIME (Local Interpretable Model-agnostic Explanations): Explains predictions by perturbing inputs and observing changes. LIME is an algorithm that explains the predictions of any machine learning classifier by approximating it locally with an interpretable model. It's model-agnostic, meaning it can be used to interpret predictions from any black-box model.
+   - Feature importance rankings: Highlight the most influential features in the model's decision-making process.
+
+   <Figure
+     src="/img/guides/2024/08/ai-observability-image.webp"
+     alt="image.webp"
+     caption="image.webp"
+   />
 
 ## Implementing AI Observability: Best Practices
 
 To implement AI observability effectively, you should follow some of the best practices:
 
 1. Establish baseline metrics:
-    - Set key performance indicators (KPIs) for your models, including accuracy, precision, recall, and F1 score.
-    - Set acceptable thresholds for each metric to define what is considered acceptable model performance.
-    - Document baseline performance during model training and validation to use as a reference point for future comparisons.
-        
-        ```python
-        # Example of establishing baseline metrics
-        baseline_metrics = {
-            "accuracy": 0.85,
-            "precision": 0.80,
-            "recall": 0.75,
-            "f1_score": 0.77
-        }
-        
-        print("Baseline Metrics:", baseline_metrics)
-        ```
-        
-        Sample Output:
-        
-        ```python
-        Baseline Metrics: {'accuracy': 0.85, 'precision': 0.8, 'recall': 0.75, 'f1_score': 0.77}
-        ```
-        
+   - Set key performance indicators (KPIs) for your models, including accuracy, precision, recall, and F1 score.
+   - Set acceptable thresholds for each metric to define what is considered acceptable model performance.
+   - Document baseline performance during model training and validation to use as a reference point for future comparisons.
+     ```python
+     # Example of establishing baseline metrics
+     baseline_metrics = {
+         "accuracy": 0.85,
+         "precision": 0.80,
+         "recall": 0.75,
+         "f1_score": 0.77
+     }
+
+     print("Baseline Metrics:", baseline_metrics)
+     ```
+     Sample Output:
+     ```python
+     Baseline Metrics: {'accuracy': 0.85, 'precision': 0.8, 'recall': 0.75, 'f1_score': 0.77}
+     ```
 2. Set up continuous monitoring and alerting:
-    - Implement real-time monitoring for important metrics to guarantee that performance issues are detected immediately. To implement real-time monitoring for important metrics, you can use tools like Prometheus for collecting and querying metrics, combined with Grafana for visualizing them in real-time dashboards.
-    - Set up notifications for threshold violations so you may respond quickly when measurements go outside of permissible limits.
-    - Use anomaly detection techniques to spot strange trends that could suggest a problem.
-    
-    ```python
-    import numpy as np
-    
-    # Example of setting up a simple anomaly detection using z-score
-    def detect_anomalies(data, threshold=3):
-        mean = np.mean(data)
-        std_dev = np.std(data)
-        anomalies = [(i, x) for i, x in enumerate(data) if abs((x - mean) / std_dev) > threshold]
-        return anomalies
-    
-    # Sample data with clear anomalies
-    performance_data = [0.85, 0.86, 0.82, 0.88, 0.79, 0.90, 0.77, 1.50, 0.76, 0.83, 1.48]
-    
-    anomalies = detect_anomalies(performance_data)
-    print("Detected Anomalies:", anomalies)
-    ```
-    
-    Sample Output
-    
-    ```python
-    Detected Anomalies: [(7, 1.5), (10, 1.48)]
-    ```
-    
-    - Note:
-        
-        A z-score is a statistical measure that indicates how many standard deviations a data point is from the mean of a dataset.
-        
+
+   - Implement real-time monitoring for important metrics to guarantee that performance issues are detected immediately. To implement real-time monitoring for important metrics, you can use tools like Prometheus for collecting and querying metrics, combined with Grafana for visualizing them in real-time dashboards.
+   - Set up notifications for threshold violations so you may respond quickly when measurements go outside of permissible limits.
+   - Use anomaly detection techniques to spot strange trends that could suggest a problem.
+
+   ```python
+   import numpy as np
+
+   # Example of setting up a simple anomaly detection using z-score
+   def detect_anomalies(data, threshold=3):
+       mean = np.mean(data)
+       std_dev = np.std(data)
+       anomalies = [(i, x) for i, x in enumerate(data) if abs((x - mean) / std_dev) > threshold]
+       return anomalies
+
+   # Sample data with clear anomalies
+   performance_data = [0.85, 0.86, 0.82, 0.88, 0.79, 0.90, 0.77, 1.50, 0.76, 0.83, 1.48]
+
+   anomalies = detect_anomalies(performance_data)
+   print("Detected Anomalies:", anomalies)
+   ```
+
+   Sample Output
+
+   ```python
+   Detected Anomalies: [(7, 1.5), (10, 1.48)]
+   ```
+
+   - Note:
+     A z-score is a statistical measure that indicates how many standard deviations a data point is from the mean of a dataset.
+
 3. Integrate observability tools into ML pipelines:
-    - Monitor each stage of the ML process, from data ingestion to model deployment. You can use pipeline orchestration tools like Apache Airflow or Kubeflow to automate and monitor each stage. Integrating logging and monitoring tools such as Prometheus or ELK Stack can be used to track data quality during ingestion, monitor model training performance, and ensure successful deployment.
-    - Automate data collection and metric calculation to decrease manual intervention and improve consistency. Implementing automated scripts using Python or Bash that run at scheduled intervals to collect data from your data sources. Use tools like Pandas for data manipulation and libraries like Scikit-learn or TensorFlow to automatically calculate performance metrics such as accuracy, precision, and recall after each model run. You can also use Apache Kafka for real-time data streaming and processing.
-    - Integrate seamlessly with existing DevOps methods, such as CI/CD pipelines, to enable continuous monitoring and deployment.
+   - Monitor each stage of the ML process, from data ingestion to model deployment. You can use pipeline orchestration tools like Apache Airflow or Kubeflow to automate and monitor each stage. Integrating logging and monitoring tools such as Prometheus or ELK Stack can be used to track data quality during ingestion, monitor model training performance, and ensure successful deployment.
+   - Automate data collection and metric calculation to decrease manual intervention and improve consistency. Implementing automated scripts using Python or Bash that run at scheduled intervals to collect data from your data sources. Use tools like Pandas for data manipulation and libraries like Scikit-learn or TensorFlow to automatically calculate performance metrics such as accuracy, precision, and recall after each model run. You can also use Apache Kafka for real-time data streaming and processing.
+   - Integrate seamlessly with existing DevOps methods, such as CI/CD pipelines, to enable continuous monitoring and deployment.
 4. Develop techniques to address model drift:
-    - Implement regular retraining plans to keep models up to date with current data patterns.
-    - Run A/B tests to validate model improvements and compare their performance to the current production model. A/B testing is a method of comparing two versions of a system, process, or model to determine which performs better. It involves comparing the current production model (A) with a new or improved version of the model (B).
-    - Create explicit protocols for model versioning and rollback to ensure that you may revert to a previous version if a new model fails to function.
-    
-    ```python
-    # Example of a simple versioning system
-    models = {
-        "version_1.0": {"accuracy": 0.85, "precision": 0.80},
-        "version_1.1": {"accuracy": 0.88, "precision": 0.82}
-    }
-    
-    # Function to rollback to a previous model version
-    def rollback_model(current_version, rollback_version):
-        if rollback_version in models:
-            return models[rollback_version]
-        else:
-            return f"Version {rollback_version} not found."
-    
-    # Rollback to version 1.0
-    current_model = rollback_model("version_1.1", "version_1.0")
-    print("Current Model after Rollback:", current_model)
-    ```
-    
-    Output:
-    
-    ```bash
-    Current Model after Rollback: {'accuracy': 0.85, 'precision': 0.8}
-    ```
-    
+
+   - Implement regular retraining plans to keep models up to date with current data patterns.
+   - Run A/B tests to validate model improvements and compare their performance to the current production model. A/B testing is a method of comparing two versions of a system, process, or model to determine which performs better. It involves comparing the current production model (A) with a new or improved version of the model (B).
+   - Create explicit protocols for model versioning and rollback to ensure that you may revert to a previous version if a new model fails to function.
+
+   ```python
+   # Example of a simple versioning system
+   models = {
+       "version_1.0": {"accuracy": 0.85, "precision": 0.80},
+       "version_1.1": {"accuracy": 0.88, "precision": 0.82}
+   }
+
+   # Function to rollback to a previous model version
+   def rollback_model(current_version, rollback_version):
+       if rollback_version in models:
+           return models[rollback_version]
+       else:
+           return f"Version {rollback_version} not found."
+
+   # Rollback to version 1.0
+   current_model = rollback_model("version_1.1", "version_1.0")
+   print("Current Model after Rollback:", current_model)
+   ```
+
+   Output:
+
+   ```bash
+   Current Model after Rollback: {'accuracy': 0.85, 'precision': 0.8}
+   ```
 
 ## Challenges in AI Observability Implementation
 
 Implementing AI observability comes with its share of challenges:
 
 1. High-dimensional data and complex architectures:
-    - Challenge: AI models often deal with high-dimensional data and complex architectures, making it difficult to track and understand the model’s behaviour across all features. Monitoring and interpreting such data can be overwhelming, leading to a loss of key insights.
-    - Solution: Use dimensionality reduction techniques, such as PCA (Principal Component Analysis) or t-SNE (t-Distributed Stochastic Neighbor Embedding), to focus on key features.
-    
-    ```python
-    from sklearn.decomposition import PCA
-    from sklearn.datasets import load_iris
-    
-    # Example dataset
-    iris = load_iris()
-    X = iris.data
-    
-    # Applying PCA for dimensionality reduction
-    pca = PCA(n_components=2)
-    X_reduced = pca.fit_transform(X)
-    
-    print("Reduced Data Shape:", X_reduced.shape)
-    ```
-    
-    Sample Output:
-    
-    ```bash
-    Reduced Data Shape: (150, 2)
-    ```
-    
+
+   - Challenge: AI models often deal with high-dimensional data and complex architectures, making it difficult to track and understand the model’s behaviour across all features. Monitoring and interpreting such data can be overwhelming, leading to a loss of key insights.
+   - Solution: Use dimensionality reduction techniques, such as PCA (Principal Component Analysis) or t-SNE (t-Distributed Stochastic Neighbor Embedding), to focus on key features.
+
+   ```python
+   from sklearn.decomposition import PCA
+   from sklearn.datasets import load_iris
+
+   # Example dataset
+   iris = load_iris()
+   X = iris.data
+
+   # Applying PCA for dimensionality reduction
+   pca = PCA(n_components=2)
+   X_reduced = pca.fit_transform(X)
+
+   print("Reduced Data Shape:", X_reduced.shape)
+   ```
+
+   Sample Output:
+
+   ```bash
+   Reduced Data Shape: (150, 2)
+   ```
+
 2. Balancing observability with data privacy:
-    - Challenge: Observability requires detailed logging and monitoring, which can potentially expose sensitive information. Ensuring that observability doesn’t compromise data privacy is a significant challenge, especially with regulations like GDPR and CCPA.
-    - Solution: Implement data anonymization techniques, such as masking personally identifiable information (PII), and use encryption to protect sensitive data.
+   - Challenge: Observability requires detailed logging and monitoring, which can potentially expose sensitive information. Ensuring that observability doesn’t compromise data privacy is a significant challenge, especially with regulations like GDPR and CCPA.
+   - Solution: Implement data anonymization techniques, such as masking personally identifiable information (PII), and use encryption to protect sensitive data.
 3. Scaling observability for large-scale AI systems:
-    - Challenge: Large-scale AI systems, especially those deployed across distributed environments, require observability solutions that can scale accordingly. Managing and monitoring these systems can become complex and resource-intensive.
-    - Solution: Leverage distributed monitoring solutions and edge computing to handle the scale and ensure that observability is maintained across large, distributed systems.
+   - Challenge: Large-scale AI systems, especially those deployed across distributed environments, require observability solutions that can scale accordingly. Managing and monitoring these systems can become complex and resource-intensive.
+   - Solution: Leverage distributed monitoring solutions and edge computing to handle the scale and ensure that observability is maintained across large, distributed systems.
 4. Addressing the skills gap:
-    - Challenge: AI observability requires specialized knowledge, and there’s often a skills gap within teams when it comes to implementing and maintaining these systems. This can hinder the effectiveness of observability initiatives.
-    - Solution: Invest in training programs to upskill your team in AI observability tools and practices. Consider partnering with experts in the field to bridge the knowledge gap.
+   - Challenge: AI observability requires specialized knowledge, and there’s often a skills gap within teams when it comes to implementing and maintaining these systems. This can hinder the effectiveness of observability initiatives.
+   - Solution: Invest in training programs to upskill your team in AI observability tools and practices. Consider partnering with experts in the field to bridge the knowledge gap.
 
 ## Leveraging AI Observability for Business Value
 
 AI observability delivers significant business value by:
 
 1. Improving model reliability:
-    - Reduce downtime and minimize negative effects on the user experience.
-    - Example: A fintech company used AI observability to cut fraud detection errors by 30%, resulting in fewer false positives and a better client experience.
-    
-    ```python
-    # Example: Monitoring model reliability
-    # Uptime percentage
-    model_uptime = 99.9 
-    # This could be dynamically calculated based on actual monitoring data
-    # Errors per month
-    fraud_detection_errors = [5, 3, 2, 4]
-    
-    # Calculating error reduction
-    initial_errors = fraud_detection_errors[0]
-    final_errors = fraud_detection_errors[-1]
-    error_reduction = ((initial_errors - final_errors) / initial_errors) * 100
-    
-    print("Model Uptime:", model_uptime, "%")
-    print("Error Reduction in Fraud Detection:", error_reduction, "%")
-    
-    ```
-    
-    Sample Output:
-    
-    ```bash
-    Model Uptime: 99.9 %
-    Error Reduction in Fraud Detection: 80.0 %
-    ```
-    
+
+   - Reduce downtime and minimize negative effects on the user experience.
+   - Example: A fintech company used AI observability to cut fraud detection errors by 30%, resulting in fewer false positives and a better client experience.
+
+   ```python
+   # Example: Monitoring model reliability
+   # Uptime percentage
+   model_uptime = 99.9
+   # This could be dynamically calculated based on actual monitoring data
+   # Errors per month
+   fraud_detection_errors = [5, 3, 2, 4]
+
+   # Calculating error reduction
+   initial_errors = fraud_detection_errors[0]
+   final_errors = fraud_detection_errors[-1]
+   error_reduction = ((initial_errors - final_errors) / initial_errors) * 100
+
+   print("Model Uptime:", model_uptime, "%")
+   print("Error Reduction in Fraud Detection:", error_reduction, "%")
+
+   ```
+
+   Sample Output:
+
+   ```bash
+   Model Uptime: 99.9 %
+   Error Reduction in Fraud Detection: 80.0 %
+   ```
+
 2. Enhancing decision-making:
-    - Offer practical insights for model optimization and company strategy.
-    - Example: An e-commerce platform raised conversion rates by 15% after fine-tuning recommendation algorithms using observability data.
-    
-    ```python
-    # Example: Enhancing decision-making with observability data
-    # Initial conversion rate
-    initial_conversion_rate = 0.10
-    # Improved conversion rate
-    improved_conversion_rate = 0.115
-    
-    # Calculating conversion increase
-    conversion_increase = ((improved_conversion_rate - initial_conversion_rate) / initial_conversion_rate) * 100
-    
-    print("Conversion Rate Increase:", conversion_increase, "%")
-    ```
-    
-    Sample Output:
-    
-    ```bash
-    Conversion Rate Increase: 15.0 %
-    ```
-    
+
+   - Offer practical insights for model optimization and company strategy.
+   - Example: An e-commerce platform raised conversion rates by 15% after fine-tuning recommendation algorithms using observability data.
+
+   ```python
+   # Example: Enhancing decision-making with observability data
+   # Initial conversion rate
+   initial_conversion_rate = 0.10
+   # Improved conversion rate
+   improved_conversion_rate = 0.115
+
+   # Calculating conversion increase
+   conversion_increase = ((improved_conversion_rate - initial_conversion_rate) / initial_conversion_rate) * 100
+
+   print("Conversion Rate Increase:", conversion_increase, "%")
+   ```
+
+   Sample Output:
+
+   ```bash
+   Conversion Rate Increase: 15.0 %
+   ```
+
 3. Streamlining compliance and governance:
-    - Facilitate audits and demonstrate responsible AI activities.
-    - Example: A healthcare provider readily passed regulatory inspections by relying on detailed AI observability reports.
-    
-    ```python
-    # Example: Streamlining compliance with observability reports
-    compliance_metrics = {
-        "audit_pass_rate": 100,
-        "regulatory_violations": 0
-    }
-    
-    print("Compliance Metrics:", compliance_metrics)
-    ```
-    
-    Sample Output:
-    
-    ```bash
-    Compliance Metrics: {'audit_pass_rate': 100, 'regulatory_violations': 0}
-    ```
-    
+
+   - Facilitate audits and demonstrate responsible AI activities.
+   - Example: A healthcare provider readily passed regulatory inspections by relying on detailed AI observability reports.
+
+   ```python
+   # Example: Streamlining compliance with observability reports
+   compliance_metrics = {
+       "audit_pass_rate": 100,
+       "regulatory_violations": 0
+   }
+
+   print("Compliance Metrics:", compliance_metrics)
+   ```
+
+   Sample Output:
+
+   ```bash
+   Compliance Metrics: {'audit_pass_rate': 100, 'regulatory_violations': 0}
+   ```
 
 ## The Role of AI Observability in Responsible AI
 
 AI observability is key in supporting responsible AI practices.
 
 1. To ensure fairness and bias detection:
-    - Check model results for demographic parity and equitable opportunity.
-    - Use bias detection techniques to uncover potential concerns.
-    
-    ```python
-    # Example: Bias detection
-    from sklearn.metrics import confusion_matrix
-    
-    # True labels representing the actual outcomes (e.g., 0 = negative, 1 = positive)
-    y_true = [0, 1, 0, 1, 0, 1, 0, 1]
-    
-    # Predicted labels generated by the model (e.g., 0 = predicted negative, 1 = predicted positive)
-    y_pred = [0, 1, 0, 1, 0, 0, 0, 1]
-    
-    # Calculate the confusion matrix to assess model performance
-    cm = confusion_matrix(y_true, y_pred)
-    print("Confusion Matrix:\n", cm)
-    
-    # Example: Demographic parity
-    # These values could be calculated from actual data; they represent the rate at which two demographic groups (A and B)
-    # receive positive outcomes from the model.
-    
-    # Suppose we have data on two demographic groups:
-    # Group A has a 50% positive outcome rate
-    # Group B has a 30% positive outcome rate
-    group_a_positive_rate = 0.50  # Positive rate for group A
-    group_b_positive_rate = 0.30  # Positive rate for group B
-    
-    # Calculate demographic parity difference to measure fairness
-    demographic_parity = abs(group_a_positive_rate - group_b_positive_rate)
-    print("Demographic Parity Difference:", demographic_parity)
-    ```
-    
-    Sample Output:
-    
-    ```bash
-    Confusion Matrix:
-     [[4 0]
-     [1 3]]
-    Demographic Parity Difference: 0.2
-    ```
-    
+
+   - Check model results for demographic parity and equitable opportunity.
+   - Use bias detection techniques to uncover potential concerns.
+
+   ```python
+   # Example: Bias detection
+   from sklearn.metrics import confusion_matrix
+
+   # True labels representing the actual outcomes (e.g., 0 = negative, 1 = positive)
+   y_true = [0, 1, 0, 1, 0, 1, 0, 1]
+
+   # Predicted labels generated by the model (e.g., 0 = predicted negative, 1 = predicted positive)
+   y_pred = [0, 1, 0, 1, 0, 0, 0, 1]
+
+   # Calculate the confusion matrix to assess model performance
+   cm = confusion_matrix(y_true, y_pred)
+   print("Confusion Matrix:\n", cm)
+
+   # Example: Demographic parity
+   # These values could be calculated from actual data; they represent the rate at which two demographic groups (A and B)
+   # receive positive outcomes from the model.
+
+   # Suppose we have data on two demographic groups:
+   # Group A has a 50% positive outcome rate
+   # Group B has a 30% positive outcome rate
+   group_a_positive_rate = 0.50  # Positive rate for group A
+   group_b_positive_rate = 0.30  # Positive rate for group B
+
+   # Calculate demographic parity difference to measure fairness
+   demographic_parity = abs(group_a_positive_rate - group_b_positive_rate)
+   print("Demographic Parity Difference:", demographic_parity)
+   ```
+
+   Sample Output:
+
+   ```bash
+   Confusion Matrix:
+    [[4 0]
+    [1 3]]
+   Demographic Parity Difference: 0.2
+   ```
+
 2. Promoting transparency and explainability:
-    - Importance: Transparency and explainability are crucial for building trust in AI models, especially in high-stakes applications like healthcare, finance, or legal decisions. Stakeholders need to understand how and why a model makes certain decisions to ensure fairness and accountability.
-    - Use interpretability tools: Utilize tools like LIME (Local Interpretable Model-agnostic Explanations) or SHAP (SHapley Additive exPlanations) to break down the model’s decisions into understandable components. These tools help in explaining the contribution of each feature to a particular prediction.
-    - Example: LIME can be used to explain why a model predicted that a loan should be denied, by showing which features (like income, and credit score) had the most impact on the decision.
-    - Create user-friendly dashboards: Develop dashboards using tools like Tableau or Dash that visualize model behaviour in a clear and accessible way. For instance, a dashboard could show how changes in input features affect predictions, helping non-technical stakeholders grasp the model’s logic.
+   - Importance: Transparency and explainability are crucial for building trust in AI models, especially in high-stakes applications like healthcare, finance, or legal decisions. Stakeholders need to understand how and why a model makes certain decisions to ensure fairness and accountability.
+   - Use interpretability tools: Utilize tools like LIME (Local Interpretable Model-agnostic Explanations) or SHAP (SHapley Additive exPlanations) to break down the model’s decisions into understandable components. These tools help in explaining the contribution of each feature to a particular prediction.
+   - Example: LIME can be used to explain why a model predicted that a loan should be denied, by showing which features (like income, and credit score) had the most impact on the decision.
+   - Create user-friendly dashboards: Develop dashboards using tools like Tableau or Dash that visualize model behaviour in a clear and accessible way. For instance, a dashboard could show how changes in input features affect predictions, helping non-technical stakeholders grasp the model’s logic.
 3. Supporting ethical AI practices:
-    - Conduct compliance checks to ensure that ethical rules are followed.
-    - Develop mechanisms for resolving and minimizing ethical concerns.
-    
-    ```python
-    # Example: Ethical compliance check in an AI model
-    
-    # Simulated results from an AI model audit
-    audit_results = {
-        "data_privacy_compliance": False,  # Data privacy issues detected
-        "bias_in_predictions": True,  # Model is unbiased
-        "explainability_score": 0.7,  # Scale: 0 to 1, higher is better
-        "transparency_in_decision_process": True  # Model decision process is transparent
-    }
-    
-    def perform_ethics_check(audit):
-        issues = []
-        
-        # Check each guideline
-        if not audit["data_privacy_compliance"]:
-            issues.append("Data privacy non-compliance detected.")
-        if audit["bias_in_predictions"] is False:
-            issues.append("Bias in model predictions detected.")
-        if audit["explainability_score"] < 0.8:
-            issues.append("Model explainability is below acceptable levels.")
-        if not audit["transparency_in_decision_process"]:
-            issues.append("Model decision process lacks transparency.")
-        
-        if issues:
-            return "Ethical issues found:\n" + "\n".join(issues)
-        else:
-            return "All ethical guidelines are met."
-    
-    # Run the ethics check
-    ethics_check_result = perform_ethics_check(audit_results)
-    print(ethics_check_result)
-    ```
-    
-    Sample Output:
-    
-    ```bash
-    Ethical issues found:
-    Data privacy non-compliance detected.
-    Model explainability is below acceptable levels.
-    ```
-    
+
+   - Conduct compliance checks to ensure that ethical rules are followed.
+   - Develop mechanisms for resolving and minimizing ethical concerns.
+
+   ```python
+   # Example: Ethical compliance check in an AI model
+
+   # Simulated results from an AI model audit
+   audit_results = {
+       "data_privacy_compliance": False,  # Data privacy issues detected
+       "bias_in_predictions": True,  # Model is unbiased
+       "explainability_score": 0.7,  # Scale: 0 to 1, higher is better
+       "transparency_in_decision_process": True  # Model decision process is transparent
+   }
+
+   def perform_ethics_check(audit):
+       issues = []
+
+       # Check each guideline
+       if not audit["data_privacy_compliance"]:
+           issues.append("Data privacy non-compliance detected.")
+       if audit["bias_in_predictions"] is False:
+           issues.append("Bias in model predictions detected.")
+       if audit["explainability_score"] < 0.8:
+           issues.append("Model explainability is below acceptable levels.")
+       if not audit["transparency_in_decision_process"]:
+           issues.append("Model decision process lacks transparency.")
+
+       if issues:
+           return "Ethical issues found:\n" + "\n".join(issues)
+       else:
+           return "All ethical guidelines are met."
+
+   # Run the ethics check
+   ethics_check_result = perform_ethics_check(audit_results)
+   print(ethics_check_result)
+   ```
+
+   Sample Output:
+
+   ```bash
+   Ethical issues found:
+   Data privacy non-compliance detected.
+   Model explainability is below acceptable levels.
+   ```
 
 ## Implementing AI Observability with SigNoz
 
@@ -459,9 +469,9 @@ SigNoz is an open-source observability platform that provides full tracking and 
 ### Steps to Implement SigNoz for AI Observability
 
 1. SetUp
-    
-    <GetStartedSigNoz />
-    
+
+   <GetStartedSigNoz />
+
 2. Instrumentation: Integrate [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) into your AI apps to gather and export metrics and traces. This stage guarantees that data from your AI models and infrastructure is appropriately gathered and monitored.
 3. Dashboard Configuration: Create custom dashboards in SigNoz to display the metrics that are most important to your AI observability plan. This aids in tracking real-time performance and making data-driven decisions.
 4. Alert Setup: To receive notifications about potential difficulties, define alerts for important thresholds and enable anomaly detection. This [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) contributes to the stability and performance of your AI models.
@@ -473,29 +483,29 @@ Interested in doing LLM monitoring with SigNoz? Refer SigNoz’s [official doc o
 The topic of AI observability is quickly evolving. Here are some emerging themes to monitor:
 
 1. Integrating Federated Learning and Observability:
-    - Monitor model performance across dispersed data sources while respecting privacy.
-    - Enable extensive observability without jeopardizing data privacy.
+   - Monitor model performance across dispersed data sources while respecting privacy.
+   - Enable extensive observability without jeopardizing data privacy.
 2. Improvements in Automated Observability:
-    - AI-powered anomaly detection and root cause analysis for faster issue resolution.
-    - Creating self-healing systems that automatically resolve common issues, reducing downtime.
+   - AI-powered anomaly detection and root cause analysis for faster issue resolution.
+   - Creating self-healing systems that automatically resolve common issues, reducing downtime.
 3. AI Observability for Edge Computing and IoT:
-    - Lightweight observability solutions for devices with limited resources.
-    - Real-time monitoring of AI models installed at the edge, assuring peak performance even in remote areas.
+   - Lightweight observability solutions for devices with limited resources.
+   - Real-time monitoring of AI models installed at the edge, assuring peak performance even in remote areas.
 4. Evolution of AI Observability Tools:
-    - Prioritized explainable AI and causal inference to improve model transparency and trust.
-    - Integrating observability with MLOps and AIOps platforms to streamline operations and increase productivity.
+   - Prioritized explainable AI and causal inference to improve model transparency and trust.
+   - Integrating observability with MLOps and AIOps platforms to streamline operations and increase productivity.
 5. Enhanced User Interfaces and Experience:
-    - Improved interfaces for improved engagement with observability tools.
-    - Customizable dashboards and reporting based on individual company requirements.
+   - Improved interfaces for improved engagement with observability tools.
+   - Customizable dashboards and reporting based on individual company requirements.
 6. Collaborative and Cross-Functional Observability:
-    - Tools to improve collaboration among data scientists, ML developers, and operations teams.
-    - Share insights and KPIs that help technical and business parties communicate more effectively.
+   - Tools to improve collaboration among data scientists, ML developers, and operations teams.
+   - Share insights and KPIs that help technical and business parties communicate more effectively.
 7. Advanced Visualization Techniques:
-    - Utilizing interactive graphs and augmented reality (AR) for improved data interpretation.
-    - Improved data storytelling to effectively communicate insights to non-technical stakeholders.
+   - Utilizing interactive graphs and augmented reality (AR) for improved data interpretation.
+   - Improved data storytelling to effectively communicate insights to non-technical stakeholders.
 8. Focus on Ethical AI and Governance:
-    - Observability tools with ethical considerations and governance frameworks.
-    - Improved capability for bias identification, fairness monitoring, and compliance reporting.
+   - Observability tools with ethical considerations and governance frameworks.
+   - Improved capability for bias identification, fairness monitoring, and compliance reporting.
 
 ## Key Takeaways
 

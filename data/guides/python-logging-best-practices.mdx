@@ -1,14 +1,25 @@
 ---
-title: "Python Logging Best Practices - Obvious and Not-So-Obvious"
-slug: "python-logging-best-practices"
-date: "2025-09-29"
+title: 'Python Logging Best Practices - Obvious and Not-So-Obvious'
+date: '2025-09-29'
 tags: [python, logging]
 authors: [vivek_goswami, yuvraj]
-description: "Master Python logging with 12 proven best practices, code examples, and expert techniques for better debugging, monitoring, and production deployments."
-keywords: [Python logging, logging best practices, structured logging, python debugging, logging configuration, production logging, log management, monitoring, observability, SigNoz]
+description: 'Master Python logging with 12 proven best practices, code examples, and expert techniques for better debugging, monitoring, and production deployments.'
+keywords:
+  [
+    Python logging,
+    logging best practices,
+    structured logging,
+    python debugging,
+    logging configuration,
+    production logging,
+    log management,
+    monitoring,
+    observability,
+    SigNoz,
+  ]
 ---
 
-The `logging` module is a core part of Python's standard library, but its default configuration is insufficient for serious application development. 
+The `logging` module is a core part of Python's standard library, but its default configuration is insufficient for serious application development.
 
 This guide provides a comprehensive overview of best practices for instrumenting your code effectively. It begins with the "obvious" configuration and usage patterns for basic scripts and services, then progresses to the "not-so-obvious" techniques: including structured formatting, exception handling, and telemetry correlation, that are essential for building robust, observable, and easily debuggable systems.
 
@@ -67,6 +78,7 @@ Note: Python log levels also have numeric values used for filtering and formatti
 Don't sprinkle logging configuration code throughout your application. **Configure it once** at the application's entry point. Using `logging.config.dictConfig` is the most flexible and recommended way to do this.
 
 Here’s a simple centralized configuration that logs `INFO`-level messages to the console:
+
 ```python
 # In your application's main entry point (e.g., main.py or __init__.py)
 import logging.config
@@ -131,8 +143,8 @@ These techniques will elevate your logging from a simple diagnostic tool to a po
 
 As applications scale, logs become a source of data to be queried and analyzed. Plain text logs are difficult for machines to parse reliably. **Structured logging** is the solution, transforming log entries into machine-readable formats like JSON.
 
-By logging in JSON, you can easily filter, search, and visualize your logs in tools like [SigNoz](https://signoz.io/), Elasticsearch (ELK), or Datadog. 
-While Python's standard `logging` module can achieve structured output with extra libraries like `python-json-logger`, **`structlog`** is a powerful, highly performant, and Pythonic library designed from the ground up for structured logging. 
+By logging in JSON, you can easily filter, search, and visualize your logs in tools like [SigNoz](https://signoz.io/), Elasticsearch (ELK), or Datadog.
+While Python's standard `logging` module can achieve structured output with extra libraries like `python-json-logger`, **`structlog`** is a powerful, highly performant, and Pythonic library designed from the ground up for structured logging.
 It simplifies the process significantly by treating log entries as dictionaries that are processed in a chain before final rendering.
 
 #### Why `structlog`?
@@ -150,7 +162,6 @@ python -m pip install structlog
 ```
 
 Here's how to configure `structlog` to produce JSON output. This configuration is typically done once at your application's startup.
-
 
 ```python
 # In your application's main entry point (e.g., main.py or __init__.py)
@@ -200,7 +211,14 @@ request_logger.info("User logged in")
 This will produce a clean JSON output (the exact timestamp will vary):
 
 ```json
-{"event": "User logged in", "logger": "my_app.auth", "level": "info", "timestamp": "2025-09-29T10:00:00.123456Z", "user_id": 123, "ip_address": "192.168.1.100"}
+{
+  "event": "User logged in",
+  "logger": "my_app.auth",
+  "level": "info",
+  "timestamp": "2025-09-29T10:00:00.123456Z",
+  "user_id": 123,
+  "ip_address": "192.168.1.100"
+}
 ```
 
 With `structlog`, you get powerful structured logging that's easy to read during development and perfectly machine-readable for production.
@@ -212,7 +230,6 @@ In web applications or microservices, it's crucial to trace a single request as 
 While the standard `logging` library requires a custom `Filter` object, `structlog` makes this pattern much simpler using its built-in support for Python's `contextvars`. A `ContextVar` object (from the `contextvars` module) holds data that is local to a specific task or thread, making it perfect for storing request-scoped information.
 
 First, ensure the `merge_contextvars` processor is included in your `structlog` configuration. This processor automatically adds any data from `structlog`'s context into your log's event dictionary.
-
 
 ```python
 # In your structlog configuration
@@ -245,7 +262,6 @@ def request_middleware(request):
 
 Now, any log call made during that request's lifecycle will automatically include the `correlation_id` without any extra effort.
 
-
 ```python
 # In some other part of your application
 logger = structlog.get_logger(__name__)
@@ -258,12 +274,16 @@ def process_order(order_id):
 The resulting JSON output will be cleanly enriched:
 
 ```json
-{"event": "Processing order", "order_id": 451, "correlation_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"}
+{
+  "event": "Processing order",
+  "order_id": 451,
+  "correlation_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+}
 ```
 
-This pattern is a powerful step up for diagnostics. 
+This pattern is a powerful step up for diagnostics.
 
->For fully distributed systems, this concept is formalized and automated by **[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)**, which uses standardized `trace_id` and `span_id` fields to provide even richer, cross-service tracing, as discussed in section 11.
+> For fully distributed systems, this concept is formalized and automated by **[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/)**, which uses standardized `trace_id` and `span_id` fields to provide even richer, cross-service tracing, as discussed in section 11.
 
 ### 8. Log Exceptions Correctly with Stack Traces
 
@@ -345,7 +365,11 @@ By instrumenting your Python application with OpenTelemetry, you can:
 
 Once you're generating telemetry data with OpenTelemetry, you need a backend to collect, store, and visualize it. **SigNoz** is an OTel-native observability platform that provides a unified experience for logs, metrics, and traces in a single application.
 
-<Figure src="/img/log-management/LogManagementHero.svg" alt="SigNoz Logs Dashboard" caption="SigNoz Logs Dashboard" />
+<Figure
+  src="/img/log-management/LogManagementHero.svg"
+  alt="SigNoz Logs Dashboard"
+  caption="SigNoz Logs Dashboard"
+/>
 
 With SigNoz, you can use the rich, structured logs you've configured to:
 

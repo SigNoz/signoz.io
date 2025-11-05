@@ -1,13 +1,19 @@
 ---
-
 title: Mastering React Monitoring - Best Practices and Tools
-slug: react-monitoring
 date: 2024-12-26
 tags: [React, Monitoring]
 authors: [sushant_gaurav]
 description: Discover essential React monitoring techniques, tools, and best practices to optimize your application's performance and user experience.
-keywords: [react monitoring, performance optimization, error tracking, user experience, web development, SigNoz, DevTools]
-
+keywords:
+  [
+    react monitoring,
+    performance optimization,
+    error tracking,
+    user experience,
+    web development,
+    SigNoz,
+    DevTools,
+  ]
 ---
 
 React has revolutionized web development, but with great power comes great responsibility. How can you optimize the performance of your React applications? What metrics should you be tracking? What tools can you utilize to ensure a seamless user experience? [React monitoring](https://signoz.io/guides/react-monitoring/#error-tracking) provides solutions to these queries.
@@ -36,7 +42,12 @@ React monitoring requires tracking, evaluating, and improving the performance of
 
 React monitoring involves four interconnected areas that work together to ensure optimal application performance. Let's break down these key features and understand how they contribute to a robust monitoring strategy:
 
-<Figure src="/img/guides/2024/12/react-monitoring-CleanShot_2024-12-26_at_15.42.092x.webp" alt="" caption="" />### 1. Performance Monitoring
+<Figure
+  src="/img/guides/2024/12/react-monitoring-CleanShot_2024-12-26_at_15.42.092x.webp"
+  alt=""
+  caption=""
+/>
+### 1. Performance Monitoring
 
 - Component Render Times: Track how quickly your React components render and re-render
 - Load Performance: Measure initial load times, Time to Interactive (TTI), and First Contentful Paint (FCP)
@@ -83,43 +94,43 @@ Tracking the correct metrics is essential for evaluating your app's health. Here
 Example: Let's take an example of utilizing Error Boundary to catch component failures:
 
 ```jsx
-import React from 'react';
+import React from 'react'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
-    super(props);
-    this.state = { hasError: false };
+    super(props)
+    this.state = { hasError: false }
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true };
+    return { hasError: true }
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Error occurred:', error, errorInfo);
+    console.error('Error occurred:', error, errorInfo)
   }
 
   render() {
     if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
+      return <h1>Something went wrong.</h1>
     }
-    return this.props.children;
+    return this.props.children
   }
 }
 
-export default ErrorBoundary;
+export default ErrorBoundary
 ```
 
 Wrap critical components in `ErrorBoundary` to ensure seamless error recovery.
 
 - User Interactions
-    - Click Events: It means what components users interacting with.  You can collect interaction data using tools such as Google Analytics or custom logs.
-    - Formal Submissions: It checks whether users are completing forms. You can track submission rates and validation mistakes with a monitoring library or custom events.
-    - Navigation Patterns: It means how do consumers navigate around your app? You can use monitoring (tools like [SigNoz](https://signoz.io/)) to detect drop-off spots in your user experience.
+  - Click Events: It means what components users interacting with. You can collect interaction data using tools such as Google Analytics or custom logs.
+  - Formal Submissions: It checks whether users are completing forms. You can track submission rates and validation mistakes with a monitoring library or custom events.
+  - Navigation Patterns: It means how do consumers navigate around your app? You can use monitoring (tools like [SigNoz](https://signoz.io/)) to detect drop-off spots in your user experience.
 - Resource Utilization
-    - Memory Usage: Check to see if your software is using excessive memory. Tools such as Chrome DevTools Memory Profiler can assist in detecting leaks caused by unmounted components or stale states.
-    - CPU Consumption: This indicates whether CPU-intensive processes cause slowdowns. To optimize costly updates, measure processes such as virtual DOM reconciliation.
-    - Network Requests: This refers to how efficient your API calls are. To discover bottlenecks, you can monitor latency, payload size, and request frequency.
+  - Memory Usage: Check to see if your software is using excessive memory. Tools such as Chrome DevTools Memory Profiler can assist in detecting leaks caused by unmounted components or stale states.
+  - CPU Consumption: This indicates whether CPU-intensive processes cause slowdowns. To optimize costly updates, measure processes such as virtual DOM reconciliation.
+  - Network Requests: This refers to how efficient your API calls are. To discover bottlenecks, you can monitor latency, payload size, and request frequency.
 
 ## Understanding React-Specific Performance Indicators
 
@@ -132,7 +143,7 @@ Tracking component render durations is critical for identifying inefficiencies, 
 Implementation Example: React's `Profiler` API makes it easy to monitor render times:
 
 ```jsx
-import { Profiler } from 'react';
+import { Profiler } from 'react'
 
 function onRenderCallback(
   id, // The "id" prop of the Profiler tree
@@ -143,7 +154,7 @@ function onRenderCallback(
   commitTime, // When React committed this update
   interactions // Set of interactions triggering the update
 ) {
-  console.log(`Component ${id} rendered in ${actualDuration}ms`);
+  console.log(`Component ${id} rendered in ${actualDuration}ms`)
 }
 
 function MyComponent() {
@@ -151,13 +162,17 @@ function MyComponent() {
     <Profiler id="MyComponent" onRender={onRenderCallback}>
       <div>Component Content</div>
     </Profiler>
-  );
+  )
 }
 ```
 
 You can send this information to a monitoring provider to track trends over time. To improve visibility, integrate a monitoring dashboard. For example, a Render Tracking Workflow:
 
-<Figure src="/img/guides/2024/12/react-monitoring-image.webp" alt="Workflow of Rendering Components" caption="Workflow of Rendering Components" />
+<Figure
+  src="/img/guides/2024/12/react-monitoring-image.webp"
+  alt="Workflow of Rendering Components"
+  caption="Workflow of Rendering Components"
+/>
 
 ### Virtual DOM Reconciliation
 
@@ -175,31 +190,31 @@ React hooks are strong but can cause performance bottlenecks if not managed prop
 Custom Hook Example with Monitoring:
 
 ```jsx
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react'
 
 function useDataFetching(url) {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(null)
 
   const fetchData = useCallback(() => {
-    const startTime = performance.now();
+    const startTime = performance.now()
     fetch(url)
       .then((response) => response.json())
       .then((result) => {
-        setData(result);
-        const endTime = performance.now();
-        console.log(`Data fetched in ${endTime - startTime}ms`);
-      });
-  }, [url]);
+        setData(result)
+        const endTime = performance.now()
+        console.log(`Data fetched in ${endTime - startTime}ms`)
+      })
+  }, [url])
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData()
+  }, [fetchData])
 
-  return data;
+  return data
 }
 
 // Usage
-const data = useDataFetching('/api/data');
+const data = useDataFetching('/api/data')
 ```
 
 Logging the fetch time allows you to track the efficiency of your hooks.
@@ -232,35 +247,39 @@ Code Example:
 ```jsx
 class ErrorBoundary extends React.Component {
   constructor(props) {
-    super(props);
-    this.state = { hasError: false };
+    super(props)
+    this.state = { hasError: false }
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true };
+    return { hasError: true }
   }
 
   componentDidCatch(error, errorInfo) {
-    logErrorToMonitoringService(error, errorInfo); // Log errors
+    logErrorToMonitoringService(error, errorInfo) // Log errors
   }
 
   render() {
     if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
+      return <h1>Something went wrong.</h1>
     }
-    return this.props.children;
+    return this.props.children
   }
 }
 
 // Usage
-<ErrorBoundary>
+;<ErrorBoundary>
   <MyComponent />
-</ErrorBoundary>;
+</ErrorBoundary>
 ```
 
 Diagram: Error Boundary Lifecycle
 
-<Figure src="/img/guides/2024/12/react-monitoring-image%201.webp" alt="Error Boundary Lifecycle" caption="Error Boundary Lifecycle" />
+<Figure
+  src="/img/guides/2024/12/react-monitoring-image%201.webp"
+  alt="Error Boundary Lifecycle"
+  caption="Error Boundary Lifecycle"
+/>
 
 ### 2. Utilize React DevTools
 
@@ -293,29 +312,29 @@ Example of Monitoring Tools:
 To achieve maximum performance, combine modern technology with tried-and-true strategies while monitoring your React application.
 
 - Browser Development Tools: These tools are essential for examining your app's runtime behaviour.
-    - Chrome DevTools: Select the Performance tab to capture and investigate runtime performance issues.
-    - React Developer Tools: This Chrome and Firefox addon can investigate component hierarchies, evaluate state changes, and identify needless re-renders.
+  - Chrome DevTools: Select the Performance tab to capture and investigate runtime performance issues.
+  - React Developer Tools: This Chrome and Firefox addon can investigate component hierarchies, evaluate state changes, and identify needless re-renders.
 - Open-Source Monitoring Libraries: Various open-source libraries increase your capacity to monitor React apps.
-    - why-did-you-render: Notifies you of unnecessary re-renders, which helps optimize component updates.
-    - react-query-dev tools: A debugging tool for effectively monitoring and controlling server-side state.
+  - why-did-you-render: Notifies you of unnecessary re-renders, which helps optimize component updates.
+  - react-query-dev tools: A debugging tool for effectively monitoring and controlling server-side state.
 - Cloud-based Monitoring Solutions: These services offer real-time insights into your application's performance, making them perfect for production situations.
-    - SigNoz: [SigNoz](https://signoz.io/) is a complete, open-source observability software that provides deep insights into the performance and behaviour of your React apps.
-    - New Relic: A full-stack observability platform with React-specific metrics.
-    - Datadog: Provides real-time analytics, error tracking, and performance monitoring specifically for React apps.
+  - SigNoz: [SigNoz](https://signoz.io/) is a complete, open-source observability software that provides deep insights into the performance and behaviour of your React apps.
+  - New Relic: A full-stack observability platform with React-specific metrics.
+  - Datadog: Provides real-time analytics, error tracking, and performance monitoring specifically for React apps.
 - Customized Logging and Analytics: They can be used to track component activities for specific monitoring requirements.
 
 ```jsx
 const logComponentRender = (componentName) => {
-  console.log(`Component ${componentName} rendered at ${new Date().toISOString()}`);
+  console.log(`Component ${componentName} rendered at ${new Date().toISOString()}`)
   // Optionally send this data to a monitoring service
-};
+}
 
 function MyComponent() {
   useEffect(() => {
-    logComponentRender('MyComponent');
-  }, []);
+    logComponentRender('MyComponent')
+  }, [])
 
-  return <div>My Component Content</div>;
+  return <div>My Component Content</div>
 }
 ```
 
@@ -327,34 +346,28 @@ Monitoring your React application offers useful information about potential perf
 
 1. Profile Component Performance: Use the React Profiler to detect which components are generating delayed renderings.
 2. Optimize Component Re-renders:
-    - Use `React.memo()` to prevent unnecessary re-renders of functional components:
-        
-        ```jsx
-        const MyComponent = React.memo(function MyComponent(props) {
-          /* render using props */
-        });
-        ```
-        
-    - Utilize the `useCallback` hook to memoize functions passed as props:
-        
-        ```jsx
-        const memoizedCallback = useCallback(() => {
-          doSomething(a, b);
-        }, [a, b]);
-        ```
-        
+   - Use `React.memo()` to prevent unnecessary re-renders of functional components:
+     ```jsx
+     const MyComponent = React.memo(function MyComponent(props) {
+       /* render using props */
+     })
+     ```
+   - Utilize the `useCallback` hook to memoize functions passed as props:
+     ```jsx
+     const memoizedCallback = useCallback(() => {
+       doSomething(a, b)
+     }, [a, b])
+     ```
 
 ### Strategies for Reducing Unnecessary Re-renders
 
 1. Optimize Class Components:
-    - Use `shouldComponentUpdate` or extend `React.PureComponent` to avoid re-renders caused by unchanged props or states.
+   - Use `shouldComponentUpdate` or extend `React.PureComponent` to avoid re-renders caused by unchanged props or states.
 2. Utilize Memoization for Expensive Operations:
-    - Use the `useMemo` hook for computationally costly calculations:
-        
-        ```jsx
-        const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
-        ```
-        
+   - Use the `useMemo` hook for computationally costly calculations:
+     ```jsx
+     const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b])
+     ```
 
 ### Optimizing State Management and Data Flow
 
@@ -366,14 +379,14 @@ Monitoring your React application offers useful information about potential perf
 To lower the size of the first bundle, split your code and load components just as needed.
 
 ```jsx
-const OtherComponent = React.lazy(() => import('./OtherComponent'));
+const OtherComponent = React.lazy(() => import('./OtherComponent'))
 
 function MyComponent() {
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
       <OtherComponent />
     </React.Suspense>
-  );
+  )
 }
 ```
 
@@ -457,83 +470,95 @@ SigNoz integrates with OpenTelemetry to provide deep insights into your React ap
 Track and optimize crucial Web Vitals metrics that directly impact your user experience and SEO:
 
 - Loading Performance
-    - Monitor Largest Contentful Paint (LCP) to ensure main content loads quickly
-    - Track First Contentful Paint (FCP) to optimize initial render times
-    - Analyze Time to First Byte (TTFB) to identify server response delays
+  - Monitor Largest Contentful Paint (LCP) to ensure main content loads quickly
+  - Track First Contentful Paint (FCP) to optimize initial render times
+  - Analyze Time to First Byte (TTFB) to identify server response delays
 - Interactivity
-    - Measure First Input Delay (FID) to ensure responsive user interactions
-    - Track Total Blocking Time (TBT) to identify JavaScript execution issues
-    - Identify and fix interaction bottlenecks affecting user experience
+  - Measure First Input Delay (FID) to ensure responsive user interactions
+  - Track Total Blocking Time (TBT) to identify JavaScript execution issues
+  - Identify and fix interaction bottlenecks affecting user experience
 - Visual Stability
-    - Monitor Cumulative Layout Shift (CLS) to maintain stable page layouts
-    - Track layout shifts that could frustrate users during page load
-    - Identify problematic components causing unexpected movements
+  - Monitor Cumulative Layout Shift (CLS) to maintain stable page layouts
+  - Track layout shifts that could frustrate users during page load
+  - Identify problematic components causing unexpected movements
 
-<Figure src="/img/guides/2024/12/react-monitoring-image%202.webp" alt="Web Vitals Dashboard in SigNoz" caption="Web Vitals Dashboard in SigNoz" />
+<Figure
+  src="/img/guides/2024/12/react-monitoring-image%202.webp"
+  alt="Web Vitals Dashboard in SigNoz"
+  caption="Web Vitals Dashboard in SigNoz"
+/>
 
 ### Performance Analytics
 
 Gain comprehensive insights into your application's behavior:
 
 - Component Performance
-    - Identify slow-rendering React components
-    - Track component mount and update times
-    - Monitor state management efficiency
-    - Analyze render cycles and optimization opportunities
+  - Identify slow-rendering React components
+  - Track component mount and update times
+  - Monitor state management efficiency
+  - Analyze render cycles and optimization opportunities
 - Resource Utilization
-    - Monitor JavaScript heap usage
-    - Track memory consumption patterns
-    - Identify potential memory leaks
-    - Analyze CPU utilization
+  - Monitor JavaScript heap usage
+  - Track memory consumption patterns
+  - Identify potential memory leaks
+  - Analyze CPU utilization
 
 ### Advanced Visualization
 
 Make data-driven decisions with SigNoz's powerful visualization tools:
 
 - Custom Dashboards
-    - Create focused views for different performance aspects
-    - Set up role-specific monitoring dashboards
-    - Design executive summaries for high-level metrics
-    - Build detailed technical dashboards for debugging
+  - Create focused views for different performance aspects
+  - Set up role-specific monitoring dashboards
+  - Design executive summaries for high-level metrics
+  - Build detailed technical dashboards for debugging
 - Smart Thresholds
-    - Implement color-coded performance thresholds
-    - Set up visual indicators for performance targets
-    - Create custom threshold levels for different metrics
-    - Get instant visual feedback on performance status
+  - Implement color-coded performance thresholds
+  - Set up visual indicators for performance targets
+  - Create custom threshold levels for different metrics
+  - Get instant visual feedback on performance status
 
-<Figure src="/img/guides/2024/12/react-monitoring-image%203.webp" alt="Smart thresholds in SigNoz" caption="Smart thresholds in SigNoz" />
+<Figure
+  src="/img/guides/2024/12/react-monitoring-image%203.webp"
+  alt="Smart thresholds in SigNoz"
+  caption="Smart thresholds in SigNoz"
+/>
 
 ### Proactive Monitoring
 
 Stay ahead of performance issues:
 
 - Intelligent Alerting
-    - Set up threshold-based alerts for key metrics
-    - Configure trend-based anomaly detection
-    - Create custom alert rules for specific scenarios
-    - Define alert priorities and notification channels
+  - Set up threshold-based alerts for key metrics
+  - Configure trend-based anomaly detection
+  - Create custom alert rules for specific scenarios
+  - Define alert priorities and notification channels
 - Performance Forecasting
-    - Analyze performance trends over time
-    - Identify potential future bottlenecks
-    - Plan capacity based on usage patterns
-    - Make data-driven optimization decisions
+  - Analyze performance trends over time
+  - Identify potential future bottlenecks
+  - Plan capacity based on usage patterns
+  - Make data-driven optimization decisions
 
-<Figure src="/img/guides/2024/12/react-monitoring-image%204.webp" alt="Anamoly Detection in SigNoz" caption="Anamoly Detection in SigNoz" />
+<Figure
+  src="/img/guides/2024/12/react-monitoring-image%204.webp"
+  alt="Anamoly Detection in SigNoz"
+  caption="Anamoly Detection in SigNoz"
+/>
 
 ### Business Impact Analysis
 
 Connect performance metrics to business outcomes:
 
 - User Experience Metrics
-    - Correlate performance with user engagement
-    - Track impact of performance on conversion rates
-    - Monitor user satisfaction indicators
-    - Measure performance across user segments
+  - Correlate performance with user engagement
+  - Track impact of performance on conversion rates
+  - Monitor user satisfaction indicators
+  - Measure performance across user segments
 - ROI Tracking
-    - Measure the impact of performance improvements
-    - Track performance-related business metrics
-    - Analyze cost implications of performance issues
-    - Justify optimization investments
+  - Measure the impact of performance improvements
+  - Track performance-related business metrics
+  - Analyze cost implications of performance issues
+  - Justify optimization investments
 
 To get started with SigNoz monitoring for your React application, visit our [Web Vitals Monitoring documentation](https://signoz.io/docs/frontend-monitoring/opentelemetry-web-vitals/) and [OpenTelemetry implementation guide](http://signoz.io/blog/opentelemetry-react).
 

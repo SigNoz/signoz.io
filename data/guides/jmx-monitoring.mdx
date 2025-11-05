@@ -1,13 +1,19 @@
 ---
-
 title: JMX Monitoring - A Beginner's Guide to Java Performance
-slug: jmx-monitoring
 date: 2024-08-23
 tags: [monitoring]
 authors: [nilesh_sinha]
 description: Learn how JMX monitoring can improve Java application performance. This guide covers JMX basics, implementation, and advanced techniques for developers.
-keywords: [JMX Monitoring, Java Performance, MBeans, JVM Monitoring, Application Management, Performance Metrics, Java Developers]
-
+keywords:
+  [
+    JMX Monitoring,
+    Java Performance,
+    MBeans,
+    JVM Monitoring,
+    Application Management,
+    Performance Metrics,
+    Java Developers,
+  ]
 ---
 
 Java developers often face challenges in monitoring and managing their applications effectively. How do you gain real-time insights into your Java application's performance? What tools can you use to identify bottlenecks and optimize resource usage? JMX monitoring offers a powerful solution to these questions. This guide will walk you through the essentials of JMX monitoring, its implementation, and how it can significantly enhance your Java application's performance.
@@ -18,13 +24,13 @@ Before we get into the gist of monitoring, let's start with the basics of JMX an
 
 Java Management Extensions or JMX provide a standardized way to manage resources such as applications, system objects, and devices. With JMX, you can keep tabs on key metrics like memory usage, thread count, and database connections. It’s like having a dashboard for your application’s health, where you can spot issues before they turn into disasters.
 
-Now let's delve into a higher-level overview of the JMX architecture. 
+Now let's delve into a higher-level overview of the JMX architecture.
 
 JMX monitoring involves:
 
 1. MBeans (Managed Beans): Java objects that represent resources to be managed. MBeans represent the resources or components you want to manage, such as memory usage, thread pools, or custom application metrics. MBeans expose attributes (like data points) and operations (like commands) that you can query or manipulate.
-2. MBean Server: A core component that acts as a registry for MBeans. The request to interact with an MBean goes to the MBean server which then finds out the exact MBean you're looking for and executes the command. 
-3. JMX Agent: The management entity that controls resources and makes them available.  It manages the interaction between the MBean Server and external monitoring tools. The agent includes protocol adaptors and connectors that allow remote applications or tools (like JConsole or VisualVM) to connect and manage the MBeans.
+2. MBean Server: A core component that acts as a registry for MBeans. The request to interact with an MBean goes to the MBean server which then finds out the exact MBean you're looking for and executes the command.
+3. JMX Agent: The management entity that controls resources and makes them available. It manages the interaction between the MBean Server and external monitoring tools. The agent includes protocol adaptors and connectors that allow remote applications or tools (like JConsole or VisualVM) to connect and manage the MBeans.
 
 The benefits of using JMX for performance monitoring include:
 
@@ -45,23 +51,23 @@ JMX monitoring is crucial for Java developers for several reasons:
 
 It's always better to understand the analogy to incorporate the entire scenario. How about visualizing a large, complex factory with numerous machines involved in the workflow?
 
-The MBeans are the individual machines in the factory, each equipped with a dashboard showing its current status and buttons to adjust its settings. 
+The MBeans are the individual machines in the factory, each equipped with a dashboard showing its current status and buttons to adjust its settings.
 
-The MBean Server is like the factory’s control room, where all the machine dashboards are displayed. 
+The MBean Server is like the factory’s control room, where all the machine dashboards are displayed.
 
 In addition, the JMX Agent is the factory’s communication system, allowing remote operators to monitor and control the machines from outside the factory.
 
 JMX monitoring operates through a set of interconnected components:
 
 1. MBeans: These are Java objects that represent manageable resources. There are four types:
-    - Standard MBeans: These are the most common type of MBeans, defined by implementing a management interface and its corresponding class. The interface defines the operations and attributes that can be managed.
-    - Dynamic MBeans: They allow you to define their management interface at runtime rather than at compile time and are, therefore more flexible. This is useful when the set of attributes or operations is not known in advance.
-    - Open MBeans: They are a specialized type of Dynamic MBeans that use a standardized data format. This makes them interoperable and easier to use across different systems and applications. Think of it as universal remote controls that can work with any device, regardless of brand.
-    - Model MBeans: They can be configured to behave like any of the other MBeans, allowing for rich and complex management capabilities.
+   - Standard MBeans: These are the most common type of MBeans, defined by implementing a management interface and its corresponding class. The interface defines the operations and attributes that can be managed.
+   - Dynamic MBeans: They allow you to define their management interface at runtime rather than at compile time and are, therefore more flexible. This is useful when the set of attributes or operations is not known in advance.
+   - Open MBeans: They are a specialized type of Dynamic MBeans that use a standardized data format. This makes them interoperable and easier to use across different systems and applications. Think of it as universal remote controls that can work with any device, regardless of brand.
+   - Model MBeans: They can be configured to behave like any of the other MBeans, allowing for rich and complex management capabilities.
 2. MBean Server: This component acts as a registry for MBeans, allowing management applications to access them. It acts as the core management hub, where all the Managed Beans (MBeans) register themselves, allowing you to manage and monitor your Java applications. Moreover, it also organizes MBeans using unique ObjectNames, similar to how files are organized in a directory. This naming system allows for easy identification and access to MBeans.
 3. JMX Connectors: These enable remote access to the MBean server. They facilitate communication between the MBean Server and remote clients over various protocols. They provide the necessary infrastructure to manage Java applications from different locations, often over a network.
-4. Protocol Adapters: They allow non-JMX-aware management applications to interact with JMX-enabled resources. 
-A protocol adapter is like a translator who converts what you say into a language each participant understands.
+4. Protocol Adapters: They allow non-JMX-aware management applications to interact with JMX-enabled resources.
+   A protocol adapter is like a translator who converts what you say into a language each participant understands.
 
 Popular [JMX monitoring tools](https://signoz.io/guides/jmx-monitoring/#how-jmx-monitoring-works) include JConsole and VisualVM, which provide graphical interfaces for viewing and managing JMX-exposed metrics.
 
@@ -70,49 +76,49 @@ Popular [JMX monitoring tools](https://signoz.io/guides/jmx-monitoring/#how-jmx-
 To enable JMX monitoring in your Java application:
 
 1. Enable JMX: Add the following JVM arguments when starting your application:
-    
-    ```bash
-    # Enable JMX remote management.
-    -Dcom.sun.management.jmxremote
-    
-    # Specify the port number for JMX connections (e.g., 9010).
-    -Dcom.sun.management.jmxremote.port=9010
-    
-    # Disable authentication for JMX connections.
-    # NOTE: This is not recommended for production environments.
-    -Dcom.sun.management.jmxremote.authenticate=false
-    
-    # Disable SSL for JMX connections.
-    # NOTE: This is also not recommended for production environments.
-    -Dcom.sun.management.jmxremote.ssl=false
-    ```
-    
+
+   ```bash
+   # Enable JMX remote management.
+   -Dcom.sun.management.jmxremote
+
+   # Specify the port number for JMX connections (e.g., 9010).
+   -Dcom.sun.management.jmxremote.port=9010
+
+   # Disable authentication for JMX connections.
+   # NOTE: This is not recommended for production environments.
+   -Dcom.sun.management.jmxremote.authenticate=false
+
+   # Disable SSL for JMX connections.
+   # NOTE: This is also not recommended for production environments.
+   -Dcom.sun.management.jmxremote.ssl=false
+   ```
+
 2. Configure security: In production environments, enable authentication and SSL:
-    
-    ```bash
-    # Enable JMX remote management.
-    -Dcom.sun.management.jmxremote
-    
-    # Specify the port number for JMX connections (e.g., 9010).
-    -Dcom.sun.management.jmxremote.port=9010
-    
-    # Enable authentication for JMX connections to secure access.
-    -Dcom.sun.management.jmxremote.authenticate=true
-    
-    # Enable SSL to encrypt communication and secure JMX connections.
-    -Dcom.sun.management.jmxremote.ssl=true
-    
-    # Specify the path to the password file, which contains credentials for authentication.
-    -Dcom.sun.management.jmxremote.password.file=/path/to/jmxremote.password
-    
-    # Specify the path to the access file, which defines user roles and permissions.
-    -Dcom.sun.management.jmxremote.access.file=/path/to/jmxremote.access
-    ```
-    
+
+   ```bash
+   # Enable JMX remote management.
+   -Dcom.sun.management.jmxremote
+
+   # Specify the port number for JMX connections (e.g., 9010).
+   -Dcom.sun.management.jmxremote.port=9010
+
+   # Enable authentication for JMX connections to secure access.
+   -Dcom.sun.management.jmxremote.authenticate=true
+
+   # Enable SSL to encrypt communication and secure JMX connections.
+   -Dcom.sun.management.jmxremote.ssl=true
+
+   # Specify the path to the password file, which contains credentials for authentication.
+   -Dcom.sun.management.jmxremote.password.file=/path/to/jmxremote.password
+
+   # Specify the path to the access file, which defines user roles and permissions.
+   -Dcom.sun.management.jmxremote.access.file=/path/to/jmxremote.access
+   ```
+
 3. Connect to JMX: Use a JMX client like JConsole to connect to your application using the configured port. The following steps would be required to connect to any JMX client like JConsole.
-    - Launch JConsole: JConsole is included with the JDK and can be started from the command line or your IDE.
-    - Connect to Your Application: Enter the hostname and port you configured (e.g., `localhost:9010`). If authentication is enabled, provide the necessary credentials.
-    - Monitor and Manage: Once connected, you can explore MBeans, monitor performance metrics, and perform management operations.
+   - Launch JConsole: JConsole is included with the JDK and can be started from the command line or your IDE.
+   - Connect to Your Application: Enter the hostname and port you configured (e.g., `localhost:9010`). If authentication is enabled, provide the necessary credentials.
+   - Monitor and Manage: Once connected, you can explore MBeans, monitor performance metrics, and perform management operations.
 
 Best practices for JMX configuration in production:
 
@@ -125,69 +131,71 @@ Best practices for JMX configuration in production:
 JMX exposes various critical performance metrics:
 
 1. JVM memory usage:
-    - Heap memory utilization: The Java Virtual Machine (JVM) uses heap memory to hold application-created objects. Understanding how much memory your program is using and spotting possible memory leaks depend on keeping an eye on heap memory use.
-    - Non-heap memory usage: The JVM uses non-heap memory to hold metadata like interned strings and class declarations. You can discover more about how much memory is being used by the JVM itself instead of the application by keeping an eye on non-heap memory utilization.
-    - Garbage collection statistics: Garbage collection (GC) is the process by which the JVM reclaims memory used by objects that are no longer referenced by the application. Monitoring GC activity helps you understand the impact of garbage collection on your application's performance.
+   - Heap memory utilization: The Java Virtual Machine (JVM) uses heap memory to hold application-created objects. Understanding how much memory your program is using and spotting possible memory leaks depend on keeping an eye on heap memory use.
+   - Non-heap memory usage: The JVM uses non-heap memory to hold metadata like interned strings and class declarations. You can discover more about how much memory is being used by the JVM itself instead of the application by keeping an eye on non-heap memory utilization.
+   - Garbage collection statistics: Garbage collection (GC) is the process by which the JVM reclaims memory used by objects that are no longer referenced by the application. Monitoring GC activity helps you understand the impact of garbage collection on your application's performance.
 2. Thread management:
-    - Thread pool utilization: Thread pool utilization gives insights into how threads are being used in your application, such as the number of active threads, the number of threads waiting, and the total number of threads created. You can use `ThreadMXBean` to monitor the thread pool utilization.
-    
-    ```java
-    // Access the MBean for thread management
-    ThreadMXBean threadMBean = ManagementFactory.getThreadMXBean();
-    
-    // Get the total number of threads currently running
-    int threadCount = threadMBean.getThreadCount();
-    
-    // Get the peak thread count since the JVM started or the peak was reset
-    int peakThreadCount = threadMBean.getPeakThreadCount();
-    
-    // Get the total number of threads created since the JVM started
-    long totalStartedThreadCount = threadMBean.getTotalStartedThreadCount();
-    ```
-    
-    - Deadlock detection: Deadlocks occur when two or more threads are blocked forever, each waiting on the other to release a resource. Detecting and resolving deadlocks is crucial to maintaining application stability. To detect deadlocks, you can use the `findDeadlockedThreads()` method provided by the `ThreadMXBean` . We’d use simple print statements in our example code to demonstrate the identification of deadlocks.
-    
-    ```java
-    // Get the IDs of threads that are deadlocked, if any
-    long[] deadlockedThreads = threadMBean.findDeadlockedThreads();
-    
-    if (deadlockedThreads != null && deadlockedThreads.length > 0) {
-        System.out.println("Deadlock detected!");
-    
-        // Get thread information for the deadlocked threads
-        ThreadInfo[] threadInfos = threadMBean.getThreadInfo(deadlockedThreads);
-    
-        for (ThreadInfo threadInfo : threadInfos) {
-            // Print details about each deadlocked thread
-            System.out.println("Thread Name: " + threadInfo.getThreadName());
-            System.out.println("Thread State: " + threadInfo.getThreadState());
-            System.out.println("Blocked on Lock: " + threadInfo.getLockName());
-            System.out.println("Blocked by Thread: " + threadInfo.getLockOwnerName());
-            System.out.println("Stack Trace:");
-            for (StackTraceElement stackTraceElement : threadInfo.getStackTrace()) {
-                System.out.println("\t" + stackTraceElement);
-            }
-        }
-    } else {
-        System.out.println("No deadlocks detected.");
-    }
-    ```
-    
+
+   - Thread pool utilization: Thread pool utilization gives insights into how threads are being used in your application, such as the number of active threads, the number of threads waiting, and the total number of threads created. You can use `ThreadMXBean` to monitor the thread pool utilization.
+
+   ```java
+   // Access the MBean for thread management
+   ThreadMXBean threadMBean = ManagementFactory.getThreadMXBean();
+
+   // Get the total number of threads currently running
+   int threadCount = threadMBean.getThreadCount();
+
+   // Get the peak thread count since the JVM started or the peak was reset
+   int peakThreadCount = threadMBean.getPeakThreadCount();
+
+   // Get the total number of threads created since the JVM started
+   long totalStartedThreadCount = threadMBean.getTotalStartedThreadCount();
+   ```
+
+   - Deadlock detection: Deadlocks occur when two or more threads are blocked forever, each waiting on the other to release a resource. Detecting and resolving deadlocks is crucial to maintaining application stability. To detect deadlocks, you can use the `findDeadlockedThreads()` method provided by the `ThreadMXBean` . We’d use simple print statements in our example code to demonstrate the identification of deadlocks.
+
+   ```java
+   // Get the IDs of threads that are deadlocked, if any
+   long[] deadlockedThreads = threadMBean.findDeadlockedThreads();
+
+   if (deadlockedThreads != null && deadlockedThreads.length > 0) {
+       System.out.println("Deadlock detected!");
+
+       // Get thread information for the deadlocked threads
+       ThreadInfo[] threadInfos = threadMBean.getThreadInfo(deadlockedThreads);
+
+       for (ThreadInfo threadInfo : threadInfos) {
+           // Print details about each deadlocked thread
+           System.out.println("Thread Name: " + threadInfo.getThreadName());
+           System.out.println("Thread State: " + threadInfo.getThreadState());
+           System.out.println("Blocked on Lock: " + threadInfo.getLockName());
+           System.out.println("Blocked by Thread: " + threadInfo.getLockOwnerName());
+           System.out.println("Stack Trace:");
+           for (StackTraceElement stackTraceElement : threadInfo.getStackTrace()) {
+               System.out.println("\t" + stackTraceElement);
+           }
+       }
+   } else {
+       System.out.println("No deadlocks detected.");
+   }
+   ```
+
 3. System load:
-    - Average system load: The average system load gives an overview of the system's workload over time, indicating how much demand is placed on the CPU. The `getSystemLoadAverage()` returns the average system load for the last minute. A return value of `-1.0` indicates that the system load average is not available.
-    
-    ```java
-    import java.lang.management.ManagementFactory;
-    import com.sun.management.OperatingSystemMXBean;
-    
-    // Access the Operating System MBean
-    OperatingSystemMXBean osMBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-    
-    // Get the system load average for the last minute
-    double systemLoadAverage = osMBean.getSystemLoadAverage();
-    
-    ```
-    
+
+   - Average system load: The average system load gives an overview of the system's workload over time, indicating how much demand is placed on the CPU. The `getSystemLoadAverage()` returns the average system load for the last minute. A return value of `-1.0` indicates that the system load average is not available.
+
+   ```java
+   import java.lang.management.ManagementFactory;
+   import com.sun.management.OperatingSystemMXBean;
+
+   // Access the Operating System MBean
+   OperatingSystemMXBean osMBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+
+   // Get the system load average for the last minute
+   double systemLoadAverage = osMBean.getSystemLoadAverage();
+
+   ```
+
 - Available processors: The number of available processors indicates the computing capacity of the system, which helps in understanding the parallel processing capabilities.
 
 ```java
@@ -196,165 +204,164 @@ int availableProcessors = osMBean.getAvailableProcessors();
 ```
 
 1. Custom application metrics: You can create custom metrics to keep an eye on particular areas of your application. Transaction rates, response times, and error rates are a few examples of these. You can develop custom MBeans to keep an eye on these. There are some code examples below to provide an insight.
-    - Transaction rates: Transaction rates measure how many transactions are processed per unit of time, providing insights into the workload and performance of your application.
-    
-    ```java
-    import javax.management.MBeanServer;
-    import javax.management.ObjectName;
-    import java.lang.management.ManagementFactory;
-    import java.util.concurrent.atomic.AtomicLong;
-    
-    public class TransactionMetrics {
-        // AtomicLong to keep track of transaction counts
-        private final AtomicLong transactionCount = new AtomicLong();
-    
-        public void recordTransaction() {
-            // Increment the transaction count
-            transactionCount.incrementAndGet();
-        }
-    
-        public long getTransactionCount() {
-            return transactionCount.get();
-        }
-    
-        public static void main(String[] args) throws Exception {
-            // Register the MBean
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName("com.example:type=TransactionMetrics");
-            TransactionMetrics mbean = new TransactionMetrics();
-            mbs.registerMBean(mbean, name);
-    
-            // Simulate transaction recording
-            for (int i = 0; i < 100; i++) {
-                mbean.recordTransaction();
-                Thread.sleep(1000); // Sleep for demonstration purposes
-            }
-        }
-    }
-    
-    ```
-    
-    - Response times: Response times measure the time it takes for your application to respond to requests, which is crucial for understanding performance.
-    
-    ```java
-    import javax.management.MBeanServer;
-    import javax.management.ObjectName;
-    import java.lang.management.ManagementFactory;
-    import java.util.concurrent.atomic.AtomicLong;
-    import java.util.concurrent.atomic.AtomicLongArray;
-    
-    public class ResponseTimeMetrics {
-        private final AtomicLongArray responseTimes = new AtomicLongArray(100);
-        private int index = 0;
-    
-        public void recordResponseTime(long responseTime) {
-            // Record the response time
-            responseTimes.set(index % responseTimes.length(), responseTime);
-            index++;
-        }
-    
-        public long getAverageResponseTime() {
-            long sum = 0;
-            for (int i = 0; i < responseTimes.length(); i++) {
-                sum += responseTimes.get(i);
-            }
-            return sum / responseTimes.length();
-        }
-    
-        public static void main(String[] args) throws Exception {
-            // Register the MBean
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName("com.example:type=ResponseTimeMetrics");
-            ResponseTimeMetrics mbean = new ResponseTimeMetrics();
-            mbs.registerMBean(mbean, name);
-    
-            // Simulate response time recording
-            for (int i = 0; i < 100; i++) {
-                mbean.recordResponseTime((long) (Math.random() * 500)); // Random response time
-                Thread.sleep(1000); // Sleep for demonstration purposes
-            }
-        }
-    }
-    ```
-    
-    - Error rates: Error rates measure the frequency of errors occurring in your application, helping you identify issues and maintain reliability.
-    
-    ```java
-    import javax.management.MBeanServer;
-    import javax.management.ObjectName;
-    import java.lang.management.ManagementFactory;
-    import java.util.concurrent.atomic.AtomicLong;
-    
-    public class ErrorMetrics {
-        private final AtomicLong errorCount = new AtomicLong();
-    
-        public void recordError() {
-            // Increment the error count
-            errorCount.incrementAndGet();
-        }
-    
-        public long getErrorCount() {
-            return errorCount.get();
-        }
-    
-        public static void main(String[] args) throws Exception {
-            // Register the MBean
-            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-            ObjectName name = new ObjectName("com.example:type=ErrorMetrics");
-            ErrorMetrics mbean = new ErrorMetrics();
-            mbs.registerMBean(mbean, name);
-    
-            // Simulate error recording
-            for (int i = 0; i < 50; i++) {
-                mbean.recordError();
-                Thread.sleep(2000); // Sleep for demonstration purposes
-            }
-        }
-    }
-    ```
-    
+
+   - Transaction rates: Transaction rates measure how many transactions are processed per unit of time, providing insights into the workload and performance of your application.
+
+   ```java
+   import javax.management.MBeanServer;
+   import javax.management.ObjectName;
+   import java.lang.management.ManagementFactory;
+   import java.util.concurrent.atomic.AtomicLong;
+
+   public class TransactionMetrics {
+       // AtomicLong to keep track of transaction counts
+       private final AtomicLong transactionCount = new AtomicLong();
+
+       public void recordTransaction() {
+           // Increment the transaction count
+           transactionCount.incrementAndGet();
+       }
+
+       public long getTransactionCount() {
+           return transactionCount.get();
+       }
+
+       public static void main(String[] args) throws Exception {
+           // Register the MBean
+           MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+           ObjectName name = new ObjectName("com.example:type=TransactionMetrics");
+           TransactionMetrics mbean = new TransactionMetrics();
+           mbs.registerMBean(mbean, name);
+
+           // Simulate transaction recording
+           for (int i = 0; i < 100; i++) {
+               mbean.recordTransaction();
+               Thread.sleep(1000); // Sleep for demonstration purposes
+           }
+       }
+   }
+
+   ```
+
+   - Response times: Response times measure the time it takes for your application to respond to requests, which is crucial for understanding performance.
+
+   ```java
+   import javax.management.MBeanServer;
+   import javax.management.ObjectName;
+   import java.lang.management.ManagementFactory;
+   import java.util.concurrent.atomic.AtomicLong;
+   import java.util.concurrent.atomic.AtomicLongArray;
+
+   public class ResponseTimeMetrics {
+       private final AtomicLongArray responseTimes = new AtomicLongArray(100);
+       private int index = 0;
+
+       public void recordResponseTime(long responseTime) {
+           // Record the response time
+           responseTimes.set(index % responseTimes.length(), responseTime);
+           index++;
+       }
+
+       public long getAverageResponseTime() {
+           long sum = 0;
+           for (int i = 0; i < responseTimes.length(); i++) {
+               sum += responseTimes.get(i);
+           }
+           return sum / responseTimes.length();
+       }
+
+       public static void main(String[] args) throws Exception {
+           // Register the MBean
+           MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+           ObjectName name = new ObjectName("com.example:type=ResponseTimeMetrics");
+           ResponseTimeMetrics mbean = new ResponseTimeMetrics();
+           mbs.registerMBean(mbean, name);
+
+           // Simulate response time recording
+           for (int i = 0; i < 100; i++) {
+               mbean.recordResponseTime((long) (Math.random() * 500)); // Random response time
+               Thread.sleep(1000); // Sleep for demonstration purposes
+           }
+       }
+   }
+   ```
+
+   - Error rates: Error rates measure the frequency of errors occurring in your application, helping you identify issues and maintain reliability.
+
+   ```java
+   import javax.management.MBeanServer;
+   import javax.management.ObjectName;
+   import java.lang.management.ManagementFactory;
+   import java.util.concurrent.atomic.AtomicLong;
+
+   public class ErrorMetrics {
+       private final AtomicLong errorCount = new AtomicLong();
+
+       public void recordError() {
+           // Increment the error count
+           errorCount.incrementAndGet();
+       }
+
+       public long getErrorCount() {
+           return errorCount.get();
+       }
+
+       public static void main(String[] args) throws Exception {
+           // Register the MBean
+           MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+           ObjectName name = new ObjectName("com.example:type=ErrorMetrics");
+           ErrorMetrics mbean = new ErrorMetrics();
+           mbs.registerMBean(mbean, name);
+
+           // Simulate error recording
+           for (int i = 0; i < 50; i++) {
+               mbean.recordError();
+               Thread.sleep(2000); // Sleep for demonstration purposes
+           }
+       }
+   }
+   ```
 
 ## Implementing JMX Monitoring in Your Java Application
 
 To implement custom JMX monitoring:
 
 1. Create an MBean interface:
-    
-    ```java
-    public interface ApplicationStatsMBean {
-        int getActiveUsers();
-        long getTotalRequests();
-    }
-    
-    ```
-    
+
+   ```java
+   public interface ApplicationStatsMBean {
+       int getActiveUsers();
+       long getTotalRequests();
+   }
+
+   ```
+
 2. Implement the MBean:
-    
-    ```java
-    public class ApplicationStats implements ApplicationStatsMBean {
-        private int activeUsers;
-        private long totalRequests;
-    
-        public int getActiveUsers() {
-            return activeUsers;
-        }
-    
-        public long getTotalRequests() {
-            return totalRequests;
-        }
-    }
-    
-    ```
-    
+
+   ```java
+   public class ApplicationStats implements ApplicationStatsMBean {
+       private int activeUsers;
+       private long totalRequests;
+
+       public int getActiveUsers() {
+           return activeUsers;
+       }
+
+       public long getTotalRequests() {
+           return totalRequests;
+       }
+   }
+
+   ```
+
 3. Register the MBean:
-    
-    ```java
-    MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    ObjectName name = new ObjectName("com.example:type=ApplicationStats");
-    ApplicationStats mbean = new ApplicationStats();
-    mbs.registerMBean(mbean, name);
-    ```
-    
+
+   ```java
+   MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+   ObjectName name = new ObjectName("com.example:type=ApplicationStats");
+   ApplicationStats mbean = new ApplicationStats();
+   mbs.registerMBean(mbean, name);
+   ```
 
 ### Exposing Application-Specific Metrics Through JMX
 
@@ -382,9 +389,9 @@ public class TransactionMetrics implements TransactionMetricsMBean {
 }
 ```
 
-Updating the metrics: 
+Updating the metrics:
 
-You also need to make sure that the application updates the metrics correctly as and when required. 
+You also need to make sure that the application updates the metrics correctly as and when required.
 
 Here’s an example to the demonstrate the same:
 
@@ -407,99 +414,97 @@ Best practices for custom MBeans:
 To take your JMX monitoring to the next level:
 
 1. Enable remote JMX over SSL:
-    - Generate keystores and truststores: The keystore holds the server’s private key and certificate. You can use `keytool` to create a keystore.
-    
-    ```bash
-    keytool -genkey -alias myserver -keyalg RSA -keysize 2048 -keystore mykeystore.jks -validity 365
-    ```
-    
-    This command generates a keystore named `mykeystore.jks` with a self-signed certificate valid for 365 days.
-    
-    A truststore stores trusted certificates from other sources (like the client’s certificates). 
-    Import the server's certificate into a truststore named `mytruststore.jks`.
-    
-    ```bash
-    keytool -import -alias myserver -file mycert.cer -keystore mytruststore.jks
-    ```
-    
-    - Configure JMX to use SSL with appropriate system properties: Set these JVM arguments to enable SSL for JMX communication. These settings configure JMX to use SSL, specifying keystore and truststore paths and passwords for secure communication.
-    
-    ```bash
-    -Dcom.sun.management.jmxremote
-    -Dcom.sun.management.jmxremote.port=9010
-    -Dcom.sun.management.jmxremote.ssl=true
-    -Dcom.sun.management.jmxremote.ssl.need.client.auth=true
-    -Dcom.sun.management.jmxremote.keystore.path=/path/to/mykeystore.jks
-    -Dcom.sun.management.jmxremote.keystore.password=keystore_password
-    -Dcom.sun.management.jmxremote.truststore.path=/path/to/mytruststore.jks
-    -Dcom.sun.management.jmxremote.truststore.password=truststore_password
-    
-    ```
-    
+
+   - Generate keystores and truststores: The keystore holds the server’s private key and certificate. You can use `keytool` to create a keystore.
+
+   ```bash
+   keytool -genkey -alias myserver -keyalg RSA -keysize 2048 -keystore mykeystore.jks -validity 365
+   ```
+
+   This command generates a keystore named `mykeystore.jks` with a self-signed certificate valid for 365 days.
+
+   A truststore stores trusted certificates from other sources (like the client’s certificates).
+   Import the server's certificate into a truststore named `mytruststore.jks`.
+
+   ```bash
+   keytool -import -alias myserver -file mycert.cer -keystore mytruststore.jks
+   ```
+
+   - Configure JMX to use SSL with appropriate system properties: Set these JVM arguments to enable SSL for JMX communication. These settings configure JMX to use SSL, specifying keystore and truststore paths and passwords for secure communication.
+
+   ```bash
+   -Dcom.sun.management.jmxremote
+   -Dcom.sun.management.jmxremote.port=9010
+   -Dcom.sun.management.jmxremote.ssl=true
+   -Dcom.sun.management.jmxremote.ssl.need.client.auth=true
+   -Dcom.sun.management.jmxremote.keystore.path=/path/to/mykeystore.jks
+   -Dcom.sun.management.jmxremote.keystore.password=keystore_password
+   -Dcom.sun.management.jmxremote.truststore.path=/path/to/mytruststore.jks
+   -Dcom.sun.management.jmxremote.truststore.password=truststore_password
+
+   ```
+
 2. [Monitor JMX](https://signoz.io/guides/jmx-monitoring/#advanced-jmx-monitoring-techniques) in containerized environments:
-    - Expose JMX ports in your container configuration
-    
-    Expose JMX Ports:
-    
-    - Dockerfile: Expose the JMX port in your Dockerfile. This makes the JMX port (9010) accessible outside the container.
-        
-        ```
-        EXPOSE 9010
-        ```
-        
-    - Kubernetes Manifest: Configure Kubernetes to expose the JMX port. This configuration exposes the port for JMX within the Kubernetes service.
-        
-        ```yaml
-        ports:
-          - containerPort: 9010
-        ```
-        
-    - Use container orchestration tools to manage JMX access
-    
-    Service Discovery: Use tools like Kubernetes for managing and discovering JMX endpoints. You can define services to access your application. This service definition allows access to the JMX port on your application.
-    
-    ```yaml
-    kind: Service
-    apiVersion: v1
-    metadata:
-      name: my-java-app
-    spec:
-      ports:
-        - port: 9010
-          targetPort: 9010
-      selector:
-        app: my-java-app
-    ```
-    
+
+   - Expose JMX ports in your container configuration
+
+   Expose JMX Ports:
+
+   - Dockerfile: Expose the JMX port in your Dockerfile. This makes the JMX port (9010) accessible outside the container.
+     ```
+     EXPOSE 9010
+     ```
+   - Kubernetes Manifest: Configure Kubernetes to expose the JMX port. This configuration exposes the port for JMX within the Kubernetes service.
+     ```yaml
+     ports:
+       - containerPort: 9010
+     ```
+   - Use container orchestration tools to manage JMX access
+
+   Service Discovery: Use tools like Kubernetes for managing and discovering JMX endpoints. You can define services to access your application. This service definition allows access to the JMX port on your application.
+
+   ```yaml
+   kind: Service
+   apiVersion: v1
+   metadata:
+     name: my-java-app
+   spec:
+     ports:
+       - port: 9010
+         targetPort: 9010
+     selector:
+       app: my-java-app
+   ```
+
 3. Integrate with monitoring platforms:
-    - Use JMX exporters to send metrics to centralized monitoring systems: Java Management Extensions (JMX) are commonly used by Java programs to expose different metrics and management data. Metrics related to garbage collection, thread activity, memory usage, and custom application-specific metrics are some of its examples. However, [JMX metrics](https://signoz.io/docs/tutorial/jmx-metrics/) are available in a Java-specific format, which isn't directly compatible with the majority of centralized monitoring solutions. In this scenario, JMX Exporters act as intermediaries that translate JMX metrics into a format that centralized monitoring systems can understand.
+   - Use JMX exporters to send metrics to centralized monitoring systems: Java Management Extensions (JMX) are commonly used by Java programs to expose different metrics and management data. Metrics related to garbage collection, thread activity, memory usage, and custom application-specific metrics are some of its examples. However, [JMX metrics](https://signoz.io/docs/tutorial/jmx-metrics/) are available in a Java-specific format, which isn't directly compatible with the majority of centralized monitoring solutions. In this scenario, JMX Exporters act as intermediaries that translate JMX metrics into a format that centralized monitoring systems can understand.
 4. Optimize performance impact:
-    - Limit the number of exposed metrics: You can adapt selective exposure technique to only expose essential metrics to avoid excessive overhead. It’s important to focus on high-impact metrics like heap memory usage or transaction rates.
-    - Use sampling for high-frequency metrics: Collecting metrics at regular intervals can be a significant factor in reducing the load. You can do so by updating metrics only at specified intervals to reduce the monitoring impact.
-    
-    ```bash
-    long lastSampleTime = System.currentTimeMillis();
-    long sampleInterval = 60000; // 1 minute
-    
-    public void updateMetric() {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastSampleTime >= sampleInterval) {
-            // Update and record metric
-            lastSampleTime = currentTime;
-        }
-    }
-    ```
-    
-    - Consider using asynchronous operations for time-consuming management tasks: Perform time-consuming tasks asynchronously to avoid blocking. It’s a better approach to use a separate thread for tasks that take time to prevent blocking the main application.
-    
-    ```bash
-    public void performTimeConsumingTask() {
-        Executors.newSingleThreadExecutor().submit(() -> {
-            // Perform the task
-        });
-    }
-    ```
-    
+
+   - Limit the number of exposed metrics: You can adapt selective exposure technique to only expose essential metrics to avoid excessive overhead. It’s important to focus on high-impact metrics like heap memory usage or transaction rates.
+   - Use sampling for high-frequency metrics: Collecting metrics at regular intervals can be a significant factor in reducing the load. You can do so by updating metrics only at specified intervals to reduce the monitoring impact.
+
+   ```bash
+   long lastSampleTime = System.currentTimeMillis();
+   long sampleInterval = 60000; // 1 minute
+
+   public void updateMetric() {
+       long currentTime = System.currentTimeMillis();
+       if (currentTime - lastSampleTime >= sampleInterval) {
+           // Update and record metric
+           lastSampleTime = currentTime;
+       }
+   }
+   ```
+
+   - Consider using asynchronous operations for time-consuming management tasks: Perform time-consuming tasks asynchronously to avoid blocking. It’s a better approach to use a separate thread for tasks that take time to prevent blocking the main application.
+
+   ```bash
+   public void performTimeConsumingTask() {
+       Executors.newSingleThreadExecutor().submit(() -> {
+           // Perform the task
+       });
+   }
+   ```
 
 ## Enhancing JMX Monitoring with SigNoz
 

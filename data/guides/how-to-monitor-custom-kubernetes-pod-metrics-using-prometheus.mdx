@@ -1,158 +1,173 @@
 ---
-
 title: How to Monitor Custom Kubernetes Pod Metrics with Prometheus
-slug: how-to-monitor-custom-kubernetes-pod-metrics-using-prometheus
 date: 2024-07-25
 tags: [prometheus, faq]
 authors: [ankit_anand]
 description: Learn how to effectively monitor custom Kubernetes pod metrics using Prometheus. A comprehensive guide for developers and DevOps engineers.
-keywords: [Kubernetes, Prometheus, custom metrics, pod monitoring, metrics collection, Kubernetes monitoring, Prometheus setup, PromQL]
-
+keywords:
+  [
+    Kubernetes,
+    Prometheus,
+    custom metrics,
+    pod monitoring,
+    metrics collection,
+    Kubernetes monitoring,
+    Prometheus setup,
+    PromQL,
+  ]
 ---
 
 <head>
   <script
     type="application/ld+json"
-    dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "How to Monitor Custom Kubernetes Pod Metrics with Prometheus",
-  "alternativeHeadline": "Effectively Monitor Custom Kubernetes Pod Metrics Using Prometheus",
-  "author": {
-    "@type": "Person",
-    "name": "Ankit Anand"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "SigNoz",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-    }
-  },
-  "datePublished": "2024-07-25T00:00:00Z",
-  "dateModified": "2024-07-25T00:00:00Z",
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "https://signoz.io/guides/how-to-monitor-custom-kubernetes-pod-metrics-using-prometheus/"
-  },
-  "description": "Learn how to effectively monitor custom Kubernetes pod metrics using Prometheus. A comprehensive guide for developers and DevOps engineers.",
-  "keywords": "Kubernetes, Prometheus, custom metrics, pod monitoring, metrics collection, Kubernetes monitoring, Prometheus setup, PromQL",
-  "articleSection": "Technology",
-  "inLanguage": "en",
-  "isPartOf": {
-    "@type": "Blog",
-    "name": "SigNoz Blog",
-    "url": "https://signoz.io/blog/"
-  },
-  "about": [
-    {
-      "@type": "Thing",
-      "name": "Kubernetes",
-      "description": "An open-source container orchestration platform for automating deployment, scaling, and management of containerized applications."
-    },
-    {
-      "@type": "Thing",
-      "name": "Prometheus",
-      "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-    },
-    {
-      "@type": "Thing",
-      "name": "Custom Metrics",
-      "description": "User-defined measurements that provide specific insights into an application's behavior and performance."
-    }
-  ],
-  "mentions": [
-    {
-      "@type": "SoftwareApplication",
-      "name": "Prometheus",
-      "applicationCategory": "Monitoring Tool"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "name": "SigNoz",
-      "applicationCategory": "Observability Platform"
-    }
-  ],
-  "mainEntity": {
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What are custom Kubernetes pod metrics?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Custom Kubernetes pod metrics are user-defined measurements that provide specific insights into your application's behavior and performance. Unlike core metrics (CPU and memory usage), custom metrics offer tailored information relevant to your application's unique characteristics."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do you set up Prometheus for Kubernetes?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "To set up Prometheus in your Kubernetes cluster, create a namespace for Prometheus, apply the necessary RBAC rules, create a ConfigMap for Prometheus configuration, and deploy Prometheus using the provided configurations."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How do you implement custom pod metrics in Kubernetes?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "To implement custom metrics, instrument your application code using a Prometheus client library, create an HTTP endpoint to expose the metrics, and add Prometheus annotations to your pod specification."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What are some best practices for custom metric monitoring?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Best practices include following the USE method (monitor Utilization, Saturation, and Errors), keeping metric names consistent and descriptive, using labels for better filtering and aggregation, and setting up alerting rules for critical custom metrics."
-        }
-      }
-    ]
-  },
-  "tutorial": {
-    "@type": "HowTo",
-    "name": "Monitoring Custom Kubernetes Pod Metrics",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "name": "Create a Kubernetes namespace for Prometheus",
-        "text": "kubectl create namespace monitoring"
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Apply RBAC rules",
-        "text": "Apply necessary RBAC rules to ensure Prometheus has access to Kubernetes resources."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Create ConfigMap for Prometheus configuration",
-        "text": "Create a ConfigMap containing Prometheus' configuration details."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Deploy Prometheus",
-        "text": "Deploy Prometheus using the provided configuration files."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Instrument application code",
-        "text": "Use a Prometheus client library to instrument your application code and expose custom metrics."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Add Prometheus annotations",
-        "text": "Add necessary Prometheus annotations to your pod specification to enable metric scraping."
-      },
-      {
-        "@type": "HowToStep",
-        "name": "Query and visualize custom metrics",
-        "text": "Use PromQL to query custom metrics and integrate with Grafana for visualization."
-      }
-    ]
-  }
-}) }}
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Monitor Custom Kubernetes Pod Metrics with Prometheus',
+        alternativeHeadline: 'Effectively Monitor Custom Kubernetes Pod Metrics Using Prometheus',
+        author: {
+          '@type': 'Person',
+          name: 'Ankit Anand',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
+        datePublished: '2024-07-25T00:00:00Z',
+        dateModified: '2024-07-25T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id':
+            'https://signoz.io/guides/how-to-monitor-custom-kubernetes-pod-metrics-using-prometheus/',
+        },
+        description:
+          'Learn how to effectively monitor custom Kubernetes pod metrics using Prometheus. A comprehensive guide for developers and DevOps engineers.',
+        keywords:
+          'Kubernetes, Prometheus, custom metrics, pod monitoring, metrics collection, Kubernetes monitoring, Prometheus setup, PromQL',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
+        },
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Kubernetes',
+            description:
+              'An open-source container orchestration platform for automating deployment, scaling, and management of containerized applications.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Custom Metrics',
+            description:
+              "User-defined measurements that provide specific insights into an application's behavior and performance.",
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What are custom Kubernetes pod metrics?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "Custom Kubernetes pod metrics are user-defined measurements that provide specific insights into your application's behavior and performance. Unlike core metrics (CPU and memory usage), custom metrics offer tailored information relevant to your application's unique characteristics.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do you set up Prometheus for Kubernetes?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'To set up Prometheus in your Kubernetes cluster, create a namespace for Prometheus, apply the necessary RBAC rules, create a ConfigMap for Prometheus configuration, and deploy Prometheus using the provided configurations.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do you implement custom pod metrics in Kubernetes?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'To implement custom metrics, instrument your application code using a Prometheus client library, create an HTTP endpoint to expose the metrics, and add Prometheus annotations to your pod specification.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What are some best practices for custom metric monitoring?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Best practices include following the USE method (monitor Utilization, Saturation, and Errors), keeping metric names consistent and descriptive, using labels for better filtering and aggregation, and setting up alerting rules for critical custom metrics.',
+              },
+            },
+          ],
+        },
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Monitoring Custom Kubernetes Pod Metrics',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Create a Kubernetes namespace for Prometheus',
+              text: 'kubectl create namespace monitoring',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Apply RBAC rules',
+              text: 'Apply necessary RBAC rules to ensure Prometheus has access to Kubernetes resources.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create ConfigMap for Prometheus configuration',
+              text: "Create a ConfigMap containing Prometheus' configuration details.",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Deploy Prometheus',
+              text: 'Deploy Prometheus using the provided configuration files.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Instrument application code',
+              text: 'Use a Prometheus client library to instrument your application code and expose custom metrics.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Add Prometheus annotations',
+              text: 'Add necessary Prometheus annotations to your pod specification to enable metric scraping.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Query and visualize custom metrics',
+              text: 'Use PromQL to query custom metrics and integrate with Grafana for visualization.',
+            },
+          ],
+        },
+      }),
+    }}
   />
 </head>
 
@@ -205,13 +220,13 @@ kind: ClusterRole
 metadata:
   name: prometheus
 rules:
-- apiGroups: [""]
-  resources:
-  - nodes
-  - services
-  - endpoints
-  - pods
-  verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources:
+      - nodes
+      - services
+      - endpoints
+      - pods
+    verbs: ['get', 'list', 'watch']
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -228,10 +243,9 @@ roleRef:
   kind: ClusterRole
   name: prometheus
 subjects:
-- kind: ServiceAccount
-  name: prometheus
-  namespace: monitoring
-
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: monitoring
 ```
 
 1. Create a ConfigMap for Prometheus configuration:
@@ -265,7 +279,6 @@ data:
           target_label: __address__
         - action: labelmap
           regex: __meta_kubernetes_pod_label_(.+)
-
 ```
 
 1. Deploy Prometheus:
@@ -288,19 +301,19 @@ spec:
     spec:
       serviceAccountName: prometheus
       containers:
-      - name: prometheus
-        image: prom/prometheus:v2.37.0
-        args:
-        - "--config.file=/etc/prometheus/prometheus.yml"
-        ports:
-        - containerPort: 9090
-        volumeMounts:
-        - name: config
-          mountPath: /etc/prometheus
+        - name: prometheus
+          image: prom/prometheus:v2.37.0
+          args:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
       volumes:
-      - name: config
-        configMap:
-          name: prometheus-config
+        - name: config
+          configMap:
+            name: prometheus-config
 ---
 apiVersion: v1
 kind: Service
@@ -311,9 +324,8 @@ spec:
   selector:
     app: prometheus
   ports:
-  - port: 9090
-    targetPort: 9090
-
+    - port: 9090
+      targetPort: 9090
 ```
 
 Apply these configurations to your cluster using `kubectl apply -f`.
@@ -329,10 +341,9 @@ To expose custom metrics from your Kubernetes pods:
 ```yaml
 metadata:
   annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "8080"
-    prometheus.io/path: "/metrics"
-
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '8080'
+    prometheus.io/path: '/metrics'
 ```
 
 Here's an example of a custom metric in Python using the `prometheus_client` library:

@@ -1,149 +1,162 @@
 ---
-
 title: How to Increase Prometheus Storage Retention - A Step-by-Step Guide
-slug: how-to-increase-prometheus-storage-retention
 date: 2024-07-24
 tags: [faq, prometheus]
 authors: [yuvraj]
 description: Learn how to increase Prometheus storage retention with our comprehensive guide. Boost your monitoring capabilities and enhance long-term data analysis.
-keywords: [Prometheus, storage retention, monitoring, data analysis, configuration, troubleshooting, best practices]
-
+keywords:
+  [
+    Prometheus,
+    storage retention,
+    monitoring,
+    data analysis,
+    configuration,
+    troubleshooting,
+    best practices,
+  ]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to Increase Prometheus Storage Retention - A Step-by-Step Guide",
-    "alternativeHeadline": "Extend Prometheus Storage Retention with This Comprehensive Guide",
-    "author": {
-      "@type": "Person",
-      "name": "Yuvraj"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-24T00:00:00Z",
-    "dateModified": "2024-07-24T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/how-to-increase-prometheus-storage-retention/"
-    },
-    "description": "Learn how to increase Prometheus storage retention with our comprehensive guide. Boost your monitoring capabilities and enhance long-term data analysis.",
-    "keywords": "Prometheus, storage retention, monitoring, data analysis, configuration, troubleshooting, best practices",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Prometheus",
-        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-      },
-      {
-        "@type": "Thing",
-        "name": "Storage Retention",
-        "description": "The duration for which time-series data is kept before being automatically purged."
-      },
-      {
-        "@type": "Thing",
-        "name": "Data Analysis",
-        "description": "The process of inspecting, cleaning, transforming, and modeling data with the goal of discovering useful information."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is the default retention period for Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The default retention period is 15 days."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Increase Prometheus Storage Retention - A Step-by-Step Guide',
+        alternativeHeadline: 'Extend Prometheus Storage Retention with This Comprehensive Guide',
+        author: {
+          '@type': 'Person',
+          name: 'Yuvraj',
         },
-        {
-          "@type": "Question",
-          "name": "Can I change retention settings without restarting Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No, changes to retention settings require a Prometheus restart to take effect."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "How does increasing retention affect Prometheus performance?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Extended retention may impact query performance and increase storage requirements. Monitor system resources and optimize as needed."
-          }
+        datePublished: '2024-07-24T00:00:00Z',
+        dateModified: '2024-07-24T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/how-to-increase-prometheus-storage-retention/',
         },
-        {
-          "@type": "Question",
-          "name": "Is there a maximum limit to Prometheus retention time?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "There's no hard limit, but practical constraints like storage capacity and query performance should be considered when setting retention periods."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Increasing Prometheus Storage Retention",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Check Current Retention Settings",
-          "text": "Locate the Prometheus configuration file (usually `prometheus.yml`). Look for the `-storage.tsdb.retention.time` flag in the startup command or configuration. Access the Prometheus UI and navigate to the `/config` endpoint to view current settings. Use the Prometheus API to query retention information."
+        description:
+          'Learn how to increase Prometheus storage retention with our comprehensive guide. Boost your monitoring capabilities and enhance long-term data analysis.',
+        keywords:
+          'Prometheus, storage retention, monitoring, data analysis, configuration, troubleshooting, best practices',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Modify Retention Period",
-          "text": "Open the Prometheus configuration file in a text editor. Locate or add the `-storage.tsdb.retention.time` flag. Set the desired retention period (e.g., `30d` for 30 days, `720h` for 30 days, or `1y` for 1 year). Save the changes and restart Prometheus to apply the new settings."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Storage Retention',
+            description:
+              'The duration for which time-series data is kept before being automatically purged.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Data Analysis',
+            description:
+              'The process of inspecting, cleaning, transforming, and modeling data with the goal of discovering useful information.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What is the default retention period for Prometheus?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'The default retention period is 15 days.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I change retention settings without restarting Prometheus?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'No, changes to retention settings require a Prometheus restart to take effect.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How does increasing retention affect Prometheus performance?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Extended retention may impact query performance and increase storage requirements. Monitor system resources and optimize as needed.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Is there a maximum limit to Prometheus retention time?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "There's no hard limit, but practical constraints like storage capacity and query performance should be considered when setting retention periods.",
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Increase Retention for Dockerized Prometheus",
-          "text": "Modify the Docker run command or docker-compose file. Add or update the `-storage.tsdb.retention.time` flag in the command arguments. Ensure persistent storage is configured to retain data across container restarts."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Increasing Prometheus Storage Retention',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Check Current Retention Settings',
+              text: 'Locate the Prometheus configuration file (usually `prometheus.yml`). Look for the `-storage.tsdb.retention.time` flag in the startup command or configuration. Access the Prometheus UI and navigate to the `/config` endpoint to view current settings. Use the Prometheus API to query retention information.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Modify Retention Period',
+              text: 'Open the Prometheus configuration file in a text editor. Locate or add the `-storage.tsdb.retention.time` flag. Set the desired retention period (e.g., `30d` for 30 days, `720h` for 30 days, or `1y` for 1 year). Save the changes and restart Prometheus to apply the new settings.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Increase Retention for Dockerized Prometheus',
+              text: 'Modify the Docker run command or docker-compose file. Add or update the `-storage.tsdb.retention.time` flag in the command arguments. Ensure persistent storage is configured to retain data across container restarts.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Implement Best Practices',
+              text: 'Estimate storage requirements. Implement data compression. Utilize remote storage. Monitor system performance regularly after increasing retention.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Troubleshoot Common Issues',
+              text: 'Address insufficient disk space by adding storage or implementing data compression. Verify data integrity and consider restarting Prometheus with a clean storage directory. Optimize queries and consider implementing recording rules for frequently accessed metrics. Check logs for retention-related errors and ensure proper configuration syntax.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Implement Best Practices",
-          "text": "Estimate storage requirements. Implement data compression. Utilize remote storage. Monitor system performance regularly after increasing retention."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Troubleshoot Common Issues",
-          "text": "Address insufficient disk space by adding storage or implementing data compression. Verify data integrity and consider restarting Prometheus with a clean storage directory. Optimize queries and consider implementing recording rules for frequently accessed metrics. Check logs for retention-related errors and ensure proper configuration syntax."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Prometheus, a powerful open-source monitoring system, collects and stores time-series data for analysis and alerting. However, its default storage retention period may not suffice for long-term trend analysis or compliance requirements. This guide will walk you through the process of increasing Prometheus storage retention, enabling you to harness the full potential of your monitoring data.
@@ -178,10 +191,10 @@ curl -s http://localhost:9090/api/v1/status/runtimeinfo | jq '.data.storageReten
 
 Follow these steps to extend Prometheus storage retention:
 
-1. Open the ****[Prometheus service](https://signoz.io/guides/cannot-start-prometheus-by-using-systemd/) file. It is usually located at `/etc/systemd/system/prometheus.service`.
+1. Open the \*\*\*\*[Prometheus service](https://signoz.io/guides/cannot-start-prometheus-by-using-systemd/) file. It is usually located at `/etc/systemd/system/prometheus.service`.
 
 ```jsx
-vi /etc/systemd/system/prometheus.service
+vi / etc / systemd / system / prometheus.service
 ```
 
 1. Locate or add the `-storage.tsdb.retention.time` flag.
@@ -212,7 +225,7 @@ If you have Prometheus installed on macOS using Homebrew:
 1. Confirm the location of your `prometheus.yml` file. It is usually located at `/opt/homebrew/etc/prometheus.yml`.
 
 ```jsx
-ls /opt/homebrew/etc/prometheus.yml
+ls / opt / homebrew / etc / prometheus.yml
 ```
 
 1. When starting Prometheus, explicitly state the location of the configuration file and pass in the `--storage.tsdb.retention.time` flag. Set this to your desired retention period.
@@ -244,7 +257,6 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
-
 ```
 
 ## Best Practices for Managing Increased Retention

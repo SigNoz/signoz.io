@@ -1,13 +1,19 @@
 ---
-
 title: When to Throw Exceptions vs. Log Errors in Code
-slug: throw-exception-vs-logging
 date: 2024-09-24
 tags: [logging]
 authors: [sushant_gaurav]
 description: Learn when to throw exceptions vs. log errors in your code. Discover best practices for effective error handling and debugging in software development.
-keywords: [Throw exception vs Logging, Error handling, Exception handling, Logging best practices, Debugging, Software development, Error management]
-
+keywords:
+  [
+    Throw exception vs Logging,
+    Error handling,
+    Exception handling,
+    Logging best practices,
+    Debugging,
+    Software development,
+    Error management,
+  ]
 ---
 
 Error management is an essential aspect of software development since it directly impacts your application's reliability, maintainability, and user experience. As a developer, one key decision in error management is whether to throw an exception or report the problem. This option affects your code's performance, behaviour, and debugability. In this post, we'll look at the distinctions between throwing exceptions and reporting mistakes and how to best include both strategies in your error management strategy.
@@ -85,14 +91,14 @@ In this example:
 Both exceptions and logging have different implications for how your application runs and performs. Here's a breakdown:
 
 1. Flow Interruption:
-    - Exceptions immediately halt the current execution path until handled. In the case of unhandled exceptions, they can even crash the entire application. This makes exceptions critical for addressing unexpected errors quickly.
-    - Logging, on the other hand, records errors or other relevant information without stopping or changing the current execution. It allows the application to continue running while issues are logged for future review.
+   - Exceptions immediately halt the current execution path until handled. In the case of unhandled exceptions, they can even crash the entire application. This makes exceptions critical for addressing unexpected errors quickly.
+   - Logging, on the other hand, records errors or other relevant information without stopping or changing the current execution. It allows the application to continue running while issues are logged for future review.
 2. Performance Considerations:
-    - Exceptions are expensive operations in terms of performance, especially when thrown frequently. They involve creating new stack traces, rolling back execution, and searching for catch blocks, which consumes more resources than regular code execution.
-    - Logging has a lower performance overhead compared to exceptions. However, excessive logging, especially at high verbosity levels like DEBUG or TRACE, can still slow down your application and fill up disk space quickly, making log rotation essential.
+   - Exceptions are expensive operations in terms of performance, especially when thrown frequently. They involve creating new stack traces, rolling back execution, and searching for catch blocks, which consumes more resources than regular code execution.
+   - Logging has a lower performance overhead compared to exceptions. However, excessive logging, especially at high verbosity levels like DEBUG or TRACE, can still slow down your application and fill up disk space quickly, making log rotation essential.
 3. Usability and Troubleshooting:
-    - Exceptions are suited for scenarios where the program must respond immediately to an error and either retry, fail gracefully, or notify the user.
-    - Logging is more useful for long-term monitoring, providing insights into not just errors but also warnings and general runtime behaviours that can be crucial for diagnosing performance bottlenecks, user behaviour, or subtle bugs that don’t immediately cause crashes.
+   - Exceptions are suited for scenarios where the program must respond immediately to an error and either retry, fail gracefully, or notify the user.
+   - Logging is more useful for long-term monitoring, providing insights into not just errors but also warnings and general runtime behaviours that can be crucial for diagnosing performance bottlenecks, user behaviour, or subtle bugs that don’t immediately cause crashes.
 
 ## When to Throw an Exception: Best Practices
 
@@ -102,7 +108,7 @@ Exceptions should be reserved for genuinely unusual circumstances—those that p
 2. Use suitable exception types: Depending on the nature of the mistake, select either verified or unchecked exceptions. Checked exceptions should be used when the caller expects to be able to recover the error. Unchecked exceptions (such as 'RuntimeException') should be used to indicate code issues.
 3. Deliver meaningful exception messages: The message in an exception should explain what went wrong and give enough information to help with troubleshooting.
 4. Add custom exceptions: Built-in exceptions may not always convey the specific issue your application encounters. In such cases, creating custom exceptions can help make your code more expressive, improve readability, and facilitate debugging by clearly communicating what went wrong.
-A custom exception should extend from an appropriate base class, such as `Exception` or `RuntimeException`, and it should include relevant information about the error. Let’s look at an example.
+   A custom exception should extend from an appropriate base class, such as `Exception` or `RuntimeException`, and it should include relevant information about the error. Let’s look at an example.
 
 Example of a Custom Exception:
 
@@ -175,11 +181,11 @@ When using exceptions, avoid the following common pitfalls:
 Logging is an important tool for analyzing and debugging your application's behaviour. Effective logging procedures may significantly increase your capacity to control mistakes and track system health over time.
 
 1. Choose appropriate log levels:
-    - `DEBUG`: Detailed information for diagnosing issues.
-    - `INFO`: General operational events to track the application’s flow.
-    - `WARN`: Potentially harmful situations that aren’t errors yet.
-    - `ERROR`: Errors that occur during runtime but don’t stop the application.
-    - `FATAL`: Critical errors that might cause the application to terminate.
+   - `DEBUG`: Detailed information for diagnosing issues.
+   - `INFO`: General operational events to track the application’s flow.
+   - `WARN`: Potentially harmful situations that aren’t errors yet.
+   - `ERROR`: Errors that occur during runtime but don’t stop the application.
+   - `FATAL`: Critical errors that might cause the application to terminate.
 2. Structure log messages for clarity Include timestamps, thread IDs, log levels, and class names in your log messages. Well-structured logs may make a significant difference when debugging complicated systems.
 3. Include context in log entries: To improve logs' usefulness during troubleshooting, include important contexts such as user IDs, request parameters, or system conditions.
 4. Implement log rotation and retention policies: To minimize performance difficulties and bloated log files, use log rotation and retention policies to archive or remove older logs as needed.
@@ -210,15 +216,15 @@ Too much logging can overload your system, slow down application performance, an
 Choosing the correct logging framework is determined by your language, system needs, and if you operate in a distributed setting. Here are a few often-used tools:
 
 - Java:
-    - Log4j: A powerful, flexible logging library widely used in enterprise applications.
-    - SLF4J: A simple logging facade that works with various logging backends.
-    - java.util.logging: The built-in logging library in the Java standard library.
+  - Log4j: A powerful, flexible logging library widely used in enterprise applications.
+  - SLF4J: A simple logging facade that works with various logging backends.
+  - java.util.logging: The built-in logging library in the Java standard library.
 - Python:
-    - Logging module: Python’s built-in logging module provides flexibility for setting up handlers and formatters, and it integrates well with various libraries.
-    - To learn about logging in Python, different levels of logging, formatters, etc. in more detail, you can refer to this article [Python Logging - From Setup to Monitoring with Best Practices](https://signoz.io/guides/logging-in-python/). You can also check out [Python Logging Best Practices - Expert Tips with Practical Examples](https://signoz.io/guides/python-logging-best-practices/).
+  - Logging module: Python’s built-in logging module provides flexibility for setting up handlers and formatters, and it integrates well with various libraries.
+  - To learn about logging in Python, different levels of logging, formatters, etc. in more detail, you can refer to this article [Python Logging - From Setup to Monitoring with Best Practices](https://signoz.io/guides/logging-in-python/). You can also check out [Python Logging Best Practices - Expert Tips with Practical Examples](https://signoz.io/guides/python-logging-best-practices/).
 - JavaScript:
-    - Winston: A popular, multi-transport logging tool for Node.js applications.
-    - Bunyan: A JSON-based logging library designed for Node.js applications with a focus on speed.
+  - Winston: A popular, multi-transport logging tool for Node.js applications.
+  - Bunyan: A JSON-based logging library designed for Node.js applications with a focus on speed.
 
 ### Centralized Logging in Distributed Systems
 
@@ -268,26 +274,25 @@ Error management in distributed systems is substantially more difficult due to t
 ## Key Strategies for Error Handling in Distributed Systems:
 
 1. Use correlation IDs: A correlation ID is a unique identification given to each request. It allows you to follow and trace the request as it moves through various services. By providing this ID in logs and error messages, you may track a request across several microservices, making distributed issues easier to troubleshoot.
-    
-    ```java
-    // Example of adding a correlation ID to logs
-    String correlationId = UUID.randomUUID().toString();
-    logger.info("Starting process with correlationId {}", correlationId);
-    ```
-    
+
+   ```java
+   // Example of adding a correlation ID to logs
+   String correlationId = UUID.randomUUID().toString();
+   logger.info("Starting process with correlationId {}", correlationId);
+   ```
+
 2. Implement circuit breakers: A circuit breaker prevents cascading failures by interrupting calls to a service that is down or under severe demand. This guarantees that dependent services are not swamped by several failed attempts.
-    - Libraries such as Hystrix and Resilience4j provide circuit breaker patterns in Java.
+   - Libraries such as Hystrix and Resilience4j provide circuit breaker patterns in Java.
 3. Design for failure: In distributed systems, always account for service outages, network timeouts, and unavailability. Use timeouts, retries, and fallbacks to gracefully manage errors without cascading into other services.
 4. Standardize error responses: Create a uniform error response style for your microservices, guaranteeing that when something goes wrong, all services return a standard payload. This simplifies error handling in client applications.
-    
-    ```json
-    {
-        "error": "Service Unavailable",
-        "message": "The payment service is currently down",
-        "status": 503
-    }
-    ```
-    
+
+   ```json
+   {
+     "error": "Service Unavailable",
+     "message": "The payment service is currently down",
+     "status": 503
+   }
+   ```
 
 ## Monitoring and Alerting: Beyond Logging and Exceptions
 
@@ -296,14 +301,14 @@ While logging and exception management are vital, they alone cannot assure an ap
 ### Key Practices for Monitoring and Alerting
 
 1. Set up alerts: Alerts should be triggered depending on exceptions, error rates, or certain log patterns. This guarantees that your team is alerted of concerns in real-time, resulting in faster remedies. Establish thresholds for essential metrics, such as:
-    - High mistake rates.
-    - Unusually sluggish reaction times.
-    - Frequently timed out or retried.
+   - High mistake rates.
+   - Unusually sluggish reaction times.
+   - Frequently timed out or retried.
 2. Implement health checks: Use health checks to constantly monitor the status of essential services and dependencies. Services should offer health endpoints (e.g., '/health') that give status information that monitoring systems may poll.
 3. Use metrics: Gather metrics to measure key performance indicators such as response times, CPU/memory use, and error rates. These metrics give insight into how the application performs over time and assist in finding bottlenecks. Track metrics such as:
-    - Latency, which measures average response times across services.
-    - Error rate: The percentage of unsuccessful requests.
-    - Resource usage: CPU and memory utilization by service.
+   - Latency, which measures average response times across services.
+   - Error rate: The percentage of unsuccessful requests.
+   - Resource usage: CPU and memory utilization by service.
 4. Integrate with incident management systems: Tools like PagerDuty, OpsGenie, or ServiceNow can help automate incident response by integrating with your monitoring tools. Alerts can be routed to the appropriate teams with clear severity levels.
 
 ### Leveraging SigNoz for Advanced Error Tracking
@@ -320,7 +325,7 @@ SigNoz's key features include real-time error tracking, which enables fast diagn
 
 ### Getting Started with SigNoz
 
-<GetStartedSigNoz /> 
+<GetStartedSigNoz />{' '}
 
 ### Best Practices for Exception and Logging Documentation
 
@@ -363,16 +368,16 @@ Create custom exceptions for situations that require additional context. Custom 
 Error handling in asynchronous code (for example, utilizing futures, promises, or callbacks) differs from synchronous code:
 
 1. Use completion handlers to capture exceptions in asynchronous functions. For example, Java's `CompletableFuture` offers error handling methods such as `handle` and `exceptionally`.
-    
-    ```java
-    CompletableFuture.supplyAsync(() -> {
-        // Do some work
-        return result;
-    }).exceptionally(e -> {
-        // Handle exception
-        return fallbackResult;
-    });
-    ```
-    
+
+   ```java
+   CompletableFuture.supplyAsync(() -> {
+       // Do some work
+       return result;
+   }).exceptionally(e -> {
+       // Handle exception
+       return fallbackResult;
+   });
+   ```
+
 2. Log exceptions appropriately without disrupting the execution of other duties.
 3. Rethrow exceptions only if the fault impacts future operations. Otherwise, handle the problem using an asynchronous callback or future.

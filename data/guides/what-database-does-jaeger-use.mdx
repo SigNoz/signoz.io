@@ -1,159 +1,172 @@
 ---
-
 title: What Database does Jaeger Use - Elasticsearch vs Cassandra
-slug: what-database-does-jaeger-use
 date: 2024-07-30
 tags: [faq, jaeger]
 authors: [yuvraj]
 description: Discover the primary databases Jaeger uses for distributed tracing. Compare Elasticsearch and Cassandra to choose the best option for your deployment.
-keywords: [Jaeger database, Elasticsearch, Cassandra, distributed tracing, storage backend, Kafka, data persistence]
-
+keywords:
+  [
+    Jaeger database,
+    Elasticsearch,
+    Cassandra,
+    distributed tracing,
+    storage backend,
+    Kafka,
+    data persistence,
+  ]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "What database does Jaeger use: Elasticsearch vs. Cassandra",
-    "alternativeHeadline": "Discover the primary databases Jaeger uses for distributed tracing",
-    "author": {
-      "@type": "Person",
-      "name": "Yuvraj"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-30T00:00:00Z",
-    "dateModified": "2024-07-30T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/what-database-does-jaeger-use/"
-    },
-    "description": "Discover the primary databases Jaeger uses for distributed tracing. Compare Elasticsearch and Cassandra to choose the best option for your deployment.",
-    "keywords": "Jaeger database, Elasticsearch, Cassandra, distributed tracing, storage backend, Kafka, data persistence",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Jaeger",
-        "description": "An open-source, end-to-end distributed tracing system."
-      },
-      {
-        "@type": "Thing",
-        "name": "Elasticsearch",
-        "description": "A distributed, RESTful search and analytics engine capable of solving a growing number of use cases."
-      },
-      {
-        "@type": "Thing",
-        "name": "Cassandra",
-        "description": "A highly scalable NoSQL database designed to handle large amounts of data across many commodity servers."
-      },
-      {
-        "@type": "Thing",
-        "name": "Kafka",
-        "description": "A distributed streaming platform capable of handling high-throughput data feeds."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Jaeger",
-        "applicationCategory": "Distributed Tracing"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Elasticsearch",
-        "applicationCategory": "Search Engine"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Cassandra",
-        "applicationCategory": "Database"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Kafka",
-        "applicationCategory": "Streaming Platform"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Can Jaeger work without a persistent database?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, Jaeger can operate with in-memory storage for testing or development purposes. However, a persistent database is crucial for production deployments to ensure data durability and enable historical analysis."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'What database does Jaeger use: Elasticsearch vs. Cassandra',
+        alternativeHeadline: 'Discover the primary databases Jaeger uses for distributed tracing',
+        author: {
+          '@type': 'Person',
+          name: 'Yuvraj',
         },
-        {
-          "@type": "Question",
-          "name": "How does Jaeger's database choice affect its performance?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The database choice impacts query performance, data ingestion rates, and overall system scalability. Elasticsearch generally offers better query performance, while Cassandra excels in write-heavy scenarios."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "Is it possible to use both Elasticsearch and Cassandra with Jaeger?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "While it's technically possible to use both databases simultaneously, it's not a common practice. Most organizations choose one primary storage backend for simplicity and consistency."
-          }
+        datePublished: '2024-07-30T00:00:00Z',
+        dateModified: '2024-07-30T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/what-database-does-jaeger-use/',
         },
-        {
-          "@type": "Question",
-          "name": "What are the minimum hardware requirements for running Jaeger with Elasticsearch?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The hardware requirements depend on your trace data volume and retention period. For small to medium deployments, start with: 3 Elasticsearch nodes, 8GB RAM per node, 4 CPU cores per node, and SSD storage for improved performance. Scale these resources as your tracing needs grow."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Setting Up Jaeger with Elasticsearch",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install Elasticsearch",
-          "text": "Install Elasticsearch and ensure it's running."
+        description:
+          'Discover the primary databases Jaeger uses for distributed tracing. Compare Elasticsearch and Cassandra to choose the best option for your deployment.',
+        keywords:
+          'Jaeger database, Elasticsearch, Cassandra, distributed tracing, storage backend, Kafka, data persistence',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Set Environment Variable",
-          "text": "Set the SPAN_STORAGE_TYPE environment variable to elasticsearch."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Jaeger',
+            description: 'An open-source, end-to-end distributed tracing system.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Elasticsearch',
+            description:
+              'A distributed, RESTful search and analytics engine capable of solving a growing number of use cases.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Cassandra',
+            description:
+              'A highly scalable NoSQL database designed to handle large amounts of data across many commodity servers.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Kafka',
+            description:
+              'A distributed streaming platform capable of handling high-throughput data feeds.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Jaeger',
+            applicationCategory: 'Distributed Tracing',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Elasticsearch',
+            applicationCategory: 'Search Engine',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Cassandra',
+            applicationCategory: 'Database',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Kafka',
+            applicationCategory: 'Streaming Platform',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'Can Jaeger work without a persistent database?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, Jaeger can operate with in-memory storage for testing or development purposes. However, a persistent database is crucial for production deployments to ensure data durability and enable historical analysis.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: "How does Jaeger's database choice affect its performance?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'The database choice impacts query performance, data ingestion rates, and overall system scalability. Elasticsearch generally offers better query performance, while Cassandra excels in write-heavy scenarios.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Is it possible to use both Elasticsearch and Cassandra with Jaeger?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "While it's technically possible to use both databases simultaneously, it's not a common practice. Most organizations choose one primary storage backend for simplicity and consistency.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What are the minimum hardware requirements for running Jaeger with Elasticsearch?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'The hardware requirements depend on your trace data volume and retention period. For small to medium deployments, start with: 3 Elasticsearch nodes, 8GB RAM per node, 4 CPU cores per node, and SSD storage for improved performance. Scale these resources as your tracing needs grow.',
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Configure Jaeger",
-          "text": "Configure Jaeger components with Elasticsearch connection details."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Setting Up Jaeger with Elasticsearch',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Install Elasticsearch',
+              text: "Install Elasticsearch and ensure it's running.",
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Set Environment Variable',
+              text: 'Set the SPAN_STORAGE_TYPE environment variable to elasticsearch.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Configure Jaeger',
+              text: 'Configure Jaeger components with Elasticsearch connection details.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Optimize Performance',
+              text: 'Use dedicated Elasticsearch indices for Jaeger data and implement proper index management and data retention policies.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Optimize Performance",
-          "text": "Use dedicated Elasticsearch indices for Jaeger data and implement proper index management and data retention policies."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Jaeger, a popular open-source [distributed tracing](https://signoz.io/distributed-tracing/) system, offers flexibility in choosing a database for storing trace data. While Jaeger supports multiple storage backends, two primary options stand out: Elasticsearch and Cassandra. This article delves into Jaeger's database choices, comparing these options to help you make an informed decision for your tracing infrastructure.
@@ -197,7 +210,6 @@ collector:
     server-urls: <http://elasticsearch:9200>
     username: elastic
     password: changeme
-
 ```
 
 For optimal performance:

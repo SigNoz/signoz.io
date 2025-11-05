@@ -1,13 +1,19 @@
 ---
-
 title: How to Fix Duplicate Log Messages in Python Logging
-slug: log-messages-appearing-twice-with-python-logging
 date: 2024-09-11
 tags: [faq]
 authors: [soumya_gupta]
 description: Learn how to fix duplicate log messages in Python logging. This guide covers common causes, quick fixes, and advanced techniques for clean logging.
-keywords: [Python logging, duplicate logs, log messages, debugging, logger configuration, log handlers, propagation]
-
+keywords:
+  [
+    Python logging,
+    duplicate logs,
+    log messages,
+    debugging,
+    logger configuration,
+    log handlers,
+    propagation,
+  ]
 ---
 
 Python's logging module is a powerful tool for tracking events in your applications. However, developers often encounter a frustrating issue: log messages appear twice. This duplication can clutter your logs, making debugging more challenging and potentially impacting application performance. Let's dive into the causes of this problem and explore effective solutions to ensure your logs are clean, accurate, and helpful.
@@ -16,12 +22,12 @@ Python's logging module is a powerful tool for tracking events in your applicati
 
 Duplicate log messages occur when the same log entry is recorded more than once. This redundancy is not just annoying—it can lead to confusion during debugging and unnecessarily bloat your log files. The primary factors behind this issue are:
 
-1. Multiple handlers attached to the same logger:  A frequent cause of duplicate log messages is having several log handlers configured. In Python's logging system, handlers determine where the log messages go, such as to a file, console, or network. When multiple handlers are set up to handle the same messages, each one processes the message, leading to duplicates in your output.
+1. Multiple handlers attached to the same logger: A frequent cause of duplicate log messages is having several log handlers configured. In Python's logging system, handlers determine where the log messages go, such as to a file, console, or network. When multiple handlers are set up to handle the same messages, each one processes the message, leading to duplicates in your output.
 2. Multiple Loggers: If multiple loggers are used for the same events, you might end up with duplicates. This usually happens when different parts of the code use different loggers or if the loggers aren't set up to share the same handler. Each logger might generate its own log entry, leading to redundant messages.
 3. Improper configuration of logger hierarchies: If you attach a handler to a logger and also to one or more of its ancestor loggers, you might see the same log message appear multiple times. This happens because loggers are organized in a hierarchy, and if handlers aren’t managed properly across parent and child loggers, you could end up with duplicates. To avoid this, make sure handlers are attached only to the specific loggers you want and not to their ancestor loggers.
 4. Unintended logger inheritance in multi-module applications: In larger applications with multiple modules, you might run into issues where log entries show up more than once. This happens because if a logger in one module inherits handlers from a parent module, the same log message can get processed multiple times if both the parent and child loggers have their own handlers. To prevent this from happening, it's a good idea to set up and manage loggers for each module separately.
 
- We'll revisit these points for a more detailed discussion later in the article.
+We'll revisit these points for a more detailed discussion later in the article.
 
 ## Root Logger vs. Child Logger Behavior
 
@@ -29,19 +35,16 @@ Understanding the hierarchy of loggers in Python is crucial for preventing dupli
 
 - The root logger sits at the top of the hierarchy. It is the default logger created automatically by python’s logging module. It is responsible for capturing all log messages unless explicitly overridden. This logger is initialized with a default configuration such as the default level is set to `WARNING` and it can be accessed using `logging.getLogger()` without any arguments. It can be customized with handlers and formatters.
 - Child loggers are explicitly created using dot notation, forming a hierarchy such as `A.B.C` represents, `A` as a child logger of the root logger, `A.B` as child logger of parent logger `A` and similarly, `A.B.C` as a child of parent logger `A.B`.
-    
-    ```powershell
-    Root Logger (implicitly '')
-    |
-    ├── A (Logger 'A')
-    |   |
-    |   ├── A.B (Logger 'A.B')
-    |       |
-    |       └── A.B.C (Logger 'A.B.C')
-    ```
-    
-    Child loggers inherit configuration from their parent loggers, but they can also have their own handlers, formatters, and levels. This allows for fine-grained control over logging output at different parts of an application.
-    
+  ```powershell
+  Root Logger (implicitly '')
+  |
+  ├── A (Logger 'A')
+  |   |
+  |   ├── A.B (Logger 'A.B')
+  |       |
+  |       └── A.B.C (Logger 'A.B.C')
+  ```
+  Child loggers inherit configuration from their parent loggers, but they can also have their own handlers, formatters, and levels. This allows for fine-grained control over logging output at different parts of an application.
 
 ```
 
@@ -52,71 +55,69 @@ Understanding the hierarchy of loggers in Python is crucial for preventing dupli
 Before diving into detailed solutions, here's a quick checklist to address common causes of duplicate logs:
 
 1. Check for multiple handlers: Ensure you're not adding redundant handlers to your root loggers.
-    
-    The root logger sits at the top of the logger hierarchy. If there's an extra handler attached to it that we don’t need, it might cause messages to be duplicated, and it’s a good to remove it.
-    
-    Firstly, let’s list all handlers attached to the root logger:
-    
-    ```python
-    import logging
-    
-    # Setup root logger with multiple handlers
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)
-    
-    # Adding multiple handlers for demonstration
-    handler1 = logging.StreamHandler()
-    handler2 = logging.StreamHandler()
-    root_logger.addHandler(handler1)
-    root_logger.addHandler(handler2)
-    
-    # Check the handlers
-    for handler in root_logger.handlers:
-        print(handler)
-    ```
-    
-    Output
-    
-    ```
-    <StreamHandler (NOTSET)>
-    <StreamHandler (NOTSET)>
-    
-    ```
-    
-    This indicates that two `StreamHandler` instances are attached to the root logger. We can then remove the redundant handlers by: 
-    
-    ```python
-    
-    if len(root_logger.handlers) > 0:
-        # Remove the first handler
-        root_logger.removeHandler(root_logger.handlers[0])
-    
-    ```
-    
-    Now, let’s verify if they have been removed. 
-    
-    ```python
-    for handler in root_logger.handlers:
-        print(handler)
-    ```
-    
-    Output: 
-    
-    ```
-    <StreamHandler (NOTSET)>
-    ```
-    
-2. Change `logger.propagate` settings for loggers: 
-    1. [Centralized logging](https://signoz.io/blog/centralized-logging/) with `logger.propagate=true` : If you have several loggers in your application, each with its own handler, it can lead to duplicate log messages in your output. This can be solved by attaching a single handler to the root logger and letting log messages propagate up to it. This approach consolidates logging and prevents duplication.
-    2. Isolated logger handling with `logger.propagate=false` : If you have a custom logger for a specific module with its own handler to isolate that component in your application, enabling propagation `propagate = True` could lead to duplicate log entries. This happens because the custom logger’s handler processes the log messages, and the same messages are then propagated to the root logger’s handler, resulting in redundancy. To avoid this duplication, you should set `propagate = False` on the custom logger, ensuring that its log messages are not forwarded to the root logger and preventing multiple outputs of the same log entry.
 
-    
+   The root logger sits at the top of the logger hierarchy. If there's an extra handler attached to it that we don’t need, it might cause messages to be duplicated, and it’s a good to remove it.
+
+   Firstly, let’s list all handlers attached to the root logger:
+
+   ```python
+   import logging
+
+   # Setup root logger with multiple handlers
+   root_logger = logging.getLogger()
+   root_logger.setLevel(logging.DEBUG)
+
+   # Adding multiple handlers for demonstration
+   handler1 = logging.StreamHandler()
+   handler2 = logging.StreamHandler()
+   root_logger.addHandler(handler1)
+   root_logger.addHandler(handler2)
+
+   # Check the handlers
+   for handler in root_logger.handlers:
+       print(handler)
+   ```
+
+   Output
+
+   ```
+   <StreamHandler (NOTSET)>
+   <StreamHandler (NOTSET)>
+
+   ```
+
+   This indicates that two `StreamHandler` instances are attached to the root logger. We can then remove the redundant handlers by:
+
+   ```python
+
+   if len(root_logger.handlers) > 0:
+       # Remove the first handler
+       root_logger.removeHandler(root_logger.handlers[0])
+
+   ```
+
+   Now, let’s verify if they have been removed.
+
+   ```python
+   for handler in root_logger.handlers:
+       print(handler)
+   ```
+
+   Output:
+
+   ```
+   <StreamHandler (NOTSET)>
+   ```
+
+2. Change `logger.propagate` settings for loggers:
+   1. [Centralized logging](https://signoz.io/blog/centralized-logging/) with `logger.propagate=true` : If you have several loggers in your application, each with its own handler, it can lead to duplicate log messages in your output. This can be solved by attaching a single handler to the root logger and letting log messages propagate up to it. This approach consolidates logging and prevents duplication.
+   2. Isolated logger handling with `logger.propagate=false` : If you have a custom logger for a specific module with its own handler to isolate that component in your application, enabling propagation `propagate = True` could lead to duplicate log entries. This happens because the custom logger’s handler processes the log messages, and the same messages are then propagated to the root logger’s handler, resulting in redundancy. To avoid this duplication, you should set `propagate = False` on the custom logger, ensuring that its log messages are not forwarded to the root logger and preventing multiple outputs of the same log entry.
 
 ```powershell
 import logging
 
 # Setup root logger (implicitly named '')
-root_logger = logging.getLogger()  
+root_logger = logging.getLogger()
 root_handler = logging.StreamHandler()
 root_handler.setLevel(logging.DEBUG)
 root_logger.addHandler(root_handler)
@@ -149,9 +150,9 @@ child_logger2.debug('Debug message from child_logger2.')  # Propagates up to 'A'
 child_logger3.debug('Debug message from child_logger3.')  # Propagates up to 'A.B', then 'A', and finally to the root logger
 ```
 
-In the above code, `child_logger1` has its own custom handler and so we used `propagate=false` whereas for `child_logger2` and `child_logger3` that requires no custom handler, we’ve set the propagation to `true`. 
+In the above code, `child_logger1` has its own custom handler and so we used `propagate=false` whereas for `child_logger2` and `child_logger3` that requires no custom handler, we’ve set the propagation to `true`.
 
-Output: 
+Output:
 
 ```powershell
 Debug message from root logger.
@@ -160,63 +161,62 @@ Debug message from child_logger2.
 Debug message from child_logger3.
 ```
 
-1. Centralize logger configuration: Use a consistent configuration approach across your application. Take a look at how loggers are used in your codebase. Ensure that the same logger is used consistently throughout the application. If you find that different loggers are being used for the same events, try consolidating them into a single logger. This will help prevent duplicate log entries and keep your logging clean and manageable. Let’s take an example, 
-    
-    ```python
-    import logging
-    
-    # Setup root logger (implicitly named '')
-    root_logger = logging.getLogger()
-    root_handler = logging.StreamHandler()
-    root_handler.setLevel(logging.DEBUG)
-    root_logger.addHandler(root_handler)
-    root_logger.setLevel(logging.DEBUG)
-    
-    # Setup first logger
-    logger1 = logging.getLogger('logger1')
-    logger1.setLevel(logging.DEBUG)
-    # No handler added to logger1, so it will propagate up to root_logger
-    
-    # Setup second logger
-    logger2 = logging.getLogger('logger2')
-    logger2.setLevel(logging.DEBUG)
-    # No handler added to logger2, so it will propagate up to root_logger
-    
-    # Log a message with both loggers
-    logger1.debug('This is a debug message.')
-    logger2.debug('This is a debug message.')
-    ```
-    
-    Output
-    
-    ```powershell
-    This is a debug message.
-    This is a debug message.
-    ```
-    
-    As you can see, the root logger outputs the same log entry twice in the output. In order to avoid this duplication, it is recommended to consolidate such loggers into one such as: 
-    
-    ```python
-    # Create a single logger
-    consolidated_logger = logging.getLogger('consolidated_logger')
-    consolidated_logger.setLevel(logging.DEBUG)
-    
-    # Add a handler to the consolidated logger
-    file_handler = logging.StreamHandler()
-    file_handler.setLevel(logging.DEBUG)
-    consolidated_logger.addHandler(file_handler)
-    
-    # Log messages with the consolidated logger
-    consolidated_logger.debug('This is a debug message.')
-         
-    ```
-    
-    Output
-    
-    ```
-    This is a debug message.
-    ```
-    
+1. Centralize logger configuration: Use a consistent configuration approach across your application. Take a look at how loggers are used in your codebase. Ensure that the same logger is used consistently throughout the application. If you find that different loggers are being used for the same events, try consolidating them into a single logger. This will help prevent duplicate log entries and keep your logging clean and manageable. Let’s take an example,
+
+   ```python
+   import logging
+
+   # Setup root logger (implicitly named '')
+   root_logger = logging.getLogger()
+   root_handler = logging.StreamHandler()
+   root_handler.setLevel(logging.DEBUG)
+   root_logger.addHandler(root_handler)
+   root_logger.setLevel(logging.DEBUG)
+
+   # Setup first logger
+   logger1 = logging.getLogger('logger1')
+   logger1.setLevel(logging.DEBUG)
+   # No handler added to logger1, so it will propagate up to root_logger
+
+   # Setup second logger
+   logger2 = logging.getLogger('logger2')
+   logger2.setLevel(logging.DEBUG)
+   # No handler added to logger2, so it will propagate up to root_logger
+
+   # Log a message with both loggers
+   logger1.debug('This is a debug message.')
+   logger2.debug('This is a debug message.')
+   ```
+
+   Output
+
+   ```powershell
+   This is a debug message.
+   This is a debug message.
+   ```
+
+   As you can see, the root logger outputs the same log entry twice in the output. In order to avoid this duplication, it is recommended to consolidate such loggers into one such as:
+
+   ```python
+   # Create a single logger
+   consolidated_logger = logging.getLogger('consolidated_logger')
+   consolidated_logger.setLevel(logging.DEBUG)
+
+   # Add a handler to the consolidated logger
+   file_handler = logging.StreamHandler()
+   file_handler.setLevel(logging.DEBUG)
+   consolidated_logger.addHandler(file_handler)
+
+   # Log messages with the consolidated logger
+   consolidated_logger.debug('This is a debug message.')
+
+   ```
+
+   Output
+
+   ```
+   This is a debug message.
+   ```
 
 ## Identifying Sources of Duplicate Logging
 
@@ -225,68 +225,66 @@ To effectively tackle duplicate logs, you need to identify their source. Here ar
 1. Examine configuration files: Review your logging configuration files (e.g., `logging.conf` or `log_config.yaml`) for any inconsistencies or redundant handlers. In larger applications, especially those with multiple modules, it's important to configure loggers in each module independently. This helps ensure that loggers don’t unintentionally inherit or duplicate configurations from other modules, keeping your logging setup clean and effective.
 2. Use debug statements: Temporarily add debug prints to trace the flow of log messages through your application. To make sure handlers aren't triggered multiple times for the same log entry, you can include specific handlers in your configuration. Additionally, you might temporarily insert trace-level logs to pinpoint exactly where log messages are being generated and processed. This can help you spot any redundant log processing paths and clean up your logging setup.
 3. Analyze handler setup: Check each module for logger and handler configurations. Check for instances where handlers might be added multiple times. Make sure that each handler is added only once to each logger. Adding handlers to both parent and child loggers can lead to messages being processed more than once. To prevent this, remove handlers from parent loggers if you want to avoid duplication in child loggers.
-    
-    ```python
-    # In the parent logger
-    logger_a = logging.getLogger('app')
-    for handler in logger_a.handlers[:]:
-        logger_a.removeHandler(handler)
-    
-    # Add handlers only to specific loggers
-    
-    ```
-    
-4. Inspect multi-module interactions: In complex applications, loggers from different modules may interact unexpectedly. Pay special attention to imported modules and their logging setups. Let’s take an example, 
-    
-    ```python
-    # module_ a
-    import logging
-    # Module A configures a logger with a file handler
-    logger = logging.getLogger('app')
-    file_handler = logging.FileHandler('module_a.log')
-    file_handler.setFormatter(logging.Formatter('%(name)s - %(levelname)s - %(message)s'))
-    logger.addHandler(file_handler)
-    # Set logger level to DEBUG
-    logger.setLevel(logging.DEBUG)  
-    
-    # module_b 
-    # Module B reconfigures the same logger name with a console handler
-    logger = logging.getLogger('app')  # Same logger name as module_a
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-    logger.addHandler(console_handler)
-    # Overwrites previous logging level to ERROR
-    logger.setLevel(logging.ERROR)  
-    
-    # main module
-    from module_a import logger as logger_a
-    from module_b import logger as logger_b
-    
-    # Ensuring basic config in main
-    # This can interfere with module settings
-    logging.basicConfig(level=logging.DEBUG)  
-    
-    # Intended for file, will not appear if overridden
-    logger_a.debug('Debug message from module_a')
-    # Intended for console  
-    logger_b.error('Error message from module_b')  
-    ```
-    
-    Output
-    
-    ```
-    ERROR: Error message from module_b
-    ERROR:app:Error message from module_b
-    ```
-    
-    The logger in `module_b` configured with a console handler affects the logger’s behavior set in `module_a`. The output `ERROR:app:Error` message from `module_b` shows that `module_b`'s console handler is overriding `module_a`'s file handler, causing all messages to appear on the console instead of the file.
-    
-    - Trace Imports and Initializations: Check that modules aren’t initializing or configuring logging in ways that might cause unexpected interactions.
-        
-        The `logging.basicConfig(level=logging.DEBUG)` call in [`m](http://main.py/)ain.py` affects the global logging configuration and can override settings from modules. In this case, it doesn’t directly impact the output, but it can cause unexpected behavior if configurations are not isolated properly. For instance, if `basicConfig` had set different handlers or levels, it might have altered the logging setup of `module_a` and `module_b`.
-        
-    - Consistency in Logger Naming: Ensure logger names are used consistently across modules. Inconsistent naming can lead to confusion, accidental overlap, or misconfiguration. Both `module_a` and `module_b` uses the same logger name `app`. The output `ERROR:app:Error` message from `module_b` demonstrates that using the same name for loggers across modules can lead to overlapping configurations. The `console_handler` from `module_b` is taking effect and overriding the `file_handler` from `module_a`.
-    - Module-Specific Configurations: Verify that modules with unique logging needs have their configurations properly isolated. This helps prevent unintended interactions with other modules. The logger in `module_b` reconfigures the same logger name `app` that `module_a` configured. This results in all log messages being handled by `module_b`’s console handler due to the level set to `ERROR`. This shows that configurations meant for different modules are interfering with each other because they’re not isolated, causing logs to be handled in a manner that wasn’t intended.
+
+   ```python
+   # In the parent logger
+   logger_a = logging.getLogger('app')
+   for handler in logger_a.handlers[:]:
+       logger_a.removeHandler(handler)
+
+   # Add handlers only to specific loggers
+
+   ```
+
+4. Inspect multi-module interactions: In complex applications, loggers from different modules may interact unexpectedly. Pay special attention to imported modules and their logging setups. Let’s take an example,
+
+   ```python
+   # module_ a
+   import logging
+   # Module A configures a logger with a file handler
+   logger = logging.getLogger('app')
+   file_handler = logging.FileHandler('module_a.log')
+   file_handler.setFormatter(logging.Formatter('%(name)s - %(levelname)s - %(message)s'))
+   logger.addHandler(file_handler)
+   # Set logger level to DEBUG
+   logger.setLevel(logging.DEBUG)
+
+   # module_b
+   # Module B reconfigures the same logger name with a console handler
+   logger = logging.getLogger('app')  # Same logger name as module_a
+   console_handler = logging.StreamHandler()
+   console_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+   logger.addHandler(console_handler)
+   # Overwrites previous logging level to ERROR
+   logger.setLevel(logging.ERROR)
+
+   # main module
+   from module_a import logger as logger_a
+   from module_b import logger as logger_b
+
+   # Ensuring basic config in main
+   # This can interfere with module settings
+   logging.basicConfig(level=logging.DEBUG)
+
+   # Intended for file, will not appear if overridden
+   logger_a.debug('Debug message from module_a')
+   # Intended for console
+   logger_b.error('Error message from module_b')
+   ```
+
+   Output
+
+   ```
+   ERROR: Error message from module_b
+   ERROR:app:Error message from module_b
+   ```
+
+   The logger in `module_b` configured with a console handler affects the logger’s behavior set in `module_a`. The output `ERROR:app:Error` message from `module_b` shows that `module_b`'s console handler is overriding `module_a`'s file handler, causing all messages to appear on the console instead of the file.
+
+   - Trace Imports and Initializations: Check that modules aren’t initializing or configuring logging in ways that might cause unexpected interactions.
+     The `logging.basicConfig(level=logging.DEBUG)` call in [`m](http://main.py/)ain.py`affects the global logging configuration and can override settings from modules. In this case, it doesn’t directly impact the output, but it can cause unexpected behavior if configurations are not isolated properly. For instance, if`basicConfig`had set different handlers or levels, it might have altered the logging setup of`module_a`and`module_b`.
+   - Consistency in Logger Naming: Ensure logger names are used consistently across modules. Inconsistent naming can lead to confusion, accidental overlap, or misconfiguration. Both `module_a` and `module_b` uses the same logger name `app`. The output `ERROR:app:Error` message from `module_b` demonstrates that using the same name for loggers across modules can lead to overlapping configurations. The `console_handler` from `module_b` is taking effect and overriding the `file_handler` from `module_a`.
+   - Module-Specific Configurations: Verify that modules with unique logging needs have their configurations properly isolated. This helps prevent unintended interactions with other modules. The logger in `module_b` reconfigures the same logger name `app` that `module_a` configured. This results in all log messages being handled by `module_b`’s console handler due to the level set to `ERROR`. This shows that configurations meant for different modules are interfering with each other because they’re not isolated, causing logs to be handled in a manner that wasn’t intended.
 
 ## Step-by-Step Solutions for Common Scenarios
 
@@ -470,91 +468,90 @@ In the code, we use a `CustomDeduplicationHandler` that extends `logging.Handler
 In multi-threaded applications, use thread-safe logging techniques to ensure that log messages from multiple threads are handled correctly and consistently:
 
 1. Use `logging.getLogger()` to get thread-safe logger instances, you ensure that the logging system handles concurrency issues internally. So, when we call `logging.getLogger(name)`, it returns a logger instance which is configured to be thread-safe. The `logging` module manages internal locks to ensure that log records are processed correctly even when multiple threads generate logs simultaneously. Let’s take an example,
-    
-    ```python
-    import logging
-    
-    # Get a thread-safe logger instance
-    logger = logging.getLogger('my_logger')
-    logger.setLevel(logging.DEBUG)
-    
-    ```
-    
-    Here, the logger instance returned by `getLogger()` is thread safe. You can use this logger in different threads without worrying about race conditions or data corruption.
-    
+
+   ```python
+   import logging
+
+   # Get a thread-safe logger instance
+   logger = logging.getLogger('my_logger')
+   logger.setLevel(logging.DEBUG)
+
+   ```
+
+   Here, the logger instance returned by `getLogger()` is thread safe. You can use this logger in different threads without worrying about race conditions or data corruption.
+
 2. Consider using `QueueHandler` and `QueueListener` for asynchronous logging. For applications with high logging volume, using `QueueHandler` and `QueueListener` can help manage logging asynchronously and reduce contention between threads. `QueueHandler` sends log records to a queue, which `QueueListener` processes in a separate thread.
-    
-    ```python
-    import logging
-    import logging.handlers
-    import queue
-    import threading
-    
-    # Create a queue for log records
-    log_queue = queue.Queue()
-    
-    # Define a QueueHandler to put log records into the queue
-    queue_handler = logging.handlers.QueueHandler(log_queue)
-    
-    # Create a logger and add the QueueHandler
-    logger = logging.getLogger('my_async_logger')
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(queue_handler)
-    
-    # Define a handler to process log records from the queue
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
-    
-    # Define a QueueListener to process log records
-    queue_listener = logging.handlers.QueueListener(log_queue, console_handler)
-    queue_listener.start()
-    
-    # Function to log messages from multiple threads
-    def worker():
-        logger.info('Log message from worker thread')
-    
-    # Start threads
-    threads = [threading.Thread(target=worker) for _ in range(5)]
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
-    
-    # Stop the QueueListener when done
-    queue_listener.stop()
-    
-    ```
-    
-    This setup allows multiple threads to log messages concurrently without blocking each other, as the `QueueListener` handles log processing asynchronously. After all threads finish logging, the `QueueListener` is stopped to ensure all messages are processed.
-    
+
+   ```python
+   import logging
+   import logging.handlers
+   import queue
+   import threading
+
+   # Create a queue for log records
+   log_queue = queue.Queue()
+
+   # Define a QueueHandler to put log records into the queue
+   queue_handler = logging.handlers.QueueHandler(log_queue)
+
+   # Create a logger and add the QueueHandler
+   logger = logging.getLogger('my_async_logger')
+   logger.setLevel(logging.DEBUG)
+   logger.addHandler(queue_handler)
+
+   # Define a handler to process log records from the queue
+   console_handler = logging.StreamHandler()
+   console_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+
+   # Define a QueueListener to process log records
+   queue_listener = logging.handlers.QueueListener(log_queue, console_handler)
+   queue_listener.start()
+
+   # Function to log messages from multiple threads
+   def worker():
+       logger.info('Log message from worker thread')
+
+   # Start threads
+   threads = [threading.Thread(target=worker) for _ in range(5)]
+   for t in threads:
+       t.start()
+   for t in threads:
+       t.join()
+
+   # Stop the QueueListener when done
+   queue_listener.stop()
+
+   ```
+
+   This setup allows multiple threads to log messages concurrently without blocking each other, as the `QueueListener` handles log processing asynchronously. After all threads finish logging, the `QueueListener` is stopped to ensure all messages are processed.
+
 3. Implement locks if you're creating custom handlers that aren't inherently thread safe. If you create custom log handlers or perform logging in complex multi-threaded environments, you might need to ensure that these custom components are thread safe. For instance, if your custom handler writes to a shared file or database, you should use threading locks to prevent concurrent write operations from causing issues.
-    
-    ```python
-    import logging
-    import threading
-    
-    class ThreadSafeHandler(logging.Handler):
-        def __init__(self):
-            super().__init__()
-            self.lock = threading.Lock()
-    
-        def emit(self, record):
-            with self.lock:
-                # Example: Write log message to a file
-                with open('logfile.log', 'a') as f:
-                    f.write(self.format(record) + '\\n')
-    
-    # Configure logger to use the custom thread-safe handler
-    logger = logging.getLogger('thread_safe_logger')
-    handler = ThreadSafeHandler()
-    handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
-    
-    ```
-    
-    In this example, `ThreadSafeHandler` uses a lock to synchronize access to the file, ensuring that log messages from different threads are written safely.
-    
+
+   ```python
+   import logging
+   import threading
+
+   class ThreadSafeHandler(logging.Handler):
+       def __init__(self):
+           super().__init__()
+           self.lock = threading.Lock()
+
+       def emit(self, record):
+           with self.lock:
+               # Example: Write log message to a file
+               with open('logfile.log', 'a') as f:
+                   f.write(self.format(record) + '\\n')
+
+   # Configure logger to use the custom thread-safe handler
+   logger = logging.getLogger('thread_safe_logger')
+   handler = ThreadSafeHandler()
+   handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+   logger.addHandler(handler)
+   logger.setLevel(logging.DEBUG)
+
+   ```
+
+   In this example, `ThreadSafeHandler` uses a lock to synchronize access to the file, ensuring that log messages from different threads are written safely.
 
 ## Best Practices for Python Logging Configuration
 
@@ -574,7 +571,6 @@ handlers:
 root:
   level: INFO
   handlers: [console]
-
 ```
 
 This `YAML` file sets up a simple logging configuration with a console handler that logs messages at the `INFO` level and above.
@@ -608,22 +604,22 @@ logging.getLogger('suspected_logger').disabled = True
 ```
 
 1. Leverage `logging.Logger.disabled`: Temporarily disable loggers to isolate the issue. Set `logger.disabled = True` for specific loggers that you suspect might be causing the duplicates. This approach helps you confirm whether a particular logger is involved in generating duplicate messages.
-    
-    ```python
-    import logging
-    
-    # Disable the logger that might be causing duplicates
-    logger = logging.getLogger('app.module')
-    logger.disabled = True
-    
-    # Perform your tests or operations here
-    # Re-enable the logger after testing
-    logger.disabled = False
-    
-    ```
-    
-    This method allows you to control which loggers are active and helps determine if disabling certain loggers resolves the duplication problem.
-    
+
+   ```python
+   import logging
+
+   # Disable the logger that might be causing duplicates
+   logger = logging.getLogger('app.module')
+   logger.disabled = True
+
+   # Perform your tests or operations here
+   # Re-enable the logger after testing
+   logger.disabled = False
+
+   ```
+
+   This method allows you to control which loggers are active and helps determine if disabling certain loggers resolves the duplication problem.
+
 2. Use [log analysis tools](https://signoz.io/comparisons/log-analysis-tools/): Tools like <a href="https://pypi.org/project/log-analyzer/" rel="noopener noreferrer nofollow" target="_blank">log_analyzer</a> can help identify patterns in your logs. These tools can help you detect patterns, anomalies, or redundancy in your log messages. They often provide features like filtering, sorting, and visualizing log data to make it easier to spot issues
 
 ## Enhancing Logging with SigNoz for Distributed Systems
@@ -698,9 +694,13 @@ if __name__ == '__main__':
 
 ```
 
-Verify by navigating to the SigNoz Logs Dashboard and see if the logs have been received. 
+Verify by navigating to the SigNoz Logs Dashboard and see if the logs have been received.
 
-<Figure src="/img/guides/2024/09/log-messages-appearing-twice-with-python-logging-39d6d193-ff73-4c69-ac59-1fe322dd6aed.webp" alt="SigNoz Logs Dashboard Si" caption="SigNoz Logs Dashboard Si" />
+<Figure
+  src="/img/guides/2024/09/log-messages-appearing-twice-with-python-logging-39d6d193-ff73-4c69-ac59-1fe322dd6aed.webp"
+  alt="SigNoz Logs Dashboard Si"
+  caption="SigNoz Logs Dashboard Si"
+/>
 
 By correlating logs with traces, SigNoz provides a powerful tool for debugging complex systems and identifying the root cause of issues, including duplicate logs.
 

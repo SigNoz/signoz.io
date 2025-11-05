@@ -1,13 +1,11 @@
 ---
-
 title: How to Count Unique Label Values with Prometheus Queries
-slug: prometheus-query-to-count-unique-label-values
 date: 2024-09-06
 tags: [Prometheus, Monitoring, PromQL, Metrics]
 authors: [simran_kumari]
 description: Learn how to effectively count unique label values using Prometheus queries. Master PromQL functions, optimize performance, and visualize results in Grafana.
-keywords: [Prometheus, PromQL, unique label values, count function, monitoring, metrics, Grafana, SigNoz]
-
+keywords:
+  [Prometheus, PromQL, unique label values, count function, monitoring, metrics, Grafana, SigNoz]
 ---
 
 Prometheus is renowned for its robust time-series data collection and querying capabilities. However, when it comes to counting unique label values, you may encounter some challenges. This guide will walk you through the essentials of Prometheus labels, the intricacies of counting unique values, and advanced techniques for optimizing your queries. We’ll also explore how to visualize these insights in Grafana and leverage SigNoz for enhanced monitoring.
@@ -16,7 +14,11 @@ Prometheus is renowned for its robust time-series data collection and querying c
 
 [Prometheus labels](https://signoz.io/guides/what-are-prometheus-labels/) are key-value pairs attached to metrics that provide additional context and allow for more detailed data analysis. They play a crucial role in identifying and categorizing metrics, enabling you to slice and dice your data in numerous ways.
 
-<Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image.webp" alt="Prometheus Labels" caption="Prometheus Labels" />
+<Figure
+  src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image.webp"
+  alt="Prometheus Labels"
+  caption="Prometheus Labels"
+/>
 
 Labels allow you to slice and dice your metrics with precision. For example, instead of having a single, monolithic count of HTTP requests, you can break it down by method, status code, endpoint, or any other dimension that matters to you. This granularity is key for:
 
@@ -36,9 +38,9 @@ In a dynamic environment, labels can multiply quickly. You might have hundreds o
 
 ## The Challenge of Counting Unique Label Values
 
-Counting unique label values can be tricky with Prometheus's basic queries. While Prometheus excels at tracking metrics over time, its standard functions aren’t designed to directly count distinct label values. 
+Counting unique label values can be tricky with Prometheus's basic queries. While Prometheus excels at tracking metrics over time, its standard functions aren’t designed to directly count distinct label values.
 
-The problem lies in Prometheus’s design. It’s optimized for performance and scalability, which means handling high-cardinality data (data with a large number of unique label combinations) isn’t its strong suit. 
+The problem lies in Prometheus’s design. It’s optimized for performance and scalability, which means handling high-cardinality data (data with a large number of unique label combinations) isn’t its strong suit.
 
 To tackle this, PromQL offers specialized functions designed for counting unique values:
 
@@ -76,29 +78,28 @@ Step-by-Step Guide to Using `count()`
 Examples of `count()` Queries
 
 1. Service Discovery: To find out how many instances of each service are running:
-    
-    ```
-    count(service_up) by (service_name)
-    ```
-    
-    This aggregates the number of service instances by `service_name`.
-    
+
+   ```
+   count(service_up) by (service_name)
+   ```
+
+   This aggregates the number of service instances by `service_name`.
+
 2. Capacity Planning: To count unique tenants or users:
-    
-    ```
-    count(user_activity_total) by (tenant_id)
-    ```
-    
-    This shows the number of metrics per unique `tenant_id`.
-    
+
+   ```
+   count(user_activity_total) by (tenant_id)
+   ```
+
+   This shows the number of metrics per unique `tenant_id`.
+
 3. Error Analysis: To count occurrences of each error type:
-    
-    ```
-    count(application_errors_total) by (error_type)
-    ```
-    
-    This groups error counts by `error_type`.
-    
+
+   ```
+   count(application_errors_total) by (error_type)
+   ```
+
+   This groups error counts by `error_type`.
 
 Best Practices for Optimizing `count()` Queries
 
@@ -112,7 +113,7 @@ When you need to dive deeper into your metrics, combining `count()` with `by()` 
 
 Combining `count()` with `by()`
 
-Using `count()` in conjunction with `by()`  lets you [aggregate metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/) across different dimensions. This is essential for complex queries where you want to analyze data across multiple labels.
+Using `count()` in conjunction with `by()` lets you [aggregate metrics](https://signoz.io/docs/metrics-management/types-and-aggregation/) across different dimensions. This is essential for complex queries where you want to analyze data across multiple labels.
 
 Syntax Example:
 
@@ -125,29 +126,28 @@ Here, `metric_name` is the metric you’re querying, and `label1` and `label2` a
 Examples of Complex Queries
 
 1. Service and Region Analysis: To count the number of active services by both `service_name` and `region`:
-    
-    ```
-    count(service_up) by (service_name, region)
-    ```
-    
-    This query helps in understanding how many instances of each service are running in each region.
-    
+
+   ```
+   count(service_up) by (service_name, region)
+   ```
+
+   This query helps in understanding how many instances of each service are running in each region.
+
 2. User Activity by Role and Region: To count the number of unique users segmented by `user_role` and `region`:
-    
-    ```
-    count(user_activity_total) by (user_role, region)
-    ```
-    
-    This provides insight into user activity levels across different roles and regions.
-    
+
+   ```
+   count(user_activity_total) by (user_role, region)
+   ```
+
+   This provides insight into user activity levels across different roles and regions.
+
 3. Error Types by Service and Environment: To count distinct error types across `service_name` and `environment`:
-    
-    ```
-    count(application_errors_total) by (error_type, service_name, environment)
-    ```
-    
-    This helps in pinpointing which error types are occurring in which services and environments.
-    
+
+   ```
+   count(application_errors_total) by (error_type, service_name, environment)
+   ```
+
+   This helps in pinpointing which error types are occurring in which services and environments.
 
 Handling [High Cardinality](https://signoz.io/blog/high-cardinality-data/) Efficiently
 
@@ -198,37 +198,72 @@ This query creates a new time series for each unique HTTP status code, allowing 
 Grafana, a popular open-source visualization tool, integrates seamlessly with Prometheus to create powerful dashboards. To visualize unique label counts:
 
 1. Add the Prometheus server as the data source to your Grafana server.
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%201.webp" alt="Adding Prometheus server as a data source in Grafana" caption="Adding Prometheus server as a data source in Grafana" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%201.webp"
+     alt="Adding Prometheus server as a data source in Grafana"
+     caption="Adding Prometheus server as a data source in Grafana"
+   />
+
 2. Create a new dashboard by adding a visualization.
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%202.webp" alt="Creating Grafana Dashboard" caption="Creating Grafana Dashboard" />
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%203.webp" alt="Add visualization to Grafana Dashboard" caption="Add visualization to Grafana Dashboard" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%202.webp"
+     alt="Creating Grafana Dashboard"
+     caption="Creating Grafana Dashboard"
+   />
+
+   <Figure
+     src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%203.webp"
+     alt="Add visualization to Grafana Dashboard"
+     caption="Add visualization to Grafana Dashboard"
+   />
+
 3. Select the data source i.e. the Prometheus server.
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%204.webp" alt="Selecting Prometheus server as data source for Grafana Dashboard" caption="Selecting Prometheus server as data source for Grafana Dashboard" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%204.webp"
+     alt="Selecting Prometheus server as data source for Grafana Dashboard"
+     caption="Selecting Prometheus server as data source for Grafana Dashboard"
+   />
+
 4. Use the Prometheus query editor to enter your unique label count query (e.g., `count(up) without(instance)`)
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%205.webp" alt="Running PromQL queries in Grafana to see unique label counts." caption="Running PromQL queries in Grafana to see unique label counts." />
-    
+
+   <Figure
+     src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%205.webp"
+     alt="Running PromQL queries in Grafana to see unique label counts."
+     caption="Running PromQL queries in Grafana to see unique label counts."
+   />
+
 5. Choose an appropriate visualization type (e.g., gauge, bar chart, or table)
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%206.webp" alt="Choosing visualization type in the Grafana dashboard" caption="Choosing visualization type in the Grafana dashboard" />
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%207.webp" alt="Switching to pie charts and running PromQL queries" caption="Switching to pie charts and running PromQL queries" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%206.webp"
+     alt="Choosing visualization type in the Grafana dashboard"
+     caption="Choosing visualization type in the Grafana dashboard"
+   />
+
+   <Figure
+     src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%207.webp"
+     alt="Switching to pie charts and running PromQL queries"
+     caption="Switching to pie charts and running PromQL queries"
+   />
+
 6. Set the panel title to "Active Instances"
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%208.webp" alt="Giving a title to Dashboard Panel in Grafana" caption="Giving a title to Dashboard Panel in Grafana" />
-    
+
+   <Figure
+     src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%208.webp"
+     alt="Giving a title to Dashboard Panel in Grafana"
+     caption="Giving a title to Dashboard Panel in Grafana"
+   />
+
 7. Adjust thresholds and other display options as needed and apply the changes.
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%209.webp" alt="Grafana panel showing unique instance count." caption="Grafana panel showing unique instance count." />
-    
+
+   <Figure
+     src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%209.webp"
+     alt="Grafana panel showing unique instance count."
+     caption="Grafana panel showing unique instance count."
+   />
 
 Tips for effective visualizations:
 
@@ -246,24 +281,33 @@ PromQL, while powerful for time-series data collection and querying, has certain
 
 ## Enhancing Monitoring with SigNoz
 
-While Prometheus is excellent for time-series data collection and querying, SigNoz extends its capabilities by offering advanced features for label-based analysis and visualization. 
+While Prometheus is excellent for time-series data collection and querying, SigNoz extends its capabilities by offering advanced features for label-based analysis and visualization.
 
 SigNoz is an open-source monitoring and observability platform designed to provide comprehensive insights into your applications and infrastructure. It offers a robust suite of features for tracking and analyzing metrics, traces, and logs, all from a unified interface. SigNoz aims to enhance observability, improve troubleshooting, and optimize performance across your systems.
 
 Here’s how SigNoz complements Prometheus:
 
 - Efficient High-Cardinality Management: SigNoz is optimized to handle metrics with numerous unique label combinations, improving performance and reducing resource strain compared to standard PromQL setups.
-    
-    <Figure src="/img/docs/product-features/query-builder/query-builder-filtering.gif" alt="Efficient High-Cardinality Data Management using SigNoz" caption="Efficient High-Cardinality Data Management using SigNoz" />
-    
+  {' '}
+  <Figure
+    src="/img/docs/product-features/query-builder/query-builder-filtering.gif"
+    alt="Efficient High-Cardinality Data Management using SigNoz"
+    caption="Efficient High-Cardinality Data Management using SigNoz"
+  />
 - Streamlined Querying: SigNoz offers a more user-friendly interface for constructing complex queries, making it easier to perform multi-dimensional analysis without the complexity often encountered in PromQL.
-    
-    <Figure src="/img/docs/product-features/query-builder/group_by.gif" alt="Streamline Querying using SigNoz" caption="Streamline Querying using SigNoz" />
-    
+  {' '}
+  <Figure
+    src="/img/docs/product-features/query-builder/group_by.gif"
+    alt="Streamline Querying using SigNoz"
+    caption="Streamline Querying using SigNoz"
+  />
 - Integrated Visualization: With built-in advanced visualization tools, SigNoz enables dynamic and insightful dashboards, making it simpler to analyze and understand metrics, especially when dealing with high-cardinality data.
-    
-    <Figure src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%2010.webp" alt="Integrated Visualization in SigNoz" caption="Integrated Visualization in SigNoz" />
-    
+  {' '}
+  <Figure
+    src="/img/guides/2024/09/prometheus-query-to-count-unique-label-values-image%2010.webp"
+    alt="Integrated Visualization in SigNoz"
+    caption="Integrated Visualization in SigNoz"
+  />
 
 <GetStartedSigNoz />
 

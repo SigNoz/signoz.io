@@ -1,199 +1,214 @@
 ---
-
 title: How to Install Prometheus and Grafana on Kubernetes with Helm
-slug: how-to-install-prometheus-and-grafana-on-kubernetes
 date: 2024-07-30
 tags: [faq, prometheus]
 authors: [ankit_anand]
 description: Learn how to install Prometheus and Grafana on Kubernetes using Helm. Follow our step-by-step guide for efficient monitoring and visualization.
-keywords: [Kubernetes monitoring, Prometheus installation, Grafana setup, Helm charts, container orchestration, metrics visualization, Kubernetes observability]
-
+keywords:
+  [
+    Kubernetes monitoring,
+    Prometheus installation,
+    Grafana setup,
+    Helm charts,
+    container orchestration,
+    metrics visualization,
+    Kubernetes observability,
+  ]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to Install Prometheus and Grafana on Kubernetes with Helm",
-    "alternativeHeadline": "Step-by-Step Guide to Install Prometheus and Grafana on Kubernetes Using Helm",
-    "author": {
-      "@type": "Person",
-      "name": "Ankit Anand"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-30T00:00:00Z",
-    "dateModified": "2024-07-30T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/how-to-install-prometheus-and-grafana-on-kubernetes/"
-    },
-    "description": "Learn how to install Prometheus and Grafana on Kubernetes using Helm. Follow our step-by-step guide for efficient monitoring and visualization.",
-    "keywords": "Kubernetes monitoring, Prometheus installation, Grafana setup, Helm charts, container orchestration, metrics visualization, Kubernetes observability",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Kubernetes Monitoring",
-        "description": "The process of tracking and analyzing the performance of Kubernetes clusters to ensure optimal performance and reliability."
-      },
-      {
-        "@type": "Thing",
-        "name": "Prometheus",
-        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-      },
-      {
-        "@type": "Thing",
-        "name": "Grafana",
-        "description": "An open-source platform for monitoring and observability, used for visualizing time series data."
-      },
-      {
-        "@type": "Thing",
-        "name": "Helm Charts",
-        "description": "A package manager for Kubernetes that simplifies the deployment and management of applications."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Grafana",
-        "applicationCategory": "Visualization Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Helm",
-        "applicationCategory": "Package Manager"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Kubernetes",
-        "applicationCategory": "Container Orchestration"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What are the system requirements for running Prometheus and Grafana on Kubernetes?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The requirements depend on your cluster size and monitoring needs. Generally, start with at least 2 CPU cores and 4GB RAM for each tool, scaling as necessary."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Install Prometheus and Grafana on Kubernetes with Helm',
+        alternativeHeadline:
+          'Step-by-Step Guide to Install Prometheus and Grafana on Kubernetes Using Helm',
+        author: {
+          '@type': 'Person',
+          name: 'Ankit Anand',
         },
-        {
-          "@type": "Question",
-          "name": "Can I use Prometheus and Grafana for monitoring non-Kubernetes workloads?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, both tools can monitor various systems. Use exporters to collect metrics from non-Kubernetes sources and visualize them in Grafana."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "How do I update Prometheus and Grafana installed via Helm?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Use `helm upgrade` with the latest chart version:\n\n```\nhelm upgrade prometheus prometheus-community/prometheus\nhelm upgrade grafana grafana/grafana\n```\n"
-          }
+        datePublished: '2024-07-30T00:00:00Z',
+        dateModified: '2024-07-30T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': 'https://signoz.io/guides/how-to-install-prometheus-and-grafana-on-kubernetes/',
         },
-        {
-          "@type": "Question",
-          "name": "What are some alternatives to Prometheus and Grafana for Kubernetes monitoring?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Alternatives include:\n\n- Datadog\n- Elastic Stack (ELK)\n- New Relic\n- Dynatrace\n- SigNoz"
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Installing Prometheus and Grafana on Kubernetes with Helm",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Install Helm",
-          "text": "Install Helm by following the official documentation: [Helm Installation Guide](https://helm.sh/docs/intro/install/)"
+        description:
+          'Learn how to install Prometheus and Grafana on Kubernetes using Helm. Follow our step-by-step guide for efficient monitoring and visualization.',
+        keywords:
+          'Kubernetes monitoring, Prometheus installation, Grafana setup, Helm charts, container orchestration, metrics visualization, Kubernetes observability',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Add Prometheus Helm repository",
-          "text": "Run `helm repo add prometheus-community https://prometheus-community.github.io/helm-charts` and `helm repo update`."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Kubernetes Monitoring',
+            description:
+              'The process of tracking and analyzing the performance of Kubernetes clusters to ensure optimal performance and reliability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Grafana',
+            description:
+              'An open-source platform for monitoring and observability, used for visualizing time series data.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Helm Charts',
+            description:
+              'A package manager for Kubernetes that simplifies the deployment and management of applications.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Grafana',
+            applicationCategory: 'Visualization Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Helm',
+            applicationCategory: 'Package Manager',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Kubernetes',
+            applicationCategory: 'Container Orchestration',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: 'What are the system requirements for running Prometheus and Grafana on Kubernetes?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'The requirements depend on your cluster size and monitoring needs. Generally, start with at least 2 CPU cores and 4GB RAM for each tool, scaling as necessary.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I use Prometheus and Grafana for monitoring non-Kubernetes workloads?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, both tools can monitor various systems. Use exporters to collect metrics from non-Kubernetes sources and visualize them in Grafana.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How do I update Prometheus and Grafana installed via Helm?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Use `helm upgrade` with the latest chart version:\n\n```\nhelm upgrade prometheus prometheus-community/prometheus\nhelm upgrade grafana grafana/grafana\n```\n',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'What are some alternatives to Prometheus and Grafana for Kubernetes monitoring?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Alternatives include:\n\n- Datadog\n- Elastic Stack (ELK)\n- New Relic\n- Dynatrace\n- SigNoz',
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Create Prometheus values file",
-          "text": "Create a `prometheus-values.yaml` file with your desired configurations."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Installing Prometheus and Grafana on Kubernetes with Helm',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Install Helm',
+              text: 'Install Helm by following the official documentation: [Helm Installation Guide](https://helm.sh/docs/intro/install/)',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Add Prometheus Helm repository',
+              text: 'Run `helm repo add prometheus-community https://prometheus-community.github.io/helm-charts` and `helm repo update`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create Prometheus values file',
+              text: 'Create a `prometheus-values.yaml` file with your desired configurations.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Install Prometheus with Helm',
+              text: 'Run `helm install prometheus prometheus-community/prometheus -f prometheus-values.yaml`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Verify Prometheus installation',
+              text: 'Run `kubectl get pods -l app=prometheus` to ensure Prometheus pods are running.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Add Grafana Helm repository',
+              text: 'Run `helm repo add grafana https://grafana.github.io/helm-charts` and `helm repo update`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create Grafana values file',
+              text: 'Create a `grafana-values.yaml` file with your desired configurations.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Install Grafana with Helm',
+              text: 'Run `helm install grafana grafana/grafana -f grafana-values.yaml`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Retrieve Grafana admin password',
+              text: 'Run `kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Access Grafana dashboard',
+              text: 'Use the LoadBalancer IP or port-forwarding to access Grafana: `kubectl port-forward service/grafana 3000:80`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Add Prometheus data source to Grafana',
+              text: 'In Grafana, navigate to Configuration > Data Sources, add a new Prometheus data source, and set the URL to `http://prometheus-server`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Create API monitoring dashboard',
+              text: 'Create a new dashboard in Grafana and add panels for key metrics like request rate, latency, and error rate.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Install Prometheus with Helm",
-          "text": "Run `helm install prometheus prometheus-community/prometheus -f prometheus-values.yaml`."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Verify Prometheus installation",
-          "text": "Run `kubectl get pods -l app=prometheus` to ensure Prometheus pods are running."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Add Grafana Helm repository",
-          "text": "Run `helm repo add grafana https://grafana.github.io/helm-charts` and `helm repo update`."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Create Grafana values file",
-          "text": "Create a `grafana-values.yaml` file with your desired configurations."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Install Grafana with Helm",
-          "text": "Run `helm install grafana grafana/grafana -f grafana-values.yaml`."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Retrieve Grafana admin password",
-          "text": "Run `kubectl get secret --namespace default grafana -o jsonpath=\"{.data.admin-password}\" | base64 --decode ; echo`."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Access Grafana dashboard",
-          "text": "Use the LoadBalancer IP or port-forwarding to access Grafana: `kubectl port-forward service/grafana 3000:80`."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Add Prometheus data source to Grafana",
-          "text": "In Grafana, navigate to Configuration > Data Sources, add a new Prometheus data source, and set the URL to `http://prometheus-server`."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Create API monitoring dashboard",
-          "text": "Create a new dashboard in Grafana and add panels for key metrics like request rate, latency, and error rate."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Monitoring Kubernetes clusters is crucial for maintaining optimal performance and reliability. Prometheus and Grafana are powerful tools that work together to provide comprehensive monitoring and visualization capabilities. This guide walks you through the process of installing Prometheus and Grafana on Kubernetes using Helm, simplifying deployment and management.
@@ -260,7 +275,6 @@ server:
 alertmanager:
   persistentVolume:
     size: 2Gi
-
 ```
 
 1. Install Prometheus using Helm:
@@ -297,8 +311,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: kube-state-metrics
   endpoints:
-  - port: http-metrics
-
+    - port: http-metrics
 ```
 
 1. Configure RBAC permissions for Prometheus:
@@ -309,14 +322,13 @@ kind: ClusterRole
 metadata:
   name: prometheus
 rules:
-- apiGroups: [""]
-  resources:
-  - nodes
-  - services
-  - endpoints
-  - pods
-  verbs: ["get", "list", "watch"]
-
+  - apiGroups: ['']
+    resources:
+      - nodes
+      - services
+      - endpoints
+      - pods
+    verbs: ['get', 'list', 'watch']
 ```
 
 1. Enable relevant exporters like node-exporter and kube-state-metrics in your Helm values file.
@@ -341,7 +353,6 @@ persistence:
   size: 5Gi
 service:
   type: LoadBalancer
-
 ```
 
 1. Install Grafana:

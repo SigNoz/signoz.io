@@ -1,154 +1,166 @@
 ---
-
 title: How to Write Prometheus Queries to Return Label Values
-slug: how-to-write-a-prometheus-query-that-returns-the-value-of-the-label
 date: 2024-07-25
 tags: [faq, prometheus]
 authors: [yuvraj]
 description: Learn how to write Prometheus queries that return label values. Master PromQL, advanced techniques, and best practices for efficient metric analysis.
-keywords: [Prometheus queries, label values, PromQL, metric analysis, Grafana visualization, monitoring systems]
-
+keywords:
+  [
+    Prometheus queries,
+    label values,
+    PromQL,
+    metric analysis,
+    Grafana visualization,
+    monitoring systems,
+  ]
 ---
 
 <head>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to Write Prometheus Queries to Return Label Values",
-    "alternativeHeadline": "Mastering PromQL: Writing Queries to Return Label Values",
-    "author": {
-      "@type": "Person",
-      "name": "Yuvraj"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SigNoz",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
-      }
-    },
-    "datePublished": "2024-07-25T00:00:00Z",
-    "dateModified": "2024-07-25T00:00:00Z",
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://signoz.io/guides/how-to-write-a-prometheus-query-that-returns-the-value-of-the-label/"
-    },
-    "description": "Learn how to write Prometheus queries that return label values. Master PromQL, advanced techniques, and best practices for efficient metric analysis.",
-    "keywords": "Prometheus queries, label values, PromQL, metric analysis, Grafana visualization, monitoring systems",
-    "articleSection": "Technology",
-    "inLanguage": "en",
-    "isPartOf": {
-      "@type": "Blog",
-      "name": "SigNoz Blog",
-      "url": "https://signoz.io/blog/"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "Prometheus",
-        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
-      },
-      {
-        "@type": "Thing",
-        "name": "PromQL",
-        "description": "Prometheus Query Language used to query and analyze metrics."
-      },
-      {
-        "@type": "Thing",
-        "name": "Label Values",
-        "description": "Key-value pairs in Prometheus metrics that provide additional context and allow for fine-grained filtering and aggregation."
-      }
-    ],
-    "mentions": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Prometheus",
-        "applicationCategory": "Monitoring Tool"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "SigNoz",
-        "applicationCategory": "Observability Platform"
-      },
-      {
-        "@type": "SoftwareApplication",
-        "name": "Grafana",
-        "applicationCategory": "Visualization Tool"
-      }
-    ],
-    "mainEntity": {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What's the difference between a metric name and a label in Prometheus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "A metric name identifies the measurement being collected, while labels provide additional context or dimensions for that metric. For example, `http_requests_total` is a metric name, and `method=\"GET\"` is a label."
-          }
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'How to Write Prometheus Queries to Return Label Values',
+        alternativeHeadline: 'Mastering PromQL: Writing Queries to Return Label Values',
+        author: {
+          '@type': 'Person',
+          name: 'Yuvraj',
         },
-        {
-          "@type": "Question",
-          "name": "How can I query for the absence of a label?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Use the `!=` matcher with an empty string: `http_requests_total{method!=\"\"}`. This selects all `http_requests_total` metrics where the `method` label is present."
-          }
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
-        {
-          "@type": "Question",
-          "name": "Is it possible to perform mathematical operations on label values?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "PromQL doesn't support direct mathematical operations on label values. However, you can use functions like `label_replace()` to manipulate label values based on regular expressions."
-          }
+        datePublished: '2024-07-25T00:00:00Z',
+        dateModified: '2024-07-25T00:00:00Z',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id':
+            'https://signoz.io/guides/how-to-write-a-prometheus-query-that-returns-the-value-of-the-label/',
         },
-        {
-          "@type": "Question",
-          "name": "Can I use label queries in Prometheus alerting rules?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, you can use label queries in alerting rules. This allows you to create specific alerts based on label values, enhancing your monitoring capabilities."
-          }
-        }
-      ]
-    },
-    "tutorial": {
-      "@type": "HowTo",
-      "name": "Writing Prometheus Queries to Return Label Values",
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Select Metrics with Specific Labels",
-          "text": "Use the basic syntax `metric_name{label_name=\"label_value\"}` to select metrics with specific labels."
+        description:
+          'Learn how to write Prometheus queries that return label values. Master PromQL, advanced techniques, and best practices for efficient metric analysis.',
+        keywords:
+          'Prometheus queries, label values, PromQL, metric analysis, Grafana visualization, monitoring systems',
+        articleSection: 'Technology',
+        inLanguage: 'en',
+        isPartOf: {
+          '@type': 'Blog',
+          name: 'SigNoz Blog',
+          url: 'https://signoz.io/blog/',
         },
-        {
-          "@type": "HowToStep",
-          "name": "Use Label Matchers",
-          "text": "Apply label matchers like `=`, `!=`, `=~`, and `!~` for exact matches, inequality, regex matches, and regex not matches respectively."
+        about: [
+          {
+            '@type': 'Thing',
+            name: 'Prometheus',
+            description:
+              'An open-source monitoring and alerting toolkit designed for reliability and scalability.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'PromQL',
+            description: 'Prometheus Query Language used to query and analyze metrics.',
+          },
+          {
+            '@type': 'Thing',
+            name: 'Label Values',
+            description:
+              'Key-value pairs in Prometheus metrics that provide additional context and allow for fine-grained filtering and aggregation.',
+          },
+        ],
+        mentions: [
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Prometheus',
+            applicationCategory: 'Monitoring Tool',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'SigNoz',
+            applicationCategory: 'Observability Platform',
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'Grafana',
+            applicationCategory: 'Visualization Tool',
+          },
+        ],
+        mainEntity: {
+          '@type': 'FAQPage',
+          mainEntity: [
+            {
+              '@type': 'Question',
+              name: "What's the difference between a metric name and a label in Prometheus?",
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'A metric name identifies the measurement being collected, while labels provide additional context or dimensions for that metric. For example, `http_requests_total` is a metric name, and `method="GET"` is a label.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'How can I query for the absence of a label?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Use the `!=` matcher with an empty string: `http_requests_total{method!=""}`. This selects all `http_requests_total` metrics where the `method` label is present.',
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Is it possible to perform mathematical operations on label values?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: "PromQL doesn't support direct mathematical operations on label values. However, you can use functions like `label_replace()` to manipulate label values based on regular expressions.",
+              },
+            },
+            {
+              '@type': 'Question',
+              name: 'Can I use label queries in Prometheus alerting rules?',
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: 'Yes, you can use label queries in alerting rules. This allows you to create specific alerts based on label values, enhancing your monitoring capabilities.',
+              },
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Extract Label Values",
-          "text": "Use the `label()` function to extract label values from metrics, for example, `label(metric_name, \"label_name\")`."
+        tutorial: {
+          '@type': 'HowTo',
+          name: 'Writing Prometheus Queries to Return Label Values',
+          step: [
+            {
+              '@type': 'HowToStep',
+              name: 'Select Metrics with Specific Labels',
+              text: 'Use the basic syntax `metric_name{label_name="label_value"}` to select metrics with specific labels.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Use Label Matchers',
+              text: 'Apply label matchers like `=`, `!=`, `=~`, and `!~` for exact matches, inequality, regex matches, and regex not matches respectively.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Extract Label Values',
+              text: 'Use the `label()` function to extract label values from metrics, for example, `label(metric_name, "label_name")`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Combine Label Conditions',
+              text: 'Combine multiple label conditions for more refined queries, such as `http_requests_total{method="GET", status="200"}`.',
+            },
+            {
+              '@type': 'HowToStep',
+              name: 'Apply Grouping and Aggregation',
+              text: 'Use the `group()` function to group by label values and apply aggregation functions like `sum()`, e.g., `sum(http_requests_total) by (method)`.',
+            },
+          ],
         },
-        {
-          "@type": "HowToStep",
-          "name": "Combine Label Conditions",
-          "text": "Combine multiple label conditions for more refined queries, such as `http_requests_total{method=\"GET\", status=\"200\"}`."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Apply Grouping and Aggregation",
-          "text": "Use the `group()` function to group by label values and apply aggregation functions like `sum()`, e.g., `sum(http_requests_total) by (method)`."
-        }
-      ]
-    }
-  }) }}
-/>
+      }),
+    }}
+  />
 </head>
 
 Prometheus queries that return label values are essential for effective metric analysis in monitoring systems. This guide will show you how to write these queries, from basic syntax to advanced techniques.
@@ -227,7 +239,7 @@ This calculates the ratio of total requests to successful requests for each meth
 To get all label names:
 
 ```jsx
-GET /api/v1/labels
+GET / api / v1 / labels
 ```
 
 To get all values for a specific label:

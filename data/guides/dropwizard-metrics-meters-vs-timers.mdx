@@ -1,13 +1,19 @@
 ---
-
 title: What is the Difference between DropWizard Metrics - Meters vs Timers
-slug: dropwizard-metrics-meters-vs-timers
 date: 2024-11-07
 tags: [faq]
 authors: [nilesh_sinha]
 description: Explore the key differences between DropWizard Metrics Meters and Timers, their use cases, and implementation strategies for effective application monitoring.
-keywords: [DropWizard Metrics, Meters, Timers, Java monitoring, application performance, metrics implementation, SigNoz integration]
-
+keywords:
+  [
+    DropWizard Metrics,
+    Meters,
+    Timers,
+    Java monitoring,
+    application performance,
+    metrics implementation,
+    SigNoz integration,
+  ]
 ---
 
 DropWizard Metrics provides powerful tools for monitoring Java applications, with Meters and Timers being two essential components. These metrics offer distinct approaches to measuring application performance, each with its own strengths and use cases. Understanding the differences between Meters and Timers is crucial for developers and DevOps professionals seeking to implement effective monitoring strategies. This article delves into the specifics of DropWizard Metrics Meters vs Timers, their implementation, and how to choose the right metric for your needs.
@@ -23,198 +29,197 @@ The library's popularity stems from its simplicity and effectiveness in providin
 DropWizard Metrics provides five core [metric types](https://signoz.io/docs/metrics-management/types-and-aggregation/) that serve distinct purposes, ensuring comprehensive and accurate application performance monitoring. Each metric type helps developers track different aspects of their application:
 
 1. Gauges: A gauge is the simplest type of metric that measures a single value at a specific point in time, making it suitable for tracking instantaneous values like memory usage, queue size, or the number of active threads.
-    
-    Example of a Gauge:
-    
-    ```java
-    package org.example;
-    
-    import com.codahale.metrics.MetricRegistry;
-    
-    import java.util.LinkedList;
-    import java.util.Queue;
-    
-    public class Main {
-        public static void main(String[] args) {
-    
-    				MetricRegistry metrics = new MetricRegistry();
-    				Queue<String> queue = new LinkedList<>();
-    				
-    				// Register a gauge metric that monitors the queue size
-    				metrics.register("queue-size", (Gauge<Integer>) queue::size);
-    				
-    				// Simulate adding elements to the queue
-    				queue.add("Request 1");
-    				queue.add("Request 2");
-    				
-    				// Output: Should display the current size of the queue
-    				System.out.println("Queue size: " + metrics.getGauges().get("queue-size").getValue());
-           }
-    }
-    ```
-    
-    Here, the `queue-size` gauge tracks the number of items in a queue. Every time the gauge is called, it returns the current queue size. This is useful for monitoring data structures, like queues, that may vary in size as tasks are added or removed.
-    
-    Output:
-    
-    ```java
-    Queue size: 2
-    ```
-    
+
+   Example of a Gauge:
+
+   ```java
+   package org.example;
+
+   import com.codahale.metrics.MetricRegistry;
+
+   import java.util.LinkedList;
+   import java.util.Queue;
+
+   public class Main {
+       public static void main(String[] args) {
+
+   				MetricRegistry metrics = new MetricRegistry();
+   				Queue<String> queue = new LinkedList<>();
+
+   				// Register a gauge metric that monitors the queue size
+   				metrics.register("queue-size", (Gauge<Integer>) queue::size);
+
+   				// Simulate adding elements to the queue
+   				queue.add("Request 1");
+   				queue.add("Request 2");
+
+   				// Output: Should display the current size of the queue
+   				System.out.println("Queue size: " + metrics.getGauges().get("queue-size").getValue());
+          }
+   }
+   ```
+
+   Here, the `queue-size` gauge tracks the number of items in a queue. Every time the gauge is called, it returns the current queue size. This is useful for monitoring data structures, like queues, that may vary in size as tasks are added or removed.
+
+   Output:
+
+   ```java
+   Queue size: 2
+   ```
+
 2. Counters: A counter is a metric that only increments or decrements, tracking a count of how many times an event has occurred. It’s useful for counting things like the number of requests received, the number of errors, or the number of tasks completed.
-    
-    Example of a Counter:
-    
-    ```java
-    package org.example;
-    
-    import com.codahale.metrics.*;
-    
-    public class Main {
-        public static void main(String[] args){
-    
-            MetricRegistry metrics = new MetricRegistry();
-           // Create a counter metric to track the number of processed requests
-            Counter requestCounter = metrics.counter("requests");
-    
-            // Increment the counter to simulate receiving requests
-            requestCounter.inc();  // Increment by 1
-            requestCounter.inc(3); // Increment by 3
-    
-            // Output: Should display the total number of requests
-            System.out.println("Total requests: " + requestCounter.getCount());
-           }
-    }
-    ```
-    
-    The counter named `requests` track how many requests have been processed. Calling `inc()` increments the counter by 1, and `inc(3)` adds 3 to the counter. Counters are useful for counting discrete events, like user logins or API calls.
-    
-    Output:
-    
-    ```java
-    Total requests: 4
-    ```
-    
+
+   Example of a Counter:
+
+   ```java
+   package org.example;
+
+   import com.codahale.metrics.*;
+
+   public class Main {
+       public static void main(String[] args){
+
+           MetricRegistry metrics = new MetricRegistry();
+          // Create a counter metric to track the number of processed requests
+           Counter requestCounter = metrics.counter("requests");
+
+           // Increment the counter to simulate receiving requests
+           requestCounter.inc();  // Increment by 1
+           requestCounter.inc(3); // Increment by 3
+
+           // Output: Should display the total number of requests
+           System.out.println("Total requests: " + requestCounter.getCount());
+          }
+   }
+   ```
+
+   The counter named `requests` track how many requests have been processed. Calling `inc()` increments the counter by 1, and `inc(3)` adds 3 to the counter. Counters are useful for counting discrete events, like user logins or API calls.
+
+   Output:
+
+   ```java
+   Total requests: 4
+   ```
+
 3. Histograms: A histogram measures the statistical distribution of a set of values, tracking metrics like the minimum, maximum, median, percentiles, and standard deviation. It is preferred for measuring sizes and latency, like response times or the sizes of payloads, to understand the range and distribution of values.
-    
-    Example of a Histogram:
-    
-    ```java
-    package org.example;
-    
-    import com.codahale.metrics.*;
-    
-    public class Main {
-        public static void main(String[] args) {
-    
-            MetricRegistry metrics = new MetricRegistry();
-            
-            // Create a histogram metric to track response sizes
-            Histogram responseSizes = metrics.histogram("response-sizes");
-    
-            // Update the histogram with various response sizes (in bytes)
-            responseSizes.update(500);   // Response 1
-            responseSizes.update(1500);  // Response 2
-            responseSizes.update(200);   // Response 3
-    
-            // Output: Displays the min, max, and mean response sizes
-            System.out.println("Min response size: " + responseSizes.getSnapshot().getMin());
-            System.out.println("Max response size: " + responseSizes.getSnapshot().getMax());
-            System.out.println("Mean response size: " + responseSizes.getSnapshot().getMean());
-        }
-    }
-    ```
-    
-    This histogram records the distribution of response sizes. After updating it with three response sizes, we can retrieve statistics like the minimum, maximum, and mean sizes. Histograms help visualize the spread and frequency of values, making them useful for performance analysis.
-    
-    Output:
-    
-    ```java
-    Min response size: 200
-    Max response size: 1500
-    Mean response size: 733.33
-    ```
-    
+
+   Example of a Histogram:
+
+   ```java
+   package org.example;
+
+   import com.codahale.metrics.*;
+
+   public class Main {
+       public static void main(String[] args) {
+
+           MetricRegistry metrics = new MetricRegistry();
+
+           // Create a histogram metric to track response sizes
+           Histogram responseSizes = metrics.histogram("response-sizes");
+
+           // Update the histogram with various response sizes (in bytes)
+           responseSizes.update(500);   // Response 1
+           responseSizes.update(1500);  // Response 2
+           responseSizes.update(200);   // Response 3
+
+           // Output: Displays the min, max, and mean response sizes
+           System.out.println("Min response size: " + responseSizes.getSnapshot().getMin());
+           System.out.println("Max response size: " + responseSizes.getSnapshot().getMax());
+           System.out.println("Mean response size: " + responseSizes.getSnapshot().getMean());
+       }
+   }
+   ```
+
+   This histogram records the distribution of response sizes. After updating it with three response sizes, we can retrieve statistics like the minimum, maximum, and mean sizes. Histograms help visualize the spread and frequency of values, making them useful for performance analysis.
+
+   Output:
+
+   ```java
+   Min response size: 200
+   Max response size: 1500
+   Mean response size: 733.33
+   ```
+
 4. Meters: A meter measures the rate of events over time, such as the number of requests per second. It’s similar to a speedometer in a car, showing the rate at which events are occurring over time. It is ideal for tracking the rate of requests, error rates, or database transactions.
-    
-    Example of a Meter:
-    
-    ```java
-    package org.example;
-    
-    import com.codahale.metrics.*;
-    
-    public class Main {
-        public static void main(String[] args) {
-    
-            MetricRegistry metrics = new MetricRegistry();
-            
-            // Create a meter metric to track the rate of requests per second
-            Meter requestsPerSecond = metrics.meter("requests-per-second");
-    
-            // Mark the meter each time a request is received
-            requestsPerSecond.mark();  // Request 1
-            requestsPerSecond.mark(5); // Simulate 5 more requests
-    
-            // Output: Displays the count and rate of events per second
-            System.out.println("Total requests: " + requestsPerSecond.getCount());
-            System.out.println("Requests per second: " + requestsPerSecond.getOneMinuteRate());
-        }
-    }
-    ```
-    
-    The meter `requests-per-second` tracks the rate of incoming requests. By calling `mark()` each time a request is received, it calculates rates (e.g., events per second). This can help track traffic patterns in real-time, showing if a service is experiencing a surge or slowdown.
-    
-    Output: 
-    
-    ```java
-    Total requests: 6
-    Requests per second: [calculated value, depending on runtime duration]
-    ```
-    
+
+   Example of a Meter:
+
+   ```java
+   package org.example;
+
+   import com.codahale.metrics.*;
+
+   public class Main {
+       public static void main(String[] args) {
+
+           MetricRegistry metrics = new MetricRegistry();
+
+           // Create a meter metric to track the rate of requests per second
+           Meter requestsPerSecond = metrics.meter("requests-per-second");
+
+           // Mark the meter each time a request is received
+           requestsPerSecond.mark();  // Request 1
+           requestsPerSecond.mark(5); // Simulate 5 more requests
+
+           // Output: Displays the count and rate of events per second
+           System.out.println("Total requests: " + requestsPerSecond.getCount());
+           System.out.println("Requests per second: " + requestsPerSecond.getOneMinuteRate());
+       }
+   }
+   ```
+
+   The meter `requests-per-second` tracks the rate of incoming requests. By calling `mark()` each time a request is received, it calculates rates (e.g., events per second). This can help track traffic patterns in real-time, showing if a service is experiencing a surge or slowdown.
+
+   Output:
+
+   ```java
+   Total requests: 6
+   Requests per second: [calculated value, depending on runtime duration]
+   ```
+
 5. Timers: A timer is basically a combination of a histogram and a meter. It measures both the rate and duration of events. Used to track how long a particular process takes and how often it happens. It is ideal for measuring response times of API calls, database queries, or critical code sections.
-    
-    Example of a Timer:
-    
-    ```java
-    package org.example;
-    
-    import com.codahale.metrics.*;
-    
-    public class Test {
-        public static void main(String[] args) {
-    
-            MetricRegistry metrics = new MetricRegistry();
-            // Create a timer metric to measure request durations
-            Timer responses = metrics.timer("responses");
-    
-            // Start timing a block of code
-            Timer.Context context = responses.time();
-            try {
-                // Simulate some work being done (e.g., a request is being processed)
-                Thread.sleep(100);  // Simulates request processing delay of 100ms
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                // Stop the timer and record the duration
-                context.stop();
-            }
-    
-            // Output: Displays the total number of timed events and mean duration
-            System.out.println("Total events: " + responses.getCount());
-            System.out.println("Mean response time: " + responses.getSnapshot().getMean() / 1_000_000 + " ms");}
-    }
-    ```
-    
-    The timer `responses` measures both the number of events and their duration. By timing specific blocks of code (in this case, simulating a 100ms delay), it collects data on how long each event takes, providing insights into process efficiency and potential bottlenecks.
-    
-    Output:
-    
-    ```java
-    Total events: 1
-    Mean response time: 100.0 ms
-    ```
-    
+
+   Example of a Timer:
+
+   ```java
+   package org.example;
+
+   import com.codahale.metrics.*;
+
+   public class Test {
+       public static void main(String[] args) {
+
+           MetricRegistry metrics = new MetricRegistry();
+           // Create a timer metric to measure request durations
+           Timer responses = metrics.timer("responses");
+
+           // Start timing a block of code
+           Timer.Context context = responses.time();
+           try {
+               // Simulate some work being done (e.g., a request is being processed)
+               Thread.sleep(100);  // Simulates request processing delay of 100ms
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           } finally {
+               // Stop the timer and record the duration
+               context.stop();
+           }
+
+           // Output: Displays the total number of timed events and mean duration
+           System.out.println("Total events: " + responses.getCount());
+           System.out.println("Mean response time: " + responses.getSnapshot().getMean() / 1_000_000 + " ms");}
+   }
+   ```
+
+   The timer `responses` measures both the number of events and their duration. By timing specific blocks of code (in this case, simulating a 100ms delay), it collects data on how long each event takes, providing insights into process efficiency and potential bottlenecks.
+
+   Output:
+
+   ```java
+   Total events: 1
+   Mean response time: 100.0 ms
+   ```
 
 Note: To use the examples in this article, ensure you have the following setup:
 
@@ -293,7 +298,11 @@ DropWizard Meters use an exponentially weighted moving average (EWMA) to calcula
 
 The decaying effect of each interval helps give more weight to recent events, ensuring that the metric adjusts to changing traffic or error patterns quickly.
 
-<Figure src="/img/guides/2024/11/dropwizard-metrics-meters-vs-timers-image.webp" alt="Demonstration of requests per second" caption="Demonstration of requests per second" />
+<Figure
+  src="/img/guides/2024/11/dropwizard-metrics-meters-vs-timers-image.webp"
+  alt="Demonstration of requests per second"
+  caption="Demonstration of requests per second"
+/>
 
 ### Implementing Meters in DropWizard
 
@@ -346,7 +355,7 @@ The methods used in the above example serve different purposes:
 - `getFiveMinuteRate()`: Returns the average rate of events over the last five minutes.
 - `getFifteenMinuteRate()`: Returns the average rate of events over the last fifteen minutes.
 
-### Best  Practices for Naming and Organizing Meters
+### Best Practices for Naming and Organizing Meters
 
 1. Use Descriptive Names: Choose names that clearly describe the action or event being tracked. For example, `api.requests.rate` for tracking API request rates or `orders.processed.rate` for processed orders.
 2. Consistent Naming Convention: Stick to a consistent naming pattern across your application to keep metrics organized and easily identifiable. For example, prefix with the system component like `db.` for database-related metrics or `service.` for service-level metrics.
@@ -357,13 +366,13 @@ The methods used in the above example serve different purposes:
 ### Common Pitfalls and How to Avoid Them with Meters
 
 1. Overuse of Meters: Tracking too many events with meters can lead to metric bloat and performance issues.
-    - Solution: Focus on high-value events, like critical business operations or high-volume events. Avoid tracking infrequent or low-priority actions with meters.
+   - Solution: Focus on high-value events, like critical business operations or high-volume events. Avoid tracking infrequent or low-priority actions with meters.
 2. Unclear Metric Naming: Vague or unclear names make it hard to identify the purpose of a meter.
-    - Solution: Use meaningful names with specific terms related to the business logic. Avoid generic terms like `rate1` or `requestRate`, which can cause confusion.
+   - Solution: Use meaningful names with specific terms related to the business logic. Avoid generic terms like `rate1` or `requestRate`, which can cause confusion.
 3. Not Removing Stale or Deprecated Meters: Meters associated with outdated logic or removed components can lead to misleading data or unnecessary overhead.
-    - *Solution:* Periodically review and clean up unused or deprecated meters from your `MetricRegistry`.
+   - _Solution:_ Periodically review and clean up unused or deprecated meters from your `MetricRegistry`.
 4. Ignoring Memory and Resource Costs: Meters add overhead, and unoptimized usage can increase memory consumption.
-    - *Solution*: Use meters judiciously, especially in high-throughput areas. Regularly monitor their resource impact, especially if you have many meters in use.
+   - _Solution_: Use meters judiciously, especially in high-throughput areas. Regularly monitor their resource impact, especially if you have many meters in use.
 
 ### Meter implementation in a Real-World Scenario
 
@@ -462,20 +471,28 @@ Utilizing Timers can significantly improve observability in various scenarios, i
 Timers calculate:
 
 1. Rate of Events: Using a meter internally, timers track how frequently a specific event (e.g., method execution) happens.
-    
-    <Figure src="/img/guides/2024/11/dropwizard-metrics-meters-vs-timers-image%201.webp" alt="Demonstration of the rate of events" caption="Demonstration of the rate of events" />
-    
-    - X-axis: Rate of events (requests per second)
-    - Y-axis: Time (e.g., minutes or seconds)
+
+   <Figure
+     src="/img/guides/2024/11/dropwizard-metrics-meters-vs-timers-image%201.webp"
+     alt="Demonstration of the rate of events"
+     caption="Demonstration of the rate of events"
+   />
+
+   - X-axis: Rate of events (requests per second)
+   - Y-axis: Time (e.g., minutes or seconds)
+
 2. Distribution of Durations: Using a histogram internally, timers capture statistical data like mean, min, max, and percentiles for the recorded durations.
-    
-    <Figure src="/img/guides/2024/11/dropwizard-metrics-meters-vs-timers-image%202.webp" alt="Distribution of event durations" caption="Distribution of event durations" />
-    
-    - X-axis: Duration (in milliseconds or seconds)
-    - Y-axis: Event types or intervals (e.g., database queries, API response times)
-    
-    The red dashed lines indicate key percentile values (e.g., 50th, 75th, 90th). These values show how spread out the event durations are, helping to detect anomalies.
-    
+
+   <Figure
+     src="/img/guides/2024/11/dropwizard-metrics-meters-vs-timers-image%202.webp"
+     alt="Distribution of event durations"
+     caption="Distribution of event durations"
+   />
+
+   - X-axis: Duration (in milliseconds or seconds)
+   - Y-axis: Event types or intervals (e.g., database queries, API response times)
+
+   The red dashed lines indicate key percentile values (e.g., 50th, 75th, 90th). These values show how spread out the event durations are, helping to detect anomalies.
 
 ### Implementing Timers in DropWizard
 
@@ -490,10 +507,10 @@ import com.codahale.metrics.Timer;
 public class TimerExample {
     public static void main(String[] args) {
         MetricRegistry metrics = new MetricRegistry();
-        
+
         // Create a timer to track database query durations
         Timer dbQueryTimer = metrics.timer("db-query-duration");
-        
+
         // Start timing the database query
         Timer.Context context = dbQueryTimer.time();
 
@@ -516,7 +533,7 @@ public class TimerExample {
         try {
             // Simulate a database query by adding a delay
             // 100 ms delay to simulate a query
-            Thread.sleep(100); 
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -551,17 +568,17 @@ To maximize the effectiveness of your timers, adhere to these best practices for
 Being aware of common pitfalls can help you use timers more effectively and prevent potential issues:
 
 1. Creating Timers in Loops
-    - Description: Avoid creating new `Timer` instances inside a loop or in methods that are called frequently.
-    - Consequence: This leads to excessive memory usage and potential memory leaks since each `Timer` creates its own internal data structure.
-    - Solution: Define the timer once at the class or method level and reuse it.
+   - Description: Avoid creating new `Timer` instances inside a loop or in methods that are called frequently.
+   - Consequence: This leads to excessive memory usage and potential memory leaks since each `Timer` creates its own internal data structure.
+   - Solution: Define the timer once at the class or method level and reuse it.
 2. Misusing `time()` Method
-    - Description: If the `Timer.Context` returned by `time()` is not properly stopped, it can lead to incomplete or inconsistent metrics.
-    - Consequence: Metrics will be skewed (inaccurate, biased, or misleading due to improper collection, incomplete data points, or irregular patterns), with some timers running indefinitely, making it difficult to diagnose real performance issues.
-    - Solution: Always use a `try-finally` block to ensure `context.stop()` is called even if exceptions occur.
+   - Description: If the `Timer.Context` returned by `time()` is not properly stopped, it can lead to incomplete or inconsistent metrics.
+   - Consequence: Metrics will be skewed (inaccurate, biased, or misleading due to improper collection, incomplete data points, or irregular patterns), with some timers running indefinitely, making it difficult to diagnose real performance issues.
+   - Solution: Always use a `try-finally` block to ensure `context.stop()` is called even if exceptions occur.
 3. Excessive Timers
-    - Description: Creating too many timers to track every small operation can overwhelm the system.
-    - Consequence: This leads to high memory consumption, CPU overhead, and cluttered metrics dashboards, making it hard to identify critical data points.
-    - Solution: Only create timers for key processes and operations that significantly impact performance. Use hierarchical naming to avoid redundancy.
+   - Description: Creating too many timers to track every small operation can overwhelm the system.
+   - Consequence: This leads to high memory consumption, CPU overhead, and cluttered metrics dashboards, making it hard to identify critical data points.
+   - Solution: Only create timers for key processes and operations that significantly impact performance. Use hierarchical naming to avoid redundancy.
 
 ## Meters vs Timers: Key Differences and When to Use Each
 
@@ -570,44 +587,44 @@ The main differences between Meters and Timers lie in their focus and the granul
 ### 1. Comparison of Measurement Focus
 
 - Meters:
-    - Focus on event rate measurement only.
-    - Ideal for tracking how frequently events are happening, like request rate or error rate.
-    - E.g., Meters are perfect for monitoring requests per second or the number of successful logins per minute.
+  - Focus on event rate measurement only.
+  - Ideal for tracking how frequently events are happening, like request rate or error rate.
+  - E.g., Meters are perfect for monitoring requests per second or the number of successful logins per minute.
 - Timers:
-    - Measure both rate and duration of events.
-    - Useful for scenarios where the execution time is also crucial, such as response time or database query latency.
-    - E.g., Timers are best for tracking API response times and method execution durations.
+  - Measure both rate and duration of events.
+  - Useful for scenarios where the execution time is also crucial, such as response time or database query latency.
+  - E.g., Timers are best for tracking API response times and method execution durations.
 
 ### 2. Granularity of Data
 
 - Meters:
-    - Provide simple counts and rates, like the number of events per second or minute.
-    - No information on how long each event took.
-    - Output includes rates over 1, 5, and 15-minute moving averages.
+  - Provide simple counts and rates, like the number of events per second or minute.
+  - No information on how long each event took.
+  - Output includes rates over 1, 5, and 15-minute moving averages.
 - Timers:
-    - Offer detailed insights through statistical distribution of durations.
-    - Record metrics like min, max, mean, and percentiles (e.g., 50th, 75th, 90th).
-    - Timers can pinpoint performance bottlenecks by showing outliers or skewed durations.
+  - Offer detailed insights through statistical distribution of durations.
+  - Record metrics like min, max, mean, and percentiles (e.g., 50th, 75th, 90th).
+  - Timers can pinpoint performance bottlenecks by showing outliers or skewed durations.
 
 ### 3. Performance Overhead Considerations
 
 - Meters:
-    - Lightweight; low overhead.
-    - Can be safely used in high-throughput applications without significant performance impact.
+  - Lightweight; low overhead.
+  - Can be safely used in high-throughput applications without significant performance impact.
 - Timers:
-    - Slightly heavier due to maintaining both rate and duration data.
-    - Avoid excessive use in high-frequency scenarios as it could lead to performance degradation.
+  - Slightly heavier due to maintaining both rate and duration data.
+  - Avoid excessive use in high-frequency scenarios as it could lead to performance degradation.
 
 ### 4. Decision-Making: When to Use Meters vs. Timers
 
 - Use Meters When:
-    - You only care about how often something happens (e.g., tracking user logins or error counts).
-    - Low overhead is crucial.
-    - Rate measurement over time is sufficient (no need for duration data).
+  - You only care about how often something happens (e.g., tracking user logins or error counts).
+  - Low overhead is crucial.
+  - Rate measurement over time is sufficient (no need for duration data).
 - Use Timers When:
-    - You want to track how long something takes in addition to how often it happens.
-    - Detailed analysis of event durations is required, such as profiling method performance.
-    - Identifying slow operations is necessary (e.g., pinpointing slow database queries).
+  - You want to track how long something takes in addition to how often it happens.
+  - Detailed analysis of event durations is required, such as profiling method performance.
+  - Identifying slow operations is necessary (e.g., pinpointing slow database queries).
 
 ## Advanced Usage: Combining Meters and Timers
 
@@ -669,7 +686,7 @@ public class DropwizardMetricsExample {
         Timer.Context context = responseTimer.time();
         try {
             // Simulate some processing logic (e.g., database access, computation)
-            Thread.sleep(200); 
+            Thread.sleep(200);
 
             // Return some dummy data
             return "Data processed successfully!";

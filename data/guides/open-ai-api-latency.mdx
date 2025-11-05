@@ -1,13 +1,10 @@
 ---
-
 title: Optimizing OpenAI API Performance - Reducing Latency
-slug: open-ai-api-latency
 date: 2024-10-03
 tags: [monitoring]
 authors: [soumya_gupta]
 description: Learn how to optimize OpenAI API performance and reduce latency. Discover strategies for faster response times in AI-powered applications.
 keywords: [OpenAI API, latency optimization, API performance, response times, AI applications]
-
 ---
 
 OpenAI's powerful language models have revolutionized AI-powered applications, but their effectiveness hinges on one critical factor: latency. As a developer, you know that slow API response times can frustrate users and hinder your application's performance. How can you harness the full potential of OpenAI's API while ensuring lightning-fast responses? This guide will walk you through practical strategies to optimize your OpenAI API integration, focusing on reducing latency and improving overall performance.
@@ -16,139 +13,148 @@ OpenAI's powerful language models have revolutionized AI-powered applications, b
 
 API latency refers to the time it takes for the OpenAI API to process your request and return a response. High latency can significantly impact user experience, especially in real-time applications or chatbots. Several factors contribute to OpenAI API response times:
 
-<Figure src="/img/guides/2024/10/open-ai-api-latency-image.webp" alt="OpenAI API Latency Factors" caption="OpenAI API Latency Factors" />
+<Figure
+  src="/img/guides/2024/10/open-ai-api-latency-image.webp"
+  alt="OpenAI API Latency Factors"
+  caption="OpenAI API Latency Factors"
+/>
 
 1. Model complexity: When we talk about latency, the first thing that probably pops into your head is inference speed. This is all about how quickly the language model processes tokens, and it’s typically measured in tokens per minute (TPM) or tokens per second (TPS). One of the biggest factors affecting inference speed is the model size. Generally, smaller models tend to run faster and are more cost-effective. In fact, if you use them wisely, they can sometimes even outperform larger models like GPT-4!
-    
-    To keep the performance high with these smaller models, here are a few strategies you might consider:
-    
-    - Train Through Examples in Prompts: Including a few-shot example or two within your prompts helps the model better understand the desired output by providing concrete examples to follow.
-    - Fine-Tuning or Distillation: Fine-tuning a smaller model on your specific data can really help tailor its responses to your needs. Distillation, on the other hand, is a process where you train a smaller model to mimic the behavior of a larger one, capturing its strengths without the overhead.
-2. Input length: While it’s true that reducing the number of input tokens can lower latency, it’s often not a game changer. For example, trimming your prompt by 50% might only improve latency by around 1-5% (<a href="https://platform.openai.com/docs/guides/latency-optimization/3-use-fewer-input-tokens" rel="noopener noreferrer nofollow" target="_blank">ref</a>). Unless you're dealing with really massive contexts, like lengthy documents or complex images, it might be better to focus your energy on other optimization strategies. But what if you are working with those larger contexts or are determined to squeeze out every last bit of performance after trying everything else? 
-    
-    Here are some techniques to help you reduce input tokens:
-    
-    - Fine-Tune the Model: This can help eliminate the need for lengthy instructions or examples, making your prompts more concise while still getting great results.
-    - Filter Context Input: Clean up your context by pruning retrieval-augmented generation (RAG) results or stripping away unnecessary HTML. This can help streamline your inputs significantly.
-    - Maximize Shared Prompt Prefix: Put changing parts like RAG results or conversation history towards the end of the prompt. This way, the beginning of the prompt can be cached (stored for reuse) by many LLM providers, so the model doesn’t have to repeatedly process the same information. This helps reduce the number of tokens processed in each request, making everything faster.
-3. Output length: 
-    - For Natural Language: If you want more concise responses, try asking the model to keep it brief—something like “under 20 words” or “be concise” can work wonders. You can also use few-shot examples or fine-tune the model to encourage shorter replies.
-    - For Structured Output: In this case it’s all about minimizing syntax. Shorten function names, omit named arguments, and combine parameters whenever you can.
-    - Use `max_tokens` or `stop_tokens`: You can set these parameters to cut off generation early, saving both time and tokens.
-    
-    Note: Every output token you trim is a (milli)second gained!
-    
+
+   To keep the performance high with these smaller models, here are a few strategies you might consider:
+
+   - Train Through Examples in Prompts: Including a few-shot example or two within your prompts helps the model better understand the desired output by providing concrete examples to follow.
+   - Fine-Tuning or Distillation: Fine-tuning a smaller model on your specific data can really help tailor its responses to your needs. Distillation, on the other hand, is a process where you train a smaller model to mimic the behavior of a larger one, capturing its strengths without the overhead.
+
+2. Input length: While it’s true that reducing the number of input tokens can lower latency, it’s often not a game changer. For example, trimming your prompt by 50% might only improve latency by around 1-5% (<a href="https://platform.openai.com/docs/guides/latency-optimization/3-use-fewer-input-tokens" rel="noopener noreferrer nofollow" target="_blank">ref</a>). Unless you're dealing with really massive contexts, like lengthy documents or complex images, it might be better to focus your energy on other optimization strategies. But what if you are working with those larger contexts or are determined to squeeze out every last bit of performance after trying everything else?
+
+   Here are some techniques to help you reduce input tokens:
+
+   - Fine-Tune the Model: This can help eliminate the need for lengthy instructions or examples, making your prompts more concise while still getting great results.
+   - Filter Context Input: Clean up your context by pruning retrieval-augmented generation (RAG) results or stripping away unnecessary HTML. This can help streamline your inputs significantly.
+   - Maximize Shared Prompt Prefix: Put changing parts like RAG results or conversation history towards the end of the prompt. This way, the beginning of the prompt can be cached (stored for reuse) by many LLM providers, so the model doesn’t have to repeatedly process the same information. This helps reduce the number of tokens processed in each request, making everything faster.
+
+3. Output length:
+
+   - For Natural Language: If you want more concise responses, try asking the model to keep it brief—something like “under 20 words” or “be concise” can work wonders. You can also use few-shot examples or fine-tune the model to encourage shorter replies.
+   - For Structured Output: In this case it’s all about minimizing syntax. Shorten function names, omit named arguments, and combine parameters whenever you can.
+   - Use `max_tokens` or `stop_tokens`: You can set these parameters to cut off generation early, saving both time and tokens.
+
+   Note: Every output token you trim is a (milli)second gained!
+
 4. Server load: When you're dealing with API responses, server load can really play a significant role. High traffic can lead to slower responses, which is something you definitely want to avoid. One effective way to manage this is through load balancing. This technique helps distribute requests evenly across your available servers, preventing any one server from becoming a bottleneck. Placing a load balancer in front of your servers can automatically route incoming requests to the server with the least load. This helps ensure that no single server is overwhelmed.
 5. Network conditions: Your network conditions play a crucial role in how quickly data moves between your application and the API. If you have a strong, stable connection, you’ll enjoy faster response times and smoother interactions. On the flip side, a weak or unstable connection can lead to delays and interruptions, making your experience less enjoyable.
 
 ## Quick Guide: 5 Steps to Reduce OpenAI API Latency
 
-1. Optimize input tokens and prompt engineering: 
-    
-    To keep your API responses fast, it’s essential to craft concise and clear prompts, because when it comes to generating a lot of tokens, it can lead to increased latency. Here are some effective strategies to reduce that:
-    
-    - Lower `max_tokens`: If your requests are generating a similar number of tokens, setting a lower `max_tokens` parameter can help cut down on latency. It’s all about giving the model less to work with.
-    - Include Stop Sequences: Adding stop sequences can prevent the model from generating unnecessary tokens. For instance, if you want a list with a specific number of items, you could use `11`. as a stop sequence. This way, the generation stops once it hits `11`, giving you just the 10 items you want.
-    - Generate Fewer Completions: Lower the values of `n` and `best_of` whenever possible. Here, `n` refers to how many completions you want for each prompt, while `best_of` is about selecting the one with the highest log probability per token. If both are set to 1 (the default), the total number of generated tokens will be at most equal to your `max_tokens`.
-    
-    Note: If you set `n` or `best_of` to greater than 1, each request will produce multiple outputs. In this case, you can think of the total number of generated tokens as `[max_tokens * max(n, best_of)]`.
-    
+1. Optimize input tokens and prompt engineering:
+
+   To keep your API responses fast, it’s essential to craft concise and clear prompts, because when it comes to generating a lot of tokens, it can lead to increased latency. Here are some effective strategies to reduce that:
+
+   - Lower `max_tokens`: If your requests are generating a similar number of tokens, setting a lower `max_tokens` parameter can help cut down on latency. It’s all about giving the model less to work with.
+   - Include Stop Sequences: Adding stop sequences can prevent the model from generating unnecessary tokens. For instance, if you want a list with a specific number of items, you could use `11`. as a stop sequence. This way, the generation stops once it hits `11`, giving you just the 10 items you want.
+   - Generate Fewer Completions: Lower the values of `n` and `best_of` whenever possible. Here, `n` refers to how many completions you want for each prompt, while `best_of` is about selecting the one with the highest log probability per token. If both are set to 1 (the default), the total number of generated tokens will be at most equal to your `max_tokens`.
+
+   Note: If you set `n` or `best_of` to greater than 1, each request will produce multiple outputs. In this case, you can think of the total number of generated tokens as `[max_tokens * max(n, best_of)]`.
+
 2. Implement caching strategies: One great way to boost your response times is by implementing caching strategies. By storing and reusing responses for frequent or similar requests, you can save yourself from making repeated calls to the API. To make the most of caching, your application should be designed to pull from cached data whenever possible. Remember to invalidate that cache whenever new information comes in. There are different ways through which you could set this up:
+
 - Database Storage: If your application needs to handle larger datasets or requires persistent storage, consider using a database, as it is great for keeping data organized and easily accessible.
 - Filesystem Storage: For simpler applications, storing data in the filesystem might be a good fit. This approach is straightforward and can be useful for quick access to static files or logs.
 - In-Memory Cache: If speed is your priority, an in-memory cache is a fantastic choice. This method allows for rapid access to frequently used data, significantly reducing response times.
-1. Use efficient API calling patterns: To optimize your API usage, focus on efficient calling patterns. One key strategy is to batch requests and avoid unnecessary calls. 
-    
-    Batching is especially helpful when sending multiple requests to the same endpoint. Instead of making individual requests for each prompt, combine them into a single request, as the prompt parameter can accommodate up to 20 unique prompts. This reduces the number of calls but may increase the total tokens generated, potentially slowing response times.
-    
-    If instant responses aren’t critical, utilize the Batch API to submit large collections of requests without impacting your synchronous request limits, streamlining processing without sacrificing performance. For quicker responses, keep in mind the OpenAI API’s limits on requests and tokens per minute. If you're reaching the requests-per-minute cap but still have token capacity, batching multiple tasks can boost your throughput, especially with smaller models that manage larger batches effectively. When sending a batch, just pass a list of strings to the prompt parameter, making it a simple yet effective change that can bring significant benefits. 
-    
-    Before we see some examples, let’s see how to set the `API KEY` for Windows PowerShell:
-    
-    ```python
-    $env:OPENAI_API_KEY="your_api_key_here"
-    
-    ```
-    
-    Case 1: Program without Batching
-    
-    ```python
-    from openai import OpenAI
-    
-    client = OpenAI()
-    
-    num_stories = 10
-    prompt = "Once upon a time,"
-    
-    # Serial example, with one story completion per request
-    for _ in range(num_stories):
-        response = client.completions.create(
-            model="curie",
-            prompt=prompt,
-            max_tokens=20,
-        )
-        # Print story
-        print(prompt + response.choices[0].text.strip())  # Use .strip() to remove any leading/trailing whitespace
-    
-    ```
-    
-    - Execution: Each story is generated one at a time in a loop.
-    - API Calls: The code makes 10 separate API calls (one for each story).
-    - Output Handling: The output is printed immediately after each request, which can lead to slower performance due to the overhead of multiple requests.
-    
-    Possible Output :
-    
-    ```
-    Once upon a time, there was a brave knight who lived in a small village.
-    Once upon a time, a little girl found a magical forest behind her house.
-    Once upon a time, a mysterious dragon appeared in the kingdom, causing panic.
-    ...
-    ```
-    
-    Note that specific output might vary according to model’s response.
-    
-    Case 2: Program with batching
-    
-    ```python
-    from openai import OpenAI
-    # API key will be picked up from the environment variable
-    client = OpenAI()
-    
-    num_stories = 10
-    prompts = ["Once upon a time,"] * num_stories
-    
-    # Batched example, with 10 story completions per request
-    response = client.completions.create(
-        model="curie",
-        prompt=prompts,
-        max_tokens=20,
-    )
-    
-    # Match completions to prompts by index
-    stories = ["" for _ in prompts]
-     # Use enumerate to get index
-    for index, choice in enumerate(response.choices):
-        stories[index] = prompts[index] + choice.text.strip()
-    
-    # Print stories
-    for story in stories:
-        print(story)
-    
-    ```
-    
-    - Execution: All story prompts are sent to the API in a single request.
-    - API Calls: The code makes just one API call to generate all stories at once.
-    - Output Handling: The output is processed after the API call completes, which can be more efficient and faster for larger numbers of stories.
-2. Choose the right model: It’s all about picking the right model that fits your needs while keeping an eye on performance and speed. OpenAI’s API offers a range of models, each with its own strengths and complexities. If you’re looking for something that can handle intricate and varied responses, the advanced GPT-4 is your go-to. Just keep in mind that it may take a bit longer to process your requests. On the flip side, if you want quicker and more budget-friendly chat completions, you might consider models like GPT-4o-mini. While they’re faster and cheaper, they might not always hit the mark in terms of accuracy or relevance. 
+
+1. Use efficient API calling patterns: To optimize your API usage, focus on efficient calling patterns. One key strategy is to batch requests and avoid unnecessary calls.
+
+   Batching is especially helpful when sending multiple requests to the same endpoint. Instead of making individual requests for each prompt, combine them into a single request, as the prompt parameter can accommodate up to 20 unique prompts. This reduces the number of calls but may increase the total tokens generated, potentially slowing response times.
+
+   If instant responses aren’t critical, utilize the Batch API to submit large collections of requests without impacting your synchronous request limits, streamlining processing without sacrificing performance. For quicker responses, keep in mind the OpenAI API’s limits on requests and tokens per minute. If you're reaching the requests-per-minute cap but still have token capacity, batching multiple tasks can boost your throughput, especially with smaller models that manage larger batches effectively. When sending a batch, just pass a list of strings to the prompt parameter, making it a simple yet effective change that can bring significant benefits.
+
+   Before we see some examples, let’s see how to set the `API KEY` for Windows PowerShell:
+
+   ```python
+   $env:OPENAI_API_KEY="your_api_key_here"
+
+   ```
+
+   Case 1: Program without Batching
+
+   ```python
+   from openai import OpenAI
+
+   client = OpenAI()
+
+   num_stories = 10
+   prompt = "Once upon a time,"
+
+   # Serial example, with one story completion per request
+   for _ in range(num_stories):
+       response = client.completions.create(
+           model="curie",
+           prompt=prompt,
+           max_tokens=20,
+       )
+       # Print story
+       print(prompt + response.choices[0].text.strip())  # Use .strip() to remove any leading/trailing whitespace
+
+   ```
+
+   - Execution: Each story is generated one at a time in a loop.
+   - API Calls: The code makes 10 separate API calls (one for each story).
+   - Output Handling: The output is printed immediately after each request, which can lead to slower performance due to the overhead of multiple requests.
+
+   Possible Output :
+
+   ```
+   Once upon a time, there was a brave knight who lived in a small village.
+   Once upon a time, a little girl found a magical forest behind her house.
+   Once upon a time, a mysterious dragon appeared in the kingdom, causing panic.
+   ...
+   ```
+
+   Note that specific output might vary according to model’s response.
+
+   Case 2: Program with batching
+
+   ```python
+   from openai import OpenAI
+   # API key will be picked up from the environment variable
+   client = OpenAI()
+
+   num_stories = 10
+   prompts = ["Once upon a time,"] * num_stories
+
+   # Batched example, with 10 story completions per request
+   response = client.completions.create(
+       model="curie",
+       prompt=prompts,
+       max_tokens=20,
+   )
+
+   # Match completions to prompts by index
+   stories = ["" for _ in prompts]
+    # Use enumerate to get index
+   for index, choice in enumerate(response.choices):
+       stories[index] = prompts[index] + choice.text.strip()
+
+   # Print stories
+   for story in stories:
+       print(story)
+
+   ```
+
+   - Execution: All story prompts are sent to the API in a single request.
+   - API Calls: The code makes just one API call to generate all stories at once.
+   - Output Handling: The output is processed after the API call completes, which can be more efficient and faster for larger numbers of stories.
+
+2. Choose the right model: It’s all about picking the right model that fits your needs while keeping an eye on performance and speed. OpenAI’s API offers a range of models, each with its own strengths and complexities. If you’re looking for something that can handle intricate and varied responses, the advanced GPT-4 is your go-to. Just keep in mind that it may take a bit longer to process your requests. On the flip side, if you want quicker and more budget-friendly chat completions, you might consider models like GPT-4o-mini. While they’re faster and cheaper, they might not always hit the mark in terms of accuracy or relevance.
 3. Leverage parallel processing: Why not supercharge your API calls by using asynchronous programming to handle multiple requests at once? When working with a large language model (LLM), parallelization can be a game changer, especially if your tasks don’t depend on each other. Think of it this way: just like two shirts take the same time to dry as one, you can split your calls into parallel requests to save time. But what if your steps do need to happen in a certain order? You can still take advantage of speculative execution. This is especially handy for classification tasks where one outcome is more likely than others, like moderation. Let’s see a quick approach:
-    - Start step 1 (input moderation) and step 2 (story generation) at the same time.
-    - Check the result of step 1.
-    - If it’s not what you expected, you can cancel step 2 (and try again if needed).
-    - If your guess for step 1 is correct, you’ve effectively run it without any added delay!
+   - Start step 1 (input moderation) and step 2 (story generation) at the same time.
+   - Check the result of step 1.
+   - If it’s not what you expected, you can cancel step 2 (and try again if needed).
+   - If your guess for step 1 is correct, you’ve effectively run it without any added delay!
 4. Scaling: If you're looking to enhance your application's performance, consider scaling it out horizontally. This approach allows you to manage incoming requests from various sources by deploying extra servers or containers to share the workload. Just remember, if you choose this route, your architecture should be prepared to support multiple nodes, and you'll need effective load balancing mechanisms to distribute traffic evenly.
-    
-    On the other hand, you might think about vertical scaling, which means upgrading a single node's resources. This could involve boosting your server’s capabilities to handle more load. If you go this route, ensure your application is optimized to leverage these enhanced resources effectively. Both methods have their benefits, so pick the one that best fits your needs!
-    
+
+   On the other hand, you might think about vertical scaling, which means upgrading a single node's resources. This could involve boosting your server’s capabilities to handle more load. If you go this route, ensure your application is optimized to leverage these enhanced resources effectively. Both methods have their benefits, so pick the one that best fits your needs!
 
 ## Analyzing OpenAI API Response Times
 
@@ -163,7 +169,7 @@ Note: These times can vary based on input complexity and server load. GPT-3.5 mo
 To measure API latency accurately:
 
 1. Use Built-in Timing Functions: Most programming languages offer built-in functions to measure time. For instance, in Python, you can use `time.time()` or the `timeit` module. This allows you to capture the duration of API calls easily, giving you precise insights into how long each request takes.
-2. Implement Server-side Logging: Setting up logging for your API calls helps you capture more than just response times. By logging the request and response details along with timestamps, you can analyze performance over time, identify patterns, and pinpoint any anomalies or delays. 
+2. Implement Server-side Logging: Setting up logging for your API calls helps you capture more than just response times. By logging the request and response details along with timestamps, you can analyze performance over time, identify patterns, and pinpoint any anomalies or delays.
 3. Utilize [API Monitoring Tools](https://signoz.io/blog/api-monitoring-complete-guide/): Tools like [SigNoz](https://signoz.io/docs/introduction/) provide a comprehensive way to monitor your API performance. They can track metrics such as response times, error rates, and throughput, allowing you to visualize trends and identify bottlenecks in real-time. This [proactive monitoring](https://signoz.io/guides/proactive-monitoring/) helps you react quickly to any performance issues that arise.
 
 ## Benchmarking OpenAI API Performance
@@ -180,6 +186,7 @@ Once you’ve gathered and analyzed your benchmarks, you can use this informatio
 1. Set Performance Baselines: Establish what "normal" performance looks like for your application. This will help you spot any anomalies quickly.
 2. Identify Areas for Optimization: By understanding where delays occur, you can target specific areas for improvement. This could mean tweaking your code, adjusting how you interact with the API, or even considering different models.
 3. Make Informed Decisions: Armed with your data, you can make better choices about model selection and API usage. For instance, you might find that a different model provides faster responses for specific tasks, which could enhance your application’s overall performance.
+
 - Identify areas for optimization
 - Make informed decisions about model selection and API usage
 
@@ -228,9 +235,8 @@ def api_call_with_retry(max_retries=3):
 
 1. Manage rate limits: Implement a queue system to control the rate of API calls and avoid hitting rate limits. Rate limits are like guardrails for OpenAI’s API, setting boundaries on how often a user or client can access the services within a given timeframe. These restrictions help ensure fair usage and maintain the performance and reliability of the system for everyone.
 2. Balance latency with cost: It’s crucial to weigh the benefits of faster, pricier models against slower, more budget-friendly alternatives. When transitioning your prototype into production, budgeting for operational costs becomes a key challenge. OpenAI uses a pay-as-you-go pricing model, where charges are based on the number of tokens processed—roughly 1,000 tokens are equivalent to about 750 words. To estimate your expenses, you’ll need to project your token usage by considering factors like traffic levels, user interaction frequency, and the volume of data being processed. A helpful way to think about cost management is to view it as a function of the number of tokens and the price per token. There are two main strategies to reduce costs:
-    - Lowering the Cost Per Token: This can be achieved by using smaller models for certain tasks, which can help you save money.
-    - Reducing Token Usage: You can decrease the number of tokens needed by using shorter prompts, fine-tuning your models, or caching frequently asked user queries to avoid repetitive processing.
-    
+   - Lowering the Cost Per Token: This can be achieved by using smaller models for certain tasks, which can help you save money.
+   - Reducing Token Usage: You can decrease the number of tokens needed by using shorter prompts, fine-tuning your models, or caching frequently asked user queries to avoid repetitive processing.
 
 Note: To assist with cost estimation, you can also try OpenAI’s interactive tokenizer tool. Additionally, the API and playground provide token counts in their responses. Once you have your application running smoothly with the most capable model, experiment with other models to see if they can deliver similar results with lower latency and costs.
 
