@@ -59,10 +59,11 @@ tags: ["test", "example"]
   })
 
   describe('validateMetadata', () => {
-    it('should pass validation for valid metadata', () => {
+    it('should pass validation for valid metadata with current date', () => {
+      const today = new Date().toISOString().split('T')[0]
       const content = `---
 title: Valid Document
-date: 2024-01-15
+date: ${today}
 description: A valid document with all required fields
 tags: ["SigNoz Cloud", "Self-Host"]
 ---
@@ -77,9 +78,10 @@ tags: ["SigNoz Cloud", "Self-Host"]
     })
 
     it('should warn when tags are missing', () => {
+      const today = new Date().toISOString().split('T')[0]
       const content = `---
 title: No Tags Document
-date: 2024-01-15
+date: ${today}
 description: A document without tags
 ---
 
@@ -108,8 +110,9 @@ tags: ["test"]
     })
 
     it('should error when title is missing', () => {
+      const today = new Date().toISOString().split('T')[0]
       const content = `---
-date: 2024-01-15
+date: ${today}
 description: A document without a title
 tags: ["test"]
 ---
@@ -123,9 +126,10 @@ tags: ["test"]
     })
 
     it('should error when description is missing', () => {
+      const today = new Date().toISOString().split('T')[0]
       const content = `---
 title: No Description Document
-date: 2024-01-15
+date: ${today}
 tags: ["test"]
 ---
 
@@ -138,9 +142,10 @@ tags: ["test"]
     })
 
     it('should error when description is empty', () => {
+      const today = new Date().toISOString().split('T')[0]
       const content = `---
 title: Empty Description Document
-date: 2024-01-15
+date: ${today}
 description: ""
 tags: ["test"]
 ---
@@ -210,10 +215,114 @@ tags: ["test"]
       assert.strictEqual(warnings.length, 0)
     })
 
+    it('should error for dates more than 7 days in the past', () => {
+      const pastDate = new Date()
+      pastDate.setDate(pastDate.getDate() - 10) // 10 days in the past
+      const pastDateStr = pastDate.toISOString().split('T')[0]
+
+      const content = `---
+title: Old Date Document
+date: ${pastDateStr}
+description: A document with an old date
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('old-date.mdx', content)
+      const { errors } = validateMetadata(filePath)
+
+      assert.ok(errors.includes('date cannot be more than 7 days in the past'))
+    })
+
+    it('should allow dates up to 7 days in the past', () => {
+      const pastDate = new Date()
+      pastDate.setDate(pastDate.getDate() - 5) // 5 days in the past
+      const pastDateStr = pastDate.toISOString().split('T')[0]
+
+      const content = `---
+title: Recent Past Date Document
+date: ${pastDateStr}
+description: A document with a recent past date
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('recent-past-date.mdx', content)
+      const { errors, warnings } = validateMetadata(filePath)
+
+      assert.strictEqual(errors.length, 0)
+      assert.strictEqual(warnings.length, 0)
+    })
+
+    it("should allow today's date", () => {
+      const today = new Date()
+      const todayStr = today.toISOString().split('T')[0]
+
+      const content = `---
+title: Today's Date Document
+date: ${todayStr}
+description: A document with today's date
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('today-date.mdx', content)
+      const { errors, warnings } = validateMetadata(filePath)
+
+      assert.strictEqual(errors.length, 0)
+      assert.strictEqual(warnings.length, 0)
+    })
+
+    it('should allow date exactly 7 days in the past', () => {
+      const pastDate = new Date()
+      pastDate.setDate(pastDate.getDate() - 7) // Exactly 7 days in the past
+      const pastDateStr = pastDate.toISOString().split('T')[0]
+
+      const content = `---
+title: Seven Days Past Document
+date: ${pastDateStr}
+description: A document with date exactly 7 days in the past
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('seven-days-past.mdx', content)
+      const { errors, warnings } = validateMetadata(filePath)
+
+      assert.strictEqual(errors.length, 0)
+      assert.strictEqual(warnings.length, 0)
+    })
+
+    it('should allow date exactly 7 days in the future', () => {
+      const futureDate = new Date()
+      futureDate.setDate(futureDate.getDate() + 7) // Exactly 7 days in the future
+      const futureDateStr = futureDate.toISOString().split('T')[0]
+
+      const content = `---
+title: Seven Days Future Document
+date: ${futureDateStr}
+description: A document with date exactly 7 days in the future
+tags: ["test"]
+---
+
+# Content
+`
+      const filePath = createTestFile('seven-days-future.mdx', content)
+      const { errors, warnings } = validateMetadata(filePath)
+
+      assert.strictEqual(errors.length, 0)
+      assert.strictEqual(warnings.length, 0)
+    })
+
     it('should warn when tags is not an array', () => {
+      const today = new Date().toISOString().split('T')[0]
       const content = `---
 title: Wrong Tags Format
-date: 2024-01-15
+date: ${today}
 description: A document with wrong tags format
 tags: test
 ---
@@ -228,9 +337,10 @@ tags: test
     })
 
     it('should warn when tags array is empty', () => {
+      const today = new Date().toISOString().split('T')[0]
       const content = `---
 title: Empty Tags
-date: 2024-01-15
+date: ${today}
 description: A document with empty tags array
 tags: []
 ---
