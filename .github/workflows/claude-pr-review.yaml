@@ -33,54 +33,89 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
+      - name: Mint identity token
+        id: mint_identity_token
+        if: ${{ vars.APP_ID }}
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: read
+          permission-issues: write
+          permission-pull-requests: write
+
       - name: Resolve PR details
         id: pr
         uses: actions/github-script@v7
         with:
           script: |
-            const baseRepo = `${context.repo.owner}/${context.repo.repo}`;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
             let prNumber = '';
-            let headBranch = '';
-            let headSha = '';
             if (context.payload.pull_request) {
               prNumber = String(context.payload.pull_request.number);
-              headBranch = context.payload.pull_request.head.ref;
-              headSha = context.payload.pull_request.head.sha;
             } else if (context.eventName === 'issue_comment' && context.payload.issue.pull_request) {
-              const { data: pr } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.payload.issue.number,
-              });
-              prNumber = String(pr.number);
-              headBranch = pr.head.ref;
-              headSha = pr.head.sha;
+              prNumber = String(context.payload.issue.number);
             }
 
-            const checkoutRef = prNumber ? `refs/pull/${prNumber}/merge` : context.ref;
-            const headFetchRef = prNumber ? `refs/pull/${prNumber}/head` : context.ref;
+            let headBranch = '';
+            let headSha = '';
+            let mergeRef = context.ref;
+            let headRef = context.ref;
+            let checkoutRef = context.ref;
 
-            core.setOutput('checkout_repo', baseRepo);
+            if (prNumber) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: Number(prNumber),
+              });
+
+              headBranch = pr.head?.ref || '';
+              headSha = pr.head?.sha || '';
+              mergeRef = `refs/pull/${prNumber}/merge`;
+              headRef = `refs/pull/${prNumber}/head`;
+              checkoutRef = headRef;
+
+              try {
+                await github.rest.git.getRef({
+                  owner,
+                  repo,
+                  ref: `pull/${prNumber}/merge`,
+                });
+                checkoutRef = mergeRef;
+              } catch (error) {
+                core.info(`Merge ref not available for PR #${prNumber}; using head ref.`);
+              }
+            }
+
             core.setOutput('checkout_ref', checkoutRef);
-            core.setOutput('head_fetch_ref', headFetchRef);
+            core.setOutput('merge_ref', mergeRef);
+            core.setOutput('head_ref', headRef);
             core.setOutput('head_branch', headBranch);
             core.setOutput('head_sha', headSha);
             core.setOutput('number', prNumber);
 
-      - name: Checkout PR
+      - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          repository: ${{ steps.pr.outputs.checkout_repo }}
           ref: ${{ steps.pr.outputs.checkout_ref }}
-          fetch-depth: 2
+          token: ${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}
+          fetch-depth: 0
 
-      - name: Mirror PR head branch
+      - name: Prepare PR workspace
         if: steps.pr.outputs.number
         env:
-          HEAD_FETCH_REF: ${{ steps.pr.outputs.head_fetch_ref }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          HEAD_REF: ${{ steps.pr.outputs.head_ref }}
           HEAD_BRANCH: ${{ steps.pr.outputs.head_branch }}
         run: |
-          git fetch origin ${HEAD_FETCH_REF}:refs/remotes/origin/${HEAD_BRANCH}
+          set -e
+          if [ -n "${HEAD_REF}" ]; then
+            TARGET="refs/remotes/origin/${HEAD_BRANCH:-pr-${PR_NUMBER}-head}"
+            git fetch origin "${HEAD_REF}:${TARGET}" || true
+          fi
 
       - uses: anthropics/claude-code-action@v1
         env:
