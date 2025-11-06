@@ -33,57 +33,93 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      - name: Resolve PR head target
-        id: resolve
+      - name: Mint identity token
+        id: mint_identity_token
+        if: ${{ vars.APP_ID && secrets.APP_PRIVATE_KEY }}
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: read
+          permission-issues: write
+          permission-pull-requests: write
+
+      - name: Resolve PR details
+        id: pr
         uses: actions/github-script@v7
         with:
           script: |
-            let repo, ref, sha, number, checkoutRef;
-            if (context.eventName === 'pull_request') {
-              const pr = context.payload.pull_request;
-              repo = pr.head.repo.full_name;
-              ref = pr.head.ref;
-              sha = pr.head.sha;
-              number = pr.number;
-              checkoutRef = `refs/pull/${pr.number}/head`;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            let prNumber = '';
+            if (context.payload.pull_request) {
+              prNumber = String(context.payload.pull_request.number);
             } else if (context.eventName === 'issue_comment' && context.payload.issue.pull_request) {
-              const prNumber = context.payload.issue.number;
-              const { data: pr } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-              });
-              repo = pr.head.repo.full_name;
-              ref = pr.head.ref;
-              sha = pr.head.sha;
-              number = pr.number;
-              checkoutRef = `refs/pull/${pr.number}/head`;
-            } else {
-              repo = `${context.repo.owner}/${context.repo.repo}`;
-              ref = context.ref;
-              sha = context.sha;
-              checkoutRef = context.ref;
+              prNumber = String(context.payload.issue.number);
             }
-            // Always checkout from base repository using pull refs when available
-            const baseRepo = `${context.repo.owner}/${context.repo.repo}`;
-            core.setOutput('checkout_repo', baseRepo);
+
+            let headBranch = '';
+            let headSha = '';
+            let mergeRef = context.ref;
+            let headRef = context.ref;
+            let checkoutRef = context.ref;
+
+            if (prNumber) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: Number(prNumber),
+              });
+
+              headBranch = pr.head?.ref || '';
+              headSha = pr.head?.sha || '';
+              mergeRef = `refs/pull/${prNumber}/merge`;
+              headRef = `refs/pull/${prNumber}/head`;
+              checkoutRef = headRef;
+
+              try {
+                await github.rest.git.getRef({
+                  owner,
+                  repo,
+                  ref: `pull/${prNumber}/merge`,
+                });
+                checkoutRef = mergeRef;
+              } catch (error) {
+                core.info(`Merge ref not available for PR #${prNumber}; using head ref.`);
+              }
+            }
+
             core.setOutput('checkout_ref', checkoutRef);
+            core.setOutput('merge_ref', mergeRef);
+            core.setOutput('head_ref', headRef);
+            core.setOutput('head_branch', headBranch);
+            core.setOutput('head_sha', headSha);
+            core.setOutput('number', prNumber);
 
-            // Still expose head details if needed by later steps
-            core.setOutput('repo', repo);
-            core.setOutput('ref', ref);
-            core.setOutput('sha', sha);
-            if (number) core.setOutput('number', String(number));
-
-      - uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v5
         with:
-          repository: ${{ steps.resolve.outputs.checkout_repo }}
-          ref: ${{ steps.resolve.outputs.checkout_ref }}
-          fetch-depth: 1
+          ref: ${{ steps.pr.outputs.checkout_ref }}
+          token: ${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}
+          fetch-depth: 0
+
+      - name: Prepare PR workspace
+        if: steps.pr.outputs.number
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          HEAD_REF: ${{ steps.pr.outputs.head_ref }}
+          HEAD_BRANCH: ${{ steps.pr.outputs.head_branch }}
+        run: |
+          set -e
+          if [ -n "${HEAD_REF}" ]; then
+            TARGET="refs/remotes/origin/${HEAD_BRANCH:-pr-${PR_NUMBER}-head}"
+            git fetch origin "${HEAD_REF}:${TARGET}" || true
+          fi
 
       - uses: anthropics/claude-code-action@v1
         env:
-          PR_NUMBER: ${{ steps.resolve.outputs.number || github.event.pull_request.number || github.event.issue.number }}
+          PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           web_search: enabled
