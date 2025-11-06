@@ -33,57 +33,58 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      - name: Resolve PR head target
-        id: resolve
+      - name: Resolve PR details
+        id: pr
         uses: actions/github-script@v7
         with:
           script: |
-            let repo, ref, sha, number, checkoutRef;
-            if (context.eventName === 'pull_request') {
-              const pr = context.payload.pull_request;
-              repo = pr.head.repo.full_name;
-              ref = pr.head.ref;
-              sha = pr.head.sha;
-              number = pr.number;
-              checkoutRef = `refs/pull/${pr.number}/head`;
+            const baseRepo = `${context.repo.owner}/${context.repo.repo}`;
+            let prNumber = '';
+            let headBranch = '';
+            let headSha = '';
+            if (context.payload.pull_request) {
+              prNumber = String(context.payload.pull_request.number);
+              headBranch = context.payload.pull_request.head.ref;
+              headSha = context.payload.pull_request.head.sha;
             } else if (context.eventName === 'issue_comment' && context.payload.issue.pull_request) {
-              const prNumber = context.payload.issue.number;
               const { data: pr } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: prNumber,
+                pull_number: context.payload.issue.number,
               });
-              repo = pr.head.repo.full_name;
-              ref = pr.head.ref;
-              sha = pr.head.sha;
-              number = pr.number;
-              checkoutRef = `refs/pull/${pr.number}/head`;
-            } else {
-              repo = `${context.repo.owner}/${context.repo.repo}`;
-              ref = context.ref;
-              sha = context.sha;
-              checkoutRef = context.ref;
+              prNumber = String(pr.number);
+              headBranch = pr.head.ref;
+              headSha = pr.head.sha;
             }
-            // Always checkout from base repository using pull refs when available
-            const baseRepo = `${context.repo.owner}/${context.repo.repo}`;
+
+            const checkoutRef = prNumber ? `refs/pull/${prNumber}/merge` : context.ref;
+            const headFetchRef = prNumber ? `refs/pull/${prNumber}/head` : context.ref;
+
             core.setOutput('checkout_repo', baseRepo);
             core.setOutput('checkout_ref', checkoutRef);
+            core.setOutput('head_fetch_ref', headFetchRef);
+            core.setOutput('head_branch', headBranch);
+            core.setOutput('head_sha', headSha);
+            core.setOutput('number', prNumber);
 
-            // Still expose head details if needed by later steps
-            core.setOutput('repo', repo);
-            core.setOutput('ref', ref);
-            core.setOutput('sha', sha);
-            if (number) core.setOutput('number', String(number));
-
-      - uses: actions/checkout@v5
+      - name: Checkout PR
+        uses: actions/checkout@v5
         with:
-          repository: ${{ steps.resolve.outputs.checkout_repo }}
-          ref: ${{ steps.resolve.outputs.checkout_ref }}
-          fetch-depth: 1
+          repository: ${{ steps.pr.outputs.checkout_repo }}
+          ref: ${{ steps.pr.outputs.checkout_ref }}
+          fetch-depth: 2
+
+      - name: Mirror PR head branch
+        if: steps.pr.outputs.number
+        env:
+          HEAD_FETCH_REF: ${{ steps.pr.outputs.head_fetch_ref }}
+          HEAD_BRANCH: ${{ steps.pr.outputs.head_branch }}
+        run: |
+          git fetch origin ${HEAD_FETCH_REF}:refs/remotes/origin/${HEAD_BRANCH}
 
       - uses: anthropics/claude-code-action@v1
         env:
-          PR_NUMBER: ${{ steps.resolve.outputs.number || github.event.pull_request.number || github.event.issue.number }}
+          PR_NUMBER: ${{ steps.pr.outputs.number || github.event.pull_request.number || github.event.issue.number }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           web_search: enabled
