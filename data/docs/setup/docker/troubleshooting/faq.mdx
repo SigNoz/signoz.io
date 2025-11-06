@@ -1,0 +1,25 @@
+---
+date: 2025-11-04
+id: faq
+tags: [Self-Host]
+title: Troubleshooting Docker Installation
+description: Instructions that should resolve most SigNoz installation issues in Docker
+---
+
+This troubleshooting guide includes step-by-step instructions that should resolve most SigNoz installation issues in Docker.
+
+## Container signoz-init-clickhouse Hangs Forever
+
+After installation, you might sometimes see the `signoz-init-clickhouse` container getting stuck. The logs will show:
+
+```bash
+docker logs signoz-init-clickhouse
+# Fetching histogram-binary for linux/amd64
+# Connecting to github.com (20.205.243.166:443)
+```
+
+This indicates the helper binary wasn’t fetched from GitHub. For these issues, restart the SigNoz containers and allow time for the helper binary to download:
+
+```bash
+docker compose restart
+```
