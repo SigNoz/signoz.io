@@ -33,11 +33,25 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
+      - name: Check GitHub App private key
+        id: check_app_private_key
+        # Only runs when the workflow has access to secrets (non-fork contexts).
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        run: |
+          set -euo pipefail
+          if [ -n "${APP_PRIVATE_KEY}" ]; then
+            echo "has_private_key=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_private_key=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Mint identity token
         id: mint_identity_token
         # Run when an App is configured AND we're not in a forked PR context
         # (secrets are unavailable for forked pull_request events).
-        if: ${{ vars.APP_ID && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false) }}
+        if: ${{ vars.APP_ID && steps.check_app_private_key.outputs.has_private_key == 'true' }}
         uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b
         with:
           app-id: ${{ vars.APP_ID }}
