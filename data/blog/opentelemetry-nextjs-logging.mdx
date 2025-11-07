@@ -1,5 +1,4 @@
 ---
-
 title: Structured Logging in NextJS with OpenTelemetry
 slug: opentelemetry-nextjs-logging
 date: 2025-06-23
@@ -7,8 +6,19 @@ tags: [OpenTelemetry, NextJS, Logging, SigNoz, JavaScript]
 authors: [yuvraj]
 description: Implement structured logging in your Next.js app using OpenTelemetry with full trace correlation and SigNoz integration. Covers server and browser logging, log exporters, and client/server context propagation.
 image: /img/blog/2024/12/opentelemetry-nextjs-cover.webp
-keywords: [nextjs logging, structured logs, opentelemetry nextjs, logs with traceId, sigznoz, javascript logging, frontend backend logging, logs correlation, browser logs, server logs]
-
+keywords:
+  [
+    nextjs logging,
+    structured logs,
+    opentelemetry nextjs,
+    logs with traceId,
+    sigznoz,
+    javascript logging,
+    frontend backend logging,
+    logs correlation,
+    browser logs,
+    server logs,
+  ]
 ---
 
 <ArticleSeriesTop seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-logging" />
@@ -33,66 +43,67 @@ With OpenTelemetry + SigNoz, you can:
 - Analyze structured metadata (userId, URL, duration, etc.)
 - Monitor logs from both the client and server
 
-
 ## Server-Side Logging with Trace Context
 
 ### Step 1: Install Required Packages
 
 ```bash
-npm install @opentelemetry/api-logs @opentelemetry/sdk-logs @opentelemetry/exporter-logs-otlp-http pino
+npm install -E @opentelemetry/api@1.30.0 \
+  @opentelemetry/resources@1.30.0 \
+  @opentelemetry/semantic-conventions@1.30.0 \
+  @opentelemetry/api-logs@0.207.0 \
+  @opentelemetry/sdk-logs@0.207.0 \
+  @opentelemetry/exporter-logs-otlp-http@0.207.0 \
+  pino
 ```
 
+> **Important:** Keep the OpenTelemetry stable (`1.x`) packages and experimental logs (`0.207.x`) packages on matching versions. Mixing lines causes TypeScript errors like `Property 'addLogRecordProcessor' does not exist on type 'LoggerProvider'` and Resource constructor typing issues.
+
 **Dependency Breakdown:**
-- **`@opentelemetry/api-logs`**: Core logging API
-- **`@opentelemetry/sdk-logs`**: SDK for log processing and export
-- **`@opentelemetry/exporter-logs-otlp-http`**: OTLP HTTP exporter for logs
+
+- **`@opentelemetry/api`**, **`@opentelemetry/resources`**, **`@opentelemetry/semantic-conventions`**: Stable core APIs and metadata helpers
+- **`@opentelemetry/api-logs`**, **`@opentelemetry/sdk-logs`**, **`@opentelemetry/exporter-logs-otlp-http`**: Experimental logging API + SDK + OTLP/HTTP exporter (all `0.207.0`)
 - **`pino`**: High-performance structured logging library
 
 ### Step 2: Create the Logs Exporter
 
 This sends structured logs to the OpenTelemetry collector:
 
-```jsx
+```ts
 // lib/logs-exporter.ts
 
-import { logs } from "@opentelemetry/api-logs";
-import {
-  LoggerProvider,
-  BatchLogRecordProcessor,
-} from "@opentelemetry/sdk-logs";
-import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
-import { Resource } from "@opentelemetry/resources";
-import {
-  ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-} from "@opentelemetry/semantic-conventions";
-import type { LogEntry } from "./logger";
+import { logs } from '@opentelemetry/api-logs'
+import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs'
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http'
+import { resourceFromAttributes } from '@opentelemetry/resources'
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
+import type { LogEntry } from './logger'
 
-let isInitialized = false;
-let loggerProvider: LoggerProvider | null = null;
+let isInitialized = false
+let loggerProvider: LoggerProvider | null = null
 
 export function initializeLogsExporter() {
-  if (isInitialized || typeof window !== "undefined") {
-    return; // Only initialize on server side
+  if (isInitialized || typeof window !== 'undefined') {
+    return // Only initialize on server side
   }
 
   try {
     // Create resource with service information
-    const resource = new Resource({
-      [ATTR_SERVICE_NAME]: "nextjs-observability-demo",
-      [ATTR_SERVICE_VERSION]: "1.0.0",
-    });
+    const resource = resourceFromAttributes({
+      [ATTR_SERVICE_NAME]: 'nextjs-observability-demo',
+      [ATTR_SERVICE_VERSION]: '1.0.0',
+    })
 
     // Create OTLP exporter
     const logExporter = new OTLPLogExporter({
-      url: "http://localhost:4318/v1/logs",
+      url: 'http://localhost:4318/v1/logs',
       headers: {},
-    });
+    })
 
     // Create logger provider
     loggerProvider = new LoggerProvider({
-      resource: resource as any,
-    });
+      resource,
+    })
 
     // Add batch processor
     loggerProvider.addLogRecordProcessor(
@@ -102,37 +113,37 @@ export function initializeLogsExporter() {
         exportTimeoutMillis: 30000,
         maxQueueSize: 100,
       })
-    );
+    )
 
     // Set global logger provider
-    logs.setGlobalLoggerProvider(loggerProvider);
-    isInitialized = true;
-    console.log(" OpenTelemetry logs exporter initialized");
+    logs.setGlobalLoggerProvider(loggerProvider)
+    isInitialized = true
+    console.log(' OpenTelemetry logs exporter initialized')
   } catch (error) {
-    console.error("❌ Failed to initialize logs exporter:", error);
+    console.error('❌ Failed to initialize logs exporter:', error)
   }
 }
 
 export function exportLogEntry(entry: LogEntry) {
-  if (!isInitialized || !loggerProvider || typeof window !== "undefined") {
-    return;
+  if (!isInitialized || !loggerProvider || typeof window !== 'undefined') {
+    return
   }
 
   try {
-    const logger = loggerProvider.getLogger("nextjs-observability-demo");
+    const logger = loggerProvider.getLogger('nextjs-observability-demo')
 
     // Build attributes object
     const attributes: Record<string, any> = {
       ...entry.context,
-      "log.level": entry.level,
-      "service.name": "nextjs-observability-demo",
-    };
+      'log.level': entry.level,
+      'service.name': 'nextjs-observability-demo',
+    }
 
     // Add error details if present
     if (entry.error) {
-      attributes["error.name"] = entry.error.name;
-      attributes["error.message"] = entry.error.message;
-      attributes["error.stack"] = entry.error.stack;
+      attributes['error.name'] = entry.error.name
+      attributes['error.message'] = entry.error.message
+      attributes['error.stack'] = entry.error.stack
     }
 
     // Convert our log entry to OpenTelemetry log record
@@ -143,37 +154,38 @@ export function exportLogEntry(entry: LogEntry) {
       severityText: entry.level.toUpperCase(),
       body: entry.message,
       attributes,
-    };
+    }
 
-    logger.emit(logRecord);
+    logger.emit(logRecord)
   } catch (error) {
-    console.error("Failed to export log entry:", error);
+    console.error('Failed to export log entry:', error)
   }
 }
 
 function getSeverityNumber(level: string): number {
   switch (level) {
-    case "debug":
-      return 5; // DEBUG
-    case "info":
-      return 9; // INFO
-    case "warn":
-      return 13; // WARN
-    case "error":
-      return 17; // ERROR
+    case 'debug':
+      return 5 // DEBUG
+    case 'info':
+      return 9 // INFO
+    case 'warn':
+      return 13 // WARN
+    case 'error':
+      return 17 // ERROR
     default:
-      return 9; // Default to INFO
+      return 9 // Default to INFO
   }
 }
 
 export function shutdownLogsExporter(): Promise<void> {
   if (loggerProvider) {
-    return loggerProvider.shutdown();
+    return loggerProvider.shutdown()
   }
-  return Promise.resolve();
+  return Promise.resolve()
 }
-
 ```
+
+Pinning the package versions in Step 1 ensures `loggerProvider.addLogRecordProcessor(...)` exists, and switching to `resourceFromAttributes(...)` keeps the `Resource` typings happy in modern OpenTelemetry releases.
 
 ### Step 3: Unified Logger
 
@@ -494,6 +506,15 @@ export const serverLogger = new PinoLogger(pinoLogger);
 
 ```
 
+### Which Logger Should You Import?
+
+| Context                                              | Import                                              | Why                                                                                                                                                      |
+| ---------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Server components, route handlers, server actions    | `import { logger } from "@/lib/logger"`             | Primary server logger that mirrors console output and forwards every entry to OpenTelemetry via `exportLogEntry`.                                        |
+| Client components (including `'use client'` helpers) | `import { browserLog } from "@/lib/browser-logger"` | Buffers in the browser, sends to `/api/logs`, and the API route forwards to the server logger.                                                           |
+| Optional structured console logging on the server    | `import { serverLogger } from "@/lib/pino-logger"`  | Use when you want Pino output in addition to the default logger. Call `exportLogEntry(...)` inside custom helpers if you also want these logs in SigNoz. |
+
+This split keeps the API surface clear: reach for `logger` on the server, `browserLog` in the browser, and treat the Pino-backed `serverLogger` as an optional add-on for richer console formatting.
 
 ## Client-Side Logging with Auto-Export
 
@@ -750,7 +771,6 @@ export const browserLog = {
   getLogs: () => browserLogger.getLogs(),
   clearLogs: () => browserLogger.clearLogs(),
 };
-j
 ```
 
 - Buffers logs in memory
@@ -836,18 +856,17 @@ export async function POST(request: NextRequest) {
 
 This route receives browser logs and sends them to the collector with trace context.
 
-
 ## Instrumentation Hook
 
 ### Step 7: Add to `instrumentation.ts`
 
 ```jsx
-import { registerOTel } from "@vercel/otel";
-import { initializeLogsExporter } from "./lib/logs-exporter";
+import { registerOTel } from '@vercel/otel'
+import { initializeLogsExporter } from './lib/logs-exporter'
 
 export function register() {
   registerOTel({
-    serviceName: "nextjs-observability-demo",
+    serviceName: 'nextjs-observability-demo',
     instrumentationConfig: {
       fetch: {
         // Propagate context to all external URLs to enable proper tracing
@@ -860,30 +879,104 @@ export function register() {
         // Don't ignore any URLs - we want to trace all external calls
         ignoreUrls: [],
         // Enable resource naming for better span identification
-        resourceNameTemplate: "{http.method} {http.host}{http.target}",
+        resourceNameTemplate: '{http.method} {http.host}{http.target}',
       },
     },
-  });
+  })
 
   // Initialize logs exporter for OpenTelemetry
-  initializeLogsExporter();
+  initializeLogsExporter()
 }
-
 ```
-
-
 
 ## Logs Demo Page
 
 ### Step 8: Create `logs-demo/page.tsx`
 
-Create a page that lets you trigger logs from browser and server:
+Create a page that lets you trigger both server and browser logs and confirm they reach SigNoz end-to-end:
 
-- Simulate API calls, slow requests, errors
-- Generate and view structured logs
-- Verify export to collector and SigNoz
+```tsx
+// app/logs-demo/ClientPanel.tsx
+'use client'
 
+import { browserLog } from '@/lib/browser-logger'
 
+export default function ClientPanel() {
+  return (
+    <div className="space-x-2">
+      <button
+        onClick={() =>
+          browserLog.info('Browser button clicked', {
+            page: 'logs-demo',
+            source: 'client',
+          })
+        }
+      >
+        Emit browser log
+      </button>
+      <button
+        onClick={() =>
+          browserLog.error('Simulated browser error', new Error('Client boom'), {
+            page: 'logs-demo',
+            source: 'client',
+          })
+        }
+      >
+        Emit browser error
+      </button>
+    </div>
+  )
+}
+```
+
+```tsx
+// app/logs-demo/page.tsx
+import ClientPanel from './ClientPanel'
+import { logger } from '@/lib/logger'
+
+export default function LogsDemoPage() {
+  async function serverLogAction() {
+    'use server'
+
+    logger.info('Server action log', {
+      page: 'logs-demo',
+      source: 'server',
+      kind: 'server-action',
+    })
+
+    try {
+      throw new Error('Server boom')
+    } catch (error) {
+      logger.error('Server error occurred', error as Error, {
+        page: 'logs-demo',
+        source: 'server',
+      })
+    }
+  }
+
+  return (
+    <div style={{ padding: 16 }}>
+      <h1>Logs Demo</h1>
+      <p>Trigger a server action and client-side logs, then verify them in SigNoz.</p>
+      <form action={serverLogAction}>
+        <button type="submit">Emit server logs (server action)</button>
+      </form>
+      <div style={{ marginTop: 12 }}>
+        <ClientPanel />
+      </div>
+    </div>
+  )
+}
+```
+
+This sample makes the flow explicit: `logger` runs on the server (including server actions) and exports directly to OpenTelemetry, while `browserLog` runs in the client and relies on `/api/logs` to forward entries to the same pipeline.
+
+**Quick verification checklist**
+
+1. Start the OTel Collector/SigNoz stack and `yarn dev` for your Next.js app.
+2. Visit `/logs-demo`, submit the server-action form, and click both client-side buttons.
+3. In SigNoz Logs, filter by `service.name="nextjs-observability-demo"` and check for entries with `source="server"` and `source="client"`.
+4. Open any entry to confirm `traceId`/`spanId` values are present (if tracing is enabled) and that client logs show metadata such as `userAgent`.
 
 ## View Logs in SigNoz
 
@@ -891,19 +984,28 @@ Create a page that lets you trigger logs from browser and server:
 
 - Go to SigNoz → Logs
 - Filter by source: `source="browser"` or `source="server"`
-    
-    <Figure src="/img/blog/2025/06/opentelemetry-nextjs-logging-image.webp" alt="SigNoz logs interface showing structured logs with trace correlation and filtering options" caption="Filter logs by source (browser/server) and view structured log entries with trace context in SigNoz" />
-    
+  {' '}
+  <Figure
+    src="/img/blog/2025/06/opentelemetry-nextjs-logging-image.webp"
+    alt="SigNoz logs interface showing structured logs with trace correlation and filtering options"
+    caption="Filter logs by source (browser/server) and view structured log entries with trace context in SigNoz"
+  />
 - Click any log to view trace metadata
-    
-    <Figure src="/img/blog/2025/06/opentelemetry-nextjs-logging-image%201.webp" alt="Navigate between logs and traces seamlessly in SigNoz" caption="Navigate between logs and traces seamlessly in SigNoz" />
-    
+  {' '}
+  <Figure
+    src="/img/blog/2025/06/opentelemetry-nextjs-logging-image%201.webp"
+    alt="Navigate between logs and traces seamlessly in SigNoz"
+    caption="Navigate between logs and traces seamlessly in SigNoz"
+  />
 - Correlate with full request trace via `traceId`
-    
-    <Figure src="/img/blog/2025/06/opentelemetry-nextjs-logging-image%202.webp" alt="SigNoz trace details view showing the correlation between logs and distributed traces" caption="Click 'Inspect in Trace' to jump from logs to the full distributed trace view with all spans and timing information" />
-    
-The real power of working with logs and traces in [SigNoz](https://signoz.io/docs/introduction/) comes from correlation - click "Inspect in Trace" or the trace ID to jump directly to the corresponding trace when checking a log or "Go to related logs" from any trace details page.
+  {' '}
+  <Figure
+    src="/img/blog/2025/06/opentelemetry-nextjs-logging-image%202.webp"
+    alt="SigNoz trace details view showing the correlation between logs and distributed traces"
+    caption="Click 'Inspect in Trace' to jump from logs to the full distributed trace view with all spans and timing information"
+  />
 
+The real power of working with logs and traces in [SigNoz](https://signoz.io/docs/introduction/) comes from correlation - click "Inspect in Trace" or the trace ID to jump directly to the corresponding trace when checking a log or "Go to related logs" from any trace details page.
 
 ## Next: Production Deployment and Scaling
 
