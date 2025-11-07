@@ -1,0 +1,196 @@
+---
+title: 'Logz.io vs Datadog (2025) - OpenSearch/Prometheus vs Proprietary'
+slug: logz-vs-datadog
+date: '2025-11-03'
+tags: [observability, datadog]
+authors: [yuvraj]
+description: 'An unbiased 2025 comparison of Logz.io and Datadog—pricing models, APM depth, SIEM, OTel support, and integrations.'
+keywords:
+  [
+    logz.io vs datadog,
+    datadog vs logz.io,
+    logz.io pricing,
+    datadog pricing,
+    observability comparison,
+    logz.io open source,
+  ]
+---
+
+**TL;DR:**
+
+- **Choose Datadog if:** You need a powerful, all-in-one SaaS platform, value a polished user experience, and require the broadest range of (1,000+) turnkey integrations. It "just works" out of the box, but you should budget carefully for its per-host and per-event pricing, which can get expensive at scale.
+- **Choose Logz.io if:** Your team is already familiar with open-source tools like OpenSearch (ELK), Prometheus, and Jaeger, and you want a managed version without the maintenance overhead. Its consumption-based pricing is more predictable for logging, and it offers strong tools for cost control.
+- **Consider SigNoz if:** You are building on OpenTelemetry and want a truly OTel-native platform. This avoids vendor lock-in and gives you the choice of a transparent cloud offering or a self-hosted community edition.
+
+---
+
+Choosing between Logz.io and Datadog often comes down to a core tradeoff: do you want a polished, all-in-one platform with extensive integrations, or a flexible, open-source-based solution with consumption pricing?
+
+In this article, we analyzed both platforms, digging into their 2025 pricing models, core features, and ease-of-use.
+
+## Logz.io vs Datadog: At a Glance
+
+This table breaks down the fundamental differences between the two platforms.
+
+| **Capability**    | **Datadog**                                                                                           | **Logz.io**                                                    |
+| ----------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **Primary Model** | Proprietary SaaS                                                                                      | Managed Open Source (SaaS)                                     |
+| **Logging**       | Proprietary log management.                                                                           | OpenSearch-based (formerly ELK).                               |
+| **Metrics**       | Proprietary metrics. Core infra metrics are included with host plans. $5 per 100 custom metrics/month | Prometheus-based. Billed per 1,000 metrics.                    |
+| **APM & Tracing** | Proprietary, mature APM & profiler.                                                                   | Jaeger-based, OpenTelemetry-compatible.                        |
+| **Security**      | Integrated Cloud SIEM module.                                                                         | Cloud SIEM on OpenSearch.                                      |
+| **Log Pricing**   | Two-part: Ingest (\$0.10/GB) + Index (\$1.70/million events).                                         | Consumption: Ingest (\$0.92/GB per day).                       |
+| **Infra Pricing** | Per-host, per-month (\$15/host).                                                                      | Per 1,000 time-series, per-day.                                |
+| **APM Pricing**   | Per-host, per-month (\$31/host).                                                                      | Per 1 million spans, per-day.                                  |
+| **Integrations**  | 1,000+ proprietary, turnkey integrations.                                                             | ~300+ integrations, focused on open-source.                    |
+| **Onboarding**    | Very fast. Often a single-line agent install.                                                         | Requires more manual setup, but simpler than self-hosting ELK. |
+
+## Pricing and TCO: The Biggest Difference
+
+Your budget and data volume are the most critical factors in this decision. The two platforms have fundamentally different pricing philosophies.
+
+### How Datadog Pricing Works
+
+Datadog uses a **tiered, feature-by-feature subscription model**. You buy licenses for each "pillar" of observability, and costs are often tied to hosts, data volume, or events.
+
+- **Infrastructure:** Starts at **\$15 per host, per month** (billed annually).
+- **APM:** Starts at **\$31 per host, per month** (billed annually).
+- **Log Management:** This is a **"two-part tariff"** that catches many users by surprise. You pay both:
+  1. **Ingest:** ~\$0.10 per GB.
+  2. **Index:** ~\$1.70 per million log events (for 15-day retention).
+
+The [primary user complaint about Datadog is **cost shock**](https://signoz.io/blog/datadog-pricing/). Because you pay per host **and** per log event **and** for custom metrics, bills can become unpredictable, especially in spiky, high-cardinality environments.
+
+### How Logz.io Pricing Works
+
+Logz.io uses a **consumption-based, pay-as-you-go model**. This approach, built on its open-source foundation, is often more transparent and predictable.
+
+- **Logs (OpenSearch):** ~\$0.92 per GB ingested, per day.
+- **Metrics (Prometheus):** ~\$0.40 per 1,000 time-series, per day.
+- **Traces (Jaeger):** ~\$0.16 per 1 million spans, per day.
+
+Logz.io also offers "Subscription" plans, which are pre-committed bundles of data, alongside its pay-as-you-go "Consumption" model. The platform is built to help you manage costs. It provides real-time usage dashboards and tools to drop noisy, low-value data to prevent bill surprises.
+
+## How They Compare: Logs, Metrics, Traces, and Security
+
+Beyond price, the platforms' capabilities reflect their philosophies: Datadog's "all-in-one" proprietary suite vs. Logz.io's "managed open-source" collection.
+
+### Logging
+
+<Figure
+  src="/img/comparisons/2025/11/logzio-vs-datadog-CleanShot_2025-11-04_at_11.12.332x.webp"
+  alt="Logging in Datadog vs Logz.io"
+  caption="Logging in Datadog vs Logz.io (credits: Datadog, Logz.io)"
+/>
+**Datadog** provides a proprietary, tightly integrated log management solution. Its main strength is
+the seamless connection between logs, metrics, and traces. You can click from a spike in a metric
+dashboard directly to the logs and traces from that exact moment, all within one UI.
+
+**Logz.io** is built on **OpenSearch** and uses **OpenSearch Dashboards** (the fork of Kibana) as its primary interface. If your team already knows and likes the ELK stack, they will feel at home. Logz.io's value is in managing the notorious difficulty of scaling an OpenSearch/Elasticsearch cluster yourself.
+
+### APM and Tracing
+
+<Figure
+  src="/img/comparisons/2025/11/logzio-vs-datadog-CleanShot_2025-11-04_at_11.17.152x.webp"
+  alt="Tracing in Datadog vs Logz.io"
+  caption="Tracing in Datadog vs Logz.io (credits: Datadog, Logz.io)"
+/>
+**Datadog** offers a mature, full-featured APM and continuous profiler. Because the agent, backend,
+and UI are all built by Datadog as a single proprietary system, the experience is tightly
+integrated. This provides a very polished, powerful experience for debugging microservices.
+
+**Logz.io** tracing is built on the open-source **Jaeger** project and is designed to work with **OpenTelemetry**. It combines traces with metrics for service performance monitoring. This is excellent for OTel-native teams, but it feels more like a collection of integrated open-source tools rather than one single, ground-up product.
+
+### Infrastructure Monitoring
+
+<Figure
+  src="/img/comparisons/2025/11/logzio-vs-datadog-CleanShot_2025-11-04_at_11.30.252x.webp"
+  alt="Infrastructure Monitoring in Datadog vs Logz.io"
+  caption="Infrastructure Monitoring in Datadog vs Logz.io (credits: Datadog, Logz.io)"
+/>
+**Datadog** is agent-based and billed per-host. The agent automatically discovers services on your
+host and starts pulling metrics, making setup extremely fast. It has deep integrations for
+Kubernetes, cloud providers, and over 1,000 other technologies.
+
+**Logz.io** is **Prometheus-based**. It's designed to be a managed, scalable Prometheus service, and you pay per 1,000 metrics (time-series). This is ideal for teams already using Prometheus exporters but who are tired of managing the Prometheus server and its storage.
+
+### Security (SIEM)
+
+<Figure
+  src="/img/comparisons/2025/11/logzio-vs-datadog-CleanShot_2025-11-04_at_11.39.572x.webp"
+  alt="Security in Datadog vs Logz.io"
+  caption="Security in Datadog vs Logz.io (credits: Datadog, Logz.io)"
+/>
+**Datadog** offers its **Cloud SIEM** as an integrated product. It leverages the same agent and log
+pipelines to collect security telemetry, audit events, and logs. It features threat detection rules
+and unified dashboards within the Datadog platform.
+
+**Logz.io** provides its **Cloud SIEM on OpenSearch**. It uses curated security dashboards and prebuilt rules (essentially OpenSearch queries) to detect threats from the logs you're already ingesting. Like its logging, security events incur an ingestion cost.
+
+## Integrations and Ecosystem
+
+This is one of the most significant differences between the two.
+
+**Datadog leads with over 1,000+ turnkey integrations.** Its vast marketplace covers everything from major cloud providers (AWS, Azure, GCP) to obscure databases and DevOps tools. If you use a wide variety of SaaS and proprietary tools, Datadog likely has a one-click integration for it.
+
+**Logz.io provides ~300+ integrations, with a strong focus on open-source.** It supports open-source collectors like Fluentd, Telegraf, and the OpenTelemetry Collector. Its open approach means it can easily ingest data from any source via its API or open agents, but it has fewer "out-of-the-box" integrations for commercial software.
+
+## Performance and Scalability
+
+Both platforms can handle large-scale enterprise deployments, but they scale differently.
+
+**Datadog,** as a mature, multi-region SaaS, Datadog's architecture is built to ingest and query massive volumes of data from thousands of hosts. Its high-watermark billing automatically adjusts to usage peaks. The main constraint on scaling with Datadog is typically **cost**, as high-traffic services can quickly generate expensive log indexing and custom metric fees.
+
+**Logz.io** scales using cloud-managed **OpenSearch** clusters, which reportedly provide a performance boost for log queries. Its key scalability feature is **tiered storage (hot/cold)**, allowing teams to keep large volumes of old logs at a much lower cost without sacrificing query capabilities.
+
+## Ease of Use and Onboarding
+
+Datadog generally wins on initial setup speed, but Logz.io is familiar to open-source users.
+
+**Datadog** users find the interface polished and the setup remarkably straightforward. You can often paste a single-line command to install the agent, and basic dashboards will light up automatically. However, the sheer breadth of its features means there is a learning curve to master the entire platform.
+
+**Logz.io** use of familiar open-source tools (OpenSearch Dashboards, Prometheus, Jaeger) lowers the barrier for teams with prior ELK or Prometheus experience. While it requires more "by hand" setup than Datadog, it is significantly easier than managing and scaling those open-source tools yourself.
+
+## Is Logz.io Open Source?
+
+This is a common point of confusion. **No, Logz.io is not open source.**
+
+It is a proprietary, managed SaaS platform that is **built on** popular open-source projects:
+
+- It uses **OpenSearch** for logs.
+- It uses **Prometheus** for metrics.
+- It uses **Jaeger** and **OpenTelemetry** for tracing.
+
+You are paying Logz.io to host, scale, and manage these open-source tools for you, which is a significant value. However, you do not get the code to the Logz.io platform itself.
+
+## An OpenTelemetry-Native Alternative: SigNoz
+
+<Figure
+  src="/img/comparisons/2025/10/signoz-overview.webp"
+  alt="SigNoz observability platform dashboard"
+  caption="SigNoz Tracing Dashboard"
+/>
+
+Both Datadog and Logz.io have adapted to OpenTelemetry, but neither was built for it. Datadog is a proprietary ecosystem, and Logz.io is a curated collection of separate open-source tools.
+
+If your primary goal is to use OpenTelemetry, a platform-native solution is a better fit. [SigNoz](https://signoz.io/) is an open-source, OpenTelemetry-native APM and observability platform. It provides a unified experience for logs, metrics, and traces in a single application, using OpenTelemetry as the core standard.
+
+This approach gives you:
+
+- **No vendor lock-in:** Since it's built on OTel, you can switch vendors at any time.
+- **Flexible deployment:** You can self-host the open-source community edition for free or use the fully-managed SigNoz Cloud.
+- **Transparent pricing:** [SigNoz Cloud pricing](https://signoz.io/pricing/) is simple and based on data volume, without the complex per-host or per-event fees.
+
+### Get Started with SigNoz
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+---
+
+Hope we answered all your questions regarding Logz.io vs Datadog. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.
