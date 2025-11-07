@@ -7,19 +7,6 @@ on:
   pull_request_review:
     types:
       - 'submitted'
-  pull_request:
-    types:
-      - 'opened'
-      - 'synchronize'
-      - 'reopened'
-      - 'ready_for_review'
-    paths:
-      - 'data/docs/**'
-      - 'public/img/docs/**'
-      - 'constants/docsSideNav.ts'
-      - 'next.config.js'
-      - 'scripts/check-doc-redirects.js'
-      - 'scripts/check-docs-metadata.js'
   issue_comment:
     types:
       - 'created'
@@ -49,17 +36,11 @@ jobs:
           env | grep '^DEBUG_'
 
   dispatch:
-    # For PRs: only if not from a fork
-    # For comments: only if user types @gemini-cli and is OWNER/MEMBER/COLLABORATOR
+    # Only if user types @gemini-cli and is OWNER/MEMBER/COLLABORATOR
     if: |-
-      (
-        github.event_name == 'pull_request' &&
-        github.event.pull_request.head.repo.fork == false
-      ) || (
-        github.event.sender.type == 'User' &&
-        startsWith(github.event.comment.body || github.event.review.body || github.event.issue.body, '@gemini-cli') &&
-        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association || github.event.review.author_association || github.event.issue.author_association)
-      )
+      github.event.sender.type == 'User' &&
+      startsWith(github.event.comment.body || github.event.review.body || github.event.issue.body, '@gemini-cli') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association || github.event.review.author_association || github.event.issue.author_association)
     runs-on: 'ubuntu-latest'
     permissions:
       contents: 'read'
@@ -91,24 +72,14 @@ jobs:
           REQUEST: '${{ github.event.comment.body || github.event.review.body || github.event.issue.body }}'
         with:
           script: |
-            const eventType = process.env.EVENT_TYPE;
             const request = process.env.REQUEST;
             core.setOutput('request', request);
 
-            const prAutoReviewEvents = new Set([
-              'pull_request.opened',
-              'pull_request.synchronize',
-              'pull_request.reopened',
-              'pull_request.ready_for_review',
-            ]);
-
-            if (prAutoReviewEvents.has(eventType)) {
-              core.setOutput('command', 'review');
-            } else if (request.startsWith("@gemini-cli /review")) {
+            if (request && request.startsWith("@gemini-cli /review")) {
               core.setOutput('command', 'review');
               const additionalContext = request.replace(/^@gemini-cli \/review/, '').trim();
               core.setOutput('additional_context', additionalContext);
-            } else if (request.startsWith("@gemini-cli")) {
+            } else if (request && request.startsWith("@gemini-cli")) {
               const additionalContext = request.replace(/^@gemini-cli/, '').trim();
               core.setOutput('command', 'invoke');
               core.setOutput('additional_context', additionalContext);
