@@ -35,6 +35,7 @@ receivers:
       - id: container-parser
         type: container
         format: docker
+        add_metadata_from_filepath: false
 
 service:
   pipelines:
@@ -44,6 +45,11 @@ service:
       processors: [batch]
       exporters: [otlp]
 ```
+
+<Admonition type="note">
+If your logs are coming from Kubernetes Pod log file paths (for example, /var/log/pods/... or /var/log/containers/...), rather than directly from Docker container log files on the host, then set
+add_metadata_from_filepath: true , in the container parser operator so that Kubernetes metadata (such as pod name, namespace, and container name) can be automatically extracted from the file path.
+</Admonition>
 
 ### Step 3: Update Docker Run Command
 
