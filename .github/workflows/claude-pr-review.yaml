@@ -80,6 +80,8 @@ jobs:
             let mergeRef = context.ref;
             let headRef = context.ref;
             let checkoutRef = context.ref;
+            let headRepoFullName = '';
+            let headRepoCloneUrl = '';
 
             if (prNumber) {
               const { data: pr } = await github.rest.pulls.get({
@@ -93,6 +95,8 @@ jobs:
               mergeRef = `refs/pull/${prNumber}/merge`;
               headRef = `refs/pull/${prNumber}/head`;
               checkoutRef = headRef;
+              headRepoFullName = pr.head?.repo?.full_name || '';
+              headRepoCloneUrl = pr.head?.repo?.clone_url || '';
 
               try {
                 await github.rest.git.getRef({
@@ -111,6 +115,8 @@ jobs:
             core.setOutput('head_ref', headRef);
             core.setOutput('head_branch', headBranch);
             core.setOutput('head_sha', headSha);
+            core.setOutput('head_repo_full_name', headRepoFullName || '');
+            core.setOutput('head_repo_clone_url', headRepoCloneUrl || '');
             core.setOutput('number', prNumber);
 
       - name: Checkout repository
@@ -131,6 +137,23 @@ jobs:
           if [ -n "${HEAD_REF}" ]; then
             TARGET="refs/remotes/origin/${HEAD_BRANCH:-pr-${PR_NUMBER}-head}"
             git fetch origin "${HEAD_REF}:${TARGET}" || true
+          fi
+
+      - name: Point origin at PR fork
+        if: >-
+          steps.pr.outputs.head_repo_clone_url &&
+          steps.pr.outputs.head_repo_full_name &&
+          steps.pr.outputs.head_repo_full_name != github.repository
+        env:
+          HEAD_REPO_CLONE_URL: ${{ steps.pr.outputs.head_repo_clone_url }}
+          HEAD_BRANCH: ${{ steps.pr.outputs.head_branch }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          set -euo pipefail
+          git remote rename origin upstream
+          git remote add origin "${HEAD_REPO_CLONE_URL}"
+          if [ -n "${HEAD_BRANCH}" ]; then
+            git fetch origin "${HEAD_BRANCH}:${HEAD_BRANCH}" --depth=20 || true
           fi
 
       - uses: anthropics/claude-code-action@v1
