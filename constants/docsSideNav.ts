@@ -2254,6 +2254,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/autogen-observability',
+        label: 'AutoGen',
+        type: 'doc',
+      },
+      {
         route: '/docs/azure-openai-monitoring',
         label: 'Azure OpenAI API',
         type: 'doc',
