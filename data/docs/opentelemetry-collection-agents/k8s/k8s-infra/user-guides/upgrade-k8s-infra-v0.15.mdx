@@ -1,5 +1,5 @@
 ---
-date: 2025-01-29
+date: 2025-11-10
 title: Upgrade k8s-infra OpenTelemetry collection agent to v0.15.0
 tags: [SigNoz Cloud, Self-Host]
 id: upgrade-k8s-infra-v0.15
@@ -130,6 +130,14 @@ kubectl logs -n <NAMESPACE> -l app.kubernetes.io/component=otel-deployment --tai
 ```
 
 ### Scenario 2: With Self-Telemetry Using Custom Endpoint Configuration
+
+<Admonition type="info">
+
+The OpenTelemetry Collector exposes its own internal metrics (such as dropped spans and queue size) for Prometheus to scrape by default at [http://127.0.0.1:8888/metrics](http://127.0.0.1:8888/metrics). If you want to access these metrics outside the pod, configure the telemetry reader to bind to `0.0.0.0:8888` instead of the default.
+
+For more details, see the [OpenTelemetry Collector Internal Telemetry documentation](https://opentelemetry.io/docs/concepts/collector/internal-telemetry/).
+
+</Admonition>
 
 If you're using self-telemetry with a directly configured endpoint, you'll need to migrate to the new `presets.selfTelemetry` configuration.
 
