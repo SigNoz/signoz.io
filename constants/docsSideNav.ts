@@ -618,6 +618,12 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route:
+                      '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/upgrade-k8s-infra-v0.15',
+                    label: 'Upgrade k8s-infra to v0.15.0',
+                  },
+                  {
+                    type: 'doc',
+                    route:
                       '/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-kubelet-endpoint',
                     label:
                       'Configuring Kubernetes Metrics Collection for IPv6 and Non-Standard Clusters',
