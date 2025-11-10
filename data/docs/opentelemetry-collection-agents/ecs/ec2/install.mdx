@@ -1,17 +1,19 @@
 ---
-date: 2025-08-13
+date: 2025-11-10
 id: overview
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: ECS EC2 Collection Agent - Install
 description: View metrics and logs for your ECS infrastructure
 ---
+
 This guide walks you through installing the daemon service to collect metrics and logs from your ECS infrastructure.
 
 ## Prerequisites Check
 
 Before starting, verify you have:
+
 - ECS cluster with **EC2** or **External** launch type
-- AWS CLI configured with appropriate permissions  
+- AWS CLI configured with appropriate permissions
 - SigNoz Cloud account or self-hosted SigNoz instance
 - Access to AWS Parameter Store and CloudFormation
 
@@ -20,6 +22,7 @@ Before starting, verify you have:
 ### Step 1: Daemon Service Template
 
 The CloudFormation template defines the infrastructure needed for the daemon service, including container specifications, IAM roles, and network settings.
+
 <Tabs groupId="launch-type">
 <TabItem value="ec2" label="EC2" default>
 ```yaml
@@ -88,7 +91,7 @@ Resources:
       NetworkMode: host
       ContainerDefinitions:
         - Name: signoz-collector
-          Image: 'otel/opentelemetry-collector-contrib:0.109.0'
+          Image: 'otel/opentelemetry-collector-contrib:0.139.0'
           User: 0
           MountPoints:
             - ReadOnly: true
@@ -275,7 +278,7 @@ Resources:
       NetworkMode: host
       ContainerDefinitions:
         - Name: signoz-collector
-          Image: 'otel/opentelemetry-collector-contrib:0.109.0'
+          Image: 'otel/opentelemetry-collector-contrib:0.139.0'
           User: 0
           MountPoints:
             - ReadOnly: true
@@ -315,7 +318,7 @@ Resources:
             - ContainerPort: 4318
               HostPort: 4318
               Protocol: tcp
-          Command: !Split [ " ", !Ref command ] # <-- This line is updated for correctness
+          Command: !Split [' ', !Ref command] # <-- This line is updated for correctness
           Secrets:
             - Name: SIGNOZ_CONFIG_CONTENT
               ValueFrom: !Ref SigNozConfigPath
@@ -399,6 +402,7 @@ Resources:
         - 'arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess'
       RoleName: OtelECSExecutionRole
 ```
+
 </TabItem>
 </Tabs>
 ### Step 2: Create OpenTelemetry Collector Configuration
@@ -406,6 +410,7 @@ Resources:
 The OpenTelemetry Collector configuration defines what data to collect and where to send it.
 
 #### 2a. OtelCollector Configuration Template
+
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
@@ -457,9 +462,9 @@ receivers:
     include_file_name: false
     include_file_path: true
     operators:
-    - id: container-parser
-      type: container
-      
+      - id: container-parser
+        type: container
+
 processors:
   # Detects resource attributes from the environment (EC2, ECS, etc.)
   # This is the replacement for the k8sattributes processor.
@@ -476,11 +481,11 @@ exporters:
   # Exports telemetry to your backend (e.g., SigNoz)
   # Uses environment variables for portability, which you'll set in your ECS task definition.
   otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
+    endpoint: 'ingest.{region}.signoz.cloud:443'
     tls:
       insecure: false
     headers:
-      signoz-ingestion-key: "<SIGNOZ_INGESTION_KEY>"
+      signoz-ingestion-key: '<SIGNOZ_INGESTION_KEY>'
   logging:
     verbosity: basic
 
@@ -502,6 +507,7 @@ service:
       processors: [resourcedetection, batch]
       exporters: [otlp, logging]
 ```
+
 </TabItem>
 
 <TabItem value="self-host" label="Self Host" default>
@@ -553,9 +559,9 @@ receivers:
     include_file_name: false
     include_file_path: true
     operators:
-    - id: container-parser
-      type: container
-      
+      - id: container-parser
+        type: container
+
 processors:
   # Detects resource attributes from the environment (EC2, ECS, etc.)
   # This is the replacement for the k8sattributes processor.
@@ -572,7 +578,7 @@ exporters:
   # Exports telemetry to your backend (e.g., SigNoz)
   # Uses environment variables for portability, which you'll set in your ECS task definition.
   otlp:
-    endpoint: "<SIGNOZ_SELF_HOST_ENDPOINT>"
+    endpoint: '<SIGNOZ_SELF_HOST_ENDPOINT>'
     tls:
       insecure: true # Set to false in production if your endpoint has a valid TLS certificate
 
@@ -599,6 +605,7 @@ service:
       processors: [resourcedetection, batch]
       exporters: [otlp, logging]
 ```
+
 </TabItem>
 </Tabs>
 #### 2b. Store Configuration in AWS Parameter Store
@@ -617,12 +624,13 @@ Configure the necessary environment variables for the CloudFormation deployment:
 
 ```bash
 export CLUSTER_NAME=<YOUR-ECS-CLUSTER-NAME>
-export REGION=<YOUR-ECS-REGION>  
+export REGION=<YOUR-ECS-REGION>
 export COMMAND=--config=env:SIGNOZ_CONFIG_CONTENT
 export SIGNOZ_CONFIG_PATH=/ecs/signoz/otelcol-daemon.yaml
 ```
 
 **Replace the placeholders:**
+
 - `<YOUR-ECS-CLUSTER-NAME>`: Name of your ECS cluster (e.g., `my-production-cluster`)
 - `<YOUR-ECS-REGION>`: AWS region where your cluster runs (e.g., `us-east-1`)
 
@@ -660,6 +668,7 @@ aws ecs list-tasks \
 ```
 
 **Expected outputs:**
+
 - Stack status should be `CREATE_COMPLETE`
 - You should see task ARNs for the daemon service containers
 
@@ -676,8 +685,9 @@ aws ecs describe-tasks \
 ```
 
 Look for:
+
 - **Task Status**: Should be `RUNNING`
-- **Health Status**: Should be `HEALTHY` 
+- **Health Status**: Should be `HEALTHY`
 - **Container Status**: All containers should be `RUNNING`
 
 ## Troubleshooting Installation
@@ -685,20 +695,22 @@ Look for:
 ### Common Issues
 
 **Stack Creation Failed:**
+
 - Check IAM permissions for CloudFormation, ECS, and Parameter Store
 - Verify the cluster name and region are correct
 - Ensure the Parameter Store parameter exists and has correct content
 
 **Tasks Not Starting:**
+
 - Check ECS cluster has available capacity
 - Verify the container image can be pulled
 - Review CloudWatch logs for the failed tasks
 
 **Parameter Store Access Issues:**
+
 - Ensure the IAM role has `ssm:GetParameter` permissions
 - Verify the parameter name matches exactly: `/ecs/signoz/otelcol-daemon.yaml`
 - Check the parameter is in the same region as your ECS cluster
-
 
 ## Clean Up (If Needed)
 
