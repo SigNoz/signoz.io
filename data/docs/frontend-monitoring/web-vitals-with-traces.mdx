@@ -1,14 +1,14 @@
 ---
 date: 2025-11-05
-title: Web Vitals Monitoring with Traces
-id: web-vitals-with-traces
+title: Web Vitals Monitoring with OpenTelemetry Traces
+id: opentelemetry-web-vitals-metrics
 description: Set up web vitals monitoring with traces using SigNoz and OpenTelemetry
 tags: [SigNoz Cloud, Self-Host]
 ---
 
 ## Overview
 
-This documentation provides a step-by-step guide to setting up web vitals monitoring with traces using SigNoz and OpenTelemetry.
+This documentation provides a step-by-step guide to setting up web vitals monitoring with OpenTelemetry traces on SigNoz.
 
 ## Prerequisites
 
@@ -63,7 +63,7 @@ This documentation provides a step-by-step guide to setting up web vitals monito
 
 The instrumentation file is required to setup the `OTLPTraceExporter` and `WebTracerProvider` which are used to capture web vitals as traces within your application and export them to your collector.
 
-<Tabs entityName="plans">
+<Tabs entityName="language">
   <TabItem value="ts" label="TypeScript" default>
     ```ts:instrumentation.ts
     import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
@@ -78,6 +78,7 @@ The instrumentation file is required to setup the `OTLPTraceExporter` and `WebTr
       // For the self-hosted version, please use the collector url instead.
       url: `https://ingest.<INGESTION_REGION>.signoz.cloud:443/v1/traces`,
       headers: {
+        // Optional for the self-hosted version
         'signoz-ingestion-key': '<INGESTION_KEY>',
       },
     });
@@ -113,6 +114,7 @@ The instrumentation file is required to setup the `OTLPTraceExporter` and `WebTr
       // For the self-hosted version, please use the collector url instead.
       url: `https://ingest.<INGESTION_REGION>.signoz.cloud:443/v1/traces`,
       headers: {
+        // Optional for the self-hosted version
         'signoz-ingestion-key': '<INGESTION_KEY>',
       },
     });
@@ -138,10 +140,11 @@ The instrumentation file is required to setup the `OTLPTraceExporter` and `WebTr
 
 <Admonition type="info">
   For self-hosted deployments, add the following CORS configuration to your OpenTelemetry Collector
-  config file to allow browser requests from your frontend domain:
+  config file to allow browser requests from your frontend domain. Also, update the endpoint and remove the ingestion key header as shown in  
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>. 
 </Admonition>
 
-```yaml
+```yaml:config.yaml
 receivers:
   otlp:
     protocols:
@@ -154,13 +157,14 @@ receivers:
             - <YOUR_FRONTEND_URL>
           allowed_headers: ['*']
 ```
+This configures the OTel Collector to export traces to SigNoz Cloud using the OTLP/HTTP protocol. Read more about OTel Collector configuration [here](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/).
 
 ### Step 3: Capture and export Web Vitals
 
 Use the `web-vitals` library to capture key performance metrics like CLS, INP, LCP, TTFB, and FCP.
 These are captured through callback functions that you define and exported as traces.
 
-<Tabs entityName="plans">
+<Tabs entityName="language">
   <TabItem value="ts" label="TypeScript" default>
     ```ts:web-vitals.ts
     import { onFCP, onINP, onTTFB, onLCP, onCLS, type Metric } from 'web-vitals';
@@ -332,9 +336,9 @@ You can enrich web vitals with additional metadata like browser type, user ID, p
 
 To do so, you need to write a custom implementation of `SpanProcessor` which will intercept all your exported spans and attach additional attributes to them.
 
-<Tabs entityName="plans">
+<Tabs entityName="language">
   <TabItem value="ts" label="TypeScript" default>
-    ```ts
+    ```ts:custom-span-processor.ts
     import type { SpanProcessor } from '@opentelemetry/sdk-trace-web';
     import { UAParser } from 'ua-parser-js';
 
@@ -392,7 +396,7 @@ To do so, you need to write a custom implementation of `SpanProcessor` which wil
 
   </TabItem>
   <TabItem value="js" label="JavaScript">
-    ```js
+    ```js:custom-span-processor.js
     import { UAParser } from 'ua-parser-js';
 
     export const CONSTANTS = {
@@ -450,7 +454,7 @@ To do so, you need to write a custom implementation of `SpanProcessor` which wil
   </TabItem>
 </Tabs>
 
-Update your `instrument.ts` file to include this processor.
+Update your instrumentation file to include this processor.
 
 ```ts
 const provider = new WebTracerProvider({
@@ -473,8 +477,6 @@ Now every span exported will include these additional contextual attributes.
     <i>Web Vitals with custom attributes</i>
   </figcaption>
 </figure>
-
-## Next Steps
 
 ### Setup Dashboard and alerts
 
@@ -504,8 +506,12 @@ SigNoz charts support thresholds with color coding. For example, the graph below
 
 ### Out of Box Dashboard
 
-You can [import](https://signoz.io/docs/dashboards/import-dashboard/) our out-of-the-box [Dashboard for web vitals monitoring](https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/frontend-monitoring/web-vitals-monitoring-with-traces.json)
+You can [import](https://signoz.io/docs/dashboards/import-dashboard/) our out-of-the-box [Dashboard for web vitals monitoring](/docs/dashboards/dashboard-templates/frontend-monitoring/#web-vitals-with-traces)
 
 ## Demo Application
 
 We have set up a [Demo React application](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/web-vitals) that demonstrates monitoring Core Web Vitals with traces using OpenTelemetry and sending them to SigNoz.
+
+## Next Steps
+- [Sending logs](/docs/frontend-monitoring/sending-logs)
+- [Sending metrics](/docs/frontend-monitoring/sending-metrics)
