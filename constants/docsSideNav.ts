@@ -3020,13 +3020,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         route: '/docs/migration/migrate-from-honeycomb-to-signoz',
-          {
-            type: 'doc',
-            route: '/docs/migration/migrate-from-honeycomb/data',
-            label: 'Migrating Data',
-          },
-            label: 'Migrating Metrics',
-          },
+        items: [
           {
             type: 'doc',
             route: '/docs/migration/migrate-from-honeycomb/data',
