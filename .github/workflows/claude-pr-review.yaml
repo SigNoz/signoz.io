@@ -1,7 +1,7 @@
 name: Claude Docs Review
 on:
   pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
+    types: [opened, ready_for_review]
     paths:
       - 'data/docs/**'
       - 'public/img/docs/**'
@@ -16,7 +16,16 @@ jobs:
   review:
     # Run on PR events as before, or when a new PR comment contains "@claude /review"
     if: >-
-      github.event_name == 'pull_request' ||
+      (
+        github.event_name == 'pull_request' &&
+        (
+          github.event.action == 'ready_for_review' ||
+          (
+            github.event.action == 'opened' &&
+            github.event.pull_request.draft == false
+          )
+        )
+      ) ||
       (
         github.event_name == 'issue_comment' &&
         github.event.issue.pull_request != null &&
