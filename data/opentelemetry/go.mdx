@@ -8,13 +8,6 @@ description: Learn how to use the language-specific implementation of OpenTeleme
 image: /img/blog/2023/07/opentelemetry_golang_cover-min.jpg
 keywords: [opentelemetry, opentelemetry golang, opentelemetry go, distributed tracing, observability, golang application monitoring, golang instrumentation, signoz]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/opentelemetry/go/"/>
-</head>
-
-
-
 OpenTelemetry can be used to generate telemetry data from your Golang applications. The collected data can then be sent to an observability tool for storage and visualization. OpenTelemetry is an open-source project under the Cloud Native Computing Foundation ([**CNCF**](https://www.cncf.io/)) that aims to standardize the generation and collection of telemetry data.
 
 <figure data-zoomable align='center'>
@@ -27,7 +20,7 @@ Steps to get started with OpenTelemetry for Go applications:
 
 - [**Creating a SigNoz cloud account**](https://signoz.io/opentelemetry/go/#installing-signoz)
 - [**Instrumenting a Go application with OpenTelemetry**](https://signoz.io/opentelemetry/go/#instrumenting-a-go-application-with-opentelemetry)
-- [**Generating telemetry data from your application**](https://www.notion.so/OpenTelemetry-Golang-67f57528ce29411bb4bd29637c2a9843?pvs=21)
+- [**Generating telemetry data from your application**](https://signoz.io/opentelemetry/go/#generating-telemetry-data-from-your-application)
 - [**Monitoring your Go application with SigNoz dashboards**](https://signoz.io/opentelemetry/go/#monitor-your-go-application-with-signoz-dashboards)
 - [**Adding custom attributes and custom events to spans**](https://signoz.io/opentelemetry/go/#adding-custom-attributes-and-custom-events-to-spans)
 
@@ -78,7 +71,7 @@ git clone -b without-instrumentation https://github.com/SigNoz/sample-golang-app
 
 **Step 2: Install dependencies**
 
-Dependencies related to OpenTelemetry exporter and SDK have to be installed first. Note that we are assuming you are using **`gin`** request router. If you are using other request routers, check out the [**corresponding package**](https://signoz.io/docs/instrumentation/opentelemetry-golang/#request-routers).
+Dependencies related to [OpenTelemetry exporter](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) and SDK have to be installed first. Note that we are assuming you are using **`gin`** request router. If you are using other request routers, check out the [**corresponding package**](https://signoz.io/docs/instrumentation/opentelemetry-golang/#request-routers).
 
 Run the below commands after navigating to the application source folder:
 
@@ -307,7 +300,7 @@ Now that you have instrumented your Go Gin application with OpenTelemetry, you n
 Run the following command to set the environment variables and start the application:
 
 ```jsx
-SERVICE_NAME=goApp INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ-INGESTION-TOKEN> OTEL_EXPORTER_OTLP_ENDPOINT=ingest.{region}.signoz.cloud:443 go run main.go
+SERVICE_NAME=goApp INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ-INGESTION-KEY> OTEL_EXPORTER_OTLP_ENDPOINT=ingest.{region}.signoz.cloud:443 go run main.go
 ```
 
 Where:
@@ -322,7 +315,7 @@ Where:
     
 - **`OTEL_EXPORTER_OTLP_HEADERS`**:
     
-    This header contains the SigNoz access token for authentication. Replace `<SIGNOZ-INGESTION-TOKEN>` with your actual [ingestion token](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+    This header contains the SigNoz ingestion key for authentication. Replace `<SIGNOZ_INGESTION_KEY>` with your actual [ingestion token](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
     
 - **`OTEL_EXPORTER_OTLP_ENDPOINT`**:
     
@@ -440,11 +433,11 @@ Output:
 <figcaption><i>Book deleted successfully</i></figcaption>
 </figure>
 
-By performing these interactions, your application will generate telemetry data, which OpenTelemetry will process and forward to SigNoz for visualization and analysis. Refresh your SigNoz dashboard to observe the metrics, traces, and logs created during these operations!
+By performing these interactions, your application will generate telemetry data, which OpenTelemetry will process and forward to [SigNoz](https://signoz.io/docs/introduction/) for visualization and analysis. Refresh your SigNoz dashboard to observe the metrics, traces, and logs created during these operations!
 
 ## Monitor your Go application with SigNoz dashboards
 
-With the above steps, you have instrumented your Go application with OpenTelemetry. OpenTelemetry sends the collected data to SigNoz which can be used to store it and visualize it. Let’s see how SigNoz can help you monitor your Go application.
+With the above steps, you have instrumented your Go application with [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/). OpenTelemetry sends the collected data to SigNoz which can be used to store it and visualize it. Let’s see how SigNoz can help you monitor your Go application.
 
 Navigate to our SigNoz cloud account. On the service page, you should see your **`goGinApp`** service.
 

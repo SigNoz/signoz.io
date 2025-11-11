@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 title: Aggregate Logs
+tags : [SigNoz Cloud, Self-Host]
 id: aggregate-logs
 ---
 
@@ -16,49 +17,38 @@ This is the JSON payload for the example described above for Aggregating Logs
 {
     "start": 1700734490000,
     "end": 1700738090000,
-    "step": 60,
+    "requestType": "scalar",
     "variables": {},
     "compositeQuery": {
-        "queryType": "builder",
-        "panelType": "table",
-        "builderQueries": {
-            "A": {
-                "dataSource": "logs",
-                "queryName": "A",
-                "aggregateOperator": "count_distinct",
-                "aggregateAttribute": {
-                    "key": "component",
-                    "dataType": "string",
-                    "type": "tag",
-                    "isColumn": false
-                },
-                "filters": {
-                    "items": [],
-                    "op": "AND"
-                },
-                "expression": "A",
-                "disabled": false,
-                "stepInterval": 60,
-                "orderBy": [
-                    {
-                        "columnName": "timestamp",
-                        "order": "desc"
-                    }
-                ],
-                "groupBy": [
-                    {
-                        "key": "container_id",
-                        "dataType": "string",
-                        "type": "tag",
-                        "isColumn": true,
-                        "isJSON": false
-                    }
-                ],
-                "offset": 0
+        "queries": [
+            {
+                "type": "builder_query",
+                "spec": {
+                    "name": "A",
+                    "signal": "logs",
+                    "aggregations": [
+                        {
+                            "expression": "count_distinct(component)",
+                            "alias": "distinct_components"
+                        }
+                    ],
+                    "groupBy": [
+                        {
+                            "name": "container_id",
+                        }
+                    ],
+                    "order": [
+                        {
+                            "key": {
+                                "name": "distinct_components"
+                            },
+                            "direction": "desc"
+                        }
+                    ],
+                    "disabled": false
+                }
             }
-        }
+        ]
     }
 }
 ```
-
-

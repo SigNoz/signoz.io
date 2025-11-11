@@ -1,0 +1,27 @@
+---
+date: 2025-08-27
+id: how-to-configure-alerts-for-missing-data
+tags : [SigNoz Cloud, Self-Host]
+title: How to Configure Alerts for Missing Data
+---
+
+You can set up alerts to notify you when data stops being ingested into SigNoz, which helps detect potential issues with your data collection pipeline.
+
+## Setting Up Missing Data Alerts
+
+To configure an alert for missing data:
+
+1. Navigate to the Alerts page
+2. Click "Define Alert Conditions"
+3. Select "More Options"
+4. Enable "Send a notification if data is missing for X minutes"
+
+## Best Practices for Missing Data Alerts
+
+When configuring alerts that monitor for metric changes or missing data, consider these recommendations:
+
+1. For metrics that are reported intermittently, use longer aggregation intervals (180-300 seconds) to reduce false positives
+2. Choose the “missing for X minutes” threshold to be at least 2–3× your export/scrape interval to avoid flapping (e.g., if exporters push every 60s, set X ≥ 3–5 minutes).
+3. If your metric only reports during specific events (like errors), uncheck the "Alert when data is missing" option to avoid false alerts during normal periods with no errors
+
+**Note:** When using the "increase" function in alerts, be aware that missing data points at the start of an evaluation window can affect calculations. Consider using longer aggregation windows if you experience intermittent data points.

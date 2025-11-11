@@ -1,0 +1,108 @@
+---
+date: 2025-08-13
+id: alerts-firing-without-visible-threshold-breach
+tags: [SigNoz Cloud, Self-Host]
+title: Alerts Firing Without Visible Threshold Breach
+---
+
+## Problem Description
+Your alert fires but when checking dashboards or explorer views, the metric appears below the configured threshold. This guide helps diagnose why alerts trigger when they shouldn't appear to.
+
+## Common Root Causes
+
+### 1. Evaluation Window Mismatch
+
+**Issue:** Alert evaluates over different time window than your dashboard displays.
+
+**Solution:**
+```yaml
+# Alert configuration
+evaluation_window: 5m    # Alert checks last 5 minutes
+dashboard_view: 15m      # You're viewing last 15 minutes
+
+# Fix: Match your dashboard time range to alert evaluation window
+```
+
+**Verification Steps:**
+1. Navigate to Alerts → Edit Alert
+2. Note the evaluation window (e.g., "for 5 minutes")
+3. Set dashboard to exact same time range
+4. Check if threshold breach becomes visible
+
+### 2. Aggregation Method Conflicts
+
+**Issue:** Using incompatible aggregation for your metric type.
+
+**Common Mistakes:**
+- `count_distinct` on continuous values
+- `p99` on sparse data (insufficient samples)
+
+### 3. "At Least Once" vs "In Total" Evaluation
+
+**Issue:** Alert condition evaluates differently than expected.
+
+**Behavior Differences:**
+- **At least once:** Fires if ANY datapoint exceeds threshold
+- **In total:** Fires if aggregated value over entire window exceeds threshold
+
+**Example:**
+```yaml
+# CPU usage datapoints over 5-minute window: [70%, 75%, 80%, 85%, 70%]
+threshold: 90%
+
+at_least_once: DOES NOT FIRE (no single datapoint > 90%)
+in_total: FIRES (sum: 70+75+80+85+70 = 380% > 90% threshold)
+```
+
+### 4. Time Synchronization Issues
+
+**Issue:** Metrics arrive with incorrect timestamps.
+
+**Diagnosis:**
+```bash
+# Check clock drift on all monitored hosts
+for host in $(cat hosts.txt); do
+  echo "Host: $host"
+  ssh $host 'timedatectl show | grep NTPSynchronized'
+done
+```
+
+**Fix:**
+```bash
+# Enable NTP synchronization
+sudo timedatectl set-ntp true
+sudo systemctl restart chronyd  # or ntpd
+```
+
+### 5. Missing Data Points & Sparse Metrics
+
+**Issue:** Gaps in data cause unexpected evaluations.
+
+**SigNoz Behavior:**
+- Missing data points are NOT interpolated by default
+- Sparse metrics may not have enough samples for percentile calculations
+
+**Solutions:**
+1. **For sparse metrics:** Use longer evaluation windows
+2. **For missing data:** Configure "No Data" alerts separately
+3. **For percentiles:** Ensure minimum 20 samples in evaluation window
+
+### 6. Few data points/samples in evaluation window
+
+**Issue:** Few data points/samples in the evaluation window can lead to inaccurate or unexpected alert evaluations.
+
+**Problem:**
+```yaml
+# Problematic configuration
+scrape_interval: 120s
+evaluation_window: 5m  # Only captures 2-3 samples
+
+# Recommended
+scrape_interval: 15s
+evaluation_window: 5m  # Captures ~20 samples
+```
+
+**Solutions:**
+1. **Increase evaluation window:** Use windows that capture at least 10-20 data points
+2. **Decrease collection interval:** More frequent collection provides better data density. Note: This increases metric ingestion volume and potential billing costs.
+3. **Rule of thumb:** Evaluation window should be 5-10x the collection interval

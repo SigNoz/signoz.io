@@ -5,21 +5,24 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { allBlogs, allAuthors } from 'contentlayer/generated'
 import type { Authors, Blog } from 'contentlayer/generated'
-import PostSimple from '@/layouts/PostSimple'
-import PostLayout from '@/layouts/PostLayout'
-import PostBanner from '@/layouts/PostBanner'
+import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
+import BlogLayout from '@/layouts/BlogLayout'
+import NewsroomLayout from '@/layouts/NewsroomLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 
-const defaultLayout = 'PostLayout'
+const defaultLayout = 'BlogLayout'
 const layouts = {
-  PostSimple,
-  PostLayout,
-  PostBanner,
+  OpenTelemetryLayout,
+  BlogLayout,
+  NewsroomLayout,
 }
+
+export const dynamicParams = false
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
@@ -28,14 +31,16 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allBlogs.find((p) => p.slug === slug)
+
+  if (!post) {
+    return notFound()
+  }
+
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
   })
-  if (!post) {
-    return
-  }
 
   const publishedAt = new Date(post.date).toISOString()
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()
@@ -99,7 +104,17 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
-  const Layout = layouts[post.layout || defaultLayout]
+  let layoutName = post.layout || defaultLayout
+  if (post.is_newsroom) {
+    layoutName = 'NewsroomLayout'
+  } else if (slug.includes('opentelemetry')) {
+    layoutName = 'OpenTelemetryLayout'
+  } else {
+    layoutName = 'BlogLayout'
+  }
+
+  // @ts-ignore
+  const Layout = layouts[layoutName]
 
   return (
     <>

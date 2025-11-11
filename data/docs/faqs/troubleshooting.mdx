@@ -1,20 +1,17 @@
 ---
 date: 2024-06-06
 id: troubleshooting
+tags : [SigNoz Cloud, Self-Host]
 title: Troubleshooting - FAQs
 description: Frequently Asked Questions About Troubleshooting
-
 ---
 
 ### How to run SigNoz in debug mode?
 
 You might want to follow our troubleshooting docs.
-
 Refer here:
 
 - [SigNoz Troubleshooting Docs](https://signoz.io/docs/install/troubleshooting/)
-- <a href="https://github.com/SigNoz/troubleshoot" rel="noopener noreferrer nofollow" target="_blank">SigNoz Troubleshoot Github Repository</a>
-- <a href="https://www.youtube.com/watch?v=Y7OkvmuTRQ8" rel="noopener noreferrer nofollow" target="_blank">SigNoz YouTube Video on Troubleshooting</a>
 
 ### How do I know if SigNoz is accessible from my Application?
 
@@ -25,12 +22,6 @@ Set `OTEL_TRACES_EXPORTER=console` and observe. If it doesn’t output the tra
 Refer here:
 
 - [SigNoz Troubleshooting Docs](https://signoz.io/docs/install/troubleshooting/#kubernetes)
-- <a href="https://github.com/SigNoz/troubleshoot" rel="noopener noreferrer nofollow" target="_blank">SigNoz Troubleshoot Github Repository</a>
-- <a href="https://www.youtube.com/watch?v=Y7OkvmuTRQ8" rel="noopener noreferrer nofollow" target="_blank">SigNoz YouTube Video on Troubleshooting</a>
-
-### I have installed SigNoz on Windows Kubernetes, but I can't make it work.
-
-We don't support Microsoft Windows as of now.
 
 ### I am not seeing all my services related to my application listed in the Services tab, what could be the potential reason?
 
@@ -38,41 +29,36 @@ We rely on the semantic conventions provided by OpenTelemetry. Every unique `se
  configured and received is part of the service list. You can read more about it from our [docs](https://signoz.io/docs/userguide/metrics/#open-the-services-section).
 
 
+### Facing Permission Issues in SigNoz
+
+A. If you're seeing permission errors when creating new or editing dashboards, views, alerts, this is often caused by cached user permissions in your session. 
+Solution — refresh your session permissions by logging out and back in:
+
+<details>
+
+<summary> Show detailed steps </summary>
+
+1. Click the logout option in your dashboard.  
+2. Log back in with your credentials.  
+3. Try creating or editing dashboards again.
+
+Additional Troubleshooting
+
+If logging out and back in does not resolve the issue, contact support for further assistance.
+</details>
+
 ### My services are not showing up in the Service Map section (but present in the services and traces tab), what should I do?
 
-You might need to zoom out a bit to see your service. Also, if you’re getting started the service map shows services from the sample hotrod application. Since your services are not connected to the hotrod application, it will appear isolated.
+A. You might need to zoom out a bit to see your service.  
+**Note:** Standalone services (without dependencies/calls to other services) are not shown in the Service Map. Only services with interdependencies (i.e., calls to other services) are visualized. For more details, refer to our [Service Map documentation](https://signoz.io/docs/userguide/service-map/).
 
-### I am trying to change the retention period of Traces but the process gets stuck everytime.
+<details>
 
-The process to change the retention period is resource-intensive, especially if you have a large amount of data ingested. The TTL (Time-to-Live) status table in the Signoz SQLite database may be stuck, preventing the retention period change from completing.
+<summary> Show detailed steps </summary>
 
-If process is stuck then you clear TTL table to try again.
+1. Zoom out on the Service Map to ensure the service isn't off-screen.  
+2. Confirm your services have inter-service calls (spans) — the Service Map visualizes dependencies, not standalone services.  
+3. Verify instrumentation is sending spans with proper service.name and relevant span attributes.  
+4. If needed, inspect traces in the Traces tab to confirm calls between services are present.
 
-1. You can connect to SQLite DB and clear TTL status table to allow updating retention setting. If you are using docker follow below steps:
-
-- Connect to query-service
-```bash
-docker exec -it query-service sh
-```
-
-2. Run the following commands:
-- Install sqlite
-```bash
-apk update
-apk add sqlite
-```
-
-- Open sqlite with signoz.db
-```bash
-sqlite3 /var/lib/signoz/signoz.db
-```
-
-- (sqlite shell) check existing ttl status
-```bash
-select * from ttl_status;
-```
-
-- Delete all rows of ttl_status
-```bash
-DELETE FROM ttl_status;
-```
+</details>

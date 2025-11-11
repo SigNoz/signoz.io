@@ -1,0 +1,143 @@
+---
+date: 2025-10-21
+id: saml-okta
+tags: [SigNoz Cloud, Self-Host]
+title: SAML Authentication with Okta
+---
+
+## Overview
+
+This guide walks you through setting up SAML (Security Assertion Markup Language) authentication between Okta and SigNoz.
+
+**What you'll accomplish:**
+
+- Configure Okta as an identity provider (IdP) for SigNoz
+- Enable your team to access SigNoz using their existing Okta accounts
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- **Okta account** with administrative access
+- **SigNoz account** (Cloud or Self-Hosted with License) with administrative access
+- **Your SigNoz instance URL** (e.g., `https://signoz.example.com`)
+
+## Configuration Steps
+
+### Step 1: Create SAML Application in Okta
+
+1. Log in to **Okta** and create a new SAML application.
+
+### Step 2: Configure SAML Settings
+
+1. From the **Admin** page, go to **Applications** > **Applications** > **Create App Integration**
+2. Select **SAML 2.0**, and hit **Next**
+3. On the **SAML Integration** page, enter the following:
+   - **Application Name**: `SigNoz`
+   - **Single Sign-on URL**: `<your-instance-url>/api/v1/complete/saml`
+   - **Audience URI (SP Entity ID)**: `<your-instance-url>`
+4. Click **Save** to create the application integration
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/okta-sso-saml-integration.gif" alt="Okta SSO SAML Integration" />
+  <figcaption>
+    <i>Okta SSO SAML Integration</i>
+  </figcaption>
+</figure>
+
+### Step 3: Export Metadata
+
+1. Visit the **Metadata URL** in Okta to get the following information:
+
+The metadata file contains important configuration details like:
+
+- Okta's signing certificate
+- Single Sign-On service URLs
+- Entity identifiers
+
+**Example metadata file structure:**
+
+```xml
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="http://www.okta.com/exk...697">
+  <md:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>cert</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="<idp-url>"/>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="<idp-url>"/>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="<idp-url>"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="<idp-url>"/>
+  </md:IDPSSODescriptor>
+</md:EntityDescriptor>
+```
+
+### Step 5: Assign Users to Application
+
+1. From **Admin** page, go to **Directories** > **People** or **Groups**
+2. Select the specific people or groups
+3. Go to **Applications** > **Assign applications**
+4. Select **SigNoz** application > **Assign** > Hit **Done**
+
+### Step 6: Configure SigNoz for SAML Authentication
+
+Now you'll configure SigNoz to accept authentication from Okta:
+
+1. **Navigate to SigNoz Settings:**
+
+   - Go to your SigNoz dashboard
+   - Click on **Settings** in the left sidebar
+   - Navigate to **Organization Settings**
+   - Click on **Authenticated Domains**
+
+2. **Add New Domain:**
+
+   - Click **Add Domain**
+   - Enter the domain that your users would login with (e.g., if your user emails are in format `john@example.com`, enter `example.com`)
+
+3. **Enter Configuration Details:**
+
+   ```
+   Domain: example.com
+   SAML ACS URL/SAML IDP URL: <idp-url>
+   SAML X.509 Certificate: <some-certificate-data>
+   SAML Entity ID: <entity-id>
+   Skip AuthN Requests Signed: False
+   ```
+
+   **Where to find these values:**
+
+   - **Domain**: The email domain for users who should use SSO (e.g., `example.com` for users with `@example.com` emails)
+   - **SAML ACS URL/SAML IDP URL**: The ACS URL from the metadata file (between `<md:SingleSignOnService Location="...">` tags)
+   - **SAML X.509 Certificate**: The certificate content from the metadata file (between `<ds:X509Certificate>` tags)
+   - **SAML Entity ID**: The `entityID` value from the metadata file
+
+4. **Save Configuration:**
+   - Click **Save** to apply the SAML configuration
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/signoz-okta-sso-enable.gif" alt="Enable Okta SSO SAML in SigNoz" />
+  <figcaption>
+    <i>Enable Okta SSO SAML in SigNoz</i>
+  </figcaption>
+</figure>
+
+### Step 7: Test the Integration
+
+1. **Log out** of SigNoz if you're currently logged in
+2. **Navigate** to your SigNoz login page
+3. **Try** logging in with an Okta user email
+4. **Verify** that you're redirected to Okta for authentication
+5. **Complete** the Okta login process
+6. **Confirm** you're successfully logged into SigNoz
+
+## Troubleshooting
+
+**Common issues and solutions:**
+
+- **"Authentication failed" error**: Check that the redirect URI exactly matches `<your-instance-url>/api/v1/complete/saml` in Okta
+- **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`

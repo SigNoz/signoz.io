@@ -1,0 +1,513 @@
+---
+date: 2025-07-20
+id: mongodb-atlas
+tags : [SigNoz Cloud, Self-Host]
+title: MongoDB Atlas Metrics and Logs
+---
+
+## Overview
+
+MongoDB Atlas is a fully managed cloud database service for modern applications. This documentation guides you through setting up monitoring 
+for MongoDB Atlas—tracking key metrics, collecting logs, and visualising them through an out-of-the-box dashboard.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+1. A MongoDB Atlas account with appropriate access
+2. MongoDB Atlas API keys with required permissions:
+   - **Public Key** and **Private Key** with access for the corresponding MongoDB Atlas Project
+   - **Project Data Access Read Only** role (minimum) for accessing project events and logs
+3. For audit logs: Audit logging [must be enabled](https://www.mongodb.com/docs/atlas/database-auditing/) in your MongoDB Atlas project
+
+## Setup
+
+<Tabs>
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+<Tabs>
+<TabItem value="metrics" label="Metrics" default>
+
+### Step 1: Install OpenTelemetry Collector
+
+Follow [this document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
+
+### Step 2: Configure MongoDB Atlas Receiver
+
+Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodbatlas` receiver:
+
+```yaml:config.yaml
+receivers:
+  mongodbatlas:
+    # Authentication
+    public_key: "<mongodb-atlas-public-key>"
+    private_key: "<mongodb-atlas-private-key>"    
+    # Metrics configuration
+    collection_interval: 5m
+
+processors:
+  batch: {}
+  resource/env:
+    attributes:
+      - key: deployment.environment
+        value: prod
+        action: upsert
+
+exporters:
+  # export to SigNoz cloud
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<ingestion-key>"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [mongodbatlas]
+      processors: [batch,resource/env]
+      exporters: [otlp]
+```
+
+- `<mongodb-atlas-public-key>` is the public key of your MongoDB Atlas project
+- `<mongodb-atlas-private-key>` is the private key of your MongoDB Atlas project
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+All the available MongoDB Atlas receiver configurations can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver).
+
+### Step 3: Start the OTel Collector
+
+Start the OpenTelemetry Collector using the above `config.yaml` file:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+### MongoDB Atlas Dashboard
+
+Here are sample screenshots of the dashboard powered by MongoDB Atlas metrics:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/overview.webp" alt="MongoDB Atlas Overview"/>
+    <figcaption><i>MongoDB Atlas Overview</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/project-stats.webp" alt="MongoDB Atlas Project Stats"/>
+    <figcaption><i>MongoDB Atlas Project Stats</i></figcaption>
+</figure>
+
+<details> 
+<summary> Complete list of MongoDB Atlas metrics </summary>
+
+- **Name**: The name of the metric.
+- **Type**: The type of the metric (e.g., Sum, Gauge).
+- **Unit**: The unit of measurement for the metric.
+- **Description**: A brief description of what the metric represents.
+
+| Name                                                                      | Type  | Unit                 | Description                                                                                             |
+| ------------------------------------------------------------------------- | ----- | -------------------- | ------------------------------------------------------------------------------------------------------- |
+| mongodbatlas.db.counts                                                    | Gauge | number               | Database feature size                                                                                   |
+| mongodbatlas.db.size                                                      | Gauge | Bytes                | Database feature size                                                                                   |
+| mongodbatlas.disk.partition.iops.average                                  | Gauge | ops/s                | Disk partition iops                                                                                     |
+| mongodbatlas.disk.partition.iops.max                                      | Gauge | ops/s                | Disk partition iops                                                                                     |
+| mongodbatlas.disk.partition.latency.average                               | Gauge | milliseconds         | Disk partition latency                                                                                  |
+| mongodbatlas.disk.partition.latency.max                                   | Gauge | milliseconds         | Disk partition latency                                                                                  |
+| mongodbatlas.disk.partition.space.average                                 | Gauge | Bytes                | Disk partition space                                                                                    |
+| mongodbatlas.disk.partition.space.max                                     | Gauge | Bytes                | Disk partition space                                                                                    |
+| mongodbatlas.disk.partition.usage.average                                 | Gauge | number               | Disk partition usage (%)                                                                                |
+| mongodbatlas.disk.partition.usage.max                                     | Gauge | number               | Disk partition usage (%)                                                                                |
+| mongodbatlas.disk.partition.utilization.average                           | Gauge | number               | The percentage of time during which requests are being issued to and serviced by the partition.         |
+| mongodbatlas.disk.partition.utilization.max                               | Gauge | number               | The maximum percentage of time during which requests are being issued to and serviced by the partition. |
+| mongodbatlas.process.asserts                                              | Gauge | assertions/s         | Number of assertions per second                                                                         |
+| mongodbatlas.process.background_flush                                     | Gauge | number               | Amount of data flushed in the background                                                                |
+| mongodbatlas.process.cache.io                                             | Gauge | Bytes                | Cache throughput (per second)                                                                           |
+| mongodbatlas.process.cache.size                                           | Sum   | Bytes                | Cache sizes                                                                                             |
+| mongodbatlas.process.connections                                          | Sum   | number               | Number of current connections                                                                           |
+| mongodbatlas.process.cpu.children.normalized.usage.average                | Gauge | number               | CPU Usage for child processes, normalized to pct                                                        |
+| mongodbatlas.process.cpu.children.normalized.usage.max                    | Gauge | number               | CPU Usage for child processes, normalized to pct                                                        |
+| mongodbatlas.process.cpu.children.usage.average                           | Gauge | number               | CPU Usage for child processes (%)                                                                       |
+| mongodbatlas.process.cpu.children.usage.max                               | Gauge | number               | CPU Usage for child processes (%)                                                                       |
+| mongodbatlas.process.cpu.normalized.usage.average                         | Gauge | number               | CPU Usage, normalized to pct                                                                            |
+| mongodbatlas.process.cpu.normalized.usage.max                             | Gauge | number               | CPU Usage, normalized to pct                                                                            |
+| mongodbatlas.process.cpu.usage.average                                    | Gauge | number               | CPU Usage (%)                                                                                           |
+| mongodbatlas.process.cpu.usage.max                                        | Gauge | number               | CPU Usage (%)                                                                                           |
+| mongodbatlas.process.cursors                                              | Gauge | number               | Number of cursors                                                                                       |
+| mongodbatlas.process.db.document.rate                                     | Gauge | documents/s          | Document access rates                                                                                   |
+| mongodbatlas.process.db.operations.rate                                   | Gauge | operations/s         | DB Operation Rates                                                                                      |
+| mongodbatlas.process.db.operations.time                                   | Sum   | milliseconds         | DB Operation Times                                                                                      |
+| mongodbatlas.process.db.query_executor.scanned                            | Gauge | objects/s            | Scanned objects                                                                                         |
+| mongodbatlas.process.db.query_targeting.scanned_per_returned              | Gauge | scanned/returned     | Scanned objects per returned                                                                            |
+| mongodbatlas.process.db.storage                                           | Gauge | Bytes                | Storage used by the database                                                                            |
+| mongodbatlas.process.global_lock                                          | Gauge | number               | Number and status of locks                                                                              |
+| mongodbatlas.process.index.btree_miss_ratio                               | Gauge | number               | Index miss ratio (%)                                                                                    |
+| mongodbatlas.process.index.counters                                       | Gauge | number               | Indexes                                                                                                 |
+| mongodbatlas.process.journaling.commits                                   | Gauge | number               | Journaling commits                                                                                      |
+| mongodbatlas.process.journaling.data_files                                | Gauge | MilliBytes           | Data file sizes                                                                                         |
+| mongodbatlas.process.journaling.written                                   | Gauge | MilliBytes           | Journals written                                                                                        |
+| mongodbatlas.process.memory.usage                                         | Gauge | Bytes                | Memory Usage                                                                                            |
+| mongodbatlas.process.network.io                                           | Gauge | Bytes/s              | Network IO                                                                                              |
+| mongodbatlas.process.network.requests                                     | Sum   | number               | Network requests                                                                                        |
+| mongodbatlas.process.oplog.rate                                           | Gauge | GigaBytes/h          | Execution rate by operation                                                                             |
+| mongodbatlas.process.oplog.time                                           | Gauge | seconds              | Execution time by operation                                                                             |
+| mongodbatlas.process.page_faults                                          | Gauge | faults/s             | Page faults                                                                                             |
+| mongodbatlas.process.restarts                                             | Gauge | restarts/h           | Restarts in last hour                                                                                   |
+| mongodbatlas.process.tickets                                              | Gauge | tickets              | Tickets                                                                                                 |
+| mongodbatlas.system.cpu.normalized.usage.average                          | Gauge | number               | System CPU Normalized to pct                                                                            |
+| mongodbatlas.system.cpu.normalized.usage.max                              | Gauge | number               | System CPU Normalized to pct                                                                            |
+| mongodbatlas.system.cpu.usage.average                                     | Gauge | number               | System CPU Usage (%)                                                                                    |
+| mongodbatlas.system.cpu.usage.max                                         | Gauge | number               | System CPU Usage (%)                                                                                    |
+| mongodbatlas.system.fts.cpu.normalized.usage                              | Gauge | number               | Full text search disk usage (%)                                                                         |
+| mongodbatlas.system.fts.cpu.usage                                         | Gauge | number               | Full-text search (%)                                                                                    |
+| mongodbatlas.system.fts.disk.used                                         | Gauge | Bytes                | Full text search disk usage                                                                             |
+| mongodbatlas.system.fts.memory.usage                                      | Sum   | MilliBytes           | Full-text search                                                                                        |
+| mongodbatlas.system.memory.usage.average                                  | Gauge | KiloBytes            | System Memory Usage                                                                                     |
+| mongodbatlas.system.memory.usage.max                                      | Gauge | KiloBytes            | System Memory Usage                                                                                     |
+| mongodbatlas.system.network.io.average                                    | Gauge | Bytes/s              | System Network IO                                                                                       |
+| mongodbatlas.system.network.io.max                                        | Gauge | Bytes/s              | System Network IO                                                                                       |
+| mongodbatlas.system.paging.io.average                                     | Gauge | pages/s              | Swap IO                                                                                                 |
+| mongodbatlas.system.paging.io.max                                         | Gauge | pages/s              | Swap IO                                                                                                 |
+| mongodbatlas.system.paging.usage.average                                  | Gauge | KiloBytes            | Swap usage                                                                                              |
+| mongodbatlas.system.paging.usage.max                                      | Gauge | KiloBytes            | Swap usage                                                                                              |
+| mongodbatlas.disk.partition.queue.depth                                   | Gauge | number               | Disk queue depth                                                                                        |
+| mongodbatlas.disk.partition.throughput                                    | Gauge | Bytes/s              | Disk throughput                                                                                         |
+| mongodbatlas.process.cache.ratio                                          | Gauge | number               | Cache ratios represented as (%)                                                                         |
+
+You can refer [this](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver/documentation.md) page for more details about the MongoDB Atlas metrics.
+
+</details>
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+### Step 1: Install OpenTelemetry Collector
+
+Follow [this document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
+
+### Step 2: Configure MongoDB Atlas Receiver
+
+Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodbatlas` receiver:
+
+```yaml:config.yaml
+receivers:
+  mongodbatlas:
+    # Authentication
+    public_key: "<mongodb-atlas-public-key>"
+    private_key: "<mongodb-atlas-private-key>"    
+    # Logs configuration
+    logs:
+      enabled: true
+      projects:
+        - name: "Project 0"
+          collect_audit_logs: true
+          collect_host_logs: true
+          include_clusters: [Cluster0]
+          access_logs:
+            page_size: 2000
+            max_pages: 10
+            poll_interval: 5m
+
+processors:
+  batch: {}
+
+exporters:
+  # export to SigNoz cloud
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<ingestion-key>"
+
+service:
+  pipelines:
+    logs:
+      receivers: [mongodbatlas]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+- `<mongodb-atlas-public-key>` is the public key of your MongoDB Atlas project
+- `<mongodb-atlas-private-key>` is the private key of your MongoDB Atlas project
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+All the available MongoDB Atlas receiver configurations can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver).
+
+### Step 3: Start the OTel Collector
+
+Start the OpenTelemetry Collector using the above `config.yaml` file:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+### MongoDB Atlas Logs
+
+Here are sample screenshots of the MongoDB Atlas logs from SigNoz:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/logs.webp" alt="MongoDB Atlas Logs"/>
+    <figcaption><i>MongoDB Atlas Logs in SigNoz</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/detailed-log.webp" alt="MongoDB Atlas Detailed Log"/>
+    <figcaption><i>MongoDB Atlas Detailed Log in SigNoz</i></figcaption>
+</figure>
+
+</TabItem>
+</Tabs>
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
+
+<Tabs>
+<TabItem value="metrics" label="Metrics" default>
+
+### Step 1: Install OpenTelemetry Collector
+
+Follow [this document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
+
+### Step 2: Configure MongoDB Atlas Receiver
+
+Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodbatlas` receiver:
+
+```yaml:config.yaml
+receivers:
+  mongodbatlas:
+    # Authentication
+    public_key: "<mongodb-atlas-public-key>"
+    private_key: "<mongodb-atlas-private-key>"    
+    # Metrics configuration
+    collection_interval: 5m
+
+processors:
+  batch: {}
+  resource/env:
+    attributes:
+      - key: deployment.environment
+        value: prod
+        action: upsert
+
+exporters:
+  # export to self-hosted SigNoz
+  otlp:
+	endpoint: "<endpoint-ip>:4317"
+	tls:
+  	   insecure: true
+
+service:
+  pipelines:
+    metrics:
+      receivers: [mongodbatlas]
+      processors: [batch,resource/env]
+      exporters: [otlp]
+```
+
+- `<mongodb-atlas-public-key>` is the public key of your MongoDB Atlas project
+- `<mongodb-atlas-private-key>` is the private key of your MongoDB Atlas project
+- Set the `<endpoint-ip>` to the IP of your self-hosted SigNoz instance
+
+All the available MongoDB Atlas receiver configurations can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver).
+
+### Step 3: Start the OTel Collector
+
+Start the OpenTelemetry Collector using the above `config.yaml` file:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+### MongoDB Atlas Dashboard
+
+Here are sample screenshots of the dashboard powered by MongoDB Atlas metrics:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/overview.webp" alt="MongoDB Atlas Overview"/>
+    <figcaption><i>MongoDB Atlas Overview</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/project-stats.webp" alt="MongoDB Atlas Project Stats"/>
+    <figcaption><i>MongoDB Atlas Project Stats</i></figcaption>
+</figure>
+
+<details> 
+<summary> Complete list of MongoDB Atlas metrics </summary>
+
+- **Name**: The name of the metric.
+- **Type**: The type of the metric (e.g., Sum, Gauge).
+- **Unit**: The unit of measurement for the metric.
+- **Description**: A brief description of what the metric represents.
+
+| Name                                                                      | Type  | Unit                 | Description                                                                                             |
+| ------------------------------------------------------------------------- | ----- | -------------------- | ------------------------------------------------------------------------------------------------------- |
+| mongodbatlas.db.counts                                                    | Gauge | number               | Database feature size                                                                                   |
+| mongodbatlas.db.size                                                      | Gauge | Bytes                | Database feature size                                                                                   |
+| mongodbatlas.disk.partition.iops.average                                  | Gauge | ops/s                | Disk partition iops                                                                                     |
+| mongodbatlas.disk.partition.iops.max                                      | Gauge | ops/s                | Disk partition iops                                                                                     |
+| mongodbatlas.disk.partition.latency.average                               | Gauge | milliseconds         | Disk partition latency                                                                                  |
+| mongodbatlas.disk.partition.latency.max                                   | Gauge | milliseconds         | Disk partition latency                                                                                  |
+| mongodbatlas.disk.partition.space.average                                 | Gauge | Bytes                | Disk partition space                                                                                    |
+| mongodbatlas.disk.partition.space.max                                     | Gauge | Bytes                | Disk partition space                                                                                    |
+| mongodbatlas.disk.partition.usage.average                                 | Gauge | number               | Disk partition usage (%)                                                                                |
+| mongodbatlas.disk.partition.usage.max                                     | Gauge | number               | Disk partition usage (%)                                                                                |
+| mongodbatlas.disk.partition.utilization.average                           | Gauge | number               | The percentage of time during which requests are being issued to and serviced by the partition.         |
+| mongodbatlas.disk.partition.utilization.max                               | Gauge | number               | The maximum percentage of time during which requests are being issued to and serviced by the partition. |
+| mongodbatlas.process.asserts                                              | Gauge | assertions/s         | Number of assertions per second                                                                         |
+| mongodbatlas.process.background_flush                                     | Gauge | number               | Amount of data flushed in the background                                                                |
+| mongodbatlas.process.cache.io                                             | Gauge | Bytes                | Cache throughput (per second)                                                                           |
+| mongodbatlas.process.cache.size                                           | Sum   | Bytes                | Cache sizes                                                                                             |
+| mongodbatlas.process.connections                                          | Sum   | number               | Number of current connections                                                                           |
+| mongodbatlas.process.cpu.children.normalized.usage.average                | Gauge | number               | CPU Usage for child processes, normalized to pct                                                        |
+| mongodbatlas.process.cpu.children.normalized.usage.max                    | Gauge | number               | CPU Usage for child processes, normalized to pct                                                        |
+| mongodbatlas.process.cpu.children.usage.average                           | Gauge | number               | CPU Usage for child processes (%)                                                                       |
+| mongodbatlas.process.cpu.children.usage.max                               | Gauge | number               | CPU Usage for child processes (%)                                                                       |
+| mongodbatlas.process.cpu.normalized.usage.average                         | Gauge | number               | CPU Usage, normalized to pct                                                                            |
+| mongodbatlas.process.cpu.normalized.usage.max                             | Gauge | number               | CPU Usage, normalized to pct                                                                            |
+| mongodbatlas.process.cpu.usage.average                                    | Gauge | number               | CPU Usage (%)                                                                                           |
+| mongodbatlas.process.cpu.usage.max                                        | Gauge | number               | CPU Usage (%)                                                                                           |
+| mongodbatlas.process.cursors                                              | Gauge | number               | Number of cursors                                                                                       |
+| mongodbatlas.process.db.document.rate                                     | Gauge | documents/s          | Document access rates                                                                                   |
+| mongodbatlas.process.db.operations.rate                                   | Gauge | operations/s         | DB Operation Rates                                                                                      |
+| mongodbatlas.process.db.operations.time                                   | Sum   | milliseconds         | DB Operation Times                                                                                      |
+| mongodbatlas.process.db.query_executor.scanned                            | Gauge | objects/s            | Scanned objects                                                                                         |
+| mongodbatlas.process.db.query_targeting.scanned_per_returned              | Gauge | scanned/returned     | Scanned objects per returned                                                                            |
+| mongodbatlas.process.db.storage                                           | Gauge | Bytes                | Storage used by the database                                                                            |
+| mongodbatlas.process.global_lock                                          | Gauge | number               | Number and status of locks                                                                              |
+| mongodbatlas.process.index.btree_miss_ratio                               | Gauge | number               | Index miss ratio (%)                                                                                    |
+| mongodbatlas.process.index.counters                                       | Gauge | number               | Indexes                                                                                                 |
+| mongodbatlas.process.journaling.commits                                   | Gauge | number               | Journaling commits                                                                                      |
+| mongodbatlas.process.journaling.data_files                                | Gauge | MilliBytes           | Data file sizes                                                                                         |
+| mongodbatlas.process.journaling.written                                   | Gauge | MilliBytes           | Journals written                                                                                        |
+| mongodbatlas.process.memory.usage                                         | Gauge | Bytes                | Memory Usage                                                                                            |
+| mongodbatlas.process.network.io                                           | Gauge | Bytes/s              | Network IO                                                                                              |
+| mongodbatlas.process.network.requests                                     | Sum   | number               | Network requests                                                                                        |
+| mongodbatlas.process.oplog.rate                                           | Gauge | GigaBytes/h          | Execution rate by operation                                                                             |
+| mongodbatlas.process.oplog.time                                           | Gauge | seconds              | Execution time by operation                                                                             |
+| mongodbatlas.process.page_faults                                          | Gauge | faults/s             | Page faults                                                                                             |
+| mongodbatlas.process.restarts                                             | Gauge | restarts/h           | Restarts in last hour                                                                                   |
+| mongodbatlas.process.tickets                                              | Gauge | tickets              | Tickets                                                                                                 |
+| mongodbatlas.system.cpu.normalized.usage.average                          | Gauge | number               | System CPU Normalized to pct                                                                            |
+| mongodbatlas.system.cpu.normalized.usage.max                              | Gauge | number               | System CPU Normalized to pct                                                                            |
+| mongodbatlas.system.cpu.usage.average                                     | Gauge | number               | System CPU Usage (%)                                                                                    |
+| mongodbatlas.system.cpu.usage.max                                         | Gauge | number               | System CPU Usage (%)                                                                                    |
+| mongodbatlas.system.fts.cpu.normalized.usage                              | Gauge | number               | Full text search disk usage (%)                                                                         |
+| mongodbatlas.system.fts.cpu.usage                                         | Gauge | number               | Full-text search (%)                                                                                    |
+| mongodbatlas.system.fts.disk.used                                         | Gauge | Bytes                | Full text search disk usage                                                                             |
+| mongodbatlas.system.fts.memory.usage                                      | Sum   | MilliBytes           | Full-text search                                                                                        |
+| mongodbatlas.system.memory.usage.average                                  | Gauge | KiloBytes            | System Memory Usage                                                                                     |
+| mongodbatlas.system.memory.usage.max                                      | Gauge | KiloBytes            | System Memory Usage                                                                                     |
+| mongodbatlas.system.network.io.average                                    | Gauge | Bytes/s              | System Network IO                                                                                       |
+| mongodbatlas.system.network.io.max                                        | Gauge | Bytes/s              | System Network IO                                                                                       |
+| mongodbatlas.system.paging.io.average                                     | Gauge | pages/s              | Swap IO                                                                                                 |
+| mongodbatlas.system.paging.io.max                                         | Gauge | pages/s              | Swap IO                                                                                                 |
+| mongodbatlas.system.paging.usage.average                                  | Gauge | KiloBytes            | Swap usage                                                                                              |
+| mongodbatlas.system.paging.usage.max                                      | Gauge | KiloBytes            | Swap usage                                                                                              |
+| mongodbatlas.disk.partition.queue.depth                                   | Gauge | number               | Disk queue depth                                                                                        |
+| mongodbatlas.disk.partition.throughput                                    | Gauge | Bytes/s              | Disk throughput                                                                                         |
+| mongodbatlas.process.cache.ratio                                          | Gauge | number               | Cache ratios represented as (%)                                                                         |
+
+You can refer [this](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver/documentation.md) page for more details about the MongoDB Atlas metrics.
+
+</details>
+
+</TabItem>
+<TabItem value="logs" label="Logs">
+
+### Step 1: Install OpenTelemetry Collector
+
+Follow [this document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
+
+### Step 2: Configure MongoDB Atlas Receiver
+
+Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `mongodbatlas` receiver:
+
+```yaml:config.yaml
+receivers:
+  mongodbatlas:
+    # Authentication
+    public_key: "<mongodb-atlas-public-key>"
+    private_key: "<mongodb-atlas-private-key>"    
+    # Logs configuration
+    logs:
+      enabled: true
+      projects:
+        - name: "Project 0"
+          collect_audit_logs: true
+          collect_host_logs: true
+          include_clusters: [Cluster0]
+          access_logs:
+            page_size: 2000
+            max_pages: 10
+            poll_interval: 5m
+
+processors:
+  batch: {}
+
+exporters:
+  # export to self-hosted SigNoz
+  otlp:
+	endpoint: "<endpoint-ip>:4317"
+	tls:
+  	   insecure: true
+
+service:
+  pipelines:
+    logs:
+      receivers: [mongodbatlas]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+- `<mongodb-atlas-public-key>` is the public key of your MongoDB Atlas project
+- `<mongodb-atlas-private-key>` is the private key of your MongoDB Atlas project
+- Set the `<endpoint-ip>` to the IP of your self-hosted SigNoz instance
+
+All the available MongoDB Atlas receiver configurations can be found [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mongodbatlasreceiver).
+
+### Step 3: Start the OTel Collector
+
+Start the OpenTelemetry Collector using the above `config.yaml` file:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+### MongoDB Atlas Logs
+
+Here are sample screenshots of the MongoDB Atlas logs from SigNoz:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/logs.webp" alt="MongoDB Atlas Logs"/>
+    <figcaption><i>MongoDB Atlas Logs in SigNoz</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/mongodb-atlas/detailed-log.webp" alt="MongoDB Atlas Detailed Log"/>
+    <figcaption><i>MongoDB Atlas Detailed Log in SigNoz</i></figcaption>
+</figure>
+
+</TabItem>
+</Tabs>
+</TabItem>
+</Tabs>
+
+## Troubleshooting
+
+### Logs Collection Issues
+
+If you do not see logs in SigNoz:
+
+1. **For audit logs** - Verify audit logging is enabled in your MongoDB Atlas project settings
+2. **Check API key permissions** - ensure your API key has at least `Project Data Ascess Read Only` role
+3. **Review collector logs** for any error messages related to MongoDB Atlas API calls
+4. **Confirm project and cluster names** match exactly with your MongoDB Atlas configuration
+5. **Confirm your cluster type** - Some cluster types do not support logging as mentioned [here](https://www.mongodb.com/docs/atlas/database-auditing/). Ensure you are using the appropriate MongoDB Atlas cluster.
+
+### Metrics Collection Issues
+
+1. **Review collector logs** for any error messages related to MongoDB Atlas API calls
+2. **Confirm your cluster type** - Available metrics depend on user role and cluster type as mentioned [here](https://www.mongodb.com/docs/atlas/review-available-metrics/). Ensure you are using the appropriate MongoDB Atlas cluster, and API key with appropriate role.

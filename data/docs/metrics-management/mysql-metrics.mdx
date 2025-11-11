@@ -1,0 +1,126 @@
+---
+date: 2025-08-04
+title: MySQL metrics
+tags : [SigNoz Cloud, Self-Host]
+id: mysql-metrics
+---
+
+This document explains how to monitor MySQL database metrics using OpenTelemetry Collector and SigNoz.
+
+## Pre-requisites
+
+- MySQL database server running and accessible
+
+## Setup
+
+### Step 1: Setup OTel Collector
+
+OpenTelemetry Collector is required to collect metrics from MySQL. Please refer to this [documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the agent.
+
+### Step 2: Configuring the MySQL receiver
+
+You will need to configure the [MySQL receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mysqlreceiver/README.md) for collecting MySQL metrics. The receiver collects various performance metrics from your MySQL database.
+
+Edit the OTel Collector config file to configure the `mysql` receiver as shown below:
+
+```yaml:config.yaml
+receivers:
+  mysql:
+    endpoint: <mysql-endpoint>
+    username: <your-root-username>
+    password: <your-root-password>
+    collection_interval: 10s
+    initial_delay: 10s
+```
+
+**Configuration parameters:**
+
+- `endpoint`: MySQL server endpoint (required)
+- `username`: MySQL username (required)
+- `password`: MySQL password (required)
+
+
+You can find more details about the MySQL receiver configuration in the [receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/mysqlreceiver/README.md).
+
+### Step 3: Configuring the pipelines
+
+Once the receiver is configured, you need to enable it in the `pipelines` section of the OTel Collector config file:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [mysql]
+```
+
+Now, run the OpenTelemetry collector and you should see the metrics coming in SigNoz. 
+
+## Visualizing MySQL Metrics
+
+Once you have configured OTel Collector to send MySQL metrics to SigNoz, you can start visualizing the metrics in the [metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+
+You can also use the pre-configured [MySQL dashboard](https://signoz.io/docs/dashboards/dashboard-templates/mysql/) to monitor critical MySQL metrics.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/dashboard-templates/mysql.webp" alt="MySQL Dashboard"/>
+    <figcaption><i>MySQL Dashboard</i></figcaption>
+</figure>
+
+<div className="flex justify-center">
+  <DashboardActions 
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/mysql/mysql-otlp-v1.json"
+    dashboardName="MySQL"
+  />
+</div>
+
+## Monitoring Multiple MySQL Instances
+
+You can monitor multiple MySQL databases by adding multiple receivers with different names:
+
+```yaml:config.yaml
+receivers:
+  mysql:
+    endpoint: <endpoint-database-1>
+    username: <username-database-1>
+    password: <password-database-1>
+    collection_interval: 10s
+    initial_delay: 10s
+  mysql/production:
+    endpoint: <endpoint-database-2>
+    username: <username-database-2>
+    password: <password-database-2>
+    collection_interval: 10s
+    initial_delay: 10s
+
+service:
+  pipelines:
+    metrics:
+      receivers: [mysql, mysql/production]
+      processors: [resource/env, batch]
+      exporters: [otlp]
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **No metrics appearing in SigNoz**
+   - Verify MySQL server is running and accessible
+   - Check MySQL credentials and user permissions
+   - Verify OTel Collector logs for connection errors
+   - Ensure MySQL is accepting connections on the specified port
+
+2. **Authentication errors**
+   - Verify MySQL username and password are correct
+   - Check if the MySQL user has appropriate privileges
+   - Ensure the user can connect from the OTel Collector host
+
+3. **Connection timeout errors**
+   - Check network connectivity between OTel Collector and MySQL
+   - Verify firewall rules allow connections on MySQL port (default 3306)
+   - Increase timeout value in receiver configuration if needed
+
+4. **Missing specific metrics**
+   - Some metrics are only available in MySQL Enterprise edition
+   - Verify MySQL version compatibility with the receiver
+   - Check if specific features (like performance schema) are enabled

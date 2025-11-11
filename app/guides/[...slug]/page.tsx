@@ -3,25 +3,26 @@ import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { allGuides, allAuthors } from 'contentlayer/generated'
-import type { Authors, Blog, Guide } from 'contentlayer/generated'
-import PostSimple from '@/layouts/PostSimple'
-import PostLayout from '@/layouts/PostLayout'
-import PostBanner from '@/layouts/PostBanner'
+import type { Authors, Guide } from 'contentlayer/generated'
+import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
+import GuidesLayout from '@/layouts/GuidesLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
-import ScrollForm from '@/components/ScrollForm'
+import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
+import Button from '@/components/ui/Button'
 
-const defaultLayout = 'PostLayout'
+const defaultLayout = 'GuidesLayout'
 const layouts = {
-  PostSimple,
-  PostLayout,
-  PostBanner,
+  OpenTelemetryLayout,
+  GuidesLayout,
 }
+
+export const dynamicParams = false
+export const dynamic = 'force-static'
 
 export async function generateMetadata({
   params,
@@ -30,14 +31,16 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allGuides.find((p) => p.slug === slug)
+
+  if (!post) {
+    return notFound()
+  }
+
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
     return coreContent(authorResults as Authors)
   })
-  if (!post) {
-    return
-  }
 
   const publishedAt = new Date(post.date).toISOString()
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()
@@ -99,27 +102,21 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
-  const Layout = layouts[post.layout || defaultLayout]
 
-  // Check if the post has the "faq" tag
-  const hasFaqTag = post.tags && post.tags.includes('faq')
-
-  // Define the custom ScrollForm props
-  const scrollFormProps = {
-    question: "Are you facing issues with your observability setup?",
-    options: [
-      "Unpredictable pricing",
-      "Difficult to manage multiple tools",
-      "Lack of OpenTelemetry-native support",
-      "No issues right now"
-    ],
-    optionBehaviors: {
-      "Unpredictable pricing": { action: 'showCTA' as const },
-      "Difficult to manage multiple tools": { action: 'showCTA' as const },
-      "Lack of OpenTelemetry-native support": { action: 'showCTA' as const },
-      "No issues right now": { action: 'close' as const }
-    }
+  // Choose layout based on slug or post layout
+  let layoutName = post.layout || defaultLayout
+  if (slug.includes('opentelemetry')) {
+    layoutName = 'OpenTelemetryLayout'
+  } else {
+    layoutName = 'GuidesLayout'
   }
+
+  // @ts-ignore
+  const Layout = layouts[layoutName]
+
+  // Check if the slug contains Grafana or Prometheus
+  const isGrafanaOrPrometheusArticle =
+    slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
 
   return (
     <>
@@ -129,12 +126,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       />
 
       <div className="container mx-auto">
-        <Link href={`/resource-center/guides/`}>
-          <button className="ml-3.5 mt-10 flex items-center">
+        <Button variant={"ghost"} to={`/resource-center/guides/`} className="ml-3.5 mt-10 hover:bg-transparent">
+          <span className="flex items-center">
             <SidebarIcons.ArrowLeft />
             <span className="pl-1.5 text-sm">Back to Guides</span>
-          </button>
-        </Link>
+          </span>
+        </Button>
       </div>
 
       <Layout
@@ -147,8 +144,8 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         <PageFeedback />
       </Layout>
 
-      {/* Render ScrollForm with custom props if the post has the "faq" tag */}
-      {hasFaqTag && <ScrollForm {...scrollFormProps} />}
+      {/* Render GrafanaVsSigNozFloatingCard if the slug contains Grafana or Prometheus */}
+      {isGrafanaOrPrometheusArticle && <GrafanaVsSigNozFloatingCard />}
     </>
   )
 }

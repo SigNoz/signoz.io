@@ -1,0 +1,87 @@
+---
+date: 2025-04-24
+id: mysql-flexible
+tags : [SigNoz Cloud]
+title: MySQL Flexible Server
+hide_table_of_contents: true
+---
+
+## QuickStart
+
+To monitor your **MySQL Flexible Server's** system metrics like CPU Usage, Memory Usage, and Storage with **SigNoz**, configure **Diagnostic Settings** in Azure to export metrics and logs to **Event Hub**, and set up the **OpenTelemetry Collector** to pull data from Event Hub and send it to SigNoz.
+
+## Overview
+
+In this guide, you'll learn how to monitor **MySQL Flexible Server** system metrics using SigNoz. This is achieved by pushing telemetry data to **Azure Event Hub** and configuring the **Central Collector (OpenTelemetry Collector)** to receive and forward it to SigNoz.
+
+> ⚠️ Note: MySQL Flexible Server **does not support SQL Monitoring Profile**. Instead, it supports Diagnostic Settings to export logs and metrics to an Event Hub.
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+## Prerequisites
+
+Make sure the following are set up:
+
+1. An Azure subscription with a running **MySQL Flexible Server**
+2. [Central Collector Setup](../bootstrapping/collector-setup)
+3. A **Diagnostic Settings** configuration in Azure for your MySQL Flexible Server that sends metrics/logs to an **Event Hub**
+
+## Setup
+
+Once prerequisites are in place, follow these steps:
+
+### Step 1: Enable Diagnostic Settings for MySQL Flexible Server
+
+1. Go to your **MySQL Flexible Server** resource in Azure.
+2. Select **Diagnostic Settings**.
+3. Create a new diagnostic setting:
+   - Choose **Metrics** and/or **Logs** (based on what you want to monitor)
+   - Destination: **Stream to an Event Hub**
+   - Select an existing **Event Hub Namespace** and **Event Hub Name** or create one.
+   - Save the diagnostic setting.
+
+### Step 2: Update Central Collector to Pull from Event Hub
+
+1. In your `otel-collector-config.yaml`, update the **metrics pipeline** or **logs pipeline** to include the `azureeventhub` receiver.
+2. A sample snippet:
+    ```yaml
+    receivers:
+      azureeventhub:
+        connection_string: "<EVENT_HUB_CONNECTION_STRING>"
+        format: "azure"
+
+    processors:
+      batch:
+
+    exporters:
+      otlp:
+        endpoint: "ingest.<region>.signoz.cloud:443"
+        tls:
+          insecure: false
+        headers:
+          "signoz-ingestion-key": "<ingestion-key>"
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [azureeventhub]
+          processors: [batch]
+          exporters: [otlp]
+        logs:
+          receivers: [azureeventhub]
+          processors: [batch]
+          exporters: [otlp]
+    ```
+
+3. Restart the Central Collector to apply the changes.
+
+## Troubleshooting
+
+1. Ensure Event Hub is receiving data (check message count/metrics in Event Hub).
+2. Verify the Central Collector is running and has the correct `connection_string`.
+3. Make sure the SigNoz collector endpoint is accessible and listening.
+4. Check for errors in Central Collector logs for misconfigurations.
+
+</TabItem>
+</Tabs>

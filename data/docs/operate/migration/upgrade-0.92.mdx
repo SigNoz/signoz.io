@@ -1,0 +1,147 @@
+---
+date: 2025-06-24
+id: upgrade-0.92
+tags: [Self-Host]
+title: Upgrade to v0.92.0 (QBv5 and Cobra Cli Migration)
+---
+
+## Overview
+
+SigNoz v0.92.0 introduces significant improvements that enhance both the user experience and system architecture:
+
+- **Query Builder v5 (QBv5)**: Features expression-based querying with intelligent auto-completion, providing an improved user experience with a streamlined interface, better performance, and reliability. Complete documentation is available at the [Query Builder v5 Guide](https://signoz.io/docs/userguide/query-builder-v5/)
+- **Cobra CLI Migration**: SigNoz has migrated to a Cobra CLI structure that simplifies command organization, offers a better help system, and enhances maintainability and extensibility (related to [GitHub issue #6805](https://github.com/SigNoz/signoz/issues/6805))
+- **ClickHouse 25.5.6 Support**: We now support ClickHouse 25.5.6 to enhance database performance and compatibility. To upgrade, just replace 24.1.2 with 25.5.6, and no special steps needed.
+
+<Admonition type="warning">
+SigNoz is now a cobra command cli. Running signoz --help will give you the following output shown above.
+```bash
+OpenTelemetry-Native Logs, Metrics and Traces in a single pane
+
+Usage:
+  signoz [command]
+
+Available Commands:
+  help        Help about any command
+  server      Run the SigNoz server
+
+Flags:
+  -h, --help      help for signoz
+  -v, --version   version for signoz
+
+Use "signoz [command] --help" for more information about a command.
+```
+</Admonition>
+
+
+
+## Upgrade Instructions
+<Admonition type="info">
+For upgrading to v0.92.0 you don't need to run any migrations manually to update dashboards, alerts and saved views as there is already an automatic migration in place to take care of the migration process.
+</Admonition>
+
+### Docker Standalone
+
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-standalone) and use the image tag `v0.92.0` for `signoz`. You can keep the other components, such as schema-migrator and signoz-otel-collector images, unchanged.
+
+### Docker Swarm
+
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#docker-swarm-cluster) and use the image tag `v0.92.0` for `signoz`. You can leave the other components such as schema-migrator and signoz-otel-collector images unchanged.
+
+### Kubernetes
+
+Follow the [standard upgrade guide](https://signoz.io/docs/operate/migration/upgrade-standard/#kubernetes) and use the image tag `v0.92.0` for `signoz`. You can leave other components such as schema-migrator and signoz-otel-collector images unchanged.
+
+### Linux Binary Installation
+
+Since the Cobra CLI has been updated, the `signoz` binary now needs the `server` subcommand. Here's how to upgrade:
+
+#### Step 1: Stop SigNoz Services
+
+```bash
+sudo systemctl stop signoz.service
+sudo systemctl stop signoz-otel-collector.service
+```
+
+#### Step 2: Download Latest Binaries
+
+The following commands automatically detect your system architecture:
+
+```bash
+# Download SigNoz binary
+curl -L https://github.com/SigNoz/signoz/releases/latest/download/signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz.tar.gz
+
+# Extract the archive
+tar -xzf signoz.tar.gz
+```
+
+#### Step 3: Replace Binaries
+
+```bash
+# Install new binaries
+sudo cp -r signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz
+
+# Fix file ownership
+sudo chown -R signoz:signoz /opt/signoz
+```
+
+#### Step 4: Update systemd Service
+
+Create the updated service file:
+
+```bash
+sudo bash -c 'cat <<EOF > /etc/systemd/system/signoz.service
+[Unit]
+Description=SigNoz
+Documentation=https://signoz.io/docs
+After=clickhouse-server.service
+
+[Service]
+User=signoz
+Group=signoz
+Type=simple
+KillMode=mixed
+Restart=on-failure
+WorkingDirectory=/opt/signoz
+EnvironmentFile=/opt/signoz/conf/systemd.env
+ExecStart=/opt/signoz/bin/signoz server
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+```
+
+#### Step 5: Start and Verify Services
+
+1. **Reload systemd and start services:**
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl start signoz.service
+   ```
+
+2. **Check service status:**
+   ```bash
+   sudo systemctl status signoz.service
+   ```
+   
+   The service should show **`active (running)`** status.
+
+3. **Verify application health:**
+   ```bash
+   curl -X GET http://localhost:8080/api/v1/health
+   ```
+   
+   Expected response: `{"status":"ok"}`
+
+4. **Test the UI:** 
+   Open your SigNoz interface in a browser to ensure everything works correctly.
+
+
+
+## Getting Help
+
+Need assistance? Reach out through these channels:
+
+- [SigNoz Documentation](https://signoz.io/docs/)
+- [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- [Community Slack](https://signoz.io/slack)

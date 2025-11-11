@@ -1,0 +1,68 @@
+---
+date: 2025-09-08
+id: upgrade-0.94
+tags: [Self-Host]
+title:  Upgrade to v0.94.0 (Clickhouse 25.5.6 Upgrade)
+---
+
+<Admonition type="warning">
+<strong>ClickHouse 25.5.6 is required for SigNoz v0.94.0 and later.</strong><br/>
+Upgrade your ClickHouse server to version 25.5.6 <b>before</b> installing or running SigNoz v0.94.0 or any newer release. Running SigNoz with an older ClickHouse version is not supported.
+</Admonition>
+
+## Upgrade Instructions
+
+### Docker Standalone
+
+Before upgrading, add the following environment variable to your `clickhouse` service:
+
+```yaml
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.5.6
+    environment:
+      - CLICKHOUSE_SKIP_SETUP_USER=1
+```
+
+Then follow the [standard upgrade guide](/docs/operate/migration/upgrade-standard/#docker-standalone).
+
+### Docker Swarm
+
+Before upgrading, ensure your Swarm stack's `clickhouse` service sets the image and env var as below, then follow the Standard Upgrade Guide.
+
+```yaml
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.5.6
+    environment:
+      - CLICKHOUSE_SKIP_SETUP_USER=1
+```
+
+Then follow the [standard upgrade guide](/docs/operate/migration/upgrade-standard/#docker-swarm-cluster).
+
+### Kubernetes
+
+Follow the [standard upgrade guide](/docs/operate/migration/upgrade-standard/#kubernetes). Ensure your ClickHouse version is `25.5.6` (set the ClickHouse image tag to `25.5.6`) before starting SigNoz v0.94.0.
+
+<Admonition type="warning">
+If you encounter issues with ClickHouse not updating or pods failing during the upgrade, you can manually patch the ClickHouse resource using the following commands:
+```bash
+kubectl patch chi -n <YOUR_SIGNOZ_INSTALLATION_NAMESPACE> signoz-clickhouse --type='json' \
+  -p='[{"op":"replace","path":"/spec/templates/podTemplates/0/spec/containers/0/image","value":"docker.io/clickhouse/clickhouse-server:25.5.6"}]'
+
+kubectl patch chi -n <YOUR_SIGNOZ_INSTALLATION_NAMESPACE> signoz-clickhouse --type='merge' \
+  -p '{"spec":{"restart":"RollingUpdate"}}'
+```
+</Admonition>
+
+### Linux Binary Installation
+
+Follow the [standard upgrade guide](/docs/operate/migration/upgrade-standard/#linux-binary-installation), ensuring your ClickHouse is on 25.5.6 before starting SigNoz v0.94.0.
+
+## Getting Help
+
+If you need assistance with the upgrade:
+
+- [SigNoz Documentation](https://signoz.io/docs/)
+- [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- [Community Slack](https://signoz.io/slack)

@@ -49,11 +49,20 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
               <img src="/img/graphics/homepage/feature-graphic-enterprise.webp" alt="" />
             </div>
           </div>
-          <Observability />
-          {isInPricingPage ? <SignozDatalog /> : null}
-          <DataProtectionLaws isInPricingPage={isInPricingPage} />
-          {!isInPricingPage ? <PricingStructure /> : null}
-          {isInPricingPage ? <CommunityEdition /> : null}
+          {isInPricingPage ? (
+            <>
+              <SignozDatalog />
+              <DataProtectionLaws isInPricingPage={isInPricingPage} />
+              <Observability />
+              <CommunityEdition />
+            </>
+          ) : (
+            <>
+              <Observability />
+              <DataProtectionLaws isInPricingPage={isInPricingPage} />
+              <PricingStructure />
+            </>
+          )}
         </div>
       </div>
     </div>

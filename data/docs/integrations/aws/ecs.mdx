@@ -1,0 +1,227 @@
+---
+date: 2025-07-08
+id: ecs
+tags : [SigNoz Cloud]
+title: AWS ECS (Elastic Container Service) Integration
+---
+
+This integration enables seamless monitoring of your AWS ECS (Elastic Container Service) infrastructure by collecting comprehensive metrics and logs from your ECS clusters, services, and tasks. With SigNoz's one-click AWS integration, you can start monitoring your ECS environment in minutes without complex manual configurations.
+
+Amazon ECS is a fully managed container orchestration service that makes it easy to deploy, manage, and scale containerized applications. Monitoring ECS is crucial for performance optimization, cost management, troubleshooting issues with container deployments, and capacity planning to understand usage patterns for future needs.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/ecs/ecs-integration-overview.webp" alt="ECS Integration Overview in SigNoz"/>
+    <figcaption><i>Monitor Elastic Container Service with SigNoz</i></figcaption>
+</figure>
+
+## What You'll Monitor & Data Collected
+
+This integration collects comprehensive ECS metrics and logs, providing visibility into:
+
+### Core ECS Metrics
+- **CPU Utilization**: Monitor CPU usage at cluster, service, and task levels
+- **Memory Utilization**: Track memory consumption and identify memory leaks
+- **Network I/O**: Monitor network traffic for performance optimization
+- **Task Status**: Track running, pending, and stopped tasks
+- **Service Health**: Monitor service stability and deployment status
+
+### Container Insights Metrics
+When **AWS Container Insights is [enabled](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/deploy-container-insights-ECS-cluster.html)** for your ECS resources, this integration also collects enhanced metrics including:
+- **Container-level resource utilization**
+- **Task-level performance metrics**
+- **Network and storage metrics**
+- **Enhanced troubleshooting data**
+
+### ECS Logs
+- **Container logs**: Application logs from your ECS tasks
+- **ECS agent logs**: Infrastructure-level logging
+- **Service event logs**: ECS service lifecycle events
+
+### Collected Data Details
+
+<details>
+<summary>📋 Logs List</summary>
+
+| Name | Path | Type |
+|------|------|------|
+| Account ID | resources.cloud.account.id | string |
+| Log Group Name | resources.aws.cloudwatch.log_group_name | string |
+| Log Stream Name | resources.aws.cloudwatch.log_stream_name | string |
+
+</details>
+
+<details>
+<summary>📊 Metrics List</summary>
+
+| Metric Name | Unit | Type |
+|-------------|------|------|
+| aws_ECS_CPUUtilization_count | Percent | Gauge |
+| aws_ECS_CPUUtilization_max | Percent | Gauge |
+| aws_ECS_CPUUtilization_min | Percent | Gauge |
+| aws_ECS_CPUUtilization_sum | Percent | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_count | None | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_max | None | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_min | None | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuReserved_sum | None | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_count | Percent | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_max | Percent | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_min | Percent | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuUtilization_sum | Percent | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_count | None | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_max | None | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_min | None | Gauge |
+| aws_ECS_ContainerInsights_ContainerCpuUtilized_sum | None | Gauge |
+| aws_ECS_ContainerInsights_ContainerInstanceCount_count | Count | Gauge |
+| aws_ECS_ContainerInsights_ContainerInstanceCount_max | Count | Gauge |
+| aws_ECS_ContainerInsights_ContainerInstanceCount_min | Count | Gauge |
+| aws_ECS_ContainerInsights_ContainerInstanceCount_sum | Count | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryReserved_count | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryReserved_max | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryReserved_min | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryReserved_sum | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilization_count | Percent | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilization_max | Percent | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilization_min | Percent | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilization_sum | Percent | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilized_count | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilized_max | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilized_min | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_ContainerMemoryUtilized_sum | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_ContainerNetworkRxBytes_count | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerNetworkRxBytes_max | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerNetworkRxBytes_min | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerNetworkRxBytes_sum | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerNetworkTxBytes_count | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerNetworkTxBytes_max | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerNetworkTxBytes_min | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerNetworkTxBytes_sum | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerStorageReadBytes_count | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerStorageReadBytes_max | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerStorageReadBytes_min | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerStorageReadBytes_sum | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerStorageWriteBytes_count | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerStorageWriteBytes_max | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerStorageWriteBytes_min | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_ContainerStorageWriteBytes_sum | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_CpuReserved_count | None | Gauge |
+| aws_ECS_ContainerInsights_CpuReserved_max | None | Gauge |
+| aws_ECS_ContainerInsights_CpuReserved_min | None | Gauge |
+| aws_ECS_ContainerInsights_CpuReserved_sum | None | Gauge |
+| aws_ECS_ContainerInsights_CpuUtilized_count | None | Gauge |
+| aws_ECS_ContainerInsights_CpuUtilized_max | None | Gauge |
+| aws_ECS_ContainerInsights_CpuUtilized_min | None | Gauge |
+| aws_ECS_ContainerInsights_CpuUtilized_sum | None | Gauge |
+| aws_ECS_ContainerInsights_DeploymentCount_count | Count | Gauge |
+| aws_ECS_ContainerInsights_DeploymentCount_max | Count | Gauge |
+| aws_ECS_ContainerInsights_DeploymentCount_min | Count | Gauge |
+| aws_ECS_ContainerInsights_DeploymentCount_sum | Count | Gauge |
+| aws_ECS_ContainerInsights_DesiredTaskCount_count | Count | Gauge |
+| aws_ECS_ContainerInsights_DesiredTaskCount_max | Count | Gauge |
+| aws_ECS_ContainerInsights_DesiredTaskCount_min | Count | Gauge |
+| aws_ECS_ContainerInsights_DesiredTaskCount_sum | Count | Gauge |
+| aws_ECS_ContainerInsights_EphemeralStorageReserved_count | Gigabytes | Gauge |
+| aws_ECS_ContainerInsights_EphemeralStorageReserved_max | Gigabytes | Gauge |
+| aws_ECS_ContainerInsights_EphemeralStorageReserved_min | Gigabytes | Gauge |
+| aws_ECS_ContainerInsights_EphemeralStorageReserved_sum | Gigabytes | Gauge |
+| aws_ECS_ContainerInsights_EphemeralStorageUtilized_count | Gigabytes | Gauge |
+| aws_ECS_ContainerInsights_EphemeralStorageUtilized_max | Gigabytes | Gauge |
+| aws_ECS_ContainerInsights_EphemeralStorageUtilized_min | Gigabytes | Gauge |
+| aws_ECS_ContainerInsights_EphemeralStorageUtilized_sum | Gigabytes | Gauge |
+| aws_ECS_ContainerInsights_MemoryReserved_count | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_MemoryReserved_max | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_MemoryReserved_min | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_MemoryReserved_sum | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_MemoryUtilized_count | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_MemoryUtilized_max | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_MemoryUtilized_min | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_MemoryUtilized_sum | Megabytes | Gauge |
+| aws_ECS_ContainerInsights_NetworkRxBytes_count | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_NetworkRxBytes_max | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_NetworkRxBytes_min | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_NetworkRxBytes_sum | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_NetworkTxBytes_count | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_NetworkTxBytes_max | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_NetworkTxBytes_min | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_NetworkTxBytes_sum | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_PendingTaskCount_count | Count | Gauge |
+| aws_ECS_ContainerInsights_PendingTaskCount_max | Count | Gauge |
+| aws_ECS_ContainerInsights_PendingTaskCount_min | Count | Gauge |
+| aws_ECS_ContainerInsights_PendingTaskCount_sum | Count | Gauge |
+| aws_ECS_ContainerInsights_RunningTaskCount_count | Count | Gauge |
+| aws_ECS_ContainerInsights_RunningTaskCount_max | Count | Gauge |
+| aws_ECS_ContainerInsights_RunningTaskCount_min | Count | Gauge |
+| aws_ECS_ContainerInsights_RunningTaskCount_sum | Count | Gauge |
+| aws_ECS_ContainerInsights_ServiceCount_count | Count | Gauge |
+| aws_ECS_ContainerInsights_ServiceCount_max | Count | Gauge |
+| aws_ECS_ContainerInsights_ServiceCount_min | Count | Gauge |
+| aws_ECS_ContainerInsights_ServiceCount_sum | Count | Gauge |
+| aws_ECS_ContainerInsights_StorageReadBytes_count | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_StorageReadBytes_max | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_StorageReadBytes_min | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_StorageReadBytes_sum | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_StorageWriteBytes_count | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_StorageWriteBytes_max | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_StorageWriteBytes_min | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_StorageWriteBytes_sum | Bytes/Second | Gauge |
+| aws_ECS_ContainerInsights_TaskCount_count | Count | Gauge |
+| aws_ECS_ContainerInsights_TaskCount_max | Count | Gauge |
+| aws_ECS_ContainerInsights_TaskCount_min | Count | Gauge |
+| aws_ECS_ContainerInsights_TaskCount_sum | Count | Gauge |
+| aws_ECS_ContainerInsights_TaskCpuUtilization_count | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskCpuUtilization_max | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskCpuUtilization_min | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskCpuUtilization_sum | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskEphemeralStorageUtilization_count | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskEphemeralStorageUtilization_max | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskEphemeralStorageUtilization_min | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskEphemeralStorageUtilization_sum | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskMemoryUtilization_count | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskMemoryUtilization_max | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskMemoryUtilization_min | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskMemoryUtilization_sum | Percent | Gauge |
+| aws_ECS_ContainerInsights_TaskSetCount_count | Count | Gauge |
+| aws_ECS_ContainerInsights_TaskSetCount_max | Count | Gauge |
+| aws_ECS_ContainerInsights_TaskSetCount_min | Count | Gauge |
+| aws_ECS_ContainerInsights_TaskSetCount_sum | Count | Gauge |
+| aws_ECS_MemoryUtilization_count | Percent | Gauge |
+| aws_ECS_MemoryUtilization_max | Percent | Gauge |
+| aws_ECS_MemoryUtilization_min | Percent | Gauge |
+| aws_ECS_MemoryUtilization_sum | Percent | Gauge |
+
+</details>
+
+## Dashboards
+
+### AWS ECS Overview Dashboard
+
+The integration provides a comprehensive overview dashboard with key ECS metrics:
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/ecs/ecs-overview-dashboard.webp" alt="AWS ECS Overview Dashboard"/>
+    <figcaption><i>AWS ECS Overview Dashboard</i></figcaption>
+</figure>
+
+**Key visualizations include:**
+- **Memory Utilization**: Maximum and minimum memory usage trends
+- **CPU Utilization**: Maximum and minimum CPU usage trends
+
+### ECS Container Insights Dashboard
+
+For enhanced monitoring with Container Insights enabled:
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/integrations/one-click-aws/ecs/ecs-container-insights.webp" alt="ECS Container Insights Dashboard"/>
+    <figcaption><i>ECS Container Insights Dashboard</i></figcaption>
+</figure>
+
+**Key visualizations include:**
+- **CPU Usage and Reserved**: Real-time CPU metrics
+- **CPU Utilization**: Container and task-level CPU performance monitoring
+- **Memory Usage and Reserved**: Memory allocation and utilization
+- **Memory Utilization**: Container and task-level memory performance monitoring  
+- **Network I/O**: Network receive and transmit metrics  
+- **Storage I/O**: Storage read and write operations
+
+---
+
+Ready to explore more integrations? [Browse all available integrations](https://signoz.io/docs/integrations/integrations-list/)

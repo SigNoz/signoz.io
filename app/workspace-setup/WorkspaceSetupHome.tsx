@@ -5,8 +5,6 @@ import { useSearchParams } from 'next/navigation'
 import WorkspaceReady from './WorkspaceReady'
 import WorkspaceSetup from './WorkspaceSetup'
 
-const WORKSPACE_SETUP_URL = 'https://api.signoz.cloud/v2'
-
 function WorkspaceSetupHome() {
   const [isWorkspaceReady, setIsWorkspaceReady] = useState(false)
   const [isWorkspaceSetupDelayed, setIsWorkspaceSetupDelayed] = useState(false)
@@ -15,13 +13,15 @@ function WorkspaceSetupHome() {
   const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [retryCount, setRetryCount] = useState(1)
   const [workspaceData, setWorkspaceData] = useState(null)
+  const [verificationError, setVerificationError] = useState<string | null>(null)
   const searchParams = useSearchParams()
 
   const code = searchParams.get('code')
   const email = searchParams.get('email')
+  const region = searchParams.get('region')
 
   const verifyEmail = async () => {
-    const res = await fetch(`${WORKSPACE_SETUP_URL}/users/verify`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users/verify`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -30,28 +30,42 @@ function WorkspaceSetupHome() {
       body: JSON.stringify({
         code: code,
         email: decodeURIComponent(email || ''),
+        region: {
+          name: region,
+        },
       }),
     })
 
     const data = await res.json()
 
-    if (data.status === 'error' && data.type !== 'already-exists') {
+    if (
+      data.status === 'error' &&
+      data.type !== 'already-exists' &&
+      !data.error?.toLocaleLowerCase()?.startsWith('cannot assign more than')
+    ) {
       setIsEmailVerified(false)
+      setVerificationError(data.error || 'Email verification failed')
     } else if (data.status === 'success') {
+      setVerificationError(null)
       setIsEmailVerified(true)
       setIsPollingEnabled(true)
-    } else if (data.status === 'error' && data.type === 'already-exists') {
+    } else if (
+      data.status === 'error' &&
+      (data.type === 'already-exists' ||
+        data.error?.toLocaleLowerCase()?.startsWith('cannot assign more than'))
+    ) {
+      setVerificationError(null)
       setIsEmailVerified(true)
       setIsPollingEnabled(true)
     }
   }
 
   const verifyWorkspaceSetup = async () => {
-    if (!code || !email) {
+    if (!code || !email || verificationError) {
       return
     }
 
-    const verifyWorkSpaceSetupURL = `${WORKSPACE_SETUP_URL}/deployments/cesearch?code=${code}&email=${email}`
+    const verifyWorkSpaceSetupURL = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/deployments/cesearch?code=${code}&email=${email}`
 
     const res = await fetch(verifyWorkSpaceSetupURL)
     const data = await res.json()
@@ -65,20 +79,30 @@ function WorkspaceSetupHome() {
   }
 
   useEffect(() => {
-    // poll every 3s for the first minute, then every 15s for the next 4 minutes
-    // total polling time is 5 minutes
-    // 3s * 20 * 1 = 1 minute (20 polls)
-    // 15s * 4 * 4 = 4 minutes (16 polls)
-    if (retryCount <= 36) {
-      if (retryCount <= 20) {
-        setPollingInterval(3000)
-      } else {
-        setPollingInterval(15000)
-      }
+    let pollingTimer: ReturnType<typeof setTimeout> | null = null
 
-      setTimeout(verifyWorkspaceSetup, pollingInterval)
-    } else {
-      setIsWorkspaceSetupDelayed(true)
+    if (isEmailVerified && isPollingEnabled && !verificationError) {
+      // poll every 3s for the first minute, then every 15s for the next 4 minutes
+      // total polling time is 5 minutes
+      // 3s * 20 * 1 = 1 minute (20 polls)
+      // 15s * 4 * 4 = 4 minutes (16 polls)
+      if (retryCount <= 36) {
+        if (retryCount <= 20) {
+          setPollingInterval(3000)
+        } else {
+          setPollingInterval(15000)
+        }
+
+        pollingTimer = setTimeout(verifyWorkspaceSetup, pollingInterval)
+      } else {
+        setIsWorkspaceSetupDelayed(true)
+      }
+    }
+
+    return () => {
+      if (pollingTimer) {
+        clearTimeout(pollingTimer)
+      }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,7 +125,11 @@ function WorkspaceSetupHome() {
       {isWorkspaceReady ? (
         <WorkspaceReady workspaceData={workspaceData} userEmail={email} />
       ) : (
-        <WorkspaceSetup isWorkspaceSetupDelayed={isWorkspaceSetupDelayed} />
+        <WorkspaceSetup
+          isWorkspaceSetupDelayed={isWorkspaceSetupDelayed}
+          verificationError={verificationError}
+          isEmailVerified={isEmailVerified}
+        />
       )}
     </Suspense>
   )

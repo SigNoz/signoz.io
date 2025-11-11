@@ -1,0 +1,42 @@
+The OpenTelemetry Demo is a microservice-based distributed system intended to illustrate the implementation of OpenTelemetry in a near real-world environment. See more details at [OpenTelemetry Demo](https://opentelemetry.io/ecosystem/demo/).
+
+1. Get the address of the SigNoz collector:
+
+```bash
+kubectl get -n <namespace> svc/signoz-otel-collector
+```
+
+This value will be used in the next step to configure the OpenTelemetry Demo to send data to the SigNoz collector.
+
+2. Create a `values.yaml` file that will contain the configuration for the chart and send it to your SigNoz installation:
+
+```yaml
+default:
+  env:
+    - name: OTEL_SERVICE_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: "metadata.labels['app.kubernetes.io/component']"
+    - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+      value: cumulative
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: 'service.name=$(OTEL_SERVICE_NAME),service.namespace=opentelemetry-demo,service.version={{ .Values.appVersion }}'
+    - name: OTEL_COLLECTOR_NAME
+      value: signoz-otel-collector.<namespace>.svc.cluster.local
+```
+
+Note: The `OTEL_COLLECTOR_NAME` is the address obtained in the previous step.
+
+
+3. Install OpenTelemetry Demo:
+
+```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
+helm install otel-demo open-telemetry/opentelemetry-demo -f values.yaml
+```
+
+More details on the installation can be found [here](https://opentelemetry.io/docs/demo/kubernetes-deployment/).
+
+

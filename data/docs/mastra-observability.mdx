@@ -1,0 +1,146 @@
+---
+date: 2025-10-10
+id: mastra-observability-with-opentelemetry
+title: Mastra Observability with SigNoz
+description: Observability and monitoring for Mastra performance and usage with OpenTelemetry instrumentation to send traces to SigNoz
+---
+
+## Overview
+
+This guide walks you through setting up observability and monitoring for Mastra using [OpenTelemetry](https://opentelemetry.io/) and exporting traces to SigNoz. With this integration, you can observe model performance, capture request/response details, giving you real-time visibility into latency, error rates, and usage trends for your Mastra applications.
+
+Instrumenting Mastra in your AI applications with telemetry ensures full observability across your AI workflows, making it easier to debug issues, optimize performance, and understand user interactions.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+- Internet access to send telemetry data to SigNoz Cloud
+- Node.js (v20.0 or higher)
+- An API key from a supported [Model Provider](https://mastra.ai/en/models/providers)
+
+## Setting Up Mastra Project
+
+You can get the full Mastra installation instructions [here](https://mastra.ai/en/docs/getting-started/installation).
+
+**Step 1:** Start the CLI Wizard
+
+Run the following command to start the interactive setup:
+
+<Tabs>
+<TabItem value="npm" label="npm" default>
+```bash
+npx create-mastra@latest
+```
+</TabItem>
+<TabItem value="yarn" label="yarn" default>
+```bash
+yarn dlx create-mastra@latest
+```
+</TabItem>
+<TabItem value="pnpm" label="pnpm" default>
+```bash
+pnpm create mastra@latest
+```
+</TabItem>
+<TabItem value="bun" label="bun" default>
+```bash
+bun create mastra@latest
+```
+</TabItem>
+</Tabs>
+
+**Step 2:** Add Your API key
+
+Add your API key to the `.env` file:
+
+```
+OPENAI_API_KEY=<your-api-key>
+```
+> This example uses OpenAI. Each LLM provider uses a unique name. See [Model Capabilities](https://mastra.ai/en/models) for more information.
+
+## Setup an Agent
+
+**Step 1:** Create an agent in your project.
+
+For example, create a file `src/mastra/agents/chefAgent.ts`:
+
+```typescript
+import { openai } from "@ai-sdk/openai";
+import { Agent } from "@mastra/core/agent";
+
+export const chefAgent = new Agent({
+  name: "chef-agent",
+  instructions:
+    "You are Michel, a practical and experienced home chef" +
+    "You help people cook with whatever ingredients they have available.",
+  model: openai("gpt-4o-mini"),
+});
+```
+
+**Step 2:** Register the Agent with Mastra
+
+In your `src/mastra/index.ts` file, register the agent with telemetry enabled:
+
+```typescript
+import { Mastra } from "@mastra/core";
+import { chefAgent } from "./agents/chefAgent";
+import { OtelExporter } from "@mastra/otel-exporter";
+
+
+export const mastra = new Mastra({
+  agents: { chefAgent },
+  observability: {
+    configs: {
+      otel: {
+        serviceName: '<service-name>',
+        exporters: [
+          new OtelExporter({
+            provider: {
+              signoz: {
+                apiKey: process.env.SIGNOZ_INGESTION_KEY,
+                region: 'us', // 'us' | 'eu' | 'in',
+              }
+            },
+          })
+        ],
+      },
+    },
+  },
+});
+```
+- **`<service_name>`** is the name of your service
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). Set the value as an environment variable.
+- **`region`** → appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+
+
+**Step 3:** Run Mastra Dev Server and Interact with Agent
+
+```bash
+npm run dev
+```
+
+You should see some output similar to this:
+
+<Figure src="/img/docs/llm/mastra/terminal-output.webp" alt="Execution Output" caption="Output when running the Mastra Dev Server" />
+
+Visit the playground url, and start chatting with the registered agent. All your interactions should be traced and sent to SigNoz under the traces tab.
+
+
+## View Traces in SigNoz
+
+Your Mastra interactions should now automatically emit traces.
+
+You should be able to view traces in Signoz Cloud under the traces tab:
+
+<Figure src="/img/docs/llm/mastra/mastra-traces.webp" alt="Mastra Trace View" caption="Mastra Trace View" />
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure src="/img/docs/llm/mastra/mastra-detailed-traces.webp" alt="Mastra Detailed Trace View" caption="Mastra Detailed Trace View" />
+
+
+## Dashboard
+
+You can also check out our custom Mastra dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/mastra-dashboard/) which provides specialized visualizations for monitoring your Masrta usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure src="/img/docs/llm/mastra/mastra-dashboard.webp" alt="Mastra Dashboard" caption="Mastra Dashboard Template" />

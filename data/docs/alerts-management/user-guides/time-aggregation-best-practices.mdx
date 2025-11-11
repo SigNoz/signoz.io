@@ -1,0 +1,68 @@
+---
+date: 2025-08-13
+title: Time Aggregation Best Practices
+tags : [SigNoz Cloud, Self-Host]
+id: time-aggregation-best-practices
+---
+
+Time aggregation determines how multiple data points within a collection/aggregation interval are combined before evaluation.
+
+## Common Time Aggregation Methods
+
+| Aggregation | Use Case | Example |
+|------------|----------|---------|
+| **Max** | Peak values, worst-case scenarios | Container restarts, max CPU spike |
+| **Min** | Minimum thresholds, availability | Minimum available memory |
+| **Avg** | General trends, smoothed metrics | Average response time |
+| **Sum** | Total counts, cumulative metrics | Total requests, error count |
+| **Count** | Number of occurrences | Event frequency |
+| **Count Distinct** | Unique values | Unique users, distinct IPs |
+| **P50/P95/P99** | Latency percentiles | Response time distributions |
+| **Rate** | Changes per time unit | Requests per second, errors per minute |
+| **Increase** | Absolute growth over time period | Total value growth since previous measurement |
+
+To learn more about aggregations in metrics, visit the [Metric types and aggregation](/docs/metrics-management/types-and-aggregation/#aggregation).
+
+## Aggregation Examples
+
+**For Container Restarts:**
+```
+Metric: k8s.container.restarts
+Aggregation: max (use running_diff to compute increments)
+Evaluation: at least once
+Formula: running_diff(k8s.container.restarts, cutoff_min=0)
+Reason: Restart counters are cumulative and don't reset to zero immediately after a restart, which can make alerts continuously fire. 
+Compute the difference between consecutive samples and drop negative values (caused by counter resets) using cutoff_min=0.
+```
+
+**For Memory Usage:**
+```
+Metric: system.memory.usage
+Aggregation: avg or max (depending on use case)
+Formula: (used - cached) / total * 100
+Reason: Exclude cached memory for accurate usage representation
+```
+
+**For Latency Monitoring:**
+```
+Metric: http.server.duration
+Aggregation: P95 or P99
+Evaluation: on average (not in total)
+Reason: Percentiles shouldn't be summed; average P95 over time makes sense
+```
+
+**For Throughput Analysis:**
+```
+Metric: http.requests.total
+Aggregation: sum
+Evaluation: in total
+Reason: Provides the total number of requests over the evaluation window, useful to monitor system load
+```
+
+**For Error Rate Calculation:**
+```
+Metric: system.errors
+Aggregation: count or rate
+Evaluation: at least once
+Reason: Detects any occurrence of error spikes and evaluates system reliability
+```

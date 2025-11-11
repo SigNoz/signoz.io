@@ -1,0 +1,76 @@
+---
+date: 2025-07-31
+id: functions-reference
+tags : [SigNoz Cloud, Self-Host]
+title: Functions Reference
+description: Array functions for querying JSON data in SigNoz.
+---
+
+This guide covers functions available for querying array fields in SigNoz.
+
+**Note:** Functions are currently supported only for JSON body searches.
+
+## Available Functions
+
+### hasToken() Function
+
+Check if a token is present in a string.
+
+The search term must be a single token—meaning a sequence of alphanumeric characters (A-Z, a-z, 0-9) that appears in the text separated by spaces, punctuation, or at the start/end of the string.
+hasToken will only match the term as a whole word, not as a substring inside another word (e.g., matches uuid123 but not abcuuid123xyz)
+
+**Syntax:**
+```
+has(field, value)
+```
+
+**Examples:**
+```
+has(body, "john@test.com")
+has(body, "e8ff7fe2-6f6a-4795-bd7f-d07f8e49d764")
+```
+
+### has() Function
+
+Checks if an array contains a specific value.
+
+**Syntax:**
+```
+has(field, value)
+```
+
+**Examples:**
+```
+has(body.user_ids, 123)
+has(body.tags, 'production')
+has(body.regions, 'us-east')
+```
+
+## Important Notes
+
+1. **Body fields only** - Functions currently work only with JSON body fields (fields prefixed with `body.`) except for the hasToken function.
+2. **Array data** - The field must contain an array for these functions to work properly
+
+## Combining with Other Conditions
+
+Functions can be combined with other query conditions:
+
+```
+# Find production logs with error status codes
+has(body.tags, 'production') AND status_code IN [500, 502, 503]
+```
+
+## Common Use Cases
+
+### Filtering by Tags
+```
+# Find all logs with production tag
+has(body.tags, 'production')
+
+## Error Messages
+
+Common errors you might encounter:
+
+- **"unknown function"** - Check function name spelling and case
+- **"function expects key and value parameters"** - Ensure you're providing both field and value
+- **"function supports only body JSON search"** - Use only with `body.` prefixed fields

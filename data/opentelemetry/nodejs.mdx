@@ -5,28 +5,23 @@ date: 2024-12-10
 tags: [javascript-monitoring]
 authors: [ankit_anand]
 description: In this article, learn how to setup application monitoring for Node.js apps with OpenTelemetry and SigNoz.
-image: /img/blog/2023/11/opentelemetry-nodejs-cover-min.jpg
+image: /img/blog/2024/12/opentelemetry-nodejs-cover.webp
 keywords: [opentelemetry,opentelemetry javascript,opentelemetry nodejs,distributed tracing,observability,nodejs monitoring,nodejs instrumentation,signoz]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/opentelemetry/nodejs/"/>
-</head>
-
 OpenTelemetry can auto-instrument many common modules for a Javascript application. The telemetry data captured can then be sent to SigNoz for analysis and visualization.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2024/12/opentelemetry-nodejs-cover.webp" alt="Monitor your Nodejs applications with SigNoz"/>
 </figure>
 
-OpenTelemetry is a set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(Logs, metrics, and traces). For any distributed system based on microservice architecture, it's an operational challenge to solve performance issues quickly.
+[OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) is a set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(Logs, metrics, and traces). For any distributed system based on microservice architecture, it's an operational challenge to solve performance issues quickly.
 
 Telemetry data helps engineering teams to troubleshoot issues across services and identify the root causes. In other words, telemetry data powers observability for your distributed applications.
 
 Steps to get started with OpenTelemetry for a Nodejs application:
 
 - Creating a SigNoz cloud account
-- Setting Up the OpenTelemetry Collector
+- Setting Up the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
 - Creating a Sample Nodejs application
 - Instrumenting the Application with OpenTelemetry
 - Viewing the Telemetry Data in SigNoz
@@ -143,11 +138,15 @@ SigNoz offers various [instrumentation methods](https://signoz.io/docs/instrumen
     npm install --save @opentelemetry/auto-instrumentations-node
     ```
     
-    These libraries enable automatic instrumentation and interaction with the OpenTelemetry API.
+    These libraries enable automatic instrumentation and interaction with the [OpenTelemetry API](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/).
     
 2. **Configure Environment Variables**
+
+    <Admonition type="info">
+    These environment variables are applicable for SigNoz cloud. You don't need Ingestion key if you're using self-hosted SigNoz. For self-hosted SigNoz, please refer to instructions [here](https://signoz.io/docs/instrumentation/opentelemetry-javascript/).
+    </Admonition>
     
-    To configure OpenTelemetry for your application, export the necessary environment variables. These variables define the data export settings and identify your application in SigNoz.
+    To configure OpenTelemetry for your application, export the necessary environment variables. These variables define the data export settings and identify your application in [SigNoz](https://signoz.io/docs/introduction/).
     
     Run the below in your terminal:
     
@@ -156,7 +155,7 @@ SigNoz offers various [instrumentation methods](https://signoz.io/docs/instrumen
     export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="<SIGNOZ_ENDPOINT>"
     export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
     export OTEL_SERVICE_NAME="<APP_NAME>"
-    export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+    export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
     export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
     ```
     
@@ -168,10 +167,10 @@ SigNoz offers various [instrumentation methods](https://signoz.io/docs/instrumen
     | **`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`** | The SigNoz ingestion URL. You should have received this URL via email after registering with SigNoz Cloud. |
     | **`OTEL_NODE_RESOURCE_DETECTORS`** | Identifies additional resource metadata such as environment, host, and OS for better trace context. |
     | **`OTEL_SERVICE_NAME`** | The name of your application. This will appear in SigNoz as the service being monitored. |
-    | **`OTEL_EXPORTER_OTLP_HEADERS`** | Contains authentication headers, including your SigNoz access token. |
+    | **`OTEL_EXPORTER_OTLP_HEADERS`** | Contains authentication headers, including your SigNoz ingestion key. |
     | **`NODE_OPTIONS`** | Configures the Node.js runtime to preload OpenTelemetry's auto-instrumentation library. |
     
-    Be sure to replace `<SIGNOZ_ACCESS_TOKEN>` with your actual SigNoz ingestion key. If you haven't created one yet, you can follow [this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to generate your access key.
+    Be sure to replace `<SIGNOZ_INGESTION_KEY>` with your actual SigNoz ingestion key. If you haven't created one yet, you can follow [this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to generate your access key.
 
     <figure data-zoomable align='center'>
     <img src="/img/blog/2024/12/export-variables-node.webp" alt="Variables configurations exported in terminal"/>

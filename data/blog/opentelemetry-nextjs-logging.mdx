@@ -1,0 +1,854 @@
+---
+title: Structured Logging in NextJS with OpenTelemetry
+slug: opentelemetry-nextjs-logging
+date: 2025-11-07
+tags: [OpenTelemetry, NextJS, Logging]
+authors: [yuvraj]
+description: Implement structured logging in your Next.js app using OpenTelemetry with full trace correlation and SigNoz integration. Covers server and browser logging, log exporters, and client/server context propagation.
+image: /img/blog/2024/12/opentelemetry-nextjs-cover.webp
+keywords:
+  [
+    nextjs logging,
+    structured logs,
+    opentelemetry nextjs,
+    logs with traceId,
+    sigznoz,
+    javascript logging,
+    frontend backend logging,
+    logs correlation,
+    browser logs,
+    server logs,
+  ]
+---
+
+<ArticleSeriesTop seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-logging" />
+
+Traces tell you **what** happened and **when**. Logs tell you **why**. When something breaks, logs are often your first clue, and if they’re correlated with traces, they can cut debugging time down from hours to minutes.
+
+In this guide, we’ll wire up end-to-end structured logging across both server and browser environments in your Next.js app, complete with trace correlation and SigNoz integration.
+
+### Why You Need More Than `console.log`
+
+Traditional logging is fine for local development, but production needs more:
+
+- **Structured, searchable logs:** Not just plain text strings.
+- **Trace correlation:** Logs tied directly to specific user actions or API requests (`traceId` and `spanId`).
+- **Unified visibility:** A single place to see server-side and browser-side logs.
+- **Centralized analysis:** The ability to query, visualize, and alert on log data.
+
+With OpenTelemetry and SigNoz, you can achieve all of this. You'll be able to see errors and logs in one place, correlate them with traces, and analyze rich metadata like `userId`, URL, and performance timings.
+
+Note: You can find the full code for any code snippet shown in this guide in the [OpenTelemetry NextJS Sample repository here](https://github.com/yuvraajsj18/nextjs-observability-demo).
+
+## Step 0 – Where we’re starting from
+
+If you haven’t instrumented tracing yet, please follow the first guide in this series, “[Monitor NextJS with OpenTelemetry](/blog/opentelemetry-nextjs/),” and then come back.
+
+From here on, we’ll assume you already have the `nextjs-observability-demo` project running with `@vercel/otel` traces and the OpenTelemetry collector stack.
+
+## Step 1 – Prep the codebase
+
+We'll start by scaffolding a new Next.js application using the official `with-supabase` example. This gives us a realistic starting point with database integration. We'll then `cd` into the directory and copy the example environment file.
+
+```bash
+npx create-next-app@latest nextjs-observability-demo --example with-supabase
+cd nextjs-observability-demo
+cp .env.example .env.local
+```
+
+Now, open the new `.env.local` file. You'll need to add your Supabase credentials. Below those, we'll add the OpenTelemetry configuration. These variables tell our app **what** to call itself (`OTEL_SERVICE_NAME`) and **where** to send its data (`OTEL_EXPORTER_OTLP_ENDPOINT`).
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=<your-url>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<your-publishable-or-anon-key>
+
+OTEL_SERVICE_NAME=nextjs-observability-demo
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
+OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
+OTEL_LOG_LEVEL=debug
+NEXT_OTEL_VERBOSE=1
+```
+
+> The `OTEL_EXPORTER_OTLP_ENDPOINT` is the key here. The OpenTelemetry SDK is smart enough to append the correct signal path (like `/v1/logs` or `/v1/traces`) automatically, so we only need to define this one base URL.
+
+## Step 2 – Install the correct OpenTelemetry versions
+
+Next, we need to install the OpenTelemetry packages for logging. The versions here are **critical** and have been chosen specifically for compatibility.
+
+```bash
+npm install -E \
+  @opentelemetry/api@1.9.0 \
+  @opentelemetry/resources@2.2.0 \
+  @opentelemetry/semantic-conventions@1.38.0 \
+  @opentelemetry/api-logs@0.207.0 \
+  @opentelemetry/sdk-logs@0.207.0 \
+  @opentelemetry/exporter-logs-otlp-http@0.207.0 \
+  @vercel/otel@^2.1.0 \
+  pino
+```
+
+This combination is known to work:
+
+- `@vercel/otel@2.x` requires the 2.x resource package and `@opentelemetry/api` \>=1.9.0.
+- The experimental log SDK (`0.207.x`) only supports `@opentelemetry/api` \<1.10.0.
+- Mixing these versions can break type definitions or cause runtime crashes (e.g., missing `LoggerProvider` methods).
+
+## Step 3 – Wire the instrumentation hook
+
+The `instrumentation.ts` file is the entry point for OpenTelemetry in a Next.js app. It runs before your application code, making it the perfect place to set up tracing and logging.
+
+We'll modify it to initialize our log exporter _only_ on the server side. Create or replace `instrumentation.ts` at the root of your project:
+
+```ts {1-16}
+import { registerOTel } from '@vercel/otel'
+import { initializeLogsExporter } from './lib/logs-exporter'
+
+export function register() {
+  registerOTel({
+    /* ...your existing tracing config... */
+  })
+
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    initializeLogsExporter()
+  }
+}
+```
+
+Here’s a breakdown of what this does:
+
+- `registerOTel`: This enables Next.js’s built-in tracing provided by Vercel, covering app routes, API routes, middleware, and `fetch` requests.
+- **Runtime Guard:** The `if (process.env.NEXT_RUNTIME === 'nodejs')` check is essential. It ensures our Node.js-based log exporter is only initialized for server-side executions (like page renders and server actions) and is _not_ bundled for the browser or Edge runtimes.
+
+## Step 4 – Build the OTLP log exporter (server side)
+
+This file is the heart of our server-side logging. We'll create `lib/logs-exporter.ts` to configure and launch the `LoggerProvider`, which is responsible for batching and sending logs to our collector.
+
+```ts {1-60}
+import { logs, LogRecord } from '@opentelemetry/api-logs'
+import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs'
+import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http'
+import { resourceFromAttributes } from '@opentelemetry/resources'
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
+import type { LogEntry } from '@/lib/logger' // We will create this type in the next step
+
+let isInitialized = false
+let loggerProvider: LoggerProvider | null = null
+
+const LOG_EXPORT_URL = process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'http://localhost:4318'
+
+function createLoggerProvider() {
+  const resource = resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME ?? 'nextjs-observability-demo',
+    [ATTR_SERVICE_VERSION]: process.env.npm_package_version ?? '1.0.0',
+  })
+
+  const exporter = new OTLPLogExporter({
+    url: `${LOG_EXPORT_URL.replace(/\/$/, '')}/v1/logs`,
+  })
+
+  const batchProcessor = new BatchLogRecordProcessor(exporter, {
+    maxExportBatchSize: 20,
+    scheduledDelayMillis: 5000,
+    exportTimeoutMillis: 30000,
+    maxQueueSize: 1000,
+  })
+
+  return new LoggerProvider({
+    resource,
+    processors: [batchProcessor],
+  })
+}
+
+export function initializeLogsExporter() {
+  if (typeof window !== 'undefined' || isInitialized) {
+    return
+  }
+
+  loggerProvider = createLoggerProvider()
+  logs.setGlobalLoggerProvider(loggerProvider)
+  isInitialized = true
+  console.log('✅ OpenTelemetry logs exporter initialized')
+}
+
+export function exportLogEntry(entry: LogEntry) {
+  if (typeof window !== 'undefined') return
+  if (!isInitialized) {
+    initializeLogsExporter()
+  }
+  if (!loggerProvider) return
+
+  const logger = loggerProvider.getLogger(
+    process.env.OTEL_SERVICE_NAME ?? 'nextjs-observability-demo'
+  )
+
+  const attributes: Record<string, unknown> = {
+    ...entry.context,
+    'log.level': entry.level,
+    'service.name': process.env.OTEL_SERVICE_NAME ?? 'nextjs-observability-demo',
+  }
+
+  if (entry.error) {
+    attributes['error.name'] = entry.error.name
+    attributes['error.message'] = entry.error.message
+    attributes['error.stack'] = entry.error.stack
+  }
+
+  const logRecord: LogRecord = {
+    body: entry.message,
+    timestamp: Date.now(),
+    observedTimestamp: Date.now(),
+    severityNumber: getSeverityNumber(entry.level),
+    severityText: entry.level.toUpperCase(),
+    attributes,
+  }
+
+  logger.emit(logRecord)
+}
+
+function getSeverityNumber(level: LogEntry['level']): number {
+  switch (level) {
+    case 'debug':
+      return 5
+    case 'info':
+      return 9
+    case 'warn':
+      return 13
+    case 'error':
+      return 17
+    default:
+      return 9
+  }
+}
+
+export function shutdownLogsExporter() {
+  return loggerProvider?.shutdown() ?? Promise.resolve()
+}
+```
+
+Let's break down what's happening in `logs-exporter.ts`:
+
+1.  **`createLoggerProvider` function:** This is the main setup.
+
+    - **Resource:** We create a `Resource` that attaches metadata to _all_ logs, like the `service.name` and `service.version`. This is how SigNoz knows the logs belong to `nextjs-observability-demo`.
+    - **Exporter:** We instantiate the `OTLPLogExporter`, pointing it to our collector's `/v1/logs` endpoint.
+    - **Batch Processor:** Instead of sending every single log line instantly (which is inefficient), we use a `BatchLogRecordProcessor`. It groups logs (up to 20) or waits 5 seconds before sending a batch. This is crucial for production performance.
+
+2.  **`initializeLogsExporter` function:** This function is called by `instrumentation.ts`. It creates the provider, sets it as the _global_ logger provider, and uses an `isInitialized` flag to prevent running twice.
+
+3.  **`exportLogEntry` function:** This is the function our application logger will call. It:
+
+    - Checks that it's running on the server (`typeof window === 'undefined'`).
+    - Gets the logger instance from our provider.
+    - Builds a `LogRecord` object, mapping our application log fields (like `level` and `error`) to OpenTelemetry's structured log format.
+    - Uses `logger.emit()` to send the log record to the batch processor.
+
+4.  **`getSeverityNumber`:** A simple utility to map text levels (e.g., 'error') to OpenTelemetry's numerical severity standard.
+
+## Step 5 – Application logger (`lib/logger.ts`)
+
+Now that we have the exporter, we need a user-friendly logger for our application. This file, `lib/logger.ts`, will be our primary interface. It's a simple class that will automatically capture the active `traceId` and `spanId` and forward logs to our exporter.
+
+```ts {1-33,41-66}
+import { trace } from '@opentelemetry/api'
+import { exportLogEntry } from '@/lib/logs-exporter'
+
+export interface LogContext {
+  traceId?: string
+  spanId?: string
+  [key: string]: unknown
+}
+
+// This interface is imported by logs-exporter.ts
+export interface LogEntry {
+  timestamp: string
+  level: 'debug' | 'info' | 'warn' | 'error'
+  message: string
+  context: LogContext
+  error?: Error
+}
+
+class Logger {
+  private getTraceContext(): Pick<LogContext, 'traceId' | 'spanId'> {
+    const span = trace.getActiveSpan()
+    if (!span) return {}
+    const { traceId, spanId } = span.spanContext()
+    return { traceId, spanId }
+  }
+
+  private log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    context?: LogContext,
+    error?: Error
+  ) {
+    const entry: LogEntry = {
+      // Use the LogEntry type
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      context: { ...this.getTraceContext(), ...context },
+      error,
+    }
+
+    if (typeof window === 'undefined') {
+      exportLogEntry(entry)
+    }
+  }
+
+  // Public methods for a complete logger
+  info(message: string, context?: LogContext) {
+    this.log('info', message, context)
+  }
+  debug(message: string, context?: LogContext) {
+    this.log('debug', message, context)
+  }
+  warn(message: string, context?: LogContext) {
+    this.log('warn', message, context)
+  }
+  error(message: string, error?: Error, context?: LogContext) {
+    this.log('error', message, context, error)
+  }
+}
+
+export const logger = new Logger()
+```
+
+Here's how this logger works:
+
+- **`getTraceContext`:** This is the magic. It uses `trace.getActiveSpan()` from the OpenTelemetry API to find the _current_ active trace. If it finds one, it pulls the `traceId` and `spanId`.
+- **`log` method:** This private method is the core. It:
+  - Creates a structured `entry` object.
+  - Calls `this.getTraceContext()` to automatically link the log to the trace.
+  - Merges in any extra `context` provided by the developer.
+  - Crucially, it checks `if (typeof window === 'undefined')` to ensure `exportLogEntry` (our server-side exporter) is _only_ called on the server.
+- **Public methods:** We provide the standard `info`, `debug`, `warn`, and `error` methods so developers can use `logger.info(...)` just like they would with `console.log`.
+
+## Step 6 – Optional: Pino console logger (`lib/pino-logger.ts`)
+
+While sending logs to SigNoz is great, you _also_ want to see structured, human-readable logs in your console during local development. [Pino](https://github.com/pinojs/pino) is a popular, high-performance logger for Node.js. This optional step creates a Pino-based logger that _also_ injects trace context.
+
+Create `lib/pino-logger.ts`:
+
+```ts {1-28}
+import pino, { type LoggerOptions } from 'pino'
+import { trace } from '@opentelemetry/api'
+import type { LogContext } from '@/lib/logger'
+
+const createPinoConfig = (
+  environment: string = process.env.NODE_ENV ?? 'development'
+): LoggerOptions => ({
+  name: 'nextjs-observability-demo',
+  level: environment === 'production' ? 'info' : 'debug',
+  timestamp: pino.stdTimeFunctions.isoTime,
+  formatters: {
+    level: (label) => ({ level: label }),
+  },
+  // Use pino-pretty in development
+  ...(environment !== 'production' && {
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+      },
+    },
+  }),
+  mixin: () => {
+    const span = trace.getActiveSpan()
+    const ctx = span?.spanContext()
+    return {
+      traceId: ctx?.traceId,
+      spanId: ctx?.spanId,
+      environment,
+    }
+  },
+})
+
+export const pinoLogger = pino(createPinoConfig())
+
+export class PinoLogger {
+  constructor(private readonly logger = pinoLogger) {}
+
+  private enrich(context: LogContext = {}): LogContext {
+    const span = trace.getActiveSpan()
+    const ctx = span?.spanContext()
+    return {
+      traceId: ctx?.traceId,
+      spanId: ctx?.spanId,
+      timestamp: new Date().toISOString(),
+      ...context,
+    }
+  }
+
+  info(message: string, context?: LogContext) {
+    this.logger.info(this.enrich(context), message)
+  }
+  debug(message: string, context?: LogContext) {
+    this.logger.debug(this.enrich(context), message)
+  }
+  warn(message: string, context?: LogContext) {
+    this.logger.warn(this.enrich(context), message)
+  }
+  error(message: string, error?: Error, context?: LogContext) {
+    const enriched = this.enrich(context)
+    if (error) {
+      enriched.error = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      }
+    }
+    this.logger.error(enriched, message)
+  }
+}
+
+export const serverLogger = new PinoLogger()
+```
+
+_Note: To use `pino-pretty` for nice development logs, you'll also need to run `npm install pino-pretty`._
+
+What this file does:
+
+- **`createPinoConfig`:** This sets up Pino. The most important part is the `mixin`. This function runs for _every log_ and uses `trace.getActiveSpan()` to automatically add the `traceId` and `spanId` to the JSON (or pretty-printed) log output.
+- **`PinoLogger` class:** This is a wrapper class, just like our `Logger` in Step 5. It provides `info`, `debug`, `warn`, and `error` methods.
+- **`serverLogger`:** We export a pre-initialized instance for easy use throughout the server-side parts of our app.
+
+> From now on, you can choose to use `logger` (from Step 5, OTLP only) or `serverLogger` (from Step 6, OTLP + Console) in your server-side code.
+
+## Step 7 – Browser logging client (`lib/browser-logger.ts`)
+
+Logging server-side is only half the story. We also need to capture errors and events from the user's browser.
+
+This module, `lib/browser-logger.ts`, is a **client-side** logger. Since we can't (and shouldn't) use the full Node.js OTLP exporter in the browser, this logger will buffer logs and send them to a custom API route.
+
+```ts {1-44}
+'use client'
+
+import { trace } from '@opentelemetry/api'
+import type { LogContext } from '@/lib/logger'
+
+// A simplified LogEntry type for the browser
+interface BrowserLogEntry {
+  timestamp: string
+  level: 'debug' | 'info' | 'warn' | 'error'
+  message: string
+  context: LogContext
+  error?: {
+    name: string
+    message: string
+    stack?: string
+  }
+}
+
+class BrowserLogger {
+  private logs: BrowserLogEntry[] = []
+  private readonly flushInterval = 10000 // Flush every 10 seconds
+  private sessionId = this.generateSessionId()
+
+  constructor() {
+    if (typeof window === 'undefined') return
+    this.setupGlobalErrorHandlers()
+    setInterval(() => this.flush(), this.flushInterval)
+    // Optional: Also flush when the page is hidden
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        this.flush()
+      }
+    })
+  }
+
+  private generateSessionId() {
+    return (
+      'session_' +
+      (Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15))
+    )
+  }
+
+  private getSessionId() {
+    return this.sessionId
+  }
+
+  private enrich(context: LogContext = {}): LogContext {
+    const span = trace.getActiveSpan()
+    const ctx = span?.spanContext()
+    return {
+      traceId: ctx?.traceId ?? 'no-trace',
+      spanId: ctx?.spanId ?? 'no-span',
+      sessionId: this.getSessionId(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      ...context,
+    }
+  }
+
+  private log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    context?: LogContext,
+    error?: Error
+  ) {
+    if (typeof window === 'undefined') return
+
+    const entry: BrowserLogEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      context: this.enrich(context),
+    }
+
+    if (error) {
+      entry.error = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      }
+    }
+
+    // Also log to console in development
+    if (process.env.NODE_ENV === 'development') {
+      console[level](message, entry)
+    }
+
+    this.logs.push(entry)
+  }
+
+  private flush() {
+    if (typeof window === 'undefined' || this.logs.length === 0) {
+      return
+    }
+
+    const logsToSend = this.logs
+    this.logs = []
+
+    // Use navigator.sendBeacon if available for reliability,
+    // especially on page unload.
+    // Note: sendBeacon only supports POST and specific data types.
+    try {
+      if (navigator.sendBeacon) {
+        const blob = new Blob([JSON.stringify(logsToSend)], {
+          type: 'application/json',
+        })
+        navigator.sendBeacon('/api/logs', blob)
+      } else {
+        fetch('/api/logs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(logsToSend),
+          keepalive: true, // Important for reliability
+        })
+      }
+    } catch (error) {
+      console.error('Failed to send browser logs', error)
+      // If sending fails, put logs back in the queue
+      this.logs = logsToSend.concat(this.logs)
+    }
+  }
+
+  // --- Public API ---
+  info(message: string, context?: LogContext) {
+    this.log('info', message, context)
+  }
+  debug(message: string, context?: LogContext) {
+    this.log('debug', message, context)
+  }
+  warn(message: string, context?: LogContext) {
+    this.log('warn', message, context)
+  }
+  error(message: string, error: Error, context?: LogContext) {
+    this.log('error', message, context, error)
+  }
+
+  private setupGlobalErrorHandlers() {
+    window.onerror = (message, source, lineno, colno, error) => {
+      this.error(`Unhandled error: ${message}`, error || new Error(message as string), {
+        source: 'window.onerror',
+        sourceFile: source,
+        line: lineno,
+        column: colno,
+      })
+    }
+
+    window.onunhandledrejection = (event) => {
+      this.error(
+        'Unhandled promise rejection',
+        event.reason || new Error('Unknown rejection reason'),
+        {
+          source: 'window.onunhandledrejection',
+        }
+      )
+    }
+  }
+}
+
+export const browserLog = new BrowserLogger()
+```
+
+Here’s what this client-side logger does:
+
+- **`'use client'`:** This directive is essential. It tells Next.js that this is a Client Component and can run in the browser.
+- **Buffering:** This class doesn't send a network request for every log line. It collects logs in a `this.logs` array and flushes them in a batch every 10 seconds (`flushInterval`).
+- **`enrich` method:** Just like our server logger, this grabs the `traceId` and `spanId` from the active span. It also adds browser-specific context like `sessionId`, `url`, and `userAgent`.
+- **`flush` method:** This sends the batched logs to our API. It prefers `navigator.sendBeacon` for reliability, especially when a user is navigating away from the page.
+- **`setupGlobalErrorHandlers`:** This part is vital. It hooks into `window.onerror` and `window.onunhandledrejection` to _automatically_ catch and log any unhandled exceptions that happen in the browser.
+
+## Step 8 – API route that ingests browser logs
+
+This is the other half of our browser logging solution. We create an API route at `app/api/logs/route.ts` that will receive the batched logs from our `BrowserLogger` and forward them to SigNoz using our server-side logger.
+
+```ts {1-38}
+import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger' // Use our Step 5 logger
+import { initializeLogsExporter } from '@/lib/logs-exporter'
+
+// Initialize the OTLP exporter when this route is first hit
+initializeLogsExporter()
+
+export async function POST(request: NextRequest) {
+  try {
+    const logs = await request.json()
+    if (!Array.isArray(logs)) {
+      return NextResponse.json({ error: 'Invalid logs payload' }, { status: 400 })
+    }
+
+    for (const logEntry of logs) {
+      const { level, message, context, error } = logEntry
+
+      // Enrich with server-side context
+      const enrichedContext = {
+        ...context,
+        source: 'browser', // Flag this log as coming from the client
+        userAgent: request.headers.get('user-agent'),
+        referer: request.headers.get('referer'),
+      }
+
+      // Re-construct the error object on the server
+      let err: Error | undefined = undefined
+      if (error) {
+        err = new Error(error.message)
+        err.name = error.name
+        err.stack = error.stack
+      }
+
+      // Use our server-side logger to forward the log
+      switch (level) {
+        case 'debug':
+          logger.debug(message, enrichedContext)
+          break
+        case 'info':
+          logger.info(message, enrichedContext)
+          break
+        case 'warn':
+          logger.warn(message, enrichedContext)
+          break
+        case 'error': {
+          logger.error(message, err, enrichedContext)
+          break
+        }
+        default:
+          logger.info(message, enrichedContext)
+      }
+    }
+
+    return NextResponse.json({ success: true, processed: logs.length })
+  } catch (error) {
+    // Log errors from the logging endpoint itself
+    logger.error('Failed to process browser logs', error as Error)
+    return NextResponse.json({ error: 'Failed to process logs' }, { status: 500 })
+  }
+}
+```
+
+This API route is simple but effective:
+
+1.  It ensures the server-side `initializeLogsExporter` has been called.
+2.  It accepts `POST` requests, parses the JSON array of logs.
+3.  It loops through each log from the browser and uses our _server-side_ `logger` (from Step 5) to forward it.
+4.  This is how browser logs get from the client, to our API, and finally to the OTLP exporter and SigNoz, all while being enriched with trace context.
+
+## Step 9 – Demo page that generates both server + browser logs
+
+To test our setup, we'll create a demo page. First, let's build the client-side component, `app/logs-demo/ClientPanel.tsx`. This component will import our `browserLog`.
+
+`app/logs-demo/ClientPanel.tsx`:
+
+```tsx
+'use client'
+
+import { browserLog } from '@/lib/browser-logger'
+
+export default function ClientPanel() {
+  return (
+    <div className="space-x-2">
+      <button
+        className="rounded bg-slate-200 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-50 dark:hover:bg-slate-600"
+        onClick={() =>
+          browserLog.info('Browser button clicked', {
+            page: 'logs-demo',
+            source: 'client',
+          })
+        }
+      >
+        Emit browser log
+      </button>
+      <button
+        className="rounded bg-rose-200 px-3 py-2 text-sm font-medium text-rose-900 hover:bg-rose-300 dark:bg-rose-700 dark:text-white dark:hover:bg-rose-600"
+        onClick={() =>
+          browserLog.error('Simulated browser error', new Error('Client boom'), {
+            page: 'logs-demo',
+            source: 'client',
+          })
+        }
+      >
+        Emit browser error
+      </button>
+    </div>
+  )
+}
+```
+
+The buttons in this panel simply call `browserLog.info` or `browserLog.error` when clicked. These logs will be batched and sent to our `/api/logs` route.
+
+Next, create the main page component at `app/logs-demo/page.tsx`:
+
+```tsx {8-24}
+import ClientPanel from '@/app/logs-demo/ClientPanel'
+import { logger } from '@/lib/logger' // Or use serverLogger from Step 6
+
+async function serverLogAction() {
+  'use server'
+
+  logger.info('Server action log', {
+    page: 'logs-demo',
+    source: 'server',
+    kind: 'server-action',
+  })
+
+  try {
+    throw new Error('Server boom')
+  } catch (error) {
+    logger.error('Server error occurred', error as Error, {
+      page: 'logs-demo',
+      source: 'server',
+    })
+  }
+}
+
+export default function LogsDemoPage() {
+  return (
+    <div className="space-y-4 p-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold">Logs Demo</h1>
+        <p className="text-muted-foreground text-sm">
+          Trigger a server action and browser logs, then verify they land in SigNoz.
+        </p>
+      </div>
+      <form action={serverLogAction}>
+        <button
+          type="submit"
+          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
+        >
+          Emit server logs (server action)
+        </button>
+      </form>
+      <ClientPanel />
+    </div>
+  )
+}
+```
+
+This page component does two things:
+
+1.  **`serverLogAction`:** This is a Next.js [Server Action](https://www.google.com/search?q=https://nextjs.org/docs/app/building-your-application/routing/server-actions). When the form is submitted, this function runs _on the server_. We use our `logger` to emit `info` and `error` logs. These logs will be sent _directly_ from the server to the OTLP collector, complete with trace context.
+2.  **Rendering:** It renders the page and includes the `<ClientPanel />`, which handles triggering the browser-side logs.
+
+<Figure
+  src="/img/blog/2025/11/nextjs-logging-demo.webp"
+  alt="NextJS logging demo page with buttons for server and client logs"
+  caption="The complete NextJS logging demo page"
+/>
+
+Use this page as a smoke test: submit the form to generate server logs, and click the buttons to emit browser logs.
+
+## Step 10 – Run the collector + SigNoz exporter
+
+Inside `infra/observability/` we ship:
+
+- `docker-compose.yaml`
+- `otel-collector-config.yaml`
+- `prometheus.yaml`
+- `.env.example`
+- `README.md`
+
+Copy `.env.example` → `.env` and set your SigNoz Cloud credentials:
+
+```env
+SIGNOZ_ENDPOINT=ingest.<region>.signoz.cloud:443
+SIGNOZ_INGESTION_KEY=<your-key>
+```
+
+Then start the stack:
+
+```bash
+cd infra/observability
+OTELCOL_IMG=otel/opentelemetry-collector-contrib:latest docker compose up -d
+```
+
+Restart this stack whenever you change `.env` or `otel-collector-config.yaml`.
+
+## Step 11 – Verify end-to-end
+
+Let's test the complete flow:
+
+1.  **Restart** your Next.js app with `npm run dev` so it picks up all the new files and environment variables.
+2.  Visit `http://localhost:3000/logs-demo`.
+3.  Submit the server form ("Emit server logs").
+4.  Click both browser buttons ("Emit browser log" and "Emit browser error").
+5.  In your Next.js terminal, you should see:
+    - `✅ OpenTelemetry logs exporter initialized`
+    - If you used the Pino logger, you'll see the pretty-printed server logs.
+    - `@vercel/otel/otlp: onSuccess 200 OK` (indicating traces are being sent).
+6.  In another terminal, check the collector logs: `docker compose logs otel-collector --tail=50`. Look for entries containing `"otelcol.signal":"logs"`, confirming logs are being received.
+7.  Open your SigNoz Cloud account. Navigate to the **Logs** tab.
+8.  Filter by `service.name="nextjs-observability-demo"`. You should see all your log entries:
+    - Server action logs (e.g., "Server error occurred").
+    - Browser logs (e.g., "Browser button clicked").
+
+{' '}
+
+<Figure
+  src="/img/blog/2025/06/opentelemetry-nextjs-logging-image.webp"
+  alt="SigNoz logs interface showing structured logs with trace correlation and filtering options"
+  caption="Filter logs by source (browser/server) and view structured log entries with trace context in SigNoz"
+/>
+
+Click on any log row to see the full structured payload. Notice the `source: "browser"` or `source: "server"` attribute we added.
+
+Most importantly, click on a log that has a `traceId`. You'll see a button to view the correlated trace.
+
+<Figure
+  src="/img/blog/2025/06/opentelemetry-nextjs-logging-image%201.webp"
+  alt="Navigate between logs and traces seamlessly in SigNoz"
+  caption="Navigate between logs and traces seamlessly in SigNoz"
+/>
+
+Clicking this will take you from your log directly to the full distributed trace, showing the exact server action or page load that generated the log.
+
+<Figure
+  src="/img/blog/2025/06/opentelemetry-nextjs-logging-image%202.webp"
+  alt="SigNoz trace details view showing the correlation between logs and distributed traces"
+  caption="Click 'Inspect in Trace' to jump from logs to the full distributed trace view with all spans and timing information"
+/>
+
+If you only see traces but no logs:
+
+- Confirm you restarted the `otel-collector` docker container **after** adding the `logs` pipeline to its configuration.
+- Ensure `lib/logs-exporter.ts` is using the correct package versions (specifically `sdk-logs@0.207.0`).
+- Double-check your `OTEL_EXPORTER_OTLP_ENDPOINT` variable is set correctly in `.env.local`.
+
+## Next: Production Deployment and Scaling
+
+With instrumentation, metrics, and logging in place, you're ready for production. In the next article, we'll cover deploying your instrumented Next.js app, choosing between collector vs direct exporter setups, implementing smart sampling strategies, and setting up production-grade alerting.
+
+<ArticleSeriesBottom seriesKey="opentelemetry-nextjs" currentSlug="opentelemetry-nextjs-logging" />

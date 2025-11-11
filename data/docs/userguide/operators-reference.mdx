@@ -1,0 +1,189 @@
+---
+date: 2025-07-31
+id: operators-reference
+tags : [SigNoz Cloud, Self-Host]
+title: Operators Reference
+description: Complete reference for all SigNoz search operators.
+---
+
+This guide provides a comprehensive reference for all operators available in SigNoz search syntax.
+
+## Comparison Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `=` | Equals | `status = 'success'` |
+| `!=` or `<>` | Not equals | `status != 'failed'` |
+| `<` | Less than | `response_time_ms < 1000` |
+| `<=` | Less than or equal | `response_time_ms <= 1000` |
+| `>` | Greater than | `response_time_ms > 500` |
+| `>=` | Greater than or equal | `response_time_ms >= 500` |
+
+## String Matching Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `LIKE` | Case-sensitive pattern matching | `message LIKE '%error%'` |
+| `NOT LIKE` | Negated LIKE | `message NOT LIKE '%debug%'` |
+| `ILIKE` | Case-insensitive pattern matching | `message ILIKE '%ERROR%'` |
+| `NOT ILIKE` | Negated ILIKE | `message NOT ILIKE '%DEBUG%'` |
+
+**Pattern matching wildcards:**
+- `%` matches any sequence of characters
+- `_` matches a single character
+
+## Range and Set Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `BETWEEN` | Value within range | `latency BETWEEN 100 AND 500` |
+| `NOT BETWEEN` | Value outside range | `latency NOT BETWEEN 100 AND 500` |
+| `IN` | Value in set | `region IN ('us-east', 'us-west')` |
+| `NOT IN` | Value not in set | `region NOT IN ('eu-west', 'eu-east')` |
+
+## Advanced Operators
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `EXISTS` | Field exists | `custom.field EXISTS` |
+| `NOT EXISTS` | Field doesn't exist | `error.details NOT EXISTS` |
+| `CONTAINS` | Contains substring | `message CONTAINS 'timeout'` |
+| `NOT CONTAINS` | Doesn't contain | `message NOT CONTAINS 'success'` |
+| `REGEXP` | Regular expression match (RE2 syntax) | `email REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'` |
+| `NOT REGEXP` | Doesn't match regex (RE2 syntax) | `path NOT REGEXP '^/api/v1'` |
+
+## Operators and Field Existence
+
+This section describes how operators handle missing fields. Not all records contain every field. Understanding how operators behave with missing fields is crucial for accurate queries.
+
+### Positive Operators (Automatically Check Field Exists)
+
+These operators **only match logs where the field exists**:
+
+| Operator | Behavior | Example |
+|----------|----------|---------|
+| `=` | Field must exist AND equal value | `service.name = 'api'` |
+| `>`, `>=`, `<`, `<=` | Field must exist AND meet condition | `response_time_ms > 500` |
+| `LIKE`, `ILIKE` | Field must exist AND match pattern | `message LIKE '%error%'` |
+| `BETWEEN` | Field must exist AND be in range | `latency BETWEEN 100 AND 500` |
+| `IN` | Field must exist AND be in set | `region IN ('us-east', 'us-west')` |
+| `CONTAINS` | Field must exist AND contain text | `body CONTAINS 'timeout'` |
+| `REGEXP` | Field must exist AND match regex | `email REGEXP '.*@company.com'` |
+
+**Example:**
+```
+response_time_ms > 500
+```
+Matches: Logs with response_time_ms field AND value > 500  
+Skips: Logs without response_time_ms field
+
+### Negative Operators (DO NOT Check Field Exists)
+
+These operators match **all logs except those with the specified value** (including logs missing the field):
+
+| Operator | Behavior | Example |
+|----------|----------|---------|
+| `!=`, `<>` | Match if field doesn't exist OR value differs | `status != 'error'` |
+| `NOT LIKE`, `NOT ILIKE` | Match if field doesn't exist OR pattern doesn't match | `message NOT LIKE '%debug%'` |
+| `NOT BETWEEN` | Match if field doesn't exist OR value outside range | `latency NOT BETWEEN 100 AND 500` |
+| `NOT IN` | Match if field doesn't exist OR value not in set | `region NOT IN ('eu-west')` |
+| `NOT CONTAINS` | Match if field doesn't exist OR doesn't contain text | `body NOT CONTAINS 'success'` |
+| `NOT REGEXP` | Match if field doesn't exist OR doesn't match regex | `path NOT REGEXP '^/api'` |
+
+**Example:**
+```
+service.name != 'redis'
+```
+Matches: 
+- Logs where service.name = 'api', 'auth', etc.
+- Logs that don't have a service.name field at all
+
+Skips: Only logs where service.name = 'redis'
+
+## Common Scenarios
+
+### Scenario 1: Find All Non-Redis Services
+**Ambiguous:**
+```
+service.name != 'redis'
+```
+This includes logs without any service name!
+
+**Explicit intent:**
+```
+service.name EXISTS AND service.name != 'redis'
+```
+This only includes logs that have a service name (and it's not 'redis')
+
+### Scenario 2: Find Logs Without Errors
+**Ambiguous:**
+```
+severity_text != 'ERROR'
+```
+This includes logs that don't even have an severity_text field!
+
+**Clear intent - exclude ERROR level only:**
+```
+severity_text EXISTS AND severity_text != 'ERROR'
+```
+
+**Clear intent - find logs explicitly marked as non-error:**
+```
+severity_text IN ('INFO', 'WARN', 'DEBUG')
+```
+
+### Scenario 3: Find Failed Requests
+**Good:**
+```
+status_code >= 400
+```
+Only matches logs that have a status_code field with error values
+
+**Be careful with:**
+```
+status_code NOT BETWEEN 200 AND 399
+```
+This would include logs without any status_code field!
+
+## Boolean Operators
+
+- `AND`: Both conditions must be true
+- `OR`: At least one condition must be true
+- `NOT`: Negates the condition
+
+**Operator Precedence** (highest to lowest):
+1. Parentheses `()`
+2. `NOT`
+3. `AND`
+4. `OR`
+
+## Regular Expression (REGEXP)
+
+The `REGEXP` operator uses RE2 syntax for pattern matching. RE2 is a fast, safe regular expression library that guarantees linear time execution. Common patterns:
+
+- `.` - Any single character
+- `*` - Zero or more of the preceding element
+- `+` - One or more of the preceding element
+- `?` - Zero or one of the preceding element
+- `[abc]` - Any character in the set
+- `[^abc]` - Any character not in the set
+- `\d` - Any digit
+- `\w` - Any word character (letter, digit, underscore)
+- `\s` - Any whitespace character
+
+Examples:
+```
+# Match email addresses
+email REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+# Match IP addresses
+ip_address REGEXP '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
+
+# Match URLs starting with https
+url REGEXP '^https://'
+
+# Match phone numbers (various formats)
+phone REGEXP '^\+?1?\d{3}[-.]?\d{3}[-.]?\d{4}$'
+```
+
+Note: RE2 does not support lookahead/lookbehind assertions or backreferences.

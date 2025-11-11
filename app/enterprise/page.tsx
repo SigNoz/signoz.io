@@ -1,11 +1,9 @@
 import Enterprise from './Enterprise'
 
-import { Metadata } from 'next'
+import { metadata } from './metadata'
 
-export const metadata: Metadata = {
-  title: 'Enterprise',
-}
+export { metadata }
 
-export default function EnterprisePage() {
+export default function Page() {
   return <Enterprise />
 }

@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import Button from '@/components/Button/Button'
+import Button from "@/components/ui/Button"
 import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
@@ -143,9 +143,7 @@ const Header = () => {
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
-      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
-        <div className="absolute left-0 top-[101px] z-0 h-9 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 sm:h-14 md:top-[225px] md:!w-[80vw]" />
-
+      <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
           Application Performance Monitoring <br />
           Powered by OpenTelemetry
@@ -161,18 +159,18 @@ const Header = () => {
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <Button id="btn-get-started-homepage-hero">
-          <Link href="/teams/" className="flex-center">
+        <Button variant='default' rounded='full' to="/teams/" id="btn-get-started-homepage-hero">
+          <span className="flex-center">
             Get Started - Free
             <ArrowRight size={14} />
-          </Link>
+          </span>
         </Button>
 
-        <Button type={Button.TYPES.SECONDARY} id="btn-read-documentation-homepage-hero">
-          <Link href="/docs/introduction/" className="flex-center">
+        <Button variant='secondary' rounded='full' to="/docs/introduction/" id="btn-read-documentation-homepage-hero">
+          <span className="flex-center">
             <BookOpen size={14} />
             Read Documentation
-          </Link>
+          </span>
         </Button>
       </div>
       <div className="section-container !mx-auto !mt-0 -mb-[9rem] !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
@@ -239,12 +237,14 @@ const TrustedByTeams = ({ page }) => {
         >
           <div className="flex flex-col items-center text-center">
             <Button
+              variant='secondary'
+              rounded='full'
+              to="/case-study/"
               id={customerStoriesId}
-              className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
-              <Link href="/case-study/" className="flex-center z-[1] mx-2">
+              <span className="flex-center z-[1] mx-2">
                 Read customer stories <ArrowRight size={14} />
-              </Link>
+              </span>
             </Button>
           </div>
         </div>
@@ -438,11 +438,11 @@ const UsageBasedPricing = () => {
               We’re here for you.
             </p>
             <UsageList />
-            <Button id="btn-get-started-homepage-hero" className="mt-5">
-              <Link href="/pricing/" className="flex-center">
+            <Button variant='default' rounded='full' to="/pricing/" id="btn-get-started-homepage-hero" className="mt-5">
+              <span className="flex-center">
                 Check Pricing
                 <ArrowRight size={14} />
-              </Link>
+              </span>
             </Button>
           </div>
         </div>
@@ -478,7 +478,7 @@ const SigNozStats = () => {
       name: 'OSS Downloads',
       value: '10 million+',
     },
-    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '18k+' },
+    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '22k+' },
     { id: 3, logo: '/img/index_features/contributions.svg', name: 'Contributors', value: '140+' },
     { id: 4, logo: '/img/index_features/community.svg', name: 'Community Members', value: '4.5k+' },
   ]
@@ -508,23 +508,28 @@ const SigNozStats = () => {
               ))}
             </div>
             <div className="flex flex-col items-center gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 py-6 sm:flex-row sm:py-6 sm:pl-10">
-              <Button className="text-xs sm:text-sm" id="btn-join-community-homepage">
-                <Link href="https://signoz.io/slack/" className="flex-center">
+              <Button 
+                href="https://signoz.io/slack/" 
+                variant={"default"}
+                rounded={"full"}
+                id="btn-join-community-homepage"
+              >
+                <span className="flex-center">
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   Join the community
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </Link>
+                </span>
               </Button>
-              <Button
-                type={Button.TYPES.SECONDARY}
-                className="text-xs sm:text-sm"
+              <Button  href="https://github.com/SigNoz/signoz/" 
+                variant={"secondary"}
+                rounded={"full"}
                 id="btn-github-repo-homepage"
               >
-                <Link href="https://github.com/SigNoz/signoz/" className="flex-center">
+                <span className="flex-center">
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   GitHub Repository
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </Link>
+                </span>
               </Button>
             </div>
           </div>
@@ -549,18 +554,28 @@ const GetStarted = ({ page }) => {
                   Get started with <br /> SigNoz Cloud today
                 </p>
                 <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                  <Button id={getStartedId}>
-                    <Link href="/teams/" className="flex-center">
+                  <Button 
+                    to="/teams/" 
+                    variant={"default"}
+                    rounded={"full"}
+                    id={getStartedId}
+                  >
+                    <span className="flex-center">
                       Get Started - Free
                       <ArrowRight size={14} />
-                    </Link>
+                    </span>
                   </Button>
 
-                  <Button type={Button.TYPES.SECONDARY} id={readDocumentationId}>
-                    <Link href="/docs/introduction/" className="flex-center">
+                  <Button 
+                    to="/docs/introduction/"
+                    variant={"secondary"}
+                    rounded={"full"}
+                    id={readDocumentationId}
+                  >
+                    <span className="flex-center">
                       <BookOpen size={14} />
                       Read Documentation
-                    </Link>
+                    </span>
                   </Button>
                 </div>
               </div>

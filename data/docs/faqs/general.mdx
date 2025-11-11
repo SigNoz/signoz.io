@@ -1,0 +1,112 @@
+---
+date: 2025-08-26
+title: General FAQs
+tags: [SigNoz Cloud, Self-Host]
+id: general-faqs
+description: Answers to common SigNoz questions covering setup, billing, and account
+  management.
+---
+
+### Q. How to setup SigNoz across different environments?
+
+A. Tag your telemetry with the `deployment.environment` resource attribute (e.g., production/staging/development) via SDK env vars or the Collector’s Resource processor, then filter and alert by environment in SigNoz. If you deploy the SigNoz k8s infra Helm chart, the chart sets `deployment.environment` for you via the required `deploymentEnvironment` value, so you do not need to add it manually—see the [Kubernetes infra install guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+
+<details>
+
+<summary> Toggle for detailed answer </summary>
+
+You can ingest data from across your environments and tag your telemetry with the `deployment.environment` resource attribute (for example: `production`, `staging`, `development`). This lets you filter, compare, and alert per environment in the UI.
+
+- SDK (all languages)
+
+  - Set via environment variables when starting your app:
+    ```bash
+    OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production"
+    ```
+
+- OpenTelemetry Collector (agent or gateway)
+  - Upsert the attribute with the Resource processor so all signals include it:
+    ```yaml
+    processors:
+      resource/env:
+        attributes:
+          - key: deployment.environment
+            value: production
+            action: upsert
+    service:
+      pipelines:
+        traces:
+          processors: [resource/env, batch]
+        metrics:
+          processors: [resource/env, batch]
+        logs:
+          processors: [resource/env, batch]
+    ```
+  - Refer to [OpenTelemetry Collector Configuration reference](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-processor) for more details on the Resource processor.
+  - Guide on setting resource attributes for logs (applies similarly to traces/metrics): [here](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs).
+
+</details>
+
+### Q. How Do I cancel my subscription ?
+
+A. Reach out to us on chatbox at the bottom right corner of your SigNoz Cloud interface.
+
+### Q. I see a message that my account might be Rate limited ?
+
+<details>
+
+<summary> Toggle for answer </summary>
+
+For SigNoz Cloud Trial Accounts you might get a message saying
+`"You are sending data at more than 100 RPS, your ingestion may be rate limited. Please reach out to us via chat support."` To remove this rate limit, you need to upgrade your plan under the Billing Section of your SigNoz Cloud Interface and add your credit card.
+{/* <!-- Hyperlink to the Billing Troubleshooting or Doc--> */}
+
+</details>
+
+### Q. I need a Vendor Address for the payment to be approved.
+
+<details>
+
+<summary> Toggle for answer </summary>
+
+You can use this Address - **SigNoz Inc - 2261 Market Street #4496, San Francisco, CA, 94114**
+
+</details>
+
+### Q. What is a DataSource ?
+
+A. DataSource is the service, db or any instance which generates telemetry data (Traces, Logs and Metrics).
+
+### Q. How do I change data retention periods in SigNoz?
+
+A. For self‑hosted, change retention in Settings → General (applies only to newly ingested data).
+For SigNoz Cloud, contact support to request retention changes (affects pricing).
+
+<details>
+
+<summary> Toggle for answer </summary>
+
+For self-hosted SigNoz:
+
+1. Navigate to the General tab in Settings.
+2. Adjust the retention period for the desired data type (logs, metrics, or traces).
+3. Note that changes will only apply to newly ingested data and will not be applied retroactively.
+
+For SigNoz Cloud:
+
+- Retention period changes require assistance from the SigNoz support team.
+- Available retention periods:
+  - Logs: Up to 180 days
+  - Metrics: Up to 13 months
+  - Traces: Up to 180 days
+- Changes to retention periods may affect pricing. Use the [pricing calculator](https://signoz.io/pricing/#estimate-your-monthly-bill) to estimate updated costs.
+
+To request a retention period change for SigNoz Cloud:
+
+1. Contact SigNoz support with the requested retention periods for each data type (logs, metrics, and/or traces).
+2. Review and confirm any pricing changes with the support team.
+3. Support will implement the changes, typically within 24 hours.
+
+Note: Retention period changes only affect newly ingested data and will not apply retroactively to existing data.
+
+</details>

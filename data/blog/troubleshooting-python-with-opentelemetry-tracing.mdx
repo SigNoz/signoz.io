@@ -9,11 +9,6 @@ image: /img/blog/2023/10/manual-tracing/manual-tracing-pythoncover.jpg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,python]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/troubleshooting-python-with-opentelemetry-tracing/"/>
-</head>
-
 In the classic definition, Observability is something one step beyond monitoring; it’s how easy our system is to understand with the architecture and monitoring we have. The problem is a familiar one: we have monitoring tools but they’re not answering our question. This article shows how a Python developer can go from having traces but not answers, to fully understanding the root cause of a latency issue.
 
 
@@ -46,11 +41,11 @@ When we dive into these traces we get another clue: there’s almost 13 seconds 
 Here we get to one of the interesting facts about Observability: _systems are more observable the more knowledge and experience you have with the system._ It’s possible that a senior developer who’s worked with this codebase for years will know one of two things right away:
 
 - Why `authenticate_check_db` can intermittently perform slowly
-- Failing that, how to check logs within the database and connect the log lines with this trace
+- Failing that, [how to check logs](https://signoz.io/guides/windows-logs/) within the database and connect the log lines with this trace
 
 In those cases, the ‘clues’ we have from OpenTelemetry will be enough to point the way to the cause. But we need to admit in these cases that we don’t really have great observability implemented. A junior developer would be totally lost at this point, not least because there are no identifying attributes on this request. We’ll be hard pressed to connect this trace to another logged request elsewhere, unless our OpenTelemetry setup has already linked the logs at the time trace was measured.
 
-This guide will show you how to go from this state to one where any developer who works with this service should be able to diagnose the problem very quickly from within their SigNoz OpenTelemetry dashboard.
+This guide will show you how to go from this state to one where any developer who works with this service should be able to diagnose the problem very quickly from within their [SigNoz](https://signoz.io/docs/introduction/) [OpenTelemetry dashboard](https://signoz.io/blog/opentelemetry-visualization/).
 
 ## How to Improve OpenTelemetry Observability
 
@@ -58,9 +53,9 @@ To add depth to this tracing information, we’ll start by checking for a config
 
 ### Can Ops fix this problem without my doing anything?
 
-One question we should ask before going any further: is it possible that our operations team can help us before we go much deeper? When we first set up OpenTelemetry monitoring with automatic instrumentation, the developers would have had little to no involvement, with all the setup being done in configuration, making sure the OpenTelemetry SDK effectively wrapped your application code. Before diving in with custom markers for our traces, we should check in with whoever implemented tracing in the first place to ask if anything can change at the configuration level.
+One question we should ask before going any further: is it possible that our operations team can help us before we go much deeper? When we first set up OpenTelemetry monitoring with automatic instrumentation, the developers would have had little to no involvement, with all the setup being done in configuration, making sure the [OpenTelemetry SDK](https://signoz.io/comparisons/opentelemetry-api-vs-sdk/) effectively wrapped your application code. Before diving in with custom markers for our traces, we should check in with whoever implemented tracing in the first place to ask if anything can change at the configuration level.
 
-For example, the OpenTelemetry collector may be removing attributes or dropping important traces, and a change to these settings may shed light on the problem. Admittedly, in this case it’s not likely, but it’s worth a check before we start adding calls to our application code.
+For example, the [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) may be removing attributes or dropping important traces, and a change to these settings may shed light on the problem. Admittedly, in this case it’s not likely, but it’s worth a check before we start adding calls to our application code.
 
 ### Add attributes to identify requests
 

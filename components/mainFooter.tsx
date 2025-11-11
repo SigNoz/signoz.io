@@ -6,12 +6,19 @@ import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 import { usePathname } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { ONBOARDING_SOURCE } from '../constants/globals'
+import { QUERY_PARAMS } from '../constants/queryParams'
 
 function Footer() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
   const isLoginRoute = pathname === '/login/'
+  const isTeamsRoute = pathname === '/teams/'
+  const isOnboardingRoute = source === ONBOARDING_SOURCE
 
-  if (isLoginRoute) {
+  if (isLoginRoute || isTeamsRoute || isOnboardingRoute) {
     return null
   }
 
@@ -32,12 +39,6 @@ function Footer() {
                 <Link href="/docs/migration/migrate-from-datadog" className="mt-5 hover:underline">
                   Migrate from Datadog
                 </Link>
-                <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="https://knowledgebase.signoz.io/kb" target="_blank">
-                    Knowledge Base
-                  </Link>
-                  <ArrowUpRight size={16} />
-                </div>
                 <Link href="/api_reference/" className="mt-5 hover:underline">
                   SigNoz API
                 </Link>
@@ -60,14 +61,8 @@ function Footer() {
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://twitter.com/SigNozHQ" target="_blank">
-                    Twitter
-                  </Link>
-                  <ArrowUpRight size={16} />
-                </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://community-chat.signoz.io/" target="_blank">
-                    Community Archive
+                  <Link href="https://x.com/SigNozHQ" target="_blank">
+                    X
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
@@ -81,8 +76,25 @@ function Footer() {
                   <Link href="/changelog">Changelog</Link>
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="/dashboards" target="_blank">
+                  <Link href="/docs/dashboards/dashboard-templates/overview/" target="_blank">
                     Dashboard Templates
+                  </Link>
+                  <ArrowUpRight size={16} />
+                </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                  <Link href="/todaysdevopswordle/" target="_blank">
+                    DevOps Wordle
+                  </Link>
+                  <ArrowUpRight size={16} />
+                </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                  <Link href="https://newsletter.signoz.io/" target="_blank">
+                    Newsletter
+                  </Link>
+                </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                  <Link href="/events/kubecon-cloudnativecon-north-america-2025/" target="_blank">
+                    KubeCon, Atlanta 2025
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
@@ -118,7 +130,7 @@ function Footer() {
                 </Link>
 
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://jobs.gem.com/signoz" target="_blank">
+                  <Link href="https://signoz.io/careers/" target="_blank">
                     Careers
                   </Link>
                   <ArrowUpRight size={16} />
@@ -156,7 +168,9 @@ function Footer() {
                   <div className="font-satoshi-bold font-medium">SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
-                  All systems operational
+                  <Link href="https://status.signoz.io/" target="_blank">
+                    All systems operational
+                  </Link>
                 </div>
                 <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2">
                   <Link
@@ -184,7 +198,7 @@ function Footer() {
                   </Link>
 
                   <Link
-                    href={'https://twitter.com/SigNozHQ'}
+                    href={'https://x.com/SigNozHQ'}
                     target="_blank"
                     aria-label="SigNoz Twitter URL"
                   >

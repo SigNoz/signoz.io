@@ -10,11 +10,6 @@ keywords: [opentelemetry,grpc,golang,opentelemetry grpc golang,opentelemetry grp
 ---
 
 
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-grpc-golang/" />
-</head>
-
 gRPC (Google Remote Procedure Call) is a high-performance, open-source universal <a href="https://en.wikipedia.org/wiki/Remote_procedure_call" rel="noopener noreferrer nofollow" target="_blank">RPC</a>
  framework that Google developed to achieve high-speed communication between microservices. gRPC has Protobuf (protocol buffers) by default which would format or serialize the messages to a specific format that will be highly packed, highly efficient data. By its virtue of being a **lightweight RPC**, **gRPC** is suited for many use-cases.
 
@@ -48,7 +43,7 @@ We will be using OpenTelemetry libraries to monitor gRPC calls in our sample Gol
 
 OpenTelemetry can only help in generating the telemetry data. In order to store, and analyze that data, you need to choose a backend analysis tool. In this article, we will monitor collected data from gRPC calls with [SigNoz](https://signoz.io/).
 
-SigNoz is a full-stack open-source APM tool that provides metrics monitoring and distributed tracing. It is built to natively support OpenTelemetry data formats. Hence, it’s a great choice for a backend analysis tool to combine with OpenTelemetry. On a side note, OpenTelemetry provides you the freedom to select a backend analysis tool of your choice.
+SigNoz is a full-stack open-source APM tool that provides metrics monitoring and [distributed tracing](https://signoz.io/distributed-tracing/). It is built to natively support OpenTelemetry data formats. Hence, it’s a great choice for a backend analysis tool to combine with OpenTelemetry. On a side note, OpenTelemetry provides you the freedom to select a backend analysis tool of your choice.
 
 ## Installing SigNoz
 
@@ -315,12 +310,12 @@ You need to generate some data to see how traces are captured in the SigNoz dash
 
 1. `cd` to the server directory and then run the go grpc server
    ```jsx
-   SERVICE_NAME=goAppServer OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=YOUR_SIGNOZ_ACCESS_TOKEN OTEL_EXPORTER_OTLP_ENDPOINT=YOUR_COLLECTOR_ENDPOINT go run .
+   SERVICE_NAME=goAppServer OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=YOUR_SIGNOZ_INGESTION_KEY OTEL_EXPORTER_OTLP_ENDPOINT=YOUR_COLLECTOR_ENDPOINT go run .
    ```
 
 2. `cd` to the client directory and then run the go grpc client
    ```jsx
-   SERVICE_NAME=goAppClient OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=YOUR_SIGNOZ_ACCESS_TOKEN OTEL_EXPORTER_OTLP_ENDPOINT=YOUR_COLLECTOR_ENDPOINT  go run .
+   SERVICE_NAME=goAppClient OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=YOUR_SIGNOZ_INGESTION_KEY OTEL_EXPORTER_OTLP_ENDPOINT=YOUR_COLLECTOR_ENDPOINT  go run .
    ```
 
 Running the client makes a set of CRUD operations in MongoDB such as create Employee, Read Employee, Update Employee and Delete Employee. We have added traces for all these operations so that it generates some monitoring data to be explored on the SigNoz dashboard.

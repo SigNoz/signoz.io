@@ -1,5 +1,5 @@
-import { Suspense } from 'react'
-import Teams from './Teams'
+import React, { Suspense } from 'react'
+import TeamsVariant from './TeamsVariant'
 
 import { Metadata } from 'next'
 
@@ -16,10 +16,10 @@ export const metadata: Metadata = {
     'Sign up for SigNoz cloud and get 30 days of free trial with access to all features.',
 }
 
-export default function TeamsPage() {
+export default async function TeamsPage() {
   return (
     <Suspense>
-      <Teams />
+      <TeamsVariant />
     </Suspense>
   )
 }

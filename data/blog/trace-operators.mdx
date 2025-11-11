@@ -1,0 +1,144 @@
+---
+
+title: Trace Operators - Define Relationships Between Spans in a Trace
+slug: trace-operators
+date: 2025-09-12
+tags: [Product]
+authors: [anushka_karmakar]
+description: Map service dependencies and validate architectural patterns without manually analyzing trace flows. Trace Operators let you query relationships between services within distributed traces using simple, intuitive syntax.
+image: /img/blog/2025/09/trace-operators.webp
+keywords: [trace operators, distributed tracing, span relationships, query builder, trace analysis, observability, OpenTelemetry]
+
+---
+
+If you're thinking something and you can think it in a generic English sentence, you can write that query and execute it with trace operators. That's basically it.
+
+## The Problem
+
+You have a trace, your full request-response map. A tree structure where a request comes into your system, goes through multiple services, hits the database, and terminates. But whenever you queried anything, you were just looking at one particular span.
+
+Let's say you want to find a database span that has an error AND originated from a frontend service. Earlier, you had to:
+
+- Query for frontend spans
+- Query for database spans with errors
+- Open multiple tabs
+- Manually check if these spans were even in the same trace
+- Figure out if they were actually related
+
+You'd be clicking through traces thinking "Okay, is this the trace with the database error? Is the parent span even frontend? Let me check another trace..."
+
+It was confusing. And to be very honest, it was a huge pain.
+
+## What Are Trace Operators
+
+<YouTube id="RKZNaXmEH0U" mute={false} />
+
+[Trace operators](https://signoz.io/docs/userguide/query-builder-v5/#multi-query-analysis-trace-operators) let you define relationships between spans in a trace. Instead of querying for individual spans and hoping they're related, you can now write queries that address:
+
+- "Give me traces where a frontend span leads to a database error"
+- "Find traces that have a cart service but DON'T have a payment service"
+- "Show me where service A calls service B which then calls service C"
+
+Earlier this wasn't possible. Now it is.
+
+## How It Actually Works
+
+Let's walk through an example. Say you're debugging a fintech platform where payments are failing.
+
+**Step 1**: Define what you're looking for
+
+Query A: `service.name = "frontend"` AND `span.kind = "root_span"`
+Query B: `service.name = "redis-manual"` AND `has_error = true`
+
+**Step 2**: Define the relationship
+
+Add trace matching: `A indirect_descendant B`
+
+**What this means**: Find traces where the frontend root span eventually leads to a Redis error somewhere down the line.
+
+That's it. You get exactly those traces. No more guessing, no more manual correlation.
+
+## The Operators You Can Use
+
+- `=>` **Direct Descendant**: B is the immediate child of A
+- `>` **Indirect Descendant**: B is somewhere in the subtree of A (can be nested deep)
+- `&&` **AND/OR**: Combine conditions (A leads to B OR C)
+- `NOT` : Exclude relationships (traces with A but NOT B)
+
+You can combine these however you want. For example:
+
+```
+A && (> B OR C)
+```
+
+This means: Frontend span that leads to either a customer service OR an error.
+
+## A More Complex Example
+
+Let's say you want to debug why some users can't complete checkout. You suspect it's either a third-party API issue or a database problem. Here's how you'd build that query:
+
+1. Frontend span at checkout: `service.name = "frontend" AND operation = "checkout"`
+2. Payment API span: `service.name = "payment-api"`
+3. Database span with error: `service.name = "database" AND has_error = true`
+
+Now connect them: `A AND (indirect_descendant B OR C)`
+
+You immediately get all traces where checkout leads to either payment API calls or database errors.
+
+## Where You Can Use This
+
+Trace operators aren't just in the Trace Explorer. They work in:
+
+- **Alerts**: Alert when frontend calls lead to database errors
+- **Dashboards**: Track specific trace patterns over time
+- **Table Views**: Group by attributes while maintaining trace relationships
+
+You can create an alert that fires when your root span takes more than 2 seconds AND has a descendant database span with an error. That's powerful.
+
+## Why This Wasn't Possible Before
+
+The earlier [query builder](https://signoz.io/blog/query-builder-v5/) wasn't built for this. We couldn't do OR operations, we couldn't define relationships, the whole architecture wasn't there. With the new query builder (launched earlier this week), we rebuilt everything from scratch. We simplified database querying, added OR functionality, and made it possible to express these relationships.
+
+To be honest, this was something we personally wanted. As people who use the product, we wanted to query traces the way we think about them. So we built it.
+
+## What This Changes
+
+Before, observability tools assumed you knew SQL or had an engineer to help you. Now, if you can describe your problem logically, you can query for it:
+
+- "Payments that fail at checkout" ✓
+- "Frontend requests that don't hit cache" ✓
+- "API calls that timeout but only from mobile clients" ✓
+
+You think it, you write it, you query it.
+
+## The Engineering Behind It
+
+We had to rewrite significant parts of our query infrastructure. The interesting part was making sure these complex queries still perform well. When you're doing relationship matching across potentially thousands of spans in a trace, efficiency matters.
+
+We're using the parent-child relationships that already exist in the trace structure, so we're not doing expensive graph traversals. The query planner figures out the optimal way to execute your relationship queries.
+
+## What's Coming Next
+
+We're working on a few things:
+
+- **Span Percentiles**: Understanding performance distributions within traces
+- **Span Events Querying**: Query on events that happen within spans
+- **More relationship operators**: We're researching what other relationships make sense
+
+The goal is simple - make traces as queryable as your mental model of the system.
+
+## Try It Out
+
+The best way to understand trace operators is to use them. Think about a problem you've been debugging:
+
+- That error that only happens for specific users
+- The performance issue in a particular flow
+- The timeout that cascades through your system
+
+Now go write that query exactly as you think about it. No SQL, no complex syntax. Just logical relationships between spans.
+
+That's [trace operators](https://signoz.io/docs/userguide/query-builder-v5/#multi-query-analysis-trace-operators). We built it because we needed it. And we are confident it will improve your querying experience too.
+
+---
+
+*We'll be at [KubeCon North America](https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america/) (November 10-13 in Atlanta) talking about [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) integrations with ArgoCD, using LLMs in production, and more. Stop by the [SigNoz](https://signoz.io/docs/introduction/) booth in the solutions showcase.*

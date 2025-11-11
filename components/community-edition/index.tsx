@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './styles.module.css'
-import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import TrackingLink from '@/components/TrackingLink'
 
 export const CommunityEdition = () => {
   return (
@@ -19,7 +19,13 @@ export const CommunityEdition = () => {
             </p>
           </div>
           <div className="h-[72px] md:h-[250px]">
-            <Link href={'https://github.com/SigNoz/signoz'}>
+            <TrackingLink 
+              href="https://github.com/SigNoz/signoz" 
+              clickType="External Click"
+              clickName="GitHub Repository Link"
+              clickText="SigNoz / signoz"
+              clickLocation="Community Edition Section"
+            >
               <div className="group flex items-center rounded border border-none bg-signoz_ink-400 p-4 text-white hover:bg-signoz_ink-300">
                 <div className="mr-4">
                   <img src="/svgs/icons/signoz.svg" alt="SigNoz Icon" />
@@ -36,7 +42,7 @@ export const CommunityEdition = () => {
                   <ArrowRight size={16} />
                 </div>
               </div>
-            </Link>
+            </TrackingLink>
           </div>
           <div className="mt-[18px] flex flex-row gap-3"></div>
         </div>

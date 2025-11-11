@@ -1,0 +1,140 @@
+---
+date: 2025-08-13
+id: missing-alerts-in-signoz
+tags : [SigNoz Cloud, Self-Host]
+title: Missing Alerts in SigNoz
+---
+
+## Problem Description
+Alerts are not firing as expected, even though the conditions for triggering them seem to be met.
+
+## Symptoms
+- Known issues or outages without corresponding alerts
+- Alerts firing much later than expected
+- Alerts never firing despite threshold breaches visible in dashboards
+- Test conditions that should trigger alerts but don't
+
+## Common Root Causes
+
+### Evaluation Pattern Misconfiguration
+**Problem:** The "all the time" pattern requires EVERY data point to meet the condition.
+
+```yaml
+# Problematic configuration:
+Alert: High CPU Usage
+Condition: cpu_usage > 80%
+Evaluation: All the time for 5 minutes
+# Won't fire if CPU drops to 79% even for 1 second
+```
+
+**Solutions:**
+```yaml
+# Option 1: Use "at least once"
+Evaluation: At least once in 5 minutes
+
+# Option 2: Use "on average" for sustained issues
+Evaluation: On average over 5 minutes
+
+# Option 3: Adjust threshold for "all the time"
+Condition: cpu_usage > 75%  # Lower threshold
+Evaluation: All the time for 5 minutes
+```
+
+### Threshold Too High/Low
+   - Review historical data to set appropriate thresholds
+   - Use percentile-based dynamic thresholds when appropriate
+
+### Missing Data Points
+
+**Problem:** Gaps in data collection prevent proper evaluation.
+
+**Common Causes:**
+- Agent/collector down
+- Network issues
+- Rate limiting
+- Sampling misconfiguration
+
+**Solutions:**
+1. **Configure No Data alerts:**
+   ```yaml
+   Alert: Service Data Missing
+   Condition: No data received
+   For: 5 minutes
+   Action: Page on-call
+   ```
+   Click on More Options under the alert conditions to set up "No Data" alerts.
+
+2. **Adjust collection intervals:**
+   ```yaml
+   # Ensure collection is more frequent than evaluation
+   collection_interval: 30s
+   alert_evaluation_window: 2m
+   ```
+
+
+### Incorrect Threshold Values
+
+**Problem:** Thresholds set based on wrong assumptions or outdated baselines, leading to alerts that never fire or fire too frequently.
+
+**Common Issues:**
+- Using static thresholds that don't account for normal variations
+- Setting thresholds based on limited time periods
+- Not considering different patterns for different time periods (business hours vs. off-hours)
+- Using absolute values instead of relative changes
+
+**Solutions:**
+
+1. **Review Historical Data:**
+   ```yaml
+   # Analyze at least 2-4 weeks of historical data
+   # Example: CPU usage analysis
+   Query: cpu_usage_percent
+   Time Range: Last 30 days
+   
+   # Find patterns:
+   # - Peak usage: 95th percentile = 75%
+   # - Normal usage: 50th percentile = 35%
+   # - Baseline: 10th percentile = 15%
+   
+   # Set threshold accordingly:
+   Alert Threshold: cpu_usage_percent > 80%  # Above 95th percentile
+   ```
+
+2. **Baseline Establishment Best Practices:**
+   - Collect data for at least 1-2 weeks before setting thresholds
+   - Account for weekly and monthly patterns
+   - Consider seasonal variations for long-running services
+   - Use different baselines for different service tiers (critical vs. non-critical)
+   - Regularly review and adjust thresholds (monthly or quarterly)
+
+### Too Specific Label Selectors
+
+**Problem:** Labels are too restrictive, matching no series.
+
+**Common Issues:**
+```yaml
+# Too specific - might not match anything
+Alert: Pod Memory High
+Filter: 
+  pod_name: "app-pod-abc123-xyz789"  # Includes random suffix
+  
+# Better - use pattern matching
+Alert: Pod Memory High
+Filter:
+  pod_name: ~"app-pod-.*"  # Regex pattern
+```
+
+### Dynamic Label Values
+
+**Problem:** Label values change frequently (like pod names with random suffixes).
+
+**Solutions:**
+```yaml
+# Use aggregation across dynamic labels
+Alert: High Memory Usage
+Query: |
+  avg by (deployment, namespace) (
+    container_memory_usage_bytes
+  ) > threshold
+# Ignores changing pod names
+```

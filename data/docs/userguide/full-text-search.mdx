@@ -1,0 +1,118 @@
+---
+date: 2025-07-31
+id: full-text-search
+tags : [SigNoz Cloud, Self-Host]
+title: Full-Text Search Guide
+description: How to use full-text search in SigNoz logs.
+---
+
+Full-text search allows you to search through log body content without specifying field names. This guide covers all aspects of text searching in SigNoz.
+
+**Note:** Full-text search is only supported for logs currently and searches only in the log body field.
+
+## Quoted Text
+
+Use quotes for exact phrase matching in the log body:
+```
+'failed to connect to database'
+```
+
+This finds logs where the body contains the exact phrase "failed to connect to database".
+
+## Unquoted Text
+
+Without quotes, each word is searched separately in the log body:
+```
+error database connection
+```
+
+This searches for logs where the body contains 'error' AND 'database' AND 'connection' (not necessarily together).
+
+## Escaping Special Characters
+
+When searching for text that contains special characters, enclose your search in single quotes and escape only these two characters:
+- Single quotes: Use `\'` 
+- Backslashes: Use `\\`
+
+Examples:
+```
+# Searching for text with single quotes
+'user\'s email address'
+'can\'t connect to database'
+'it\'s working'
+
+# Searching for text with backslashes
+'C:\\Program Files\\App'
+'escape sequence: \\n'
+'path\\to\\file'
+
+# Combining both
+'user\'s path: C:\\Users\\John'
+```
+
+Note: You don't need to escape other special characters like double quotes, brackets, or symbols when they're inside single quotes:
+```
+# These work without escaping
+'error: "connection failed"'
+'array[index] = value'
+'status != 200'
+'price: $99.99'
+```
+
+## Regular Expressions
+
+You can use any valid [RE2 syntax](https://github.com/google/re2/wiki/syntax) as the full text search.
+
+### Examples
+
+Match structured log entries:
+```
+'^\[SnapshotGenerator id=\d+\] Creating new KRaft snapshot file snapshot \d+-\d+ because .+ \d+ bytes\.$'
+```
+
+This matches log records with body like:
+```
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109202-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109163-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001109124-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001108539-0000000001 because we have replayed at least 2800 bytes.
+[SnapshotGenerator id=1] Creating new KRaft snapshot file snapshot 00000000000001108305-0000000001 because we have replayed at least 2800 bytes.
+```
+
+Match logs where the body contains email addresses:
+```
+'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+```
+
+## Combining Full-Text with Field Searches
+
+You can combine full-text search (on log body) with field-based filtering:
+```
+'payment failed' AND service.name = 'payment-service'
+```
+
+This finds logs where the body contains "payment failed" AND the service name is 'payment-service'.
+
+## Important: When to Use Quotes
+
+Always use quotes when:
+1. Searching for exact phrases
+2. Your search term contains special characters or operators
+3. You want to search for operator keywords as text
+
+Examples where quotes are necessary:
+```
+# Wrong - AND will be treated as boolean operator
+searching for AND operator
+
+# Correct - searches for the phrase including 'AND'
+'searching for AND operator'
+```
+
+## Best Practices
+
+1. **Use quotes for phrases** - Always quote multi-word searches unless you want each word searched separately
+2. **Be specific** - More specific searches perform better than broad ones
+3. **Combine with fields** - Add field filters to narrow down results
+4. **Test regex patterns** - Complex regex can be slow; test and optimize
+5. **Escape properly** - Only escape single quotes and backslashes inside quoted strings

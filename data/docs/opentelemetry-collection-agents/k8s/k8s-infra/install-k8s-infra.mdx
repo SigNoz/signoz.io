@@ -1,0 +1,406 @@
+---
+date: 2025-07-22
+tags : [SigNoz Cloud, Self-Host]
+title: K8s Infra - Install
+id: install-k8s-infra
+---
+K8s-Infra is a set of observability components that help you monitor and gain insights into your Kubernetes clusters. This guide will walk you through the steps to deploy K8s-Infra using the official [Helm Chart](https://github.com/SigNoz/charts/tree/main/charts/k8s-infra) provided by SigNoz. By following these instructions, you'll be able to collect metrics, logs, and traces from your Kubernetes workloads and send them to your SigNoz backend for analysis.
+
+To add the SigNoz Helm repository to your helm client, run the following command:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+```
+
+If the chart is already present, update the chart to the latest version:
+
+```bash
+helm repo update
+```
+
+Based on how you are running SigNoz (e.g. SigNoz Cloud, in an independent VM or Kubernetes cluster),
+you have to provide the address to send data from the above receivers.
+
+<Tabs>
+  <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+<Tabs groupId="k8s-vendor">
+  <TabItem value="generic" label="Generic" default>
+
+    For generic Kubernetes clusters, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: others
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+    otelInsecure: false
+    signozApiKey: <SIGNOZ_INGESTION_KEY>
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+    ```
+
+  </TabItem>
+  <TabItem value="eks" label="AWS EKS">
+
+    For AWS Elastic Kubernetes Service (EKS), you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: aws
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+    otelInsecure: false
+    signozApiKey: <SIGNOZ_INGESTION_KEY>
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - eks
+          - system
+    ```
+
+  </TabItem>
+  <TabItem value="gke" label="GKE (Standard)">
+
+    For Google Kubernetes Engine (GKE) Standard, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: gcp
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+    otelInsecure: false
+    signozApiKey: <SIGNOZ_INGESTION_KEY>
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - gcp
+          - system
+    ```
+
+  </TabItem>
+  <TabItem value="gke-autopilot" label="GKE (Autopilot)">
+
+    For Google Kubernetes Engine (GKE) Autopilot, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: gcp/autogke
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+    otelInsecure: false
+    signozApiKey: <SIGNOZ_INGESTION_KEY>
+    presets:
+      kubeletMetrics:
+        authType: none
+        endpoint: ${K8S_NODE_NAME}:10255
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - gcp
+          - system
+    ```
+
+  </TabItem>
+  <TabItem value="aks" label="AKS">
+
+    For Azure Kubernetes Service (AKS), you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: aks
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+    otelInsecure: false
+    signozApiKey: <SIGNOZ_INGESTION_KEY>
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - azure
+          - system
+    ```
+
+  </TabItem>
+  <TabItem value="k8s-windows" label="Kubernetes with Windows Hosts">
+
+    For Kubernetes clusters with Windows hosts, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: aws
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+    otelInsecure: false
+    signozApiKey: <SIGNOZ_INGESTION_KEY>
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - eks
+          - system
+      hostMetrics:
+        # Root path configuration is only required for Linux environments.
+        # On Windows, this must be set to empty string to prevent installation failures.
+        root_path: ""
+    otelAgent:
+      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
+      image:
+        tag: 0.123.0-windows-2022-amd64
+    otelDeployment:
+      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
+      image:
+        tag: 0.123.0-windows-2022-amd64
+    ```
+
+  </TabItem>
+</Tabs>
+
+Depending on the choice of your region for SigNoz cloud, the ingestion endpoint will vary according to this table.
+
+| Region	| Endpoint |
+| --- | --- |
+| US | ingest.us.signoz.cloud:443 |
+| IN | ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
+
+<Admonition>
+- Replace `<SIGNOZ_INGESTION_KEY>` with the one provided by SigNoz.
+- Replace `<CLUSTER_NAME>` with the name of the Kubernetes cluster or a unique identifier of the
+  cluster.
+- Replace `<DEPLOYMENT_ENVIRONMENT>` with the deployment environment of your application.
+  Example: "staging", "production", etc.
+</Admonition>
+
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
+<Tabs groupId="k8s-vendor">
+  <TabItem value="generic" label="Generic" default>
+
+    For generic Kubernetes clusters, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: others
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: <IP-or-Endpoint-of-SigNoz-OtelCollector>:4317
+    otelInsecure: true
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+    ```
+
+  </TabItem>
+  <TabItem value="eks" label="AWS EKS">
+
+    For AWS Elastic Kubernetes Service (EKS), you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: aws
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: <IP-or-Endpoint-of-SigNoz-OtelCollector>:4317
+    otelInsecure: true
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - eks
+          - system
+    ```
+
+  </TabItem>
+  <TabItem value="gke" label="GKE (Standard)">
+
+    For Google Kubernetes Engine (GKE) Standard, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: gcp
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: <IP-or-Endpoint-of-SigNoz-OtelCollector>:4317
+    otelInsecure: true
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - gcp
+          - system
+    ```
+
+  </TabItem>
+  <TabItem value="gke-autopilot" label="GKE (Autopilot)">
+
+    For Google Kubernetes Engine (GKE) Autopilot, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: gcp/autogke
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: <IP-or-Endpoint-of-SigNoz-OtelCollector>:4317
+    otelInsecure: true
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      kubeletMetrics:
+        authType: none
+        endpoint: ${K8S_NODE_NAME}:10255
+      resourceDetection:
+        detectors:
+          - gcp
+          - system
+    ```
+
+  </TabItem>
+  <TabItem value="k8s-windows" label="Kubernetes with Windows Hosts">
+
+    For Kubernetes clusters with Windows hosts, you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: aks
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: <IP-or-Endpoint-of-SigNoz-OtelCollector>:4317
+    otelInsecure: true
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - azure
+          - system
+      hostMetrics:
+        # Root path configuration is only required for Linux environments.
+        # On Windows, this must be set to empty string to prevent installation failures.
+        root_path: ""
+    otelAgent:
+      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
+      image:
+        tag: 0.123.0-windows-2022-amd64
+    otelDeployment:
+      # Use Windows-compatible OpenTelemetry Collector Contrib images for Windows hosts
+      image:
+        tag: 0.123.0-windows-2022-amd64
+    ```
+
+  </TabItem>
+  <TabItem value="aks" label="AKS">
+
+    For Azure Kubernetes Service (AKS), you can use the following configuration:
+
+    _override-values.yaml_
+
+    ```yaml
+    global:
+      cloud: aks
+      clusterName: <CLUSTER_NAME>
+      deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+    otelCollectorEndpoint: <IP-or-Endpoint-of-SigNoz-OtelCollector>:4317
+    otelInsecure: true
+    presets:
+      otlpExporter:
+        enabled: true
+      loggingExporter:
+        enabled: false
+      resourceDetection:
+        detectors:
+          - azure
+          - system
+    ```
+
+  </TabItem>
+</Tabs>
+
+<Admonition>
+- Replace `<CLUSTER_NAME>` with the name of the Kubernetes cluster or a unique
+  identifier of the cluster.
+- Replace `<DEPLOYMENT_ENVIRONMENT>` with the deployment environment of your application.
+  Example: "staging", "production", etc.
+- If the OtelCollector endpoint is secured, you would have to disable `otelInsecure`
+  configuration and often make other changes such as including either config
+  or path to the TLS certificate and private key.
+</Admonition>
+</TabItem>
+</Tabs>
+
+
+To install the `k8s-infra` chart with the above configuration, run the following command:
+
+```bash
+helm install my-release signoz/k8s-infra -f override-values.yaml
+```
+
+
+## Next Step
+- [Configure K8s-Infra OtelCollectors](/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra)
+- [Learn more about K8s-Infra](/docs/collection-agents/k8s/k8s-infra/overview)
+- [Monitor Multiple K8S Clusters](/docs/collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster)
+
+
+
+
+

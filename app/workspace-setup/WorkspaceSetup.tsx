@@ -1,10 +1,16 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, XCircleIcon } from 'lucide-react'
 import { CheckCircleIcon, HouseIcon, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
 import './workspace-setup.styles.css'
 
-function WorkspaceSetup({ isWorkspaceSetupDelayed }) {
+interface WorkspaceSetupProps {
+  isWorkspaceSetupDelayed: boolean;
+  verificationError: string | null;
+  isEmailVerified: boolean;
+}
+
+function WorkspaceSetup({ isWorkspaceSetupDelayed, verificationError, isEmailVerified }: WorkspaceSetupProps) {
   return (
     <div className="welcome-container mx-auto flex max-w-[640px] flex-col items-center py-32">
       <HouseIcon size={56} className="text-signoz_robin-500" />
@@ -12,18 +18,28 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed }) {
       <div className="mt-[28px] bg-neutral-950 text-2xl"> Setting up your workspace </div>
 
       <div className="text-md mt-[28px] w-full rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
-        <div className="flex items-center gap-4 text-sm">
-          <CheckCircleIcon size={24} /> Email verified! Looking good.
-        </div>
+        {verificationError ? (
+          <div className="flex items-center gap-4 text-sm text-signoz_cherry-500">
+            <XCircleIcon size={24} /> {verificationError}
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-4 text-sm">
+              <CheckCircleIcon size={24} /> Email verified! Looking good.
+            </div>
 
-        <div
-          className={`mt-[28px] flex items-center gap-4 text-sm ${
-            isWorkspaceSetupDelayed ? 'text-signoz_amber-500' : ''
-          }`}
-        >
-          <Loader2 size={24} className="animate-spin" /> Preparing your cloud workspace, This may
-          take a few minutes ...
-        </div>
+            {isEmailVerified && (
+              <div
+                className={`mt-[28px] flex items-center gap-4 text-sm ${
+                  isWorkspaceSetupDelayed ? 'text-signoz_amber-500' : ''
+                }`}
+              >
+                <Loader2 size={24} className="animate-spin" /> Preparing your cloud workspace, This may
+                take a few minutes ...
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {isWorkspaceSetupDelayed && (

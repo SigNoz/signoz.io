@@ -1,0 +1,95 @@
+---
+date: 2025-08-05
+id: logs_faqs
+tags : [SigNoz Cloud, Self-Host]
+title: General FAQs
+description: General FAQs about logs
+---
+
+### Q. I can't see related logs for traces.  
+A. Make sure your logs include `trace_id` and `span_id`.
+
+<details>
+<summary>Show detailed steps</summary>
+
+* If you are collecting application logs from file, ensure you emit the `trace_id` and `span_id` to those logs.
+* Once you have `trace_id` and `span_id` in your logs, parse them using the pipelines trace parser. See documentation [here](https://signoz.io/docs/logs-pipelines/guides/trace/).
+
+</details>
+
+### Q. I want to extract trace_id and span_id from my log line  
+A. You can extract these using the logs pipelines trace parser. See documentation [here](https://signoz.io/docs/logs-pipelines/guides/trace/).
+
+### Q. I want to extract an attribute from my log line  
+A. Use Logs Pipeline to parse and extract attributes.
+
+<details>
+<summary>Show detailed steps</summary>
+
+The best way to do this is using Logs Pipeline. Refer to:  
+- [Logs Pipeline Introduction](https://signoz.io/docs/logs-pipelines/introduction/)  
+- [Parse JSON logs with Pipelines](https://signoz.io/docs/logs-pipelines/guides/json/)
+
+</details>
+
+### Q. How to filter logs of same application/service from different hosts?
+A. You can identify them by adding a resource attribute.
+
+<details>
+<summary>Show detailed steps</summary>
+
+If you have a application/service which is emitting similar kind of logs but there are multiple instances of it running on different
+hosts you can identify them by adding a resource attribute.
+
+There are different ways to add a resource attribute.
+
+1. By passing it as an environment variable if you are using the opentelemetry SDK or auto-instrumentation
+    ```
+    OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name>,host.name=<host_name>
+    ```
+    Replace the value of `<service_name>` with the actual service name and `<host_name>` with the actual hostname
+2. If you have a otel collector running on each host you can add a processor to add the hostname.
+    ```yaml
+    processors:
+        resource/add_hostname:
+            attributes:
+                - key: host.name
+                  value: <host_name>
+                  action: upsert
+    ...
+    service:
+        logs:
+            processors: [resource/add_hostname, batch]
+    ```
+    replace the value of `<host_name>` with the actual hostname
+</details>
+
+### Q. I am sending logs but my logs are not visible on SigNoz  
+A. Check your exporter and collector configuration.
+
+<details>
+<summary>Show detailed troubleshooting steps</summary>
+
+- Add a console exporter at the application level (if using SDK) or at the local collector level.
+- If the issue persists, reach out to us via chatbox at the bottom right corner of your SigNoz Cloud interface.
+
+</details>
+
+### Q. How to increase the retention period of logs from x days to y days?  
+A. If you are using SigNoz Cloud, contact SigNoz support via the chatbox. Or if you are self-hosting, you can change the retention period in the SigNoz UI under Settings > Logs Retention.
+
+### Q. In java my mdc attributes are not visible in SigNoz  
+A. Ensure your logging configuration includes MDC pattern and OpenTelemetry is configured to capture MDC attributes.
+
+<details>
+<summary>Show detailed configuration steps</summary>
+
+You can get your mdc attributes by using the [appender settings][def] and passing it as `-D<property>=<value>` format.
+
+For example, for **logback** use:  
+`otel.instrumentation.logback-appender.experimental.capture-mdc-attributes=*`  
+For **log4j** use:  
+`otel.instrumentation.log4j-appender.experimental.capture-mdc-attributes=*`  
+See [this documentation][def] for more system properties.
+
+</details>

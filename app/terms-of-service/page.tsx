@@ -7,188 +7,193 @@ export const metadata: Metadata = {
   title: 'Terms of Service',
 }
 
-const markdownContent = `
-# TERMS OF SERVICE
+const markdownContent = `**TERMS AND CONDITIONS**
 
-Last updated: 17/01/2022
+These Terms and Conditions (the **“Agreement”** or **“Terms”**) are a legally binding agreement between you (“**Customer**”**,** “**You**” **or** “**Your**”) and Signoz, Inc. (“**Signoz**”, “**Company**”, “**We**”, “**Us**”), a company duly incorporated under the laws of State of Delaware, with its office 2261 Market Street \#4496, San Francisco, CA, 94114 or its subsidiaries and affiliates. You acknowledge and agree that your use of the Signoz platform through the Signoz website at [https://signoz.io/](https://signoz.io/)  (“**Website**”) will be governed by the terms of this Agreement, our \[Privacy Policy\], other related terms updated from time to time. Any updates to these Terms or our Privacy Policy shall be updated to you via email and/or text message. 
 
-1. **Introduction**
+PLEASE READ THE TERMS OF THIS AGREEMENT CAREFULLY TO ENSURE THAT YOU UNDERSTAND EACH PROVISION. PLEASE NOTE THAT THESE TERMS CONTAIN A BINDING AND MANDATORY ARBITRATION PROVISION THAT REQUIRES THE USE OF ARBITRATION ON AN INDIVIDUAL BASIS TO RESOLVE DISPUTES, AND LIMITS REMEDIES AVAILABLE TO YOU IN THE EVENT OF CERTAIN DISPUTES.
 
-Welcome to **SigNoz, Inc.** (“**Company**”, “**we**”, “**our**”, “**us**”)! As you have just clicked our Terms of Service, please pause, grab a cup of coffee and carefully read the following pages. It will take you approximately 20 minutes.
+THE COMPANY RESERVES THE RIGHT TO MODIFY THESE TERMS AT ANY TIME. ANY CHANGES WILL BE EFFECTIVE IMMEDIATELY UPON YOUR ACCEPTANCE OF THE SAID REVISED TERMS. 
 
-These Terms of Service (“**Terms**”, “**Terms of Service**”) govern your use of our web pages located at https://signoz.io operated by SigNoz, Inc.
+BY ACCESSING OR CLICKING “I AGREE” BOX, SIGNING UP, USING OUR WEBSITE AND PLATFORM, YOU AGREE TO ACCEPT ALL THE TERMS CONTAINED IN THIS AGREEMENT AND/OR ANY MODIFICATIONS MADE HERETO FROM TIME TO TIME AND NOTIFIED BY THE COMPANY. BY ACCEPTING THESE TERMS, BY CLICKING A BOX INDICATING YOUR ACCEPTANCE, YOU AGREE THAT (A) YOU HAVE READ AND UNDERSTOOD THE TERMS; B) YOU REPRESENT THAT YOU ARE AT LEAST 18 YEARS OLD; (C) YOU CAN FORM A BINDING CONTRACT; AND (D) YOU ACCEPT THIS AGREEMENT AND AGREE THAT YOU ARE LEGALLY BOUND BY THE TERMS OF USE, REFERENCED HEREIN.
 
-Our Privacy Policy also governs your use of our Service and explains how we collect, safeguard and disclose information that results from your use of our web pages. Please read it here https://signoz.io/privacy.
+IF YOU ARE ENTERING INTO THIS AGREEMENT ON BEHALF OF A COMPANY OR OTHER LEGAL ENTITY, YOU REPRESENT THAT YOU HAVE THE AUTHORITY TO BIND SUCH ENTITY AND ITS AFFILIATES TO THESE TERMS AND CONDITIONS, IN WHICH CASE THE TERMS “YOU” OR “YOUR” SHALL REFER TO SUCH ENTITY AND ITS AFFILIATES. IF YOU DO NOT HAVE SUCH AUTHORITY, OR IF YOU DO NOT AGREE WITH THIS AGREEMENT, YOU MUST NOT ACCEPT THIS AGREEMENT AND MAY NOT USE OUR WEBSITE AND PLATFORM.
 
-Your agreement with us includes these Terms and our Privacy Policy (“**Agreements**”). You acknowledge that you have read and understood Agreements, and agree to be bound of them.
+The capitalized terms not defined herein shall have the same meaning as set out in the Terms of Reference [https://signoz.io/terms-of-reference/](https://signoz.io/terms-of-reference/) . 
 
-If you do not agree with (or cannot comply with) Agreements, then you may not use the Service, but please let us know by emailing at support@signoz.io so we can try to find a solution. These Terms apply to all visitors, users and others who wish to access or use Service.
+1. **SERVICE LICENSE** 
 
-Thank you for being responsible
+1) The Customer agrees that the Company provides its services through an open-source observability tool used for monitoring and troubleshooting applications, enabling users to gain insights and enhance performance (“**Services**”) through its Platform available on [https://signoz.io/](https://signoz.io/) (“**SaaS Platform**”). The Company grants to the Customer and the Customer accepts a limited, non- exclusive and non-transferable license to access and use the SaaS Platform (version and features as stipulated in your subscription plan set out in the billing summary page) during the Term (defined below) of this Agreement. The Company may use subcontractors and consultants to perform these Services.
 
-2. **Communications**
+2) The Customer may, but is not required to, give the Company Feedback, in which case Customer gives Feedback “AS IS”. The Company may use all Feedback freely without any restriction or obligation. In addition, Company may collect and analyze Usage Data in accordance with the terms of the Privacy Policy [https://signoz.io/privacy/](https://signoz.io/privacy/) , and Company may freely use Usage Data to maintain, improve, enhance, and promote SaaS Platform and Services without restriction or obligation. However, Company may only disclose Usage Data to others as per the terms of the Privacy Policy [https://signoz.io/privacy/](https://signoz.io/privacy/) . 
 
-By using our Service, you agree to subscribe to newsletters, marketing or promotional materials and other information we may send. However, you may opt out of receiving any, or all, of these communications from us by following the unsubscribe link or by emailing at.
+3) The Customer agrees that the Intellectual Property Rights in the SaaS Platform and any modification, improvements to it or other such derivative works rest solely and exclusively with the Company. Nothing in this Agreement hereto shall be construed as an assignment of any Intellectual Property Rights in and to the SaaS Platform to the Customer.
 
-3. **Contests, Sweepstakes and Promotions**
+4) The Company may copy, display, modify, and use Customer Content only as needed to provide and maintain the services and related offerings available at [https://signoz.io/pricing/](https://signoz.io/pricing/). The Customer is responsible for the accuracy and content of Customer Content. Except for the limited rights in Clause 1 (e) and 1(f) of this Agreement. The Customer retains all right, title, and interest in and to the Customer Content. 
 
-Any contests, sweepstakes or other promotions (collectively, “**Promotions**”) made available through Service may be governed by rules that are separate from these Terms of Service. If you participate in any Promotions, please review the applicable rules as well as our Privacy Policy. If the rules for a Promotion conflict with these Terms of Service, Promotion rules will apply.
+5) Usage Data and Customer Content may be used to develop, train, or enhance artificial intelligence or machine learning models that are part of SaaS Platform and Services, including third-party components of the SaaS Platform, and Customer authorizes Company to process its Usage Data and Customer Content for such purposes. However, (a) Usage Data and Customer Content must be aggregated before it can be used for these purposes, and (b) Company will use commercially reasonable efforts consistent with industry standard technology to de-identify Usage Data and Customer Content before such use. Nothing in this clause will reduce or limit the Company’s obligations regarding Personal Data that may be contained in Usage Data or Customer Content under Applicable Data Protection Laws. Due to the nature of artificial intelligence and machine learning, information generated by these features may be incorrect or inaccurate. Services feature(s) that include artificial intelligence or machine learning models are not human and are not a substitute for human oversight.   
+     
+6) Before submitting Personal Data, the Customer must enter into read and accept the Privacy Policy with the Company which is available at [https://signoz.io/privacy/](https://signoz.io/privacy/) . The Company and the Customer shall comply with the obligations under the Privacy Policy, and the terms of the Privacy Policy shall control rights and obligations of the Company and the Customer in relation to the Personal Data.   
+ 
 
-4. **Content**
 
-Our Service allows you to post, link, store, share and otherwise make available certain information, text, graphics, videos, or other material (“**Content**”). You are responsible for Content that you post on or through Service, including its legality, reliability, and appropriateness.
+2. **ACCEPTABLE USE OF THE WEBSITE AND SAAS PLATFORM** 
 
-By posting Content on or through Service, You represent and warrant that: (i) Content is yours (you own it) and/or you have the right to use it and the right to grant us the rights and license as provided in these Terms, and (ii) that the posting of your Content on or through Service does not violate the privacy rights, publicity rights, copyrights, contract rights or any other rights of any person or entity. We reserve the right to terminate the account of anyone found to be infringing on a copyright.
+   1) The Customer is permitted to access the Services  on a subscription basis. A monthly or annual bill shall be raised which shall be calculated on the basis of the amount of data use as per the terms of pricing available at [https://signoz.io/pricing/](https://signoz.io/pricing/). The Customer must use the SaaS Platform (a) only in a manner and for the purposes for which the SaaS Platform was designed in accordance with subscription plan and Services; and (b) only on Customer Content for its sole and exclusive benefit. 
 
-You retain any and all of your rights to any Content you submit, post or display on or through Service and you are responsible for protecting those rights. We take no responsibility and assume no liability for Content you or any third party posts on or through Service. However, by posting Content using Service you grant us the right and license to use, modify, publicly perform, publicly display, reproduce, and distribute such Content on and through Service. You agree that this license includes the right for us to make your Content available to other users of Service, who may also use your Content subject to these Terms.
+   2) The Customer shall be responsible for all actions of the Users and the Customer Content generated on the SaaS Platform. The Customer shall ensure that all Users’ comply with the Terms of this Agreement. The Customer and Users’ shall ensure the confidentiality of their passwords and login credentials. The Customer will promptly notify the Company if it suspects or knows of any fraudulent activity with its accounts, passwords, or credentials, or if they become compromised.
 
-SigNoz, Inc. has the right but not the obligation to monitor and edit all Content provided by users.
+   3) All uses not permitted under the Clause 2 of this Agreement are prohibited. By way of example and without limitation, the Customer may not: (a) in any way use the SaaS Platform that violates any applicable national or international law or regulation; (b) utilize the SaaS Platform for the purpose of exploiting, harming, or attempting to exploit or harm minors in any way by exposing them to inappropriate content or otherwise; (c) transmit, or procure the sending of, any advertising or promotional material, including any “junk mail”, “chain letter,” “spam”, or any other similar solicitation using the SaaS Platform; (d) permit use of the SaaS Platform to impersonate or attempt to impersonate the Company, a Company employee, another User, or any other person or entity; (e) operate the SaaS Platform in any way that infringes upon the rights of others, or in any way is illegal, threatening, fraudulent, or harmful, or in connection with any unlawful, illegal, fraudulent, or harmful purpose or activity; or (f) use the SaaS Platform to engage in any other conduct that restricts or inhibits anyone’s use or enjoyment of Service, or which, as determined by us, may harm or offend the Company or Users or expose them to liability.
 
-In addition, Content found on or through this Service are the property of SigNoz, Inc. or used with permission. You may not distribute, modify, transmit, reuse, download, repost, copy, or use said Content, whether in whole or in part, for commercial purposes or for personal gain, without express advance written permission from us.
+   4) The Customer agrees, at its own expense, to operate in full compliance with all governmental laws, regulations and requirements applicable to the duties conducted hereunder. It shall be the responsibility of the Customer to pay for any necessary permits and approvals as may be necessary for the performance of the Services under this Agreement. 
 
-5. **Prohibited Uses**
+3. **Warranty** 
 
-You may use Service only for lawful purposes and in accordance with Terms. You agree not to use Service:
+   1) **SaaS Platform Warranty:**
 
-1. In any way that violates any applicable national or international law or regulation.
-2. For the purpose of exploiting, harming, or attempting to exploit or harm minors in any way by exposing them to inappropriate content or otherwise.
-3. To transmit, or procure the sending of, any advertising or promotional material, including any “junk mail”, “chain letter,” “spam,” or any other similar solicitation.
-4. To impersonate or attempt to impersonate Company, a Company employee, another user, or any other person or entity.
-5. In any way that infringes upon the rights of others, or in any way is illegal, threatening, fraudulent, or harmful, or in connection with any unlawful, illegal, fraudulent, or harmful purpose or activity.
-6. To engage in any other conduct that restricts or inhibits anyone’s use or enjoyment of Service, or which, as determined by us, may harm or offend Company or users of Service or expose them to liability.
+      1) The Company warrants that the SaaS Platform, in unmodified form, will conform in all material respects to the services specifications stipulated in documentation accompanying the SaaS Platform. The Company makes no other warranty or representation relating to the SaaS Platform or its performance. The Customer acknowledges that the output generated by the SaaS Platform should be used strictly for internal business purposes.
 
-Additionally, you agree not to:
+      2) If the Company gives Customer access to a Beta Product, the Beta Product is provided “AS IS” and sub-clause (a) of Clause 3 of this Agreement does not apply to any Beta Products. The Customer acknowledges that Beta Products are experimental in nature and may be modified or removed at Provider's discretion with or without notice.
 
-1. Use Service in any manner that could disable, overburden, damage, or impair Service or interfere with any other party’s use of Service, including their ability to engage in real time activities through Service.
-2. Use any robot, spider, or other automatic device, process, or means to access Service for any purpose, including monitoring or copying any of the material on Service.
-3. Use any manual process to monitor or copy any of the material on Service or for any other unauthorized purpose without our prior written consent.
-4. Use any device, software, or routine that interferes with the proper working of Service.
-5. Introduce any viruses, trojan horses, worms, logic bombs, or other material which is malicious or technologically harmful.
-6. Attempt to gain unauthorized access to, interfere with, damage, or disrupt any parts of Service, the server on which Service is stored, or any server, computer, or database connected to Service.
-7. Attack Service via a denial-of-service attack or a distributed denial-of-service attack.
-8. Take any action that may damage or falsify Company rating.
-9. Otherwise attempt to interfere with the proper working of Service.
+   2) **Service Warranty:**
 
-6. **Analytics**
+The Company does not warrant in any form the results or achievements of the Services provided. The Company only warrants that the Services will be performed by qualified personnel in a professional and workmanlike manner in accordance with the generally accepted industry standards and practices. 
 
-We may use third-party Service Providers to monitor and analyze the use of our Service.
+3) **Limitation of Warranty:**
 
-**Google Analytics**
+THE WARRANTY SET FORTH IN CLAUSE 3 OF THESE TERMS AND CONDITIONS, IS EXCLUSIVE AND IS IN LIEU OF ALL OTHER WARRANTIES, EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE WITH RESPECT TO THE SAAS PLATFORM, SERVICES PROVIDED UNDER THESE TERMS AND CONDITIONS, OR AS TO THE RESULTS WHICH MAY BE OBTAINED THEREFROM. THE COMPANY DISCLAIMS ANY AND ALL IMPLIED WARRANTIES INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR AGAINST INFRINGEMENT. THE SAAS PLATFORM AND SERVICES ARE PROVIDED “AS IS” AND THE  COMPANY MAKES NO WARRANTIES OR REPRESENTATIONS ABOUT THE ACCURACY OR COMPLETENESS OF THE SERVICES’ CONTENT OR THE CONTENT OF ANY SAAS PLATFORM, THIRD PARTY SERVICES, WEBSITES OR MOBILE APPLICATIONS, CUSTOMER DATA LINKED TO AND/OR USED IN CONJUNCTION WITH THE SAAS PLATFORM AND THE  COMPANY WILL ASSUME NO LIABILITY OR RESPONSIBILITY FOR ANY (1) ERRORS, MISTAKES, OR INACCURACIES OF CUSTOMER DATA AND MATERIALS, (2) PERSONAL INJURY OR PROPERTY DAMAGE, OF ANY NATURE WHATSOEVER, RESULTING FROM THE CUSTOMER’S ACCESS TO AND USE OF THE SAAS PLATFORM, (3) ANY UNAUTHORIZED ACCESS TO OR USE OF CUSTOMER’S SERVERS AND/OR ANY AND ALL PERSONAL INFORMATION AND/OR FINANCIAL INFORMATION STORED THEREIN, (4) ANY INTERRUPTION OR CESSATION OF TRANSMISSION TO OR FROM THE SAAS PLATFORM, (5) ANY BUGS, VIRUSES, TROJAN HORSES, OR THE LIKE WHICH MAY BE TRANSMITTED TO OR THROUGH THE SAAS PLATFORM BY ANY THIRD PARTY, AND/OR (6) ANY ERRORS OR OMISSIONS IN ANY CONTENT AND MATERIALS OR FOR ANY LOSS OR DAMAGE OF ANY KIND INCURRED AS A RESULT OF THE USE OF ANY CONTENT POSTED, TRANSMITTED, OR OTHERWISE MADE AVAILABLE VIA THE SAAS PLATFORM OR THE SERVICES. CUSTOMER SHALL BE SOLELY RESPONSIBLE FOR ENSURING THAT THERE ARE NECESSARY BACKUPS OF THE CUSTOMER DATA. 
 
-Google Analytics is a web analytics service offered by Google that tracks and reports website traffic. Google uses the data collected to track and monitor the use of our Service. This data is shared with other Google services. Google may use the collected data to contextualise and personalise the ads of its own advertising network.
+4) **Exclusive Remedy**:
 
-For more information on the privacy practices of Google, please visit the Google Privacy Terms web page: [https://policies.google.com/privacy?hl=en](https://policies.google.com/privacy?hl=en)
+CUSTOMER’S EXCLUSIVE REMEDY FOR BREACH OF WARRANTY UNDER CLAUSE 3 OF THE TERMS IS REPERFORMANCE OF THE SERVICES, OR IF REPERFORMANCE IS NOT POSSIBLE OR CONFORMING, REFUND OF AMOUNTS PAID UNDER THESE TERMS AND CONDITIONS FOR SUCH NON-CONFORMING SERVICES.
 
-We also encourage you to review the Google's policy for safeguarding your data: [https://support.google.com/analytics/answer/6004245](https://support.google.com/analytics/answer/6004245).
+4. **PAYMENT TERMS**  
+     
+   1) The Company shall issue invoices to the Customer pursuant to its pricing terms available at  [https://signoz.io/pricing/](https://signoz.io/pricing/) including for any reasonable expenses incurred by the Company in connection with its performance of the Services and access to SaaS Platform as per the subscription availed. 
 
-7. **No Use By Minors**
+   2) The Customer shall be liable to pay all taxes, duties and levies arising out of the Services offered by the Company. 
 
-Service is intended only for access and use by individuals at least eighteen (18) years old. By accessing or using any of Company, you warrant and represent that you are at least eighteen (18) years of age and with the full authority, right, and capacity to enter into this agreement and abide by all of the terms and conditions of Terms. If you are not at least eighteen (18) years old, you are prohibited from both the access and usage of Service.
+   3) The Customer will pay invoices in US Dollar within thirty (30) days of the date of the Company’s invoice. Payments must be made by wire transfer or such other method as may be agreed upon by the Company. The Customer shall have no right of offset or withholding under these Terms. 
 
-8. **Accounts**
+   4) The Customer shall be liable to pay interest charges on any amounts which remains unpaid by Customer, from the date due until paid, at the rate of one and one-half percent (1.5%) per month, or the highest interest rate allowable by law (whichever is less), payable monthly.
 
-When you create an account with us, you guarantee that you are above the age of 18, and that the information you provide us is accurate, complete, and current at all times. Inaccurate, incomplete, or obsolete information may result in the immediate termination of your account on Service.
+   5) The Company shall have the right to withhold further Services without further notice and incurring any liability, if any amounts due to the Company from Customer becomes past due until all invoices have been paid in full. 
 
-You are responsible for maintaining the confidentiality of your account and password, including but not limited to the restriction of access to your computer and/or account. You agree to accept responsibility for any and all activities or actions that occur under your account and/or password, whether your password is with our Service or a third-party service. You must notify us immediately upon becoming aware of any breach of security or unauthorized use of your account.
+5. **CONFIDENTIALITY** 
 
-You may not use as a username the name of another person or entity or that is not lawfully available for use, a name or trademark that is subject to any rights of another person or entity other than you, without appropriate authorization. You may not use as a username any name that is offensive, vulgar or obscene.
+1) During the term of this Agreement and for two (2) years after the termination or expiration of this Agreement, neither the Company nor the Customer shall make use of the other’s Confidential Information (as hereinafter defined) for purposes other than the performance of its obligations under this Agreement. Each party shall protect the other party’s Confidential Information by using the same degree of care as it uses to protect its own information of a like nature, but no less than a reasonable degree of care. The receiving party shall only disclose the Confidential Information to its employees who have a need to know such Confidential Information in order to perform its obligations under this Agreement.  “**Confidential Information**” shall mean all information of either party not generally available to the public which is provided to the receiving party by the disclosing party or which the receiving party has access to or discovers in the performance of this Agreement, including but without limitation, all information relating to a party’s Services, business and operations including, but not limited to, business plans, financial records, customers, suppliers, vendors, products, costs, sources, strategies, inventions, procedures, forecasts, sales materials and data, technical advice or knowledge, contractual agreements, pricing, product specifications, trade secrets, procedures, distribution methods, inventories, marketing strategies, algorithms, designs, drawings, work sheets, blueprints, manufacturing processes, computer programs and systems and know-how or other intellectual property of a party and its affiliates that may be at any time furnished, communicated or delivered by a party to the other Party, whether in oral, tangible, electronic or other form. All Confidential Information shall remain the property of the disclosing party.
 
-We reserve the right to refuse service, terminate accounts, remove or edit content, or cancel orders in our sole discretion.
+2) Confidential Information shall not include any information that: (a) was rightfully known to a party prior to disclosure by the other party; (b) is rightfully obtained by a party from a third party; (c) is made available by the disclosing party to the public without restrictions; (d) is disclosed by a party with prior written permission of the other party; (e) is independently developed or learned by the recipient party through legitimate means; (f) is disclosed by the disclosing party to a third party without a duty of confidentiality on the third party; or (g) is disclosed pursuant to any applicable laws, regulations, or order of a court of competent jurisdiction, or by the recipient in defence of a claim against the recipient. Each party will provide reasonable prior notice to the other, unless prohibited by applicable law, if it is required to disclose any of the other party’s Confidential Information under operation of law, and such disclosure shall not constitute a breach of this Agreement.
 
-9. **Intellectual Property**
+6. **INDEMNIFICATION** 
 
-Service and its original content (excluding Content provided by users), features and functionality are and will remain the exclusive property of SigNoz, Inc. and its licensors. Service is protected by copyright, trademark, and other laws of the United States. Our trademarks and trade dress may not be used in connection with any product or service without the prior written consent of SigNoz, Inc..
+   1) The  Company hereby agrees to defend and hold harmless the Customer and its affiliates, officers, employees and directors, from and against any and all third party demands, claims, actions, proceedings, damages, liabilities, losses, fees, costs or expenses (including without limitation reasonable attorneys’ fees and the costs of any investigation) directly or indirectly arising from (i) any claim that the SaaS Platform infringes any third party Intellectual Property Right, (iv) failure of the Company to comply with any applicable law.
 
-10. **Copyright Policy**
+   2) Customer hereby agrees to defend and hold harmless the  Company and its affiliates, officers, employees and directors, from and against any and all third party demands, claims, actions, proceedings, damages, liabilities, losses, fees, costs or expenses (including without limitation reasonable attorneys’ fees and the costs of any investigation) directly or indirectly arising from or in any way connected with (i) any use of the SaaS Platform that is not in accordance with these Terms, or (ii) failure of the Customer to comply with any applicable law. 
 
-We respect the intellectual property rights of others. It is our policy to respond to any claim that Content posted on Service infringes on the copyright or other intellectual property rights (“**Infringement**”) of any person or entity.
+   3) The party seeking indemnification shall provide the indemnifying Party with prompt written notice of any claim and give complete control of the defense and settlement to the indemnifying Party, and shall cooperate with the indemnifying party, its insurance the Company, and its legal counsel in its defense of such claim(s). This indemnity shall not cover any claim in which there is a failure to give the indemnifying party prompt notice to the extent such lack of notice prejudices the defense of the claim.
 
-If you are a copyright owner, or authorized on behalf of one, and you believe that the copyrighted work has been copied in a way that constitutes copyright infringement, please submit your claim via email to support@signoz.io, with the subject line: “Copyright Infringement” and include in your claim a detailed description of the alleged Infringement as detailed below, under “DMCA Notice and Procedure for Copyright Infringement Claims”
+   4) If a claim is made that the SaaS Platform, or any portion thereof, infringes any patent, copyright, trade secret, or other proprietary right, the Company, at its sole expense and option, shall either: (i) procure for the Customer the right to exercise the rights and licenses granted hereunder with respect to the SaaS Platform; (ii) modify the SaaS Platform to make it non-infringing but continue to meet the product specifications; (iii) replace the SaaS Platform with equivalent but non-infringing software of like functionality that meets the product specifications; or (iv) terminate this Agreement and provide a prorated refund of the fees to Customer upon the return to the Company of the infringing SaaS Platform; provided, however, that the liability of the Company pursuant to the Clause 6(d) of this Agreement shall be subject to the limitations set forth in Clause 7 of this Agreement, and the Company shall have no liability for any claim of infringement based on use of any modified, altered and/or derivative version of the SaaS Platform and/or use of the SaaS Platform in conjunction with any third party product or services not provided by the  Company.
 
-You may be held accountable for damages (including costs and attorneys' fees) for misrepresentation or bad-faith claims on the infringement of any Content found on and/or through Service on your copyright.
+   5) CLAUSE 6 OF THE AGREEMENT STATES THE ENTIRE OBLIGATION AND THE EXCLUSIVE REMEDIES WITH RESPECT TO THE PARTIES’ INDEMNIFICATION OBLIGATIONS PURSUANT TO THIS AGREEMENT.
 
-11. **DMCA Notice and Procedure for Copyright Infringement Claims**
+7. **LIMITATION OF LIABILITY** 
 
-You may submit a notification pursuant to the Digital Millennium Copyright Act (DMCA) by providing our Copyright Agent with the following information in writing (see 17 U.S.C 512(c)(3) for further detail):
+   1) IN NO EVENT SHALL THE COMPANY AND CUSTOMER BE LIABLE UNDER THESE TERMS TO EACH OTHER FOR ANY INCIDENTAL, CONSEQUENTIAL, INDIRECT, STATUTORY, SPECIAL, EXEMPLARY OR PUNITIVE DAMAGES, INCLUDING, BUT NOT LIMITED TO, LOST PROFITS, LOSS OF USE, LOSS OF TIME, INCONVENIENCE, LOST BUSINESS OPPORTUNITIES, DAMAGE TO GOODWILL OR REPUTATION, AND COSTS OF COVER, REGARDLESS OF WHETHER SUCH LIABILITY IS BASED ON BREACH OF CONTRACT, TORT, STRICT LIABILITY OR OTHERWISE, AND EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES OR SUCH DAMAGES COULD HAVE BEEN REASONABLY FORESEEN.IN NO EVENT SHALL EITHER PARTY’S LIABILITY EXCEED THE FEES PAID BY CUSTOMER FOR THE SAAS PLATFORM IN THE PRECEDING TWELVE (12) MONTHS IMMEDIATELY PRECEDING THE CAUSE OF ACTION.
 
-1. an electronic or physical signature of the person authorized to act on behalf of the owner of the copyright's interest;
-2. a description of the copyrighted work that you claim has been infringed, including the URL (i.e., web page address) of the location where the copyrighted work exists or a copy of the copyrighted work;
-3. identification of the URL or other specific location on Service where the material that you claim is infringing is located;
-4. your address, telephone number, and email address;
-5. a statement by you that you have a good faith belief that the disputed use is not authorized by the copyright owner, its agent, or the law;
-6. a statement by you, made under penalty of perjury, that the above information in your notice is accurate and that you are the copyright owner or authorized to act on the copyright owner's behalf.
+   2) NO ACTION SHALL BE BROUGHT FOR ANY CLAIM RELATING TO OR ARISING OUT OF THESE TERMS MORE THAN ONE (1) YEAR AFTER THE ACCRUAL OF SUCH CAUSE OF ACTION, EXCEPT FOR MONEY DUE ON AN OPEN ACCOUNT.
 
-You can contact our Copyright Agent via email at support@signoz.io
+8. **CUSTOMER COOPERATION**
 
-12. **Error Reporting and Feedback**
+   1) The Customer agrees to comply with all reasonable requests of the Company and shall provide the Company’s personnel with access to all documents, facilities, and subscription accounts, as may be reasonably necessary for the performance of the Services under these Terms. Customer further agrees to furnish without charge adequate space at Customer’s premises for use by the Company’s personnel while performing the Services if such Service requires the Company’s personnel to be on the Customer’s premises. 
 
-You may provide us directly at support@signoz.io with information and feedback concerning errors, suggestions for improvements, ideas, problems, complaints, and other matters related to our Service (“**Feedback**”). You acknowledge and agree that: (i) you shall not retain, acquire or assert any intellectual property right or other right, title or interest in or to the Feedback; (ii) Company may have development ideas similar to the Feedback; (iii) Feedback does not contain confidential information or proprietary information from you or any third party; and (iv) Company is not under any obligation of confidentiality with respect to the Feedback. In the event the transfer of the ownership to the Feedback is not possible due to applicable mandatory laws, you grant Company and its affiliates an exclusive, transferable, irrevocable, free-of-charge, sub-licensable, unlimited and perpetual right to use (including copy, modify, create derivative works, publish, distribute and commercialize) Feedback in any manner and for any purpose.
+   2) The Customer acknowledges that the performance of the Services is contingent on the cooperation of the Customer. In the unlikely event that the Customer does not cooperate or delays in providing the assistance sought by the Company for any reason, the Company may withhold further Services until the Customer cooperates and such withholding of Services shall not be considered a breach or default of any of the Company’s obligations hereunder. 
 
-13. **Links To Other Web Sites**
+9. **TERM AND TERMINATION** 
 
-Our Service may contain links to third party web sites or services that are not owned or controlled by SigNoz, Inc.
+   1) **Term:**
 
-SigNoz, Inc. has no control over, and assumes no responsibility for the content, privacy policies, or practices of any third party web sites or services. We do not warrant the offerings of any of these entities/individuals or their websites.
+The Term of the Agreement will begin as of the Effective Date and will terminate depending on the tenure of the plan accessed by you, the details of which are available at [https://signoz.io/pricing/](https://signoz.io/pricing/), unless earlier terminated or extended in accordance with the provisions of the Agreement. 
 
-YOU ACKNOWLEDGE AND AGREE THAT SIGNOZ, INC. SHALL NOT BE RESPONSIBLE OR LIABLE, DIRECTLY OR INDIRECTLY, FOR ANY DAMAGE OR LOSS CAUSED OR ALLEGED TO BE CAUSED BY OR IN CONNECTION WITH USE OF OR RELIANCE ON ANY SUCH CONTENT, GOODS OR SERVICES AVAILABLE ON OR THROUGH ANY SUCH THIRD PARTY WEB SITES OR SERVICES.
+2) **Termination for Breach:**
 
-WE STRONGLY ADVISE YOU TO READ THE TERMS OF SERVICE AND PRIVACY POLICIES OF ANY THIRD PARTY WEB SITES OR SERVICES THAT YOU VISIT.
+The Company and the Customer shall have the right to terminate these Terms at any time in the event of a breach by the other party of a material covenant, commitment or obligation under these Terms that remains uncured: (i) in the event of a monetary breach, seven (7) calendar days following written notice thereof; and (ii) in the event of a non-monetary breach after thirty (30) days following written notice thereof. Such termination shall be effective immediately and automatically upon the expiration of the applicable notice period, without further notice or action by either party. Termination shall be in addition to any other remedies that may be available to the non-breaching party.
 
-14. **Disclaimer Of Warranty**
+3) **Obligations Upon Termination:**
 
-THESE SERVICES ARE PROVIDED BY COMPANY ON AN “AS IS” AND “AS AVAILABLE” BASIS. COMPANY MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, AS TO THE OPERATION OF THEIR SERVICES, OR THE INFORMATION, CONTENT OR MATERIALS INCLUDED THEREIN. YOU EXPRESSLY AGREE THAT YOUR USE OF THESE SERVICES, THEIR CONTENT, AND ANY SERVICES OR ITEMS OBTAINED FROM US IS AT YOUR SOLE RISK.
+Termination of this Agreement for any reason shall not discharge either the Company or the Customer of its liability for obligations incurred hereunder and amounts unpaid at the time of such termination. The Customer shall pay the Company for all licenses granted under the Clause of Service License of this Agreement and the Services rendered prior to the effective date of termination. Upon termination the Company and the Customer shall return the other’s Confidential Information in its possession at the time of termination. Upon the termination, Customer shall promptly/return delete the SaaS Platform, any equipment, materials or other property of the Company which are in Customer’s possession or control. Upon the Customer’s request, Company shall delete all Usage Data, Personal Data, and/or Customer Content within sixty (60) Days. 
 
-NEITHER COMPANY NOR ANY PERSON ASSOCIATED WITH COMPANY MAKES ANY WARRANTY OR REPRESENTATION WITH RESPECT TO THE COMPLETENESS, SECURITY, RELIABILITY, QUALITY, ACCURACY, OR AVAILABILITY OF THE SERVICES. WITHOUT LIMITING THE FOREGOING, NEITHER COMPANY NOR ANYONE ASSOCIATED WITH COMPANY REPRESENTS OR WARRANTS THAT THE SERVICES, THEIR CONTENT, OR ANY SERVICES OR ITEMS OBTAINED THROUGH THE SERVICES WILL BE ACCURATE, RELIABLE, ERROR-FREE, OR UNINTERRUPTED, THAT DEFECTS WILL BE CORRECTED, THAT THE SERVICES OR THE SERVER THAT MAKES IT AVAILABLE ARE FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS OR THAT THE SERVICES OR ANY SERVICES OR ITEMS OBTAINED THROUGH THE SERVICES WILL OTHERWISE MEET YOUR NEEDS OR EXPECTATIONS.
+10. **NON-SOLICITATION**
 
-COMPANY HEREBY DISCLAIMS ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, STATUTORY, OR OTHERWISE, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, NON-INFRINGEMENT, AND FITNESS FOR PARTICULAR PURPOSE.
+The Customers agree not directly solicit or induce any person who performs Services hereunder on behalf of the Company to leave the employment of the Company. The Customer is not prohibited from responding to or hiring the Company’s employees who inquire about employment on their own accord or in response to a public advertisement or employment solicitation in general.
 
-THE FOREGOING DOES NOT AFFECT ANY WARRANTIES WHICH CANNOT BE EXCLUDED OR LIMITED UNDER APPLICABLE LAW.
+11. **RELATIONSHIP OF PARTIES**
 
-15. **Limitation Of Liability**
+The relationship of the Company and the Customer is that of independent contractors. Nothing in these Terms shall be construed to create or imply an employment or agency relationship or a partnership or joint venture relationship between the Company and Customer. The Company and Customer do not have any authority to bind or contract any obligation in the name of or on account of each other or to incur any liability or make any statements, representations, warranties or commitments on behalf of each other or otherwise. The Company and the Customer shall be solely responsible for payment of the salaries of its employees and personnel (including withholding of income taxes and social security), workers compensation, and all other employment benefits.
 
-EXCEPT AS PROHIBITED BY LAW, YOU WILL HOLD US AND OUR OFFICERS, DIRECTORS, EMPLOYEES, AND AGENTS HARMLESS FOR ANY INDIRECT, PUNITIVE, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGE, HOWEVER IT ARISES (INCLUDING ATTORNEYS' FEES AND ALL RELATED COSTS AND EXPENSES OF LITIGATION AND ARBITRATION, OR AT TRIAL OR ON APPEAL, IF ANY, WHETHER OR NOT LITIGATION OR ARBITRATION IS INSTITUTED), WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE, OR OTHER TORTIOUS ACTION, OR ARISING OUT OF OR IN CONNECTION WITH THIS AGREEMENT, INCLUDING WITHOUT LIMITATION ANY CLAIM FOR PERSONAL INJURY OR PROPERTY DAMAGE, ARISING FROM THIS AGREEMENT AND ANY VIOLATION BY YOU OF ANY FEDERAL, STATE, OR LOCAL LAWS, STATUTES, RULES, OR REGULATIONS, EVEN IF COMPANY HAS BEEN PREVIOUSLY ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. EXCEPT AS PROHIBITED BY LAW, IF THERE IS LIABILITY FOUND ON THE PART OF COMPANY, IT WILL BE LIMITED TO THE AMOUNT PAID FOR THE PRODUCTS AND/OR SERVICES, AND UNDER NO CIRCUMSTANCES WILL THERE BE CONSEQUENTIAL OR PUNITIVE DAMAGES. SOME STATES DO NOT ALLOW THE EXCLUSION OR LIMITATION OF PUNITIVE, INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THE PRIOR LIMITATION OR EXCLUSION MAY NOT APPLY TO YOU.
+12. **FORCE MAJEURE**
 
-16. **Termination**
+Neither the Company nor the Customer shall be liable hereunder for any failure or delay in the performance of its obligations under these Terms, except for the payment of money, if such failure or delay is on account of causes beyond its reasonable control, including civil commotion, war, fires, floods, accident, earthquakes, inclement weather, telecommunications line failures, electrical outages, network failures, governmental regulations or controls, casualty, strikes or labor disputes, pandemics, epidemics, local disease outbreaks, public health emergencies, communicable diseases, quarantines, terrorism, acts of God, or other similar or different occurrences beyond the reasonable control of the Party so defaulting or delaying in the performance of these Terms, for so long as such force majeure event is in effect. Each Party shall use reasonable efforts to notify the other party of the occurrence of such an event within five (5) Business Days of its occurrence, which notice shall include a description of the force majeure event and an estimate of the length of time such event will delay or prevent performance hereunder.
 
-We may terminate or suspend your account and bar access to Service immediately, without prior notice or liability, under our sole discretion, for any reason whatsoever and without limitation, including but not limited to a breach of Terms.
+13. **PARTIAL INVALIDITY**
 
-If you wish to terminate your account, you may simply discontinue using Service.
+In the event that any part or portion of this Agreement is deemed to be invalid, illegal, or otherwise unenforceable: (1) the Company and the Customer shall use all reasonable efforts to negotiate in good faith to amend the term to eliminate any such invalidity, illegality, or unenforceability to the extent practically possible, taking into full account their original intent when entering into this Agreement; and (2) the remaining provisions of the Agreement shall continue in full force and effect.
 
-All provisions of Terms which by their nature should survive termination shall survive termination, including, without limitation, ownership provisions, warranty disclaimers, indemnity and limitations of liability.
+14. **PUBLICITY** 
 
-17. **Governing Law**
+Subject to the confidentiality provisions set forth herein, the Company shall be free to disclose to the public that Customer is a client of the Company and may use Customer’s name, logo and other trademarks to make such a statement. Nothing in these Terms shall deem to grant either party any right over the trademark or other intellectual property rights associated with the publication of the name, logo or other trademarks strictly for marketing purposes. 
 
-These Terms shall be governed and construed in accordance with the laws of State of Delaware without regard to its conflict of law provisions.
+15. **ASSIGNMENT**
 
-Our failure to enforce any right or provision of these Terms will not be considered a waiver of those rights. If any provision of these Terms is held to be invalid or unenforceable by a court, the remaining provisions of these Terms will remain in effect. These Terms constitute the entire agreement between us regarding our Service and supersede and replace any prior agreements we might have had between us regarding Service.
+The Customer may not assign, delegate or otherwise transfer these Terms or its obligations or benefits hereunder, in whole or in part, without the prior written consent of the Company. Any purported assignment or delegation in violation of this clause shall be null and void. No permitted assignment or delegation will relieve Customer of its obligations under these Terms, and as such, Customer shall remain primarily liable in connection therewith. 
 
-18. **Changes To Service**
+16. **NOTICES/COMMUNICATIONS**
 
-We reserve the right to withdraw or amend our Service, and any service or material we provide via Service, in our sole discretion without notice. We will not be liable if for any reason all or any part of Service is unavailable at any time or for any period. From time to time, we may restrict access to some parts of Service, or the entire Service, to users, including registered users.
+All notices, requests, consents, claims, demands, waivers, and other communications hereunder shall be in writing and addressed to the Parties at the address provided below:
 
-19. **Amendments To Terms**
+If to the Company
 
-We may amend Terms at any time by posting the amended terms on this site. It is your responsibility to review these Terms periodically.
+Name: Pranay Prateek
 
-Your continued use of the Platform following the posting of revised Terms means that you accept and agree to the changes. You are expected to check this page frequently so you are aware of any changes, as they are binding on you.
+Title: Chief Executive Officer
 
-By continuing to access or use our Service after any revisions become effective, you agree to be bound by the revised terms. If you do not agree to the new terms, you are no longer authorized to use Service.
+Address: 2261 Market Street \#4496, San Francisco, CA, 94114 
 
-20. **Waiver And Severability**
+Email: [support@signoz.io](mailto:support@signoz.io) 
 
-No waiver by Company of any term or condition set forth in Terms shall be deemed a further or continuing waiver of such term or condition or a waiver of any other term or condition, and any failure of Company to assert a right or provision under Terms shall not constitute a waiver of such right or provision.
+All Notices shall be delivered either by email, personal delivery, nationally recognized overnight courier (with all fees prepaid), or certified or registered mail (return receipt requested, postage prepaid). Except as otherwise provided in this Agreement, a notice is effective only (1) upon receipt by the receiving party; and (2) if the party giving the notice has complied with the requirements of this clause.
 
-If any provision of Terms is held by a court or other tribunal of competent jurisdiction to be invalid, illegal or unenforceable for any reason, such provision shall be eliminated or limited to the minimum extent such that the remaining provisions of Terms will continue in full force and effect.
+17. **SURVIVAL**
 
-21. **Acknowledgement**
+Following the termination of this Agreement, any provision set forth herein which, by its very nature, is intended to survive any expiration or termination hereof, shall so survive, including without limitation, the provisions respecting ownership of work product, confidentiality, indemnification, limitation of liability, non-solicitation, accrued payment obligations.
 
-BY USING SERVICE OR OTHER SERVICES PROVIDED BY US, YOU ACKNOWLEDGE THAT YOU HAVE READ THESE TERMS OF SERVICE AND AGREE TO BE BOUND BY THEM.
+18. **WAIVER**
 
-22. **Contact Us**
+No waiver of any term or right in this Agreement shall be effective unless in writing, signed by an Authorized Representative of the waiving party. The failure of either the Company or Customer to enforce any provision of these Terms shall not be construed as a waiver or modification of such provision, or impairment of its right to enforce such clause or any other clause of this Agreement thereafter.
 
-Please send your feedback, comments, requests for technical support:
+19. **GOVERNING LAW; VENUE**
 
-By email: support@signoz.io.`
+This Agreement will be governed by and interpreted in accordance with the laws of the State of Delaware without giving effect to its conflicts of law rules. Each of the Parties to this Agreement consents to the exclusive jurisdiction and venue of the state and federal courts located in New Castle County in the State of Delaware.
+
+20. **ATTORNEYS’ FEES**
+
+If either the Company or the Customer incurs any legal fees associated with the enforcement of this Agreement or any rights hereunder, the prevailing party shall be entitled to recover its reasonable outside attorney’s fees and any court, arbitration, mediation, or other reasonable litigation expenses from the other party.
+
+21. **EXPORT CONTROL**
+
+The Company and the Customer is responsible for complying with United States export controls and for any violation of such controls, including any United States embargoes or other federal rules and regulations restricting exports. Each party represents and warrants that it is not (a) located in, or a resident or a national of, any country subject to a U.S. government embargo or that has been designated by the U.S. government as a “terrorist supporting” country; (b) on any of the U.S. government lists of restricted end users.
+
+22. **COLLECTION EXPENSES**
+
+If the Company incurs any costs, expenses, or fees, including reasonable attorney’s fees and professional collection services fees, in connection with the collection or payment of any amounts due under this Agreement, Customer agrees to reimburse the Company for all such costs, expenses and fees.
+
+23. **HEADINGS; CONSTRUCTION**
+
+The headings/captions appearing in this Agreement have been inserted for the purposes of convenience and ready reference, and do not purport to and shall not be deemed to define, limit or extend the scope or intent of the provisions to which they appear in.. This Agreement is the result of negotiations between the parties and their counsel. Accordingly, this Agreement shall not be construed more strongly against either party regardless of which party is more responsible for its preparation, and any ambiguity that might exist herein shall not be construed against the drafting party.
+
+24. **OTHER AGREEMENTS** 
+
+The Company and Customer agree that these Terms shall constitute the entire agreement between the Company and the Customer with respect to the subject matter hereof and shall supersede all other agreements with respect to such subject matter, now or in the future, including any shrink-wrap, browse-wrap, click-wrap, or “click to approve” agreement or other terms or conditions that may appear when accessing or using the Services or otherwise.`
 
 export default function termsPage() {
   return (

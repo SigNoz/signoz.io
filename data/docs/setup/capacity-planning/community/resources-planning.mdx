@@ -1,0 +1,45 @@
+---
+date: 2025-10-28
+id: resources-planning
+tags: [Self-Hosted Community]
+title: SigNoz Resources Planning
+description: Guide to SigNoz deployment requirements and capacity planning, including sizing, architecture, and resource recommendations for self-hosted signoz.
+---
+
+This guide provides a comprehensive overview of the core components, sizing guidelines, resource specifications, and architectural considerations crucial for scaling and capacity planning when deploying SigNoz. Use this information to plan the right deployment size and ensure your SigNoz installation is optimized for both present and future growth.
+
+## Components Overview
+
+A SigNoz deployment consists of several key components, each with specific resource requirements. The following sections detail the configuration requirements for each component.
+
+The following table outlines the resource requirements for all SigNoz components:
+
+| Component   | Replicas | CPU per Pod/Instance (cores) | Memory per Pod/Instance (GiB)            | Node Count | Total CPU (cores) | Total Memory (GiB) |
+| ----------- | -------- | ---------------------------- | ---------------------------------------- | ---------- | ----------------- | ------------------ |
+| Collectors  | 3        | 4                            | 16                                       | 3          | 12                | 48                 |
+| ClickHouse  | 2 shards | 16                           | 32 <br/>(variable, based on data volume) | 2          | 32                | 64 (variable)      |
+| SigNoz Core | 1        | 4                            | 8                                        | 1          | 4                 | 8                  |
+| PostgreSQL  | 1        | 2                            | 8                                        | 1          | 2                 | 8                  |
+| ZooKeeper   | 3        | 2                            | 8                                        | 3          | 6                 | 24                 |
+
+**Notes:**
+
+- **Collectors**: Scale with processing needs. More processors or pipelines will require more CPU. In very high-scale environments or if ClickHouse is throttling, allocate more memory to Collectors.
+- **ClickHouse**: Ensure storage capacity is sized according to your retention policy and expected data volume. Plan for growth over time.
+- **SigNoz Core**: Resource requirements vary based on component functionality and usage.
+- **PostgreSQL**: Size according to metadata volume and query patterns. Managed database services (AWS RDS, GCP Cloud SQL) are recommended
+- **ZooKeeper**: Required by ClickHouse for cluster operation; should have stable resource allocation.
+
+## Instance Types
+
+These are the node types we suggest from various cloud providers. Please see the relevant specifications in the provider's documentation.
+
+**For AWS:**
+
+- **General Purpose workloads (Collectors, SigNoz Core, PostgreSQL, ZooKeeper):** Any General Purpose machine available in your region that belongs to `T3` instance family and above for Intel chips and `T4g` instance family and above for ARM chips.
+- **Compute-optimized workloads (ClickHouse):** Any Compute Optimized machine available in your region that belongs to `C5` instance family and above for Intel chips and `C6g` or `C7g` instance family and above for ARM chips.
+
+**For GCP:**
+
+- **General Purpose workloads (Collectors, SigNoz Core, PostgreSQL, ZooKeeper):** Any General Purpose machine available in your region that belongs to `E2` instance family and above.
+- **Compute-optimized workloads (ClickHouse):** Any Compute Optimized machine available in your region that belongs to `C3` or `C3D` instance family and above.

@@ -1,6 +1,7 @@
 ---
 date: 2024-11-06
 title: Strimzi
+tags : [SigNoz Cloud]
 id: strimzi
 ---
 
@@ -326,7 +327,7 @@ presets:
 otelDeployment:
   config:
     receivers:
-      kafkametrics:
+      kafkametrics: #configure kafkametrics receiver
         collection_interval: 10s
         cluster_alias: signoz-demo-cluster1
         brokers:
@@ -347,6 +348,10 @@ otelDeployment:
               - source_labels: [__meta_kubernetes_pod_label_strimzi_io_kind]
                 regex: Kafka
                 action: keep
+      services:
+        pipelines:
+          metrics:
+            receivers: [prometheus, kafkametrics] #add kafkametrics receiver to the metrics pipeline.
 ```
 
 Deploy the collector:

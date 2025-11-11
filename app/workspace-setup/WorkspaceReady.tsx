@@ -1,7 +1,5 @@
 import {
-  HouseIcon,
   CheckCircleIcon,
-  Loader2,
   ArrowRight,
   Link2,
   AtSignIcon,
@@ -27,12 +25,11 @@ function WorkspaceReady({
     <div className="welcome-container mx-auto flex max-w-[640px] flex-col items-center py-32">
       <CheckCircleIcon size={56} className="text-signoz_robin-500" />
 
-      <div className="mt-[28px] bg-neutral-950 text-2xl"> Your workspace is ready! </div>
+      <div className="mt-[28px] bg-neutral-950 text-2xl"> Your workspace is provisioned! </div>
 
       <div className="text-md mt-[28px] rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
         <div className="flex items-center gap-4 text-sm">
-          Your SigNoz cloud account is ready to be used. The following details have also been
-          emailed to you.
+          Your SigNoz cloud account has been created. The final step is to set a password to secure your account and access your workspace.
         </div>
       </div>
 
@@ -44,7 +41,7 @@ function WorkspaceReady({
         <div className="flex w-full flex-col items-center gap-4 px-[16px] py-[24px] text-sm">
           <div className="flex w-full items-center justify-between">
             <div className="flex flex-1 items-center gap-2 text-sm">
-              <Link2 size={16} /> Tenant URL
+              <Link2 size={16} /> Workspace URL
             </div>
 
             <div className="flex flex-1 items-center gap-4 text-sm text-signoz_robin-500">
@@ -82,7 +79,7 @@ function WorkspaceReady({
           className="mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_robin-500 px-[16px] py-[8px] text-sm font-medium"
           href={workspaceData?.invite_link}
         >
-          <span className="flex text-xs leading-5">Go to my workspace</span>
+          <span className="flex text-xs leading-5">Set password & go to workspace</span>
           <ArrowRight size={14} />
         </a>
 

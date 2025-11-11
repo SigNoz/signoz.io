@@ -1,0 +1,122 @@
+---
+date: 2025-08-13
+id: understanding-alert-evaluation-patterns
+tags : [SigNoz Cloud, Self-Host]
+title: Understanding Alert Evaluation Patterns
+---
+
+## Overview
+
+This document explains the different alert evaluation patterns available in the system and provides guidance on how to use them effectively.
+
+## Alert Evaluation Patterns
+
+### 1. At Least Once
+**When to use:** When you want to trigger an alert if the threshold is crossed even once during the evaluation window.
+
+**How it works:** The alert fires if any single data point in the evaluation window crosses the threshold.
+
+**Example use cases:**
+- Critical error detection (any occurrence matters)
+- Service downtime alerts
+- Container crash detection
+- Spike detection in error rates
+
+**Configuration example:**
+```
+Metric: http_request_errors
+Condition: > 0
+Evaluation: At least once in 5 minutes
+```
+
+### 2. All the Time
+**When to use:** When you want to ensure a condition persists throughout the entire evaluation window.
+
+**How it works:** The alert only fires if every data point in the evaluation window meets the threshold condition.
+
+**Example use cases:**
+- Sustained high CPU usage
+- Persistent memory pressure
+- Continuous high latency
+- Service completely unavailable
+
+**Configuration example:**
+```
+Metric: cpu_usage_percent
+Condition: > 90
+Evaluation: All the time for 10 minutes
+```
+
+**Note about sparse metrics:** If a metric is sparse (many timestamps have no datapoints in the evaluation window), the "All the Time" pattern is evaluated only against the samples that exist. This can lead to surprising results:
+- If only a few samples are present and they all meet the condition, the alert may fire even though most of the window had no data.
+- Depending on the evaluation engine's "no data" handling, missing points might be treated as non-matching and prevent firing, or ignored entirely.
+
+Mitigation: ensure enough samples by increasing the evaluation window or collection frequency, configure "No Data" behavior or minimum sample counts, or choose a different pattern (e.g., "On Average" or "At Least Once") when working with sparse metrics.
+
+### 3. On Average
+**When to use:** When you want to smooth out temporary spikes and focus on the overall trend.
+
+**How it works:** Calculates the average of all data points in the evaluation window and compares it against the threshold.
+
+**Example use cases:**
+- Average response time monitoring
+- Mean request rate thresholds
+- Average queue depth
+- Overall resource utilization trends
+
+**Configuration example:**
+```
+Metric: http_request_duration_p95
+Condition: > 500ms
+Evaluation: On average over 15 minutes
+```
+
+### 4. In Total
+**When to use:** When you need to monitor cumulative values over a time period.
+
+**How it works:** Sums all values in the evaluation window and compares the total against the threshold.
+
+**Example use cases:**
+- Total error count thresholds
+- Cumulative request volume
+- Total bytes transferred
+- Sum of transaction amounts
+
+**⚠️ Warning:** Be careful with percentile metrics (P95, P99) - summing percentiles doesn't provide meaningful results.
+
+**Configuration example:**
+```
+Metric: payment_transaction_count
+Condition: < 100
+Evaluation: In total over 1 hour
+```
+
+### 5. Last
+**When to use:** When you only care about the most recent value.
+
+**How it works:** Only evaluates the most recent data point against the threshold.
+
+**Example use cases:**
+- Current disk space availability
+- Latest deployment status
+- Most recent backup completion
+- Current connection count
+
+**Configuration example:**
+```
+Metric: disk_used_percent
+Condition: > 85
+Evaluation: Last value
+```
+
+## Best Practices
+
+- **Test your alerts in a staging environment** before deploying them to production.
+- **Use "At Least Once" for critical events** where any occurrence should trigger immediate action (errors, crashes).
+- **Use "All the Time" for sustained issues** that require consistent threshold breaches before alerting.
+- **Use "On Average" to reduce noise** from temporary spikes while monitoring overall trends.
+- **Avoid "In Total" with percentile metrics** (P95, P99) as summing percentiles produces meaningless results.
+- **Consider your evaluation window carefully** - longer windows reduce noise but delay detection of issues.
+- **Use "Last" pattern sparingly** - only when the most recent value is truly the only relevant data point.
+- **Match alert severity to evaluation pattern** - stricter patterns (All the Time) for lower severity, looser patterns (At Least Once) for critical alerts.
+- **Handle sparse metrics explicitly:** For metrics with intermittent sampling, prefer longer evaluation windows, align the evaluation window with the scrape/collection interval, configure "No Data" or minimum-samples behavior, or use patterns less sensitive to missing points (e.g., "On Average" or "In Total") to avoid false positives/negatives from sparse data.

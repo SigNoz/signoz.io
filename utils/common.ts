@@ -39,3 +39,12 @@ export function getPrevAndNextRoutes(navItems, currentRoute) {
     next: nextRoute ? { route: nextRoute.route, label: nextRoute.label } : null,
   }
 }
+
+export function sluggify(str: string) {
+  return str
+    .toLowerCase() // Convert to lowercase
+    .trim() // Remove any leading or trailing whitespace
+    .replace(/[^\w\s-]/g, '') // Remove non-word characters except for spaces and hyphens
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
+}

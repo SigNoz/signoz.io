@@ -77,7 +77,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '',
     'blog',
     'tags',
-    'newsroom',
     'pricing',
     'case-study',
     'about-us',

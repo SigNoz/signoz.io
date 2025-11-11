@@ -9,18 +9,13 @@ image: /img/blog/2023/11/opentelemetry-memcached-metrics-cover.jpeg
 hide_table_of_contents: false
 keywords: [opentelemetry,signoz,observability,memcached,mertics]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/memcached-monitoring-with-opentelemetry/"/>
-</head>
-
 Let's dive deep into the realm of Memcached, where we'll uncover the power of monitoring with OpenTelemetry and SigNoz. This isn't just about caching data; it's about watching over Memcached like a vigilant guardian, ensuring it performs at its best, and optimizing your application's speed.
 
 
 
 ![Cover Image](/img/blog/2023/11/opentelemetry-memcached-metrics-cover.webp)
 
-In this tutorial, you will install OpenTelemetry Collector to collect Memcached metrics that should be monitored for performance and then send the collected data to SigNoz for visualization and alerts.
+In this tutorial, you will install [OpenTelemetry Collector](https://signoz.io/guides/opentelemetry-collector-vs-exporter/) to collect Memcached metrics that should be monitored for performance and then send the collected data to SigNoz for visualization and alerts.
 
 We will cover:
 
@@ -123,7 +118,7 @@ service:
       exporters: [otlp, zipkin]
 ```
 
-Now that you understand how OpenTelemetry collector collects data let’s see how you can collect Memcached metrics with OpenTelemetry.
+Now that you understand how OpenTelemetry collector collects data let’s see how you can collect [Memcached metrics](https://signoz.io/docs/dashboards/dashboard-templates/memcached/) with OpenTelemetry.
 
 ## Prerequisites
 
@@ -170,15 +165,15 @@ Download the appropriate binary package for your Linux or macOS distribution fro
 For MACOS (arm64):
 
 ```bash
-curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_darwin_arm64.tar.gz
+curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_darwin_arm64.tar.gz
 ```
 
 ### Step 2 - Extracting the package
 
-Create a new directory named `otelcol-contrib` and then extract the contents of the `otelcol-contrib_0.88.0_darwin_arm64.tar.gz` archive into this newly created directory with the following command:
+Create a new directory named `otelcol-contrib` and then extract the contents of the `otelcol-contrib_0.116.0_darwin_arm64.tar.gz` archive into this newly created directory with the following command:
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_darwin_arm64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_darwin_arm64.tar.gz -C otelcol-contrib
 ```
 
 ### Step 3 - Setting up the Configuration file
@@ -233,8 +228,8 @@ exporters:
     tls:
       insecure: false
     headers:
-      "signoz-ingestion-key": <SIGNOZ_ACCESS_TOKEN>
-  logging:
+      "signoz-ingestion-key": <SIGNOZ_INGESTION_KEY>
+  debug:
     verbosity: detailed
 service:
   telemetry:
@@ -293,7 +288,7 @@ tail 50 will give the last 50 lines from the file `otelcol-output.log`
 You can check if your service is running successfully by seeing the last log something like -
 
 ```bash
-2023-11-17T19:33:20.161Z  info  service@v0.88.0/service.go:169  Everything is ready. Begin running and processing data.
+2023-11-17T19:33:20.161Z  info  service@v0.116.0/service.go:169  Everything is ready. Begin running and processing data.
 ```
 
 You can stop the collector service with the following command:
@@ -369,7 +364,7 @@ These metrics are enabled by default. Collectors provide many metrics that you c
 
 **Name:** The name of the metric is a unique identifier that distinguishes it from other metrics. It helps in referencing and organizing various metrics on SigNoz as well.
 
-**Type:** The type of metric defines the kind of data it represents. Common metric types include INT, DOUBLE, STRING, etc.
+**Type:** The type of metric defines the kind of data it represents. Common [metric types](https://signoz.io/docs/metrics-management/types-and-aggregation/) include INT, DOUBLE, STRING, etc.
 
 **Unit:** The unit specifies the measurement unit associated with the metric. It helps in interpreting and comparing metric values, including Bytes, NONE, etc.
 

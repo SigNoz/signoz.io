@@ -1,0 +1,45 @@
+---
+date: 2025-04-15
+id: smpt-email-invitations
+tags : [Self-Host]
+title: Enable SMTP for Email Invitations
+description: Learn how to Configure SMTP for Email Invitations
+---
+
+SigNoz allows you to configure email settings for sending email Invitations. Depending on the version you're using, you can choose which variables to configure.
+
+
+## Version greater than 0.84.x
+
+| Environment variable                                | Description                                                                                                                                |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`SIGNOZ_EMAILING_ENABLED`**                       | Enable or disable emailing                                                                                                                 |
+| **`SIGNOZ_EMAILING_TEMPLATES_DIRECTORY`**           | The directory containing the email templates. This directory should contain a list of files defined at [`pkg/types/emailtypes/template.go`](https://github.com/SigNoz/signoz/blob/9e13245d1b2781a193b718b6ca43d79691b82df2/pkg/types/emailtypes/template.go) |
+| **`SIGNOZ_EMAILING_SMTP_ADDRESS`**                  | SMTP server address (host:port)                                                                                                           |
+| **`SIGNOZ_EMAILING_SMTP_FROM`**                     | Sender address                                                                                                                             |
+| **`SIGNOZ_EMAILING_SMTP_HELLO`**                    | Hello message to use for the SMTP server                                                                                                   |
+| **`SIGNOZ_EMAILING_SMTP_HEADERS`**                  | Static headers to send with the email                                                                                                      |
+| **`SIGNOZ_EMAILING_SMTP_AUTH_USERNAME`**            | Username to use for the SMTP server                                                                                                        |
+| **`SIGNOZ_EMAILING_SMTP_AUTH_PASSWORD`**            | Password to use for the SMTP server                                                                                                        |
+| **`SIGNOZ_EMAILING_SMTP_AUTH_SECRET`**              | Secret to use for the SMTP server                                                                                                          |
+| **`SIGNOZ_EMAILING_SMTP_AUTH_IDENTITY`**            | Identity to use for the SMTP server                                                                                                        |
+| **`SIGNOZ_EMAILING_SMTP_TLS_ENABLED`**              | To enable TLS. It should be false in most cases since the authentication mechanism should use the STARTTLS extension instead.              |
+| **`SIGNOZ_EMAILING_SMTP_TLS_INSECURE_SKIP_VERIFY`** | Whether to skip TLS verification                                                                                                           |
+| **`SIGNOZ_EMAILING_SMTP_TLS_CA_FILE_PATH`**         | Path to CA file                                                                                                                            |
+| **`SIGNOZ_EMAILING_SMTP_TLS_KEY_FILE_PATH`**        | Path to Key file                                                                                                                           |
+| **`SIGNOZ_EMAILING_SMTP_TLS_CERT_FILE_PATH`**       | Path to the Certificate file                                                                                                               |
+
+## Versions less than or equal to 0.84.x
+
+To enable email, you need to set the following environment variables
+
+- `SMTP_ENABLED`: Enable SMTP for sending email invitations.
+- `SMTP_FROM`: The email address from which the invitations will be sent.
+- `SMTP_HOST`: The SMTP host obtained from your email provider.
+- `SMTP_PORT`: The SMTP port obtained from your email provider.
+- `SMTP_USERNAME`: The SMTP user obtained from your email provider.
+- `SMTP_PASSWORD`: The SMTP password obtained from your email provider.
+
+<Admonition>
+If you are using a version less than or equal to 0.75.0, you need to set these environment variables specifically for the `query-service` component. As Starting from v0.76.0, multiple services (Query Service, Frontend, and Alertmanager) were combined into a single `signoz` binary/image.
+</Admonition>

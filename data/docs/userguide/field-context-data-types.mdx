@@ -1,0 +1,195 @@
+---
+date: 2025-07-31
+id: field-context-and-data-types
+tags : [SigNoz Cloud, Self-Host]
+title: Field Context & Data Types
+description: Learn how to work with ambiguous fields
+---
+
+
+This guide explains when and how to use explicit field contexts in your queries.
+
+## When You Need Explicit Context
+
+**You only need to specify context when a field exists in multiple places.** When there's no conflict, SigNoz automatically infers the correct context from your data.
+
+### Simple Query (No Context Needed)
+If a field only exists in one context, just use it directly:
+```
+http.status_code = 200
+user.email = 'john@example.com'
+response_time_ms > 1000
+```
+
+### When Context is Required
+If the same field exists in multiple contexts, you'll see this error:
+```
+service.name = 'payment'
+# Error: key `service.name` is ambiguous
+```
+
+Fix it by specifying the context:
+```
+resource.service.name = 'payment'
+# OR
+attribute.service.name = 'payment'
+```
+
+## When Ambiguity Occurs
+
+If you see an ambiguity error, it typically means a resource attribute is being incorrectly sent as both a resource attribute AND a regular attribute. This is an instrumentation issue that should be fixed.
+
+**Common causes:**
+- Misconfigured instrumentation libraries
+- Manual instrumentation duplicating what auto-instrumentation already sets
+- Multiple SDKs or agents setting the same fields differently
+- Migration issues when updating instrumentation
+
+**Examples of fields that might be affected:**
+```
+service.name, k8s.namespace.name, host.name, cloud.region, 
+container.name, deployment.environment, etc.
+```
+
+**Note:** ANY resource attribute can have this issue. The solution is to fix your instrumentation so resource attributes are only sent in the resource context, not as span/log attributes.
+
+## Available Contexts
+
+### Resource Context
+Identifies the source of telemetry (service, host, container):
+```
+resource.service.name = 'api-gateway'
+resource.k8s.namespace.name = 'production'
+resource.host.name = 'prod-server-01'
+```
+
+### Attribute Context  
+Signal-specific data added during instrumentation:
+```
+attribute.http.status_code = 200
+attribute.user.id = '12345'
+attribute.error.message = 'timeout'
+```
+
+### Signal-Specific Contexts
+
+**Spans:**
+```
+span.name = 'GET /users'
+span.duration > 1000
+```
+
+**Logs:**
+```
+log.severity_text = 'ERROR'
+log.body CONTAINS 'failed'
+```
+
+## Performance Considerations
+
+Resource attributes are optimized for filtering and perform significantly better than regular attributes:
+
+```
+# ✅ Fast (resource attributes are indexed)
+resource.service.name = 'redis'
+
+# ⚠️ Slower (regular attributes)
+attribute.service.name = 'redis'
+
+# ❌ No data if ambiguous
+service.name = 'redis'
+```
+
+**Important:** Fields incorrectly sent as both resource and regular attributes can cause queries to scan more data. Check your instrumentation to ensure fields like `service.name` are only sent as resource attributes. [Learn more](/blog/query-performance-improvement).
+
+## Data Types
+
+### When to Specify Types
+Unlike field context (which fails on ambiguity), SigNoz searches across ALL data types when a field has multiple types. This means:
+- Queries still work but may be slower
+- Type comparisons might not work as expected
+
+Specify types when:
+- You need to ensure numeric vs string comparison
+- You want to search only one data type for performance
+- You're working with arrays
+
+### Syntax
+```
+field:type operator value
+```
+
+### Examples
+```
+# Without type (searches all data types where status_code exists)
+status_code = 200  # Works but slower if field has multiple types
+
+# With type (searches only numeric status_code fields)
+status_code:float64 = 200  # Faster and ensures numeric comparison
+
+# Boolean values
+is_active:bool = true
+
+# Arrays
+user.roles:[]string = ['admin', 'user']
+status.codes:[]int64 = [200, 201, 204]
+```
+
+### Supported Types
+- `string` - Text values
+- `float64` - Numbers (integers or decimals)
+- `bool` - True/false
+- `[]string`, `[]int64`, `[]float64`, `[]bool` - Arrays
+
+## Troubleshooting
+
+### "Key is ambiguous" Error
+The field exists in multiple contexts. Check which contexts have this field:
+```
+# Try each context to see where data exists
+resource.service.name = 'payment'
+attribute.service.name = 'payment'
+```
+
+### Query Returns No Data
+1. Check if you need explicit context (ambiguity error)
+2. Verify the field name is correct
+3. Check if the field exists: `field.name EXISTS`
+
+### Type Comparison Issues
+If numeric comparisons aren't working:
+```
+# Try with explicit type
+status_code:float64 >= 400
+# OR
+status_code:string = '400'
+```
+
+## Best Practices
+
+1. **Only add context when needed** - Don't prefix fields unnecessarily
+2. **Use resource attributes for service identity** - `service.name`, `k8s.namespace.name` should be resource attributes
+3. **Fix instrumentation issues** - If you see ambiguity warnings, fix the root cause in your instrumentation
+
+## Quick Reference
+
+**No context needed (default):**
+```
+http.method = 'POST'
+status_code >= 400
+error.type = 'timeout'
+```
+
+**Context required (if fields are ambiguous, otherwise not needed):**
+```
+resource.service.name = 'api'
+resource.k8s.namespace.name = 'prod'
+attribute.target.service = 'database'
+```
+
+**Type specification (when needed):**
+```
+latency:float64 > 100
+user.active:bool = true
+tags:[]string = ['prod', 'critical']
+```

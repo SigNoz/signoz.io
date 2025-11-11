@@ -1,0 +1,95 @@
+name: Add to Onboarding
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+jobs:
+  create-onboarding-issue:
+    if: github.event.label.name == 'add-to-onboarding'
+    runs-on: ubuntu-latest
+
+    steps:
+      # ---- Step 1: detect documentation changes ----
+      - name: Check docs in PR
+        id: check-docs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request.number;
+
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              pull_number: pr
+            });
+
+            const docsFiles = files.filter(f =>
+              f.filename.startsWith('data/docs/') ||
+              f.filename.startsWith('src/pages/docs/')
+            );
+
+            if (docsFiles.length === 0) {
+              core.setFailed('no documentation files found in this PR');
+              return;
+            }
+
+            core.setOutput('run_next', 'true');   // flag for next step
+
+      # ---- Step 2: create the issue and comment ----
+      - name: Create onboarding issue
+        if: steps.check-docs.outputs.run_next == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              pull_number: pr.number
+            });
+
+            const docsFiles = files.filter(f =>
+              f.filename.startsWith('data/docs/') ||
+              f.filename.startsWith('src/pages/docs/')
+            );
+
+            const list = docsFiles.map(f =>
+              `- ${f.status === 'added' ? '➕' : f.status === 'modified' ? '📝' : '❌'} ${f.filename}`
+            ).join('\n');
+
+            const body = [
+              '## Documentation to Add to Onboarding',
+              '',
+              `PR: ${pr.title} (#${pr.number})`,
+              `Author: @${pr.user.login}`,
+              `PR Link: ${pr.html_url}`,
+              '',
+              '### Documentation Files Changed:',
+              list,
+              '',
+              '### Context:',
+              'This issue was auto‑generated because the PR carries the `add-to-onboarding` label. Please include these docs into the onboarding flow during the next sprint.',
+            ].join('\n');
+
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              title: `[Onboarding] ${pr.title}`,
+              body,
+              labels: ['documentation', 'onboarding'],
+              assignees: ['Calm-Rock']   // remove if the user lacks access
+            });
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: pr.number,
+              body: `📚 Onboarding issue created… see #${issue.number}`
+            });

@@ -1,0 +1,254 @@
+---
+date: 2025-09-26
+id: signoz-mcp-server
+tags : [SigNoz Cloud, Self-Host]
+title: SigNoz MCP Server
+description: Learn about SigNoz MCP Server integration for enhanced observability.
+---
+
+MCP (Model Context Protocol) is an open-source standard for connecting AI applications to external systems.
+
+Signoz MCP Server lets AI assistance and LLMs connect to Signoz observability data.
+Integration of signoz-mcp-server with LLMs and AI assistance like Cursor or Claude enables you to query in natural language and
+get more precise and structured information.
+
+### Working
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   MCP Client    │───▶│  MCP Server      │───▶│   SigNoz API    │
+│  (AI Assistant) │    │  (Go)            │    │  (Observability)│
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                              │
+                              ▼
+                       ┌──────────────────┐
+                       │   Tool Handlers  │
+                       │  (HTTP Client)   │
+                       └──────────────────┘
+```
+
+> 📌 Note: Signoz MCP Server is ready for use but under heavy development and its expected to see changes. Early feedback is appreciated.
+> 
+
+Current state of signoz-mcp-server provides tools as mentioned below.
+
+- **List Metric Keys**: Retrieve all available metric keys from SigNoz
+- **Search Metric Keys**: Find specific metrics
+- **List Alerts**: Get all active alerts with detailed status
+- **Get Alert Details**: Retrieve comprehensive information about specific alert rules
+- **Get Alert History**: Timeline of alert history for specific rules
+- **Get Logs for Alert**: Logs related to specific alerts automatically
+- **Get Error Logs**: Logs with ERROR or FATAL severity
+- **Search Logs by Service**: Search logs for specific services with filters
+- **List Log Views**: Get all saved log views
+- **Get Log View**: Retrieve complete log view configuration
+- **List Dashboards**: Get dashboard summaries (name, UUID, description, tags)
+- **Get Dashboard**: Retrieve complete dashboard configurations with panels and queries
+- **List Services**: Discover all services within specified time ranges
+- **Service Top Operations**: Analyze performance metrics for specific services
+- **Get Trace Field Values**: Available field values for trace queries
+- **Search Traces by Service**: Search traces with filters (errors, duration, operation)
+- **Get Trace Details**: Comprehensive trace information with all spans and metadata
+- **Get Trace Error Analysis**: Analyze error patterns in traces
+- **Get Trace Span Hierarchy**: Trace span relationships and hierarchy
+
+### Core Components
+
+- **MCP Server**: Handles MCP protocol communication
+- **Tool Handlers**: Register and manage available tools
+- **SigNoz Client**: HTTP client for SigNoz API interactions
+- **Configuration**: Environment-based configuration management
+- **Logging**: Structured logging with Zap
+
+### Installation
+
+The SigNoz MCP Server is available as open-source software on GitHub: [https://github.com/SigNoz/signoz-mcp-server](https://github.com/SigNoz/signoz-mcp-server)
+
+**Building from Source:**
+
+1. Clone the repository:
+```bash
+git clone https://github.com/SigNoz/signoz-mcp-server.git
+cd signoz-mcp-server
+```
+
+2. Build the binary:
+```bash
+make build
+```
+
+The binary will be created at `bin/signoz-mcp-server`.
+
+**Using Docker:**
+
+You can also run the MCP server using Docker Compose. See the [repository](https://github.com/SigNoz/signoz-mcp-server) for docker-compose configuration examples.
+
+### Integrations
+
+In current state signoz-mcp-server can be integrated with Stdio or http mode, tested with Cursor and Claude.
+
+### Claude Desktop
+#### Stdio based
+
+1. Build or locate the binary path for `signoz-mcp-server` (for example: `.../signoz-mcp-server/bin/signoz-mcp-server`).
+2. Go to Claude -> Settings -> Developer -> Local MCP Server click on `edit config`
+3. Edit `claude_desktop_config.json` Add shown config with your signoz url, api key and path to signoz-mcp-server binary.
+
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "command": "/absolute/path/to/signoz-mcp-server/bin/signoz-mcp-server",
+      "args": [],
+      "env": {
+        "SIGNOZ_URL": "https://your-signoz-instance.com",
+        "SIGNOZ_API_KEY": "your-api-key-here",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+4. Restart Claude Desktop. You should see the `signoz` server load in the developer console and its tools become available.
+
+> 📌 Note: Replace the `command` path with your actual binary location.
+> 
+
+#### HTTP based
+
+HTTP mode supports two authentication methods:
+
+**Method 1: Environment Variable**
+
+1. Build and run signoz-mcp-server with API key in environment:
+```bash
+SIGNOZ_URL=signoz_url SIGNOZ_API_KEY=signoz_apikey TRANSPORT_MODE=http MCP_SERVER_PORT=8000 LOG_LEVEL=log_level ./signoz-mcp-server
+```
+Or use docker-compose.
+
+2. Go to Claude -> Settings -> Developer -> Local MCP Server click on `edit config`
+3. Edit `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+**Method 2: Authorization Header**
+
+1. Build and run signoz-mcp-server without API key in environment:
+```bash
+SIGNOZ_URL=signoz_url TRANSPORT_MODE=http MCP_SERVER_PORT=8000 LOG_LEVEL=log_level ./signoz-mcp-server
+```
+
+2. Go to Claude -> Settings -> Developer -> Local MCP Server click on `edit config`
+3. Edit `claude_desktop_config.json` with API key in Authorization header:
+
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "http://localhost:8000/mcp",
+      "headers": {
+        "Authorization": "Bearer your-signoz-api-key-here"
+      }
+    }
+  }
+}
+```
+
+This method allows application-level access control and is ideal for hosted MCP servers or multi-tenant scenarios.
+
+4. Restart Claude Desktop. You should see the `signoz` server load in the developer console and its tools become available.
+
+### Cursor
+#### Stdio based
+Option A — GUI:
+- Open Cursor → Settings → Cursor Settings → Tool & Integrations → `+` New MCP Server
+
+Option B — Project config file:
+Create `.cursor/mcp.json` in your project root:
+
+For Both options use same json struct
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "command": "/absolute/path/to/signoz-mcp-server/bin/signoz-mcp-server",
+      "args": [],
+      "env": {
+        "SIGNOZ_URL": "https://your-signoz-instance.com",
+        "SIGNOZ_API_KEY": "your-api-key-here",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+Once added, restart Cursor to use the SigNoz tools.
+
+
+#### HTTP based
+
+HTTP mode supports two authentication methods:
+
+**Method 1: Environment Variable**
+
+Build and run signoz-mcp-server with API key in environment:
+```bash
+SIGNOZ_URL=signoz_url SIGNOZ_API_KEY=signoz_apikey TRANSPORT_MODE=http MCP_SERVER_PORT=8000 LOG_LEVEL=log_level ./signoz-mcp-server
+```
+Or use docker-compose.
+
+Option A — GUI:
+- Open Cursor → Settings → Cursor Settings → Tool & Integrations → `+` New MCP Server
+
+Option B — Project config file:
+- Create `.cursor/mcp.json` in your project root
+
+For both options use this JSON structure:
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "http://localhost:8000/mcp"
+    }
+  }
+}
+```
+
+**Method 2: Authorization Header**
+
+Build and run signoz-mcp-server without API key in environment:
+```bash
+SIGNOZ_URL=signoz_url TRANSPORT_MODE=http MCP_SERVER_PORT=8000 LOG_LEVEL=log_level ./signoz-mcp-server
+```
+
+Option A — GUI:
+- Open Cursor → Settings → Cursor Settings → Tool & Integrations → `+` New MCP Server
+
+Option B — Project config file:
+- Create `.cursor/mcp.json` in your project root
+
+For both options use this JSON structure with Authorization header:
+```json
+{
+  "mcpServers": {
+    "signoz": {
+      "url": "http://localhost:8000/mcp",
+      "headers": {
+        "Authorization": "Bearer your-signoz-api-key-here"
+      }
+    }
+  }
+}
+```
+
+> 📌 Note: By default, the server logs at `info` level. If you need detailed debugging information, set `LOG_LEVEL=debug` in your environment. For production use, consider using `LOG_LEVEL=warn` to reduce log verbosity.
+> 

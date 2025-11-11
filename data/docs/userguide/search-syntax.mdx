@@ -1,0 +1,122 @@
+---
+date: 2025-07-31
+id: search-syntax
+tags : [SigNoz Cloud, Self-Host]
+title: Search Syntax
+description: Learn how to use SigNoz search syntax.
+---
+
+This guide explains how to use search clause and filter your telemetry data including logs, traces, and metrics.
+
+## Table of Contents
+- [Quick Start](#quick-start)
+- [Basic Concepts](#basic-concepts)
+- [Query Structure](#query-structure)
+- [Related Guides](#related-guides)
+
+## Quick Start
+
+The most basic queries look like this:
+
+```
+service.name = 'payment-service'
+```
+
+You can combine multiple conditions:
+
+```
+service.name = 'payment-service' AND http.status_code >= 400
+```
+
+For full-text search, simply type what you're looking for:
+
+```
+'error connecting to database'
+```
+
+Note: Make sure the phrase you want to search is enclosed in single quotes.
+
+## Basic Concepts
+
+### Fields and Values
+
+A query consists of fields (what you're searching in) and values (what you're searching for):
+
+- **Field**: The property name (e.g., `service.name`, `http.status_code`)
+- **Value**: What you're comparing against (e.g., `'payment-service'`, `200`)
+
+### Query Structure
+
+Conditions follow this general pattern:
+
+```
+field operator value
+```
+
+Multiple conditions can be combined with boolean operators:
+
+```
+condition1 AND condition2 OR condition3
+```
+
+## Related Guides
+
+For detailed information on specific topics:
+
+- **[Operators Reference](/docs/userguide/operators-reference)** - Complete list of operators and their behavior
+- **[Full-Text Search Guide](/docs/userguide/full-text-search)** - How to search text content in logs
+- **[Functions Reference](/docs/userguide/functions-reference)** - Array functions for JSON searches
+- **[Field Context & Data Types](/docs/userguide/field-context-data-types)** - Understanding contexts and type specification
+- **[Troubleshooting Guide](/docs/userguide/search-troubleshooting)** - Common errors and how to fix them
+- **[Advanced Examples](/docs/userguide/search-advanced-examples)** - Complex query patterns and use cases
+
+## Common Pitfalls
+
+Avoid these common mistakes when writing queries. Each example shows the incorrect approach followed by the correct syntax.
+
+### 1. Forgetting Quotes for String Values
+**Not recommended:** `status = active`  
+**Correct:** `status = 'active'`
+
+### 2. Missing Wildcards in LIKE
+**Wrong:** `message LIKE 'error'` (exact match only)  
+**Correct:** `message LIKE '%error%'` (contains 'error')
+
+### 3. Incorrect Array Syntax
+**Wrong:** `region IN 'us-east', 'us-west'`  
+**Correct:** `region IN ('us-east', 'us-west')`
+
+### 4. Ambiguous Precedence
+**Wrong:** `a = 1 OR b = 2 AND c = 3`  
+**Correct:** `a = 1 OR (b = 2 AND c = 3)`
+
+### 5. Case Sensitivity
+Remember that `LIKE` is case-sensitive. Use `ILIKE` for case-insensitive matching:
+```
+# Only matches 'Error' exactly
+message LIKE '%Error%'
+
+# Matches 'error', 'ERROR', 'Error', etc.
+message ILIKE '%error%'
+```
+
+### 6. Special Characters in Search
+If searching for special characters or operators as text, always use quotes:
+```
+# Searching for the literal text 'NOT'
+message CONTAINS 'NOT'
+
+# Searching for logs with text [debug]
+'[debug]'
+
+# Searching for text with operators
+'response != 200'
+```
+
+## Best Practices
+
+1. **Start Simple**: Begin with basic field comparisons and add complexity as needed
+2. **Test Incrementally**: Build complex queries step by step, testing each addition
+3. **Leverage Autocomplete**: Use the UI's autocomplete feature to discover available fields
+4. **Quote String Values**: Always quote string values to avoid parsing ambiguities
+5. **Parenthesize Complex Logic**: Use parentheses liberally to make intent clear

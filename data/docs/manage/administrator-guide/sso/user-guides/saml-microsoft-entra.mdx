@@ -1,0 +1,107 @@
+---
+date: 2025-10-21
+id: saml-microsoft-entra
+tags : [SigNoz Cloud, Self-Host]
+title: SAML Authentication with Microsoft Entra ID
+---
+
+## Overview
+
+This guide walks you through setting up SAML (Security Assertion Markup Language) authentication between Microsoft Entra ID (Azure AD) and SigNoz.
+
+**What you'll accomplish:**
+- Configure Microsoft Entra ID as an identity provider (IdP) for SigNoz
+- Enable your team to access SigNoz using their existing Microsoft Entra ID accounts
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- **Microsoft Entra ID account** with administrative access
+- **SigNoz account** (Cloud or Self-Hosted with License) with administrative access
+- **Your SigNoz instance URL** (e.g., `https://signoz.example.com`)
+
+## Configuration Steps
+
+### Step 1: Create SAML Application in Microsoft Entra ID
+
+1. Log in to your **Microsoft Entra ID** admin console and create a new SAML application.
+
+### Step 2: Configure SAML Settings
+
+1. Once the application is created, go to **Single Sign-On** from the left sidebar, click on the **SAML** card option, and in the **Basic SAML Configuration** section, click the edit icon. 
+2. **Entity Identifier (Entity ID)**: Enter your SigNoz instance host:port (e.g., `signoz.example.com` if your SigNoz instance URL is `https://signoz.example.com`)
+3. **Reply URL (Assertion Consumer Service URL)**:  Enter your SigNoz instance URL with the redirect path `/api/v1/complete/saml` appended to it (e.g., `https://signoz.example.com/api/v1/complete/saml`)
+4. **Sign on URL**: Enter your SigNoz instance URL (e.g., `https://signoz.example.com`)
+
+### Step 3: Export Metadata
+
+1. Locate the **App Federation Metadata URL** in the SAML configuration page
+2. Open this metadata page in a new tab
+
+The metadata file contains important configuration details like:
+- Microsoft Entra ID's signing certificate
+- Single Sign-On service URLs
+- Entity identifiers
+
+**Example metadata file structure:**
+
+```xml
+   <EntityDescriptor ID="_2d8d...a006" entityID="https://sts.windows.net/00d562...816c79/" xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
+   ...
+   <ds:X509Data>
+       <ds:X509Certificate>certificate-content-here</ds:X509Certificate>
+   </ds:X509Data>
+   ...
+   <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://login.microsoftonline.com/323a6......12688fe83e3s30/saml2"/>
+```
+
+For more details on the metadata page, see [Microsoft's federation metadata documentation](https://learn.microsoft.com/en-us/entra/identity-platform/federation-metadata).
+
+### Step 4: Configure SigNoz for SAML Authentication
+
+Now you'll configure SigNoz to accept authentication from Microsoft Entra ID:
+
+1. **Navigate to SigNoz Settings:**
+   - Go to your SigNoz dashboard
+   - Click on **Settings** in the left sidebar
+   - Navigate to **Organization Settings**
+   - Click on **Authenticated Domains**
+
+2. **Add New Domain:**
+   - Click **Add Domain**
+   - Enter the domain that your users would login with (e.g., if your user emails are in format `john@example.com`, enter `example.com`)
+
+3. **Enter Configuration Details:**
+   ```
+   Domain: example.com
+   SAML ACS URL/SAML IDP URL: <idp-url>
+   SAML X.509 Certificate: <some-certificate-data>
+   SAML Entity ID: <entity-id>
+   Skip AuthN Requests Signed: False
+   ```
+
+   **Where to find these values:**
+   - **Domain**: The email domain for users who should use SSO (e.g., `example.com` for users with `@example.com` emails)
+   - **SAML ACS URL/SAML IDP URL**: The ACS URL from the metadata file (between `<md:SingleSignOnService Location="...">` tags)
+   - **SAML X.509 Certificate**: The certificate content from the metadata file (between `<ds:X509Certificate>` tags)
+   - **SAML Entity ID**: The `entityID` value from the metadata file
+
+4. **Save Configuration:**
+   - Click **Save** to apply the SAML configuration
+
+### Step 5: Test the Integration
+
+1. **Log out** of SigNoz if you're currently logged in
+2. **Navigate** to your SigNoz login page
+3. **Try** logging in with a Microsoft Entra ID user email
+4. **Verify** that you're redirected to Microsoft Entra ID for authentication
+5. **Complete** the Microsoft Entra ID login process
+6. **Confirm** you're successfully logged into SigNoz
+
+## Troubleshooting
+
+**Common issues and solutions:**
+
+- **"Authentication failed" error**: Check that the redirect URI exactly matches `https://${SIGNOZ_BASEURL}/api/v1/complete/saml` in Microsoft Entra ID
+- **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`

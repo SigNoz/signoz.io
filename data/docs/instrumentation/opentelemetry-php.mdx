@@ -1,24 +1,29 @@
 ---
 date: 2024-06-06
 id: php
+tags : [SigNoz Cloud, Self-Host]
 title: PHP Opentelemetry Instrumentation
 description: Send events from your PHP application to SigNoz
-
+hide_table_of_contents: true
 ---
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
-This doc contains instructions about how to set up OpenTelemetry(OTel) instrumentation in your PHP application. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your PHP application.
+This document contains instructions on how to set up OpenTelemetry instrumentation in your PHP applications and view your application traces in SigNoz.
 
+{/* This doc contains instructions about how to set up OpenTelemetry(OTel) instrumentation in your PHP application.  */}
+
+{/* OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your PHP application. */}
+{/* 
 Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
 
 There are three major steps to using OpenTelemetry:
 
 - Instrumenting your PHP application with OpenTelemetry
 - Configuring the exporter to send data to SigNoz
-- Validating that configuration to ensure that data is being sent as expected.
+- Validating that configuration to ensure that data is being sent as expected. */}
 
-In this documentation, we will instrument a PHP application for traces and send it to SigNoz.
+{/* In this documentation, we will instrument a PHP application for traces and send it to SigNoz. */}
 
 ## Requirements
 
@@ -26,11 +31,14 @@ In this documentation, we will instrument a PHP application for traces and send 
 - [PECL](https://pecl.php.net/)
 - [Composer](https://getcomposer.org/)
 
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 ## Send traces to SigNoz Cloud
 Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
 
 <Tabs>
-<TabItem value="VM" label="VM" default>
+<TabItem value="vm" label="VM" default>
 From VMs, there are two ways to send data to SigNoz Cloud.
 
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
@@ -38,7 +46,7 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 
 #### Send traces directly to SigNoz cloud
 
-Here we will be sending traces to SigNoz cloud in 4 easy steps, if you want to send traces to self hosted SigNoz , you can refer to [this](https://signoz.io/docs/instrumentation/PHP/#send-traces-to-self-hosted-signoz). We will be using Zero-code configuration for Automatic Instrumentation.
+Here we will be sending traces to SigNoz cloud in 4 easy steps. We will be using Zero-code configuration for Automatic Instrumentation.
 
 **Step 1: Setup Development Environment**
 
@@ -118,32 +126,24 @@ env OTEL_PHP_AUTOLOAD_ENABLED=true \
     OTEL_SERVICE_NAME=<SERVICE_NAME> \
     OTEL_TRACES_EXPORTER=otlp \
     OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
-    OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> \
+    OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 \
     OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<INGESTION_KEY> \
     OTEL_PROPAGATORS=baggage,tracecontext \
     php -S localhost:8080 app.php
 ```
 
-You can change the env vars value by referencing values from the following lookup table
-
-| Environment Variable                  | Value                                        |
-|-------------------------------|----------------------------------------------|
-| OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
-| OTEL_EXPORTER_OTLP_ENDPOINT    | `<SIGNOZ_ENDPOINT>` replace this with SigNoz cloud endpoint                       |
-| OTEL_EXPORTER_OTLP_HEADERS     | signoz-ingestion-key=`<INGESTION_KEY>` replace this with the ingestion key which you must have received in mail        |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
-
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
 
 
 #### Send traces via OTel Collector binary
 
-**Step 1: Install OTel Collector**
+**Step 1.** Install OTel Collector binary<br></br>
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-<Admonition>
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your PHP application.
-</Admonition>
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
 
 **Step 2: Setup Development Environment**
 
@@ -236,7 +236,7 @@ You can change the env vars value by referencing values from the following looku
 | php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
 
 </TabItem>
-<TabItem value="orange" label="Kubernetes">
+<TabItem value="k8s" label="Kubernetes">
 
 **Step 1: Install OTel Collector agent in K8s**
 
@@ -335,12 +335,12 @@ You can change the env vars value by referencing values from the following looku
 <TabItem value="windows" label="Windows">
 From Windows, there are two ways to send data to SigNoz Cloud.
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+- Send traces directly to SigNoz Cloud
+- Send traces via OTel Collector binary (recommended)
 
 #### Send traces directly to SigNoz cloud
 
-Here we will be sending traces to SigNoz cloud in 4 easy steps, if you want to send traces to self hosted SigNoz , you can refer to [this](https://signoz.io/docs/instrumentation/PHP/#send-traces-to-self-hosted-signoz). We will be using Zero-code configuration for Automatic Instrumentation.
+Here we will be sending traces to SigNoz cloud in 4 easy steps. We will be using Zero-code configuration for Automatic Instrumentation.
 
 **Step 1: Setup Development Environment**
 
@@ -439,7 +439,7 @@ function initOpenTelemetry()
  $headers = [
  'signoz-ingestion-key' => "<INGESTION_KEY>",
  ];
- $transport = (new GrpcTransportFactory())->create('<SIGNOZ_ENDPOINT>' . OtlpUtil::method(Signals::TRACE), 'application/x-protobuf', $headers);
+ $transport = (new GrpcTransportFactory())->create('ingest.<region>.signoz.cloud:443' . OtlpUtil::method(Signals::TRACE), 'application/x-protobuf', $headers);
  $spanExporter = new SpanExporter($transport);
 
 
@@ -461,14 +461,18 @@ function initOpenTelemetry()
 ?>
 ```
 
-You can change the env vars value by referencing values from the following lookup table
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+
+{/* You can change the env vars value by referencing values from the following lookup table
 
 | Environment Variable                  | Value                                        |
 |-------------------------------|----------------------------------------------|
 | OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
 | OTEL_EXPORTER_OTLP_ENDPOINT    | `<SIGNOZ_ENDPOINT>` replace this with SigNoz cloud endpoint                       |
 | OTEL_EXPORTER_OTLP_HEADERS     | signoz-ingestion-key=`<INGESTION_KEY>` replace this with the ingestion key which you must have received in mail        |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
+| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        | */}
 
 **Step 5: Set environment variables and run app**
 
@@ -480,13 +484,11 @@ Run application using your run command or the following generalized command (dep
 
 #### Send traces via OTel Collector binary
 
-**Step 1: Install OTel Collector**
+**Step 1.** Install OTel Collector binary<br></br>
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-<Admonition>
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your PHP application.
-</Admonition>
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
 
 **Step 2: Setup Development Environment**
 
@@ -612,7 +614,175 @@ You can change the env vars value by referencing values from the following looku
 | php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
 
 </TabItem>
+<TabItem value="Docker" label="Docker">
+
+There are two ways to send data to SigNoz Cloud. You can containerize the images in both the cases.
+
+- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud-1)
+- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
+
+#### Send traces directly to SigNoz Cloud
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+...
+
+# Install build tools, protobuf, unzip, git, curl
+RUN apt-get update && apt-get install -y \
+   gcc \
+   make \
+   autoconf \
+   libprotobuf-dev \
+   protobuf-compiler \
+   unzip \
+   git \
+   curl \
+   && apt-get clean \
+   && rm -rf /var/lib/apt/lists/*
+
+# Install Composer globally
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+...
+
+# Install PHP extensions via PECL
+RUN pecl install opentelemetry \
+   && pecl install protobuf \
+   && docker-php-ext-enable opentelemetry protobuf
+
+...
+
+# Environment variables
+ENV OTEL_PHP_AUTOLOAD_ENABLED=true
+ENV OTEL_SERVICE_NAME="<service_name>"
+ENV OTEL_TRACES_EXPORTER="otlp"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_PROPAGATORS="baggage,tracecontext"
+
+...
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+
+The above steps install OpenTelemetry dependencies directly inside the Docker container without altering `composer.json` of project & sets environment variables to export the traces.
+
+**Step 2.** Run your Docker container
+
+Here's how you can run your docker container:
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+- `-p` maps a host port to a container port
+
+
+**Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+---
+
+#### Send traces via OTel Collector binary
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+# -------- Stage 1: Get OpenTelemetry Collector --------
+FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
+
+...
+
+# Install build tools and deps
+RUN apt-get update && apt-get install -y \
+   gcc \
+   make \
+   autoconf \
+   libprotobuf-dev \
+   protobuf-compiler \
+   unzip \
+   git \
+   curl \
+   && apt-get clean \
+   && rm -rf /var/lib/apt/lists/*
+
+# Install Composer globally
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+...
+
+# Install PECL extensions (opentelemetry + protobuf)
+RUN pecl install opentelemetry \
+   && pecl install protobuf \
+   && docker-php-ext-enable opentelemetry protobuf
+
+...
+
+# Copy OpenTelemetry Collector binary + config from first stage
+COPY --from=otel /otelcol-contrib /otelcol-contrib
+COPY --from=otel /etc/otelcol-contrib /etc/otelcol-contrib
+COPY config.yaml /etc/otelcol-contrib/config.yaml
+
+# Expose ports (App + Collector)
+EXPOSE <APP_PORT> 4317 4318
+
+...
+
+# Environment variables (point PHP to local Collector)
+ENV OTEL_PHP_AUTOLOAD_ENABLED=true
+ENV OTEL_SERVICE_NAME="<service_name>"
+ENV OTEL_TRACES_EXPORTER="otlp"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+ENV OTEL_PROPAGATORS="baggage,tracecontext"
+
+
+# Run both Collector and PHP app in the same container
+CMD sh -c "/otelcol-contrib --config=/etc/otelcol-contrib/config.yaml & <run_command>"
+
+```
+
+Make sure you have `config.yaml` in `root` of the application. This config.yaml should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
+
+- Replace `<run_command>` with the command to run your application
+- `<service_name>` is name of your service
+
+
+**Step 2.** Run your Docker container
+
+Run your docker container to start exporting.
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+
+- `-p` maps a host port to a container port
+
+
+**Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+</TabItem>
 </Tabs>
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
 
 ## Send Traces to Self-Hosted SigNoz
 
@@ -690,28 +860,26 @@ Run your application using:
 
 ```
 env OTEL_PHP_AUTOLOAD_ENABLED=true \
-    OTEL_SERVICE_NAME=<SERVICE_NAME> \
+    OTEL_SERVICE_NAME=<service_name> \
     OTEL_TRACES_EXPORTER=otlp \
     OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
-    OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> \
+    OTEL_EXPORTER_OTLP_ENDPOINT=<self-host-ip> \
     OTEL_PROPAGATORS=baggage,tracecontext \
     php -S localhost:8080 app.php
 ```
 
-You can change the env vars value by referencing values from the following lookup table
+- Set the `<self-host-ip>` as the IP of Self-Hosted SigNoz.
+- `<service_name>` is name of your service
 
-| Environment Variable                  | Value                                        |
-|-------------------------------|----------------------------------------------|
-| OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
-| OTEL_EXPORTER_OTLP_ENDPOINT    | `<SIGNOZ_ENDPOINT>` replace this with the url where you have hosted SigNoz                     |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
+</TabItem>
+</Tabs>
 
 ## Sample PHP Application
 
 We have included a sample PHP application at [Sample PHP App Github Repo](https://github.com/SigNoz/OpenTelemetry-PHP-example), 
 
-## Tutorial
+{/* ## Tutorial
 
-Here's a [tutorial](https://signoz.io/blog/opentelemetry-php) with step by step guide on how to install SigNoz and start monitoring a sample PHP app. 
+Here's a [tutorial](https://signoz.io/blog/opentelemetry-php) with step by step guide on how to install SigNoz and start monitoring a sample PHP app. */}
 
-<InstrumentationFAQ />
+{/* <InstrumentationFAQ /> */}

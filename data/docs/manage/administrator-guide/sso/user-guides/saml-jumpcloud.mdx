@@ -1,0 +1,133 @@
+---
+date: 2025-10-21
+id: saml-jumpcloud
+tags : [SigNoz Cloud, Self-Host]
+title: SAML Authentication with JumpCloud
+---
+
+## Overview
+
+This guide walks you through setting up SAML (Security Assertion Markup Language) authentication between JumpCloud and SigNoz.
+
+**What you'll accomplish:**
+- Configure JumpCloud as an identity provider (IdP) for SigNoz
+- Enable your team to access SigNoz using their existing JumpCloud accounts
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- **JumpCloud account** with administrative access
+- **SigNoz account** (Cloud or Self-Hosted with License) with administrative access
+- **Your SigNoz instance URL** (e.g., `https://signoz.example.com`)
+
+## Configuration Steps
+
+### Step 1: Create SAML Application in JumpCloud
+
+1. Log in to your JumpCloud admin console
+2. Navigate to **SSO** > **Applications**
+3. Click **+ Add New Application**
+4. Select **SAML** as the application type
+
+### Step 2: Configure Entity ID and URLs
+
+In the SAML application configuration:
+
+1. **Entity ID**: Enter your SigNoz instance URL (e.g., `https://signoz.example.com`)
+
+2. **ACS URL**: Enter your SigNoz instance URL with the redirect path `/api/v1/complete/saml` appended to it (e.g., `https://signoz.example.com/api/v1/complete/saml`)
+
+
+![JumpCloud SAML Application Configuration 1](/img/docs/sso/jumpcloud-01.png)
+
+### Step 3: Configure Additional Settings
+
+Ensure the following settings match the configuration shown in the image below:
+
+![JumpCloud SAML Application Configuration 2](/img/docs/sso/jumpcloud-02.png)
+
+### Step 4: Save Configuration
+
+Click the **Save** button to create your SAML application.
+
+### Step 5: Export Metadata
+
+1. After saving, locate the **Export Metadata** button (usually at the top of the configuration page)
+2. Click **Export Metadata** to download the XML metadata file
+3. Save this file - you'll need it for the next step
+
+The metadata file contains important configuration details like:
+- JumpCloud's signing certificate
+- Single Sign-On service URLs
+- Entity identifiers
+
+**Example metadata file structure:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="<entity-id>">
+    <md:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+        <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <ds:X509Data>
+                <ds:X509Certificate>some-certificate-data</ds:X509Certificate>
+            </ds:X509Data>
+        </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.0:nameid-format:unspecified</md:NameIDFormat>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="<idp-url>"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="<idp-url>"/>
+    </md:IDPSSODescriptor>
+</md:EntityDescriptor>
+```
+
+### Step 6: Configure SigNoz for SAML Authentication
+
+Now you'll configure SigNoz to accept authentication from JumpCloud:
+
+1. **Navigate to SigNoz Settings:**
+   - Go to your SigNoz dashboard
+   - Click on **Settings** in the left sidebar
+   - Navigate to **Members & SSO**
+   - Click on **Authenticated Domains**
+
+2. **Add New Domain:**
+   - Click **Add Domain**
+   - Select **SAML** as the authentication method
+
+3. **Enter Configuration Details:**
+   ```
+   Domain: example.com
+   SAML ACS URL/SAML IDP URL: <idp-url>
+   SAML X.509 Certificate: <some-certificate-data>
+   SAML Entity ID: <entity-id>
+   Skip AuthN Requests Signed: True
+   ```
+
+   **Where to find these values:**
+   - **Domain**: The email domain for users who should use SSO (e.g., `example.com` for users with `@example.com` emails)
+   - **SAML IDP URL**: Found in the metadata file under `<md:SingleSignOnService Location="...">`
+   - **SAML X.509 Certificate**: The certificate content from the metadata file (between `<ds:X509Certificate>` tags)
+   - **SAML Entity ID**: The `entityID` value from the metadata file
+
+4. **Save Configuration:**
+   - Click **Save** to apply the SAML configuration
+
+### Step 7: Test the Integration
+
+1. **Log out** of SigNoz if you're currently logged in
+2. **Navigate** to your SigNoz login page
+3. **Try** logging in with a JumpCloud user email
+4. **Verify** that you're redirected to JumpCloud for authentication
+5. **Complete** the JumpCloud login process
+6. **Confirm** you're successfully logged into SigNoz
+
+## Troubleshooting
+
+**Common issues and solutions:**
+
+- **"Invalid certificate" error**: Ensure you copied the complete certificate from the metadata file
+- **"Entity ID mismatch" error**: Verify the Entity ID matches exactly between JumpCloud and SigNoz
+- **Users can't access SigNoz**: Check that their email domain matches the configured domain in SigNoz
+- **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`
+

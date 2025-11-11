@@ -1,0 +1,65 @@
+---
+date: 2025-08-21
+id: uninstall
+tags : [Self-Host]
+title: Uninstall SigNoz
+description: Learn how to uninstall SigNoz across different deployment methods.
+---
+
+This document outlines the steps to uninstall SigNoz, covering various deployment methods such as Docker Standalone, Docker Swarm, and Kubernetes.
+
+## Docker Standalone
+
+To uninstall SigNoz installed via Docker Standalone, use the following command:
+
+```bash
+docker compose down -v
+```
+
+This command will stop and remove all containers, networks, and volumes associated with the SigNoz deployment.
+
+## Docker Swarm
+
+To uninstall SigNoz deployed on Docker Swarm, use the following command:
+
+```bash
+docker stack rm signoz
+```
+
+This command will remove all services and resources associated with the SigNoz stack.
+
+## Kubernetes
+
+To uninstall SigNoz deployed on Kubernetes using Helm, follow these steps:
+
+1.  **Uninstall Helm Release:**
+    This command removes all Kubernetes components associated with the Helm chart and deletes the release, except for ClickHouse CRD resources.
+
+    ```bash
+    helm -n <namespace> uninstall "<release-name>"
+    ```
+
+    Refer to the [Helm docs](https://helm.sh/docs/helm/helm_uninstall/) for more details on the `helm uninstall` command.
+
+2.  **Delete ClickHouse CRD Resources:**
+    If you are using ClickHouse managed by SigNoz, you might need to manually remove finalizers from ClickHouse CRD resources to ensure their complete deletion.
+
+    ```bash
+    kubectl -n <namespace> patch \
+      clickhouseinstallations.clickhouse.altinity.com/<release-name>-clickhouse \
+      -p '{"metadata":{"finalizers":[]}}' --type=merge
+    ```
+
+3.  **Delete Persistent Volume Claims (PVCs):**
+    The uninstallation process may not automatically delete associated PVCs. To clean them up, use the following command:
+
+    ```bash
+    kubectl -n <namespace> delete pvc -l app.kubernetes.io/instance=<release-name>
+    ```
+
+4.  **Delete Namespace:**
+    Finally, delete the namespace where SigNoz was installed:
+
+    ```bash
+    kubectl delete namespace <namespace>
+    ```

@@ -5,7 +5,7 @@ import Blogs from './Blogs'
 import Comparisons from '../comparisons/Comparisons'
 import Guides from '../guides/Guides'
 import OpenTelemetry from '../opentelemetry/OpenTelemetry'
-import Tabs from '../Shared/Tabs'
+
 export default function BlogHome() {
   const [activeTab, setActiveTab] = useState('blog-tab')
 

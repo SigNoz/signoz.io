@@ -1,0 +1,133 @@
+---
+
+title: How we made ClickHouse log queries 99.5% faster with resource fingerprinting
+slug: query-performance-improvement
+date: 2025-07-10
+tags: [Product]
+authors: [anushka_karmakar, nitya]
+description: Learn how SigNoz achieved 99.5% query performance improvement using hierarchical resource fingerprinting for ClickHouse sparse indexing. 
+image: /img/blog/2025/07/95-percent-faster-queries.webp
+keywords: [clickhouse, performance, query optimization, sparse index, hierarchical fingerprinting, observability, logs, SigNoz, database optimization, data blocks]
+
+---
+We cut log-query scanning from ~100% of data blocks to < 1% by reorganizing how logs are stored in ClickHouse. Instead of relying on bloom-filter skip indexes, they generate a deterministic “resource fingerprint” (hash of cluster + namespace + pod, etc.) for every log source and sort the table by this fingerprint in the primary-key ORDER BY clause. This packs logs from the same pod/service contiguously, letting ClickHouse’s sparse primary-key index skip irrelevant blocks. Result: a namespace filter now reads 222/26,135 blocks (0.85 %), slashing I/O and latency while remaining schema-compatible and extensible to AWS, Docker, etc.
+<Figure src="/img/blog/2025/07/95-percent-faster-queries.webp" alt="How we made our queries 99.5% faster" />
+
+Here's how we did it.
+
+## The Problem
+
+When logs come into [SigNoz](https://signoz.io/docs/introduction/) from different pods, services, and environments, they get mixed up in storage. A single data block might contain:
+
+- Some logs from `production`
+- Some from `staging`
+- Some from `development`
+- Random logs from everywhere else
+
+So when you query for logs from a specific namespace, the database can't skip any blocks because every block *might* contain relevant data scattered throughout.
+
+For a simple filter like `namespace = 'production'`, we were scanning 41,498 out of 41,676 data blocks. Essentially reading 99.5% of all data to find logs from one namespace.
+
+## How ClickHouse Stores Data
+
+To understand our solution, you need to know how ClickHouse (our underlying database) organizes data:
+
+**Granules/Blocks**: ClickHouse groups rows into blocks of 8,192 rows each by default (configurable via `index_granularity`). When you query, it decides which entire blocks to read or skip.
+<Figure src="/img/blog/2025/07/granules-blocks.webp" caption="How ClickHouse organizes table rows into granules of 8,192 rows each, stored in columnar format. Source: https://clickhouse.com/docs/guides/best-practices/sparse-primary-indexes" />
+
+**Primary Key Index**: This is a "sparse index" - it doesn't index every row, but rather creates index entries for each block. If your primary key helps identify which blocks contain relevant data, ClickHouse can skip irrelevant blocks entirely.
+<Figure src="/img/blog/2025/07/primary-key-index.webp" caption="ClickHouse's sparse primary index with one entry per granule. Source: https://clickhouse.com/docs/guides/best-practices/sparse-primary-indexes" />
+
+**Skip Indexes**: Secondary indexes (like bloom filters) that help skip blocks for non-primary key columns. These work, but not as efficiently as the primary key.
+
+**Why This Matters**: ClickHouse is a columnar database optimized for analytical workloads. Unlike row-based databases that read entire rows, ClickHouse reads data in columnar blocks. The efficiency comes from being able to skip entire blocks that don't contain relevant data. The primary key determines the physical storage order, which directly impacts which blocks can be skipped.
+
+**The Physical Layout**: When ClickHouse writes data to disk, it sorts and stores rows according to the `ORDER BY` clause in your table definition. This becomes your primary key for indexing purposes. Rows with similar primary key values are stored physically adjacent to each other in the same blocks.
+
+The key insight: if you can organize your data so the primary key naturally groups related records together, you get much better performance than relying on secondary indexes.
+
+## Our Solution: Hierarchical Resource Fingerprinting
+
+We realized that logs from the same Kubernetes pod always have identical resource attributes. Same cluster, same namespace, same pod name.
+
+Instead of treating these as random metadata, we started creating a "fingerprint" for each resource hierarchy:
+
+```jsx
+message = "hello john", cluster = c1, namespace = n1, pod = p1
+message = "hello alice", cluster = c1, namespace = n1, pod = p1  
+message = "hello bob", cluster = c1, namespace = n1, pod = p2
+message = "hello charlie", cluster = c1, namespace = n2, pod = p1
+message = "hello david", cluster = c2, namespace = n1, pod = p1
+message = "bye john", ec2.tag.env = fn-prod, cloudwatch.log.stream = service1
+message = "bye alice", ec2.tag.env = fn-prod, cloudwatch.log.stream = service1
+```
+
+```
+cluster=c1;namespace=n1;pod=p1;hash=15482603570120227210
+cluster=c1;namespace=n1;pod=p2;hash=15182603570120224210  
+cluster=c1;namespace=n2;pod=p1;hash=15282603570120223210
+cluster=c2;namespace=n1;pod=p1;hash=15382603570120226210
+ec2.tag.env=fn-prod;cloudwatch.log.stream=service1;hash=10649409385811604510
+```
+
+Then we changed our storage schema to sort by this fingerprint first:
+
+```sql
+ORDER BY (
+  ts_bucket_start,
+  resource_fingerprint,  -- This is the magic
+  severity_text,
+  timestamp,
+  id
+)
+```
+
+Now all logs from the same resource are stored together physically. When you query for `production` namespace logs, we only read blocks that actually contain production data.
+
+## The Results
+
+Same query, completely different execution:
+
+**Before:** Scanned 41,498 out of 41,676 blocks (**99.5%**)
+
+**After:** Scanned 222 out of 26,135 blocks (**0.85%**)
+
+Here's the actual query execution plan comparison:
+
+### Before
+
+<Figure src="/img/blog/2025/07/before-faster-queries.webp" alt="Before faster queries" />
+```
+Skip Index: bloom_filter (41498/41676 granules)
+```
+The bloom filter barely helped.
+
+### After
+
+<Figure src="/img/blog/2025/07/after-faster-queries.webp" alt="After faster queries" />
+```
+PrimaryKey: resource_fingerprint filter (222/26135 granules)
+```
+The primary key index eliminated 25,913 blocks.
+
+## Implementation Details
+
+The fingerprinting works for any resource hierarchy - Kubernetes pods, Docker containers, AWS services. The algorithm adapts automatically:
+
+- **Kubernetes**: `cluster;namespace;pod`
+- **AWS CloudWatch**: `ec2.tag.env;cloudwatch.log.stream`
+- **Docker**: `container.name;container.image`
+
+We implemented this as a schema migration while maintaining backward compatibility with existing queries.
+
+## What We Learned
+
+Most log queries filter by resource attributes (which pod, which service, which environment). By organizing data based on actual access patterns rather than just chronological order, we achieved massive performance gains.
+
+Sometimes the biggest wins come from understanding your data layout and optimizing storage accordingly.
+
+---
+
+This optimization has been live for months. [Try it out](https://signoz.io/teams/) and see the difference yourself.
+
+*Part of our engineering series on building SigNoz. Questions? [Join our Slack](https://signoz.io/slack).*

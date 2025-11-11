@@ -1,6 +1,4 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import { sortPosts, allCoreContent } from 'pliny/utils/contentlayer'
-import { allBlogs } from 'contentlayer/generated'
 import { Header } from '@/components/index-header'
 import BuildForDevelopers from '@/components/build-for-developers'
 import { SigNozFeatures } from '@/components/index-features'
@@ -12,7 +10,7 @@ import WhySelectSignoz from '@/components/why-select-signoz'
 import { GetStarted } from '@/components/GetStarted'
 import { NextUIProvider } from '@nextui-org/react'
 import { Metadata } from 'next'
-import dynamic from 'next/dynamic'
+import Chatbase from '@/components/Chatbase'
 
 export const metadata: Metadata = {
   title: 'SigNoz | The Open Source Datadog Alternative',
@@ -25,7 +23,7 @@ export const metadata: Metadata = {
     'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
 }
 
-export default async function Page() {
+export default function Page() {
   return (
     <NextUIProvider>
       <div className="relative mt-[-56px] bg-signoz_ink-500 ">
@@ -42,6 +40,7 @@ export default async function Page() {
           <Testimonials page="homepage" />
           <GetStarted page="homepage" />
         </main>
+        <Chatbase />
       </div>
     </NextUIProvider>
   )

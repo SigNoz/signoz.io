@@ -1,0 +1,82 @@
+---
+date: 2025-01-15
+title: Setup Trace Funnels
+tags : [SigNoz Cloud, Self-Host]
+id: setup
+hide_table_of_contents: false
+---
+
+[Trace Funnels](https://signoz.io/docs/trace-funnels/overview/) works automatically with properly instrumented applications that export traces to SigNoz. This document explains the requirements needed for this feature to work effectively.
+
+## Prerequisites
+
+Before you begin using Trace Funnels, ensure you have:
+
+- Tracing Enabled - Your application must be [instrumented](https://signoz.io/docs/instrumentation/) and exporting spans to SigNoz
+
+## Definitions
+
+Understanding these key terms will help you effectively use Trace Funnels:
+
+- **Trace**: A collection of spans representing a single end-to-end request
+- **Span**: A timed operation within a trace (e.g., an HTTP request, database query)
+- **Funnel Step**: One of the sequential operations you wish to track
+- **Conversion Rate**: The percentage of requests that successfully complete a step
+- **Transition**: The movement from one step to the next within the same trace
+
+## Setup
+
+For every span that you want to include in your funnels, ensure the following [attributes](https://signoz.io/blog/opentelemetry-spans/#what-are-span-attributes) are present:
+
+- `service.name` - The name of the service emitting the span
+- `span.name` - The name of the specific operation
+- `trace.id` - The unique identifier for the trace (automatically added by OpenTelemetry)
+
+These span attributes are used to automatically correlate spans within the same trace and identify sequential operations.
+
+<Admonition>
+In case of manual instrumentation, ensure that all spans include the required attributes and that the `service.name` and `span.name` are set to meaningful values that clearly identify your operations.
+</Admonition>
+
+## Verification
+
+To verify that your instrumentation is correctly configured for Trace Funnels:
+
+1. Generate some traffic that includes the operations you want to monitor
+2. Navigate to the [Trace Explorer](/docs/userguide/traces) and search for traces
+3. Verify that your spans have meaningful `service.name` and `span.name` values
+4. Navigate to the Trace Funnels section in SigNoz
+5. Create a new funnel and verify that your services and span names appear in the dropdowns
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/trace-funnels/create_a_new_funnel_and_add_span_to_it.gif" alt="Trace Funnels verification"/>
+    <figcaption><i>Verifying Trace Funnels Setup</i></figcaption>
+</figure>
+
+## Accessing Trace Funnels
+
+To access the Trace Funnels feature:
+
+1. In the navigation bar, click **Traces**
+2. At the top of the Traces page, select **Trace Funnels**
+
+The Trace Funnels button appears beside the main search bar.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/trace-funnels/navigating_to_trace_funnels.gif" alt="Accessing Trace Funnels"/>
+    <figcaption><i>Accessing Trace Funnels from the Traces page</i></figcaption>
+</figure>
+
+## Troubleshooting
+
+If your services or span names aren't appearing in the Trace Funnels interface:
+
+- Check that your service is properly [instrumented](https://signoz.io/docs/instrumentation/) and sending traces to SigNoz
+- Verify that your spans include the required `service.name` and `span.name` attributes
+- Ensure that your OpenTelemetry collector is properly configured and forwarding all attributes
+- Check the [Trace Explorer](/docs/userguide/traces) to confirm that traces are being ingested correctly
+- For manual instrumentation, ensure you're setting all required attributes explicitly
+
+## Next Steps
+
+Once your application is properly instrumented and you can access Trace Funnels, head to the [Overview section](/docs/trace-funnels/overview) to learn how to create and use Trace Funnels to gain insights into your request flows and identify performance bottlenecks. 

@@ -1,24 +1,29 @@
 ---
 date: 2024-06-06
 id: fastapi
+tags : [SigNoz Cloud, Self-Host]
 title: FastAPI OpenTelemetry Instrumentation
 description: Instrument your FastAPI application with OpenTelemetry and send data to SigNoz
-
+hide_table_of_contents: true
 ---
 
 
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your FastAPI applications and view your application traces in SigNoz.
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your FastAPI applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your FastAPI application.
+{/* This document contains instructions on how to set up OpenTelemetry instrumentation in your FastAPI applications.  */}
+{/* OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your FastAPI application. */}
 
-Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
+{/* Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz. */}
 
 ## Requirements
 
 - Python 3.8 or newer
 
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 ## Send Traces to SigNoz Cloud
 
 Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
@@ -78,23 +83,16 @@ Please make sure that you have installed all the dependencies of your applicatio
 
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 opentelemetry-instrument <your_run_command>
 ```
 
-- *`<service_name>`* is the name of the service you want
-- *`<your_run_command>`* can be `python3 app.py` or `python manage.py runserver --noreload`
-- Replace `SIGNOZ_INGESTION_KEY` with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- `<your_run_command>` can be `python3 app.py` or `python manage.py runserver --noreload`
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
 
 <Admonition>
 Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, you can disable the auto reload with `--noreload`.
@@ -108,18 +106,20 @@ In case you encounter an issue where all applications do not get listed in the s
 
 #### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+**Step 1.** Install OTel Collector binary<br></br>
 
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Python application.
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-**Step 1.** Create a virtual environment<br></br>
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2.** Create a virtual environment<br></br>
     
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-**Step 2.** Install the OpenTelemetry dependencies
+**Step 3.** Install the OpenTelemetry dependencies
 
 ```bash
 pip install opentelemetry-distro==0.43b0
@@ -143,7 +143,7 @@ The dependencies included are briefly explained below:
 The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
 </Admonition>
 
-**Step 3.** Add automatic instrumentation
+**Step 4.** Add automatic instrumentation
 
 ```bash
 opentelemetry-bootstrap --action=install
@@ -179,8 +179,221 @@ In case you encounter an issue where all applications do not get listed in the s
 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
+You can auto-instrument sending traces from the FastAPI application using one of the following methods:
 
-For Python application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
+1. Using Kubernetes OTel Operator (recommended)
+2. Using OTel Collector Agent
+
+<Tabs>
+<TabItem value="k8s-otel-operator" label="K8s OTel Operator" default>
+### K8s OTel Operator Based Automatic Instrumentation (recommended)
+
+#### Send traces directly to SigNoz Cloud - Using K8s OTel Operator
+
+For Python FastAPI application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
+
+An [OpenTelemetry Operator](https://opentelemetry.io/docs/kubernetes/operator) is a Kubernetes Operator that manages 
+[OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) and auto-instrumentation of 
+workloads. It basically simplifies the deployment and management of OpenTelemetry in a Kubernetes environment.
+
+The OpenTelemetry Operator provides two Custom Resource Definitions (CRDs):
+
+- `OpenTelemetryCollector`
+- `Instrumentation`
+
+The `OpenTelemetryCollector` CRD allows you to deploy and manage OpenTelemetry Collectors in your Kubernetes cluster.
+
+The `Instrumentation` CRD allows you to configure and inject OpenTelemetry auto-instrumentation libraries into your workloads.
+
+Here are the steps you need to follow to auto-instrument FastAPI application using OTel Operator:
+
+**Step 1.** Install cert-manager
+
+Run the following commands to apply cert manager.
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
+
+kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
+```
+
+**Step 2.** Install OpenTelemetry Operator
+
+To install the operator in the existing K8s cluster, run the following command:
+
+```bash
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
+```
+
+Installing the OpenTelemetry Operator sets up the necessary components and configurations to enable the observability and monitoring of applications running in the cluster.
+
+**Step 3.** Setup the OpenTelemetry Collector instance
+
+Once the `opentelemetry-operator` has been deployed, you can proceed with the creation of the OpenTelemetry Collector (`otelcol`) instance. The OpenTelemetry Collector collects, processes, and exports telemetry data.
+
+There are different deployment modes for the `OpenTelemetryCollector`, and you can specify them in the spec.mode section of the custom resource. The available deployment modes are:
+
+- [Daemonset](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
+- [Sidecar](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
+- [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
+- [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) (default mode)
+
+The default method - the `Deployment` mode, will be used here.
+
+To create a simple instance of the OpenTelemetry Collector, create a file `otel-collector.yaml` with the following contents:
+
+```yaml:otel-collector.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+spec:
+  mode: deployment
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      batch: {}
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: prod # can be dev, prod, staging etc. based on your environment
+          action: upsert
+    exporters:
+      debug: {}
+      otlp:
+        endpoint: "ingest.<region>.signoz.cloud:443" # replace <region> with your region of SigNoz Cloud
+        tls:
+          insecure: false
+        headers:
+          "signoz-ingestion-key": "<your-ingestion-key>" # Obtain from https://{your-signoz-tenant-url}/settings/ingestion-settings
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [otlp]
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Apply the above yaml file using the following command:
+
+```bash
+kubectl apply -f otel-collector.yaml
+```
+
+**Step 4.** Setup the Instrumentation instance
+
+Once the OpenTelemetry Collector instance has been deployed, the next step will be to create an instrumentation instance, which will be responsible for sending OTLP data to the OTel Collector.
+
+Create a file `instrumentation.yaml` with the following contents:
+
+```yaml:instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: traces-instrumentation
+spec:
+  exporter:
+    endpoint: https://ingest.<region>.signoz.cloud:443  # replace <region> with your region of SigNoz Cloud
+  env:
+    - name: OTEL_EXPORTER_OTLP_HEADERS
+      value: signoz-ingestion-key="<signoz-token>"  # Obtain from https://{your-signoz-url}/settings/ingestion-settings
+    - name: OTEL_EXPORTER_OTLP_INSECURE
+      value: "false"
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+    env:
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://otel-collector-collector:4318 #This is formed as: "http://<OpenTelemetryCollector name>-collector:4318"
+```
+
+Apply the above instrumentation using the following command:
+
+```bash
+kubectl apply -f instrumentation.yaml
+```
+
+**Step 5.** Auto-instrument your FastAPI app with OpenTelemetry
+
+Create `deployment.yaml` file for your FastAPI application as follows:
+
+```yaml:deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-app
+spec:
+  selector:
+    matchLabels:
+      app: fastapi-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fastapi-app
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
+        instrumentation.opentelemetry.io/otel-python-platform: "musl"
+        resource.opentelemetry.io/service.name: "fastapi-app"
+    spec:
+      containers:
+      - name: app
+        image: fastapi-app:latest
+        ports:
+        - containerPort: 8080
+```
+
+It is important to add the following annotation under `spec > template > metadata > annotations`:
+
+```
+instrumentation.opentelemetry.io/inject-python: "true"
+instrumentation.opentelemetry.io/otel-python-platform: "musl" # "musl" for Linux musl based images or "glibc" for Linux glibc based images
+```
+
+This helps in auto-instrumenting the traces from the FastAPI application.
+
+Apply the deployment using the following command:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+With this, the auto-instrumentation of traces for FastAPI application is ready.
+
+**Step 6.** Running the FastAPI application
+
+In order to run the application on port 8080, run the following commands:
+
+```bash
+export POD_NAME=$(kubectl get pod -l app=<service-name> -o jsonpath="{.items[0].metadata.name}")  # service name is `fastapi-app` in this case.   
+
+kubectl port-forward ${POD_NAME} 8080:8080
+```
+
+You can now access the application on port 8080.
+
+You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
+
+</TabItem>
+<TabItem value="otel-collector-agent" label="OTel Collector Agent">
+For Python FastAPI application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Python instrumentation by following the below steps:
 
@@ -253,9 +466,140 @@ In case you encounter an issue where all applications do not get listed in the s
   
 </TabItem>
 </Tabs>
+</TabItem>
+<TabItem value="Docker" label="Docker">
 
+There are two ways to send data to SigNoz Cloud. You can containerize the images in both the cases.
+
+- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud-1)
+- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
+
+#### Send traces directly to SigNoz Cloud
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+...
+
+# install dependencies
+RUN pip install opentelemetry-distro==0.43b0 opentelemetry-exporter-otlp==1.22.0
+
+...
+
+# NOTE: ADD THIS AFTER pip install requirements.txt
+RUN opentelemetry-bootstrap --action=install
+
+...
+
+# Set environment variables for OpenTelemetry
+ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+
+# Replace with your run command
+CMD ["opentelemetry-instrument", <run_command>]
+```
+
+- Replace `<run_command>` with the command to run your application
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+
+The above steps install OpenTelemetry dependencies directly inside the Docker container without altering `requirements.txt` file of project & sets environment variables to export the traces.
+
+**Step 2.** Run your Docker container
+
+Here's how you can run your docker container:
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+- `-p` maps a host port to a container port
+
+
+**Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+---
+
+#### Send traces via OTel Collector binary
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+# install OpenTelemetry Collector in Docker container
+FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
+
+COPY --from=otel /otelcol-contrib /otelcol-contrib
+COPY --from=otel /etc/otelcol-contrib /etc/otelcol-contrib
+
+COPY config.yaml /etc/otelcol-contrib/config.yaml
+
+...
+
+# And install OpenTelemetry packages
+RUN pip install --upgrade pip && \
+    pip install opentelemetry-distro==0.43b0 opentelemetry-exporter-otlp==1.22.0
+
+...
+
+# add this right after installing your dependencies
+RUN opentelemetry-bootstrap --action=install
+
+# Replace APP_PORT with the port of your application
+EXPOSE 4317 4318 <APP_PORT>
+
+# Set environment variables for OpenTelemetry
+ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+
+# Run app.py with OpenTelemetry instrumentation when the container launches
+CMD sh -c "/otelcol-contrib --config=/etc/otelcol-contrib/config.yaml & opentelemetry-instrument <run_command>
+...
+```
+
+Make sure you have `config.yaml` in `root` of the application. This config.yaml should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
+
+- Replace `<run_command>` with the command to run your application
+- `<service_name>` is name of your service
+
+
+**Step 2.** Run your Docker container
+
+Run your docker container to start exporting.
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+
+- `-p` maps a host port to a container port
+
+
+**Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+</TabItem>
+</Tabs>
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
 ## Send Traces to Self-Hosted SigNoz
-
+{/* 
 There are three major steps to using OpenTelemetry:
 
 - Instrumenting your FastAPI application with OpenTelemetry
@@ -265,7 +609,7 @@ There are three major steps to using OpenTelemetry:
 <figure data-zoomable align='center'>
     <img src="/img/docs/otel_python_instrumentation.webp" alt="OpenTelemetry helps to generate and collect telemetry data from your application which is then sent to an observability backend like SigNoz"/>
     <figcaption><i>OpenTelemetry helps generate and collect telemetry data from Python applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption>
-</figure>
+</figure> */}
 
 
 Let’s understand how to download, install, and run OpenTelemetry in FastAPI.
@@ -346,6 +690,8 @@ You can use OpenTelemetry to send your traces directly to SigNoz. OpenTelemetry 
      
     In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
+</TabItem>
+</Tabs>
 ## Validating instrumentation by checking for traces
 
 With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
@@ -358,15 +704,15 @@ Validate your traces in SigNoz:
 2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
 3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
 
-You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
+{/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/opentelemetry_python_app_instrumented.webp" alt="Python Application in the list of services being monitored in SigNoz"/>
     <figcaption><i>Python Application in the list of services being monitored in SigNoz</i></figcaption>
-</figure>
+</figure> */}
 
 
-## Database Instrumentation
+{/* ## Database Instrumentation
 
 Make sure that the DB client library you are using has the corresponding instrumentation library, and the version of the DB client library is supported by OpenTelemetry.
 
@@ -404,7 +750,7 @@ You can check the supported versions [here](https://github.com/open-telemetry/op
 </Admonition>
 
 
-
+ */}
 
 ## Running applications with Gunicorn, uWSGI
 
@@ -412,7 +758,7 @@ For application servers which are based on pre fork model like Gunicorn, uWSGI y
 
 Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest/examples/fork-process-model/README.html) from OpenTelemetry on how to set it up.
 
-[Here's](https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples/fork-process-model) a working example where a gunicorn server is configured with `post_fork` hook.
+Here's a [working example](https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples/fork-process-model) where a gunicorn server is configured with `post_fork` hook.
 
 
 
@@ -473,4 +819,4 @@ Ensure you have the correct opentelemetry instrumentations:
 
 - We have included a sample FastAPI application with README.md at [Sample FastAPI App Github Repo.](https://github.com/SigNoz/sample-fastAPI-app)
 
-<InstrumentationFAQ />
+{/* <InstrumentationFAQ /> */}

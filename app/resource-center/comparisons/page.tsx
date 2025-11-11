@@ -5,7 +5,6 @@ import Blogs from '../blog/Blogs'
 import Comparisons from './Comparisons'
 import Guides from '../guides/Guides'
 import OpenTelemetry from '../opentelemetry/OpenTelemetry'
-import Tabs from '../Shared/Tabs'
 
 export default function ComparisonsHome() {
   const [activeTab, setActiveTab] = useState('comparisons-tab')

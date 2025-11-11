@@ -1,18 +1,22 @@
 ---
 date: 2024-06-06
 id: golang
+tags : [SigNoz Cloud, Self-Host]
 title: Go OpenTelemetry Instrumentation
 description:  Learn how to instrument your Go application with OpenTelemetry and send telemetry data to SigNoz
-
+hide_table_of_contents: true
 ---
 
+{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Go applications and view your application traces in SigNoz.
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+{/* This document contains instructions on how to set up OpenTelemetry instrumentation in your Go applications.  */}
 
+{/* OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Go application. */}
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your Go applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Go application.
-
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 ## Send Traces to SigNoz Cloud
 
 <Tabs>
@@ -145,34 +149,24 @@ From VMs, there are two ways to send data to SigNoz Cloud.
    The run command must have some environment variables to send data to SigNoz cloud. The run command:
     
     ```bash
-    SERVICE_NAME=goApp INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ-INGESTION-TOKEN> OTEL_EXPORTER_OTLP_ENDPOINT=ingest.{region}.signoz.cloud:443 go run main.go
+    SERVICE_NAME=<service_name> INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+    OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 go run main.go
     ```
 
-    We can replace the placeholders based on our environment. 
-    
-    `SERVICE_NAME`: goGinApp (you can name it whatever you want)
-
-    `OTEL_EXPORTER_OTLP_HEADERS`: `signoz-ingestion-key=<SIGNOZ-INGESTION-TOKEN>`. Update `<SIGNOZ-INGESTION-TOKEN>` with the ingestion token provided by SigNoz
-    
-    `OTEL_EXPORTER_OTLP_ENDPOINT`: ingest.`{region}`.signoz.cloud:443. Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-    | Region | Endpoint |
-    | --- | --- |
-    | US |	ingest.us.signoz.cloud:443 |
-    | IN |	ingest.in.signoz.cloud:443 |
-    | EU | ingest.eu.signoz.cloud:443 |
-
-
----
+    - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+    - `<service_name>` is name of your service
 
 
 #### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+1. **Install OTel Collector binary**<br></br>
 
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Golang application.
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-1. **Install Dependencies**<br></br>
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+2. **Install Dependencies**<br></br>
    Dependencies related to OpenTelemetry exporter and SDK have to be installed first. Note that we are assuming you are using `gin` request router. If you are using other request routers, check out the [corresponding package](#request-routers).
    
    Run the below commands after navigating to the application source folder:
@@ -186,7 +180,7 @@ You can find instructions to install OTel Collector binary [here](https://signoz
       go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
     ```
     
-2. **Declare environment variables for configuring OpenTelemetry**<br></br>
+3. **Declare environment variables for configuring OpenTelemetry**<br></br>
    Declare the following global variables in `main.go` which we will use to configure OpenTelemetry:
    
    ```go
@@ -197,7 +191,7 @@ You can find instructions to install OTel Collector binary [here](https://signoz
     )
     ```
     
-3. **Instrument your Go application with OpenTelemetry**<br></br>
+4. **Instrument your Go application with OpenTelemetry**<br></br>
    To configure your application to send data we will need a function to initialize OpenTelemetry. Add the following snippet of code in your `main.go` file.
     
    ```go
@@ -258,7 +252,7 @@ You can find instructions to install OTel Collector binary [here](https://signoz
         return exporter.Shutdown
     }
     
-4. **Initialize the tracer in main.go**<br></br>
+5. **Initialize the tracer in main.go**<br></br>
    Modify the main function to initialise the tracer in `main.go`. Initiate the tracer at the very beginning of our main function.
     
     ```go
@@ -270,7 +264,7 @@ You can find instructions to install OTel Collector binary [here](https://signoz
     }
     ```
     
-5. **Add the OpenTelemetry Gin middleware**<br></br>
+6. **Add the OpenTelemetry Gin middleware**<br></br>
    Configure Gin to use the middleware by adding the following lines in `main.go`.
     
     ```go
@@ -287,23 +281,28 @@ You can find instructions to install OTel Collector binary [here](https://signoz
     }
     ```
     
-6. **Set environment variables and run your Go Gin application**<br></br>
+7. **Set environment variables and run your Go Gin application**<br></br>
    The run command must have some environment variables to send data to SigNoz. The run command:
     
     ```bash
-    SERVICE_NAME=goGinApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
+    SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
     ```
-    
-    If you want to update your `service_name`, you can modify the `SERVICE_NAME` variable.<br></br>
-    `SERVICE_NAME`: goGinApp (you can name it whatever you want)
 
-7. You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+    `<service_name>` is name of your service
+
+8. You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
 </TabItem>
 
 <TabItem value="k8s" label="Kubernetes">
+You can auto-instrument sending traces from the Golang application using one of the following methods:
 
-For Golang application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](/docs/tutorial/kubernetes-infra-metrics/).
+1. Using OTel Collector Agent
+2. Using Kubernetes OTel Operator
+
+<Tabs>
+<TabItem value="otel-collector-agent" label="OTel Collector Agent" default>
+For Golang application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Golang instrumentation by following the below steps:
 
@@ -426,22 +425,254 @@ Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Go
    The run command must have some environment variables to send data to SigNoz. The run command:
     
     ```bash
-    SERVICE_NAME=goGinApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
+    SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
     ```
     
-    If you want to update your `service_name`, you can modify the `SERVICE_NAME` variable.<br></br>
-    `SERVICE_NAME`: goGinApp (you can name it whatever you want)
+    `<service_name>` is name of your service
 
 7. You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+</TabItem>
+<TabItem value="k8s-otel-operator" label="K8s OTel Operator">
+### K8s OTel Operator Based Automatic Instrumentation
 
+#### Send traces directly to SigNoz Cloud - Using K8s OTel Operator
+
+For Golang application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
+
+<Admonition type="warning">
+
+The OTel Operator for Golang is not yet production ready. You can check the latest status of the Otel Operator for Golang [here](https://github.com/open-telemetry/opentelemetry-go-instrumentation). 
+We recommend to use this in production only after it is marked as ready for production use.
+
+</Admonition>
+
+An [OpenTelemetry Operator](https://opentelemetry.io/docs/kubernetes/operator) is a Kubernetes Operator that manages 
+[OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) and auto-instrumentation of 
+workloads. It basically simplifies the deployment and management of OpenTelemetry in a Kubernetes environment.
+
+The OpenTelemetry Operator provides two Custom Resource Definitions (CRDs):
+
+- `OpenTelemetryCollector`
+- `Instrumentation`
+
+The `OpenTelemetryCollector` CRD allows you to deploy and manage OpenTelemetry Collectors in your Kubernetes cluster.
+
+The `Instrumentation` CRD allows you to configure and inject OpenTelemetry auto-instrumentation libraries into your workloads.
+
+Here are the steps you need to follow to auto-instrument Golang application using OTel Operator:
+
+**Step 1.** Install cert-manager
+
+Run the following commands to apply cert manager.
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
+
+kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
+```
+
+**Step 2.** Install OpenTelemetry Operator
+
+To install the operator in the existing K8s cluster, run the following command:
+
+```bash
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
+```
+
+Installing the OpenTelemetry Operator sets up the necessary components and configurations to enable the observability and monitoring of applications running in the cluster.
+
+**Step 3.** Setup the OpenTelemetry Collector instance
+
+Once the `opentelemetry-operator` has been deployed, you can proceed with the creation of the OpenTelemetry Collector (`otelcol`) instance. The OpenTelemetry Collector collects, processes, and exports telemetry data.
+
+There are different deployment modes for the `OpenTelemetryCollector`, and you can specify them in the spec.mode section of the custom resource. The available deployment modes are:
+
+- [Daemonset](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
+- [Sidecar](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
+- [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
+- [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) (default mode)
+
+The default method - the `Deployment` mode, will be used here.
+
+To create a simple instance of the OpenTelemetry Collector, create a file `otel-collector.yaml` with the following contents:
+
+```yaml:otel-collector.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+spec:
+  mode: deployment
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      batch: {}
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: prod # can be dev, prod, staging etc. based on your environment
+          action: upsert
+    exporters:
+      debug: {}
+      otlp:
+        endpoint: "ingest.<region>.signoz.cloud:443" # replace <region> with your region of SigNoz Cloud
+        tls:
+          insecure: false
+        headers:
+          "signoz-ingestion-key": "<your-ingestion-key>" # Obtain from https://{your-signoz-tenant-url}/settings/ingestion-settings
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [otlp]
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+Apply the above yaml file using the following command:
+
+```bash
+kubectl apply -f otel-collector.yaml
+```
+
+**Step 4.** Setup the Instrumentation instance
+
+Once the OpenTelemetry Collector instance has been deployed, the next step will be to create an instrumentation instance, which will be responsible for sending OTLP data to the OTel Collector.
+
+Create a file `instrumentation.yaml` with the following contents:
+
+```yaml:instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: traces-instrumentation
+spec:
+  exporter:
+    endpoint: https://ingest.<region>.signoz.cloud:443  # replace <region> with your region of SigNoz Cloud
+  env:
+    - name: OTEL_EXPORTER_OTLP_HEADERS
+      value: signoz-ingestion-key="<signoz-token>"  # Obtain from https://{your-signoz-url}/settings/ingestion-settings
+    - name: OTEL_EXPORTER_OTLP_INSECURE
+      value: "false"
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"
+  go:
+    image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:latest
+    env:
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://otel-collector-collector:4318 #This is formed as: "http://<OpenTelemetryCollector name>-collector:4318"
+```
+
+Apply the above instrumentation using the following command:
+
+```bash
+kubectl apply -f instrumentation.yaml
+```
+
+**Step 5.** Auto-instrument your .NET app with OpenTelemetry
+
+Create `deployment.yaml` file for your .NET application as follows:
+
+```yaml:deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: golang-app
+spec:
+  selector:
+    matchLabels:
+      app: golang-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: golang-app
+      annotations:
+        instrumentation.opentelemetry.io/inject-go: "true"
+        instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/app/server"
+        resource.opentelemetry.io/service.name: "golang-app"
+    spec:
+      containers:
+      - name: app
+        image: golang-app:latest
+        ports:
+        - containerPort: 8080
+      - name: autoinstrumentation-go
+        image: otel/autoinstrumentation-go
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: OTEL_GO_AUTO_TARGET_EXE
+          value: "/app/server"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://otel-collector-collector:4318" #This is formed as: "http://<OpenTelemetryCollector name>-collector:4318"
+        - name: OTEL_SERVICE_NAME
+          value: "golang-app"
+        securityContext:
+          runAsUser: 0
+          privileged: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      shareProcessNamespace: true
+```
+
+It is important to add the following annotation under `spec > template > metadata > annotations`:
+
+```
+instrumentation.opentelemetry.io/inject-go: "true"
+instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/app/server" # This is the location of target application binary
+```
+
+This helps in auto-instrumenting the traces from the Golang application.
+
+Note that for Golang, we need to add a specific container for auto-instrumentation: `autoinstrumentation-go`. All the OTel related 
+environment variables have been provided as part of this container.
+
+Apply the deployment using the following command:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+With this, the auto-instrumentation of traces for Golang application is ready.
+
+**Step 6.** Running the Golang application
+
+In order to run the application on port 8080, run the following commands:
+
+```bash
+export POD_NAME=$(kubectl get pod -l app=<service-name> -o jsonpath="{.items[0].metadata.name}")  # service name is `golang-app` in this case.   
+
+kubectl port-forward ${POD_NAME} 8080:8080
+```
+
+You can now access the application on port 8080.
+
+You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
+</TabItem>
+</Tabs>
 </TabItem>
 
 <TabItem value="windows" label="Windows">
 
 From Windows, there are two ways to send data to SigNoz Cloud.
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+- Send traces directly to SigNoz Cloud
+- Send traces via OTel Collector binary (recommended)
 
 #### Send traces directly to SigNoz Cloud
 
@@ -565,41 +796,30 @@ From Windows, there are two ways to send data to SigNoz Cloud.
    The run command must have some environment variables to send data to SigNoz cloud. The run commands:
     
     ```bash
-    set SERVICE_NAME=goApp
+    set SERVICE_NAME=<service_name>
     set INSECURE_MODE=false
-    set OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ-INGESTION-TOKEN>
-    set OTEL_EXPORTER_OTLP_ENDPOINT=ingest.{region}.signoz.cloud:443
+    set OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+    set OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443
     ```
 
     ```bash
     go run main.go
     ```
 
-    We can replace the placeholders based on our environment. 
-    
-    `SERVICE_NAME`: goGinApp (you can name it whatever you want)
-
-    `OTEL_EXPORTER_OTLP_HEADERS`: `signoz-ingestion-key=<SIGNOZ-INGESTION-TOKEN>`. Update `<SIGNOZ-INGESTION-TOKEN>` with the ingestion token provided by SigNoz
-    
-    `OTEL_EXPORTER_OTLP_ENDPOINT`: ingest.`{region}`.signoz.cloud:443. Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-    | Region | Endpoint |
-    | --- | --- |
-    | US |	ingest.us.signoz.cloud:443 |
-    | IN |	ingest.in.signoz.cloud:443 |
-    | EU | ingest.eu.signoz.cloud:443 |
-
-
----
+    - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+    - `<service_name>` is name of your service
 
 
 #### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+1. **Install OTel Collector binary**<br></br>
 
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Golang application.
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-1. **Install Dependencies**<br></br>
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+2. **Install Dependencies**<br></br>
    Dependencies related to OpenTelemetry exporter and SDK have to be installed first. Note that we are assuming you are using `gin` request router. If you are using other request routers, check out the [corresponding package](#request-routers).
    
    Run the below commands after navigating to the application source folder:
@@ -613,7 +833,7 @@ You can find instructions to install OTel Collector binary [here](https://signoz
       go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
     ```
     
-2. **Declare environment variables for configuring OpenTelemetry**<br></br>
+3. **Declare environment variables for configuring OpenTelemetry**<br></br>
    Declare the following global variables in `main.go` which we will use to configure OpenTelemetry:
    
    ```go
@@ -624,7 +844,7 @@ You can find instructions to install OTel Collector binary [here](https://signoz
     )
     ```
     
-3. **Instrument your Go application with OpenTelemetry**<br></br>
+4. **Instrument your Go application with OpenTelemetry**<br></br>
    To configure your application to send data we will need a function to initialize OpenTelemetry. Add the following snippet of code in your `main.go` file.
     
    ```go
@@ -685,7 +905,7 @@ You can find instructions to install OTel Collector binary [here](https://signoz
         return exporter.Shutdown
     }
     
-4. **Initialize the tracer in main.go**<br></br>
+5. **Initialize the tracer in main.go**<br></br>
    Modify the main function to initialise the tracer in `main.go`. Initiate the tracer at the very beginning of our main function.
     
     ```go
@@ -697,7 +917,7 @@ You can find instructions to install OTel Collector binary [here](https://signoz
     }
     ```
     
-5. **Add the OpenTelemetry Gin middleware**<br></br>
+6. **Add the OpenTelemetry Gin middleware**<br></br>
    Configure Gin to use the middleware by adding the following lines in `main.go`.
     
     ```go
@@ -714,11 +934,11 @@ You can find instructions to install OTel Collector binary [here](https://signoz
     }
     ```
     
-6. **Set environment variables and run your Go Gin application**<br></br>
+7. **Set environment variables and run your Go Gin application**<br></br>
    The run command must have some environment variables to send data to SigNoz. Then run the following commands:
     
     ```bash
-    set SERVICE_NAME=goGinApp
+    set SERVICE_NAME=<service_name>
     set INSECURE_MODE=true
     set OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317
     ```
@@ -727,15 +947,15 @@ You can find instructions to install OTel Collector binary [here](https://signoz
     go run main.go
     ```
     
-    If you want to update your `service_name`, you can modify the `SERVICE_NAME` variable.<br></br>
-    `SERVICE_NAME`: goGinApp (you can name it whatever you want)
+    `<service_name>` is name of your service
 
-7. You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+8. You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
 </TabItem>
 </Tabs>
 
-
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
 ## Send Traces to Self-Hosted SigNoz
 
 1. **Install Dependencies**<br></br>
@@ -860,9 +1080,7 @@ You can find instructions to install OTel Collector binary [here](https://signoz
     SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=<IP of SigNoz backend:4317> go run main.go
     ```
     
-    We can replace the placeholders based on our environment.
-    
-    `SERVICE_NAME`: goGinApp (you can name it whatever you want)
+    `<service_name>` is name of your service
     
     `OTEL_EXPORTER_OTLP_ENDPOINT`: localhost:4317
     
@@ -875,9 +1093,13 @@ You can find instructions to install OTel Collector binary [here](https://signoz
     Hence, the final run command looks like this:
     
     ```bash
-    SERVICE_NAME=goGinApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
+    SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
     ```
 
+    `<service_name>` is name of your service
+
+</TabItem>
+</Tabs>
 
 ## Validating instrumentation by checking for traces
 
@@ -891,15 +1113,15 @@ Validate your traces in SigNoz:
 2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
 3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
 
-You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
+{/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/blog/2022/04/goginapp_signoz_dashboard.webp" alt="Go Application in the list of services being monitored in SigNoz"/>
     <figcaption><i>Go Application in the list of services being monitored in SigNoz</i></figcaption>
-</figure>
+</figure> */}
 
 
-If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide.
+{/* If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide. */}
     
 
 ## Request Routers
@@ -994,12 +1216,12 @@ It’s also possible to set custom attributes or tags to a span. To add custom a
     ```
     
 
-SigNoz dashboards can be used to track these custom attributes.
+{/* SigNoz dashboards can be used to track these custom attributes. */}
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/opentelemetry_go_custom_attributes.webp" alt="Custom attributes under 'Tags' section on SigNoz trace detail page"/>
     <figcaption><i>Custom attributes can be seen under `Tags` section on SigNoz trace detail page</i></figcaption>
-    </figure>
+    </figure> */}
 
 
 We can also set custom events on the span with its own attribute.
@@ -1007,11 +1229,11 @@ We can also set custom events on the span with its own attribute.
 ```bash
 span.AddEvent("This is a sample event", trace.WithAttributes(attribute.Int("pid", 4328), attribute.String("sampleAttribute", "Test")))
 ```
-
+{/* 
 <figure data-zoomable align='center'>
     <img src="/img/docs/opentelemetry_go_events.webp" alt="Events can be seen under `Events` section on SigNoz trace detail page"/>
     <figcaption><i>Events can be seen under `Events` section on SigNoz trace detail page</i></figcaption>
-    </figure>
+    </figure> */}
 
 
 
@@ -1093,4 +1315,4 @@ You can also find libraries, plugins, integrations, and other useful tools for e
 
 
 
-<InstrumentationFAQ />
+{/* <InstrumentationFAQ /> */}

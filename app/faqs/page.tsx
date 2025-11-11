@@ -1,10 +1,9 @@
 'use client'
 
+import Button from '@/components/ui/Button'
 import { allFAQs } from 'contentlayer/generated'
 import Link from 'next/link'
-import { useState } from 'react'
-import { TrieveModalSearch } from 'trieve-search-component'
-import 'trieve-search-component/dist/index.css'
+import React, { useState } from 'react'
 
 export default function FAQsPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -18,7 +17,7 @@ export default function FAQsPage() {
     )
   ).sort()
 
-  // Filter only by tags now since search is handled by Trieve
+  // Filter only by tags
   const faqs = allFAQs
     .filter((faq) => !faq.draft)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -38,7 +37,7 @@ export default function FAQsPage() {
     <div className="relative min-h-screen w-full bg-signoz_ink-500">
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
       <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] sm:h-[450px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
-      
+
       <div className="relative mx-auto flex w-full max-w-7xl flex-col items-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-24">
         <div className="w-full space-y-4 sm:space-y-6">
           <h1 className="text-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-signoz_vanilla-100">
@@ -47,61 +46,34 @@ export default function FAQsPage() {
           <p className="text-center text-base sm:text-lg leading-relaxed text-signoz_vanilla-400 max-w-2xl mx-auto">
             Find answers to common questions about SigNoz's features, capabilities, and implementation
           </p>
-          
-          <div className="mx-auto mt-6 sm:mt-8 w-full max-w-xl px-4 flex flex-col">
-            <TrieveModalSearch
-              theme="dark"
-              apiKey='tr-cK2MylVI0my78NUoafAiTvvmpdktntO3'
-              datasetId='4650e231-7857-45aa-beb1-cb52006a2460'
-              defaultSearchQueries={[
-                "How does SigNoz ensure data security and privacy?",
-                "Who uses SigNoz in production?",
-                "Can SigNoz handle large-scale production environments effectively?",
-              ]}
-              defaultAiQuestions={[
-                "What is SigNoz?",
-                "How to change retention period?",
-                "How do I install SigNoz?",
-              ]}
-              brandColor="#E75536"
-              brandName='SigNoz'
-              brandLogoImgSrcUrl="https://avatars.githubusercontent.com/u/76905799?s=200&v=4"
-              ButtonEl={() => (
-                <div className="w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-2 text-signoz_vanilla-100 placeholder-signoz_vanilla-400 focus:border-primary-500 focus:outline-none flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                  </svg>
-                  <span className="text-signoz_vanilla-400">Ask a question about SigNoz</span>
-                </div>
-              )}
-            />
-
-            <div className="mt-4 flex flex-wrap gap-2 justify-center">
+          <div className="mx-auto mt-6 sm:mt-8 w-full max-w-2xl px-4">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {allTags.map((tag) => (
-                <button
+                <Button
+                  isButton
                   key={tag}
-                  onClick={() => toggleTag(tag)}
+                  onClick={() => toggleTag(tag as string)}
                   className={`rounded-full px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors ${
-                    selectedTags.includes(tag)
+                    selectedTags.includes(tag as string)
                       ? 'bg-primary-500 text-signoz_vanilla-100'
                       : 'bg-signoz_ink-400 text-signoz_vanilla-400 hover:bg-signoz_ink-300'
                   } border border-signoz_slate-400`}
                 >
                   {tag}
-                </button>
+                </Button>
               ))}
             </div>
+            {selectedTags.length > 0 && (
+              <Button
+                isButton
+                type="button"
+                onClick={() => setSelectedTags([])}
+                variant="link"
+                className="mt-4 w-full justify-center text-xs sm:text-sm font-medium text-primary-400 hover:text-primary-300"
+              >
+                Clear filters
+              </Button>
+            )}
           </div>
         </div>
 

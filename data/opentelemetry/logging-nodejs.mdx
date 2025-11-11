@@ -15,10 +15,6 @@ keywords:
   - signoz
 ---
 
-<head>
-  <link rel="canonical" href="https://signoz.io/opentelemetry/logging-nodejs/"/>
-</head>
-
 <Admonition type="info">
 This article is part of the **OpenTelemetry NodeJS series**:
 - Previous Article: [Setting up Custom Metrics - OpenTelemetry NodeJS](/opentelemetry/custom-metrics-nodejs)
@@ -27,8 +23,8 @@ This article is part of the **OpenTelemetry NodeJS series**:
 
 Check out the complete series at: [Overview - Implementing OpenTelemetry in NodeJS with SigNoz - OpenTelemetry NodeJS](/opentelemetry/nodejs-tutorial-overview)
 </Admonition>
-
-Logs records sequential events that happen within an application, giving context to operations and aiding in debugging. This article will guide you through enhancing the Order with structured logging, using OpenTelemetry for observability and SigNoz for visualization.
+[structured logging](https://signoz.io/blog/structured-logs/)
+Logs records sequential events that happen within an application, giving context to operations and aiding in debugging. This article will guide you through enhancing the Order with [structured logging](https://signoz.io/guides/structlog/), using OpenTelemetry for observability and SigNoz for visualization.
 
 ## Prerequisites
 
@@ -42,7 +38,7 @@ Structured logging captures log data in a consistent and machine-readable format
 
 ## Setting Up the Environment
 
-Before diving into logging, ensure your microservices, including the Order and Product services, are containerized with Docker, and the OpenTelemetry Collector is configured to handle logs. If you have followed the tutorial till now then you don’t need to worry about this.
+Before diving into logging, ensure your microservices, including the Order and Product services, are containerized with Docker, and the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) is configured to handle logs. If you have followed the tutorial till now then you don’t need to worry about this.
 
 ## Integrating Pino for Logging
 
@@ -285,7 +281,7 @@ Pino transports are used to transform and/or transmit log output to a particular
 - **`targets`**: An array where each item defines a specific log destination or processing method.
 - **`target`**:
     - Specifies the **`pino-pretty`** module, which formats the logs in a more human-readable form.
-    - **`Pino-opentelemetry-transport`**: This transport integrates logging with OpenTelemetry, allowing log data to be collected as part of OpenTelemetry's observability framework. It's configured to include resource attributes, specifying **`service.name`** as "order-service" to identify logs originating from this service in the monitoring tools.
+    - **`Pino-opentelemetry-transport`**: This transport integrates logging with [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/), allowing log data to be collected as part of OpenTelemetry's observability framework. It's configured to include resource attributes, specifying **`service.name`** as "order-service" to identify logs originating from this service in the monitoring tools.
 - **`level`**: Sets the log level to **`info`**, meaning only logs at this level or higher will be captured (e.g., **`info`**, **`warn`**, **`error`**).
 - **`options`**: Provides additional settings for the target, such as **`colorize: true`**, which adds color to the log output for better readability.
 
@@ -325,7 +321,7 @@ As an exercise to learn: For the Product service, consider logging inventory upd
 
 - **Structured Logging Integration**: We integrated Pino, a structured logging library, within the Order service, demonstrating how to enrich logging statements with detailed, contextual information like order IDs and validation results.
 - **Log Routing**: We set up Logspout in our Docker environment to capture container logs and route them to the OpenTelemetry Collector.
-- **OpenTelemetry Collector Configuration**: Modifications were made to the OpenTelemetry Collector configuration to accept logs from the Logspout service, demonstrating how logs are processed and forwarded to SigNoz.
+- **OpenTelemetry Collector Configuration**: Modifications were made to the OpenTelemetry Collector configuration to accept logs from the Logspout service, demonstrating how logs are processed and forwarded to [SigNoz](https://signoz.io/docs/introduction/).
 - **Visualization in SigNoz**: By configuring SigNoz to receive structured logs, we showed how these logs can be visualized and queried, enhancing the monitoring capabilities and providing deeper insights into the system’s operational health.
 
 Structured logging in microservices enhances observability, providing clear insights into application behaviors and aiding in quick troubleshooting. This approach ensures that both operational visibility and system reliability are maintained at high standards.

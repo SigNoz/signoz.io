@@ -1,0 +1,200 @@
+---
+date: 2025-08-01
+id: upgrade-standard
+tags: [Self-Host]
+title: Standard Upgrade Guide for SigNoz
+description: Learn how to upgrade SigNoz Instance
+---
+
+This guide covers how to upgrade your SigNoz instance across different deployment methods.
+
+## Prerequisites
+
+- Backup your existing SigNoz configuration and data before upgrading
+- Ensure you have appropriate permissions to perform the upgrade
+- Review the [release notes](https://github.com/SigNoz/signoz/releases) for any breaking changes
+
+
+## Kubernetes Deployment
+
+### Quick Upgrade to Latest Version
+
+Replace `<release-name>` and `<namespace>` with your actual values.
+
+1. **Update Helm repositories:**
+   ```bash
+   helm repo update
+   ```
+
+2. **Upgrade to the latest version:**
+   ```bash
+   helm -n <namespace> upgrade <release-name> signoz/signoz
+   ```
+
+### Upgrade to Specific Version
+
+If you need to upgrade to a particular version:
+
+1. **List available versions:**
+   ```bash
+   helm search repo signoz --versions
+   ```
+   
+   Example output:
+   ```
+   NAME               CHART VERSION  APP VERSION  DESCRIPTION
+   signoz/signoz      0.2.5         0.10.2       SigNoz Observability Platform Helm Chart
+   signoz/signoz      0.2.3         0.10.1       SigNoz Observability Platform Helm Chart
+   signoz/signoz      0.2.2         0.10.0       SigNoz Observability Platform Helm Chart
+   ```
+
+2. **Upgrade to specific version:**
+   ```bash
+   helm -n <namespace> upgrade <release-name> signoz/signoz --version 0.2.5
+   ```
+
+For more details, see the [Helm upgrade documentation](https://helm.sh/docs/helm/helm_upgrade/).
+
+
+## Docker Standalone
+
+### Upgrade to Latest Version
+
+1. **Switch to main branch:**
+   ```bash
+   git checkout main
+   ```
+
+2. **Pull latest changes:**
+   ```bash
+   git pull origin main
+   ```
+
+3. **Run the installation script:**
+   ```bash
+   cd deploy && ./install.sh
+   ```
+
+### Upgrade to Specific Version
+
+To upgrade to a specific version (e.g., v0.6.2):
+
+1. **Checkout the desired version:**
+   ```bash
+   git checkout v0.6.2
+   ```
+
+2. **Run the installation script:**
+   ```bash
+   cd deploy && ./install.sh
+   ```
+
+
+## Docker Swarm Cluster
+
+### Manual Image Update
+
+1. **Update image tags** in your `docker-compose.yaml` for these services:
+   - `signoz`
+   - `schema-migrator-sync`
+   - `schema-migrator-async`
+   - `signoz-otel-collector`
+
+2. **Deploy the updated stack:**
+   ```bash
+   docker stack deploy -c docker-compose.yaml signoz
+   ```
+
+### Important Notes for Docker Swarm
+
+- **Review configuration changes** between versions to avoid compatibility issues
+- **Compare Docker Compose files** before upgrading:
+  ```bash
+  git checkout v0.6.1  # or your target version
+  # Compare your current docker-compose.yaml with the new version
+  ```
+
+
+## Linux Binary Installation
+
+### Step 1: Stop SigNoz Services
+
+```bash
+sudo systemctl stop signoz.service
+sudo systemctl stop signoz-otel-collector.service
+```
+
+### Step 2: Download Latest Binaries
+
+The following commands automatically detect your system architecture:
+
+1. **Download SigNoz binary:**
+   ```bash
+   curl -L https://github.com/SigNoz/signoz/releases/latest/download/signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz.tar.gz
+   tar -xzf signoz.tar.gz
+   ```
+
+2. **Download SigNoz OTEL Collector:**
+   ```bash
+   curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
+   tar -xzf signoz-otel-collector.tar.gz
+   ```
+
+3. **Download Schema Migrator:**
+   ```bash
+   curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-schema-migrator.tar.gz
+   tar -xzf signoz-schema-migrator.tar.gz
+   ```
+
+### Step 3: Replace Binaries and Run Migrations
+
+1. **Install new binaries:**
+   ```bash
+   sudo cp -r signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz
+   sudo cp -r signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz-otel-collector
+   ```
+
+2. **Fix file ownership:**
+   ```bash
+   sudo chown -R signoz:signoz /opt/signoz
+   sudo chown -R signoz:signoz /opt/signoz-otel-collector
+   ```
+
+3. **Run database migrations:**
+   ```bash
+   ./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator sync --dsn="tcp://localhost:9000?password=password" --replication=true --up=
+   ./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator async --dsn="tcp://localhost:9000?password=password" --replication=true --up=
+   ```
+
+### Step 4: Start Services and Verify
+
+1. **Restart services:**
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl start signoz-otel-collector.service
+   sudo systemctl start signoz.service
+   ```
+
+2. **Check service status:**
+   ```bash
+   sudo systemctl status signoz.service
+   sudo systemctl status signoz-otel-collector.service
+   ```
+   
+   Both services should show **`active (running)`** status.
+
+3. **Verify application health:**
+   ```bash
+   curl -X GET http://localhost:8080/api/v1/health
+   ```
+   
+   Expected response: `{"status":"ok"}`
+
+4. **Test the UI:** Open your SigNoz interface in a browser to ensure everything works correctly.
+
+
+## Getting Help
+
+- [SigNoz Documentation](https://signoz.io/docs/)
+- [GitHub Issues](https://github.com/SigNoz/signoz/issues)
+- [Community Slack](https://signoz.io/slack)
