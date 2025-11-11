@@ -515,62 +515,9 @@ export const Authors = defineDocumentType(() => ({
   computedFields,
 }))
 
-export const CaseStudy = defineDocumentType(() => ({
-  name: 'CaseStudy',
-  filePathPattern: 'case-study/**/*.mdx',
-  contentType: 'mdx',
-  fields: {
-    title: { type: 'string', required: true },
-    slug: { type: 'string', required: true },
-    image: { type: 'string', required: false },
-    authors: { type: 'list', of: { type: 'string' }, required: false },
-  },
-  computedFields,
-}))
-
-export const FAQ = defineDocumentType(() => ({
-  name: 'FAQ',
-  filePathPattern: 'faqs/**/*.mdx',
-  contentType: 'mdx',
-  fields: {
-    title: { type: 'string', required: true },
-    date: { type: 'date', required: true },
-    tags: { type: 'list', of: { type: 'string' }, default: [] },
-    lastmod: { type: 'date' },
-    draft: { type: 'boolean' },
-    summary: { type: 'string' },
-    description: { type: 'string', required: true },
-    slug: { type: 'string', required: true },
-    authors: { type: 'list', of: { type: 'string' }, required: true },
-  },
-  computedFields: {
-    ...computedFields,
-    relatedArticles: {
-      type: 'json',
-      resolve: (doc) => getRelatedArticles(doc, faqsRelatedArticles),
-    },
-    structuredData: {
-      type: 'json',
-      resolve: (doc) => ({
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: {
-          '@type': 'Question',
-          name: doc.title,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: doc.description
-          }
-        },
-        url: `${siteMetadata.siteUrl}/faqs/${doc.slug}`,
-      }),
-    },
-  },
-}))
-
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom, CaseStudy, FAQ],
+  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
