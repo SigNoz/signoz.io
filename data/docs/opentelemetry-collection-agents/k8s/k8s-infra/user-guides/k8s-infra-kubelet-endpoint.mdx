@@ -1,0 +1,73 @@
+---
+title: Configuring Kubernetes Metrics Collection for IPv6 and Non-Standard Clusters
+date: 2025-10-30
+description: User guide to configure Kubernetes metrics collection in k8s-infra OpenTelemetry collection agent for IPv6, dual-stack, or non-standard Kubernetes environments.
+tags: [SigNoz Cloud, Self-Host]
+id: k8s-infra-kubelet-endpoint
+---
+
+This guide explains how to configure Kubernetes metrics collection in the k8s-infra OpenTelemetry collection agent for IPv6, dual-stack, or other non-standard Kubernetes environments.
+
+## Prerequisites
+
+Before setting up OpenTelemetry monitoring for your Kubernetes cluster, ensure you have:
+
+- A SigNoz backend (SigNoz Cloud or self-hosted) to receive OpenTelemetry data
+- **[K8s-infra OpenTelemetry collection agent](/docs/collection-agents/k8s/k8s-infra/install-k8s-infra)** installed in your Kubernetes Cluster
+- Basic understanding of Kubernetes concepts (pods, nodes, namespaces)
+
+## How k8s-infra Connects to the Kubelet API
+
+The `k8s-infra` collection agent includes a `kubeletMetrics` preset that uses the OpenTelemetry Collector's **`kubeletstats` receiver** to gather essential Kubernetes node and pod metrics. By default, this preset connects to the Kubelet API at `${env:K8S_HOST_IP}:10250`, relying on the node's IP address.
+
+When the `endpoint` field is left unconfigured, the receiver falls back to using the pod's hostname to reach the Kubelet API. However, both the default IP-based approach and the hostname fallback can fail in certain environments:
+
+However, relying on node hostname resolution can be problematic—especially in some cloud provider environments—where DNS for node hostnames may be unavailable or unreliable,
+leading to failed metric collection.
+
+## Configure kubeletMetrics Endpoint for IPv6 or Custom Networking
+
+The `kubeletstats` receiver connects to the Kubelet API on each node. Using the node IP is sufficient for most clusters, but some environments may need to use the node name instead for metrics collection.
+
+### Step 1: Set the Endpoint
+
+To override the default and use the node name, update your `values.yaml` for [presets.kubeletMetrics](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml#L354):
+
+```yaml
+presets:
+  kubeletMetrics:
+    endpoint: '${env:K8S_NODE_NAME}:10250'
+```
+
+Other kubeletMetrics settings (authType, collectionInterval, etc.) can remain at defaults unless you have specific requirements.
+
+### Step 2: Apply the Configuration
+
+Apply your configuration changes to the k8s-infra Helm release:
+
+```sh
+helm upgrade <RELEASE_NAME> signoz/k8s-infra \
+  -n <NAMESPACE> \
+  -f <YOUR_VALUES_FILE>.yaml
+```
+
+### Step 3: Validate
+
+1. Wait a minute for the updated settings to take effect.
+2. Open the SigNoz dashboard and confirm that **node** and **pod** metrics are visible (check the infrastructure or metrics page).
+3. If metrics do not appear as expected, inspect the k8s-infra collector pod logs for errors or warnings.
+
+<Admonition>  
+To revert to the default behavior (typically suitable for standard clusters), configure the endpoint back to node IP in your values:
+
+```yaml
+presets:
+  kubeletMetrics:
+    endpoint: '${env:K8S_HOST_IP}:10250'
+```
+
+</Admonition>
+## Next Steps
+
+1. **[K8s-Infra Overview](/docs/collection-agents/k8s/k8s-infra/overview)**
+2. **[Configure K8s-Infra](/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra)**

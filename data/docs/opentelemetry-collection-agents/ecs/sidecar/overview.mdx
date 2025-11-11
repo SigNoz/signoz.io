@@ -1,0 +1,61 @@
+---
+date: 2025-08-19
+id: overview
+tags : [SigNoz Cloud, Self-Host]
+title: ECS Serverless Collection Agent - Overview
+description: View metrics, traces and logs for your ECS Serverless infrastructure using sidecar containers
+---
+
+## What is ECS Serverless Collection?
+
+This documentation explains how to collect metrics, traces, and logs from your Amazon ECS (Elastic Container Service) infrastructure using a sidecar container approach in ECS Cluster for Serverless Services. The sidecar method involves deploying an additional container (the "sidecar") that runs in each application container of your ECS cluster running Serverless Services to collect telemetry data and forward it to SigNoz.
+The sidecar approach involves deploying a specialized container that:
+
+## How It Works
+
+
+1. **Runs alongside applications**: The sidecar container runs within the same ECS task as your application containers
+2. **Collects infrastructure data**: Gathers ECS container metrics and forwards any received OTLP data
+3. **Acts as a gateway**: Receives OpenTelemetry Protocol (OTLP) telemetry data from your applications
+4. **Forwards to SigNoz**: Sends all collected data to your SigNoz instance for visualization and analysis
+
+## Architecture Overview
+
+```
+ECS Serverless Task
+├── Your Application Container(s)
+├── Sidecar Container (OpenTelemetry Collector)
+│   ├── Collects ECS container metrics
+│   ├── Receives OTLP data from apps
+│   └── Forwards data to SigNoz
+└── Log Router Container (Fluent Bit) - Optional
+    └── Routes application logs to sidecar
+```
+
+## Prerequisites
+
+Before setting up the sidecar collection, ensure you have:
+
+- **ECS Cluster**: An active ECS cluster with at least one task definition
+- **Launch Type**: Your ECS cluster can use any launch type: **Fargate**, **EC2**, or **External**
+- **SigNoz Instance**: Either SigNoz Cloud account or self-hosted SigNoz installation
+- **AWS CLI**: Configured with appropriate permissions for ECS and Parameter Store operations
+- **IAM Permissions**: Access to create ECS task definitions, Parameter Store resources, and CloudWatch Logs
+
+## What Data Gets Collected?
+
+The sidecar collects:
+- **Metrics:** ECS container/task metrics via the Task Metadata Endpoint
+- **Traces & custom metrics:** OTLP telemetry from your applications
+- **Logs (optional):** Application logs via Fluent Bit, with ECS metadata
+
+## Launch Type Support
+
+- **Fargate**: Fully supported; no host access needed—ideal for serverless workloads.
+- **EC2**: Fully supported; can use host networking and offers more resource control.
+- **External**: Supported for hybrid/external resources; may need extra network setup.
+
+## Next Steps
+
+- [Install Sidecar Collection Agent in your ECS Cluster](/docs/collection-agents/ecs/sidecar/install/)
+- [Configure Sidecar Collection Agent in your ECS Cluster](/docs/collection-agents/ecs/sidecar/configure/)

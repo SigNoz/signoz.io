@@ -1,0 +1,210 @@
+---
+date: 2025-08-13
+id: overview
+tags : [SigNoz Cloud, Self-Host]
+title: ECS EC2 Collection Agent - Configure
+description: View metrics and logs for your ECS infrastructure
+---
+
+This guide covers configuring your daemon service after installation, verifying data flow, and setting up application data collection.
+
+## Prerequisites
+
+Before configuring, ensure you have:
+- Completed the [installation steps](/docs/collection-agents/ecs/ec2/install/)
+- Daemon service running on your ECS cluster
+- Access to SigNoz Cloud or self-hosted instance
+
+## Verify Data Collection
+
+Log into your SigNoz instance and check that ECS infrastructure metrics and logs are being received.
+
+To visualize ECS data, import pre-built dashboards:
+
+- [instance-metrics.json](https://github.com/SigNoz/dashboards/blob/main/ecs-infra-metrics/instance-metrics.json)
+- [hostmetrics.json](https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics.json)
+
+Import these in the **Dashboards** section of SigNoz.
+
+## Send Data from Applications
+
+<div>
+In this section, we will see how to send data from applications deployed in ECS to
+SigNoz Cloud using Daemon Service we created in the previous section.
+</div>
+<br/>
+
+### Step 1: Add OpenTelemetry Instrumentation to your Application
+
+To add OpenTelemetry instrumentation to your application, you can follow the
+docs [here](https://signoz.io/docs/instrumentation/).
+
+<Admonition>
+This step include adding the [OpenTelemetry SDK](https://opentelemetry.io/docs/instrumentation/)
+as well as the initialization code to your application codebase and rebuilding the application
+container image.
+</Admonition>
+
+### Step 2: Add Entrypoint to your Application Container
+
+We need to add an entrypoint to the application container to set the
+`OTEL_EXPORTER_OTLP_ENDPOINT` environment variable to the endpoint of the
+daemon service. Such that the application container can send data to the
+daemon container running in the same host.
+
+<Tabs groupId="launch-type">
+<TabItem value="ec2" label="EC2" default>
+**Method 1: Updating entrypoint in task definition**
+
+We need to obtain the endpoint or IP address of the instance on which the task
+is running. We can do this by querying the metadata service of the instance.
+For EC2, the metadata service is available at `169.254.169.254`.
+
+The `entryPoint` will look like:
+
+```
+{
+       
+      "entryPoint": [
+        "sh",
+        "-c",
+        "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl http://169.254.169.254/latest/meta-data/local-ipv4):4317\"; <Application Startup Commands>"
+      ],
+			"command": [],
+			
+}
+```
+
+- Replace `<Application Startup Commands>` with the commands to start your application.
+</TabItem>
+<TabItem value="external" label="External">
+**Method 1: Updating entrypoint in task definition**
+
+We need to obtain the endpoint or IP address of the instance on which the task
+is running. This can be done by multiple ways depending on the network mode and cloud provider.
+
+The `entryPoint` will look like the following based on your network mode and cloud provider:
+
+- Using default networking mode i.e. **Bridge**:
+    
+    ```json
+    {
+           
+          "entryPoint": [
+            "sh",
+            "-c",
+            "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://172.17.0.1:4317\"; <Application Startup Commands>"
+          ],
+    			"command": [],
+    			
+    }
+    ```
+    
+- Using **Bridge** mode with custom docker network
+    
+    If you are using custom docker networking, you would have to use `ExtraHosts` in your task definition. 
+    
+    ```json
+    {
+        
+        "extraHosts": [
+          {
+            "hostname": "signoz-collector",
+            "ipAddress": "host-gateway"
+          }
+          
+        ]
+    }
+    ```
+    
+    And the `entryPoint` will look like:
+    
+    ```json
+    {
+           
+          "entryPoint": [
+            "sh",
+            "-c",
+            "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://signoz-collector:4317\"; <Application Startup Commands>"
+          ],
+    			"command": [],
+    			
+    }
+    ```
+    
+- If network mode is not **Bridge**, and AWS EC2 instance:
+    
+    ```json
+    {
+           
+          "entryPoint": [
+            "sh",
+            "-c",
+            "export OTEL_EXPORTER_OTLP_ENDPOINT=\"http://$(curl http://169.254.169.254/latest/meta-data/local-ipv4):4317\"; <Application Startup Commands>"
+          ],
+    			"command": [],
+    			
+    }
+    ```
+    
+- If network mode is not **Bridge**, and GCP instance:
+    
+    ```json
+    {
+           
+          "entryPoint": [
+            "sh",
+            "-c",
+    				'export OTEL_EXPORTER_OTLP_ENDPOINT="http://$(curl "http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/ip?recursive=true&alt=text" -H "Metadata-Flavor: Google"):4317"; <Application Startup Commands>'
+          ],
+    			"command": [],
+    			
+    }
+    ```
+
+**NOTES:**
+- Replace `<Application Startup Commands>` with the commands to start your application.
+- For more information about the metadata server, refer https://www.baeldung.com/linux/cloud-ip-meaning
+</TabItem>
+</Tabs>
+
+### 3. Add Service Name of your Application
+
+To add the service name of your application, you need to set the
+`OTEL_RESOURCE_ATTRIBUTES` environment variable of the application container
+to `service.name=<your-service-name>`.
+
+In your task definition, you can add the following lines.
+
+```yaml
+
+    ContainerDefinitions:
+        - Name: <your-container-name>
+          
+          Environment:
+            - Name: OTEL_RESOURCE_ATTRIBUTES
+              Value: service.name=<your-service-name>
+          
+
+```
+
+In case of JSON task definition, you can add the following lines.
+
+```json
+
+    "containerDefinitions": [
+        {
+            "name": "<your-container-name>",
+            
+            "environment": [
+                {
+                    "name": "OTEL_RESOURCE_ATTRIBUTES",
+                    "value": "service.name=<your-service-name>"
+                }
+            ],
+            
+        }
+    ],
+
+
+```

@@ -1,0 +1,102 @@
+---
+date: 2025-07-29
+title: Monitor Multiple K8S Clusters with k8s-Infra
+tags : [SigNoz Cloud, Self-Host]
+id: k8s-infra-multi-cluster
+---
+
+This guide explains how to use the SigNoz `k8s-infra` Helm chart to monitor multiple Kubernetes clusters and view them together in SigNoz. The approach is simple: deploy the chart in each cluster, point them to the same SigNoz backend, and assign a unique cluster name.
+
+## Prerequisites
+
+- A SigNoz backend (SigNoz Cloud or self-hosted)
+- kubectl access to each target cluster
+- Helm v3 installed
+
+## How it works
+
+- Install `k8s-infra` separately in each cluster.  
+- Each deployment sends telemetry to a common SigNoz backend.  
+- A unique cluster identifier (`global.clusterName`) lets you filter and compare signals across clusters.  
+
+## Step 1: Pick unique cluster names
+
+Choose a naming scheme that is stable and human-friendly. Examples:  
+- `prod-us1`, `prod-eu1`, `staging`, `dev-team-a`
+
+Set this value in `global.clusterName` for each cluster.
+
+## Step 2: Prepare per-cluster overrides
+
+Create an overrides file per cluster (for example, `override-values-prod-us1.yaml`).  
+
+<Tabs>
+  <TabItem value="cloud" label="SigNoz Cloud" default>
+
+_override-values.yaml_
+
+```yaml
+global:
+  cloud: others                 # or aws/gcp/aks to enable resource detection
+  clusterName: <UNIQUE_CLUSTER_NAME>
+  deploymentEnvironment: <ENV>  # e.g., production, staging
+otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+otelInsecure: false
+signozApiKey: <SIGNOZ_INGESTION_KEY>
+presets:
+  otlpExporter:
+    enabled: true
+````
+
+<Admonition>
+- Replace `<UNIQUE_CLUSTER_NAME>` with a unique name per cluster.
+- Set your ingestion endpoint according to your SigNoz Cloud region. Refer to [the SigNoz Cloud ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) to find the correct endpoint for your deployment.
+- Replace `<SIGNOZ_INGESTION_KEY>` with the one provided by SigNoz.
+</Admonition>
+
+  </TabItem>
+  <TabItem value="selfhosted" label="Self-Hosted SigNoz">
+
+*override-values.yaml*
+
+```yaml
+global:
+  cloud: others
+  clusterName: <UNIQUE_CLUSTER_NAME>
+  deploymentEnvironment: <ENV>
+otelCollectorEndpoint: <SIGNOZ_OTLP_ENDPOINT>:4317
+otelInsecure: true            # set to false if your endpoint uses TLS
+presets:
+  otlpExporter:
+    enabled: true
+```
+
+  </TabItem>
+</Tabs>
+
+## Step 3: Install in each cluster
+
+Run the following in every cluster with its overrides file:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update
+helm install k8s-infra-<cluster> signoz/k8s-infra -n signoz-infra --create-namespace -f override-values-<cluster>.yaml
+```
+
+## Step 4: Verify in SigNoz
+
+* In Metrics/Logs/Traces views, filter by `clusterName` (from `global.clusterName`).
+* Create dashboards per cluster or compare across clusters with group-by filters.
+
+## Best practices
+
+* Use consistent, unique `global.clusterName` values.
+* Consider separate ingestion keys per cluster for isolation/rotation.
+* Ensure egress to your OTLP endpoint (`4317` for gRPC; `443` for SigNoz Cloud).
+
+## Next Steps
+
+- [Install K8s-Infra](/docs/collection-agents/k8s/k8s-infra/install-k8s-infra)
+- [Configure K8s-Infra](/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra)
+- [K8s-Infra Overview](/docs/collection-agents/k8s/k8s-infra/overview)

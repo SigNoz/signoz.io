@@ -165,7 +165,6 @@ export const fetchChangelogEntries = async (
 
 export const saveChangelogSubscription = async (email: string): Promise<boolean> => {
   try {
-    console.log({ url: `${API_URL}${API_SUBSCRIPTION_PATH}` })
     const response = await fetch(`${API_URL}${API_SUBSCRIPTION_PATH}`, {
       method: 'POST',
       headers: {
@@ -210,8 +209,6 @@ export const fetchChangelogById = async (
       addQueryPrefix: true, // Add '?' at the beginning
       arrayFormat: 'repeat', // Use repeat format for arrays
     })
-
-    console.log(`${API_URL}${API_PATH}/${changelogId}${queryParams}`)
 
     const response = await fetch(`${API_URL}${API_PATH}/${changelogId}${queryParams}`, {
       headers: {

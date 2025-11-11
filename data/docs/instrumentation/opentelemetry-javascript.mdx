@@ -1,17 +1,15 @@
 ---
 date: 2024-06-06
 id: javascript
+tags : [SigNoz Cloud, Self-Host]
 title: Javascript OpenTelemetry Instrumentation
 description: Send events from your Javascript application to SigNoz
 hide_table_of_contents: true
 ---
 
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 import VersionPin from '@/components/shared/nodejs-version-pin.mdx'
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Javascript applications and view your application traces in SigNoz.
-
-{/* This document contains OpenTelemetry instrumentation instructions for Javascript backend frameworks and modules based on Nodejs. If you're using self-hosted SigNoz refer to this [section](#send-traces-to-self-hosted-signoz). If you're using SigNoz cloud, refer to this [section](#send-traces-to-signoz-cloud). */}
 
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
@@ -88,9 +86,8 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 const exporterOptions = {
   url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
   headers: {
-      "signoz-access-token": "<your-ingestion-key>"
-    }
-  
+    "signoz-ingestion-key": "<your-ingestion-key>"
+  }
 }
 // highlight-end
 
@@ -133,7 +130,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 const exporterOptions = {
   url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
   headers: {
-    "signoz-access-token": "<your-ingestion-key>"
+    "signoz-ingestion-key": "<your-ingestion-key>"
   }
 };
 
@@ -201,7 +198,7 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
@@ -559,7 +556,7 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
@@ -783,7 +780,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
 const exporterOptions = {
   url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
-  headers: { 'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY || '<your-ingestion-key>' },
+  headers: { 'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || '<your-ingestion-key>' },
 }
 
 const traceExporter = new OTLPTraceExporter(exporterOptions)
@@ -858,7 +855,7 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 $env:OTEL_TRACES_EXPORTER="otlp"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 $env:OTEL_SERVICE_NAME="<service_name>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
@@ -986,7 +983,138 @@ node -r ./tracing.js app.js
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 </TabItem>
+<TabItem value="Docker" label="Docker">
+
+There are two ways to send data to SigNoz Cloud. You can containerize the images in both the cases.
+
+- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud-1)
+- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
+
+#### Send traces directly to SigNoz Cloud
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+...
+
+# Install opentelemetry dependencies
+RUN npm install @opentelemetry/api@1.9.0 @opentelemetry/auto-instrumentations-node@0.57.0
+
+...
+
+# Set environment variables for OpenTelemetry
+ENV OTEL_TRACES_EXPORTER="otlp"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+ENV OTEL_SERVICE_NAME="<service_name>"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+
+...
+
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+
+The above steps install OpenTelemetry dependencies directly inside the Docker container without altering `package.json` of project & sets environment variables to export the traces.
+
+**Step 2.** Run your Docker container
+
+Here's how you can run your docker container:
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+- `-p` maps a host port to a container port
+
+
+**Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+---
+
+#### Send traces via OTel Collector binary
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+# get the OpenTelemetry Collector //STAGE 1
+FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
+
+...
+
+# Install OpenTelemetry Node.js dependencies
+RUN npm install @opentelemetry/api@1.9.0 @opentelemetry/auto-instrumentations-node@0.57.0
+
+# Copy OpenTelemetry Collector binary + config from STAGE 1
+COPY --from=otel /otelcol-contrib /otelcol-contrib
+COPY --from=otel /etc/otelcol-contrib /etc/otelcol-contrib
+COPY config.yaml /etc/otelcol-contrib/config.yaml
+
+...
+
+# Expose ports for app + collector
+EXPOSE 4317 4318 <APP_PORT>
+
+... 
+
+# Environment variables for Node.js instrumentation
+ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+ENV OTEL_SERVICE_NAME="node-js-auto-instrument"
+ENV OTEL_TRACES_EXPORTER="otlp"
+ENV OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+
+
+# Point Node.js exporter to local collector
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+
+...
+
+# Run both Collector and Node.js app in same container
+CMD sh -c "/otelcol-contrib --config=/etc/otelcol-contrib/config.yaml & <run_command>"
+
+```
+
+Make sure you have `config.yaml` in `root` of the application. This config.yaml should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
+
+- Replace `<run_command>` with the command to run your application
+- `<service_name>` is name of your service
+
+
+**Step 2.** Run your Docker container
+
+Run your docker container to start exporting.
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+
+- `-p` maps a host port to a container port
+
+
+**Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+</TabItem>
 </Tabs>
+
 </TabItem>
 <TabItem value='self-host' label='Self-Host'>
 ## Send Traces to Self-Hosted SigNoz
@@ -1016,7 +1144,7 @@ You can use [OpenTelemetry Nodejs](https://signoz.io/opentelemetry/nodejs/) clie
 
 The recommended way to instrument your Javascript Nodejs application is to use the all-in-one auto-instrumentation library - `@opentelemetry/auto-instrumentations-node`. It provides a simple way to initialize multiple Nodejs instrumentations.
 
-Internally, it calls the specific auto-instrumentation library for components used in the application. You can see the complete list [here](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node#supported-instrumentations).
+Internally, it calls the specific auto-instrumentation library for components used in the application. You can see the complete list [here](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/packages/auto-instrumentations-node#supported-instrumentations).
 
 The instrumentation automatically identifies the following within your application:
 
@@ -1183,227 +1311,22 @@ http://<IP of SigNoz backend>:4318/v1/traces
 </Tabs>
 ## Validating instrumentation by checking for traces
 
-With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
+Trigger requests in your app to generate traces… then check the Services and Traces tabs in SigNoz after refreshing to confirm your application shows up.
 
-To do this, you need to ensure that your application generates some data. Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz.
+If traces don’t appear right away, interact with the app a few more times and wait a bit since OpenTelemetry buffers data before sending.
 
-Validate your traces in SigNoz:
+## Collecting Logs from Your Node.js Application
 
-1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time.
-2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
-3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
+Node.js doesn’t ship with a full-fledged logging framework, but popular libraries like Winston and Pino make it easy to add structured logging.
 
-{/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
+To forward your logs to SigNoz, follow these guides:
 
-{/* <figure data-zoomable align="center">
-  <img
-    src="/img/docs/nodejs_in_services_list.webp"
-    alt="Node Application in the list of services being monitored in SigNoz"
-  />
-  <figcaption>
-    <i>Node Application in the list of services being monitored in SigNoz</i>
-  </figcaption>
-</figure> */}
+- [Send Pino logs to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs/)
+- [Send Winston logs to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/)
 
-{/* If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide. */}
+## Correlate Traces with Logs
 
-{/* ### Using a specific auto-instrumentation library
-
-If total installation size is not constrained, it is recommended to use the `@opentelemetry/auto-instrumentations-node` bundle with `@opentelemetry/sdk-node` for the most seamless instrumentation experience.
-
-But you can also install specific auto-instrumenation packages for the components used by your application.
-
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/individual_auto_instrumentation_libraries.webp"
-    alt="All in one OpenTelemetry nodejs instrumentation "
-  />
-  <figcaption>
-    <i>
-      You can also choose individual auto-instrumenation libraries, but the all-in-one library is
-      recommended to get started
-    </i>
-  </figcaption>
-</figure> */}
-
-{/* If an application uses Express, HTTP, and MongoDB, we can instrument the application using the following modules:
-
-- opentelemetry-instrumentation-express
-- opentelemetry/instrumentation-mongodb
-- opentelemetry/instrumentation-http
-
-If you are using Express, the instrumentation relies on HTTP calls to also be instrumented. That’s why we’re also including the module for http instrumentation. Let’s see the steps required.
-
-**Steps to use specific auto-instrumentation libraries**
-
-1. **Install the dependencies**<br></br>
-   We start by installing the relevant dependencies.
-
-   ```bash
-   npm install --save @opentelemetry/sdk-node
-   npm install --save @opentelemetry/exporter-trace-otlp-http
-   npm install --save @opentelemetry/instrumentation-express
-   npm install --save @opentelemetry/instrumentation-mongodb
-   npm install --save @opentelemetry/instrumentation-http
-   ```
-
-2. **Creat a `tracing.js` file**<br></br>
-   The `tracing.js` file will contain the following tracing setup code.
-
-   ```jsx
-   // tracing.js
-   'use strict'
-   const process = require('process')
-   //OpenTelemetry
-   const opentelemetry = require('@opentelemetry/sdk-node')
-   const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
-   //instrumentations
-   const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express')
-   const { MongoDBInstrumentation } = require('@opentelemetry/instrumentation-mongodb')
-   const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http')
-
-   const { Resource } = require('@opentelemetry/resources')
-   const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions')
-
-   const exporterOptions = {
-     url: 'http://localhost:4318/v1/traces',
-   }
-
-   const traceExporter = new OTLPTraceExporter(exporterOptions)
-   const sdk = new opentelemetry.NodeSDK({
-     traceExporter,
-     instrumentations: [
-       new ExpressInstrumentation(),
-       new MongoDBInstrumentation(),
-       new HttpInstrumentation(),
-     ],
-     resource: new Resource({
-       [SemanticResourceAttributes.SERVICE_NAME]: 'service_name',
-     }),
-   })
-
-   // initialize the SDK and register with the OpenTelemetry API
-   // this enables the API to record telemetry
-   sdk.start()
-
-   // gracefully shut down the SDK on process exit
-   process.on('SIGTERM', () => {
-     sdk
-       .shutdown()
-       .then(() => console.log('Tracing terminated'))
-       .catch((error) => console.log('Error terminating tracing', error))
-       .finally(() => process.exit(0))
-   })
-   ```
-
-   OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
-
-   About environment variables:
-
-   `service_name` : service_name (you can give whatever name that suits you)
-
-   `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
-
-   `http://<IP of SigNoz backend>:4318/v1/traces`
-
-   <Admonition>
-     Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
-   </Admonition>
-
-3. **Run the application**<br></br>
-   The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
-
-   ```jsx
-   node -r ./tracing.js app.js
-   ```
-
-   <Admonition>
-     If you're running your nodejs application in PM2 cluster mode, it doesn't support node args:
-     [Unitech/pm2#3227](https://github.com/Unitech/pm2/issues/3227). As above sample app
-     instrumentation requires to load `tracing.js` before app load by passing node arg, so nodejs
-     instrumentation doesn't work in PM2 cluster mode. So you need to import `tracing.js` in your
-     main application. The `import ./tracing.js` should be the first line of your application code
-     and initialize it before any other function. Here's the [sample github
-     repo](https://github.com/SigNoz/sample-nodejs-app/tree/init-tracer-main) which shows the
-     implementation.
-   </Admonition>
-
-With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by [validating](#validating-instrumentation-by-checking-for-traces) if your traces are being to SigNoz.
-
-## Manual Instrumentation in JavaScript
-
-For those looking to gain deeper insights into their application's performance and behavior, manual instrumentation provides a powerful way to achieve this.
-
-Refer to the documentation for [Manual Instrumentation in NodeJS](/docs/instrumentation/manual-instrumentation/javascript/nodejs) to delve into the step-by-step process of adding custom tracing to your Node.js applications.
-
-## Instrumentation Modules for Databases
-
-The `@opentelemetry/auto-instrumentations-node` can inititialize instrumentation for popular databases. Hence it’s recommended to [get started](#using-the-all-in-one-auto-instrumentation-library) with it.
-
-But if you are using [specific auto-instrumentation packages](#using-a-specific-auto-instrumentation-library), here’s a list of packages for popular databases.
-
-### MongoDB instrumentation
-
-<Admonition>
-  If you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific
-  modules for your database.
-</Admonition>
-**Supported Versions**
-
-• `>=3.3 <5`
-
-Module that provides automatic instrumentation for MongoDB:
-
-```jsx
-npm install --save @opentelemetry/instrumentation-mongodb
-```
-
-### Redis Instrumentation
-
-<Admonition>
-  If you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific
-  modules for your database.
-</Admonition>
-**Supported Versions**
-
-This package supports `redis@^2.6.0` and `redis@^3.0.0`
-For version `redis@^4.0.0`, please use `@opentelemetry/instrumentation-redis-4`
-
-```jsx
-npm install --save @opentelemetry/instrumentation-redis
-```
-
-### MySQL Instrumentation
-
-<Admonition>
-  If you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific
-  modules for your database.
-</Admonition>
-**Supported Versions**
-
-• `2.x`
-
-Module that provides automatic instrumentation for MySQL:
-
-```jsx
-npm install --save @opentelemetry/instrumentation-mysql
-```
-
-### Memcached Instrumentation
-
-<Admonition>
-  If you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific
-  modules for your database.
-</Admonition>
-**Supported Versions**
-
-- `>=2.2`
-
-Module that provides automatic instrumentation for Memcached:
-
-```jsx
-npm install --save @opentelemetry/instrumentation-memcached
-``` */}
+Checkout this guide on [correlating traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/).
 
 ## Troubleshooting your installation
 

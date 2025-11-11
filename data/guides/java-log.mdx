@@ -567,13 +567,13 @@ This approach lets you modernize your logging infrastructure gradually, without 
 
 Before deploying to production, confirm these basics:
 
-- Structured logging (JSON format) for easy parsing and analysis
+- [structured logging](https://signoz.io/blog/structured-logs/) (JSON format) for easy parsing and analysis
 - Async logging for high-throughput applications
 - MDC for request tracing across your system
 - Log rotation to prevent disk space issues
 - Package-specific log levels to control verbosity
 - No sensitive data in logs (passwords, tokens, credit cards)
-- Correlation IDs for distributed tracing
+- Correlation IDs for [distributed tracing](https://signoz.io/distributed-tracing/)
 - Separate error logs for monitoring and alerting
 
 Here's a battle-tested production configuration that implements all these practices:
@@ -635,7 +635,7 @@ This configuration separates errors into their own file for easy monitoring, use
 
 Logs sitting on disk do not help anyone. Once you emit structured events, wire them into monitoring rules. Stream Java logs to SigNoz, create a view that filters `level:ERROR`, and alert when the count spikes or when a service stops sending logs altogether.
 
-In a Spring Boot application, you can add a lightweight self-test by emitting a heartbeat log at startup and verifying it reaches SigNoz using a query such as:
+In a Spring Boot application, you can add a lightweight self-test by emitting a heartbeat log at startup and verifying it reaches [SigNoz](https://signoz.io/docs/introduction/) using a query such as:
 
 ```
 log_type = "application" and service.name = "payment-service" and message = "logging-heartbeat"
@@ -647,7 +647,7 @@ If the query shows no events for a few minutes, alert the on-call engineer, beca
 
 SigNoz offers three deployment paths. Start quickly with the [SigNoz cloud](https://signoz.io/teams/) trial, which provides full-feature access for 30 days. Teams that must retain data on their own infrastructure can pick the [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/). If you prefer to manage the stack yourself, deploy the [community edition](https://signoz.io/docs/install/self-host/). 
 
-Once you have SigNoz running, point the OpenTelemetry Collector to the structured log file you created earlier. The `filelog` receiver tails the JSON output and forwards it to SigNoz without additional changes to your application code:
+Once you have SigNoz running, point the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)to the structured log file you created earlier. The `filelog` receiver tails the JSON output and forwards it to SigNoz without additional changes to your application code:
 
 ```yaml
 receivers:
@@ -660,7 +660,7 @@ exporters:
   otlp:
     endpoint: https://ingest.signoz.io:443
     headers:
-      signoz-access-token: ${SIGNOZ_ACCESS_TOKEN}
+      signoz-ingestion-key: "{SIGNOZ_INGESTION_KEY}"
 
 service:
   pipelines:
@@ -677,7 +677,7 @@ For end-to-end instructions on forwarding Java logs, follow the [SigNoz guide fo
 
 ## Your Next Steps
 
-You now have a clear path from println debugging to production-ready logging. 
+You now have a clear path from println debugging to [production-ready](https://signoz.io/guides/production-readiness-checklist/) logging. 
 
 Remember, good logging isn't about logging everything, it's about logging the right things with enough context to solve problems quickly. The difference between finding a production bug in minutes versus hours often comes down to the quality of your logs.
 

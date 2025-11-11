@@ -1,25 +1,24 @@
 import React from 'react'
-import DistributedTracing from './DistributedTracing'
+import DistributedTracingPage from './DistributedTracingPage'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Distributed Tracing | SigNoz',
+    absolute: 'High-Performance Trace Analysis Powered by Columnar Storage | SigNoz',
   },
   openGraph: {
-    title: 'Distributed Tracing | SigNoz',
-    description: 'Implement distributed tracing in your microservices-based applications powered by OpenTelemetry SDKs. Track user requests across services to help you identify performance bottlenecks.',
-    images:"/img/features/distributed-tracing/distributed-tracing-cover.webp"
+    title: "High-Performance Trace Analysis Powered by Columnar Storage",
+    description: "Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.",
+    images: "/img/platform/DistributedTracingMeta.png"
   },
-  description:
-    'Implement distributed tracing in your microservices-based applications powered by OpenTelemetry SDKs. Track user requests across services to help you identify performance bottlenecks.',
+  description: "Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.",
   twitter:{
-    title: 'Distributed Tracing | SigNoz',
-    description: 'Implement distributed tracing in your microservices-based applications powered by OpenTelemetry SDKs. Track user requests across services to help you identify performance bottlenecks.',
-    images:"/img/features/distributed-tracing/distributed-tracing-cover.webp",
+    title: "High-Performance Trace Analysis Powered by Columnar Storage",
+    description: "Aggregate and analyze millions of spans with ClickHouse performance. Correlate traces with logs and metrics to find root cause in distributed systems.",
+    images: "/img/platform/DistributedTracingMeta.png"
   }
 }
 
-export default function Page() {
-  return <DistributedTracing />
+export default function DistributedTracing() {
+  return <DistributedTracingPage />
 }

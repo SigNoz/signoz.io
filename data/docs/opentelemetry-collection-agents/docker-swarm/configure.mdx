@@ -1,0 +1,196 @@
+---
+title: Docker Swarm Collector - Configure
+id: configure
+tags : [SigNoz Cloud, Self-Host]
+description: Configure container and service-level metrics collection in Docker Swarm 
+---
+
+Learn how to configure the OpenTelemetry Collector in Docker Swarm to collect and forward telemetry data to SigNoz. This guide covers setup for traces, metrics, and logs from your containers and services.
+
+## Prerequisites
+
+* A running **Docker Swarm cluster** 
+* OpenTelemetry Collector deployed as a Swarm service (see [Deploy the Collector](/docs/collection-agents/docker-swarm/install))
+* Access to the Docker Engine socket (`/var/run/docker.sock`) on nodes where the Collector runs
+* SigNoz Cloud or Self-hosted SigNoz is available for ingestion
+
+
+## Configure the Collector
+
+### Docker Stats Collection
+
+The `docker_stats` receiver connects directly to the Docker Engine socket to scrape cgroup stats.
+
+#### What it Collects
+* CPU usage and utilization
+* Memory usage, limits, and percentages
+* Network I/O
+* Container uptime and restarts
+
+<Admonition>
+You can also map **Docker container labels** into metric attributes using `container_labels_to_metric_labels`. This allows grouping and filtering metrics by service, stack, or task in SigNoz dashboards.
+</Admonition>
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    api_version: "1.48"
+    collection_interval: 60s
+    container_labels_to_metric_labels:
+        com.docker.stack.namespace:        docker.stack.name
+        com.docker.swarm.node.id:          docker.node.id
+        com.docker.swarm.service.name:     docker.service.name
+        com.docker.swarm.task.name:        docker.task.name
+    metrics:
+      container.cpu.usage.total:
+        enabled: true
+      container.cpu.utilization:
+        enabled: true
+      container.cpu.limit:
+        enabled: true
+      container.memory.usage.total:
+        enabled: true
+      container.memory.percent:
+        enabled: true
+      container.memory.usage.limit:
+        enabled: true
+      container.uptime:
+        enabled: true
+      container.restarts:
+        enabled: true
+      container.network.io.usage.rx_bytes:
+        enabled: true
+      container.network.io.usage.tx_bytes:
+        enabled: true
+
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "ingest.<YOUR_REGION>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<YOUR_INGESTION_KEY>"
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp, docker_stats]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+<Admonition>
+- Set your ingestion endpoint according to your SigNoz Cloud region. Refer to [the SigNoz Cloud ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) to find the correct endpoint for your deployment.
+- Replace `<SIGNOZ_INGESTION_KEY>` with the one provided by SigNoz.
+</Admonition>
+
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    api_version: "1.48"
+    collection_interval: 60s
+    container_labels_to_metric_labels:
+        com.docker.stack.namespace:        docker.stack.name
+        com.docker.swarm.node.id:          docker.node.id
+        com.docker.swarm.service.name:     docker.service.name
+        com.docker.swarm.task.name:        docker.task.name
+    metrics:
+      container.cpu.usage.total:
+        enabled: true
+      container.cpu.utilization:
+        enabled: true
+      container.cpu.limit:
+        enabled: true
+      container.memory.usage.total:
+        enabled: true
+      container.memory.percent:
+        enabled: true
+      container.memory.usage.limit:
+        enabled: true
+      container.uptime:
+        enabled: true
+      container.restarts:
+        enabled: true
+      container.network.io.usage.rx_bytes:
+        enabled: true
+      container.network.io.usage.tx_bytes:
+        enabled: true
+
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "http://<SIGNOZ_HOST>:4317"
+    tls:
+      insecure: true
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp, docker_stats]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+Once you have configured the collector, you can see your container logs, metrics and application traces by following the below links:
+- [Send Docker logs](https://signoz.io/docs/userguide/collect_docker_logs/)
+- [Send Application traces](https://signoz.io/docs/instrumentation/)
+

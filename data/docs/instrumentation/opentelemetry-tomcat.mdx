@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 id: tomcat
+tags : [SigNoz Cloud, Self-Host]
 title: Tomcat OpenTelemetry Instrumentation
 description: Instrument your Tomcat application with OpenTelemetry and send data to SigNoz
 hide_table_of_contents: true
@@ -119,11 +120,11 @@ In case you encounter an issue where all applications do not get listed in the s
 
 You can auto-instrument sending traces from Java Tomcat application using one of the following methods:
 
-1. Using Kubernetes OTel Operator (recommended)
+1. Using Kubernetes OTel Operator
 2. Using OTel Collector Agent
 
 <Tabs>
-<TabItem value="k8s-otel-operator" label="K8s OTel Operator" default>
+<TabItem value="k8s-otel-operator" label="K8s OTel Operator">
 
 For Java Tomcat application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
 
@@ -320,7 +321,7 @@ You can now access the application on port 8080.
 You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
 </TabItem>
-<TabItem value="otel-collector-agent" label="OTel Collector Agent">
+<TabItem value="otel-collector-agent" label="OTel Collector Agent" default>
 For Java Tomcat application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry java instrumentation by following the below steps:
@@ -413,6 +414,132 @@ set CATALINA_OPTS="$CATALINA_OPTS -javaagent:/path/to/opentelemetry-javaagent.ja
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 </TabItem>
+<TabItem value="Docker" label="Docker">
+
+There are two ways to send data to SigNoz Cloud. You can containerize the images in both the cases.
+
+- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud-1)
+- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
+
+#### Send traces directly to SigNoz Cloud
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+...
+
+# Download OpenTelemetry Java Agent
+RUN wget -O opentelemetry-javaagent.jar \
+    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+
+...
+
+# Set environment variables for OTEL
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+...
+
+# Run the application with instrumentation
+ENTRYPOINT ["java", "-javaagent:/opentelemetry-javaagent.jar", "-jar", "app.jar"]
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+
+The above steps install OpenTelemetry dependencies directly inside the Docker container & sets environment variables to export the traces.
+
+**Step 2.** Run your Docker container
+
+Here's how you can run your docker container:
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+- `-p` maps a host port to a container port
+
+
+**Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+---
+
+#### Send traces via OTel Collector binary
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+# -------- Stage 1: Get OpenTelemetry Collector --------
+FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
+
+...
+
+# Download OpenTelemetry Java Agent
+RUN wget -O opentelemetry-javaagent.jar \
+    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+
+...
+
+# Copy OpenTelemetry Collector binary + config from first stage
+COPY --from=otel /otelcol-contrib /otelcol-contrib
+COPY --from=otel /etc/otelcol-contrib /etc/otelcol-contrib
+COPY config.yaml /etc/otelcol-contrib/config.yaml
+
+# Expose ports (App + Collector)
+EXPOSE <APP_PORT> 4317 4318
+
+...
+
+# Environment variables (point PHP to local Collector)
+ENV OTEL_SERVICE_NAME="<service_name>"
+ENV OTEL_TRACES_EXPORTER="otlp"
+ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+ENV OTEL_PROPAGATORS="baggage,tracecontext"
+
+
+# Run both Collector and Java app in the same container
+CMD sh -c "/otelcol-contrib --config=/etc/otelcol-contrib/config.yaml & \
+           java -javaagent:/opentelemetry-javaagent.jar -jar /app/app.jar"
+```
+
+Make sure you have `config.yaml` in `root` of the application. This config.yaml should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
+
+- Replace `<run_command>` with the command to run your application
+- `<service_name>` is name of your service
+
+
+**Step 2.** Run your Docker container
+
+Run your docker container to start exporting.
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+
+- `-p` maps a host port to a container port
+
+
+**Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+</TabItem>
 
 </Tabs>
 
@@ -485,6 +612,8 @@ Here's a video on how to instrument Tomcat applications with SigNoz and a [blog]
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 </TabItem>
 </Tabs>
+
+**Note:** By default, Java auto-instrumentation does not create spans for user-defined functions. In such scenarios, we can use annotations to quickly create spans for user-defined functions with minimal code change. You can instrument your Tomcat application following this [guide on annotations](/docs/instrumentation/manual-instrumentation/java/annotations/).
 
 ## Validating instrumentation by checking for traces
 

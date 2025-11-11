@@ -1,0 +1,200 @@
+---
+title: Docker Swarm Collector - Install
+id: install
+tags : [SigNoz Cloud, Self-Host]
+description: Step-by-step guide to install OpenTelemetry Collector on Docker Swarm
+---
+
+## Prerequisites
+
+Before installing the OpenTelemetry Collector, ensure you have:
+
+- Docker Engine 20.10+ installed and running
+- Docker Swarm initialized (run `docker swarm init` if not already)
+- Administrative access to the Docker host/cluster
+
+## Installation
+
+### Step 1: Create Configuration Directory
+
+Creates a dedicated directory to organize the OpenTelemetry Collector configuration file.
+
+```bash
+mkdir -p ~/opentelemetry-collector
+cd ~/opentelemetry-collector
+```
+
+### Step 2: Create Collector Configuration
+
+Defines how the OpenTelemetry Collector receives, processes, and exports telemetry data to SigNoz.
+
+Create `config.yaml`:
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "ingest.<YOUR_REGION>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<YOUR_INGESTION_KEY>"
+  debug:
+    verbosity: normal
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+
+<Admonition>
+- Set your ingestion endpoint according to your SigNoz Cloud region. Refer to [the SigNoz Cloud ingestion endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/) to find the correct endpoint for your deployment.
+- Replace `<SIGNOZ_INGESTION_KEY>` with the one provided by SigNoz.
+</Admonition>
+
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "http://<SIGNOZ_HOST>:4317"
+    tls:
+      insecure: true
+  debug:
+    verbosity: normal
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+**Configuration Steps:**
+- Replace `<SIGNOZ_HOST>` with your SigNoz instance hostname or IP address
+
+</TabItem>
+</Tabs>
+
+### Step 3: Create a Docker Swarm Config
+
+Adds the collector configuration to Swarm as a config object.
+
+```bash
+docker config create otelcol_config ./config.yaml
+```
+
+If you need to update it later, create a new config (for example `otelcol_config_v2`) and update the service to use the new one.
+
+### Step 4: Deploy the OpenTelemetry Collector Service
+
+Starts the OpenTelemetry Collector as a Swarm service to receive and forward telemetry data to SigNoz.
+
+```bash
+docker service create \
+  --name opentelemetry-collector \
+  --detach=true \
+  --restart-condition any \
+  --publish target=4317,published=4317,protocol=tcp \
+  --publish target=4318,published=4318,protocol=tcp \
+  --config source=otelcol_config,target=/etc/otelcol-contrib/config.yaml,mode=0444 \
+  otel/opentelemetry-collector-contrib:0.130.1
+```
+
+Optional: attach to an existing overlay network if your apps send data over that network:
+
+```bash
+docker service create \
+  --name opentelemetry-collector \
+  --network your_overlay_network \
+  --publish target=4317,published=4317,protocol=tcp \
+  --publish target=4318,published=4318,protocol=tcp \
+  --config source=otelcol_config,target=/etc/otelcol-contrib/config.yaml,mode=0444 \
+  otel/opentelemetry-collector-contrib:0.130.1
+```
+
+
+## Verification
+
+### Check Collector Status
+
+Verify that the OpenTelemetry Collector service is running and healthy.
+
+List the service
+```bash
+docker service ls | grep opentelemetry-collector
+```
+
+Inspect tasks (replicas and placement)
+```bash
+docker service ps opentelemetry-collector
+```
+
+Check collector logs (from a task/container)
+```bash
+docker service logs -f opentelemetry-collector
+```
+
+You should see logs indicating successful startup and readiness to process data.
+
+## Next Steps
+
+- [Configure the Collector](/docs/collection-agents/docker-swarm/configure)
+

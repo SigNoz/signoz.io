@@ -1,0 +1,61 @@
+---
+date: 2025-08-13
+id: overview
+tags : [SigNoz Cloud, Self-Host]
+title: ECS EC2 Collection Agent - Overview
+description: View metrics and logs for your ECS infrastructure
+---
+
+## What is ECS Daemon Service Collection?
+
+This documentation explains how to collect metrics and logs from your Amazon ECS (Elastic Container Service) infrastructure using a daemon service approach. The daemon service runs a container on each node of your ECS cluster to collect infrastructure metrics and logs, then forwards them to SigNoz for monitoring and analysis.
+
+## How It Works
+
+The daemon service approach involves deploying a specialized container that:
+
+1. **Runs as a daemon**: The service deploys one container per ECS cluster node
+2. **Collects infrastructure data**: Gathers metrics and logs from the host instance and Docker containers
+3. **Acts as a gateway**: Receives OpenTelemetry Protocol (OTLP) telemetry data from your applications
+4. **Forwards to SigNoz**: Sends all collected data to your SigNoz instance for visualization and analysis
+
+## Architecture Overview
+
+```
+ECS Cluster Nodes
+├── Your Application Containers
+├── Daemon Service Container (OpenTelemetry Collector)
+│   ├── Collects host metrics
+│   ├── Collects container logs  
+│   ├── Receives OTLP data from apps
+│   └── Forwards data to SigNoz
+```
+
+## Prerequisites
+
+Before setting up the daemon service, ensure you have:
+
+- **ECS Cluster**: An active ECS cluster with at least one task definition
+- **Launch Type**: Your ECS cluster must use either **EC2** or **External** launch type
+- **SigNoz Instance**: Either SigNoz Cloud account or self-hosted SigNoz installation
+- **AWS CLI**: Configured with appropriate permissions for ECS and CloudFormation operations
+- **IAM Permissions**: Access to create CloudFormation stacks, ECS services, and Parameter Store resources
+
+> **Note for Fargate Users**: If you're using Fargate launch type, this daemon service approach won't work. Instead, check out the [ECS Sidecar documentation](https://signoz.io/docs/collection-agents/ecs/sidecar/overview) for Fargate-compatible collection methods.
+
+## What Data Gets Collected?
+
+- **Infrastructure metrics** (CPU, memory, network, disk, container resource usage)
+- **Container and system logs** (application, system, Docker daemon logs)
+- **Application telemetry** (traces, custom metrics, OTLP-compatible data)
+
+
+## Launch Type
+
+- **EC2**: Fully supported; collects host metrics/logs with host network access.
+- **External**: Supported for hybrid/external resources; may need extra network setup.
+
+## Next Steps
+
+- [Install daemon service in your ECS Cluster](/docs/collection-agents/ecs/ec2/install/)
+- [Configure daemon service in your ECS Cluster](/docs/collection-agents/ecs/ec2/configure/)

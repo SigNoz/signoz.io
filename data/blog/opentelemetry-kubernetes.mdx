@@ -21,11 +21,11 @@ OpenTelemetry’s vendor neutral APIs and data formats form its core capability 
 
 # The Lineage of an Open Standard
 
-OpenTelemerty is the culmination of a two decades worth of effort into observability standards and vendor neutral APIs. Inspired by papers and implementations from early 2000s, Google had built Dapper, an internal tool for auto-instrumentation and distributed tracing of the Google Search related micro-services. Google released the Dapper paper in 2010 and set the modern tracing ecosystem in motion.
+OpenTelemerty is the culmination of a two decades worth of effort into observability standards and vendor neutral APIs. Inspired by papers and implementations from early 2000s, Google had built Dapper, an internal tool for auto-instrumentation and [distributed tracing](https://signoz.io/distributed-tracing/) of the Google Search related micro-services. Google released the Dapper paper in 2010 and set the modern tracing ecosystem in motion.
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
-Soon, Twitter had its own implementation of the Dapper paper called Zipkin, backed by Cassandra backend and the famed Finagle RPC framework. Uber was already running it’s internal tracing tool called Merckx, that slowly morphed into Jaeger by 2015 borrowing inspiration from both Dapper and open-zipkin. Initially Jaeger directly used the zipkin-ui component.
+Soon, Twitter had its own implementation of the Dapper paper called Zipkin, backed by Cassandra backend and the famed Finagle RPC framework. Uber was already running it’s internal [tracing tool](https://signoz.io/blog/distributed-tracing-tools/) called Merckx, that slowly morphed into Jaeger by 2015 borrowing inspiration from both Dapper and open-zipkin. Initially Jaeger directly used the zipkin-ui component.
 
 Maintainers of Dapper (Ben Sigelman), Zipkin (Adrian Cole) and Jaeger (Yuri Shkuro) came together in 2016 to write the first specification for OpenTracing in 2016. OpenTracing soon got accepted as the third incubated project under CNCF (Cloud Native Computing Foundation) the same year. It focused on vendor neutral APIs for consumption of traces.
 
@@ -66,7 +66,7 @@ We will now try and deploy a fully working example of open-telemetry collector i
 
 ![OpenTelemetry collector kubernetes deployment](/img/blog/2020/07/Copy-of-fig-4---otel-collector-k8s.webp)Fig 3. Opentelemetry-collector kubernetes deployment
 
-We use a load-generator deployment that generates simulated metrics and traces for OpenTelemetry stack to consume, this consists of:
+We use a load-generator deployment that generates simulated metrics and traces for [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) stack to consume, this consists of:
 
 - A simple go app deployment with OpenCensus instrumented traces and metrics
 - Source:  [https://github.com/open-telemetry/opentelemetry-collector/blob/master/examples/main.go](https://github.com/open-telemetry/opentelemetry-collector/blob/master/examples/demo/app/main.go)
@@ -76,17 +76,17 @@ We use a load-generator deployment that generates simulated metrics and traces f
 
 - [Jaeger traces](https://signoz.io/blog/distributed-tracing-jaeger/)
 - Zipkin traces
-- Freshtracks.io’s prometheus metrics load generator - Avalanche
+- Freshtracks.io’s [prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/) load generator - Avalanche
 
 [![Prometheus/OpenMetrics endpoint series generator for load testing.](/img/blog/2020/07/avalanche_github.webp)](https://github.com/open-fresh/avalanche)
 
-For each of the above data sources, we configure a corresponding receiver in opentelmetry agent which runs as a daemonset. While the opencensus, jaeger and zipkin receivers are push based, with the app having to push traces and metrics to a pre-configured endpoint; the prometheus receiver is pull based, one just needs to write standard prometheus scrape-configs on the sources /metrics endpoint in order to receive the metrics.
+For each of the above data sources, we configure a corresponding receiver in opentelmetry agent which runs as a daemonset. While the opencensus, jaeger and zipkin receivers are push based, with the app having to push traces and metrics to a pre-configured endpoint; the [prometheus receiver](https://signoz.io/blog/opentelemetry-collector-prometheus-receiver/) is pull based, one just needs to write standard prometheus scrape-configs on the sources /metrics endpoint in order to receive the metrics.
 
 One caveat to note here is that since all above receivers work on GRPC ports, the agent needs to expose them through an headless service with **ClusterIP: None,** so that individual pod IPs are exposed through the **Endpoint** object, making sure grpc clients on the load-generator deployment don’t break connection.
 
 Once the traces and metrics have been consumed by opentelemetry-agent, they are converted to the internal format and then sent to the opencensus exporter through both the batch and queued-retry processors.
 
-The OpenCensus exporter on the agent then sends this combined data to opentelemetry collector deployment exposed through a headless service as before. Also to note, since the agent and collector are the same binary and entirely identical in functionality, the differentiation of a collector from an agent only differs in resource allocation. The agent has a lower resource quota usage than a collector, one can also configure memory usage using the Memory Limiter processor in both cases.
+The OpenCensus exporter on the agent then sends this combined data to [opentelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) deployment exposed through a headless service as before. Also to note, since the agent and collector are the same binary and entirely identical in functionality, the differentiation of a collector from an agent only differs in resource allocation. The agent has a lower resource quota usage than a collector, one can also configure memory usage using the Memory Limiter processor in both cases.
 
 Thus, the collected trace and metrics data through the opencensus receiver is routed through the batch and queued-retry processors on the collector to the three exporters configured in the pipeline, one each for jaeger, zipkin and prometheus.
 

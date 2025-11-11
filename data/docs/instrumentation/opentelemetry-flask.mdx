@@ -1,6 +1,7 @@
 ---
 date: 2024-06-06
 id: flask
+tags : [SigNoz Cloud, Self-Host]
 title: Flask OpenTelemetry Instrumentation
 description: Instrument your Flask application with OpenTelemetry and send data to SigNoz
 hide_table_of_contents: true
@@ -473,6 +474,134 @@ In case you encounter an issue where all applications do not get listed in the s
 
 </TabItem>
 </Tabs>
+</TabItem>
+<TabItem value="Docker" label="Docker">
+
+There are two ways to send data to SigNoz Cloud. You can containerize the images in both the cases.
+
+- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud-1)
+- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
+
+#### Send traces directly to SigNoz Cloud
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+...
+
+# install dependencies
+RUN pip install opentelemetry-distro==0.43b0 opentelemetry-exporter-otlp==1.22.0
+
+...
+
+# NOTE: ADD THIS AFTER pip install requirements.txt
+RUN opentelemetry-bootstrap --action=install
+
+...
+
+# Set environment variables for OpenTelemetry
+ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
+ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+
+# Replace with your run command
+CMD ["opentelemetry-instrument", <run_command>]
+```
+
+- Replace `<run_command>` with the command to run your application
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+
+The above steps install OpenTelemetry dependencies directly inside the Docker container without altering `requirements.txt` file of project & sets environment variables to export the traces.
+
+**Step 2.** Run your Docker container
+
+Here's how you can run your docker container:
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+- `-p` maps a host port to a container port
+
+
+**Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+---
+
+#### Send traces via OTel Collector binary
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+# install OpenTelemetry Collector in Docker container
+FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
+
+COPY --from=otel /otelcol-contrib /otelcol-contrib
+COPY --from=otel /etc/otelcol-contrib /etc/otelcol-contrib
+
+COPY config.yaml /etc/otelcol-contrib/config.yaml
+
+...
+
+# And install OpenTelemetry packages
+RUN pip install --upgrade pip && \
+    pip install opentelemetry-distro==0.43b0 opentelemetry-exporter-otlp==1.22.0
+
+...
+
+# add this right after installing your dependencies
+RUN opentelemetry-bootstrap --action=install
+
+# Replace APP_PORT with the port of your application
+EXPOSE 4317 4318 <APP_PORT>
+
+# Set environment variables for OpenTelemetry
+ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+
+# Run app.py with OpenTelemetry instrumentation when the container launches
+CMD sh -c "/otelcol-contrib --config=/etc/otelcol-contrib/config.yaml & opentelemetry-instrument <run_command>
+...
+```
+
+Make sure you have `config.yaml` in `root` of the application. This config.yaml should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
+
+- Replace `<run_command>` with the command to run your application
+- `<service_name>` is name of your service
+
+
+**Step 2.** Run your Docker container
+
+Run your docker container to start exporting.
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+
+- `-p` maps a host port to a container port
+
+
+**Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
 </TabItem>
 </Tabs>
 </TabItem>

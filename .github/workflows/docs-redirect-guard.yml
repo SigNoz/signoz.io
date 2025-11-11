@@ -1,0 +1,35 @@
+name: Docs Redirect Guard
+
+on:
+  pull_request:
+    paths:
+      - 'data/docs/**'
+      - 'next.config.js'
+      - 'scripts/check-doc-redirects.js'
+      - 'tests/doc-redirects.test.js'
+      - 'tests/fixtures/**'
+      - 'package.json'
+      - '.github/workflows/docs-redirect-guard.yml'
+
+jobs:
+  check-redirects:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive
+
+      - name: Run doc redirect tests
+        run: yarn test:doc-redirects
+
+      - name: Validate docs redirects
+        run: yarn check:doc-redirects

@@ -1,0 +1,504 @@
+---
+date: 2025-11-05
+title: Web Vitals Monitoring with OpenTelemetry Metrics
+id: opentelemetry-web-vitals-metrics
+description: Set up web vitals monitoring with metrics using SigNoz and OpenTelemetry
+tags: [SigNoz Cloud, Self-Host]
+---
+
+## Overview
+
+This documentation provides a step-by-step guide to setting up web vitals monitoring with OpenTelemetry metrics on SigNoz.
+
+<Admonition type="info">  
+  **Already sending frontend metrics?** If you've followed the <a href="/docs/frontend-monitoring/sending-metrics">Sending Metrics from your frontend application</a> guide, you can skip Steps 1 and 2 below—your instrumentation file is already set up. Jump straight to <a href="#step-3-capture-and-export-web-vitals">Step 3</a> to add web vitals capture to your existing setup.  
+</Admonition>  
+
+## Prerequisites
+
+- [SigNoz Cloud](https://signoz.io/teams/) or self-hosted account
+- A web application from where you want to send web vitals
+
+## Setup
+
+### Step 1: Install dependencies
+
+<Tabs groupId="web-vitals-dependencies">
+  <TabItem value="npm" label="Npm" default>
+    ```sh
+    npm install web-vitals
+    npm install @opentelemetry/api
+    npm install @opentelemetry/exporter-metrics-otlp-http
+    npm install @opentelemetry/sdk-metrics
+    npm install @opentelemetry/resources
+    ```
+  </TabItem>
+  <TabItem value="yarn" label="Yarn">
+    ```sh
+    yarn add web-vitals
+    yarn add @opentelemetry/api
+    yarn add @opentelemetry/exporter-metrics-otlp-http
+    yarn add @opentelemetry/sdk-metrics
+    yarn add @opentelemetry/resources
+    ```
+  </TabItem>
+</Tabs>
+
+<details>
+  <summary> Read more about the dependencies </summary>
+
+- **`web-vitals`**: Core library for measuring and reporting web vitals metrics (LCP, INP, CLS, TTFB, FCP)
+- **`@opentelemetry/api`**: Provides the core OpenTelemetry API for creating metrics and meters
+- **`@opentelemetry/exporter-metrics-otlp-http`**: Exports metrics to OpenTelemetry Protocol (OTLP) over HTTP
+- **`@opentelemetry/sdk-metrics`**: Provides the OpenTelemetry metrics SDK implementation
+- **`@opentelemetry/resources`**: Defines service metadata and attributes for your application
+</details>
+
+### Step 2: Create an instrumentation file
+
+The instrumentation file is required to setup the `MeterProvider` which is used to create custom metrics.
+
+<Tabs entityName="language">
+  <TabItem value="ts" label="TypeScript" default>
+    ```ts:instrumentation.ts
+    import {
+      MeterProvider,
+      PeriodicExportingMetricReader,
+    } from '@opentelemetry/sdk-metrics';
+    import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
+    import { metrics } from '@opentelemetry/api';
+
+    // Define your resource, e.g., service name, environment.
+    const resource = resourceFromAttributes({
+      'service.name': '<SERVICE_NAME>',
+    });
+
+    // Create a metric reader with OTLP exporter configured to send metrics to a local collector.
+    const metricReader = new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({
+        // For the self-hosted version, please use the collector url instead.
+        url: `https://ingest.<INGESTION_REGION>.signoz.cloud:443/v1/metrics`,
+        headers: {
+          // Optional for the self-hosted version
+          'signoz-ingestion-key': '<INGESTION_KEY>',
+        },
+      }),
+      exportIntervalMillis: 10000, // Export metrics every 10 seconds.
+    });
+
+    // Initialize a MeterProvider with the above configurations.
+    const myServiceMeterProvider = new MeterProvider({
+      resource,
+      readers: [metricReader],
+    });
+
+    // Set the initialized MeterProvider as global to enable metric collection across the app.
+    metrics.setGlobalMeterProvider(myServiceMeterProvider);
+    ```
+
+    - Set the `<INGESTION_REGION>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - Replace `<INGESTION_KEY>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+    - `<SERVICE_NAME>` is the name of your service
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+    ```js:instrumentation.js
+    import {
+      MeterProvider,
+      PeriodicExportingMetricReader,
+    } from '@opentelemetry/sdk-metrics';
+    import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+    import { resourceFromAttributes } from '@opentelemetry/resources';
+    import { metrics } from '@opentelemetry/api';
+
+    // Define your resource, e.g., service name, environment.
+    const resource = resourceFromAttributes({
+      'service.name': '<SERVICE_NAME>',
+    });
+
+    // Create a metric reader with OTLP exporter configured to send metrics to a local collector.
+    const metricReader = new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({
+        // For the self-hosted version, please use the collector url instead.
+        url: `https://ingest.<INGESTION_REGION>.signoz.cloud:443/v1/metrics`,
+        headers: {
+          // Optional for the self-hosted version
+          'signoz-ingestion-key': '<INGESTION_KEY>',
+        },
+      }),
+      exportIntervalMillis: 10000, // Export metrics every 10 seconds.
+    });
+
+    // Initialize a MeterProvider with the above configurations.
+    const myServiceMeterProvider = new MeterProvider({
+      resource,
+      readers: [metricReader],
+    });
+
+    // Set the initialized MeterProvider as global to enable metric collection across the app.
+    metrics.setGlobalMeterProvider(myServiceMeterProvider);
+    ```
+
+    - Set the `<INGESTION_REGION>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - Replace `<INGESTION_KEY>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+    - `<SERVICE_NAME>` is the name of your service
+
+  </TabItem>
+</Tabs>
+
+<Admonition type="info">
+  For self-hosted deployments, add the following CORS configuration to your OpenTelemetry Collector
+  config file to allow browser requests from your frontend domain. Also, update the endpoint and remove the ingestion key header as shown in  
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>. 
+</Admonition>
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - <YOUR_FRONTEND_URL>
+          allowed_headers: ['*']
+```
+This configures the OTel Collector to export traces to SigNoz Cloud using the OTLP/HTTP protocol. Read more about OTel Collector configuration [here](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/).
+
+### Step 3: Capture and export Web Vitals
+
+Use the `web-vitals` library to capture key performance metrics like CLS, INP, LCP, TTFB, and FCP.
+These are captured through callback functions that you define and exported as metrics.
+
+<Tabs entityName="language">
+  <TabItem value="ts" label="TypeScript" default>
+    ```ts:web-vitals.ts
+    import { metrics } from '@opentelemetry/api';
+    import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from 'web-vitals';
+
+    const meter = metrics.getMeter('web-vitals');
+    const lcp = meter.createHistogram('lcp');
+    const cls = meter.createObservableGauge('cls');
+    const inp = meter.createHistogram('inp');
+    const ttfb = meter.createHistogram('ttfb');
+    const fcp = meter.createHistogram('fcp');
+
+    function sendToAnalytics(metric: Metric) {
+      switch (metric.name) {
+        case 'LCP': {
+          lcp.record(metric.value);
+          break;
+        }
+        case 'CLS': {
+          cls.addCallback(result => {
+            result.observe(metric.value);
+          });
+          break;
+        }
+        case 'INP': {
+          inp.record(metric.value);
+          break;
+        }
+        case 'TTFB': {
+          ttfb.record(metric.value);
+
+          break;
+        }
+        case 'FCP': {
+          fcp.record(metric.value);
+          break;
+        }
+        default: {
+          console.log('unexpected metric name');
+        }
+      }
+    }
+
+    onCLS(sendToAnalytics);
+    onINP(sendToAnalytics);
+    onLCP(sendToAnalytics);
+    onTTFB(sendToAnalytics);
+    onFCP(sendToAnalytics);
+    ```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+    ```js:web-vitals.js
+    import { metrics } from '@opentelemetry/api';
+    import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
+
+    const meter = metrics.getMeter('web-vitals');
+    const lcp = meter.createHistogram('lcp');
+    const cls = meter.createObservableGauge('cls');
+    const inp = meter.createHistogram('inp');
+    const ttfb = meter.createHistogram('ttfb');
+    const fcp = meter.createHistogram('fcp');
+
+    function sendToAnalytics(metric) {
+      switch (metric.name) {
+        case 'LCP': {
+          lcp.record(metric.value);
+          break;
+        }
+        case 'CLS': {
+          cls.addCallback((result) => {
+            result.observe(metric.value);
+          });
+          break;
+        }
+        case 'INP': {
+          inp.record(metric.value);
+          break;
+        }
+        case 'TTFB': {
+          ttfb.record(metric.value);
+          break;
+        }
+        case 'FCP': {
+          fcp.record(metric.value);
+          break;
+        }
+        default: {
+          console.log('unexpected metric name');
+        }
+      }
+    }
+
+    onCLS(sendToAnalytics);
+    onINP(sendToAnalytics);
+    onLCP(sendToAnalytics);
+    onTTFB(sendToAnalytics);
+    onFCP(sendToAnalytics);
+    ```
+
+  </TabItem>
+</Tabs>
+
+## Validate
+
+The captured web vitals can be viewed in the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/guides/frontend-monitoring/web-vitals/web-vitals-metrics-explorer.webp"
+    alt="Web Vitals"
+  />
+  <figcaption>
+    <i>Web Vitals</i>
+  </figcaption>
+</figure>
+
+### Attaching additional identifiers to your Web Vitals
+
+You can enrich web vitals with additional metadata like browser type, user ID, page URL etc. to enable real user monitoring (RUM)-like insights.
+
+<Tabs entityName="language">
+  <TabItem value="ts" label="TypeScript" default>
+    ```ts:web-vitals.ts
+    import { metrics } from '@opentelemetry/api';
+    import { UAParser } from 'ua-parser-js';
+    import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from 'web-vitals';
+
+    const pageUrl = window.location.pathname
+      .replace(/\?.*$/, '') // remove query params
+      .replace(/\/\d+/g, '/:id'); // normalize numeric IDs
+
+    export const CONSTANTS = {
+      USER_ID: 'user.id',
+      USER_AGENT_NAME: 'user_agent.name',
+      PAGE_URL: 'url.path_template',
+    };
+
+    function getBrowserInfo() {
+      // You can add your custom browser tracking logic here as well.
+      // This example uses the ua-parser-js package.
+      const parser = new UAParser();
+      const result = parser.getResult();
+      return result.browser.name || '';
+    }
+
+    function getUserId() {
+      // You can add your custom user ID tracking logic here as well.
+      // This example uses localStorage.
+      const userId = localStorage.getItem('userId');
+      return userId || '';
+    }
+
+    const customAttributes = {
+      [CONSTANTS.USER_ID]: getUserId(),
+      [CONSTANTS.USER_AGENT_NAME]: getBrowserInfo(),
+      [CONSTANTS.PAGE_URL]: pageUrl,
+    };
+
+    const meter = metrics.getMeter('web-vitals');
+    const lcp = meter.createHistogram('lcp');
+    const cls = meter.createObservableGauge('cls');
+    const inp = meter.createHistogram('inp');
+    const ttfb = meter.createHistogram('ttfb');
+    const fcp = meter.createHistogram('fcp');
+
+    function sendToAnalytics(metric: Metric) {
+      switch (metric.name) {
+        case 'LCP': {
+          lcp.record(metric.value, customAttributes);
+          break;
+        }
+        case 'CLS': {
+          cls.addCallback(result => {
+            result.observe(metric.value, customAttributes);
+          });
+          break;
+        }
+        case 'INP': {
+          inp.record(metric.value, customAttributes);
+          break;
+        }
+        case 'TTFB': {
+          ttfb.record(metric.value, customAttributes);
+
+          break;
+        }
+        case 'FCP': {
+          fcp.record(metric.value, customAttributes);
+          break;
+        }
+        default: {
+          console.log('unexpected metric name');
+        }
+      }
+    }
+
+    onCLS(sendToAnalytics);
+    onINP(sendToAnalytics);
+    onLCP(sendToAnalytics);
+    onTTFB(sendToAnalytics);
+    onFCP(sendToAnalytics);
+    ```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+    ```js:web-vitals.js
+    import { metrics } from '@opentelemetry/api';
+    import { UAParser } from 'ua-parser-js';
+    import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
+
+    const pageUrl = window.location.pathname
+      .replace(/\?.*$/, '') // remove query params
+      .replace(/\/\d+/g, '/:id'); // normalize numeric IDs
+
+    export const CONSTANTS = {
+      USER_ID: 'user.id',
+      USER_AGENT_NAME: 'user_agent.name',
+      PAGE_URL: 'url.path_template',
+    };
+
+    function getBrowserInfo() {
+      // You can add your custom browser tracking logic here as well.
+      // This example uses the ua-parser-js package.
+      const parser = new UAParser();
+      const result = parser.getResult();
+      return result.browser.name || '';
+    }
+
+    function getUserId() {
+      // You can add your custom user ID tracking logic here as well.
+      // This example uses localStorage.
+      const userId = localStorage.getItem('userId');
+      return userId || '';
+    }
+
+    const customAttributes = {
+      [CONSTANTS.USER_ID]: getUserId(),
+      [CONSTANTS.USER_AGENT_NAME]: getBrowserInfo(),
+      [CONSTANTS.PAGE_URL]: pageUrl,
+    };
+
+    const meter = metrics.getMeter('web-vitals');
+    const lcp = meter.createHistogram('lcp');
+    const cls = meter.createObservableGauge('cls');
+    const inp = meter.createHistogram('inp');
+    const ttfb = meter.createHistogram('ttfb');
+    const fcp = meter.createHistogram('fcp');
+
+    function sendToAnalytics(metric) {
+      switch (metric.name) {
+        case 'LCP': {
+          lcp.record(metric.value, customAttributes);
+          break;
+        }
+        case 'CLS': {
+          cls.addCallback(result => {
+            result.observe(metric.value, customAttributes);
+          });
+          break;
+        }
+        case 'INP': {
+          inp.record(metric.value, customAttributes);
+          break;
+        }
+        case 'TTFB': {
+          ttfb.record(metric.value, customAttributes);
+
+          break;
+        }
+        case 'FCP': {
+          fcp.record(metric.value, customAttributes);
+          break;
+        }
+        default: {
+          console.log('unexpected metric name');
+        }
+      }
+    }
+
+    onCLS(sendToAnalytics);
+    onINP(sendToAnalytics);
+    onLCP(sendToAnalytics);
+    onTTFB(sendToAnalytics);
+    onFCP(sendToAnalytics);
+    ```
+
+  </TabItem>
+</Tabs>
+
+### Setup Dashboard and alerts
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/events/launch-week-1/web-vitals.webp"
+    alt="Core Web Vitals Monitoring in SigNoz"
+  />
+  <figcaption>
+    <i>Core Web Vitals Monitoring in SigNoz </i>
+  </figcaption>
+</figure>
+
+SigNoz charts support thresholds with color coding. For example, the graph below shows three thresholds for `good`, `needs improvement`, and `critical` levels.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/events/launch-week-1/thresholds-chart.webp"
+    alt="Thresholds in SigNoz"
+  />
+  <figcaption>
+    <i>Thresholds provide a visual cue about your application's performance </i>
+  </figcaption>
+</figure>
+
+### Out of Box Dashboard
+
+You can [import](https://signoz.io/docs/dashboards/import-dashboard/) our out-of-the-box [Dashboard for web vitals monitoring](/docs/dashboards/dashboard-templates/frontend-monitoring/#web-vitals-with-metrics)
+
+## Demo Application
+
+We have set up a [Demo React application](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/web-vitals-with-metrics) that demonstrates monitoring Core Web Vitals with metrics using OpenTelemetry and sending them to SigNoz.
+
+## Next Steps
+- [Sending logs](/docs/frontend-monitoring/sending-logs)
+- [Sending traces](/docs/frontend-monitoring/sending-traces)

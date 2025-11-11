@@ -48,8 +48,7 @@ export const featureItems = [
   {
     iconName: ICON_BUDGET_FRIENDLY,
     title: 'Budget-Friendly',
-    description:
-      'Special pricing tailored for startups with limited resources. 50% off standard pricing.',
+    description: 'Special pricing tailored for startups with limited resources.',
     bgColor: 'bg-primary/10',
     hoverBorder: 'hover:border-primary/40',
     hoverShadow: 'hover:shadow-primary/5',

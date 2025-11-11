@@ -119,7 +119,7 @@ The above configuration will **drop any log line containing "healthcheck" or " D
 
 **Why filter before sending?** Once data reaches Datadog, you’re incurring ingestion costs. Dropping data *after* ingestion (via exclusion filters) saves on indexing but not on ingestion costs. So it’s often best to do initial filtering in your logging agent or pipeline on your infrastructure.
 
-**Reminder:** When filtering, ensure you’re not dropping logs that you’ll regret losing during an incident. A good approach is to involve developers in deciding which logs are mission-critical.
+**Reminder:** When filtering, ensure you’re not [dropping logs](https://signoz.io/docs/logs-management/guides/drop-logs/) that you’ll regret losing during an incident. A good approach is to involve developers in deciding which logs are mission-critical.
 
 **Use Exclusion Filters for Indexing:**
 
@@ -225,12 +225,12 @@ SigNoz takes a simpler approach:
     
 - **Self-Hosting Option**
     
-    Run the full stack (ClickHouse + OpenTelemetry collector + frontend) on your own infrastructure for zero licensing costs—only pay your cloud/VM bills.
+    Run the full stack (ClickHouse + [OpenTelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) + frontend) on your own infrastructure for zero licensing costs—only pay your cloud/VM bills.
     
 - **Core Observability Features**
     - **Metrics:** Prebuilt dashboards for system and application metrics, plus custom queries via PromQL.
-    - **Logs:** Query your logs quickly with our powerful logs query builder with cost-effective long-term storage of logs.
-    - **Traces:** Native OpenTelemetry support with distributed-trace flame graphs and span-level querying.
+    - **Logs:** Query your logs quickly with our powerful logs [query builder](https://signoz.io/blog/query-builder-v5/) with cost-effective long-term storage of logs.
+    - **Traces:** Native [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) support with distributed-trace flame graphs and span-level querying.
     - **Alerts:** Threshold and anomaly detectors driven by real-time data.
 - **Technical Advantages**
     - **Unified Storage:** All telemetry (metrics, logs, traces) lives in one ClickHouse cluster—cross-correlation queries are just SQL joins.
@@ -289,7 +289,7 @@ Explore a [feature-by-feature comparison of SigNoz vs. Datadog](https://signoz.i
 2. **Filter aggressively:** Drop 70-90% of low-value logs and metrics before they hit Datadog.
 3. **Control cardinality:** Avoid high-cardinality tags. Use controlled vocabularies.
 4. **Set hard limits:** Use daily quotas and usage caps to prevent bill shock.
-5. **Consider alternatives:** For high-volume workloads, tools like SigNoz can offer 90%+ savings.
+5. **Consider alternatives:** For high-volume workloads, tools like [SigNoz](https://signoz.io/docs/introduction/) can offer 90%+ savings.
 6. **Optimize incrementally:** Start with biggest cost drivers (usually custom metrics and logs).
 
 Most teams can reduce Datadog costs by 30-70% through these optimizations while maintaining essential observability. The key is treating cost as a first-class metric to monitor and optimize continuously.

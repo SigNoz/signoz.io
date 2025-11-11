@@ -10,18 +10,13 @@ keywords: [fluentd vs logstash,fluentd,logstash,elasticsearch,elk,elk stack,elas
 ---
 
 
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/fluentd-vs-logstash/"/>
-</head>
-
 When we have large-scale, distributed systems, Logging becomes essential for observability, monitoring, and security. No matter what architecture (Monolith/Microservices) our systems have, they are complex due to the number of moving parts they have and the challenges they face around management, deployment, and scaling.
 
 
 
 ![Cover Image](/img/blog/2022/12/fluentd_vs_logstash_cover.webp)
 
-In this scenario, Log management tools rescue the DevOps and SRE teams in order to help them monitor and improve performance, debug errors, and visualize events.
+In this scenario, [Log management tools](https://signoz.io/blog/open-source-log-management/) rescue the DevOps and SRE teams in order to help them monitor and improve performance, debug errors, and visualize events.
 
 In layman's terms, a log analysis tool has the following major components:
 
@@ -30,7 +25,7 @@ In layman's terms, a log analysis tool has the following major components:
 - Logs storage
 - Logs visualization
 
-In this article, we will be discussing two very famous open-source log collectors that are Logstash and Fluentd. The hidden gems of any log analysis tool are the log collectors. They run on servers, pull server metrics, parse all the logs, and then transfer them to the systems like Elasticsearch or Postgresql. It's their routing mechanism that eventually makes log analysis possible. 
+In this article, we will be discussing two very famous open-source log collectors that are Logstash and Fluentd. The hidden gems of any [log analysis tool](https://signoz.io/comparisons/log-analysis-tools/#solarwinds) are the log collectors. They run on servers, pull server metrics, parse all the logs, and then transfer them to the systems like Elasticsearch or Postgresql. It's their routing mechanism that eventually makes log analysis possible. 
 
 Both Logstash and Fluentd are open-source data collectors under the Apache 2 license. Logstash is popularly known as the ‘L’ part of the ELK stack managed by Elastic itself. Whereas Fluentd is built, and managed by Treasure Data and is a part of CNCF.
 
@@ -84,7 +79,7 @@ Fluentd uses a tagging approach, whereas Logstash uses if-then-else statements f
 
 ### Log Parsing
 
-The components for log parsing differ tool per tool. Fluentd uses standard [built-in parsers](https://docs.docker.com/config/containers/logging/fluentd/)(JSON, regex, CSV, etc.), and Logstash uses [plugins](https://www.elastic.co/guide/en/logstash/current/filter-plugins.html) for this. This makes Fluentd more favorable over Logstash as we don’t have to deal with any external plugin for this feature.
+The components for [log parsing](https://signoz.io/guides/log-parsing/) differ tool per tool. Fluentd uses standard [built-in parsers](https://docs.docker.com/config/containers/logging/fluentd/)(JSON, regex, CSV, etc.), and Logstash uses [plugins](https://www.elastic.co/guide/en/logstash/current/filter-plugins.html) for this. This makes Fluentd more favorable over Logstash as we don’t have to deal with any external plugin for this feature.
 
 ### Docker support
 
@@ -93,7 +88,7 @@ So if you're running your applications with Docker, FluentD is a more natural ch
 
 ## When to prefer Fluentd over Logstash or vice-versa
 
-For the Kubernetes environments or teams working with Docker, Fluentd is the ideal candidate for a logs collector. Fluentd has a built-in Docker logging driver and parser. You don't need an extra agent on the container to push logs to FluentD. Because of this feature, Fluentd makes the architecture less complex and less risky for logging errors. Moreover, when memory is your pain point, then go for Fluentd as it is more memory-efficient due to the lack of JVM and java runtime dependencies.
+For the Kubernetes environments or teams working with Docker, Fluentd is the ideal candidate for a logs collector. Fluentd has a built-in [Docker logging driver](https://signoz.io/blog/docker-logging/) and parser. You don't need an extra agent on the container to push logs to FluentD. Because of this feature, Fluentd makes the architecture less complex and less risky for logging errors. Moreover, when memory is your pain point, then go for Fluentd as it is more memory-efficient due to the lack of JVM and java runtime dependencies.
 
 On the other hand, Logstash works well with Elasticsearch and Kibana. So, if you already have Elasticsearch and Kibana in your infrastructure then Logstash would be your best bet for a log collector. In general, if you are looking for a more managed and supported system, then always go for Logstash.
 
@@ -101,15 +96,15 @@ If you have come this far, you surely are looking to try your hands at a log man
 
 ## Log management in Signoz
 
-SigNoz is a full-stack open source Application Performance Monitoring tool that you can use for monitoring logs, metrics, and traces. Having all the important telemetry signals under a single dashboard leads to less operational overhead. Users can also access telemetry data with richer context by correlating these signals.
+SigNoz is a full-stack open source Application Performance Monitoring tool that you can use for [monitoring logs](https://signoz.io/blog/log-monitoring/), metrics, and traces. Having all the important telemetry signals under a single dashboard leads to less operational overhead. Users can also access telemetry data with richer context by correlating these signals.
 
 SigNoz uses a columnar database ClickHouse to store logs, which is very efficient at ingesting and storing logs data. Columnar databases like ClickHouse are very effective in storing log data and making it available for analysis.
 
-Big companies like Uber have <a href = "https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" >shifted</a> from the Elastic stack to ClickHouse for their log analytics platform. Cloudflare too was using Elasticsearch for many years but <a href = "https://blog.cloudflare.com/log-analytics-using-clickhouse/" rel="noopener noreferrer nofollow" target="_blank" >shifted to ClickHouse</a> because of limitations in handling large log volumes with Elasticsearch.
+Big companies like Uber have <a href = "https://www.uber.com/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" >shifted</a> from the Elastic stack to ClickHouse for their log analytics platform. Cloudflare too was using Elasticsearch for many years but <a href = "https://blog.cloudflare.com/log-analytics-using-clickhouse/" rel="noopener noreferrer nofollow" target="_blank" >shifted to ClickHouse</a> because of limitations in handling large log volumes with Elasticsearch.
 
 SigNoz uses <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> for instrumenting applications. OpenTelemetry, backed by <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank" >CNCF</a>, is quickly becoming the world standard for instrumenting cloud-native applications.
 
-The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
+The logs tab in SigNoz has advanced features like a log [query builder](https://signoz.io/blog/query-builder-v5/), search across multiple fields, structured table view, JSON view, etc.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_logs.webp" alt="Log management in SigNoz"/>

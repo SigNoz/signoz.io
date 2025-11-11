@@ -1,0 +1,92 @@
+---
+date: 2025-08-21
+id: install
+tags : [SigNoz Cloud, Self-Host]
+title: OpenTelemetry Operator - Install
+description: How to install OpenTelemetry Operator in your Kubernetes Cluster
+---
+import OtelOperatorOTLPEndpoint from '@/components/shared/otel-operator-otlp-endpoint.mdx'
+import OtelOperatorAutoInstrumentation from '@/components/shared/otel-operator-auto-instrumentation.mdx'
+import OtelOperatorPetClinic from '@/components/shared/otel-operator-pet-clinic.md'
+import OtelOperatorCleanUp from '@/components/shared/otel-operator-cleanup.md'
+
+[OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator) makes it easier to set up the OpenTelemetry collector and auto-instrument workloads deployed on Kubernetes.
+
+A Kubernetes operator is a method of packaging, deploying, and managing a Kubernetes application. OpenTelemetry Operator helps a lot in managing OpenTelemetry collectors and enables auto-instrumentation.
+
+## Prerequisite
+
+Before installing the OpenTelemetry Operator, ensure you have:
+
+- A running Kubernetes cluster (v1.19 or later recommended)
+- Administrative kubectl access to your cluster
+- SigNoz installed and running ([Installation Guide](https://signoz.io/docs/install/))
+- [cert-manager](https://cert-manager.io/docs/installation/) installed in your cluster
+
+
+## Installing the OpenTelemetry Operator
+
+Choose your preferred installation method to deploy the operator:
+
+<Tabs>
+<TabItem label="Kubectl - Apply Manifest" value="manifest">
+Deploy the operator directly using the latest release manifest:
+
+```bash
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+```
+
+Verify the installation:
+```bash
+kubectl get deployment opentelemetry-operator-controller-manager -n opentelemetry-operator-system
+```
+</TabItem>
+<TabItem label="Helm Chart" value="helm">
+Add the OpenTelemetry Helm repository:
+
+```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
+```
+
+Install the OpenTelemetry Operator:
+
+```bash
+helm install opentelemetry-operator open-telemetry/opentelemetry-operator \
+  --create-namespace \
+  --namespace opentelemetry-operator-system
+```
+
+Check the [OpenTelemetry Operator Helm Chart Documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator#install-chart) for advanced configuration options.
+</TabItem>
+</Tabs>
+
+Once the `opentelemetry-operator` deployment is ready, you can proceed with creating OpenTelemetry Collector instances and configuring automatic instrumentation.
+
+## OpenTelemetry Collector
+
+The OpenTelemetry Operator provides a [Custom Resource Definition (CRD) for OpenTelemetry Collectors](https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/opentelemetrycollectors.md) with flexible deployment options through the `.Spec.Mode` property. You can deploy collectors as:
+
+The `.Spec.Config` property contains the OpenTelemetry Collector configuration YAML. Explore additional [deployment mode examples](https://github.com/open-telemetry/opentelemetry-operator?tab=readme-ov-file#deployment-modes) in the official repository.
+
+OpenTelemetry Operator provides [examples](https://github.com/open-telemetry/opentelemetry-operator?tab=readme-ov-file#deployment-modes) for each deployment mode.
+
+<Admonition type="tip">
+To quickly deploy OpenTelemetry Collectors for node-level and cluster-level data collection with SigNoz, you can use our [Configure Guide](/docs/collection-agents/k8s/otel-operator/configure/) which provides ready-to-use DaemonSet and Deployment manifests with pre-configured settings for sending telemetry directly to SigNoz.  
+ 
+This guide includes:
+- DaemonSet and Deployment CRs tailored for SigNoz (Cloud & Self-Hosted)
+- RBAC examples for required permissions
+- Step-by-step instructions for both deployment modes  
+ 
+[Go to the Configure Guide →](/docs/collection-agents/k8s/otel-operator/configure/)
+</Admonition>
+
+
+## Next Step
+- [Configure Otel Operator OtelCollectors](/docs/collection-agents/k8s/otel-operator/configure)
+- [Learn more about Otel-Operator](/docs/collection-agents/k8s/otel-operator/overview)
+
+
+
+

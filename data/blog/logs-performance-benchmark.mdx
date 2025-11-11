@@ -9,11 +9,6 @@ image: /img/blog/2022/12/benchmark-cover-min.jpg
 hide_table_of_contents: false
 keywords: [logs management,log analytics,logs performance benchmark,open source,application monitoring,apm tools,signoz]
 ---
-
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/logs-performance-benchmark/"/>
-</head>
-
 Logs are an integral part of any system that helps you get information about the application state and how it handles its operations. The goal of this blog is to compare the commonly used logging solutions, i.e., ElasticSearch (ELK stack) and Loki (PLG stack), with SigNoz on three parameters: ingestion, query, and storage.
 
 
@@ -22,7 +17,7 @@ Logs are an integral part of any system that helps you get information about the
 
 Though the performance benchmarks in our tests represent a very specific scenario and use cases, our results seem to directionally agree with what other observability teams have reported, especially wrt. Elastic stack.
 
-Many big companies like <a href="https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank">Uber</a> and Cloudflare have been shifting to ClickHouse as their main workhorse for Logs management seeing much better performance. for e.g Cloudflare recently shifted from Elastic to ClickHouse and are seeing <a href="https://blog.cloudflare.com/log-analytics-using-clickhouse/" rel="noopener noreferrer nofollow" target="_blank">8x improvement</a> in memory/cpu resource requirement in ingestion.
+Many big companies like <a href="https://www.uber.com/blog/logging/" rel="noopener noreferrer nofollow" target="_blank">Uber</a> and Cloudflare have been shifting to ClickHouse as their main workhorse for Logs management seeing much better performance. for e.g Cloudflare recently shifted from Elastic to ClickHouse and are seeing <a href="https://blog.cloudflare.com/log-analytics-using-clickhouse/" rel="noopener noreferrer nofollow" target="_blank">8x improvement</a> in memory/cpu resource requirement in ingestion.
 
 Performance benchmarks are not easy to execute. Each tool has nuances, and the testing environments must aim to provide a level playing field for all tools. We have tried our best to be transparent about the setup and configurations used in this performance benchmark. We are open to receiving feedback from the community on what can be done better. Please feel free to create issues in the following repo.
 
@@ -35,7 +30,7 @@ We will go through how we have created the environment for benchmarking the diff
 For any log management tool to be efficient, the following three factors are very important.
 
 - **Ingestion**<br></br>
-  Distributed cloud-native applications can generate logs at a humungous scale. Log management tools should be efficient at ingesting log data at scale.
+  Distributed cloud-native applications can generate logs at a humungous scale. [Log management tools](https://signoz.io/blog/open-source-log-management/) should be efficient at ingesting log data at scale.
 
 - **Query**<br></br>
   Logs help in troubleshooting, and troubleshooting should be fast. The end-user experience depends on how fast a user can query relevant logs.
@@ -48,7 +43,7 @@ For any log management tool to be efficient, the following three factors are ver
 - **For ingestion**, we found SigNoz to be **2.5x faster** than ELK and consumed **50% less resources**.
 - For querying benchmarks, we tested out different types of commonly used queries. While ELK was better at performing queries like COUNT, SigNoz is **13x faster than ELK** for **aggregate queries**.
 - **Storage** used by SigNoz for the same amount of logs is about **half of what ELK uses.**
-- Loki doesn’t perform well if you want to index and query high cardinality data. In our setup for Loki we were not able to push it to ingest high cardinality labels/indexes.
+- Loki doesn’t perform well if you want to index and query [high cardinality data](https://signoz.io/blog/high-cardinality-data/). In our setup for Loki we were not able to push it to ingest high cardinality labels/indexes.
 
 We saw Loki team has [recently shared](https://twitter.com/sukhanisandeep/status/1615243908241588224) some improvements in querying speed, but this benchmark is not updated based on this update and we have not verified if it would help in high cardinality data. If anyone in the community has been able to get good performance for high cardinality data, we would love to learn more.
 
@@ -99,9 +94,9 @@ SigNoz cluster architecture for the performance benchmark looks as the following
 </figure>
 
 
-The three VMs are generating logs and sending it to signoz-otel-collector using OTLP. The reason we are using OTEL collectors on the receiver side instead of directly writing to ClickHouse from the generator VMs is that the OTEL collectors running in the generator VM's may or may not be the distribution from SigNoz.
+The three VMs are generating logs and sending it to signoz-[OTel](https://signoz.io/blog/what-is-opentelemetry/)-collector using OTLP. The reason we are using OTEL collectors on the receiver side instead of directly writing to ClickHouse from the generator VMs is that the OTEL collectors running in the generator VM's may or may not be the distribution from SigNoz.
 
-In our otel collector configuration, we have extracted all fields, and we have converted all the fields from interesting fields to selected fields in the UI, which means they all are indexed.
+In our [otel collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) configuration, we have extracted all fields, and we have converted all the fields from interesting fields to selected fields in the UI, which means they all are indexed.
 
 ## Preparing Elasticsearch
 
@@ -289,9 +284,9 @@ We chose different types of queries to compare.
 | Get logs corresponding to a trace_id (**log corresponding to high cardinality field**)             | 0.137s | 0.001s        | -    |
 | Get first 100 logs with method GET (**logs based on filters**)                                     | 0.20s  | 0.014s        | -    |
 
-At SigNoz, we believe that observability is fundamentally a data analytics problems and a lot of querying esp. for logs happen around aggregation and slicing and dicing of data.
+At [SigNoz](https://signoz.io/docs/introduction/), we believe that observability is fundamentally a data analytics problems and a lot of querying esp. for logs happen around aggregation and slicing and dicing of data.
 
-Companies like Uber have found that in production environment, more than <a href = "https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" >80% of queries</a> are aggregation queries, such as terms, histograms and percentile aggregations.
+Companies like Uber have found that in production environment, more than <a href = "https://www.uber.com/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" >80% of queries</a> are aggregation queries, such as terms, histograms and percentile aggregations.
 
 Hence, we think that fast aggregation queries will greatly improve the user querying experience in SigNoz compared to the ELK stack.
 

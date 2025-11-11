@@ -1,0 +1,326 @@
+---
+date: 2025-08-19
+id: configure
+tags : [SigNoz Cloud, Self-Host]
+title: ECS Serverless Collection Agent - Configure
+description: Configure your sidecar service and set up application data collection for ECS Serverless Infrastructure
+---
+
+This guide explains how to configure your ECS sidecar service, verify data flow, and set up application data collection.
+
+## Prerequisites
+
+- Complete the [installation steps](/docs/collection-agents/ecs/sidecar/install/)
+- Sidecar container running in your ECS tasks
+- Access to SigNoz Cloud or self-hosted instance
+
+## Verify Data Collection
+
+Log into your SigNoz instance and check that infrastructure data is being received. You should see ECS metrics and logs in the relevant sections.
+
+To visualize ECS data, import pre-built dashboards:
+
+- [container-metrics.json](https://github.com/SigNoz/dashboards/raw/main/ecs-infra-metrics/container-metrics.json)
+- [hostmetrics.json](https://github.com/SigNoz/dashboards/raw/main/hostmetrics/hostmetrics.json)
+
+Import these in the **Dashboards** section of SigNoz.
+
+## Send Data from Applications
+
+To send data from your ECS applications to SigNoz via the sidecar:
+
+### 1. Instrument Your Application
+
+Add OpenTelemetry instrumentation to your application. See [SigNoz instrumentation docs](https://signoz.io/docs/instrumentation/).
+
+### 2. Configure OTLP Endpoint
+
+Set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable in your application container to point to the sidecar.
+
+<Tabs>
+<TabItem value="bridge" label="Bridge" default>
+
+```json
+{
+    ...
+    "containerDefinitions": [
+        {
+            "name": "<your-container-name>",
+            "environment": [
+                {
+                    "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
+                    "value": "http://signoz-collector:4317"
+                },
+                {
+                    "name": "OTEL_RESOURCE_ATTRIBUTES",
+                    "value": "service.name=<your-service-name>"
+                }
+            ],
+            "links": [
+                "signoz-collector"
+            ],
+            ...
+        }
+    ]
+}
+```
+
+</TabItem>
+<TabItem value="awsvpc" label="AWS VPC">
+
+```json
+{
+    ...
+    "containerDefinitions": [
+        {
+            "name": "<your-container-name>",
+            "environment": [
+                {
+                    "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
+                    "value": "http://localhost:4317"
+                },
+                {
+                    "name": "OTEL_RESOURCE_ATTRIBUTES",
+                    "value": "service.name=<your-service-name>"
+                }
+            ],
+            ...
+        }
+      ]
+    }
+    ```
+
+</TabItem>
+</Tabs>
+
+### 3. Add Service Name of your Application
+
+To add the service name of your application, you need to set the `OTEL_RESOURCE_ATTRIBUTES` environment variable of the application container to `service.name=<your-service-name>`.
+
+In your task definition, you can add the following lines:
+
+```yaml
+ContainerDefinitions:
+    - Name: <your-container-name>
+      
+      Environment:
+        - Name: OTEL_RESOURCE_ATTRIBUTES
+          Value: service.name=<your-service-name>
+```
+
+In case of JSON task definition, you can add the following lines:
+
+```json
+"containerDefinitions": [
+    {
+        "name": "<your-container-name>",
+        
+        "environment": [
+            {
+                "name": "OTEL_RESOURCE_ATTRIBUTES",
+                "value": "service.name=<your-service-name>"
+            }
+        ],
+        
+    }
+],
+```
+
+## Send Logs Data from Applications
+
+In this section, we will see how to send logs data from applications deployed in ECS to SigNoz using the sidecar container that we deployed in the previous section.
+
+### 1. Configure Log Router
+
+In your application code, you need to configure the Fluent Bit log router to your application to the sidecar otel-collector container.
+
+```json
+{
+    ...
+    {
+        "name": "signoz-log-router",
+        "image": "906394416424.dkr.ecr.us-west-2.amazonaws.com/aws-for-fluent-bit:stable",
+        "cpu": 250,
+        "memory": 512,
+        "essential": true,
+        "dependsOn": [
+            {
+                "containerName": "signoz-collector",
+                "condition": "HEALTHY"
+            }
+        ],
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-create-group": "True",
+                "awslogs-group": "/ecs/ecs-signoz-log-router",
+                "awslogs-region": "us-east-1",
+                "awslogs-stream-prefix": "ecs"
+            }
+        },
+        "firelensConfiguration": {
+            "type": "fluentbit",
+            "options": {
+                "enable-ecs-log-metadata": "true"
+            }
+        }
+    }
+}
+```
+
+<Admonition type="info">
+When collecting logs from multiple applications, it is recommended to use `<application-name>-log-router` pattern instead of `signoz-log-router` for container name and `awslogs-group`. It helps to separate log router of different application.
+</Admonition>
+
+### 2. Send Logs to Sidecar Container
+
+In your application task definition, you need to use `awsfirelens` log driver to send logs to the sidecar otel-collector container via Fluent Bit log router.
+
+<Tabs>
+<TabItem value="bridge" label="Bridge" default>
+
+```json
+{
+    ...
+    "containerDefinitions": [
+        {
+            "name": "<your-container-name>",
+            "dependsOn": [
+                {
+                    "containerName": "signoz-log-router",
+                    "condition": "START"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awsfirelens",
+                "options": {
+                    "Name": "forward",
+                    "Match": "*",
+                    "Host": "signoz-collector",
+                    "Port": "8006",
+                    "tls": "off",
+                    "tls.verify": "off"
+                }
+            },
+            "links": [
+                "signoz-collector"
+            ],
+            ...
+        }
+    ]
+}
+```
+
+</TabItem>
+<TabItem value="awsvpc" label="AWS VPC">
+
+```json
+{
+    ...
+    "containerDefinitions": [
+        {
+            "name": "<your-container-name>",
+            "dependsOn": [
+                {
+                    "containerName": "signoz-log-router",
+                    "condition": "START"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awsfirelens",
+                "options": {
+                    "Name": "forward",
+                    "Match": "*",
+                    "Host": "localhost",
+                    "Port": "8006",
+                    "tls": "off",
+                    "tls.verify": "off"
+                }
+            }
+            ...
+        }
+    ]
+}
+```
+
+</TabItem>
+</Tabs>
+
+
+## Customize Collection Settings
+
+### Modify Collection Intervals
+
+You can adjust how frequently the sidecar container collects data by modifying the configuration in AWS Parameter Store:
+
+1. Navigate to **AWS Systems Manager > Parameter Store**
+2. Find the `/ecs/signoz/otelcol-sidecar.yaml` parameter
+3. Edit the parameter value
+4. Modify collection intervals in the configuration:
+
+```yaml
+receivers:
+  awsecscontainermetrics:
+    collection_interval: 20s  # Adjust this value
+  
+  hostmetrics:
+    collection_interval: 30s  # Adjust this value
+```
+
+5. Save the parameter
+6. Restart your ECS tasks to apply the new configuration
+
+### Filter Specific Metrics
+
+To collect only specific metrics, you can modify the configuration to include only the scrapers you need:
+
+```yaml
+receivers:
+  hostmetrics:
+    scrapers:
+      cpu:        # Only CPU metrics
+      memory:     # Only memory metrics
+      # Comment out or remove scrapers you don't need
+      # disk:
+      # network:
+      # filesystem:
+```
+
+### Customize Log Collection
+
+To customize log collection, you can modify the filelog receiver configuration:
+
+```yaml
+receivers:
+  filelog:
+    include: [/var/lib/docker/containers/*/*-json.log]
+    start_at: end
+    include_file_name: false
+    include_file_path: true
+    operators:
+    - id: container-parser
+      type: container
+    # Add custom log parsing operators here
+```
+
+## Troubleshooting Configuration
+
+### Common Issues
+
+**No Data in SigNoz:**
+- Verify the sidecar container is running and healthy
+- Check CloudWatch logs for the sidecar container
+- Ensure the OTLP endpoint is correctly configured
+- Verify IAM permissions for Parameter Store access
+
+**Application Traces Not Appearing:**
+- Confirm the `OTEL_EXPORTER_OTLP_ENDPOINT` is set correctly
+- Check that the application is instrumented with OpenTelemetry
+- Verify the sidecar container ports are accessible
+- Ensure the service name is properly configured
+
+**Logs Not Being Collected:**
+- Verify the log router container is running
+- Check the `awsfirelens` log driver configuration
+- Ensure the sidecar container is accessible on port 8006
+- Verify the log router has proper dependencies configured

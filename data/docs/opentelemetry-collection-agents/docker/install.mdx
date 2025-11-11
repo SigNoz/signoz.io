@@ -1,0 +1,201 @@
+---
+title: OpenTelemetry Collector for Docker - Install
+id: install
+tags : [SigNoz Cloud, Self-Host]
+description: Step-by-step guide to install OpenTelemetry Collector for Docker environments
+---
+
+## Prerequisites
+
+Before installing the OpenTelemetry Collector, ensure you have:
+
+- Docker Engine 20.10+ installed and running
+- Administrative access to the Docker host
+
+## Installation
+
+### Step 1: Create Configuration Directory
+
+Creates a dedicated directory to organize the OpenTelemetry Collector configuration file.
+
+```bash
+mkdir -p ~/opentelemetry-collector
+cd ~/opentelemetry-collector
+```
+
+### Step 2: Create Collector Configuration
+
+Defines how the OpenTelemetry Collector receives, processes, and exports telemetry data to SigNoz.
+
+Create `config.yaml`:
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "ingest.<YOUR_REGION>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<YOUR_INGESTION_KEY>"
+  debug:
+    verbosity: normal
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+**Configuration Steps:**
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "http://<SIGNOZ_HOST>:4317"
+    tls:
+      insecure: true
+  debug:
+    verbosity: normal
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+**Configuration Steps:**
+- Replace `<SIGNOZ_HOST>` with your SigNoz instance hostname or IP address
+
+</TabItem>
+</Tabs>
+
+### Step 3: Run the OpenTelemetry Collector
+
+Starts the OpenTelemetry Collector as a Docker container to begin receiving and forwarding telemetry data to SigNoz.
+
+```bash
+docker run --name opentelemetry-collector \
+  --restart unless-stopped \
+  --detach \
+  -p 4317:4317 -p 4318:4318 \
+  -v "$(pwd)/config.yaml":/etc/otelcol-contrib/config.yaml \
+  otel/opentelemetry-collector-contrib:0.130.1
+```
+
+## Verification
+
+### Check Collector Status
+
+Verifies that the OpenTelemetry Collector container is running and operational.
+
+Check if container is running
+```bash
+docker ps | grep opentelemetry-collector
+```
+
+Check collector logs
+```bash
+docker logs opentelemetry-collector
+```
+
+You will see the OpenTelemetry Collector logs indicating successful startup and readiness to process data.
+
+## Send Docker data
+
+Once you have your collector up and running, you can see your container logs, metrics and application traces by following the below links:
+- [Send Docker logs](https://signoz.io/docs/userguide/collect_docker_logs/)
+- [Send Containers metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/)
+- [Send Application traces](https://signoz.io/docs/instrumentation/)
+
+## Troubleshooting
+
+### Container Name Already in Use
+
+If you get an error about the container name already being in use:
+
+```bash
+# Check existing containers
+docker ps -a | grep opentelemetry-collector
+
+# Stop and remove the existing container
+docker stop opentelemetry-collector
+docker rm opentelemetry-collector
+
+# Then re-run the installation command
+```
+
+### Configuration Errors
+
+If the collector fails to start, check the logs:
+
+```bash
+docker logs opentelemetry-collector
+```
+
+Common issues:
+- Invalid YAML syntax in config file
+- Missing or incorrect SigNoz credentials
+- Port conflicts with other services
+
+The OpenTelemetry Collector is now running and ready to receive telemetry data on ports 4317 (gRPC) and 4318 (HTTP).

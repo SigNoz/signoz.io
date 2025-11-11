@@ -1,0 +1,89 @@
+---
+date: 2025-10-22
+title: Monitoring Kubernetes Clusters in EKS Fargate using Opentelemetry Collection Agents
+tags: [SigNoz Cloud, Self-Host]
+id: serverless-get-started
+description: Monitor Kubernetes clusters running on EKS Fargate (serverless) using the OpenTelemetry k8s-infra collection agent and sidecar collectors to send metrics, logs, and traces to SigNoz
+---
+
+This guide explains how to monitor serverless Kubernetes workloads on Amazon EKS Fargate using OpenTelemetry. You'll deploy an OpenTelemetry Collector as a sidecar to collect OTLP telemetry from your applications along with `K8s-Infra` Collection Agent for cluster-level telemetry collection and send it to SigNoz for end-to-end observability.
+
+## What is Serverless Kubernetes Monitoring with OpenTelemetry?
+
+EKS Fargate runs Kubernetes Pods on serverless compute. Since there is no node access, DaemonSets and host mounts are not supported. To collect telemetry, an OpenTelemetry Collector runs as a sidecar inside each Pod you want to observe. Your app sends traces, metrics, and logs to the local sidecar via OTLP; the sidecar then forwards data to your SigNoz backend.
+
+To learn how Fargate differs from node-based setups and what the sidecar collects, see the [K8s Serverless Overview](/docs/collection-agents/k8s/serverless/overview).
+
+## Prerequisites
+
+- A SigNoz backend (SigNoz Cloud or self-hosted) to receive OpenTelemetry data
+- An EKS cluster with Fargate profiles configured
+- kubectl access to update your Deployment/Pod specs
+- A Kubernetes ServiceAccount mapped to your workloads with sufficient RBAC permissions
+
+## How OpenTelemetry Monitoring Works on Fargate
+
+On EKS Fargate, the OpenTelemetry Collector runs as a sidecar in your Pods:
+
+1. Install the cluster-level components using `k8s-infra` (with DaemonSet disabled for Fargate)
+2. Add an OpenTelemetry Collector sidecar to your application Pods
+3. Your applications emit OTLP telemetry to the sidecar (localhost)
+4. The sidecar enriches data with Kubernetes metadata and forwards it to SigNoz via OTLP
+5. Explore metrics, logs, and traces in SigNoz
+
+## Step 1: Install Cluster Components (k8s-infra)
+
+Install the `k8s-infra` Helm chart to enable cluster-level collection (e.g., Kubernetes objects, events). For Fargate, disable the DaemonSet `otelAgent` and keep `otelDeployment` if you need cluster metrics/events.
+
+Follow the instructions in the [K8s-Infra Installation Guide](/docs/collection-agents/k8s/k8s-infra/install-k8s-infra).
+
+## Step 2: Add the OpenTelemetry Sidecar to Your Pods
+
+Deploy an OpenTelemetry Collector as a sidecar in each Pod that you want to monitor. The sidecar provides local OTLP endpoints and exports telemetry to SigNoz.
+
+Follow the complete configuration in the [K8s Serverless (EKS Fargate) - Install](/docs/collection-agents/k8s/serverless/install) guide.
+
+## Step 3: What Telemetry Can You Collect?
+
+Once deployed, the sidecar-centric approach on Fargate supports:
+
+- Application traces, metrics, and logs via OTLP
+- Kubelet metrics via API-server proxy using `kubeletstats` (when available)
+- Kubernetes metadata enrichment via `k8sattributes`
+
+For details and examples, see the [Install](/docs/collection-agents/k8s/serverless/install) and [Configure](/docs/collection-agents/k8s/serverless/configure) guides.
+
+## Step 4: Configure Options and Best Practices
+
+The sidecar and cluster setup can be tuned for your needs:
+
+- Log collection on Fargate via AWS-managed log router (Fluent Bit) → ingest using Collector receivers like `awscloudwatchreceiver`
+- Trace sampling and batching to manage volume and cost
+- Resource detection and Kubernetes metadata enrichment
+- Performance tuning: batch sizes, timeouts, resource limits
+
+See the [K8s Serverless (EKS Fargate) - Configure](/docs/collection-agents/k8s/serverless/configure) guide for step-by-step configurations, including CloudWatch ingestion.
+
+## Step 5: Multi-Environment and Multi-Cluster Setups
+
+You can send telemetry from multiple EKS Fargate environments to a single SigNoz backend:
+
+1. Deploy the sidecar in each environment
+2. Set unique `k8s.cluster.name` values per environment
+3. Point all sidecars to the same SigNoz OTLP endpoint
+
+Refer to the [K8s-Infra Installation Guide](/docs/collection-agents/k8s/k8s-infra/install-k8s-infra) for multi-cluster considerations.
+
+## Step 6: Visualize Telemetry in SigNoz
+
+After sending data to SigNoz, you can:
+
+- Filter by `k8s.cluster.name`, `k8s.namespace.name`, and other Kubernetes attributes
+- Build dashboards for per-environment, per-namespace, or per-service views
+- Investigate traces and logs side-by-side for faster root cause analysis
+
+## Next Steps
+
+1. [K8s Serverless Overview](/docs/collection-agents/k8s/serverless/overview)
+2. [Install the sidecar on EKS Fargate](/docs/collection-agents/k8s/serverless/install)
+3. [Configure Fargate log routing and Collector receivers](/docs/collection-agents/k8s/serverless/configure)

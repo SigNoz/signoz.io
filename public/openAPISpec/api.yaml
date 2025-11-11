@@ -35,6 +35,8 @@ tags:
     x-displayName: The Dashboards Model
     description: |
       <SchemaDefinition schemaRef="#/components/schemas/Dashboard" />
+  - name: fields
+    description: Fields of Logs, Traces
 x-tagGroups:
   - name: General
     tags:
@@ -45,6 +47,84 @@ x-tagGroups:
       - alerts_model
       - dashboards_model
 paths:
+  '/api/v1/logs/fields':
+    post:
+      tags:
+        - fields
+      summary: Convert a log field to a selected field
+      description: Convert a log field to a selected field
+      operationId: updateLogField
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '400':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/Field'
+    get:
+      tags:
+        - fields
+      summary: Get all log fields
+      description: ''
+      operationId: getLogFields
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+  '/api/v2/traces/fields':
+    post:
+      tags:
+        - fields
+      summary: Convert a trace field to a selected field
+      description: Convert a trace field to a selected field
+      operationId: updateTraceField
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '400':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/Field'
+    get:
+      tags:
+        - fields
+      summary: Get all trace fields
+      description: ''
+      operationId: getTraceFields
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
   '/api/v1/rules':
     post:
       tags:
@@ -370,9 +450,21 @@ paths:
         '500':
           description: Internal server error
 
-
 components:
   schemas:
+    Field:
+      type: object
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+        type:
+          type: string
+          enum: ["static"]
+        selected:
+          type: boolean
+          enum: [true]
     ApiResponse:
       type: object
       properties:
@@ -2248,6 +2340,16 @@ components:
                 type: string
 
   requestBodies:
+    Field:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - description: Field object that needs to be added to the system
+                title: Field
+              - $ref: '#/components/schemas/Field'
+      description: Field object that needs to be added to the system
+      required: true
     Alert:
       content:
         application/json:
