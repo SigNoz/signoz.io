@@ -164,7 +164,6 @@ export async function generateStaticParams() {
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const path = params.slug.join('/')
-  console.log(`Fetching case study content for path: ${path}`)
 
   // Fetch content from Strapi with error handling
   let content: MDXContent

@@ -36,8 +36,6 @@ export default function FAQsClient({ faqs }: FAQsClientProps) {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
   }
 
-  console.log('filteredFaqs', filteredFaqs)
-
   return (
     <div className="relative min-h-screen w-full bg-signoz_ink-500">
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />

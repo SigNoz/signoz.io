@@ -175,7 +175,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   }
 
   const path = params.slug.join('/')
-  console.log(`Fetching FAQ content for path: ${path}`)
 
   const isProduction = process.env.VERCEL_ENV === 'production'
 
@@ -221,8 +220,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     console.error('Error compiling MDX:', error)
     notFound()
   }
-
-  console.log('logging content tags', content.tags)
 
   // Generate structured data
   const structuredData = generateStructuredData('faqs', content)

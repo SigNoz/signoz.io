@@ -91,7 +91,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       deploymentStatus,
       true
     )) as MDXContentApiResponse
-    console.log('FAQs response:', faqsResponse)
+
     faqRoutes = faqsResponse.data.map((faq) => ({
       url: `${siteUrl}/faqs${faq.path}/`,
       lastModified: faq.date || faq.updatedAt || faq.publishedAt,
@@ -109,7 +109,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       deploymentStatus,
       true
     )) as MDXContentApiResponse
-    console.log('Case studies response:', caseStudiesResponse)
+
     caseStudyRoutes = caseStudiesResponse.data.map((caseStudy) => ({
       url: `${siteUrl}/case-study${caseStudy.path}/`,
       changeFrequency: mapChangeFrequency('weekly'),
