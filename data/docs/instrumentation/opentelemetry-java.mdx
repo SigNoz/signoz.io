@@ -325,16 +325,94 @@ Once you have set up OTel Collector agent, you can proceed with OpenTelemetry ja
    wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
    ```
 
-2. Run your application<br></br>
-   
-   ```bash
-   java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <myapp>.jar
+2. Run your application in Kubernetes
+
+   For Kubernetes deployments, you need to containerize your Java application with the OpenTelemetry Java agent.
+
+   **Step 2.1: Create a Dockerfile for your Java application**
+
+   Create a `Dockerfile` in your application's root directory. This `Dockerfile` will:
+   - Build your Java application.
+   - Download the OpenTelemetry Java agent.
+   - Package both into a Docker image.
+
+   ```dockerfile
+   # Use a base image with Java installed
+   FROM openjdk:17-jdk-slim
+
+   # Set working directory
+   WORKDIR /app
+
+   # Copy your application's JAR file
+   COPY target/<your-app>.jar app.jar
+
+   # Download the OpenTelemetry Java agent
+   ARG OTEL_JAVAAGENT_VERSION=1.32.0 # Use the latest stable version
+   RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
+
+   # Command to run the application with the OpenTelemetry agent
+   ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
    ```
 
-   - `<myapp>` is the name of your application jar file
-   - In case you download `opentelemetry-javaagent.jar` file in different directory than that of the project, replace `$PWD` with the path of the otel jar file.
+   - Replace `<your-app>.jar` with the actual name of your application's JAR file.
+   - Ensure `OTEL_JAVAAGENT_VERSION` is set to the latest stable version.
 
-3. Make sure to dockerise your application along with OpenTelemetry instrumentation.
+   **Step 2.2: Build and push your Docker image**
+
+   Build your Docker image and push it to a container registry (e.g., Docker Hub, GCR, ECR).
+
+   ```bash
+   docker build -t <your-registry>/<your-app-image-name>:<tag> .
+   docker push <your-registry>/<your-app-image-name>:<tag>
+   ```
+
+   **Step 2.3: Deploy your application to Kubernetes**
+
+   Create a Kubernetes Deployment YAML file (e.g., `java-app-deployment.yaml`) to deploy your containerized application. This example assumes you have an OpenTelemetry Collector running as a `Service` named `otel-collector` in the `default` namespace, listening on port `4317` for OTLP/gRPC.
+
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: <your-java-app-name>
+     labels:
+       app: <your-java-app-name>
+   spec:
+     replicas: 1
+     selector:
+       matchLabels:
+         app: <your-java-app-name>
+     template:
+       metadata:
+         labels:
+           app: <your-java-app-name>
+       spec:
+         containers:
+         - name: <your-java-app-name>
+           image: <your-registry>/<your-app-image-name>:<tag> # Replace with your image
+           ports:
+           - containerPort: 8080 # Adjust to your application's port
+           env:
+           - name: OTEL_RESOURCE_ATTRIBUTES
+             value: service.name=<your-service-name> # Name of your service
+           - name: OTEL_EXPORTER_OTLP_ENDPOINT
+             value: http://otel-collector:4317 # Point to your OTel Collector service
+           - name: OTEL_EXPORTER_OTLP_PROTOCOL
+             value: grpc
+           # Optional: If your application needs to listen on a specific port
+           # - name: SERVER_PORT
+           #   value: "8080"
+   ```
+
+   - Replace `<your-java-app-name>`, `<your-registry>/<your-app-image-name>:<tag>`, and `<your-service-name>` with your specific values.
+   - Adjust `containerPort` if your application listens on a different port.
+   - The `OTEL_EXPORTER_OTLP_ENDPOINT` assumes your OpenTelemetry Collector is accessible via `http://otel-collector:4317`. Adjust this if your collector service name or port is different.
+
+   Apply the deployment:
+
+   ```bash
+   kubectl apply -f java-app-deployment.yaml
+   ```
 
 You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
