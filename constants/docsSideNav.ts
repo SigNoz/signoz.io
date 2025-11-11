@@ -2189,17 +2189,17 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/sending-logs',
+        route: '/docs/frontend-monitoring/sending-logs-with-opentelemetry',
         label: 'Sending Logs',
       },
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/sending-traces',
+        route: '/docs/frontend-monitoring/sending-traces-with-opentelemetry',
         label: 'Sending Traces',
       },
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/sending-metrics',
+        route: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry',
         label: 'Sending Metrics',
       },
       {
