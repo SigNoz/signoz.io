@@ -1793,6 +1793,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/frontend-monitoring',
+            label: 'Frontend Monitoring',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/google-gemini-dashboard',
             label: 'Google Gemini',
           },
@@ -2198,9 +2203,22 @@ const docsSideNav = [
         label: 'Sending Metrics',
       },
       {
-        type: 'doc',
+        type: 'category',
+        isExpanded: false,
         route: '/docs/frontend-monitoring/opentelemetry-web-vitals',
         label: 'Web Vitals',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/web-vitals-with-metrics',
+            label: 'Web Vitals with Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/frontend-monitoring/web-vitals-with-traces',
+            label: 'Web Vitals with Traces',
+          },
+        ],
       },
       {
         type: 'doc',

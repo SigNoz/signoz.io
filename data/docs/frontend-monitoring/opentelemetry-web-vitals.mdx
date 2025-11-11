@@ -1,9 +1,12 @@
 ---
-date: 2024-08-02
-tags: [SigNoz Cloud]
+date: 2025-11-05
+tags: [SigNoz Cloud, Self-Host]
 title: Web Vitals Monitoring
 id: web-vitals
+description: Choose between sending Core Web Vitals as metrics or traces to SigNoz using OpenTelemetry.
 ---
+
+import WebVitalsGrid from '@/components/FrontendMonitoring/WebVitalsGrid.tsx'
 
 This documentation provides a step-by-step guide to setting up web vitals monitoring using SigNoz and OpenTelemetry.
 In short, you’ll capture Core Web Vitals from real users—a RUM (Real User Monitoring)–style approach—so you can analyze field performance in SigNoz.
@@ -13,251 +16,36 @@ In short, you’ll capture Core Web Vitals from real users—a RUM (Real User Mo
 Web vitals are essential metrics to measure the user experience on your website. SigNoz allows you to monitor these vitals seamlessly using OpenTelemetry. The key web vitals are:
 
 - Largest Contentful Paint (LCP)
-- First Input Delay (FID) / Interaction to Next Paint (INP)
+- Interaction to Next Paint (INP)
 - Cumulative Layout Shift (CLS)
 - Time to First Byte (TTFB)
-- Total Blocking Time (TBT)
+- First Contentful Paint (FCP)
 
-## Prerequisites
+## Metrics vs Traces: Choosing the Right Approach
 
-- [SigNoz Cloud](https://signoz.io/teams/) account
-- A web application where you want to monitor web vitals
+Web vitals can be exported as either **metrics** or **traces** in OpenTelemetry, and the choice depends on your specific use case:
 
-## Setup
+### Exporting as Metrics
 
-### Step 1: Setup OTel Collector
+**Best for larger scale deployments where sampling might be required:**
 
-Install Otel collector binary using [these instructions](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+- Provides aggregated statistical data (percentiles, histograms)
+- More efficient for high-volume applications
+- Better for trend analysis and alerting
+- Easier to implement sampling strategies
+- Ideal when you need to monitor overall performance trends across your user base
 
-### Step 2: Install dependencies
+### Exporting as Traces
 
-```sh
-npm install web-vitals
-npm install @opentelemetry/api
-npm install @opentelemetry/sdk-trace-web
-npm install @opentelemetry/auto-instrumentations-web
-npm install @opentelemetry/exporter-trace-otlp-http
-npm install @opentelemetry/exporter-metrics-otlp-http
-npm install @opentelemetry/sdk-metrics
-npm install @opentelemetry/resources
-npm install @opentelemetry/semantic-conventions
-```
+**Best for simple, straightforward cases:**
 
-### Step 3: Create an instrumentation file
+- Provides detailed, individual performance data for each page load
+- Better for debugging specific user issues
+- Easier to correlate with other trace data
+- More suitable for development and debugging scenarios
+- Ideal when you need granular visibility into individual user experiences
+- Enables easy addition of custom attributes for RUM (Real User Monitoring) features like browser information, user ID, device type, and other contextual data
 
-This file (e.g., `instrument.ts`) is needed to setup the `MeterProvider` which is used to create custom metrics.
+Choose the approach that aligns with your monitoring goals and infrastructure requirements. For production environments with high traffic, histogram metrics are often the better choice, while traces provide more detailed insights for development and troubleshooting scenarios.
 
-```ts
-import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http'
-import { resourceFromAttributes } from '@opentelemetry/resources'
-import { metrics } from '@opentelemetry/api'
-
-// Define your resource, e.g., service name, environment.
-const resource = resourceFromAttributes({
-  'service.name': 'yourServiceName',
-})
-
-// Create a metric reader with OTLP exporter configured to send metrics to a local collector.
-const metricReader = new PeriodicExportingMetricReader({
-  exporter: new OTLPMetricExporter({
-    url: 'http://127.0.0.1:4318/v1/metrics',
-  }),
-  exportIntervalMillis: 10000, // Export metrics every 10 seconds.
-})
-
-// Initialize a MeterProvider with the above configurations.
-const myServiceMeterProvider = new MeterProvider({
-  resource,
-  readers: [metricReader],
-})
-
-// Set the initialized MeterProvider as global to enable metric collection across the app.
-metrics.setGlobalMeterProvider(myServiceMeterProvider)
-```
-
-### Step 4: Capture Web Vitals
-
-Use the web-vitals library to capture key performance metrics like CLS, FID, LCP, TTFB, and FCP.
-These metrics are captured through callback functions that you define.
-
-<Tabs groupId="web-vitals-version">
-  <TabItem value="latest" label="Latest Web Vitals (v5+)" default>
-    ```ts
-    import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
-
-    function yourCustomCallback(metric) {
-      // Send the metric to your analytics server or perform any custom logic
-    }
-
-    onCLS(yourCustomCallback);
-    onINP(yourCustomCallback);
-    onLCP(yourCustomCallback);
-    onTTFB(yourCustomCallback);
-    onFCP(yourCustomCallback);
-
-    ```
-
-  </TabItem>
-  <TabItem value="legacy" label="Legacy Web Vitals (< v5)">
-    ```ts
-    import { onCLS, onFCP, onFID, onLCP, onTTFB } from 'web-vitals';
-
-    function yourCustomCallback(metric) {
-      // Send the metric to your analytics server or perform any custom logic
-    }
-
-    onCLS(yourCustomCallback);
-    onFID(yourCustomCallback);
-    onLCP(yourCustomCallback);
-    onTTFB(yourCustomCallback);
-    onFCP(yourCustomCallback);
-
-    ```
-
-  </TabItem>
-</Tabs>
-
-### Step 5: Export Web Vitals
-
-Using OpenTelemetry, create Observable Async Gauges to periodically observe and export these metrics.
-This ensures that the captured web vitals are correctly recorded and sent to SigNoz for monitoring.
-
-<Tabs groupId="web-vitals-export">
-  <TabItem value="latest" label="Latest Web Vitals (v5+)" default>
-  ```ts
-    import { metrics } from '@opentelemetry/api';
-    import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
-
-    const meter = metrics.getMeter('web-vitals');
-    const lcp = meter.createHistogram('lcp');
-    const cls = meter.createObservableGauge('cls');
-    const inp = meter.createHistogram('inp');
-    const ttfb = meter.createHistogram('ttfb');
-    const fcp = meter.createHistogram('fcp');
-
-    function sendToAnalytics(metric) {
-      switch (metric.name) {
-        case 'LCP': {
-          lcp.record(metric.value);
-          break;
-        }
-        case 'CLS': {
-          cls.addCallback((result) => {
-            result.observe(metric.value);
-          });
-          break;
-        }
-        case 'INP': {
-          inp.record(metric.value);
-          break;
-        }
-        case 'TTFB': {
-          ttfb.record(metric.value);
-          break;
-        }
-        case 'FCP': {
-          fcp.record(metric.value);
-          break;
-        }
-        default: {
-          console.log('unexpected metric name');
-        }
-      }
-    }
-
-    onCLS(sendToAnalytics);
-    onINP(sendToAnalytics);
-    onLCP(sendToAnalytics);
-    onTTFB(sendToAnalytics);
-    onFCP(sendToAnalytics);
-
-````
-</TabItem>
-<TabItem value="legacy" label="Legacy Web Vitals (< v5)">
-```ts
-  import { metrics } from '@opentelemetry/api';
-  import { onCLS, onFCP, onFID, onLCP, onTTFB } from 'web-vitals';
-
-  const meter = metrics.getMeter('web-vitals');
-  const lcp = meter.createHistogram('lcp');
-  const cls = meter.createObservableGauge('cls');
-  const fid = meter.createHistogram('fid');
-  const ttfb = meter.createHistogram('ttfb');
-  const fcp = meter.createHistogram('fcp');
-
-  function sendToAnalytics(metric) {
-    switch (metric.name) {
-      case 'LCP': {
-        lcp.record(metric.value);
-        break;
-      }
-      case 'CLS': {
-        cls.addCallback((result) => {
-          result.observe(metric.value);
-        })
-        break;
-      }
-      case 'FID': {
-        fid.record(metric.value);
-        break;
-      }
-      case 'TTFB': {
-        ttfb.record(metric.value);
-        break;
-      }
-      case 'FCP': {
-        fcp.record(metric.value);
-        break;
-      }
-      default: {
-        console.log('unexpected metric name');
-      }
-    }
-  }
-
-  onCLS(sendToAnalytics);
-  onFID(sendToAnalytics);
-  onLCP(sendToAnalytics);
-  onTTFB(sendToAnalytics);
-  onFCP(sendToAnalytics);
-````
-
-  </TabItem>
-</Tabs>
-
-This code captures web vitals (LCP, CLS, FID, TTFB, FCP) using the web-vitals library and logs these metrics,
-setting up observable gauges with OpenTelemetry to record the values for each metric. It defines a callback function,
-sendToAnalytics, that processes and observes each metric value, ensuring they are monitored appropriately.
-
-To better understand how this is used, you can check out [this GitHub link](https://github.com/SigNoz/signoz/pull/4579/files#diff-f8c6adf20de182a86841534a8c156a960598635717c63b17a4be45ec8d340193) which shows how web-vitals are used
-for monitoring SigNoz.
-
-### Step 6: Setup Dashboard and alerts
-
-You can create a [custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard) and [set alerts](https://signoz.io/docs/setup-alerts-notification/)
-to monitor your core web-vitals and be notified about anything critical.
-
-<figure data-zoomable align="center">
-  <img
-    className="box-shadowed-image"
-    src="/img/events/launch-week-1/web-vitals.webp"
-    alt="Core Web Vitals Monitoring in SigNoz"
-  />
-  <figcaption>
-    <i>Core Web Vitals Monitoring in SigNoz </i>
-  </figcaption>
-</figure>
-
-One of the cool feature of SigNoz charts is that you can create thresholds in the chart with different color coding. For example, in the below graph there are three thresholds for `good`, `needs improvement`, and `critical` level.
-
-<figure data-zoomable align="center">
-  <img
-    className="box-shadowed-image"
-    src="/img/events/launch-week-1/thresholds-chart.webp"
-    alt="Thresholds in SigNoz"
-  />
-  <figcaption>
-    <i>Thresholds provide a visual cue about your application's performance </i>
-  </figcaption>
-</figure>
+<WebVitalsGrid />

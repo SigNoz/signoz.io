@@ -177,6 +177,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Flask Monitoring Dashboard Template',
   },
   {
+    name: 'Frontend Monitoring',
+    href: '/docs/dashboards/dashboard-templates/frontend-monitoring',
+    icon: <Network className="h-7 w-7 text-white" />,
+    clickName: 'Frontend Monitoring Dashboard Template',
+  },
+  {
     name: 'GCP Compute Engine',
     href: 'https://github.com/SigNoz/dashboards/tree/main/gcp/compute-engine',
     icon: <Cloud className="h-7 w-7 text-blue-500" />,
