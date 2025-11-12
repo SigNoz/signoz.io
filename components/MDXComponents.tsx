@@ -38,6 +38,7 @@ import ImageCTA from './ImageCTA/ImageCTA'
 import TrackingLink from './TrackingLink'
 import APMQuickStartOverview from './APM/APMQuickStartOverview'
 import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
+import JavascriptInstrumentationListicle from './APM/JavascriptInstrumentationListicle'
 import MDXButton from './MDXButton/MDXButton'
 import IconCardGrid from './Card/IconCardGrid'
 import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
@@ -105,6 +106,7 @@ export const components: MDXComponents = {
   TrackingLink,
   APMQuickStartOverview,
   APMInstrumentationListicle,
+  JavascriptInstrumentationListicle,
   MDXButton,
   IconCardGrid,
   LogsQuickStartOverview,

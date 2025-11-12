@@ -953,43 +953,21 @@ const docsSideNav = [
             isExpanded: false,
             label: 'Javascript',
             route: '/docs/instrumentation/opentelemetry-javascript',
-            // link: {
-            // type: 'doc',
-            // route: '/docs/instrumentation/opentelemetry-javascript',
-            // title: 'JavaScript',
-            // description: 'Learn how to instrument JavaScript applications with OpenTelemetry',
-            // slug: 'instrumentation/javascript',
-            // },
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-express',
-                label: 'Express',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-nestjs',
-                label: 'NestJS',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-angular',
-                label: 'Angular',
+                route: '/docs/instrumentation/opentelemetry-nodejs',
+                label: 'Node.js',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/opentelemetry-nextjs',
-                label: 'NextJS',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-reactjs',
-                label: 'ReactJS',
+                label: 'Next.js',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/opentelemetry-nuxtjs',
-                label: 'NuxtJS',
+                label: 'Nuxt.js',
               },
             ],
           },
