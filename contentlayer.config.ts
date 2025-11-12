@@ -22,7 +22,6 @@ import comparisonsRelatedArticles from './constants/comparisonsRelatedArticles.j
 import guidesRelatedArticles from './constants/guidesRelatedArticles.json'
 import opentelemetryRelatedArticles from './constants/opentelemetryRelatedArticles.json'
 import allAuthors from './constants/authors.json'
-import faqsRelatedArticles from './constants/faqsRelatedArticles.json'
 
 const isProduction = process.env.NODE_ENV === 'production'
 
