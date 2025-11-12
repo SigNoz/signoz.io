@@ -3015,6 +3015,30 @@ const docsSideNav = [
         ],
       },
       {
+        label: 'From Honeycomb',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-honeycomb-to-signoz',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/data',
+            label: 'Migrating Data',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
+      },
+      {
         label: 'From OpenTelemetry',
         className: 'new-doc',
         type: 'category',
