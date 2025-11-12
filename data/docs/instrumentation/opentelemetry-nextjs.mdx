@@ -27,7 +27,7 @@ Based on your application environment, you can choose the setup below to send tr
 From VMs, there are two ways to send data to SigNoz:
 
 - **Direct to SigNoz Cloud (recommended for beginners):** no extra installs beyond the SDK; you only need the region endpoint and ingestion key.
-- **Optional: install a local OTel Collector binary on the VM:** it listens at `http://localhost:4318`, forwards telemetry to SigNoz, and does not require an ingestion key from the app. Install it with the [OTel Collector binary guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+- **Optional: Install a local OTel Collector binary on the VM:** it listens at `http://localhost:4318`, forwards telemetry to SigNoz, and does not require an ingestion key from the app. Install it with the [OTel Collector binary guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
 ### Step 1. Install OpenTelemetry packages
 
@@ -165,7 +165,7 @@ export function register() {
   registerOTel({
     serviceName: '<service_name>',
     traceExporter: new OTLPHttpJsonTraceExporter({
-      url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+      url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'http://localhost:4318/v1/traces',
     }),
   });
 }
@@ -184,7 +184,7 @@ exports.register = function register() {
   registerOTel({
     serviceName: '<service_name>',
     traceExporter: new OTLPHttpJsonTraceExporter({
-      url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+      url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'http://localhost:4318/v1/traces',
     }),
   });
 };
@@ -193,7 +193,21 @@ exports.register = function register() {
 </TabItem>
 </Tabs>
 
-Set `OTEL_EXPORTER_OTLP_ENDPOINT` in your deployment manifest when you need to override the collector endpoint.
+Set `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` in your deployment manifest when you need to override the collector endpoint.
+
+<Admonition type="note">
+  The instrumentation file should live in the project root (or inside `src/` if you keep Next.js
+  code there). Do not place it inside the `app` or `pages` directory. A working example is available
+  in the{' '}
+  <a
+    href="https://github.com/SigNoz/sample-nextjs-app"
+    rel="noopener noreferrer nofollow"
+    target="_blank"
+  >
+    sample Next.js repo
+  </a>
+  .
+</Admonition>
 
 ### Step 4. Deploy your workload
 
@@ -388,7 +402,7 @@ In case you encounter an issue where all applications do not get listed in the S
 From Windows machines, you can follow the same instrumentation steps as the VM flow, with the following OS-specific notes.
 
 - **Send traces directly to SigNoz Cloud:** call the SigNoz ingest endpoint and include the ingestion key header.
-- **Optional: install the local OTel Collector binary:** point the exporter to `http://localhost:4318/v1/traces` so you can skip the ingestion key.
+- **Optional: Install the local OTel Collector binary:** point the exporter to `http://localhost:4318/v1/traces` so you can skip the ingestion key.
 
 ### Step 1. Install OpenTelemetry packages (PowerShell or Command Prompt)
 
@@ -459,6 +473,20 @@ exports.register = function register() {
 - Set `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - To send data through a local collector, switch the exporter URL to `http://localhost:4318/v1/traces` and remove the `headers` block.
+
+<Admonition type="note">
+  The instrumentation file should live in the project root (or inside `src/` if you keep Next.js
+  code there). Do not place it inside the `app` or `pages` directory. A working example is available
+  in the{' '}
+  <a
+    href="https://github.com/SigNoz/sample-nextjs-app"
+    rel="noopener noreferrer nofollow"
+    target="_blank"
+  >
+    sample Next.js repo
+  </a>
+  .
+</Admonition>
 
 ### Step 4. Set environment variables when needed
 

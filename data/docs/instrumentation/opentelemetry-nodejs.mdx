@@ -27,7 +27,7 @@ Based on your application environment, you can choose the setup below to send tr
 From VMs, there are two ways to send data to SigNoz:
 
 - **Direct to SigNoz Cloud (recommended for beginners):** no extra installs beyond the SDK; you only need the region endpoint and ingestion key.
-- **Optional: install a local OTel Collector binary on the VM:** it listens at `http://localhost:4318`, forwards telemetry to SigNoz, and does not require an ingestion key from the app. Install it with the [OTel Collector binary guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+- **Optional: Install a local OTel Collector binary on the VM:** it listens at `http://localhost:4318`, forwards telemetry to SigNoz, and does not require an ingestion key from the app. Install it with the [OTel Collector binary guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
 <Tabs>
 <TabItem value="no-code" label="No Code Automatic Instrumentation (recommended)" default>
@@ -331,13 +331,13 @@ process.on('SIGTERM', () => {
 
 Set `OTEL_EXPORTER_OTLP_ENDPOINT` as env variable using powershell:
 
-```bash
+```powershell
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="<otlp_endpoint>"
 ```
 
 ### Step 3. Run the application
 
-```bash
+```powershell
 node -r ./tracing.js app.js
 ```
 
@@ -619,7 +619,7 @@ const { ATTR_SERVICE_NAME } = require('@opentelemetry/semantic-conventions')
 // highlight-start
 const exporterOptions = {
 url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
-headers: { 'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || <your-ingestion-key> },
+headers: { 'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || `<your-ingestion-key>` },
 }
 // highlight-end
 
@@ -659,7 +659,7 @@ import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
 const exporterOptions = {
   url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
-  headers: { 'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || <your-ingestion-key> },
+  headers: { 'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || `<your-ingestion-key>` },
 }
 
 const traceExporter = new OTLPTraceExporter(exporterOptions);
@@ -819,13 +819,13 @@ process.on('SIGTERM', () => {
 
 Set `OTEL_EXPORTER_OTLP_ENDPOINT` as env variable using powershell:
 
-```bash
+```powershell
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="<otlp_endpoint>"
 ```
 
 ### Step 3. Run the application
 
-```bash
+```powershell
 node -r ./tracing.js app.js
 ```
 
@@ -842,7 +842,7 @@ In case you encounter an issue where all applications do not get listed in the s
 There are two ways to send data from Docker containers:
 
 - **Direct to SigNoz Cloud (default):** configure your container to talk to the cloud endpoint with an ingestion key.
-- **Optional: run a local OTel Collector binary:** install the collector beside your containers and point `OTEL_EXPORTER_OTLP_ENDPOINT` at `http://localhost:4318`, dropping the ingestion key. Install guide: [OTel Collector binary for VMs](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+- **Optional: Run a local OTel Collector binary:** Install the collector beside your containers and point `OTEL_EXPORTER_OTLP_ENDPOINT` at `http://localhost:4318`, dropping the ingestion key. Install guide: [OTel Collector binary for VMs](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
 ### Step 1. Configure OpenTelemetry to run in Docker Container
 
