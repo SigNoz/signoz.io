@@ -116,8 +116,11 @@ export async function generateMetadata({
     // Convert slug array to path
     const path = params.slug.join('/')
 
+    const isProduction = process.env.VERCEL_ENV === 'production'
+    const deploymentStatus = isProduction ? 'live' : 'staging'
+
     try {
-      const response = await fetchMDXContentByPath('case-studies', path, 'live')
+      const response = await fetchMDXContentByPath('case-studies', path, deploymentStatus)
       const content = Array.isArray(response.data) ? response.data[0] : response.data
 
       return {
@@ -172,7 +175,10 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       throw new Error('Strapi API URL is not configured')
     }
 
-    const response = await fetchMDXContentByPath('case-studies', path, 'live')
+    const isProduction = process.env.VERCEL_ENV === 'production'
+    const deploymentStatus = isProduction ? 'live' : 'staging'
+
+    const response = await fetchMDXContentByPath('case-studies', path, deploymentStatus)
     if (!response || !response.data) {
       console.error(`Invalid response for path: ${path}`)
       notFound()
