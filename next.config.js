@@ -441,6 +441,21 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/frontend-monitoring/sending-logs/',
+          destination: '/docs/frontend-monitoring/sending-logs-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/frontend-monitoring/sending-metrics/',
+          destination: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/frontend-monitoring/sending-traces/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
+          permanent: true,
+        },
+        {
           source: '/guides/unified-observability/',
           destination: '/unified-observability/',
           permanent: true,
