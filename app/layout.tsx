@@ -107,17 +107,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <ThemeProviders>
           <GrowthBookProvider>
-            <Suspense>
-              <SectionContainer>
-                <div className="relative flex h-screen flex-col justify-between ">
-                  <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                    <TopNav />
-                    <main className="mb-auto mt-[48px]">{children}</main>
-                  </SearchProvider>
-                  <MainFooter />
-                </div>
-              </SectionContainer>
-            </Suspense>
+            <SectionContainer>
+              <div className="relative flex h-screen flex-col justify-between ">
+                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                  <TopNav />
+                  <main className="mb-auto mt-[48px]">{children}</main>
+                </SearchProvider>
+                <MainFooter />
+              </div>
+            </SectionContainer>
           </GrowthBookProvider>
         </ThemeProviders>
       </body>
