@@ -11,8 +11,6 @@ keywords: [opentelemetry logs,opentelemetry log,opentelemetry,logs correlation,o
 ---
 OpenTelemetry is a Cloud Native Computing Foundation(<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank" >CNCF</a>) incubating project aimed at standardizing the way we instrument applications for generating telemetry data(logs, metrics, and traces). OpenTelemetry aims to provide a vendor-agnostic observability framework that provides a set of tools, APIs, and SDKs to instrument applications.
 
-
-
 ![Cover Image](/img/blog/2023/10/otel-logs-cover.webp)
 
 Modern-day software systems are built with many pre-built components taken from the open source ecosystem like web frameworks, databases, HTTP clients, etc. Instrumenting such a software system in-house can pose a huge challenge. And using vendor-specific instrumentation agents can create a dependency. OpenTelemetry provides an open source instrumentation layer that can instrument various technologies like open source libraries, programming languages, databases, etc.
@@ -39,9 +37,8 @@ OpenTelemetry provides instrumentation libraries for your application. The devel
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry Architecture"/>
-    <figcaption><i>How OpenTelemetry fits in an application architecture. OTel collector refers to OpenTelemetry Collector</i></figcaption>
+    <figcaption><i>How OpenTelemetry fits in an application architecture. OTel is the convenient short form for OpenTelemetry</i></figcaption>
 </figure>
-
 
 OpenTelemetry libraries can be used to generate logs, metrics, and traces. You can then collect these signals with OpenTelemetry Collector or send them to an observability backend of your choice. In this article, we will focus on [OpenTelemetry logs](https://signoz.io/comparisons/opentelemetry-events-vs-logs/). OpenTelemetry can be used to collect log data and process it. Let's explore OpenTelemetry logs further.
 
@@ -220,7 +217,7 @@ In OpenTelemetry, there are two important context IDs for context propagation.
   A trace is a complete breakdown of a transaction as it travels through different components of a distributed system. Each trace gets a [trace ID](https://signoz.io/comparisons/opentelemetry-trace-id-vs-span-id/) that helps to correlate all events connected with a single trace.
 
 - **Span IDs**<br></br>
-  A trace consists of multiple spans. Each span represents a single unit of logical work in the trace data. Spans have span ids that are used to represent the parent-child relationship.
+  A trace consists of multiple spans. Each span represents a single unit of logical work in the trace data. Spans have span IDs that are used to represent the parent-child relationship.
     <figure data-zoomable align='center'>
     <img src="/img/blog/2025/09/otel-spans.webp" alt="Traces in SigNoz"/>
     <figcaption><i>A trace graph broken down into individual spans visualized as Flamegraphs and Gantt charts in SigNoz dashboard</i></figcaption>
@@ -269,17 +266,16 @@ from its SDK.
   Here's an example of using OpenTelemetry's [LoggingInstrumentor](https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/logging/logging.html) to instrument the logging library to automatically add trace context in a Python application.
 
   ```python 
-
-      import logging
-        from opentelemetry.instrumentation.logging import LoggingInstrumentor
-        
-        # Instrument the logging library to automatically add trace context
-        LoggingInstrumentor().instrument(set_logging_format=True)
-        
-        # Now, any log created within an active trace will automatically
-        # include trace_id and span_id in its record.
-        logging.basicConfig(level=logging.INFO)
-        logging.info("User login successful.")
+  import logging
+  from opentelemetry.instrumentation.logging import LoggingInstrumentor
+  
+  # Instrument the logging library to automatically add trace context
+  LoggingInstrumentor().instrument(set_logging_format=True)
+  
+  # Now, any log created within an active trace will automatically
+  # include trace_id and span_id in its record.
+  logging.basicConfig(level=logging.INFO)
+  logging.info("User login successful.")
   ```
 
   **Example 2. Instrumenting in Java with a Log Appender**
@@ -311,15 +307,11 @@ application's source code as shown in the below example.
         </Root>
     </Loggers>
 </Configuration>
-
   ```
 
   As you can see, while the mechanism differs by language ecosystem (Handlers in Python, Appenders in Java), the
   underlying idea is the same, i.e, integrate the OpenTelemetry SDK with your existing logging framework to automatically enrich
   all your logs with invaluable trace context.
-
-
-
 
 ### Collecting third-party application log data
 
@@ -430,7 +422,7 @@ how you can perform log analytics. The logs tab in SigNoz has advanced features 
 
 Your key step in any investigation during an escalation is to find the right logs. Instead of manually searching through tons of logs,
 you can use a query builder to filter logs based on any field in the OpenTelemetry log data model. 
-We recently made some improvements to the query builder to make it more, you can read more about it [here](https://signoz.io/blog/query-builder-v5/).
+We have recently overhauled the Query Builder, you can read more about it [here](https://signoz.io/blog/query-builder-v5/).
 
 For example, you can quickly find all logs with `SeverityText = ERROR` from your web-backend service that occurred in
 the last hour as shown in the below screenshot.
@@ -467,8 +459,6 @@ In SigNoz, the `TraceId` in a log record is a clickable link. Meaning, when you 
     <img src="/img/blog/2025/09/otel-log-correlation.webp" alt="Correlating Logs with Traces in SigNoz"/>
     <figcaption><i>Correlating Logs with Traces in SigNoz</i></figcaption>
 </figure>
-
-
 
 ## Getting started with SigNoz
 
