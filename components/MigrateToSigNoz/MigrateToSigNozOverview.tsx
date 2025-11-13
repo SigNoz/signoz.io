@@ -42,6 +42,19 @@ const MigrateVendorsData: IconCardData[] = [
     clickName: 'Migrate from New Relic',
   },
   {
+    name: 'Migrate from Honeycomb',
+    href: '/docs/migration/migrate-from-honeycomb-to-signoz/',
+    icon: (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+        src="/svgs/icons/honeycomb.svg"
+        alt="Honeycomb"
+        className="h-7 w-7 object-contain"
+        />
+    ),
+    clickName: 'Migrate from Honeycomb',
+  },
+  {
     name: 'Migrate from OpenTelemetry',
     href: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
     icon: <SiOpentelemetry className="h-7 w-7 text-blue-500" />,

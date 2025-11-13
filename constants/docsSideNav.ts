@@ -2189,17 +2189,17 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/sending-logs',
+        route: '/docs/frontend-monitoring/sending-logs-with-opentelemetry',
         label: 'Sending Logs',
       },
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/sending-traces',
+        route: '/docs/frontend-monitoring/sending-traces-with-opentelemetry',
         label: 'Sending Traces',
       },
       {
         type: 'doc',
-        route: '/docs/frontend-monitoring/sending-metrics',
+        route: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry',
         label: 'Sending Metrics',
       },
       {
@@ -3010,6 +3010,30 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/migration/migrate-from-newrelic/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
+      },
+      {
+        label: 'From Honeycomb',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-honeycomb-to-signoz',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/data',
+            label: 'Migrating Data',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/alerts',
             label: 'Migrating Alerts',
           },
         ],
