@@ -1,6 +1,7 @@
 import React from 'react'
 import LogManagement from './LogManagement'
 import { Metadata } from 'next'
+import ClarityPriority from '@/components/Analytics/ClarityPriority'
 
 export const metadata: Metadata = {
   title: {
@@ -8,18 +9,25 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Log Management | SigNoz',
-    description: 'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
-    images:"/img/platform/LogsManagementHero.webp"
+    description:
+      'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
+    images: '/img/platform/LogsManagementHero.webp',
   },
   description:
     'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
-  twitter:{
+  twitter: {
     title: 'Log Management | SigNoz',
-    description: 'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
-    images:"/img/platform/LogsManagementHero.webp",
-  }
+    description:
+      'Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore suited for storing logs at scale.',
+    images: '/img/platform/LogsManagementHero.webp',
+  },
 }
 
 export default function LogManagementPage() {
-  return <LogManagement />
+  return (
+    <>
+      <ClarityPriority />
+      <LogManagement />
+    </>
+  )
 }
