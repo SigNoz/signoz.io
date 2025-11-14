@@ -839,6 +839,11 @@ const docsSideNav = [
             label: 'Configuration Components',
             route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration',
           },
+          {
+            type: 'doc',
+            label: 'Why Use Collector',
+            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
+          }
         ],
       },
     ],

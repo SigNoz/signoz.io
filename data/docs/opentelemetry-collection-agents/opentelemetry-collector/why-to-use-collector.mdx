@@ -1,0 +1,127 @@
+---
+date: 2025-11-13
+title: Why Use OpenTelemetry Collector with SigNoz
+id: why-to-use-collector
+tags: [SigNoz Cloud, Self-Host]
+description: Learn why you should use OpenTelemetry Collector with SigNoz for data processing, automatic resource enrichment, and flexible telemetry routing in production environments.
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+The OpenTelemetry (OTel) Collector is a vendor-agnostic component that sits between your applications and SigNoz. While you can directly send telemetry data from your applications to SigNoz, using the OTel Collector provides significant advances in production environments.
+
+## Key Benefits
+
+### 1. Data Processing and Transformation
+
+The OTel Collector acts as a powerful data processing layer between your applications and SigNoz, allowing you to:
+
+#### Filtering
+
+- **Removing unnecessary data:** Filter out noisy or low-value telemetry data to reduce costs and storage requirements.
+- **Sampling:** Implement tail-based sampling to keep only relevant traces.
+- **Conditional filtering**: Apply filters based on attributes, resource information, or specific conditions.
+- **Drop health check endpoints:** Drop health check endpoints and internal monitoring traffic.
+
+#### Dropping Data
+
+- **Drop specific spans or metrics:** Remove telemetry data that doesn't provide value.
+- **Reduce cardinality:** Drop high-cardinality attributes which can impact performance.
+- **Control data volume:** Prevent telemetry explosions during traffic spikes.
+
+You can check guides for dropping telemetry data in [logs](https://signoz.io/docs/logs-management/guides/drop-logs/), [metrics](https://signoz.io/docs/userguide/drop-metrics/) and [traces](https://signoz.io/docs/traces-management/guides/drop-spans/#filter-processor).
+
+#### PII Scrubbing
+
+- **Protect sensitive information:** Automatically detect and remove Personally Identifiable Information (PII).
+- **Data compliance:** Ensure GDPR, HIPAA, and other regulatory compliance.
+- **Redact attributes:** Mask or remove attributes which includes email addresses, IP addresses, or authentication tokens.
+- **Pattern matching:** Use regex patterns to identify and scrub sensitive data before it leaves your infrastructure.
+
+For more examples, you can check guides for scrubbing PII in [logs](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) and [traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/).
+
+#### Data Transformation
+
+Standardize telemetry across different environments:
+
+- Normalize attribute names and values.
+- Convert between different data formats.
+- Aggregate metrics before export.
+- Enrich telemetry with additional context.
+
+### 2. Auto-Added Resource Attributes
+
+The Collector automatically enhances the telemetry data with additional contexts:
+
+#### Infrastructure Context
+
+- **Host information:** Automatically adds hostname, OS, architecture.
+- **Cloud provider metadata:** AWS, GCP, Azure instance details, region, availability zone.
+- **Container information:** Pod name, namespace, container ID in Kubernetes environments.
+- **Process details:** Process ID, executable name, command-line arguments.
+
+Check out these guides for setting resource attributes using [resource processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-processor) and [resource detection processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor).
+
+#### Benefits for Legacy Systems
+
+- **No code changes required:** Add rich context without modifying legacy applications.
+- **Unified tagging:** Consistent resource attributes across all services.
+- **Better correlation:** Connect telemetry from different sources using standardized attributes.
+- **Simplified debugging:** Quickly identify which host, container, or cloud instance generated telemetry.
+
+### 3. Export to Multiple Destinations
+
+The OTel Collector supports exporting to multiple destinations allowing you gradually migrating from existing observability tools to SigNoz.
+
+## Architecture Patterns
+
+### Centralized Collection
+
+Deploy the Collector as a centralized gateway that receives telemetry data from multiple applications and routes it to SigNoz.
+
+### Agent-Based Deployment
+
+Run Collector agents on each host or as sidecars in Kubernetes to collect and preprocess data locally before sending it to SigNoz.
+
+### Hybrid Approach
+
+Combine local agents for initial processing with centralized collectors for routing and aggregation.
+
+## Getting Started
+
+To start using OpenTelemetry Collector with SigNoz:
+
+### 1. Choose deployment mode:
+
+Decide between agent, gateway, or hybrid deployment. Check out [OpenTelemetry Collection Agents](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) docs for different ways to deploy the Collector.
+
+### 2. Configure processors
+
+Set up filtering, PII Scrubbing, and resource attributes to enhance the telemetry data.
+
+### 3. Configure exporters
+
+Configure OTLP exporter to SigNoz endpoint: `ingest.<region>.signoz.cloud:443`
+
+Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+
+### 4. Deploy
+
+Roll out the Collector deployment.
+
+### 5. Update applications
+
+Configure applications to send telemetry to the Collector.
+
+## Best Practices
+
+- Start with basic filtering and gradually add more sophisticated processing.
+- Use resource detection processors to automatically enrich telemetry.
+- Implement PII scrubbing early to prevent sensitive data leaks.
+- Version control your Collector configurations for reproducibility.
+
+## Get Help
+
+<GetHelp />
