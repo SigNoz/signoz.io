@@ -12,6 +12,8 @@ This document explains how to send logs from Cloudflare Workers to SigNoz using 
 
 Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant logs directly to SigNoz without code changes, using Cloudflare's built-in observability features. This includes application logs from `console.log()` output.
 
+When combined with trace instrumentation, logs can be correlated with traces for complete observability. See [Cloudflare Workers OpenTelemetry Instrumentation](/docs/instrumentation/opentelemetry-cloudflare) to set up traces.
+
 ## Prerequisites
 
 - SigNoz Cloud account OR Self-hosted SigNoz instance
@@ -69,6 +71,77 @@ For complete configuration options, refer to [Cloudflare's OpenTelemetry documen
 ## Step 4: Deploy
 
 Run `wrangler deploy`. Logs will appear in SigNoz within minutes.
+
+## Validate
+
+After deploying your Worker, verify that logs are being sent to SigNoz:
+
+1. **Access SigNoz UI**: Navigate to the `Logs` tab in your SigNoz dashboard
+2. **Generate logs**: Trigger your Cloudflare Worker to generate log output (e.g., `console.log()` statements)
+3. **View logs**: Within a few minutes, logs from your Worker should appear in the Logs view
+4. **Check destination status**: In your Cloudflare dashboard under Workers Observability > Destinations, verify the status:
+   - **Last: n minutes ago** - Data is being delivered successfully
+   - **Never run** - No data has been delivered yet (check if your Worker is receiving traffic or review sampling rates)
+   - **Error** - Delivery failed (verify OTLP endpoint and authentication headers)
+
+**Expected behavior**: You should see logs with attributes like `worker_name`, `script_name`, and any custom fields from your Worker code.
+
+<Figure
+  src="/img/docs/instrumentation/cloudflare/autoinstrumentation_loglist.webp"
+  alt="Cloudflare Logs in Logs View"
+  caption="Cloudflare Logs in Logs View"
+/>
+
+You can click on a particular log entry in the `Logs` view to get the detailed view of the Cloudflare Worker log as shown below.
+
+<Figure
+  src="/img/docs/instrumentation/cloudflare/autoinstrumentation_logline.webp"
+  alt="Sample Cloudflare Log Entry"
+  caption="Sample Cloudflare Log Entry"
+/>
+
+## Troubleshooting
+
+### Logs not appearing in SigNoz
+
+**Symptom**: No logs visible in SigNoz UI after deploying the Worker.
+
+**Possible causes and fixes**:
+
+1. **Incorrect OTLP endpoint**
+   - **Cause**: Wrong region or endpoint format
+   - **Fix**: Verify the endpoint matches your SigNoz setup:
+     - SigNoz Cloud: `https://ingest.<region>.signoz.cloud:443/v1/logs`
+     - Self-Hosted: `http://<otel-collector-host>:4318/v1/logs`
+
+2. **Missing or invalid ingestion key**
+   - **Cause**: Incorrect or missing `signoz-ingestion-key` header (SigNoz Cloud only)
+   - **Fix**: Copy the correct ingestion key from SigNoz Cloud settings and update the destination header
+
+3. **Worker not receiving traffic**
+   - **Cause**: No requests to the Worker means no logs generated
+   - **Fix**: Send test requests to your Worker endpoint and ensure it has `console.log()` or similar logging statements
+
+4. **Sampling rate too low**
+   - **Cause**: Low `head_sampling_rate` means fewer logs are sent
+   - **Fix**: Increase the sampling rate in your `wrangler.jsonc` configuration
+
+5. **Destination not configured in wrangler.jsonc**
+   - **Cause**: Missing or incorrect destination name in configuration
+   - **Fix**: Ensure the destination name in `wrangler.jsonc` matches the one created in Cloudflare dashboard
+
+6. **Network/connectivity issues**
+   - **Cause**: Firewall or network blocking OTLP traffic (Self-Hosted only)
+   - **Fix**: Verify your OTel collector is accessible from Cloudflare Workers
+
+**Verification**: Check the destination status in Cloudflare dashboard (Workers Observability > Destinations) to see delivery status and any errors.
+
+## Next steps
+
+- **Set up traces**: Correlate logs with traces by setting up [Cloudflare Workers trace instrumentation](/docs/instrumentation/opentelemetry-cloudflare)
+- **Query logs**: Use the [Logs Explorer](https://signoz.io/docs/userguide/logs/) to search and filter your Worker logs
+- **Create alerts**: Set up alerts based on log patterns to monitor Worker issues
+- **Build dashboards**: Create custom dashboards combining logs and traces for complete observability
 
 ## Limitations
 

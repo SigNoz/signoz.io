@@ -72,7 +72,7 @@ export default instrument(handler, config)
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - Replace `<service-name>` with the name of the service associated with this trace
-- For self-hosted SigNoz, use `url: 'http://<otel-collector-host>:4318/v1/traces'` and remove the headers
+- For self-hosted SigNoz, use `url: 'http://<otel-collector-host>:4318/v1/traces'` and remove the headers. See [Cloud vs Self-Hosted comparison](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted) for more details.
 
 **Step 4: Deploy the project**
 
@@ -153,9 +153,17 @@ Run `wrangler deploy`. Data appears in SigNoz within minutes.
 </TabItem>
 </Tabs>
 
-## Visualize the traces in SigNoz
+## Validate
 
-- Traces can be viewed under the `Traces` tab in the SigNoz UI.
+After deploying your Worker, verify that traces are being sent to SigNoz:
+
+1. **Access SigNoz UI**: Navigate to the `Traces` tab in your SigNoz dashboard
+2. **Generate traffic**: Send requests to your Cloudflare Worker to generate trace data
+3. **View traces**: Within a few minutes, traces from your Worker should appear in the Traces view
+4. **Check destination status**: In your Cloudflare dashboard under Workers Observability > Destinations, verify the status:
+   - **Last: n minutes ago** - Data is being delivered successfully
+   - **Never run** - No data has been delivered yet (check if your Worker is receiving traffic or review sampling rates)
+   - **Error** - Delivery failed (verify OTLP endpoint and authentication headers)
 
 <Figure
   src="/img/docs/instrumentation/cloudflare/autoinstrumentation_tracelist.webp"
@@ -163,10 +171,60 @@ Run `wrangler deploy`. Data appears in SigNoz within minutes.
   caption="Cloudflare Traces in Traces View"
 />
 
-- You can click on a particular `TraceID` in the `Traces` view to get the detailed view of the Cloudflare Worker as shown in the image below.
+You can click on a particular `TraceID` in the `Traces` view to get the detailed view of the Cloudflare Worker as shown below.
 
 <Figure
   src="/img/docs/instrumentation/cloudflare/autoinstrumentation_traceid.webp"
   alt="Sample Cloudflare Trace"
   caption="Sample Cloudflare Trace"
 />
+
+## Troubleshooting
+
+### Traces not appearing in SigNoz
+
+**Symptom**: No traces visible in SigNoz UI after deploying the Worker.
+
+**Possible causes and fixes**:
+
+1. **Incorrect OTLP endpoint**
+   - **Cause**: Wrong region or endpoint format
+   - **Fix**: Verify the endpoint matches your SigNoz setup:
+     - **SDK method**: Check the `exporter.url` in your `src/index.ts` configuration
+       - SigNoz Cloud: `https://ingest.<region>.signoz.cloud:443/v1/traces`
+       - Self-Hosted: `http://<otel-collector-host>:4318/v1/traces`
+     - **Auto-instrumentation**: Check the OTLP Endpoint in your Cloudflare destination configuration
+
+2. **Missing or invalid ingestion key**
+   - **Cause**: Incorrect or missing `signoz-ingestion-key` header (SigNoz Cloud only)
+   - **Fix**:
+     - **SDK method**: Verify the `exporter.headers` in your `src/index.ts` contains the correct ingestion key
+     - **Auto-instrumentation**: Check the Headers in your Cloudflare destination configuration
+
+3. **Worker not receiving traffic**
+   - **Cause**: No requests to the Worker means no traces generated
+   - **Fix**: Send test requests to your Worker endpoint
+
+4. **Missing Node.js compatibility flag** (SDK method only)
+   - **Cause**: `nodejs_compat` flag not enabled in `wrangler.toml`
+   - **Fix**: Add `compatibility_flags = [ "nodejs_compat" ]` to your `wrangler.toml`
+
+5. **Sampling rate too low** (Auto-instrumentation only)
+   - **Cause**: Low `head_sampling_rate` means fewer traces are sent
+   - **Fix**: Increase the sampling rate in your `wrangler.jsonc` configuration
+
+6. **Destination not configured** (Auto-instrumentation only)
+   - **Cause**: Missing or incorrect destination name in `wrangler.jsonc`
+   - **Fix**: Ensure the destination name in `wrangler.jsonc` matches the one created in Cloudflare dashboard
+
+7. **Network/connectivity issues**
+   - **Cause**: Firewall or network blocking OTLP traffic (Self-Hosted only)
+   - **Fix**: Verify your OTel collector is accessible from Cloudflare Workers
+
+
+## Next steps
+
+- **Set up logs**: Send Cloudflare Worker logs to SigNoz by following the [Cloudflare logs guide](/docs/logs-management/send-logs/cloudflare-logs)
+- **Create dashboards**: Build custom dashboards to visualize your Worker performance
+- **Set up alerts**: Configure alerts based on trace data to monitor Worker health
+- **Analyze traces**: Use the [Trace Explorer](https://signoz.io/docs/userguide/traces/) to debug issues and optimize performance
