@@ -30,6 +30,14 @@ export default function ChatbaseClient({
       return
     }
 
+    const hasOnboardingSourceParam =
+      new URLSearchParams(window.location.search).get('source') === 'onboarding'
+
+    if (hasOnboardingSourceParam) {
+      console.log('Skipping Chatbase initialization due to onboarding source param')
+      return
+    }
+
     // Prevent multiple initializations
     if (isInitialized.current) return
     isInitialized.current = true
