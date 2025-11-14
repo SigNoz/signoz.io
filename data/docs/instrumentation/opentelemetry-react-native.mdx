@@ -27,16 +27,16 @@ The JS OTel packages are supported for node and web environments. While they wor
 **Step 1.** Install OpenTelemetry packages
 
 ```bash
-npm install --save @opentelemetry/api@^1.9.0
-npm install --save @opentelemetry/core@^1.28.0
-npm install --save @opentelemetry/exporter-trace-otlp-http@^0.52.0
-npm install --save @opentelemetry/instrumentation@^0.55.0
-npm install --save @opentelemetry/instrumentation-fetch@^0.55.0
-npm install --save @opentelemetry/instrumentation-xml-http-request@^0.55.0
-npm install --save @opentelemetry/resources@^2.0.1
-npm install --save @opentelemetry/sdk-trace-base@^1.28.0
-npm install --save @opentelemetry/sdk-trace-web@^1.28.0
-npm install --save @opentelemetry/semantic-conventions@^1.28.0
+npm install --save @opentelemetry/api
+npm install --save @opentelemetry/core
+npm install --save @opentelemetry/exporter-trace-otlp-http
+npm install --save @opentelemetry/instrumentation
+npm install --save @opentelemetry/instrumentation-fetch
+npm install --save @opentelemetry/instrumentation-xml-http-request
+npm install --save @opentelemetry/resources
+npm install --save @opentelemetry/sdk-trace-base
+npm install --save @opentelemetry/sdk-trace-web
+npm install --save @opentelemetry/semantic-conventions
 ```
 
 **Step 2.** Create a tracing configuration file
@@ -47,57 +47,31 @@ Create a `tracing.jsx` file in the `/hooks` directory. This file initializes the
 - Auto-instrumentation for fetch and XMLHttpRequest network calls
 
 ```jsx
-// Copyright The OpenTelemetry Authors
-// SPDX-License-Identifier: Apache-2.0
 import {
-  CompositePropagator,
-  W3CBaggagePropagator,
-  W3CTraceContextPropagator,
-} from "@opentelemetry/core";
-import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
+    CompositePropagator,
+    W3CBaggagePropagator,
+    W3CTraceContextPropagator,
+} from '@opentelemetry/core';
+import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { XMLHttpRequestInstrumentation } from '@opentelemetry/instrumentation-xml-http-request';
+import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import {
-  BatchSpanProcessor,
-} from "@opentelemetry/sdk-trace-base";
-import { XMLHttpRequestInstrumentation } from "@opentelemetry/instrumentation-xml-http-request";
-import { FetchInstrumentation } from "@opentelemetry/instrumentation-fetch";
-import { registerInstrumentations } from "@opentelemetry/instrumentation";
-import { resourceFromAttributes } from "@opentelemetry/resources";
-import {
-  ATTR_DEVICE_ID,
-  ATTR_OS_NAME,
-  ATTR_OS_VERSION,
-  ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-} from "@opentelemetry/semantic-conventions/incubating";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import getLocalhost from "@/utils/Localhost";
-import { useEffect, useState } from "react";
-import {
-  getDeviceId,
-  getSystemVersion,
-  getVersion,
-} from "react-native-device-info";
-import { Platform } from "react-native";
-import { SessionIdProcessor } from "@/utils/SessionIdProcessor";
+    ATTR_OS_NAME,
+    ATTR_SERVICE_NAME,
+} from '@opentelemetry/semantic-conventions/incubating';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 
 const Tracer = async () => {
-  const localhost = await getLocalhost();
-
-  // TODO Should add a resource detector for React Native that provides this automatically
   const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: "<service_name>",
     [ATTR_OS_NAME]: Platform.OS,
-    [ATTR_OS_VERSION]: getSystemVersion(),
-    [ATTR_SERVICE_VERSION]: getVersion(),
-    [ATTR_DEVICE_ID]: getDeviceId(),
   });
 
-  // TODO Not obvious that the WebTracerProvider can be used for React Native, might be useful to have a thin
-  //  ReactNativeTracerProvider on top of it (or BasicTracerProvider) that makes this clear. Could also add some
-  //  protection against browser specific functionality being added to WebTracerProvider that breaks functionality
-  //  for React Native.
-  //  Alternatively could offer a TracerProvider that exposed a JS interface on top of the OTEL Android and Swift SDKS,
-  //  giving developers the option of collecting telemetry at the native mobile layer
   const provider = new WebTracerProvider({
     resource,
     spanProcessors: [
@@ -115,10 +89,6 @@ const Tracer = async () => {
           scheduledDelayMillis: 500,
         },
       ),
-
-      // TODO introduce a React Native session processor package that could be used here, taking into account mobile
-      // specific considerations for the session such as putting the app into the background
-      new SessionIdProcessor(),
     ],
   });
 
@@ -133,11 +103,6 @@ const Tracer = async () => {
 
   registerInstrumentations({
     instrumentations: [
-      // TODO Some tiptoeing required here, propagateTraceHeaderCorsUrls is required to make the instrumentation
-      // work in the context of a mobile app even though we are not making CORS requests. `clearTimingResources` must
-      // be turned off to avoid using the web-only Performance API
-      // Overall wrapping or forking this and providing a React Native specific auto instrumentation will ease
-      // integration and make it less error-prone
       new FetchInstrumentation({
         propagateTraceHeaderCorsUrls: /.*/,
         clearTimingResources: false,
