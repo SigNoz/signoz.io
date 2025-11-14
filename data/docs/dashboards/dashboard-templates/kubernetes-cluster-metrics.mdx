@@ -8,6 +8,13 @@ description: Monitor Kubernetes metrics for running pods for deployments, daemon
 
 This dashboard provides an overview for the Kubernetes pods for deployments, daemonsets, statefulset, replicasets and pods count by phase using [`k8sclusterreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md).
 
+<Admonition type="info">
+  This dashboard requires K8s Infra to be installed and configured to collect cluster metrics. See
+  the [K8s Infra installation
+  guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) to
+  set up the data source.
+</Admonition>
+
 ## Dashboard Preview
 
 <figure data-zoomable align="center">
@@ -94,6 +101,28 @@ The dashboard utilizes these metrics from the k8sclusterreceiver:
 - `k8s.job.failed_pods`: Failed job pods
 
 - `k8s.job.desired_successful_pods`: Desired successful job pods
+
+## Prerequisites
+
+To use this dashboard, you need:
+
+- OpenTelemetry Collector configured with the [`k8sclusterreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md)
+- The receiver configured with serviceAccount authentication to access the Kubernetes API
+- Metrics being exported to SigNoz
+
+You also need to set `k8s.cluster.name` resource attribute which can be set by using [resource processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-processor):
+
+```yaml {7-9}
+processors:
+  resource:
+    attributes:
+      - key: service.name
+        value: 'k8s-cluster-metrics'
+        action: upsert
+      - key: k8s.cluster.name
+        value: 'microk8s-cluster'
+        action: upsert
+```
 
 ## Dashboard Variables
 
