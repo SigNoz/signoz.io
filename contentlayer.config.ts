@@ -446,7 +446,7 @@ export const Doc = defineDocumentType(() => ({
     id: { type: 'string', required: true },
     slug: { type: 'string', required: false },
     date: { type: 'date', required: false },
-    tags: { type: 'list', of: { type: 'string' }, default: [], required: false },
+    tags: { type: 'list', of: { type: 'string' }, default: ['SigNoz Cloud', 'Self-Host'], required: false },
     lastmod: { type: 'date', required: false },
     draft: { type: 'boolean', required: false },
     summary: { type: 'string', required: false },
