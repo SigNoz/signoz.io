@@ -12,6 +12,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - [Workflow](#workflow)
 - [Git Hooks and Checks](#git-hooks-and-checks)
 - [General Guidelines](#general-guidelines)
+- [Documentation types and Diátaxis](#documentation-types-and-diátaxis)
 - [Content Structure](#content-structure)
   - [Patterns and components](#patterns-and-components)
   - [Link references to keep handy](#link-references-to-keep-handy)
@@ -87,6 +88,40 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
   - Use angle-bracket placeholders like `<service-name>`, `<region>`, `<SIGNOZ_INGESTION_KEY>`.
   - Immediately below the snippet, explain what each placeholder means.
 
+## Documentation types and Diátaxis
+
+We classify each docs page by its primary purpose using the [Diátaxis framework](https://diataxis.fr/).  
+This helps keep pages focused and makes the docs easier to navigate and maintain.
+
+Set a `doc_type` in the frontmatter for new docs:
+
+- `tutorial` – **Learn by doing**  
+  - Guided, opinionated, end-to-end flows.  
+  - Example: “Set up RED-style monitoring and alerts for a microservice”.
+- `howto` – **Achieve a specific goal**  
+  - Narrow, task-focused instructions.  
+  - Example: “Send traces from Spring Boot to SigNoz”, “Edit columns in Logs Explorer”.
+- `reference` – **Look up exact facts**  
+  - Schemas, config options, endpoints, limits. No step-by-step flow.  
+  - Example: “SigNoz Cloud ingestion endpoints and ports”.
+- `explanation` – **Understand concepts**  
+  - Why and how something works; background and trade-offs.  
+  - Example: “How SigNoz turns traces into APM metrics”, “Types and aggregations in Metrics”.
+
+**Rough mapping to SigNoz sections:**
+
+- **Send Data docs** – usually `howto` (instrumentation, pipelines).
+- **User Guides / end-to-end flows** – usually `tutorial`.
+- **Knowledge base – concepts** – `explanation`.
+- **Knowledge base – schemas / options** – `reference`.
+- **Product docs / Working with [Module]** – mostly `howto`, with separate `explanation` docs for deep dives.
+- **Overview docs for modules/features** – usually `explanation` (short concept + navigation, not step-by-step).
+- **Dashboard template docs** – usually `explanation` (overview of the dashboard and its metrics).
+- **Troubleshooting docs** – `howto` with a problem-first framing.
+
+For a deeper dive into Diátaxis, see  
+[Diátaxis: streamlining technical documentation](https://edify.cr/insights/streamlining-technical-documentation-with-diataxis-framework/).
+
 ## Content Structure
 
 Every doc should be skimmable and actionable.
@@ -100,10 +135,12 @@ Every doc should be skimmable and actionable.
     title: <Title in Sentence Case>
     description: <1–2 line summary with key terms>
     tags: [SigNoz Cloud, Self-Host] # choose both if applicable
+    doc_type: howto # one of: tutorial | howto | reference | explanation
     ---
     ```
   - Use `id` as a stable unique slug (no spaces); update links if it changes.
   - Use `tags` consistently. Supported tags include `SigNoz Cloud` and `Self-Host`.
+  - Use `doc_type` to match the main intent of the page (see [Documentation types and Diátaxis](#documentation-types-and-diátaxis)).
 - Standard sections (H2 level)
   - `## Overview` – what the doc covers and when to use it.
   - `## Prerequisites` – versions, accounts, keys, cluster access, etc. Include links.
@@ -253,12 +290,34 @@ Every doc should be skimmable and actionable.
 
 ## Doc Type–Specific Guidelines
 
+### Overview docs (modules and feature families)
+
+These are the top-level “Overview” pages for a module or feature area (for example, Metrics overview, Logs overview).
+
+- Audience: users deciding **“Is this the right place for my job?”**
+- Goal: explain what the module/feature is for and route users to the right docs.
+- Content:
+  - 1–3 short paragraphs on **what it is** and **when to use it**.
+  - A brief list of key capabilities.
+  - Curated links grouped by intent, such as:
+    - “Get started” (Send Data / basic setup how-tos)
+    - “Do specific tasks” (Working with [Module] how-tos)
+    - “Learn more” (User guides / tutorials)
+    - “Reference and concepts” (Knowledge base)
+- Avoid:
+  - Step-by-step setup instructions.
+  - Large configuration tables or API/field listings.
+  - Deep theory or long troubleshooting sections.
+
+`doc_type` for overview pages is usually `explanation`.
+
 ### Product docs (features, UI flows)
 
 - Audience: end users in the SigNoz UI.
 - Cover: feature overview, why/when to use it, prerequisites, step-by-step with screenshots, expected outcomes, and links to related user guides.
 - Include caveats, version availability, and plan differences if any.
 - Show the exact UI path and terminology that matches the product.
+- `doc_type` is usually `howto`. If the page is purely conceptual, use `explanation`.
 
 ### Send Data docs (instrumentation and pipelines)
 
@@ -272,15 +331,18 @@ Every doc should be skimmable and actionable.
   - Include network/endpoint checks, auth/ingestion key pitfalls, TLS notes, and version mismatches.
   - Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO (e.g., "Why don’t I see traces for <service-name>?", or include the exact error message).
 - Don’t stop at “Data Sent”. Close the loop with next steps: Link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
+- `doc_type` is usually `howto` for Send Data docs.
 
 ### Dashboard templates
 
 - Always include a short prerequisite or info note near the top that links to setting up the data source and sending telemetry to SigNoz.
   - Link the relevant instrumentation/observability guide for the technology (for example, Mastra → https://signoz.io/docs/mastra-observability/).
-  - When helpful, also link Cloud ingestion details: endpoint guide https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint and keys https://signoz.io/docs/ingestion/signoz-cloud/keys/
-- Include import instructions (prefer the `DashboardActions` helper). If unavailable, provide a direct JSON link and manual import steps.
-- Add a brief “Validate” note that points to where users should see data in SigNoz once the source is connected.
-- Cross-link adjacent dashboards and related user guides.
+- Include a **Dashboard Preview** (screenshot) near the top. Use the `Figure` component with descriptive `alt` and a concise `caption`.
+- Provide **import instructions** using the `DashboardActions` helper (include both dashboard JSON link and import steps).
+- Include a **What This Dashboard Monitors** section that describes the key metrics and insights this dashboard provides.
+- Include a **Metrics Included** section that lists the metrics included in the dashboard.
+- Cross-link adjacent dashboards and related user guides in the **Next Steps** section.
+- `doc_type` is usually `explanation` for Dashboard Template docs.
 
 ### Troubleshooting docs
 
@@ -294,16 +356,57 @@ Every doc should be skimmable and actionable.
 - Provide links to relevant product docs and Send Data docs.
 - Titles and headings: use question-style titles or include the exact error/topic to improve search and SEO. Prefer exact error strings and component names (SDK/receiver/exporter) in headings.
 - For minor, frequently asked Q&A, add/update a concise FAQ page. Keep answers short and point to deeper guides when needed.
+`doc_type` for troubleshooting docs is `howto`. Treat each page as a focused “how to fix this specific problem” guide, with a problem-first title and concrete resolution steps.
 
-### User guides (how-to, tasks)
+### User guides (end-to-end flows)
 
-- Goal-oriented, step-by-step; assume minimal context but link to existing setup.
-- Call out pre-requisites clearly.
+- Goal-oriented, step-by-step flows that combine multiple features or modules.
+- Assume minimal context, but link to existing setup/instrumentation where needed.
 - Include “Expected result” at the end of each major step.
 - End with “Next steps” and links to deeper topics or automation.
+- `doc_type` is usually `tutorial` for these end-to-end guides. Use `howto` for narrower, single-task pages.
 
-### Sample apps
+### Explanation docs (concepts and deep dives)
 
+Explanation docs are where we answer **“why does this work like this?”** and **“how does this fit together?”**
+
+- Audience: users trying to build a mental model or make design decisions.
+- Cover:
+  - Core observability concepts in SigNoz (for example, how traces become APM metrics, how logs are stored and queried, how sampling or retention works).
+  - Trade-offs and design choices (for example, cardinality, aggregation strategies, performance considerations).
+  - Conceptual breakdowns of complex features (for example, query builder queries, metric types, etc.).
+- Structure:
+  - Use diagrams, examples, and scenarios to explain ideas.
+  - Link out to how-to guides for concrete steps and to reference docs for raw details.
+- Avoid:
+  - Step-by-step task flows.
+  - Large tables of options or fields (those belong in reference).
+
+Set `doc_type: explanation` for these pages.
+
+### Reference docs (schemas, config, APIs)
+
+Reference docs exist so users can **look up exact facts** quickly.
+
+- Audience: users who already know *what* they’re doing and just need details.
+- Cover:
+  - Configuration options, environment variables, CLI flags.
+  - Ingestion endpoints, ports, authentication headers.
+  - Metrics, logs, and traces schemas (field names, types, units, example values).
+  - Limits, quotas, and version/plan availability.
+- Structure:
+  - Use tables, lists, and short descriptions.
+  - Link back from how-to and tutorial docs instead of duplicating.
+  - Keep examples minimal and purely illustrative (no deep narratives).
+- Avoid:
+  - Guided workflows (“first do X, then Y…”).
+  - Long conceptual intros — keep context tight and link to explanation docs instead.
+
+Set `doc_type: reference` for these pages.
+
+### Sample apps (README.md files)
+
+- Generally present as individual repo under the [SigNoz GitHub organization](https://github.com/SigNoz).
 - Use the correct endpoints and link ingestion docs:
   - Cloud: `https://ingest.<region>.signoz.cloud:443` with `signoz-ingestion-key`. Also link to the Cloud ingestion references: [endpoint guide](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and [keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
   - Self-Host: `http://<otel-collector-host>:4318` or `:4317` (OTLP/HTTP vs OTLP/gRPC). Also link to the Cloud → Self-Hosted adaptation guidance: [cloud to self-hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted)
@@ -314,13 +417,14 @@ Every doc should be skimmable and actionable.
 
 ## Docs PR Checklist
 
-- [ ] Frontmatter includes `date`, `id`, `title`, `description`, and appropriate `tags`.
+- [ ] Frontmatter includes `date`, `id`, `title`, `description`, appropriate `tags`, and a `doc_type` (`tutorial`, `howto`, `reference`, or `explanation`).
 - [ ] SEO: primary keywords appear in `title`, `description`, URL/slug, and the first paragraph. For Send Data docs, include "OpenTelemetry" in slug/title.
 - [ ] If the guide is Cloud-only or Self-Hosted-only, include the Cloud vs Self-Hosted drop-in snippet linking to the comparison page; use tabs only if steps materially diverge.
 - [ ] Commands explain what they do and where to run them.
 - [ ] Code/config snippets are annotated and explained; placeholders are defined.
 - [ ] “Validate” section shows how to confirm success.
 - [ ] Troubleshooting covers common failures with concrete fixes.
+- [ ] The content matches the chosen `doc_type` (tutorial / howto / reference / explanation).
 - [ ] Included a short “Next steps” section linking to adjacent features or deeper guides when applicable.
 - [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.
 - [ ] For Dashboard Template docs: include a clear link to set up the data source (relevant Send Data/instrumentation guide) near the top, ideally as a brief Prerequisites or info note.
