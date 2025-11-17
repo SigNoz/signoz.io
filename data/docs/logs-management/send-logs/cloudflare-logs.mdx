@@ -10,9 +10,13 @@ This document explains how to send logs from Cloudflare Workers to SigNoz using 
 
 ## Overview
 
-Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant logs directly to SigNoz without code changes, using Cloudflare's built-in observability features. This includes application logs from `console.log()` output.
+Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant logs directly to SigNoz without code changes, using Cloudflare's built-in observability features.
 
 When combined with trace instrumentation, logs can be correlated with traces for complete observability. See [Cloudflare Workers OpenTelemetry Instrumentation](/docs/instrumentation/opentelemetry-cloudflare) to set up traces.
+
+<Admonition type="info">
+    Currently only application logs (including console.log() output) and system-generated logs are supported. For more information please refer to [Cloudflare Workers official OpenTelemetry Docs](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#supported-telemetry-types)
+</Admonition>
 
 ## Prerequisites
 
@@ -41,7 +45,7 @@ When combined with trace instrumentation, logs can be correlated with traces for
      - SigNoz Cloud: `https://ingest.<region>.signoz.cloud:443/v1/logs`
      - Self-Hosted: `http://<otel-collector-host>:4318/v1/logs`
    - **Headers**:
-     - SigNoz Cloud: Add `signoz-ingestion-key: <your-key>`
+     - SigNoz Cloud: Add `signoz-ingestion-key: <your-ingestion-key>`
      - Self-Hosted: None required
 5. Save
 
@@ -66,7 +70,7 @@ You can customize the configuration with additional options such as:
 - `head_sampling_rate`: Control sampling rate for logs
 - `persist: false`: Disable storing data in Cloudflare dashboard (only send to SigNoz)
 
-For complete configuration options, refer to [Cloudflare's OpenTelemetry documentation](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/).
+For complete configuration options, refer to [Cloudflare's OpenTelemetry documentation](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#enabling-opentelemetry-export-for-your-worker).
 
 ## Step 4: Deploy
 
@@ -146,4 +150,3 @@ You can click on a particular log entry in the `Logs` view to get the detailed v
 ## Limitations
 
 - **Beta status**: OpenTelemetry data export from Cloudflare Workers is in beta. Features may change.
-- **Log types**: Application logs (including `console.log()` output) and system-generated logs are supported.
