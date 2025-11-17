@@ -16,15 +16,19 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - [Content Structure](#content-structure)
   - [Patterns and components](#patterns-and-components)
   - [Link references to keep handy](#link-references-to-keep-handy)
+  - [Happy path vs troubleshooting](#happy-path-vs-troubleshooting)
   - [URLs and redirects](#urls-and-redirects)
 - [Doc Type–Specific Guidelines](#doc-type–specific-guidelines)
+  - [Overview docs (modules and feature families)](#overview-docs-modules-and-feature-families)
   - [Product docs (features, UI flows)](#product-docs-features-ui-flows)
   - [Send Data docs (instrumentation and pipelines)](#send-data-docs-instrumentation-and-pipelines)
   - [Dashboard templates](#dashboard-templates)
   - [Troubleshooting docs](#troubleshooting-docs)
-  - [User guides (how-to, tasks)](#user-guides-how-to-tasks)
-  - [Sample apps](#sample-apps)
-- [PR Checklist (copy into your PR)](#pr-checklist-copy-into-your-pr)
+  - [User guides (end-to-end flows)](#user-guides-end-to-end-flows)
+  - [Explanation docs (concepts and deep dives)](#explanation-docs-concepts-and-deep-dives)
+  - [Reference docs (schemas, config, APIs)](#reference-docs-schemas-config-apis)
+  - [Sample apps (README.md files)](#sample-apps-readmemd-files)
+- [Docs PR Checklist](#docs-pr-checklist)
 - [Contribute a Doc or Blog Post](#contribute-a-doc-or-blog-post)
 
 ## Workflow
@@ -263,6 +267,21 @@ Every doc should be skimmable and actionable.
 - Cloud → Self-Hosted anchor: <https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted>
 - OpenTelemetry Collector docs: link the specific receiver/exporter you use.
 - OTel Collector configuration guide: <https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/>
+
+### Happy path vs troubleshooting
+
+For tutorials and how-to docs, write for the **happy path** by default:
+
+- Assume a normal, supported setup and show one clear end-to-end flow.
+- Avoid branching into multiple edge cases in the middle of the procedure.
+
+Handle problems as follows:
+
+- Put **critical, common caveats** (version constraints, destructive actions, known sharp edges) inline as short notes or warnings next to the relevant step.
+- Put **detailed debugging and rare edge cases** in a `## Troubleshooting` section at the end of the doc, or in a separate troubleshooting/FAQ page.
+
+Rule of thumb: if most readers will hit the issue, keep a brief warning inline.  
+If only some users will hit it, link them to troubleshooting instead of bloating the main flow.
 
 ### URLs and redirects
 
