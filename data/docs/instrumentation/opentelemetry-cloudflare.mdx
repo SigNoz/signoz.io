@@ -2,25 +2,82 @@
 date: 2025-11-14
 id: opentelemetry-cloudflare
 title: Cloudflare Workers OpenTelemetry Instrumentation
-description: Instrument Cloudflare Workers with OpenTelemetry SDK or auto-instrumentation and send traces to SigNoz
-tags: [SigNoz Cloud, Self-Host]
+description: Instrument Cloudflare Workers with OpenTelemetry Community or Official and send traces to SigNoz
+tags: [SigNoz]
 hide_table_of_contents: true
 ---
 
-This document explains how to instrument Cloudflare Workers with OpenTelemetry using SDK or auto-instrumentation and send traces to SigNoz.
+This document explains how to instrument Cloudflare Workers with OpenTelemetry using Community or Official and send traces to SigNoz.
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
 
 ## Prerequisites
 
 You will need the following in place before moving on to the next step:
 
-- SigNoz Cloud account OR Self-hosted SigNoz instance
-- A Cloudflare account (Paid plan or higher in case of auto instrumentation)
+- A Cloudflare account (Paid plan or higher in case of Official)
 - [Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/), the CLI tool for Cloudflare.
 
 ## Send traces to SigNoz
 
 <Tabs entityName="methods">
-<TabItem value="sdk" label="SDK" default>
+<TabItem value='official' label='Official'>
+
+Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant traces directly to SigNoz without code changes, using Cloudflare's built-in observability features.
+
+#### Step 1: Create destination in Cloudflare
+
+1. Go to [Workers Observability](https://dash.cloudflare.com/?to=/:account/workers-and-pages/observability/pipelines) in your Cloudflare dashboard
+2. Click on **Destinations** Tab
+3. Click **Add destination**
+4. Configure:
+   - **Name**: Choose a name (e.g., `signoz-traces`)
+   - **Type**: Traces
+   - **OTLP Endpoint**:
+     - `https://ingest.<region>.signoz.cloud:443/v1/traces`
+     - See [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview)
+   - **Headers**:
+     - Add `signoz-ingestion-key: <your-ingestion-key>`
+5. Click Save
+
+#### Step 2: Configure Wrangler
+
+Update `wrangler.jsonc` ( _use the destination name created in Step 1_ ):
+
+```json
+{
+  "observability": {
+    "traces": {
+      "enabled": true,
+      "destinations": ["signoz-traces"]
+    }
+  }
+}
+```
+
+**Additional configuration options:**
+
+You can customize the configuration with additional options such as:
+
+- `head_sampling_rate`: Control sampling rate for traces
+- `persist: false`: Disable storing data in Cloudflare dashboard (only send to SigNoz)
+
+For complete configuration options, refer to [Cloudflare's OpenTelemetry documentation](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#enabling-opentelemetry-export-for-your-worker).
+
+#### Step 3: Deploy
+
+Run `wrangler deploy`. Data appears in SigNoz within minutes.
+
+### Limitations
+
+- **Beta status**: OpenTelemetry data export from Cloudflare Workers is in beta. Features may change.
+
+</TabItem>
+<TabItem value="community" label="Community">
 
 **Step 1: Install the SDK**
 
@@ -70,10 +127,9 @@ const config: ResolveConfigFn = (env: Env, _trigger) => {
 export default instrument(handler, config)
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Set the `<region>` to match your SigNoz [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - Replace `<service-name>` with the name of the service associated with this trace
-- For self-hosted SigNoz, use `url: 'http://<otel-collector-host>:4318/v1/traces'` and remove the headers. See [Cloud vs Self-Hosted comparison](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted) for more details.
 
 **Step 4: Deploy the project**
 
@@ -84,80 +140,17 @@ npm run deploy
 ```
 
 </TabItem>
-<TabItem value='auto-instrumentation' label='Auto-instrumentation'>
-
-Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant traces directly to SigNoz without code changes, using Cloudflare's built-in observability features.
-
-#### Step 1: Get SigNoz details
-
-**SigNoz Cloud:**
-- Endpoint: `https://ingest.<region>.signoz.cloud:443` (replace `<region>` with your region: us, eu, or in)
-- Ingestion Key: From your SigNoz Cloud account settings
-
-**Self-Hosted:**
-- Endpoint: `http://<otel-collector-host>:4318`
-
-#### Step 2: Create destinations in Cloudflare
-
-1. Go to [Workers Observability](https://dash.cloudflare.com/?to=/:account/workers-and-pages/observability/pipelines) in your Cloudflare dashboard
-2. Click on **Destinations** Tab
-3. Click **Add destination**
-4. Configure:
-   - **Name**: Choose a name (e.g., `signoz-traces`)
-   - **Type**: Traces
-   - **OTLP Endpoint**:
-     - SigNoz Cloud: `https://ingest.<region>.signoz.cloud:443/v1/traces`
-     - Self-Hosted: `http://<otel-collector-host>:4318/v1/traces`
-   - **Headers**:
-     - SigNoz Cloud: Add `signoz-ingestion-key: <your-ingestion-key>`
-     - Self-Hosted: None required
-5. Save
-
-#### Step 3: Configure Wrangler
-
-Update `wrangler.jsonc` ( _use the destination names created in Step 2_ ):
-
-```json
-{
-  "observability": {
-    "traces": {
-      "enabled": true,
-      "destinations": ["signoz-traces"]
-    }
-  }
-}
-```
-
-**Additional configuration options:**
-
-You can customize the configuration with additional options such as:
-- `head_sampling_rate`: Control sampling rate for traces
-- `persist: false`: Disable storing data in Cloudflare dashboard (only send to SigNoz)
-
-For complete configuration options, refer to [Cloudflare's OpenTelemetry documentation](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#enabling-opentelemetry-export-for-your-worker).
-
-#### Step 4: Deploy
-
-Run `wrangler deploy`. Data appears in SigNoz within minutes.
-
-### Limitations
-
-- **Beta status**: OpenTelemetry data export from Cloudflare Workers is in beta. Features may change.
-
-</TabItem>
 </Tabs>
 
 ## Validate
 
 After deploying your Worker, verify that traces are being sent to SigNoz:
 
-1. **Access SigNoz UI**: Navigate to the `Traces` tab in your SigNoz dashboard
-2. **Generate traffic**: Send requests to your Cloudflare Worker to generate trace data
-3. **View traces**: Within a few minutes, traces from your Worker should appear in the Traces view
-4. **Check destination status**: In your Cloudflare dashboard under Workers Observability > Destinations, verify the status:
-   - **Last: n minutes ago** - Data is being delivered successfully
-   - **Never run** - No data has been delivered yet (check if your Worker is receiving traffic or review sampling rates)
-   - **Error** - Delivery failed (verify OTLP endpoint and authentication headers)
+1. **Access SigNoz UI and generate traces**: Navigate to the `Traces` tab in your SigNoz dashboard and send requests to your Cloudflare Worker to generate trace data
+
+2. **View traces**: Within a few minutes, traces from your Worker should appear in the Traces view
+
+**Expected behavior**: You should see traces with attributes like `worker_name`, `script_name`, and any custom fields from your Worker code.
 
 <Figure
   src="/img/docs/instrumentation/cloudflare/autoinstrumentation_tracelist.webp"
@@ -179,42 +172,40 @@ You can click on a particular `TraceID` in the `Traces` view to get the detailed
 
 **Symptom**: No traces visible in SigNoz UI after deploying the Worker.
 
-**Possible causes and fixes**:
+**Things to investigate**:
 
-1. **Incorrect OTLP endpoint**
-   - **Cause**: Wrong region or endpoint format
-   - **Fix**: Verify the endpoint matches your SigNoz setup:
-     - **SDK method**: Check the `exporter.url` in your `src/index.ts` configuration
-       - SigNoz Cloud: `https://ingest.<region>.signoz.cloud:443/v1/traces`
-       - Self-Hosted: `http://<otel-collector-host>:4318/v1/traces`
-     - **Auto-instrumentation**: Check the OTLP Endpoint in your Cloudflare destination configuration
+1. **Check destination status**
 
-2. **Missing or invalid ingestion key**
-   - **Cause**: Incorrect or missing `signoz-ingestion-key` header (SigNoz Cloud only)
-   - **Fix**:
-     - **SDK method**: Verify the `exporter.headers` in your `src/index.ts` contains the correct ingestion key
-     - **Auto-instrumentation**: Check the Headers in your Cloudflare destination configuration
+   - In your Cloudflare dashboard under Workers Observability > Destinations, verify the status:
+     - **Last: n minutes ago** - Data is being delivered successfully
+     - **Never run** - No data has been delivered yet (check if your Worker is receiving traffic or review sampling rates)
+     - **Error** - Delivery failed (verify OTLP endpoint and authentication headers)
 
-3. **Worker not receiving traffic**
-   - **Cause**: No requests to the Worker means no traces generated
-   - **Fix**: Send test requests to your Worker endpoint
+2. **Incorrect OTLP endpoint**
 
-4. **Missing Node.js compatibility flag** (SDK method only)
-   - **Cause**: `nodejs_compat` flag not enabled in `wrangler.toml`
-   - **Fix**: Add `compatibility_flags = [ "nodejs_compat" ]` to your `wrangler.toml`
+   - Wrong region or endpoint format
+   - Verify the endpoint matches your SigNoz setup: [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview)
 
-5. **Sampling rate too low** (Auto-instrumentation only)
-   - **Cause**: Low `head_sampling_rate` means fewer traces are sent
-   - **Fix**: Increase the sampling rate in your `wrangler.jsonc` configuration
+3. **Missing or invalid ingestion key**
 
-6. **Destination not configured** (Auto-instrumentation only)
-   - **Cause**: Missing or incorrect destination name in `wrangler.jsonc`
-   - **Fix**: Ensure the destination name in `wrangler.jsonc` matches the one created in Cloudflare dashboard
+   - Incorrect or missing `signoz-ingestion-key` header
+   - Copy the correct ingestion key from SigNoz settings and update the destination header
 
-7. **Network/connectivity issues**
-   - **Cause**: Firewall or network blocking OTLP traffic (Self-Hosted only)
-   - **Fix**: Verify your OTel collector is accessible from Cloudflare Workers
+4. **Worker not receiving traffic**
 
+   - No requests to the Worker means no traces generated
+   - Send test requests to your Worker endpoint
+
+5. **Sampling rate too low**
+
+   - Low `head_sampling_rate` means fewer traces are sent
+   - Increase the sampling rate in your `wrangler.jsonc` configuration
+
+6. **Network/connectivity issues**
+   - Firewall or network blocking OTLP traffic
+   - Verify your OTel collector is accessible from Cloudflare Workers
+
+**Verification**: Check the destination status in Cloudflare dashboard (Workers Observability > Destinations) to see delivery status and any errors.
 
 ## Next steps
 
