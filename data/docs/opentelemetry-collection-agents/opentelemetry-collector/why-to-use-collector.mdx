@@ -78,6 +78,18 @@ The Collector's batch processor is a key feature for improving data ingestion ef
 
 Learn how to configure it in the [Batch Processor section of the configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#batch-processor).
 
+### 6. Application Performance and Resource Offloading
+
+The Collector offloads telemetry processing from your applications and services, significantly reducing resource consumption and performance impact. The applications don't need to handle batching, retries, encryption, or complex export logic, the Collector handles these tasks with ease.
+
+### 7. Resilience and Reliability
+
+The Collector provides built-in options to prevent data loss during network issues or backend outages. It has automatic retries, [persistent storage](https://opentelemetry.io/docs/collector/resiliency/#persistent-storage-write-ahead-log---wal), [in-memory buffer](https://opentelemetry.io/docs/collector/resiliency/#sending-queue-in-memory-buffering) features which safeguards telemetry data and makes sure network outages are handled properly.
+
+### 8. Centralized Configuration and Management
+
+Managing telemetry configuration directly in the collection instead of managing separate applications simplifies operations. This allows updating filter rules, adding new exporters, or changing attributes in telemetry data possible without redeploying application.
+
 ## Getting Started
 
 To start using the OpenTelemetry Collector with SigNoz, follow these general steps.
@@ -100,13 +112,13 @@ exporters:
 service:
   pipelines:
     traces:
-      # ... other processors
+      # ... processors like batch, filter, resource, etc.
       exporters: [otlp]
     metrics:
-      # ... other processors
+      # ... processors like batch, filter, etc.
       exporters: [otlp]
     logs:
-      # ... other processors
+      # ... processors like batch, resource, etc.
       exporters: [otlp]
 ```
 
