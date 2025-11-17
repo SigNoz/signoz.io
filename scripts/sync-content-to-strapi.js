@@ -181,6 +181,34 @@ async function fetchAllEntities(endpoint) {
   }
 }
 
+// Helper: Filter entities by deployment_status when available
+function filterEntitiesByDeploymentStatus(entities) {
+  console.log(`  🔍 [DEBUG] Filtering entities by deployment_status: ${DEPLOYMENT_STATUS} ${entities.length} entities`, entities)
+  if (!Array.isArray(entities) || entities.length === 0) {
+    return entities
+  }
+
+  const filteredEntities = entities.filter((entity) => {
+    if (!Object.prototype.hasOwnProperty.call(entity, 'deployment_status')) {
+      return true
+    }
+
+    if (entity.deployment_status === null || entity.deployment_status === undefined) {
+      return true
+    }
+
+    return entity.deployment_status === DEPLOYMENT_STATUS
+  })
+
+  if (filteredEntities.length !== entities.length) {
+    console.log(
+      `  🔒 Filtered ${entities.length - filteredEntities.length} relation candidate(s) by deployment_status=${DEPLOYMENT_STATUS}`
+    )
+  }
+
+  return filteredEntities
+}
+
 // Helper: Create a tag or keyword entry
 async function createTagOrKeyword(endpoint, value, folderName) {
   try {
@@ -243,6 +271,7 @@ async function resolveRelations(folderName, frontmatter) {
 
     // Fetch all entities from the relation endpoint
     let entities = await fetchAllEntities(relationConfig.endpoint)
+    entities = filterEntitiesByDeploymentStatus(entities)
 
     if (entities.length === 0 && !isTagsOrKeywords) {
       console.warn(`  ⚠️ No entities found in ${relationConfig.endpoint}`)
