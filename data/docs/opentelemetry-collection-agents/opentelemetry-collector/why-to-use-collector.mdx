@@ -26,7 +26,7 @@ This is helpful in removing unnecessary traffic like health check endpoints, and
 
 #### Dropping Data
 
-Sometimes you need to remove specific telemetry data entirely. The Collector allows you to drop individual spans or metrics based on their attributes, metrics names, etc. It comes handy when your telemetry data has high cardinality attributes which can impact performance as well as storage costs.
+Sometimes you need to remove specific telemetry data entirely. The Collector allows you to drop individual spans or metrics based on their attributes, metrics names, etc. It comes in handy when your telemetry data has high cardinality attributes which can impact performance as well as storage costs.
 
 You can check guides for dropping telemetry data in [logs](https://signoz.io/docs/logs-management/guides/drop-logs/), [metrics](https://signoz.io/docs/userguide/drop-metrics/) and [traces](https://signoz.io/docs/traces-management/guides/drop-spans/#filter-processor).
 
@@ -50,7 +50,7 @@ The Collector automatically enhances your telemetry data with additional context
 
 Without any manual configuration, the Collector adds metadata including hostname, operating system, and other details about the environment. In cloud environments it automatically detects and adds provider specific metadata such as AWS instance IDs, GCP project information, Azure resource details, along with region and availability zone data.
 
-For containized applications, especially in Kubernetes, the Collector adds metadata with pod names, namespaces and container IDs.
+For containerized applications, especially in Kubernetes, the Collector adds metadata with pod names, namespaces and container IDs.
 
 Check out these guides for setting resource attributes using [resource processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-processor) and [resource detection processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor).
 
@@ -68,11 +68,11 @@ The OTel Collector supports exporting to multiple destinations simultaneously, w
 
 To start using the OpenTelemetry Collector with SigNoz, follow these general steps.
 
-### 1. Deploy the Collector
+#### 1. Deploy the Collector
 
 Choose a deployment method that fits your environment. You can run the Collector as a standalone agent, a sidecar, or a gateway. See the [OTel Collector deployment guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) for detailed instructions.
 
-### 2. Configure the Exporter
+#### 2. Configure the Exporter
 
 In your OTel Collector configuration file (e.g., `otel-collector-config.yaml`), configure the `otlp` exporter to send data to SigNoz.
 
@@ -107,15 +107,15 @@ Replace the following placeholders:
   Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
-### 3. Configure Processors
+#### 3. Configure Processors
 
 Set up processors to filter, scrub, or enrich your telemetry data. For example, you can use the `filter` processor to drop noisy spans or the `resource` processor to add custom attributes. You can find more details in the [OTel Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#2-processors).
 
-### 4. Update Applications
+#### 4. Update Applications
 
 Configure your instrumented applications to send telemetry data to the OTel Collector's address instead of directly to SigNoz.
 
-### 5. Validate in SigNoz
+#### 5. Validate in SigNoz
 
 After deploying the Collector and updating your applications, confirm that telemetry data is appearing in SigNoz under the **Traces**, **Metrics**, and **Logs** tabs.
 
