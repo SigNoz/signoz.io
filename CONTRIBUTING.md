@@ -79,12 +79,29 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Be concise and direct
   - Avoid filler and marketing fluff. Get to the point.
   - Avoid generic intros like “In today’s digital landscape…” and adjectives like “powerful,” “robust,” “seamless.”
+  - Prefer short, focused sentences. If a sentence has multiple clauses, consider splitting it.
+  - Assume the reader is busy and scanning; lead with the most important information.
+- Use plain, consistent language
+  - Avoid jargon if a simpler phrase works.
+  <!-- - When you must use domain-specific terms (for example, “span,” “instrumentation library”), define them once and link to a reference doc. (Reference docs or Glossary page are still WIP so this is not yet required.) -->
+  - Use the same term for the same concept across docs.
 - Prefer clarity over cleverness
   - Use active voice and second person (“you”).
   - Show before/after and expected outcomes when it helps.
+  - Be explicit about what a feature or setting does. For example, instead of “configure the agent as needed,” specify what can be configured and recommended defaults.
+- Set clear expectations and limitations
+  - Call out important caveats (supported environments, versions, performance constraints, and missing features).
+  - If a feature is beta or has known gaps, say so directly so users can plan around it.
 - AI/LLM Usage
   - Using AI/LLMs for research is fine, but verify everything and rewrite in your voice.
   - Do not paste unvetted AI/LLM text. Avoid vague generalities and ensure steps are reproducible.
+- Tone: friendly, not cutesy
+  - Docs are not marketing copy, a blog post, or LinkedIn content.
+  - Aim for confident, clear, professional language with a small amount of warmth when appropriate.
+  - Avoid slang or hypey phrases that get in the way of instructions.
+- Anchor concepts in real-world use cases
+  - When explaining new ideas, ground them in concrete scenarios (for example, “monitoring a Kubernetes app,” “tracking latency across microservices,” or “setting up alerts for errors”).
+  - Prefer concrete, named examples over abstract descriptions.
 - Acronyms and short forms
   - Define on first use, then use the short form consistently.
   - Examples: “OpenTelemetry (OTel),” “OpenTelemetry Collector (OTel Collector),” “OpenTelemetry Protocol (OTLP).”
@@ -151,6 +168,7 @@ Every doc should be skimmable and actionable.
   - `## Steps` or specific setup sections – ordered, with subheadings for clarity.
   - `## Validate` – how to confirm it worked (UI path, endpoint, example output).
   - `## Troubleshooting` – common issues and fixes (more details below).
+  - `## Limitations` – when relevant, call out important constraints and unsupported scenarios (environments, versions, data sources, scale).
 - Explaining commands and code
 
   - Before each command, explain what it does and where to run it (local shell, container, Kubernetes, CI, etc.).
