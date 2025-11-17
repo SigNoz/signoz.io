@@ -1,0 +1,129 @@
+---
+date: 2025-11-14
+id: cloudflare-logs
+title: Send Cloudflare Workers Logs to SigNoz
+description: Send logs from Cloudflare Workers to SigNoz using auto-instrumentation
+tags: [SigNoz Cloud, Self-Host]
+---
+
+Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant logs directly to SigNoz without code changes, using Cloudflare's built-in observability features.
+
+When combined with trace instrumentation, logs can be correlated with traces for complete observability. See [Cloudflare Workers OpenTelemetry Instrumentation](/docs/instrumentation/opentelemetry-cloudflare) to set up traces.
+
+<Admonition type="info">
+Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+remove the ingestion key header as shown in [Cloud →
+Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+
+</Admonition>
+
+## Prerequisites
+
+- Cloudflare Workers Paid plan or higher
+- Wrangler CLI
+
+## Step 1: Create destination in Cloudflare
+
+1. Go to [Workers Observability](https://dash.cloudflare.com/?to=/:account/workers-and-pages/observability/pipelines) in your Cloudflare dashboard
+2. Click on **Destinations** Tab
+3. Click **Add destination**
+4. Configure:
+   - **Name**: Choose a name (e.g., `signoz-logs`)
+   - **Type**: Logs
+   - **OTLP Endpoint**:
+     - `https://ingest.<region>.signoz.cloud:443/v1/logs`
+     - See [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview)
+   - **Headers**:
+     - Add `signoz-ingestion-key: <your-ingestion-key>`
+5. Click Save
+
+## Step 2: Configure Wrangler
+
+Update `wrangler.jsonc` ( _use the destination name created in Step 1_ ):
+
+```json
+{
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "destinations": ["signoz-logs"]
+    }
+  }
+}
+```
+
+**Additional configuration options:**
+
+You can customize the configuration with additional options such as:
+
+- `head_sampling_rate`: Control sampling rate for logs
+- `persist: false`: Disable storing data in Cloudflare dashboard (only send to SigNoz)
+
+For complete configuration options, refer to [Cloudflare's OpenTelemetry documentation](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#enabling-opentelemetry-export-for-your-worker).
+
+## Step 3: Deploy
+
+Run `wrangler deploy`. Logs will appear in SigNoz within minutes.
+
+## Validate
+
+After deploying your Worker, verify that logs are being sent to SigNoz:
+
+1. **Access SigNoz UI and generate logs**: Navigate to the `Logs` tab in your SigNoz dashboard and trigger your Cloudflare Worker to generate log output (e.g., `console.log()` statements)
+2. **View logs**: Within a few minutes, logs from your Worker should appear in the Logs view
+
+**Expected behavior**: You should see logs with attributes like `worker_name`, `script_name`, and any custom fields from your Worker code.
+
+You can click on a particular log entry in the `Logs` view to get the detailed view of the Cloudflare Worker log as shown below.
+
+<Figure
+  src="/img/docs/instrumentation/cloudflare/autoinstrumentation_logline.webp"
+  alt="Sample Cloudflare Log Entry"
+  caption="Sample Cloudflare Log Entry"
+/>
+
+## Troubleshooting
+
+### Logs not appearing in SigNoz
+
+**Symptom**: No logs visible in SigNoz UI after deploying the Worker.
+
+**Things to investigate**:
+
+1. **Check destination status**
+
+   - In your Cloudflare dashboard under Workers Observability > Destinations, verify the status:
+     - **Last: n minutes ago** - Data is being delivered successfully
+     - **Never run** - No data has been delivered yet (check if your Worker is receiving traffic or review sampling rates)
+     - **Error** - Delivery failed (verify OTLP endpoint and authentication headers)
+
+2. **Incorrect OTLP endpoint**
+
+   - Wrong region or endpoint format
+   - Verify the endpoint matches your SigNoz setup: [SigNoz Ingestion Docs](https://signoz.io/docs/ingestion/signoz-cloud/overview)
+
+3. **Missing or invalid ingestion key**
+
+   - Incorrect or missing `signoz-ingestion-key` header
+   - Copy the correct ingestion key from SigNoz settings and update the destination header
+
+4. **Worker not receiving traffic**
+
+   - No requests to the Worker means no logs generated
+   - Send test requests to your Worker endpoint and ensure it has `console.log()` or similar logging statements
+
+5. **Network/connectivity issues**
+   - Firewall or network blocking OTLP traffic
+   - Verify your OTel collector is accessible from Cloudflare Workers
+
+## Next steps
+
+- **Set up traces**: Correlate logs with traces by setting up [Cloudflare Workers trace instrumentation](/docs/instrumentation/opentelemetry-cloudflare)
+- **Query logs**: Use the [Logs Explorer](https://signoz.io/docs/userguide/logs/) to search and filter your Worker logs
+- **Create alerts**: Set up alerts based on log patterns to monitor Worker issues
+- **Build dashboards**: Create custom dashboards combining logs and traces for complete observability
+
+## Limitations
+
+- **Beta status**: OpenTelemetry data export from Cloudflare Workers is in beta. Features may change.
+- **Limited log types**: Currently only application logs (including console.log() output) and system-generated logs are supported. For more information please refer to [Cloudflare Workers official OpenTelemetry Docs](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#supported-telemetry-types)

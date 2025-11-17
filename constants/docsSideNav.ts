@@ -1336,6 +1336,11 @@ const docsSideNav = [
             label: 'Cloudwatch logs',
           },
           {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/cloudflare-logs',
+            label: 'Cloudflare logs',
+          },
+          {
             type: 'category',
             isExpanded: false,
             label: 'Existing Collectors to SigNoz',
