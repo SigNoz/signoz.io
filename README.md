@@ -14,20 +14,26 @@
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
    ```
 
-2. Install and use the correct Node.js version by running the following commands in the project directory:
+2. Install Yarn if you haven't already:
+
+   ```bash
+   npm install -g yarn
+   ```
+
+3. Install and use the correct Node.js version by running the following commands in the project directory:
 
    ```bash
    nvm install
    nvm use
    ```
 
-3. Install dependencies:
+4. Install dependencies:
 
    ```bash
    yarn install
    ```
 
-4. Build the project to ensure there are no errors:
+5. Build the project to ensure there are no errors:
 
    ```bash
    yarn build
@@ -35,13 +41,13 @@
 
    This will create a `build` directory with the production build of the website. Check the output for any errors.
 
-5. Start the development server:
+6. Start the development server:
 
    ```bash
    yarn dev
    ```
 
-6. Open your browser and navigate to `http://localhost:3000` to view the website locally.
+7. Open your browser and navigate to `http://localhost:3000` to view the website locally.
 
 ### Git Hooks
 

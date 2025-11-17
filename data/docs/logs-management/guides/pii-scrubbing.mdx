@@ -1,8 +1,9 @@
 ---
-date: 2024-07-05
+date: 2025-11-12
 id: pii-scrubbing
-tags : [SigNoz Cloud]
+tags: [SigNoz Cloud, Self-Host]
 title: Guide to perform PII Scrubbing using SigNoz
+description: Learn how to scrub PII (Personally Identifiable Information) from logs using OpenTelemetry Collector. This guide shows you how to remove sensitive data like emails, SSNs, and credit card numbers from application logs before they reach SigNoz to ensure GDPR and CCPA compliance.
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -12,29 +13,43 @@ import GetHelp from '@/components/shared/get-help.md'
 PII scrubbing removes sensitive personal information from data to protect privacy and comply with regulations like GDPR and CCPA. SigNoz simplifies this process for your applications using OpenTelemetry. This guide explains how to implement PII scrubbing in your data pipeline before sending information to SigNoz.
 
 ## Prerequisite
+
 - [SigNoz Cloud](https://signoz.io/teams/) account
-- Logs in log file
+- Application sending logs to OpenTelemetry Collector (via OTLP or any other receivers)
 
 ## Send application logs to SigNoz
 
-You need to configure OpenTelemetry Collector to send your logs in log files to SigNoz, checkout [this documentation](https://signoz.io/docs/userguide/collect_logs_from_file/)
-for detailed instructions on how to do this.
+You can send logs to SigNoz via OpenTelemetry Collector using various methods:
+
+- **OTLP:** Direct instrumentation from your application
+- **File Logs:** Using filelog receiver, checkout [this documentation](https://signoz.io/docs/userguide/collect_logs_from_file/)
+- Other OpenTelemetry receivers and protocols
+
+For more detailed guides on setting up log collection for your specific use case, refer to the [Send Logs to SigNoz documentation](https://signoz.io/docs/logs-management/send-logs-to-signoz/).
 
 ## Process of Scrubbing PII Data
 
 OpenTelemetry Collector offers a powerful [transform processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md) to filter and modify sensitive data before it reaches SigNoz. We'll use this processor to perform PII scrubbing on our logs.
 
-### Sample log 
+### Sample log
 
 Let's use the following sample log line to demonstrate the PII scrubbing process:
 
 ```json
-{"timestamp": "2024-07-05T12:34:56Z", "severity": "INFO", "message": "User john.doe@example.com (SSN: 123-45-6789) made a purchase with credit card 4111-1111-1111-1111", "user_id": "12345", "purchase_amount": 99.99}
+{
+  "timestamp": "2024-07-05T12:34:56Z",
+  "severity": "INFO",
+  "message": "User john.doe@example.com (SSN: 123-45-6789) made a purchase with credit card 4111-1111-1111-1111",
+  "user_id": "12345",
+  "purchase_amount": 99.99
+}
 ```
 
 This log contains several pieces of PII that we want to scrub: an email address, a social security number (SSN), and a credit card number inside the log body.
+
 ### Configuring the Transform Processor
-To scrub this PII, we'll use the transform processor in our OpenTelemetry Collector configuration. Trasform processor makes use of [Regular Expressions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions) for scrubbing your sensitive data. Here's how we can set it up:
+
+To scrub this PII, we'll use the transform processor in our OpenTelemetry Collector configuration. Transform processor makes use of [Regular Expressions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions) for scrubbing your sensitive data. Here's how we can set it up:
 
 ```yaml
 processors:
@@ -58,7 +73,9 @@ Let's break down what each statement does:
 - The third statement identifies credit card number patterns and replaces all digits with asterisks.
 
 ### Applying the Processor
+
 To apply this processor to your logs pipeline, add it to the processors list in your pipeline configuration:
+
 ```yaml
 service:
   pipelines:
@@ -68,9 +85,12 @@ service:
       processors: [batch, transform]
       exporters: [otlp]
 ```
+
 ### Result
+
 After applying this configuration and restarting your OpenTelemetry Collector, the sample log line would be transformed to:
-```yaml
+
+```json
 {
   "timestamp": "2024-07-05T12:34:56Z",
   "severity": "INFO",
@@ -79,17 +99,22 @@ After applying this configuration and restarting your OpenTelemetry Collector, t
   "purchase_amount": 99.99
 }
 ```
-<figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/guides/sample-log-scrubbed-output.webp" alt="Sample log output with PII data scrubbed out"/>
-    <figcaption><i>Sample log output with PII data scrubbed out</i></figcaption>
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/logs-management/guides/sample-log-scrubbed-output.webp"
+    alt="Sample log output with PII data scrubbed out"
+  />
+  <figcaption>
+    <i>Sample log output with PII data scrubbed out</i>
+  </figcaption>
 </figure>
 
 As you can see, the email address, SSN, and credit card number have been scrubbed, protecting this sensitive information before it reaches SigNoz.
 Remember to adjust the regular expressions in the `replace_pattern` statements as needed to match the specific formats of PII in your logs. You can add more statements to handle additional types of sensitive data that may appear in your logs.
 
-
-To know more about the capabilities of trasform processsor, checkout [this documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md).
+To know more about the capabilities of transform processor, checkout [this documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md).
 
 ## Get Help
 
-<GetHelp /> 
+<GetHelp />
