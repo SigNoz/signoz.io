@@ -1,0 +1,129 @@
+---
+date: 2025-10-21
+id: saml-awsso
+tags : [SigNoz Cloud, Self-Host]
+title: SAML Authentication with AWS SSO
+---
+
+## Overview
+
+This guide walks you through setting up SAML (Security Assertion Markup Language) authentication between AWS SSO and SigNoz.
+
+**What you'll accomplish:**
+- Configure AWS SSO as an identity provider (IdP) for SigNoz
+- Enable your team to access SigNoz using their existing AWS SSO accounts
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- **AWS SSO account** with administrative access
+- **SigNoz account** (Cloud or Self-Hosted with License) with administrative access
+- **Your SigNoz instance URL** (e.g., `https://signoz.example.com`)
+
+## Configuration Steps
+
+### Step 1: Create SAML Application in AWS Identity Center
+
+1. Log in to your AWS Identity Center admin console and create a new SAML application.
+2. The name of the application should be the URL of your SigNoz instance. For instance, if your SigNoz instance URL is `https://signoz.example.com`, then the name of the application should be `https://signoz.example.com`.
+
+### Step 2: Configure Entity ID and URLs
+
+In the SAML application configuration:
+
+1. **Application Start URL**: Enter your SigNoz instance URL (e.g., `https://signoz.example.com`)
+
+2. **ACS URL**: Enter your SigNoz instance URL with the redirect path `/api/v1/complete/saml` appended to it (e.g., `https://signoz.example.com/api/v1/complete/saml`)
+
+3. **Application SAML Audience**: Enter your SigNoz instance host:port (e.g., `signoz.example.com` if your SigNoz instance URL is `https://signoz.example.com`)
+
+![AWS SSO SAML Application Configuration 1](/img/docs/sso/awsso-01.png)
+
+
+### Step 3: Configure Additional Settings
+
+Ensure the following settings match the configuration shown in the image below:
+
+![AWS SSO SAML Application Configuration 2](/img/docs/sso/awsso-02.png)
+
+### Step 4: Save Configuration
+
+Click the **Save** button to create your SAML application.
+
+### Step 5: Export Metadata
+
+1. Export the AWS SSO metadata file.
+
+The metadata file contains important configuration details like:
+- AWS SSO's signing certificate
+- Single Sign-On service URLs
+- Entity identifiers
+
+**Example metadata file structure:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="<entity-id>">
+  <md:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <ds:X509Data>
+          <ds:X509Certificate>cert</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="<idp-url>"/>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="<idp-url>"/>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="<idp-url>"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="<idp-url>"/>
+  </md:IDPSSODescriptor>
+</md:EntityDescriptor>
+```
+
+### Step 6: Configure SigNoz for SAML Authentication
+
+Now you'll configure SigNoz to accept authentication from AWS SSO:
+
+1. **Navigate to SigNoz Settings:**
+   - Go to your SigNoz dashboard
+   - Click on **Settings** in the left sidebar
+   - Navigate to **Members & SSO**
+   - Click on **Authenticated Domains**
+
+2. **Add New Domain:**
+   - Click **Add Domain**
+   - Select **SAML** as the authentication method
+
+3. **Enter Configuration Details:**
+   ```
+   Domain: example.com
+   SAML ACS URL/SAML IDP URL: <idp-url>
+   SAML X.509 Certificate: <cert>
+   SAML Entity ID: <entity-id>
+   Skip AuthN Requests Signed: True
+   ```
+
+   **Where to find these values:**
+   - **Domain**: The email domain for users who should use SSO (e.g., `example.com` for users with `@example.com` emails)
+   - **SAML IDP URL**: Found in the metadata file under `<md:SingleSignOnService Location="...">`
+   - **SAML X.509 Certificate**: The certificate content from the metadata file (between `<ds:X509Certificate>` tags)
+   - **SAML Entity ID**: The `entityID` value from the metadata file
+
+4. **Save Configuration:**
+   - Click **Save** to apply the SAML configuration
+
+### Step 7: Test the Integration
+
+1. **Log out** of SigNoz if you're currently logged in
+2. **Navigate** to your SigNoz login page
+3. **Try** logging in with a AWS SSO user email
+4. **Verify** that you're redirected to AWS SSO for authentication
+5. **Complete** the AWS SSO login process
+6. **Confirm** you're successfully logged into SigNoz
+
+## Troubleshooting
+
+**Common issues and solutions:**
+
+- If AWS SSO keeps failing, double check the SAML Audience. It should match the SigNoz instance host:port.
+- **Locked out?**: If you're unable to login because of faulty setup, use password authentication by appending `?password=Y` to your login URL: `<your-instance-url>/login?password=Y`

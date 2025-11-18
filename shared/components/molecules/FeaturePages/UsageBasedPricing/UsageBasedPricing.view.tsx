@@ -25,7 +25,7 @@ const UsageBasedPricing: React.FC<{ show: Section[] }> = ({ show }) => {
                   We're here for you.
                 </p>
                 <div className="[&>div]:border-0 [&>div]:bg-transparent">
-                  <PricingCalculator show={show} showHeader={false} showFooter={false} />
+                  <PricingCalculator show={show} showHeader={false} showFooter={false} embedded={true} />
                 </div>
                 <Card className="bg-transparent p-0 [&>div]:border-0">
                   <div className="flex items-center justify-between gap-4 p-4 bg-signoz_robin-500/10 rounded-lg">

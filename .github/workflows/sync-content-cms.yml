@@ -1,0 +1,231 @@
+# GitHub Actions Workflow: Sync Content to Strapi CMS (With Relations Support)
+# This workflow syncs content changes from specific data folders to Strapi CMS
+# Supports foreign key relations: tags, authors, related_faqs
+# Triggers: On labeled PR, on push to staging/main branches
+
+name: Sync Content to Strapi CMS
+
+on:
+  pull_request:
+    types: [labeled, synchronize, opened, reopened]
+    paths:
+      - 'data/**/*.mdx'
+      - 'data/**/*.md'
+  push:
+    branches:
+      - main  # Configurable: Change to your production branch
+      - staging  # Configurable: Change to your staging branch
+    paths:
+      - 'data/**/*.mdx'
+      - 'data/**/*.md'
+
+env:
+  # Configurable: Array of folders to sync to CMS
+  SYNC_FOLDERS: '["faqs", "case-study"]'
+  
+  # Strapi Configuration
+  CMS_API_URL: ${{ secrets.CMS_API_URL }}
+  CMS_API_TOKEN: ${{ secrets.CMS_API_TOKEN }}
+  
+  # Revalidation Configuration
+  NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+  NEXT_PUBLIC_STAGING_BASE_URL: ${{ secrets.NEXT_PUBLIC_STAGING_BASE_URL }}
+  REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+  
+  # Branch Configuration
+  PRODUCTION_BRANCH: 'main'
+  STAGING_BRANCH: 'staging'
+
+jobs:
+  detect-changes:
+    name: Detect Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      changed_files: ${{ steps.changed-files.outputs.all_changed_files }}
+      deleted_files: ${{ steps.changed-files.outputs.deleted_files }}
+      any_changed: ${{ steps.changed-files.outputs.any_changed }}
+      any_deleted: ${{ steps.changed-files.outputs.any_deleted }}
+      deployment_status: ${{ steps.determine-status.outputs.deployment_status }}
+      should_sync: ${{ steps.check-sync.outputs.should_sync }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            data/**/*.mdx
+            data/**/*.md
+          json: true
+          escape_json: false
+
+      - name: Check if Sync is Required
+        id: check-sync
+        run: |
+          echo "Checking if sync should run..."
+          
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'staging') }}" == "true" ]]; then
+              echo "should_sync=true" >> $GITHUB_OUTPUT
+              echo "✅ Sync enabled: PR has 'staging' label"
+            else
+              echo "should_sync=false" >> $GITHUB_OUTPUT
+              echo "⏭️ Sync skipped: PR does not have 'staging' label"
+            fi
+          else
+            echo "should_sync=true" >> $GITHUB_OUTPUT
+            echo "✅ Sync enabled: Push event to branch"
+          fi
+
+      - name: Determine Deployment Status
+        id: determine-status
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'staging') }}" == "true" ]]; then
+              echo "deployment_status=staging" >> $GITHUB_OUTPUT
+              echo "📦 Deployment Status: staging"
+            else
+              echo "deployment_status=draft" >> $GITHUB_OUTPUT
+              echo "📦 Deployment Status: draft"
+            fi
+          elif [[ "${{ github.ref }}" == "refs/heads/${{ env.PRODUCTION_BRANCH }}" ]]; then
+            echo "deployment_status=live" >> $GITHUB_OUTPUT
+            echo "📦 Deployment Status: live"
+          elif [[ "${{ github.ref }}" == "refs/heads/${{ env.STAGING_BRANCH }}" ]]; then
+            echo "deployment_status=staging" >> $GITHUB_OUTPUT
+            echo "📦 Deployment Status: staging"
+          else
+            echo "deployment_status=draft" >> $GITHUB_OUTPUT
+            echo "📦 Deployment Status: draft"
+          fi
+
+      - name: Display Changed Files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "📝 Changed files detected:"
+          echo '${{ steps.changed-files.outputs.all_changed_files }}' | jq -r '.[]'
+
+      - name: Display Deleted Files
+        if: steps.changed-files.outputs.any_deleted == 'true'
+        run: |
+          echo "🗑️ Deleted files detected:"
+          echo '${{ steps.changed-files.outputs.deleted_files }}' | jq -r '.[]'
+
+  sync-to-cms:
+    name: Sync Content to CMS
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: (needs.detect-changes.outputs.any_changed == 'true' || needs.detect-changes.outputs.any_deleted == 'true') && needs.detect-changes.outputs.should_sync == 'true'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm install --no-save \
+            gray-matter \
+            axios \
+            js-yaml
+
+      - name: Sync Content to Strapi
+        id: sync
+        env:
+          CHANGED_FILES: ${{ needs.detect-changes.outputs.changed_files }}
+          DELETED_FILES: ${{ needs.detect-changes.outputs.deleted_files }}
+          DEPLOYMENT_STATUS: ${{ needs.detect-changes.outputs.deployment_status }}
+        run: node scripts/sync-content-to-strapi.js
+
+      - name: Trigger Revalidation
+        if: success()
+        env:
+          DEPLOYMENT_STATUS: ${{ needs.detect-changes.outputs.deployment_status }}
+        run: |
+          echo "🔄 Triggering ISR revalidation..."
+          echo "Environment: $DEPLOYMENT_STATUS"
+          
+          # Determine the base URL based on deployment status
+          if [ "$DEPLOYMENT_STATUS" = "live" ]; then
+            BASE_URL="${{ env.NEXT_PUBLIC_BASE_URL }}"
+            echo "Using production URL: $BASE_URL"
+          elif [ "$DEPLOYMENT_STATUS" = "staging" ]; then
+            BASE_URL="${{ env.NEXT_PUBLIC_STAGING_BASE_URL }}"
+            echo "Using staging URL: $BASE_URL"
+          else
+            echo "⏭️ Skipping revalidation for draft deployment"
+            exit 0
+          fi
+          
+          RESPONSE=$(curl -s -w "\n%{http_code}" --location "$BASE_URL/api/revalidate" \
+            --header 'Content-Type: application/json' \
+            --data "{
+              \"revalidateAll\": true,
+              \"clearCache\": true,
+              \"secret\": \"${{ env.REVALIDATE_SECRET }}\"
+            }")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "✅ Revalidation successful!"
+            echo "Response: $BODY"
+          else
+            echo "❌ Revalidation failed with HTTP $HTTP_CODE"
+            echo "Response: $BODY"
+            exit 1
+          fi
+
+      - name: Update PR Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          JOB_STATUS: ${{ job.status }}
+          DEPLOYMENT_STATUS: ${{ needs.detect-changes.outputs.deployment_status }}
+        with:
+          script: |
+            const script = require('${{ github.workspace }}/scripts/update-pr-comment.js');
+            await script({github, context, core});
+
+  report-status:
+    name: Report Status
+    runs-on: ubuntu-latest
+    needs: [detect-changes, sync-to-cms]
+    if: always()
+    
+    steps:
+      - name: Report Success
+        if: needs.sync-to-cms.result == 'success'
+        run: |
+          echo "✅ Workflow completed successfully!"
+          echo "Deployment Status: ${{ needs.detect-changes.outputs.deployment_status }}"
+
+      - name: Report Failure
+        if: needs.sync-to-cms.result == 'failure'
+        run: |
+          echo "❌ Workflow failed!"
+          echo "Please check the logs above for detailed error messages."
+          exit 1
+
+      - name: Report Skipped
+        if: needs.detect-changes.outputs.should_sync != 'true' || (needs.detect-changes.outputs.any_changed != 'true' && needs.detect-changes.outputs.any_deleted != 'true')
+        run: |
+          echo "⏭️ Sync was skipped."
+          if [[ "${{ needs.detect-changes.outputs.any_changed }}" != "true" && "${{ needs.detect-changes.outputs.any_deleted }}" != "true" ]]; then
+            echo "Reason: No content files changed or deleted"
+          else
+            echo "Reason: PR does not have 'staging' label"
+          fi

@@ -1,0 +1,101 @@
+---
+date: 2025-10-23
+title: Cloud vs Self-Hosted Ingestion
+tags: [SigNoz Cloud, Self-Host]
+id: ingestion-cloud-vs-self-hosted
+---
+
+Most ingestion steps are identical for SigNoz Cloud and self-hosted SigNoz. The main differences are endpoint, authentication, and TLS. Use this page when a doc only shows one environment and you want to adapt it to the other.
+
+## Quick Differences
+
+- Endpoint
+  - Cloud: `https://ingest.<region>.signoz.cloud:443` (single port for OTLP/HTTP and OTLP/gRPC)
+  - Self-Host: `http(s)://<signoz-host>:4317` (gRPC) or `http(s)://<signoz-host>:4318` (HTTP)
+- Authentication
+  - Cloud: Add header `signoz-ingestion-key: <key>` (or basic auth)
+  - Self-Host: No ingestion key; add auth/TLS at your proxy/ingress if you need it
+- TLS
+  - Cloud: Always TLS on `443`
+  - Self-Host: Plain HTTP by default; enable TLS via ingress/reverse proxy for production
+- Paths (OTLP/HTTP)
+  - Both: SDKs/collectors append `/v1/{traces|metrics|logs}` automatically
+- CORS
+  - Cloud: Enabled on all endpoints
+  - Self-Host: Enable CORS explicitly on the OTLP HTTP receiver if needed
+
+## Cloud to Self-Hosted
+
+Using a guide that only shows SigNoz Cloud steps? Apply the following minimal changes to send data to self-hosted SigNoz:
+
+### Language SDKs
+
+```diff
+- OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+- OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<KEY>
++ OTEL_EXPORTER_OTLP_ENDPOINT=http://<signoz-host>:4317   # or :4318 for HTTP
++ OTEL_EXPORTER_OTLP_INSECURE=true                       # set to false when using TLS
++ # No ingestion key header needed
+```
+
+Notes:
+
+- If you enable TLS for self-hosted (via ingress/reverse proxy), use `https://<host>:443` and set `OTEL_EXPORTER_OTLP_INSECURE=false` (or omit it) and trust the certificates as needed.
+- OTLP/HTTP appends `/v1/{traces|metrics|logs}` automatically when you use the signal-agnostic endpoint variable `OTEL_EXPORTER_OTLP_ENDPOINT`.
+
+### OpenTelemetry Collector (gateway/agent)
+
+```diff
+ exporters:
+-  otlphttp:
+-    endpoint: https://ingest.<region>.signoz.cloud:443
+-    headers:
+-      signoz-ingestion-key: <KEY>
++  otlp:                       # gRPC (use otlphttp on :4318 if you prefer HTTP)
++    endpoint: <signoz-host>:4317
++    tls:
++      insecure: true         # set to false when you enable TLS/HTTPS
+```
+
+If you switch to HTTPS on self-hosted, change the endpoint to `https://<host>:443`, remove `tls.insecure: true`, and add a `tls` block only if you need to trust custom CAs.
+
+## Self-Hosted to Cloud
+
+Using a guide that only shows Self-Hosted steps? Apply the following minimal changes to send data to SigNoz Cloud:
+
+### Language SDKs
+
+```diff
+- OTEL_EXPORTER_OTLP_ENDPOINT=http://<signoz-host>:4317   # or :4318 for HTTP
+- OTEL_EXPORTER_OTLP_INSECURE=true                       # when not using TLS
++ OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
++ OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<KEY>
++ # Keep your protocol (grpc or http/protobuf); both work on 443
++ # Remove OTEL_EXPORTER_OTLP_INSECURE if previously set
+```
+
+Notes:
+
+- Keep your current protocol; Cloud supports both OTLP/gRPC and OTLP/HTTP on 443.
+
+### OpenTelemetry Collector (gateway/agent)
+
+```diff
+ exporters:
+-  otlp:                       # gRPC to self-hosted
+-    endpoint: '<signoz-host>:4317'
+-    tls:
+-      insecure: true
++  otlphttp:
++    endpoint: https://ingest.<region>.signoz.cloud:443
++    headers:
++      signoz-ingestion-key: <KEY>
+```
+
+Alternative (gRPC): you can also keep `otlp` and set `endpoint: ingest.<region>.signoz.cloud:443` with `headers: { signoz-ingestion-key: <KEY> }` and no `tls.insecure`.
+
+## References
+
+- [Self-Hosted Ingestion Overview](/docs/ingestion/self-hosted/overview)
+- [SigNoz Cloud Ingestion Overview](/docs/ingestion/signoz-cloud/overview)
+- [OpenTelemetry Collector configuration](/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration)

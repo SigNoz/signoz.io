@@ -7,7 +7,8 @@ import {
   SiClaude,
   SiGooglegemini,
   SiAnthropic,
-  SiAmazonwebservices
+  SiAmazonwebservices,
+  SiPydantic,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -33,7 +34,13 @@ const LLMMonitoringData: IconCardData[] = [
   {
     name: 'Azure OpenAI API',
     href: '/docs/azure-openai-monitoring',
-    icon: <img src="/svgs/icons/LLMMonitoring/azure-logo.webp" alt="Azure OpenAI Icon" className="h-7 w-7" />,
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/azure-logo.webp"
+        alt="Azure OpenAI Icon"
+        className="h-7 w-7"
+      />
+    ),
     clickName: 'Azure OpenAI API Monitoring',
   },
   {
@@ -44,14 +51,22 @@ const LLMMonitoringData: IconCardData[] = [
   },
   {
     name: 'Crew AI',
-    href: '/docs/crewai-monitoring',
-    icon: <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />,
+    href: '/docs/crewai-observability',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/crewai-logo.svg" alt="Crew AI Icon" className="h-7 w-7" />
+    ),
     clickName: 'Crew AI Monitoring',
   },
   {
     name: 'DeepSeek API',
     href: '/docs/deepseek-monitoring',
-    icon: <img src="/svgs/icons/LLMMonitoring/deepseek-icon.svg" alt="DeepSeek Icon" className="h-7 w-7" />,
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/deepseek-icon.svg"
+        alt="DeepSeek Icon"
+        className="h-7 w-7"
+      />
+    ),
     clickName: 'DeepSeek Monitoring',
   },
   {
@@ -62,31 +77,51 @@ const LLMMonitoringData: IconCardData[] = [
   },
   {
     name: 'LangChain/LangGraph',
-    href: '/docs/langchain-monitoring',
+    href: '/docs/langchain-observability',
     icon: <SiLangchain className="h-7 w-7 text-white" />,
     clickName: 'LangChain Monitoring',
   },
   {
+    name: 'LiteLLM',
+    href: '/docs/litellm-observability',
+    icon: (
+      <img src="/img/docs/llm/litellm/litellm-logo.webp" alt="LiteLLM Icon" className="h-7 w-7" />
+    ),
+    clickName: 'LiteLLM Monitoring',
+  },
+  {
     name: 'LlamaIndex',
-    href: '/docs/llamaindex-monitoring',
-    icon: <img src="/svgs/icons/LLMMonitoring/llamaindex-icon.svg" alt="LlamaIndex Icon" className="h-7 w-7" />,
+    href: '/docs/llamaindex-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/llamaindex-icon.svg"
+        alt="LlamaIndex Icon"
+        className="h-7 w-7"
+      />
+    ),
     clickName: 'LlamaIndex Monitoring',
   },
   {
     name: 'Mastra',
-    href: '/docs/mastra-monitoring',
+    href: '/docs/mastra-observability',
     icon: <img src="/img/docs/llm/mastra/mastra-icon.webp" alt="Mastra Icon" className="h-7 w-7" />,
     clickName: 'Mastra Monitoring',
   },
   {
     name: 'OpenAI',
-    href: '/docs/opentelemetry-openai-monitoring',
+    href: '/docs/openai-monitoring',
     icon: <SiOpenai className="h-7 w-7 text-green-400" />,
     clickName: 'OpenAI Monitoring',
   },
   {
+    name: 'Pydantic AI',
+    href: '/docs/pydantic-ai-observability',
+    icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
+    clickName: 'Pydantic AI Monitoring',
+  },
+  {
     name: 'Vercel AI SDK',
-    href: '/docs/vercel-ai-sdk-monitoring',
+    href: '/docs/vercel-ai-sdk-observability',
     icon: <SiVercel className="h-7 w-7 text-white" />,
     clickName: 'Vercel AI SDK Monitoring',
   },

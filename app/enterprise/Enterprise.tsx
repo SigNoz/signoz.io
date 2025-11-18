@@ -356,7 +356,7 @@ export default function Enterprise() {
                   <div className="font-normal">
                     Powered by ClickHouse (used by likes of{' '}
                     <a
-                      href="https://www.uber.com/en-IN/blog/logging/"
+                      href="https://www.uber.com/blog/logging/"
                       target="_blank"
                       rel="noopener noreferrer"
                     >

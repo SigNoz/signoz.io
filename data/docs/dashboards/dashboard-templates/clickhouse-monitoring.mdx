@@ -1,0 +1,143 @@
+---
+date: 2025-01-03
+id: clickhouse-monitoring
+title: ClickHouse Monitoring Dashboard
+description: Monitor ClickHouse database performance with comprehensive metrics including query execution, resource utilization, connection metrics, replication health, and storage operations.
+---
+
+This dashboard provides comprehensive monitoring of ClickHouse database performance, offering detailed visibility into query execution times, resource utilization, connection metrics, replication health, and storage operations. It enables teams to effectively monitor their ClickHouse deployments and troubleshoot performance issues.
+
+<div className="flex justify-center">
+  <DashboardActions 
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/clickhouse/clickhouse-overview.json"
+    dashboardName="ClickHouse Monitoring Dashboard"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks essential ClickHouse metrics to help you:
+
+- **Query Performance Monitoring**: Track query execution times, throughput, and failed queries
+- **Resource Utilization**: Monitor CPU, memory, and disk usage across ClickHouse nodes
+- **Connection Management**: Track active connections, connection pool status, and session metrics
+- **Replication Health**: Monitor replica lag, synchronization status, and cluster health
+- **Storage Operations**: Track disk usage, merge operations, part statistics, and storage efficiency
+- **System Performance**: Analyze background processes, cache performance, and system load
+
+## Metrics Included
+
+### Query Performance Section
+
+#### Query Execution Metrics
+- **Queries Per Second (QPS)**: Real-time query throughput showing database load
+  - Grouped by query type (SELECT, INSERT, etc.) for detailed analysis
+  - Essential for capacity planning and performance optimization
+
+- **Query Execution Time**: Response time metrics including:
+  - **Average Duration**: Mean query execution time
+  - **P50/P90/P99 Latency**: Percentile-based latency analysis
+  - Helps identify slow queries and performance bottlenecks
+
+#### Query Status Tracking
+- **Failed Query Rate**: Percentage of failed queries over time
+  - Critical for identifying database issues and application problems
+  - Grouped by error type for detailed troubleshooting
+
+- **Query Types Distribution**: Breakdown of query types (SELECT, INSERT, UPDATE, DELETE)
+  - Shows workload patterns and database usage trends
+  - Useful for optimizing database schema and indexes
+
+### Resource Utilization Section
+
+#### CPU and Memory Performance
+- **CPU Utilization**: Host and ClickHouse process CPU consumption
+  - Tracks both system-wide and ClickHouse-specific CPU usage
+  - Essential for identifying processing bottlenecks
+
+- **Memory Usage**: Memory consumption metrics including:
+  - **Total Memory Usage**: Overall memory consumption by ClickHouse
+  - **Query Memory Usage**: Memory used by active queries
+  - **Cache Memory**: Memory used for various ClickHouse caches
+
+#### Storage Metrics
+- **Disk Usage**: Storage consumption across ClickHouse data directories
+  - Tracks data growth patterns and capacity planning needs
+  - Grouped by disk and partition for detailed analysis
+
+- **Disk I/O Operations**: Read and write operations per second
+  - Monitor disk performance and identify I/O bottlenecks
+  - Essential for storage optimization and capacity planning
+
+### Connection and Session Management
+
+#### Connection Metrics
+- **Active Connections**: Current number of client connections
+  - Tracks connection pool utilization and capacity
+  - Important for connection limit management
+
+- **Connection Rate**: New connections per second
+  - Monitors connection establishment patterns
+  - Helps identify connection leaks or unusual access patterns
+
+#### Session Analysis
+- **Active Sessions**: Currently executing queries and their duration
+  - Shows concurrent query execution and resource usage
+  - Critical for identifying long-running or stuck queries
+
+### Replication and Cluster Health
+
+#### Replication Monitoring
+- **Replica Lag**: Maximum lag time between replicas
+  - Tracks replication health and data consistency
+  - Critical for high-availability deployments
+
+- **Replication Queue**: Number of pending replication tasks
+  - Shows replication backlog and potential issues
+  - Important for maintaining cluster synchronization
+
+#### Cluster Statistics
+- **Cluster Node Status**: Health status of all cluster nodes
+  - Monitors node availability and cluster integrity
+  - Essential for distributed ClickHouse deployments
+
+- **Shard Distribution**: Data distribution across cluster shards
+  - Shows balance of data and query load
+  - Important for cluster optimization
+
+### Storage and Merge Operations
+
+#### Part Management
+- **Parts Count**: Number of data parts per table and partition
+  - Tracks storage fragmentation and merge efficiency
+  - High part counts may indicate need for merge optimization
+
+- **Parts Size Distribution**: Size analysis of data parts
+  - Shows storage efficiency and compression effectiveness
+  - Useful for optimizing storage and query performance
+
+#### Background Operations
+- **Merge Operations**: Active and queued merge operations
+  - Tracks background maintenance activities
+  - Important for understanding storage optimization progress
+
+- **Mutation Operations**: DDL operations and their progress
+  - Monitors schema changes and data modifications
+  - Critical for tracking long-running operations
+
+## Dashboard Variables
+
+This dashboard includes comprehensive filtering capabilities:
+
+- **cluster**: Filter by ClickHouse cluster name for multi-cluster environments
+- **database**: Select specific database for focused monitoring
+- **table**: Filter metrics by specific table names
+- **node**: Select individual ClickHouse nodes for node-specific analysis
+- **query_type**: Filter by query types (SELECT, INSERT, etc.)
+
+## Related Dashboards
+
+- [MySQL](/docs/dashboards/dashboard-templates/mysql)
+- [PostgreSQL](/docs/dashboards/dashboard-templates/postgresql)
+- [Redis](https://github.com/SigNoz/dashboards/tree/main/redis)
+- [Host Metrics](/docs/dashboards/dashboard-templates/hostmetrics-dashboards)

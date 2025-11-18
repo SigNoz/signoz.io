@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
+import { useSearchParams } from 'next/navigation'
+import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '@/utils/userUtils'
 
 interface ChatbaseClientProps {
@@ -22,11 +24,18 @@ export default function ChatbaseClient({
 }: ChatbaseClientProps) {
   const isInitialized = useRef(false)
   const [shouldLoadScript, setShouldLoadScript] = useState(false)
+  const searchParams = useSearchParams()
+  const source = searchParams?.get('source')
 
   useEffect(() => {
     // Ensure we're running in a browser environment
     if (typeof window === 'undefined') {
       console.log('Window object not available, skipping Chatbase initialization')
+      return
+    }
+
+    if (source === ONBOARDING_SOURCE) {
+      console.log('Skipping Chatbase initialization due to onboarding source param')
       return
     }
 
@@ -102,7 +111,7 @@ export default function ChatbaseClient({
 
     // Trigger script loading
     setShouldLoadScript(true)
-  }, [disableFloatingMessages, userId, userHash])
+  }, [disableFloatingMessages, source, userId, userHash])
 
   const handleScriptLoad = () => {
     console.log('Chatbase script loaded successfully')

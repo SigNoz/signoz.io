@@ -447,6 +447,148 @@ where,
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 </TabItem>
+<TabItem value="Docker" label="Docker">
+
+There are two ways to send data to SigNoz Cloud. You can containerize the images in both the cases.
+
+- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud-1)
+- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
+
+#### Send traces directly to SigNoz Cloud
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+# -------- Base Image: JBoss EAP --------
+FROM quay.io/wildfly/wildfly:27.0.1.Final-jdk11
+
+# Switch to root for installation
+USER root
+
+# -------- Step 1: Download OpenTelemetry Java Agent --------
+RUN curl -L -o /opt/jboss/opentelemetry-javaagent.jar \
+    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+
+# -------- Step 2: Deploy Application --------
+# Copy your application WAR or EAR file into JBoss deployments
+COPY app.war /opt/jboss/wildfly/standalone/deployments/
+
+# -------- Step 3: Configure OpenTelemetry for SigNoz Cloud --------
+# Add the required JAVA_OPTS configuration to standalone.conf
+RUN echo '\nJAVA_OPTS="$JAVA_OPTS -javaagent:/opt/jboss/opentelemetry-javaagent.jar \
+-Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443 \
+-Dotel.exporter.otlp.headers=\"signoz-ingestion-key=<your-ingestion-key>\" \
+-Dotel.resource.attributes=\"service.name=<service_name>\""' \
+>> /opt/jboss/wildfly/bin/standalone.conf
+
+# -------- Step 4: Expose JBoss Ports --------
+EXPOSE 8080 9990
+
+# -------- Step 5: Start JBoss --------
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+
+The above steps install OpenTelemetry dependencies directly inside the Docker container & sets environment variables to export the traces.
+
+**Step 2.** Run your Docker container
+
+Here's how you can run your docker container:
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+- `-p` maps a host port to a container port
+
+
+**Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+---
+
+#### Send traces via OTel Collector binary
+
+**Step 1.** Configure OpenTelemetry to run in Docker Container
+
+Add the following in your Dockerfile.
+
+```bash
+# -------- Stage 1: Get OpenTelemetry Collector --------
+FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
+
+# -------- Stage 2: Build JBoss EAP App Image --------
+FROM quay.io/wildfly/wildfly:27.0.1.Final-jdk11
+
+USER root
+
+# Download OpenTelemetry Java Agent
+RUN curl -L -o /opt/jboss/opentelemetry-javaagent.jar \
+    https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+
+# Copy your application EAR/WAR file into deployments
+COPY app.war /opt/jboss/wildfly/standalone/deployments/
+
+# Update JBoss configuration to include OTel Java agent
+# We append the javaagent line to standalone.conf
+RUN echo '\nJAVA_OPTS="$JAVA_OPTS -javaagent:/opt/jboss/opentelemetry-javaagent.jar"' \
+    >> /opt/jboss/wildfly/bin/standalone.conf
+
+# Copy OpenTelemetry Collector binary + config from first stage
+COPY --from=otel /otelcol-contrib /otelcol-contrib
+COPY --from=otel /etc/otelcol-contrib /etc/otelcol-contrib
+COPY config.yaml /etc/otelcol-contrib/config.yaml
+
+# Environment variables for OTel
+ENV OTEL_SERVICE_NAME="<service_name>" \
+    OTEL_TRACES_EXPORTER="otlp" \
+    OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
+    OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318" \
+    OTEL_PROPAGATORS="baggage,tracecontext"
+
+# Expose relevant ports (JBoss + Collector)
+EXPOSE 8080 9990 4317 4318
+
+# Run both OTel Collector and JBoss in same container
+CMD sh -c "/otelcol-contrib --config=/etc/otelcol-contrib/config.yaml & \
+           /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0"
+```
+
+Make sure you have `config.yaml` in `root` of the application. This config.yaml should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
+
+- Replace `<run_command>` with the command to run your application
+- `<service_name>` is name of your service
+
+
+**Step 2.** Run your Docker container
+
+Run your docker container to start exporting.
+
+```bash
+docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```
+
+- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+
+- `-d` runs the container in detached mode
+
+- `-p` maps a host port to a container port
+
+
+**Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+
+</TabItem>
 </Tabs>
 
 </TabItem>
