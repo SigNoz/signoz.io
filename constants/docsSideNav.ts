@@ -1899,6 +1899,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
+            label: 'Semantic Kernel',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
             label: 'SigNoz Ingestion Analysis',
           },

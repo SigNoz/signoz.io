@@ -341,6 +341,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Redis Dashboard Template',
   },
   {
+    name: 'Semantic Kernel',
+    href: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/sk-logo.webp"
+        alt="Semantic Kernel Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Semantic Kernel Dashboard Template',
+  },
+  {
     name: 'SigNoz Ingestion Analysis',
     href: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
     icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
