@@ -37,6 +37,9 @@ const DocContent: React.FC<{
 
   const hasTabs = !!post?.body?.raw && post.body.raw.includes('<Tabs')
   const effectiveHideTOC = hideTableOfContents && !hasTabs
+  const shouldRenderTOC =
+    !effectiveHideTOC && Array.isArray(toc) && toc.length > 0 && source !== ONBOARDING_SOURCE
+  const shouldReserveTocColumn = source !== ONBOARDING_SOURCE
 
   return (
     <>
@@ -77,15 +80,15 @@ const DocContent: React.FC<{
         <DocsPrevNext />
       </div>
 
-      {effectiveHideTOC ? (
-        <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
-      ) : (
+      {shouldRenderTOC ? (
         <TableOfContents
           toc={toc}
           hideTableOfContents={effectiveHideTOC}
           source={source || ''}
         />
-      )}
+      ) : shouldReserveTocColumn ? (
+        <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+      ) : null}
     </>
   )
 }
