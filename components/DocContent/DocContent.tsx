@@ -77,7 +77,9 @@ const DocContent: React.FC<{
         <DocsPrevNext />
       </div>
 
-      {!effectiveHideTOC && (
+      {effectiveHideTOC ? (
+        <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+      ) : (
         <TableOfContents
           toc={toc}
           hideTableOfContents={effectiveHideTOC}
