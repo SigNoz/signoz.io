@@ -1,89 +1,82 @@
 ---
-date: 2025-09-12
+date: 2025-11-18
 title: Metrics Overview
 id: metrics-overview
+tags: [SigNoz Cloud, Self-Host]
+description: Overview of metrics management in SigNoz
+doc_type: 'explanation'
 ---
 
-## What are metrics?
+## Overview
 
-Metrics are numerical measurements collected at regular intervals that help you understand the performance and health of your applications and infrastructure. In SigNoz, metrics are time-series data points that track everything from application response times and error rates to system CPU usage and memory consumption.
-As one of the three pillars of observability (alongside logs and traces), metrics provide the quantitative foundation for monitoring, alerting, and performance optimization. SigNoz natively supports OpenTelemetry metrics format along with Prometheus metrics ingestion compatibility, making it easy to ingest metrics from any source.
+Metrics are numbers you collect over time to understand how your applications and infrastructure are behaving. You can use SigNoz to monitor systems with metrics — including CPU usage, memory consumption, and custom metrics your services report.
+
+Metrics help you spot issues early, measure changes, and decide when to scale or optimize. Use this overview to decide where to go next — whether you want to start sending metrics, explore them in the UI, or learn about more advanced options.
 
 ## Types of Metrics
+
 SigNoz supports four fundamental metric types that cover different measurement scenarios:
 
-- Counter: Monotonically increasing values that only go up (e.g., total requests, errors count, bytes processed)
-- Gauge: Values that can go up or down (e.g., CPU usage, memory consumption, queue size)
-- Histogram: Statistical distribution of values in configurable buckets (e.g., request latency, response sizes)
-- Exponential Histogram: An exponential histogram is a metric that represents the distribution of a set of values on a logarithmic scale. Exponential histograms are used to track the distribution of values that span several orders of magnitude. For example, the latency of a network request.
+- Counter: Monotonically increasing values that only go up (for example, total requests, error count, bytes processed).
+- Gauge: Values that can go up or down (for example, CPU usage, memory consumption, queue size).
+- Histogram: Distribution of values in configurable buckets (for example, request latency, response sizes).
+- Exponential Histogram: A histogram that uses logarithmic buckets to efficiently track values that span several orders of magnitude (for example, highly variable network latency).
 
-Each metric type serves specific monitoring needs and comes with appropriate aggregation methods for meaningful analysis.
+Each metric type serves specific monitoring needs and comes with appropriate aggregation methods for meaningful analysis. Learn more in the detailed guide on [Metric Types and Aggregations](https://signoz.io/docs/metrics-management/types-and-aggregation/).
 
-You can learn more in our detailed guide on [Metric Types and Aggregations](https://signoz.io/docs/metrics-management/types-and-aggregation/).
+## Key capabilities
 
-## Sending Metrics to SigNoz
-SigNoz provides multiple pathways to ingest metrics from various sources:
+- **Send metrics from anywhere**
+  - APM metrics: Out-of-the-box APM metrics are derived from traces at no extra cost, providing immediate visibility into application performance. [Learn more](https://signoz.io/docs/traces-management/guides/apm-metrics/).
+  - Custom application metrics: Instrument your applications using OpenTelemetry SDKs for languages like Java, Node.js, Python, Go, and more. Capture custom business metrics alongside standard application performance metrics.
+  - Infrastructure metrics: Collect system-level metrics from hosts, Kubernetes clusters, databases, and CI/CD pipelines using the OpenTelemetry Collector or native integrations.
+  - Prometheus metrics: Seamlessly ingest existing Prometheus metrics using remote write configuration or scrape Prometheus exporters directly using the OpenTelemetry Prometheus receiver.
+  - Cloud provider metrics: Use one-click integrations for AWS. Follow our simple guides for GCP and Azure to monitor cloud resources alongside your applications.
 
-- APM Metrics: Out-of-the-box APM metrics are derived from traces at no extra cost, providing immediate visibility into application performance. [Learn more](https://signoz.io/docs/traces-management/guides/apm-metrics/).
-- Custom Application Metrics: Instrument your applications using OpenTelemetry SDKs for languages like Java, Node.js, Python, Go, and more. Capture custom business metrics alongside standard application performance metrics.
-- Infrastructure Metrics: Collect system-level metrics from hosts, Kubernetes clusters, databases, and CI/CD pipelines using OpenTelemetry Collector or native integrations.
-- Prometheus Metrics: Seamlessly ingest existing Prometheus metrics using remote write configuration or scrape Prometheus exporters directly using OpenTelemetry Prometheus receiver.
-- Cloud Provider Metrics: One-click integrations for AWS, GCP, and Azure services to monitor cloud resources alongside your applications.
+- **Explore metrics interactively**
+  - The Metrics Explorer is SigNoz's interactive interface for discovering, querying, and visualizing metrics. It combines a visual query builder with powerful transformation and aggregation features so you can quickly answer operational questions and iterate on investigations.
+  - Key capabilities include a searchable metric selector, aggregations and functions (sum, avg, percentiles, and more), grouping and breakdowns by attributes (such as service, host, region), filters for precise queries, and options to save and reuse queries.
+    <Figure
+      src="/img/docs/metrics/metrics-explorer/overview-interface.webp"
+      alt="Metrics Explorer overview interface showing comprehensive metrics visibility"
+      caption="Metrics Explorer overview interface showing comprehensive metrics visibility"
+    />
 
-All metrics flow through SigNoz's high-performance ingestion pipeline, with support for filtering and dropping unnecessary metrics to optimize costs.
+- **Query, visualize, and alert on metrics**
+  - Query Builder: Construct complex queries visually by selecting metrics, applying filters, choosing aggregations, and grouping by dimensions. [Learn more about Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
+  - Dashboards: Create custom dashboards with multiple panels and visualization types, and use 40+ pre-built dashboard templates for common services like MongoDB, PostgreSQL, and ArgoCD. [Learn how to manage dashboards](https://signoz.io/docs/userguide/manage-dashboards/).
+  - Alerts: Set up intelligent alerts based on metric thresholds, anomalies, or complex conditions. Configure multi-step rules with multiple notification channels including email, Slack, PagerDuty, and webhooks. [Configure metrics-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
 
-## Exploring Metrics
-The Metrics Explorer is SigNoz's interactive interface for discovering, querying, and visualizing metrics. It combines a friendly visual query builder with powerful transformation and aggregation features so you can quickly answer operational questions and iterate on investigations.
+- **Use advanced query languages when needed**
+  - PromQL: Write Prometheus-style queries for advanced metric analysis and calculations. [Learn to write PromQL queries](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/).
+  - ClickHouse SQL: Use ClickHouse SQL for complex analytics, joins, and custom aggregations on your metrics data. [Write ClickHouse queries for metrics](https://signoz.io/docs/userguide/write-a-metrics-clickhouse-query/).
 
-![Metrics Explorer screenshot](/images/metrics-explorer.svg)
+- **Monitor infrastructure and correlate with applications**
+  - Host monitoring: Track CPU, memory, disk, and network metrics for virtual machines and hosts.
+  - Kubernetes monitoring: Get visibility into pods, nodes, namespaces, clusters, and deployments with automatic service discovery.
+  - Unified observability: Correlate infrastructure health with application logs and traces for rapid root cause analysis. [Learn more about infrastructure monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/).
 
-Key capabilities:
+## Get started
 
-- Metric selector: Quickly find and select any metric from your ingested dataset. Metrics are searchable by name and can show helpful metadata like type, description, sample counts, cardinality, and more.
-- Aggregations & functions: Apply common aggregations (sum, avg, min, max, count, percentiles) and advanced operations (running diff, cut off, time shift and lot more) to shape the data.
-- Grouping & breakdowns: Group results by attributes (for example, service, host, region) and display top-N series to spot hot spots and distribution differences.
-- Filters & search: Apply attribute-level filters to focus on a subset of your environment, and combine multiple filters for precise queries.
-- Save, share & add: Save useful queries as reusable charts, share them with teammates, or add them to dashboards for continuous monitoring.
+- [Send metrics to SigNoz](https://signoz.io/docs/userguide/send-metrics-cloud/) – Start ingesting metrics from your applications and infrastructure.
+- [APM metrics from traces](https://signoz.io/docs/traces-management/guides/apm-metrics/) – Use out-of-the-box APM metrics derived from traces.
 
-The Explorer supports both the visual query builder for rapid iteration and a raw query mode for advanced users who prefer writing queries directly.
+## Use metrics in SigNoz
 
-Learn more in the full guide: [Metrics Explorer guide](https://signoz.io/docs/metrics-management/metrics-explorer/).
+- [Use Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/) – Learn to query and visualize your metrics data.
+- [Manage dashboards](https://signoz.io/docs/userguide/manage-dashboards/) – Build custom dashboards for your monitoring needs.
+- [Configure metrics-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) – Set up alerting rules to get notified about issues.
+- [Infrastructure monitoring overview](https://signoz.io/docs/infrastructure-monitoring/overview/) – Monitor your VMs and Kubernetes clusters.
 
-## Querying Metrics
-SigNoz offers flexible querying capabilities to extract insights from your metrics:
+## Learn more
 
-- **Query Builder**: A visual interface for constructing complex queries without writing code. Select metrics, apply filters, choose aggregations, and group by dimensions with simple clicks. [Learn more about Query Builder](https://signoz.io/docs/userguide/query-builder-v5/).
+- [Metric types and aggregations](https://signoz.io/docs/metrics-management/types-and-aggregation/) – Understand metric types and aggregation strategies.
+- [Metric reporting and storage](https://signoz.io/docs/metrics-management/data-storage/) – Learn how metrics are reported and stored in SigNoz.
+- [Configure custom buckets for histograms](https://signoz.io/docs/metrics-management/configure-custom-buckets/) – Control histogram buckets for latency and other metrics.
+- [Cloud provider metric delay](https://signoz.io/docs/metrics-management/cloud-provider-metric-delay/) – Understand typical delays when using cloud provider metrics.
 
-- **Dashboards**: Create custom dashboards with multiple panels displaying different metrics. Use 6+ visualization types and combine metrics from different sources. Access 40+ pre-built dashboard templates for common services like MongoDB, PostgreSQL, and ArgoCD. [Learn how to manage dashboards](https://signoz.io/docs/userguide/manage-dashboards/).
+## Reference and advanced topics
 
-- **Alerts**: Set up intelligent alerts based on metric thresholds, anomalies, or complex conditions. Configure multi-step alert rules with support for multiple notifications channels including email, Slack, PagerDuty, webhooks and more. [Configure metrics-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
-
-### Advanced Query Languages
-
-Beyond the visual query builder, SigNoz supports multiple query languages for advanced users:
-
-- **PromQL**: Write Prometheus-style queries for complex metric analysis and calculations. PromQL provides powerful aggregation operators, mathematical functions, and time-based operations. [Learn to write PromQL queries](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/).
-
-- **ClickHouse SQL**: Access the full power of ClickHouse's SQL capabilities for advanced analytics, complex joins, and custom aggregations on your metrics data. [Write ClickHouse queries for metrics](https://signoz.io/docs/userguide/write-a-metrics-clickhouse-query/).
-
-These query options provide flexibility to match your team's preferences and use cases, from simple visual queries to complex workloads.
-
-## Infrastructure Monitoring
-SigNoz provides comprehensive infrastructure monitoring capabilities:
-
-- **Host Monitoring**: Track CPU, memory, disk, and network metrics for virtual machines and hosts with real-time performance tracking
-- **Kubernetes Monitoring**: Full visibility into pods, nodes, namespaces, clusters, and deployments with automatic service discovery
-- **Unified Observability**: Correlate infrastructure health with application logs and traces for rapid root cause analysis
-
-Infrastructure metrics automatically correlate with application metrics, enabling rapid root cause analysis when issues arise.
-
-[Learn more about Infrastructure Monitoring](https://signoz.io/docs/infrastructure-monitoring/overview/)
-
-## Quick Links
-Get started with the following resources:
-
-Send Metrics → - Start ingesting metrics from your applications and infrastructure
-Metrics Explorer → - Learn to query and visualize your metrics data
-Create Dashboards → - Build custom dashboards for your monitoring needs
-Set up Alerts → - Configure alerting rules to get notified about issues
-Infrastructure Monitoring → - Monitor your VMs and Kubernetes clusters
+- [Query Builder v5](https://signoz.io/docs/userguide/query-builder-v5/) – Deep dive into the visual query builder.
+- [Write a PromQL query](https://signoz.io/docs/userguide/write-a-prom-query-with-new-format/) – Reference for PromQL in SigNoz.
+- [Write a metrics ClickHouse query](https://signoz.io/docs/userguide/write-a-metrics-clickhouse-query/) – Use ClickHouse SQL for metrics analytics.
