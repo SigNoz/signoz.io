@@ -85,85 +85,97 @@ provider "signoz" {
 
 Define your alert by using the `signoz_alert` resource type as follows:
 ```hcl
-resource "signoz_alert" "example" {
-  alert      = "Example alert"
-  alert_type = "METRIC_BASED_ALERT"
-  condition = jsonencode(
-    {
-      "absentFor" : 10,
-      "alertOnAbsent" : true,
-      "compositeQuery" : {
-        "builderQueries" : {
-          "A" : {
-            "IsAnomaly" : false,
-            "QueriesUsedInFormula" : null,
-            "ShiftBy" : 0,
-            "aggregateAttribute" : {
-              "dataType" : "float64",
-              "isColumn" : true,
-              "isJSON" : false,
-              "key" : "k8s_node_memory_rss",
-              "type" : "Gauge"
-            },
-            "aggregateOperator" : "avg",
-            "dataSource" : "metrics",
-            "disabled" : false,
-            "expression" : "A",
-            "filters" : {
-              "items" : [],
-              "op" : "AND"
-            },
-            "groupBy" : [
+resource "signoz_alert" "new_alert_v2" {
+  alert      = "new alert with v2 schema"
+  alert_type = "LOGS_BASED_ALERT"
+  severity   = "critical"
+
+  condition = jsonencode({
+    compositeQuery = {
+      queries = [
+        {
+          type = "builder_query"
+          spec = {
+            name         = "A"
+            stepInterval = 0
+            signal       = "logs"
+            source       = ""
+            aggregations = [
               {
-                "dataType" : "string",
-                "isColumn" : false,
-                "isJSON" : false,
-                "key" : "k8s_node_name",
-                "type" : "tag"
+                expression = "count()"
               }
-            ],
-            "limit" : 0,
-            "offset" : 0,
-            "pageSize" : 0,
-            "queryName" : "A",
-            "reduceTo" : "avg",
-            "spaceAggregation" : "avg",
-            "stepInterval" : 60,
-            "timeAggregation" : "avg"
+            ]
+            filter = {
+              expression = ""
+            }
+            having = {
+              expression = ""
+            }
           }
-        },
-        "chQueries" : {
-          "A" : {
-            "disabled" : false,
-            "query" : ""
-          }
-        },
-        "panelType" : "graph",
-        "promQueries" : {
-          "A" : {
-            "disabled" : false,
-            "query" : ""
-          }
-        },
-        "queryType" : "builder",
-        "unit" : "bytes"
-      },
-      "matchType" : "1",
-      "op" : "1",
-      "selectedQueryName" : "A",
-      "target" : 10,
-      "targetUnit" : "gbytes"
+        }
+      ]
+      panelType = "graph"
+      queryType = "builder"
     }
-  )
-  severity           = "info"
-  broadcast_to_all   = false
-  preferred_channels = []
-  rule_type          = "threshold_rule"
-  description        = "An example alert created by Terraform"
-  eval_window        = "5m0s"
-  frequency          = "1m0s"
+    selectedQueryName = "A"
+    thresholds = {
+      kind = "basic"
+      spec = [
+        {
+          name           = "critical"
+          target         = 100
+          targetUnit     = ""
+          recoveryTarget = null
+          matchType      = "1"
+          op             = "1"
+          channels       = ["alert-test-terraform"]
+        },
+        {
+          name           = "warning"
+          target         = 50
+          targetUnit     = ""
+          recoveryTarget = null
+          matchType      = "1"
+          op             = "1"
+          channels       = ["alert-test-terraform"]
+        }
+      ]
+    }
+  })
+
+  description      = "This alert is fired when log count crosses the threshold (current: {{$value}}, threshold: {{$threshold}})"
+  summary          = "Log count alert triggered"
+  eval_window      = "5m0s"
+  frequency        = "1m0s"
+  broadcast_to_all = false
+  disabled         = false
+  rule_type        = "threshold_rule"
+  version          = "v5"
+
+  schema_version = "v2alpha1"
+
+  evaluation = jsonencode({
+    kind = "rolling"
+    spec = {
+      evalWindow = "35m0s"
+      frequency  = "1m0s"
+    }
+  })
+
+  notification_settings = {
+    renotify = {
+      interval     = "25m0s"
+      alert_states = ["nodata", "firing"]
+      enabled      = true
+    },
+    group_by   = ["container.id"]
+    use_policy = true
+  }
+
+  preferred_channels = ["alert-test-terraform"]
+
   labels = {
-    "environment" = "test"
+    "team" = "platform"
   }
 }
    ```
