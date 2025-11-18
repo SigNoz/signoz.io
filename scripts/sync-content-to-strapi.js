@@ -183,7 +183,7 @@ async function fetchAllEntities(endpoint) {
 
 // Helper: Filter entities by deployment_status when available
 function filterEntitiesByDeploymentStatus(entities) {
-  console.log(`  🔍 [DEBUG] Filtering entities by deployment_status: ${DEPLOYMENT_STATUS} ${entities.length} entities`, entities)
+  console.log(`  🔍 [DEBUG] Filtering entities by deployment_status: ${DEPLOYMENT_STATUS} ${entities.length} entities`)
   if (!Array.isArray(entities) || entities.length === 0) {
     return entities
   }
@@ -308,7 +308,7 @@ async function resolveRelations(folderName, frontmatter) {
       // Check if matched and has documentId
       if (matched && matched?.documentId) {
         matchedIds.push(matched.documentId)
-        console.log(`    ✅ Matched "${value}" → ID: ${matched.documentId}`)
+        console.log(`    ✅ Matched "${value}" → ID: ${matched.documentId} with deployment_status: ${matched.deployment_status}`)
       } else if (matched && !matched?.documentId) {
         // Matched entity but no documentId
         unmatchedValues.push(value)
