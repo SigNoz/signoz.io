@@ -1774,6 +1774,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/autogen-dashboard',
+            label: 'Autogen',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/azure-openai-dashboard',
             label: 'Azure OpenAI API',
           },
