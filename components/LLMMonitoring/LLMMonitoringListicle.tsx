@@ -32,6 +32,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Anthropic API Monitoring',
   },
   {
+    name: 'AutoGen',
+    href: '/docs/autogen-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/autogen-logo.webp"
+        alt="AutoGen Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'AutoGen Monitoring',
+  },
+  {
     name: 'Azure OpenAI API',
     href: '/docs/azure-openai-monitoring',
     icon: (
