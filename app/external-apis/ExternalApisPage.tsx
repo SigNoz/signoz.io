@@ -13,6 +13,7 @@ import TestimonialCards from '@/shared/components/molecules/FeaturePages/Testimo
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
 import CarouselCards from '@/shared/components/molecules/FeaturePages/CarouselCards'
+import TrackingButton from '@/components/TrackingButton'
 
 // Main Component Sections
 const Header: React.FC = () => {
@@ -157,6 +158,7 @@ const CustomerStories: React.FC = () => {
           <TestimonialCards />
           
           <div className="flex justify-center items-end -mt-[25rem] z-5 bg-gradient-to-t from-signoz_ink-500 to-transparent relative h-96 py-6 max-md:py-16">
+            <TrackingButton clickType="Secondary CTA" clickName="Read Customer Stories Link" clickLocation="Testimonials Section" clickText="Read customer stories">
             <Button 
               variant="secondary" 
               rounded="full"
@@ -166,6 +168,7 @@ const CustomerStories: React.FC = () => {
               Read customer stories
               <ArrowRight size={14} />
             </Button>
+            </TrackingButton>
           </div>
         </div>
       </SectionLayout>
