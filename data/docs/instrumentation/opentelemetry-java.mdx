@@ -70,7 +70,7 @@ wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releas
 **Step 2.** Run your application
 
 ```bash
-java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <myapp>.jar
+java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
 ```
 
 - `<myapp>` is the name of your application jar file
@@ -271,7 +271,7 @@ With this, the auto-instrumentation of traces for Java application is ready.
 In order to run the application on port 8080, run the following commands:
 
 ```bash
-export POD_NAME=$(kubectl get pod -l app=<service-name> -o jsonpath="{.items[0].metadata.name}")  # service name is `java-app` in this case.
+export POD_NAME=$(kubectl get pod -l app=java-app -o jsonpath="{.items[0].metadata.name}")  # Adjust 'java-app' to match your service name if different.
 
 kubectl port-forward ${POD_NAME} 8080:8080
 ```
@@ -316,8 +316,7 @@ WORKDIR /app
 COPY target/<your-app>.jar app.jar
 
 # Download the OpenTelemetry Java agent
-ARG OTEL_JAVAAGENT_VERSION=1.32.0 # Use the latest stable version
-RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
 
 # Command to run the application with the OpenTelemetry agent
 ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
@@ -445,7 +444,7 @@ docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> 
 
 **Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 ---
 
@@ -511,7 +510,7 @@ docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> 
 
 **Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 </TabItem>
 
