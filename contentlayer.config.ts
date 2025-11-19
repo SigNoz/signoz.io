@@ -509,9 +509,6 @@ export const Doc = defineDocumentType(() => ({
     docTags: {
       type: 'json',
       resolve: (doc) => {
-        if (doc._raw.sourceFilePath === 'docs/install.mdx') {
-          console.log('doc.tags', doc, typeof doc.tags, Array.isArray(doc.tags), doc.tags)
-        }
         const resolvedTags = extractPlainArrayValues<string>(doc?.tags)
 
         if (resolvedTags === undefined) {
@@ -519,9 +516,6 @@ export const Doc = defineDocumentType(() => ({
         }
 
         const sanitizedTags = sanitizeDocTags(resolvedTags)
-        if (doc._raw.sourceFilePath === 'docs/install.mdx') {
-          console.log('sanitizedTags', sanitizedTags)
-        }
 
         return sanitizedTags
       },
@@ -661,8 +655,7 @@ export default makeSource({
     ],
   },
   onSuccess: async (importData) => {
-    const importResult = await importData()
-    const allBlogs = 'allBlogs' in importResult ? importResult.allBlogs : []
+    const { allBlogs } = await importData()
     createTagCount(allBlogs)
   },
 })
