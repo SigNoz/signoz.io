@@ -297,17 +297,39 @@ You can validate if your application is sending traces to SigNoz cloud by follow
 </TabItem>
 <TabItem value="otel-collector-agent" label="OTel Collector Agent" default>
 
-For a Java application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
+For a Java application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud.
+
+**Step 1. Install OTel Collector Agent**
+
+Add the SigNoz Helm repository:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update
+```
+
+Install the chart with your SigNoz Cloud configuration:
+
+```bash
+helm install k8s-infra signoz/k8s-infra \
+  --set otelCollectorEndpoint=ingest.<region>.signoz.cloud:443 \
+  --set otelCollectorHeader.signoz-ingestion-key=<your-ingestion-key> \
+  --set global.clusterName=<your-cluster-name>
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Replace `<your-cluster-name>` with a name for your Kubernetes cluster
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Java instrumentation by following the below steps:
 
-1. Download OTel Java binary agent
+**Step 1. Download OTel Java binary agent**
 
 ```bash
 wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 ```
 
-2. Run your application in Kubernetes
+**Step 2. Run your application in Kubernetes**
 
 For Kubernetes deployments, you need to containerize your Java application with the OpenTelemetry Java agent.
 
@@ -412,7 +434,7 @@ There are two ways to send data to SigNoz Cloud. You can containerize the images
 
 #### Send traces directly to SigNoz Cloud
 
-**Step 1.** Configure OpenTelemetry to run in Docker Container
+**Step 1. Configure OpenTelemetry to run in Docker Container**
 
 Add the following in your Dockerfile.
 
@@ -442,7 +464,7 @@ ENTRYPOINT ["java", "-javaagent:/opentelemetry-javaagent.jar", "-jar", "app.jar"
 
 The above steps install OpenTelemetry dependencies directly inside the Docker container & sets environment variables to export the traces.
 
-**Step 2.** Run your Docker container
+**Step 2. Run your Docker container**
 
 Here's how you can run your docker container:
 
@@ -463,7 +485,7 @@ If your applications do not appear in the services section, please refer to the 
 
 #### Send traces via OTel Collector binary
 
-**Step 1.** Configure OpenTelemetry to run in Docker Container
+**Step 1. Configure OpenTelemetry Collector to run in Docker Container**
 
 Add the following in your Dockerfile.
 
@@ -506,7 +528,7 @@ Make sure you have `config.yaml` in `root` of the application. This `config.yaml
 
 - `<service_name>` is name of your service
 
-**Step 2.** Run your Docker container
+**Step 2. Run your Docker container**
 
 Run your docker container to start exporting.
 
@@ -537,7 +559,7 @@ You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelem
 
 [OpenTelemetry Java auto-instrumentation](https://signoz.io/opentelemetry/java-auto-instrumentation/) supports collecting telemetry data from a huge number of libraries and frameworks. You can check out the full list [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md).
 
-1. **Download the latest OpenTelemetry Java JAR agent**
+**Step 1. Download the latest OpenTelemetry Java JAR agent**
 
 Download the latest [Java JAR agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar). You can also use the terminal to get the file using the following command:
 
@@ -545,7 +567,7 @@ Download the latest [Java JAR agent](https://github.com/open-telemetry/opentelem
 wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 ```
 
-2. **Enable the instrumentation agent and run your application**
+**Step 2. Enable the instrumentation agent and run your application**
 
 If you run your Java application as a JAR file, run your application using the following command:
 
