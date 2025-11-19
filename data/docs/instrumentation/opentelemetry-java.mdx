@@ -1,48 +1,15 @@
 ---
-date: 2025-11-11
+date: 2025-11-18
 id: java
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: Java OpenTelemetry Instrumentation
 description: Learn how to instrument your Java application with OpenTelemetry and send telemetry data to SigNoz.
 hide_table_of_contents: true
 ---
 
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
-
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Java applications and view your application traces in SigNoz.
 
-{/* OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Java application.
-*/}
-OpenTelemetry Java is the language-specific implementation of OpenTelemetry in Java. 
-{/* 
-Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
-
-There are three major steps to using OpenTelemetry:
-
-- Instrumenting your Java application with OpenTelemetry
-- Configuring exporter to send data to SigNoz
-- Validating that configuration to ensure that data is being sent as expected. */}
-
-{/* <figure data-zoomable align='center'>
-    <img src="/img/docs/opentelemetry_java_instrument.webp" alt="OpenTelemetry helps to generate and collect telemetry data from your application which is then sent to an observability backend like SigNoz"/>
-    <figcaption><i>OpenTelemetry helps generate and collect telemetry data from Java applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption>
-    </figure> */}
-
-
-{/* There are two types of application instrumentation:
-
-- **Auto Instrumentation**<br></br>
-A completely automatic and out of box experience, with minimal code changes. For your Java application, we recommend getting started with auto instrumentation.
-
-  <Admonition type="info">
-  If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Java applications very easily.
-  </Admonition> */}
-
-{/* - **Manual Instrumentation**<br></br>
-It involves writing instrumentation using OpenTelemetry SDK and API manually. You would need to get a handle to an instance of the `OpenTelemetry` interface, acquire a tracer, and create [spans](https://signoz.io/blog/distributed-tracing-span/) manually. Manual isntrumentation might also be used along with auto instrumentation. */}
-
-{/* 
-Let’s understand how to download, install, and run OpenTelemetry in Java. If you're using SigNoz cloud, refer to this [section](#send-traces-to-signoz-cloud). If you're using self-hosted SigNoz refer to this [section](#send-traces-to-self-hosted-signoz). */}
+OpenTelemetry Java is the language-specific implementation of OpenTelemetry in Java.
 
 ## Requirements
 
@@ -66,9 +33,10 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
 
 #### Send traces directly to SigNoz Cloud
+
 OpenTelemetry Java agent can send traces directly to SigNoz Cloud.
-  
-**Step 1.** Download otel java binary agent
+
+**Step 1.** Download OTel Java binary agent
 
 ```bash
 wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
@@ -79,7 +47,7 @@ wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releas
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
 OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
 java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
 ```
 
@@ -93,22 +61,23 @@ In case you encounter an issue where all applications do not get listed in the s
 
 #### Send traces via OTel Collector binary
 
-**Step 1.** Download OTel java binary agent<br></br>
+**Step 1.** Download OTel Java binary agent
+
 ```bash
 wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 ```
 
-**Step 2.** Run your application<br></br>
+**Step 2.** Run your application
 
 ```bash
 java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <myapp>.jar
 ```
 
 - `<myapp>` is the name of your application jar file
-- In case you download `opentelemetry-javaagent.jar` file in different directory than that of the project, replace `$PWD` with the path of the otel jar file.
+- In case you download `opentelemetry-javaagent.jar` file in different directory than that of the project, replace `$PWD` with the path of the OTel jar file.
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
-  
+
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 You can auto-instrument sending traces from Java application using one of the following methods:
@@ -119,11 +88,9 @@ You can auto-instrument sending traces from Java application using one of the fo
 <Tabs>
 <TabItem value="k8s-otel-operator" label="K8s OTel Operator">
 
-For Java application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
+For Java application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator.
 
-An [OpenTelemetry Operator](https://opentelemetry.io/docs/kubernetes/operator) is a Kubernetes Operator that manages 
-[OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) and auto-instrumentation of 
-workloads. It basically simplifies the deployment and management of OpenTelemetry in a Kubernetes environment.
+An [OpenTelemetry Operator](https://opentelemetry.io/docs/kubernetes/operator) is a Kubernetes Operator that manages [OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) and auto-instrumentation of workloads. It basically simplifies the deployment and management of OpenTelemetry in a Kubernetes environment.
 
 The OpenTelemetry Operator provides two Custom Resource Definitions (CRDs):
 
@@ -212,7 +179,7 @@ spec:
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-Apply the above yaml file using the following command:
+Apply the above YAML file using the following command:
 
 ```bash
 kubectl apply -f otel-collector.yaml
@@ -299,12 +266,12 @@ kubectl apply -f deployment.yaml
 
 With this, the auto-instrumentation of traces for Java application is ready.
 
-####  Step 6: Running the Java application
+#### Step 6: Running the Java application
 
 In order to run the application on port 8080, run the following commands:
 
 ```bash
-export POD_NAME=$(kubectl get pod -l app=<service-name> -o jsonpath="{.items[0].metadata.name}")  # service name is `java-app` in this case.   
+export POD_NAME=$(kubectl get pod -l app=<service-name> -o jsonpath="{.items[0].metadata.name}")  # service name is `java-app` in this case.
 
 kubectl port-forward ${POD_NAME} 8080:8080
 ```
@@ -315,109 +282,111 @@ You can validate if your application is sending traces to SigNoz cloud by follow
 
 </TabItem>
 <TabItem value="otel-collector-agent" label="OTel Collector Agent" default>
+
 For Java application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
-Once you have set up OTel Collector agent, you can proceed with OpenTelemetry java instrumentation by following the below steps:
+Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Java instrumentation by following the below steps:
 
-1. Download otel java binary<br></br>
+1. Download OTel Java binary agent
 
-   ```bash
-   wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
-   ```
+```bash
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
 
 2. Run your application in Kubernetes
 
-   For Kubernetes deployments, you need to containerize your Java application with the OpenTelemetry Java agent.
+For Kubernetes deployments, you need to containerize your Java application with the OpenTelemetry Java agent.
 
-   **Step 2.1: Create a Dockerfile for your Java application**
+**Step 2.1: Create a Dockerfile for your Java application**
 
-   Create a `Dockerfile` in your application's root directory. This `Dockerfile` will:
-   - Build your Java application.
-   - Download the OpenTelemetry Java agent.
-   - Package both into a Docker image.
+Create a `Dockerfile` in your application's root directory. This `Dockerfile` will:
 
-   ```dockerfile
-   # Use a base image with Java installed
-   FROM openjdk:17-jdk-slim
+- Build your Java application.
+- Download the OpenTelemetry Java agent.
+- Package both into a Docker image.
 
-   # Set working directory
-   WORKDIR /app
+```dockerfile
+# Use a base image with Java installed
+FROM openjdk:17-jdk-slim
 
-   # Copy your application's JAR file
-   COPY target/<your-app>.jar app.jar
+# Set working directory
+WORKDIR /app
 
-   # Download the OpenTelemetry Java agent
-   ARG OTEL_JAVAAGENT_VERSION=1.32.0 # Use the latest stable version
-   RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
+# Copy your application's JAR file
+COPY target/<your-app>.jar app.jar
 
-   # Command to run the application with the OpenTelemetry agent
-   ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
-   ```
+# Download the OpenTelemetry Java agent
+ARG OTEL_JAVAAGENT_VERSION=1.32.0 # Use the latest stable version
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
 
-   - Replace `<your-app>.jar` with the actual name of your application's JAR file.
-   - Ensure `OTEL_JAVAAGENT_VERSION` is set to the latest stable version.
+# Command to run the application with the OpenTelemetry agent
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
+```
 
-   **Step 2.2: Build and push your Docker image**
+- Replace `<your-app>.jar` with the actual name of your application's JAR file.
+- Ensure `OTEL_JAVAAGENT_VERSION` is set to the latest stable version.
 
-   Build your Docker image and push it to a container registry (e.g., Docker Hub, GCR, ECR).
+**Step 2.2: Build and push your Docker image**
 
-   ```bash
-   docker build -t <your-registry>/<your-app-image-name>:<tag> .
-   docker push <your-registry>/<your-app-image-name>:<tag>
-   ```
+Build your Docker image and push it to a container registry (e.g., Docker Hub, GCR, ECR).
 
-   **Step 2.3: Deploy your application to Kubernetes**
+```bash
+docker build -t <your-registry>/<your-app-image-name>:<tag> .
+docker push <your-registry>/<your-app-image-name>:<tag>
+```
 
-   Create a Kubernetes Deployment YAML file (e.g., `java-app-deployment.yaml`) to deploy your containerized application. This example assumes you have an OpenTelemetry Collector running as a `Service` named `otel-collector` in the `default` namespace, listening on port `4317` for OTLP/gRPC.
+**Step 2.3: Deploy your application to Kubernetes**
 
-   ```yaml
-   apiVersion: apps/v1
-   kind: Deployment
-   metadata:
-     name: <your-java-app-name>
-     labels:
-       app: <your-java-app-name>
-   spec:
-     replicas: 1
-     selector:
-       matchLabels:
-         app: <your-java-app-name>
-     template:
-       metadata:
-         labels:
-           app: <your-java-app-name>
-       spec:
-         containers:
-         - name: <your-java-app-name>
-           image: <your-registry>/<your-app-image-name>:<tag> # Replace with your image
-           ports:
-           - containerPort: 8080 # Adjust to your application's port
-           env:
-           - name: OTEL_RESOURCE_ATTRIBUTES
-             value: service.name=<your-service-name> # Name of your service
-           - name: OTEL_EXPORTER_OTLP_ENDPOINT
-             value: http://otel-collector:4317 # Point to your OTel Collector service
-           - name: OTEL_EXPORTER_OTLP_PROTOCOL
-             value: grpc
-           # Optional: If your application needs to listen on a specific port
-           # - name: SERVER_PORT
-           #   value: "8080"
-   ```
+Create a Kubernetes Deployment YAML file (e.g., `java-app-deployment.yaml`) to deploy your containerized application. This example assumes you have an OpenTelemetry Collector running as a `Service` named `otel-collector` in the `default` namespace, listening on port `4317` for OTLP/gRPC.
 
-   - Replace `<your-java-app-name>`, `<your-registry>/<your-app-image-name>:<tag>`, and `<your-service-name>` with your specific values.
-   - Adjust `containerPort` if your application listens on a different port.
-   - The `OTEL_EXPORTER_OTLP_ENDPOINT` assumes your OpenTelemetry Collector is accessible via `http://otel-collector:4317`. Adjust this if your collector service name or port is different.
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <your-java-app-name>
+  labels:
+    app: <your-java-app-name>
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: <your-java-app-name>
+  template:
+    metadata:
+      labels:
+        app: <your-java-app-name>
+    spec:
+      containers:
+        - name: <your-java-app-name>
+          image: <your-registry>/<your-app-image-name>:<tag> # Replace with your image
+          ports:
+            - containerPort: 8080 # Adjust to your application's port
+          env:
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.name=<your-service-name> # Name of your service
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector:4317 # Point to your OTel Collector service
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grpc
+          # Optional: If your application needs to listen on a specific port
+          # - name: SERVER_PORT
+          #   value: "8080"
+```
 
-   Apply the deployment:
+- Replace `<your-java-app-name>`, `<your-registry>/<your-app-image-name>:<tag>`, and `<your-service-name>` with your specific values.
+- Adjust `containerPort` if your application listens on a different port.
+- The `OTEL_EXPORTER_OTLP_ENDPOINT` assumes your OpenTelemetry Collector is accessible via `http://otel-collector:4317`. Adjust this if your collector service name or port is different.
 
-   ```bash
-   kubectl apply -f java-app-deployment.yaml
-   ```
+Apply the deployment:
+
+```bash
+kubectl apply -f java-app-deployment.yaml
+```
 
 You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
-  
+
 </TabItem>
 </Tabs>
 
@@ -435,7 +404,7 @@ There are two ways to send data to SigNoz Cloud. You can containerize the images
 
 Add the following in your Dockerfile.
 
-```bash
+```dockerfile
 ...
 
 # Download OpenTelemetry Java Agent
@@ -474,7 +443,6 @@ docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> 
 - `-d` runs the container in detached mode
 - `-p` maps a host port to a container port
 
-
 **Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
@@ -487,7 +455,7 @@ In case you encounter an issue where all applications do not get listed in the s
 
 Add the following in your Dockerfile.
 
-```bash
+```dockerfile
 # -------- Stage 1: Get OpenTelemetry Collector --------
 FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
 
@@ -519,14 +487,13 @@ ENV OTEL_PROPAGATORS="baggage,tracecontext"
 
 # Run both Collector and Java app in the same container
 CMD sh -c "/otelcol-contrib --config=/etc/otelcol-contrib/config.yaml & \
-           java -javaagent:/opentelemetry-javaagent.jar -jar /app/app.jar"
+    java -javaagent:/opentelemetry-javaagent.jar -jar /app/app.jar"
 ```
 
-Make sure you have `config.yaml` in `root` of the application. This config.yaml should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
+Make sure you have `config.yaml` in `root` of the application. This `config.yaml` should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
 
 - Replace `<run_command>` with the command to run your application
 - `<service_name>` is name of your service
-
 
 **Step 2.** Run your Docker container
 
@@ -542,7 +509,6 @@ docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> 
 
 - `-p` maps a host port to a container port
 
-
 **Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
@@ -551,135 +517,50 @@ In case you encounter an issue where all applications do not get listed in the s
 
 </Tabs>
 <TabItem value='self-host' label='Self-Host'>
+
 ## Send Traces to Self-Hosted SigNoz
 
-You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelemetry provides a **handy Java JAR agent** that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks. 
+You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelemetry provides a **handy Java JAR agent** that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks.
 
 ### Steps to auto-instrument Java applications for traces
 
 [OpenTelemetry Java auto-instrumentation](https://signoz.io/opentelemetry/java-auto-instrumentation/) supports collecting telemetry data from a huge number of libraries and frameworks. You can check out the full list [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md).
 
-1. **Download the latest OpenTelemetry Java JAR agent**<br></br>
-   Download the latest [Java JAR agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar). You can also use the terminal to get the file using the following command:
-   
-   ```bash
-    wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
-    ```
-    
+1. **Download the latest OpenTelemetry Java JAR agent**
 
-2. **Enable the instrumentation agent and run your application**<br></br>
-   If you run your Java application as a JAR file, run your application using the following command:
-    
-    ```bash
-    OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> java -javaagent:/path/to/opentelemetry-javaagent.jar -jar  <myapp>.jar
-    ```
-    
-    where `<app_name>` is the name you want to set for your application. `path` should be updated to the path of the downloaded Java JAR agent.
-    
-    
-    In the above command, we are configuring the exporter to send data to SigNoz backend. By default, OpenTelemetry Java agent uses [OTLP exporter](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp) configured to send data.<br></br>
-    
-    Two things to note about the command:<br></br>
-
-    `OTEL_EXPORTER_OTLP_ENDPOINT` - This is the endpoint of the machine where SigNoz is installed.
-
-    `path/to` -  Update it to the path of your downloaded Java JAR agent.<br></br>
-    
-    If you have installed SigNoz on your `localhost` and your Java JAR agent is saved at `/Users/john/Downloads/`, then the final command looks like:<br></br>
-    
-    ```bash
-    OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp java -javaagent:/Users/john/Downloads/opentelemetry-javaagent.jar -jar target/*.jar
-    ```
-    
-    Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
-    
-    You can also specify environment variables in the following way:
-    
-    ```bash
-    java -javaagent:/path/opentelemetry-javaagent.jar \
-        -Dotel.exporter.otlp.endpoint=http://<IP of SigNoz Backend>:4317 \
-        -Dotel.resource.attributes=service.name=<app_name> \
-        -jar <myapp>.jar
-    ```
-    
-
-<Admonition>
-💡 Remember to allow incoming requests to port 4317 of the machine where SigNoz backend is hosted.
-</Admonition>
-
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
-</TabItem>
-</TabItem>
-</Tabs>
-
-**Note:** By default, Java auto-instrumentation does not create spans for user-defined functions. In such scenarios, we can use annotations to quickly create spans for user-defined functions with minimal code change. You can instrument your Java application following this [guide on annotations](/docs/instrumentation/manual-instrumentation/java/annotations/).
-
-## Validating instrumentation by checking for traces
-
-With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
-
-To do this, you need to ensure that your application generates some data. Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz.
-
-Validate your traces in SigNoz:
-
-1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time.
-2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner.
-3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
-
-{/* You might see other dummy applications if you’re using self-hosted SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
-
-{/* <figure data-zoomable align='center'>
-    <img src="/img/docs/java_app_services_list.webp" alt="Java Application in the list of services being monitored in SigNoz"/>
-    <figcaption><i>Java Application in the list of services being monitored in SigNoz</i></figcaption>
-    </figure> */}
-
-
-{/* If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide. */}
-
-## Configuring the agent
-
-The agent is highly configurable. You can check out all the configuration options available [here](https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/).
-
-## Disabled instrumentations
-
-Some instrumentations can produce too many spans and make traces very noisy. For this reason, the following instrumentations are disabled by default:
-
-- `jdbc-datasource` which creates spans whenever the `java.sql.DataSource#getConnection` method is called.
-- `dropwizard-metrics`, which might create very low-quality metrics data because of the lack of label/attribute support in the Dropwizard metrics API.
-
-To enable them, add the `otel.instrumentation.<name>.enabled` system property: `-Dotel.instrumentation.jdbc-datasource.enabled=true`
-
-## Manual Instrumentation
-
-For manual instrumentation of Java application, refer to the docs [here](https://opentelemetry.io/docs/instrumentation/java/manual/).
-
-
-{/* <!-- Get up and running with OpenTelemetry in just a few quick steps! The setup process consists of two phases--getting OpenTelemetry installed and configured, and then validating that configuration to ensure that data is being sent as expected. This guide explains how to download, install, and run OpenTelemetry in Java.
-
-We follow [OpenTelemetry java instrumentation library](https://github.com/open-telemetry/opentelemetry-java-instrumentation). **We shall be exporting data in OTLP format.**
-
-### Getting Started
-
-Download the [latest version](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar).
-
-This package includes the instrumentation agent as well as instrumentations for all supported libraries and all available data exporters. The package provides a completely automatic, out-of-the-box experience.
-
-Enable the instrumentation agent using the -javaagent flag to the JVM.
-
-
-
-### For Java applications packaged as JAR files
-
-If you run your Java application as a JAR file, please follow the below instruction
-
+Download the latest [Java JAR agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar). You can also use the terminal to get the file using the following command:
 
 ```bash
-OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> java -javaagent:/path/opentelemetry-javaagent.jar -jar  <myapp>.jar
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 ```
 
-where <app_name> is the name you want to set for your application. `path` should be updated to the path of downloaded Java JAR agent.
+2. **Enable the instrumentation agent and run your application**
 
-You can also specify environment variables in the following way
+If you run your Java application as a JAR file, run your application using the following command:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> java -javaagent:/path/to/opentelemetry-javaagent.jar -jar  <myapp>.jar
+```
+
+where `<app_name>` is the name you want to set for your application. `path` should be updated to the path of the downloaded Java JAR agent.
+
+In the above command, we are configuring the exporter to send data to SigNoz backend. By default, OpenTelemetry Java agent uses [OTLP exporter](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp) configured to send data.
+
+Two things to note about the command:
+
+`OTEL_EXPORTER_OTLP_ENDPOINT` - This is the endpoint of the machine where SigNoz is installed.
+
+`path/to` - Update it to the path of your downloaded Java JAR agent.
+
+If you have installed SigNoz on your `localhost` and your Java JAR agent is saved at `/Users/john/Downloads/`, then the final command looks like:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp java -javaagent:/Users/john/Downloads/opentelemetry-javaagent.jar -jar target/*.jar
+```
+
+Here's a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
+
+You can also specify environment variables in the following way:
 
 ```bash
 java -javaagent:/path/opentelemetry-javaagent.jar \
@@ -689,84 +570,45 @@ java -javaagent:/path/opentelemetry-javaagent.jar \
 ```
 
 <Admonition>
-Remember to allow incoming requests to port 4317 of machine where SigNoz backend is hosted
+  💡 Remember to allow incoming requests to port 4317 of the machine where SigNoz backend is hosted.
 </Admonition>
 
-If you want to try out SigNoz with a sample Java application, visit this [GitHub repo](https://github.com/SigNoz/spring-petclinic).
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
- --> */}
+</TabItem>
+</TabItem>
+</Tabs>
 
-{/* <!-- ## Tomcat Instrumentation
+**Note:** By default, Java auto-instrumentation does not create spans for user-defined functions. In such scenarios, we can use annotations to quickly create spans for user-defined functions with minimal code change. You can instrument your Java application following this [guide on annotations](https://signoz.io/docs/instrumentation/manual-instrumentation/java/annotations/).
 
-For Tomcat application, you need to make sure the following environment variables are set up.
+## Validating instrumentation by checking for traces
 
-If you run your `.war` package by putting in `webapps` folder, just add `setenv.sh` in your Tomcat `bin` folder.
+With your application running, you can verify that you've instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
 
-This should set these environment variables and start sending telemetry data to SigNoz backend specified in the IP
+To do this, you need to ensure that your application generates some data. Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz.
 
-```bash
+Validate your traces in SigNoz:
 
-export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/path/to/opentelemetry-javaagent.jar"
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://<IP of SigNoz Backend>:4317
-export OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name>
+1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time.
+2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner.
+3. Go to the `Traces` tab, and apply relevant filters to see your application's traces.
 
-```
+## Configuring the agent
 
-where `app_name` is the name you want to set for your application
-and `IP of SigNoz Backend` is the IP where SigNoz backend is accessible
+The agent is highly configurable. You can check out all the configuration options available [here](https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/).
 
+## Disabled instrumentations
 
+Some instrumentations can produce too many spans and make traces very noisy. For this reason, the following instrumentations are disabled by default:
 
+- `jdbc-datasource` which creates spans whenever the `java.sql.DataSource#getConnection` method is called.
+- `dropwizard-metrics`, which might create very low-quality metrics data because of the lack of label/attribute support in the Dropwizard metrics API.
 
-Here's a video on how to instrument Tomcat applications with SigNoz and a [blog](https://signoz.io/opentelemetry/tomcat/) with step by step instructions.
+To enable them, add the `otel.instrumentation.<name>.enabled` system property: `-Dotel.instrumentation.jdbc-datasource.enabled=true`
 
-<YouTube id="4obQilMqU4E" mute={false} />
+## Manual Instrumentation
 
- --> */}
-
-{/* commented by @anukulpandey while refactoring the code */}
-{/* ## Instrumentation using Otel buildpack (paketo) for Java
-
-1. **Clone OTel buildpack repo:**<br></br>
-     
-     ```bash
-     git clone https://github.com/paketo-buildpacks/opentelemetry.git
-     ```
-
-2. **Switch to config-binding branch:**<br></br>
-   
-   ```bash
-   git checkout config-binding
-   ```
-
-3. **Run the following command:**<br></br>
-   
-   ```bash
-   scripts/build.sh
-   ```
-
-4. **Now run below command to build a pack:**<br></br>
-    
-    ```bash
-    pack build paketo-demo-app \
-      --path /Users/makeavish/samples/java/maven \
-      --buildpack paketo-buildpacks/java \
-      --buildpack . \
-      --builder paketobuildpacks/builder:base \
-      --verbose --trust-builder \
-      -e BP_JVM_VERSION=17 -e BP_OPENTELEMETRY_ENABLED=true
-    ```
-    
-5. Pass environment variables to enable java agent `OTEL_JAVAAGENT_ENABLED=true` set exporter endpoint `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317` and set service name `OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp`
-
-6. Other otel configurations can be updated by passing more environment variables. Refer to <a href = "https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/" rel="noopener noreferrer nofollow" target="_blank" >official docs</a> for more such configurations.
-
-7. Run docker command:
-    
-    ```bash
-    docker run -d -p 8080:8080 -e PORT=8080 -e OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 -e OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp -e OTEL_JAVAAGENT_ENABLED=true paketo-demo-app
-    ```
- */}
+For manual instrumentation of Java application, refer to the docs [here](https://opentelemetry.io/docs/instrumentation/java/manual/).
 
 ## Troubleshooting your installation
 
@@ -811,9 +653,6 @@ Span {
 },
 ```
 
-
 ## Sample Java Application
 
 - We have included a sample Java application with README.md at [Sample Java App Github Repo.](https://github.com/SigNoz/distributed-tracing-java-sample)
-
-{/* <InstrumentationFAQ /> */}
