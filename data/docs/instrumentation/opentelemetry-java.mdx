@@ -108,7 +108,7 @@ Here are the steps you need to follow to auto-instrument Java application using 
 Run the following commands to apply cert manager.
 
 ```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.1/cert-manager.yaml
 
 kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
 ```
@@ -118,10 +118,17 @@ kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
 To install the operator in the existing K8s cluster, run the following command:
 
 ```bash
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.139.0/opentelemetry-operator.yaml
 ```
 
 Installing the OpenTelemetry Operator sets up the necessary components and configurations to enable the observability and monitoring of applications running in the cluster.
+
+Verify operator is running:
+
+```bash
+kubectl get deployment opentelemetry-operator-controller-manager -n opentelemetry-operator-system
+kubectl get pods -n opentelemetry-operator-system
+```
 
 #### Step 3: Setup the OpenTelemetry Collector instance
 
@@ -142,7 +149,7 @@ To create a simple instance of the OpenTelemetry Collector, create a file `otel-
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
-  name: otel-collector
+  name: otel
 spec:
   mode: deployment
   config: |
@@ -185,6 +192,13 @@ Apply the above YAML file using the following command:
 kubectl apply -f otel-collector.yaml
 ```
 
+Verify OpenTelemetry Collector is running:
+
+```bash
+kubectl get opentelemetrycollector
+kubectl get pods -l app.kubernetes.io/name=otel-collector
+```
+
 #### Step 4: Setup the Instrumentation instance
 
 Once the OpenTelemetry Collector instance has been deployed, the next step will be to create an instrumentation instance, which will be responsible for sending OTLP data to the OTel Collector.
@@ -192,7 +206,7 @@ Once the OpenTelemetry Collector instance has been deployed, the next step will 
 Create a file `instrumentation.yaml` with the following contents:
 
 ```yaml:instrumentation.yaml
-apiVersion: opentelemetry.io/v1beta1
+apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
   name: traces-instrumentation
