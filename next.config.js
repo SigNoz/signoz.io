@@ -365,6 +365,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/react-native/',
+          destination: '/docs/instrumentation/opentelemetry-react-native/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/php/',
           destination: '/docs/instrumentation/opentelemetry-php/',
           permanent: true,

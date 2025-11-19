@@ -215,6 +215,12 @@ export default function APMInstrumentationListicle({
             clickName: 'ReactJS Instrumentation Link',
           },
           {
+            name: 'React Native',
+            href: '/docs/instrumentation/opentelemetry-react-native',
+            icon: <SiReact className="h-7 w-7 text-blue-400" />,
+            clickName: 'React Native Instrumentation Link',
+          },
+          {
             name: 'NuxtJS',
             href: '/docs/instrumentation/opentelemetry-nuxtjs',
             icon: <SiNuxtdotjs className="h-7 w-7 text-green-500" />,

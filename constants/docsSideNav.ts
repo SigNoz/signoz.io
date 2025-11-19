@@ -993,6 +993,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-react-native',
+                label: 'React Native',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/opentelemetry-nuxtjs',
                 label: 'NuxtJS',
               },
