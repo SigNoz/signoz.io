@@ -156,6 +156,16 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-distributed-tracing-part-2/',
+          destination: '/blog/opentelemetry-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-distributed-tracing-part-1/',
+          destination: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          permanent: true,
+        },
+        {
           source: '/why-opentelemetry/',
           destination: '/blog/what-is-opentelemetry/',
           permanent: true,
