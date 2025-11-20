@@ -1,5 +1,5 @@
 ---
-date: 2025-11-12
+date: 2025-11-20
 title: Kubernetes Cluster Metrics Dashboard
 id: kubernetes-cluster-metrics
 tags: [SigNoz Cloud, Self-Host]
@@ -101,28 +101,6 @@ The dashboard utilizes these metrics from the k8sclusterreceiver:
 - `k8s.job.failed_pods`: Failed job pods
 
 - `k8s.job.desired_successful_pods`: Desired successful job pods
-
-## Prerequisites
-
-To use this dashboard, you need:
-
-- OpenTelemetry Collector configured with the [`k8sclusterreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md)
-- The receiver configured with serviceAccount authentication to access the Kubernetes API
-- Metrics being exported to SigNoz
-
-You also need to set `k8s.cluster.name` resource attribute which can be set by using [resource processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-processor):
-
-```yaml {7-9}
-processors:
-  resource:
-    attributes:
-      - key: service.name
-        value: 'k8s-cluster-metrics'
-        action: upsert
-      - key: k8s.cluster.name
-        value: 'microk8s-cluster'
-        action: upsert
-```
 
 ## Dashboard Variables
 
