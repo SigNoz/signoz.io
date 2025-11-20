@@ -942,6 +942,11 @@ module.exports = () => {
           destination: '/docs/setup/docker/troubleshooting/faq',
           permanent: true,
         },
+        {
+          source: '/docs/integrations/aws/integration-template/',
+          destination: '/docs/integrations/aws/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {

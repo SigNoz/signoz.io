@@ -1,14 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import {
-  SiNodedotjs,
-  SiNextdotjs,
-  SiNuxtdotjs,
-  SiCloudflare,
-  SiJavascript,
-  SiReact,
-} from 'react-icons/si'
+import { SiNodedotjs, SiNextdotjs, SiNuxtdotjs, SiJavascript, SiReact } from 'react-icons/si'
 import { LuActivity, LuLogIn } from 'react-icons/lu'
 import { TbChartHistogram, TbHeartbeat, TbShieldLock } from 'react-icons/tb'
 import { FaRegFileAlt } from 'react-icons/fa'
@@ -61,27 +54,21 @@ export default function JavascriptInstrumentationListicle({
         cards={[
           {
             name: 'Node.js',
-            href: '/docs/instrumentation/opentelemetry-nodejs',
+            href: '/docs/instrumentation/javascript/opentelemetry-nodejs',
             icon: <SiNodedotjs className="h-7 w-7 text-green-500" />,
             clickName: 'Node.js Instrumentation Link',
           },
           {
             name: 'Next.js',
-            href: '/docs/instrumentation/opentelemetry-nextjs',
+            href: '/docs/instrumentation/javascript/opentelemetry-nextjs',
             icon: <SiNextdotjs className="h-7 w-7 rounded-full bg-white text-black" />,
             clickName: 'Next.js Instrumentation Link',
           },
           {
             name: 'Nuxt.js',
-            href: '/docs/instrumentation/opentelemetry-nuxtjs',
+            href: '/docs/instrumentation/javascript/opentelemetry-nuxtjs',
             icon: <SiNuxtdotjs className="h-7 w-7 text-green-500" />,
             clickName: 'Nuxt.js Instrumentation Link',
-          },
-          {
-            name: 'Cloudflare Workers',
-            href: '/docs/instrumentation/opentelemetry-cloudflare',
-            icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
-            clickName: 'Cloudflare Workers Instrumentation Link',
           },
         ]}
         sectionName="JavaScript Back-end Section"
@@ -115,7 +102,7 @@ export default function JavascriptInstrumentationListicle({
           },
           {
             name: 'React Native',
-            href: '/docs/instrumentation/opentelemetry-react-native',
+            href: '/docs/instrumentation/javascript/opentelemetry-react-native',
             icon: <SiReact className="h-7 w-7 text-sky-400" />,
             clickName: 'React Native Instrumentation Link',
           },
