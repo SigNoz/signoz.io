@@ -31,14 +31,24 @@ interface LayoutProps {
   children: ReactNode
   toc: tocItemProps[]
   relatedArticles?: RelatedArticleProps[]
+  tags: string[]
 }
 
-export default function FAQLayout({ content, authors, children, toc }: LayoutProps) {
-  const { slug, date, title, tags, readingTime, relatedArticles } = content
+export default function FAQLayout({
+  content,
+  authors,
+  children,
+  toc,
+  tags,
+  relatedArticles,
+}: LayoutProps) {
+  const { slug, date, title, readingTime } = content
   const mainRef = useRef<HTMLElement | null>(null)
   const [isTocVisible, setIsTocVisible] = useState(true)
   const lastScrollY = useRef(0)
   const scrollDirection = useRef<'up' | 'down'>('up')
+
+  console.log(content, tags, authors)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -103,7 +113,7 @@ export default function FAQLayout({ content, authors, children, toc }: LayoutPro
               {children}
             </article>
             <div className="my-8">
-              <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl pt-8 pb-4 px-8 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+              <div className="transform rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 px-8 pb-4 pt-8 shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
                 <GetStartedSigNoz />
               </div>
             </div>
@@ -113,8 +123,6 @@ export default function FAQLayout({ content, authors, children, toc }: LayoutPro
           <RelatedArticles relatedArticles={relatedArticles} />
         )}
       </SectionContainer>
-
-      
     </main>
   )
 }

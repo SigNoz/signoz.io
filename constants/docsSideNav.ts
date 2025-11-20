@@ -836,8 +836,14 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            label: 'Configuration Components',
+            label: 'Configuration & Components',
             route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration',
+          },
+          {
+            type: 'doc',
+            label: 'Why Use Collector',
+            route:
+              '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
           },
         ],
       },
@@ -963,6 +969,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/instrumentation/opentelemetry-nextjs',
                 label: 'Next.js',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-react-native',
+                label: 'React Native',
               },
               {
                 type: 'doc',
@@ -1307,6 +1318,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/send-cloudwatch-logs-to-signoz',
             label: 'Cloudwatch logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/cloudflare-logs',
+            label: 'Cloudflare logs',
           },
           {
             type: 'category',
@@ -1736,6 +1752,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/autogen-dashboard',
+            label: 'Autogen',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/azure-openai-dashboard',
             label: 'Azure OpenAI API',
           },
@@ -1859,6 +1880,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/rabbitmq',
             label: 'RabbitMQ',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
+            label: 'Semantic Kernel',
           },
           {
             type: 'doc',
@@ -2256,6 +2282,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/autogen-observability',
+        label: 'AutoGen',
+        type: 'doc',
+      },
+      {
         route: '/docs/azure-openai-monitoring',
         label: 'Azure OpenAI API',
         type: 'doc',
@@ -2303,6 +2334,11 @@ const docsSideNav = [
       {
         route: '/docs/pydantic-ai-observability',
         label: 'Pydantic AI',
+        type: 'doc',
+      },
+      {
+        route: '/docs/semantic-kernel-observability',
+        label: 'Semantic Kernel',
         type: 'doc',
       },
       {
@@ -2988,6 +3024,30 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/migration/migrate-from-newrelic/alerts',
+            label: 'Migrating Alerts',
+          },
+        ],
+      },
+      {
+        label: 'From Honeycomb',
+        className: 'new-doc',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/migration/migrate-from-honeycomb-to-signoz',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/data',
+            label: 'Migrating Data',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-honeycomb/alerts',
             label: 'Migrating Alerts',
           },
         ],

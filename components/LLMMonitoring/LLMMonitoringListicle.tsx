@@ -32,6 +32,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Anthropic API Monitoring',
   },
   {
+    name: 'AutoGen',
+    href: '/docs/autogen-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/autogen-logo.webp"
+        alt="AutoGen Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'AutoGen Monitoring',
+  },
+  {
     name: 'Azure OpenAI API',
     href: '/docs/azure-openai-monitoring',
     icon: (
@@ -118,6 +130,18 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/pydantic-ai-observability',
     icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
     clickName: 'Pydantic AI Monitoring',
+  },
+  {
+    name: 'Semantic Kernel',
+    href: '/docs/semantic-kernel-observability',
+    icon: (
+      <img
+        src="/img/docs/llm/semantic-kernel/sk-logo.webp"
+        alt="Semantic Kernel Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Semantic Kernel Monitoring',
   },
   {
     name: 'Vercel AI SDK',

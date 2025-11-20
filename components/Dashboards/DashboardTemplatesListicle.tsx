@@ -85,6 +85,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'ArgoCD Dashboard Template',
   },
   {
+    name: 'Autogen',
+    href: '/docs/dashboards/dashboard-templates/autogen-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/autogen-logo.webp"
+        alt="Autogen Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Autogen Dashboard Template',
+  },
+  {
     name: 'AWS ElastiCache Redis',
     href: '/docs/dashboards/dashboard-templates/aws-elasticache-redis',
     icon: <Cloud className="h-7 w-7 text-orange-600" />,
@@ -327,6 +339,18 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/redis',
     icon: <SiRedis className="h-7 w-7 text-red-600" />,
     clickName: 'Redis Dashboard Template',
+  },
+  {
+    name: 'Semantic Kernel',
+    href: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/sk-logo.webp"
+        alt="Semantic Kernel Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Semantic Kernel Dashboard Template',
   },
   {
     name: 'SigNoz Ingestion Analysis',

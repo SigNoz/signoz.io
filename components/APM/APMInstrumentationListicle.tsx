@@ -26,6 +26,7 @@ import {
   SiNextdotjs,
   SiNuxtdotjs,
   SiNginx,
+  SiReact,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -189,7 +190,19 @@ export default function APMInstrumentationListicle({
             clickName: 'Next.js Instrumentation Link',
           },
           {
-            name: 'Nuxt.js',
+            name: 'ReactJS',
+            href: '/docs/instrumentation/opentelemetry-reactjs',
+            icon: <SiReact className="h-7 w-7 text-blue-400" />,
+            clickName: 'ReactJS Instrumentation Link',
+          },
+          {
+            name: 'React Native',
+            href: '/docs/instrumentation/opentelemetry-react-native',
+            icon: <SiReact className="h-7 w-7 text-blue-400" />,
+            clickName: 'React Native Instrumentation Link',
+          },
+          {
+            name: 'NuxtJS',
             href: '/docs/instrumentation/opentelemetry-nuxtjs',
             icon: <SiNuxtdotjs className="h-7 w-7 text-green-500" />,
             clickName: 'Nuxt.js Instrumentation Link',
