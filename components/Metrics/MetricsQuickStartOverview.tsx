@@ -10,12 +10,22 @@ import {
   SiRedis,
   SiApachekafka,
   SiMysql,
+  SiPrometheus,
+  SiOpentelemetry,
+  SiTraefikproxy,
 } from 'react-icons/si'
 import { FaJava, FaWindows } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
 
 interface MetricsQuickStartOverviewProps {
-  category?: 'all' | 'infrastructure' | 'databases' | 'web-servers' | 'messaging' | 'runtimes'
+  category?:
+    | 'all'
+    | 'infrastructure'
+    | 'databases'
+    | 'web-servers'
+    | 'messaging'
+    | 'runtimes'
+    | 'collection'
 }
 
 export default function MetricsQuickStartOverview({
@@ -23,6 +33,7 @@ export default function MetricsQuickStartOverview({
 }: MetricsQuickStartOverviewProps) {
   const sections = [
     { id: 'all', label: 'All' },
+    { id: 'collection', label: 'Collection' },
     { id: 'infrastructure', label: 'Infrastructure' },
     { id: 'databases', label: 'Databases' },
     { id: 'web-servers', label: 'Web Servers' },
@@ -66,6 +77,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/overview',
             icon: <SiKubernetes className="h-7 w-7 text-blue-600" />,
             clickName: 'Kubernetes Metrics Link',
+          },
+          {
+            name: 'Traefik',
+            href: '/docs/tutorial/traefik-observability',
+            icon: <SiTraefikproxy className="h-7 w-7 text-blue-500" />,
+            clickName: 'Traefik Metrics Link',
           },
         ]}
         sectionName="Infrastructure Metrics"
@@ -162,9 +179,33 @@ export default function MetricsQuickStartOverview({
             href: '/docs/tutorial/jmx-metrics',
             icon: <FaJava className="h-7 w-7 text-red-600" />,
             clickName: 'JMX Metrics Link',
-          }
+          },
         ]}
         sectionName="Runtime Metrics"
+        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+      />
+    </div>
+  )
+
+  const renderCollectionSection = () => (
+    <div className="mb-10">
+      <h2 className="mb-4 text-2xl font-semibold">Collection</h2>
+      <IconCardGrid
+        cards={[
+          {
+            name: 'OTel Receivers',
+            href: '/docs/userguide/otel-metrics-receivers',
+            icon: <SiOpentelemetry className="h-7 w-7 text-purple-500" />,
+            clickName: 'OTel Receivers Link',
+          },
+          {
+            name: 'Prometheus',
+            href: '/docs/userguide/prometheus-metrics',
+            icon: <SiPrometheus className="h-7 w-7 text-orange-500" />,
+            clickName: 'Prometheus Metrics Link',
+          },
+        ]}
+        sectionName="Collection Metrics"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
       />
     </div>
@@ -173,7 +214,9 @@ export default function MetricsQuickStartOverview({
   return (
     <div>
       <NavigationPills />
-      {(activeSection === 'all' || activeSection === 'infrastructure') && renderInfrastructureSection()}
+      {(activeSection === 'all' || activeSection === 'collection') && renderCollectionSection()}
+      {(activeSection === 'all' || activeSection === 'infrastructure') &&
+        renderInfrastructureSection()}
       {(activeSection === 'all' || activeSection === 'databases') && renderDatabasesSection()}
       {(activeSection === 'all' || activeSection === 'web-servers') && renderWebServersSection()}
       {(activeSection === 'all' || activeSection === 'messaging') && renderMessagingSection()}

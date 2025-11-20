@@ -944,12 +944,12 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/send-metrics-cloud/',
-          destination: '/docs/userguide/otel-collector-metrics/',
+          destination: '/docs/userguide/otel-metrics-receivers/',
           permanent: true,
         },
         {
           source: '/docs/userguide/send-metrics/',
-          destination: '/docs/userguide/otel-collector-metrics/',
+          destination: '/docs/userguide/otel-metrics-receivers/',
           permanent: true,
         },
         {

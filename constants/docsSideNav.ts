@@ -144,7 +144,6 @@ const docsSideNav = [
                 type: 'doc',
                 label: 'Linux',
                 route: '/docs/install/linux',
-    
               },
             ],
           },
@@ -944,7 +943,6 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/instrumentation/opentelemetry-quarkus',
                 label: 'Quarkus',
-    
               },
               {
                 type: 'doc',
@@ -1375,7 +1373,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/windows-events-log',
             label: 'Windows Event logs',
-      
           },
           {
             type: 'doc',
@@ -1507,7 +1504,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/logs-management/long-term-storage',
-        label: 'Long Term Storage'
+        label: 'Long Term Storage',
       },
       {
         type: 'category',
@@ -1541,31 +1538,6 @@ const docsSideNav = [
         label: 'Overview',
       },
       {
-        type: 'doc',
-        route: '/docs/metrics-management/metrics-explorer',
-        label: 'Metrics Explorer',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/types-and-aggregation',
-        label: 'Types and Aggregation',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/data-storage',
-        label: 'Metrics Tables',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/cloud-provider-metric-delay',
-        label: 'Cloud provider metric delay',
-      },
-      {
-          type: 'doc',
-          route: '/docs/metrics-management/configure-custom-buckets',
-          label: 'Configure custom buckets for histograms',
-      },
-      {
         label: 'Send Metrics',
         type: 'category',
         isExpanded: false,
@@ -1573,13 +1545,13 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/userguide/prometheus-metrics',
-            label: 'Prometheus Metrics',
+            route: '/docs/userguide/otel-metrics-receivers',
+            label: 'OpenTelemetry Receivers',
           },
           {
             type: 'doc',
-            route: '/docs/userguide/otel-collector-metrics',
-            label: 'Otel Collector Receivers',
+            route: '/docs/userguide/prometheus-metrics',
+            label: 'Prometheus Metrics',
           },
           {
             type: 'category',
@@ -1645,6 +1617,31 @@ const docsSideNav = [
             ],
           },
         ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/metrics-explorer',
+        label: 'Metrics Explorer',
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/types-and-aggregation',
+        label: 'Types and Aggregation',
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/data-storage',
+        label: 'Metrics Tables',
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/cloud-provider-metric-delay',
+        label: 'Cloud provider metric delay',
+      },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/configure-custom-buckets',
+        label: 'Configure custom buckets for histograms',
       },
       {
         type: 'doc',
@@ -1890,7 +1887,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
-                label: "Kubernetes Cluster Metrics Dashboard"
+                label: 'Kubernetes Cluster Metrics Dashboard',
               },
               {
                 type: 'doc',
