@@ -1,15 +1,15 @@
 import SigNozVSGrafanaV2 from './SigNozVsGrafanaV2'
-import siteMetadata from '../../../data/siteMetadata'
+import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'In Depth - SigNoz vs Grafana',
+  title: 'Modern Grafana Alternative | SigNoz',
   description:
-    'How is SigNoz a great alternative to Grafana? Learn where SigNoz is a better fit for your use cases when compared to Grafana.',
+    'SigNoz is the modern Grafana alternative: one OpenTelemetry-native backend for logs, metrics, and traces without stitching Loki, Tempo, and Mimir together.',
   openGraph: {
-    title: 'In Depth - SigNoz vs Grafana',
+    title: 'Modern Grafana Alternative | SigNoz',
     description:
-      'How is SigNoz a great alternative to Grafana? Learn where SigNoz is a better fit for your use cases when compared to Grafana.',
+      'SigNoz is the modern Grafana alternative: one OpenTelemetry-native backend for logs, metrics, and traces without stitching Loki, Tempo, and Mimir together.',
     images: [
       {
         url: '/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp',
@@ -19,21 +19,22 @@ export const metadata: Metadata = {
       },
     ],
     type: 'website',
-    url: `${siteMetadata.siteUrl}/product-comparison/signoz-vs-grafana`,
+    url: `${siteMetadata.siteUrl}/grafana-alternative`,
     siteName: siteMetadata.title,
   } as const,
   twitter: {
     card: 'summary_large_image',
-    title: 'In Depth - SigNoz vs Grafana | SigNoz',
+    title: 'Modern Grafana Alternative | SigNoz',
     description:
-      'How is SigNoz a great alternative to Grafana? Learn where SigNoz is a better fit for your use cases when compared to Grafana.',
+      'SigNoz is the modern Grafana alternative: one OpenTelemetry-native backend for logs, metrics, and traces without stitching Loki, Tempo, and Mimir together.',
     images: ['/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp'],
     site: siteMetadata.twitter,
   } as const,
   keywords: [
-    'SigNoz vs Grafana',
+    'Modern Grafana alternative',
     'Grafana alternative',
     'open source Grafana alternative',
+    'SigNoz vs Grafana',
     'Grafana comparison',
     'observability platform',
     'application monitoring',
