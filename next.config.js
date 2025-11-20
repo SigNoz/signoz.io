@@ -15,7 +15,7 @@ const ContentSecurityPolicy = `
   font-src * 'self';
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
-  frame-ancestors 'self' http://localhost:3301 https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
+  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
 `
 
 const securityHeaders = [
@@ -477,7 +477,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/opentelemetry-javascript/',
-          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
