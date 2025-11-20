@@ -1,0 +1,140 @@
+---
+date: 2025-11-19
+id: prometheus-metrics
+title: Prometheus Metrics
+description: Send metrics to SigNoz using the Prometheus receiver in OpenTelemetry Collector.
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+SigNoz supports all exporters listed on the [Prometheus Exporters and Integrations](https://prometheus.io/docs/instrumenting/exporters/) page. To ingest Prometheus metrics, we use the [Prometheus Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver). If you have a running Prometheus instance or expose metrics in Prometheus format, you can scrape them into SigNoz by configuring the Prometheus receiver in your OpenTelemetry Collector.
+
+## Prerequisites
+
+- [SigNoz Otel Collector installed](/docs/opentelemetry-collection-agents/get-started/)
+- Access to the `otel-collector-config.yaml` file (location varies by installation method).
+- A target exposing Prometheus metrics.
+
+## Steps
+
+### Step 1: Configure the Prometheus Receiver
+
+To enable the Prometheus receiver, you must edit the `receivers` section of your `otel-collector-config.yaml` file.
+
+1. Open your `otel-collector-config.yaml` file in a text editor.
+
+2. You can enable the receiver by either creating a new job or adding a target to an existing job.
+
+   **Option A: Create a new job**
+
+   Add a new `job_name` under `scrape_configs`. This is useful for separating different sources of metrics.
+
+   ```yaml {10-13}
+   receivers:
+     prometheus:
+       config:
+         scrape_configs:
+           - job_name: "otel-collector"
+             scrape_interval: 30s
+             static_configs:
+               - targets: ["otel-collector:8889"]
+           - job_name: "my-new-job"
+             scrape_interval: 30s
+             static_configs:
+               - targets: ["localhost:8080"]
+   ```
+
+   **Option B: Add a target to an existing job**
+
+   Add your target to the `targets` list of an existing job.
+
+   ```yaml {9}
+   receivers:
+     prometheus:
+       config:
+         scrape_configs:
+           - job_name: "otel-collector"
+             scrape_interval: 30s
+             static_configs:
+               - targets: ["otel-collector:8889", "localhost:8080"]
+   ```
+
+   <Admonition type="info">
+   **Scraping from the host machine**
+   
+   If your Prometheus instance is running on the host machine and you are running the OpenTelemetry Collector in Docker (including the default SigNoz Self-Hosted setup):
+   - Linux: Replace `localhost` with `172.17.0.1`
+   - macOS: Replace `localhost` with `host.docker.internal`
+   
+   For SigNoz Cloud users running the collector as a binary on the host, `localhost` will work correctly.
+   </Admonition>
+
+   Note that jobs are scraped in parallel, while targets within a job are scraped serially.
+
+### Step 2: Enable the Prometheus Receiver
+
+Once you have configured the receiver, you need to enable it in the metrics pipeline.
+
+1. In your `otel-collector-config.yaml` file, locate the `service` section.
+2. Under `pipelines` -> `metrics` -> `receivers`, add `prometheus`.
+
+   ```yaml {4}
+   service:
+     pipelines:
+       metrics:
+         receivers: [otlp, prometheus]
+         processors: [batch]
+         exporters: [otlp]
+   ```
+
+### Step 3: Restart the Collector
+
+Depending on your setup, restart the appropriate service to apply changes.
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud / Standalone Agent">
+
+If you are using SigNoz Cloud or running a standalone OpenTelemetry Collector agent, you only need to restart the collector agent.
+
+```bash
+# Example for systemd service
+sudo systemctl restart otel-collector
+
+# Example for Docker
+docker restart <your-collector-container-name>
+```
+
+</TabItem>
+<TabItem value="self-hosted" label="SigNoz Self-Hosted">
+
+If you are running the default SigNoz Self-Hosted bundle (Docker Standalone), the collector is part of the stack. You can restart the specific container or the stack.
+
+```bash
+# Go to your signoz/deploy/docker directory
+docker compose -f docker-compose.yaml restart otel-collector
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+To verify that metrics are being received:
+1. Go to the **[Metrics Explorer](/docs/metrics-management/metrics-explorer/)** in SigNoz.
+2. Search for a metric you expect to see (e.g., `up` or a specific metric from your application).
+3. You can also verify data arrival in the **Dashboards** section by creating a panel with your metric.
+
+## Troubleshooting
+
+If you don't see metrics:
+- Check the OpenTelemetry Collector logs for errors.
+- Verify network connectivity between the Collector and the target.
+- Ensure the scrape interval is appropriate.
+
+## Get Help
+
+<GetHelp />

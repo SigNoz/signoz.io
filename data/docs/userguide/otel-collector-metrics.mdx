@@ -1,0 +1,91 @@
+---
+date: 2025-11-19
+id: otel-collector-metrics
+title: Otel Collector Receivers
+description: Send metrics to SigNoz using any OpenTelemetry Collector receiver.
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+SigNoz supports all receivers listed in the [opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver) repository. You can check the [OpenTelemetry Registry](https://opentelemetry.io/ecosystem/registry/?component=receiver) to find available receivers. You can configure any of these receivers to collect metrics from various services and infrastructure components.
+
+## Prerequisites
+
+- [SigNoz Otel Collector installed](/docs/opentelemetry-collection-agents/get-started/)
+- Access to the `otel-collector-config.yaml` file.
+
+## Steps
+
+To enable a specific receiver, you need to configure it in the `receivers` section and then add it to the `service` pipeline.
+
+### Step 1: Configure the Receiver
+
+Open `otel-collector-config.yaml` and add the receiver configuration. For example, to enable the `rabbitmq` receiver:
+
+```yaml
+receivers:
+  rabbitmq:
+    endpoint: http://localhost:15672
+    username: <RABBITMQ_USERNAME>
+    password: <RABBITMQ_PASSWORD>
+    collection_interval: 30s
+```
+
+Refer to the [OpenTelemetry Collector Contrib Receivers](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver) for specific configuration options for your desired receiver.
+
+### Step 2: Enable the Receiver in Pipeline
+
+Add the receiver name to the `receivers` list in the `metrics` pipeline under `service`.
+
+```yaml {4}
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, rabbitmq]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+### Step 3: Restart the Collector
+
+Depending on your setup, restart the appropriate service to apply changes.
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud / Standalone Agent">
+
+If you are using SigNoz Cloud or running a standalone OpenTelemetry Collector agent, you only need to restart the collector agent. Do **not** restart SigNoz.
+
+```bash
+# Example for systemd service
+sudo systemctl restart otel-collector
+
+# Example for Docker
+docker restart <your-collector-container-name>
+```
+
+</TabItem>
+<TabItem value="self-hosted" label="SigNoz Self-Hosted">
+
+If you are running the default SigNoz Self-Hosted bundle (Docker Standalone), the collector is part of the stack. You can restart the specific container or the stack.
+
+```bash
+# Go to your signoz/deploy/docker directory
+docker compose -f docker-compose.yaml restart otel-collector
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+1. Go to the **[Metrics Explorer](/docs/metrics-management/metrics-explorer/)** in SigNoz.
+2. Search for metrics starting with the receiver prefix (e.g., `rabbitmq_` for RabbitMQ receiver).
+3. Verify that data is appearing in the query results.
+
+## Get Help
+
+<GetHelp />

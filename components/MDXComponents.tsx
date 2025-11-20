@@ -64,6 +64,7 @@ import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
 import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
+import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
 
 export const components: MDXComponents = {
   Image,
@@ -128,4 +129,5 @@ export const components: MDXComponents = {
   CollectionAgentsListicle,
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
+  MetricsQuickStartOverview,
 }

@@ -877,6 +877,21 @@ module.exports = () => {
           destination: '/docs/setup/docker/troubleshooting/faq',
           permanent: true,
         },
+        {
+          source: '/docs/userguide/send-metrics-cloud/',
+          destination: '/docs/userguide/otel-collector-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/send-metrics/',
+          destination: '/docs/userguide/otel-collector-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorials/',
+          destination: '/docs/install/',
+          permanent: true,
+        }
       ]
     },
     webpack: (config, options) => {

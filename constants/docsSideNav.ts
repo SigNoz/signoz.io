@@ -43,7 +43,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/product-features/saved-view',
             label: 'Saved View',
-            // className: 'new-doc', // Add this if you want to add a new tag in sidebar
           },
           {
             type: 'doc',
@@ -145,7 +144,7 @@ const docsSideNav = [
                 type: 'doc',
                 label: 'Linux',
                 route: '/docs/install/linux',
-                className: 'new-doc',
+    
               },
             ],
           },
@@ -518,6 +517,11 @@ const docsSideNav = [
                     type: 'doc',
                     route: '/docs/manage/administrator-guide/sso/user-guides/sso-google',
                     label: 'Google Workspace - Single Sign-on Authentication',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
+                    label: 'Setting Up SSO SAML 2.0 With Keycloak',
                   },
                 ],
               },
@@ -939,7 +943,7 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/instrumentation/opentelemetry-quarkus',
                 label: 'Quarkus',
-                className: 'new-doc',
+    
               },
               {
                 type: 'doc',
@@ -1104,7 +1108,7 @@ const docsSideNav = [
           //   isExpanded: false,
           //   label: 'Mobile Instrumentation',
           //   route: '/docs/mobile-instrumentation',
-          //   // className: 'new-doc',
+          //
           //   // route: '',
           //   // link: {
           //   // type: 'doc',
@@ -1382,7 +1386,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/windows-events-log',
             label: 'Windows Event logs',
-            // className: 'new-doc',
+      
           },
           {
             type: 'doc',
@@ -1514,8 +1518,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/logs-management/long-term-storage',
-        label: 'Long Term Storage',
-        className: 'new-doc',
+        label: 'Long Term Storage'
       },
       {
         type: 'category',
@@ -1569,42 +1572,88 @@ const docsSideNav = [
         label: 'Cloud provider metric delay',
       },
       {
+          type: 'doc',
+          route: '/docs/metrics-management/configure-custom-buckets',
+          label: 'Configure custom buckets for histograms',
+      },
+      {
         label: 'Send Metrics',
         type: 'category',
         isExpanded: false,
+        route: '/docs/metrics-management/send-metrics',
         items: [
           {
             type: 'doc',
-            route: '/docs/userguide/send-metrics-cloud',
-            label: 'Send Metrics to SigNoz Cloud',
+            route: '/docs/userguide/prometheus-metrics',
+            label: 'Prometheus Metrics',
           },
           {
             type: 'doc',
-            route: '/docs/userguide/send-metrics',
-            label: 'Send Metrics (Self Hosted)',
+            route: '/docs/userguide/otel-collector-metrics',
+            label: 'Otel Collector Receivers',
           },
           {
-            type: 'doc',
-            className: 'new-doc',
-            route: '/docs/metrics-management/docker-container-metrics',
-            label: 'Docker container metrics',
+            type: 'category',
+            label: 'Infrastructure',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/docker-container-metrics',
+                label: 'Docker container metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/tutorial/traefik-observability',
+                label: 'Traefik Observability',
+              },
+            ],
           },
           {
-            type: 'doc',
-            className: 'new-doc',
-            route: '/docs/metrics-management/nginx-metrics',
-            label: 'NGINX metrics',
+            type: 'category',
+            label: 'Databases',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/tutorial/mongodb-metrics',
+                label: 'MongoDB Metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/mysql-metrics',
+                label: 'MySQL',
+              },
+            ],
           },
           {
-            type: 'doc',
-            className: 'new-doc',
-            route: '/docs/metrics-management/mysql-metrics',
-            label: 'MySQL metrics',
+            type: 'category',
+            label: 'Web Servers',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/nginx-metrics',
+                label: 'NGINX',
+              },
+            ],
           },
           {
-            type: 'doc',
-            route: '/docs/metrics-management/configure-custom-buckets',
-            label: 'Configure custom buckets for histograms',
+            type: 'category',
+            label: 'Runtimes',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/tutorial/jvm-metrics',
+                label: 'JVM',
+              },
+              {
+                type: 'doc',
+                route: '/docs/tutorial/jmx-metrics',
+                label: 'JMX Metrics',
+              },
+            ],
           },
         ],
       },
@@ -1631,7 +1680,6 @@ const docsSideNav = [
   {
     label: 'Cost Meter',
     type: 'category',
-    className: 'new-doc',
     isExpanded: false,
     items: [
       {
@@ -1660,7 +1708,6 @@ const docsSideNav = [
       {
         label: 'Manage',
         type: 'category',
-        className: 'new-doc',
         isExpanded: false,
         items: [
           {
@@ -2372,7 +2419,6 @@ const docsSideNav = [
     label: 'Integrations',
     type: 'category',
     isExpanded: false,
-    className: 'new-doc',
     route: '/docs/integrations/integrations-list',
     items: [
       {
@@ -2383,19 +2429,19 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/integrations/aws/one-click-aws-integrations',
-            className: 'new-doc',
+
             label: 'Overview',
           },
           {
             type: 'doc',
             route: '/docs/integrations/aws/ecs',
-            className: 'new-doc',
+
             label: 'ECS',
           },
           {
             type: 'doc',
             route: '/docs/integrations/aws/s3-sync',
-            className: 'new-doc',
+
             label: 'S3 Sync',
           },
         ],
@@ -2403,7 +2449,6 @@ const docsSideNav = [
       {
         label: 'Temporal',
         type: 'category',
-        className: 'new-doc',
         isExpanded: false,
         items: [
           {
@@ -2545,7 +2590,7 @@ const docsSideNav = [
         label: 'Celery',
         type: 'category',
         isExpanded: false,
-        //className: 'new-doc',
+
         //route: '/docs/integrations/integrations-list',
         items: [
           {
@@ -2565,9 +2610,7 @@ const docsSideNav = [
   {
     label: 'External API Monitoring',
     type: 'category',
-    className: 'new-doc',
     isExpanded: false,
-    // route: '',
     items: [
       {
         type: 'doc',
@@ -2584,9 +2627,7 @@ const docsSideNav = [
   {
     label: 'Trace Funnels',
     type: 'category',
-    className: 'new-doc',
     isExpanded: false,
-    // route: '',
     items: [
       {
         type: 'doc',
@@ -2603,9 +2644,7 @@ const docsSideNav = [
   {
     label: 'CICD Monitoring',
     type: 'category',
-    className: 'new-doc',
     isExpanded: false,
-    // route: '',
     items: [
       {
         label: 'GitHub',
@@ -2783,50 +2822,9 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Tutorials',
-    type: 'category',
-    isExpanded: false,
-    route: '/docs/tutorials',
-    // link: {
-    // type: 'generated-index',
-    // title: 'Tutorials',
-    // description:
-    // 'SigNoz tutorials are step-by-step training exercises that guide you through monitoring your applications and infrastructure.',
-    // route: '/docs/tutorial/tutorials',
-    // },
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/tutorial/jvm-metrics',
-        label: 'Spring Boot JVM Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/jmx-metrics',
-        label: 'JMX Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/mongodb-metrics',
-        label: 'MongoDB Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
-        label: 'Setting Up SSO SAML 2.0 With Keycloak',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/traefik-observability',
-        label: 'Traefik Observability',
-      },
-    ],
-  },
-  {
     label: 'AWS Monitoring',
     type: 'category',
     isExpanded: false,
-    // route: '',
     items: [
       //'aws/getting-started',
       {
@@ -2935,7 +2933,6 @@ const docsSideNav = [
       },
       {
         label: 'From Grafana Stack',
-        className: 'new-doc',
         type: 'category',
         isExpanded: false,
         route: '/docs/migration/migrate-from-grafana-to-signoz',
@@ -2969,7 +2966,6 @@ const docsSideNav = [
       },
       {
         label: 'From ELK Stack',
-        className: 'new-doc',
         type: 'category',
         isExpanded: false,
         route: '/docs/migration/migrate-from-elk-to-signoz',
@@ -3003,7 +2999,6 @@ const docsSideNav = [
       },
       {
         label: 'From New Relic',
-        className: 'new-doc',
         type: 'category',
         isExpanded: false,
         route: '/docs/migration/migrate-from-newrelic-to-signoz',
@@ -3037,7 +3032,6 @@ const docsSideNav = [
       },
       {
         label: 'From Honeycomb',
-        className: 'new-doc',
         type: 'category',
         isExpanded: false,
         route: '/docs/migration/migrate-from-honeycomb-to-signoz',
@@ -3061,7 +3055,6 @@ const docsSideNav = [
       },
       {
         label: 'From OpenTelemetry',
-        className: 'new-doc',
         type: 'category',
         isExpanded: false,
         route: '/docs/migration/migrate-from-opentelemetry-to-signoz',
@@ -3089,7 +3082,6 @@ const docsSideNav = [
     label: 'Azure Monitoring',
     type: 'category',
     isExpanded: false,
-    // className: 'new-doc',
     route: '/docs/azure-monitoring',
     items: [
       {
@@ -3246,7 +3238,6 @@ const docsSideNav = [
     label: 'GCP Monitoring',
     type: 'category',
     isExpanded: false,
-    // className: 'new-doc',
     route: '/docs/gcp-monitoring',
     items: [
       {

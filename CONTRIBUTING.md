@@ -577,8 +577,6 @@ Docs pages must be added to the sidebar navigation.
    }
    ```
 
-Optional: To mark a doc as new, include `className: 'new-doc'` on the entry.
-
 If you introduced a new tag in your doc frontmatter, add its tooltip definition in `constants/tagDefinitions.ts`.
 
 ### Step 8: Add and Commit Your Changes
