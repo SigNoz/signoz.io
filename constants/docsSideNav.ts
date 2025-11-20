@@ -1858,6 +1858,11 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
+                label: "Kubernetes Cluster Metrics Dashboard"
+              },
+              {
+                type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
                 label: 'Kubernetes Pod Metrics (Detailed)',
               },

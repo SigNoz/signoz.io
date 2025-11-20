@@ -1,0 +1,118 @@
+---
+date: 2025-11-20
+title: Kubernetes Cluster Metrics Dashboard
+id: kubernetes-cluster-metrics
+tags: [SigNoz Cloud, Self-Host]
+description: Monitor Kubernetes metrics for running pods for deployments, daemonsets, statefulset, replicasets and pods count by phase.
+---
+
+This dashboard provides an overview for the Kubernetes pods for deployments, daemonsets, statefulset, replicasets and pods count by phase using [`k8sclusterreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md).
+
+<Admonition type="info">
+  This dashboard requires K8s Infra to be installed and configured to collect cluster metrics. See
+  the [K8s Infra installation
+  guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) to
+  set up the data source.
+</Admonition>
+
+## Dashboard Preview
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics.webp"
+    alt="Kubernetes Cluster Metrics Dashboard"
+  />
+  <figcaption>
+    <i>Kubernetes Cluster Metrics Dashboard</i>
+  </figcaption>
+</figure>
+
+<div className="flex justify-center">
+  <DashboardActions
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/k8s-infra-metrics/kubernetes-cluster-metrics.json"
+    dashboardName="Kubernetes Cluster Metrics"
+  />
+</div>
+
+## What This Dashboard Monitors
+
+This dashboard tracks Kubernetes cluster metrics across different resource types:
+
+### Pod Phase by Namespace
+
+Shows the distribution of pods across different lifecycle phases (Pending, Running, Succeeded, Failed, Unknown) grouped by namespace.
+
+### Pod Replicas
+
+Monitors Horizontal Pod Autoscaler (HPA) metrics including current replicas, desired replicas, minimum replicas, and maximum replicas.
+
+### Deployments Available and Desired
+
+Displays the number of available pods versus desired pods for each deployment.
+
+### Jobs
+
+Tracks job execution status showing active pods, successful pods, failed pods, and desired successful pods for each job.
+
+### Daemonset Nodes
+
+Monitors daemonset distribution across nodes, showing current scheduled nodes, desired scheduled nodes, and ready nodes.
+
+### Statefulset Pods
+
+Tracks statefulset health with metrics for current pods, desired pods, ready pods, and updated pods.
+
+## Metrics Used
+
+The dashboard utilizes these metrics from the k8sclusterreceiver:
+
+- `k8s.pod.phase`: Pod lifecycle phase status
+
+- `k8s.deployment.available`: Number of available deployment pods
+
+- `k8s.deployment.desired`: Number of desired deployment pods
+
+- `k8s.hpa.current_replicas`: Current HPA replica count
+
+- `k8s.hpa.desired_replicas`: Desired HPA replica count
+
+- `k8s.hpa.min_replicas`: Minimum HPA replicas
+
+- `k8s.hpa.max_replicas`: Maximum HPA replicas
+
+- `k8s.daemonset.current_scheduled_nodes`: Currently scheduled daemonset nodes
+
+- `k8s.daemonset.desired_scheduled_nodes`: Desired daemonset nodes
+
+- `k8s.daemonset.ready_nodes`: Ready daemonset nodes
+
+- `k8s.statefulset.current_pods`: Current statefulset pods
+
+- `k8s.statefulset.desired_pods`: Desired statefulset pods
+
+- `k8s.statefulset.ready_pods`: Ready statefulset pods
+
+- `k8s.statefulset.updated_pods`: Updated statefulset pods
+
+- `k8s.job.active_pods`: Active job pods
+
+- `k8s.job.successful_pods`: Successful job pods
+
+- `k8s.job.failed_pods`: Failed job pods
+
+- `k8s.job.desired_successful_pods`: Desired successful job pods
+
+## Dashboard Variables
+
+This dashboard includes two template variables for filtering:
+
+- `k8s.cluster.name`: Filter by specific Kubernetes cluster (single selection)
+
+- `k8s.namespace.name`: Filter by one or multiple namespaces (multi-select enabled, defaults to "default")
+
+## Related Dashboards
+
+- [Kubernetes Pod Metrics - Detailed](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed/)
+- [Kubernetes Node Metrics - Detailed](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed)
+- [Docker Container Metrics](https://signoz.io/docs/dashboards/dashboard-templates/docker-container-metrics/)
+- [Host Metrics Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/hostmetrics-dashboards/)
