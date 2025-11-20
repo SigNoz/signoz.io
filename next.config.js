@@ -171,6 +171,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/gathering-data-with-opentelemetry-collector/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
           source: '/why-opentelemetry/',
           destination: '/blog/what-is-opentelemetry/',
           permanent: true,
