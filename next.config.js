@@ -176,6 +176,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-nodejs/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
           source: '/why-opentelemetry/',
           destination: '/blog/what-is-opentelemetry/',
           permanent: true,
