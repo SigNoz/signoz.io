@@ -15,7 +15,7 @@ const ContentSecurityPolicy = `
   font-src * 'self';
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
-  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
+  frame-ancestors 'self' http://localhost:3301 https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
 `
 
 const securityHeaders = [
@@ -311,7 +311,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/express/',
-          destination: '/docs/instrumentation/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
@@ -356,7 +356,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/opentelemetry-express/',
-          destination: '/docs/instrumentation/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
@@ -366,17 +366,32 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/nestjs/',
-          destination: '/docs/instrumentation/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/opentelemetry-nestjs/',
-          destination: '/docs/instrumentation/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/nextjs/',
-          destination: '/docs/instrumentation/opentelemetry-nextjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nextjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nextjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nextjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nuxtjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nuxtjs/',
           permanent: true,
         },
         {
@@ -386,7 +401,12 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/react-native/',
-          destination: '/docs/instrumentation/opentelemetry-react-native/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-react-native/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
           permanent: true,
         },
         {
@@ -438,6 +458,11 @@ module.exports = () => {
           source: '/docs/instrumentation/manual-instrumentation/javascript/nodejs/',
           destination:
             '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-javascript/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs',
           permanent: true,
         },
         {

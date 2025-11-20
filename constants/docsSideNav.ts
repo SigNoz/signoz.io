@@ -958,26 +958,26 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Javascript',
-            route: '/docs/instrumentation/opentelemetry-javascript',
+            route: '/docs/instrumentation/javascript/overview',
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-nodejs',
+                route: '/docs/instrumentation/javascript/opentelemetry-nodejs',
                 label: 'Node.js',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-nextjs',
+                route: '/docs/instrumentation/javascript/opentelemetry-nextjs',
                 label: 'Next.js',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-react-native',
+                route: '/docs/instrumentation/javascript/opentelemetry-react-native',
                 label: 'React Native',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-nuxtjs',
+                route: '/docs/instrumentation/javascript/opentelemetry-nuxtjs',
                 label: 'Nuxt.js',
               },
             ],

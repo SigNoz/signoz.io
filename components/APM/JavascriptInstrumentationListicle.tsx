@@ -9,7 +9,7 @@ import {
   SiJavascript,
   SiReact,
 } from 'react-icons/si'
-import { LuLogIn } from 'react-icons/lu'
+import { LuActivity, LuLogIn } from 'react-icons/lu'
 import { TbChartHistogram, TbHeartbeat, TbShieldLock } from 'react-icons/tb'
 import { FaRegFileAlt } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -96,15 +96,9 @@ export default function JavascriptInstrumentationListicle({
       <IconCardGrid
         cards={[
           {
-            name: 'Frontend Monitoring Overview',
-            href: '/docs/frontend-monitoring',
-            icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
-            clickName: 'Frontend Monitoring Overview Link',
-          },
-          {
             name: 'Send Frontend Traces',
             href: '/docs/frontend-monitoring/sending-traces-with-opentelemetry',
-            icon: <SiReact className="h-7 w-7 text-sky-400" />,
+            icon: <LuActivity className="h-7 w-7 text-sky-500" />,
             clickName: 'Frontend Traces Instrumentation Link',
           },
           {
@@ -118,6 +112,12 @@ export default function JavascriptInstrumentationListicle({
             href: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry',
             icon: <TbChartHistogram className="h-7 w-7 text-emerald-500" />,
             clickName: 'Frontend Metrics Instrumentation Link',
+          },
+          {
+            name: 'React Native',
+            href: '/docs/instrumentation/opentelemetry-react-native',
+            icon: <SiReact className="h-7 w-7 text-sky-400" />,
+            clickName: 'React Native Instrumentation Link',
           },
           {
             name: 'Monitor Web Vitals',
