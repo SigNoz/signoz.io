@@ -104,22 +104,13 @@ function Footer() {
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
                 <div className="text-sm font-semibold uppercase leading-5 tracking-wide">More</div>
 
-                <Link
-                  href="/product-comparison/signoz-vs-datadog/"
-                  className="mt-5 hover:underline"
-                >
+                <Link href="/datadog-alternative/" className="mt-5 hover:underline">
                   SigNoz vs Datadog
                 </Link>
-                <Link
-                  href="/product-comparison/signoz-vs-newrelic/"
-                  className="mt-5 hover:underline"
-                >
+                <Link href="/newrelic-alternative/" className="mt-5 hover:underline">
                   SigNoz vs New Relic
                 </Link>
-                <Link
-                  href="/product-comparison/signoz-vs-grafana/"
-                  className="mt-5 hover:underline"
-                >
+                <Link href="/grafana-alternative/" className="mt-5 hover:underline">
                   SigNoz vs Grafana
                 </Link>
                 <Link

@@ -119,18 +119,21 @@ const SigNozVsDatadogV2 = () => {
             transition={{ duration: 0.8 }}
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-blue-200">
               SigNoz vs Datadog
+            </p>
+            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
+              Datadog Alternative
             </h1>
-            <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
-              For 20 APM and 50 infra hosts, SigNoz can save up to 80% of your Datadog bill - check
-              comparison with{' '}
+            <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
+              Teams moving from Datadog save up to 80% on 20 APM and 50 infra hosts—go deeper with
+              the{' '}
               <Link
                 href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
                 className="text-blue-400 hover:text-blue-300"
                 target="_blank"
               >
-                detailed spreadsheet
+                detailed SigNoz vs Datadog spreadsheet
               </Link>
               .
             </h3>
