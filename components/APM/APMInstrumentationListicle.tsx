@@ -28,6 +28,7 @@ import {
   SiNuxtdotjs,
   SiNginx,
   SiExpress,
+  SiLaravel,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -250,6 +251,12 @@ export default function APMInstrumentationListicle({
             href: '/docs/instrumentation/php',
             icon: <SiPhp className="h-7 w-7 text-purple-500" />,
             clickName: 'PHP Instrumentation Link',
+          },
+          {
+            name: 'Laravel',
+            href: '/docs/instrumentation/laravel',
+            icon: <SiLaravel className="h-7 w-7 text-purple-500" />,
+            clickName: 'Laravel Instrumentation Link',
           },
           {
             name: '.NET',
