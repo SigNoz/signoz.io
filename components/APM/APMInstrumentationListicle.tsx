@@ -21,13 +21,13 @@ import {
   SiSpringboot,
   SiQuarkus,
   SiApachetomcat,
-  SiNestjs,
-  SiAngular,
+  SiNodedotjs,
+  SiCloudflare,
   SiNextdotjs,
-  SiReact,
   SiNuxtdotjs,
   SiNginx,
-  SiExpress,
+  SiReact,
+  SiLaravel,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -179,34 +179,16 @@ export default function APMInstrumentationListicle({
       <IconCardGrid
         cards={[
           {
-            name: 'JavaScript',
-            href: '/docs/instrumentation/javascript',
-            icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
-            clickName: 'JavaScript Instrumentation Link',
+            name: 'Node.js',
+            href: '/docs/instrumentation/opentelemetry-nodejs',
+            icon: <SiNodedotjs className="h-7 w-7 text-green-500" />,
+            clickName: 'Node.js Instrumentation Link',
           },
           {
-            name: 'Express',
-            href: '/docs/instrumentation/express',
-            icon: <SiExpress className="h-7 w-7 rounded-full bg-white p-1 text-black" />,
-            clickName: 'Express Instrumentation Link',
-          },
-          {
-            name: 'NestJS',
-            href: '/docs/instrumentation/nestjs',
-            icon: <SiNestjs className="h-7 w-7 text-red-600" />,
-            clickName: 'NestJS Instrumentation Link',
-          },
-          {
-            name: 'Angular',
-            href: '/docs/instrumentation/angular',
-            icon: <SiAngular className="h-7 w-7 text-red-600" />,
-            clickName: 'Angular Instrumentation Link',
-          },
-          {
-            name: 'NextJS',
-            href: '/docs/instrumentation/nextjs',
+            name: 'Next.js',
+            href: '/docs/instrumentation/opentelemetry-nextjs',
             icon: <SiNextdotjs className="h-7 w-7 rounded-full bg-white text-black" />,
-            clickName: 'NextJS Instrumentation Link',
+            clickName: 'Next.js Instrumentation Link',
           },
           {
             name: 'ReactJS',
@@ -215,10 +197,28 @@ export default function APMInstrumentationListicle({
             clickName: 'ReactJS Instrumentation Link',
           },
           {
+            name: 'React Native',
+            href: '/docs/instrumentation/opentelemetry-react-native',
+            icon: <SiReact className="h-7 w-7 text-blue-400" />,
+            clickName: 'React Native Instrumentation Link',
+          },
+          {
             name: 'NuxtJS',
             href: '/docs/instrumentation/opentelemetry-nuxtjs',
             icon: <SiNuxtdotjs className="h-7 w-7 text-green-500" />,
-            clickName: 'NuxtJS Instrumentation Link',
+            clickName: 'Nuxt.js Instrumentation Link',
+          },
+          {
+            name: 'Cloudflare Workers',
+            href: '/docs/instrumentation/opentelemetry-cloudflare',
+            icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
+            clickName: 'Cloudflare Workers Instrumentation Link',
+          },
+          {
+            name: 'Frontend Monitoring',
+            href: '/docs/frontend-monitoring',
+            icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
+            clickName: 'Frontend Monitoring Overview Link',
           },
         ]}
         sectionName="JavaScript Frameworks"
@@ -244,6 +244,12 @@ export default function APMInstrumentationListicle({
             href: '/docs/instrumentation/php',
             icon: <SiPhp className="h-7 w-7 text-purple-500" />,
             clickName: 'PHP Instrumentation Link',
+          },
+          {
+            name: 'Laravel',
+            href: '/docs/instrumentation/laravel',
+            icon: <SiLaravel className="h-7 w-7 text-purple-500" />,
+            clickName: 'Laravel Instrumentation Link',
           },
           {
             name: '.NET',
@@ -302,7 +308,7 @@ export default function APMInstrumentationListicle({
           },
           {
             name: 'Manual JS',
-            href: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
+            href: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs',
             icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
             clickName: 'Manual JavaScript Instrumentation Link',
           },

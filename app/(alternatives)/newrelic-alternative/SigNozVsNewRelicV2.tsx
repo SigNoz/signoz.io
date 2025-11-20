@@ -118,10 +118,13 @@ const SigNozVsNewRelicV2 = () => {
             transition={{ duration: 0.8 }}
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-blue-200">
               SigNoz vs New Relic
+            </p>
+            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
+              New Relic Alternative
             </h1>
-            <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
+            <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
               Tired of New Relic's user-based pricing? Even for teams of 10-15 devs, New Relic's
               pricing for user seats can be a significant portion of your monthly bill - check{' '}
               <Link
@@ -129,9 +132,9 @@ const SigNozVsNewRelicV2 = () => {
                 className="text-blue-400 hover:text-blue-300"
                 target="_blank"
               >
-                comparison with detailed spreadsheet
-              </Link>
-              .
+                detailed SigNoz vs New Relic spreadsheet
+              </Link>{' '}
+              for the full breakdown.
             </h3>
             <div className="flex flex-col gap-2">
               <div className="flex flex-row gap-2">

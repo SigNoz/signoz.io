@@ -1,15 +1,15 @@
 import SigNozVsDatadogV2 from './SigNozVsDatadogV2'
 import { Metadata } from 'next'
-import siteMetadata from '../../../data/siteMetadata'
+import siteMetadata from '@/data/siteMetadata'
 
 export const metadata: Metadata = {
-  title: 'In Depth - SigNoz vs Datadog',
+  title: 'Modern Datadog Alternative | SigNoz',
   description:
-    'How is SigNoz a great alternative to Datadog? Learn where SigNoz is a better fit for your use cases when compared to Datadog.',
+    'SigNoz is the modern Datadog alternative. Built on OpenTelemetry, it delivers affordable, full-stack observability across logs, metrics, and traces.',
   openGraph: {
-    title: 'In Depth - SigNoz vs Datadog',
+    title: 'Modern Datadog Alternative | SigNoz',
     description:
-      'How is SigNoz a great alternative to Datadog? Learn where SigNoz is a better fit for your use cases when compared to Datadog.',
+      'SigNoz is the modern Datadog alternative. Built on OpenTelemetry, it delivers affordable, full-stack observability across logs, metrics, and traces.',
     images: [
       {
         url: '/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp',
@@ -19,21 +19,22 @@ export const metadata: Metadata = {
       },
     ],
     type: 'website',
-    url: `${siteMetadata.siteUrl}/product-comparison/signoz-vs-datadog`,
+    url: `${siteMetadata.siteUrl}/datadog-alternative`,
     siteName: siteMetadata.title,
   } as const,
   twitter: {
     card: 'summary_large_image',
-    title: 'In Depth - SigNoz vs Datadog | SigNoz',
+    title: 'Modern Datadog Alternative | SigNoz',
     description:
-      'How is SigNoz a great alternative to Datadog? Learn where SigNoz is a better fit for your use cases when compared to Datadog.',
+      'SigNoz is the modern Datadog alternative. Built on OpenTelemetry, it delivers affordable, full-stack observability across logs, metrics, and traces.',
     images: ['/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp'],
     site: siteMetadata.twitter,
   } as const,
   keywords: [
-    'SigNoz vs Datadog',
+    'Modern Datadog alternative',
     'Datadog alternative',
     'open source Datadog alternative',
+    'SigNoz vs Datadog',
     'Datadog comparison',
     'observability platform',
     'application monitoring',

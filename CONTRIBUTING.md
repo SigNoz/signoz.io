@@ -244,17 +244,13 @@ Every doc should be skimmable and actionable.
     - For Cloud-only guides:
       ```mdx
       <Admonition type="info">
-        Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint
-        and remove the ingestion key header as shown in [Cloud →
-        Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+        Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
       </Admonition>
       ```
     - For Self-Hosted-only guides:
       ```mdx
       <Admonition type="info">
-        Using SigNoz Cloud? Most steps are identical. To adapt this guide, point to the Cloud
-        endpoint and add the ingestion key header as shown in [Self-Hosted →
-        Cloud](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud).
+        Using SigNoz Cloud? Most steps are identical. To adapt this guide, point to the Cloud endpoint and add the ingestion key header as shown in [Self-Hosted → Cloud](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud).
       </Admonition>
       ```
   - Only use tabs if instructions materially diverge (e.g., different components/flows), not for small endpoint/header differences.

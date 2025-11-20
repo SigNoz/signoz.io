@@ -1,5 +1,5 @@
 ---
-date: 2025-11-05
+date: 2025-11-20
 title: Web Vitals Monitoring with OpenTelemetry Metrics
 id: opentelemetry-web-vitals-metrics
 description: Set up web vitals monitoring with metrics using SigNoz and OpenTelemetry
@@ -10,9 +10,11 @@ tags: [SigNoz Cloud, Self-Host]
 
 This documentation provides a step-by-step guide to setting up web vitals monitoring with OpenTelemetry metrics on SigNoz.
 
-<Admonition type="info">  
-  **Already sending frontend metrics?** If you've followed the <a href="/docs/frontend-monitoring/sending-metrics">Sending Metrics from your frontend application</a> guide, you can skip Steps 1 and 2 below—your instrumentation file is already set up. Jump straight to <a href="#step-3-capture-and-export-web-vitals">Step 3</a> to add web vitals capture to your existing setup.  
-</Admonition>  
+<Admonition>
+  **Already sending frontend metrics?** 
+  
+  If you've followed the [Sending Metrics from your frontend application](https://signoz.io/docs/frontend-monitoring/sending-metrics-with-opentelemetry) guide, you can skip Steps 1 and 2 below as your instrumentation file is already set up. Jump straight to [Step 3](#step-3-capture-and-export-web-vitals) to add web vitals capture to your existing setup.
+</Admonition>
 
 ## Prerequisites
 
@@ -147,11 +149,8 @@ The instrumentation file is required to setup the `MeterProvider` which is used 
   </TabItem>
 </Tabs>
 
-<Admonition type="info">
-  For self-hosted deployments, add the following CORS configuration to your OpenTelemetry Collector
-  config file to allow browser requests from your frontend domain. Also, update the endpoint and remove the ingestion key header as shown in  
-  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>. 
-</Admonition>
+<Admonition>
+  For self-hosted deployments, add the following CORS configuration to your OpenTelemetry Collector config file to allow browser requests from your frontend domain. Also, update the endpoint and remove the ingestion key header as shown in <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
 
 ```yaml:config.yaml
 receivers:
@@ -166,7 +165,10 @@ receivers:
             - <YOUR_FRONTEND_URL>
           allowed_headers: ['*']
 ```
+
 This configures the OTel Collector to export traces to SigNoz Cloud using the OTLP/HTTP protocol. Read more about OTel Collector configuration [here](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/).
+
+</Admonition>
 
 ### Step 3: Capture and export Web Vitals
 
@@ -500,5 +502,6 @@ You can [import](https://signoz.io/docs/dashboards/import-dashboard/) our out-of
 We have set up a [Demo React application](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/web-vitals-with-metrics) that demonstrates monitoring Core Web Vitals with metrics using OpenTelemetry and sending them to SigNoz.
 
 ## Next Steps
+
 - [Sending logs](/docs/frontend-monitoring/sending-logs)
 - [Sending traces](/docs/frontend-monitoring/sending-traces)

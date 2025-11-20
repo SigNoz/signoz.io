@@ -846,8 +846,9 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Why Use Collector',
-            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
-          }
+            route:
+              '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
+          },
         ],
       },
     ],
@@ -961,44 +962,27 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Javascript',
-            route: '/docs/instrumentation/opentelemetry-javascript',
-            // link: {
-            // type: 'doc',
-            // route: '/docs/instrumentation/opentelemetry-javascript',
-            // title: 'JavaScript',
-            // description: 'Learn how to instrument JavaScript applications with OpenTelemetry',
-            // slug: 'instrumentation/javascript',
-            // },
+            route: '/docs/instrumentation/javascript/overview',
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-express',
-                label: 'Express',
+                route: '/docs/instrumentation/javascript/opentelemetry-nodejs',
+                label: 'Node.js',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-nestjs',
-                label: 'NestJS',
+                route: '/docs/instrumentation/javascript/opentelemetry-nextjs',
+                label: 'Next.js',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-angular',
-                label: 'Angular',
+                route: '/docs/instrumentation/javascript/opentelemetry-react-native',
+                label: 'React Native',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-nextjs',
-                label: 'NextJS',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-reactjs',
-                label: 'ReactJS',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-nuxtjs',
-                label: 'NuxtJS',
+                route: '/docs/instrumentation/javascript/opentelemetry-nuxtjs',
+                label: 'Nuxt.js',
               },
             ],
           },
@@ -1011,6 +995,11 @@ const docsSideNav = [
             type: 'doc',
             label: 'PHP',
             route: '/docs/instrumentation/opentelemetry-php',
+          },
+          {
+            type: 'doc',
+            label: 'Laravel',
+            route: '/docs/instrumentation/opentelemetry-laravel',
           },
           {
             type: 'doc',
@@ -1900,6 +1889,11 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
+                label: "Kubernetes Cluster Metrics Dashboard"
+              },
+              {
+                type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-pod-metrics-detailed',
                 label: 'Kubernetes Pod Metrics (Detailed)',
               },
@@ -1949,6 +1943,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/rabbitmq',
             label: 'RabbitMQ',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/semantic-kernel-dashboard',
+            label: 'Semantic Kernel',
           },
           {
             type: 'doc',
@@ -2346,6 +2345,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/autogen-observability',
+        label: 'AutoGen',
+        type: 'doc',
+      },
+      {
         route: '/docs/azure-openai-monitoring',
         label: 'Azure OpenAI API',
         type: 'doc',
@@ -2393,6 +2397,11 @@ const docsSideNav = [
       {
         route: '/docs/pydantic-ai-observability',
         label: 'Pydantic AI',
+        type: 'doc',
+      },
+      {
+        route: '/docs/semantic-kernel-observability',
+        label: 'Semantic Kernel',
         type: 'doc',
       },
       {
