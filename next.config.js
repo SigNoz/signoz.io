@@ -936,7 +936,6 @@ module.exports = () => {
           destination: '/docs/manage/administrator-guide/sso/overview/',
           permanent: true,
         },
-
         {
           source: '/docs/install/troubleshooting/',
           destination: '/docs/setup/docker/troubleshooting/faq',
