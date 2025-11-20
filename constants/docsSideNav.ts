@@ -2358,6 +2358,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/semantic-kernel-observability',
+        label: 'Semantic Kernel',
+        type: 'doc',
+      },
+      {
         route: '/docs/vercel-ai-sdk-observability',
         label: 'Vercel AI SDK',
         type: 'doc',
