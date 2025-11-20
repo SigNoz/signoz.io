@@ -151,6 +151,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/getting-started-with-opentelemetry/',
+          destination: '/blog/opentelemetry-demo/',
+          permanent: true,
+        },
+        {
           source: '/why-opentelemetry/',
           destination: '/blog/what-is-opentelemetry/',
           permanent: true,
