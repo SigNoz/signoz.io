@@ -123,7 +123,7 @@ const SigNozVsDatadogV2 = () => {
               SigNoz vs Datadog
             </p>
             <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
-              Modern Datadog Alternative
+              Datadog Alternative
             </h1>
             <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
               Teams moving from Datadog save up to 80% on 20 APM and 50 infra hosts—go deeper with

@@ -122,7 +122,7 @@ const SigNozVsNewRelicV2 = () => {
               SigNoz vs New Relic
             </p>
             <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
-              Modern New Relic Alternative
+              New Relic Alternative
             </h1>
             <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
               Tired of New Relic's user-based pricing? Even for teams of 10-15 devs, New Relic's
