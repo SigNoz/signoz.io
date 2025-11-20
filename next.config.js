@@ -112,17 +112,32 @@ module.exports = () => {
         },
         {
           source: '/comparisons/signoz-vs-datadog/',
-          destination: '/product-comparison/signoz-vs-datadog/',
+          destination: '/datadog-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/product-comparison/signoz-vs-datadog/',
+          destination: '/datadog-alternative/',
           permanent: true,
         },
         {
           source: '/comparisons/signoz-vs-newrelic/',
-          destination: '/product-comparison/signoz-vs-newrelic/',
+          destination: '/newrelic-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/product-comparison/signoz-vs-newrelic/',
+          destination: '/newrelic-alternative/',
           permanent: true,
         },
         {
           source: '/comparisons/signoz-vs-grafana/',
-          destination: '/product-comparison/signoz-vs-grafana/',
+          destination: '/grafana-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/product-comparison/signoz-vs-grafana/',
+          destination: '/grafana-alternative/',
           permanent: true,
         },
         {

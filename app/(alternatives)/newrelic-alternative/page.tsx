@@ -1,15 +1,15 @@
 import SigNozVSNewRelicV2 from './SigNozVsNewRelicV2'
-import siteMetadata from '../../../data/siteMetadata'
+import siteMetadata from '@/data/siteMetadata'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'In Depth - SigNoz vs New Relic',
+  title: 'Modern New Relic Alternative | SigNoz',
   description:
-    'How is SigNoz a great alternative to New Relic? Learn where SigNoz is a better fit for your use cases when compared to New Relic.',
+    'SigNoz is the modern New Relic alternative with OpenTelemetry-native ingestion, unlimited basic seats, and predictable usage-based pricing.',
   openGraph: {
-    title: 'In Depth - SigNoz vs New Relic',
+    title: 'Modern New Relic Alternative | SigNoz',
     description:
-      'How is SigNoz a great alternative to New Relic? Learn where SigNoz is a better fit for your use cases when compared to New Relic.',
+      'SigNoz is the modern New Relic alternative with OpenTelemetry-native ingestion, unlimited basic seats, and predictable usage-based pricing.',
     images: [
       {
         url: '/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp',
@@ -19,21 +19,22 @@ export const metadata: Metadata = {
       },
     ],
     type: 'website',
-    url: `${siteMetadata.siteUrl}/product-comparison/signoz-vs-newrelic`,
+    url: `${siteMetadata.siteUrl}/newrelic-alternative`,
     siteName: siteMetadata.title,
   } as const,
   twitter: {
     card: 'summary_large_image',
-    title: 'In Depth - SigNoz vs New Relic | SigNoz',
+    title: 'Modern New Relic Alternative | SigNoz',
     description:
-      'How is SigNoz a great alternative to New Relic? Learn where SigNoz is a better fit for your use cases when compared to New Relic.',
+      'SigNoz is the modern New Relic alternative with OpenTelemetry-native ingestion, unlimited basic seats, and predictable usage-based pricing.',
     images: ['/img/product-comparisons/signoz-vs-datadog/messaging-queue-monitoring-otel.webp'],
     site: siteMetadata.twitter,
   } as const,
   keywords: [
-    'SigNoz vs New Relic',
+    'Modern New Relic alternative',
     'New Relic alternative',
     'open source New Relic alternative',
+    'SigNoz vs New Relic',
     'New Relic comparison',
     'observability platform',
     'application monitoring',

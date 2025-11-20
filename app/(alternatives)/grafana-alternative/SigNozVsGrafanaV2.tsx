@@ -119,14 +119,16 @@ const SigNozVsGrafanaV2 = () => {
             transition={{ duration: 0.8 }}
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-green-200">
               SigNoz vs Grafana
+            </p>
+            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.2] text-transparent lg:text-6xl lg:leading-[1.2]">
+              Grafana Alternative
             </h1>
             <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
-              Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir &
-              Prometheus. SigNoz is powered by a single columnar datastore to serve logs, metrics,
-              and traces in a single pane of glass from Day 1, which enables better context for
-              troubleshooting performance issues.
+              Skip the Loki + Tempo + Mimir patchwork. SigNoz delivers logs, metrics, and traces on
+              a single OpenTelemetry-native datastore so you get unified context from Day 1 without
+              managing multiple backends.
             </h3>
             <div className="flex flex-col gap-2">
               <div className="flex flex-row gap-2">

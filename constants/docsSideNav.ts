@@ -994,6 +994,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Laravel',
+            route: '/docs/instrumentation/opentelemetry-laravel',
+          },
+          {
+            type: 'doc',
             label: '.NET',
             route: '/docs/instrumentation/opentelemetry-dotnet',
           },
