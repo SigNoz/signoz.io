@@ -181,6 +181,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/opentelemetry-python-auto-and-manual-instrumentation/',
+          destination: '/opentelemetry/python/',
+          permanent: true,
+        },
+        {
           source: '/why-opentelemetry/',
           destination: '/blog/what-is-opentelemetry/',
           permanent: true,
