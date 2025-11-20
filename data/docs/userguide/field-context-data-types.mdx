@@ -1,5 +1,5 @@
 ---
-date: 2025-07-31
+date: 2025-11-20
 id: field-context-and-data-types
 tags : [SigNoz Cloud, Self-Host]
 title: Field Context & Data Types
@@ -22,13 +22,13 @@ response_time_ms > 1000
 ```
 
 ### When Context is Required
-If the same field exists in multiple contexts, you'll see this error:
+If the same field exists in multiple contexts, you'll see this warning:
 ```
 service.name = 'payment'
-# Error: key `service.name` is ambiguous
+# Warning: key `service.name` is ambiguous
 ```
 
-Fix it by specifying the context:
+If you want to remove the warning, fix it by specifying the context:
 ```
 resource.service.name = 'payment'
 # OR
@@ -37,7 +37,7 @@ attribute.service.name = 'payment'
 
 ## When Ambiguity Occurs
 
-If you see an ambiguity error, it typically means a resource attribute is being incorrectly sent as both a resource attribute AND a regular attribute. This is an instrumentation issue that should be fixed.
+If you see an ambiguity warning, it typically means a resource attribute is being incorrectly sent as both a resource attribute AND a regular attribute. This is an instrumentation issue that should be fixed.
 
 **Common causes:**
 - Misconfigured instrumentation libraries
@@ -50,6 +50,15 @@ If you see an ambiguity error, it typically means a resource attribute is being 
 service.name, k8s.namespace.name, host.name, cloud.region, 
 container.name, deployment.environment, etc.
 ```
+<Admonition type="note">
+If the same field is sent in multiple contexts, the system applies the following rules:
+
+**Resource vs Attribute Priority** : 
+If a field is sent as both a resource attribute and an attribute attribute (e.g., `resource.context` and `attribute.context`), the system prioritizes the resource value.
+
+**Same Field in Multiple Contexts** : 
+If a field such as `body` is sent in more than one context (e.g., `attribute.body` and `log.body`), the system will check all provided contexts. In this case, it will search in both `attribute.body` and `log.body`.
+</Admonition>
 
 **Note:** ANY resource attribute can have this issue. The solution is to fix your instrumentation so resource attributes are only sent in the resource context, not as span/log attributes.
 
