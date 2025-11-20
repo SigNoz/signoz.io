@@ -842,8 +842,9 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'Why Use Collector',
-            route: '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
-          }
+            route:
+              '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
+          },
         ],
       },
     ],
@@ -1012,6 +1013,11 @@ const docsSideNav = [
             type: 'doc',
             label: 'PHP',
             route: '/docs/instrumentation/opentelemetry-php',
+          },
+          {
+            type: 'doc',
+            label: 'Laravel',
+            route: '/docs/instrumentation/opentelemetry-laravel',
           },
           {
             type: 'doc',
