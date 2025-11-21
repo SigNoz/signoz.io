@@ -4,6 +4,7 @@ id: rust
 tags: [SigNoz Cloud, Self-Host]
 title: Rust Opentelemetry Instrumentation
 description: Send events from your Rust application to SigNoz
+doc_type: howto
 hide_table_of_contents: true
 ---
 
@@ -37,9 +38,9 @@ To configure your Rust application to send data we need to initialize OpenTeleme
 ```toml
 opentelemetry = { version = "0.27.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
+opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.12", features = ["tls-roots"] }
+tonic = { version = "0.12" }
 ```
 
 after adding these in `Cargo.toml` , you need to use these in entry point of your Rust application , which is `main.rs` file in majority of applications.
@@ -73,6 +74,7 @@ fn init_tracer() -> TracerProvider {
 
     let exporter = SpanExporter::builder()
         .with_tonic()
+        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
         .with_metadata(metadata)
         .with_endpoint(signoz_endpoint)
         .build()
@@ -170,7 +172,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-let _ = tracer_provider.shutdown();
+tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
 ```
 
 **Step 4: Set environment variables and run app**
@@ -275,7 +277,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-let _ = tracer_provider.shutdown();
+tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
 ```
 
 **Step 5: Set environment variables and run app**
@@ -298,7 +300,7 @@ in terminal to start the application!
 
 **Step 1 : Install OTel Collector agent in K8s**
 
-For Rust application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+For Rust application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
 
 **Step 2 : Instrument your application with OpenTelemetry**
 
@@ -385,7 +387,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-let _ = tracer_provider.shutdown();
+tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
 ```
 
 **Step 5: Set environment variables and run app**
@@ -419,9 +421,9 @@ To configure your Rust application to send data we need to initialize OpenTeleme
 ```toml
 opentelemetry = { version = "0.27.0", features = ["trace"] }
 opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
+opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace", "tls-roots"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.12", features = ["tls-roots"] }
+tonic = { version = "0.12" }
 ```
 
 after adding these in `Cargo.toml` , you need to use these in entry point of your Rust application , which is `main.rs` file in majority of applications.
@@ -455,6 +457,7 @@ fn init_tracer() -> TracerProvider {
 
     let exporter = SpanExporter::builder()
         .with_tonic()
+        .with_tls_config(tonic::transport::ClientTlsConfig::new().with_native_roots())
         .with_metadata(metadata)
         .with_endpoint(signoz_endpoint)
         .build()
@@ -552,7 +555,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-let _ = tracer_provider.shutdown();
+tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
 ```
 
 **Step 4: Set environment variables and run app**
@@ -657,7 +660,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-let _ = tracer_provider.shutdown();
+tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
 ```
 
 **Step 5: Set environment variables and run app**
@@ -783,7 +786,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-let _ = tracer_provider.shutdown();
+tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
 ```
 
 **Step 4: Set environment variables and run app**
