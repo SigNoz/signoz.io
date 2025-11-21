@@ -665,23 +665,6 @@ tracer_provider.shutdown().expect("Failed to shutdown tracer provider");
 
 **Step 5: Set environment variables and run the app**
 
-Create a `.env` file in the root of the project. The structure should look like this:
-
-```
-project_root/
-|-- Cargo.toml
-|-- src/
-|   |-- main.rs
-|-- .env
-```
-
-Paste the following in the `.env` file:
-
-```bash
-OTEL_EXPORTER_OTLP_ENDPOINT=<otel_collector_endpoint>
-OTEL_RESOURCE_ATTRIBUTES=<service_name>
-```
-
 | Variable                              | Description                                                                                                                                                                      |
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | OTEL_EXPORTER_OTLP_ENDPOINT           | This is the endpoint of your OTel Collector. If you have hosted it somewhere, provide the URL. Otherwise, the default is `http://localhost:4317` if you have followed our guide. |
@@ -690,6 +673,8 @@ OTEL_RESOURCE_ATTRIBUTES=<service_name>
 Now run:
 
 ```
+set OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+set OTEL_RESOURCE_ATTRIBUTES=service.name=sample-rust-app
 cargo run
 ```
 
