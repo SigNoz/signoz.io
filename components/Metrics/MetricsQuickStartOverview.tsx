@@ -38,10 +38,12 @@ interface MetricsQuickStartOverviewProps {
     | 'cloud-platforms'
 }
 
+type SectionId = NonNullable<MetricsQuickStartOverviewProps['category']>
+
 export default function MetricsQuickStartOverview({
   category = 'all',
 }: MetricsQuickStartOverviewProps) {
-  const sections = [
+  const sections: { id: SectionId; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'collection', label: 'Collection' },
     { id: 'infrastructure', label: 'Infrastructure' },
@@ -52,14 +54,16 @@ export default function MetricsQuickStartOverview({
     { id: 'cloud-platforms', label: 'Cloud Platforms' },
   ]
 
-  const [activeSection, setActiveSection] = useState(category === 'all' ? 'all' : category)
+  const [activeSection, setActiveSection] = useState<SectionId>(
+    category === 'all' ? 'all' : category
+  )
 
   const NavigationPills = () => (
     <div className="mb-8 flex flex-wrap gap-2">
       {sections.map((section) => (
         <button
           key={section.id}
-          onClick={() => setActiveSection(section.id as any)}
+          onClick={() => setActiveSection(section.id)}
           className={`inline-block rounded-full px-4 py-2 text-sm font-medium transition-colors ${
             activeSection === section.id
               ? 'bg-blue-600 text-white'
@@ -103,13 +107,13 @@ export default function MetricsQuickStartOverview({
           },
           {
             name: 'AWS ECS Fargate',
-            href: '/docs/aws-monitoring/ecs-fargate',
+            href: '/docs/opentelemetry-collection-agents/ecs/sidecar/overview/',
             icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
             clickName: 'AWS ECS Fargate Metrics Link',
           },
           {
             name: 'AWS EC2',
-            href: '/docs/aws-monitoring/ec2-infra-metrics',
+            href: '/docs/opentelemetry-collection-agents/ecs/ec2/overview/',
             icon: <SiAmazon className="h-7 w-7 text-orange-500" />,
             clickName: 'AWS EC2 Metrics Link',
           },
