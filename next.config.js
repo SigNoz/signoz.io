@@ -943,12 +943,12 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/send-metrics-cloud/',
-          destination: '/docs/userguide/otel-metrics-receivers/',
+          destination: '/docs/metrics-management/send-metrics/',
           permanent: true,
         },
         {
           source: '/docs/userguide/send-metrics/',
-          destination: '/docs/userguide/otel-metrics-receivers/',
+          destination: '/docs/metrics-management/send-metrics/',
           permanent: true,
         },
         {
