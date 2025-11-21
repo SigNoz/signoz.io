@@ -9,6 +9,11 @@ hide_table_of_contents: true
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Rust applications and view your application traces in SigNoz.
 
+## Requirements
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [Cargo](https://doc.rust-lang.org/cargo/)
+
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
@@ -30,11 +35,11 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 To configure your Rust application to send data we need to initialize OpenTelemetry, OTel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
 ```toml
-opentelemetry = { version = "0.31.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.31.0", features = ["trace"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace"] }
+opentelemetry = { version = "0.27.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.13", features = ["tls-roots"] }
+tonic = { version = "0.12", features = ["tls-roots"] }
 ```
 
 after adding these in `Cargo.toml` , you need to use these in entry point of your Rust application , which is `main.rs` file in majority of applications.
@@ -43,7 +48,7 @@ after adding these in `Cargo.toml` , you need to use these in entry point of you
 use opentelemetry::trace::{TraceContextExt, Tracer};
 use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::{SpanExporter, WithExportConfig, WithTonicConfig};
-use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::trace::TracerProvider;
 use opentelemetry_sdk::Resource;
 ```
 
@@ -52,7 +57,7 @@ use opentelemetry_sdk::Resource;
 Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetry tracer with the OpenTelemetry OTLP exporter which is sending data to SigNoz Cloud.
 
 ```rust
-fn init_tracer() -> SdkTracerProvider {
+fn init_tracer() -> TracerProvider {
     let signoz_ingestion_key = std::env::var("SIGNOZ_INGESTION_KEY")
         .expect("SIGNOZ_INGESTION_KEY not set");
     let signoz_endpoint = std::env::var("SIGNOZ_ENDPOINT")
@@ -73,13 +78,13 @@ fn init_tracer() -> SdkTracerProvider {
         .build()
         .expect("Failed to create span exporter");
 
-    let resource = Resource::builder()
-        .with_service_name(app_name)
-        .build();
+    let resource = Resource::new(vec![
+        KeyValue::new("service.name", app_name),
+    ]);
 
-    SdkTracerProvider::builder()
+    TracerProvider::builder()
         .with_resource(resource)
-        .with_batch_exporter(exporter)
+        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
         .build()
 }
 ```
@@ -165,7 +170,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-tracer_provider.shutdown();
+let _ = tracer_provider.shutdown();
 ```
 
 **Step 4: Set environment variables and run app**
@@ -190,9 +195,9 @@ You can find instructions to install OTel Collector binary [here](https://signoz
 To configure your Rust application to send traces we need to initialize OpenTelemetry, OTel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
 ```toml
-opentelemetry = { version = "0.31.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.31.0", features = ["trace"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace"] }
+opentelemetry = { version = "0.27.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -202,7 +207,7 @@ after adding these in `Cargo.toml` , you need to use these in entry point of you
 use opentelemetry::trace::{TraceContextExt, Tracer};
 use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::SpanExporter;
-use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::trace::TracerProvider;
 use opentelemetry_sdk::Resource;
 ```
 
@@ -213,15 +218,15 @@ Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetr
 This tracer initializes the connection with the OTel collector from the system variables passed while starting the app.
 
 ```rust
-fn init_tracer() -> SdkTracerProvider {
+fn init_tracer() -> TracerProvider {
     let exporter = SpanExporter::builder()
         .with_tonic()
         .build()
         .expect("Failed to create span exporter");
 
-    SdkTracerProvider::builder()
+    TracerProvider::builder()
         .with_resource(Resource::default())
-        .with_batch_exporter(exporter)
+        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
         .build()
 }
 ```
@@ -270,7 +275,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-tracer_provider.shutdown();
+let _ = tracer_provider.shutdown();
 ```
 
 **Step 5: Set environment variables and run app**
@@ -300,9 +305,9 @@ For Rust application deployed on Kubernetes, you need to install OTel Collector 
 To configure your Rust application to send traces we need to initialize OpenTelemetry, OTel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
 ```toml
-opentelemetry = { version = "0.31.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.31.0", features = ["trace"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace"] }
+opentelemetry = { version = "0.27.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -312,7 +317,7 @@ after adding these in `Cargo.toml` , you need to use these in entry point of you
 use opentelemetry::trace::{TraceContextExt, Tracer};
 use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::SpanExporter;
-use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::trace::TracerProvider;
 use opentelemetry_sdk::Resource;
 ```
 
@@ -323,15 +328,15 @@ Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetr
 This tracer initializes the connection with the OTel collector from the system variables passed while starting the app.
 
 ```rust
-fn init_tracer() -> SdkTracerProvider {
+fn init_tracer() -> TracerProvider {
     let exporter = SpanExporter::builder()
         .with_tonic()
         .build()
         .expect("Failed to create span exporter");
 
-    SdkTracerProvider::builder()
+    TracerProvider::builder()
         .with_resource(Resource::default())
-        .with_batch_exporter(exporter)
+        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
         .build()
 }
 ```
@@ -380,7 +385,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-tracer_provider.shutdown();
+let _ = tracer_provider.shutdown();
 ```
 
 **Step 5: Set environment variables and run app**
@@ -412,9 +417,9 @@ From Windows, there are two ways to send data to SigNoz Cloud.
 To configure your Rust application to send data we need to initialize OpenTelemetry, OTel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
 ```toml
-opentelemetry = { version = "0.31.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.31.0", features = ["trace"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace"] }
+opentelemetry = { version = "0.27.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
 tokio = { version = "1", features = ["full"] }
 tonic = { version = "0.12", features = ["tls-roots"] }
 ```
@@ -425,7 +430,7 @@ after adding these in `Cargo.toml` , you need to use these in entry point of you
 use opentelemetry::trace::{TraceContextExt, Tracer};
 use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::{SpanExporter, WithExportConfig, WithTonicConfig};
-use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::trace::TracerProvider;
 use opentelemetry_sdk::Resource;
 ```
 
@@ -434,7 +439,7 @@ use opentelemetry_sdk::Resource;
 Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetry tracer with the OpenTelemetry OTLP exporter which is sending data to SigNoz Cloud.
 
 ```rust
-fn init_tracer() -> SdkTracerProvider {
+fn init_tracer() -> TracerProvider {
     let signoz_ingestion_key = std::env::var("SIGNOZ_INGESTION_KEY")
         .expect("SIGNOZ_INGESTION_KEY not set");
     let signoz_endpoint = std::env::var("SIGNOZ_ENDPOINT")
@@ -455,13 +460,13 @@ fn init_tracer() -> SdkTracerProvider {
         .build()
         .expect("Failed to create span exporter");
 
-    let resource = Resource::builder()
-        .with_service_name(app_name)
-        .build();
+    let resource = Resource::new(vec![
+        KeyValue::new("service.name", app_name),
+    ]);
 
-    SdkTracerProvider::builder()
+    TracerProvider::builder()
         .with_resource(resource)
-        .with_batch_exporter(exporter)
+        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
         .build()
 }
 ```
@@ -547,7 +552,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-tracer_provider.shutdown();
+let _ = tracer_provider.shutdown();
 ```
 
 **Step 4: Set environment variables and run app**
@@ -572,9 +577,9 @@ You can find instructions to install OTel Collector binary [here](https://signoz
 To configure your Rust application to send traces we need to initialize OpenTelemetry, OTel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
 ```toml
-opentelemetry = { version = "0.31.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.31.0", features = ["trace"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace"] }
+opentelemetry = { version = "0.27.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -584,7 +589,7 @@ after adding these in `Cargo.toml` , you need to use these in entry point of you
 use opentelemetry::trace::{TraceContextExt, Tracer};
 use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::SpanExporter;
-use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::trace::TracerProvider;
 use opentelemetry_sdk::Resource;
 ```
 
@@ -595,15 +600,15 @@ Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetr
 This tracer initializes the connection with the OTel collector from the system variables passed while starting the app.
 
 ```rust
-fn init_tracer() -> SdkTracerProvider {
+fn init_tracer() -> TracerProvider {
     let exporter = SpanExporter::builder()
         .with_tonic()
         .build()
         .expect("Failed to create span exporter");
 
-    SdkTracerProvider::builder()
+    TracerProvider::builder()
         .with_resource(Resource::default())
-        .with_batch_exporter(exporter)
+        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
         .build()
 }
 ```
@@ -652,7 +657,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-tracer_provider.shutdown();
+let _ = tracer_provider.shutdown();
 ```
 
 **Step 5: Set environment variables and run app**
@@ -700,9 +705,9 @@ in terminal to start the application!
 To configure your Rust application to send traces we need to initialize OpenTelemetry, OTel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
 ```toml
-opentelemetry = { version = "0.31.0", features = ["trace"] }
-opentelemetry_sdk = { version = "0.31.0", features = ["trace"] }
-opentelemetry-otlp = { version = "0.31.0", features = ["grpc-tonic", "trace"] }
+opentelemetry = { version = "0.27.0", features = ["trace"] }
+opentelemetry_sdk = { version = "0.27.0", features = ["trace", "rt-tokio"] }
+opentelemetry-otlp = { version = "0.27.0", features = ["grpc-tonic", "trace"] }
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -712,7 +717,7 @@ after adding these in `Cargo.toml` , you need to use these in entry point of you
 use opentelemetry::trace::{TraceContextExt, Tracer};
 use opentelemetry::{global, KeyValue};
 use opentelemetry_otlp::SpanExporter;
-use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::trace::TracerProvider;
 use opentelemetry_sdk::Resource;
 ```
 
@@ -721,15 +726,15 @@ use opentelemetry_sdk::Resource;
 Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetry tracer with the OpenTelemetry OTLP exporter which is sending data to your Self-Hosted SigNoz.
 
 ```rust
-fn init_tracer() -> SdkTracerProvider {
+fn init_tracer() -> TracerProvider {
     let exporter = SpanExporter::builder()
         .with_tonic()
         .build()
         .expect("Failed to create span exporter");
 
-    SdkTracerProvider::builder()
+    TracerProvider::builder()
         .with_resource(Resource::default())
-        .with_batch_exporter(exporter)
+        .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
         .build()
 }
 ```
@@ -778,7 +783,7 @@ tracer.in_span("operation", |cx| {
 });
 
 // Shutdown trace provider
-tracer_provider.shutdown();
+let _ = tracer_provider.shutdown();
 ```
 
 **Step 4: Set environment variables and run app**
