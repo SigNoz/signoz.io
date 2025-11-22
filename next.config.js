@@ -936,10 +936,24 @@ module.exports = () => {
           destination: '/docs/manage/administrator-guide/sso/overview/',
           permanent: true,
         },
-
         {
           source: '/docs/install/troubleshooting/',
           destination: '/docs/setup/docker/troubleshooting/faq',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/send-metrics-cloud/',
+          destination: '/docs/metrics-management/send-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/send-metrics/',
+          destination: '/docs/metrics-management/send-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorials/',
+          destination: '/docs/install/',
           permanent: true,
         },
         {

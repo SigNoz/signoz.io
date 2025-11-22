@@ -219,8 +219,9 @@ Every doc should be skimmable and actionable.
 
 - Hyperlinks
 
-  - Prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
-  - External links should open in a new tab and preserve security attributes:
+  - Internal links should open in the new tab. Always prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
+
+  - External links should open in a new tab and preserve security attributes by using href:
 
     ```mdx
     <a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">
@@ -230,10 +231,9 @@ Every doc should be skimmable and actionable.
 
   - Use descriptive anchor text that makes the link destination clear. Avoid generic phrases like "here" or "link" and do not paste raw URLs into the body text.
 
-    - ✅ `Learn from the [Temporal Golang sample repository](https://github.com/SigNoz/temporal-golang-opentelemetry/tree/main)`
-    - ❌ `See (link)` or `Refer to https://github.com/...`
+    - ✅ `Learn from the [Temporal Golang tutorial](https://signoz.io/docs/integrations/temporal-golang-opentelemetry/)`
+    - ❌ `See (link)` or `Refer to https://signoz.io/...`
 
-  - Internal links typically open in the same tab unless the link switches product/app context or interrupts an in-progress task.
   - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
 
 - Cloud vs Self-Host
@@ -572,8 +572,6 @@ Docs pages must be added to the sidebar navigation.
      label: 'Cloudflare',
    }
    ```
-
-Optional: To mark a doc as new, include `className: 'new-doc'` on the entry.
 
 If you introduced a new tag in your doc frontmatter, add its tooltip definition in `constants/tagDefinitions.ts`.
 
