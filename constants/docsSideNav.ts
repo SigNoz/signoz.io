@@ -1309,6 +1309,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-logs',
+                label: 'Node.js logs',
+              },
+              {
+                type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-pino-logs',
                 label: 'Pino Node.js logs',
               },
@@ -1837,7 +1842,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
-                label: "Kubernetes Cluster Metrics Dashboard"
+                label: 'Kubernetes Cluster Metrics Dashboard',
               },
               {
                 type: 'doc',

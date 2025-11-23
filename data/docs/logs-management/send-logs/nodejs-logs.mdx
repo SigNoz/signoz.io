@@ -1,0 +1,269 @@
+---
+date: 2025-11-21
+tags: [SigNoz Cloud, Self-Host]
+title: Send logs from Node.js default logger to SigNoz using OpenTelemetry
+id: nodejs-logs
+doc_type: howto
+description: Learn how to send logs from Node.js default logger to SigNoz using OpenTelemetry SDK.
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+This guide will walk you through instrumenting your Node.js application to send logs from the default `console` logger to SigNoz using the OpenTelemetry (OTel) SDK.
+
+## Prerequisites
+
+- Node.js version 14 or higher
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- An existing Node.js application
+
+## Setup
+
+### Step 1: Install dependencies
+
+Install the required OpenTelemetry packages:
+
+```bash
+npm install --save @opentelemetry/api-logs@0.208.0 \
+  @opentelemetry/sdk-logs@0.208.0 \
+  @opentelemetry/exporter-logs-otlp-http@0.208.0 \
+  @opentelemetry/instrumentation@0.208.0 \
+  @opentelemetry/resources@2.2.0 \
+  @opentelemetry/semantic-conventions@1.38.0
+```
+
+### Step 2: Create the OpenTelemetry Logger Configuration
+
+Create a new file called `logger.js` in your project root:
+
+```javascript:logger.js
+const {
+  LoggerProvider,
+  BatchLogRecordProcessor,
+} = require("@opentelemetry/sdk-logs");
+const { OTLPLogExporter } = require("@opentelemetry/exporter-logs-otlp-http");
+const { resourceFromAttributes } = require("@opentelemetry/resources");
+const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
+
+// Create a resource with your service information
+const resource = resourceFromAttributes({
+  [ATTR_SERVICE_NAME]: "nodejs-express-logger",
+});
+
+// Configure the OTLP exporter
+const logExporter = new OTLPLogExporter({
+  url: 'http://localhost:4318/v1/logs',
+  headers: {},
+});
+
+// Create and configure the logger provider
+const loggerProvider = new LoggerProvider({
+  resource,
+  processors: [new BatchLogRecordProcessor(logExporter)],
+});
+module.exports = loggerProvider;
+```
+
+### Step 3: Instrument the Default Console Logger
+
+Create a new file called `console-instrumentation.js` in your project root. This file wraps the default console methods to send logs to OpenTelemetry:
+
+```javascript:console-instrumentation.js
+require("@opentelemetry/api-logs");
+const loggerProvider = require("./logger");
+
+// Get a logger instance
+const logger = loggerProvider.getLogger("default", "1.0.0");
+
+// Store original console methods
+const originalConsole = {
+  log: console.log,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+  debug: console.debug,
+};
+
+// Map severity levels
+const SeverityNumber = {
+  DEBUG: 5,
+  INFO: 9,
+  WARN: 13,
+  ERROR: 17,
+};
+
+// Override console methods
+console.log = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.log.apply(console, args);
+};
+
+console.info = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.info.apply(console, args);
+};
+
+console.warn = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.WARN,
+    severityText: "WARN",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.warn.apply(console, args);
+};
+
+console.error = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.ERROR,
+    severityText: "ERROR",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.error.apply(console, args);
+};
+
+console.debug = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.DEBUG,
+    severityText: "DEBUG",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.debug.apply(console, args);
+};
+```
+
+### Step 4: Initialize Instrumentation in Your Application
+
+Import the instrumentation at the very top of your main application file (e.g., index.js or app.js):
+
+```javascript:index.js
+// This must be the first import
+require('./console-instrumentation')
+
+// Your application code follows
+const express = require('express')
+const app = express()
+
+console.log('Application started')
+console.error('This is an error message')
+
+app.listen(3000, () => {
+  console.info('Server listening on port 3000')
+})
+```
+
+### Step 5: Configure SigNoz Endpoint
+
+Update the `logger.js` file with your SigNoz endpoint:
+
+```javascript:logger.js
+const logExporter = new OTLPLogExporter({
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs' // Must include /v1/logs path,
+  headers: {
+    'signoz-access-token': '<SIGNOZ_INGESTION_KEY>',
+  },
+});
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+### Step 6: Run Your Application
+
+Run your application:
+
+```bash
+node index.js
+```
+
+## Validate Logs
+
+Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/userguide/logs/) section.
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/logs-management/send-logs/nodejs-logs.webp" alt="Node.js Logs" />
+  <figcaption>
+    <i>Node.js Logs</i>
+  </figcaption>
+</figure>
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/logs-management/send-logs/nodejs-logs-detailed-view.webp"
+    alt="Node.js Logs Detailed View"
+  />
+  <figcaption>
+    <i>Node.js Logs Detailed View</i>
+  </figcaption>
+</figure>
+
+## Troubleshooting
+
+### Why do I see "404 Not Found" errors?
+
+This usually happens if the endpoint URL is incorrect. Ensure your URL ends with `/v1/logs`.
+
+- Cloud: `https://ingest.<region>.signoz.cloud:443/v1/logs`
+- Self-Hosted: `http://localhost:4318/v1/logs`
+
+### Why are my logs not appearing in SigNoz?
+
+- Check if the application started successfully and is actually generating logs.
+- Verify your `<region>` and `<SIGNOZ_INGESTION_KEY>` are correct.
+- If using `console.log`, ensure `console-instrumentation.js` is required **before** any other code in your application.
+
+## Next Steps
+
+- [Send Logs from Node.js Pino Logger to SigNoz](/docs/logs-management/send-logs/nodejs-pino-logs)
+- [Send Logs from Node.js Winston Logger to SigNoz](/docs/logs-management/send-logs/nodejs-winston-logs)
+
+## Get Help
+
+<GetHelp />
