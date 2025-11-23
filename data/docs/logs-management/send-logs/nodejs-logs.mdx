@@ -4,7 +4,7 @@ tags: [SigNoz Cloud, Self-Host]
 title: Send logs from Node.js default logger to SigNoz using OpenTelemetry
 id: nodejs-logs
 doc_type: howto
-description: Learn how to send logs from Node.js default logger to SigNoz using OpenTelemetry SDK.
+description: Learn how to send logs from Node.js default console logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -26,12 +26,12 @@ This guide will walk you through instrumenting your Node.js application to send 
 Install the required OpenTelemetry packages:
 
 ```bash
-npm install --save @opentelemetry/api-logs@0.208.0 \
-  @opentelemetry/sdk-logs@0.208.0 \
-  @opentelemetry/exporter-logs-otlp-http@0.208.0 \
-  @opentelemetry/instrumentation@0.208.0 \
-  @opentelemetry/resources@2.2.0 \
-  @opentelemetry/semantic-conventions@1.38.0
+npm install --save @opentelemetry/api-logs \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/instrumentation \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions
 ```
 
 ### Step 2: Create the OpenTelemetry Logger Configuration
@@ -54,14 +54,14 @@ const resource = resourceFromAttributes({
 
 // Configure the OTLP exporter
 const logExporter = new OTLPLogExporter({
-  url: 'http://localhost:4318/v1/logs',
+  url: 'http://localhost:4318/v1/logs', // Full path required
   headers: {},
 });
 
 // Create and configure the logger provider
 const loggerProvider = new LoggerProvider({
   resource,
-  processors: [new BatchLogRecordProcessor(logExporter)],
+  processors: [new BatchLogRecordProcessor(logExporter)], // Configure batch processor
 });
 module.exports = loggerProvider;
 ```
@@ -197,9 +197,9 @@ Update the `logger.js` file with your SigNoz endpoint:
 
 ```javascript:logger.js
 const logExporter = new OTLPLogExporter({
-  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs' // Must include /v1/logs path,
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs' // OTLP logs endpoint
   headers: {
-    'signoz-access-token': '<SIGNOZ_INGESTION_KEY>',
+    'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
   },
 });
 ```
@@ -261,8 +261,11 @@ This usually happens if the endpoint URL is incorrect. Ensure your URL ends with
 
 ## Next Steps
 
-- [Send Logs from Node.js Pino Logger to SigNoz](/docs/logs-management/send-logs/nodejs-pino-logs)
-- [Send Logs from Node.js Winston Logger to SigNoz](/docs/logs-management/send-logs/nodejs-winston-logs)
+- [Send Logs from Node.js Pino Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs)
+- [Send Logs from Node.js Winston Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs)
+- [Log Query/Filtering guides](https://signoz.io/docs/userguide/logs/)
+- [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
+- [APM Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/apm-dashboards/)
 
 ## Get Help
 
