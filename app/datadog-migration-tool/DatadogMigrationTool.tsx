@@ -124,7 +124,10 @@ const Header: React.FC = () => {
 
 const TopHeroSection: React.FC = () => {
   return (
-    <SectionLayout variant="bordered" className="!px-0">
+    <SectionLayout
+      variant="bordered"
+      className="!border-b-1 !border-t-1 !border-dashed !border-signoz_slate-400 !px-0"
+    >
       <div className="mb-8 text-center">
         <h2 className="mb-6 text-signoz_sienna-100">Typical Migration Pain</h2>
       </div>
@@ -151,10 +154,6 @@ const LlmPoweredIntelligenceSection: React.FC = () => {
       />
     </div>
   )
-}
-
-const SimpleAutomatedMigrationSection: React.FC = () => {
-  return <SimpleAutomatedMigrationSteps />
 }
 
 const CustomerStories: React.FC = () => {
@@ -210,13 +209,13 @@ const CustomerStories: React.FC = () => {
   )
 }
 
-const SimpleAutomatedMigrationSteps: React.FC = () => {
+const SimpleAutomatedMigrationSection: React.FC = () => {
   return (
     <SectionLayout variant="bordered" className="!px-0">
-      <div className="pb-6 pt-10">
-        <h2 className="mb-6 text-center text-signoz_sienna-100">Simple, Automated Migration</h2>
+      <div className="pb-0 pt-10">
+        <h2 className="text-center text-signoz_sienna-100">Simple, Automated Migration</h2>
       </div>
-      <GridLayout variant="split" className="p-10 max-lg:!grid max-lg:grid-cols-1">
+      <GridLayout variant="split" className="px-10 pb-10 max-lg:!grid max-lg:grid-cols-1">
         <div className="flex w-full flex-col gap-4 pr-4 max-lg:pr-0">
           <div className="mb-4">
             <span className="flex items-center gap-2 font-bold uppercase text-red-400">I</span>
@@ -311,7 +310,7 @@ const WhatWeSupportSection: React.FC = () => {
       variant="no-border"
       className="!border-x-0 !border-t-1 !border-dashed !border-signoz_slate-400"
     >
-      <div className="my-8 max-w-4xl px-6">
+      <div className="px-6 py-8">
         <h2 className="mb-6 text-signoz_sienna-100">What We Support</h2>
         <p className="leading-relaxed text-signoz_vanilla-400">
           The tool manages the migration of metrics, logs, and traces dashboards, and also supports
@@ -319,7 +318,7 @@ const WhatWeSupportSection: React.FC = () => {
           translated:
         </p>
       </div>
-      <div className="w-full border-y border-dashed border-signoz_slate-400">
+      <div className="w-full">
         <div className="grid grid-cols-1 md:grid-cols-2">
           {WHAT_WE_SUPPORT_ITEMS.map((item, index) => (
             <div key={index} className={`${getCellClasses(index)}`}>
