@@ -10,11 +10,13 @@ import PostSimple from '@/layouts/PostSimple'
 import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
+import OpenTelemetryHubLayout from '@/layouts/OpenTelemetryHubLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
+import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 
 const defaultLayout = 'OpenTelemetryLayout'
 const layouts = {
@@ -90,6 +92,7 @@ export const generateStaticParams = async () => {
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
+  const currentRoute = `/opentelemetry/${slug}`
   // Filter out drafts in production
   const sortedCoreContents = allCoreContent(sortPosts(allOpentelemetries))
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
@@ -105,6 +108,34 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
+
+  const hubContext = getHubContextForRoute(currentRoute)
+
+  if (hubContext) {
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <OpenTelemetryHubLayout
+          content={mainContent}
+          authorDetails={authorDetails}
+          authors={post?.authors}
+          toc={post.toc}
+          navItems={hubContext.items}
+          currentHubPath={hubContext.pathKey}
+          pathMeta={hubContext.firstRouteByPath}
+          defaultLanguage={hubContext.defaultLanguage}
+          availableLanguages={hubContext.languages}
+          currentRoute={currentRoute}
+        >
+          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+          <PageFeedback />
+        </OpenTelemetryHubLayout>
+      </>
+    )
+  }
 
   const Layout = layouts[post.layout || defaultLayout]
 
