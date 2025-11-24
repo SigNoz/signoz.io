@@ -320,6 +320,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/opentelemetry/series/nextjs/',
+          destination: '/blog/opentelemetry-nextjs/',
+          permanent: true,
+        },
+        {
           source: '/guides/',
           destination: '/resource-center/guides/',
           permanent: true,
