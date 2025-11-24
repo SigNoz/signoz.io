@@ -99,7 +99,7 @@ const Header: React.FC = () => {
       <RequestEarlyAccessButton className="!mx-auto !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]" />
 
       {/* Hero image */}
-      <SectionLayout variant="no-border" className="!mt-0 max-md:-mb-[3rem]">
+      <SectionLayout variant="bordered" className="!mt-0 max-md:-mb-[3rem]">
         <div className="w-100 mx-[-28px]">
           <div className="product-explainer-video hero-figure rounded-xl px-3">
             <div className="embed-container">
