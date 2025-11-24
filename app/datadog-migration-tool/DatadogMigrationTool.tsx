@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { ArrowRight, ChartNoAxesColumn, DraftingCompass, Grid2x2 } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Modal, ModalBody, ModalContent, useDisclosure } from '@nextui-org/react'
 import ProductNav from '@/components/ProductNav/ProductNav'
@@ -10,6 +10,7 @@ import {
   CARDS,
   LLM_POWERED_INTELLIGENCE_CARDS,
   HUBSPOT_DATA,
+  WHAT_WE_SUPPORT_ITEMS,
 } from './DatadogMigrationTool.constants'
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
@@ -18,11 +19,12 @@ import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLay
 import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
 import PricingForm from '../pricing-form'
+import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
 
-const RequestEarlyAccessButton: React.FC = () => {
+const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
   return (
-    <div className="relative z-[1] !mx-auto mx-2 !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]">
+    <div className={`relative z-[1] mx-2 ${className}`}>
       <div className="flex items-center justify-center">
         <Button
           variant="default"
@@ -62,12 +64,15 @@ const RequestEarlyAccessButton: React.FC = () => {
 
 const ReadyToMigrateBanner: React.FC = () => {
   return (
-    <div>
+    <SectionLayout
+      variant="no-border"
+      className="!border-x-0 !border-t-1 !border-dashed !border-signoz_slate-400 py-10"
+    >
       <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
         Ready to Migrate from Datadog?
       </h2>
-      <RequestEarlyAccessButton />
-    </div>
+      <RequestEarlyAccessButton className="!mx-auto" />
+    </SectionLayout>
   )
 }
 
@@ -91,7 +96,7 @@ const Header: React.FC = () => {
       </div>
 
       {/* Buttons */}
-      <RequestEarlyAccessButton />
+      <RequestEarlyAccessButton className="!mx-auto !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]" />
 
       {/* Hero image */}
       <SectionLayout variant="no-border" className="!mt-0 max-md:-mb-[3rem]">
@@ -149,13 +154,7 @@ const LlmPoweredIntelligenceSection: React.FC = () => {
 }
 
 const SimpleAutomatedMigrationSection: React.FC = () => {
-  return (
-    <div className="border-t-1 border-dashed border-signoz_slate-400">
-      <div className="my-8 max-w-4xl px-6">
-        <h2 className="mb-6 text-signoz_sienna-100">Simple, Automated Migration</h2>
-      </div>
-    </div>
-  )
+  return <SimpleAutomatedMigrationSteps />
 }
 
 const CustomerStories: React.FC = () => {
@@ -211,32 +210,84 @@ const CustomerStories: React.FC = () => {
   )
 }
 
-const WHAT_WE_SUPPORT_ITEMS = [
-  {
-    label: <ChartNoAxesColumn className="h-4 w-4" />,
-    title: 'Dashboard Panels',
-    description:
-      'All your visualization types including time series graphs, bar charts, and tables are preserved with their original layout and styling.',
-  },
-  {
-    label: <DraftingCompass className="h-4 w-4" />,
-    title: 'Panel Configurations',
-    description:
-      'Titles, descriptions, units, display settings, and threshold configurations carry over so your dashboards look and function the same way.',
-  },
-  {
-    label: <Image src="/img/index_features/logs.svg" alt="Logs Icon" width={16} height={16} />,
-    title: 'Query Translations',
-    description:
-      'Complex metric queries with filters, aggregations, and groupings are automatically converted to SigNoz query syntax while maintaining the same data retrieval logic.',
-  },
-  {
-    label: <Grid2x2 className="h-4 w-4" />,
-    title: 'Metric Mappings',
-    description:
-      'The tool intelligently translates metric names and attribute mappings between Datadog and SigNoz, handling differences in naming conventions and data structures.',
-  },
-] as const
+const SimpleAutomatedMigrationSteps: React.FC = () => {
+  return (
+    <SectionLayout variant="bordered" className="!px-0">
+      <div className="pb-6 pt-10">
+        <h2 className="mb-6 text-center text-signoz_sienna-100">Simple, Automated Migration</h2>
+      </div>
+      <GridLayout variant="split" className="p-10 max-lg:!grid max-lg:grid-cols-1">
+        <div className="flex w-full flex-col gap-4 pr-4 max-lg:pr-0">
+          <div className="mb-4">
+            <span className="flex items-center gap-2 font-bold uppercase text-red-400">I</span>
+            <h2 className="mb-6 text-signoz_sienna-100">Get Your Dashboard Data</h2>
+            <p className="text-justify leading-relaxed text-signoz_vanilla-400">
+              Export your Datadog dashboard configurations in JSON format. This includes all panels,
+              queries, visualizations, and alert configurations so there’s nothing manual for your
+              team to migrate.
+            </p>
+          </div>
+          <Image
+            src="/img/datadog-migration-tool/get-your-dashboard-data.png"
+            alt="Get Your Dashboard Data"
+            width={10000}
+            height={10000}
+            className="w-full rounded-lg border border-signoz_slate-400/40"
+          />
+          <div className="hidden lg:block">
+            <span className="flex items-center gap-2 font-bold uppercase text-red-400">III</span>
+            <h2 className="mb-6 text-signoz_sienna-100">Import to SigNoz</h2>
+            <p className="text-justify leading-relaxed text-signoz_vanilla-400">
+              Import the translated dashboards into SigNoz through a UI. Your dashboards are ready
+              to use immediately with the same visual layouts, queries, and alerting logic you had
+              in Datadog.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col gap-0 pl-4 max-lg:pl-0">
+          <div className="-mb-12 -ml-24 flex justify-start pt-16 max-lg:hidden">
+            <Image
+              src="/img/datadog-migration-tool/downwards-arrow-1.svg"
+              alt="Downwards Arrow"
+              width={100}
+              height={100}
+              className="h-3/4 w-2/3 object-contain"
+            />
+          </div>
+          <div className="order-first lg:order-none">
+            <span className="flex items-center gap-2 font-bold uppercase text-red-400">II</span>
+            <h2 className="mb-6 text-signoz_sienna-100">LLM-Powered Translation</h2>
+            <p className="text-justify leading-relaxed text-signoz_vanilla-400">
+              Our tool automatically translates your dashboards, mapping metrics, queries, and panel
+              configurations to SigNoz formats. The LLM intelligently learns from sample dashboards,
+              auto-fills mappings, and gently surfaces differences between platforms.
+            </p>
+          </div>
+          <div className="flex justify-start max-lg:hidden">
+            <Image
+              src="/img/datadog-migration-tool/downwards-arrow-2.svg"
+              alt="Downwards Arrow"
+              width={100}
+              height={100}
+              className="h-full w-1/2 object-contain"
+            />
+          </div>
+        </div>
+
+        <div className="lg:hidden">
+          <span className="flex items-center gap-2 font-bold uppercase text-red-400">III</span>
+          <h2 className="mb-6 text-signoz_sienna-100">Import to SigNoz</h2>
+          <p className="text-justify leading-relaxed text-signoz_vanilla-400">
+            Import the translated dashboards into SigNoz through a UI. Your dashboards are ready to
+            use immediately with the same visual layouts, queries, and alerting logic you had in
+            Datadog.
+          </p>
+        </div>
+      </GridLayout>
+    </SectionLayout>
+  )
+}
 
 const WhatWeSupportSection: React.FC = () => {
   const getCellClasses = (index: number) => {
@@ -256,7 +307,10 @@ const WhatWeSupportSection: React.FC = () => {
   }
 
   return (
-    <div className="border-t-1 border-dashed border-signoz_slate-400">
+    <SectionLayout
+      variant="no-border"
+      className="!border-x-0 !border-t-1 !border-dashed !border-signoz_slate-400"
+    >
       <div className="my-8 max-w-4xl px-6">
         <h2 className="mb-6 text-signoz_sienna-100">What We Support</h2>
         <p className="leading-relaxed text-signoz_vanilla-400">
@@ -277,12 +331,12 @@ const WhatWeSupportSection: React.FC = () => {
           ))}
         </div>
       </div>
-    </div>
+    </SectionLayout>
   )
 }
 
 // Main Component
-const LogsManagement: React.FC = () => {
+const DatadogMigrationTool: React.FC = () => {
   return (
     <main className="!mt-[-10px] mb-auto">
       <ProductNav />
@@ -304,7 +358,7 @@ const LogsManagement: React.FC = () => {
           <ReadyToMigrateBanner />
         </SectionLayout>
 
-        <UsageBasedPricing show={['logs']} />
+        <UsageBasedPricing show={['traces']} />
         <SigNozStats />
         <CustomerStories />
       </div>
@@ -312,4 +366,4 @@ const LogsManagement: React.FC = () => {
   )
 }
 
-export default LogsManagement
+export default DatadogMigrationTool
