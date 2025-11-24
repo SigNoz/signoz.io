@@ -8,11 +8,12 @@ import type { Authors, Blog } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
+import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
-import { ChevronDown, ChevronRight, FileCode, FileText, Globe2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, FileCode, FileText, Code, Menu, X } from 'lucide-react'
+import Image from 'next/image'
 import {
   SiJavascript,
   SiTypescript,
@@ -32,6 +33,10 @@ import {
   SiSpring,
 } from 'react-icons/si'
 import type { IconBaseProps, IconType } from 'react-icons'
+import authorsDirectory from '@/constants/authors.json'
+import ArticleMetaDetailsCard, {
+  type RenderedAuthor,
+} from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
 
 const LANGUAGE_STORAGE_KEY = 'ot-hub-language'
 
@@ -363,6 +368,7 @@ export default function OpenTelemetryHubLayout({
     defaultLanguage ? defaultLanguage : availableLanguages.length ? 'ALL' : null
   )
   const [isLangOpen, setIsLangOpen] = useState(false)
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const hasRestoredLanguage = useRef(false)
   const router = useRouter()
   const pathname = usePathname()
@@ -400,6 +406,12 @@ export default function OpenTelemetryHubLayout({
       setSelectedLanguage(null)
     }
   }, [availableLanguages, defaultLanguage, selectedLanguage])
+
+  useEffect(() => {
+    // Close any mobile overlays when navigating
+    setIsMobileNavOpen(false)
+    setIsLangOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -440,7 +452,7 @@ export default function OpenTelemetryHubLayout({
     [navItems, selectedLanguage]
   )
   const orderedPathMeta = useMemo(() => {
-    const order = ['learn', 'comparisons']
+    const order = ['learn', 'quick-start']
     const ordered = order
       .map((key) => pathMeta.find((p) => p.key === key))
       .filter(Boolean) as HubPathMeta[]
@@ -461,8 +473,9 @@ export default function OpenTelemetryHubLayout({
     ]
   }, [availableLanguages])
 
-  const formattedDate = content.date
-    ? new Date(content.date).toLocaleDateString('en-US', {
+  const updatedDate = content.lastmod || content.date
+  const formattedUpdatedDate = updatedDate
+    ? new Date(updatedDate).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -474,18 +487,58 @@ export default function OpenTelemetryHubLayout({
     content.readingTime?.text || // @ts-ignore
     (content.readingTime?.minutes ? `${Math.ceil(content.readingTime.minutes)} min read` : null)
 
-  const renderedAuthors =
-    authors && authors.length > 0
-      ? authors
-      : authorDetails && authorDetails.length > 0
-        ? authorDetails.map((a) => a.name).filter(Boolean)
-        : []
+  const renderedAuthors = useMemo<RenderedAuthor[]>(() => {
+    const directory = authorsDirectory as Record<
+      string,
+      { name?: string; url?: string; image_url?: string }
+    >
 
-  const visibleTags = Array.isArray(content.tags) ? content.tags.slice(0, 3) : []
-  const extraTags =
-    Array.isArray(content.tags) && content.tags.length > visibleTags.length
-      ? content.tags.length - visibleTags.length
-      : 0
+    if (authorDetails && authorDetails.length > 0) {
+      return authorDetails
+        .map((detail, idx) => {
+          const slug = authors?.[idx]
+          const fallbackProfile = slug ? directory[slug] : undefined
+
+          const name = detail.name || fallbackProfile?.name
+
+          if (!name) return null
+
+          return {
+            name,
+            url: detail.url || fallbackProfile?.url,
+            image: fallbackProfile?.image_url,
+          }
+        })
+        .filter(Boolean) as RenderedAuthor[]
+    }
+
+    if (authors && authors.length > 0) {
+      return authors
+        .map((slug) => {
+          const profile = directory[slug]
+          if (!profile?.name) return null
+          return {
+            name: profile.name,
+            url: profile.url,
+            image: profile.image_url,
+          }
+        })
+        .filter(Boolean) as RenderedAuthor[]
+    }
+
+    return []
+  }, [authorDetails, authors])
+
+  const MAX_VISIBLE_TAGS = 2
+  const tagsArray = Array.isArray(content.tags) ? content.tags : []
+  const primaryTags = tagsArray.slice(0, MAX_VISIBLE_TAGS)
+  const hiddenTags = tagsArray.slice(MAX_VISIBLE_TAGS)
+  const hiddenTagsTitle = hiddenTags.length ? hiddenTags.join(', ') : undefined
+  const hasMetaInfo =
+    renderedAuthors.length > 0 ||
+    Boolean(readingTimeText) ||
+    Boolean(formattedUpdatedDate) ||
+    primaryTags.length > 0
 
   useEffect(() => {
     // If current route is not visible after filtering, move to first available doc for selected language
@@ -564,12 +617,91 @@ export default function OpenTelemetryHubLayout({
     }
   }
 
+  const showSidebar = currentHubPath !== 'quick-start' && (filteredNav?.length ?? 0) > 0
+  const docClasses = [
+    'doc overflow-clip px-3 md:px-6 lg:px-8',
+    !showSidebar ? 'doc-no-sidebar' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const hasToc = Array.isArray(toc) && toc.length > 0
+
+  const metaInfoCard = hasMetaInfo && (
+    <ArticleMetaDetailsCard
+      authors={renderedAuthors}
+      readingTimeText={readingTimeText}
+      formattedUpdatedDate={formattedUpdatedDate}
+      primaryTags={primaryTags}
+      hiddenTags={hiddenTags}
+      hiddenTagsTitle={hiddenTagsTitle}
+    />
+  )
+
+  const languageSelector = availableLanguages.length > 0 && (
+    <div className="mb-4 px-3">
+      <div className="mb-1 text-xs uppercase text-gray-400">Language</div>
+      <div className="relative">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/40 px-3 py-2 text-sm text-white shadow-sm transition-colors hover:border-signoz_robin-500 focus:border-signoz_robin-500 focus:outline-none"
+          onClick={() => setIsLangOpen((v) => !v)}
+        >
+          <span className="flex items-center gap-4 truncate">
+            {selectedLanguage && normalizeLanguage(selectedLanguage) !== 'all' ? (
+              <LanguageIcon lang={selectedLanguage} />
+            ) : (
+              <Code size={16} color="#9ca3af" />
+            )}
+            <span className="truncate">
+              {selectedLanguage && normalizeLanguage(selectedLanguage) !== 'all'
+                ? selectedLanguage
+                : 'All'}
+            </span>
+          </span>
+          <ChevronDown
+            size={16}
+            className={`transition-transform ${isLangOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        {isLangOpen && (
+          <div className="absolute z-20 mt-2 w-full rounded-lg border border-signoz_ink-300 bg-signoz_ink-500/80 shadow-lg backdrop-blur-sm">
+            <div className="max-h-72 overflow-y-auto py-2">
+              {languageOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  className={`flex w-full items-center gap-4 px-3 py-2 text-sm transition-colors ${
+                    normalizeLanguage(selectedLanguage) === normalizeLanguage(opt.value)
+                      ? 'bg-signoz_ink-400/80 text-white'
+                      : 'text-gray-200 hover:bg-signoz_ink-400/40'
+                  }`}
+                  onClick={() => {
+                    handleLanguageChange(opt.value)
+                    setIsLangOpen(false)
+                  }}
+                >
+                  {normalizeLanguage(opt.value) === 'all' ? (
+                    <Code size={16} color="#9ca3af" />
+                  ) : (
+                    <LanguageIcon lang={opt.value} />
+                  )}
+                  <span className="truncate">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <main ref={mainRef}>
       <SectionContainer>
         <ProgressBar target={mainRef} />
 
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-signoz_ink-300 px-4 pb-3 pt-6 md:px-6 lg:px-8">
+        <div className="mb-4 hidden flex-wrap items-center justify-between gap-3 border-b border-signoz_ink-300 px-4 pb-3 pt-6 md:px-6 lg:flex lg:px-8">
           <div className="doc-header flex flex-wrap items-center gap-6">
             {orderedPathMeta.map((path) => {
               if (!path.firstRoute) return null
@@ -577,8 +709,8 @@ export default function OpenTelemetryHubLayout({
               const label =
                 path.key === 'learn'
                   ? 'Learn OpenTelemetry'
-                  : path.key === 'comparisons'
-                    ? 'Comparisons'
+                  : path.key === 'quick-start'
+                    ? 'OpenTelemetry Quick Start'
                     : path.label
               return (
                 <Link
@@ -597,135 +729,183 @@ export default function OpenTelemetryHubLayout({
           </div>
         </div>
 
-        <div className="doc overflow-clip px-3 md:px-6 lg:px-8">
-          <div className="doc-sidenav">
-            <Sidebar
-              items={filteredNav}
-              activeRoute={normalizedRoute}
-              persistExpansionKey={languagesCategoryKey}
-              languageSelector={
-                availableLanguages.length > 0 && (
-                  <div className="mb-4 px-3">
-                    <div className="mb-1 text-xs uppercase text-gray-400">Language</div>
-                    <div className="relative">
-                      <button
-                        type="button"
-                        className="flex w-full items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/40 px-3 py-2 text-sm text-white shadow-sm transition-colors hover:border-signoz_robin-500 focus:border-signoz_robin-500 focus:outline-none"
-                        onClick={() => setIsLangOpen((v) => !v)}
-                      >
-                        <span className="flex items-center gap-4 truncate">
-                          {selectedLanguage && normalizeLanguage(selectedLanguage) !== 'all' ? (
-                            <LanguageIcon lang={selectedLanguage} />
-                          ) : (
-                            <Globe2 size={16} color="#9ca3af" />
-                          )}
-                          <span className="truncate">
-                            {selectedLanguage && normalizeLanguage(selectedLanguage) !== 'all'
-                              ? selectedLanguage
-                              : 'All'}
-                          </span>
-                        </span>
-                        <ChevronDown
-                          size={16}
-                          className={`transition-transform ${isLangOpen ? 'rotate-180' : ''}`}
-                        />
-                      </button>
-
-                      {isLangOpen && (
-                        <div className="absolute z-20 mt-2 w-full rounded-lg border border-signoz_ink-300 bg-signoz_ink-500/80 shadow-lg backdrop-blur-sm">
-                          <div className="max-h-72 overflow-y-auto py-2">
-                            {languageOptions.map((opt) => (
-                              <button
-                                key={opt.value}
-                                className={`flex w-full items-center gap-4 px-3 py-2 text-sm transition-colors ${
-                                  normalizeLanguage(selectedLanguage) ===
-                                  normalizeLanguage(opt.value)
-                                    ? 'bg-signoz_ink-400/80 text-white'
-                                    : 'text-gray-200 hover:bg-signoz_ink-400/40'
-                                }`}
-                                onClick={() => {
-                                  handleLanguageChange(opt.value)
-                                  setIsLangOpen(false)
-                                }}
-                              >
-                                {normalizeLanguage(opt.value) === 'all' ? (
-                                  <Globe2 size={16} color="#9ca3af" />
-                                ) : (
-                                  <LanguageIcon lang={opt.value} />
-                                )}
-                                <span className="truncate">{opt.label}</span>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              }
-            />
-          </div>
+        <div className={docClasses}>
+          {showSidebar && (
+            <div className="doc-sidenav hidden lg:block">
+              <Sidebar
+                items={filteredNav}
+                activeRoute={normalizedRoute}
+                persistExpansionKey={languagesCategoryKey}
+                languageSelector={languageSelector}
+              />
+            </div>
+          )}
 
           <div className="doc-content md:px-0 lg:px-4">
-            <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
-              <MobileAuthorInfo authors={authors} />
+            {(showSidebar || hasToc) && (
+              <div className="mb-4 flex flex-wrap gap-3 lg:hidden">
+                {showSidebar && (
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 rounded-lg border border-signoz_ink-300 bg-signoz_ink-500/60 px-3 pb-1 pt-6 text-sm text-white shadow-sm transition-colors hover:border-signoz_robin-500"
+                    onClick={() => setIsMobileNavOpen(true)}
+                  >
+                    <Menu size={16} />
+                    <span className="font-semibold">See All Guides</span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            <article className="prose prose-slate max-w-none px-3 py-6 dark:prose-invert">
               <h1 className="text-3xl font-bold">{title}</h1>
-              {(renderedAuthors.length ||
-                formattedDate ||
-                readingTimeText ||
-                visibleTags.length > 0) && (
-                <div className="mb-4 mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-gray-400">
-                  {renderedAuthors.length > 0 && <span>{renderedAuthors.join(', ')}</span>}
-                  {formattedDate && <span className="opacity-70">· {formattedDate}</span>}
-                  {readingTimeText && <span className="opacity-70">· {readingTimeText}</span>}
-                  {visibleTags.length > 0 && (
-                    <span className="flex flex-wrap items-center gap-2">
-                      <span className="opacity-70">·</span>
-                      {visibleTags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full bg-signoz_ink-500/60 px-2 py-1 text-xs text-gray-200"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {extraTags > 0 && (
-                        <span className="rounded-full bg-signoz_ink-500/60 px-2 py-1 text-xs text-gray-200">
-                          +{extraTags} more
-                        </span>
-                      )}
-                    </span>
-                  )}
+              {(formattedUpdatedDate || readingTimeText) && (
+                <div className="mb-2 mt-3 flex flex-wrap gap-3 text-xs text-gray-400 lg:hidden">
+                  {formattedUpdatedDate && <span>Updated {formattedUpdatedDate}</span>}
+                  {readingTimeText && <span>{readingTimeText}</span>}
                 </div>
               )}
               {children}
             </article>
+            {(renderedAuthors.length > 0 || primaryTags.length > 0) && (
+              <div className="lg:hidden">
+                <div className="rounded-xl border border-signoz_ink-300/80 bg-signoz_ink-500/50 p-4 text-xs text-white/90 shadow-lg">
+                  <div className="flex flex-col gap-4">
+                    {renderedAuthors.length > 0 && (
+                      <div className="flex items-center gap-3">
+                        {renderedAuthors[0].image && (
+                          <Image
+                            src={renderedAuthors[0].image}
+                            alt={renderedAuthors[0].name}
+                            width={36}
+                            height={36}
+                            className="h-9 w-9 rounded-full border border-white/10 object-cover"
+                          />
+                        )}
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
+                            Author{renderedAuthors.length > 1 ? 's' : ''}
+                          </span>
+                          <span className="text-sm text-white">
+                            {renderedAuthors.map((author, idx) => (
+                              <span key={`${author.name}-${idx}`}>
+                                {author.url ? (
+                                  <Link
+                                    href={author.url}
+                                    className="!text-gray-200 transition-colors hover:text-signoz_robin-400"
+                                  >
+                                    {author.name}
+                                  </Link>
+                                ) : (
+                                  author.name
+                                )}
+                                {idx < renderedAuthors.length - 1 && (
+                                  <span className="text-white/60">, </span>
+                                )}
+                              </span>
+                            ))}
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
-            {authorDetails?.length > 0 && (
-              <div className="mt-10">
-                <SidebarAuthorInfo authors={authors} />
+                    {primaryTags.length > 0 && (
+                      <div className="flex flex-col gap-2">
+                        <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
+                          Tags
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {primaryTags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/90"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {hiddenTags.length > 0 && (
+                            <span
+                              className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/70"
+                              title={hiddenTagsTitle}
+                            >
+                              +{hiddenTags.length} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          {toc && Array.isArray(toc) && toc.length > 0 && (
-            <div className="doc-toc">
-              <div className="mb-3 text-xs uppercase text-gray-400">On this page</div>
+          {(hasMetaInfo || hasToc) && (
+            <aside className="doc-right hidden lg:block" aria-label="On this page navigation">
+              <div className="doc-right-inner">
+                {metaInfoCard}
 
-              <div
-                ref={tocContainerRef}
-                className="doc-toc-items border-l border-signoz_slate-500 pl-3"
-              >
-                <TableOfContents
-                  toc={toc}
-                  activeSection={activeSection}
-                  setActiveSection={setActiveSection}
-                  scrollableContainerRef={tocContainerRef}
+                {hasToc && (
+                  <div className="doc-toc">
+                    <div className="mb-3 text-xs uppercase text-gray-400">On this page</div>
+
+                    <div
+                      ref={tocContainerRef}
+                      className="doc-toc-items doc-toc-scroll border-l border-signoz_slate-500 pl-3"
+                    >
+                      <TableOfContents
+                        toc={toc}
+                        activeSection={activeSection}
+                        setActiveSection={setActiveSection}
+                        scrollableContainerRef={tocContainerRef}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </aside>
+          )}
+        </div>
+
+        {showSidebar && isMobileNavOpen && (
+          <div className="fixed inset-0 z-40 lg:hidden">
+            <div
+              className="absolute inset-0 bg-black/60"
+              onClick={() => setIsMobileNavOpen(false)}
+              aria-label="Close navigation overlay"
+            />
+
+            <div className="absolute inset-y-0 right-0 w-[90%] max-w-sm overflow-y-auto border-l border-signoz_ink-300 bg-signoz_ink-500 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-signoz_ink-300 px-4 py-3">
+                <div className="text-sm font-semibold text-white">Guide</div>
+                <button
+                  type="button"
+                  className="rounded-full p-2 text-gray-300 transition-colors hover:bg-signoz_ink-400/50 hover:text-white"
+                  onClick={() => setIsMobileNavOpen(false)}
+                  aria-label="Close navigation"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="p-3">
+                <Sidebar
+                  items={filteredNav}
+                  activeRoute={normalizedRoute}
+                  persistExpansionKey={languagesCategoryKey}
+                  onNavigate={() => setIsMobileNavOpen(false)}
+                  languageSelector={languageSelector}
                 />
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {hasToc && (
+          <div className="lg:hidden">
+            <FloatingTableOfContents />
+          </div>
+        )}
       </SectionContainer>
     </main>
   )

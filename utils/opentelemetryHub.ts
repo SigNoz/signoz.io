@@ -18,18 +18,7 @@ type RawHubPath = {
   sections?: RawHubGroup[]
 }
 
-const PATH_ORDER = [
-  'introduction',
-  'opentelemetry-fundamentals',
-  'language-and-frameworks',
-  'databases-caches-and-messaging',
-  'infrastructure-cloud-and-ci-cd',
-  'llms-ai-and-ml',
-  'best-practices',
-  'misc',
-  'comparisons',
-  'learn',
-]
+const PATH_ORDER = ['learn', 'quick-start']
 
 const LEARN_CHAPTER_ORDER = [
   'introduction',
@@ -40,6 +29,7 @@ const LEARN_CHAPTER_ORDER = [
   'llms-ai-and-ml',
   'best-practices',
   'misc',
+  'comparisons',
 ]
 
 type RawHubGroup = {
