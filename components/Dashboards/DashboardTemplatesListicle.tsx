@@ -293,6 +293,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Memcached Dashboard Template',
   },
   {
+    name: 'Cost Meter',
+    href: '/docs/dashboards/dashboard-templates/cost-meter',
+    icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
+    clickName: 'Cost Meter Dashboard Template',
+  },
+  {
     name: 'MongoDB',
     href: 'https://github.com/SigNoz/dashboards/tree/main/mongodb',
     icon: <SiMongodb className="h-7 w-7 text-green-600" />,
