@@ -1918,6 +1918,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/cost-meter',
+            label: 'Meter',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/mysql',
             label: 'MySQL',
           },
