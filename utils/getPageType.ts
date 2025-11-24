@@ -20,6 +20,8 @@ export const getPageType = (pathname: string): string => {
     '/metrics-and-dashboards',
     '/exceptions-monitoring',
     '/alerts-management',
+    '/trace-funnels',
+    '/external-apis',
   ]
   if (featurePages.includes(normalizedPath)) return 'Feature Page'
 

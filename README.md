@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) - We use Node.js version 18.19.0
+- [Node.js](https://nodejs.org/) - We use Node.js version 20.19.4
 - [NVM (Node Version Manager)](https://github.com/nvm-sh/nvm) - For managing Node.js versions
 - [Yarn](https://yarnpkg.com/) - Package manager
 
