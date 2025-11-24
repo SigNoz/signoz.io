@@ -1827,6 +1827,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/cost-meter',
+            label: 'Cost Meter',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/couchdb',
             label: 'CouchDB',
           },
@@ -1915,11 +1920,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/memcached',
             label: 'Memcached',
-          },
-          {
-            type: 'doc',
-            route: '/docs/dashboards/dashboard-templates/cost-meter',
-            label: 'Meter',
           },
           {
             type: 'doc',
