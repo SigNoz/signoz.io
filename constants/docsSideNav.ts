@@ -1919,7 +1919,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cost-meter',
-            label: 'Meter',
+            label: 'Cost Meter',
           },
           {
             type: 'doc',

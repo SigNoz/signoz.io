@@ -145,6 +145,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'ClickHouse Dashboard Template',
   },
   {
+    name: 'Cost Meter',
+    href: '/docs/dashboards/dashboard-templates/cost-meter',
+    icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
+    clickName: 'Cost Meter Dashboard Template',
+  },
+  {
     name: 'CouchDB',
     href: '/docs/dashboards/dashboard-templates/couchdb',
     icon: <Database className="h-7 w-7 text-red-500" />,
@@ -291,12 +297,6 @@ const DashboardTemplatesData: IconCardData[] = [
     href: '/docs/dashboards/dashboard-templates/memcached',
     icon: <HardDrive className="h-7 w-7 text-green-600" />,
     clickName: 'Memcached Dashboard Template',
-  },
-  {
-    name: 'Cost Meter',
-    href: '/docs/dashboards/dashboard-templates/cost-meter',
-    icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
-    clickName: 'Cost Meter Dashboard Template',
   },
   {
     name: 'MongoDB',
