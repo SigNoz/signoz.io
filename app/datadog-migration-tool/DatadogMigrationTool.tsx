@@ -129,7 +129,7 @@ const TopHeroSection: React.FC = () => {
       className="!border-b-1 !border-t-1 !border-dashed !border-signoz_slate-400 !px-0"
     >
       <div className="mb-8 text-center">
-        <h2 className="mb-6 text-signoz_sienna-100">Typical Migration Pain</h2>
+        <h2 className="mb-6 pt-12 text-signoz_sienna-100">Typical Migration Pain</h2>
       </div>
       <HeroCards cards={CARDS} layoutVariant={'no-border'} variant="combined" />
     </SectionLayout>
