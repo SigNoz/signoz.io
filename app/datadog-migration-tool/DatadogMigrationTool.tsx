@@ -42,13 +42,11 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" placement="center">
         <ModalContent className="max-w-2xl rounded-3xl border border-signoz_slate-200 bg-white text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]">
           {(closeHandler) => (
-            <>
-              <ModalBody className="px-10 py-8 text-signoz_ink-500">
-                <HubspotProvider>
-                  <PricingForm portalId={HUBSPOT_DATA.portalId} formId={HUBSPOT_DATA.formId} />
-                </HubspotProvider>
-              </ModalBody>
-            </>
+            <ModalBody className="px-10 py-8 text-signoz_ink-500">
+              <HubspotProvider>
+                <PricingForm portalId={HUBSPOT_DATA.portalId} formId={HUBSPOT_DATA.formId} />
+              </HubspotProvider>
+            </ModalBody>
           )}
         </ModalContent>
       </Modal>
@@ -96,21 +94,13 @@ const Header: React.FC = () => {
       {/* Hero image */}
       <SectionLayout variant="bordered" className="!mt-0 max-md:-mb-[3rem]">
         <div className="w-100 mx-[-28px]">
-          <div className="product-explainer-video hero-figure rounded-xl px-3">
-            <div className="embed-container">
-              <div className="absolute w-full">
-                <div className="p-0">
-                  <Image
-                    src="/img/platform/DatadogMigrationToolHero.png"
-                    alt="Datadog migration tool hero"
-                    className="w-full rounded-xl"
-                    width={10000}
-                    height={10000}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          <Image
+            src="/img/platform/DatadogMigrationToolHero.png"
+            alt="Datadog migration tool hero"
+            className="w-full rounded-xl"
+            width={10000}
+            height={10000}
+          />
         </div>
       </SectionLayout>
     </header>
