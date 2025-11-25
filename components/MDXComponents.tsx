@@ -66,6 +66,7 @@ import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
 import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
+import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 
 export const components: MDXComponents = {
   Image,
@@ -132,4 +133,5 @@ export const components: MDXComponents = {
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
   MetricsQuickStartOverview,
+  CICDMonitoringListicle,
 }
