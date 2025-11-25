@@ -2,359 +2,40 @@
 
 import '../css/opentelemetry-hub.css'
 
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Authors, Blog } from 'contentlayer/generated'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { ExternalLink, Menu, X } from 'lucide-react'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
-import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
-import { usePathname, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import {
-  ChevronDown,
-  ChevronRight,
-  FileCode,
-  FileText,
-  Code,
-  Menu,
-  X,
-  ExternalLink,
-} from 'lucide-react'
-import Image from 'next/image'
-import {
-  SiJavascript,
-  SiTypescript,
-  SiPython,
-  SiOpenjdk,
-  SiGo,
-  SiPhp,
-  SiDotnet,
-  SiRubyonrails,
-  SiRust,
-  SiAngular,
-  SiReact,
-  SiNextdotjs,
-  SiNodedotjs,
-  SiNestjs,
-  SiElixir,
-  SiSpring,
-} from 'react-icons/si'
-import type { IconBaseProps, IconType } from 'react-icons'
 import authorsDirectory from '@/constants/authors.json'
 import ArticleMetaDetailsCard, {
   type RenderedAuthor,
 } from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
+import { Sidebar } from './open-telemetry-hub/Sidebar'
+import { LanguageSelector } from './open-telemetry-hub/LanguageSelector'
+import {
+  categoryContainsRoute,
+  filterByLanguage,
+  findDocByRoute,
+  findFirstDoc,
+  findFirstDocWithLanguage,
+  normalizeLanguage,
+  normalizeRoute,
+} from './open-telemetry-hub/navigation'
+import type {
+  HubPathMeta,
+  LanguageOption,
+  LayoutProps,
+  SidebarCategory,
+  SidebarItem,
+  TocItemProps,
+} from './open-telemetry-hub/types'
 
 const LANGUAGE_STORAGE_KEY = 'ot-hub-language'
-
-export interface TocItemProps {
-  url: string
-  depth: number
-  value: string
-}
-
-type HubPathMeta = {
-  key: string
-  label: string
-  firstRoute?: string
-}
-
-type HubNavDoc = {
-  type: 'doc'
-  route: string
-  label: string
-  language?: string
-}
-
-type HubNavCategory = {
-  type: 'category'
-  label: string
-  route?: string
-  items: HubNavItem[]
-}
-
-type HubNavItem = HubNavDoc | HubNavCategory
-
-interface LayoutProps {
-  content: CoreContent<Blog>
-  authorDetails: CoreContent<Authors>[]
-  authors: string[]
-  children: ReactNode
-  toc: TocItemProps[]
-  navItems: HubNavItem[]
-  currentHubPath: string
-  pathMeta: HubPathMeta[]
-  defaultLanguage: string | null
-  availableLanguages: string[]
-  currentRoute: string
-}
-
-type SidebarCategory = {
-  type: 'category'
-  label: string
-  route?: string
-  items: SidebarItem[]
-}
-
-type SidebarDoc = {
-  type: 'doc'
-  route: string
-  label: string
-  language?: string
-}
-
-type SidebarItem = SidebarCategory | SidebarDoc
-
-function normalizeRoute(route: string) {
-  if (!route) return ''
-  if (route.endsWith('/')) {
-    return route.slice(0, -1)
-  }
-  return route
-}
-
-function normalizeLanguage(lang?: string | null) {
-  return (lang || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-}
-
-function filterByLanguage(items: HubNavItem[], language: string | null): SidebarItem[] {
-  if (language === 'ALL') {
-    return items as SidebarItem[]
-  }
-  return items
-    .map((item) => {
-      if (item.type === 'doc') {
-        if (
-          item.language &&
-          language &&
-          normalizeLanguage(item.language) !== normalizeLanguage(language)
-        ) {
-          return null
-        }
-        return item
-      }
-
-      const filteredChildren = filterByLanguage(item.items, language)
-      if (!filteredChildren.length) {
-        return null
-      }
-      return {
-        ...item,
-        items: filteredChildren,
-      }
-    })
-    .filter(Boolean) as SidebarItem[]
-}
-
-function findFirstDoc(items: SidebarItem[]): SidebarDoc | undefined {
-  for (const item of items) {
-    if (item.type === 'doc') return item
-    const child = findFirstDoc(item.items)
-    if (child) return child
-  }
-  return undefined
-}
-
-function categoryContainsRoute(category: SidebarCategory, route: string) {
-  for (const item of category.items) {
-    if (item.type === 'doc' && normalizeRoute(item.route) === route) return true
-    if (item.type === 'category' && categoryContainsRoute(item, route)) return true
-  }
-  return false
-}
-
-function findDocByRoute(items: SidebarItem[], route: string): SidebarDoc | null {
-  for (const item of items) {
-    if (item.type === 'doc' && normalizeRoute(item.route) === route) return item
-    if (item.type === 'category') {
-      const found = findDocByRoute(item.items, route)
-      if (found) return found
-    }
-  }
-  return null
-}
-
-function findFirstDocWithLanguage(
-  items: SidebarItem[],
-  language: string | null
-): SidebarDoc | undefined {
-  const target = normalizeLanguage(language)
-  for (const item of items) {
-    if (item.type === 'doc' && normalizeLanguage(item.language) === target) return item
-    if (item.type === 'category') {
-      const found = findFirstDocWithLanguage(item.items, language)
-      if (found) return found
-    }
-  }
-  return undefined
-}
-
-const JavaIcon = (props: IconBaseProps): React.FC<IconBaseProps> =>
-  (
-    <img src="/img/icons/java-icon.svg" alt="Java" className="h-[16px] w-[16px]" />
-  ) as unknown as React.FC<IconBaseProps>
-
-function LanguageIcon({ lang }: { lang: string }) {
-  const normalized = normalizeLanguage(lang)
-  const size = 16
-  const brandColors: Record<string, string> = {
-    javascript: '#f7df1e',
-    typescript: '#3178c6',
-    nodejs: '#539e43',
-    nextjs: '#ffffff',
-    nestjs: '#e0234e',
-    python: '#3776ab',
-    java: '#f89820',
-    spring: '#6db33f',
-    dotnet: '#512bd4',
-    net: '#512bd4',
-    golang: '#00add8',
-    go: '#00add8',
-    php: '#777bb4',
-    ruby: '#cc342d',
-    rust: '#dea584',
-    angular: '#dd0031',
-    react: '#61dafb',
-  }
-  const iconMap: Record<string, IconType> = {
-    javascript: SiJavascript,
-    typescript: SiTypescript,
-    nodejs: SiNodedotjs,
-    node: SiNodedotjs,
-    nextjs: SiNextdotjs,
-    nestjs: SiNestjs,
-    python: SiPython,
-    java: JavaIcon as unknown as IconType,
-    spring: SiSpring,
-    dotnet: SiDotnet,
-    net: SiDotnet,
-    golang: SiGo,
-    go: SiGo,
-    php: SiPhp,
-    ruby: SiRubyonrails,
-    rust: SiRust,
-    angular: SiAngular,
-    react: SiReact,
-    elixir: SiElixir,
-  }
-
-  const IconComp = iconMap[normalized]
-  const color = brandColors[normalized] || '#9ca3af'
-  if (IconComp) {
-    return <IconComp size={size} color={color} />
-  }
-  return <FileCode size={size} color={color} />
-}
-
-function Sidebar({
-  items,
-  activeRoute,
-  onNavigate,
-  languageSelector,
-  persistExpansionKey,
-}: {
-  items: SidebarItem[]
-  activeRoute: string
-  onNavigate?: () => void
-  languageSelector?: ReactNode
-  persistExpansionKey?: string
-}) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
-
-  useEffect(() => {
-    const expandedSet = new Set<string>(persistExpansionKey ? [persistExpansionKey] : [])
-    const markParents = (nodes: SidebarItem[], trail: string[]) => {
-      for (const node of nodes) {
-        if (node.type === 'doc') continue
-        const key = [...trail, node.label].join('>')
-        if (categoryContainsRoute(node, activeRoute)) {
-          expandedSet.add(key)
-          markParents(node.items, [...trail, node.label])
-        }
-      }
-    }
-    markParents(items, [])
-    setExpanded(expandedSet)
-  }, [activeRoute, items])
-
-  const toggle = (key: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.add(key)
-      }
-      return next
-    })
-  }
-
-  const renderItems = (nodes: SidebarItem[], trail: string[]) => {
-    return (
-      <ul className="list-none space-y-1 p-0">
-        {nodes.map((node) => {
-          if (node.type === 'doc') {
-            const isActive = normalizeRoute(node.route) === activeRoute
-            return (
-              <li key={node.route} className="group mx-2 my-1 transition-all duration-200">
-                <Link
-                  href={node.route}
-                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
-                    isActive
-                      ? 'bg-blue-500/10 text-blue-400 shadow-sm'
-                      : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
-                  }`}
-                  onClick={onNavigate}
-                >
-                  <FileText
-                    className="flex-shrink-0 opacity-60 group-hover:opacity-100"
-                    size={14}
-                  />
-                  <span className="truncate">{node.label}</span>
-                </Link>
-              </li>
-            )
-          }
-
-          const key = [...trail, node.label].join('>')
-          const isExpanded = expanded.has(key)
-
-          return (
-            <li key={key} className="group mx-2 my-1">
-              <div
-                className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
-                  isExpanded
-                    ? 'bg-blue-500/10 text-blue-400'
-                    : 'text-gray-200 hover:bg-gray-800/50 hover:text-white'
-                }`}
-                onClick={() => toggle(key)}
-              >
-                <div className="flex-shrink-0 opacity-60 group-hover:opacity-100">
-                  {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                </div>
-                <span className="truncate">{node.label}</span>
-              </div>
-              {isExpanded && node.items.length > 0 && (
-                <div className="mt-1 border-l border-gray-700/50 pl-3">
-                  {renderItems(node.items, [...trail, node.label])}
-                </div>
-              )}
-            </li>
-          )
-        })}
-      </ul>
-    )
-  }
-
-  return (
-    <nav className="docs-sidebar sticky top-[80px] h-[calc(100vh-100px)] w-full overflow-y-auto py-4 text-white">
-      {languageSelector}
-      {renderItems(items, [])}
-    </nav>
-  )
-}
 
 export default function OpenTelemetryHubLayout({
   content,
@@ -471,7 +152,7 @@ export default function OpenTelemetryHubLayout({
 
   const languagesCategoryKey = useMemo(() => 'Language and Frameworks', [])
 
-  const languageOptions = useMemo(() => {
+  const languageOptions = useMemo<LanguageOption[]>(() => {
     const dedup = new Map<string, string>()
     availableLanguages.forEach((lang) => {
       dedup.set(normalizeLanguage(lang), lang)
@@ -575,56 +256,71 @@ export default function OpenTelemetryHubLayout({
     }
   }, [filteredNav, normalizedRoute, router, selectedLanguage])
 
-  const handleLanguageChange = (value: string) => {
-    const nextLanguage = value || null
-    setSelectedLanguage(nextLanguage)
-    if (typeof window !== 'undefined') {
-      if (nextLanguage) {
-        window.localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage)
-      } else {
-        window.localStorage.removeItem(LANGUAGE_STORAGE_KEY)
+  const handleLanguageChange = useCallback(
+    (value: string) => {
+      const nextLanguage = value || null
+      setSelectedLanguage(nextLanguage)
+      if (typeof window !== 'undefined') {
+        if (nextLanguage) {
+          window.localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage)
+        } else {
+          window.localStorage.removeItem(LANGUAGE_STORAGE_KEY)
+        }
       }
-    }
 
-    const currentLangNorm = normalizeLanguage(currentNavDoc?.language)
-    const nextLangNorm = normalizeLanguage(nextLanguage)
+      const currentLangNorm = normalizeLanguage(currentNavDoc?.language)
+      const nextLangNorm = normalizeLanguage(nextLanguage)
 
-    const matchesCurrent =
-      currentNavDoc &&
-      (!currentLangNorm || currentLangNorm === nextLangNorm || nextLangNorm === 'all')
+      const matchesCurrent =
+        currentNavDoc &&
+        (!currentLangNorm || currentLangNorm === nextLangNorm || nextLangNorm === 'all')
 
-    if (matchesCurrent) {
-      return
-    }
-
-    if (nextLangNorm !== 'all') {
-      const targetDoc = findFirstDocWithLanguage(navItems as SidebarItem[], nextLanguage)
-      if (targetDoc) {
-        router.push(targetDoc.route)
+      if (matchesCurrent) {
         return
       }
 
-      const filtered = filterByLanguage(navItems, nextLanguage)
-      const fallback = findFirstDoc(filtered)
-      if (fallback) {
-        router.push(fallback.route)
-      }
-      return
-    }
+      if (nextLangNorm !== 'all') {
+        const targetDoc = findFirstDocWithLanguage(navItems as SidebarItem[], nextLanguage)
+        if (targetDoc) {
+          router.push(targetDoc.route)
+          return
+        }
 
-    // For "ALL", stay on the current route unless it disappears
-    const filteredAll = filterByLanguage(navItems, null)
-    const existsInAll = filteredAll.some((item) => {
-      if (item.type === 'doc') return normalizeRoute(item.route) === normalizedRoute
-      return categoryContainsRoute(item as SidebarCategory, normalizedRoute)
-    })
-    if (!existsInAll) {
-      const fallbackAll = findFirstDoc(filteredAll as SidebarItem[])
-      if (fallbackAll) {
-        router.push(fallbackAll.route)
+        const filtered = filterByLanguage(navItems, nextLanguage)
+        const fallback = findFirstDoc(filtered)
+        if (fallback) {
+          router.push(fallback.route)
+        }
+        return
       }
-    }
-  }
+
+      // For "ALL", stay on the current route unless it disappears
+      const filteredAll = filterByLanguage(navItems, null)
+      const existsInAll = filteredAll.some((item) => {
+        if (item.type === 'doc') return normalizeRoute(item.route) === normalizedRoute
+        return categoryContainsRoute(item as SidebarCategory, normalizedRoute)
+      })
+      if (!existsInAll) {
+        const fallbackAll = findFirstDoc(filteredAll as SidebarItem[])
+        if (fallbackAll) {
+          router.push(fallbackAll.route)
+        }
+      }
+    },
+    [currentNavDoc, navItems, normalizedRoute, router]
+  )
+
+  const handleLanguageOptionSelect = useCallback(
+    (value: string) => {
+      handleLanguageChange(value)
+      setIsLangOpen(false)
+    },
+    [handleLanguageChange]
+  )
+
+  const toggleLanguageSelector = useCallback(() => {
+    setIsLangOpen((prev) => !prev)
+  }, [])
 
   const showSidebar = currentHubPath !== 'quick-start' && (filteredNav?.length ?? 0) > 0
   const docClasses = [
@@ -647,63 +343,16 @@ export default function OpenTelemetryHubLayout({
     />
   )
 
-  const languageSelector = availableLanguages.length > 0 && (
-    <div className="mb-4 px-3">
-      <div className="mb-1 text-xs uppercase text-gray-400">Language</div>
-      <div className="relative">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/40 px-3 py-2 text-sm text-white shadow-sm transition-colors hover:border-signoz_robin-500 focus:border-signoz_robin-500 focus:outline-none"
-          onClick={() => setIsLangOpen((v) => !v)}
-        >
-          <span className="flex items-center gap-4 truncate">
-            {selectedLanguage && normalizeLanguage(selectedLanguage) !== 'all' ? (
-              <LanguageIcon lang={selectedLanguage} />
-            ) : (
-              <Code size={16} color="#9ca3af" />
-            )}
-            <span className="truncate">
-              {selectedLanguage && normalizeLanguage(selectedLanguage) !== 'all'
-                ? selectedLanguage
-                : 'All'}
-            </span>
-          </span>
-          <ChevronDown
-            size={16}
-            className={`transition-transform ${isLangOpen ? 'rotate-180' : ''}`}
-          />
-        </button>
-
-        {isLangOpen && (
-          <div className="absolute z-20 mt-2 w-full rounded-lg border border-signoz_ink-300 bg-signoz_ink-500/80 shadow-lg backdrop-blur-sm">
-            <div className="max-h-72 overflow-y-auto py-2">
-              {languageOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  className={`flex w-full items-center gap-4 px-3 py-2 text-sm transition-colors ${
-                    normalizeLanguage(selectedLanguage) === normalizeLanguage(opt.value)
-                      ? 'bg-signoz_ink-400/80 text-white'
-                      : 'text-gray-200 hover:bg-signoz_ink-400/40'
-                  }`}
-                  onClick={() => {
-                    handleLanguageChange(opt.value)
-                    setIsLangOpen(false)
-                  }}
-                >
-                  {normalizeLanguage(opt.value) === 'all' ? (
-                    <Code size={16} color="#9ca3af" />
-                  ) : (
-                    <LanguageIcon lang={opt.value} />
-                  )}
-                  <span className="truncate">{opt.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
+  const languageSelector =
+    availableLanguages.length > 0 ? (
+      <LanguageSelector
+        options={languageOptions}
+        selectedLanguage={selectedLanguage}
+        isOpen={isLangOpen}
+        onToggle={toggleLanguageSelector}
+        onChange={handleLanguageOptionSelect}
+      />
+    ) : null
 
   return (
     <main ref={mainRef}>
