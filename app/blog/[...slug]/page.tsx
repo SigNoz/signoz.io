@@ -88,7 +88,10 @@ export const generateStaticParams = async () => {
   return paths
 }
 
-export default async function Page({ params }: { params: { slug: string[] } }) {
+export default async function Page(props: { params: { slug: string[] } }) {
+  const { params } = props
+  const suppressStructuredData = (props as { suppressStructuredData?: boolean })
+    .suppressStructuredData
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/blog/${slug}`
   // Filter out drafts in production
@@ -112,10 +115,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   if (hubContext) {
     return (
       <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        {!suppressStructuredData && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
         <OpenTelemetryHubLayout
           content={mainContent}
           authorDetails={authorDetails}
@@ -149,10 +154,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {!suppressStructuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       <Layout
         content={mainContent}
         authorDetails={authorDetails}

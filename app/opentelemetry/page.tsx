@@ -12,6 +12,7 @@ import BlogArticlePage, {
 
 const LANDING_PARAMS = { slug: ['what-is-opentelemetry'] }
 const LANDING_CANONICAL = `${siteMetadata.siteUrl}/opentelemetry/`
+const BlogArticlePageWithOptions = BlogArticlePage as any
 
 export const dynamic = blogDynamic
 export const dynamicParams = blogDynamicParams
@@ -47,7 +48,7 @@ export default function OpenTelemetryLanding() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <BlogArticlePage params={LANDING_PARAMS} />
+      <BlogArticlePageWithOptions params={LANDING_PARAMS} suppressStructuredData />
     </>
   )
 }
