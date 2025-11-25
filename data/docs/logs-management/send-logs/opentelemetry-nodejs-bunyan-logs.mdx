@@ -62,7 +62,8 @@ const {
 } = require("@opentelemetry/instrumentation-bunyan");
 const { resourceFromAttributes } = require("@opentelemetry/resources");
 const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
-const { SimpleLogRecordProcessor } = require("@opentelemetry/sdk-logs");
+const { BatchLogRecordProcessor } = require("@opentelemetry/sdk-logs");
+const { SeverityNumber } = require("@opentelemetry/api-logs");
 
 // Configure the OTLP log exporter
 const logExporter = new OTLPLogExporter({
@@ -77,7 +78,7 @@ const sdk = new NodeSDK({
   resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: "nodejs-bunyan-logger",
   }),
-  logRecordProcessor: new SimpleLogRecordProcessor(logExporter),
+  logRecordProcessor: new BatchLogRecordProcessor(logExporter),
   instrumentations: [
     new BunyanInstrumentation({
       // Optional: Disable log sending (only keep log correlation)
@@ -90,6 +91,11 @@ const sdk = new NodeSDK({
       logHook: (span, record) => {
         record["resource.environment"] = "dev";
       },
+
+      // Optional: Set default log severity
+      // Default: SeverityNumber.UNSPECIFIED
+      // Other options: SeverityNumber.TRACE, SeverityNumber.DEBUG, SeverityNumber.INFO, SeverityNumber.WARN, SeverityNumber.ERROR, SeverityNumber.FATAL
+      logSeverity: SeverityNumber.UNSPECIFIED,
     }),
   ],
 });
