@@ -1,17 +1,19 @@
 ---
-date: 2025-08-19
+date: 2025-11-10
 id: install
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: ECS Serverless Collection Agent - Install
 description: Install and deploy the sidecar container for ECS Serverless infrastructure monitoring
 ---
+
 This guide walks you through installing the sidecar container to collect metrics, traces, and logs from your ECS Serverless infrastructure.
 
 ## Prerequisites Check
 
 Before starting, verify you have:
+
 - ECS cluster with any launch type (**Fargate**)
-- AWS CLI configured with appropriate permissions  
+- AWS CLI configured with appropriate permissions
 - SigNoz Cloud account or self-hosted SigNoz instance
 - Access to AWS Parameter Store and CloudWatch Logs
 
@@ -21,11 +23,15 @@ Before starting, verify you have:
 
 The OpenTelemetry Collector configuration defines what data to collect and where to send it.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/ecs-docs/ecs-otelcol-sidecar-config-ssm.webp" alt="otelcol-sidecar parameter in AWS Parameter Store"/>
-    <figcaption><i>OTel Collector config in AWS Parameter Store</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/ecs-docs/ecs-otelcol-sidecar-config-ssm.webp"
+    alt="otelcol-sidecar parameter in AWS Parameter Store"
+  />
+  <figcaption>
+    <i>OTel Collector config in AWS Parameter Store</i>
+  </figcaption>
 </figure>
-
 
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
@@ -33,71 +39,70 @@ The OpenTelemetry Collector configuration defines what data to collect and where
 1. Navigate to AWS Parameter Store and create a new parameter named `/ecs/signoz/otelcol-sidecar.yaml`.
 2. Copy the following configuration and paste it into the value field of the `/ecs/signoz/otelcol-sidecar.yaml` parameter:
 
-    ```yaml
-    extensions:
-      health_check:
+   ```yaml
+   extensions:
+     health_check:
 
-    receivers:
-      awsecscontainermetrics:
-        collection_interval: 30s
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
-      fluentforward:
-        endpoint: 0.0.0.0:8006
+   receivers:
+     awsecscontainermetrics:
+       collection_interval: 30s
+     otlp:
+       protocols:
+         grpc:
+           endpoint: 0.0.0.0:4317
+         http:
+           endpoint: 0.0.0.0:4318
+     fluentforward:
+       endpoint: 0.0.0.0:8006
 
-    processors:
-      batch:
-        timeout: 10s
-      filter:
-        metrics:
-          include:
-            match_type: strict
-            metric_names:
-              - ecs.task.memory.reserved
-              - ecs.task.memory.utilized
-              - ecs.task.cpu.reserved
-              - ecs.task.cpu.utilized
-              - ecs.task.network.rate.rx
-              - ecs.task.network.rate.tx
-              - ecs.task.storage.read_bytes
-              - ecs.task.storage.write_bytes
-              - container.duration
+   processors:
+     batch:
+       timeout: 10s
+     filter:
+       metrics:
+         include:
+           match_type: strict
+           metric_names:
+             - ecs.task.memory.reserved
+             - ecs.task.memory.utilized
+             - ecs.task.cpu.reserved
+             - ecs.task.cpu.utilized
+             - ecs.task.network.rate.rx
+             - ecs.task.network.rate.tx
+             - ecs.task.storage.read_bytes
+             - ecs.task.storage.write_bytes
+             - container.duration
 
-    exporters:
-      otlp:
-        endpoint: "ingest.{region}.signoz.cloud:443"
-        headers:
-          "signoz-ingestion-key": "SIGNOZ_INGESTION_KEY"
+   exporters:
+     otlp:
+       endpoint: 'ingest.{region}.signoz.cloud:443'
+       headers:
+         'signoz-ingestion-key': 'SIGNOZ_INGESTION_KEY'
 
-    service:
-      extensions: [health_check]
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
-        metrics:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
-        metrics/aws:
-          receivers: [awsecscontainermetrics]
-          processors: [filter]
-          exporters: [otlp]
-        logs:
-          receivers: [otlp, fluentforward]
-          processors: [batch]
-          exporters: [otlp]
-    ```
+   service:
+     extensions: [health_check]
+     pipelines:
+       traces:
+         receivers: [otlp]
+         processors: [batch]
+         exporters: [otlp]
+       metrics:
+         receivers: [otlp]
+         processors: [batch]
+         exporters: [otlp]
+       metrics/aws:
+         receivers: [awsecscontainermetrics]
+         processors: [filter]
+         exporters: [otlp]
+       logs:
+         receivers: [otlp, fluentforward]
+         processors: [batch]
+         exporters: [otlp]
+   ```
 
 3. Update the following placeholders in the YAML configuration:
    - Replace `SIGNOZ_INGESTION_KEY` with your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
    - Replace `{region}` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-
 
 </TabItem>
 
@@ -106,66 +111,66 @@ The OpenTelemetry Collector configuration defines what data to collect and where
 1. Navigate to AWS Parameter Store and create a new parameter named `/ecs/signoz/otelcol-sidecar.yaml`.
 2. Copy the following configuration and paste it into the value field of the `/ecs/signoz/otelcol-sidecar.yaml` parameter:
 
-    ```yaml
-    extensions:
-      health_check:
+   ```yaml
+   extensions:
+     health_check:
 
-    receivers:
-      awsecscontainermetrics:
-        collection_interval: 30s
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
-      fluentforward:
-        endpoint: 0.0.0.0:8006
+   receivers:
+     awsecscontainermetrics:
+       collection_interval: 30s
+     otlp:
+       protocols:
+         grpc:
+           endpoint: 0.0.0.0:4317
+         http:
+           endpoint: 0.0.0.0:4318
+     fluentforward:
+       endpoint: 0.0.0.0:8006
 
-    processors:
-      batch:
-        timeout: 10s
-      filter:
-        metrics:
-          include:
-            match_type: strict
-            metric_names:
-              - ecs.task.memory.reserved
-              - ecs.task.memory.utilized
-              - ecs.task.cpu.reserved
-              - ecs.task.cpu.utilized
-              - ecs.task.network.rate.rx
-              - ecs.task.network.rate.tx
-              - ecs.task.storage.read_bytes
-              - ecs.task.storage.write_bytes
-              - container.duration
+   processors:
+     batch:
+       timeout: 10s
+     filter:
+       metrics:
+         include:
+           match_type: strict
+           metric_names:
+             - ecs.task.memory.reserved
+             - ecs.task.memory.utilized
+             - ecs.task.cpu.reserved
+             - ecs.task.cpu.utilized
+             - ecs.task.network.rate.rx
+             - ecs.task.network.rate.tx
+             - ecs.task.storage.read_bytes
+             - ecs.task.storage.write_bytes
+             - container.duration
 
-    exporters:
-      otlp:
-        endpoint: "<IP of machine hosting SigNoz>:4317"
-        tls:
-          insecure: true
+   exporters:
+     otlp:
+       endpoint: '<IP of machine hosting SigNoz>:4317'
+       tls:
+         insecure: true
 
-    service:
-      extensions: [health_check]
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
-        metrics:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
-        metrics/aws:
-          receivers: [awsecscontainermetrics]
-          processors: [filter]
-          exporters: [otlp]
-        logs:
-          receivers: [otlp, fluentforward]
-          processors: [batch]
-          exporters: [otlp]
-    ```
+   service:
+     extensions: [health_check]
+     pipelines:
+       traces:
+         receivers: [otlp]
+         processors: [batch]
+         exporters: [otlp]
+       metrics:
+         receivers: [otlp]
+         processors: [batch]
+         exporters: [otlp]
+       metrics/aws:
+         receivers: [awsecscontainermetrics]
+         processors: [filter]
+         exporters: [otlp]
+       logs:
+         receivers: [otlp, fluentforward]
+         processors: [batch]
+         exporters: [otlp]
+   ```
 
 3. Update `<IP of machine hosting SigNoz>` with the address of your SigNoz OTelCollector in the YAML configuration.
 
@@ -173,6 +178,7 @@ The OpenTelemetry Collector configuration defines what data to collect and where
 Replace `<IP of machine hosting SigNoz>` with the address of [SigNoz OTelCollector](https://signoz.io/docs/install/troubleshooting/#signoz-otel-collector-address-grid).
 
 After successful setup, feel free to remove the `logging` exporter if it gets too noisy. To do so, simply remove the `logging` exporter from the `exporters` list in the following pipelines: `traces`, `metrics`, `metrics/aws`, and `logs` from the `otelcol-sidecar.yaml` file.
+
 </Admonition>
 
 </TabItem>
@@ -193,7 +199,7 @@ In your ECS [task definition](https://docs.aws.amazon.com/AmazonECS/latest/devel
         ...,
         {
             "name": "signoz-collector",
-            "image": "otel/opentelemetry-collector-contrib:0.109.0",
+            "image": "otel/opentelemetry-collector-contrib:0.139.0",
             "user": "root",
             "command": [
                 "--config=env:SIGNOZ_CONFIG_CONTENT"
@@ -235,24 +241,29 @@ In your ECS [task definition](https://docs.aws.amazon.com/AmazonECS/latest/devel
 ...
 }
 ```
+
 <Admonition type="warning">
 Avoid defining a healthCheck for the otel-collector container in your ECS task definition.
 The OpenTelemetry Collector image is based on a minimal base and does not include a shell (/bin/sh or /bin/bash). As a result, any health check command defined in the task definition will fail because AWS ECS attempts to execute it inside the container.
 
 This failure can cause the task to remain in a UNHEALTHY state even when the collector is running correctly.
+
 </Admonition>
 
 The sidecar container will run the SigNoz collector and includes essential components like the **name** ("signoz-collector"), **image** (e.g., "signoz/signoz-otel-collector:0.88.7"), and **command** for execution, alongside **secrets** for secure configuration. It also specifies **memory** and **CPU** resources, **port mappings** for network communication, a **health check** to ensure operational integrity, and **log configuration** for output management.
 
 #### 2b. Update ECS Task Execution Role
- Your ECS Task Execution Role needs permission to read from SSM Parameter Store and write to CloudWatch Logs.  
-- Attach `AmazonSSMReadOnlyAccess` and `CloudWatchLogsFullAccess` managed policies, **or**  
+
+Your ECS Task Execution Role needs permission to read from SSM Parameter Store and write to CloudWatch Logs.
+
+- Attach `AmazonSSMReadOnlyAccess` and `CloudWatchLogsFullAccess` managed policies, **or**
 - Add an inline policy that allows `ssm:GetParameter` for your config and CloudWatch Logs actions.
 
 #### 2c. Update ECS Task Role
- 
-The ECS Task Role (not the execution role) should also have access to SSM Parameter Store and CloudWatch Logs if your app/sidecar needs it.  
-- Attach the same managed policies as above, or  
+
+The ECS Task Role (not the execution role) should also have access to SSM Parameter Store and CloudWatch Logs if your app/sidecar needs it.
+
+- Attach the same managed policies as above, or
 - Use a minimal inline policy for just the required resources.
 
 ### Step 3: Deploy the Task Definition
@@ -264,16 +275,19 @@ Deploy your updated ECS task definition as usual (update your service or run a n
 ### Common Issues
 
 **Task Not Starting:**
+
 - Check ECS cluster has available capacity
 - Verify the container image can be pulled
 - Review CloudWatch logs for the failed tasks
 
 **Parameter Store Access Issues:**
+
 - Ensure the IAM role has `ssm:GetParameter` permissions
 - Verify the parameter name matches exactly: `/ecs/signoz/otelcol-sidecar.yaml`
 - Check the parameter is in the same region as your ECS cluster
 
 **Container Health Check Failures:**
+
 - Verify the health check endpoint is accessible
 - Check container logs for any startup errors
 - Ensure proper port mappings are configured
@@ -282,4 +296,3 @@ Deploy your updated ECS task definition as usual (update your service or run a n
 
 - [Configure the Sidecar Collection Agent in your ECS Cluster ](/docs/collection-agents/ecs/sidecar/configure/)
 - [Learn more about Collection from Serverless](/docs/collection-agents/ecs/sidecar/overview)
-

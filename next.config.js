@@ -7,11 +7,11 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net https://www.chatbase.co https://static.reo.dev https://*.clarity.ms;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
-  connect-src * https://api.reo.dev;
+  connect-src * https://api.reo.dev https://www.clarity.ms https://*.clarity.ms;
   font-src * 'self';
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
@@ -112,17 +112,32 @@ module.exports = () => {
         },
         {
           source: '/comparisons/signoz-vs-datadog/',
-          destination: '/product-comparison/signoz-vs-datadog/',
+          destination: '/datadog-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/product-comparison/signoz-vs-datadog/',
+          destination: '/datadog-alternative/',
           permanent: true,
         },
         {
           source: '/comparisons/signoz-vs-newrelic/',
-          destination: '/product-comparison/signoz-vs-newrelic/',
+          destination: '/newrelic-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/product-comparison/signoz-vs-newrelic/',
+          destination: '/newrelic-alternative/',
           permanent: true,
         },
         {
           source: '/comparisons/signoz-vs-grafana/',
-          destination: '/product-comparison/signoz-vs-grafana/',
+          destination: '/grafana-alternative/',
+          permanent: true,
+        },
+        {
+          source: '/product-comparison/signoz-vs-grafana/',
+          destination: '/grafana-alternative/',
           permanent: true,
         },
         {
@@ -148,7 +163,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3f0a8p8iv-Q_owXy6v0KUxlrJEkV_7hw',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3hr54hgo7-eZZHi6MRX4KodCfArtnTXA',
           basePath: false,
           permanent: true,
         },
@@ -286,7 +301,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/angular/',
-          destination: '/docs/instrumentation/opentelemetry-angular/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
           permanent: true,
         },
         {
@@ -311,7 +326,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/express/',
-          destination: '/docs/instrumentation/opentelemetry-express/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
@@ -350,18 +365,63 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/opentelemetry-angular/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-express/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/jboss/',
           destination: '/docs/instrumentation/opentelemetry-jboss/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/nestjs/',
-          destination: '/docs/instrumentation/opentelemetry-nestjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nestjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/nextjs/',
-          destination: '/docs/instrumentation/opentelemetry-nextjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nextjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nextjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nextjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nuxtjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nuxtjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-reactjs/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/react-native/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-react-native/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
           permanent: true,
         },
         {
@@ -416,6 +476,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/opentelemetry-javascript/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/mobile-instrumentation/swiftUi/',
           destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui/',
           permanent: true,
@@ -438,6 +503,21 @@ module.exports = () => {
         {
           source: '/docs/frontend-monitoring/web-vitals/',
           destination: '/docs/frontend-monitoring/opentelemetry-web-vitals/',
+          permanent: true,
+        },
+        {
+          source: '/docs/frontend-monitoring/sending-logs/',
+          destination: '/docs/frontend-monitoring/sending-logs-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/frontend-monitoring/sending-metrics/',
+          destination: '/docs/frontend-monitoring/sending-metrics-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/frontend-monitoring/sending-traces/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
           permanent: true,
         },
         {
@@ -730,7 +810,7 @@ module.exports = () => {
         },
         {
           source: '/docs/tutorial/instrumenting-angular-frontend/',
-          destination: '/docs/instrumentation/opentelemetry-angular/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
           permanent: true,
         },
         {
@@ -854,6 +934,31 @@ module.exports = () => {
         {
           source: '/docs/userguide/sso-authentication/',
           destination: '/docs/manage/administrator-guide/sso/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/install/troubleshooting/',
+          destination: '/docs/setup/docker/troubleshooting/faq',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/send-metrics-cloud/',
+          destination: '/docs/metrics-management/send-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/send-metrics/',
+          destination: '/docs/metrics-management/send-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorials/',
+          destination: '/docs/install/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/aws/integration-template/',
+          destination: '/docs/integrations/aws/',
           permanent: true,
         },
       ]

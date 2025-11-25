@@ -1,0 +1,335 @@
+---
+date: 2025-11-10
+title: Upgrade k8s-infra OpenTelemetry collection agent to v0.15.0
+tags: [SigNoz Cloud, Self-Host]
+id: upgrade-k8s-infra-v0.15
+description: Upgrade guide for k8s-infra OpenTelemetry collection agent to version 0.15.0, including OpenTelemetry collector updates and self-telemetry configuration changes
+---
+
+This guide walks you through upgrading your k8s-infra Helm chart to version 0.15.0, which includes important updates to the OpenTelemetry Collector and simplified configuration options.
+
+## What's New in v0.15.0
+
+This release brings several improvements:
+
+**OpenTelemetry Collector Update**: Upgraded from version 0.109.0 to 0.139.0, delivering performance improvements and bug fixes.
+
+**Simplified Self-Telemetry Configuration**: The `presets.selfTelemetry` option simplifies the process of configuring how k8s-infra reports its own metrics. The setup now automatically manages endpoint formatting and TLS settings.
+
+**Configuration Cleanup**: Removed deprecated fields no longer supported in newer OpenTelemetry Collector versions, streamlining your configuration files.
+
+## Prerequisites
+
+Before setting up OpenTelemetry monitoring for your Kubernetes cluster, ensure you have:
+
+- A SigNoz backend (SigNoz Cloud or self-hosted) to receive OpenTelemetry data
+- **[K8s-infra OpenTelemetry collection agent](/docs/collection-agents/k8s/k8s-infra/install-k8s-infra)** installed in your Kubernetes Cluster
+- A backup of your current k8s-infra Helm chart configuration file (usually `values.yaml`)
+
+## Important Changes to Know About
+
+### Removed Configuration Fields
+
+Two types of configuration fields have been removed:
+
+**Telemetry Metrics Address**: The `service::telemetry::metrics::address` field is no longer supported. [OpenTelemetry Collector v0.123.0 deprecated this field](https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.123.0), and it's now completely ignored. The collector manages telemetry metrics exposure internally, so you should remove any references to:
+
+- `otelAgent.service::telemetry::metrics::address`
+- `otelDeployment.service::telemetry::metrics::address`
+
+<Admonition type="note">
+  The chart no longer automatically renders the `OTEL_EXPORTER_OTLP_INSECURE` and
+  `OTEL_EXPORTER_OTLP_INSECURE_SKIP_VERIFY` environment variables. If you were previously setting
+  these manually in your values file and still require them, you can keep them. Otherwise, you do
+  not need to take any action regarding these environment variables.
+</Admonition>
+
+## Upgrade Process
+
+Choose the scenario that matches your current setup:
+
+### Scenario 1: Basic Setup (No Self-Telemetry)
+
+If you're not using self-telemetry features, your upgrade is straightforward.
+
+#### Step 1: Update Helm Repository
+
+```bash
+helm repo update signoz
+```
+
+#### Step 2: Save Current Configuration
+
+Save your current k8s-infra configuration to a local file for reference and backup:
+
+```bash
+helm get values <RELEASE_NAME> -n <NAMESPACE> > current-values.yaml
+```
+
+Replace `<RELEASE_NAME>` with your Helm release name and `<NAMESPACE>` with the namespace where k8s-infra is installed.
+
+#### Step 3: Remove Deprecated Fields
+
+Check your `current-values.yaml` for these deprecated fields and remove them if present:
+
+```diff
+otelAgent:
+  service
+    telemetry:
+-     metrics:
+-       address: 0.0.0.0:8888
+
+otelDeployment:
+  service
+    telemetry:
+-     metrics:
+-       address: 0.0.0.0:8888
+```
+
+#### Step 4: Run the Upgrade
+
+```bash
+helm upgrade <RELEASE_NAME> signoz/k8s-infra \
+  -n <NAMESPACE> \
+  -f your-values.yaml
+```
+
+Or to upgrade to a specific version:
+
+```bash
+helm upgrade <RELEASE_NAME> signoz/k8s-infra \
+  -n <NAMESPACE> \
+  --version 0.15.0 \
+  -f your-values.yaml
+```
+
+#### Step 5: Verify the Upgrade
+
+Check that pods are running the new version:
+
+```bash
+# Verify image versions
+kubectl get pods -n <NAMESPACE> -l app.kubernetes.io/component=otel-agent \
+  -o jsonpath='{.items[*].spec.containers[*].image}'
+
+kubectl get pods -n <NAMESPACE> -l app.kubernetes.io/component=otel-deployment \
+  -o jsonpath='{.items[*].spec.containers[*].image}'
+```
+
+You should see images tagged with version 0.139.0 or later.
+
+Confirm all pods are healthy:
+
+```bash
+kubectl get pods -n <NAMESPACE> -l app.kubernetes.io/name=k8s-infra
+```
+
+All pods should show a `Running` status.
+
+#### Step 6: Check Logs
+
+```bash
+kubectl logs -n <NAMESPACE> -l app.kubernetes.io/component=otel-agent --tail=50
+kubectl logs -n <NAMESPACE> -l app.kubernetes.io/component=otel-deployment --tail=50
+```
+
+### Scenario 2: With Self-Telemetry Using Custom Endpoint Configuration
+
+<Admonition type="info">
+
+The OpenTelemetry Collector exposes its own internal metrics (such as dropped spans and queue size) for Prometheus to scrape by default at [http://127.0.0.1:8888/metrics](http://127.0.0.1:8888/metrics). If you want to access these metrics outside the pod, configure the telemetry reader to bind to `0.0.0.0:8888` instead of the default.
+
+For more details, see the [OpenTelemetry Collector Internal Telemetry documentation](https://opentelemetry.io/docs/concepts/collector/internal-telemetry/).
+
+</Admonition>
+
+If you're using self-telemetry with a directly configured endpoint, you'll need to migrate to the new `presets.selfTelemetry` configuration.
+
+#### Step 1: Update Helm Repository
+
+```bash
+helm repo update signoz
+```
+
+#### Step 2: Save Current Configuration
+
+```bash
+helm get values <RELEASE_NAME> -n <NAMESPACE> > current-values.yaml
+```
+
+#### Step 3: Update k8s-infra Helm chart configuration
+
+Update your `current-values.yaml` file with these changes:
+
+```diff
+otelAgent:
+  service
+    telemetry:
+-     metrics:
+-       address: 0.0.0.0:8888
+otelDeployment:
+  service
+    telemetry:
+-     metrics:
+-       address: 0.0.0.0:8888
+# No changes required for the selfTelemetry preset
+presets:
+  selfTelemetry:
+    endpoint: your-endpoint:4317
+    insecure: false
+    insecureSkipVerify: false
+    signozApiKey: your-ingestion-key
+    traces:
+      enabled: true
+    metrics:
+      enabled: true
+    logs:
+      enabled: true
+```
+
+#### Step 4: Remove Deprecated Environment Variables (If Manually Set)
+
+The chart no longer automatically renders `OTEL_EXPORTER_OTLP_INSECURE` and `OTEL_EXPORTER_OTLP_INSECURE_SKIP_VERIFY` environment variables. If you were **manually** setting these in your values file, remove them:
+
+```diff
+otelAgent:
+  env:
+-     - name: OTEL_EXPORTER_OTLP_INSECURE
+-       value: "true"
+-     - name: OTEL_EXPORTER_OTLP_INSECURE_SKIP_VERIFY
+-       value: "false"
+```
+
+If you weren't manually setting these variables, no action is needed.
+
+#### Step 5: Run the Upgrade
+
+```bash
+helm upgrade <RELEASE_NAME> signoz/k8s-infra \
+  -n <NAMESPACE> \
+  -f your-values.yaml
+```
+
+#### Step 6: Verify the Upgrade
+
+Check that pods are running the new version:
+
+```bash
+kubectl get pods -n <NAMESPACE> -l app.kubernetes.io/name=k8s-infra
+```
+
+All pods should show a `Running` status with image version 0.139.0 or later.
+
+#### Example Configuration
+
+```yaml
+global:
+  cloud: others
+  clusterName: my-cluster
+  deploymentEnvironment: production
+
+otelCollectorEndpoint: ingest.us.signoz.cloud:443
+signozApiKey: <YOUR_API_KEY>
+
+presets:
+  otlpExporter:
+    enabled: true
+  selfTelemetry:
+    endpoint: ingest.us.signoz.cloud:443
+    insecure: false
+    insecureSkipVerify: false
+    signozApiKey: <YOUR_SELF_TELEMETRY_KEY>
+    traces:
+      enabled: true
+    metrics:
+      enabled: true
+    logs:
+      enabled: true
+```
+
+---
+
+### Scenario 3: With Self-Telemetry Using default self-telemetry endpoint configuration
+
+If you're using the default collector endpoint configuration for self-telemetry the same as the one used for sending your infra signals, your upgrade is simpler.
+
+#### Step 1: Update Helm Repository
+
+```bash
+helm repo update signoz
+```
+
+#### Step 2: Save Current Configuration
+
+```bash
+helm get values <RELEASE_NAME> -n <NAMESPACE> > current-values.yaml
+```
+
+#### Step 3: Update Configuration
+
+Remove the `telemetry.metrics.address` field if present:
+
+```diff
+otelAgent:
+  telemetry:
+-     metrics:
+-       address: 0.0.0.0:8888
+otelDeployment:
+  telemetry:
+-     metrics:
+-       address: 0.0.0.0:8888
+```
+
+Update your `current-values.yaml` file with these changes:
+
+```yaml
+# No changes required for the selfTelemetry preset
+presets:
+  selfTelemetry:
+    signozApiKey: your-ingestion-key
+    traces:
+      enabled: true
+    metrics:
+      enabled: true
+    logs:
+      enabled: true
+
+otelCollectorEndpoint: ingest.us.signoz.cloud:443
+# Use global settings for TLS configuration
+otelInsecure: false
+insecureSkipVerify: false
+```
+
+#### Step 4: Run the Upgrade
+
+```bash
+helm upgrade <RELEASE_NAME> signoz/k8s-infra \
+  -n <NAMESPACE> \
+  -f your-values.yaml
+```
+
+#### Step 5: Verify the Upgrade
+
+```bash
+# Check image versions
+kubectl get pods -n <NAMESPACE> -l app.kubernetes.io/component=otel-agent \
+  -o jsonpath='{.items[*].spec.containers[*].image}'
+
+# Check pod status
+kubectl get pods -n <NAMESPACE> -l app.kubernetes.io/name=k8s-infra
+
+# Review logs
+kubectl logs -n <NAMESPACE> -l app.kubernetes.io/component=otel-agent --tail=50
+```
+
+#### How Self-Telemetry Endpoint Selection Works
+
+The self-telemetry endpoint is determined in this order:
+
+1. If you specify `presets.selfTelemetry.endpoint`, it uses that value, with `insecure` and `insecureSkipVerify` coming from your `presets.selfTelemetry` settings.
+2. Otherwise, it falls back to the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable if available, with settings coming from the global `otelInsecure` and `insecureSkipVerify` values.
+
+## Next Steps
+
+- [Configure K8s-Infra](/docs/collection-agents/k8s/k8s-infra/configure-k8s-infra)
+- [K8s-Infra Overview](/docs/collection-agents/k8s/k8s-infra/overview)

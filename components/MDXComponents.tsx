@@ -38,6 +38,7 @@ import ImageCTA from './ImageCTA/ImageCTA'
 import TrackingLink from './TrackingLink'
 import APMQuickStartOverview from './APM/APMQuickStartOverview'
 import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
+import JavascriptInstrumentationListicle from './APM/JavascriptInstrumentationListicle'
 import MDXButton from './MDXButton/MDXButton'
 import IconCardGrid from './Card/IconCardGrid'
 import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
@@ -57,12 +58,14 @@ import DashboardActions from './Dashboards/DashboardActions'
 import KubernetesDashboardsListicle from './Dashboards/KubernetesDashboardsListicle'
 import APMDashboardsListicle from './Dashboards/APMDashboardsListicle'
 import HostMetricsDashboardsListicle from './Dashboards/HostMetricsDashboardsListicle'
+import LiteLLMDashboardsListicle from './Dashboards/LiteLLMDashboardsListicle'
 import ProductFeatureShowcase from './ProductFeatureShowcase/ProductFeatureShowcase'
 
 import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
 import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
+import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
 
 export const components: MDXComponents = {
   Image,
@@ -104,6 +107,7 @@ export const components: MDXComponents = {
   TrackingLink,
   APMQuickStartOverview,
   APMInstrumentationListicle,
+  JavascriptInstrumentationListicle,
   MDXButton,
   IconCardGrid,
   LogsQuickStartOverview,
@@ -120,10 +124,12 @@ export const components: MDXComponents = {
   KubernetesDashboardsListicle,
   APMDashboardsListicle,
   HostMetricsDashboardsListicle,
+  LiteLLMDashboardsListicle,
   MarketplaceInstallationListicle,
   LLMMonitoringListicle,
   OtelCollectorFlow,
   CollectionAgentsListicle,
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
+  MetricsQuickStartOverview,
 }

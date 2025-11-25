@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-
 set -e
 
 echo 'husky (pre-commit): running lint-staged'
@@ -7,9 +6,18 @@ yarn lint-staged
 
 STAGED_FILES=$(git diff --cached --name-only)
 
+# Check for docs redirect changes
 if printf '%s\n' "$STAGED_FILES" | grep -E '^(data/docs/.*\.mdx|next\.config\.js|scripts/check-doc-redirects\.js)$' >/dev/null; then
   echo 'husky (pre-commit): verifying docs redirects'
   yarn check:doc-redirects
 else
   echo 'husky (pre-commit): skipping docs redirect check (no relevant changes staged)'
+fi
+
+# Check for docs metadata
+if printf '%s\n' "$STAGED_FILES" | grep -E '^data/docs/.*\.mdx$' >/dev/null; then
+  echo 'husky (pre-commit): validating docs metadata'
+  HUSKY_PRE_COMMIT=true yarn check:docs-metadata
+else
+  echo 'husky (pre-commit): skipping docs metadata check (no documentation changes staged)'
 fi

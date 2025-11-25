@@ -1,0 +1,533 @@
+---
+date: 2025-11-20
+id: nextjs
+tags: [SigNoz Cloud, Self-Host]
+title: Nextjs OpenTelemetry Instrumentation
+description: Learn how to instrument your Nextjs application with OpenTelemetry and send traces to SigNoz
+doc_type: howto
+---
+
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Nextjs applications and view your application traces in SigNoz.
+
+If you also need browser-side coverage for your Nextjs app, follow the [client-side instrumentation guide](https://signoz.io/docs/frontend-monitoring/sending-traces-with-opentelemetry/) alongside this backend setup.
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+## Send traces to SigNoz
+
+Based on your application environment, you can choose the setup below to send traces to SigNoz.
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+From VMs, there are two ways to send data to SigNoz:
+
+- **Direct to SigNoz Cloud (recommended for beginners):** no extra installs beyond the SDK; you only need the region endpoint and ingestion key.
+- **Optional: Install a local OTel Collector binary on the VM:** it listens at `http://localhost:4318`, forwards telemetry to SigNoz, and does not require an ingestion key from the app. Install it with the [OTel Collector binary guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+
+### Step 1. Install OpenTelemetry packages
+
+```bash
+npm install --save @vercel/otel @opentelemetry/api
+```
+
+### Step 2. Update `next.config.mjs` to include `instrumentationHook`
+
+<Admonition type="note">This step is only needed when using Next.js 14 and below.</Admonition>
+
+```tsx
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // include instrumentationHook experimental feature
+  experimental: {
+    instrumentationHook: true,
+  },
+}
+
+export default nextConfig
+```
+
+### Step 3. Create `instrumentation.ts` or `instrumentation.js`
+
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
+
+```ts:instrumentation.ts
+import { registerOTel, OTLPHttpJsonTraceExporter } from '@vercel/otel';
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set to DEBUG when troubleshooting
+
+export function register() {
+  registerOTel({
+    serviceName: '<service_name>',
+    traceExporter: new OTLPHttpJsonTraceExporter({
+      url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+      headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
+    }),
+  });
+}
+```
+
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+
+```js:instrumentation.js
+const { registerOTel, OTLPHttpJsonTraceExporter } = require('@vercel/otel');
+const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set to DEBUG when troubleshooting
+
+exports.register = function register() {
+  registerOTel({
+    serviceName: '<service_name>',
+    traceExporter: new OTLPHttpJsonTraceExporter({
+      url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+      headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
+    }),
+  });
+};
+```
+
+</TabItem>
+</Tabs>
+
+- `<service_name>` is the name you want to appear in SigNoz.
+- Set `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+If you installed the local OTel Collector binary on the VM, change the exporter URL to `http://localhost:4318/v1/traces` and omit the `headers` block (ingestion key not required).
+
+<Admonition type="note">
+  The instrumentation file should live in the project root (or inside `src/` if you keep Next.js
+  code there). Do not place it inside the `app` or `pages` directory. A working example is available
+  in the{' '}
+  <a
+    href="https://github.com/SigNoz/sample-nextjs-app"
+    rel="noopener noreferrer nofollow"
+    target="_blank"
+  >
+    sample Next.js repo
+  </a>
+  .
+</Admonition>
+
+### Step 4. Run the application
+
+```bash
+npm run dev
+# or
+next dev
+```
+
+Interact with the app and validate if traces arrive in SigNoz using [the section below](#validating-instrumentation-by-checking-for-traces).
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+You can auto-instrument sending traces from a Nextjs application using one of the following deployment styles:
+
+- **OTel Collector Agent (recommended default):** install the agent inside your cluster and point your app at `http://localhost:4318` so you can skip the ingestion key.
+- **Kubernetes OTel Operator:** the operator injects auto-instrumentation and manages collectors, making it ideal when you cannot modify the application code.
+
+<Tabs>
+<TabItem value="otel-collector-agent" label="OTel Collector Agent" default>
+
+For Nextjs applications deployed on Kubernetes, install the OTel Collector agent in your cluster to collect and send traces to SigNoz Cloud. Install instructions are available [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/). Once the agent is running, reuse the same instrumentation steps as the VM flow but point the exporter to the in-cluster collector.
+
+### Step 1. Install OpenTelemetry packages
+
+```bash
+npm install --save @vercel/otel @opentelemetry/api
+```
+
+### Step 2. Update `next.config.mjs` (only for Next.js 14 and below)
+
+Same as the VM instructions above.
+
+### Step 3. Create the instrumentation file
+
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
+
+```ts:instrumentation.ts
+import { registerOTel, OTLPHttpJsonTraceExporter } from '@vercel/otel';
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
+
+export function register() {
+  registerOTel({
+    serviceName: '<service_name>',
+    traceExporter: new OTLPHttpJsonTraceExporter({
+      url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'http://localhost:4318/v1/traces',
+    }),
+  });
+}
+```
+
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+
+```js:instrumentation.js
+const { registerOTel, OTLPHttpJsonTraceExporter } = require('@vercel/otel');
+const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
+
+exports.register = function register() {
+  registerOTel({
+    serviceName: '<service_name>',
+    traceExporter: new OTLPHttpJsonTraceExporter({
+      url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'http://localhost:4318/v1/traces',
+    }),
+  });
+};
+```
+
+</TabItem>
+</Tabs>
+
+Set `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` in your deployment manifest when you need to override the collector endpoint.
+
+<Admonition type="note">
+  The instrumentation file should live in the project root (or inside `src/` if you keep Next.js
+  code there). Do not place it inside the `app` or `pages` directory. A working example is available
+  in the{' '}
+  <a
+    href="https://github.com/SigNoz/sample-nextjs-app"
+    rel="noopener noreferrer nofollow"
+    target="_blank"
+  >
+    sample Next.js repo
+  </a>
+  .
+</Admonition>
+
+### Step 4. Deploy your workload
+
+Add the instrumentation file to the container image, build, and deploy. Your pods will automatically send traces to the in-cluster collector at `http://localhost:4318/v1/traces`.
+
+</TabItem>
+
+<TabItem value="k8s-otel-operator" label="K8s OTel Operator">
+
+### K8s OTel Operator Based Automatic Instrumentation
+
+For Nextjs applications deployed on Kubernetes, you can auto-instrument traces using the Kubernetes OpenTelemetry Operator. This path is especially helpful when you cannot modify the application code because the operator injects instrumentation for you.
+
+An [OpenTelemetry Operator](https://opentelemetry.io/docs/kubernetes/operator) is a Kubernetes Operator that manages
+[OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) and auto-instrumentation of
+workloads. It simplifies the deployment and management of OpenTelemetry in a Kubernetes environment.
+
+The OpenTelemetry Operator provides two Custom Resource Definitions (CRDs):
+
+- `OpenTelemetryCollector`
+- `Instrumentation`
+
+The `OpenTelemetryCollector` CRD allows you to deploy and manage OpenTelemetry Collectors in your Kubernetes cluster.
+
+The `Instrumentation` CRD allows you to configure and inject OpenTelemetry auto-instrumentation libraries into your workloads.
+
+Here are the steps you need to follow to auto-instrument a Nextjs application using the OTel Operator:
+
+### Step 1. Install cert-manager
+
+Run the following commands to apply cert-manager.
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
+
+kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
+```
+
+### Step 2. Install OpenTelemetry Operator
+
+To install the operator in the existing K8s cluster, run the following command:
+
+```bash
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
+```
+
+### Step 3. Set up the OpenTelemetry Collector instance
+
+Once the `opentelemetry-operator` has been deployed, you can proceed with the creation of the OpenTelemetry Collector (`otelcol`) instance. The OpenTelemetry Collector collects, processes, and exports telemetry data.
+
+To create a simple instance of the OpenTelemetry Collector, create a file `otel-collector.yaml` with the following contents:
+
+```yaml:otel-collector.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+spec:
+  mode: deployment
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    processors:
+      batch: {}
+      resource/env:
+        attributes:
+        - key: deployment.environment
+          value: prod # can be dev, prod, staging etc. based on your environment
+          action: upsert
+    exporters:
+      debug: {}
+      otlp:
+        endpoint: "ingest.<region>.signoz.cloud:443" # replace <region> with your region of SigNoz Cloud
+        tls:
+          insecure: false
+        headers:
+          "signoz-ingestion-key": "<your-ingestion-key>" # Obtain from https://{your-signoz-tenant-url}/settings/ingestion-settings
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch, resource/env]
+          exporters: [otlp]
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+Apply the above yaml file using the following command:
+
+```bash
+kubectl apply -f otel-collector.yaml
+```
+
+### Step 4. Set up the Instrumentation instance
+
+Create a file `instrumentation.yaml` with the following contents:
+
+```yaml:instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: traces-instrumentation
+spec:
+  exporter:
+    endpoint: https://ingest.<region>.signoz.cloud:443  # replace <region> with your region of SigNoz Cloud
+  env:
+    - name: OTEL_EXPORTER_OTLP_HEADERS
+      value: signoz-ingestion-key="<signoz-token>"  # Obtain from https://{your-signoz-url}/settings/ingestion-settings
+    - name: OTEL_EXPORTER_OTLP_INSECURE
+      value: "false"
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "1"
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+```
+
+Apply the above instrumentation using the following command:
+
+```bash
+kubectl apply -f instrumentation.yaml
+```
+
+### Step 5. Auto-instrument your Nextjs app with OpenTelemetry
+
+Create `deployment.yaml` for your Nextjs application as follows:
+
+```yaml:deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-app
+spec:
+  selector:
+    matchLabels:
+      app: nextjs-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nextjs-app
+      annotations:
+        instrumentation.opentelemetry.io/inject-nodejs: "true"
+        resource.opentelemetry.io/service.name: "nextjs-app"
+    spec:
+      containers:
+      - name: app
+        image: nextjs-app:latest
+        ports:
+        - containerPort: 8080
+```
+
+Add the annotation `instrumentation.opentelemetry.io/inject-nodejs: "true"` under `spec > template > metadata > annotations` to enable auto-instrumentation.
+
+Apply the deployment using the following command:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+### Step 6. Run the Nextjs application
+
+In order to run the application on port 8080, run the following commands:
+
+```bash
+export POD_NAME=$(kubectl get pod -l app=<service-name> -o jsonpath="{.items[0].metadata.name}")  # service name is `nextjs-app` in this case.
+
+kubectl port-forward ${POD_NAME} 8080:8080
+```
+
+You can now access the application on port 8080 and validate that traces reach SigNoz.
+
+</TabItem>
+</Tabs>
+
+In case you encounter an issue where all applications do not get listed in the Services section, refer to the [troubleshooting section](#troubleshooting-your-installation).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+From Windows machines, you can follow the same instrumentation steps as the VM flow, with the following OS-specific notes.
+
+- **Send traces directly to SigNoz Cloud:** call the SigNoz ingest endpoint and include the ingestion key header.
+- **Optional: Install the local OTel Collector binary:** point the exporter to `http://localhost:4318/v1/traces` so you can skip the ingestion key.
+
+### Step 1. Install OpenTelemetry packages (PowerShell or Command Prompt)
+
+```powershell
+npm install --save @vercel/otel @opentelemetry/api
+```
+
+### Step 2. Update `next.config.mjs` (required only for Next.js 14 and below)
+
+```tsx
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // include instrumentationHook experimental feature
+  experimental: {
+    instrumentationHook: true,
+  },
+}
+
+export default nextConfig
+```
+
+### Step 3. Create the instrumentation file
+
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
+
+```ts:instrumentation.ts
+import { registerOTel, OTLPHttpJsonTraceExporter } from '@vercel/otel';
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set to DEBUG when troubleshooting
+
+export function register() {
+  registerOTel({
+    serviceName: '<service_name>',
+    traceExporter: new OTLPHttpJsonTraceExporter({
+      url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+      headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
+    }),
+  });
+}
+```
+
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+
+```js:instrumentation.js
+const { registerOTel, OTLPHttpJsonTraceExporter } = require('@vercel/otel');
+const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set to DEBUG when troubleshooting
+
+exports.register = function register() {
+  registerOTel({
+    serviceName: '<service_name>',
+    traceExporter: new OTLPHttpJsonTraceExporter({
+      url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+      headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
+    }),
+  });
+};
+```
+
+</TabItem>
+</Tabs>
+
+- `<service_name>` is the name you want to appear in SigNoz.
+- Set `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- To send data through a local collector, switch the exporter URL to `http://localhost:4318/v1/traces` and remove the `headers` block.
+
+<Admonition type="note">
+  The instrumentation file should live in the project root (or inside `src/` if you keep Next.js
+  code there). Do not place it inside the `app` or `pages` directory. A working example is available
+  in the{' '}
+  <a
+    href="https://github.com/SigNoz/sample-nextjs-app"
+    rel="noopener noreferrer nofollow"
+    target="_blank"
+  >
+    sample Next.js repo
+  </a>
+  .
+</Admonition>
+
+### Step 4. Set environment variables when needed
+
+PowerShell syntax examples:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+```
+
+For a local collector:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "http://localhost:4318"
+Remove-Item Env:OTEL_EXPORTER_OTLP_HEADERS
+```
+
+### Step 5. Run the application
+
+```powershell
+npm run dev
+# or
+next dev
+```
+
+Open your browser, exercise the app, and validate that traces reach SigNoz using [the steps below](#validating-instrumentation-by-checking-for-traces).
+
+</TabItem>
+</Tabs>
+
+## Validating instrumentation by checking for traces
+
+With the app running, confirm that traces reach SigNoz.
+
+1. Trigger a request in your app a few times to generate traffic and wait for buffered data to flush.
+2. In SigNoz, open `Services`, refresh, and confirm your app appears.
+3. Open `Traces`, apply filters, and inspect your spans.
+
+If you face any issues while trying out SigNoz, you can reach out with your questions in #support channel 👇
+
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
+
+## Next Steps
+
+- [Instrument the client-side of your Nextjs app](/docs/frontend-monitoring/sending-traces-with-opentelemetry)
+- [Capture frontend metrics, logs, and vitals](/docs/frontend-monitoring)
