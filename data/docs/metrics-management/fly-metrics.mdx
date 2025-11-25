@@ -3,14 +3,14 @@ date: 2025-10-30
 title: Fly.io Metrics
 id: fly-metrics
 description: Monitor Fly.io application metrics in SigNoz
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 ---
 
 This document explains how to monitor Fly.io application metrics in SigNoz by scraping Fly’s Prometheus federation endpoint with the OpenTelemetry Collector.
 
 ## Pre-requisites
 
-- A `SigNoz Cloud` (or self-hosted) workspace 
+- A `SigNoz Cloud` (or self-hosted) workspace
 - `Fly CLI installed` and a Fly.io account
 - Your Fly.io organization slug (e.g., personal)
 - A sample Fly app to generate test traffic
@@ -90,7 +90,23 @@ receivers:
           authorization:
             type: FlyV1
             credentials_file: /etc/otel/secret/fly_federate_token
+
+processors:
+  transform/fly_metrics:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - 'convert_gauge_to_sum("cumulative", true) where IsMatch(metric.name, "^fly_.*_count$") or metric.name == "fly_instance_cpu" or metric.name == "fly_instance_net_sent_bytes" or metric.name == "fly_instance_net_recv_bytes"'
+
+  batch: {}
 ```
+
+<Admonition type="note">
+  Fly's `/federate` endpoint doesn't expose metric types, so all metrics are mapped as Gauge by
+  default. To override this, we use the transform processor `convert_gauge_to_sum`. If you want to
+  convert any other metrics, add them to the transform processor.
+</Admonition>
 
 <Tabs entityName="plans">
 
@@ -117,6 +133,7 @@ exporters:
     tls:
       insecure: true
 ```
+
 You would need to replace `{signoz-instance}` with the IP address or FQDN of your self-hosted SigNoz server.
 
 </TabItem>
@@ -124,9 +141,6 @@ You would need to replace `{signoz-instance}` with the IP address or FQDN of you
 </Tabs>
 
 ```yaml:otel.yaml
-processors:
-  batch: {}
-
 service:
   telemetry:
     logs:
@@ -134,7 +148,7 @@ service:
   pipelines:
     metrics:
       receivers: [prometheus]
-      processors: [batch]
+      processors: [transform/fly_metrics, batch]
       exporters: [otlphttp]
 ```
 
@@ -144,7 +158,7 @@ service:
 docker run --rm -it \
   -v "$(pwd)/otel.yaml:/etc/otel/config.yaml" \
   -v "$(pwd)/fly_federate_token:/etc/otel/secret/fly_federate_token:ro" \
-  otel/opentelemetry-collector:latest \
+  otel/opentelemetry-collector-contrib:latest \
   --config /etc/otel/config.yaml
 ```
 
@@ -176,13 +190,15 @@ Once you have configured the OTel Collector to send Fly.io metrics to SigNoz, yo
 
 You can use the pre-configured dashboard for Docker metrics or [create your own custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard). To use the pre-configured dashboard, download the dashboard JSON from [here](https://github.com/SigNoz/dashboards/blob/main/container-metrics/docker/container-metrics-by-host.json) and import it to SigNoz by clicking Dashboards → New dashboard → Import JSON:
 
-<figure data-zoomable align='center'>
-  <img src="/img/docs/dashboards/dashboard-templates/fly-dashboard.webp" alt="Fly.io Dashboard"/>
-  <figcaption><i>Fly.io Dashboard</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/docs/dashboards/dashboard-templates/fly-dashboard.webp" alt="Fly.io Dashboard" />
+  <figcaption>
+    <i>Fly.io Dashboard</i>
+  </figcaption>
 </figure>
 
 <div className="flex justify-center">
-  <DashboardActions 
+  <DashboardActions
     dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/flyio/fly-prometheus-v1.json"
     dashboardName="Fly.io (Prometheus)"
   />
