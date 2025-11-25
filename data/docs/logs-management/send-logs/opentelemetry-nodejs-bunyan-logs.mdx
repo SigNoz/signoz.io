@@ -1,0 +1,280 @@
+---
+date: 2025-11-24
+tags: [SigNoz Cloud, Self-Host]
+title: Send logs from Node.js Bunyan logger to SigNoz using OpenTelemetry
+id: opentelemetry-nodejs-bunyan-logs
+doc_type: howto
+description: Learn how to send logs from Node.js Bunyan logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+This guide will walk you through the process of sending logs from a Node.js application that uses the Bunyan logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
+
+## Prerequisites
+
+- Node.js version 14 or higher
+- A SigNoz instance (either SigNoz Cloud or self-hosted)
+- A Node.js application that uses the Bunyan logger
+
+## Setup
+
+### Step 1: Install dependencies
+
+Install the required OpenTelemetry dependencies:
+
+<Tabs>
+<TabItem value="npm" label="npm" default>
+
+```bash
+npm install @opentelemetry/sdk-node \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/instrumentation-bunyan \
+  bunyan \
+  express
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn add @opentelemetry/sdk-node \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/instrumentation-bunyan \
+  bunyan \
+  express
+```
+
+</TabItem>
+</Tabs>
+
+### Step 2: Configure OpenTelemetry SDK
+
+Create a file named `instrumentation.js` or `logging.js` in your project root:
+
+```javascript:instrumentation.js
+const { NodeSDK } = require("@opentelemetry/sdk-node");
+const { OTLPLogExporter } = require("@opentelemetry/exporter-logs-otlp-http");
+const {
+  BunyanInstrumentation,
+} = require("@opentelemetry/instrumentation-bunyan");
+const { resourceFromAttributes } = require("@opentelemetry/resources");
+const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
+const { SimpleLogRecordProcessor } = require("@opentelemetry/sdk-logs");
+
+// Configure the OTLP log exporter
+const logExporter = new OTLPLogExporter({
+  url: "https://ingest.<region>.signoz.cloud:443/v1/logs", // Replace <region> with your SigNoz region
+  headers: {
+    "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>", // Replace <SIGNOZ_INGESTION_KEY> with your SigNoz ingestion key
+  },
+});
+
+// Initialize the OpenTelemetry SDK
+const sdk = new NodeSDK({
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: "nodejs-bunyan-logger",
+  }),
+  logRecordProcessor: new SimpleLogRecordProcessor(logExporter),
+  instrumentations: [
+    new BunyanInstrumentation({
+      // Optional: Disable log sending (only keep log correlation)
+      // disableLogSending: false,
+
+      // Optional: Disable log correlation (trace context injection)
+      // disableLogCorrelation: false,
+
+      // Optional: Add custom fields to log records
+      logHook: (span, record) => {
+        record["resource.environment"] = "dev";
+      },
+    }),
+  ],
+});
+
+sdk.start();
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  sdk
+    .shutdown()
+    .then(() => console.log("OpenTelemetry SDK shut down successfully"))
+    .catch((error) => console.error("Error shutting down SDK", error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+
+### Step 3: Initialize OpenTelemetry SDK
+
+Import the instrumentation at the very top of your main application file (e.g., `index.js` or `app.js`).
+
+```javascript:index.js
+require("./instrumentation"); // Must be imported first
+
+const bunyan = require("bunyan");
+const express = require("express");
+
+// Create your Bunyan logger as usual
+const logger = bunyan.createLogger({
+  name: "express-app",
+  level: "info",
+});
+
+// Your application code
+const app = express();
+
+app.get("/", (req, res) => {
+  logger.info({ path: req.path, method: req.method }, "Request received");
+  res.send("Hello World!");
+});
+
+app.get("/test-log", (req, res) => {
+  logger.info({ path: req.path, method: req.method }, "Test log endpoint hit");
+  res.send("Test log endpoint");
+});
+
+app.get("/error-log", (req, res) => {
+  logger.error(
+    { path: req.path, method: req.method },
+    "Error log endpoint hit",
+  );
+  res.status(500).send("Error log endpoint");
+});
+
+app.get("/warn-log", (req, res) => {
+  logger.warn({ path: req.path, method: req.method }, "Warn log endpoint hit");
+  res.status(400).send("Warn log endpoint");
+});
+
+app.listen(3000, () => {
+  logger.info("Server listening on port 3000");
+});
+```
+
+### Step 4: Configure SigNoz Endpoint
+
+Update the `instrumentation.js` file with your SigNoz endpoint:
+
+<Tabs>
+<TabItem value="vm" label="VM / Local" default>
+
+```javascript:instrumentation.js
+const logExporter = new OTLPLogExporter({
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs', // OTLP logs endpoint
+  headers: {
+    'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+  },
+});
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+If your application runs in Kubernetes with an OpenTelemetry Collector:
+
+```javascript:instrumentation.js
+const logExporter = new OTLPLogExporter({
+  url: 'http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs',
+  headers: {},
+});
+```
+
+**Find your collector service details:**
+
+```bash
+# List OTel collector services
+kubectl get svc -A | grep otel
+
+# Example output:
+# platform  signoz-otel-collector  ClusterIP  10.96.0.10  <none>  4318/TCP
+```
+
+Replace `<otel-collector-service>` and `<namespace>` with your actual values.
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
+See the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) for more details.
+
+</TabItem>
+</Tabs>
+
+### Step 5: Run the Application
+
+Run your application:
+
+```bash
+node index.js
+```
+
+## Validate Logs
+
+Open your SigNoz instance and navigate to the Logs section to view the logs sent from your application.
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/logs-management/send-logs/nodejs-bunyan-logs.webp"
+    alt="Node.js Bunyan Logs"
+  />
+  <figcaption>
+    <i>Node.js Bunyan Logs</i>
+  </figcaption>
+</figure>
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/logs-management/send-logs/nodejs-bunyan-logs-detailed.webp"
+    alt="Node.js Bunyan Logs"
+  />
+  <figcaption>
+    <i>Node.js Bunyan Logs Detailed View</i>
+  </figcaption>
+</figure>
+
+## Troubleshooting
+
+#### Why do I see "404 Not Found" errors?
+
+This usually happens if the endpoint URL is incorrect. Ensure your URL ends with `/v1/logs`.
+
+- Cloud: `https://ingest.<region>.signoz.cloud:443/v1/logs`
+- Self-Hosted: `http://localhost:4318/v1/logs`
+
+#### Why are my logs not appearing in SigNoz?
+
+- Check if the application started successfully and is actually generating logs.
+- Verify your `<region>` and `<SIGNOZ_INGESTION_KEY>` are correct.
+
+## Next Steps
+
+- [Send Logs from Node.js Default Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-logs)
+- [Send Logs from Node.js Pino Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs)
+- [Send Logs from Node.js Winston Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs)
+- [Log Query/Filtering guides](https://signoz.io/docs/userguide/logs/)
+- [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
+- [APM Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/apm-dashboards/)
+
+## Get Help
+
+<GetHelp />
