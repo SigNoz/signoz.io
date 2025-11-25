@@ -195,9 +195,12 @@ app.listen(3000, () => {
 
 Update the `logger.js` file with your SigNoz endpoint:
 
+<Tabs>
+<TabItem value="vm" label="VM / Local" default>
+
 ```javascript:logger.js
 const logExporter = new OTLPLogExporter({
-  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs' // OTLP logs endpoint
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs', // OTLP logs endpoint
   headers: {
     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
   },
@@ -214,6 +217,33 @@ Replace the placeholders:
   remove the ingestion key header as shown in [Cloud →
   Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
+
+</TabItem>
+<TabItem value="kubernetes" label="Kubernetes">
+
+If you are running your application in Kubernetes, you can send logs to the OpenTelemetry Collector running in your cluster.
+
+```javascript:logger.js
+const logExporter = new OTLPLogExporter({
+  // Use the service name of your OTel Collector
+  // For SigNoz Helm chart default: http://signoz-otel-collector.platform.svc.cluster.local:4318/v1/logs
+  url: 'http://signoz-otel-collector.platform.svc.cluster.local:4318/v1/logs',
+  headers: {}, // No headers needed for internal cluster communication
+});
+```
+
+Instruments for setting up K8s-infra are available in the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+
+<Admonition type="warning">
+  **Disable Log Collection in k8s-infra**
+
+If you are deploying the `k8s-infra` chart (SigNoz Helm chart), which automatically collects container logs, make sure to **disable log collection** for this application to prevent duplicate log entries.
+
+Refer to the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection) for instructions.
+
+</Admonition>
+</TabItem>
+</Tabs>
 
 ### Step 6: Run Your Application
 
