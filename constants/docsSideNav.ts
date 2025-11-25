@@ -1661,6 +1661,11 @@ const docsSideNav = [
             route: '/docs/userguide/manage-variables',
             label: 'Manage Variables',
           },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/terraform-provider-signoz',
+            label: 'Terraform Provider',
+          },
         ],
       },
       {
@@ -1837,7 +1842,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics',
-                label: "Kubernetes Cluster Metrics Dashboard"
+                label: 'Kubernetes Cluster Metrics Dashboard',
               },
               {
                 type: 'doc',

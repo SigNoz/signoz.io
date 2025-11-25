@@ -7,7 +7,7 @@ description: How to create and manage SigNoz Dashboards with Terraform for infra
 doc_type: howto
 ---
 
-Dashboard configurations are critical for monitoring and observability. By defining SigNoz dashboards as Terraform code, you can version control, review, and replicate dashboard configurations across environments with confidence.
+Define SigNoz dashboards as Terraform code to version control, review, and replicate configurations across environments.
 
 ## Overview
 
@@ -43,16 +43,16 @@ terraform {
 ### Step 2: Install Terraform signoz Provider
 
 Add a specification block for the **signoz** provider as follows:
-```diff
+```diff {4-9}
 terraform {
   required_version = ">= 0.13"
 
-+ required_providers {
-+   signoz = {
-+     source = "Signoz/signoz"
-+     version = "~>0.0.4"
-+   }
-+ }
+ required_providers {
+   signoz = {
+     source = "Signoz/signoz"
+     version = "~>0.0.4"
+   }
+ }
 }
 ```
 
@@ -67,7 +67,7 @@ This will create `.terraform.lock.hcl` and a `.terraform` directory with provide
 
 Add the provider configuration to specify your SigNoz instance endpoint and authentication:
 
-```diff
+```diff {12-15}
 terraform {
   required_version = ">= 0.13"
 
@@ -79,10 +79,10 @@ terraform {
   }
 }
 
-+ provider "signoz" {
-+   endpoint     = "<SIGNOZ-ENDPOINT>"
-+   access_token = "<SIGNOZ-API-KEY>"
-+ }
+ provider "signoz" {
+   endpoint     = "<SIGNOZ-ENDPOINT>"
+   access_token = "<SIGNOZ-API-KEY>"
+ }
 ```
 
 - **`<SIGNOZ-ENDPOINT>`**: Endpoint URL of your SigNoz instance
@@ -242,7 +242,7 @@ If you see planned changes, review and update your configuration to match the ac
 
 ## Using Dashboard Templates
 
-SigNoz provides a variety of [dashboard templates](https://github.com/SigNoz/dashboards) for common monitoring scenarios. You can use these templates with Terraform:
+SigNoz provides a variety of [dashboard templates](https://signoz.io/docs/dashboards/dashboard-templates/overview) for common monitoring scenarios. You can use these templates with Terraform:
 
 ### Step 1: Choose a Template
 
