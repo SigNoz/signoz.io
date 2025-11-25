@@ -192,7 +192,7 @@ module.exports = () => {
         },
         {
           source: '/why-opentelemetry/',
-          destination: '/blog/what-is-opentelemetry/',
+          destination: '/opentelemetry/',
           permanent: true,
         },
         {
