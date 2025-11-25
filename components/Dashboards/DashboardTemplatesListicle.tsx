@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from 'react'
 import {
   SiKubernetes,
@@ -8,7 +10,6 @@ import {
   SiApache,
   SiNginx,
   SiRabbitmq,
-  SiApachekafka,
   SiDocker,
   SiJenkins,
   SiSnowflake,
