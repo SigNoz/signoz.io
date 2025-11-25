@@ -1663,7 +1663,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/alerts-management/terraform-provider-signoz',
+            route: '/docs/dashboards/terraform-provider-signoz',
             label: 'Terraform Provider',
           },
         ],
