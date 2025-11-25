@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { CoreContent } from 'pliny/utils/contentlayer'
-import type { Authors, Blog } from 'contentlayer/generated'
+import type { Authors, Blog, Comparison, Guide, Opentelemetry } from 'contentlayer/generated'
 
 export interface TocItemProps {
   url: string
@@ -47,7 +47,7 @@ export type SidebarDoc = {
 export type SidebarItem = SidebarCategory | SidebarDoc
 
 export interface LayoutProps {
-  content: CoreContent<Blog>
+  content: CoreContent<Blog | Comparison | Guide | Opentelemetry>
   authorDetails: CoreContent<Authors>[]
   authors: string[]
   children: ReactNode

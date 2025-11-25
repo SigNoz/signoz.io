@@ -172,10 +172,16 @@ export default function OpenTelemetryHubLayout({
       })
     : null
 
-  const readingTimeText =
-    // @ts-expect-error contentlayer readingTime
-    content.readingTime?.text || // @ts-ignore
-    (content.readingTime?.minutes ? `${Math.ceil(content.readingTime.minutes)} min read` : null)
+  const readingTimeText = (() => {
+    // readingTime is attached by contentlayer only for certain content types.
+    if ('readingTime' in content && content.readingTime) {
+      return (
+        content.readingTime.text ||
+        (content.readingTime.minutes ? `${Math.ceil(content.readingTime.minutes)} min read` : null)
+      )
+    }
+    return null
+  })()
 
   const renderedAuthors = useMemo<RenderedAuthor[]>(() => {
     const directory = authorsDirectory as Record<

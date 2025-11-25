@@ -90,6 +90,8 @@ export const generateStaticParams = async () => {
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
   const currentRoute = `/guides/${slug}`
+  const isGrafanaOrPrometheusArticle =
+    slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
   // Filter out drafts in production
   const sortedCoreContents = allCoreContent(sortPosts(allGuides))
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
@@ -132,7 +134,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         <OpenTelemetryHubLayout
           content={mainContent}
           authorDetails={authorDetails}
-          authors={post?.authors}
+          authors={authorList}
           toc={post.toc}
           navItems={hubContext.items}
           currentHubPath={hubContext.pathKey}
@@ -162,10 +164,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   // @ts-ignore
   const Layout = layouts[layoutName]
 
-  // Check if the slug contains Grafana or Prometheus
-  const isGrafanaOrPrometheusArticle =
-    slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
-
   return (
     <>
       <script
@@ -189,7 +187,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
-        authors={post?.authors}
+        authors={authorList}
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />

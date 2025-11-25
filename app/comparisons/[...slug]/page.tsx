@@ -117,7 +117,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         <OpenTelemetryHubLayout
           content={mainContent}
           authorDetails={authorDetails}
-          authors={post?.authors}
+          authors={authorList}
           toc={post.toc}
           navItems={hubContext.items}
           currentHubPath={hubContext.pathKey}
@@ -153,7 +153,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
-        authors={post?.authors}
+        authors={authorList}
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
