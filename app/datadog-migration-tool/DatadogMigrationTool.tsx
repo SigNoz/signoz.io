@@ -40,10 +40,10 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
       </div>
 
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" placement="center">
-        <ModalContent className="bg-signoz_vanilla-500 text-signoz_ink-500">
+        <ModalContent className="max-w-2xl rounded-3xl border border-signoz_slate-200 bg-white text-signoz_ink-500 shadow-[0_20px_60px_rgba(9,16,29,0.35)]">
           {(closeHandler) => (
             <>
-              <ModalBody className="bg-signoz_vanilla-500 py-8 text-signoz_ink-500">
+              <ModalBody className="px-10 py-8 text-signoz_ink-500">
                 <HubspotProvider>
                   <PricingForm portalId={HUBSPOT_DATA.portalId} formId={HUBSPOT_DATA.formId} />
                 </HubspotProvider>
