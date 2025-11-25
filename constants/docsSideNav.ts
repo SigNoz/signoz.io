@@ -1711,6 +1711,11 @@ const docsSideNav = [
             route: '/docs/userguide/manage-variables',
             label: 'Manage Variables',
           },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/terraform-provider-signoz',
+            label: 'Terraform Provider',
+          },
         ],
       },
       {
