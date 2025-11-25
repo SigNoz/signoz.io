@@ -20,7 +20,7 @@ type RawHubPath = {
 
 const PATH_ORDER = ['learn', 'quick-start']
 
-const LEARN_CHAPTER_ORDER = [
+export const LEARN_CHAPTER_ORDER = [
   'introduction',
   'opentelemetry-fundamentals',
   'language-and-frameworks',
@@ -56,6 +56,7 @@ export type HubNavCategory = {
   label: string
   route?: string
   items: HubNavItem[]
+  key?: string
 }
 
 export type HubNavItem = HubNavDoc | HubNavCategory
@@ -157,6 +158,7 @@ function mapGroupToCategory(group: RawHubGroup): HubNavCategory {
     label: group.label,
     route: firstDocRoute,
     items,
+    key: group.key,
   }
 }
 
@@ -287,4 +289,9 @@ export function getHubContextForRoute(route: string) {
 export function listHubRoutes(): string[] {
   const { lookup } = getHubIndex()
   return Array.from(lookup.keys())
+}
+
+export function getHubPaths(): HubPathNav[] {
+  const { paths } = getHubIndex()
+  return paths
 }
