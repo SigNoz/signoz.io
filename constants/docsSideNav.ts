@@ -1933,6 +1933,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/livekit-dashboard',
+            label: 'LiveKit',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/mastra-dashboard',
             label: 'Mastra',
           },
