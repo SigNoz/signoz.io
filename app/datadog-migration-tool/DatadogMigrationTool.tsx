@@ -94,10 +94,7 @@ const Header: React.FC = () => {
       <RequestEarlyAccessButton className="!mx-auto !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]" />
 
       {/* Hero image */}
-      <SectionLayout
-        variant="no-border"
-        className="!mt-0 !border-x-1 !border-t-1 !border-dashed !border-signoz_slate-400 max-md:-mb-[3rem]"
-      >
+      <SectionLayout variant="bordered" className="!mt-0 max-md:-mb-[3rem]">
         <div className="w-100 mx-[-28px]">
           <div className="product-explainer-video hero-figure rounded-xl px-3">
             <div className="embed-container">
@@ -124,10 +121,10 @@ const TopHeroSection: React.FC = () => {
   return (
     <SectionLayout
       variant="bordered"
-      className="!border-b-1 !border-t-1 !border-dashed !border-signoz_slate-400 py-10"
+      className="!border-b-1 !border-t-1 !border-dashed !border-signoz_slate-400"
     >
       <div className="mb-8 text-center">
-        <h2 className="mb-6 pt-12 text-4xl font-semibold text-signoz_sienna-100 max-md:px-10 max-md:text-left">
+        <h2 className="mb-6 pt-12 text-4xl font-semibold text-signoz_sienna-100">
           Typical Migration Pain
         </h2>
       </div>
@@ -140,7 +137,7 @@ const LlmPoweredIntelligenceSection: React.FC = () => {
   return (
     <SectionLayout
       variant="bordered"
-      className="!border-t-1 !border-dashed !border-signoz_slate-400 bg-signoz_ink-500 py-10"
+      className="!border-t-1 !border-dashed !border-signoz_slate-400 bg-signoz_ink-500"
     >
       <div className="mb-6 max-w-4xl px-8 py-6">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">
@@ -216,12 +213,9 @@ const CustomerStories: React.FC = () => {
 
 const SimpleAutomatedMigrationSection: React.FC = () => {
   return (
-    <SectionLayout
-      variant="no-border"
-      className="!px-0 py-10 md:border-x-1 md:border-dashed md:border-signoz_slate-400"
-    >
+    <SectionLayout variant="bordered" className="!px-0">
       <div className="pb-0 pt-10">
-        <h2 className="text-center text-4xl font-semibold text-signoz_sienna-100 max-md:px-10 max-md:text-left">
+        <h2 className="text-center text-4xl font-semibold text-signoz_sienna-100">
           Simple, Automated Migration
         </h2>
       </div>
@@ -318,7 +312,7 @@ const WhatWeSupportSection: React.FC = () => {
   return (
     <SectionLayout
       variant="no-border"
-      className="!border-x-0 !border-t-1 !border-dashed !border-signoz_slate-400 py-10"
+      className="!border-x-0 !border-t-1 !border-dashed !border-signoz_slate-400"
     >
       <div className="px-6 py-8">
         <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">What We Support</h2>
