@@ -39,13 +39,7 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
         </Button>
       </div>
 
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        size="3xl"
-        placement="center"
-        className="bg-signoz_ink-500 text-signoz_vanilla-100"
-      >
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" placement="center">
         <ModalContent>
           {(closeHandler) => (
             <>
