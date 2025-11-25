@@ -12,7 +12,16 @@ import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableO
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronDown, ChevronRight, FileCode, FileText, Code, Menu, X } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  FileCode,
+  FileText,
+  Code,
+  Menu,
+  X,
+  ExternalLink,
+} from 'lucide-react'
 import Image from 'next/image'
 import {
   SiJavascript,
@@ -706,23 +715,30 @@ export default function OpenTelemetryHubLayout({
             {orderedPathMeta.map((path) => {
               if (!path.firstRoute) return null
               const isActive = path.key === currentHubPath
+              const isQuickStart = path.key === 'quick-start'
               const label =
                 path.key === 'learn'
                   ? 'Learn OpenTelemetry'
                   : path.key === 'quick-start'
                     ? 'OpenTelemetry Quick Start'
                     : path.label
+              const iconColor = isActive ? 'text-white' : 'text-gray-400'
               return (
                 <Link
                   key={path.key}
                   href={path.firstRoute}
+                  target={isQuickStart ? '_blank' : undefined}
+                  rel={isQuickStart ? 'noopener noreferrer' : undefined}
                   className={`border-b-2 px-1 pb-2 text-sm font-semibold transition-colors ${
                     isActive
                       ? 'border-white/60 text-white'
                       : 'border-transparent text-gray-400 hover:text-white'
                   }`}
                 >
-                  {label}
+                  <span className="flex items-center gap-1">
+                    {label}
+                    {isQuickStart && <ExternalLink size={14} className={iconColor} />}
+                  </span>
                 </Link>
               )
             })}
