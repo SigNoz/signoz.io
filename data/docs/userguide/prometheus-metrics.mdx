@@ -1,0 +1,92 @@
+---
+date: 2025-11-19
+id: prometheus-metrics
+title: Prometheus Metrics
+description: Send metrics to SigNoz using the Prometheus receiver in OpenTelemetry Collector.
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+SigNoz can store and visualize Prometheus metrics. If you are already exposing metrics in Prometheus format (e.g., from a `/metrics` endpoint), you don't need to change your code. You can simply configure the OpenTelemetry Collector to "scrape" (collect) these metrics and send them to SigNoz.
+
+## Prerequisites
+
+- **SigNoz Otel Collector installed**: You need the OpenTelemetry Collector running in your environment. See [Installation Guides](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+- **Access to Configuration**: You must be able to edit the `otel-collector-config.yaml` file where the collector is running.
+- **A Target**: An application or service exposing metrics on an HTTP endpoint (usually `/metrics`).
+
+## Steps
+
+To start collecting Prometheus metrics, you need to configure the **Prometheus Receiver** in your collector.
+
+### Step 1: Configure the Scrape Job
+
+Open your `otel-collector-config.yaml` file. In the `receivers` > `prometheus` > `config` > `scrape_configs` section, you define "jobs". A job tells the collector *what* to scrape and *how often*.
+
+Add a new job for your service:
+
+```yaml {6-13}
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        # Scrape the collector's own metrics
+        - job_name: "otel-collector"
+          scrape_interval: 30s
+          static_configs:
+            - targets: ["localhost:8889"]
+
+        # Scrape your application metrics
+        - job_name: "my-app-metrics"
+          scrape_interval: 30s
+          static_configs:
+            - targets: ["localhost:8080"]
+```
+
+
+### Step 2: Enable the Receiver in the Pipeline
+
+Ensure the `prometheus` receiver is added to your metrics pipeline. This is usually enabled by default, but it's good to verify.
+
+Scroll down to `service` > `pipelines` > `metrics` and check the `receivers` list:
+
+```yaml {4}
+service:
+  pipelines:
+    metrics:
+      # Ensure 'prometheus' is in this list
+      receivers: [otlp, prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+### Step 3: Restart the Collector
+
+For the changes to take effect, restart the OpenTelemetry Collector.
+
+
+## Validate
+
+1. Go to the **[Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)** in SigNoz.
+2. Search for a metric from your application (e.g., `http_requests_total` or `go_goroutines`).
+3. Run the query to confirm data is flowing.
+
+## Troubleshooting
+
+If you don't see metrics:
+- **Check Logs**: Look at the OpenTelemetry Collector logs for connection errors (e.g., "connection refused").
+- **Verify Endpoint**: Ensure you can `curl` the metrics endpoint from the machine running the collector.
+- **Check Job Name**: Ensure the `job_name` is unique in your config.
+
+## Next Steps
+
+- **Create Dashboards**: Visualize your Prometheus metrics by creating custom dashboards. [Learn more](https://signoz.io/docs/userguide/dashboards/).
+- **Set Alerts**: Configure alerts to get notified when metrics cross a threshold. [Learn more](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+
+## Get Help
+
+<GetHelp />

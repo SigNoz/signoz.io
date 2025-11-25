@@ -219,8 +219,9 @@ Every doc should be skimmable and actionable.
 
 - Hyperlinks
 
-  - Prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
-  - External links should open in a new tab and preserve security attributes:
+  - Internal links should open in the new tab. Always prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
+
+  - External links should open in a new tab and preserve security attributes by using href:
 
     ```mdx
     <a href="https://example.com" target="_blank" rel="noopener noreferrer nofollow">
@@ -230,10 +231,9 @@ Every doc should be skimmable and actionable.
 
   - Use descriptive anchor text that makes the link destination clear. Avoid generic phrases like "here" or "link" and do not paste raw URLs into the body text.
 
-    - ✅ `Learn from the [Temporal Golang sample repository](https://github.com/SigNoz/temporal-golang-opentelemetry/tree/main)`
-    - ❌ `See (link)` or `Refer to https://github.com/...`
+    - ✅ `Learn from the [Temporal Golang tutorial](https://signoz.io/docs/integrations/temporal-golang-opentelemetry/)`
+    - ❌ `See (link)` or `Refer to https://signoz.io/...`
 
-  - Internal links typically open in the same tab unless the link switches product/app context or interrupts an in-progress task.
   - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
 
 - Cloud vs Self-Host
@@ -244,17 +244,13 @@ Every doc should be skimmable and actionable.
     - For Cloud-only guides:
       ```mdx
       <Admonition type="info">
-        Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint
-        and remove the ingestion key header as shown in [Cloud →
-        Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+        Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
       </Admonition>
       ```
     - For Self-Hosted-only guides:
       ```mdx
       <Admonition type="info">
-        Using SigNoz Cloud? Most steps are identical. To adapt this guide, point to the Cloud
-        endpoint and add the ingestion key header as shown in [Self-Hosted →
-        Cloud](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud).
+        Using SigNoz Cloud? Most steps are identical. To adapt this guide, point to the Cloud endpoint and add the ingestion key header as shown in [Self-Hosted → Cloud](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud).
       </Admonition>
       ```
   - Only use tabs if instructions materially diverge (e.g., different components/flows), not for small endpoint/header differences.
@@ -576,8 +572,6 @@ Docs pages must be added to the sidebar navigation.
      label: 'Cloudflare',
    }
    ```
-
-Optional: To mark a doc as new, include `className: 'new-doc'` on the entry.
 
 If you introduced a new tag in your doc frontmatter, add its tooltip definition in `constants/tagDefinitions.ts`.
 

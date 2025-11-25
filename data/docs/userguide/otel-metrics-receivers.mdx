@@ -1,0 +1,88 @@
+---
+date: 2025-11-22
+id: otel-metrics-receivers
+title: OpenTelemetry Receivers
+description: How to export metrics from OpenTelemetry receivers to SigNoz.
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+OpenTelemetry receivers allow you to collect metrics from your infrastructure and third-party services (like Redis, PostgreSQL, RabbitMQ, Nginx, etc.) without installing separate agents for each service.
+
+Think of a **Receiver** as a plugin for the OpenTelemetry Collector. It connects to a specific service, gathers its metrics, and exports them to SigNoz or any other backend of your choice.
+
+### Why use OpenTelemetry Receivers?
+
+- **Unified Collection**: Instead of running a "Redis Exporter," a "Postgres Exporter," and a "Host Agent," you run a single OpenTelemetry Collector that handles everything.
+- **Rich Ecosystem**: There are hundreds of community-maintained receivers available for databases, message queues, cloud providers, and more.
+- **Open Standard**: You are using industry-standard configuration rather than proprietary vendor-specific agents.
+
+## Prerequisites
+
+- **OpenTelemetry Collector**: You need the OpenTelemetry Collector running in your environment. See [Installation Guides](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+- **Access to Configuration**: You must be able to edit the `otel-collector-config.yaml` file where the collector is running.
+
+## Steps
+
+To start collecting metrics from a new source, you need to do two things:
+1. **Define** the receiver (tell the collector *how* to connect to your service).
+2. **Enable** the receiver (tell the collector to *process* data from this source).
+
+### Step 1: Configure the Receiver
+
+Open your `otel-collector-config.yaml` file. In the `receivers` section, add the configuration for the service you want to monitor.
+
+For example, to monitor **RabbitMQ**, you would add:
+
+```yaml
+receivers:
+  # ... existing receivers ...
+  rabbitmq:
+    endpoint: http://localhost:15672
+    username: <RABBITMQ_USERNAME>
+    password: <RABBITMQ_PASSWORD>
+    collection_interval: 30s
+```
+
+> **Note**: You can find the configuration settings for any service in the [OpenTelemetry Collector Contrib repository](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver).
+
+### Step 2: Enable the Receiver in the Pipeline
+
+Just defining the receiver isn't enough; you must add it to the **pipeline** so the data is actually processed and sent to SigNoz.
+
+Scroll down to the `service` > `pipelines` > `metrics` section in your config file. Add your new receiver name (e.g., `rabbitmq`) to the `receivers` list.
+
+```yaml {4}
+service:
+  pipelines:
+    metrics:
+      # Add 'rabbitmq' to the list of receivers
+      receivers: [otlp, rabbitmq]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+### Step 3: Restart the Collector
+
+For the changes to take effect, you must restart the OpenTelemetry Collector.
+
+## Validate
+
+Once restarted, the metrics should start flowing into SigNoz.
+
+1. Go to the **[Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)** in SigNoz.
+2. In the query builder, search for metrics related to your service (e.g., type `rabbitmq` to see available RabbitMQ metrics).
+3. Select a metric and run the query to verify data is present.
+
+## Next Steps
+
+- **Create Dashboards**: Visualize your metrics by creating custom dashboards. [Learn more](https://signoz.io/docs/userguide/dashboards/).
+- **Set Alerts**: Configure alerts to get notified when metrics cross a threshold. [Learn more](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+
+## Get Help
+
+<GetHelp />

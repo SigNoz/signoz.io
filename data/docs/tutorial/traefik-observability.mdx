@@ -1,56 +1,56 @@
 ---
-date: 2024-06-06
+date: 2025-11-22
 id: traefik-observability
-tags : [SigNoz Cloud, Self-Host]
-title: Traefik Observability
-description: Tutorial to export Traefik metrics and traces to SigNoz.
+tags: [SigNoz Cloud, Self-Host]
+title: Traefik Observability with OpenTelemetry
+description: Tutorial to export Traefik metrics and traces to SigNoz using OpenTelemetry.
+doc_type: tutorial
 ---
 
 import TraefikMetrics from '@/components/shared/traefik-metrics-list.md'
 
-### Overview
+## Overview
 
 In this tutorial, we will see how to export metrics and traces of Traefik to SigNoz. Visualizing Traefik metrics and traces will help you to understand the performance of services running behind Traefik and troubleshoot issues.
 
-### Prerequisites
+## Prerequisites
 
 - Traefik v3.0 or above
-- Must have SigNoz running. You can follow the [installation guide][1] to install SigNoz.
-- Must have SigNoz OtelCollector accessible from Traefik
-- If you don’t already have a SigNoz Cloud account, you can sign up [here][4].
+- SigNoz setup (choose one):
+  - [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key
+  - Self-hosted SigNoz instance
 
-## Export Traefik Metrics and Traces to SigNoz
+## Steps
 
-Based on how you are running SigNoz (e.g. SigNoz Cloud, in an independent VM or Kubernetes cluster), you have to provide the address to send data from the above receivers.
+To send Traefik metrics and traces to SigNoz, you need to configure Traefik to export data using the OpenTelemetry Protocol (OTLP).
 
-<Tabs>
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
 
-In this section, we will see how to export Traefik metrics and traces to SigNoz Cloud.
+### Step 1: Configure Traefik CLI Flags
 
-For metrics, we will have to set the following CLI flags in Traefik:
+You need to enable OTLP export for both metrics and traces in your Traefik configuration.
 
-- `--metrics.otlp=true`
-- `--metrics.otlp.grpc=true`
-- `--metrics.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443`
-- `--metrics.otlp.grpc.insecure=false`
-- `--metrics.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`
+**For Metrics:**
+- `--metrics.otlp=true`: Enables OTLP metrics export.
+- `--metrics.otlp.grpc=true`: Uses gRPC for transport (recommended).
+- `--metrics.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443`: Sets the destination endpoint.
+- `--metrics.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`: Authenticates with your SigNoz Cloud key.
 
-For traces, we will have to set the following CLI flags in Traefik:
+**For Traces:**
+- `--tracing.otlp=true`: Enables OTLP tracing.
+- `--tracing.otlp.grpc=true`: Uses gRPC for transport.
+- `--tracing.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443`: Sets the destination endpoint.
+- `--tracing.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`: Authenticates with your SigNoz Cloud key.
 
-- `--tracing.otlp=true`
-- `--tracing.otlp.grpc=true`
-- `--tracing.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443`
-- `--tracing.otlp.grpc.insecure=false`
-- `--tracing.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY`
+### Step 2: Create the Docker Compose File
 
-We will take an example `docker-compose.yaml` with a simple `hello-app` running behind Traefik.
+We will use a `docker-compose.yaml` file to run Traefik and a sample `hello-app` service. This configuration sets up Traefik as a reverse proxy and configures it to send telemetry data to SigNoz.
 
+Create a file named `docker-compose.yaml` with the following content:
 
-
-```
-# docker-compose.yaml {13-14,18-19}
-
+```yaml
 version: '3'
 services:
   reverse-proxy:
@@ -60,11 +60,13 @@ services:
     command:
       - --api.insecure=true
       - --providers.docker
+      # Metrics Configuration
       - --metrics.otlp=true
       - --metrics.otlp.grpc=true
       - --metrics.otlp.grpc.insecure=false
       - --metrics.otlp.grpc.endpoint=ingest.{region}.signoz.cloud:443
       - --metrics.otlp.grpc.headers.signoz-ingestion-key=SIGNOZ_INGESTION_KEY
+      # Tracing Configuration
       - --tracing.otlp=true
       - --tracing.otlp.grpc=true
       - --tracing.otlp.grpc.insecure=false
@@ -87,113 +89,35 @@ services:
 ```
 
 <Admonition>
-- Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
-- Replace `{region}` with the region of your SigNoz Cloud instance.
-</Admonition>
-Refer to the table below for the region-specific endpoints:
-
-| Region	| Endpoint                   |
-| ------- | -------------------------- |
-| US      | ingest.us.signoz.cloud:443 |
-| IN      | ingest.in.signoz.cloud:443 |
-| EU      | ingest.eu.signoz.cloud:443 |
-
-</TabItem>
-
-<TabItem value='self-host' label='Self-Host'>
-
-In this section, we will see how to export Traefik metrics and traces to SigNoz.
-
-For metrics, we will have to set the following CLI flags in Traefik:
-
-- `--metrics.otlp=true`
-- `--metrics.otlp.grpc=true`
-- `--metrics.otlp.grpc.endpoint=<SigNoz OtelCollector IP>:4317`
-- `--metrics.otlp.grpc.insecure=true`
-
-For traces, we will have to set the following CLI flags in Traefik:
-
-- `--tracing.otlp=true`
-- `--tracing.otlp.grpc=true`
-- `--tracing.otlp.grpc.endpoint=<SigNoz OtelCollector IP>:4317`
-- `--tracing.otlp.grpc.insecure=true`
-
-<Admonition>
-Replace `<SigNoz OtelCollector IP>` with the IP address or hostname of the host running SigNoz OtelCollector.
+- Replace `SIGNOZ_INGESTION_KEY` with your actual [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Replace `{region}` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (e.g., `us`, `in`, `eu`).
 </Admonition>
 
-We will take an example `docker-compose.yaml` with a simple `hello-app` running behind Traefik.
+### Step 3: Run the Services and Generate Traffic
 
-docker-compose.yaml
+Start the services using Docker Compose:
 
-```
-version: '3'
-services:
-  reverse-proxy:
-    image: traefik:latest
-    extra_hosts:
-      - signoz:host-gateway
-    command:
-      - --api.insecure=true
-      - --providers.docker
-      - --metrics.otlp=true
-      - --metrics.otlp.grpc=true
-      - --metrics.otlp.grpc.insecure=true
-      - --metrics.otlp.grpc.endpoint=signoz:4317
-      - --tracing.otlp=true
-      - --tracing.otlp.grpc=true
-      - --tracing.otlp.grpc.insecure=true
-      - --tracing.otlp.grpc.endpoint=signoz:4317
-    ports:
-      - "80:80"
-      - "8080:8080"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-  hello-app:
-    image: gcr.io/google-samples/hello-app:2.0
-    environment:
-      - PORT=8080
-    labels:
-      traefik.enable: true
-      traefik.http.routers.hello-app.rule: Host(`hello-app.docker.localhost`)
-      traefik.http.routers.hello-app.entrypoints: http
-      traefik.http.routers.hello-app.service: hello-app
-```
-
-<Admonition type="info">
-In case SigNoz is not running on the same host, you will have to replace `signoz` with the IP address of the host running SigNoz.
-</Admonition>
-
-</TabItem>
-</Tabs>
-
-To start the services, run the following command:
-
-```
+```bash
 docker compose up -d
 ```
 
-We will visit the `hello-app` service to generate some traffic.
+Once the services are running, generate some traffic to the `hello-app` service. This will create traces and metrics that Traefik will send to SigNoz.
 
-```
+```bash
 curl -H Host:hello-app.docker.localhost http://127.0.0.1
 ```
 
-Now, we will visit the SigNoz UI to see the traces and metrics.
+### Step 4: Verify in SigNoz
 
-![Traefik Traces](/img/docs/tutorial/traefik-traces.webp)
+1. Open your SigNoz UI.
+2. Go to the **Traces** tab to see the traces generated by your requests.
+3. Go to the **[Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)** tab and search for `traefik` to see the incoming metrics.
+4. Go to the **Dashboards** tab to visualize metrics. You can create a new dashboard and add widgets to plot Traefik metrics. Learn more about creating dashboards [here](https://signoz.io/docs/userguide/dashboards/).
 
-To plot metrics generated from **Traefik**, follow the instructions given in the docs [here][2].
-
-Check out the [List of metrics from Traefik][3].
+You can also check the list of available metrics below to know what you can visualize.
 
 ## List of Metrics
 
 <TraefikMetrics />
 
----
 
-[1]: https://signoz.io/docs/install/
-[2]: https://signoz.io/docs/userguide/dashboards/
-[3]: #list-of-metrics
-[4]: https://signoz.io/teams/

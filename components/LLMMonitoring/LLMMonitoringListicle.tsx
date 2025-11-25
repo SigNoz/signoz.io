@@ -131,11 +131,15 @@ const LLMMonitoringData: IconCardData[] = [
     icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
     clickName: 'Pydantic AI Monitoring',
   },
-   {
+  {
     name: 'Semantic Kernel',
     href: '/docs/semantic-kernel-observability',
     icon: (
-      <img src="/img/docs/llm/semantic-kernel/sk-logo.webp" alt="Semantic Kernel Icon" className="h-7 w-7" />
+      <img
+        src="/img/docs/llm/semantic-kernel/sk-logo.webp"
+        alt="Semantic Kernel Icon"
+        className="h-7 w-7"
+      />
     ),
     clickName: 'Semantic Kernel Monitoring',
   },

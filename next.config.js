@@ -352,7 +352,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/angular/',
-          destination: '/docs/instrumentation/opentelemetry-angular/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
           permanent: true,
         },
         {
@@ -377,7 +377,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/express/',
-          destination: '/docs/instrumentation/opentelemetry-express/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
@@ -416,23 +416,63 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/opentelemetry-angular/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-express/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/jboss/',
           destination: '/docs/instrumentation/opentelemetry-jboss/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/nestjs/',
-          destination: '/docs/instrumentation/opentelemetry-nestjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nestjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/nextjs/',
-          destination: '/docs/instrumentation/opentelemetry-nextjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nextjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nextjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nextjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-nuxtjs/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nuxtjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-reactjs/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/react-native/',
-          destination: '/docs/instrumentation/opentelemetry-react-native/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-react-native/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-react-native/',
           permanent: true,
         },
         {
@@ -484,6 +524,11 @@ module.exports = () => {
           source: '/docs/instrumentation/manual-instrumentation/javascript/nodejs/',
           destination:
             '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-javascript/',
+          destination: '/docs/instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
@@ -816,7 +861,7 @@ module.exports = () => {
         },
         {
           source: '/docs/tutorial/instrumenting-angular-frontend/',
-          destination: '/docs/instrumentation/opentelemetry-angular/',
+          destination: '/docs/frontend-monitoring/sending-traces-with-opentelemetry/',
           permanent: true,
         },
         {
@@ -942,10 +987,34 @@ module.exports = () => {
           destination: '/docs/manage/administrator-guide/sso/overview/',
           permanent: true,
         },
-
         {
           source: '/docs/install/troubleshooting/',
           destination: '/docs/setup/docker/troubleshooting/faq',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/send-metrics-cloud/',
+          destination: '/docs/metrics-management/send-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/send-metrics/',
+          destination: '/docs/metrics-management/send-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorials/',
+          destination: '/docs/install/',
+          permanent: true,
+        },
+        {
+          source: '/docs/integrations/aws/integration-template/',
+          destination: '/docs/integrations/aws/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/docker-standalone/',
+          destination: '/docs/install/docker/',
           permanent: true,
         },
       ]
