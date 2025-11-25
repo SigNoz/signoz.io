@@ -221,27 +221,38 @@ Replace the placeholders:
 </TabItem>
 <TabItem value="kubernetes" label="Kubernetes">
 
-If you are running your application in Kubernetes, you can send logs to the OpenTelemetry Collector running in your cluster.
+If your application runs in Kubernetes with an OpenTelemetry Collector:
 
 ```javascript:logger.js
 const logExporter = new OTLPLogExporter({
-  // Use the service name of your OTel Collector
-  // For SigNoz Helm chart default: http://signoz-otel-collector.platform.svc.cluster.local:4318/v1/logs
-  url: 'http://signoz-otel-collector.platform.svc.cluster.local:4318/v1/logs',
-  headers: {}, // No headers needed for internal cluster communication
+  url: 'http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs',
+  headers: {},
 });
 ```
 
-Instruments for setting up K8s-infra are available in the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+**Find your collector service details:**
+
+```bash
+# List OTel collector services
+kubectl get svc -A | grep otel
+
+# Example output:
+# platform  signoz-otel-collector  ClusterIP  10.96.0.10  <none>  4318/TCP
+```
+
+Replace `<otel-collector-service>` and `<namespace>` with your actual values.
 
 <Admonition type="warning">
-  **Disable Log Collection in k8s-infra**
+**Avoiding Duplicate Logs**
 
-If you are deploying the `k8s-infra` chart (SigNoz Helm chart), which automatically collects container logs, make sure to **disable log collection** for this application to prevent duplicate log entries.
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
 
-Refer to the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection) for instructions.
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
 
 </Admonition>
+
+See the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) for more details.
+
 </TabItem>
 </Tabs>
 
