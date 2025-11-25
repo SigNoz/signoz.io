@@ -40,10 +40,10 @@ const RequestEarlyAccessButton: React.FC<{ className?: string }> = ({ className 
       </div>
 
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" placement="center">
-        <ModalContent>
+        <ModalContent className="bg-signoz_vanilla-500 text-signoz_ink-500">
           {(closeHandler) => (
             <>
-              <ModalBody className="py-8">
+              <ModalBody className="bg-signoz_vanilla-500 py-8 text-signoz_ink-500">
                 <HubspotProvider>
                   <PricingForm portalId={HUBSPOT_DATA.portalId} formId={HUBSPOT_DATA.formId} />
                 </HubspotProvider>
@@ -80,12 +80,13 @@ const Header: React.FC = () => {
       {/* Main content */}
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
-          Migrate from Datadog to SigNoz <br /> in Minutes
+          Migrate from Datadog to SigNoz <br className="hidden md:block" /> in Minutes
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
-          LLM-powered migration tool that automatically translates your Datadog dashboards to <br />{' '}
-          SigNoz through a simple UI, preserving your configurations, queries, and panels.
+          LLM-powered migration tool that automatically translates your Datadog dashboards to{' '}
+          <br className="hidden md:block" /> SigNoz through a simple UI, preserving your
+          configurations, queries, and panels.
         </p>
       </div>
 
@@ -123,7 +124,9 @@ const TopHeroSection: React.FC = () => {
       className="!border-b-1 !border-t-1 !border-dashed !border-signoz_slate-400 !px-0"
     >
       <div className="mb-8 text-center">
-        <h2 className="mb-6 pt-12 text-signoz_sienna-100">Typical Migration Pain</h2>
+        <h2 className="mb-6 pt-12 text-4xl font-semibold text-signoz_sienna-100">
+          Typical Migration Pain
+        </h2>
       </div>
       <HeroCards cards={CARDS} layoutVariant={'no-border'} variant="combined" />
     </SectionLayout>
@@ -133,8 +136,10 @@ const TopHeroSection: React.FC = () => {
 const LlmPoweredIntelligenceSection: React.FC = () => {
   return (
     <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500">
-      <div className="mb-6 max-w-4xl p-6">
-        <h2 className="mb-6 text-signoz_sienna-100">LLM-Powered Intelligence</h2>
+      <div className="mb-6 max-w-4xl px-8 py-6">
+        <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">
+          LLM-Powered Intelligence
+        </h2>
         <p className="leading-relaxed text-signoz_vanilla-400">
           The migration tool uses LLM to intelligently translate dashboards between platforms,
           understanding context and intent rather than relying on literal syntax matching. This
@@ -207,14 +212,16 @@ const SimpleAutomatedMigrationSection: React.FC = () => {
   return (
     <SectionLayout variant="bordered" className="!px-0">
       <div className="pb-0 pt-10">
-        <h2 className="text-center text-signoz_sienna-100">Simple, Automated Migration</h2>
+        <h2 className="text-center text-4xl font-semibold text-signoz_sienna-100">
+          Simple, Automated Migration
+        </h2>
       </div>
       <GridLayout variant="split" className="px-10 pb-10 max-lg:!grid max-lg:grid-cols-1">
         <div className="flex w-full flex-col gap-4 pr-4 max-lg:pr-0">
           <div className="mb-4">
             <span className="flex items-center gap-2 font-bold uppercase text-red-400">I</span>
             <h2 className="mb-6 text-signoz_sienna-100">Get Your Dashboard Data</h2>
-            <p className="text-justify leading-relaxed text-signoz_vanilla-400">
+            <p className="leading-relaxed text-signoz_vanilla-400">
               Export your Datadog dashboard configurations in JSON format. This includes all panels,
               queries, visualizations, and alert configurations so there’s nothing manual for your
               team to migrate.
@@ -230,7 +237,7 @@ const SimpleAutomatedMigrationSection: React.FC = () => {
           <div className="hidden lg:block">
             <span className="flex items-center gap-2 font-bold uppercase text-red-400">III</span>
             <h2 className="mb-6 text-signoz_sienna-100">Import to SigNoz</h2>
-            <p className="text-justify leading-relaxed text-signoz_vanilla-400">
+            <p className="leading-relaxed text-signoz_vanilla-400">
               Import the translated dashboards into SigNoz through a UI. Your dashboards are ready
               to use immediately with the same visual layouts, queries, and alerting logic you had
               in Datadog.
@@ -251,7 +258,7 @@ const SimpleAutomatedMigrationSection: React.FC = () => {
           <div className="order-first lg:order-none">
             <span className="flex items-center gap-2 font-bold uppercase text-red-400">II</span>
             <h2 className="mb-6 text-signoz_sienna-100">LLM-Powered Translation</h2>
-            <p className="text-justify leading-relaxed text-signoz_vanilla-400">
+            <p className="leading-relaxed text-signoz_vanilla-400">
               Our tool automatically translates your dashboards, mapping metrics, queries, and panel
               configurations to SigNoz formats. The LLM intelligently learns from sample dashboards,
               auto-fills mappings, and gently surfaces differences between platforms.
@@ -271,7 +278,7 @@ const SimpleAutomatedMigrationSection: React.FC = () => {
         <div className="lg:hidden">
           <span className="flex items-center gap-2 font-bold uppercase text-red-400">III</span>
           <h2 className="mb-6 text-signoz_sienna-100">Import to SigNoz</h2>
-          <p className="text-justify leading-relaxed text-signoz_vanilla-400">
+          <p className="leading-relaxed text-signoz_vanilla-400">
             Import the translated dashboards into SigNoz through a UI. Your dashboards are ready to
             use immediately with the same visual layouts, queries, and alerting logic you had in
             Datadog.
@@ -305,7 +312,7 @@ const WhatWeSupportSection: React.FC = () => {
       className="!border-x-0 !border-t-1 !border-dashed !border-signoz_slate-400"
     >
       <div className="px-6 py-8">
-        <h2 className="mb-6 text-signoz_sienna-100">What We Support</h2>
+        <h2 className="mb-6 text-4xl font-semibold text-signoz_sienna-100">What We Support</h2>
         <p className="leading-relaxed text-signoz_vanilla-400">
           The tool manages the migration of metrics, logs, and traces dashboards, and also supports
           Datadog integrations such as Redis, PostgreSQL, and AWS. Here's what gets automatically
@@ -351,7 +358,7 @@ const DatadogMigrationTool: React.FC = () => {
           <ReadyToMigrateBanner />
         </SectionLayout>
 
-        <UsageBasedPricing show={['traces']} />
+        <UsageBasedPricing show={['logs', 'traces', 'metrics']} />
         <SigNozStats />
         <CustomerStories />
       </div>
