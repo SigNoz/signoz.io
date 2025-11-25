@@ -1,5 +1,5 @@
 ---
-date: 2025-11-06
+date: 2025-11-20
 tags: [SigNoz Cloud, Self-Host]
 title: Sending Traces from your frontend application using OpenTelemetry
 id: sending-traces-frontend
@@ -191,26 +191,25 @@ The instrumentation file is required to setup the `OTLPTraceExporter` and `WebTr
   </TabItem>
 </Tabs>
 
-<Admonition type="info">
-  For self-hosted deployments, add the following CORS configuration to your OpenTelemetry Collector
-  config file to allow browser requests from your frontend domain. Also, update the endpoint and remove the ingestion key header as shown in  
-  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>. 
+<Admonition>
+  For self-hosted deployments, add the following CORS configuration to your OpenTelemetry Collector config file to allow browser requests from your frontend domain. Also, update the endpoint and remove the ingestion key header as shown in <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
 
-  ```yaml:config.yaml
-  receivers:
-    otlp:
-      protocols:
-        grpc:
-          endpoint: 0.0.0.0:4317
-        http:
-          endpoint: 0.0.0.0:4318
-          cors:
-            allowed_origins:
-              - <YOUR_FRONTEND_URL>
-            allowed_headers: ['*']
-  ```
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - <YOUR_FRONTEND_URL>
+          allowed_headers: ['*']
+```
 
-  - `<YOUR_FRONTEND_URL>` is the url pointing to your frontend application
+- `<YOUR_FRONTEND_URL>` is the url pointing to your frontend application
+
 </Admonition>
 
 Going through each of the 3 instrumentations set up:
@@ -224,9 +223,8 @@ Going through each of the 3 instrumentations set up:
 
 ### Step 3: Importing the instrumentation file
 
-<Admonition type="info">
-  Import the instrumentation file at the top level of your application. 
-  This ensures that the OpenTelemetry instrumentation is initialized before any other code runs, allowing it to capture telemetry data from the very beginning of your application's execution.
+<Admonition type="warning">
+  Import the instrumentation file at the top level of your application. This ensures that the OpenTelemetry instrumentation is initialized before any other code runs, allowing it to capture telemetry data from the very beginning of your application's execution.
 </Admonition>
 
 <Tabs groupId="framework-choice">
@@ -282,6 +280,7 @@ Going through each of the 3 instrumentations set up:
       },
     };
     ```
+
   </TabItem>
 
   <TabItem value="nextjs-pages" label="Next.js (Pages Router)">
@@ -639,6 +638,9 @@ export async function eventHandler() {
 Check out this [full-stack application](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/sending-traces) that demonstrates sending traces from both frontend and backend to SigNoz.
 
 ## Next Steps
-- [Sending metrics](/docs/frontend-monitoring/sending-metrics-with-opentelemetry)
-- [Sending logs](/docs/frontend-monitoring/sending-logs-with-opentelemetry)
-- [Sending web vitals](/docs/frontend-monitoring/opentelemetry-web-vitals)
+
+- [Instrument your NodeJs backend for traces](/docs/instrumentation/opentelemetry-nodejs)
+- [Instrument your Nextjs backend for traces](/docs/instrumentation/opentelemetry-nextjs)
+- [Send frontend metrics with OpenTelemetry](/docs/frontend-monitoring/sending-metrics-with-opentelemetry)
+- [Send frontend logs with OpenTelemetry](/docs/frontend-monitoring/sending-logs-with-opentelemetry)
+- [Capture frontend web vitals with OpenTelemetry](/docs/frontend-monitoring/opentelemetry-web-vitals)

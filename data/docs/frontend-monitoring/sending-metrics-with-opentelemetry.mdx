@@ -1,5 +1,5 @@
 ---
-date: 2025-11-06
+date: 2025-11-20
 tags: [SigNoz Cloud, Self-Host]
 title: Sending Metrics from your frontend using OpenTelemetry
 id: sending-metrics-frontend
@@ -146,33 +146,31 @@ The instrumentation file is required to setup the `MeterProvider` which is used 
   </TabItem>
 </Tabs>
 
-<Admonition type="info">
-  For self-hosted deployments, add the following CORS configuration to your OpenTelemetry Collector
-  config file to allow browser requests from your frontend domain. Also, update the endpoint and remove the ingestion key header as shown in  
-  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>. 
+<Admonition>
+  For self-hosted deployments, add the following CORS configuration to your OpenTelemetry Collector config file to allow browser requests from your frontend domain. Also, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 
-  ```yaml:config.yaml
-  receivers:
-    otlp:
-      protocols:
-        grpc:
-          endpoint: 0.0.0.0:4317
-        http:
-          endpoint: 0.0.0.0:4318
-          cors:
-            allowed_origins:
-              - <YOUR_FRONTEND_URL>
-            allowed_headers: ['*']
-  ```
+```yaml:config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - <YOUR_FRONTEND_URL>
+          allowed_headers: ['*']
+```
 
-  - `<YOUR_FRONTEND_URL>` is the url pointing to your frontend application
+- `<YOUR_FRONTEND_URL>` is the url pointing to your frontend application
+
 </Admonition>
 
 ### Step 3: Importing the instrumentation file
 
-<Admonition type="info">
-  Import the instrumentation file at the top level of your application. 
-  This ensures that the OpenTelemetry instrumentation is initialized before any other code runs, allowing it to capture telemetry data from the very beginning of your application's execution.
+<Admonition type="warning">
+  Import the instrumentation file at the top level of your application. This ensures that the OpenTelemetry instrumentation is initialized before any other code runs, allowing it to capture telemetry data from the very beginning of your application's execution.
 </Admonition>
 
 <Tabs groupId="framework-choice">
@@ -228,6 +226,7 @@ The instrumentation file is required to setup the `MeterProvider` which is used 
       },
     };
     ```
+
   </TabItem>
 
   <TabItem value="nextjs-pages" label="Next.js (Pages Router)">
@@ -262,6 +261,7 @@ The instrumentation file is required to setup the `MeterProvider` which is used 
       },
     };
     ```
+
   </TabItem>
 
   <TabItem value="nuxt" label="Nuxt.js">
@@ -444,6 +444,7 @@ The captured metrics can then be viewed in the [Metrics Explorer](https://signoz
 Check out this [Sample React Application](https://github.com/SigNoz/frontend-monitoring-examples/tree/main/sending-metrics) that demonstrates sending metrics to SigNoz.
 
 ## Next Steps
+
 - [Sending logs](/docs/frontend-monitoring/sending-logs-with-opentelemetry)
 - [Sending traces](/docs/frontend-monitoring/sending-traces-with-opentelemetry)
 - [Sending web vitals](/docs/frontend-monitoring/opentelemetry-web-vitals)

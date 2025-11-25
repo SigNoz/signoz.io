@@ -38,6 +38,7 @@ import ImageCTA from './ImageCTA/ImageCTA'
 import TrackingLink from './TrackingLink'
 import APMQuickStartOverview from './APM/APMQuickStartOverview'
 import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
+import JavascriptInstrumentationListicle from './APM/JavascriptInstrumentationListicle'
 import MDXButton from './MDXButton/MDXButton'
 import IconCardGrid from './Card/IconCardGrid'
 import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
@@ -64,6 +65,8 @@ import LLMMonitoringListicle from './LLMMonitoring/LLMMonitoringListicle'
 import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
+import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
+import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 
 export const components: MDXComponents = {
   Image,
@@ -105,6 +108,7 @@ export const components: MDXComponents = {
   TrackingLink,
   APMQuickStartOverview,
   APMInstrumentationListicle,
+  JavascriptInstrumentationListicle,
   MDXButton,
   IconCardGrid,
   LogsQuickStartOverview,
@@ -128,4 +132,6 @@ export const components: MDXComponents = {
   CollectionAgentsListicle,
   ResponseTimeVisualizer,
   ProductFeatureShowcase,
+  MetricsQuickStartOverview,
+  CICDMonitoringListicle,
 }

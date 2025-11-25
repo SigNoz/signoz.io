@@ -27,6 +27,8 @@ tags:
     description: Alerts API
   - name: dashboards
     description: Access to dashboards
+  - name: export
+    description: Export raw data from logs, traces, and metrics
   - name: alerts_model
     x-displayName: The Alerts Model
     description: |
@@ -42,6 +44,7 @@ x-tagGroups:
     tags:
       - alerts
       - dashboards
+      - export
   - name: Models
     tags:
       - alerts_model
@@ -125,6 +128,224 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Field'
+  '/api/v1/export_raw_data':
+    get:
+      tags:
+        - export
+      summary: Export raw telemetry data
+      description: |
+        Export raw data from logs in CSV or JSONL format. This endpoint streams data 
+        in chunks and is designed for exporting large datasets efficiently.
+        
+        **Note:** Currently only logs export is fully supported. Traces and metrics export are not yet available.
+        
+        **Response Format:**
+        - CSV: Headers in first row, data in subsequent rows
+        - JSONL: One JSON object per line (JSON Lines format)
+        
+        **Response Headers:**
+        - `Content-Type`: "text/csv" or "application/x-ndjson"
+        - `Content-Disposition`: "attachment; filename=\"data_exported_[timestamp].[format]\""
+        - `X-Response-Complete`: "true" if all data exported, "false" if truncated due to size limits
+        - `Transfer-Encoding`: "chunked" (data is streamed)
+        
+        **Limits:**
+        - Maximum rows: 50,000
+        - Maximum response size: ~1GB
+        - If either limit is reached, the response will be truncated and `X-Response-Complete` header will be `false`
+        
+        **Examples:**
+        
+        Basic CSV export:
+        ```
+        GET /api/v1/export_raw_data?start=1693612800000000000&end=1693699199000000000
+        ```
+        
+        Export with specific columns and format:
+        ```
+        GET /api/v1/export_raw_data?start=1693612800000000000&end=1693699199000000000&format=jsonl&columns=log.timestamp&columns=log.body&columns=log.severity_text
+        ```
+        
+        Export with filter and ordering:
+        ```
+        GET /api/v1/export_raw_data?start=1693612800000000000&end=1693699199000000000&filter='severity="error"'&order_by=timestamp:desc&limit=1000
+        ```
+      operationId: exportRawData
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: false
+          description: API key for authentication (alternative to Bearer token)
+          schema:
+            type: string
+          example: '<TOKEN>'
+        - name: Authorization
+          in: header
+          required: false
+          description: Bearer token for authentication (alternative to API key). Format: "Bearer <token>"
+          schema:
+            type: string
+          example: 'Bearer eyJhbGc...'
+        - name: source
+          in: query
+          description: Type of data to export. Currently only "logs" is fully supported.
+          required: false
+          schema:
+            type: string
+            enum:
+              - logs
+              - traces
+              - metrics
+            default: logs
+          example: logs
+        - name: format
+          in: query
+          description: Output format for the exported data
+          required: false
+          schema:
+            type: string
+            enum:
+              - csv
+              - jsonl
+            default: csv
+          example: csv
+        - name: start
+          in: query
+          description: Start time for the query (Unix timestamp in nanoseconds)
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1693612800000000000
+        - name: end
+          in: query
+          description: End time for the query (Unix timestamp in nanoseconds)
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1693699199000000000
+        - name: limit
+          in: query
+          description: |
+            Maximum number of rows to export. Must be positive and cannot exceed 50,000.
+            Default is 10,000 if not specified.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50000
+            default: 10000
+          example: 10000
+        - name: filter
+          in: query
+          description: |
+            Filter expression to apply to the query. Uses the same filter syntax as the query builder.
+            Example: `severity="error"` or `service.name="frontend" AND http.status_code>=500`
+          required: false
+          schema:
+            type: string
+          example: 'severity="error"'
+        - name: columns
+          in: query
+          description: |
+            Specific columns/fields to include in the export. Can be specified multiple times for multiple columns.
+            If not specified, all columns are returned.
+            
+            Format options:
+            - `log.field` - Log field (e.g., "log.timestamp", "log.body", "log.severity_text")
+            - `attribute.field` - Attribute field (e.g., "attribute.http.method", "attribute.user.id")
+            - `resource.field` - Resource field (e.g., "resource.service.name", "resource.cloud.account.id")
+            - `log.field:type` - Field with type specification (e.g., "log.trace_id:string", "attribute.amount:number")
+            - `attribute.field:type` - Attribute with type (e.g., "attribute.StatusCode:string")
+            - `resource.field:type` - Resource with type (e.g., "resource.cloud.account.id:string")
+            
+            Common data types: string, number, bool
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          example: ['log.timestamp', 'log.body', 'log.trace_id:string', 'attribute.http.method:string', 'resource.service.name:string']
+        - name: order_by
+          in: query
+          description: |
+            Sorting specification for the results. Can be specified multiple times for multiple sort keys.
+            
+            Format options:
+            - `column:direction` - Simple format (e.g., "timestamp:desc")
+            - `context.field:type:direction` - Full format (e.g., "attribute.duration:float64:asc")
+            
+            Direction: "asc" (ascending) or "desc" (descending)
+            
+            Default: ["timestamp:desc", "id:desc"]
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          example: ['timestamp:desc']
+      responses:
+        '200':
+          description: |
+            Data export stream. The response is streamed in chunks as data is processed.
+          headers:
+            Content-Type:
+              description: MIME type of the response
+              schema:
+                type: string
+                enum:
+                  - text/csv
+                  - application/x-ndjson
+            Content-Disposition:
+              description: Attachment filename for the download
+              schema:
+                type: string
+                example: 'attachment; filename="data_exported_2024-01-15_143052.csv"'
+            Transfer-Encoding:
+              description: Data is transferred in chunks
+              schema:
+                type: string
+                enum:
+                  - chunked
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+              example: |
+                timestamp,severity,message,service.name
+                2024-01-15T14:30:52Z,ERROR,Connection timeout,frontend
+                2024-01-15T14:30:51Z,WARN,Slow query detected,backend
+            application/x-ndjson:
+              schema:
+                type: string
+                format: binary
+              example: |
+                {"timestamp":"2024-01-15T14:30:52Z","severity":"ERROR","message":"Connection timeout","service.name":"frontend"}
+                {"timestamp":"2024-01-15T14:30:51Z","severity":"WARN","message":"Slow query detected","service.name":"backend"}
+        '400':
+          description: |
+            Bad request - Invalid input parameters
+            
+            Common errors:
+            - Missing required parameters (start, end)
+            - Invalid time format
+            - Invalid limit value (must be positive and <= 50,000)
+            - Invalid format (must be csv or jsonl)
+            - Invalid source (only logs is currently supported)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid limit: limit must be positive"
+        '401':
+          description: Unauthorized - Invalid or missing API key or Bearer token
+        '500':
+          description: Internal server error
   '/api/v1/rules':
     post:
       tags:
