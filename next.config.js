@@ -961,6 +961,11 @@ module.exports = () => {
           destination: '/docs/integrations/aws/',
           permanent: true,
         },
+        {
+          source: '/docs/operate/docker-standalone/',
+          destination: '/docs/install/docker/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
