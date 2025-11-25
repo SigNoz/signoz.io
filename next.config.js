@@ -204,6 +204,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/install/cloud/',
+          destination: '/docs/cloud/',
+          permanent: true,
+        },
+        {
           source: '/docs/userguide/metrics-dashboard/',
           destination: '/docs/userguide/dashboards',
           permanent: true,
