@@ -107,17 +107,29 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     return coreContent(authorResults as Authors)
   })
   const mainContent = coreContent(post)
+  const canonicalUrl = `${siteMetadata.siteUrl}/opentelemetry/${post.slug}`
   const jsonLd = post.structuredData
+    ? {
+        ...post.structuredData,
+        mainEntityOfPage: {
+          ...(post.structuredData.mainEntityOfPage || { '@type': 'WebPage' }),
+          '@id': canonicalUrl,
+        },
+        url: canonicalUrl,
+      }
+    : null
 
   const hubContext = getHubContextForRoute(currentRoute)
 
   if (hubContext) {
     return (
       <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
         <OpenTelemetryHubLayout
           content={mainContent}
           authorDetails={authorDetails}
@@ -141,10 +153,12 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       <Layout
         content={mainContent}
         authorDetails={authorDetails}

@@ -62,6 +62,7 @@ export function Sidebar({
             <li key={node.route} className="group mx-2 my-1 transition-all duration-200">
               <Link
                 href={node.route}
+                prefetch={false}
                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
                   isActive
                     ? 'bg-blue-500/10 text-blue-400 shadow-sm'
