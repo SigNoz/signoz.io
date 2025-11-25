@@ -196,6 +196,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/what-is-opentelemetry/',
+          destination: '/opentelemetry/',
+          permanent: true,
+        },
+        {
           source: '/comparisons/',
           destination: '/resource-center/comparisons/',
           permanent: true,
@@ -314,11 +319,7 @@ module.exports = () => {
           destination: '/resource-center/blog/',
           permanent: true,
         },
-        {
-          source: '/opentelemetry/',
-          destination: '/resource-center/opentelemetry/',
-          permanent: true,
-        },
+        // Keep /opentelemetry/ as the canonical hub landing instead of redirecting to the Resource Center.
         {
           source: '/opentelemetry/series/nextjs/',
           destination: '/blog/opentelemetry-nextjs/',
