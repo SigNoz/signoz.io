@@ -238,7 +238,7 @@ export default function OpenTelemetrySidebarClient({
       ? createPortal(
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-signoz_ink-300 bg-signoz_ink-500/60 px-3 pb-1 pt-6 text-sm text-white shadow-sm transition-colors hover:border-signoz_robin-500"
+            className="my-6 flex w-full items-center justify-end gap-2 rounded-lg border border-signoz_ink-300 bg-signoz_ink-500/60 px-3 py-3 text-sm text-white shadow-sm transition-colors hover:border-signoz_robin-500"
             onClick={() => setIsMobileNavOpen(true)}
           >
             <Menu size={16} />
