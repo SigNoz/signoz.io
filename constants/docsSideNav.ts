@@ -1568,6 +1568,11 @@ const docsSideNav = [
                 route: '/docs/tutorial/traefik-observability',
                 label: 'Traefik Observability',
               },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/fly-metrics',
+                label: 'Fly.io metrics',
+              },
             ],
           },
           {
