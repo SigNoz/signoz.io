@@ -15,14 +15,8 @@ This guide shows you how to instrument your Go application with OpenTelemetry an
 </Admonition>
 ## Overview
 Instrument your Go services with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or a self-hosted collector.
-Examples in this guide are validated with the versions below (see `go-examples/*/go.mod`):
-- Go 1.25.1 runtime
-- `go.opentelemetry.io/otel` and `go.opentelemetry.io/otel/sdk` v1.38.0
-- `go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc` v1.38.0
-- `go.opentelemetry.io/contrib` instrumentation packages (`net/http`, `google.golang.org/grpc`) v0.63.0
-- `google.golang.org/grpc` v1.77.0 for gRPC examples
 ## Prerequisites
-- Go 1.25.1 or later (guide validated with Go 1.25.1)
+- Go 1.21 or later
 - A SigNoz Cloud account or self-hosted SigNoz instance
 - Your application code
 ## Send traces to SigNoz
@@ -309,6 +303,13 @@ mux.HandleFunc("/manual", func(w http.ResponseWriter, r *http.Request) {
 })
 ```
 
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.63.0
+```
+
 </LibraryTab>
 <LibraryTab value="gin" label="Gin" category="web">
 
@@ -410,6 +411,13 @@ r.GET("/process", func(c *gin.Context) {
 
 	c.JSON(200, gin.H{"status": "processed"})
 })
+```
+
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.63.0
 ```
 
 </LibraryTab>
@@ -519,6 +527,13 @@ e.GET("/process", func(c echo.Context) error {
 })
 ```
 
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/v4/otelecho v0.63.0
+```
+
 </LibraryTab>
 <LibraryTab value="fiber" label="Fiber" category="web">
 
@@ -621,6 +636,13 @@ app.Get("/process", func(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{"status": "processed"})
 })
+```
+
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/github.com/gofiber/fiber/v2/otelfiber v0.63.0
 ```
 
 </LibraryTab>
@@ -727,9 +749,16 @@ r.Get("/process", func(w http.ResponseWriter, r *http.Request) {
 	// Your business logic here
 	// Use ctx for any downstream calls to propagate trace context
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"status": "processed"}`))
+w.Header().Set("Content-Type", "application/json")
+w.Write([]byte(`{"status": "processed"}`))
 })
+```
+
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- github.com/riandyrn/otelchi v0.12.2
 ```
 
 </LibraryTab>
@@ -831,9 +860,16 @@ r.HandleFunc("/process", func(w http.ResponseWriter, r *http.Request) {
 	// Your business logic here
 	// Use ctx for any downstream calls to propagate trace context
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"status": "processed"}`))
+w.Header().Set("Content-Type", "application/json")
+w.Write([]byte(`{"status": "processed"}`))
 })
+```
+
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.63.0
 ```
 
 </LibraryTab>
@@ -889,6 +925,13 @@ span.SetAttributes(attribute.String("user.id", userID))
 rows, err := db.QueryContext(ctx, "SELECT * FROM users WHERE id = $1", userID)
 ```
 
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/database/sql/otelsql v0.63.0
+```
+
 </LibraryTab>
 <LibraryTab value="gorm" label="GORM" category="database">
 
@@ -932,6 +975,14 @@ func initDB() (*gorm.DB, error) {
 db.WithContext(ctx).Where("id = ?", userID).First(&user)
 ```
 
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- gorm.io/gorm v1.31.1
+- gorm.io/plugin/opentelemetry v0.1.16
+```
+
 </LibraryTab>
 <LibraryTab value="mongo" label="MongoDB" category="database">
 
@@ -970,6 +1021,13 @@ if err != nil {
 // All MongoDB operations will now be automatically traced
 collection := client.Database("mydb").Collection("users")
 result, err := collection.FindOne(ctx, bson.M{"email": email})
+```
+
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.63.0
 ```
 
 </LibraryTab>
@@ -1014,6 +1072,13 @@ if err := otelredis.InstrumentTracing(rdb,
 val, err := rdb.Get(ctx, "key").Result()
 ```
 
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/github.com/redis/go-redis/v9/otelredis v0.63.0
+```
+
 </LibraryTab>
 <LibraryTab value="grpc-server" label="gRPC Server" category="grpc">
 
@@ -1050,8 +1115,16 @@ if err != nil {
 }
 log.Println("gRPC server starting on :50051")
 if err := s.Serve(lis); err != nil {
-	log.Fatalf("failed to serve: %v", err)
+log.Fatalf("failed to serve: %v", err)
 }
+```
+
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0
+- google.golang.org/grpc v1.77.0
 ```
 
 </LibraryTab>
@@ -1094,6 +1167,14 @@ defer conn.Close()
 // Make RPC calls - they will be automatically traced
 // Always pass context to propagate traces
 // resp, err := client.YourMethod(ctx, &pb.YourRequest{})
+```
+
+```text
+Tested with:
+- Go 1.25.1
+- OpenTelemetry Go SDK v1.38.0
+- go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0
+- google.golang.org/grpc v1.77.0
 ```
 
 </LibraryTab>
