@@ -363,7 +363,7 @@ These are the top-level “Overview” pages for a module or feature area (for e
 - Add a `## Troubleshooting` section with symptoms, causes, exact fixes, and verification. Provide as much context as possible to make it clear to readers where exactly the troubleshooting instructions are applicable
   - Include network/endpoint checks, auth/ingestion key pitfalls, TLS notes, and version mismatches.
   - Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO (e.g., "Why don’t I see traces for <service-name>?", or include the exact error message).
-  - Use `<ToggleHeading>` to collapse the troubleshooting section and other non-essential parts. This keeps the "happy path" clean, which is especially important for docs rendered inside the product.
+  - Use `<ToggleHeading>` to collapse troubleshooting sections, advanced configurations, optional setup steps, and other non-essential content. This keeps the "happy path" clean, which is especially important for docs rendered inside the product.
     Example:
 
     ```mdx
