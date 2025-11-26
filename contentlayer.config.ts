@@ -450,6 +450,7 @@ export const Doc = defineDocumentType(() => ({
     draft: { type: 'boolean', required: false },
     summary: { type: 'string', required: false },
     description: { type: 'string', required: false },
+    doc_type: { type: 'string', required: false },
     images: { type: 'json', required: false },
     image: { type: 'string', required: false },
     authors: { type: 'list', of: { type: 'string' }, required: false },
@@ -483,8 +484,8 @@ export const Doc = defineDocumentType(() => ({
           },
         },
         headline: doc.title,
-        datePublished: doc.date || 'Thu Jun 06 2024', // Setting it Jun 06, 2024 as date metadat doesn't exist for docs, TODO: add date to all exisiting doc files
-        dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2024',
+        datePublished: doc.date || 'Thu Jun 06 2025', // Setting it Jun 06, 2025 as date metadat doesn't exist for docs, TODO: add date to all exisiting doc files
+        dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2025',
         description: doc.description,
         image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,

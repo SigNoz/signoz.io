@@ -1,61 +1,48 @@
 ---
-date: 2024-09-22
+date: 2025-11-22
 id: kotlin-mobile-app
-tags : [SigNoz Cloud]
-title: Android App in Kotlin Instrumentation
-description: Instrument your Android application built with Kotlin using OpenTelemetry and send data to SigNoz
+tags: [SigNoz Cloud, Self-Host]
+title: Android app in Kotlin instrumentation
+description: Instrument your Android app with Kotlin and OpenTelemetry, sending traces to SigNoz Cloud or self-hosted deployments.
+doc_type: howto
 ---
 
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
+## Overview
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Android applications built using Kotlin and view your application traces in SigNoz.
 
-{/* This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your Android mobile application built using Kotlin. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Kotlin application.
+## Prerequisites
 
-Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
+- Kotlin support in your Android app project.
+- Kotlin toolchain installed; see the [Kotlin documentation](https://kotlinlang.org/docs/home.html).
+- Access to a SigNoz Cloud account or self-hosted SigNoz instance.
 
-There are three major steps to using OpenTelemetry:
+## Send traces to SigNoz
 
-- Instrumenting your android application with OpenTelemetry
-- Configuring the exporter to send data to SigNoz
-- Validating the configuration to ensure that data is being sent as expected.
-
-In this tutorial, we will instrument a Kotlin Mobile application (Android) for traces and send it to SigNoz. */}
-
-## Requirements
-
-[Kotlin](https://kotlinlang.org/api/latest/jvm/stdlib/org.w3c.dom.svg/-s-v-g-a-element/download.html)
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-### Send traces directly to SigNoz cloud
-
-<Admonition type="info">
-You can test sample application for [Kotlin](https://github.com/SigNoz/mobile-monitoring-sample-apps/tree/main/android-kotlin)
+<Admonition type="note">
+Test the sample app for [Kotlin](https://github.com/SigNoz/mobile-monitoring-sample-apps/tree/main/android-kotlin).
 </Admonition>
 
-**Step 1 : Instrument your application with OpenTelemetry**
+### Step 1: Add OpenTelemetry dependencies
 
-To configure your Kotlin application to send traces to OpenTelemetry you need to add the following dependencies to the build.gradle file of a module or project
+Add these to your module `build.gradle`:
 
-For that, paste the following inside `build.gradle` of your project.
-
-```kotlin
-implementation platform('io.opentelemetry:opentelemetry-bom:1.25.0')
-implementation "io.opentelemetry:opentelemetry-api"
-implementation "io.opentelemetry:opentelemetry-context"
-implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
-implementation 'io.opentelemetry:opentelemetry-exporter-logging'
-implementation 'io.opentelemetry:opentelemetry-extension-kotlin'
-implementation 'io.opentelemetry:opentelemetry-sdk'
-implementation 'io.opentelemetry:opentelemetry-semconv'
+```kotlin:app/build.gradle
+implementation platform("io.opentelemetry:opentelemetry-bom:1.25.0")
+implementation("io.opentelemetry:opentelemetry-api")
+implementation("io.opentelemetry:opentelemetry-context")
+implementation("io.opentelemetry:opentelemetry-exporter-otlp")
+implementation("io.opentelemetry:opentelemetry-exporter-logging")
+implementation("io.opentelemetry:opentelemetry-extension-kotlin")
+implementation("io.opentelemetry:opentelemetry-sdk")
+implementation("io.opentelemetry:opentelemetry-semconv")
 ```
 
-**Step 2: Configure network settings**
+### Step 2: Configure network settings
 
-Create a file named `network_security_config.xml` in the `app/res/xml` directory and add the following content to the file
+`app/res/xml/network_security_config.xml`:
 
-```
+```xml:app/res/xml/network_security_config.xml
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
@@ -64,29 +51,29 @@ Create a file named `network_security_config.xml` in the `app/res/xml` directory
 </network-security-config>
 ```
 
-Add the following content to the `app/src/main/AndroidManifest.xml` file to allow the application to access the network
+`app/src/main/AndroidManifest.xml`:
 
-```
+```xml:app/src/main/AndroidManifest.xml
 <?xml version="1.0" encoding="utf-8"?>
 <manifest ...>
-  <!-- Add the following line to grant network access permissions. -->
   <uses-permission android:name="android.permission.INTERNET" />
 
   <application
     ...
-    <!-- Add the following line to configure the network for the domain name to which you want to report data. -->
-    android:networkSecurityConfig="@xml/network_security_config"
-    ...>
-
+    android:networkSecurityConfig="@xml/network_security_config">
     ...
   </application>
 
 </manifest>
 ```
 
-Create a file named OpentelemetryUtil.kt with the following content
+For self-hosted, replace the domain with your collector host (emulator often `10.0.2.2`). Allow cleartext only when you use `http://`.
 
-```kotlin
+### Step 3: Initialize OpenTelemetry
+
+Create `OpentelemetryUtil.kt`:
+
+```kotlin:app/src/main/java/com/example/androidkotlindemo/OpenTelemetryUtil.kt
 package com.example.androidkotlindemo
 
 import io.opentelemetry.api.OpenTelemetry
@@ -144,81 +131,82 @@ class OpenTelemetryUtil {
             return tracer
         }
     }
-
 }
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
+Replace the placeholders:
+- `<service_name>`: logical name of your mobile service; this is what you will see in SigNoz.
+- `<region>`: your SigNoz Cloud region, for example `us`, `eu`, or `in`.
+- `<your-ingestion-key>`: ingestion key for your SigNoz Cloud organization.
 
-Inside MainActivity.kt file, initialize the util
+<Admonition type="info">
+Using self-hosted SigNoz? Most steps are identical. Update the endpoint and remove the ingestion key header as shown in <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer nofollow">Cloud → Self-Hosted</a>.
+</Admonition>
+
+Initialize OpenTelemetry in `MainActivity.kt`:
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
-
-    ...
     override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        // Add the following line to initialize OpenTelemetry. 
         OpenTelemetryUtil.init()
-
-            ...
+        ...
     }
 }
 ```
 
-**Step 3: Send Telemetry data to SigNoz**
+### Step 4: Send telemetry data
 
-Import these at top 
+Add the tracer imports where you create spans:
 
-```
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Scope;
+```kotlin:app/src/main/java/com/example/androidkotlindemo/MainActivity.kt
+import io.opentelemetry.api.trace.Tracer
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.context.Scope
 ```
 
-Use this function to create span 
+Create spans:
 
-```kotlin
-
+```kotlin:app/src/main/java/com/example/androidkotlindemo/MainActivity.kt
 fun parentSpan() {
-        val tracer: Tracer = OpenTelemetryUtil.getTracer()!!
-        val span = tracer.spanBuilder("Parent Span").startSpan()
-        try {
-            span.makeCurrent().use { scope ->
-                println(span.spanContext.traceId)
-                println(span.spanContext.spanId)
-                childSpan()
-            }
-        } finally {
-            span.end()
+    val tracer: Tracer = OpenTelemetryUtil.getTracer()!!
+    val span = tracer.spanBuilder("Parent Span").startSpan()
+    try {
+        span.makeCurrent().use {
+            childSpan()
         }
+    } finally {
+        span.end()
     }
-
+}
 
 fun childSpan() {
-        val tracer: Tracer = OpenTelemetryUtil.getTracer()!!
-        val span = tracer.spanBuilder("Child Span").startSpan()
-        try {
-            span.makeCurrent().use { scope ->
-                println(span.spanContext.traceId)
-                println(span.spanContext.spanId)
-            }
-        } finally {
-            span.end()
+    val tracer: Tracer = OpenTelemetryUtil.getTracer()!!
+    val span = tracer.spanBuilder("Child Span").startSpan()
+    try {
+        span.makeCurrent().use {
+            // add attributes/events as needed
         }
+    } finally {
+        span.end()
     }
-
+}
 ```
 
+### Step 5: Run the app
 
-**Step 4: Run app**
+Run your application from Android Studio.
 
-Run your application from Android Studio to see the output & you can verify the sent span in SigNoz .
-</TabItem>
-</Tabs>
+## Validate
+
+- In SigNoz, go to **Traces Explorer** and confirm that the traces for your service (for example `<service_name>`) are present.
+- Open a recent trace and verify that spans from your Kotlin Android app are present with the attributes you set.
+
+## Troubleshooting
+
+- If spans are missing, verify that the `ingest.<region>.signoz.cloud` or your self-hosted collector endpoint is reachable from the emulator/device and that the ingestion key (for Cloud) is correct.
+
+## Next steps
+
+- Explore your mobile traces in the [Trace Explorer](https://signoz.io/docs/product-features/trace-explorer/).
+- Create latency and error alerts for your service using [Alert Management](https://signoz.io/docs/alerts-management/trace-based-alerts/).

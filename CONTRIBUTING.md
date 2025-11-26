@@ -363,6 +363,21 @@ These are the top-level “Overview” pages for a module or feature area (for e
 - Add a `## Troubleshooting` section with symptoms, causes, exact fixes, and verification. Provide as much context as possible to make it clear to readers where exactly the troubleshooting instructions are applicable
   - Include network/endpoint checks, auth/ingestion key pitfalls, TLS notes, and version mismatches.
   - Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO (e.g., "Why don’t I see traces for <service-name>?", or include the exact error message).
+  - Use `<ToggleHeading>` to collapse troubleshooting sections, advanced configurations, optional setup steps, and other non-essential content. This keeps the "happy path" clean, which is especially important for docs rendered inside the product.
+    Example:
+
+    ```mdx
+    <details>
+    <ToggleHeading>
+
+    ## Troubleshooting
+
+    </ToggleHeading>
+
+    ### Issue 1...
+    </details>
+    ```
+
 - Don’t stop at “Data Sent”. Close the loop with next steps: Link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
 - `doc_type` is usually `howto` for Send Data docs.
 
@@ -456,7 +471,7 @@ Set `doc_type: reference` for these pages.
 - [ ] Commands explain what they do and where to run them.
 - [ ] Code/config snippets are annotated and explained; placeholders are defined.
 - [ ] “Validate” section shows how to confirm success.
-- [ ] Troubleshooting covers common failures with concrete fixes.
+- [ ] Troubleshooting covers common failures with concrete fixes. For Send Data docs, use `<ToggleHeading>` to collapse this section.
 - [ ] The content matches the chosen `doc_type` (tutorial / howto / reference / explanation).
 - [ ] Included a short “Next steps” section linking to adjacent features or deeper guides when applicable.
 - [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.

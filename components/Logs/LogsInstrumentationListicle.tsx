@@ -12,6 +12,7 @@ import {
   SiApachetomcat,
   SiAmazonwebservices,
   SiGo,
+  SiCloudflare,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
 import { FaAws, FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
@@ -101,6 +102,12 @@ export default function LogsInstrumentationListicle({
             href: '/docs/logs-management/send-logs/windows-events-log',
             icon: <FaWindows className="h-7 w-7 text-blue-500" />,
             clickName: 'Windows Logs Link',
+          },
+          {
+            name: 'Cloudflare',
+            href: '/docs/logs-management/send-logs/cloudflare-logs',
+            icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
+            clickName: 'Cloudflare Logs Link',
           },
         ]}
         sectionName="Platform Logs"
@@ -262,6 +269,12 @@ export default function LogsInstrumentationListicle({
               </span>
             ),
             clickName: 'Vercel Cloud Logs Link',
+          },
+          {
+            name: 'Cloudflare',
+            href: '/docs/logs-management/send-logs/cloudflare-logs',
+            icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
+            clickName: 'Cloudflare Cloud Logs Link',
           },
         ]}
         sectionName="Cloud Logs"

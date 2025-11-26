@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import WorkspaceReady from './WorkspaceReady'
 import WorkspaceSetup from './WorkspaceSetup'
 
+
+
 function WorkspaceSetupHome() {
   const [isWorkspaceReady, setIsWorkspaceReady] = useState(false)
   const [isWorkspaceSetupDelayed, setIsWorkspaceSetupDelayed] = useState(false)
@@ -13,7 +15,6 @@ function WorkspaceSetupHome() {
   const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [retryCount, setRetryCount] = useState(1)
   const [workspaceData, setWorkspaceData] = useState(null)
-  const [verificationError, setVerificationError] = useState<string | null>(null)
   const searchParams = useSearchParams()
 
   const code = searchParams.get('code')
@@ -38,30 +39,19 @@ function WorkspaceSetupHome() {
 
     const data = await res.json()
 
-    if (
-      data.status === 'error' &&
-      data.type !== 'already-exists' &&
-      !data.error?.toLocaleLowerCase()?.startsWith('cannot assign more than')
-    ) {
+    if (data.status === 'error' && data.type !== 'already-exists') {
       setIsEmailVerified(false)
-      setVerificationError(data.error || 'Email verification failed')
     } else if (data.status === 'success') {
-      setVerificationError(null)
       setIsEmailVerified(true)
       setIsPollingEnabled(true)
-    } else if (
-      data.status === 'error' &&
-      (data.type === 'already-exists' ||
-        data.error?.toLocaleLowerCase()?.startsWith('cannot assign more than'))
-    ) {
-      setVerificationError(null)
+    } else if (data.status === 'error' && data.type === 'already-exists') {
       setIsEmailVerified(true)
       setIsPollingEnabled(true)
     }
   }
 
   const verifyWorkspaceSetup = async () => {
-    if (!code || !email || verificationError) {
+    if (!code || !email) {
       return
     }
 
@@ -79,30 +69,20 @@ function WorkspaceSetupHome() {
   }
 
   useEffect(() => {
-    let pollingTimer: ReturnType<typeof setTimeout> | null = null
-
-    if (isEmailVerified && isPollingEnabled && !verificationError) {
-      // poll every 3s for the first minute, then every 15s for the next 4 minutes
-      // total polling time is 5 minutes
-      // 3s * 20 * 1 = 1 minute (20 polls)
-      // 15s * 4 * 4 = 4 minutes (16 polls)
-      if (retryCount <= 36) {
-        if (retryCount <= 20) {
-          setPollingInterval(3000)
-        } else {
-          setPollingInterval(15000)
-        }
-
-        pollingTimer = setTimeout(verifyWorkspaceSetup, pollingInterval)
+    // poll every 3s for the first minute, then every 15s for the next 4 minutes
+    // total polling time is 5 minutes
+    // 3s * 20 * 1 = 1 minute (20 polls)
+    // 15s * 4 * 4 = 4 minutes (16 polls)
+    if (retryCount <= 36) {
+      if (retryCount <= 20) {
+        setPollingInterval(3000)
       } else {
-        setIsWorkspaceSetupDelayed(true)
+        setPollingInterval(15000)
       }
-    }
 
-    return () => {
-      if (pollingTimer) {
-        clearTimeout(pollingTimer)
-      }
+      setTimeout(verifyWorkspaceSetup, pollingInterval)
+    } else {
+      setIsWorkspaceSetupDelayed(true)
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,11 +105,7 @@ function WorkspaceSetupHome() {
       {isWorkspaceReady ? (
         <WorkspaceReady workspaceData={workspaceData} userEmail={email} />
       ) : (
-        <WorkspaceSetup
-          isWorkspaceSetupDelayed={isWorkspaceSetupDelayed}
-          verificationError={verificationError}
-          isEmailVerified={isEmailVerified}
-        />
+        <WorkspaceSetup isWorkspaceSetupDelayed={isWorkspaceSetupDelayed} />
       )}
     </Suspense>
   )

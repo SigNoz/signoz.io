@@ -1,129 +1,329 @@
 ---
-title: Getting started with OpenTelemetry on Kubernetes
+title: Kubernetes Observability with OpenTelemetry | A Complete Setup Guide
 slug: opentelemetry-kubernetes
-date: 2020-07-23
+date: 2025-07-17
 tags: [OpenTelemetry]
-authors: [joy]
-description: OpenTelemetry is an instrumentation standard for application monitoring - both for monitoring metrics & distributed tracing. In this blog, we take you through a hands on guide on how to run this on Kubernetes.
-image: /img/blog/2020/07/SigNoz-OpenTelemetry-k8s.webp
-keywords: [OpenTelemetry,Kubernetes,Distributed Tracing,Open Source,OTLP]
+authors: [elizabeth_mathew]
+description: Learn how to set up comprehensive Kubernetes observability using OpenTelemetry. This guide covers DaemonSet and Deployment collectors, metrics collection, logging best practices, and cluster monitoring on Minikube.
+image: /img/blog/2025/07/k8s-observability-cover.webp
+keywords: [kubernetes observability, opentelemetry, kubernetes monitoring, kubernetes logging, kubernetes metrics, minikube, helm charts, daemonset, deployment, kubelet metrics, kubernetes events]
 ---
 
-OpenTelemetry is an instrumentation standard for application monitoring - both for monitoring metrics & distributed tracing. In this blog, we take you through a hands on guide on how to run this on Kubernetes.
+Kubernetes provides a wealth of telemetry data from container metrics and application traces to cluster events and logs. OpenTelemetry [OTel] offers a vendor-neutral, end-to-end solution for collecting and exporting this telemetry in a standardised format.
 
+In this blog, we’ll walk through a [Kubernetes observability](https://signoz.io/guides/kubernetes-observability/) setup on Minikube using OpenTelemetry, but you can easily extend the setup to your Kubernetes setup as well. We’ll deploy an example instrumented application, then set up the OpenTelemetry Collector in two modes - DaemonSet and Deployment, using the official Helm charts. This two-pronged approach will capture both service-level metrics and traces, as well as cluster-level metrics and events, giving you full visibility into your Kubernetes environment.
 
+This walkthrough aims to give you a solid practical foundation and a clear blueprint to instrument your own Kubernetes cluster using OpenTelemetry.
 
-![Cover Image](/img/blog/2021/07/SigNoz-Opentelemetry-k8s.webp)
+Let’s get started.
 
-At [SigNoz](https://signoz.io/), we support OpenTelemetry as an instrumentation standard - and provide an easy way to accomplish application monitoring leveraging the same. As a first step, we are sharing a detailed guide for developers/devops/SRE folks who want to get started with OpenTelemetry stack on Kubernetes.
+## Minikube and the OpenTelemetry Demo App
 
-OpenTelemetry’s vendor neutral APIs and data formats form its core capability to act as both a metric and trace delivery pipeline has been an amazing step in the observability space. As per the project roadmap, logs too would be included to encompass the final of The [Three Pillars of Observability](https://signoz.io/blog/three-pillars-of-observability/).
+<Admonition type="info">
 
-# The Lineage of an Open Standard
+If you already have a Kubernetes setup, jump to the next section to see how to get telemetry data from them directly. 
+If you want to experiment, play around or want to explore in a demo environment, read on.
 
-OpenTelemerty is the culmination of a two decades worth of effort into observability standards and vendor neutral APIs. Inspired by papers and implementations from early 2000s, Google had built Dapper, an internal tool for auto-instrumentation and [distributed tracing](https://signoz.io/distributed-tracing/) of the Google Search related micro-services. Google released the Dapper paper in 2010 and set the modern tracing ecosystem in motion.
-
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
-
-Soon, Twitter had its own implementation of the Dapper paper called Zipkin, backed by Cassandra backend and the famed Finagle RPC framework. Uber was already running it’s internal [tracing tool](https://signoz.io/blog/distributed-tracing-tools/) called Merckx, that slowly morphed into Jaeger by 2015 borrowing inspiration from both Dapper and open-zipkin. Initially Jaeger directly used the zipkin-ui component.
-
-Maintainers of Dapper (Ben Sigelman), Zipkin (Adrian Cole) and Jaeger (Yuri Shkuro) came together in 2016 to write the first specification for OpenTracing in 2016. OpenTracing soon got accepted as the third incubated project under CNCF (Cloud Native Computing Foundation) the same year. It focused on vendor neutral APIs for consumption of traces.
-
-Google open sourced it’s internal Census tool as OpenCensus circa 2018, this open standard had API implementations for both traces and metrics. Around the same time W3C (World Wide Web Consortium) also started working on the Trace Context and Correlation Context header specifications to efficiently communicate traceIDs over HTTP.
-
-In March 2019, Ben Sigelman announced that OpenTracing and OpenCensus projects had decided to merge to further their common goals of an open standards based interoperability and vendor neutral observability ecosystem.
-
-![Graphical history of OpenTelemetry project](https://lh3.googleusercontent.com/efnww3EnuCcBNLGjsUWoPmt5Whl23R1Je4potAduy8oxAtN_bYaOm1fnHtQDKySWx__4Fl142CfWfPYmK1If-p9uOgfjmw3xgYnLYY0x45EFBhkN86LljkRTWsk-k8ESyFd6e8EO)Fig 1. A short graphical history of the open-telemetry project
-
-# Architecture
-
-OpenTelemetry offers standard vendor neutral APIs for collecting metrics and traces from applications and libraries to convert most existing data formats to another.
-
-The code is instrumented either with any of OpenTelemetry’s provided language-specific client libraries, auto-instrumentation libraries or using any of the existing vendor libraries like jaeger, opentracing, opencensus, zipkin.
-
-**Receivers** collect the data from all available sources and convert them to internal format before sending out to processors. **OTLP** is OpenTelemetry’s internal wire protocol and the intermediate data format for all other open / proprietary formats for telemetry data.
-![OpenTelemetry data flow](/img/blog/2020/07/Copy-of-fig-2---Open-Telemetry-data-flow--1-.webp)Fig 2. Open-telemetry data flow
-The **OTLP** receiver collects data from code instrumented with provided client libraries, while there are specific receivers available for many of the current instrumentation vendors / FOSS projects.
-
-**Processors** would then pre-process data before sending it to a specific exporter as defined in the pipeline. They queue and batch the received data and implement retry mechanisms to prevent lossy transmissions. They may do validations before either refusing or accepting telemetry data. Additionally a processor can add / remove attributes as needed and sample the data before sending them to all available exporters.
-
-**Exporters** are again vendor / data-sink specific like receivers. They receive massaged, possibly sampled data from processors and convert that to a target data-sink specific format and implement communication protocols for such data sinks.
-
-A **Pipeline** defines a combination of various metric and trace receivers, a set of processors and a final set of metrics and trace receivers.
-
-![OpenTelemetry receivers, processors and exporters](https://lh5.googleusercontent.com/mRc_j2ZiBvrIxHL0NCH7_aVROB8P8vSJ36vxrygh65uAshupJ2aepeQq949wQSuN2ZC2HrnaNUfUjAJqVPANdo8_waeC3UytWzI0fW6foMD3oISajNNvs5kWNhIS71qMuC_kk1q7)Fig 3. OpenTelemetry Receivers, Processors and Exporters : Core components in green, contrib components in Red
-
-The core receivers, processors and exporters live on the [https://github.com/open-telemetry/opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) repo. However, many other community contributed ones can be found on the official contrib repo at [https://github.com/open-telemetry/opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib).
-
-
-<Admonition>
-The above lists and diagrams are not exhaustive and only indicative, new receivers and exporters are constantly being added by the community.
 </Admonition>
 
-# Deploying to Kubernetes
+For our demo, we’ll deploy the [OpenTelemetry Astronomy Shop demo application](https://opentelemetry.io/docs/demo/architecture/) in a minikube cluster, a microservices app instrumented with OpenTelemetry [it generates traces, metrics and logs]. The OTel project provides a [convenient Helm chart for this demo](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-demo).
 
-We will now try and deploy a fully working example of open-telemetry collector in kubernetes. We assume familiarity with kubernetes objects like Deployment, Service, Daemonset, ConfigMap etc going ahead.
+<Admonition type="warning">
 
-![OpenTelemetry collector kubernetes deployment](/img/blog/2020/07/Copy-of-fig-4---otel-collector-k8s.webp)Fig 3. Opentelemetry-collector kubernetes deployment
+The full demo needs ~6 GB of memory, so ensure your Minikube has sufficient resources. If your minikube driver is Docker Desktop, you can increase your memory and cores from the settings.
 
-We use a load-generator deployment that generates simulated metrics and traces for [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) stack to consume, this consists of:
+</Admonition>
 
-- A simple go app deployment with OpenCensus instrumented traces and metrics
-- Source:  [https://github.com/open-telemetry/opentelemetry-collector/blob/master/examples/main.go](https://github.com/open-telemetry/opentelemetry-collector/blob/master/examples/demo/app/main.go)
-- Omnition’s synthetic-load-generator
+### Prerequisites
 
-[![Generates synthetic operational load (traces, metrics, logs, events) simulating a microservice-based app.](/img/blog/2020/07/synthetic_load_genrator_github.webp)](https://github.com/Omnition/synthetic-load-generator)
+Ensure you have [Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Fmacos%2Farm64%2Fstable%2Fbinary+download) running [a single-node Kubernetes cluster] and have `kubectl` and `helm` installed. 
 
-- [Jaeger traces](https://signoz.io/blog/distributed-tracing-jaeger/)
-- Zipkin traces
-- Freshtracks.io’s [prometheus metrics](https://signoz.io/guides/what-are-the-4-types-of-metrics-in-prometheus/) load generator - Avalanche
+### Setup
 
-[![Prometheus/OpenMetrics endpoint series generator for load testing.](/img/blog/2020/07/avalanche_github.webp)](https://github.com/open-fresh/avalanche)
+Let’s start our minikube.
 
-For each of the above data sources, we configure a corresponding receiver in opentelmetry agent which runs as a daemonset. While the opencensus, jaeger and zipkin receivers are push based, with the app having to push traces and metrics to a pre-configured endpoint; the [prometheus receiver](https://signoz.io/blog/opentelemetry-collector-prometheus-receiver/) is pull based, one just needs to write standard prometheus scrape-configs on the sources /metrics endpoint in order to receive the metrics.
+```
+minikube start --memory 8192 --cpus 6
+```
 
-One caveat to note here is that since all above receivers work on GRPC ports, the agent needs to expose them through an headless service with **ClusterIP: None,** so that individual pod IPs are exposed through the **Endpoint** object, making sure grpc clients on the load-generator deployment don’t break connection.
+The [OpenTelemetry](https://signoz.io/blog/what-is-opentelemetry/) Helm repository should be added:
 
-Once the traces and metrics have been consumed by opentelemetry-agent, they are converted to the internal format and then sent to the opencensus exporter through both the batch and queued-retry processors.
+```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
+```
 
-The OpenCensus exporter on the agent then sends this combined data to [opentelemetry collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) deployment exposed through a headless service as before. Also to note, since the agent and collector are the same binary and entirely identical in functionality, the differentiation of a collector from an agent only differs in resource allocation. The agent has a lower resource quota usage than a collector, one can also configure memory usage using the Memory Limiter processor in both cases.
+You can install the OTel demo with,
 
-Thus, the collected trace and metrics data through the opencensus receiver is routed through the batch and queued-retry processors on the collector to the three exporters configured in the pipeline, one each for jaeger, zipkin and prometheus.
+```bash
+# Create a namespace for the demo [optional]
+kubectl create namespace otel-demo
 
-Each of these exporters in turn send data to final sinks:
+# Install the OpenTelemetry Demo microservices app
+helm install my-otel-demo open-telemetry/opentelemetry-demo -n otel-demo
+```
 
-- Jaeger-all-in-one deployment
-- Zipkin-all-in-one deployment
-- Single replica prometheus deployment
+This will spin up various services [frontend, backend, load generator, etc]. The demo app is pre-instrumented to emit telemetry. By default, it includes its own OTel Collector. However, we want to showcase our *own* collectors as well, monitoring the cluster. Therefore, we will treat the demo app as just another set of workloads; our collectors will scrape and receive telemetry from it, just like any other application.
 
-The processed metrics are exposed at :8889 for the prometheus deployment to scrape, whereas the collector’s own metrics can also be scraped on :8888 separately.
+<Admonition type="info">
 
-Please remember all the above trace, metrics sinks are for demonstration only, it’s not advisable to run any of the all-in-one deployments in production. We recommend using the jaeger and prometheus operators respectively for running production workloads. OpenTelemetry itself has an operator in the works, which we are currently evaluating internally. We might do future posts on the same.
+We already have a pod running OTel collector, which comes bundled with the demo. It collects telemetry related to the application. You can configure the values.yaml to send it to any backend of your choice.
 
-The source code for this post is available at below link:
+</Admonition>
 
-[![openelemetry-kubernetes setup with load-generators](/img/blog/2020/07/hashfyre_otel_k8s.webp)](https://github.com/Hashfyre/otel-k8s)
+At this point, our Minikube cluster has a running demo application. Now we’ll set up two [OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/): 
 
-Given the scope and expanse of the [Opentelemetry project](https://signoz.io/blog/opentelemetry-apm/), we barely scratched the surface of the possibilities, and even important aspects like tail-sampling. That said, following this post should get one bootstrapped easily with a running OpenTelemetry stack on your own cluster.
+- One running on each node [DaemonSet] to act as an **agent**
+- And one running as a single-instance gateway [Deployment] for cluster-level data.
 
----
+Using both ensures we capture **all layers of telemetry**.
 
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+## OpenTelemetry Collector as a DaemonSet [Agent]
 
-If you want to learn more about Open telemetry or how we are using it at SigNoz, feel free to reach out to us at:
+First, we deploy the collector as a DaemonSet. This means an [OTel](https://signoz.io/blog/what-is-opentelemetry/) Collector pod will run on **each node** of the cluster [in Minikube’s case, just one node = one pod]. This “agent” collector will focus on node and pod-level metrics, container logs, and will serve as a local OTLP endpoint for application telemetry.
 
-- [pranay@signoz.io](mailto:pranay@signoz.io)
-- [ankit@signoz.io](mailto:ankit@signoz.io)
-- me@hashfyre.dev (author)
+In OTel terms, the DaemonSet collector will include components like,
 
-# References
+1/ an **OTLP receiver** [to get app traces/metrics from local pods],
 
-- [Google Dapper paper ](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/36356.pdf)
-- [OpenCensus: A Stats Collection and Distributed Tracing Framework](https://opensource.googleblog.com/2018/01/opencensus.html)
-- [Distributed Systems Tracing with Zipkin](https://blog.twitter.com/engineering/en_us/a/2012/distributed-systems-tracing-with-zipkin.html)
-- [Evolving Distributed Tracing at Uber Engineering](https://eng.uber.com/distributed-tracing/)
-- [Towards Turnkey Distributed Tracing](https://medium.com/opentracing/towards-turnkey-distributed-tracing-5f4297d1736)
-- [Trace-Context and the road toward trace tool interoperability](https://medium.com/@AloisReitbauer/trace-context-and-the-road-toward-trace-tool-interoperability-d4d56932369c)
-- [Merging OpenTracing and OpenCensus: Goals and Non-Goals](https://medium.com/opentracing/merging-opentracing-and-opencensus-f0fe9c7ca6f0)
-- [Github - Otel Collector](https://medium.com/opentracing/merging-opentracing-and-opencensus-f0fe9c7ca6f0)
-- [Github - Otel Spec](https://github.com/open-telemetry/opentelemetry-specification)
+2/ the **kubelet stats receiver** [for CPU/memory usage of pods and nodes],
+
+3/ the **filelog receiver** [for logs from pods on that node], 
+
+4/ and a **Kubernetes attributes processor** [to tag all data with k8s metadata]
+
+The [official Helm chart](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-collector) makes it easy to enable these pieces via presets. Let's prepare a values file for the Helm chart [call it otel-collector-daemonset.yaml **].**
+
+```bash
+mode: daemonset
+
+image:
+  repository: otel/opentelemetry-collector-k8s
+
+replicaCount: 1
+
+mode: daemonset
+
+image:
+  repository: otel/opentelemetry-collector-k8s
+
+presets:
+  kubernetesAttributes:
+    enabled: true
+  kubeletMetrics:
+    enabled: true
+  logsCollection:
+    enabled: true
+
+config:
+  exporters:
+    otlp:
+      endpoint: <OBSERVABILITY_BACKEND>
+      
+
+  connectors:
+    spanmetrics:
+
+  service:
+    pipelines:
+      traces:
+        exporters: [spanmetrics, otlp]
+      metrics:
+        receivers: [otlp, spanmetrics]
+        exporters: [otlp] 
+      logs:
+        exporters: [otlp]
+
+```
+
+<Admonition type="note">
+
+**What Are *Presets* in a Helm Chart?**
+
+Helm charts may includes **presets**, which are convenient, pre-configured building blocks for common use cases. When enabled in your values.yaml, these presets **automatically wire up the necessary receivers, processors, and exporters in the collector’s pipeline**.
+
+</Admonition>
+
+Now, we install the DaemonSet collector using Helm:
+
+```bash
+helm install otel-collector open-telemetry/opentelemetry-collector \
+    -n otel-demo --values otel-collector-daemonset.yaml  
+
+```
+
+This installs the OTel Collector with the name `otel-collector` in the specified namespace. Verify that a DaemonSet pod is running:
+
+```bash
+kubectl get pods -n otel-demo   
+```
+
+You should see **one pod** [named something like `otel-collector-*****`] for the single Minikube node. If you had multiple nodes, you’d see one per node. 
+
+Great.
+
+We now have the **[OTel agent](https://signoz.io/comparisons/opentelemetry-collector-vs-agent/)** running, which automatically scrapes host metrics and listens for app telemetry on each node.
+
+### Functionality of the Collector Daemonset
+
+We set `mode: daemonset` to get one collector per node. The Helm chart will handle setting the proper Kubernetes `DaemonSet` object, including RBAC permissions, **host ports**, and volume mounts needed to access the host’s logs and kubelet API.
+
+- The `kubernetesAttributes` processor is enabled to auto-annotate metrics, traces, and logs with Kubernetes context or meta [e.g. add `k8s.pod.name`, `k8s.node.name`, etc.] for correlation. This is crucial for connecting *[application telemetry](https://signoz.io/comparisons/opentelemetry-vs-application-insights/) with the platform/ infra telemetry*.
+- The `kubeletMetrics` preset enables the `kubeletstats` receiver. This receiver pulls resource usage metrics from each node’s Kubelet API. It provides metrics like **container memory usage**, **pod CPU usage**, and **node network errors**, among others.
+    
+    For example, it will report how much CPU and memory each pod/container is using, which is vital for performance monitoring and right-sizing.
+    
+- The `logsCollection` preset enables a file log tailer. This will read logs from `/var/log/pods/...` on each node [where the container stdout/stderr is stored by Kubernetes]. This means you can collect application logs and node logs without running a separate log agent. The logs are ingested into the collector’s log pipeline, also annotated with pod metadata [thanks to the attributes processor, mentioned before].
+
+By default, the Helm chart also leaves an OTLP receiver open [on the collector’s own pod IP] for traces and metrics.
+
+## Kubernetes Logging
+
+The *logsCollection* preset in our DaemonSet collector is designed to collect logs from `/var/log/pods/...` on each node, capturing the container *stdout/ stderr*. This is a common and effective method for integrating application logs into your [observability pipeline](https://signoz.io/guides/observability-pipeline/). However, it's essential to understand the broader context of Kubernetes logging.
+
+### Kubernetes Logging Best Practices
+
+Effective logging in Kubernetes involves more than just collecting *stdout/stderr*. Here are some best practices:
+
+1. **Log to Standard Output/Error:** This is the most fundamental practice. Containerised applications should write all logs to *stdout* and *stderr*. Kubernetes automatically captures these streams and hands them off to the container runtime [e.g., containerd, Docker], which then writes them to a file on the node [typically in `/var/log/pods/<pod-uid>/<container-name>/<log-id>.log` ]. This is exactly what the *filelog* receiver in OpenTelemetry collects.
+2. **[structured logging](https://signoz.io/blog/structured-logs/):** Whenever possible, applications should emit logs in a structured format, such as JSON. This makes logs much easier to parse, query, and analyze programmatically. Instead of plain text, a [JSON log](https://signoz.io/blog/json-logs/) might look like,
+    
+    ```json
+    {"timestamp": "...", "level": "INFO", "service": "frontend", "message": "User logged in", "user_id": "123", "ip_address": "192.168.1.10"}
+    ```
+    
+3. **Appropriate Log Levels:** Use standard log levels [DEBUG, INFO, WARN, ERROR, FATAL] consistently. This allows for filtering and severity-based alerting.
+4. **Enrich Logs with Context:** While OpenTelemetry's `kubernetesAttributes` processor automatically adds Kubernetes metadata (pod name, namespace, container ID], applications themselves can add valuable business-level context [e.g., `user_id`, `transaction_id]`. This bridges the gap between infrastructure logs and application-specific insights.
+5. **Centralised Logging System:** Ship logs to a centralised system [like an [OpenTelemetry backend](https://signoz.io/blog/opentelemetry-backend/), Elasticsearch, Loki, etc.] for aggregation, storage, search, and analysis. Relying solely on `kubectl logs` is not scalable for production environments.
+6. **Log Rotation and Retention:** Implement proper log rotation to prevent nodes from running out of disk space. Define clear retention policies for your centralised logging solution based on compliance and operational needs.
+7. **Resource Limits for Logging Agents:** Ensure your logging agents [like the OTel Collector DaemonSet] have appropriate CPU and memory limits to prevent them from consuming excessive resources or being evicted.
+8. **Avoid Logging Sensitive Information:** Never log sensitive data such as passwords, API keys, or personally identifiable information [PII].
+
+### Limitations of kubectl logs
+
+While `kubectl logs` is a convenient command for inspecting container logs, it has significant limitations for production-grade observability:
+
+1. **Ephemeral Nature:** `kubectl logs` retrieves logs from the container runtime on the node. If a pod restarts, moves to another node, or is deleted, its past logs may be lost unless they were streamed to a persistent storage.
+2. **No Centralised View:** You can only view logs for one pod or container at a time. It doesn't provide a consolidated view across multiple pods, deployments, or the entire cluster. Correlating events across different services becomes extremely challenging.
+3. **Limited Search and Filtering:** `kubectl logs` offers basic filtering [e.g., *-since, -tail -f* for follow]. However, it lacks advanced search capabilities, regex matching, or structured query language support that centralised logging systems provide.
+4. **Performance Issues on High Volume:** For applications generating a high volume of logs, `kubectl logs -f` can be overwhelming and may even put a strain on the Kubernetes API server.
+5. **No Aggregation or Analytics:** `kubectl logs` is purely for viewing raw log lines. It cannot perform aggregations, generate dashboards, detect anomalies, or provide insights into log patterns.
+6. **Requires Direct Cluster Access:** To use `kubectl logs`, you need direct `kubectl` access to the cluster, which might not be granted to all team members [e.g., developers needing to troubleshoot their application logs]. Centralised systems allow role-based access to log data.
+7. **Scalability Challenges:** As your cluster grows in size and complexity, manually sifting through logs using `kubectl` across hundreds or thousands of pods becomes impossible.
+
+These limitations underscore the necessity of a dedicated logging solution, such as the one built with the OpenTelemetry Collector, to manage and gain insights from your Kubernetes logs effectively.
+
+## OpenTelemetry Collector as a Deployment [Cluster-Level Collector]
+
+Now we set up a second collector instance, this time as a single **Deployment** [one pod] that will act as a central gateway for cluster-level data. This collector will be responsible for metrics and data that represent the entire cluster’s state, rather than a single node. 
+
+What *does* the cluster-level collector gather? 
+
+In our setup, we will enable the Kubernetes Cluster Receiver, which fetches high-level metrics about the cluster, and the Kubernetes Objects [Events] Receiver, which listens for Kubernetes events. These components give us insight into the overall health and activity of the cluster.
+
+To configure the Deployment-mode collector via Helm, we create otel-collector-deployment.yaml:
+
+```bash
+mode: deployment
+
+image:
+  repository: otel/opentelemetry-collector-k8s
+
+replicaCount: 1
+
+presets:
+  clusterMetrics:
+    enabled: true
+  kubernetesEvents:
+    enabled: true
+
+config:
+  exporters:
+    otlp:
+      endpoint: <OBSERVABILITY_BACKEND>
+
+  connectors:
+    spanmetrics:
+
+  service:
+    pipelines:
+      traces:
+        exporters: [spanmetrics, otlp]
+      metrics:
+        receivers: [otlp, spanmetrics]
+        exporters: [otlp] 
+      logs:
+        exporters: [otlp]
+```
+
+Next, install the cluster-level collector with Helm:
+
+```bash
+helm install otel-collector-cluster open-telemetry/opentelemetry-collector \
+   -n otel-demo --values otel-collector-deployment.yaml
+```
+
+This will create a Deployment [named `otel-collector-cluster`]. After a minute, verify the pod is running:
+
+```bash
+kubectl get pods -n otel-demo 
+```
+
+You should see one pod [e.g. `otel-collector-cluster-xxxxxxxx` ] actively scraping **cluster state metrics** and listening for **events** from the Kubernetes API server.
+
+### Functionality of the Collector Deployment
+
+The `mode: deployment` tells the Helm chart to create a normal Deployment [default 1 replica]. We explicitly set `replicaCount: 1` to reinforce that we only want one pod [to avoid duplicate collection]
+
+### Cluster Metrics & Attributes
+
+Enabling `clusterMetrics` adds the **k8s Cluster Receiver** to the metrics pipeline, preconfigured to gather cluster stats. The Helm chart takes care of cluster-wide RBAC permissions [it will need to query the Kubernetes API for objects states] and any config details. Once running, this will feed metrics like `k8s.node.count`, `k8s.pod.count_by_phase`, `k8s.deployment.desired` vs `...available`, and even things like total container restarts across the cluster.
+
+| Metric Name | Description | Attributes |
+| --- | --- | --- |
+| `k8s.node.count` | Total number of nodes in the cluster | `status` |
+| `k8s.pod.count_by_phase` | Number of pods in each phase | `phase` |
+| `k8s.deployment.desired` | Desired number of replicas for a deployment | `deployment.name`, `namespace` |
+| `k8s.deployment.available` | Number of available replicas for a deployment | `deployment.name`, `namespace` |
+| `k8s.daemonset.desired` | Desired number of pods for a DaemonSet | `daemonset.name`, `namespace` |
+| `k8s.daemonset.available` | Number of available pods for a DaemonSet | `daemonset.name`, `namespace` |
+| `k8s.statefulset.desired` | Desired number of replicas for a StatefulSet | `statefulset.name`, `namespace` |
+| `k8s.statefulset.available` | Number of available replicas for a StatefulSet | `statefulset.name`, `namespace` |
+| `k8s.container.restarts_total` | Total number of container restarts | `container.name`, `pod.name`, `namespace` |
+| `k8s.namespace.count` | Total number of namespaces |  |
+| `k8s.cronjob.last_schedule_time` | Last time a CronJob was successfully scheduled | `cronjob.name`, `namespace` |
+| `k8s.job.active_pods` | Number of active pods for a Job | `job.name`, `namespace` |
+| `k8s.hpa.current_replicas` | Current number of replicas managed by an HPA | `hpa.name`, `namespace` |
+| `k8s.hpa.desired_replicas` | Desired number of replicas managed by an HPA | `hpa.name`, `namespace` |
+
+### Kubernetes Events
+
+Kubernetes events are objects that provide insights into what is happening inside the cluster. They are generated by the Kubernetes control plane components [like the API server, scheduler, and controller manager] and by nodes [kubelet]. Enabling `kubernetesEvents` adds the **k8s Objects Receiver** focusing on events [it actually watches all objects, but by default filters to events]. This means all Kubernetes events will appear in the collector’s **logs pipeline**. By default, the chart will configure this receiver to only capture events [***not*** every object change] to keep data volume reasonable. 
+
+<Figure caption="Some Kubernetes metrics as visualised by SigNoz" alt="Some Kubernetes metrics as visualised by SigNoz" src="/img/blog/2025/07/k8s-metrics.webp" />
+
+
+<Figure caption="Infra metrics collected from the minikube cluster visualised in SigNoz" alt="Infra metrics collected from the minikube cluster visualised in SigNoz" src="/img/blog/2025/07/k8s-infra-metrics.gif" />
+
+
+### Why Is Kubernetes Events Monitoring Important?
+
+Monitoring Kubernetes events is crucial for several reasons:
+
+1. **Troubleshooting and Debugging:** Events are often the first place to look when a pod isn't starting, a deployment isn't scaling, or a service is behaving unexpectedly. They provide immediate clues about underlying issues. For example, a *FailedScheduling* event tells you why a pod couldn't be placed on a node [e.g., insufficient resources, taints/tolerations].
+2. **Operational Awareness:** Events offer a real-time stream of cluster activity, allowing operators to understand the state changes within their environment. This helps in proactive identification of potential problems before they impact services.
+3. **Security Auditing:** Certain events, especially those related to API server activities or configuration changes, can be vital for security auditing and compliance.
+4. **Performance Analysis:** Events like *Killing* a container or *Evicted* pods can indicate resource contention or misconfigurations that affect application performance.
+5. **Alerting:** While not directly used for metrics, events can trigger alerts for critical issues, such as image pull failures, readiness probe failures, or persistent volume mounting errors.
+
+By collecting and analysing Kubernetes events through the OTel Collector, you gain invaluable context for your metrics and traces, enabling faster root cause analysis and a more complete picture of your cluster's health.
+
+## Key Takeaways
+
+- OpenTelemetry provides end-to-end observability for Kubernetes, capturing traces, metrics, and logs in a standardised, vendor-neutral format.
+- Minikube provides a lightweight Kubernetes environment for safely experimenting with observability concepts before applying them to production clusters.
+- Deploying collectors in **two modes** ensures full coverage:
+    - **DaemonSet** for per-node data [logs, kubelet stats, local app telemetry]
+    - **Deployment** for cluster-wide data [Kubernetes metrics and events]
+- Helm presets like *kubeletMetrics*, *logsCollection*, and *clusterMetrics* make it easy to configure receivers and processors without writing full config blocks manually.
+- Though demoed on Minikube, this architecture mirrors real-world production setups and can be extended to any Kubernetes environment with minimal changes.
