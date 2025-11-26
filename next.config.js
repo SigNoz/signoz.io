@@ -151,6 +151,56 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/getting-started-with-opentelemetry/',
+          destination: '/blog/opentelemetry-demo/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-distributed-tracing-part-2/',
+          destination: '/blog/opentelemetry-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-distributed-tracing-part-1/',
+          destination: '/blog/what-is-distributed-tracing-in-opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/blog/introduction-to-opentelemetry-metrics/',
+          destination: '/blog/opentelemetry-metrics-with-examples/',
+          permanent: true,
+        },
+        {
+          source: '/blog/gathering-data-with-opentelemetry-collector/',
+          destination: '/blog/opentelemetry-collector-complete-guide/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-nodejs/',
+          destination: '/opentelemetry/nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/blog/opentelemetry-python-auto-and-manual-instrumentation/',
+          destination: '/opentelemetry/python/',
+          permanent: true,
+        },
+        {
+          source: '/blog/kubernetes-observability-with-opentelemetry/',
+          destination: '/blog/opentelemetry-kubernetes/',
+          permanent: true,
+        },
+        {
+          source: '/why-opentelemetry/',
+          destination: '/opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/blog/what-is-opentelemetry/',
+          destination: '/opentelemetry/',
+          permanent: true,
+        },
+        {
           source: '/comparisons/',
           destination: '/resource-center/comparisons/',
           permanent: true,
@@ -274,9 +324,10 @@ module.exports = () => {
           destination: '/resource-center/blog/',
           permanent: true,
         },
+        // Keep /opentelemetry/ as the canonical hub landing instead of redirecting to the Resource Center.
         {
-          source: '/opentelemetry/',
-          destination: '/resource-center/opentelemetry/',
+          source: '/opentelemetry/series/nextjs/',
+          destination: '/blog/opentelemetry-nextjs/',
           permanent: true,
         },
         {
