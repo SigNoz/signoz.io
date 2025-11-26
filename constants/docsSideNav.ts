@@ -1554,6 +1554,11 @@ const docsSideNav = [
             label: 'Prometheus Metrics',
           },
           {
+            type: 'doc',
+            route: '/docs/userguide/envoy-metrics',
+            label: 'Envoy Metrics',
+          },
+          {
             type: 'category',
             label: 'Infrastructure',
             isExpanded: false,
