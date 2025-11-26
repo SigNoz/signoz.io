@@ -60,10 +60,17 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
       toc.forEach((item) => {
         const rawId = item.url.startsWith('#') ? item.url.slice(1) : item.url
         const normalizedId = rawId.replace(/-+$/g, '') // trim trailing hyphens
-        const el = typeof document !== 'undefined'
-          ? (document.getElementById(rawId) || document.getElementById(normalizedId))
-          : null
+        const el =
+          typeof document !== 'undefined'
+            ? document.getElementById(rawId) || document.getElementById(normalizedId)
+            : null
         if (!el) return
+        // Check if inside a closed details element
+        const closedDetails = el.closest('details:not([open])')
+        if (closedDetails) {
+          const summary = closedDetails.querySelector('summary')
+          if (!summary || !summary.contains(el)) return
+        }
         // Only include headings that are currently rendered (not display:none)
         // Using getClientRects is robust across nested hidden ancestors
         const isRendered = el.getClientRects().length > 0
@@ -85,6 +92,14 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
     }
     document.addEventListener('click', onTabClick, { capture: true })
 
+    // Recompute on details toggle
+    const onToggle = (e: Event) => {
+      if ((e.target as HTMLElement).tagName === 'DETAILS') {
+        setTimeout(computeFiltered, 0)
+      }
+    }
+    document.addEventListener('toggle', onToggle, { capture: true })
+
     // Also observe attribute changes to panels' hidden attribute
     const observer = new MutationObserver((mutations) => {
       for (const m of mutations) {
@@ -101,6 +116,7 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
 
     return () => {
       document.removeEventListener('click', onTabClick, { capture: true } as any)
+      document.removeEventListener('toggle', onToggle, { capture: true } as any)
       observer.disconnect()
       window.removeEventListener('resize', computeFiltered)
     }
@@ -178,6 +194,12 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
       if (!el) return false
 
       activateTabsForElement(el)
+
+      // Open parent details if closed
+      const details = el.closest('details')
+      if (details && !details.open) {
+        details.open = true
+      }
 
       const scrollBehavior = options.behavior ?? 'smooth'
       setTimeout(() => {
@@ -257,10 +279,7 @@ const DocsTOC: React.FC<DocsTOCProps> = ({ toc, hideTableOfContents, source }) =
   return (
     <div className="doc-toc" ref={tocContainerRef}>
       <div className="mb-3 text-xs uppercase"> On this page </div>
-      <div
-        ref={tocItemsRef}
-        className="doc-toc-items border-l border-signoz_slate-500 pl-3"
-      >
+      <div ref={tocItemsRef} className="doc-toc-items border-l border-signoz_slate-500 pl-3">
         <TableOfContents
           toc={filteredToc}
           activeSection={activeSection}

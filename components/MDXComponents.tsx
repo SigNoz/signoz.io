@@ -67,8 +67,10 @@ import OtelCollectorFlow from './OtelCollectorFlow/OtelCollectorFlow'
 import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
 import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
 import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
+import ToggleHeading from './Headings/ToggleHeading'
 
 export const components: MDXComponents = {
+  ToggleHeading,
   Image,
   TOCInline,
   a: CustomLink,
