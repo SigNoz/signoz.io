@@ -1,76 +1,62 @@
 ---
-date: 2024-09-22
+date: 2025-11-22
 id: swiftui
-tags : [SigNoz Cloud]
-title: iOS App in Swift UI Instrumentation
-description: Instrument your Swift UI iOS application with OpenTelemetry and send data to SigNoz
+tags: [SigNoz Cloud, Self-Host]
+title: iOS app in SwiftUI instrumentation
+description: Instrument your SwiftUI iOS app with OpenTelemetry and send traces to SigNoz Cloud or self-hosted deployments.
+doc_type: howto
 ---
 
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
+## Overview
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your iOS applications built using Swift and view your application traces in SigNoz.
 
+## Prerequisites
 
-{/* This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your iOS mobile application built using Swift UI. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Swift UI application.
+- A SwiftUI-based iOS application in Xcode.
+- Swift toolchain installed; see [Swift getting started](https://www.swift.org/getting-started/#installing-swift).
+- Access to a SigNoz Cloud account or self-hosted SigNoz instance.
 
-Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
+## Send traces to SigNoz
 
-There are three major steps to using OpenTelemetry:
-
-- Instrumenting your iOS application with OpenTelemetry
-- Configuring the exporter to send data to SigNoz
-- Validating the configuration to ensure that data is being sent as expected.
-
-In this tutorial, we will instrument a Swift Mobile application for traces and send it to SigNoz. */}
-
-## Requirements
-
-[Swift](https://www.swift.org/getting-started/#installing-swift)
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-### Send traces directly to SigNoz cloud
-
-<Admonition type="info">
-You can test sample application for [Swift UI](https://github.com/SigNoz/mobile-monitoring-sample-apps/tree/main/ios-swift)
+<Admonition type="note">
+You can test the sample app for [SwiftUI](https://github.com/SigNoz/mobile-monitoring-sample-apps/tree/main/ios-swift).
 </Admonition>
 
-**Step 1 : Instrument your application with OpenTelemetry**
+### Step 1: Add OpenTelemetry dependencies
 
-To configure your Swift application to send traces to OpenTelemetry you need to install [opentelemetry-swift](https://github.com/open-telemetry/opentelemetry-swift.git) and [grpc-swift](https://github.com/grpc/grpc-swift) as dependency in your project.
+Install [opentelemetry-swift](https://github.com/open-telemetry/opentelemetry-swift.git) and [grpc-swift](https://github.com/grpc/grpc-swift) in `Package.swift`.
 
-For that, paste the following inside `Package.swift` of your project.
-
-```
- dependencies: [
-        .package(url: "https://github.com/open-telemetry/opentelemetry-swift.git", .upToNextMajor(from: "1.9.1")),
-        .package(url: "https://github.com/grpc/grpc-swift", from: "1.15.0"),
-    ],
-    targets: [
-        .executableTarget(
-            name: "<service_name>",
-            dependencies: [
-                .product(name: "OpenTelemetryApi", package: "opentelemetry-swift"),
-                .product(name: "OpenTelemetrySdk", package: "opentelemetry-swift"),
-                .product(name: "StdoutExporter", package: "opentelemetry-swift"),
-                .product(name: "ResourceExtension", package: "opentelemetry-swift"),
-                .product(name: "ZipkinExporter", package: "opentelemetry-swift"),
-                .product(name: "OpenTelemetryProtocolExporter", package: "opentelemetry-swift"),
-                .product(name: "SignPostIntegration", package: "opentelemetry-swift"),
-                .product(name: "GRPC", package: "grpc-swift")
-            ],
-            path: "."
-        )
-    ]
+```swift:Package.swift
+dependencies: [
+      .package(url: "https://github.com/open-telemetry/opentelemetry-swift.git", .upToNextMajor(from: "1.9.1")),
+      .package(url: "https://github.com/grpc/grpc-swift", from: "1.15.0"),
+  ],
+  targets: [
+      .executableTarget(
+          name: "<service_name>",
+          dependencies: [
+              .product(name: "OpenTelemetryApi", package: "opentelemetry-swift"),
+              .product(name: "OpenTelemetrySdk", package: "opentelemetry-swift"),
+              .product(name: "StdoutExporter", package: "opentelemetry-swift"),
+              .product(name: "ResourceExtension", package: "opentelemetry-swift"),
+              .product(name: "ZipkinExporter", package: "opentelemetry-swift"),
+              .product(name: "OpenTelemetryProtocolExporter", package: "opentelemetry-swift"),
+              .product(name: "SignPostIntegration", package: "opentelemetry-swift"),
+              .product(name: "GRPC", package: "grpc-swift")
+          ],
+          path: "."
+      )
+  ]
 ```
 
-`<service_name>` is name of your service
+`<service_name>` is the name of your service.
 
-**Step 2: Initialize the tracer**
+### Step 2: Initialize the tracer
 
-To enable tracing and send traces to the SigNoz cloud, you need to initialize the tracer, to do that create a new file named `OpentelemetrySetup.swift`
+Create `OpentelemetrySetup.swift` and configure the exporter.
 
-```swift
+```swift:OpentelemetrySetup.swift
 // OpenTelemetrySetup.swift
 import Foundation
 import GRPC
@@ -110,9 +96,14 @@ struct OpenTelemetrySetup {
 }
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
+Replace the placeholders:
+- `<service_name>`: logical name of your iOS service; this is what you will see in SigNoz.
+- `<your-ingestion-key>`: ingestion key for your SigNoz Cloud organization.
+- `<region>`: your SigNoz Cloud region, for example `us`, `eu`, or `in`.
+
+<Admonition type="info">
+Using self-hosted SigNoz? Most steps are identical. Update the endpoint and remove the ingestion key header as shown in <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer nofollow">Cloud → Self-Hosted</a>.
+</Admonition>
 
 Once you replace the content of the file, you need to add `init` in the `<project_name>.swift file` 
 
@@ -122,11 +113,11 @@ init() {
     }
 ```
 
-**Step 3: Send Telemetry data to SigNoz**
+### Step 3: Send telemetry data to SigNoz
 
 To send telemetry data to SigNoz, you can create a function to add spans and data. But prior to that you need to import `OpenTelemetryApi` & create instance of tracer, using the following snippet
 
-```swift
+```swift:ContentView.swift
 import OpenTelemetryApi // Import OpenTelemetryApi for the tracer
 
 //this should be inside ContentView Struct
@@ -155,8 +146,20 @@ let tracer = OpenTelemetry.instance.tracerProvider.get(instrumentationName: "Swi
 ```
 
 
-**Step 4: Run app**
+### Step 4: Run the app
 
-Run your application from X Code to see the output & you can verify the sent span in SigNoz .
-</TabItem>
-</Tabs>
+Run your application from Xcode.
+
+## Validate
+
+- In SigNoz, go to **Traces Explorer** and confirm that the traces for your service (for example `<service_name>`) are present.
+- Open a recent trace and verify that spans from your iOS app are present with the attributes you set.
+
+## Troubleshooting
+
+- If you do not see your iOS service in SigNoz, confirm the endpoint/port is reachable from the simulator or device and that the ingestion key (for Cloud) is correct.
+
+## Next steps
+
+- Explore your mobile traces in the [Trace Explorer](https://signoz.io/docs/product-features/trace-explorer/).
+- Create latency and error alerts for your service using [Alert Management](https://signoz.io/docs/alerts-management/trace-based-alerts/).

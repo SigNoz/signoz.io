@@ -1,146 +1,113 @@
 ---
-date: 2024-09-22
+date: 2025-11-22
 id: flutter-mobile-app
-tags : [SigNoz Cloud]
+tags: [SigNoz Cloud, Self-Host]
 title: Android/iOS App in Flutter Instrumentation
-description: Instrument your Android/iOS application built with Flutter using OpenTelemetry and send data to SigNoz
+description: Instrument your Flutter application with OpenTelemetry and send traces to SigNoz
+doc_type: howto
 ---
 
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
+## Overview
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your Flutter applications and view your application traces in SigNoz.
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Flutter applications and view traces in SigNoz.
 
-{/* 
-This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your Android/iOS mobile application built using Flutter. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Flutter application.
-
-Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
-
-There are three major steps to using OpenTelemetry:
-
-- Instrumenting your iOS application with OpenTelemetry
-- Configuring the exporter to send data to SigNoz
-- Validating the configuration to ensure that data is being sent as expected. */}
-
-<Admonition type="info">
-The package which we are using here is [Unofficial](https://pub.dev/packages/opentelemetry) Implementation of OpenTelemetry Packages. 
+<Admonition type="note">
+The package used here is an <a href="https://pub.dev/packages/opentelemetry" target="_blank" rel="noopener noreferrer nofollow">unofficial OpenTelemetry implementation</a>.
 </Admonition>
 
+## Prerequisites
 
-In this tutorial, we will instrument an Android/iOS Mobile application for traces and send it to SigNoz.
+- A Flutter application (Android and/or iOS targets).
+- Flutter SDK installed; see the [Flutter install guide](https://docs.flutter.dev/get-started/install).
+- Access to a SigNoz Cloud account or self-hosted SigNoz instance.
 
-## Requirements
-
-[Flutter](https://docs.flutter.dev/get-started/install)
-
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-### Send traces directly to SigNoz cloud
-
+## Send traces to SigNoz
 
 <Admonition type="info">
-You can test sample application for [Flutter](https://github.com/SigNoz/mobile-monitoring-sample-apps/tree/main/android-ios-flutter) (Replace the variables inside `main.dart`)
+Test the sample app for [Flutter](https://github.com/SigNoz/mobile-monitoring-sample-apps/tree/main/android-ios-flutter) (replace the variables inside `main.dart`).
 </Admonition>
 
+### Step 1: Install the OpenTelemetry package
 
-**Step 1 : Instrument your application with OpenTelemetry**
-
-To configure your Flutter application to send traces to OpenTelemetry you need to install [opentelemetry](https://pub.dev/packages/opentelemetry)
-
-For that,run the following command.
-
-```
+```bash
 flutter pub add opentelemetry
 ```
 
-**Step 2: Initialize the tracer**
+### Step 2: Initialize the tracer
 
-To enable tracing and send traces to the SigNoz cloud, you need to initialize the tracer as follows:
+Add imports to `main.dart`:
 
-Import the packages
-
-```
+```dart:lib/main.dart
 import 'package:opentelemetry/api.dart';
 import 'package:opentelemetry/sdk.dart';
 ```
 
-Put the following in `main.dart` file.
+Configure the exporter and tracer provider:
 
-```
+```dart:lib/main.dart
 final headers = {
-    //INGESTION KEY HERE VARIABLE
-    'signoz-ingestion-key': '<your-ingestion-key>',
-  };
+  'signoz-ingestion-key': '<your-ingestion-key>', // Cloud only: paste your ingestion key
+};
 
-  final exporter = CollectorExporter(
-    //enter ingestion url here VARIABLE
-    Uri.parse('ingest.<region>.signoz.cloud:443/v1/traces'),
-    headers: headers,
-  );
+final exporter = CollectorExporter(
+  Uri.parse('ingest.<region>.signoz.cloud:443/v1/traces'), // Cloud endpoint (keep https)
+  headers: headers,
+);
 
-  // Set up span processors
-  final processor = BatchSpanProcessor(exporter);
-  final provider = TracerProviderBase(
-    processors: [processor],
-    //enter service name here VARIABLE
-    resource: Resource( [Attribute.fromString("service.name", "<service_name>")]),
-  );
+final processor = BatchSpanProcessor(exporter);
+final provider = TracerProviderBase(
+  processors: [processor],
+  resource: Resource([Attribute.fromString('service.name', '<service_name>')]), // set your service name
+);
 
-  registerGlobalTracerProvider(provider);
+registerGlobalTracerProvider(provider);
+```
 
-  void _createSpan() {
-    final inputText = _controller.text;
+Replace the placeholders:
+- `<your-ingestion-key>`: ingestion key for your SigNoz Cloud organization.
+- `<region>`: your SigNoz Cloud region, for example `us`, `eu`, or `in`.
+- `<service_name>`: service name that will show up under **Traces Explorer** in SigNoz.
 
-    // Start a root span
-    final rootSpan = _tracer.startSpan('root-span');
+<Admonition type="info">
+Using self-hosted SigNoz? Most steps are identical. Update the endpoint and remove the ingestion key header as shown in <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer nofollow">Cloud → Self-Hosted</a>.
+</Admonition>
+
+### Step 3: Create spans
+
+```dart:lib/main.dart
+final _tracer = provider.getTracer('flutter-example');
+
+void createSpan(String inputText) {
+  final rootSpan = _tracer.startSpan('root-span');
+  try {
+    final childSpan = _tracer.startSpan('child-span', kind: SpanKind.client); // child span example
     try {
-      // Create a child span with the input text
-      final childSpan = _tracer.startSpan('child-span', kind: SpanKind.client);
-      try {
-        // Set attribute for the child span
-        childSpan.setAttribute(Attribute.fromString('input.name', inputText));
-
-        // Simulate a remote procedure call (this could be a real async call)
-        remoteProcedureCall();
-
-        // Add an event to the child span
-        childSpan.addEvent('Processed input: $inputText');
-      } catch (e) {
-        childSpan.recordException(e);
-      } finally {
-        childSpan.end();
-      }
-    } catch (e) {
-      // Handle any exceptions that may occur while starting spans
-      print('Error creating span: $e');
+      childSpan.setAttribute(Attribute.fromString('input.name', inputText));
+      // add your work here
+      childSpan.addEvent('Processed input: $inputText');
     } finally {
-      // End the root span
-      rootSpan.end();
+      childSpan.end();
     }
+  } finally {
+    rootSpan.end();
   }
-
-  Future<void> remoteProcedureCall() async {
-    final headers = <String, String>{};
-    W3CTraceContextPropagator().inject(Context.current, headers, _TextMapSetter());
-  }
-
-
+}
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
+### Step 4: Run the app
 
-**Step 3: Send Telemetry data to SigNoz**
+Run from Android Studio or an iOS simulator.
 
-To send telemetry data to SigNoz, you can use the `_createSpan` function which we created above.
+## Validate
 
-```
-_createSpan()
-```
+- In SigNoz, go to **Traces Explorer** and confirm that the traces for your service (for example `<service_name>`) are present.
+- Open a recent trace and verify that spans from your Flutter app are present with the attributes you set.
 
-**Step 4: Run app**
+## Troubleshooting
 
-Run your application from Android Studio to see the output & you can verify the sent span in SigNoz .
-</TabItem>
-</Tabs>
+- If spans do not show up, verify the exporter endpoint (Cloud or your self-hosted collector endpoint) and confirm the device/emulator can reach it over the configured protocol (HTTP/HTTPS).
+
+## Next steps
+
+- Explore your mobile traces in the [Trace Explorer](https://signoz.io/docs/product-features/trace-explorer/).
+- Create latency and error alerts for your service using [Alert Management](https://signoz.io/docs/alerts-management/trace-based-alerts/).
