@@ -218,6 +218,7 @@ export default function OpenTelemetrySidebarClient({
         isOpen={isLangOpen}
         onToggle={toggleLanguageSelector}
         onChange={handleLanguageOptionSelect}
+        onClose={() => setIsLangOpen(false)}
       />
     ) : null
 

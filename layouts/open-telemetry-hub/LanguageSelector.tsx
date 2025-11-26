@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { ChevronDown, Code } from 'lucide-react'
 
 import { normalizeLanguage } from './navigation'
@@ -12,6 +13,7 @@ interface LanguageSelectorProps {
   isOpen: boolean
   onToggle: () => void
   onChange: (value: string) => void
+  onClose: () => void
 }
 
 export function LanguageSelector({
@@ -20,11 +22,40 @@ export function LanguageSelector({
   isOpen,
   onToggle,
   onChange,
+  onClose,
 }: LanguageSelectorProps) {
   const normalizedSelected = normalizeLanguage(selectedLanguage)
+  const selectorRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const handleInteraction = (event: MouseEvent | TouchEvent) => {
+      const target = event.target instanceof Node ? event.target : null
+      if (!target || !selectorRef.current) {
+        return
+      }
+
+      if (selectorRef.current.contains(target)) {
+        return
+      }
+
+      onClose()
+    }
+
+    document.addEventListener('mousedown', handleInteraction)
+    document.addEventListener('touchstart', handleInteraction)
+
+    return () => {
+      document.removeEventListener('mousedown', handleInteraction)
+      document.removeEventListener('touchstart', handleInteraction)
+    }
+  }, [isOpen, onClose])
 
   return (
-    <div className="mb-4 px-3">
+    <div className="mb-4 px-3" ref={selectorRef}>
       <div className="mb-1 text-xs uppercase text-gray-400">Language</div>
       <div className="relative">
         <button
