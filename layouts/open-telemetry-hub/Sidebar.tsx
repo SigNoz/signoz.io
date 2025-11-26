@@ -26,6 +26,7 @@ export function Sidebar({
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const activeItemRef = useRef<HTMLAnchorElement | null>(null)
   const pendingScrollRef = useRef(false)
+  const containerRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const expandedSet = new Set<string>(persistExpansionKey ? [persistExpansionKey] : [])
@@ -44,16 +45,28 @@ export function Sidebar({
     pendingScrollRef.current = true
   }, [activeRoute, items, persistExpansionKey])
 
+  // Ensure the sidebar scrolls to reveal the active item without shifting the main content.
   useEffect(() => {
-    if (!pendingScrollRef.current || !activeItemRef.current) {
+    if (!pendingScrollRef.current || !activeItemRef.current || !containerRef.current) {
       return
     }
 
-    activeItemRef.current.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-      inline: 'nearest',
-    })
+    const container = containerRef.current
+    const activeElement = activeItemRef.current
+    const containerRect = container.getBoundingClientRect()
+    const activeRect = activeElement.getBoundingClientRect()
+    const isAbove = activeRect.top < containerRect.top
+    const isBelow = activeRect.bottom > containerRect.bottom
+
+    if (isAbove || isBelow) {
+      const offsetWithinContainer = activeRect.top - containerRect.top + activeRect.height / 2
+      const nextScrollTop = container.scrollTop + offsetWithinContainer - container.clientHeight / 2
+      container.scrollTo({
+        top: nextScrollTop,
+        behavior: 'smooth',
+      })
+    }
+
     pendingScrollRef.current = false
   }, [activeRoute, expanded])
 
@@ -123,7 +136,10 @@ export function Sidebar({
   )
 
   return (
-    <nav className="docs-sidebar sticky top-[80px] h-[calc(100vh-100px)] w-full overflow-y-auto py-4 text-white">
+    <nav
+      className="docs-sidebar sticky top-[80px] h-[calc(100vh-100px)] w-full overflow-y-auto py-4 text-white"
+      ref={containerRef}
+    >
       {languageSelector}
       {renderItems(items, [])}
     </nav>
