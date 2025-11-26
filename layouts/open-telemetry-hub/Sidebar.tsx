@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { ChevronDown, ChevronRight, FileText } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { categoryContainsRoute, normalizeRoute } from './navigation'
@@ -24,6 +24,8 @@ export function Sidebar({
   persistExpansionKey,
 }: SidebarProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const activeItemRef = useRef<HTMLAnchorElement | null>(null)
+  const pendingScrollRef = useRef(false)
 
   useEffect(() => {
     const expandedSet = new Set<string>(persistExpansionKey ? [persistExpansionKey] : [])
@@ -39,7 +41,21 @@ export function Sidebar({
     }
     markParents(items, [])
     setExpanded(expandedSet)
+    pendingScrollRef.current = true
   }, [activeRoute, items, persistExpansionKey])
+
+  useEffect(() => {
+    if (!pendingScrollRef.current || !activeItemRef.current) {
+      return
+    }
+
+    activeItemRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'nearest',
+    })
+    pendingScrollRef.current = false
+  }, [activeRoute, expanded])
 
   const toggle = (key: string) => {
     setExpanded((prev) => {
@@ -69,6 +85,7 @@ export function Sidebar({
                     : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
                 }`}
                 onClick={onNavigate}
+                ref={isActive ? activeItemRef : undefined}
               >
                 <FileText className="flex-shrink-0 opacity-60 group-hover:opacity-100" size={14} />
                 <span className="truncate">{node.label}</span>
