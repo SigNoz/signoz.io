@@ -985,9 +985,17 @@ const docsSideNav = [
             ],
           },
           {
-            type: 'doc',
+            type: 'category',
+            isExpanded: false,
             label: 'Golang',
             route: '/docs/instrumentation/opentelemetry-golang',
+            items: [
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation',
+              },
+            ],
           },
           {
             type: 'doc',
