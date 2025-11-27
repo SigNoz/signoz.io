@@ -1,0 +1,75 @@
+---
+
+title: Introducing SigNoz's LLM-Powered Datadog Migration Tool
+slug: datadog-migration-tool
+date: 2025-11-25
+tags: [Product]
+authors: [anushka_karmakar]
+description: Learn how SigNoz's LLM-powered migration tool automates Datadog dashboard migration in minutes. Migrate metrics, logs, and traces dashboards without manual rebuilding or rewriting queries.
+image: /img/blog/2025/11/dd-migration-tool-signoz.png
+keywords: [Datadog migration, observability migration, SigNoz, OpenTelemetry, dashboard migration, LLM migration tool, Datadog alternative, migrate from Datadog]
+
+---
+
+~20% of new SigNoz users are migrating from Datadog. Teams want OpenTelemetry-native observability with predictable pricing and no vendor lock-in. The value proposition is clear.
+
+But migration is painful. 
+
+Moving from Datadog means manually rebuilding dashboards, rewriting every query, and reconfiguring panels one by one. What took months to build takes weeks to migrate. Engineering teams get pulled away from actual product work to rebuild monitoring infrastructure they already had working. Critical monitoring setups and the context around why dashboards were built a certain way often get lost.
+
+We kept hearing about this from teams evaluating SigNoz, so we built a solution. 
+
+Today, we're introducing the [SigNoz Datadog Migration Tool](https://signoz.io/datadog-migration-tool/), an LLM-powered tool that automates dashboard migration from Datadog to SigNoz. 
+
+What used to take weeks now takes minutes!
+
+<Figure
+src="/img/blog/2025/11/dd-migration-tool-signoz.png"
+alt="SigNoz Datadog Migration Tool automating dashboard translation from Datadog JSON to SigNoz monitoring panels"
+/>
+
+## Why Dashboard Migration is Complicated
+
+The typical migration process starts with exporting your Datadog dashboards through their UI or JSON exports. 
+
+Then you rebuild each dashboard in your new platform. You recreate every panel, rewrite queries to match the new query syntax, reconfigure visualization settings, and set up threshold alerts again.
+
+The complexity comes from the differences between platforms. 
+
+Datadog uses specific metric naming conventions and query syntax that don't directly map to other observability tools. A metric tracking pod CPU usage in Datadog might have one structure, while the equivalent metric in another platform uses different naming and attributes. Your queries might use Datadog-specific functions or aggregations that need complete rewrites. Panel configurations like units, display settings, and thresholds all need manual transfer.
+
+This manual process is time-consuming and error-prone. 
+
+You might miss a critical dashboard panel. A query might look correct but retrieve different data because of subtle syntax differences. Threshold alerts might not trigger the same way. 
+
+Teams often discover these issues weeks after migration when something breaks in production and the monitoring doesn't catch it.
+
+As a result, migration becomes a project that stretches over weeks or months. This is also the moat of legacy observability tools. Moving out is so difficult that engineering teams delay it even when there's a better alternative because it feels too risky and resource-intensive.
+
+## What We Built and How It Works
+
+The SigNoz Datadog Migration Tool automates dashboard translation from Datadog to SigNoz. The process is straightforward. You export your Datadog dashboard configurations in JSON format, run them through our migration tool, and import the translated dashboards into SigNoz.
+
+The tool manages the migration of metrics, logs, and traces dashboards. It also supports dashboards built on Datadog integrations like Redis, PostgreSQL, and AWS services. You can migrate infrastructure monitoring dashboards, application performance dashboards, and custom metric dashboards through the same process.
+
+What gets automatically translated includes all visualization types like time series graphs, bar charts, and tables. The layout and styling are preserved. Complex metric queries with filters, aggregations, and groupings are converted to SigNoz query syntax while maintaining the same data retrieval logic. Panel configurations like titles, descriptions, units, display settings, and threshold configurations carry over so your dashboards function the same way.
+
+The entire process takes minutes instead of weeks. So, you don’t have to rebuild dashboards from scratch or manually rewrite the queries. The tool does the heavy lifting while you maintain control over what gets migrated and when.
+
+## How the LLM Powers This
+
+We use large language models to handle the complexity of translating dashboards between platforms. Traditional migration scripts break when they encounter metric names without exact one-to-one matches or query syntax that differs between systems. They rely on hardcoded mappings that fail when they see anything unexpected.
+
+But the model understands the context and intent behind queries rather than just doing literal syntax matching. When it sees a Datadog metric name, it can intelligently map it to the equivalent SigNoz metric even when there's no direct correspondence. 
+
+It understands what the query is trying to accomplish and adapts the structure to work in SigNoz while preserving the aggregations, filters, groupings, and logic that make your dashboards valuable.
+
+This context-aware translation means the tool can handle dashboards with custom metrics, complex queries, or configurations that a simple find-and-replace script would break. 
+
+## What's Next
+
+We're launching this as a private beta to work closely with early users and refine the tool based on feedback. If you're currently on Datadog and evaluating SigNoz, you can [request early access](https://signoz.io/datadog-migration-tool/) to the migration tool. Our team will reach out to help you get set up.
+
+The goal is to make switching from Datadog to SigNoz as frictionless as possible so teams can focus on the observability benefits rather than the migration logistics.
+
+If you want to learn more about SigNoz or see how we compare to Datadog, you can check out our [Datadog comparison page](https://signoz.io/blog/open-source-datadog-alternative/).

@@ -1716,6 +1716,11 @@ const docsSideNav = [
             route: '/docs/userguide/manage-variables',
             label: 'Manage Variables',
           },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/terraform-provider-signoz',
+            label: 'Terraform Provider',
+          },
         ],
       },
       {
@@ -1808,12 +1813,27 @@ const docsSideNav = [
                 route: '/docs/dashboards/dashboard-templates/db-calls-monitoring',
                 label: 'DB Calls Monitoring',
               },
+              {
+                type: 'doc',
+                route: '/docs/dashboards/dashboard-templates/http-api-monitoring',
+                label: 'HTTP API Monitoring',
+              },
             ],
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/argocd-dashboard',
+            label: 'ArgoCD',
           },
           {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/autogen-dashboard',
             label: 'Autogen',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/aws-sqs-prometheus',
+            label: 'AWS SQS',
           },
           {
             type: 'doc',
@@ -1823,7 +1843,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cicd',
-            label: 'CICD',
+            label: 'CI/CD',
           },
           {
             type: 'doc',
@@ -2658,10 +2678,16 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'CICD Monitoring',
+    label: 'CI/CD Monitoring',
     type: 'category',
     isExpanded: false,
+    route: '/docs/cicd/overview',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/cicd/overview',
+        label: 'Overview',
+      },
       {
         label: 'GitHub',
         type: 'category',

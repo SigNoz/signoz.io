@@ -5,7 +5,9 @@ import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer
 import { allGuides, allAuthors } from 'contentlayer/generated'
 import type { Authors, Guide } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
+import OpenTelemetryHubLayout from '@/layouts/OpenTelemetryHubLayout'
 import GuidesLayout from '@/layouts/GuidesLayout'
+import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
@@ -87,6 +89,9 @@ export const generateStaticParams = async () => {
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
+  const currentRoute = `/guides/${slug}`
+  const isGrafanaOrPrometheusArticle =
+    slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
   // Filter out drafts in production
   const sortedCoreContents = allCoreContent(sortPosts(allGuides))
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
@@ -103,6 +108,51 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
+  const hubContext = getHubContextForRoute(currentRoute)
+
+  if (hubContext) {
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+
+        <div className="container mx-auto">
+          <Button
+            variant={'ghost'}
+            to={`/resource-center/guides/`}
+            className="ml-3.5 mt-10 hover:bg-transparent"
+          >
+            <span className="flex items-center">
+              <SidebarIcons.ArrowLeft />
+              <span className="pl-1.5 text-sm">Back to Guides</span>
+            </span>
+          </Button>
+        </div>
+
+        <OpenTelemetryHubLayout
+          content={mainContent}
+          authorDetails={authorDetails}
+          authors={authorList}
+          toc={post.toc}
+          navItems={hubContext.items}
+          currentHubPath={hubContext.pathKey}
+          pathMeta={hubContext.firstRouteByPath}
+          defaultLanguage={hubContext.defaultLanguage}
+          availableLanguages={hubContext.languages}
+          currentRoute={currentRoute}
+        >
+          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+          <PageFeedback />
+        </OpenTelemetryHubLayout>
+
+        {/* Render GrafanaVsSigNozFloatingCard if the slug contains Grafana or Prometheus */}
+        {isGrafanaOrPrometheusArticle && <GrafanaVsSigNozFloatingCard />}
+      </>
+    )
+  }
+
   // Choose layout based on slug or post layout
   let layoutName = post.layout || defaultLayout
   if (slug.includes('opentelemetry')) {
@@ -114,10 +164,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   // @ts-ignore
   const Layout = layouts[layoutName]
 
-  // Check if the slug contains Grafana or Prometheus
-  const isGrafanaOrPrometheusArticle =
-    slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
-
   return (
     <>
       <script
@@ -126,7 +172,11 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       />
 
       <div className="container mx-auto">
-        <Button variant={"ghost"} to={`/resource-center/guides/`} className="ml-3.5 mt-10 hover:bg-transparent">
+        <Button
+          variant={'ghost'}
+          to={`/resource-center/guides/`}
+          className="ml-3.5 mt-10 hover:bg-transparent"
+        >
           <span className="flex items-center">
             <SidebarIcons.ArrowLeft />
             <span className="pl-1.5 text-sm">Back to Guides</span>
@@ -137,7 +187,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
-        authors={post?.authors}
+        authors={authorList}
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
