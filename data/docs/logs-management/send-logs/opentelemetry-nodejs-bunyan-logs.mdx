@@ -52,7 +52,10 @@ yarn add @opentelemetry/sdk-node \
 
 ### Step 2: Configure OpenTelemetry SDK
 
-Create a file named `logging-instrumentation.js` in your project root:
+Create a file named `logging-instrumentation.js` or `logging-instrumentation.ts` in your project root:
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
 
 ```javascript:logging-instrumentation.js
 const { NodeSDK } = require("@opentelemetry/sdk-node");
@@ -114,9 +117,74 @@ process.on("SIGTERM", () => {
 module.exports = sdk;
 ```
 
+</TabItem>
+
+<TabItem label="typescript" label="TypeScript">
+
+```typescript:logging-instrumentation.ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
+import { BunyanInstrumentation } from "@opentelemetry/instrumentation-bunyan";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
+import { SeverityNumber } from "@opentelemetry/api-logs";
+
+// Configure the OTLP log exporter
+const logExporter = new OTLPLogExporter({
+  url: "https://ingest.<region>.signoz.cloud:443/v1/logs", // Replace with your SigNoz endpoint
+  headers: {
+    "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>", // For SigNoz Cloud
+  },
+});
+
+// Initialize the OpenTelemetry SDK
+const sdk = new NodeSDK({
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]:
+      process.env.OTEL_SERVICE_NAME || "nodejs-bunyan-logger",
+  }),
+  logRecordProcessor: new BatchLogRecordProcessor(logExporter),
+  instrumentations: [
+    new BunyanInstrumentation({
+      // Optional: Disable log sending (only keep log correlation)
+      // disableLogSending: false,
+
+      // Optional: Disable log correlation (trace context injection)
+      // disableLogCorrelation: false,
+
+      // Optional: Add custom fields to log records
+      logHook: (_span, record) => {
+        record["resource.environment"] = "dev";
+      },
+      logSeverity: SeverityNumber.FATAL,
+    }),
+  ],
+});
+
+sdk.start();
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  sdk
+    .shutdown()
+    .then(() => console.log("OpenTelemetry SDK shut down successfully"))
+    .catch((error) => console.error("Error shutting down SDK", error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+
+</TabItem>
+</Tabs>
+
 ### Step 3: Initialize OpenTelemetry SDK
 
-Import the instrumentation at the very top of your main application file (e.g., `index.js` or `app.js`).
+Import the instrumentation at the very top of your main application file (e.g., `index.js` or `index.ts`).
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
 
 ```javascript:index.js
 require("./instrumentation"); // Must be imported first
@@ -151,12 +219,54 @@ app.listen(3000, () => {
 });
 ```
 
-### Step 4: Configure SigNoz Endpoint
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
 
-Update the `instrumentation.js` file with your SigNoz endpoint:
+```typescript:index.ts
+import("./instrumentation"); // Must be first!
+
+import * as bunyan from "bunyan";
+import express, { Request, Response } from "express";
+
+// Now create your Bunyan logger as usual
+const logger = bunyan.createLogger({
+  name: "express-app",
+  level: "info",
+});
+
+// Your application code
+const app: express.Express = express();
+
+app.get("/", (req: Request, res: Response) => {
+  logger.info({ path: req.path, method: req.method }, "Request received");
+  res.send("Hello World!");
+});
+
+app.get("/error-log", (req: Request, res: Response) => {
+  logger.error(
+    { path: req.path, method: req.method },
+    "Error log endpoint hit",
+  );
+  res.status(500).send("Error log endpoint");
+});
+
+app.listen(3000, () => {
+  logger.info("Server listening on port 3000");
+});
+```
+
+</TabItem>
+</Tabs>
+
+### Step 4: Configure SigNoz Endpoint
 
 <Tabs>
 <TabItem value="vm" label="VM / Local" default>
+
+Update the `instrumentation.js` or `instrumentation.ts` file with your SigNoz endpoint:
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript">
 
 ```javascript:instrumentation.js
 ---
@@ -168,10 +278,26 @@ const logExporter = new OTLPLogExporter({
 });
 ```
 
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:instrumentation.ts
+---
+const logExporter = new OTLPLogExporter({
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs', // OTLP logs endpoint
+  headers: {
+    'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+  },
+});
+```
+
+</TabItem>
+</Tabs>
+
 Replace the placeholders:
 
 - `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
-- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Admonition type="info">
   Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
@@ -184,6 +310,9 @@ Replace the placeholders:
 
 If your application runs in Kubernetes with an OpenTelemetry Collector:
 
+<Tabs>
+<TabItem value="javascript" label="JavaScript">
+
 ```javascript:instrumentation.js
 ---
 const logExporter = new OTLPLogExporter({
@@ -191,6 +320,20 @@ const logExporter = new OTLPLogExporter({
   headers: {},
 });
 ```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:instrumentation.ts
+---
+const logExporter = new OTLPLogExporter({
+  url: 'http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs',
+  headers: {},
+});
+```
+
+</TabItem>
+</Tabs>
 
 **Find your collector service details:**
 
@@ -223,7 +366,7 @@ See the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-coll
 Run your application:
 
 ```bash
-node index.js
+npm run dev
 ```
 
 ## Validate Logs
