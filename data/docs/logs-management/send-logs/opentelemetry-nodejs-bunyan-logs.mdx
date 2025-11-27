@@ -13,13 +13,68 @@ import GetHelp from '@/components/shared/get-help.md'
 
 This guide will walk you through the process of sending logs from a Node.js application that uses the Bunyan logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
 
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
 ## Prerequisites
 
 - Node.js version 14 or higher
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 - A Node.js application that uses the Bunyan logger
 
-## Setup
+## Send logs to SigNoz
+
+There are two ways to send logs from your Node.js application to SigNoz:
+
+- **Direct to SigNoz Cloud (recommended for beginners):** no extra installs beyond the SDK; you only need the region endpoint and ingestion key.
+- **Optional: Install a local OTel Collector binary on the VM:** it listens at `http://localhost:4318`, forwards telemetry to SigNoz, and does not require an ingestion key from the app. Install it with the [OTel Collector binary guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+
+<Tabs>
+<TabItem value="automatic" label="No Code Auto-Instrumentation (recommended)" default>
+
+Auto-instrumentation automatically captures:
+
+- **Bunyan logs** with trace correlation
+- **HTTP requests** (incoming and outgoing)
+
+### Step 1: Install dependencies
+
+Install the required OpenTelemetry dependencies:
+
+```bash
+npm install --save @opentelemetry/api \
+  @opentelemetry/auto-instrumentations-node
+```
+
+### Step 2: Run the application
+
+You can use the `NODE_OPTIONS` environment variable to auto-instrument your application.
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<service_name>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node index.js # Replace with your entry file
+```
+
+- Replace `<service_name>` with your service name.
+- Replace `<region>` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- Replace `<your-ingestion-key>` with your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+If you prefer sending telemetry to local OTel Collector, replace the `OTEL_EXPORTER_OTLP_ENDPOINT` with `http://localhost:4318` and skip the ingestion key:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+# Do not set OTEL_EXPORTER_OTLP_HEADERS when using the local collector
+```
+
+</TabItem>
+<TabItem value="code-level" label="Code Level Instrumentation (advanced)">
 
 ### Step 1: Install dependencies
 
@@ -29,22 +84,22 @@ Install the required OpenTelemetry dependencies:
 <TabItem value="npm" label="npm" default>
 
 ```bash
-npm install @opentelemetry/sdk-node \
-  @opentelemetry/exporter-logs-otlp-http \
-  @opentelemetry/instrumentation-bunyan \
-  bunyan \
-  express
+npm install @opentelemetry/sdk-node@^0.208.0 \
+  @opentelemetry/exporter-logs-otlp-http@^0.208.0 \
+  @opentelemetry/instrumentation-bunyan@^0.54.0 \
+  bunyan@^1.8.15 \
+  express@^5.1.0
 ```
 
 </TabItem>
 <TabItem value="yarn" label="yarn">
 
 ```bash
-yarn add @opentelemetry/sdk-node \
-  @opentelemetry/exporter-logs-otlp-http \
-  @opentelemetry/instrumentation-bunyan \
-  bunyan \
-  express
+yarn add @opentelemetry/sdk-node@^0.208.0 \
+  @opentelemetry/exporter-logs-otlp-http@^0.208.0 \
+  @opentelemetry/instrumentation-bunyan@^0.54.0 \
+  bunyan@^1.8.15 \
+  express@^5.1.0
 ```
 
 </TabItem>
@@ -296,7 +351,7 @@ const logExporter = new OTLPLogExporter({
 
 Replace the placeholders:
 
-- `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Admonition type="info">
@@ -368,6 +423,9 @@ Run your application:
 ```bash
 npm run dev
 ```
+
+</TabItem>
+</Tabs>
 
 ## Validate Logs
 
