@@ -87,6 +87,15 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 # Do not set OTEL_EXPORTER_OTLP_HEADERS when using the local collector
 ```
 
+#### Note
+
+By default, auto-instrumentation collects traces and metrics. If you want to collect only logs, you can disable traces and metrics by setting the following environment variables:
+
+```bash
+export OTEL_TRACES_EXPORTER="none"
+export OTEL_METRICS_EXPORTER="none"
+```
+
 </TabItem>
 <TabItem value="code-level" label="Code Level Instrumentation (advanced)">
 
@@ -430,12 +439,60 @@ See the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-coll
 </TabItem>
 </Tabs>
 
-### Step 5: Run the Application
+### Step 5: Log Correlation (Optional)
+
+Bunyan logs created within a tracing span are automatically enriched with span and trace IDs, enabling [correlation](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/). The added fields are:
+
+- `trace_id`
+- `span_id`
+- `trace_flags`
+
+You can use `tracer.startActiveSpan` to correlate logs with traces. Here is an example:
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```javascript:index.js
+---
+const api = require('@opentelemetry/api')
+
+const tracer = api.trace.getTracer('example')
+
+tracer.startActiveSpan('process-order', (span) => {
+  logger.info({ orderId: '12345' }, 'Processing order')
+  // Log record will include: trace_id, span_id, trace_flags
+
+  span.end()
+})
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:index.ts
+---
+const api = require('@opentelemetry/api')
+
+const tracer = api.trace.getTracer('example')
+
+tracer.startActiveSpan('process-order', (span) => {
+  logger.info({ orderId: '12345' }, 'Processing order')
+  // Log record will include: trace_id, span_id, trace_flags
+
+  span.end()
+})
+```
+
+</TabItem>
+</Tabs>
+
+### Step 6: Run the Application
 
 Run your application:
 
 ```bash
 npm run dev
+# or your application's start command
 ```
 
 </TabItem>
