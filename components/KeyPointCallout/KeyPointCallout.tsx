@@ -33,7 +33,7 @@ const KeyPointCallout: React.FC<KeyPointCalloutProps> = ({ title, children, defa
         </div>
         <span
           className={`text-sm font-medium text-gray-300 transition-transform ${
-            isCollapsed ? 'rotate-180' : 'rotate-0'
+            isCollapsed ? 'rotate-0' : 'rotate-180'
           }`}
           aria-hidden="true"
         >
