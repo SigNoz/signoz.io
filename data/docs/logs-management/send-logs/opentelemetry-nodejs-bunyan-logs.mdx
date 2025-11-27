@@ -13,17 +13,17 @@ import GetHelp from '@/components/shared/get-help.md'
 
 This guide will walk you through the process of sending logs from a Node.js application that uses the Bunyan logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
 
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</Admonition>
-
 ## Prerequisites
 
 - Node.js version 14 or higher
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 - A Node.js application that uses the Bunyan logger
+
+<Admonition type="info">
+  For full correlation between logs and traces, you'll also need to instrument your application for
+  traces. See [Node.js OpenTelemetry
+  instrumentation](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/).
+</Admonition>
 
 ## Send logs to SigNoz
 
@@ -130,7 +130,12 @@ yarn add @opentelemetry/sdk-node@^0.208.0 \
 
 ### Step 2: Configure OpenTelemetry SDK
 
-Create a file named `logging-instrumentation.js` or `logging-instrumentation.ts` in your project root:
+Create a file named `logging-instrumentation.js` or `logging-instrumentation.ts` in your project root.
+
+<Tabs>
+<TabItem value="cloud-vm" label="Cloud / VM (Default)" default>
+
+Use this configuration if you are sending logs directly to SigNoz Cloud or a local OTel Collector on a VM.
 
 <Tabs>
 <TabItem value="javascript" label="JavaScript" default>
@@ -153,6 +158,10 @@ const logExporter = new OTLPLogExporter({
     "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>", // Replace <SIGNOZ_INGESTION_KEY> with your SigNoz ingestion key
   },
 });
+
+// If using a local OTel Collector (VM), use:
+// url: "http://localhost:4318/v1/logs",
+// headers: {},
 
 // Initialize the OpenTelemetry SDK
 const sdk = new NodeSDK({
@@ -216,6 +225,10 @@ const logExporter = new OTLPLogExporter({
   },
 });
 
+// If using a local OTel Collector (VM), use:
+// url: "http://localhost:4318/v1/logs",
+// headers: {},
+
 // Initialize the OpenTelemetry SDK
 const sdk = new NodeSDK({
   resource: resourceFromAttributes({
@@ -253,6 +266,150 @@ process.on("SIGTERM", () => {
 
 module.exports = sdk;
 ```
+
+</TabItem>
+</Tabs>
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</Admonition>
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Use this configuration if your application runs in Kubernetes and sends logs to an OpenTelemetry Collector within the cluster.
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```javascript:logging-instrumentation.js
+const { NodeSDK } = require("@opentelemetry/sdk-node");
+const { OTLPLogExporter } = require("@opentelemetry/exporter-logs-otlp-http");
+const {
+  BunyanInstrumentation,
+} = require("@opentelemetry/instrumentation-bunyan");
+const { resourceFromAttributes } = require("@opentelemetry/resources");
+const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
+const { BatchLogRecordProcessor } = require("@opentelemetry/sdk-logs");
+const { SeverityNumber } = require("@opentelemetry/api-logs");
+
+// Configure the OTLP log exporter for Kubernetes
+const logExporter = new OTLPLogExporter({
+  url: "http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs",
+  headers: {},
+});
+
+// Initialize the OpenTelemetry SDK
+const sdk = new NodeSDK({
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: "nodejs-bunyan-logger",
+  }),
+  logRecordProcessor: new BatchLogRecordProcessor(logExporter),
+  instrumentations: [
+    new BunyanInstrumentation({
+      logHook: (span, record) => {
+        record["resource.environment"] = "k8s";
+      },
+      logSeverity: SeverityNumber.UNSPECIFIED,
+    }),
+  ],
+});
+
+sdk.start();
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  sdk
+    .shutdown()
+    .then(() => console.log("OpenTelemetry SDK shut down successfully"))
+    .catch((error) => console.error("Error shutting down SDK", error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+
+</TabItem>
+
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:logging-instrumentation.ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
+import { BunyanInstrumentation } from "@opentelemetry/instrumentation-bunyan";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
+import { SeverityNumber } from "@opentelemetry/api-logs";
+
+// Configure the OTLP log exporter for Kubernetes
+const logExporter = new OTLPLogExporter({
+  url: "http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs",
+  headers: {},
+});
+
+// Initialize the OpenTelemetry SDK
+const sdk = new NodeSDK({
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]:
+      process.env.OTEL_SERVICE_NAME || "nodejs-bunyan-logger",
+  }),
+  logRecordProcessor: new BatchLogRecordProcessor(logExporter),
+  instrumentations: [
+    new BunyanInstrumentation({
+      logHook: (_span, record) => {
+        record["resource.environment"] = "k8s";
+      },
+      logSeverity: SeverityNumber.FATAL,
+    }),
+  ],
+});
+
+sdk.start();
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  sdk
+    .shutdown()
+    .then(() => console.log("OpenTelemetry SDK shut down successfully"))
+    .catch((error) => console.error("Error shutting down SDK", error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+
+</TabItem>
+</Tabs>
+
+**Find your collector service details:**
+
+```bash
+# List OTel collector services
+kubectl get svc -A | grep otel
+
+# Example output:
+# platform  signoz-otel-collector  ClusterIP  10.96.0.10  <none>  4318/TCP
+```
+
+Replace `<otel-collector-service>` and `<namespace>` with your actual values.
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
 
 </TabItem>
 </Tabs>
@@ -336,110 +493,7 @@ app.listen(3000, () => {
 </TabItem>
 </Tabs>
 
-### Step 4: Configure SigNoz Endpoint
-
-<Tabs>
-<TabItem value="vm" label="VM / Local" default>
-
-Update the `instrumentation.js` or `instrumentation.ts` file with your SigNoz endpoint:
-
-<Tabs>
-<TabItem value="javascript" label="JavaScript">
-
-```javascript:instrumentation.js
----
-const logExporter = new OTLPLogExporter({
-  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs', // OTLP logs endpoint
-  headers: {
-    'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
-  },
-});
-```
-
-</TabItem>
-<TabItem value="typescript" label="TypeScript">
-
-```typescript:instrumentation.ts
----
-const logExporter = new OTLPLogExporter({
-  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs', // OTLP logs endpoint
-  headers: {
-    'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
-  },
-});
-```
-
-</TabItem>
-</Tabs>
-
-Replace the placeholders:
-
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</Admonition>
-
-</TabItem>
-<TabItem value="kubernetes" label="Kubernetes">
-
-If your application runs in Kubernetes with an OpenTelemetry Collector:
-
-<Tabs>
-<TabItem value="javascript" label="JavaScript">
-
-```javascript:instrumentation.js
----
-const logExporter = new OTLPLogExporter({
-  url: 'http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs',
-  headers: {},
-});
-```
-
-</TabItem>
-<TabItem value="typescript" label="TypeScript">
-
-```typescript:instrumentation.ts
----
-const logExporter = new OTLPLogExporter({
-  url: 'http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs',
-  headers: {},
-});
-```
-
-</TabItem>
-</Tabs>
-
-**Find your collector service details:**
-
-```bash
-# List OTel collector services
-kubectl get svc -A | grep otel
-
-# Example output:
-# platform  signoz-otel-collector  ClusterIP  10.96.0.10  <none>  4318/TCP
-```
-
-Replace `<otel-collector-service>` and `<namespace>` with your actual values.
-
-<Admonition type="warning">
-**Avoiding Duplicate Logs**
-
-If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
-
-[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
-
-</Admonition>
-
-See the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) for more details.
-
-</TabItem>
-</Tabs>
-
-### Step 5: Log Correlation (Optional)
+### Step 4: Log Correlation (Optional)
 
 Bunyan logs created within a tracing span are automatically enriched with span and trace IDs, enabling [correlation](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/). The added fields are:
 
@@ -457,7 +511,6 @@ You can use `tracer.startActiveSpan` to correlate logs with traces. Here is an e
 const api = require('@opentelemetry/api')
 
 const tracer = api.trace.getTracer('example')
-
 tracer.startActiveSpan('process-order', (span) => {
   logger.info({ orderId: '12345' }, 'Processing order')
   // Log record will include: trace_id, span_id, trace_flags
@@ -474,7 +527,6 @@ tracer.startActiveSpan('process-order', (span) => {
 const api = require('@opentelemetry/api')
 
 const tracer = api.trace.getTracer('example')
-
 tracer.startActiveSpan('process-order', (span) => {
   logger.info({ orderId: '12345' }, 'Processing order')
   // Log record will include: trace_id, span_id, trace_flags
@@ -486,7 +538,7 @@ tracer.startActiveSpan('process-order', (span) => {
 </TabItem>
 </Tabs>
 
-### Step 6: Run the Application
+### Step 5: Run the Application
 
 Run your application:
 
