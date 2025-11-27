@@ -9,21 +9,11 @@ description: Learn how to send logs from Node.js Bunyan logger to SigNoz using t
 
 import GetHelp from '@/components/shared/get-help.md'
 
-## Overview
-
-This guide will walk you through the process of sending logs from a Node.js application that uses the Bunyan logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
-
 ## Prerequisites
 
 - Node.js version 14 or higher
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 - A Node.js application that uses the Bunyan logger
-
-<Admonition type="info">
-  For full correlation between logs and traces, you'll also need to instrument your application for
-  traces. See [Node.js OpenTelemetry
-  instrumentation](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/).
-</Admonition>
 
 ## Send logs to SigNoz
 
@@ -133,7 +123,7 @@ yarn add @opentelemetry/sdk-node@^0.208.0 \
 Create a file named `logging-instrumentation.js` or `logging-instrumentation.ts` in your project root.
 
 <Tabs>
-<TabItem value="cloud-vm" label="Cloud / VM (Default)" default>
+<TabItem value="vm" label="VM" default>
 
 Use this configuration if you are sending logs directly to SigNoz Cloud or a local OTel Collector on a VM.
 
@@ -149,7 +139,6 @@ const {
 const { resourceFromAttributes } = require("@opentelemetry/resources");
 const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
 const { BatchLogRecordProcessor } = require("@opentelemetry/sdk-logs");
-const { SeverityNumber } = require("@opentelemetry/api-logs");
 
 // Configure the OTLP log exporter
 const logExporter = new OTLPLogExporter({
@@ -171,21 +160,7 @@ const sdk = new NodeSDK({
   logRecordProcessor: new BatchLogRecordProcessor(logExporter),
   instrumentations: [
     new BunyanInstrumentation({
-      // Optional: Disable log sending (only keep log correlation)
-      // disableLogSending: false,
-
-      // Optional: Disable log correlation (trace context injection)
-      // disableLogCorrelation: false,
-
-      // Optional: Add custom fields to log records
-      logHook: (span, record) => {
-        record["resource.environment"] = "dev";
-      },
-
-      // Optional: Set default log severity
-      // Default: SeverityNumber.UNSPECIFIED
-      // Other options: SeverityNumber.TRACE, SeverityNumber.DEBUG, SeverityNumber.INFO, SeverityNumber.WARN, SeverityNumber.ERROR, SeverityNumber.FATAL
-      logSeverity: SeverityNumber.UNSPECIFIED,
+      // configure the instrumentation
     }),
   ],
 });
@@ -215,7 +190,6 @@ import { BunyanInstrumentation } from "@opentelemetry/instrumentation-bunyan";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
-import { SeverityNumber } from "@opentelemetry/api-logs";
 
 // Configure the OTLP log exporter
 const logExporter = new OTLPLogExporter({
@@ -238,17 +212,7 @@ const sdk = new NodeSDK({
   logRecordProcessor: new BatchLogRecordProcessor(logExporter),
   instrumentations: [
     new BunyanInstrumentation({
-      // Optional: Disable log sending (only keep log correlation)
-      // disableLogSending: false,
-
-      // Optional: Disable log correlation (trace context injection)
-      // disableLogCorrelation: false,
-
-      // Optional: Add custom fields to log records
-      logHook: (_span, record) => {
-        record["resource.environment"] = "dev";
-      },
-      logSeverity: SeverityNumber.FATAL,
+      // configure the instrumentation
     }),
   ],
 });
@@ -299,7 +263,6 @@ const {
 const { resourceFromAttributes } = require("@opentelemetry/resources");
 const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
 const { BatchLogRecordProcessor } = require("@opentelemetry/sdk-logs");
-const { SeverityNumber } = require("@opentelemetry/api-logs");
 
 // Configure the OTLP log exporter for Kubernetes
 const logExporter = new OTLPLogExporter({
@@ -315,10 +278,7 @@ const sdk = new NodeSDK({
   logRecordProcessor: new BatchLogRecordProcessor(logExporter),
   instrumentations: [
     new BunyanInstrumentation({
-      logHook: (span, record) => {
-        record["resource.environment"] = "k8s";
-      },
-      logSeverity: SeverityNumber.UNSPECIFIED,
+      // configure the instrumentation
     }),
   ],
 });
@@ -348,7 +308,6 @@ import { BunyanInstrumentation } from "@opentelemetry/instrumentation-bunyan";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
-import { SeverityNumber } from "@opentelemetry/api-logs";
 
 // Configure the OTLP log exporter for Kubernetes
 const logExporter = new OTLPLogExporter({
@@ -365,10 +324,7 @@ const sdk = new NodeSDK({
   logRecordProcessor: new BatchLogRecordProcessor(logExporter),
   instrumentations: [
     new BunyanInstrumentation({
-      logHook: (_span, record) => {
-        record["resource.environment"] = "k8s";
-      },
-      logSeverity: SeverityNumber.FATAL,
+      // configure the instrumentation
     }),
   ],
 });
@@ -413,6 +369,8 @@ If using the `k8s-infra` chart (which auto-collects container logs), disable log
 
 </TabItem>
 </Tabs>
+
+Check out the Bunyan instrumentation options [here](https://www.npmjs.com/package/@opentelemetry/instrumentation-bunyan#bunyan-instrumentation-options).
 
 ### Step 3: Initialize OpenTelemetry SDK
 
@@ -597,6 +555,7 @@ This usually happens if the endpoint URL is incorrect. Ensure your URL ends with
 
 ## Next Steps
 
+- [Traces Instrumentation guide](https://signoz.io/docs/instrumentation/)
 - [Log Query/Filtering guides](https://signoz.io/docs/userguide/logs/)
 - [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
 
