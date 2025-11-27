@@ -16,7 +16,7 @@ This guide will walk you through the process of sending logs from a Node.js appl
 ## Prerequisites
 
 - Node.js version 14 or higher
-- A SigNoz instance (either SigNoz Cloud or self-hosted)
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 - A Node.js application that uses the Bunyan logger
 
 ## Setup
@@ -52,9 +52,9 @@ yarn add @opentelemetry/sdk-node \
 
 ### Step 2: Configure OpenTelemetry SDK
 
-Create a file named `instrumentation.js` or `logging.js` in your project root:
+Create a file named `logging-instrumentation.js` in your project root:
 
-```javascript:instrumentation.js
+```javascript:logging-instrumentation.js
 const { NodeSDK } = require("@opentelemetry/sdk-node");
 const { OTLPLogExporter } = require("@opentelemetry/exporter-logs-otlp-http");
 const {
@@ -138,22 +138,12 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/test-log", (req, res) => {
-  logger.info({ path: req.path, method: req.method }, "Test log endpoint hit");
-  res.send("Test log endpoint");
-});
-
 app.get("/error-log", (req, res) => {
   logger.error(
     { path: req.path, method: req.method },
     "Error log endpoint hit",
   );
   res.status(500).send("Error log endpoint");
-});
-
-app.get("/warn-log", (req, res) => {
-  logger.warn({ path: req.path, method: req.method }, "Warn log endpoint hit");
-  res.status(400).send("Warn log endpoint");
 });
 
 app.listen(3000, () => {
@@ -169,6 +159,7 @@ Update the `instrumentation.js` file with your SigNoz endpoint:
 <TabItem value="vm" label="VM / Local" default>
 
 ```javascript:instrumentation.js
+---
 const logExporter = new OTLPLogExporter({
   url: 'https://ingest.<region>.signoz.cloud:443/v1/logs', // OTLP logs endpoint
   headers: {
@@ -194,6 +185,7 @@ Replace the placeholders:
 If your application runs in Kubernetes with an OpenTelemetry Collector:
 
 ```javascript:instrumentation.js
+---
 const logExporter = new OTLPLogExporter({
   url: 'http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs',
   headers: {},
