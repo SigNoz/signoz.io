@@ -580,6 +580,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         label: 'Kubernetes',
+        route: '/docs/opentelemetry-collection-agents/k8s/get-started',
         items: [
           {
             type: 'category',

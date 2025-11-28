@@ -1,0 +1,33 @@
+---
+date: 2025-11-28
+id: get-started
+title: Kubernetes Collection Agents
+description: Overview of SigNoz collection agents for Kubernetes environments.
+tags: [SigNoz Cloud, Self-Host]
+doc_type: explanation
+---
+
+SigNoz provides specialized collection agents to help you monitor your Kubernetes clusters and applications. Depending on your specific needs—whether you need full infrastructure monitoring, application auto-instrumentation, or support for serverless environments—you can choose the agent that best fits your use case.
+
+## Choose your agent
+
+<CollectionAgentsListicle platform="kubernetes" />
+
+## Which agent should I use?
+
+### K8s Infra (Recommended)
+**K8s Infra** is the default choice for most environments. It is based on the standard [OpenTelemetry Collector Helm chart](https://opentelemetry.io/docs/platforms/kubernetes/helm/collector/) but comes pre-configured by SigNoz with best practices for:
+- **Logs**: Cluster-level logs from all pods.
+- **Metrics**: Node, pod, and container metrics.
+- **Traces**: Acts as a gateway for application traces.
+
+Use this for full cluster visibility with minimal setup. To send traces, [instrument your application](https://signoz.io/docs/instrumentation) and point it to the K8s Infra agent.
+
+### OpenTelemetry Operator
+Use the **OpenTelemetry Operator** if you need **auto-instrumentation** (capturing traces without code changes). It injects instrumentation libraries directly into your application pods.
+
+**Recommendation**:
+Start with **K8s Infra** for standard cluster monitoring (logs, metrics, and traces). Add the **OpenTelemetry Operator** only if you specifically need auto-instrumentation.
+
+### Serverless (EKS Fargate)
+Use the **Serverless agent** for AWS EKS Fargate workloads. Since Fargate abstracts the underlying nodes, this agent runs as a sidecar to collect telemetry.
