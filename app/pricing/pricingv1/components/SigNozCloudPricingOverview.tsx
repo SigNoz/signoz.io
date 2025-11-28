@@ -198,7 +198,20 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
         {/* Bottom link */}
         <div className="text-center text-sm">
           <p className="text-signoz_vanilla-400">
-            Tired of unpredictable pricing and complex billing structure? Save up to{' '}
+            Tired of unpredictable pricing and complex billing structure?
+            <br />
+            Migrate your Datadog dashboards in minutes with our{' '}
+            <TrackingLink
+              href="https://signoz.io/datadog-migration-tool/"
+              className="text-signoz_robin-500 hover:underline"
+              clickType="Nav Click"
+              clickName="Migration Tool Link"
+              clickLocation="Pricing Overview Card"
+              clickText="automated migration tool"
+            >
+              automated migration tool
+            </TrackingLink>{' '}
+            and save up to{' '}
             <TrackingLink
               href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
               className="text-signoz_robin-500 hover:underline"
