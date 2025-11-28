@@ -46,11 +46,12 @@ export const getPageType = (pathname: string): string => {
   if (normalizedPath.match(/^\/guides\/page\/\d+$/)) return 'Guide Listing Page'
 
   // OTel listing pages
-  if (normalizedPath === '/resource-center/opentelemetry' || normalizedPath === '/opentelemetry')
-    return 'OTel Listing Page'
+  if (normalizedPath === '/resource-center/opentelemetry') return 'OTel Listing Page'
   if (normalizedPath.match(/^\/resource-center\/opentelemetry\/page\/\d+$/))
     return 'OTel Listing Page'
   if (normalizedPath.match(/^\/opentelemetry\/page\/\d+$/)) return 'OTel Listing Page'
+
+  if (normalizedPath === '/opentelemetry') return 'Blog Page'
 
   // Content pages (ensure they are not listing pages)
   if (normalizedPath.startsWith('/blog/') && !normalizedPath.match(/^\/blog\/page\/\d+$/))
