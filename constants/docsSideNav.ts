@@ -1554,11 +1554,6 @@ const docsSideNav = [
             label: 'Prometheus Metrics',
           },
           {
-            type: 'doc',
-            route: '/docs/userguide/envoy-metrics',
-            label: 'Envoy Metrics',
-          },
-          {
             type: 'category',
             label: 'Infrastructure',
             isExpanded: false,
@@ -1567,6 +1562,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/metrics-management/docker-container-metrics',
                 label: 'Docker container metrics',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/envoy-metrics',
+                label: 'Envoy Metrics',
               },
               {
                 type: 'doc',
