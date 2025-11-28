@@ -27,43 +27,7 @@ Not sure if you need a Collector? See [Why use the OpenTelemetry Collector?](htt
 
 Update your Collector's configuration file to forward data to SigNoz.
 
-```yaml:otel-collector-config.yaml
-receivers:
-  otlp:
-    protocols:
-      http:
-        endpoint: 0.0.0.0:4318
-      grpc:
-        endpoint: 0.0.0.0:4317
-
-processors:
-  batch:
-
-exporters:
-  otlphttp:
-    endpoint: https://ingest.<region>.signoz.cloud:443
-    headers:
-      signoz-ingestion-key: <your-ingestion-key>
-
-service:
-  pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp]
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp]
-    logs:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp]
-```
-
-Replace:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+Please follow the [configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) to configure your OpenTelemetry Collector. You will need to update the `endpoint` with your [Ingestion Endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and add your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to the `headers`.
 
 ## Step 2. Update your application environment variables
 
@@ -82,7 +46,9 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 unset OTEL_EXPORTER_OTLP_HEADERS
 ```
 
+<Admonition type="info">
 If your Collector runs on a different host, replace `localhost` with the Collector's hostname or IP. For Kubernetes, use the Service name (e.g., `http://otel-collector.observability.svc.cluster.local:4318`).
+</Admonition>
 
 ## Step 3. Restart and validate
 

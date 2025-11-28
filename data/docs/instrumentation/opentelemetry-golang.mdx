@@ -6,12 +6,12 @@ description: Learn how to instrument your Go application with OpenTelemetry and 
 tags: [SigNoz Cloud, Self-Host]
 doc_type: howto
 ---
-This guide shows you how to instrument your Go application with OpenTelemetry and send traces to SigNoz.
+This guide shows you how to instrument your Go application with OpenTelemetry and send traces to SigNoz. Instrument your Go services with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or a self-hosted collector.
+
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
-## Overview
-Instrument your Go services with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or a self-hosted collector.
+
 ## Prerequisites
 - Go 1.21 or later
 - A SigNoz Cloud account or self-hosted SigNoz instance
@@ -164,8 +164,6 @@ func initTracer(ctx context.Context) (func(context.Context) error, error) {
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(res),
-		// Sample 10% of traces (adjust based on your needs)
-		sdktrace.WithSampler(sdktrace.TraceIDRatioBased(0.1)),
 	)
 
 	// Makes the tracer available to instrumentation libraries
@@ -1142,18 +1140,6 @@ echo $OTEL_SERVICE_NAME
 curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
 ```
 
-**Enable debug logging:**
-
-```go:debug-logging.go
-import "go.opentelemetry.io/otel/sdk/trace"
-
-
-tp := sdktrace.NewTracerProvider(
-	// ... other options
-	sdktrace.WithSampler(sdktrace.AlwaysSample()),
-)
-```
-
 ### Why do OTLP exports fail with `connection refused`?
 
 - **VM**: Verify the endpoint URL and that your firewall allows outbound HTTPS
@@ -1163,10 +1149,8 @@ tp := sdktrace.NewTracerProvider(
 ### Why do spans go missing for specific requests?
 
 Ensure you're using instrumented versions of HTTP clients and database drivers.
-Also confirm your sampler configuration matches expectations—if you switched from `sdktrace.WithSampler(sdktrace.AlwaysSample())` in dev to `TraceIDRatioBased` in prod, make sure the ratio still captures critical flows (e.g., `sdktrace.TraceIDRatioBased(0.2)` instead of `0.01`). See the framework-specific guides above for instrumentation details.
+Check if you have not set a sampling rate type which might affect sending spans or span rate.
 </details>
-
-
 <details>
 <ToggleHeading>
 ## Setup OpenTelemetry Collector (Optional)
