@@ -75,7 +75,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Assume basic language/library knowledge
   - Readers know their programming language and framework basics.
   - Do not explain language fundamentals (e.g., how to install dependencies, what environment variables are, basic syntax).
-  - However, assume **no prior OpenTelemetry knowledge**. Explain OTel concepts clearly when introduced (spans, traces, collectors, exporters, etc.).
+  - However, assume **no prior OpenTelemetry knowledge**. Briefly explain OTel concepts when introduced (spans, traces, collectors, exporters, etc.) and link to reference docs. Do not go deep into explanation.
 - Be complete and practical
   - Cover end-to-end use cases. Link to related topics: ingestion, dashboard templates, alerts, query builder, and relevant features.
   - Add brief context for OpenTelemetry-specific terms and define them on first use.
@@ -264,19 +264,17 @@ Every doc should be skimmable and actionable.
 
 ### Patterns and components
 
-- Use `KeyPointCallout` for notes, warnings, tips, and collapsible supplementary info:
+- Use `Admonition` for notes, warnings, and tips:
   ```mdx
-  <KeyPointCallout title="Important note">
-  Short, actionable note content here.
-  </KeyPointCallout>
+  <Admonition type="info">Short, actionable note.</Admonition>
   ```
-  For collapsible content:
+- Use `KeyPointCallout` for collapsible supplementary info:
   ```mdx
   <KeyPointCallout title="Optional details" defaultCollapsed={true}>
   Content that users can expand if needed.
   </KeyPointCallout>
   ```
-- Use `Tabs`/`TabItem` to branch by platform, OS, or materially different flows. For Cloud vs Self-Host, prefer the `KeyPointCallout` snippet + comparison page.
+- Use `Tabs`/`TabItem` to branch by platform, OS, or materially different flows. For Cloud vs Self-Host, prefer the drop-in snippet + comparison page.
 - Use numbered steps for procedures and bullets for reference content.
 - Keep headings short and meaningful. Prefer H2 for main sections.
 
@@ -369,7 +367,7 @@ Send Data docs guide users through instrumenting their applications to send tele
 - **Knows**: Their programming language, framework basics, and general development workflow.
 - **Doesn't know**: OpenTelemetry concepts, instrumentation patterns, or how observability data flows.
 
-Explain OTel-specific terms (spans, traces, exporters, collectors) when first introduced. Don't explain language basics.
+Explain OTel-specific terms (spans, traces, exporters, collectors) when first introduced. Add brief context and reference other docs; do not go deep into explanation. Don't explain language basics.
 
 #### URL and naming
 
@@ -418,7 +416,7 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 #### Optional Collector setup section
 
-Include this collapsible section at the end of Send Data docs, before Troubleshooting:
+Include this collapsible section at the end of Send Data docs which by default don't mandatorily need OTel collector, before Troubleshooting:
 
 ```mdx
 <details>
