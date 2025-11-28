@@ -7,8 +7,6 @@ tags: [SigNoz Cloud, Self-Host]
 doc_type: howto
 ---
 
-## Overview
-
 Manual instrumentation gives you fine-grained control when automatic instrumentation alone cannot express important business operations. Use it to capture steps that matter for debugging, to attach business-specific attributes, or to guarantee that failures surface with the right context in SigNoz.
 
 <KeyPointCallout title="Works for both SigNoz Cloud and Self-Hosted">
@@ -20,7 +18,6 @@ Manual instrumentation gives you fine-grained control when automatic instrumenta
 - Finish the core Go setup in the [OpenTelemetry Go instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-golang/) so exporters, tracer provider, and propagators are configured.
 - Propagate `context.Context` through handlers and business logic. Manual spans derive from these contexts so traces stay connected.
 - Tested with Go 1.25.1 and OpenTelemetry Go SDK v1.38.0.
-
 ## Step 1. Create manual spans
 
 Use the SDK tracer to wrap important work inside custom spans:
@@ -148,5 +145,6 @@ func riskyOperation(ctx context.Context) error {
 
 ## Next steps
 
-- Add instrumentation to common Go frameworks via the [Go instrumentation library catalog](https://signoz.io/docs/instrumentation/opentelemetry-golang/#library-instrumentation).
-- Review [manual instrumentation patterns for Java](https://signoz.io/docs/instrumentation/manual-instrumentation/java/annotations) and [JavaScript](https://signoz.io/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs) if you work across multiple runtimes.
+- Send logs from your Go application using popular logging libraries: [Logrus](https://signoz.io/docs/logs-management/send-logs/logrus-to-signoz/), [Zap](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz/), or [Zerolog](https://signoz.io/docs/logs-management/send-logs/zerolog-to-signoz/)
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to accelerate triage across signals
+- Add instrumentation to common Go frameworks via the [Go instrumentation library catalog](https://signoz.io/docs/instrumentation/opentelemetry-golang/#library-instrumentation)
