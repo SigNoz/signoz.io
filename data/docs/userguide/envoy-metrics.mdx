@@ -22,7 +22,7 @@ Envoy is a high-performance edge and service proxy. This guide will help you sen
 
 ### Step 1: Configure Envoy with OpenTelemetry Sink
 
-Envoy can send metrics to SigNoz using the OpenTelemetry (OTel) protocol. You can learn more about it at [OpenTelemetry Stat Sink](https://www.envoyproxy.io/docs/envoy/latest/operations/operations#operations-metrics).
+Envoy can send metrics to SigNoz using the OpenTelemetry (OTel) protocol. You can learn more about it at <a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/stat_sinks/open_telemetry_stat_sink" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Stat Sink</a>.
 
 Update your Envoy configuration:
 
@@ -61,50 +61,9 @@ static_resources:
 
 ### Step 2: Configure OpenTelemetry Collector
 
-Update your OpenTelemetry Collector configuration in `otel-collector-config.yaml`:
+SigNoz OpenTelemetry Collector is configured to receive OTLP metrics by default. If you are using a custom collector, ensure it is configured to receive OTLP metrics.
 
-```yaml:otel-collector-config.yaml
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-
-processors:
-  batch:
-
-  memory_limiter:
-    check_interval: 5s
-    limit_mib: 4000
-
-exporters:
-  otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
-
-service:
-  pipelines:
-    metrics:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [otlp]
-```
-
-Replace the placeholders:
-
-- `<region>`: Set to your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for more information.
-
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</Admonition>
+For more details on configuring the collector, refer to the [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) guide.
 
 ### Step 3: Restart the Collector
 
@@ -112,7 +71,7 @@ Restart the OpenTelemetry Collector for the changes to take effect.
 
 ## Validate Metrics
 
-After setting up the collector, go to the **[Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)** in SigNoz and search for a metric from your application, run the query to confirm data is flowing:
+After setting up the collector, go to the **[Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/)** in SigNoz and search for Envoy metrics to confirm data is flowing:
 
 - `envoy_cluster_upstream_cx_total`
 - `envoy_cluster_upstream_cx_active`
