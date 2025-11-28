@@ -845,6 +845,12 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'Switch to Collector',
+            route:
+              '/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector',
+          },
+          {
+            type: 'doc',
             label: 'Why Use Collector',
             route:
               '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
@@ -986,9 +992,17 @@ const docsSideNav = [
             ],
           },
           {
-            type: 'doc',
+            type: 'category',
+            isExpanded: false,
             label: 'Golang',
             route: '/docs/instrumentation/opentelemetry-golang',
+            items: [
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation',
+              },
+            ],
           },
           {
             type: 'doc',
