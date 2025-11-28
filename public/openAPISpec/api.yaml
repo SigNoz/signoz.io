@@ -182,7 +182,7 @@ paths:
         - name: Authorization
           in: header
           required: false
-          description: Bearer token for authentication (alternative to API key). Format: "Bearer <token>"
+          description: 'Bearer token for authentication (alternative to API key). Format: "Bearer <token>"'
           schema:
             type: string
           example: 'Bearer eyJhbGc...'
@@ -598,7 +598,7 @@ paths:
         * `builder` - Query builder for logs, traces, and metrics
         * `clickhouse_sql` - Raw SQL queries (recommended to use this only when you need to use complex queries that are not supported by the query builder)
         * `promql` - PromQL queries (uses Prometheus remote read with ClickHouse as the backend, slower than the query builder)
-      operationId: queryRange
+      operationId: queryRangeV4
       parameters:
         - name: SIGNOZ-API-KEY
           in: header
@@ -1085,7 +1085,7 @@ components:
       properties:
         target:
           description: Target value for the condition. The "Alert Threshold" from the alert configuration UI.
-          type: float
+          type: number
         matchType:
           description: Type of the match
           oneOf:
@@ -2565,30 +2565,21 @@ components:
       content:
         application/json:
           schema:
-            allOf:
-              - description: Field object that needs to be added to the system
-                title: Field
-              - $ref: '#/components/schemas/Field'
+            $ref: '#/components/schemas/Field'
       description: Field object that needs to be added to the system
       required: true
     Alert:
       content:
         application/json:
           schema:
-            allOf:
-              - description: Alert object that needs to be added to the system
-                title: Alert
-              - $ref: '#/components/schemas/Alert'
+            $ref: '#/components/schemas/Alert'
       description: Alert object that needs to be added to the system
       required: true
     Dashboard:
       content:
         application/json:
           schema:
-            allOf:
-              - description: Dashboard object that needs to be added to the system
-                title: Dashboard
-              - $ref: '#/components/schemas/Dashboard'
+            $ref: '#/components/schemas/Dashboard'
       description: Dashboard object that needs to be added to the system
       required: true
   securitySchemes:
