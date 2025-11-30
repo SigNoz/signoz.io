@@ -221,6 +221,10 @@ Every doc should be skimmable and actionable.
     - `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
     - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
 
+  - **Append, don't replace**: When showing OpenTelemetry Collector configuration (e.g., adding a new receiver or exporter), show only the specific snippet to add and instruct the user to **append** it to their existing `otel-collector-config.yaml` and **enable** it in the pipeline. Avoid showing a full `otel-collector-config.yaml` that users might copy-paste, overwriting their existing setup (like resource detectors or other processors).
+    - ✅ "Add the `filelog` receiver to your `receivers` section and enable it in `service.pipelines.logs`."
+    - ❌ "Replace your `otel-collector-config.yaml` with the following content:"
+
 - Hyperlinks
 
   - Internal links should open in the new tab. Always prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.

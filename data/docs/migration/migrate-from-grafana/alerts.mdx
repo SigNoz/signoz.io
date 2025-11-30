@@ -1,16 +1,31 @@
 ---
-date: 2025-04-22
+date: 2025-11-30
 id: migrate-from-grafana-alerts
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: Migrate Alerts from LGTM Stack
-description: Migrating alerts from LGTM Stack to SigNoz. How to migrate alerts from LGTM Stack to SigNoz.
+description: Learn how to migrate your alerts from the LGTM stack (Prometheus/Grafana) to SigNoz.
+doc_type: howto
 ---
 
 While migrating your observability stack from the LGTM stack to SigNoz, you'll also need to recreate your alerts in SigNoz's alert management system.
 
+## Prerequisites
+
+- A SigNoz account (SigNoz Cloud or Self-Hosted).
+- List of existing alert rules and notification channels from Grafana/AlertManager.
+
+## Migration Steps
+
 ### Setting Up Notification Channels
 
-Before migrating your alerts to SigNoz, you will need to set up the notification channels you want to use. Below is a list of notification channels supported by AlertManager/Grafana and SigNoz:
+Before migrating your alerts to SigNoz, you will need to set up the notification channels you want to use.
+
+<details>
+<ToggleHeading>
+### Supported Notification Channels
+</ToggleHeading>
+
+Below is a list of notification channels supported by AlertManager/Grafana and SigNoz:
 
 | Notification Channel | AlertManager/Grafana | SigNoz             |
 |----------------------|----------------------|-------------------|
@@ -30,21 +45,42 @@ Before migrating your alerts to SigNoz, you will need to set up the notification
 | Rootly               | ✓ (via Webhook)      | ✓ (via Webhook)   |
 | Zenduty              | ✓ (via Webhook)      | ✓ (via Webhook)   |
 
-As you can see, in addition to the most of the channels supported by AlertManager/Grafana, some more modern incident management platforms like Incident.io, Rootly, and Zenduty are also supported by SigNoz. If the notification channel you need is not listed, you will need to use `Webhook` channel to integrate with other tools.
+</details>
 
-Please refer to [Alerts Notification Channel](/docs/alerts-management/notification-channel) documentation for more details on how to set up notification channels in SigNoz.
+If the notification channel you need is not listed, you can use the **Webhook** channel to integrate with other tools.
 
+For detailed setup instructions, see the [Alerts Notification Channel documentation](https://signoz.io/docs/alerts-management/notification-channel).
 
 ### Setting Up Alert Rules
 
-SigNoz provides a comprehensive alert management system that supports:
+SigNoz provides a comprehensive alert management system. You can migrate your existing rules by mapping them to the corresponding alert types in SigNoz:
 
-- **[Metrics-based alerts](/docs/alerts-management/metrics-based-alerts/)**: Monitor metric values and trigger alerts based on thresholds
-- **[Trace-based alerts](/docs/alerts-management/trace-based-alerts/)**: Alert on trace metrics like latency or error rates
-- **[Log-based alerts](/docs/alerts-management/log-based-alerts/)**: Create alerts based on log patterns or frequencies
-- **[Anomaly-based alerts](/docs/alerts-management/anomaly-based-alerts/)**: Trigger alerts when metrics deviate from normal patterns
-- **[Exceptions-based alerts](/docs/alerts-management/exceptions-based-alerts/)**: Alert on application exceptions
+#### Alert Rule Mapping
 
-Both Metrics-based and Anomaly-based alerts support using PromQL queries to define the alert condition, meaning you can use the same queries you used in Prometheus/Grafana.
+| Grafana / Prometheus Rule | SigNoz Alert Type | Notes |
+| :--- | :--- | :--- |
+| **Metric Alert** (PromQL) | [Metric Alert](https://signoz.io/docs/alerts-management/metrics-based-alerts/) | Supports raw PromQL. Direct copy-paste often works. |
+| **Log Alert** (LogQL) | [Log Alert](https://signoz.io/docs/alerts-management/log-based-alerts/) | Use Query Builder to recreate LogQL filters. |
+| **Trace Alert** (Tempo) | [Trace Alert](https://signoz.io/docs/alerts-management/trace-based-alerts/) | Alert on latency, error rates, or span attributes. |
+| **Anomaly Detection** | [Anomaly Alert](https://signoz.io/docs/alerts-management/anomaly-based-alerts/) | Detects deviations without static thresholds. |
+| **Recording Rules** | Not directly supported | Use scheduled queries or materialization (ClickHouse) if needed. |
 
-In case you define alert rules as code in your LGTM Stack (either as Prometheus rules or using Grafana Terraform provider), you can continue using the same approach while migrating to SigNoz, by utilizing the [SigNoz Terraform Provider](https://signoz.io/docs/alerts-management/terraform-provider-signoz/).
+### Infrastructure as Code (Terraform)
+
+If you define alert rules as code in your LGTM Stack (either as Prometheus rules or using the Grafana Terraform provider), you can continue using the same approach while migrating to SigNoz.
+
+Use the [SigNoz Terraform Provider](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs) to manage your alerts and notification channels programmatically.
+
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Alerts not triggering
+
+- **Check Query**: Verify that the PromQL query returns data in the Query Builder.
+- **Check Thresholds**: Ensure the threshold conditions are met.
+- **Check Notification Channel**: Send a test alert to verify the channel configuration.
+
+</details>

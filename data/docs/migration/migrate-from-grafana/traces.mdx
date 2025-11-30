@@ -1,65 +1,143 @@
 ---
-date: 2025-04-22
+date: 2025-11-30
 id: migrate-from-grafana-traces
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: Migrate Traces from LGTM Stack
-description: Migrating traces from LGTM Stack to SigNoz. How to migrate traces from LGTM Stack to SigNoz.
+description: Learn how to migrate your distributed traces from Tempo (LGTM Stack) to SigNoz using OpenTelemetry.
+doc_type: howto
 ---
 
 Migrating your distributed tracing from Tempo to SigNoz involves redirecting your trace collection to SigNoz's OpenTelemetry Collector. The approach you take depends on how your applications are currently instrumented.
 
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- A SigNoz account (SigNoz Cloud or Self-Hosted).
+- Access to your application code or OpenTelemetry Collector configuration.
+
+## Migration Strategies
+
 ### For Applications Using OpenTelemetry
 
-If your applications are already instrumented with OpenTelemetry:
+If your applications are already instrumented with OpenTelemetry, you can easily switch to SigNoz by updating your exporter configuration.
 
-- Follow the [language-specific instrumentation guides](/docs/instrumentation/).
-- If you're using an OpenTelemetry Collector in your environment, update its configuration:
+#### Step 1: Obtain Connection Details
 
-```yaml
-exporters:
-  otlp:
-    # For SigNoz Cloud
-    endpoint: "ingest.{region}.signoz.cloud:443"
-    headers:
-      "signoz-ingestion-key": "<your-ingestion-key>"
-    tls:
-      insecure: false
+1. Log into your [SigNoz Cloud account](https://signoz.io/teams/).
+2. Navigate to **Settings** → **Ingestion Settings**.
+3. Note your **Ingestion Key** and **Ingestion URL**.
 
-    # For Self-hosted SigNoz
-    # endpoint: "<signoz-otel-collector>:4317"
-    # tls:
-    #   insecure: true
+#### Step 2: Update OpenTelemetry Configuration
+
+Set the following environment variables for your application:
+
+```bash
+# Replace with your SigNoz cloud region
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# Replace with your SigNoz ingestion key
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
 ```
+
+If you are using an **OpenTelemetry Collector**, update your `config.yaml` to include the OTLP exporter.
+
+1. **Add OTLP Exporter**: Add the following to your `exporters` section:
+
+   ```yaml
+   exporters:
+     otlp:
+       endpoint: "https://ingest.<region>.signoz.cloud:443"
+       headers:
+         signoz-ingestion-key: "SIGNOZ_INGESTION_KEY"
+       tls:
+         insecure: false
+   ```
+
+2. **Enable in Pipeline**: Add `otlp` to your traces pipeline in the `service` section:
+
+   ```yaml
+   service:
+     pipelines:
+       traces:
+         exporters: [otlp] # Add other exporters if needed
+   ```
+
+Replace the following placeholders:
+- `<region>`: Your SigNoz Cloud region (e.g., `us`, `eu`, `in`).
+- `SIGNOZ_INGESTION_KEY`: Your SigNoz Ingestion Key.
+
+<Admonition type="tip">
+  We also recommend configuring the [Resource Detection Processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) to automatically detect resource attributes from the host environment.
+</Admonition>
 
 ### For Applications Using Jaeger or Zipkin
 
 Tempo can be used with open source tracing protocols, including Jaeger, Zipkin, or OpenTelemetry. If you are already using Tempo with this setup, the migration is straightforward:
 
-1. Configure the OpenTelemetry Collector with [Jaeger](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jaegerreceiver/README.md) and [Zipkin](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/zipkinreceiver/README.md) receivers:
+1. **Install OpenTelemetry Collector**  
+   If you haven't already, install the OpenTelemetry Collector. Follow the [installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
 
-```yaml
-receivers:
-  # For Zipkin
-  zipkin:
-    endpoint: 0.0.0.0:9411
-  # For Jaeger
-  jaeger:
-    protocols:
-      grpc:
-  jaeger/withendpoint:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:14260
-```
+2. **Configure Receivers**  
+   Add the [Jaeger](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jaegerreceiver/README.md) and [Zipkin](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/zipkinreceiver/README.md) receivers to your `config.yaml`.
 
-2. Point your applications to the OpenTelemetry Collector instead of Tempo.
+   ```yaml
+   receivers:
+     # For Zipkin
+     zipkin:
+       endpoint: 0.0.0.0:9411
+     # For Jaeger
+     jaeger:
+       protocols:
+         grpc:
+           endpoint: 0.0.0.0:14250
+         thrift_http:
+           endpoint: 0.0.0.0:14268
+   ```
 
----
+3. **Enable in Pipeline**: Add these receivers to your traces pipeline:
+
+   ```yaml
+   service:
+     pipelines:
+       traces:
+         receivers: [jaeger, zipkin, otlp]
+         processors: [batch]
+         exporters: [otlp]
+   ```
+
+4. **Point Applications to Collector**  
+   Update your applications to send traces to the OpenTelemetry Collector's address instead of Tempo.
+
+## Validate
+
+To confirm that traces are being sent to SigNoz:
+
+1. Generate some traffic to your application.
+2. Go to **Traces** in SigNoz.
+3. Click on **Run Query** (or use the default view).
+4. You should see a list of recent traces.
+
+## Next Steps
 
 SigNoz provides advanced features for analyzing traces:
 
-- **[Trace Explorer](/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces
-- **[Service Map](/docs/userguide/service-map/)**: Visualize dependencies between services
-- **[Exceptions Monitoring](/docs/userguide/exceptions/)**: Track and analyze application exceptions
+- **[Trace Explorer](https://signoz.io/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces.
+- **[Service Map](https://signoz.io/docs/userguide/service-map/)**: Visualize dependencies between services.
+- **[Exceptions Monitoring](https://signoz.io/docs/userguide/exceptions/)**: Track and analyze application exceptions.
 
-By migrating from Tempo to SigNoz, you gain a more integrated experience with metrics and logs, enabling faster troubleshooting and more comprehensive analysis.
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Traces not appearing
+
+- **Check Endpoint**: Ensure you are sending data to the correct endpoint (`ingest.{region}.signoz.cloud:443` for Cloud, port `4317` for Self-Hosted).
+- **Check Protocol**: Ensure you are using the correct protocol (gRPC vs HTTP). The example above uses gRPC (`otlp`).
+- **Check Authentication**: For SigNoz Cloud, verify your `signoz-ingestion-key`.
+- **Check Logs**: Look at the OpenTelemetry Collector logs for any export errors.
+
+</details>
