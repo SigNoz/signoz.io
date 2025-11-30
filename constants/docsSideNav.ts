@@ -2417,6 +2417,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/litellm-observability',
+        label: 'LiteLLM',
+        type: 'doc',
+      },
+      {
         route: '/docs/llamaindex-observability',
         label: 'LlamaIndex',
         type: 'doc',
@@ -3106,22 +3111,9 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'From OpenTelemetry',
-        type: 'category',
-        isExpanded: false,
+        type: 'doc',
         route: '/docs/migration/migrate-from-opentelemetry-to-signoz',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/migration/migrate-from-opentelemetry/cloud',
-            label: 'Migrate to SigNoz Cloud',
-          },
-          {
-            type: 'doc',
-            route: '/docs/migration/migrate-from-opentelemetry/self-hosted',
-            label: 'Migrate to Self-Hosted SigNoz',
-          },
-        ],
+        label: 'From OpenTelemetry',
       },
       {
         type: 'doc',

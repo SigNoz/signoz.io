@@ -1022,6 +1022,16 @@ module.exports = () => {
           destination: '/docs/install/docker/',
           permanent: true,
         },
+        {
+          source: '/docs/migration/migrate-from-opentelemetry/cloud/',
+          destination: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-opentelemetry/self-hosted/',
+          destination: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
