@@ -15,7 +15,6 @@ import TrackingLink from '@/components/TrackingLink'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
-import { useScrollToHash } from '@/hooks/useScrollToHash'
 
 // Extend the Blog type to include CTA fields
 interface OpenTelemetryContent extends Blog {
@@ -48,8 +47,6 @@ export default function OpenTelemetryLayout({
   const mainRef = useRef<HTMLElement | null>(null)
   const tocContainerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<string>('')
-
-  useScrollToHash()
 
   useEffect(() => {
     const observer = new IntersectionObserver(

@@ -580,7 +580,6 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         label: 'Kubernetes',
-        route: '/docs/opentelemetry-collection-agents/k8s/get-started',
         items: [
           {
             type: 'category',
@@ -845,12 +844,6 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: 'Switch to Collector',
-            route:
-              '/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector',
-          },
-          {
-            type: 'doc',
             label: 'Why Use Collector',
             route:
               '/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector',
@@ -992,17 +985,9 @@ const docsSideNav = [
             ],
           },
           {
-            type: 'category',
-            isExpanded: false,
+            type: 'doc',
             label: 'Golang',
             route: '/docs/instrumentation/opentelemetry-golang',
-            items: [
-              {
-                type: 'doc',
-                label: 'Manual Instrumentation',
-                route: '/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation',
-              },
-            ],
           },
           {
             type: 'doc',
