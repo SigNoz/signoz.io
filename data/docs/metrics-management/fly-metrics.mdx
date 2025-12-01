@@ -79,6 +79,9 @@ echo '<RAW_TOKEN_AFTER_FlyV1>' > fly_federate_token
 
 ### Step 4: Configure the OpenTelemetry Collector
 
+<Tabs>
+<TabItem value="Docker" label="Docker">
+
 Update `otel.yaml` to scrape Fly’s federation endpoint and export to SigNoz.
 
 ```yaml:otel.yaml
@@ -124,7 +127,7 @@ service:
       exporters: [otlphttp]
 ```
 
-You would need to replace `{region}` with the [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) of your SigNoz Cloud environment and `<YOUR_SIGNOZ_API_KEY>` with your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/), and <your-org-slug> with your organization slug.
+You would need to replace `{region}` with the [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) of your SigNoz Cloud environment and `<YOUR_SIGNOZ_API_KEY>` with your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/), and \<your-org-slug\> with your organization slug.
 
 
 <Admonition type="note">
@@ -146,7 +149,190 @@ docker run --rm -it \
 You should see logs indicating the collector started and is sending metrics to the SigNoz ingest endpoint.
 If you see “failed to scrape” or auth errors, re-check the token step.
 
-### Step 6: Manually verify the federation endpoint
+</TabItem>
+
+<TabItem value="vm" label="VM" default>
+Follow instructions here to install [OpenTelemetry Binary as an agent](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)
+
+Update `config.yaml` in `otelcol-contrib` folder and paste the below yaml configuration code in it.
+
+```yaml:otel.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: fly-federate
+          scheme: https
+          metrics_path: /prometheus/<your-org-slug>/federate   # e.g., /prometheus/personal/federate
+          params:
+            match[]: ['{__name__=~"fly_.*"}']                  # only Fly metrics
+          static_configs:
+            - targets: ["api.fly.io"]
+          authorization:
+            type: FlyV1
+            credentials_file: /etc/otel/secret/fly_federate_token
+
+processors:
+  transform/fly_metrics:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - 'convert_gauge_to_sum("cumulative", true) where IsMatch(metric.name, "^fly_.*_count$") or metric.name == "fly_instance_cpu" or metric.name == "fly_instance_net_sent_bytes" or metric.name == "fly_instance_net_recv_bytes"'
+
+  batch: {}
+
+exporters:
+  otlphttp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    headers:
+      signoz-access-token: <YOUR_SIGNOZ_API_KEY>
+
+service:
+  telemetry:
+    logs:
+      level: debug
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [transform/fly_metrics, batch]
+      exporters: [otlphttp]
+```
+
+You would need to replace `{region}` with the [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) of your SigNoz Cloud environment and `<YOUR_SIGNOZ_API_KEY>` with your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/), and `\<your-org-slug\>` with your organization slug.
+
+
+<Admonition type="note">
+  Fly's `/federate` endpoint doesn't expose metric types, so all metrics are mapped as Gauge by
+  default. To override this, we use the transform processor `convert_gauge_to_sum`. If you want to
+  convert any other metrics, add them to the transform processor.
+</Admonition>
+
+
+### Step 5: Run the Collector
+From the otelcol-contrib, run the following command:
+
+```
+./otelcol-contrib --config ./config.yaml
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+You can use K8s-Infra for this,start by running the following command:
+```
+helm repo add signoz https://charts.signoz.io
+```
+If the chart is already present, update the chart to the latest version:
+```
+helm repo update
+```
+
+1. **Create the namespace (if needed):**
+
+```bash
+kubectl create namespace signoz
+```
+
+2. **Create the secret for the Fly token:**
+
+```bash
+kubectl create secret generic fly-federate-token \
+  --from-file=fly_federate_token=./fly_federate_token \
+  -n signoz
+```
+
+3. **Create a ConfigMap for `otel.yaml`:**
+
+```bash
+kubectl create configmap fly-otel-config \
+  --from-file=otel.yaml=./otel.yaml \
+  -n signoz
+```
+
+4. **Create `override-values.yaml` with your cluster details and image version:**
+
+```yaml:override-values.yaml
+global:
+  cloud: others
+  clusterName: <CLUSTER_NAME>
+  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+otelInsecure: false
+signozApiKey: <SIGNOZ_INGESTION_KEY>
+
+otelAgent:
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: 0.103.1
+  config: 
+    receivers:
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: fly-federate
+              scheme: https
+              metrics_path: /prometheus/<your-org-slug>/federate
+              params:
+                match[]: ['{__name__=~"fly_.*"}']
+              static_configs:
+                - targets: ["api.fly.io"]
+              authorization:
+                type: FlyV1
+                credentials_file: /etc/otel/secret/fly_federate_token
+    processors:
+      batch: {}
+      transform/fly_metrics:
+        error_mode: ignore
+        metric_statements:
+          - context: datapoint
+            statements:
+              - 'convert_gauge_to_sum("cumulative", true) where IsMatch(metric.name, "^fly_.*_count$") or metric.name == "fly_instance_cpu" or metric.name == "fly_instance_net_sent_bytes" or metric.name == "fly_instance_net_recv_bytes"'
+    exporters:
+      otlphttp:
+        endpoint: ingest.{region}.signoz.cloud:443
+        headers:
+          signoz-access-token: <SIGNOZ_INGESTION_KEY>
+    service:
+      pipelines:
+        metrics:
+          receivers: [prometheus]
+          processors: [transform/fly_metrics, batch]
+          exporters: [otlphttp]
+  extraVolumes: # mounts for the config map and secret 
+    - name: fly-config
+      configMap:
+        name: fly-otel-config
+    - name: fly-token
+      secret:
+        secretName: fly-federate-token
+  extraVolumeMounts:
+    - name: fly-config
+      mountPath: /etc/otel/config.yaml
+      subPath: otel.yaml
+    - name: fly-token
+      mountPath: /etc/otel/secret/fly_federate_token
+      subPath: fly_federate_token
+      readOnly: true
+```
+<Admonition type="note">
+  Fly's `/federate` endpoint doesn't expose metric types, so all metrics are mapped as Gauge by
+  default. To override this, we use the transform processor `convert_gauge_to_sum`. If you want to
+  convert any other metrics, add them to the transform processor.
+</Admonition>
+
+5. **Upgrade the chart:**
+
+```bash
+helm install my-release signoz/k8s-infra -f override-values.yaml
+```
+
+The chart mounts your Fly-specific config, uses the 0.103.1 collector image, and deploys the same pipeline that the Docker/VM instructions run locally.
+
+
+</TabItem>
+</Tabs>
+
+###  Manually verify the federation endpoint
 
 Generate a bit of traffic to your app:
 
@@ -188,7 +374,7 @@ You should see lines like `fly_instance_cpu_user_seconds_total`, `fly_instance_m
 
 ## Next steps
 
-- **Create alerts**: Set up alerts based on fly.io metrics. [Learn more] (https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+- **Create alerts**: Set up alerts based on fly.io metrics. [Learn more](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
 - **Build dashboards**: Once you have configured the OTel Collector to send Fly.io metrics to SigNoz, you can start visualizing the metrics in the SigNoz UI.
 You can use the pre-configured dashboard for Fly metrics or [create your own custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard). To use the pre-configured dashboard, download the dashboard JSON from <a href="https://github.com/SigNoz/dashboards/blob/main/fly/fly-prometheus-v1.json" target="_blank" rel="noopener noreferrer nofollow"> Fly.io dashboard JSON </a> and import it to SigNoz by clicking Dashboards → New dashboard → Import JSON:
 
