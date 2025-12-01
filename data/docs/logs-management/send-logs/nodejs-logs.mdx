@@ -1,5 +1,5 @@
 ---
-date: 2025-11-21
+date: 2025-12-01
 tags: [SigNoz Cloud, Self-Host]
 title: Send logs from Node.js default logger to SigNoz using OpenTelemetry
 id: opentelemetry-nodejs-logs
@@ -9,9 +9,11 @@ description: Learn how to send logs from Node.js default console logger to SigNo
 
 import GetHelp from '@/components/shared/get-help.md'
 
-## Overview
-
-This guide will walk you through instrumenting your Node.js application to send logs from the default `console` logger to SigNoz using the OpenTelemetry (OTel) SDK.
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
 ## Prerequisites
 
@@ -19,11 +21,16 @@ This guide will walk you through instrumenting your Node.js application to send 
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 - An existing Node.js application
 
-## Setup
+## Send logs to SigNoz
+
+This guide will walk you through instrumenting your Node.js application to send logs from the default `console` logger to SigNoz using the OpenTelemetry (OTel) SDK.
 
 ### Step 1: Install dependencies
 
 Install the required OpenTelemetry packages:
+
+<Tabs>
+<TabItem value="npm" label="npm" default>
 
 ```bash
 npm install --save @opentelemetry/api-logs \
@@ -35,9 +42,159 @@ npm install --save @opentelemetry/api-logs \
   express
 ```
 
-### Step 2: Create the OpenTelemetry Logger Configuration
+</TabItem>
+<TabItem value="yarn" label="yarn">
 
-Create a new file called `logger.js` in your project root:
+```bash
+yarn add @opentelemetry/api-logs \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/instrumentation \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions \
+  express
+```
+
+</TabItem>
+</Tabs>
+
+### Step 2: Set environment variables
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+Set the following environment variables to configure the OpenTelemetry exporter:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_SERVICE_NAME="nodejs-console-app"
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+If using a local OTel Collector (VM), use:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+# Do not set OTEL_EXPORTER_OTLP_HEADERS
+```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>'
+  - name: OTEL_SERVICE_NAME
+    value: 'nodejs-console-app'
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy instrumentation files and application code
+COPY logger.js ./
+COPY console-instrumentation.js ./
+COPY . .
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+ENV OTEL_SERVICE_NAME="nodejs-console-app"
+
+# Expose application port
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "index.js"]
+```
+
+Build and run the container:
+
+```bash
+# Build the image
+docker build -t nodejs-console-app .
+
+# Run the container
+docker run -p 3000:3000 nodejs-console-app
+```
+
+Replace the placeholders in the Dockerfile:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+$env:OTEL_SERVICE_NAME = "nodejs-console-app"
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+</Tabs>
+
+### Step 3: Configure OpenTelemetry Logger
+
+Create a new file called `logger.js` in your project root. This file reads the configuration from the environment variables set in the previous step.
 
 ```javascript:logger.js
 const {
@@ -50,14 +207,12 @@ const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
 
 // Create a resource with your service information
 const resource = resourceFromAttributes({
-  [ATTR_SERVICE_NAME]: "nodejs-express-logger",
+  [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME || "nodejs-console-app",
 });
 
 // Configure the OTLP exporter
-const logExporter = new OTLPLogExporter({
-  url: 'http://localhost:4318/v1/logs', // Full path required
-  headers: {},
-});
+// It automatically reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS
+const logExporter = new OTLPLogExporter({});
 
 // Create and configure the logger provider
 const loggerProvider = new LoggerProvider({
@@ -67,7 +222,7 @@ const loggerProvider = new LoggerProvider({
 module.exports = loggerProvider;
 ```
 
-### Step 3: Instrument the Default Console Logger
+### Step 4: Instrument the Default Console Logger
 
 Create a new file called `console-instrumentation.js` in your project root. This file wraps the default console methods to send logs to OpenTelemetry:
 
@@ -172,9 +327,9 @@ console.debug = function (...args) {
 };
 ```
 
-### Step 4: Initialize Instrumentation in Your Application
+### Step 5: Initialize Instrumentation in Your Application
 
-Import the instrumentation at the very top of your main application file (e.g., index.js or app.js):
+Import the instrumentation at the very top of your main application file (e.g., `index.js` or `app.js`):
 
 ```javascript:index.js
 // This must be the first import
@@ -191,71 +346,6 @@ app.listen(3000, () => {
   console.info('Server listening on port 3000')
 })
 ```
-
-### Step 5: Configure SigNoz Endpoint
-
-Update the `logger.js` file with your SigNoz endpoint:
-
-<Tabs>
-<TabItem value="vm" label="VM / Local" default>
-
-```javascript:logger.js
-const logExporter = new OTLPLogExporter({
-  url: 'https://ingest.<region>.signoz.cloud:443/v1/logs', // OTLP logs endpoint
-  headers: {
-    'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
-  },
-});
-```
-
-Replace the placeholders:
-
-- `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
-- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-
-<Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</Admonition>
-
-</TabItem>
-<TabItem value="kubernetes" label="Kubernetes">
-
-If your application runs in Kubernetes with an OpenTelemetry Collector:
-
-```javascript:logger.js
-const logExporter = new OTLPLogExporter({
-  url: 'http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs',
-  headers: {},
-});
-```
-
-**Find your collector service details:**
-
-```bash
-# List OTel collector services
-kubectl get svc -A | grep otel
-
-# Example output:
-# platform  signoz-otel-collector  ClusterIP  10.96.0.10  <none>  4318/TCP
-```
-
-Replace `<otel-collector-service>` and `<namespace>` with your actual values.
-
-<Admonition type="warning">
-**Avoiding Duplicate Logs**
-
-If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
-
-[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
-
-</Admonition>
-
-See the [K8s-infra installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) for more details.
-
-</TabItem>
-</Tabs>
 
 ### Step 6: Run Your Application
 
@@ -286,14 +376,19 @@ Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/usergu
   </figcaption>
 </figure>
 
+<details>
+<ToggleHeading>
+
 ## Troubleshooting
+
+</ToggleHeading>
 
 #### Why do I see "404 Not Found" errors?
 
-This usually happens if the endpoint URL is incorrect. Ensure your URL ends with `/v1/logs`.
+This usually happens if the endpoint URL is incorrect.
 
-- Cloud: `https://ingest.<region>.signoz.cloud:443/v1/logs`
-- Self-Hosted: `http://localhost:4318/v1/logs`
+- Cloud: `https://ingest.<region>.signoz.cloud:443`
+- Self-Hosted: `http://localhost:4318`
 
 #### Why are my logs not appearing in SigNoz?
 
@@ -301,13 +396,14 @@ This usually happens if the endpoint URL is incorrect. Ensure your URL ends with
 - Verify your `<region>` and `<SIGNOZ_INGESTION_KEY>` are correct.
 - If using `console.log`, ensure `console-instrumentation.js` is required **before** any other code in your application.
 
+</details>
+
 ## Next Steps
 
 - [Send Logs from Node.js Pino Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs)
 - [Send Logs from Node.js Winston Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs)
 - [Log Query/Filtering guides](https://signoz.io/docs/userguide/logs/)
 - [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
-- [APM Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/apm-dashboards/)
 
 ## Get Help
 
