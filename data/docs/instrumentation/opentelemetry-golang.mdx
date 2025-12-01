@@ -1,1318 +1,1182 @@
 ---
-date: 2024-06-06
-id: golang
-tags : [SigNoz Cloud, Self-Host]
+date: 2025-11-25
+id: opentelemetry-golang
 title: Go OpenTelemetry Instrumentation
-description:  Learn how to instrument your Go application with OpenTelemetry and send telemetry data to SigNoz
-hide_table_of_contents: true
+description: Learn how to instrument your Go application with OpenTelemetry and send telemetry data to SigNoz
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
 ---
+This guide shows you how to instrument your Go application with OpenTelemetry and send traces to SigNoz. Instrument your Go services with the OpenTelemetry Go SDK and send traces to SigNoz Cloud or a self-hosted collector.
 
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your Go applications and view your application traces in SigNoz.
+## Prerequisites
+- Go 1.21 or later
+- A SigNoz Cloud account or self-hosted SigNoz instance
+- Your application code
 
-{/* This document contains instructions on how to set up OpenTelemetry instrumentation in your Go applications.  */}
-
-{/* OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Go application. */}
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-## Send Traces to SigNoz Cloud
-
-<Tabs>
+## Send traces to SigNoz
+<Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
+        <KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+            A VM is a virtual computer that runs on physical hardware. This includes:
+            - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+            - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+            - **Bare metal servers**: Physical servers running Linux/Unix directly
 
-From VMs, there are two ways to send data to SigNoz Cloud.
+            Use this section if you're deploying your Go application directly on a server or VM without containerization.
+        </KeyPointCallout>
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
-
-#### Send traces directly to SigNoz Cloud
-
-1. **Install Dependencies**<br></br>
-   Dependencies related to OpenTelemetry exporter and SDK have to be installed first. Note that we are assuming you are using `gin` request router. If you are using other request routers, check out the [corresponding package](#request-routers).
-   
-   Run the below commands after navigating to the application source folder:
-    
-    ```bash
-    go get go.opentelemetry.io/otel \
-      go.opentelemetry.io/otel/trace \
-      go.opentelemetry.io/otel/sdk \
-      go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
-    ```
-    
-2. **Declare environment variables for configuring OpenTelemetry**<br></br>
-   Declare the following global variables in `main.go` which we will use to configure OpenTelemetry:
-   
-   ```bash
-    var (
-        serviceName  = os.Getenv("SERVICE_NAME")
-        collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-        insecure     = os.Getenv("INSECURE_MODE")
-    )
-    ```
-    
-3. **Instrument your Go application with OpenTelemetry**<br></br>
-   To configure your application to send data we will need a function to initialize OpenTelemetry. Add the following snippet of code in your `main.go` file.
-   
-    ```go
-        
-    import (
-        .....
-
-        "google.golang.org/grpc/credentials"
-        "github.com/gin-gonic/gin"
-        "go.opentelemetry.io/otel"
-        "go.opentelemetry.io/otel/attribute"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-
-        "go.opentelemetry.io/otel/sdk/resource"
-        sdktrace "go.opentelemetry.io/otel/sdk/trace"
-    )
-
-    func initTracer() func(context.Context) error {
-
-        var secureOption otlptracegrpc.Option
-
-        if strings.ToLower(insecure) == "false" || insecure == "0" || strings.ToLower(insecure) == "f" {
-            secureOption = otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-        } else {
-            secureOption = otlptracegrpc.WithInsecure()
-        }
-
-        exporter, err := otlptrace.New(
-            context.Background(),
-            otlptracegrpc.NewClient(
-                secureOption,
-                otlptracegrpc.WithEndpoint(collectorURL),
-            ),
-        )
-
-        if err != nil {
-            log.Fatalf("Failed to create exporter: %v", err)
-        }
-        resources, err := resource.New(
-            context.Background(),
-            resource.WithAttributes(
-                attribute.String("service.name", serviceName),
-                attribute.String("library.language", "go"),
-            ),
-        )
-        if err != nil {
-            log.Fatalf("Could not set resources: %v", err)
-        }
-
-        otel.SetTracerProvider(
-            sdktrace.NewTracerProvider(
-                sdktrace.WithSampler(sdktrace.AlwaysSample()),
-                sdktrace.WithBatcher(exporter),
-                sdktrace.WithResource(resources),
-            ),
-        )
-        return exporter.Shutdown
-    }
-    ```
-    
-4. **Initialize the tracer in main.go**<br></br>
-   Modify the main function to initialise the tracer in `main.go`. Initiate the tracer at the very beginning of our main function.
-    
-    ```go
-    func main() {
-        cleanup := initTracer()
-        defer cleanup(context.Background())
-    
-        ......
-    }
-    ```
-    
-5. **Add the OpenTelemetry Gin middleware**<br></br>
-   Configure Gin to use the middleware by adding the following lines in `main.go`.
-    
-    ```go
-    import (
-        ....
-      "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-    )
-    
-    func main() {
-        ......
-        r := gin.Default()
-        r.Use(otelgin.Middleware(serviceName))
-        ......
-    }
-    ```
-
-6. **Set environment variables and run your Go Gin application**<br></br>
-   The run command must have some environment variables to send data to SigNoz cloud. The run command:
-    
-    ```bash
-    SERVICE_NAME=<service_name> INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
-    OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 go run main.go
-    ```
-
-    - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-    - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-    - `<service_name>` is name of your service
-
-
-#### Send traces via OTel Collector binary
-
-1. **Install OTel Collector binary**<br></br>
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
-
-2. **Install Dependencies**<br></br>
-   Dependencies related to OpenTelemetry exporter and SDK have to be installed first. Note that we are assuming you are using `gin` request router. If you are using other request routers, check out the [corresponding package](#request-routers).
-   
-   Run the below commands after navigating to the application source folder:
-    
-    ```bash
-    go get go.opentelemetry.io/otel \
-      go.opentelemetry.io/otel/trace \
-      go.opentelemetry.io/otel/sdk \
-      go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
-    ```
-    
-3. **Declare environment variables for configuring OpenTelemetry**<br></br>
-   Declare the following global variables in `main.go` which we will use to configure OpenTelemetry:
-   
-   ```go
-    var (
-        serviceName  = os.Getenv("SERVICE_NAME")
-        collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-        insecure     = os.Getenv("INSECURE_MODE")
-    )
-    ```
-    
-4. **Instrument your Go application with OpenTelemetry**<br></br>
-   To configure your application to send data we will need a function to initialize OpenTelemetry. Add the following snippet of code in your `main.go` file.
-    
-   ```go
-        
-    import (
-        .....
-
-        "google.golang.org/grpc/credentials"
-        "github.com/gin-gonic/gin"
-        "go.opentelemetry.io/otel"
-        "go.opentelemetry.io/otel/attribute"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-
-        "go.opentelemetry.io/otel/sdk/resource"
-        sdktrace "go.opentelemetry.io/otel/sdk/trace"
-    )
-
-    func initTracer() func(context.Context) error {
-
-        var secureOption otlptracegrpc.Option
-
-        if strings.ToLower(insecure) == "false" || insecure == "0" || strings.ToLower(insecure) == "f" {
-            secureOption = otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-        } else {
-            secureOption = otlptracegrpc.WithInsecure()
-        }
-
-        exporter, err := otlptrace.New(
-            context.Background(),
-            otlptracegrpc.NewClient(
-                secureOption,
-                otlptracegrpc.WithEndpoint(collectorURL),
-            ),
-        )
-
-        if err != nil {
-            log.Fatalf("Failed to create exporter: %v", err)
-        }
-        resources, err := resource.New(
-            context.Background(),
-            resource.WithAttributes(
-                attribute.String("service.name", serviceName),
-                attribute.String("library.language", "go"),
-            ),
-        )
-        if err != nil {
-            log.Fatalf("Could not set resources: %v", err)
-        }
-
-        otel.SetTracerProvider(
-            sdktrace.NewTracerProvider(
-                sdktrace.WithSampler(sdktrace.AlwaysSample()),
-                sdktrace.WithBatcher(exporter),
-                sdktrace.WithResource(resources),
-            ),
-        )
-        return exporter.Shutdown
-    }
-    
-5. **Initialize the tracer in main.go**<br></br>
-   Modify the main function to initialise the tracer in `main.go`. Initiate the tracer at the very beginning of our main function.
-    
-    ```go
-    func main() {
-        cleanup := initTracer()
-        defer cleanup(context.Background())
-    
-        ......
-    }
-    ```
-    
-6. **Add the OpenTelemetry Gin middleware**<br></br>
-   Configure Gin to use the middleware by adding the following lines in `main.go`.
-    
-    ```go
-    import (
-        ....
-      "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-    )
-    
-    func main() {
-        ......
-        r := gin.Default()
-        r.Use(otelgin.Middleware(serviceName))
-        ......
-    }
-    ```
-    
-7. **Set environment variables and run your Go Gin application**<br></br>
-   The run command must have some environment variables to send data to SigNoz. The run command:
-    
-    ```bash
-    SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
-    ```
-
-    `<service_name>` is name of your service
-
-8. You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
-
+### Step 1. Set environment variables
+Set the following environment variables to configure the OpenTelemetry exporter:
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+```
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 </TabItem>
-
+    
 <TabItem value="k8s" label="Kubernetes">
-You can auto-instrument sending traces from the Golang application using one of the following methods:
-
-1. Using OTel Collector Agent
-2. Using Kubernetes OTel Operator
-
-<Tabs>
-<TabItem value="otel-collector-agent" label="OTel Collector Agent" default>
-For Golang application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
-
-Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Golang instrumentation by following the below steps:
-
-1. **Install Dependencies**<br></br>
-   Dependencies related to OpenTelemetry exporter and SDK have to be installed first. Note that we are assuming you are using `gin` request router. If you are using other request routers, check out the [corresponding package](#request-routers).
-   
-   Run the below commands after navigating to the application source folder:
-    
-    ```bash
-    go get go.opentelemetry.io/otel \
-      go.opentelemetry.io/otel/trace \
-      go.opentelemetry.io/otel/sdk \
-      go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
-    ```
-    
-2. **Declare environment variables for configuring OpenTelemetry**<br></br>
-   Declare the following global variables in `main.go` which we will use to configure OpenTelemetry:
-   
-   ```go
-    var (
-        serviceName  = os.Getenv("SERVICE_NAME")
-        collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-        insecure     = os.Getenv("INSECURE_MODE")
-    )
-    ```
-    
-3. **Instrument your Go application with OpenTelemetry**<br></br>
-   To configure your application to send data we will need a function to initialize OpenTelemetry. Add the following snippet of code in your `main.go` file.
-    
-   ```go
-        
-    import (
-        .....
-
-        "google.golang.org/grpc/credentials"
-        "github.com/gin-gonic/gin"
-        "go.opentelemetry.io/otel"
-        "go.opentelemetry.io/otel/attribute"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-
-        "go.opentelemetry.io/otel/sdk/resource"
-        sdktrace "go.opentelemetry.io/otel/sdk/trace"
-    )
-
-    func initTracer() func(context.Context) error {
-
-        var secureOption otlptracegrpc.Option
-
-        if strings.ToLower(insecure) == "false" || insecure == "0" || strings.ToLower(insecure) == "f" {
-            secureOption = otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-        } else {
-            secureOption = otlptracegrpc.WithInsecure()
-        }
-
-        exporter, err := otlptrace.New(
-            context.Background(),
-            otlptracegrpc.NewClient(
-                secureOption,
-                otlptracegrpc.WithEndpoint(collectorURL),
-            ),
-        )
-
-        if err != nil {
-            log.Fatalf("Failed to create exporter: %v", err)
-        }
-        resources, err := resource.New(
-            context.Background(),
-            resource.WithAttributes(
-                attribute.String("service.name", serviceName),
-                attribute.String("library.language", "go"),
-            ),
-        )
-        if err != nil {
-            log.Fatalf("Could not set resources: %v", err)
-        }
-
-        otel.SetTracerProvider(
-            sdktrace.NewTracerProvider(
-                sdktrace.WithSampler(sdktrace.AlwaysSample()),
-                sdktrace.WithBatcher(exporter),
-                sdktrace.WithResource(resources),
-            ),
-        )
-        return exporter.Shutdown
-    }
-    
-4. **Initialize the tracer in main.go**<br></br>
-   Modify the main function to initialise the tracer in `main.go`. Initiate the tracer at the very beginning of our main function.
-    
-    ```go
-    func main() {
-        cleanup := initTracer()
-        defer cleanup(context.Background())
-    
-        ......
-    }
-    ```
-    
-5. **Add the OpenTelemetry Gin middleware**<br></br>
-   Configure Gin to use the middleware by adding the following lines in `main.go`.
-    
-    ```go
-    import (
-        ....
-      "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-    )
-    
-    func main() {
-        ......
-        r := gin.Default()
-        r.Use(otelgin.Middleware(serviceName))
-        ......
-    }
-    ```
-    
-6. **Set environment variables and run your Go Gin application**<br></br>
-   The run command must have some environment variables to send data to SigNoz. The run command:
-    
-    ```bash
-    SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
-    ```
-    
-    `<service_name>` is name of your service
-
-7. You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+### Step 1. Set environment variables
+Add these environment variables to your deployment manifest:
+```yaml
+env:
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+```
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 </TabItem>
-<TabItem value="k8s-otel-operator" label="K8s OTel Operator">
-### K8s OTel Operator Based Automatic Instrumentation
-
-#### Send traces directly to SigNoz Cloud - Using K8s OTel Operator
-
-For Golang application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
-
-<Admonition type="warning">
-
-The OTel Operator for Golang is not yet production ready. You can check the latest status of the Otel Operator for Golang [here](https://github.com/open-telemetry/opentelemetry-go-instrumentation). 
-We recommend to use this in production only after it is marked as ready for production use.
-
-</Admonition>
-
-An [OpenTelemetry Operator](https://opentelemetry.io/docs/kubernetes/operator) is a Kubernetes Operator that manages 
-[OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) and auto-instrumentation of 
-workloads. It basically simplifies the deployment and management of OpenTelemetry in a Kubernetes environment.
-
-The OpenTelemetry Operator provides two Custom Resource Definitions (CRDs):
-
-- `OpenTelemetryCollector`
-- `Instrumentation`
-
-The `OpenTelemetryCollector` CRD allows you to deploy and manage OpenTelemetry Collectors in your Kubernetes cluster.
-
-The `Instrumentation` CRD allows you to configure and inject OpenTelemetry auto-instrumentation libraries into your workloads.
-
-Here are the steps you need to follow to auto-instrument Golang application using OTel Operator:
-
-**Step 1.** Install cert-manager
-
-Run the following commands to apply cert manager.
-
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
-
-kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
-```
-
-**Step 2.** Install OpenTelemetry Operator
-
-To install the operator in the existing K8s cluster, run the following command:
-
-```bash
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
-```
-
-Installing the OpenTelemetry Operator sets up the necessary components and configurations to enable the observability and monitoring of applications running in the cluster.
-
-**Step 3.** Setup the OpenTelemetry Collector instance
-
-Once the `opentelemetry-operator` has been deployed, you can proceed with the creation of the OpenTelemetry Collector (`otelcol`) instance. The OpenTelemetry Collector collects, processes, and exports telemetry data.
-
-There are different deployment modes for the `OpenTelemetryCollector`, and you can specify them in the spec.mode section of the custom resource. The available deployment modes are:
-
-- [Daemonset](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
-- [Sidecar](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
-- [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
-- [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) (default mode)
-
-The default method - the `Deployment` mode, will be used here.
-
-To create a simple instance of the OpenTelemetry Collector, create a file `otel-collector.yaml` with the following contents:
-
-```yaml:otel-collector.yaml
-apiVersion: opentelemetry.io/v1alpha1
-kind: OpenTelemetryCollector
-metadata:
-  name: otel-collector
-spec:
-  mode: deployment
-  config: |
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
-    processors:
-      batch: {}
-      resource/env:
-        attributes:
-        - key: deployment.environment
-          value: prod # can be dev, prod, staging etc. based on your environment
-          action: upsert
-    exporters:
-      debug: {}
-      otlp:
-        endpoint: "ingest.<region>.signoz.cloud:443" # replace <region> with your region of SigNoz Cloud
-        tls:
-          insecure: false
-        headers:
-          "signoz-ingestion-key": "<your-ingestion-key>" # Obtain from https://{your-signoz-tenant-url}/settings/ingestion-settings
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [batch, resource/env]
-          exporters: [otlp]
-```
-
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
-Apply the above yaml file using the following command:
-
-```bash
-kubectl apply -f otel-collector.yaml
-```
-
-**Step 4.** Setup the Instrumentation instance
-
-Once the OpenTelemetry Collector instance has been deployed, the next step will be to create an instrumentation instance, which will be responsible for sending OTLP data to the OTel Collector.
-
-Create a file `instrumentation.yaml` with the following contents:
-
-```yaml:instrumentation.yaml
-apiVersion: opentelemetry.io/v1alpha1
-kind: Instrumentation
-metadata:
-  name: traces-instrumentation
-spec:
-  exporter:
-    endpoint: https://ingest.<region>.signoz.cloud:443  # replace <region> with your region of SigNoz Cloud
-  env:
-    - name: OTEL_EXPORTER_OTLP_HEADERS
-      value: signoz-ingestion-key="<signoz-token>"  # Obtain from https://{your-signoz-url}/settings/ingestion-settings
-    - name: OTEL_EXPORTER_OTLP_INSECURE
-      value: "false"
-  propagators:
-    - tracecontext
-    - baggage
-    - b3
-  sampler:
-    type: parentbased_traceidratio
-    argument: "1"
-  go:
-    image: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go:latest
-    env:
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://otel-collector-collector:4318 #This is formed as: "http://<OpenTelemetryCollector name>-collector:4318"
-```
-
-Apply the above instrumentation using the following command:
-
-```bash
-kubectl apply -f instrumentation.yaml
-```
-
-**Step 5.** Auto-instrument your .NET app with OpenTelemetry
-
-Create `deployment.yaml` file for your .NET application as follows:
-
-```yaml:deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: golang-app
-spec:
-  selector:
-    matchLabels:
-      app: golang-app
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: golang-app
-      annotations:
-        instrumentation.opentelemetry.io/inject-go: "true"
-        instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/app/server"
-        resource.opentelemetry.io/service.name: "golang-app"
-    spec:
-      containers:
-      - name: app
-        image: golang-app:latest
-        ports:
-        - containerPort: 8080
-      - name: autoinstrumentation-go
-        image: otel/autoinstrumentation-go
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: OTEL_GO_AUTO_TARGET_EXE
-          value: "/app/server"
-        - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "http://otel-collector-collector:4318" #This is formed as: "http://<OpenTelemetryCollector name>-collector:4318"
-        - name: OTEL_SERVICE_NAME
-          value: "golang-app"
-        securityContext:
-          runAsUser: 0
-          privileged: true
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      shareProcessNamespace: true
-```
-
-It is important to add the following annotation under `spec > template > metadata > annotations`:
-
-```
-instrumentation.opentelemetry.io/inject-go: "true"
-instrumentation.opentelemetry.io/otel-go-auto-target-exe: "/app/server" # This is the location of target application binary
-```
-
-This helps in auto-instrumenting the traces from the Golang application.
-
-Note that for Golang, we need to add a specific container for auto-instrumentation: `autoinstrumentation-go`. All the OTel related 
-environment variables have been provided as part of this container.
-
-Apply the deployment using the following command:
-
-```bash
-kubectl apply -f deployment.yaml
-```
-
-With this, the auto-instrumentation of traces for Golang application is ready.
-
-**Step 6.** Running the Golang application
-
-In order to run the application on port 8080, run the following commands:
-
-```bash
-export POD_NAME=$(kubectl get pod -l app=<service-name> -o jsonpath="{.items[0].metadata.name}")  # service name is `golang-app` in this case.   
-
-kubectl port-forward ${POD_NAME} 8080:8080
-```
-
-You can now access the application on port 8080.
-
-You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
-
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
-</TabItem>
-</Tabs>
-</TabItem>
-
+    
 <TabItem value="windows" label="Windows">
-
-From Windows, there are two ways to send data to SigNoz Cloud.
-
-- Send traces directly to SigNoz Cloud
-- Send traces via OTel Collector binary (recommended)
-
-#### Send traces directly to SigNoz Cloud
-
-1. **Install Dependencies**<br></br>
-   Dependencies related to OpenTelemetry exporter and SDK have to be installed first. Note that we are assuming you are using `gin` request router. If you are using other request routers, check out the [corresponding package](#request-routers).
-   
-   Run the below commands after navigating to the application source folder:
+### Step 1. Set environment variables (PowerShell)
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+```
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service.
+</TabItem>
     
-    ```bash
-    go get go.opentelemetry.io/otel \
-      go.opentelemetry.io/otel/trace \
-      go.opentelemetry.io/otel/sdk \
-      go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
-    ```
-    
-2. **Declare environment variables for configuring OpenTelemetry**<br></br>
-   Declare the following global variables in `main.go` which we will use to configure OpenTelemetry:
-   
-   ```bash
-    var (
-        serviceName  = os.Getenv("SERVICE_NAME")
-        collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-        insecure     = os.Getenv("INSECURE_MODE")
-    )
-    ```
-    
-3. **Instrument your Go application with OpenTelemetry**<br></br>
-   To configure your application to send data we will need a function to initialize OpenTelemetry. Add the following snippet of code in your `main.go` file.
-   
-    ```go
-        
-    import (
-        .....
+<TabItem value="docker" label="Docker">
+### Step 1. Set environment variables in Dockerfile
+Add environment variables to your Dockerfile:
+```dockerfile:Dockerfile
+FROM golang:1.21-alpine AS builder
 
-        "google.golang.org/grpc/credentials"
-        "github.com/gin-gonic/gin"
-        "go.opentelemetry.io/otel"
-        "go.opentelemetry.io/otel/attribute"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
 
-        "go.opentelemetry.io/otel/sdk/resource"
-        sdktrace "go.opentelemetry.io/otel/sdk/trace"
-    )
+COPY . .
+RUN go build -o main .
 
-    func initTracer() func(context.Context) error {
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /app/main .
 
-        var secureOption otlptracegrpc.Option
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service-name>"
 
-        if strings.ToLower(insecure) == "false" || insecure == "0" || strings.ToLower(insecure) == "f" {
-            secureOption = otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-        } else {
-            secureOption = otlptracegrpc.WithInsecure()
-        }
+CMD ["./main"]
+```
 
-        exporter, err := otlptrace.New(
-            context.Background(),
-            otlptracegrpc.NewClient(
-                secureOption,
-                otlptracegrpc.WithEndpoint(collectorURL),
-            ),
-        )
+Or pass them at runtime using `docker run`:
+```bash
+docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service-name>" \
+    your-image:latest
+```
 
-        if err != nil {
-            log.Fatalf("Failed to create exporter: %v", err)
-        }
-        resources, err := resource.New(
-            context.Background(),
-            resource.WithAttributes(
-                attribute.String("service.name", serviceName),
-                attribute.String("library.language", "go"),
-            ),
-        )
-        if err != nil {
-            log.Fatalf("Could not set resources: %v", err)
-        }
-
-        otel.SetTracerProvider(
-            sdktrace.NewTracerProvider(
-                sdktrace.WithSampler(sdktrace.AlwaysSample()),
-                sdktrace.WithBatcher(exporter),
-                sdktrace.WithResource(resources),
-            ),
-        )
-        return exporter.Shutdown
-    }
-    ```
-    
-4. **Initialize the tracer in main.go**<br></br>
-   Modify the main function to initialise the tracer in `main.go`. Initiate the tracer at the very beginning of our main function.
-    
-    ```go
-    func main() {
-        cleanup := initTracer()
-        defer cleanup(context.Background())
-    
-        ......
-    }
-    ```
-    
-5. **Add the OpenTelemetry Gin middleware**<br></br>
-   Configure Gin to use the middleware by adding the following lines in `main.go`.
-    
-    ```go
-    import (
-        ....
-      "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-    )
-    
-    func main() {
-        ......
-        r := gin.Default()
-        r.Use(otelgin.Middleware(serviceName))
-        ......
-    }
-    ```
-
-6. **Set environment variables and run your Go Gin application**<br></br>
-   The run command must have some environment variables to send data to SigNoz cloud. The run commands:
-    
-    ```bash
-    set SERVICE_NAME=<service_name>
-    set INSECURE_MODE=false
-    set OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
-    set OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443
-    ```
-
-    ```bash
-    go run main.go
-    ```
-
-    - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-    - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-    - `<service_name>` is name of your service
-
-
-#### Send traces via OTel Collector binary
-
-1. **Install OTel Collector binary**<br></br>
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
-
-2. **Install Dependencies**<br></br>
-   Dependencies related to OpenTelemetry exporter and SDK have to be installed first. Note that we are assuming you are using `gin` request router. If you are using other request routers, check out the [corresponding package](#request-routers).
-   
-   Run the below commands after navigating to the application source folder:
-    
-    ```bash
-    go get go.opentelemetry.io/otel \
-      go.opentelemetry.io/otel/trace \
-      go.opentelemetry.io/otel/sdk \
-      go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
-    ```
-    
-3. **Declare environment variables for configuring OpenTelemetry**<br></br>
-   Declare the following global variables in `main.go` which we will use to configure OpenTelemetry:
-   
-   ```go
-    var (
-        serviceName  = os.Getenv("SERVICE_NAME")
-        collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-        insecure     = os.Getenv("INSECURE_MODE")
-    )
-    ```
-    
-4. **Instrument your Go application with OpenTelemetry**<br></br>
-   To configure your application to send data we will need a function to initialize OpenTelemetry. Add the following snippet of code in your `main.go` file.
-    
-   ```go
-        
-    import (
-        .....
-
-        "google.golang.org/grpc/credentials"
-        "github.com/gin-gonic/gin"
-        "go.opentelemetry.io/otel"
-        "go.opentelemetry.io/otel/attribute"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-
-        "go.opentelemetry.io/otel/sdk/resource"
-        sdktrace "go.opentelemetry.io/otel/sdk/trace"
-    )
-
-    func initTracer() func(context.Context) error {
-
-        var secureOption otlptracegrpc.Option
-
-        if strings.ToLower(insecure) == "false" || insecure == "0" || strings.ToLower(insecure) == "f" {
-            secureOption = otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-        } else {
-            secureOption = otlptracegrpc.WithInsecure()
-        }
-
-        exporter, err := otlptrace.New(
-            context.Background(),
-            otlptracegrpc.NewClient(
-                secureOption,
-                otlptracegrpc.WithEndpoint(collectorURL),
-            ),
-        )
-
-        if err != nil {
-            log.Fatalf("Failed to create exporter: %v", err)
-        }
-        resources, err := resource.New(
-            context.Background(),
-            resource.WithAttributes(
-                attribute.String("service.name", serviceName),
-                attribute.String("library.language", "go"),
-            ),
-        )
-        if err != nil {
-            log.Fatalf("Could not set resources: %v", err)
-        }
-
-        otel.SetTracerProvider(
-            sdktrace.NewTracerProvider(
-                sdktrace.WithSampler(sdktrace.AlwaysSample()),
-                sdktrace.WithBatcher(exporter),
-                sdktrace.WithResource(resources),
-            ),
-        )
-        return exporter.Shutdown
-    }
-    
-5. **Initialize the tracer in main.go**<br></br>
-   Modify the main function to initialise the tracer in `main.go`. Initiate the tracer at the very beginning of our main function.
-    
-    ```go
-    func main() {
-        cleanup := initTracer()
-        defer cleanup(context.Background())
-    
-        ......
-    }
-    ```
-    
-6. **Add the OpenTelemetry Gin middleware**<br></br>
-   Configure Gin to use the middleware by adding the following lines in `main.go`.
-    
-    ```go
-    import (
-        ....
-      "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-    )
-    
-    func main() {
-        ......
-        r := gin.Default()
-        r.Use(otelgin.Middleware(serviceName))
-        ......
-    }
-    ```
-    
-7. **Set environment variables and run your Go Gin application**<br></br>
-   The run command must have some environment variables to send data to SigNoz. Then run the following commands:
-    
-    ```bash
-    set SERVICE_NAME=<service_name>
-    set INSECURE_MODE=true
-    set OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317
-    ```
-
-    ```bash
-    go run main.go
-    ```
-    
-    `<service_name>` is name of your service
-
-8. You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
-
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 </TabItem>
 </Tabs>
+### Step 2. Install OpenTelemetry packages
 
-</TabItem>
-<TabItem value='self-host' label='Self-Host'>
-## Send Traces to Self-Hosted SigNoz
-
-1. **Install Dependencies**<br></br>
-   Dependencies related to OpenTelemetry exporter and SDK have to be installed first. Note that we are assuming you are using `gin` request router. If you are using other request routers, check out the [corresponding package](#request-routers).
-   
-   Run the below commands after navigating to the application source folder:
-    
-    ```bash
-    go get go.opentelemetry.io/otel \
-      go.opentelemetry.io/otel/trace \
-      go.opentelemetry.io/otel/sdk \
-      go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace \
-      go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
-    ```
-    
-2. **Declare environment variables for configuring OpenTelemetry**<br></br>
-   Declare the following global variables in `main.go` which we will use to configure OpenTelemetry:
-   
-   ```go
-    var (
-        serviceName  = os.Getenv("SERVICE_NAME")
-        collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-        insecure     = os.Getenv("INSECURE_MODE")
-    )
-    ```
-    
-3. **Instrument your Go application with OpenTelemetry**<br></br>
-   To configure your application to send data we will need a function to initialize OpenTelemetry. Add the following snippet of code in your `main.go` file.
-    
-   ```go
-        
-    import (
-        .....
-
-        "google.golang.org/grpc/credentials"
-        "github.com/gin-gonic/gin"
-        "go.opentelemetry.io/otel"
-        "go.opentelemetry.io/otel/attribute"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-
-        "go.opentelemetry.io/otel/sdk/resource"
-        sdktrace "go.opentelemetry.io/otel/sdk/trace"
-    )
-
-    func initTracer() func(context.Context) error {
-
-        var secureOption otlptracegrpc.Option
-
-        if strings.ToLower(insecure) == "false" || insecure == "0" || strings.ToLower(insecure) == "f" {
-            secureOption = otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-        } else {
-            secureOption = otlptracegrpc.WithInsecure()
-        }
-
-        exporter, err := otlptrace.New(
-            context.Background(),
-            otlptracegrpc.NewClient(
-                secureOption,
-                otlptracegrpc.WithEndpoint(collectorURL),
-            ),
-        )
-
-        if err != nil {
-            log.Fatalf("Failed to create exporter: %v", err)
-        }
-        resources, err := resource.New(
-            context.Background(),
-            resource.WithAttributes(
-                attribute.String("service.name", serviceName),
-                attribute.String("library.language", "go"),
-            ),
-        )
-        if err != nil {
-            log.Fatalf("Could not set resources: %v", err)
-        }
-
-        otel.SetTracerProvider(
-            sdktrace.NewTracerProvider(
-                sdktrace.WithSampler(sdktrace.AlwaysSample()),
-                sdktrace.WithBatcher(exporter),
-                sdktrace.WithResource(resources),
-            ),
-        )
-        return exporter.Shutdown
-    }
-    
-4. **Initialize the tracer in main.go**<br></br>
-   Modify the main function to initialise the tracer in `main.go`. Initiate the tracer at the very beginning of our main function.
-    
-    ```go
-    func main() {
-        cleanup := initTracer()
-        defer cleanup(context.Background())
-    
-        ......
-    }
-    ```
-    
-5. **Add the OpenTelemetry Gin middleware**<br></br>
-   Configure Gin to use the middleware by adding the following lines in `main.go`.
-    
-    ```go
-    import (
-        ....
-      "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-    )
-    
-    func main() {
-        ......
-        r := gin.Default()
-        r.Use(otelgin.Middleware(serviceName))
-        ......
-    }
-    ```
-    
-6. **Set environment variables and run your Go Gin application**<br></br>
-   The run command must have some environment variables to send data to SigNoz. The run command:
-    
-    ```bash
-    SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=<IP of SigNoz backend:4317> go run main.go
-    ```
-    
-    `<service_name>` is name of your service
-    
-    `OTEL_EXPORTER_OTLP_ENDPOINT`: localhost:4317
-    
-    Since, we have installed SigNoz on our local machine, we use the above IP. If you install SigNoz on a different machine, you can update it with the relevant IP. 
-
-    Do not use `http` or `https` in the IP address. For example, if the IP is `http://test.com` then the `OTEL_EXPORTER_OTLP_ENDPOINT` will be `test.com:4317`.
-    
-    Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
-    
-    Hence, the final run command looks like this:
-    
-    ```bash
-    SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
-    ```
-
-    `<service_name>` is name of your service
-
-</TabItem>
-</Tabs>
-
-## Validating instrumentation by checking for traces
-
-With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
-
-To do this, you need to ensure that your application generates some data. Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz.
-
-Validate your traces in SigNoz:
-
-1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time.
-2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
-3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
-
-{/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
-
-{/* <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/goginapp_signoz_dashboard.webp" alt="Go Application in the list of services being monitored in SigNoz"/>
-    <figcaption><i>Go Application in the list of services being monitored in SigNoz</i></figcaption>
-</figure> */}
-
-
-{/* If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide. */}
-    
-
-## Request Routers
-
-### OpenTelemetry gin/gonic instrumentation
+Run the following command in your project directory:
 
 ```bash
-# Add one line to your import() stanza depending upon your request router:
-middleware "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+go get \
+  go.opentelemetry.io/otel \
+  go.opentelemetry.io/otel/sdk \
+  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc \
+  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
 ```
 
-and then inject OpenTelemetry middleware:
+### Step 3. Create the tracer initialization
 
-```bash
-router.Use(middleware.Middleware(serviceName))
-```
+Create a file named `tracing.go` in your project:
 
-### OpenTelemetry gorillamux instrumentation
+```go:tracing.go
+package main
 
-```bash
-# Add one line to your import() stanza depending upon your request router:
-middleware "go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
-```
-
-and then inject OpenTelemetry middleware:
-
-```bash
-router.Use(middleware.Middleware(serviceName))
-```
-
-### OpenTelemetry echo instrumentation
-
-```bash
-# Add one line to your import() stanza depending upon your request router:
-middleware "go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
-```
-
-and then inject OpenTelemetry middleware:
-
-```bash
-router.Use(middleware.Middleware(serviceName))
-```
-
-### If you don’t use a request router
-
-```bash
 import (
-  "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"context"
+	"log"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
-```
+func initTracer(ctx context.Context) (func(context.Context) error, error) {
+	// Reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS from environment
+	exporter, err := otlptracegrpc.New(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-In each place where you pass an http.Handler to a ServeMux, you’ll wrap the handler function. For instance, you’ll make the following replacements:
+	// Reads OTEL_SERVICE_NAME from environment and adds host/process/OS attributes
+	res, err := resource.New(ctx,
+		resource.WithFromEnv(),
+		resource.WithHost(),
+		resource.WithOS(),
+		resource.WithProcess(),
+	)
+	if err != nil {
+		return nil, err
+	}
 
-```bash
-- mux.Handle("/path", h)
-+ mux.Handle("/path", otelhttp.NewHandler(h, "description of path"))
-```
-
-```bash
-- mux.Handle("/path", http.HandlerFunc(f))
-+ mux.Handle("/path", otelhttp.NewHandler(http.HandlerFunc(f), "description of path"))
-```
-
-In this fashion, you can ensure that every function you wrap with othttp will automatically have its metadata collected and a corresponding trace started.
-
-
-## Adding custom attributes and custom events to spans
-
-It’s also possible to set custom attributes or tags to a span. To add custom attributes and events follow the below steps:
-
-1. **Import trace and attribute libraries**
-    
-    ```bash
-    import (
-        ...
-        "go.opentelemetry.io/otel/attribute"
-        "go.opentelemetry.io/otel/trace"
-    )
-    ```
-    
-2. **Fetch current span from context**
-    
-    ```bash
-    span := trace.SpanFromContext(c.Request.Context())
-    ```
-    
-3. **Set attribute on current**
-    
-    ```bash
-    span.SetAttributes(attribute.String("controller", "books"))
-    ```
-    
-
-{/* SigNoz dashboards can be used to track these custom attributes. */}
-
-{/* <figure data-zoomable align='center'>
-    <img src="/img/docs/opentelemetry_go_custom_attributes.webp" alt="Custom attributes under 'Tags' section on SigNoz trace detail page"/>
-    <figcaption><i>Custom attributes can be seen under `Tags` section on SigNoz trace detail page</i></figcaption>
-    </figure> */}
-
-
-We can also set custom events on the span with its own attribute.
-
-```bash
-span.AddEvent("This is a sample event", trace.WithAttributes(attribute.Int("pid", 4328), attribute.String("sampleAttribute", "Test")))
-```
-{/* 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/opentelemetry_go_events.webp" alt="Events can be seen under `Events` section on SigNoz trace detail page"/>
-    <figcaption><i>Events can be seen under `Events` section on SigNoz trace detail page</i></figcaption>
-    </figure> */}
-
-
-
-## gRPC Instrumentation with OpenTelemetry
-
-OpenTelemetry can also help you automatically instrument gRPC requests. To instrument any gRPC servers you have.
-
-```go
-import (
-    "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-)
-
-func main() {
-  [...]
-
-    // add StatsHandler to gRPC server initialization
-	s := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
-
-}
-
-```
-
-Similarly, instrument your gRPC client as well by adding otelgrpc when initializing gRPC client
-
-```go
-import (
-    "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-)
-
-func main() {
-  [...]
-
-    // add StatsHandler to gRPC client initialization
-	cc, err := grpc.NewClient(serverUrl, grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
 	)
 
+	// Makes the tracer available to instrumentation libraries
+	otel.SetTracerProvider(tp)
+
+	// Propagates trace context across service boundaries using W3C standards
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+
+	return tp.Shutdown, nil
 }
-
 ```
 
-We have a blog [Monitor gRPC calls with OpenTelemetry - explained with a Golang example](https://signoz.io/blog/opentelemetry-grpc-golang/), do refer to that in case you need a helping hand to work with gRPC server.
+### Step 4. Instrument your application
 
-## Recording Errors and Exceptions
+Here's a complete example using net/http with automatic instrumentation:
 
-```go
-import "go.opentelemetry.io/otel/codes"
+```go:main.go
+package main
 
-// Get the current span from the tracer
-span := trace.SpanFromContext(ctx)
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
 
-// RecordError converts an error into a span event.
-span.RecordError(err)
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+)
 
-// Mark span as failed.
-span.SetStatus(codes.Error, "internal error")
+func main() {
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
+	shutdown, err := initTracer(ctx)
+	if err != nil {
+		log.Fatalf("Failed to initialize tracer: %v", err)
+	}
+	defer shutdown(ctx)
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Hello from instrumented server!")
+	})
+
+	// Wrap with otelhttp middleware for automatic instrumentation
+	handler := otelhttp.NewHandler(mux, "my-service")
+
+	log.Println("Server starting on :8080")
+	log.Fatal(http.ListenAndServe(":8080", handler))
+}
 ```
 
+## Library instrumentation
+
+Choose your Go framework or library to add automatic instrumentation without leaving this page.
+Use the categories below to pick a specific integration.
+
+<LibraryTabs
+    defaultCategory="all"
+    defaultLibrary="gorm"
+    categoryLabels={{
+        database: 'Databases & Caches',
+        web: 'Web Frameworks',
+        grpc: 'gRPC',
+    }}
+>
+    <LibraryTab value="gorm" label="GORM" category="database">
+
+        This guide shows you how to add OpenTelemetry instrumentation to GORM. Complete the core Go instrumentation setup first.
+
+        ### Install GORM OpenTelemetry plugin
+
+        ```bash
+        go get gorm.io/gorm
+        go get gorm.io/plugin/opentelemetry/tracing
+        ```
+
+        ### Configure GORM with tracing
+
+        ```go
+        import (
+        	"gorm.io/driver/postgres"
+        	"gorm.io/gorm"
+        	"gorm.io/plugin/opentelemetry/tracing"
+        )
+
+        func initDB() (*gorm.DB, error) {
+        	dsn := "host=localhost user=postgres password=secret dbname=myapp port=5432"
+
+        	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+        	if err != nil {
+        		return nil, err
+        	}
+
+        	// Add OpenTelemetry tracing plugin to instrument all operations
+        	if err := db.Use(tracing.NewPlugin()); err != nil {
+        		return nil, err
+        	}
+
+        	return db, nil
+        }
+
+        // Use WithContext to propagate trace context
+        db.WithContext(ctx).Where("id = ?", userID).First(&user)
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - gorm.io/gorm v1.31.1
+        - gorm.io/plugin/opentelemetry v0.1.16
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="database-sql" label="database/sql" category="database">
+
+        This guide shows you how to add OpenTelemetry instrumentation to database/sql. Complete the core Go instrumentation setup first.
+
+        ### Install database/sql instrumentation
+
+        ```bash
+        go get go.opentelemetry.io/contrib/instrumentation/database/sql/otelsql
+        ```
+
+        ### Register instrumented driver
+
+        ```go
+        import (
+        	"context"
+        	"database/sql"
+        	_ "github.com/lib/pq"
+
+        	"go.opentelemetry.io/contrib/instrumentation/database/sql/otelsql"
+        	"go.opentelemetry.io/otel"
+        	"go.opentelemetry.io/otel/attribute"
+        )
+
+        // Open an instrumented database connection
+        db, err := otelsql.Open("postgres", dsn, otelsql.WithAttributes(
+        	attribute.String("db.system", "postgresql"),
+        ))
+
+        // All operations are automatically traced when using context
+        rows, err := db.QueryContext(ctx, "SELECT * FROM users WHERE id = $1", userID)
+        ```
+
+        ### Adding manual child spans
+
+        ```go
+        tracer := otel.Tracer("my-service")
+        ctx, span := tracer.Start(ctx, "fetch-user-details")
+        defer span.End()
+
+        span.SetAttributes(attribute.String("user.id", userID))
+
+        rows, err := db.QueryContext(ctx, "SELECT * FROM users WHERE id = $1", userID)
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/database/sql/otelsql v0.63.0
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="mongo" label="MongoDB" category="database">
+
+        This guide shows you how to add OpenTelemetry instrumentation to MongoDB driver. Complete the core Go instrumentation setup first.
+
+        ### Install MongoDB instrumentation
+
+        ```bash
+        go get go.mongodb.org/mongo-driver/mongo
+        go get go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo
+        ```
+
+        ### Instrument MongoDB client
+
+        ```go
+        import (
+        	"context"
+        	"go.mongodb.org/mongo-driver/mongo"
+        	"go.mongodb.org/mongo-driver/mongo/options"
+        	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
+        )
+
+        clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+
+        // Add OpenTelemetry monitor to trace all MongoDB operations
+        clientOptions.SetMonitor(otelmongo.NewMonitor())
+
+        client, err := mongo.Connect(ctx, clientOptions)
+        if err != nil {
+        	log.Fatal(err)
+        }
+
+        // All operations are automatically traced
+        collection := client.Database("mydb").Collection("users")
+        result, err := collection.FindOne(ctx, bson.M{"email": email})
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.63.0
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="redis" label="Redis" category="database">
+
+        This guide shows you how to add OpenTelemetry instrumentation to Redis. Complete the core Go instrumentation setup first.
+
+        ### Install Redis instrumentation
+
+        ```bash
+        go get github.com/redis/go-redis/v9
+        go get go.opentelemetry.io/contrib/instrumentation/github.com/redis/go-redis/v9/otelredis
+        ```
+
+        ### Instrument Redis client
+
+        ```go
+        import (
+        	"context"
+        	"github.com/redis/go-redis/v9"
+        	"go.opentelemetry.io/contrib/instrumentation/github.com/redis/go-redis/v9/otelredis"
+        	"go.opentelemetry.io/otel/attribute"
+        )
+
+        rdb := redis.NewClient(&redis.Options{
+        	Addr: "localhost:6379",
+        })
+
+        // Add OpenTelemetry instrumentation to trace all Redis commands
+        if err := otelredis.InstrumentTracing(rdb,
+        	otelredis.WithAttributes(
+        		attribute.String("db.system", "redis"),
+        	),
+        ); err != nil {
+        	log.Fatal(err)
+        }
+
+        // All operations are automatically traced
+        val, err := rdb.Get(ctx, "key").Result()
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/github.com/redis/go-redis/v9/otelredis v0.63.0
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="net-http" label="net/http" category="web">
+
+        This guide shows you how to add OpenTelemetry instrumentation to net/http (standard library). Complete the core Go instrumentation setup first.
+
+        ### Install net/http instrumentation
+
+        ```bash
+        go get go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
+        ```
+
+        ### Complete example
+
+        Full working example using standard net/http:
+
+        ```go
+        package main
+
+        import (
+        	"context"
+        	"fmt"
+        	"log"
+        	"net/http"
+        	"os"
+        	"os/signal"
+
+        	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+        	"go.opentelemetry.io/otel"
+        	"go.opentelemetry.io/otel/attribute"
+        	"go.opentelemetry.io/otel/trace"
+        )
+
+        // Use the initTracer function from Step 3 above
+        func initTracer(ctx context.Context) (func(context.Context) error, error) {
+        	// Paste the complete initTracer implementation from the core setup section
+        	return nil, nil  // Placeholder - replace with actual implementation
+        }
+
+        func main() {
+        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer cancel()
+
+        	shutdown, err := initTracer(ctx)
+        	if err != nil {
+        		log.Fatal(err)
+        	}
+        	defer shutdown(ctx)
+
+        	mux := http.NewServeMux()
+
+        	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        		// Extract the span created by otelhttp middleware
+        		span := trace.SpanFromContext(r.Context())
+
+        		// Add custom attributes to the span
+        		span.SetAttributes(attribute.String("custom.key", "value"))
+
+        		fmt.Fprint(w, "Hello net/http with tracing!")
+        	})
+
+        	// Wrap with otelhttp middleware to create spans automatically
+        	handler := otelhttp.NewHandler(mux, "net-http-server")
+
+        	log.Println("Server starting on :8080")
+        	log.Fatal(http.ListenAndServe(":8080", handler))
+        }
+        ```
+
+        ### Adding manual spans
+
+        Create custom child spans to trace specific operations within your handlers:
+
+        ```go
+        mux.HandleFunc("/manual", func(w http.ResponseWriter, r *http.Request) {
+        	tracer := otel.Tracer("my-service")
+
+        	// Create a child span (parent created by otelhttp middleware)
+        	ctx, span := tracer.Start(r.Context(), "custom-operation")
+        	defer span.End()
+
+        	span.SetAttributes(attribute.String("manual.key", "value"))
+        	span.AddEvent("manual.event")
+
+        	// Use ctx for downstream calls to propagate the trace
+        	fmt.Fprint(w, "Manual tracing!")
+        })
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.63.0
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="gin" label="Gin" category="web">
+
+        This guide shows you how to add OpenTelemetry instrumentation to a Gin application. Complete the core Go instrumentation setup first.
+
+        ### Install Gin instrumentation
+
+        ```bash
+        go get github.com/gin-gonic/gin
+        go get go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin
+        ```
+
+        ### Complete example
+
+        ```go
+        package main
+
+        import (
+        	"context"
+        	"log"
+        	"os"
+        	"os/signal"
+
+        	"github.com/gin-gonic/gin"
+        	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+        	"go.opentelemetry.io/otel"
+        	"go.opentelemetry.io/otel/attribute"
+        	"go.opentelemetry.io/otel/trace"
+        )
+
+        // Use the initTracer function from Step 3 above
+        func initTracer(ctx context.Context) (func(context.Context) error, error) {
+        	// Paste the complete initTracer implementation from the core setup section
+        	return nil, nil  // Placeholder - replace with actual implementation
+        }
+
+        func main() {
+        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer cancel()
+
+        	shutdown, err := initTracer(ctx)
+        	if err != nil {
+        		log.Fatal(err)
+        	}
+        	defer shutdown(ctx)
+
+        	r := gin.Default()
+
+        	// Add OpenTelemetry middleware to instrument all routes
+        	r.Use(otelgin.Middleware("my-gin-service"))
+
+        	r.GET("/", func(c *gin.Context) {
+        		// Extract the span created by otelgin middleware
+        		ctx := c.Request.Context()
+        		span := trace.SpanFromContext(ctx)
+
+        		span.SetAttributes(attribute.String("custom.key", "value"))
+        		span.AddEvent("manual.event")
+
+        		c.JSON(200, gin.H{"message": "Hello traced Gin!"})
+        	})
+
+        	log.Println("Server starting on :8080")
+        	log.Fatal(r.Run(":8080"))
+        }
+        ```
+
+        ### Adding manual child spans
+
+        Create additional spans to trace specific operations within your handlers:
+
+        ```go
+        r.GET("/process", func(c *gin.Context) {
+        	tracer := otel.Tracer("my-service")
+
+        	// Create a child span (parent created by otelgin middleware)
+        	ctx, span := tracer.Start(c.Request.Context(), "process-data")
+        	defer span.End()
+
+        	span.SetAttributes(attribute.String("operation", "data-processing"))
+
+        	// Use ctx for downstream calls to propagate trace context
+
+        	c.JSON(200, gin.H{"status": "processed"})
+        })
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.63.0
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="echo" label="Echo" category="web">
+
+        This guide shows you how to add OpenTelemetry instrumentation to an Echo application. Complete the core Go instrumentation setup first.
+
+        ### Install Echo instrumentation
+
+        ```bash
+        go get github.com/labstack/echo/v4
+        go get go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/v4/otelecho
+        ```
+
+        ### Complete example
+
+        ```go
+        package main
+
+        import (
+        	"context"
+        	"log"
+        	"net/http"
+        	"os"
+        	"os/signal"
+
+        	"github.com/labstack/echo/v4"
+        	"github.com/labstack/echo/v4/middleware"
+        	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/v4/otelecho"
+        	"go.opentelemetry.io/otel"
+        	"go.opentelemetry.io/otel/attribute"
+        	"go.opentelemetry.io/otel/trace"
+        )
+
+        // Use the initTracer function from Step 3 above
+        func initTracer(ctx context.Context) (func(context.Context) error, error) {
+        	// Paste the complete initTracer implementation from the core setup section
+        	return nil, nil  // Placeholder - replace with actual implementation
+        }
+
+        func main() {
+        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer cancel()
+
+        	shutdown, err := initTracer(ctx)
+        	if err != nil {
+        		log.Fatal(err)
+        	}
+        	defer shutdown(ctx)
+
+        	e := echo.New()
+
+        	e.Use(middleware.Recover())
+
+        	// Add OpenTelemetry middleware to instrument all routes
+        	e.Use(otelecho.Middleware("my-echo-service"))
+
+        	e.GET("/", func(c echo.Context) error {
+        		// Extract the span created by otelecho middleware
+        		span := trace.SpanFromContext(c.Request().Context())
+
+        		span.SetAttributes(attribute.String("custom.key", "value"))
+        		span.AddEvent("manual.event")
+
+        		return c.String(http.StatusOK, "Hello traced Echo!")
+        	})
+
+        	log.Println("Server starting on :8080")
+        	log.Fatal(e.Start(":8080"))
+        }
+        ```
+
+        ### Adding manual child spans
+
+        Create additional spans to trace specific operations within your handlers:
+
+        ```go
+        e.GET("/process", func(c echo.Context) error {
+        	tracer := otel.Tracer("my-service")
+
+        	// Create a child span (parent created by otelecho middleware)
+        	ctx, span := tracer.Start(c.Request().Context(), "process-data")
+        	defer span.End()
+
+        	span.SetAttributes(attribute.String("operation", "data-processing"))
+
+        	// Use ctx for downstream calls to propagate trace context
+
+        	return c.JSON(http.StatusOK, map[string]string{"status": "processed"})
+        })
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/v4/otelecho v0.63.0
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="fiber" label="Fiber" category="web">
+
+        This guide shows you how to add OpenTelemetry instrumentation to a Fiber application. Complete the core Go instrumentation setup first.
+
+        ### Install Fiber instrumentation
+
+        ```bash
+        go get github.com/gofiber/fiber/v2
+        go get github.com/gofiber/contrib/otelfiber
+        ```
+
+        ### Complete example
+
+        ```go
+        package main
+
+        import (
+        	"context"
+        	"log"
+        	"os"
+        	"os/signal"
+
+        	"github.com/gofiber/contrib/otelfiber"
+        	"github.com/gofiber/fiber/v2"
+        	"go.opentelemetry.io/otel"
+        	"go.opentelemetry.io/otel/attribute"
+        	"go.opentelemetry.io/otel/trace"
+        )
+
+        // Use the initTracer function from Step 3 above
+        func initTracer(ctx context.Context) (func(context.Context) error, error) {
+        	// Paste the complete initTracer implementation from the core setup section
+        	return nil, nil  // Placeholder - replace with actual implementation
+        }
+
+        func main() {
+        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer cancel()
+
+        	shutdown, err := initTracer(ctx)
+        	if err != nil {
+        		log.Fatal(err)
+        	}
+        	defer shutdown(ctx)
+
+        	app := fiber.New()
+
+        	// Add OpenTelemetry middleware to instrument all routes
+        	app.Use(otelfiber.Middleware())
+
+        	app.Get("/", func(c *fiber.Ctx) error {
+        		// Important: Use UserContext() for Fiber (fasthttp-based)
+        		span := trace.SpanFromContext(c.UserContext())
+
+        		span.SetAttributes(attribute.String("custom.key", "value"))
+        		span.AddEvent("manual.event")
+
+        		return c.SendString("Hello traced Fiber!")
+        	})
+
+        	log.Println("Server starting on :8080")
+        	log.Fatal(app.Listen(":8080"))
+        }
+        ```
+
+        ### Adding manual child spans
+
+        Create additional spans to trace specific operations within your handlers:
+
+        ```go
+        app.Get("/process", func(c *fiber.Ctx) error {
+        	tracer := otel.Tracer("my-service")
+
+        	// Create a child span (parent created by otelfiber middleware)
+        	// Important: Use UserContext() for Fiber (fasthttp-based)
+        	ctx, span := tracer.Start(c.UserContext(), "process-data")
+        	defer span.End()
+
+        	span.SetAttributes(attribute.String("operation", "data-processing"))
+
+        	// Use ctx for downstream calls to propagate trace context
+
+        	return c.JSON(fiber.Map{"status": "processed"})
+        })
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/github.com/gofiber/fiber/v2/otelfiber v0.63.0
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="chi" label="Chi" category="web">
+
+        This guide shows you how to add OpenTelemetry instrumentation to a Chi application. Complete the core Go instrumentation setup first.
+
+        ### Install Chi instrumentation
+
+        ```bash
+        go get github.com/go-chi/chi/v5
+        go get github.com/riandyrn/otelchi
+        ```
+
+        ### Complete example
+
+        ```go
+        package main
+
+        import (
+        	"context"
+        	"log"
+        	"net/http"
+        	"os"
+        	"os/signal"
+
+        	"github.com/go-chi/chi/v5"
+        	"github.com/go-chi/chi/v5/middleware"
+        	"github.com/riandyrn/otelchi"
+        	"go.opentelemetry.io/otel"
+        	"go.opentelemetry.io/otel/attribute"
+        	"go.opentelemetry.io/otel/trace"
+        )
+
+        // Use the initTracer function from Step 3 above
+        func initTracer(ctx context.Context) (func(context.Context) error, error) {
+        	// Paste the complete initTracer implementation from the core setup section
+        	return nil, nil  // Placeholder - replace with actual implementation
+        }
+
+        func main() {
+        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer cancel()
+
+        	shutdown, err := initTracer(ctx)
+        	if err != nil {
+        		log.Fatal(err)
+        	}
+        	defer shutdown(ctx)
+
+        	r := chi.NewRouter()
+
+        	r.Use(middleware.Recoverer)
+        	r.Use(middleware.Logger)
+
+        	// Add OpenTelemetry middleware to instrument all routes
+        	// WithChiRoutes enables better route matching for span names
+        	r.Use(otelchi.Middleware("my-chi-service", otelchi.WithChiRoutes(r)))
+
+        	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+        		// Extract the span created by otelchi middleware
+        		span := trace.SpanFromContext(r.Context())
+
+        		span.SetAttributes(attribute.String("custom.key", "value"))
+        		span.AddEvent("manual.event")
+
+        		w.Write([]byte("Hello traced Chi!"))
+        	})
+
+        	log.Println("Server starting on :8080")
+        	log.Fatal(http.ListenAndServe(":8080", r))
+        }
+        ```
+
+        ### Adding manual child spans
+
+        Create additional spans to trace specific operations within your handlers:
+
+        ```go
+        r.Get("/process", func(w http.ResponseWriter, r *http.Request) {
+        	tracer := otel.Tracer("my-service")
+
+        	// Create a child span (parent created by otelchi middleware)
+        	ctx, span := tracer.Start(r.Context(), "process-data")
+        	defer span.End()
+
+        	span.SetAttributes(attribute.String("operation", "data-processing"))
+
+        	// Use ctx for downstream calls to propagate trace context
+
+        	w.Header().Set("Content-Type", "application/json")
+        	w.Write([]byte(`{"status": "processed"}`))
+        })
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - github.com/riandyrn/otelchi v0.12.2
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="gorilla" label="Gorilla Mux" category="web">
+
+        This guide shows you how to add OpenTelemetry instrumentation to a Gorilla Mux application. Complete the core Go instrumentation setup first.
+
+        ### Install Gorilla instrumentation
+
+        ```bash
+        go get github.com/gorilla/mux
+        go get go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux
+        ```
+
+        ### Complete example
+
+        ```go
+        package main
+
+        import (
+        	"context"
+        	"log"
+        	"net/http"
+        	"os"
+        	"os/signal"
+
+        	"github.com/gorilla/mux"
+        	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
+        	"go.opentelemetry.io/otel"
+        	"go.opentelemetry.io/otel/attribute"
+        	"go.opentelemetry.io/otel/trace"
+        )
+
+        // Use the initTracer function from Step 3 above
+        func initTracer(ctx context.Context) (func(context.Context) error, error) {
+        	// Paste the complete initTracer implementation from the core setup section
+        	return nil, nil  // Placeholder - replace with actual implementation
+        }
+
+        func main() {
+        	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+        	defer cancel()
+
+        	shutdown, err := initTracer(ctx)
+        	if err != nil {
+        		log.Fatal(err)
+        	}
+        	defer shutdown(ctx)
+
+        	r := mux.NewRouter()
+
+        	// Add OpenTelemetry middleware to instrument all routes
+        	r.Use(otelmux.Middleware("my-gorilla-service"))
+
+        	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        		// Extract the span created by otelmux middleware
+        		span := trace.SpanFromContext(r.Context())
+
+        		span.SetAttributes(attribute.String("custom.key", "value"))
+        		span.AddEvent("manual.event")
+
+        		w.Write([]byte("Hello traced Gorilla!"))
+        	})
+
+        	log.Println("Server starting on :8080")
+        	log.Fatal(http.ListenAndServe(":8080", r))
+        }
+        ```
+
+        ### Adding manual child spans
+
+        Create additional spans to trace specific operations within your handlers:
+
+        ```go
+        r.HandleFunc("/process", func(w http.ResponseWriter, r *http.Request) {
+        	tracer := otel.Tracer("my-service")
+
+        	// Create a child span (parent created by otelmux middleware)
+        	ctx, span := tracer.Start(r.Context(), "process-data")
+        	defer span.End()
+
+        	span.SetAttributes(attribute.String("operation", "data-processing"))
+
+        	// Use ctx for downstream calls to propagate trace context
+
+        	w.Header().Set("Content-Type", "application/json")
+        	w.Write([]byte(`{"status": "processed"}`))
+        })
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.63.0
+        ```
 
 
-## Sample Golang application
+    </LibraryTab>
+    <LibraryTab value="grpc-server" label="gRPC Server" category="grpc">
 
-We have included a sample gin/gonic application with `README.md` at https://github.com/SigNoz/sample-golang-app.
+        This guide shows you how to add OpenTelemetry instrumentation to a gRPC server. Complete the core Go instrumentation setup first.
 
-Feel free to use this repo to test out OpenTelemetry instrumentation and how to send telemetry data to SigNoz.
+        ### Install gRPC instrumentation
 
+        ```bash
+        go get google.golang.org/grpc
+        go get go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc
+        ```
 
-## Library and framework support
+        ### Add server interceptors
 
-Besides OpenTelemetry core modules, it is important to install instrumentation packages for every important library and framework which your service depends upon. Beyond the critical telemetry data these components emit, library and framework integrations are often required to ensure that the [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) is properly propagated.
+        ```go
+        import (
+        	"google.golang.org/grpc"
+        	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+        )
 
-OpenTelemetry automatically provides instrumentation for a large number of libraries and frameworks, right out of the box.
+        // Create gRPC server with OpenTelemetry instrumentation
+        s := grpc.NewServer(
+        	grpc.StatsHandler(otelgrpc.NewServerHandler()),
+        )
 
-The full list of supported instrumentation can be found in the [README](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/master/instrumentation).
+        // Register your gRPC services
+        // pb.RegisterYourServiceServer(s, &yourServer{})
 
-You can also find libraries, plugins, integrations, and other useful tools for extending OpenTelemetry from the OpenTelemetry [registry](https://opentelemetry.io/registry/?language=go).
+        lis, err := net.Listen("tcp", ":50051")
+        if err != nil {
+        	log.Fatalf("failed to listen: %v", err)
+        }
+        log.Println("gRPC server starting on :50051")
+        if err := s.Serve(lis); err != nil {
+        	log.Fatalf("failed to serve: %v", err)
+        }
+        ```
 
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0
+        - google.golang.org/grpc v1.77.0
+        ```
 
+    </LibraryTab>
+    <LibraryTab value="grpc-client" label="gRPC Client" category="grpc">
 
+        This guide shows you how to add OpenTelemetry instrumentation to a gRPC client. Complete the core Go instrumentation setup first.
 
+        ### Install gRPC instrumentation
 
-{/* <InstrumentationFAQ /> */}
+        ```bash
+        go get google.golang.org/grpc
+        go get go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc
+        ```
+
+        ### Add client interceptors
+
+        ```go
+        import (
+        	"context"
+        	"google.golang.org/grpc"
+        	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+        )
+
+        // Create gRPC client with OpenTelemetry instrumentation
+        conn, err := grpc.NewClient(
+        	"localhost:50051",
+        	grpc.WithTransportCredentials(insecure.NewCredentials()),
+        	grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+        )
+        if err != nil {
+        	log.Fatalf("failed to connect: %v", err)
+        }
+        defer conn.Close()
+
+        // Create your gRPC client
+        // client := pb.NewYourServiceClient(conn)
+
+        // All RPC calls are automatically traced
+        // resp, err := client.YourMethod(ctx, &pb.YourRequest{})
+        ```
+
+        ```text
+        Tested with:
+        - Go 1.25.1
+        - OpenTelemetry Go SDK v1.38.0
+        - go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0
+        - google.golang.org/grpc v1.77.0
+        ```
+
+    </LibraryTab>
+</LibraryTabs>
+
+## Validate
+
+After running your instrumented application, verify traces appear in SigNoz:
+
+1. Generate some traffic by making requests to your application.
+2. Open SigNoz and navigate to **Traces**.
+3. Click **Refresh** and look for new trace entries from your application.
+
+<Figure
+    src="/img/docs/instrumentation/golang/trace-list.webp"
+    alt="Go application traces list in SigNoz"
+    caption="List of traces from your Go application"
+/>
+
+4. Click on any trace to view detailed span information and timing.
+
+<Figure
+    src="/img/docs/instrumentation/golang/trace-individual.webp"
+    alt="Individual trace details in SigNoz"
+    caption="Detailed view of a single trace with span information"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Why don't traces appear in SigNoz?
+
+**Check environment variables are set:**
+
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+echo $OTEL_SERVICE_NAME
+```
+
+**Verify network connectivity:**
+
+```bash
+# For SigNoz Cloud
+curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+### Why do OTLP exports fail with `connection refused`?
+
+- **VM**: Verify the endpoint URL and that your firewall allows outbound HTTPS
+- **Kubernetes**: Ensure the OTel Collector service is running and accessible
+- **Self-hosted**: Confirm the collector is listening on the expected port
+
+### Why do spans go missing for specific requests?
+
+Ensure you're using instrumented versions of HTTP clients and database drivers.
+Check if you have not set a sampling rate type which might affect sending spans or span rate.
+</details>
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next steps
+
+- Send logs from your Go application using popular logging libraries: [Logrus](https://signoz.io/docs/logs-management/send-logs/logrus-to-signoz/), [Zap](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz/), or [Zerolog](https://signoz.io/docs/logs-management/send-logs/zerolog-to-signoz/)
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to accelerate triage across signals
+- [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your Go application
+- [Create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize metrics
+- Need to create custom spans or add attributes yourself? Use the [Manual Instrumentation in Go guide](https://signoz.io/docs/instrumentation/manual-instrumentation/golang/manual-instrumentation) once the base setup is in place.

@@ -1,0 +1,150 @@
+---
+date: 2025-11-27
+id: golang-manual-instrumentation
+title: How to add manual instrumentation in Go
+description: Create custom spans, enrich them, and record errors in Go applications with OpenTelemetry and SigNoz
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+Manual instrumentation gives you fine-grained control when automatic instrumentation alone cannot express important business operations. Use it to capture steps that matter for debugging, to attach business-specific attributes, or to guarantee that failures surface with the right context in SigNoz.
+
+<KeyPointCallout title="Works for both SigNoz Cloud and Self-Hosted" defaultCollapsed={true}>
+  Manual instrumentation steps are identical across deployments—only your OTLP endpoint and ingestion key differ.
+</KeyPointCallout>
+
+## Prerequisites
+
+- Finish the core Go setup in the [OpenTelemetry Go instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-golang/) so exporters, tracer provider, and propagators are configured.
+- Propagate `context.Context` through handlers and business logic. Manual spans derive from these contexts so traces stay connected.
+- Tested with Go 1.25.1 and OpenTelemetry Go SDK v1.38.0.
+## Step 1. Create manual spans
+
+Use the SDK tracer to wrap important work inside custom spans:
+
+```go:manual-span.go
+import (
+	"context"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+)
+
+func processOrder(ctx context.Context, orderID string) error {
+	tracer := otel.Tracer("order-service")
+
+	ctx, span := tracer.Start(ctx, "process-order")
+	defer span.End()
+
+	span.SetAttributes(
+		attribute.String("order.id", orderID),
+		attribute.String("order.status", "processing"),
+	)
+
+	// Use ctx for downstream work so child spans stay linked.
+	return nil
+}
+```
+
+Tips:
+
+- Reuse tracer instances instead of creating a new one for each request.
+- Start spans with descriptive names that match business steps (`checkout`, `fetch-user`, etc.).
+- Always end the span, preferably with `defer`.
+
+## Step 2. Add attributes and events
+
+Attributes show up as key-value pairs in SigNoz so you can filter and aggregate spans. Events capture notable moments inside a span.
+
+```go:attributes.go
+import (
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
+)
+
+func handlePayment(ctx context.Context, amount float64) {
+	span := trace.SpanFromContext(ctx)
+
+	span.SetAttributes(
+		attribute.Float64("payment.amount", amount),
+		attribute.String("payment.currency", "USD"),
+		attribute.String("payment.method", "credit_card"),
+	)
+
+	span.AddEvent("payment.processed", trace.WithAttributes(
+		attribute.String("status", "success"),
+		attribute.String("transaction.id", "txn_123456"),
+	))
+}
+```
+
+- Keep attribute keys consistent (use semantic conventions when possible).
+- Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
+
+## Step 3. Record errors
+
+Flag failures on the span so they are easy to query in SigNoz.
+
+```go:error-handling.go
+import (
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
+)
+
+func riskyOperation(ctx context.Context) error {
+	span := trace.SpanFromContext(ctx)
+
+	err := doSomethingRisky()
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+
+	span.SetStatus(codes.Ok, "")
+	return nil
+}
+```
+
+- `RecordError` attaches stack and message details.
+- Setting status to `codes.Error` surfaces the span in SigNoz error views and alerts.
+- Continue propagating the error upstream so calling code can respond.
+
+## Validate
+
+1. Trigger the code paths that emit manual spans.
+2. In SigNoz **Traces**, filter by `service.name` or your span name.
+3. Open a trace and verify attributes, events, and error status.
+4. Check the **Errors** view to confirm failures show up with recorded exceptions.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Why don't I see my custom spans in SigNoz?
+
+- Confirm `initTracer` (and automatic instrumentation) runs before your application handlers.
+- Check sampler configuration. Using `TraceIDRatioBased(0.01)` in dev may drop most manual spans.
+- Verify traffic hits the functions where you inserted spans.
+
+### Why are child spans missing even though I create them?
+
+- Ensure you pass the `ctx` returned by `tracer.Start` (or `trace.SpanFromContext`) into downstream functions.
+- HTTP/database client calls must receive the propagated context as well, otherwise traces break across boundaries.
+
+### Why don't attributes or events appear on the span?
+
+- Attribute keys must be strings and values must use the correct helper (`attribute.String`, `attribute.Float64`, etc.).
+- Call `span.AddEvent` or `span.SetAttributes` before `span.End()`. Post-end mutations are ignored.
+- Avoid reusing finished spans—always create a new span for each invocation.
+
+</details>
+
+## Next steps
+
+- Send logs from your Go application using popular logging libraries: [Logrus](https://signoz.io/docs/logs-management/send-logs/logrus-to-signoz/), [Zap](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz/), or [Zerolog](https://signoz.io/docs/logs-management/send-logs/zerolog-to-signoz/)
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) to accelerate triage across signals
+- Add instrumentation to common Go frameworks via the [Go instrumentation library catalog](https://signoz.io/docs/instrumentation/opentelemetry-golang/#library-instrumentation)
