@@ -32,6 +32,9 @@ Install the required OpenTelemetry packages:
 <Tabs>
 <TabItem value="npm" label="npm" default>
 
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
 ```bash
 npm install --save @opentelemetry/api-logs \
   @opentelemetry/sdk-logs \
@@ -42,7 +45,29 @@ npm install --save @opentelemetry/api-logs \
 ```
 
 </TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```bash
+npm install --save @opentelemetry/api-logs \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions \
+  express \
+  typescript \
+  ts-node \
+  @types/node \
+  @types/express
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
 <TabItem value="yarn" label="yarn">
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
 
 ```bash
 yarn add @opentelemetry/api-logs \
@@ -52,6 +77,25 @@ yarn add @opentelemetry/api-logs \
   @opentelemetry/semantic-conventions \
   express
 ```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```bash
+yarn add @opentelemetry/api-logs \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions \
+  express \
+  typescript \
+  ts-node \
+  @types/node \
+  @types/express
+```
+
+</TabItem>
+</Tabs>
 
 </TabItem>
 </Tabs>
@@ -192,7 +236,10 @@ Replace the placeholders:
 
 ### Step 3: Configure OpenTelemetry Logger
 
-Create a new file called `logger.js` in your project root. This file reads the configuration from the environment variables set in the previous step.
+Create a new file called `logger.js` or `logger.ts` in your project root. This file reads the configuration from the environment variables set in the previous step.
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
 
 ```javascript:logger.js
 const {
@@ -220,9 +267,45 @@ const loggerProvider = new LoggerProvider({
 module.exports = loggerProvider;
 ```
 
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:logger.ts
+import {
+  LoggerProvider,
+  BatchLogRecordProcessor,
+} from "@opentelemetry/sdk-logs";
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+
+// Create a resource with your service information
+const resource = resourceFromAttributes({
+  [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME || "nodejs-console-app",
+});
+
+// Configure the OTLP exporter
+// It automatically reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS
+const logExporter = new OTLPLogExporter({});
+
+// Create and configure the logger provider
+const loggerProvider = new LoggerProvider({
+  resource,
+  processors: [new BatchLogRecordProcessor(logExporter)], // Configure batch processor
+});
+
+export default loggerProvider;
+```
+
+</TabItem>
+</Tabs>
+
 ### Step 4: Instrument the Default Console Logger
 
-Create a new file called `console-instrumentation.js` in your project root. This file wraps the default console methods to send logs to OpenTelemetry:
+Create a new file called `console-instrumentation.js` or `console-instrumentation.ts` in your project root. This file wraps the default console methods to send logs to OpenTelemetry:
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
 
 ```javascript:console-instrumentation.js
 require("@opentelemetry/api-logs");
@@ -325,9 +408,119 @@ console.debug = function (...args) {
 };
 ```
 
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:console-instrumentation.ts
+import "@opentelemetry/api-logs";
+import loggerProvider from "./logger";
+
+// Get a logger instance
+const logger = loggerProvider.getLogger("default", "1.0.0");
+
+// Store original console methods
+const originalConsole = {
+  log: console.log,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+  debug: console.debug,
+};
+
+// Map severity levels
+const SeverityNumber = {
+  DEBUG: 5,
+  INFO: 9,
+  WARN: 13,
+  ERROR: 17,
+};
+
+// Override console methods
+console.log = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.log.apply(console, args);
+};
+
+console.info = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.info.apply(console, args);
+};
+
+console.warn = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.WARN,
+    severityText: "WARN",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.warn.apply(console, args);
+};
+
+console.error = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.ERROR,
+    severityText: "ERROR",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.error.apply(console, args);
+};
+
+console.debug = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.DEBUG,
+    severityText: "DEBUG",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.debug.apply(console, args);
+};
+```
+
+</TabItem>
+</Tabs>
+
 ### Step 5: Initialize Instrumentation in Your Application
 
-Import the instrumentation at the very top of your main application file (e.g., `index.js` or `app.js`):
+Import the instrumentation at the very top of your main application file (e.g., `index.js` or `index.ts`):
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
 
 ```javascript:index.js
 // This must be the first import
@@ -345,13 +538,48 @@ app.listen(3000, () => {
 })
 ```
 
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:index.ts
+// This must be the first import
+import './console-instrumentation';
+
+// Your application code follows
+import express from 'express';
+const app = express();
+
+console.log('Application started');
+console.error('This is an error message');
+
+app.listen(3000, () => {
+  console.info('Server listening on port 3000');
+});
+```
+
+</TabItem>
+</Tabs>
+
 ### Step 6: Run Your Application
 
 Run your application:
 
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
 ```bash
 node index.js
 ```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```bash
+npx ts-node index.ts
+```
+
+</TabItem>
+</Tabs>
 
 ## Validate Logs
 
