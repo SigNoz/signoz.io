@@ -1334,6 +1334,11 @@ const docsSideNav = [
                 route: '/docs/logs-management/send-logs/nodejs-winston-logs',
                 label: 'Winston Node.js logs',
               },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs',
+                label: 'Bunyan Node.js logs',
+              },
             ],
           },
           {
