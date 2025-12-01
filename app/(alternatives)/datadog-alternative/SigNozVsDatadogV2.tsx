@@ -210,6 +210,17 @@ const SigNozVsDatadogV2 = () => {
               but brings along the benefits of open-source standards.
               <br />
               <br />
+              Switching from Datadog is now easier with our{' '}
+              <Link
+                href="/datadog-migration-tool/"
+                className="text-blue-400 hover:text-blue-300"
+                target="_blank"
+              >
+                automated migration tool
+              </Link>{' '}
+              that translates your dashboards in minutes, preserving all configurations and queries.
+              <br />
+              <br />
               Top reasons why developers prefer SigNoz over Datadog
             </p>
           </div>

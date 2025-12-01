@@ -1,0 +1,347 @@
+---
+date: 2025-11-20
+id: terraform-provider-signoz
+tags : [SigNoz Cloud, Self-Host]
+title: Creating SigNoz Dashboards with Terraform
+description: How to create and manage SigNoz Dashboards with Terraform for infrastructure-as-code workflows.
+doc_type: howto
+---
+
+Define SigNoz dashboards as Terraform code to version control, review, and replicate configurations across environments.
+
+## Overview
+
+SigNoz dashboards provide powerful visualization and monitoring capabilities for your services. While you can create dashboards using the [SigNoz UI](https://signoz.io/docs/dashboards/import-dashboard/), the **Terraform 'signoz' provider** enables you to manage SigNoz dashboards as infrastructure-as-code, making them reviewable, version-controlled, and reproducible.
+
+This document will guide you on how to:
+- Configure the provider
+- Create a new dashboard in SigNoz
+- Start managing existing dashboards using Terraform
+- Use dashboard templates from the [SigNoz Dashboards repository](https://github.com/SigNoz/dashboards)
+
+## Prerequisites
+
+- Terraform
+  - version of Terraform runtime: [v0.13.0](https://github.com/hashicorp/terraform/releases/tag/v0.13.0) or later
+  - version of Signoz provider: [0.0.4](https://github.com/SigNoz/terraform-provider-signoz/releases/tag/v0.0.4) or later
+- SigNoz Instance (any of the following)
+  - SigNoz Enterprise
+  - SigNoz Cloud
+  - Self-hosted Community Edition ([v0.85.0](https://github.com/SigNoz/signoz/releases/tag/v0.85.0) or later)
+
+## Configure Terraform Provider
+
+### Step 1: Configure Terraform Environment
+
+Create a `.tf` file with an arbitrary name (e.g., `main.tf` is commonly used) and add the following content:
+
+```hcl:main.tf
+terraform {
+  required_version = ">= 0.13"
+}
+```
+
+### Step 2: Install Terraform signoz Provider
+
+Add a specification block for the **signoz** provider as follows:
+```hcl:main.tf {4-9}
+terraform {
+  required_version = ">= 0.13"
+
+ required_providers {
+   signoz = {
+     source = "Signoz/signoz"
+     version = "~>0.0.4"
+   }
+ }
+}
+```
+
+Run:
+```bash
+terraform init
+```
+
+This will create `.terraform.lock.hcl` and a `.terraform` directory with provider plugins installed in your current working directory.
+
+### Step 3: Configure the SigNoz Provider
+
+Add the provider configuration to specify your SigNoz instance endpoint and authentication:
+
+```hcl:main.tf {12-15}
+terraform {
+  required_version = ">= 0.13"
+
+  required_providers {
+    signoz = {
+      source = "Signoz/signoz"
+      version = "~>0.0.4"
+    }
+  }
+}
+
+ provider "signoz" {
+   endpoint     = "<SIGNOZ-ENDPOINT>"
+   access_token = "<SIGNOZ-API-KEY>"
+ }
+```
+
+- **`<SIGNOZ-ENDPOINT>`**: Endpoint URL of your SigNoz instance
+- **`<SIGNOZ-API-KEY>`**: Your SigNoz API access token
+
+## Create a New Dashboard
+
+### Step 1: Define the Dashboard Resource
+
+Create a new dashboard by defining a `signoz_dashboard` resource in your Terraform configuration:
+
+```hcl:main.tf
+resource "signoz_dashboard" "my_dashboard" {
+  collapsable_rows_migrated = true
+  description               = "CPU and Memory metrics for Kubernetes nodes"
+  name                      = "k8s-node-monitoring"
+  title                     = "Kubernetes Node Monitoring"
+  version                   = "v4"
+  uploaded_grafana          = false
+  tags                      = ["kubernetes", "infrastructure"]
+
+  layout = jsonencode([
+    {
+      "h" : 8,
+      "i" : "widget-1",
+      "moved" : false,
+      "static" : false,
+      "w" : 6,
+      "x" : 0,
+      "y" : 0
+    }
+  ])
+
+  variables = jsonencode({
+    "cluster-var" : {
+      "customValue" : "",
+      "description" : "The k8s cluster name",
+      "id" : "cluster-var",
+      "modificationUUID" : "uuid-here",
+      "multiSelect" : false,
+      "name" : "k8s_cluster_name",
+      "order" : 1,
+      "queryValue" : "SELECT DISTINCT JSONExtractString(labels, 'k8s_cluster_name') AS cluster FROM signoz_metrics.distributed_time_series_v4_1day",
+      "showALLOption" : true,
+      "sort" : "ASC",
+      "type" : "QUERY",
+      "selectedValue" : ["default"],
+      "allSelected" : false
+    }
+  })
+
+  widgets = jsonencode([
+    {
+      "id" : "widget-1",
+      "description" : "Node CPU Usage",
+      "panelTypes" : "graph",
+      "title" : "CPU Usage by Node",
+      "yAxisUnit" : "percent",
+      "query" : {
+        "builder" : {
+          "queryData" : [
+            {
+              "aggregateOperator" : "avg",
+              "dataSource" : "metrics",
+              "expression" : "A",
+              "queryName" : "A",
+              "aggregateAttribute" : {
+                "key" : "k8s_node_cpu_utilization",
+                "type" : "Gauge"
+              }
+            }
+          ]
+        },
+        "queryType" : "builder"
+      }
+    }
+  ])
+
+  panel_map = jsonencode({})
+}
+```
+
+### Step 2: Apply the Configuration
+
+Run the following commands to create the dashboard:
+
+```bash
+# Preview the changes
+terraform plan
+
+# Apply the changes
+terraform apply
+```
+
+Terraform will show you the changes it plans to make. Type `yes` to confirm and create the dashboard.
+
+### Step 3: Verify in SigNoz
+
+Navigate to the **Dashboards** page in your SigNoz UI to verify that the new dashboard has been created successfully.
+
+## Import Existing Dashboard from SigNoz
+
+If you have dashboards already created in SigNoz and want to manage them with Terraform:
+
+### Step 1: Get the Dashboard ID
+
+Find the dashboard ID from the SigNoz UI:
+- Navigate to the dashboard you want to import
+- The dashboard ID is visible in the URL: `https://<your-signoz>/dashboard/<DASHBOARD-ID>`
+
+### Step 2: Create a Resource Block
+
+Add an empty resource block for the dashboard in your Terraform configuration:
+
+```hcl
+resource "signoz_dashboard" "existing_dashboard" {
+  # Configuration will be imported
+}
+```
+
+### Step 3: Import the Dashboard
+
+Run the import command:
+
+```bash
+terraform import signoz_dashboard.existing_dashboard <DASHBOARD-ID>
+```
+
+### Step 4: Generate Configuration
+
+After importing, generate the configuration to see the current state:
+
+```bash
+# For Terraform 1.5+
+terraform show -no-color > imported_dashboard.tf
+
+# Then extract the relevant resource block and add it to your main configuration
+```
+
+Alternatively, you can use:
+
+```bash
+terraform state show signoz_dashboard.existing_dashboard
+```
+
+Copy the output and format it as a proper resource block in your `.tf` file.
+
+### Step 5: Verify the Import
+
+Run `terraform plan` to ensure Terraform recognizes the imported resource and shows no changes:
+
+```bash
+terraform plan
+```
+
+If you see planned changes, review and update your configuration to match the actual dashboard state.
+
+## Using Dashboard Templates
+
+SigNoz provides a variety of [dashboard templates](https://signoz.io/docs/dashboards/dashboard-templates/overview) for common monitoring scenarios. You can use these templates with Terraform:
+
+### Step 1: Choose a Template
+
+Browse available templates:
+- [Kubernetes Cluster Metrics](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-cluster-metrics/)
+- [MySQL Monitoring](https://signoz.io/docs/dashboards/dashboard-templates/mysql/)
+- [PostgreSQL Monitoring](https://signoz.io/docs/dashboards/dashboard-templates/postgresql/)
+- [NGINX Monitoring](https://signoz.io/docs/dashboards/dashboard-templates/nginx/)
+- And many more at [SigNoz Dashboards](https://signoz.io/dashboards)
+
+### Step 2: Convert JSON to Terraform
+
+Download the dashboard JSON and convert the necessary fields to Terraform format. The main fields to extract are:
+- `title`, `name`, `description`
+- `layout`, `widgets`, `variables`, `panel_map`
+- `tags`, `version`
+
+### Step 3: Create the Resource
+
+Use the extracted values in your `signoz_dashboard` resource definition.
+
+## Dashboard Schema Reference
+
+### Required Attributes
+
+- **`collapsable_rows_migrated`** (Boolean) - Whether collapsable rows have been migrated
+- **`description`** (String) - Description of the dashboard
+- **`layout`** (String) - JSON-encoded layout configuration for widget positioning
+- **`name`** (String) - Internal name/identifier for the dashboard
+- **`title`** (String) - Display title of the dashboard
+- **`uploaded_grafana`** (Boolean) - Whether the dashboard was uploaded from Grafana
+- **`variables`** (String) - JSON-encoded dashboard variables for dynamic filtering
+- **`version`** (String) - Dashboard version (e.g., "v4")
+- **`widgets`** (String) - JSON-encoded widget configurations
+
+### Optional Attributes
+
+- **`panel_map`** (String) - JSON-encoded panel grouping configuration
+- **`source`** (String) - Source of the dashboard (defaults to `<SIGNOZ_ENDPOINT>/dashboard`)
+- **`tags`** (List of String) - Tags for categorizing the dashboard
+
+### Read-Only Attributes
+
+- **`id`** (String) - Auto-generated unique identifier
+- **`created_at`** (String) - Dashboard creation timestamp
+- **`created_by`** (String) - User who created the dashboard
+- **`updated_at`** (String) - Last update timestamp
+- **`updated_by`** (String) - User who last updated the dashboard
+
+## Best Practices
+
+1. **Version Control**: Store your Terraform configurations in version control (Git) to track changes to dashboards over time
+
+2. **Module Organization**: Organize dashboards into modules by category:
+   ```
+   dashboards/
+   ├── kubernetes/
+   ├── databases/
+   ├── applications/
+   └── infrastructure/
+   ```
+
+3. **Variable Usage**: Use Terraform variables for common values like cluster names, environments, or namespaces to make dashboards reusable
+
+4. **State Management**: Use remote state backends (e.g., S3, Terraform Cloud) for team collaboration
+
+5. **Testing**: Test dashboard changes in a development environment before applying to production
+
+6. **Documentation**: Add comments in your Terraform files explaining the purpose of each dashboard and widget
+
+## Troubleshooting
+
+### Error: Invalid JSON in layout/widgets/variables
+
+Ensure that JSON values are properly encoded using `jsonencode()` function or valid JSON strings.
+
+### Dashboard Not Appearing in UI
+
+- Verify the endpoint and access token are correct
+- Check that the dashboard was successfully created: `terraform state show signoz_dashboard.<resource_name>`
+- Refresh the SigNoz UI
+
+### Import Fails
+
+- Ensure the dashboard ID is correct
+- Verify you have proper permissions to access the dashboard
+- Check that the SigNoz provider configuration is correct
+
+## Next Steps
+
+After setting up Terraform-managed dashboards:
+- Create [alerts with Terraform](https://signoz.io/docs/alerts-management/terraform-provider-signoz/) to complement your dashboards
+- Explore [dashboard templates](https://github.com/SigNoz/dashboards) for common monitoring scenarios
+- Learn about [managing dashboard variables](https://signoz.io/docs/userguide/manage-variables/) for dynamic filtering
+
+## Additional Resources
+
+- [SigNoz Dashboard Documentation](https://signoz.io/docs/dashboards/import-dashboard/)
+- [Dashboard Templates Repository](https://github.com/SigNoz/dashboards)
+- [Terraform Provider Documentation](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/resources/dashboard)
+- [Terraform Best Practices](https://developer.hashicorp.com/terraform/cloud-docs/recommended-practices)

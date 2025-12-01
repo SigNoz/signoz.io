@@ -5,7 +5,6 @@ import { SigNozFeatures } from '@/components/index-features'
 import SigNozStats from '@/components/signoz-stats'
 import { Testimonials } from '@/components/testimonials'
 import { TrustedByTeams } from '@/components/trusted-by'
-import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { GetStarted } from '@/components/GetStarted'
 import { NextUIProvider } from '@nextui-org/react'
@@ -34,7 +33,6 @@ export default function Page() {
           <TrustedByTeams page="homepage" />
           <SigNozFeatures />
           <BuildForDevelopers />
-          <WhyOpenTelemetry />
           <WhySelectSignoz />
           <SigNozStats />
           <Testimonials page="homepage" />

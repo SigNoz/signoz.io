@@ -26,7 +26,7 @@ const KubernetesDashboardsData: IconCardData[] = [
     clickName: 'Kubernetes Pod Metrics Detailed Dashboard Template',
   },
   {
-    name: 'Kubernetes Node Metrics (Detailed)', 
+    name: 'Kubernetes Node Metrics (Detailed)',
     href: '/docs/dashboards/dashboard-templates/kubernetes-node-metrics-detailed',
     icon: <Server className="h-7 w-7 text-green-600" />,
     clickName: 'Kubernetes Node Metrics Detailed Dashboard Template',

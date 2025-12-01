@@ -38,6 +38,50 @@ const icon = fromHtmlIsomorphic(
   { fragment: true }
 )
 
+const DEFAULT_DOC_TAGS = ['SigNoz Cloud', 'Self-Host']
+
+type PlainArr<T> = {
+  _array?: T[]
+  toArray?: () => T[]
+}
+
+const isPlainArr = (value: unknown): value is PlainArr<unknown> => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  return '_array' in value || 'toArray' in value
+}
+
+const extractPlainArrayValues = <T>(value: T[] | PlainArr<T> | undefined): T[] | undefined => {
+  if (!value) {
+    return undefined
+  }
+
+  if (Array.isArray(value)) {
+    return value
+  }
+
+  if (isPlainArr(value)) {
+    if (Array.isArray(value._array)) {
+      return value._array
+    }
+
+    const convertedArray = value.toArray?.()
+    if (Array.isArray(convertedArray)) {
+      return convertedArray
+    }
+  }
+
+  return undefined
+}
+
+const sanitizeDocTags = (tags: string[]) => {
+  return tags
+    .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
+    .filter((tag): tag is string => Boolean(tag))
+}
+
 const computedFields: ComputedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
   slug: {
@@ -445,11 +489,12 @@ export const Doc = defineDocumentType(() => ({
     id: { type: 'string', required: true },
     slug: { type: 'string', required: false },
     date: { type: 'date', required: false },
-    tags: { type: 'list', of: { type: 'string' }, default: [], required: false },
+    tags: { type: 'list', of: { type: 'string' }, required: false },
     lastmod: { type: 'date', required: false },
     draft: { type: 'boolean', required: false },
     summary: { type: 'string', required: false },
     description: { type: 'string', required: false },
+    doc_type: { type: 'string', required: false },
     images: { type: 'json', required: false },
     image: { type: 'string', required: false },
     authors: { type: 'list', of: { type: 'string' }, required: false },
@@ -461,6 +506,20 @@ export const Doc = defineDocumentType(() => ({
   },
   computedFields: {
     ...computedFields,
+    docTags: {
+      type: 'json',
+      resolve: (doc) => {
+        const resolvedTags = extractPlainArrayValues<string>(doc?.tags)
+
+        if (resolvedTags === undefined) {
+          return DEFAULT_DOC_TAGS
+        }
+
+        const sanitizedTags = sanitizeDocTags(resolvedTags)
+
+        return sanitizedTags
+      },
+    },
     structuredData: {
       type: 'json',
       resolve: (doc) => ({
@@ -483,8 +542,8 @@ export const Doc = defineDocumentType(() => ({
           },
         },
         headline: doc.title,
-        datePublished: doc.date || 'Thu Jun 06 2024', // Setting it Jun 06, 2024 as date metadat doesn't exist for docs, TODO: add date to all exisiting doc files
-        dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2024',
+        datePublished: doc.date || 'Thu Jun 06 2025', // Setting it Jun 06, 2025 as date metadat doesn't exist for docs, TODO: add date to all exisiting doc files
+        dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2025',
         description: doc.description,
         image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
