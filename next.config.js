@@ -993,6 +993,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/tutorial/setting-up-sso-saml-with-keycloak/',
+          destination: '/docs/manage/administrator-guide/sso/user-guides/saml-keycloak',
+          permanent: true,
+        },
+        {
           source: '/docs/install/troubleshooting/',
           destination: '/docs/setup/docker/troubleshooting/faq',
           permanent: true,
