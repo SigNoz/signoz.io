@@ -23,7 +23,7 @@ At a high level, you connect your organization’s email domain to an IdP, and S
 2. **Choose Method**: For that domain, select SAML, OIDC, or Google (for Workspace) and provide the IdP details.
 3. **Just‑in‑Time access**: Users with emails on that domain can sign in via your IdP without a prior invite. Role assignment can then be managed inside SigNoz by admins.
 4. **SP‑initiated**: User goes to SigNoz login page (`<your-instance-url>/login`), enters email, and is redirected to the IdP.
-5. **IdP‑initiated**: Users can also authenticate from the IdP. See the [IdP-initiated section](#idp‑initiated) below for configuration details.
+5. **IdP‑initiated**: Users can also authenticate from the IdP. See the [IdP-Initiated section](#idp‑initiated) below for configuration details.
 
 ## Setup at a glance
 
@@ -34,9 +34,11 @@ At a high level, you connect your organization’s email domain to an IdP, and S
 - Optionally toggle **Enforce SSO** for that domain
 - If you encounter any issues, you can temporarily use password authentication by appending `?password=Y` to the login URL, e.g. `<your-instance-url>/login?password=Y`.
 
-## IdP‑initiated SSO setup
+## IdP‑Initiated SSO setup
 
-- Copy the `IDP Initiated SSO URL` from the `Authenticated Domains` section and set this as the `Relay State URL` in your IdP
+Note: This setup is only for SAML-based IdP-initiated flows (not OIDC or Google OAuth)
+
+- Copy the `IdP Initiated SSO URL` from the `Authenticated Domains` section and set this as the `Relay State URL` in your IdP
 - Set the ACS URL as your SigNoz instance URL with the redirect path `/api/v1/complete/saml` appended to it (e.g., `https://signoz.example.com/api/v1/complete/saml`)
 
 ## Next steps
