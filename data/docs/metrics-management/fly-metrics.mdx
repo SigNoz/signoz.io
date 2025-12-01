@@ -12,6 +12,7 @@ This document explains how to monitor Fly.io application metrics in SigNoz by sc
 ## Pre-requisites
 
 - A `SigNoz Cloud` (or self-hosted) workspace
+- SigNoz Otel Collector installed : Check [Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
 - `Fly CLI installed` and a Fly.io account
 - Your Fly.io organization slug (e.g., personal)
 - A sample Fly app to generate test traffic
@@ -74,7 +75,7 @@ echo '<RAW_TOKEN_AFTER_FlyV1>' > fly_federate_token
 
 ### Step 4: Configure the OpenTelemetry Collector
 
-Create `otel.yaml` to scrape Fly’s federation endpoint and export to SigNoz.
+Update `otel.yaml` to scrape Fly’s federation endpoint and export to SigNoz.
 
 ```yaml:otel.yaml
 receivers:
@@ -185,7 +186,11 @@ curl -sS -i -G \
 
 You should see lines like `fly_instance_cpu_user_seconds_total`, `fly_instance_memory_resident`, etc.
 
+<details>
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
+
 
 ### Federation or ingestion not working
 
@@ -199,10 +204,13 @@ You should see lines like `fly_instance_cpu_user_seconds_total`, `fly_instance_m
   - Add those metric names to the `transform/fly_metrics` processor in `otel.yaml`, following the examples in this doc, so they are converted from Gauge to Sum
   - After updating `transform/fly_metrics`, restart the Collector and re-check the metrics in Query Builder.
 
-## Visualizing Fly.io Metrics
 
-Once you have configured the OTel Collector to send Fly.io metrics to SigNoz, you can start visualizing the metrics in the SigNoz UI.
+</details>
 
+## Next steps
+
+- **Create alerts**: Set up alerts based on fly.io metrics. [Learn more] (https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+- **Build dashboards**: Once you have configured the OTel Collector to send Fly.io metrics to SigNoz, you can start visualizing the metrics in the SigNoz UI.
 You can use the pre-configured dashboard for Fly metrics or [create your own custom dashboard](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard). To use the pre-configured dashboard, download the dashboard JSON from <a href="https://github.com/SigNoz/dashboards/blob/main/fly/fly-prometheus-v1.json" target="_blank" rel="noopener noreferrer nofollow"> Fly.io dashboard JSON </a> and import it to SigNoz by clicking Dashboards → New dashboard → Import JSON:
 
 <figure data-zoomable align="center">
@@ -218,3 +226,4 @@ You can use the pre-configured dashboard for Fly metrics or [create your own cus
     dashboardName="Fly.io (Prometheus)"
   />
 </div>
+
