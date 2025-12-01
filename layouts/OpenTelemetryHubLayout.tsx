@@ -8,6 +8,7 @@ import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableO
 import ArticleMetaDetailsCard, {
   type RenderedAuthor,
 } from '@/components/ArticleMetaDetailsCard/ArticleMetaDetailsCard'
+import ScrollToHashClient from '@/components/ScrollToHashClient'
 import authorsDirectory from '@/constants/authors.json'
 import OpenTelemetrySidebarClient from './open-telemetry-hub/OpenTelemetrySidebarClient'
 import OpenTelemetryProgressBar from './open-telemetry-hub/OpenTelemetryProgressBar'
@@ -150,6 +151,7 @@ export default function OpenTelemetryHubLayout({
 
   return (
     <main id={MAIN_CONTENT_ID}>
+      <ScrollToHashClient />
       <SectionContainer>
         <OpenTelemetryProgressBar targetId={MAIN_CONTENT_ID} />
 

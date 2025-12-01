@@ -56,10 +56,12 @@ export const generateRssItem = (config, post) => {
     }
     <pubDate>${date}</pubDate>
     ${config.email ? `<author>${config.email} (${config.author ?? ''})</author>` : ''}
-    ${
-      Array.isArray(post.tags)
-        ? post.tags.map((t) => `<category>${escape(t)}</category>`).join('')
-        : ''
+    ${link?.includes('/docs/') ? 
+      (post.docTags ? post.docTags.map((t) => `<category>${t}</category>`).join('') : '') 
+      :Array.isArray(post.tags)
+      ? post.tags.map((t) => `<category>${escape(t)}</category>`).join('')
+      : ''
+    }
     }
   </item>
 `.trim()

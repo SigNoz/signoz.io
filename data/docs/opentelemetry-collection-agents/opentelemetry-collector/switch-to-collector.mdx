@@ -1,0 +1,130 @@
+---
+date: 2025-11-28
+id: switch-to-collector
+title: Switch from Direct Export to OpenTelemetry Collector
+description: Convert your application from sending telemetry directly to SigNoz to routing it through an OpenTelemetry Collector.
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+This guide shows you how to switch from sending telemetry data directly from your application to SigNoz to routing it through an OpenTelemetry Collector.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#quick-differences).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Your application is already instrumented with OpenTelemetry and sending data to SigNoz
+- Access to modify your application's environment variables or configuration
+- An OpenTelemetry Collector deployed in your environment — see [get started with collection agents](https://signoz.io/docs/opentelemetry-collection-agents/get-started/)
+
+Not sure if you need a Collector? See [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/)
+
+## Step 1. Configure the Collector to forward to SigNoz
+
+Update your Collector's configuration file to forward data to SigNoz.
+
+Please follow the [configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) to configure your OpenTelemetry Collector. You will need to update the `endpoint` with your [Ingestion Endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and add your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to the `headers`.
+
+## Step 2. Update your application environment variables
+
+Update your application to send to the Collector instead of directly to SigNoz:
+
+**Before (direct to SigNoz Cloud):**
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+**After (via Collector):**
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+# Remove the ingestion key - the Collector handles it now
+unset OTEL_EXPORTER_OTLP_HEADERS
+```
+
+<Admonition type="info">
+If your Collector runs on a different host, replace `localhost` with the Collector's hostname or IP. For Kubernetes, use the Service name (e.g., `http://otel-collector.observability.svc.cluster.local:4318`).
+</Admonition>
+
+## Step 3. Restart and validate
+
+1. Restart your application with the updated configuration.
+2. Check the Collector logs to verify it's receiving and exporting data.
+3. In SigNoz, navigate to **Traces** or **Metrics** and verify new data is appearing.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No data appears in SigNoz after switching
+
+**Verify Collector is receiving data:**
+
+Add a debug exporter to see data flowing through:
+
+```yaml:otel-collector-config.yaml
+exporters:
+  debug:
+    verbosity: detailed
+  otlphttp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, otlphttp]
+```
+
+Check logs for data. If you see spans/metrics in debug output but not in SigNoz, the issue is with the exporter configuration.
+
+**Verify application is sending to Collector:**
+
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+# Should output: http://localhost:4318 (or your Collector host)
+```
+
+### Application can't connect to Collector
+
+**Check Collector is listening:**
+
+```bash
+netstat -tuln | grep -E '4317|4318'
+```
+
+Should show ports 4317 and 4318 in LISTEN state.
+
+**For Kubernetes:**
+
+Verify the Service endpoints:
+
+```bash
+kubectl get svc otel-collector -n observability
+kubectl get endpoints otel-collector -n observability
+```
+
+</details>
+
+## Next steps
+
+Now that data flows through the Collector, you can add processors for:
+
+- **Filtering** — Drop health checks or debug data. See [drop spans](https://signoz.io/docs/traces-management/guides/drop-spans/), [drop logs](https://signoz.io/docs/logs-management/guides/drop-logs/), [drop metrics](https://signoz.io/docs/userguide/drop-metrics/)
+- **PII scrubbing** — Remove sensitive data. See [PII scrubbing for logs](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) and [traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/)
+- **Enrichment** — Add resource attributes. See [resource detection processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor)
+- **Advanced configuration** — Explore all options in the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)
+
+## Get Help
+
+<GetHelp />
