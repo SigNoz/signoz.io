@@ -70,12 +70,14 @@ Group logs by how they're being collected:
 
 | Source Type | How to Identify | Migration Path |
 |-------------|-----------------|----------------|
-| **APM agent logs** | `instrumentation.provider` contains agent name | [Application logs via OTel SDK](#from-new-relic-apm-agent-log-forwarding) |
-| **Infrastructure agent** | `hostname` populated, file paths like `/var/log/*` | [File logs via filelog receiver](#from-infrastructure-agent-file-logs) |
-| **Fluentd/Fluent Bit** | You have Fluentd/Fluent Bit configured | [Redirect to OTel Collector](#from-fluentdfluentbit) |
-| **Log API** | Direct API calls in your code | [Use OTLP exporter](#from-log-api) |
 | **Kubernetes** | `k8s.cluster.name`, `k8s.pod.name` attributes | [Kubernetes log collection](#from-kubernetes) |
 | **Docker** | `container.name`, `container.id` attributes | [Docker log collection](#from-docker-containers) |
+| **APM agent logs** | `instrumentation.provider` contains agent name | [Application logs via OTel SDK](#from-new-relic-apm-agent-log-forwarding) |
+| **Fluentd/Fluent Bit** | You have Fluentd/Fluent Bit configured | [Redirect to OTel Collector](#from-fluentdfluentbit) |
+| **Log API** | Direct API calls in your code | [Use OTLP exporter](#from-log-api) |
+| **Cloud Provider Logs** | `cloud.provider` attribute | [Cloud provider log collection](#from-cloud-provider-logs) |
+| **Infrastructure agent** | `hostname` populated, file paths like `/var/log/*` | [File logs via filelog receiver](#from-infrastructure-agent-file-logs) |
+
 
 Save this inventory. You'll use it to validate your migration is complete.
 
@@ -110,129 +112,79 @@ Replace:
 
 Work through each source type from your inventory.
 
-### From Infrastructure Agent (File Logs)
+### From Kubernetes
 
-Replace New Relic Infrastructure agent file log collection with the `filelog` receiver.
+For Kubernetes environments, the easiest approach is to use the SigNoz K8s Infra Helm chart which automatically collects logs from all pods—including your application logs.
 
-**Step 1: Add the filelog receiver**
+<Admonition type="tip">
+If you're using the [SigNoz Kubernetes Infra Helm chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/), **all pod logs are automatically collected**, including application logs. You don't need separate application log configuration—stdout/stderr from all containers will appear in SigNoz immediately after deploying the chart.
+</Admonition>
 
-```yaml:otel-collector-config.yaml
-receivers:
-  filelog:
-    include:
-      - /var/log/myapp/*.log
-      - /var/log/syslog
-    start_at: end
-    include_file_path: true
-    include_file_name: true
-```
+This means if your application writes logs to stdout (which is the standard practice in Kubernetes), they're already being collected. No additional instrumentation needed.
 
-**Step 2: Enable in the logs pipeline**
+**Manual setup (if not using the Helm chart)**
 
-```yaml:otel-collector-config.yaml
-service:
-  pipelines:
-    logs:
-      receivers: [filelog]
-      processors: [batch]
-      exporters: [otlp]
-```
+If you prefer manual setup, deploy the OpenTelemetry Collector as a DaemonSet and configure the `filelog` receiver for container logs.
 
-**Step 3: Add parsing for your log format**
+### From Docker Containers
 
-For plain text logs, add operators to parse them:
+For standalone Docker environments, you can collect logs from **all containers at once**—including your application logs—using the OpenTelemetry Collector.
 
-```yaml:otel-collector-config.yaml
-receivers:
-  filelog:
-    include:
-      - /var/log/myapp/*.log
-    operators:
-      - type: regex_parser
-        regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] (?P<message>.*)$'
-        timestamp:
-          parse_from: attributes.timestamp
-          layout: '2006-01-02 15:04:05'
-        severity:
-          parse_from: attributes.level
-```
+<Admonition type="tip">
+By mounting Docker's log directory, you automatically collect logs from every container, including application containers. If your apps write to stdout/stderr (Docker's default logging), no additional application-level log configuration is needed.
+</Admonition>
 
-For JSON logs:
-
-```yaml:otel-collector-config.yaml
-receivers:
-  filelog:
-    include:
-      - /var/log/myapp/*.json
-    operators:
-      - type: json_parser
-        timestamp:
-          parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-```
-
-See [Collect Application Logs](https://signoz.io/docs/userguide/collect-logs/) for more parsing examples.
+See [Collect Docker Container Logs](https://signoz.io/docs/userguide/collect_docker_logs/) for complete setup instructions including:
+- Running the OTel Collector as a Docker container
+- Configuring the `filelog` receiver for `/var/lib/docker/containers/*/*.log`
+- Parsing container metadata
+- Filtering specific containers
 
 ### From New Relic APM Agent Log Forwarding
 
-If logs were forwarded via New Relic APM agents, you have several options:
+If logs were forwarded via New Relic APM agents, you have several options depending on your language.
 
-**Option A: Write to files, collect with filelog receiver**
+**Java: Use the OpenTelemetry Java Agent**
 
-1. Configure your application to write logs to files (most apps do this by default).
-2. Use the `filelog` receiver as shown above.
+The OTel Java agent can collect logs automatically from Logback and Log4j without code changes:
 
-**Option B: Use OpenTelemetry logging SDK**
-
-For applications already using OpenTelemetry for traces, add log instrumentation:
-
-**Java (Logback/Log4j):**
-
-```xml
-<!-- Add to pom.xml -->
-<dependency>
-    <groupId>io.opentelemetry.instrumentation</groupId>
-    <artifactId>opentelemetry-logback-appender-1.0</artifactId>
-</dependency>
+```bash
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+java -javaagent:/path/opentelemetry-javaagent.jar -jar <myapp>.jar
 ```
 
-```xml
-<!-- logback.xml -->
-<appender name="OpenTelemetry" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender"/>
-<root level="INFO">
-    <appender-ref ref="OpenTelemetry"/>
-</root>
+See [Collecting Application Logs Using OTEL Java Agent](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/) for Logback/Log4j configuration options.
+
+**Python: Enable logs auto-instrumentation**
+
+Python logs can be collected automatically without SDK code changes—just add an environment variable:
+
+```bash
+OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> \
+opentelemetry-instrument --logs_exporter otlp python app.py
 ```
 
-**Python:**
+See [Python Logs Auto-Instrumentation](https://signoz.io/docs/userguide/python-logs-auto-instrumentation/) for details.
 
-```python
-from opentelemetry._logs import set_logger_provider
-from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+**Node.js: Use Pino or Winston**
 
-logger_provider = LoggerProvider()
-set_logger_provider(logger_provider)
-logger_provider.add_log_record_processor(BatchLogRecordProcessor(OTLPLogExporter()))
+For Node.js applications, use OpenTelemetry-compatible logging libraries:
 
-handler = LoggingHandler(logger_provider=logger_provider)
-logging.getLogger().addHandler(handler)
-```
+- **Pino**: Install `pino-opentelemetry-transport` and configure the transport. See [Node.js Pino Logs](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs/).
+- **Winston**: Install `@opentelemetry/winston-transport` and add the transport. See [Node.js Winston Logs](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/).
 
-**Node.js:**
+**Other languages and methods**
 
-```javascript
-const { logs } = require('@opentelemetry/api-logs');
-const { LoggerProvider, BatchLogRecordProcessor } = require('@opentelemetry/sdk-logs');
-const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-grpc');
-
-const loggerProvider = new LoggerProvider();
-loggerProvider.addLogRecordProcessor(new BatchLogRecordProcessor(new OTLPLogExporter()));
-logs.setGlobalLoggerProvider(loggerProvider);
-```
-
-For detailed setup, see [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/).
+For all available log collection methods, see the [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/) central guide which covers:
+- File-based collection
+- Syslog
+- HTTP/OTLP direct send
+- Language-specific integrations
 
 ### From Fluentd/FluentBit
 
@@ -306,84 +258,88 @@ curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json' \
 
 See [Send Logs to SigNoz](https://signoz.io/docs/userguide/send-logs-http//) for detailed setup.
 
-### From Kubernetes
+### From Cloud Provider Logs
 
-For Kubernetes environments, deploy the OpenTelemetry Collector as a DaemonSet to collect container logs.
+If you were using New Relic's cloud integrations for AWS, Azure, or GCP logs, SigNoz provides native integrations:
 
-**Step 1: Deploy the collector**
+| Provider | Log Sources | Setup Guide |
+|----------|-------------|-------------|
+| **AWS** | CloudWatch Logs, S3, Lambda | [AWS Cloud Integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/) |
+| **Azure** | Azure Monitor, Event Hubs | [Azure Monitoring](https://signoz.io/docs/azure-monitoring/) |
+| **GCP** | Cloud Logging, Pub/Sub | [GCP Monitoring](https://signoz.io/docs/gcp-monitoring/) |
 
-Follow the [Kubernetes Log Collection guide](https://signoz.io/docs/userguide/collect-kubernetes-pod-logs/).
+### From Infrastructure Agent (File Logs)
 
-**Step 2: Configure the filelog receiver for container logs**
+Replace New Relic Infrastructure agent file log collection with the `filelog` receiver.
+
+**Step 1: Add the filelog receiver**
 
 ```yaml:otel-collector-config.yaml
 receivers:
   filelog:
     include:
-      - /var/log/pods/*/*/*.log
-    exclude:
-      - /var/log/pods/*/otel-collector/*.log
+      - /var/log/myapp/*.log
+      - /var/log/syslog
     start_at: end
     include_file_path: true
-    operators:
-      - type: router
-        routes:
-          - output: parser-docker
-            expr: 'body matches "^\\{"'
-          - output: parser-containerd
-            expr: 'body matches "^[^ Z]+ "'
-      - id: parser-docker
-        type: json_parser
-        output: extract-metadata
-      - id: parser-containerd
-        type: regex_parser
-        regex: '^(?P<time>[^ Z]+) (?P<stream>stdout|stderr) (?P<logtag>[^ ]*) ?(?P<log>.*)$'
-        output: extract-metadata
-      - id: extract-metadata
-        type: regex_parser
-        regex: '^.*\/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[a-f0-9\-]+)\/(?P<container_name>[^\._]+)\/(?P<restart_count>\d+)\.log$'
-        parse_from: attributes["log.file.path"]
+    include_file_name: true
 ```
 
-### From Docker Containers
-
-For standalone Docker environments:
-
-**Option A: Collect from Docker log files**
+**Step 2: Enable in the logs pipeline**
 
 ```yaml:otel-collector-config.yaml
-receivers:
-  filelog:
-    include:
-      - /var/lib/docker/containers/*/*.log
-    operators:
-      - type: json_parser
-        timestamp:
-          parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog]
+      processors: [batch]
+      exporters: [otlp]
 ```
 
-**Option B: Use Docker logging driver**
+See [Collect Logs from File](https://signoz.io/docs/userguide/collect_logs_from_file/) for more information.
 
-Configure containers to send logs to Fluentd, then forward to OTel Collector:
 
-```yaml
-# docker-compose.yml
-services:
-  myapp:
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: localhost:24224
-```
+### Finding More Log Sources
 
-See [Docker Logs](https://signoz.io/docs/userguide/collect-docker-logs/) for detailed setup.
+For a complete list of all supported log collection methods, see [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/) - this central guide covers:
 
-## Step 4: Log Parsing Reference
+- Application logs (by language)
+- Infrastructure logs (syslog, journald)
+- Cloud provider logs
+- Container and Kubernetes logs
+- Third-party integrations
 
-Common parsing patterns for logs you might have been sending to New Relic.
+## Step 4: Log Parsing
 
-### Apache/Nginx Access Logs
+SigNoz provides two approaches for parsing logs:
+
+### Option 1: Log Pipelines (Recommended)
+
+SigNoz includes a **UI-based Log Pipelines** feature that lets you parse and transform logs without modifying collector configuration. This is the recommended approach because:
+
+- No collector restarts required
+- Visual interface for building parsers
+- Test patterns against sample logs before applying
+- Easy to modify and maintain
+
+Log Pipelines support multiple processors:
+
+| Processor | Use Case |
+|-----------|----------|
+| **Regex** | Extract fields using regular expressions |
+| **Grok** | Use predefined patterns (like `%{IP:client_ip}`) for common formats |
+| **JSON Parser** | Parse JSON log bodies into attributes |
+| **Timestamp Parser** | Extract and normalize timestamps |
+| **Severity Parser** | Map log levels to standard severity |
+| **Add/Remove/Move/Copy** | Transform log attributes |
+
+See [Log Pipelines Processors](https://signoz.io/docs/logs-pipelines/processors/) for detailed documentation on each processor.
+
+### Option 2: Collector-Level Parsing
+
+For high-volume parsing or when you need to reduce data before it reaches SigNoz, configure parsing in the OpenTelemetry Collector using operators in the `filelog` receiver.
+
+Example for Apache/Nginx access logs:
 
 ```yaml
 operators:
@@ -394,25 +350,7 @@ operators:
       layout: '%d/%b/%Y:%H:%M:%S %z'
 ```
 
-### Syslog Format
-
-```yaml
-operators:
-  - type: regex_parser
-    regex: '^<(?P<priority>\d+)>(?P<timestamp>[A-Za-z]+ +\d+ \d+:\d+:\d+) (?P<hostname>[^ ]+) (?P<app>[^\[]+)\[(?P<pid>\d+)\]: (?P<message>.*)$'
-```
-
-### Multi-line Stack Traces
-
-```yaml
-operators:
-  - type: multiline
-    line_start_pattern: '^\d{4}-\d{2}-\d{2}'
-  - type: regex_parser
-    regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>\w+) (?P<message>[\s\S]*)$'
-```
-
-For advanced parsing, see [Parsing Logs with the OpenTelemetry Collector](https://signoz.io/blog/parsing-logs-with-the-opentelemetry-collector/).
+For collector-level parsing patterns, see [Parsing Logs with the OpenTelemetry Collector](https://signoz.io/blog/parsing-logs-with-the-opentelemetry-collector/).
 
 ## Validate
 
