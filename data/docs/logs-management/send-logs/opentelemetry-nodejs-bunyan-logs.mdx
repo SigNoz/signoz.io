@@ -1,5 +1,5 @@
 ---
-date: 2025-11-24
+date: 2025-12-01
 tags: [SigNoz Cloud, Self-Host]
 title: Send logs from Node.js Bunyan logger to SigNoz using OpenTelemetry
 id: opentelemetry-nodejs-bunyan-logs
@@ -9,6 +9,12 @@ description: Learn how to send logs from Node.js Bunyan logger to SigNoz using t
 
 import GetHelp from '@/components/shared/get-help.md'
 
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
 ## Prerequisites
 
 - Node.js version 14 or higher
@@ -16,12 +22,6 @@ import GetHelp from '@/components/shared/get-help.md'
 - A Node.js application that uses the Bunyan logger
 
 ## Send logs to SigNoz
-
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
-  header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
 
 <Tabs>
 <TabItem value="automatic" label="No Code Auto-Instrumentation (recommended)" default>
@@ -56,7 +56,20 @@ yarn add @opentelemetry/api \
 
 ### Step 2: Run the application
 
-You can use the `NODE_OPTIONS` environment variable to auto-instrument your application.
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+Set the environment variables and run your application using the `NODE_OPTIONS` environment variable:
 
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
@@ -67,16 +80,113 @@ export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/registe
 node index.js # Replace with your entry file
 ```
 
-- Replace `<service_name>` with your service name.
-- Replace `<region>` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- Replace `<your-ingestion-key>` with your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+Replace the following:
 
-If you prefer sending telemetry to local OTel Collector, replace the `OTEL_EXPORTER_OTLP_ENDPOINT` with `http://localhost:4318` and skip the ingestion key:
+- `<service_name>`: Your service name.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+If using a local OTel Collector (VM), use:
 
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<service_name>"
 # Do not set OTEL_EXPORTER_OTLP_HEADERS when using the local collector
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node index.js # Replace with your entry file
 ```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_NODE_RESOURCE_DETECTORS
+    value: 'env,host,os'
+  - name: OTEL_SERVICE_NAME
+    value: '<service_name>'
+  - name: NODE_OPTIONS
+    value: '--require @opentelemetry/auto-instrumentations-node/register'
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Add environment variables to your Dockerfile:
+
+```dockerfile
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+ENV OTEL_SERVICE_NAME="<service_name>"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+```
+
+Or pass them at runtime:
+
+```bash
+docker run \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+  -e OTEL_NODE_RESOURCE_DETECTORS="env,host,os" \
+  -e OTEL_SERVICE_NAME="<service_name>" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+  -e NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register" \
+  your-image-name
+```
+
+Replace the placeholders:
+
+- `<service_name>`: Your service name.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_NODE_RESOURCE_DETECTORS = "env,host,os"
+$env:OTEL_SERVICE_NAME = "<service_name>"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:NODE_OPTIONS = "--require @opentelemetry/auto-instrumentations-node/register"
+node index.js # Replace with your entry file
+```
+
+Replace the placeholders:
+
+- `<service_name>`: Your service name.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+</Tabs>
 
 #### Note
 
@@ -163,22 +273,17 @@ Add these environment variables to your deployment manifest:
 ```yaml
 env:
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    value: 'http://<otel-collector-service>.<namespace>.svc.cluster.local:4318/v1/logs'
+    value: 'https://ingest.<region>.signoz.cloud:443/v1/logs'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>'
   - name: OTEL_SERVICE_NAME
     value: 'nodejs-bunyan-logger'
 ```
 
-**Find your collector service details:**
+Replace the following:
 
-```bash
-# List OTel collector services
-kubectl get svc -A | grep otel
-
-# Example output:
-# platform  signoz-otel-collector  ClusterIP  10.96.0.10  <none>  4318/TCP
-```
-
-Replace `<otel-collector-service>` and `<namespace>` with your actual values.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 <Admonition type="warning">
 **Avoiding Duplicate Logs**
