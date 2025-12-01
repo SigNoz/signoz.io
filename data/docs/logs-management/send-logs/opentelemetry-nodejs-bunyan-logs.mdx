@@ -136,29 +136,48 @@ If using the `k8s-infra` chart (which auto-collects container logs), disable log
 
 <TabItem value="docker" label="Docker">
 
-Add environment variables to your Dockerfile:
+Create a `Dockerfile` in your project root:
 
 ```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies including OpenTelemetry auto-instrumentation
+RUN npm install
+RUN npm install @opentelemetry/api @opentelemetry/auto-instrumentations-node
+
+# Copy application code
+COPY . .
+
+# Set OpenTelemetry environment variables
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 ENV OTEL_SERVICE_NAME="<service_name>"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+
+# Expose application port
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "index.js"]
 ```
 
-Or pass them at runtime:
+Build and run the container:
 
 ```bash
-docker run \
-  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
-  -e OTEL_NODE_RESOURCE_DETECTORS="env,host,os" \
-  -e OTEL_SERVICE_NAME="<service_name>" \
-  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-  -e NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register" \
-  your-image-name
+# Build the image
+docker build -t nodejs-bunyan-app .
+
+# Run the container
+docker run -p 3000:3000 nodejs-bunyan-app
 ```
 
-Replace the placeholders:
+Replace the placeholders in the Dockerfile:
 
 - `<service_name>`: Your service name.
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
@@ -247,7 +266,7 @@ Use this section if you're deploying your application directly on a server or VM
 Set the following environment variables to configure the OpenTelemetry exporter:
 
 ```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/logs"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
 export OTEL_SERVICE_NAME="nodejs-bunyan-logger"
 ```
@@ -273,7 +292,7 @@ Add these environment variables to your deployment manifest:
 ```yaml
 env:
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    value: 'https://ingest.<region>.signoz.cloud:443/v1/logs'
+    value: 'https://ingest.<region>.signoz.cloud:443'
   - name: OTEL_EXPORTER_OTLP_HEADERS
     value: 'signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>'
   - name: OTEL_SERVICE_NAME
@@ -298,25 +317,46 @@ If using the `k8s-infra` chart (which auto-collects container logs), disable log
 
 <TabItem value="docker" label="Docker">
 
-Add environment variables to your Dockerfile:
+Create a `Dockerfile` in your project root:
 
 ```dockerfile
-ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/logs"
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy instrumentation file and application code
+COPY logging-instrumentation.js ./
+COPY . .
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
 ENV OTEL_SERVICE_NAME="nodejs-bunyan-logger"
+
+# Expose application port
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "index.js"]
 ```
 
-Or pass them at runtime:
+Build and run the container:
 
 ```bash
-docker run \
-  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/logs" \
-  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
-  -e OTEL_SERVICE_NAME="nodejs-bunyan-logger" \
-  ...
+# Build the image
+docker build -t nodejs-bunyan-app .
+
+# Run the container
+docker run -p 3000:3000 nodejs-bunyan-app
 ```
 
-Replace the placeholders:
+Replace the placeholders in the Dockerfile:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
@@ -328,7 +368,7 @@ Replace the placeholders:
 Set environment variables in PowerShell:
 
 ```powershell
-$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443/v1/logs"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
 $env:OTEL_SERVICE_NAME = "nodejs-bunyan-logger"
 ```
@@ -437,7 +477,7 @@ module.exports = sdk;
 </TabItem>
 </Tabs>
 
-Check out the Bunyan instrumentation options [here](https://www.npmjs.com/package/@opentelemetry/instrumentation-bunyan#bunyan-instrumentation-options).
+Check out the Bunyan instrumentation options <a href="https://www.npmjs.com/package/@opentelemetry/instrumentation-bunyan#bunyan-instrumentation-options" target="_blank" rel="noopener noreferrer nofollow">here</a>.
 
 ### Step 4: Initialize OpenTelemetry SDK
 
@@ -577,25 +617,17 @@ npm run dev
 
 Open your SigNoz instance and navigate to the Logs section to view the logs sent from your application.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/logs-management/send-logs/nodejs-bunyan-logs.webp"
-    alt="Node.js Bunyan Logs"
-  />
-  <figcaption>
-    <i>Node.js Bunyan Logs</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/logs-management/send-logs/nodejs-bunyan-logs.webp"
+  alt="Node.js Bunyan Logs"
+  caption="Node.js Bunyan Logs"
+/>
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/logs-management/send-logs/nodejs-bunyan-logs-detailed.webp"
-    alt="Node.js Bunyan Logs"
-  />
-  <figcaption>
-    <i>Node.js Bunyan Logs Detailed View</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/logs-management/send-logs/nodejs-bunyan-logs-detailed.webp"
+  alt="Node.js Bunyan Logs"
+  caption="Node.js Bunyan Logs Detailed View"
+/>
 
 <details>
 <ToggleHeading>
