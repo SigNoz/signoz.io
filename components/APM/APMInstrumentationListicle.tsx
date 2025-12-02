@@ -36,7 +36,7 @@ import {
 import IconCardGrid from '../Card/IconCardGrid'
 
 interface APMInstrumentationListicleProps {
-  language?: 'python' | 'java' | 'javascript' | 'other' | 'additional' | 'all'
+  language?: 'python' | 'java' | 'javascript' | 'other' | 'mobile' | 'additional' | 'all'
 }
 
 export default function APMInstrumentationListicle({
