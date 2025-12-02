@@ -100,6 +100,13 @@ See the [Prometheus Metrics guide](https://signoz.io/docs/userguide/prometheus-m
 - **SigNoz Cloud:** Configurable (e.g., 15-180 days for traces/logs, up to 13 months for metrics).
 - **Self-Hosted:** Limited only by your storage.
 
+## Troubleshooting
+
+- **401/403 errors when exporting**: Verify `signoz-ingestion-key` header value and that the key is active in SigNoz Cloud settings.
+- **TLS or connection errors**: Ensure the endpoint uses `https://ingest.<region>.signoz.cloud:443` and that `tls.insecure` remains `false`.
+- **Metrics or logs missing but traces present**: Confirm all three pipelines include the SigNoz exporter and that services emit those signals. Check collector logs for dropped data.
+- **High latency or backpressure**: Add the `batch` processor and enable retry queue in the exporter to prevent data loss under load.
+
 ## Next Steps
 
 - [Migrate Dashboards](https://signoz.io/docs/migration/migrate-from-honeycomb/dashboards/)

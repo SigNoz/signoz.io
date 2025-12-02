@@ -1,14 +1,29 @@
 ---
 date: 2025-11-28
 id: migrate-from-datadog-to-signoz
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: Migrate From Datadog
 description: Migrating from Datadog to SigNoz. How to migrate metrics, traces/APM, and logs from Datadog to SigNoz.
+doc_type: howto
 ---
 
 SigNoz provides a unified OpenTelemetry native solution for monitoring metrics, traces, and logs, allowing for greater flexibility and control over your data. This guide will walk you through the steps to migrate your existing Datadog setup to SigNoz, covering all essential signals: metrics, traces/APM, and logs.
 
 **Quick Start:** Looking to migrate your Datadog dashboards quickly? Try our [automated migration tool](https://signoz.io/datadog-migration-tool/) that translates your dashboards in minutes. This guide covers the complete migration process for metrics, traces/APM, and logs.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. For self-hosted, set `OTEL_EXPORTER_OTLP_ENDPOINT` to `http://<otel-collector-host>:4318` (HTTP) or `http://<otel-collector-host>:4317` (gRPC) and omit the Cloud ingestion key header. See https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted.
+</KeyPointCallout>
+
+## Overview
+
+What you'll learn: how to switch Datadog metrics, traces/APM, and logs to SigNoz using OpenTelemetry exporters/collectors, plus how to recreate dashboards and unsupported integrations.
+
+## Prerequisites
+
+- SigNoz Cloud org (or running self-hosted SigNoz) with ingestion endpoint/key
+- Access to Datadog agent/app configs and credentials
+- Network access from your hosts/collectors to the SigNoz OTLP endpoint
 
 ## Migrating Metrics
 
@@ -211,6 +226,22 @@ Structuring logs enhances their usability and allows for more effective querying
    - Verify that logs are correctly parsed and that the structured data is available in SigNoz.
 
 ---
+
+## Validate
+
+1. Generate sample traffic in an instrumented service.
+2. In SigNoz, confirm:
+   - **Traces** appear in Traces Explorer for the migrated services.
+   - **Metrics** show up in Metrics Explorer (search by service/namespace).
+   - **Logs** arrive in Logs Explorer with expected fields.
+3. If any signal is missing, recheck collector/exporter endpoints and headers, then restart agents/collectors.
+
+## Troubleshooting
+
+- **OTLP export errors (401/403)**: Verify `signoz-ingestion-key` value and region in the OTLP endpoint; remove the header when targeting self-hosted.
+- **gRPC/HTTP connection failures**: Ensure outbound traffic to `https://ingest.<region>.signoz.cloud:443` is allowed; set `tls.insecure: false` in collectors.
+- **Missing metrics after switch**: Confirm receivers/pipelines include your new OTLP or Prometheus receiver and that exporters reference SigNoz.
+- **Log parsing mismatches**: Align log formats with SigNoz parsing rules or adjust the log pipeline mapping to set correct attributes.
 
 ## Conclusion
 
