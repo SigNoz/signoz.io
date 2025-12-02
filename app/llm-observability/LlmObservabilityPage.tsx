@@ -13,11 +13,10 @@ import {
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
 import ButtonGroup from '@/shared/components/molecules/FeaturePages/ButtonGroup'
-import HeroCards from '@/shared/components/molecules/FeaturePages/HeroCards'
 import TestimonialCards from '@/shared/components/molecules/FeaturePages/TestimonialCard'
 import UsageBasedPricing from '@/shared/components/molecules/FeaturePages/UsageBasedPricing'
 import SigNozStats from '@/shared/components/molecules/FeaturePages/SignozStats'
-import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCardGrid'
+import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 import TrackingLink from '@/components/TrackingLink'
 import { ComparisonTableProps } from './LlmObservabilityPage.types'
 
@@ -267,71 +266,6 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
   )
 }
 
-const RouteAlertsDynamically: React.FC = () => {
-  return (
-    <>
-      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6">
-        <div className="mb-8 max-w-4xl">
-          <h2 className="mb-6 text-signoz_vanilla-100">
-            Route alerts dynamically with label-based policies
-          </h2>
-          <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-            Define routing policies that match alerts based on service, environment, severity,
-            Kubernetes labels, or custom attributes. Automatically send notifications to the right
-            teams and channels based on alert context. One alert can match multiple policies and
-            notify different channels.
-          </p>
-        </div>
-
-        <Button
-          variant="secondary"
-          rounded="full"
-          className="flex w-fit items-center gap-2"
-          to="/docs/alerts-management/routing-policy/"
-        >
-          Read Documentation
-          <ArrowRight size={14} />
-        </Button>
-
-        <Image
-          src="/img/alerts-management/route-alerts-dynamically.png"
-          alt="Route alerts dynamically with label-based policies"
-          width={10000}
-          height={10000}
-          className="mb-8"
-        />
-      </div>
-    </>
-  )
-}
-
-const AnalyzeAlertPatterns: React.FC = () => {
-  return (
-    <>
-      <div className="border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6">
-        <div className="mb-8 max-w-4xl">
-          <h2 className="mb-6 text-signoz_vanilla-100">
-            Analyze alert patterns with history and timelines
-          </h2>
-          <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-            Understand why alerts fire repeatedly, identify which services or pods are contributing
-            most, and jump directly to related logs, traces, or metrics for faster root cause
-            analysis.
-          </p>
-        </div>
-
-        <Image
-          src="/img/alerts-management/analyze-alert-patterns.png"
-          alt="Analyze alert patterns"
-          width={10000}
-          height={10000}
-          className="mb-8"
-        />
-      </div>
-    </>
-  )
-}
-
 const HowSigNozCompares: React.FC = () => {
   return (
     <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
@@ -409,83 +343,6 @@ const CustomerStories: React.FC = () => {
   )
 }
 
-const StopAlertFatigueBanner: React.FC = () => {
-  const stopAlertFatigueButtons = [
-    {
-      text: 'Start your free trial',
-      href: '/teams/',
-      variant: 'default' as const,
-      className: 'flex-center',
-    },
-    {
-      text: 'Read Documentation',
-      href: '/docs/alerts/',
-      variant: 'secondary' as const,
-      className: 'flex-center',
-    },
-  ]
-
-  return (
-    <div className="flex flex-col items-center justify-center border-t-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 p-6 py-20">
-      <h2 className="mb-6 text-center text-4xl text-signoz_vanilla-100">
-        Stop alert fatigue. <br /> Start catching real issues.
-      </h2>
-      <ButtonGroup buttons={stopAlertFatigueButtons} />
-    </div>
-  )
-}
-
-const FineTuneAndMaintainenceWindows: React.FC = () => {
-  return (
-    <>
-      <div className="mt-12 border-y-1 border-dashed border-signoz_slate-400 bg-signoz_ink-500 py-16">
-        <GridLayout variant="split">
-          {/* Left Column */}
-          <div className="flex flex-col px-6">
-            <div className="flex flex-col justify-between">
-              <div>
-                <h2 className="mb-6 text-signoz_vanilla-100">Fine-tune alert behavior</h2>
-                <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-                  Set evaluation frequency and minimum data point requirements. Set alert when data
-                  stops flowing and test notifications before saving.
-                </p>
-              </div>
-            </div>
-
-            <Image
-              src="/img/alerts-management/fine-tune-alert-behavior.png"
-              alt="Fine-tune alert behavior"
-              width={10000}
-              height={10000}
-              className="mb-8"
-            />
-          </div>
-
-          {/* Right Column */}
-          <div className="-my-16 flex flex-col border-l-1 border-dashed border-signoz_slate-400 px-6 pt-16">
-            <div className="flex flex-col justify-between">
-              <div>
-                <h2 className="mb-6 text-signoz_vanilla-100">Schedule maintenance windows</h2>
-                <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-                  Schedule one-time or recurring maintenance windows. Silence all alerts or select
-                  specific ones during planned downtime.
-                </p>
-              </div>
-            </div>
-
-            <Image
-              src="/img/alerts-management/schedule-maintenance-windows.png"
-              alt="Schedule maintenance windows"
-              width={10000}
-              height={10000}
-            />
-          </div>
-        </GridLayout>
-      </div>
-    </>
-  )
-}
-
 const StartMonitoring: React.FC = () => {
   const startMonitoringButtons = [
     {
@@ -557,7 +414,7 @@ const StartMonitoring: React.FC = () => {
 }
 
 // Main Component
-const AlertsManagement: React.FC = () => {
+const LlmObservabilityPage: React.FC = () => {
   return (
     <main className="!mt-[-10px] mb-auto">
       <ProductNav />
@@ -585,4 +442,4 @@ const AlertsManagement: React.FC = () => {
   )
 }
 
-export default AlertsManagement
+export default LlmObservabilityPage

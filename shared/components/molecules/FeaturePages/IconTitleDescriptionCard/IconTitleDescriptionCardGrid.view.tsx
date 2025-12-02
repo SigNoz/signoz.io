@@ -1,17 +1,6 @@
 import React from 'react'
-import IconTitleDescriptionCard from './IconTitleDescriptionCard'
-
-export type IconTitleDescriptionCardData = {
-  icon: React.ReactNode
-  iconText: string
-  title: string
-  description: string
-}
-
-type IconTitleDescriptionCardGridProps = {
-  cards: IconTitleDescriptionCardData[]
-  className?: string
-}
+import IconTitleDescriptionCard from './IconTitleDescriptionCard.view'
+import { IconTitleDescriptionCardGridProps } from './IconTitleDescriptionCardGrid.types'
 
 const IconTitleDescriptionCardGrid: React.FC<IconTitleDescriptionCardGridProps> = ({
   cards,

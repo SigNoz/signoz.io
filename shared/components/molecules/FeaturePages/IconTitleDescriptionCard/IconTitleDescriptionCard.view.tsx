@@ -1,10 +1,4 @@
-type IconTitleDescriptionCardProps = {
-  icon: React.ReactNode
-  iconText: string
-  title: string
-  description: string
-  className?: string
-}
+import { IconTitleDescriptionCardProps } from './IconTitleDescriptionCard.types'
 
 const IconTitleDescriptionCard: React.FC<IconTitleDescriptionCardProps> = ({
   icon,
