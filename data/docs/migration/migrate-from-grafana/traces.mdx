@@ -7,7 +7,16 @@ description: Learn how to migrate your distributed traces/APM from Tempo (LGTM S
 doc_type: howto
 ---
 
-Migrating your distributed tracing/APM from Tempo to SigNoz involves redirecting your trace collection to SigNoz's OpenTelemetry Collector. The approach you take depends on how your applications are currently instrumented.
+## Overview
+
+This guide walks you through migrating distributed tracing and APM from Tempo (LGTM Stack) to SigNoz. You will:
+
+1. Check your current trace sources in Tempo
+2. Redirect your trace data to SigNoz
+3. Validate traces are flowing correctly
+4. Explore SigNoz's APM capabilities
+
+SigNoz is built natively on OpenTelemetry, making it compatible with most existing instrumentation used with Tempo (OpenTelemetry, Jaeger, Zipkin).
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -15,129 +24,191 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ## Prerequisites
 
-- A SigNoz account (SigNoz Cloud or Self-Hosted).
-- Access to your application code or OpenTelemetry Collector configuration.
+Before starting, ensure you have:
 
-## Migration Strategies
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your Grafana/Tempo instance to review current services
+- Access to your application source code or collector configuration
 
-### For Applications Using OpenTelemetry
+## Step 1: Assess Your Current Tracing Setup
 
-If your applications are already instrumented with OpenTelemetry, you can easily switch to SigNoz by updating your exporter configuration.
+Before migrating, inventory what you're collecting in Tempo.
 
-#### Step 1: Obtain Connection Details
+### List Your Services
 
-1. Log into your [SigNoz Cloud account](https://signoz.io/teams/).
-2. Navigate to **Settings** → **Ingestion Settings**.
-3. Note your **Ingestion Key** and **Ingestion URL**.
+In Grafana Explore (select Tempo datasource), you can usually see a list of services in the "Service Name" dropdown of the Search tab. Make a note of:
 
-#### Step 2: Update OpenTelemetry Configuration
+- **Service Names**: The applications sending traces.
+- **Instrumentation**: Are they using OpenTelemetry SDKs, Jaeger agents, Zipkin, or Grafana Agent?
 
-Set the following environment variables for your application:
+### Categorize Your Services
+
+Group services by how they're instrumented:
+
+| Instrumentation Type | Migration Path |
+|----------------------|----------------|
+| **OpenTelemetry SDK** | [Redirect OTLP exporter](#from-opentelemetry-sdk) |
+| **Grafana Agent** | [Migrate to OTel Collector](#from-grafana-agent) |
+| **Jaeger Client** | [Use Jaeger Receiver](#from-jaeger-clients) |
+| **Zipkin Client** | [Use Zipkin Receiver](#from-zipkin-clients) |
+
+## Step 2: Migrate Each Service
+
+Work through each service from your inventory.
+
+### From OpenTelemetry SDK
+
+If your applications are already instrumented with OpenTelemetry and sending to Tempo (directly or via a collector), you just need to update the exporter configuration.
+
+For new applications or to switch from other agents, see our [Instrumentation Guides](https://signoz.io/docs/instrumentation/).
+
+**Before (Tempo/Grafana Agent):**
 
 ```bash
-# Replace with your SigNoz cloud region
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-
-# Replace with your SigNoz ingestion key
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
+OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
 ```
 
-If you are using an **OpenTelemetry Collector**, update your `config.yaml` to include the OTLP exporter.
+**After (SigNoz Cloud):**
 
-1. **Add OTLP Exporter**: Add the following to your `exporters` section:
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+```
 
-   ```yaml
-   exporters:
-     otlp:
-       endpoint: "https://ingest.<region>.signoz.cloud:443"
-       headers:
-         signoz-ingestion-key: "SIGNOZ_INGESTION_KEY"
-       tls:
-         insecure: false
-   ```
+Replace:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-2. **Enable in Pipeline**: Add `otlp` to your traces pipeline in the `service` section:
+### From Grafana Agent
 
-   ```yaml
-   service:
-     pipelines:
-       traces:
-         exporters: [otlp] # Add other exporters if needed
-   ```
+If you are using Grafana Agent to collect traces, we recommend migrating to the **OpenTelemetry Collector**. The OTel Collector is the upstream project for Grafana Agent's tracing features and provides the most compatibility.
 
-Replace the following placeholders:
-- `<region>`: Your SigNoz Cloud region (e.g., `us`, `eu`, `in`).
-- `SIGNOZ_INGESTION_KEY`: Your SigNoz Ingestion Key.
+1. **Install OpenTelemetry Collector**: Follow the [installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+2. **Configure Receivers**: Copy your receiver configuration (e.g., `otlp`, `jaeger`, `zipkin`) from Grafana Agent to the OTel Collector's `config.yaml`.
+3. **Configure Exporter**: Set up the OTLP exporter to send to SigNoz.
 
-<Admonition type="tip">
-  We also recommend configuring the [Resource Detection Processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) to automatically detect resource attributes from the host environment.
-</Admonition>
+```yaml:otel-collector-config.yaml
+exporters:
+  otlp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "<SIGNOZ_INGESTION_KEY>"
+    tls:
+      insecure: false
 
-### For Applications Using Jaeger or Zipkin
+service:
+  pipelines:
+    traces:
+      receivers: [otlp] # Add jaeger/zipkin if needed
+      processors: [batch]
+      exporters: [otlp]
+```
 
-Tempo can be used with open source tracing protocols, including Jaeger, Zipkin, or OpenTelemetry. If you are already using Tempo with this setup, the migration is straightforward:
+### From Jaeger Clients
 
-1. **Install OpenTelemetry Collector**  
-   If you haven't already, install the OpenTelemetry Collector. Follow the [installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+If your applications use legacy Jaeger clients sending to Tempo:
 
-2. **Configure Receivers**  
-   Add the [Jaeger](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jaegerreceiver/README.md) and [Zipkin](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/zipkinreceiver/README.md) receivers to your `config.yaml`.
+1. **Install OpenTelemetry Collector**: [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+2. **Enable Jaeger Receiver**: Add the Jaeger receiver to your `config.yaml`.
 
-   ```yaml
-   receivers:
-     # For Zipkin
-     zipkin:
-       endpoint: 0.0.0.0:9411
-     # For Jaeger
-     jaeger:
-       protocols:
-         grpc:
-           endpoint: 0.0.0.0:14250
-         thrift_http:
-           endpoint: 0.0.0.0:14268
-   ```
+```yaml:otel-collector-config.yaml
+receivers:
+  jaeger:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14250
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+```
 
-3. **Enable in Pipeline**: Add these receivers to your traces pipeline:
+3. **Update Pipeline**:
 
-   ```yaml
-   service:
-     pipelines:
-       traces:
-         receivers: [jaeger, zipkin, otlp]
-         processors: [batch]
-         exporters: [otlp]
-   ```
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    traces:
+      receivers: [jaeger]
+      exporters: [otlp]
+```
 
-4. **Point Applications to Collector**  
-   Update your applications to send traces to the OpenTelemetry Collector's address instead of Tempo.
+4. **Point Applications**: Update your application to send traces to the Collector's Jaeger endpoint (e.g., `http://localhost:14268/api/traces`).
+
+### From Zipkin Clients
+
+If your applications use Zipkin clients:
+
+1. **Install OpenTelemetry Collector**: [Installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+2. **Enable Zipkin Receiver**: Add the Zipkin receiver to your `config.yaml`.
+
+```yaml:otel-collector-config.yaml
+receivers:
+  zipkin:
+    endpoint: 0.0.0.0:9411
+```
+
+3. **Update Pipeline**:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    traces:
+      receivers: [zipkin]
+      exporters: [otlp]
+```
+
+4. **Point Applications**: Update your application to send traces to the Collector's Zipkin endpoint (e.g., `http://localhost:9411/api/v2/spans`).
 
 ## Validate
 
-To confirm that traces are being sent to SigNoz:
+Verify traces are flowing correctly by comparing against your service inventory.
 
-1. Generate some traffic to your application.
-2. Go to **Traces** in SigNoz.
-3. Click on **Run Query** (or use the default view).
-4. You should see a list of recent traces.
+### Check Services Are Reporting
 
-## Next Steps
+1. In SigNoz, navigate to **Services** in the left sidebar.
+2. Verify each service from your inventory appears in the list.
+3. Click a service to see its metrics (latency, error rate, throughput).
 
-SigNoz provides advanced features for analyzing traces:
+### Verify Traces
 
-- **[Trace Explorer](https://signoz.io/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces.
-- **[Service Map](https://signoz.io/docs/userguide/service-map/)**: Visualize dependencies between services.
-- **[Exceptions Monitoring](https://signoz.io/docs/userguide/exceptions/)**: Track and analyze application exceptions.
+1. Navigate to **Traces** in the left sidebar.
+2. Select a service and time range.
+3. Verify spans appear with expected attributes.
+4. Check that trace context propagates across service boundaries (parent-child relationships).
 
 <details>
 <ToggleHeading>
 ## Troubleshooting
 </ToggleHeading>
 
-### Traces not appearing
+### Traces not appearing in SigNoz
 
-- **Check Endpoint**: Ensure you are sending data to the correct endpoint (`ingest.{region}.signoz.cloud:443` for Cloud, port `4317` for Self-Hosted).
-- **Check Protocol**: Ensure you are using the correct protocol (gRPC vs HTTP). The example above uses gRPC (`otlp`).
-- **Check Authentication**: For SigNoz Cloud, verify your `signoz-ingestion-key`.
-- **Check Logs**: Look at the OpenTelemetry Collector logs for any export errors.
+1. **Check connectivity**: Verify your application or collector can reach `ingest.<region>.signoz.cloud:443`.
+2. **Verify service name**: Ensure `OTEL_SERVICE_NAME` or the equivalent config is set.
+3. **Check application logs**: Look for exporter errors.
+4. **Enable debug logging**: Set `OTEL_LOG_LEVEL=debug` to see detailed SDK logs.
+
+### Broken or incomplete traces
+
+If traces appear fragmented across services:
+
+1. **Check context propagation**: Ensure all services use compatible propagation (W3C Trace Context is recommended).
+2. **Verify all services are instrumented**: Missing instrumentation on any service breaks the trace chain.
+
+### Missing spans within a service
+
+If some operations aren't being traced:
+
+1. **Check auto-instrumentation coverage**: Some libraries may not be auto-instrumented.
+2. **Add manual instrumentation**: For custom code, add manual spans using the OTel API.
 
 </details>
+
+## Next Steps
+
+Once your traces are flowing to SigNoz:
+
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-grafana/dashboards) with trace-based panels
+- [Set up trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) for latency and errors
+- [Correlate traces with logs](https://signoz.io/docs/logs-pipelines/guides/trace/) for debugging
+- [Explore the Service Map](https://signoz.io/docs/userguide/service-map/) to understand dependencies
+- [Migrate your logs](https://signoz.io/docs/migration/migrate-from-grafana/logs) next

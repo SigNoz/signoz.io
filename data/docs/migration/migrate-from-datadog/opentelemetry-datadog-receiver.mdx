@@ -9,7 +9,7 @@ doc_type: howto
 
 ## Overview
 
-The OpenTelemetry Datadog Receiver allows you to receive metrics and traces from Datadog Agents without modifying your applications. This is useful for:
+The OpenTelemetry Datadog Receiver allows you to receive metrics from Datadog Agents without modifying your applications. This is useful for:
 
 - **Gradual migration**: Continue using Datadog Agent while migrating to OpenTelemetry
 - **DogStatsD metrics**: Receive custom DogStatsD metrics without changing application code
@@ -40,12 +40,12 @@ Add the Datadog receiver to your OpenTelemetry Collector configuration to accept
 ```yaml:otel-collector-config.yaml
 receivers:
   datadog:
-    endpoint: 0.0.0.0:8126
+    endpoint: 0.0.0.0:8125
     read_timeout: 60s
 ```
 
 This configures the receiver to:
-- Listen on all interfaces (`0.0.0.0`) on port `8126` (default Datadog APM port)
+- Listen on all interfaces (`0.0.0.0`) on port `8125` (default Datadog DogStatsD port)
 - Wait up to 60 seconds for data before timing out
 
 ## Step 2: Configure the Exporter
@@ -75,10 +75,6 @@ Integrate the Datadog receiver into your pipelines:
 ```yaml:otel-collector-config.yaml
 service:
   pipelines:
-    traces:
-      receivers: [datadog, otlp]
-      processors: [batch]
-      exporters: [otlp]
     metrics:
       receivers: [datadog, otlp]
       processors: [batch]
@@ -96,14 +92,14 @@ If you want to send data to both SigNoz (via OTel Collector) and Datadog during 
 **Using environment variable:**
 
 ```bash
-DD_ADDITIONAL_ENDPOINTS='{"http://<OTEL_COLLECTOR_HOST>:8126": ["signoz"]}'
+DD_ADDITIONAL_ENDPOINTS='{"http://<OTEL_COLLECTOR_HOST>:8125": ["signoz"]}'
 ```
 
 **Or update `datadog.yaml`:**
 
 ```yaml:datadog.yaml
 additional_endpoints:
-  "http://<OTEL_COLLECTOR_HOST>:8126":
+  "http://<OTEL_COLLECTOR_HOST>:8125":
     - "signoz"
 ```
 
@@ -116,13 +112,13 @@ To send data exclusively to SigNoz (stop sending to Datadog):
 **Using environment variable:**
 
 ```bash
-DD_DD_URL=http://<OTEL_COLLECTOR_HOST>:8126
+DD_DD_URL=http://<OTEL_COLLECTOR_HOST>:8125
 ```
 
 **Or update `datadog.yaml`:**
 
 ```yaml:datadog.yaml
-dd_url: http://<OTEL_COLLECTOR_HOST>:8126
+dd_url: http://<OTEL_COLLECTOR_HOST>:8125
 ```
 
 ## Step 5: Restart Services
@@ -139,11 +135,10 @@ Verify data is flowing through the Datadog receiver to SigNoz:
 
 1. **Verify in SigNoz:**
    - Navigate to **Metrics** to see DogStatsD metrics
-   - Check that service names and metrics match your Datadog data
+   - Check that metrics match your Datadog data
 
 2. **Compare with Datadog:**
-   - Verify the same services/metrics appear in both platforms
-   - Check that trace counts are similar
+   - Verify the same metrics appear in both platforms
 
 <details>
 <ToggleHeading>
@@ -154,12 +149,12 @@ Verify data is flowing through the Datadog receiver to SigNoz:
 
 If the Datadog Agent can't connect to the OTel Collector:
 
-1. **Check port binding**: Verify the Collector is listening on port 8126:
+1. **Check port binding**: Verify the Collector is listening on port 8125:
    ```bash
-   netstat -tlnp | grep 8126
+   netstat -tlnp | grep 8125
    ```
 
-2. **Check firewall**: Ensure port 8126 is open between Agent and Collector.
+2. **Check firewall**: Ensure port 8125 is open between Agent and Collector.
 
 3. **Verify endpoint**: Confirm the Agent is configured with the correct Collector address.
 
@@ -168,11 +163,6 @@ If the Datadog Agent can't connect to the OTel Collector:
 1. **Check Collector logs**: Look for errors in the OTel Collector logs.
 
 2. **Verify pipeline configuration**: Ensure the `datadog` receiver is listed in the appropriate pipeline(s).
-
-3. **Test connectivity**: Use curl to test the Collector endpoint:
-   ```bash
-   curl -v http://<OTEL_COLLECTOR_HOST>:8126/v0.4/traces
-   ```
 
 ### Metrics not appearing
 
@@ -189,7 +179,6 @@ If the Datadog Agent can't connect to the OTel Collector:
 Be aware of these limitations when using the Datadog receiver:
 
 - **Not all features supported**: Some Datadog-specific features may not translate to OpenTelemetry
-- **Trace context**: May require configuration for proper context propagation
 - **Metric types**: Some Datadog metric types may be converted differently
 - **Performance**: Adding a hop (DD Agent → OTel Collector → SigNoz) adds latency
 

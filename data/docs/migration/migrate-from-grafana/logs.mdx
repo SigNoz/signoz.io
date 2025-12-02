@@ -7,7 +7,16 @@ description: Learn how to migrate your logs from Loki (LGTM Stack) to SigNoz usi
 doc_type: howto
 ---
 
-To migrate logs from Loki to SigNoz, you'll need to reconfigure your log collection agents to send data to OpenTelemetry collectors or directly to SigNoz.
+## Overview
+
+This guide walks you through migrating logs from Loki (LGTM Stack) to SigNoz. You will:
+
+1. Inventory your current log sources
+2. Set up the OpenTelemetry Collector
+3. Configure log collection to replace Promtail/FluentBit
+4. Validate logs are flowing correctly
+
+SigNoz uses the OpenTelemetry Collector for log collection, which provides a more robust and standard-compliant alternative to Promtail.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
@@ -15,132 +24,197 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 ## Prerequisites
 
-- A SigNoz account (SigNoz Cloud or Self-Hosted).
-- Access to your existing log collection setup (FluentBit, Promtail, etc.).
+Before starting, ensure you have:
 
-## Migration Strategies
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your existing log collection configuration (Promtail config, FluentBit config)
+- Administrative access to deploy the OpenTelemetry Collector
 
-### Using OpenTelemetry Collector for Logs
+## Step 1: Assess Your Current Log Sources
 
-The most straightforward approach is to use the OpenTelemetry Collector to collect logs directly. This replaces Promtail.
+Before migrating, list what you are currently collecting in Loki.
 
-1. **Install OpenTelemetry Collector**  
-   Follow the [installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) to set up the collector.
+### List Your Log Streams
 
-2. **Configure Log Receivers**  
-   Add the `filelog` receiver to your `config.yaml` to collect logs from files.
+Run this LogQL query in Grafana (against your Loki datasource) to see log volume by job:
 
-   ```yaml
-   receivers:
-     filelog:
-       include:
-         - /var/log/myapp/*.log
-       start_at: end
-   ```
+```logql
+count_over_time({job=~".+"}[1h])
+```
 
-3. **Enable in Pipeline**: Add `filelog` to your logs pipeline:
+This will give you a list of jobs (e.g., `varlogs`, `kubernetes-pods`, `systemd`) that are sending logs.
 
-   ```yaml
-   service:
-     pipelines:
-       logs:
-         receivers: [otlp, filelog]
-         processors: [batch]
-         exporters: [otlp]
-   ```
+### Categorize Your Sources
 
-   For more advanced configurations (Docker, Kubernetes, etc.), see [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/).
+Group your logs by how they are collected:
 
-> **Note**: If you are currently using **Promtail**, we recommend switching to the OpenTelemetry Collector's `filelog` receiver. It provides robust capabilities for tailing, parsing, and filtering logs, effectively replacing Promtail in your stack.
+| Source Type | Current Agent | Migration Path |
+|-------------|---------------|----------------|
+| **File Logs** | Promtail (`static_configs`) | [Use Filelog Receiver](#from-promtail-file-logs) |
+| **Kubernetes Pods** | Promtail (`kubernetes_sd_configs`) | [Use K8s Infra Chart](#from-kubernetes-pods) |
+| **Systemd/Journald** | Promtail (`journal`) | [Use Journald Receiver](#from-systemd-journald) |
+| **Syslog** | Promtail (`syslog`) | [Use Syslog Receiver](#from-syslog) |
+| **FluentBit** | FluentBit | [Forward to OTel Collector](#from-fluentbit) |
 
-### Using FluentBit with OpenTelemetry
+## Step 2: Set Up the OpenTelemetry Collector
 
-If you're already using FluentBit (often used with Loki), you can reconfigure it to work with OpenTelemetry.
+Most migration paths require the OpenTelemetry Collector.
 
-1. **Install OpenTelemetry Collector**  
-   If you haven't already, install the OpenTelemetry Collector. Follow the [installation guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+1. [Install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) in your environment.
+2. Configure the OTLP exporter to send logs to SigNoz Cloud.
 
-2. **Update FluentBit Configuration**  
-   Configure FluentBit to forward logs to the OpenTelemetry Collector using the `forward` output plugin:
+```yaml:otel-collector-config.yaml
+exporters:
+  otlp:
+    endpoint: ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+    tls:
+      insecure: false
 
-   ```yaml:/etc/fluent-bit/fluent-bit.conf
-   [OUTPUT]
-       Name        forward
-       Match       *
-       Host        ${OTEL_COLLECTOR_HOST}
-       Port        8006
-   ```
+service:
+  pipelines:
+    logs:
+      exporters: [otlp]
+```
 
-2. **Configure OpenTelemetry Collector**  
-   Add the `fluentforward` receiver to your `config.yaml`:
+## Step 3: Migrate Each Log Source
 
-   ```yaml
-   receivers:
-     fluentforward:
-       endpoint: 0.0.0.0:8006
-   ```
+Work through each source type from your inventory.
 
-3. **Enable in Pipeline**: Add `fluentforward` to your logs pipeline:
+### From Promtail (File Logs)
 
-   ```yaml
-   service:
-     pipelines:
-       logs:
-         receivers: [fluentforward]
-         processors: [batch]
-         exporters: [otlp]
-   ```
+If you use Promtail to tail static files (e.g., `/var/log/*.log`), use the `filelog` receiver in the OpenTelemetry Collector.
 
-   For more details, see the [FluentBit to SigNoz guide](https://signoz.io/docs/userguide/fluentbit_to_signoz/).
+**Promtail Config:**
+```yaml
+scrape_configs:
+- job_name: system
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      job: varlogs
+      __path__: /var/log/*.log
+```
 
-## Loki vs. SigNoz
+**OTel Collector Config:**
+```yaml:otel-collector-config.yaml
+receivers:
+  filelog:
+    include:
+      - /var/log/*.log
+    start_at: end
+    include_file_path: true
+    include_file_name: true
+```
 
-Migrating from Loki involves a shift in how you collect, store, and query logs. Here is a quick mapping of concepts to help you orient yourself.
+Refer to [File Log Collection](https://signoz.io/docs/userguide/collect_logs_from_file/) for more details.
 
-### Concept Mapping
+### From Kubernetes Pods
 
-| Feature | Loki (LGTM) | SigNoz (OpenTelemetry) | Notes |
-| :--- | :--- | :--- | :--- |
-| **Collection Agent** | Promtail | OpenTelemetry Collector | OTel Collector is the industry standard for all telemetry signals. |
-| **Data Model** | Labels (indexed) + Content (unindexed) | Resource Attributes + Log Attributes + Body | SigNoz indexes high-cardinality attributes by default, unlike Loki. |
-| **Query Language** | LogQL | Query Builder / ClickHouse SQL | SigNoz offers a visual builder and raw SQL for complex analysis. |
-| **Parsing** | Query-time (mostly) | Ingestion-time (Processors) | SigNoz encourages parsing logs *before* storage to enable aggregations. |
+If you use Promtail to collect Kubernetes pod logs, we recommend switching to the **SigNoz K8s Infra Helm Chart**. It automatically deploys an OpenTelemetry Collector DaemonSet configured to collect logs from all pods, enrich them with K8s metadata, and send them to SigNoz.
 
-### Query Translation
+See [Kubernetes Log Collection](https://signoz.io/docs/userguide/collect_kubernetes_logs/) for details.
 
-Here are some common LogQL queries and their equivalents in SigNoz's Query Builder:
+### From Systemd (Journald)
 
-**1. Filter by Label**
-- **LogQL**: `{app="frontend"}`
-- **SigNoz**: Add filter `app = frontend` (assuming `app` is a resource or log attribute).
+If you collect logs from systemd journal:
 
-**2. Filter by Content (Grep)**
-- **LogQL**: `{app="frontend"} |= "error"`
-- **SigNoz**: Add filter `app = frontend` AND `body CONTAINS error`.
+**Promtail Config:**
+```yaml
+scrape_configs:
+  - job_name: journal
+    journal:
+      max_age: 12h
+      labels:
+        job: systemd-journal
+```
 
-**3. Count over time**
-- **LogQL**: `count_over_time({app="frontend"}[5m])`
-- **SigNoz**: Use the "Aggregate" tab, select `Count` of logs, group by `app`.
+**OTel Collector Config:**
+```yaml:otel-collector-config.yaml
+receivers:
+  journald:
+    directory: /var/log/journal
+    start_at: end
+```
 
-<Admonition type="tip">
-  **Structured Logging**: While Loki often relies on parsing logs at query time (e.g., `| json`), SigNoz works best when you parse logs at ingestion time using [Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/). This converts unstructured text into structured attributes that are faster to search and aggregate.
-</Admonition>
+Refer to [Systemd Log Collection](https://signoz.io/docs/logs-management/send-logs/collect-systemd-logs/) for more details.
+
+### From Syslog
+
+If you collect syslog messages:
+
+**OTel Collector Config:**
+```yaml:otel-collector-config.yaml
+receivers:
+  syslog:
+    tcp:
+      listen_address: '0.0.0.0:54527'
+    protocol: rfc3164
+    location: UTC
+    operators:
+      - type: move
+        from: attributes.message
+        to: body
+```
+
+Refer to [Syslog Log Collection](https://signoz.io/docs/userguide/collecting_syslogs/) for more details.
+
+### From FluentBit
+
+If you are already using FluentBit, you can reconfigure it to forward logs to the OpenTelemetry Collector instead of Loki.
+
+1. **Update FluentBit Output**:
+
+```ini
+[OUTPUT]
+    Name        forward
+    Match       *
+    Host        ${OTEL_COLLECTOR_HOST}
+    Port        24224
+```
+
+2. **Configure Collector Receiver**:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  fluentforward:
+    endpoint: 0.0.0.0:24224
+```
+
+Refer to [FluentBit Log Collection](https://signoz.io/docs/userguide/fluentbit_to_signoz/) for more details.
+
+### Finding More Log Sources
+
+For a complete list of all supported log collection methods, see [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/).
+
+## Step 4: Log Parsing
+
+Loki often relies on query-time parsing (LogQL). SigNoz supports ingestion-time parsing.
+
+### Ingestion-Time Parsing (Log Pipelines)
+
+We recommend parsing logs to extract structured attributes. This makes queries faster and allows for aggregation.
+
+Use **SigNoz Log Pipelines** in the UI to build parsers (JSON, Regex, Grok) to extract structured attributes.
+
+See [Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
 
 ## Validate
 
-To confirm that logs are being sent to SigNoz:
+Verify logs are flowing correctly.
 
-1. Go to **Logs** in SigNoz.
-2. Use the **Logs Explorer** to view incoming logs.
-3. You should see your logs appearing in real-time.
+### Check Logs Are Arriving
 
-## Next Steps
+1. In SigNoz, navigate to **Logs** in the left sidebar.
+2. Use the **Logs Explorer** to browse recent logs.
+3. Verify logs from each source in your inventory appear.
 
-As part of the migration, you might need to modify your logs pipelines. SigNoz offers several features to enhance your logs:
+### Verify Attributes
 
-- **[Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/)**: Parse and structure logs with processors like JSON, regex, and grok.
-- **[Log Querying](https://signoz.io/docs/userguide/query-builder-v5/)**: Advanced query capabilities for searching and filtering logs.
-- **[Log-Trace Correlation](https://signoz.io/docs/logs-pipelines/guides/trace/)**: Link logs with related traces for contextual debugging.
+1. Click on a log entry to expand it.
+2. Check that attributes like `job`, `service.name`, `k8s.pod.name` are present and correct.
 
 <details>
 <ToggleHeading>
@@ -149,8 +223,23 @@ As part of the migration, you might need to modify your logs pipelines. SigNoz o
 
 ### Logs not appearing
 
-- **Check FluentBit/Collector Connectivity**: Ensure FluentBit can reach the OpenTelemetry Collector on the configured port (e.g., 8006).
-- **Check Collector Exporter**: Ensure the OpenTelemetry Collector is successfully exporting data to SigNoz. Check the collector logs for errors.
-- **Timestamp Issues**: If logs are old, they might not appear in the default "Last 15 mins" view. Adjust the time range in SigNoz.
+1. **Check Collector status**: Verify the OpenTelemetry Collector is running.
+2. **Check file permissions**: Ensure the Collector has read access to log files (`/var/log/...`).
+3. **Check include paths**: Verify glob patterns match your files.
+
+### Unparsed logs
+
+If logs appear as raw text:
+
+1. **Check Log Pipelines**: Ensure you have a pipeline configured to parse the logs.
+2. **Check JSON parsing**: If logs are JSON, use the JSON parser processor in Log Pipelines.
 
 </details>
+
+## Next Steps
+
+Once your logs are flowing to SigNoz:
+
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-grafana/dashboards) with log-based panels
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) for error patterns
+- [Correlate logs with traces](https://signoz.io/docs/logs-pipelines/guides/trace/) using trace IDs
