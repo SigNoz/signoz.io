@@ -22,6 +22,7 @@ import {
   SiAmazon,
   SiGooglecloud,
   SiSnowflake,
+  SiFlydotio,
   SiEnvoyproxy,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
@@ -160,6 +161,12 @@ export default function MetricsQuickStartOverview({
             icon: <SiHashicorp className="h-7 w-7 text-purple-600" />,
             clickName: 'Nomad Metrics Link',
           },
+          {
+            name: 'Fly.io',
+            href: '/docs/metrics-management/fly-metrics',
+            icon: <SiFlydotio className="h-7 w-7 text-purple-500" />,
+            clickName: 'Fly.io Metrics Link',
+           },
           {
             name: 'Envoy',
             href: '/docs/userguide/envoy-metrics',
