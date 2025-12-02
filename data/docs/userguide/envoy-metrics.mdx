@@ -20,6 +20,9 @@ Envoy is a high-performance edge and service proxy. This guide will help you sen
 
 ## Send Envoy Metrics to SigNoz
 
+<Tabs>
+<TabItem value="docker" label="Docker" default>
+
 ### Step 1: Configure Envoy with OpenTelemetry Sink
 
 Envoy can send metrics to SigNoz using the OpenTelemetry (OTel) protocol. You can learn more about it at <a href="https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/stat_sinks/open_telemetry_stat_sink" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Stat Sink</a>.
@@ -59,13 +62,25 @@ static_resources:
                       port_value: 4317
 ```
 
-### Step 2: Configure OpenTelemetry Collector
+### Step 2: Run Envoy with Docker
+
+You can run Envoy using the official Docker image. For more details, see the [Envoy Docker Installation Guide](https://www.envoyproxy.io/docs/envoy/latest/start/install#install-envoy-using-docker).
+
+Save the above configuration as `envoy.yaml` and run the following command:
+
+```bash
+docker run --name=envoy -p 9901:9901 -p 10000:10000 -v $(pwd)/envoy.yaml:/etc/envoy/envoy.yaml envoyproxy/envoy:v1.30-latest
+```
+
+### Step 3: Configure OpenTelemetry Collector
 
 Ensure your OpenTelemetry Collector is configured to receive OTLP metrics on port `4317` (gRPC). The SigNoz OTel Collector already listens on port `4317` to receive OTLP metrics by default.
 
 For more details on configuring the collector, refer to the [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) guide.
 
-## Kubernetes Deployment
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
 
 If you're deploying Envoy on Kubernetes, follow these steps to set up the complete monitoring stack.
 
@@ -531,6 +546,9 @@ Verify all pods are running:
 ```bash
 kubectl get pods -n default
 ```
+
+</TabItem>
+</Tabs>
 
 ## Validate Metrics
 
