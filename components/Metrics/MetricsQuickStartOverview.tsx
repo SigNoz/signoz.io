@@ -22,6 +22,7 @@ import {
   SiAmazon,
   SiGooglecloud,
   SiSnowflake,
+  SiFlydotio,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -158,6 +159,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/integrations/nomad',
             icon: <SiHashicorp className="h-7 w-7 text-purple-600" />,
             clickName: 'Nomad Metrics Link',
+          },
+          {
+            name: 'Fly.io',
+            href: '/docs/metrics-management/fly-metrics',
+            icon: <SiFlydotio className="h-7 w-7 text-purple-500" />,
+            clickName: 'Fly.io Metrics Link',
           },
         ]}
         sectionName="Infrastructure Metrics"
