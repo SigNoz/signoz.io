@@ -2983,8 +2983,33 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/migration/opentelemetry-datadog-receiver',
-            label: 'Using Datadog OTLP receiver',
+            route: '/docs/migration/migrate-from-datadog/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/alerts',
+            label: 'Migrating Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver',
+            label: 'Using Datadog Receiver',
           },
         ],
       },

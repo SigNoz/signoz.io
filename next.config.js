@@ -106,6 +106,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/migration/opentelemetry-datadog-receiver/',
+          destination: '/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/',
+          permanent: true,
+        },
+        {
           source: '/security/',
           destination: 'https://trust.signoz.io/',
           permanent: true,

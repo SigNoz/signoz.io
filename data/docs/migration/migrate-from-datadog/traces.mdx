@@ -1,56 +1,53 @@
 ---
-date: 2025-11-30
+date: 2025-12-02
 id: traces
 tags: [SigNoz Cloud, Self-Host]
-title: Migrate Traces/APM from New Relic
-description: Learn how to migrate your distributed tracing/APM from New Relic to SigNoz using OpenTelemetry.
+title: Migrate Traces/APM from Datadog
+description: Learn how to migrate your distributed tracing/APM from Datadog to SigNoz using OpenTelemetry.
 doc_type: howto
 ---
 
 ## Overview
 
-This guide walks you through migrating distributed tracing and APM from New Relic to SigNoz. You will:
+This guide walks you through migrating distributed tracing and APM from Datadog to SigNoz. You will:
 
-1. Check your New Relic services and trace sources
-2. Replace New Relic agents with OpenTelemetry instrumentation
+1. Check your Datadog services and trace sources
+2. Replace Datadog APM libraries with OpenTelemetry instrumentation
 3. Validate traces are flowing correctly to SigNoz
-4. Map New Relic attributes to OpenTelemetry conventions
 
-SigNoz is built natively on OpenTelemetry, so migration involves replacing New Relic agents with OTel instrumentation.
+SigNoz is built natively on OpenTelemetry, so migration involves replacing Datadog tracing libraries with OTel instrumentation.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
+
+## Key Differences: Datadog vs SigNoz
+
+| Aspect | Datadog | SigNoz |
+|--------|---------|--------|
+| **Instrumentation** | dd-trace libraries (proprietary) | OpenTelemetry SDKs (open standard) |
+| **Protocol** | Datadog Agent protocol | OTLP (OpenTelemetry Protocol) |
+| **Auto-instrumentation** | Language-specific dd-trace auto-instrumenters | OTel auto-instrumenters |
+| **Context Propagation** | Datadog headers + W3C | W3C Trace Context (standard) |
+| **Sampling** | Datadog Agent sampling | OTel SDK or Collector sampling |
 
 ## Prerequisites
 
 Before starting, ensure you have:
 
 - A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
-- Access to your New Relic account to review current APM services
+- Access to your Datadog account to review current APM services
 - Access to your application source code and deployment configuration
 
 ## Step 1: Assess Your Current Tracing Setup
 
-Before migrating, inventory what you're collecting in New Relic.
+Before migrating, inventory what you're collecting in Datadog.
 
 ### List Your Instrumented Services
 
-Run this NRQL query in New Relic's Query Builder to list all services sending traces:
-
-```sql
-SELECT uniques(entity.name) FROM Span SINCE 7 days ago LIMIT MAX
-```
-
-For a breakdown by language/agent type:
-
-```sql
-SELECT count(*)
-FROM Span
-SINCE 7 days ago
-FACET entity.name, instrumentation.provider, language
-LIMIT MAX
-```
+1. Navigate to **APM → Services** in Datadog.
+2. List all services sending traces.
+3. Note the language/runtime for each service.
 
 ### Categorize Your Services
 
@@ -58,65 +55,24 @@ Group services by how they're instrumented:
 
 | Instrumentation Type | How to Identify | Migration Path |
 |---------------------|-----------------|----------------|
-| **OpenTelemetry SDK** | `instrumentation.provider = 'opentelemetry'` | [Redirect OTLP exporter](#from-opentelemetry-sdk) |
-| **New Relic Java Agent** | `language = 'java'`, `instrumentation.provider = 'newRelic'` | [Replace with OTel Java Agent](#from-new-relic-java-agent) |
-| **New Relic Node.js Agent** | `language = 'nodejs'` | [Replace with OTel Node.js SDK](#from-new-relic-nodejs-agent) |
-| **New Relic Python Agent** | `language = 'python'` | [Replace with OTel Python SDK](#from-new-relic-python-agent) |
-| **New Relic .NET Agent** | `language = 'dotnet'` | [Replace with OTel .NET SDK](#from-new-relic-net-agent) |
-| **New Relic Go Agent** | `language = 'go'` | [Replace with OTel Go SDK](#from-new-relic-go-agent) |
-| **New Relic Ruby Agent** | `language = 'ruby'` | [Replace with OTel Ruby SDK](#from-new-relic-ruby-agent) |
-| **New Relic PHP Agent** | `language = 'php'` | [Replace with OTel PHP SDK](#from-new-relic-php-agent) |
-| **New Relic Browser Agent** | `entity.type = 'BROWSER'` or Browser app in New Relic | [Replace with OTel Browser SDK](#from-new-relic-browser-agent) |
+| **dd-trace-java** | Java services with `dd-java-agent.jar` | [Replace with OTel Java Agent](#from-dd-trace-java) |
+| **dd-trace-js** | Node.js services with `dd-trace` package | [Replace with OTel Node.js SDK](#from-dd-trace-js-nodejs) |
+| **dd-trace-py** | Python services with `ddtrace` package | [Replace with OTel Python SDK](#from-dd-trace-py-python) |
+| **dd-trace-dotnet** | .NET services with Datadog .NET tracer | [Replace with OTel .NET SDK](#from-dd-trace-dotnet) |
+| **dd-trace-go** | Go services with `gopkg.in/DataDog/dd-trace-go.v1` | [Replace with OTel Go SDK](#from-dd-trace-go) |
+| **dd-trace-rb** | Ruby services with `ddtrace` gem | [Replace with OTel Ruby SDK](#from-dd-trace-rb-ruby) |
+| **dd-trace-php** | PHP services with Datadog PHP tracer | [Replace with OTel PHP SDK](#from-dd-trace-php) |
 
 ## Step 2: Migrate Each Service
 
 Work through each service from your inventory.
 
-### From OpenTelemetry SDK
+### From dd-trace-java
 
-If you're already using OpenTelemetry with New Relic's OTLP endpoint, redirect to SigNoz:
+**Step 1: Remove the Datadog agent**
 
-**Before (New Relic):**
-
-```bash
-OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.nr-data.net
-OTEL_EXPORTER_OTLP_HEADERS=api-key=<NEW_RELIC_LICENSE_KEY>
-```
-
-**After (SigNoz Cloud):**
-
-```bash
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
-```
-
-Replace:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
-- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
-For collector-based setups, update the exporter in your `otel-collector-config.yaml`:
-
-```yaml:otel-collector-config.yaml
-exporters:
-otlp:
-    endpoint: ingest.<region>.signoz.cloud:443
-  headers:
-      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
-  tls:
-    insecure: false
-
-service:
-  pipelines:
-    traces:
-      exporters: [otlp]
-```
-
-### From New Relic Java Agent
-
-**Step 1: Remove the New Relic agent**
-
-- Remove the `-javaagent:/path/to/newrelic.jar` JVM argument
-- Remove `newrelic.yml` and the `newrelic/` directory
+- Remove the `-javaagent:/path/to/dd-java-agent.jar` JVM argument
+- Remove Datadog-specific environment variables (`DD_*`)
 
 **Step 2: Add the OpenTelemetry Java agent**
 
@@ -137,17 +93,21 @@ java -javaagent:/path/to/opentelemetry-javaagent.jar \
      -jar your-application.jar
 ```
 
+Replace:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
 For detailed configuration options, see [Java Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-java/).
 
-### From New Relic Node.js Agent
+### From dd-trace-js (Node.js)
 
-**Step 1: Remove the New Relic agent**
+**Step 1: Remove the Datadog tracer**
 
 ```bash
-npm uninstall newrelic
+npm uninstall dd-trace
 ```
 
-Remove `require('newrelic')` from your application entry point and delete `newrelic.js` config file.
+Remove `require('dd-trace').init()` from your application entry point and delete any `DD_*` environment variables.
 
 **Step 2: Add OpenTelemetry**
 
@@ -168,15 +128,15 @@ node app.js
 
 For detailed configuration, see [Node.js Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-nodejs/).
 
-### From New Relic Python Agent
+### From dd-trace-py (Python)
 
-**Step 1: Remove the New Relic agent**
+**Step 1: Remove the Datadog tracer**
 
 ```bash
-pip uninstall newrelic
+pip uninstall ddtrace
 ```
 
-Remove `import newrelic.agent` and `newrelic.agent.initialize()` from your code. Delete `newrelic.ini`.
+Remove `ddtrace-run` from your startup command and delete any `DD_*` environment variables.
 
 **Step 2: Add OpenTelemetry**
 
@@ -197,12 +157,12 @@ opentelemetry-instrument python app.py
 
 For detailed configuration, see [Python Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-python/).
 
-### From New Relic .NET Agent
+### From dd-trace-dotnet
 
-**Step 1: Remove the New Relic agent**
+**Step 1: Remove the Datadog tracer**
 
-- Uninstall the New Relic .NET agent from your system
-- Remove `newrelic.config` and any New Relic environment variables
+- Uninstall the Datadog .NET tracer from your system
+- Remove `DD_*` environment variables
 
 **Step 2: Add OpenTelemetry**
 
@@ -230,11 +190,18 @@ dotnet run
 
 For detailed configuration, see [.NET Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/).
 
-### From New Relic Go Agent
+### From dd-trace-go
 
-**Step 1: Remove the New Relic agent**
+**Step 1: Remove the Datadog tracer**
 
-Remove `github.com/newrelic/go-agent/v3/newrelic` from your imports and delete New Relic initialization code.
+Remove `gopkg.in/DataDog/dd-trace-go.v1` imports and delete tracer initialization code:
+
+```go
+// Remove this
+import "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+tracer.Start()
+defer tracer.Stop()
+```
 
 **Step 2: Install OpenTelemetry packages**
 
@@ -250,34 +217,29 @@ go get go.opentelemetry.io/otel \
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
-export OTEL_SERVICE_NAME="<service-name>"
+export OTEL_SERVICE_NAME="your-service-name"
 ```
-
-Replace:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
-- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service-name>`: A descriptive name for your service
 
 **Step 4: Initialize and instrument**
 
-The Go SDK reads configuration from environment variables. See [Go Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-golang/) for complete setup including:
+See [Go Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-golang/) for complete setup including:
 - Tracer initialization code
 - Framework-specific instrumentation (Gin, Echo, Chi, Fiber, Gorilla)
 - Database instrumentation (GORM, MongoDB, Redis)
 - gRPC instrumentation
 
-### From New Relic Ruby Agent
+### From dd-trace-rb (Ruby)
 
-**Step 1: Remove the New Relic agent**
+**Step 1: Remove the Datadog tracer**
 
 Remove from your Gemfile:
 
 ```ruby
 # Remove this line
-gem 'newrelic_rpm'
+gem 'ddtrace'
 ```
 
-Run `bundle install` and delete `newrelic.yml`.
+Run `bundle install` and remove Datadog configuration.
 
 **Step 2: Add OpenTelemetry**
 
@@ -315,11 +277,11 @@ export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
 
 For detailed configuration, see [Ruby Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-ruby/).
 
-### From New Relic PHP Agent
+### From dd-trace-php
 
-**Step 1: Remove the New Relic agent**
+**Step 1: Remove the Datadog tracer**
 
-Disable or uninstall the New Relic PHP extension from your PHP configuration.
+Disable or uninstall the Datadog PHP extension from your PHP configuration.
 
 **Step 2: Add OpenTelemetry**
 
@@ -333,27 +295,13 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
 export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
 ```
 
-### From New Relic Browser Agent
-
-If you were using New Relic Browser for frontend monitoring, migrate to OpenTelemetry browser instrumentation.
-
-**For frontend applications:**
-
-See [Frontend Monitoring](https://signoz.io/docs/frontend-monitoring/) for setup instructions.
-
 ### Other Languages and Frameworks
 
-For languages not covered above (Elixir, Rust, C++, Swift) or specific frameworks (Django, FastAPI, Spring Boot, Laravel, etc.), see the complete [Instrumentation Guide](https://signoz.io/docs/instrumentation/) which covers:
+For languages not covered above or specific frameworks, see the complete [Instrumentation Guide](https://signoz.io/docs/instrumentation/) which covers:
 
 - All supported languages and frameworks
 - Framework-specific auto-instrumentation
 - Manual instrumentation options
-
-## Step 3: Attribute Mapping Reference
-
-When migrating, be aware that New Relic and OpenTelemetry use different attribute names. If you have dashboards or alerts that reference specific attributes, you'll need to update them.
-
-For a complete list, see [New Relic attribute dictionary](https://docs.newrelic.com/attribute-dictionary/) and [OpenTelemetry semantic conventions](https://opentelemetry.io/docs/specs/semconv/general/trace/).
 
 ## Validate
 
@@ -388,7 +336,7 @@ Verify traces are flowing correctly by comparing against your service inventory.
 
 If traces appear fragmented across services:
 
-1. **Check context propagation**: Ensure all services use compatible propagation (W3C Trace Context is recommended).
+1. **Check context propagation**: Ensure all services use W3C Trace Context propagation.
 2. **Verify all services are instrumented**: Missing instrumentation on any service breaks the trace chain.
 3. **Check HTTP headers**: Verify `traceparent` header is being passed between services.
 
@@ -399,13 +347,7 @@ If some operations aren't being traced:
 1. **Check auto-instrumentation coverage**: Some libraries may not be auto-instrumented.
 2. **Add manual instrumentation**: For custom code, add manual spans using the OTel API.
 3. **Verify sampling**: Check if sampling is dropping spans unintentionally.
-
-### High cardinality warnings
-
-If you see warnings about high cardinality:
-
-1. **Review custom attributes**: Avoid adding unique IDs (user IDs, request IDs) as span attributes.
-2. **Use span events**: For high-cardinality data, consider span events instead of attributes.
+4. **Mixed Datadog/OTel**: If some services are still on Datadog, the spans will not be visible in SigNoz.
 
 </details>
 
@@ -413,8 +355,8 @@ If you see warnings about high cardinality:
 
 Once your traces are flowing to SigNoz:
 
-- [Create dashboards](https://signoz.io/docs/migration/migrate-from-newrelic/dashboards) with trace-based panels
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-datadog/dashboards/) with trace-based panels
 - [Set up trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) for latency and errors
 - [Correlate traces with logs](https://signoz.io/docs/logs-pipelines/guides/trace/) for debugging
 - [Explore the Service Map](https://signoz.io/docs/userguide/service-map/) to understand dependencies
-- [Migrate your logs](https://signoz.io/docs/migration/migrate-from-newrelic/logs) next
+- [Migrate your logs](https://signoz.io/docs/migration/migrate-from-datadog/logs/) next

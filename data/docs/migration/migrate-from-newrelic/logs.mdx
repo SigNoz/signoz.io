@@ -48,9 +48,16 @@ Before migrating, inventory what's sending logs to New Relic.
 Run this NRQL query in New Relic's Query Builder:
 
 ```sql
-SELECT uniques(entity.name), uniques(hostname), uniques(filePath)
-FROM Log 
-SINCE 7 days ago 
+SELECT count(*)
+FROM Log
+SINCE 7 days ago
+FACET 
+  CASES(
+    WHERE entity.name IS NOT NULL THEN 'service',
+    WHERE hostname IS NOT NULL THEN 'host',
+    WHERE filePath IS NOT NULL THEN 'file'
+  ) AS type,
+  coalesce(entity.name, hostname, filePath) AS value
 LIMIT MAX
 ```
 
@@ -58,9 +65,11 @@ For a breakdown by source type:
 
 ```sql
 SELECT count(*) 
-FROM Log 
-FACET instrumentation.provider, entity.name 
-SINCE 7 days ago 
+FROM Log
+FACET
+  coalesce(instrumentation.provider, 'unknown'),
+  coalesce(entity.name, 'unknown')
+SINCE 7 days ago
 LIMIT MAX
 ```
 
