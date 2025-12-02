@@ -1326,6 +1326,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-logs',
+                label: 'Node.js logs',
+              },
+              {
+                type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-pino-logs',
                 label: 'Pino Node.js logs',
               },
