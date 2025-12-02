@@ -1,4 +1,3 @@
-import React from 'react'
 import IconTitleDescriptionCard from './IconTitleDescriptionCard.view'
 import { IconTitleDescriptionCardGridProps } from './IconTitleDescriptionCardGrid.types'
 

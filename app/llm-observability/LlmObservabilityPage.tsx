@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { ArrowRight, BookOpen, CircleArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import ProductNav from '@/components/ProductNav/ProductNav'
@@ -28,12 +27,24 @@ const Header: React.FC = () => {
       href: '/teams/',
       variant: 'default' as const,
       className: 'flex-center',
+      tracking: {
+        clickType: 'Primary CTA',
+        clickName: 'LLM Observability Hero Start Trial',
+        clickLocation: 'LLM Observability Hero',
+        clickText: 'Start your free trial',
+      },
     },
     {
       text: 'Read Documentation',
       href: '/docs/trace-funnels/overview/',
       variant: 'secondary' as const,
       className: 'flex-center',
+      tracking: {
+        clickType: 'Secondary CTA',
+        clickName: 'LLM Observability Hero Docs',
+        clickLocation: 'LLM Observability Hero',
+        clickText: 'Read Documentation',
+      },
     },
   ]
 
@@ -45,12 +56,14 @@ const Header: React.FC = () => {
       {/* Main content */}
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
-          Monitor LLM Apps and Agents, <br /> Correlate with Infra Metrics
+          Monitor LLM Apps and Agents, <br className="hidden md:block" /> Correlate with Infra
+          Metrics
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
           Track AI workflows, RAG pipelines, and agents alongside microservices. Get unified
-          alerting, dashboards, and correlation across your entire stack.
+          alerting, <br className="hidden md:block" /> dashboards, and correlation across your
+          entire stack.
         </p>
       </div>
 
@@ -126,46 +139,6 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({ rows, className = '' 
   )
 }
 
-const ManageAlertsAsCode: React.FC = () => {
-  return (
-    <div className="bg-signoz_ink-500 py-6">
-      <GridLayout variant="split">
-        {/* Left Column */}
-        <div className="flex h-full w-full flex-col justify-center px-6">
-          <div className="flex flex-col justify-between">
-            <h2 className="mb-6 text-signoz_vanilla-100">Manage alerts as code with Terraform</h2>
-            <p className="mb-8 leading-relaxed text-signoz_vanilla-400">
-              Define alerts as Terraform resources with full version control. Import existing alerts
-              from the UI into your codebase. Deploy consistent alert configurations across
-              environments through standard Terraform workflows.
-            </p>
-          </div>
-
-          <Button
-            variant="secondary"
-            rounded="full"
-            className="flex w-fit items-center gap-2"
-            to="/docs/alerts-management/terraform-provider-signoz/"
-          >
-            Read Documentation
-            <ArrowRight size={14} />
-          </Button>
-        </div>
-
-        {/* Right Column */}
-        <div className="h-full w-full px-6">
-          <Image
-            src="/img/alerts-management/manage-alerts-as-code.png"
-            alt="Manage alerts as code"
-            width={10000}
-            height={10000}
-          />
-        </div>
-      </GridLayout>
-    </div>
-  )
-}
-
 const EverythingYouNeedCards: React.FC = () => {
   return (
     <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
@@ -176,7 +149,7 @@ const EverythingYouNeedCards: React.FC = () => {
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
               <div className="flex flex-col items-center gap-12 text-2xl font-medium leading-[3.25rem] text-signoz_sienna-100">
                 <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
-                  Everything You Need to <br /> Monitor LLM Applications
+                  Everything You Need to <br className="hidden md:block" /> Monitor LLM Applications
                 </h2>
                 <SectionLayout variant="no-border" className="!mx-auto p-0">
                   <IconTitleDescriptionCardGrid cards={LLM_OBSERVABILITY_CARDS} />
@@ -213,11 +186,19 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
                     variant="secondary"
                     rounded="full"
                     className="flex w-fit items-center gap-2"
-                    to="/docs/llm-observability/"
+                    asChild
                   >
-                    <BookOpen className="h-5 w-5 text-signoz_vanilla-400" />
-                    See All Integrations
-                    <ArrowRight className="h-5 w-5 text-signoz_vanilla-400" />
+                    <TrackingLink
+                      href="/docs/llm-observability/"
+                      clickType="Secondary CTA"
+                      clickName="LLM Observability Integrations Button"
+                      clickLocation="LLM Observability Integrations Section"
+                      clickText="See All Integrations"
+                    >
+                      <BookOpen className="h-5 w-5 text-signoz_vanilla-400" />
+                      See All Integrations
+                      <ArrowRight className="h-5 w-5 text-signoz_vanilla-400" />
+                    </TrackingLink>
                   </Button>
                 </div>
               </div>
@@ -327,14 +308,17 @@ const CustomerStories: React.FC = () => {
           <TestimonialCards />
 
           <div className="z-5 relative -mt-[25rem] flex h-96 items-end justify-center bg-gradient-to-t from-signoz_ink-500 to-transparent py-6 max-md:py-16">
-            <Button
-              variant="secondary"
-              rounded="full"
-              className="flex items-center gap-2"
-              to="/case-study/"
-            >
-              Read customer stories
-              <ArrowRight size={14} />
+            <Button variant="secondary" rounded="full" className="flex items-center gap-2" asChild>
+              <TrackingLink
+                href="/case-study/"
+                clickType="Secondary CTA"
+                clickName="LLM Observability Customer Stories Button"
+                clickLocation="LLM Observability Testimonials"
+                clickText="Read customer stories"
+              >
+                Read customer stories
+                <ArrowRight size={14} />
+              </TrackingLink>
             </Button>
           </div>
         </div>
@@ -350,12 +334,24 @@ const StartMonitoring: React.FC = () => {
       href: '/teams/',
       variant: 'default' as const,
       className: 'flex-center',
+      tracking: {
+        clickType: 'Primary CTA',
+        clickName: 'LLM Observability Bottom CTA Start Trial',
+        clickLocation: 'LLM Observability Bottom Section',
+        clickText: 'Start your free trial',
+      },
     },
     {
       text: 'Read Documentation',
       href: '/docs/llm-observability/',
       variant: 'secondary' as const,
       className: 'flex-center',
+      tracking: {
+        clickType: 'Secondary CTA',
+        clickName: 'LLM Observability Bottom CTA Docs',
+        clickLocation: 'LLM Observability Bottom Section',
+        clickText: 'Read Documentation',
+      },
     },
   ]
   return (

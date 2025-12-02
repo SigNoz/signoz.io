@@ -5,12 +5,10 @@ import {
   DraftingCompass,
   ChartNoAxesColumn,
   DatabaseZap,
-  CheckCircle,
-  XCircle,
   Check,
   X,
 } from 'lucide-react'
-import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCardGrid'
+import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
 
 export const LLM_OBSERVABILITY_CARDS: IconTitleDescriptionCardData[] = [
   {
