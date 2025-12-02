@@ -101,7 +101,7 @@ receivers:
 ```
 Replace `<your-org-slug>` with your actual organization slug. Then, add the `prometheus` receiver to your `receivers` configuration.
 
-```
+```yaml:config.yaml
 processors:
   transform/fly_metrics:
     error_mode: ignore
@@ -111,7 +111,7 @@ processors:
           - 'convert_gauge_to_sum("cumulative", true) where IsMatch(metric.name, "^fly_.*_count$") or metric.name == "fly_instance_cpu" or metric.name == "fly_instance_net_sent_bytes" or metric.name == "fly_instance_net_recv_bytes"'
 ```
 Add the `transform/fly_metrics` processor to your `processors` configuration.
-```
+```yaml:config.yaml
 exporters:
   otlphttp:
     endpoint: "https://ingest.{region}.signoz.cloud:443"
@@ -120,7 +120,7 @@ exporters:
 ```
 Replace `{region}` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) and `<YOUR_SIGNOZ_API_KEY>` with your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). If you have already configured the SigNoz exporter, you can skip this step.
 
-```
+```yaml:config.yaml
 service:
   telemetry:
     logs:
@@ -142,7 +142,7 @@ service:
 ### Step 4: Run the Collector
 From the otelcol-contrib, run the following command:
 
-```
+```bash
 ./otelcol-contrib --config ./config.yaml
 ```
 
@@ -171,7 +171,7 @@ receivers:
 ```
 Replace `<your-org-slug>` with your actual organization slug. Then, add the `prometheus` receiver to your `receivers` configuration.
 
-```
+```yaml:otel.yaml
 processors:
   transform/fly_metrics:
     error_mode: ignore
@@ -183,7 +183,7 @@ processors:
 Add the `transform/fly_metrics` processor to your `processors` configuration.
 
 
-```
+```yaml:otel.yaml
 exporters:
   otlphttp:
     endpoint: "https://ingest.{region}.signoz.cloud:443"
@@ -193,7 +193,7 @@ exporters:
 Replace `{region}` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) and `<YOUR_SIGNOZ_API_KEY>` with your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). If you have already configured the SigNoz exporter, you can skip this step.
 
 
-```
+```yaml:otel.yaml
 service:
   telemetry:
     logs:
@@ -284,7 +284,7 @@ otelAgent:
   ```
   Replace `<your-org-slug>` with your actual organization slug. Then, add the `prometheus` receiver to your `receivers` configuration.
 
-  ```
+  ```yaml:override-values.yaml
     processors:
       transform/fly_metrics:
         error_mode: ignore
@@ -295,7 +295,7 @@ otelAgent:
   ```
   Add the `transform/fly_metrics` processor to your `processors` configuration.
 
-  ```
+  ```yaml:override-values.yaml
     exporters:
       otlphttp:
         endpoint: https://ingest.{region}.signoz.cloud:443
@@ -305,7 +305,7 @@ otelAgent:
   Replace `{region}` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/) and `<YOUR_SIGNOZ_API_KEY>` with your [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/). If you have already configured the SigNoz exporter, you can skip this step.
 
 
-```
+```yaml:override-values.yaml
     service:
       pipelines:
         metrics:
@@ -383,6 +383,10 @@ You should see lines like `fly_instance_cpu_user_seconds_total`, `fly_instance_m
 - You can see some Fly.io metrics, but specific counters don’t appear or behave unexpectedly in Query Builder. It is because of Fly’s `/federate` endpoint does not expose metric types, so all metrics are ingested as Gauges by default.
   - Add those metric names to the `transform/fly_metrics` processor in `otel.yaml`, following the examples in this doc, so they are converted from Gauge to Sum
   - After updating `transform/fly_metrics`, restart the Collector and re-check the metrics in Query Builder.
+
+### Collector Version Compatibility
+
+- We have tested this setup with OpenTelemetry Collector Contrib version **0.103.1**. If you encounter issues with newer versions, please try reverting to version 0.103 or earlier.
 
 
 </details>
