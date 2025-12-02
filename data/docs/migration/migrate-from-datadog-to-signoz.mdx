@@ -1,223 +1,81 @@
 ---
-date: 2024-10-03
+date: 2025-12-02
 id: migrate-from-datadog-to-signoz
-tags : [SigNoz Cloud, Self-Host]
-title: Migrate From Datadog
-description: Migrating from Datadog to SigNoz. How to migrate metrics, traces, and logs from Datadog to SigNoz.
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate From Datadog to SigNoz
+description: Complete guide to migrating from Datadog to SigNoz. How to migrate metrics, traces/APM, logs, dashboards, and alerts.
+doc_type: explanation
 ---
 
-SigNoz provides a unified OpenTelemetry native solution for monitoring metrics, traces, and logs, allowing for greater flexibility and control over your data. This guide will walk you through the steps to migrate your existing Datadog setup to SigNoz, covering all essential signals: metrics, traces, and logs.
+import GetHelp from '@/components/shared/get-help.md'
 
-## Migrating Metrics
+SigNoz provides a unified OpenTelemetry-native solution for monitoring metrics, traces, and logs, giving you greater flexibility, control over your data, and freedom from vendor lock-in. This guide provides an overview of migrating your existing Datadog setup to SigNoz.
 
-Transitioning your metrics monitoring to SigNoz involves adopting the OpenTelemetry Protocol (OTLP) and configuring your systems to export metrics accordingly.
+## Why Migrate to SigNoz?
 
-### Switch to OTLP Metrics
+- **Open Source & Open Standards**: SigNoz is open-source and built natively on OpenTelemetry, ensuring you are not locked into proprietary agents or data formats.
+- **Data Control**: Full ownership and privacy of your telemetry data
+- **Cost Efficiency**: Predictable pricing without per-host or per-container fees
+  - Read the pricing analysis: [SigNoz vs Datadog vs New Relic vs Grafana](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/)
+- **Unified Platform**: Single UI for metrics, traces, and logs with built-in correlation
 
-It is recommended to switch to OTLP Metrics to monitor your existing system whereever possible. Below are some of the benefits of using OTLP:
+## Migration Overview
 
-**Benefits of OTLP:**
+Migrating from Datadog to SigNoz involves replacing Datadog agents and libraries with OpenTelemetry instrumentation. The process can be done incrementally—you can migrate one signal type at a time while running both platforms in parallel.
 
-- **Standardization:** OTLP is an open standard, reducing vendor lock-in and promoting interoperability.
-- **Data Control and Privacy:** Ensures complete ownership and security of telemetry data without third-party dependencies with help of OTel SDKs, Processors and collectors.
-- **Compatibility:** OTLP can be used with any OpenTelemetry-compatible vendor. 50+ observability/monitoring vendors today support OTLP.
-- **Ecosystem Support:** Widely adopted, ensuring compatibility with various tools and platforms.
+### Migration Paths
 
-**Steps to Switch to OTLP Metrics:**
+| Signal | Guide | Key Changes |
+|--------|-------|-------------|
+| **Metrics** | [Migrate Metrics](https://signoz.io/docs/migration/migrate-from-datadog/metrics/) | Replace Datadog Agent with OTel Collector, migrate DogStatsD to OTel SDK |
+| **Traces/APM** | [Migrate Traces](https://signoz.io/docs/migration/migrate-from-datadog/traces/) | Replace dd-trace libraries with OpenTelemetry SDKs |
+| **Logs** | [Migrate Logs](https://signoz.io/docs/migration/migrate-from-datadog/logs/) | Replace Datadog log forwarders with OTel Collector |
+| **Dashboards** | [Migrate Dashboards](https://signoz.io/docs/migration/migrate-from-datadog/dashboards/) | Recreate dashboards using templates or Query Builder |
+| **Alerts** | [Migrate Alerts](https://signoz.io/docs/migration/migrate-from-datadog/alerts/) | Map Datadog monitors to SigNoz alert types |
 
-1. **Configure Exporters:**
-   - Set up OTLP exporters to send metrics data to SigNoz.
-   - Ensure your applications are exporting metrics using the OTLP protocol.
+### Bridge Solution: Datadog Receiver
 
-2. **Add OpenTelemetry Receivers:**
-   - Add OTLP receivers to your OpenTelemetry Collector. There are around 100 [OpenTelemetry receivers](https://opentelemetry.io/ecosystem/registry/?s=&component=receiver&language=all) available.
-   - Refer to this [SigNoz Guide](https://signoz.io/docs/userguide/send-metrics-cloud/) on adding an OpenTelemetry receiver to OpenTelemetry Collector.
+If you need to continue using Datadog Agent during migration, you can use the [Datadog Receiver](https://signoz.io/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/) in the OpenTelemetry Collector. This allows you to receive Datadog Agent traffic and forward it to SigNoz without modifying your applications immediately.
 
-3. **Verify Data Reception:**
-   - Check SigNoz dashboards to confirm that metrics are being received and displayed correctly.
+## Key Differences: Datadog vs SigNoz
 
-### Use Prometheus Receiver if OTLP Metrics are not supported
+| Aspect | Datadog | SigNoz |
+|--------|---------|--------|
+| **Instrumentation** | Proprietary dd-trace libraries | OpenTelemetry SDKs (open standard) |
+| **Agent** | Datadog Agent | OpenTelemetry Collector |
+| **Custom Metrics** | DogStatsD | OpenTelemetry SDK |
+| **Query Language** | Datadog Query Language | PromQL, ClickHouse SQL, Query Builder |
+| **Dashboards** | JSON (Datadog schema) | JSON (SigNoz schema) |
+| **Storage** | Proprietary | ClickHouse (open source) |
 
-If exporting OTLP metrics is not supported by tool, you can utilize the Prometheus receiver.
+For a detailed comparison, check out [SigNoz vs Datadog](https://signoz.io/datadog-alternative/).
 
-**Configuration Steps:**
+## Migration Tools
 
-1. **Enable Prometheus Receiver:**
-   - Follow the guide on [Enabling a Prometheus Receiver](https://signoz.io/docs/userguide/send-metrics/#enable-a-prometheus-receiver) to configure SigNoz to accept Prometheus metrics.
+### Automated Dashboard Migration
 
-2. **Expose Prometheus Metrics:**
-   - Configure your applications to expose metrics in Prometheus format.
+Try the [SigNoz Datadog Migration Tool](https://signoz.io/datadog-migration-tool/) to automatically translate Datadog dashboard JSON to SigNoz format. This provides a starting point for complex dashboards.
 
-3. **Update Scrape Configurations:**
-   - Adjust the scrape configurations in the SigNoz OpenTelemetry Collector to include your application's endpoints.
+### Import Pre-built Dashboards
 
-### Custom Metrics: From DogStatsD to OTLP
+SigNoz provides ready-to-use dashboard templates in the [SigNoz Dashboards Repository](https://github.com/SigNoz/dashboards):
 
-#### Replace DogStatsD with OpenTelemetry
-
-For a more integrated approach, replace DogStatsD with OpenTelemetry metrics.
-
-**Steps:**
-
-1. **Update Client Libraries:**
-   - Replace DogStatsD client libraries with OpenTelemetry SDKs in your applications.
-
-2. **Instrument Metrics:**
-   - Use OpenTelemetry APIs to instrument your custom metrics.
-
-**Example in Python:**
-
-```python
-from opentelemetry import metrics
-from opentelemetry.sdk.metrics import MeterProvider
-
-metrics.set_meter_provider(MeterProvider())
-meter = metrics.get_meter("my_app", "0.1.2")
-
-counter = meter.create_counter(
-    name="requests",
-    description="Number of requests",
-    unit="1",
-)
-
-# Record a metric
-counter.add(1, {"endpoint": "/api/v1/resource"})
-```
-
-3. **Configure Exporter:**
-   - Set up the OTLP exporter to send metrics data to SigNoz.
-
-#### Continue to Use DogStatsD
-
-You can continue using DogStatsD for custom metrics by configuring a Datadog receiver at your OTel Agent.
-
-**Using Datadog Receiver:**
-   - Configure the [Datadog receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/datadogreceiver) in the OpenTelemetry Collector to accept DogStatsD metrics.
-   - Refer to this [ingesting Datadog metrics tutorial](https://signoz.io/docs/migration/opentelemetry-datadog-receiver) for detailed instructions.
-
-
-### Import Prebuilt SigNoz Dashboards
-
-Leverage prebuilt dashboards to visualize your metrics data effectively.
-
-**Available Dashboards:**
-
-- Host Metrics
-- MySQL
+- MongoDB Metrics
+- Redis Metrics  
+- MySQL/PostgreSQL
 - JVM Metrics
 - And more...
 
-**Steps to Import:**
+## Next Steps
 
-1. **Access the Dashboards Repository:**
-   - Visit the SigNoz dashboards repository: [SigNoz Dashboards](https://github.com/SigNoz/dashboards).
+Start with the signal that's most important for your use case:
 
-2. **Choose Dashboards:**
-   - Select the dashboards relevant to your infrastructure and applications.
+- [Migrate Metrics](https://signoz.io/docs/migration/migrate-from-datadog/metrics/) - Infrastructure and custom metrics
+- [Migrate Traces/APM](https://signoz.io/docs/migration/migrate-from-datadog/traces/) - Application performance monitoring
+- [Migrate Logs](https://signoz.io/docs/migration/migrate-from-datadog/logs/) - Log collection and analysis
+- [Migrate Dashboards](https://signoz.io/docs/migration/migrate-from-datadog/dashboards/) - Visualizations and panels
+- [Migrate Alerts](https://signoz.io/docs/migration/migrate-from-datadog/alerts/) - Monitoring and notifications
 
-3. **Import Dashboards:**
-   - Follow the instructions provided in the repository to import dashboards into your SigNoz instance.
+## Get Help
 
-### Handling Unsupported Datadog Integrations
-
-If certain Datadog integrations are not directly supported by SigNoz, you can utilize the Datadog receiver to bridge the gap.
-
-Refer to this [ingesting Datadog metrics tutorial](https://signoz.io/docs/migration/opentelemetry-datadog-receiver) for detailed instructions.
-
-**Steps:**
-
-1. **Configure Datadog Receiver:**
-   - Adjust the OpenTelemetry Collector configuration to include the Datadog receiver.
-   - Reference: [Datadog Receiver Configuration](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/datadogreceiver)
-
-2. **Update Agents:**
-   - Point your Datadog agents to send data to the SigNoz OpenTelemetry Collector.
-
----
-
-## Migrating Traces/APM
-
-Transitioning your tracing setup involves re-instrumenting your applications with OpenTelemetry SDKs to send trace data to SigNoz.
-
-### Switch to OpenTelemetry SDKs
-
-**Steps:**
-
-1. **Install OpenTelemetry SDKs:**
-   - Choose the appropriate SDK for your application's language from the [SigNoz Instrumentation Guide](https://signoz.io/docs/instrumentation/).
-
-2. **Instrument Your Application:**
-   - Use automatic or manual instrumentation to capture trace data.
-
-3. **Verify Traces in SigNoz:**
-   - Use the SigNoz dashboard to ensure that trace data is being collected and displayed.
-
-{/* ### Try Datadog Receiver
-
-If re-instrumentation is not immediately possible, you can use the Datadog receiver to collect trace data.
-
-**Steps:**
-
-1. **Configure Datadog Receiver:**
-   - Update the OpenTelemetry Collector configuration to include the [Datadog receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/datadogreceiver) for traces.
-
-2. **Adjust Datadog Agents:**
-   - Point your existing Datadog agents to send trace data to the SigNoz collector.
-
-3. **Limitations:**
-   - Note that this approach may not support all tracing features.
-   - Re-instrumentation with OpenTelemetry is recommended for full functionality. */}
-
----
-
-## Migrating Logs
-
-To migrate your logging setup, you need to configure appropriate log receivers and set up parsing pipelines in SigNoz.
-
-### Use OpenTelemetry Log Receivers
-
-**Available Receivers:**
-
-- **Filelog Receiver:** For reading logs from files.
-- **TCP/Syslog Receiver:** For receiving logs over network protocols.
-- And more...
-
-**Steps:**
-
-1. **Configure Log Receivers:**
-   - Follow the [SigNoz Log Receivers Guide](https://signoz.io/docs/userguide/logs/#log-receivers) to set up the appropriate receivers.
-
-2. **Update Log Sources:**
-   - Ensure your applications are writing logs to locations or endpoints monitored by the receivers.
-
-### Use SigNoz Log Parsing Pipeline to Structure Logs
-
-Structuring logs enhances their usability and allows for more effective querying and alerting.
-
-**Steps:**
-
-1. **Understand Log Pipelines:**
-   - Read the introduction to [SigNoz Log Parsing Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to grasp the concepts.
-
-2. **Define Parsing Rules:**
-   - Create rules to parse unstructured logs into structured formats (e.g., JSON).
-
-3. **Configure Pipelines:**
-   - Set up pipelines in SigNoz to process incoming logs according to your parsing rules.
-
-4. **Test and Validate:**
-   - Verify that logs are correctly parsed and that the structured data is available in SigNoz.
-
----
-
-## Conclusion
-
-Migrating from Datadog to SigNoz empowers you with an open-source observability platform that is flexible, extensible, and based on open standards. By leveraging OpenTelemetry, you avoid vendor lock-in and ensure compatibility across various tools and services. This guide provides a roadmap for transitioning your metrics, traces, and logs to SigNoz. For more detailed instructions and support, refer to the SigNoz documentation and community resources.
-
----
-
-**Additional Resources:**
-
-- **SigNoz Documentation:** [https://signoz.io/docs/](https://signoz.io/docs/)
-- **OpenTelemetry Collector Configuration:** [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)
-- **Community Support:** Join the SigNoz community on [Slack](https://signoz.io/slack) for assistance.
+<GetHelp />

@@ -1,0 +1,99 @@
+---
+date: 2025-12-01
+id: saml-keycloak
+tags : [SigNoz Cloud, Self-Host]
+title: Setting Up SSO SAML 2.0 With Keycloak
+description: Setting Up Single Sign-On (SSO) SAML 2.0 With Keycloak.
+---
+
+<Admonition type="info">
+SAML-based authentication is available exclusively on Self Hosted Enterprise plan and SigNoz Cloud.
+</Admonition>
+
+### Overview
+
+This guide walks you through setting up SSO using Keycloak, a powerful open-source identity and access management solution, with SigNoz.
+
+**What you'll accomplish:**
+- Configure Keycloak as an identity provider (IdP) for SigNoz
+- Enable your team to access SigNoz using their existing Keycloak accounts
+
+### Prerequisites
+
+Before you begin, ensure you have:
+
+- **Keycloak** with administrative access
+- **SigNoz account** (Cloud or Self-Hosted with License) with administrative access
+- **Your SigNoz instance URL** (e.g., `https://signoz.example.com`)
+
+## Keycloak Configuration Steps
+
+### Step 1: Create SigNoz Realm in Keycloak Admin Console
+![Admin login page](/img/docs/saml-keycloak/create-realm.webp)
+### Step 2: Configure a new SAML client
+- Navigate to Clients → Create Client
+- Select SAML as the client type
+- Set Client ID to your SigNoz domain (e.g., `signoz.example.com`)
+![Admin login page](/img/docs/saml-keycloak/create-client.webp)
+
+### Step 3: Configure Client Settings
+- Set the `Home URL` as `<your-instance-url>/api/v1/complete/saml`
+- Set the `Valid redirect URIs` as `<your-instance-url>/*`
+![Admin login page](/img/docs/saml-keycloak/client-access-settings.webp)
+- Navigate to the `Advanced` tab
+- Set the `Assertion Consumer Service POST Binding URL` as `<your-instance-url>/api/v1/complete/saml`
+![Admin login page](/img/docs/saml-keycloak/client-settings-advanced-idp-acs.webp)
+
+### Step 4: Set up SAML Mappers
+- Go to Client Scopes → `signoz.example.com-dedicated`
+- Add these predefined mappers:
+   - role list
+   - X500 email
+   - X500 givenName
+   ![Admin login page](/img/docs/saml-keycloak/add-predefined-mappers.webp)
+
+### Step 5: Configure SAML capabilities
+- Set Name ID format to "email"
+![Admin login page](/img/docs/saml-keycloak/saml-capabilities-email-id.webp)
+- Disable Client Signature Required
+![Admin login page](/img/docs/saml-keycloak/client-signature-required.webp)
+
+## SigNoz Configuration Steps
+
+### Gather SAML Information
+- Access Realm Settings → SAML 2.0 Identity Provider Metadata
+- Note down:
+   - SAML ACS URL (ends with `/protocol/saml`)
+   - Entity ID
+   - X.509 certificate
+   ![Admin login page](/img/docs/saml-keycloak/realm-settings-saml.webp)
+
+### Configure SigNoz
+- Go to Settings → Organization Settings → Authenticated Domains
+- Click on `Add Domain` button and select `SAML Authentication`
+- Add your email domain (e.g., `your-domain.com`)
+- Configure SAML settings with collected information
+- Enable "Enforce SSO" toggle
+![Admin login page](/img/docs/saml-keycloak/add-domain.webp)
+
+### Configure IdP-initiated Login
+- Go to SigNoz Settings → Organization Settings → Authenticated Domains
+- Copy the `IDP Initiated SSO URL` of your domain
+- Go to Keycloak Admin → Open Client settings
+- Set the `IDP-Initiated SSO URL name` as some unique idenfier like `signoz-idp`
+- Set the `IDP Initiated SSO Relay State`as the URL copied in previous steps from SigNoz's `Authenticated Domains` page
+![Admin login page](/img/docs/saml-keycloak/idp-settings.webp)
+
+### Verify the setup
+
+1. Provide access to the Keycloak Realm to some user or create a new one
+2. Navigate to your SigNoz URL
+3. Click "Login" → "SSO Login"
+4. Enter Keycloak credentials when prompted
+5. Verify successful authentication
+
+#### To verify IdP-initiated login
+
+1. Navigate to `<your-keycloak-domain>/realms/master/protocol/saml/clients/<your-unique-sso-url-name>` (like `signoz-idp` above)
+2. Enter Keycloak credentials when prompted
+3. Verify successful authentication

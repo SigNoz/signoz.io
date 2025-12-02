@@ -1,0 +1,197 @@
+---
+date: 2025-12-02
+id: datadog-receiver
+tags: [SigNoz Cloud, Self-Host]
+title: Using Datadog Receiver
+description: How to use the OpenTelemetry Datadog Receiver to bridge Datadog Agent traffic to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+The OpenTelemetry Datadog Receiver allows you to receive metrics from Datadog Agents without modifying your applications. This is useful for:
+
+- **Gradual migration**: Continue using Datadog Agent while migrating to OpenTelemetry
+- **DogStatsD metrics**: Receive custom DogStatsD metrics without changing application code
+
+<Admonition type="info">
+This approach is a bridge solution. For long-term use, we recommend migrating to native OpenTelemetry instrumentation for better integration and standardization.
+</Admonition>
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) installed and running
+- **Datadog Agent** installed (if forwarding from existing agents)
+- Access to modify configuration files and environment variables
+- Network connectivity between Datadog Agent and OpenTelemetry Collector
+
+## Step 1: Configure the Datadog Receiver
+
+Add the Datadog receiver to your OpenTelemetry Collector configuration to accept Datadog Agent traffic.
+
+**Add to your `otel-collector-config.yaml`:**
+
+```yaml:otel-collector-config.yaml
+receivers:
+  datadog:
+    endpoint: 0.0.0.0:8125
+    read_timeout: 60s
+```
+
+This configures the receiver to:
+- Listen on all interfaces (`0.0.0.0`) on port `8125` (default Datadog DogStatsD port)
+- Wait up to 60 seconds for data before timing out
+
+## Step 2: Configure the Exporter
+
+You can skip this step if you followed the steps in [OpenTelemetry Collector Installation](https://signoz.io/docs/opentelemetry-collection-agents/get-started/#installation) to configure the OpenTelemetry Collector.
+
+Set up the OTLP exporter to send data to SigNoz:
+
+```yaml:otel-collector-config.yaml
+exporters:
+  otlp:
+    endpoint: ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+    tls:
+      insecure: false
+```
+
+Replace:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+## Step 3: Update the Pipelines
+
+Integrate the Datadog receiver into your pipelines:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [datadog, otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+## Step 4: Configure the Datadog Agent
+
+Configure your Datadog Agent to forward data to the OpenTelemetry Collector.
+
+### Option A: Forward to Both SigNoz and Datadog
+
+If you want to send data to both SigNoz (via OTel Collector) and Datadog during migration:
+
+**Using environment variable:**
+
+```bash
+DD_ADDITIONAL_ENDPOINTS='{"http://<OTEL_COLLECTOR_HOST>:8125": ["signoz"]}'
+```
+
+**Or update `datadog.yaml`:**
+
+```yaml:datadog.yaml
+additional_endpoints:
+  "http://<OTEL_COLLECTOR_HOST>:8125":
+    - "signoz"
+```
+
+Replace `<OTEL_COLLECTOR_HOST>` with the hostname or IP where your OTel Collector is running (e.g., `localhost`, `otel-collector.default.svc.cluster.local`).
+
+### Option B: Forward Only to SigNoz
+
+To send data exclusively to SigNoz (stop sending to Datadog):
+
+**Using environment variable:**
+
+```bash
+DD_DD_URL=http://<OTEL_COLLECTOR_HOST>:8125
+```
+
+**Or update `datadog.yaml`:**
+
+```yaml:datadog.yaml
+dd_url: http://<OTEL_COLLECTOR_HOST>:8125
+```
+
+## Step 5: Restart Services
+
+After making configuration changes:
+
+1. Restart the OpenTelemetry Collector
+
+2. Restart the Datadog Agent
+   
+## Validate
+
+Verify data is flowing through the Datadog receiver to SigNoz:
+
+1. **Verify in SigNoz:**
+   - Navigate to **Metrics** to see DogStatsD metrics
+   - Check that metrics match your Datadog data
+
+2. **Compare with Datadog:**
+   - Verify the same metrics appear in both platforms
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Connection refused errors
+
+If the Datadog Agent can't connect to the OTel Collector:
+
+1. **Check port binding**: Verify the Collector is listening on port 8125:
+   ```bash
+   netstat -tlnp | grep 8125
+   ```
+
+2. **Check firewall**: Ensure port 8125 is open between Agent and Collector.
+
+3. **Verify endpoint**: Confirm the Agent is configured with the correct Collector address.
+
+### No data appearing in SigNoz
+
+1. **Check Collector logs**: Look for errors in the OTel Collector logs.
+
+2. **Verify pipeline configuration**: Ensure the `datadog` receiver is listed in the appropriate pipeline(s).
+
+### Metrics not appearing
+
+1. **Check metric type**: The Datadog receiver may not support all metric types.
+
+2. **Verify DogStatsD configuration**: Ensure DogStatsD is properly configured in both Agent and Collector.
+
+3. **Check metric names**: Metrics may be renamed during translation to OTel format.
+
+</details>
+
+## Limitations
+
+Be aware of these limitations when using the Datadog receiver:
+
+- **Not all features supported**: Some Datadog-specific features may not translate to OpenTelemetry
+- **Metric types**: Some Datadog metric types may be converted differently
+- **Performance**: Adding a hop (DD Agent → OTel Collector → SigNoz) adds latency
+
+## Next Steps
+
+The Datadog receiver is a bridge solution. For long-term benefits, consider migrating to native OpenTelemetry:
+
+- [Migrate Traces to OpenTelemetry](https://signoz.io/docs/migration/migrate-from-datadog/traces/)
+- [Migrate Metrics to OpenTelemetry](https://signoz.io/docs/migration/migrate-from-datadog/metrics/)
+- [Migrate Logs to OpenTelemetry](https://signoz.io/docs/migration/migrate-from-datadog/logs/)
+
+## Additional Resources
+
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/datadogreceiver" target="_blank" rel="noopener noreferrer nofollow">Datadog Receiver Documentation</a>
+- <a href="https://opentelemetry.io/docs/collector/configuration/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collector Configuration Guide</a>
+- <a href="https://docs.datadoghq.com/agent/configuration/dual-shipping/" target="_blank" rel="noopener noreferrer nofollow">Datadog Dual Shipping Documentation</a>

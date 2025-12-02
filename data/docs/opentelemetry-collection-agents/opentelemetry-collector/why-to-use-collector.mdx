@@ -1,99 +1,63 @@
 ---
-date: 2025-11-13
+date: 2025-11-28
 title: Why use OpenTelemetry Collector
 id: why-to-use-collector
 tags: [SigNoz Cloud, Self-Host]
-description: Learn why you should use OpenTelemetry Collector with SigNoz for data processing, automatic resource enrichment, and flexible telemetry routing in production environments.
+description: Discover the benefits of using OpenTelemetry Collector with SigNoz including centralized data control, universal compatibility, and improved application performance.
+doc_type: explanation
 ---
-
-import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-The OpenTelemetry (OTel) Collector is a vendor-agnostic component that sits between your applications and SigNoz. While you can directly send telemetry data from your applications to SigNoz, using the OTel Collector provides significant advantages in production environments.
+The OpenTelemetry (OTel) Collector is a vendor-agnostic agent that sits between your applications and SigNoz. It acts as a centralized processing hub, allowing you to control, enhance, and route your telemetry data efficiently.
+
+<Figure
+  src="/img/docs/opentelemetry-collection-agents/why-use-otel-collector.webp"
+  alt="OpenTelemetry Collector Workflow: Ingest, Process, and Export"
+  caption="The OpenTelemetry Collector sits between your apps and SigNoz, handling data processing and routing."
+/>
+
+While you can send data directly to SigNoz, the Collector provides critical advantages for production environments.
 
 ## Key Benefits
 
-### 1. Data Processing and Transformation
+### Data Control & Security
 
-The OTel Collector acts as a powerful data processing layer between your applications and SigNoz, giving you fine-grained control over your telemetry data before it is exported to SigNoz.
+The Collector gives you fine-grained control over your data before it leaves your infrastructure.
 
-#### Filtering
+*   **Filter and Drop Data**: Reduce costs and storage by filtering out noisy logs, health checks, or high-cardinality metrics. You can drop specific spans or metrics based on attributes, ensuring you only store what matters.
+    *   *Learn more: [Drop Logs](https://signoz.io/docs/logs-management/guides/drop-logs/), [Drop Metrics](https://signoz.io/docs/userguide/drop-metrics/), [Filter Traces](https://signoz.io/docs/traces-management/guides/drop-spans/#filter-processor).*
 
-The Collector enables you to filter out noisy or low-value telemetry data significantly reducing costs and storage requirements. The [filter processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#filter-processor) has a lot of conditional logic which allows you to apply filters based on specific attributes, resource information, or custom attributes.
+*   **PII Scrubbing & Transformation**: Automatically detect and redact sensitive information (PII) like emails or tokens to comply with GDPR/HIPAA. You can also normalize attribute names across different services to ensure consistent data formats.
+    *   *Learn more: [Scrub PII in Logs](https://signoz.io/docs/logs-management/guides/pii-scrubbing/), [Scrub PII in Traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/).*
 
-This is helpful in removing unnecessary traffic like health check endpoints, and internal monitoring requests.
+### Universal Connectivity
 
-#### Dropping Data
+The Collector decouples your applications from the backend, offering flexibility in how you ingest and export data.
 
-Sometimes you need to remove specific telemetry data entirely. The Collector allows you to drop individual spans or metrics based on their attributes, metrics names, etc. It comes in handy when your telemetry data has high cardinality attributes which can impact performance as well as storage costs.
+*   **Ingest from Anywhere**: Support for 100+ receivers means you can ingest data from AWS, Azure, VMs, Kubernetes, CI/CD pipelines, and databases without changing your application code.
+    *   *Learn more: [Receivers](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#1-receivers).*
+*   **Export to Multiple Destinations**: Send data to SigNoz for analysis while simultaneously archiving to S3 for long-term retention. This simplifies migration and data governance.
+    *   *Learn more: [Infinite Retention with S3](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/).*
 
-You can check guides for dropping telemetry data in [logs](https://signoz.io/docs/logs-management/guides/drop-logs/), [metrics](https://signoz.io/docs/userguide/drop-metrics/) and [traces](https://signoz.io/docs/traces-management/guides/drop-spans/#filter-processor).
+### Performance & Reliability
 
-#### PII Scrubbing
+Offloading telemetry duties to the Collector improves your application's stability and efficiency.
 
-It is important to protect PII data for both security as well as compliance purposes. The Collector can automatically detect and remove Personally Identifiable Information (PII) before telemetry data leaves your infrastructure. This capability ensures compliance with regulations like GDPR and HIPAA without requiring any changes to your codebase.
+*   **Resource Offloading**: Your apps don't need to handle complex batching, retries, or encryption. The Collector handles these tasks, reducing the CPU and memory footprint of your services.
+*   **Batching & Buffering**: The [Batch Processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#batch-processor) groups data to reduce network calls, while persistent queues and automatic retries prevent data loss during network outages.
 
-You can configure the Collector to redact attributes which include email addresses, IP addresses, authentication tokens and other sensitive data using pattern matching with regex with the [transform processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#transform-processor). This pre-process approach means the sensitive information never reaches SigNoz or long-term storage.
+### Automatic Context & Management
 
-For more examples, you can check guides for scrubbing PII in [logs](https://signoz.io/docs/logs-management/guides/pii-scrubbing/) and [traces](https://signoz.io/docs/traces-management/guides/pii-scrubbing/).
-
-#### Data Transformation
-
-Standardizing telemetry across different environments becomes simpler with the Collector's transformation capabilities. You can normalize attributes names and their values to make consistent telemetry data across different services and teams with the [transform processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#transform-processor). The Collector also supports converting between different data formats, aggregating metrics before export, and enriching telemetry data with additional contextual information.
-
-Check out complete list of processors from [OpenTelemetry Registry](https://opentelemetry.io/ecosystem/registry/?component=processor).
-
-### 2. Auto-Add Resource Attributes
-
-The Collector automatically enhances your telemetry data with additional context information about the infrastructure and environment where your application runs.
-
-Without any manual configuration, the Collector adds metadata including hostname, operating system, and other details about the environment. In cloud environments it automatically detects and adds provider specific metadata such as AWS instance IDs, GCP project information, Azure resource details, along with region and availability zone data.
-
-For containerized applications, especially in Kubernetes, the Collector adds metadata with pod names, namespaces and container IDs.
-
-Check out these guides for setting resource attributes using [resource processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-processor) and [resource detection processor](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor).
-
-### 3. Export to Multiple Destinations
-
-The OTel Collector supports exporting to multiple destinations simultaneously, which is very helpful during migrations. This capability allows you to gradually migrate from existing observability tools to SigNoz.
-
-This also allows you to configure long term storage using S3 exporter for example, you can check more about long term storage in [Infinite Retention of OpenTelemetry Data](https://signoz.io/docs/tutorial/infinite-retention-aws-s3/) doc.
-
-### 4. Multiple Receiver Support
-
-The OTel Collector can accept telemetry data from a wide variety of sources and in different formats like Jaeger, Prometheus, or Zipkin, in addition to OpenTelemetry-native OTLP, the Collector can ingest it all. This ability to support multiple receivers makes it an ideal central ingestion point for all your telemetry data, regardless of its origin.
-
-The complete list of 50+ receivers can be found at: [OpenTelemetry Registry](https://opentelemetry.io/ecosystem/registry/?component=receiver).
-
-For a detailed guide on configuring different receivers, see the [Receivers section in the configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#1-receivers).
-
-### 5. Efficient Data Handling with Batching
-
-The Collector's batch processor is a key feature for improving data ingestion efficiency. It groups telemetry data into batches before sending it to the backend, which significantly reduces network overhead and increases throughput.
-
-Learn how to configure it in the [Batch Processor section of the configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#batch-processor).
-
-### 6. Application Performance and Resource Offloading
-
-The Collector offloads telemetry processing from your applications and services, significantly reducing resource consumption and performance impact. The applications don't need to handle batching, retries, encryption, or complex export logic, the Collector handles these tasks with ease.
-
-### 7. Resilience and Reliability
-
-The Collector provides built-in options to prevent data loss during network issues or backend outages. It has automatic retries, [persistent storage](https://opentelemetry.io/docs/collector/resiliency/#persistent-storage-write-ahead-log---wal), [in-memory buffer](https://opentelemetry.io/docs/collector/resiliency/#sending-queue-in-memory-buffering) features which safeguards telemetry data and makes sure network outages are handled properly.
-
-### 8. Centralized Configuration and Management
-
-Managing telemetry configuration directly in the collection instead of managing separate applications simplifies operations. This allows updating filter rules, adding new exporters, or changing attributes in telemetry data possible without redeploying applications.
+*   **Rich Metadata**: The Collector automatically detects and adds environment details (Kubernetes pods, AWS regions, hostnames) to your telemetry, making debugging easier.
+    *   *Learn more: [Resource Detection](https://signoz.io/docs/logs-management/guides/set-resource-attributes-for-logs/#using-resource-detection-processor).*
+*   **Centralized Config**: Manage sampling rates, filtering rules, and exporters in one place without redeploying your applications.
 
 ## Next Steps
 
-To get started with the OpenTelemetry Collector and send data to SigNoz:
+*   **[Install the Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/)**: Set up the OTel Collector in your environment.
+*   **[Configure the Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)**: Learn how to customize your processing pipeline.
+*   **[Instrument your app](https://signoz.io/docs/instrumentation/)**: Start sending traces.
+*   **[Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/)**: Send logs to SigNoz.
+*   **[Export Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/)**: Export metrics to SigNoz.
 
-- **Install the OpenTelemetry Collector**: Follow our guide to [get started with collection agents](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
-- **Configure the Collector**: Learn how to [configure the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) to process and route your telemetry data.
-- **Instrument your application and send data**: Find instructions for your language or framework in our [instrumentation guides](https://signoz.io/docs/instrumentation/) to send telemetry data to the collector.
-
-## Get Help
-
-<GetHelp />

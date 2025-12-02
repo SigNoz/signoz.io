@@ -1,18 +1,16 @@
 ---
-date: 2025-11-14
+date: 2025-11-26
 id: opentelemetry-cloudflare
 title: Cloudflare Workers OpenTelemetry Instrumentation
-description: Instrument Cloudflare Workers with OpenTelemetry Community or Official and send traces to SigNoz
+description: Learn how to instrument Cloudflare Workers with OpenTelemetry and send traces to SigNoz
 tags: [SigNoz Cloud, Self-Host]
-hide_table_of_contents: true
+doc_type: howto
 ---
 
 This document explains how to instrument Cloudflare Workers with OpenTelemetry using Community or Official methods and send traces to SigNoz.
 
 <Admonition type="info">
-  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
-  remove the ingestion key header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </Admonition>
 
 ## Prerequisites
@@ -29,7 +27,7 @@ You will need the following in place before moving on to the next step:
 
 Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant traces directly to SigNoz without code changes, using Cloudflare's built-in observability features.
 
-#### Step 1: Create destination in Cloudflare
+### Step 1: Create destination in Cloudflare
 
 1. Go to [Workers Observability](https://dash.cloudflare.com/?to=/:account/workers-and-pages/observability/pipelines) in your Cloudflare dashboard
 2. Click on **Destinations** Tab
@@ -44,7 +42,7 @@ Cloudflare Workers supports exporting OpenTelemetry (OTel)-compliant traces dire
      - Add `signoz-ingestion-key: <your-ingestion-key>`
 5. Click Save
 
-#### Step 2: Configure Wrangler
+### Step 2: Configure Wrangler
 
 Update `wrangler.jsonc` ( _use the destination name created in Step 1_ ):
 
@@ -68,7 +66,7 @@ You can customize the configuration with additional options such as:
 
 For complete configuration options, refer to [Cloudflare's OpenTelemetry documentation](https://developers.cloudflare.com/workers/observability/exporting-opentelemetry-data/#enabling-opentelemetry-export-for-your-worker).
 
-#### Step 3: Deploy
+### Step 3: Deploy
 
 Run `wrangler deploy`. Data appears in SigNoz within minutes.
 
@@ -79,7 +77,7 @@ Run `wrangler deploy`. Data appears in SigNoz within minutes.
 </TabItem>
 <TabItem value="community" label="Community">
 
-**Step 1: Install the SDK**
+### Step 1: Install the SDK
 
 Install `@microlabs/otel-cf-workers` in your [project](https://developers.cloudflare.com/workers/get-started/guide/#1-create-a-new-worker-project).
 
@@ -93,7 +91,7 @@ npm i @microlabs/otel-cf-workers
   Workers.
 </Admonition>
 
-**Step 2: Add Node.js Compatibility Flag**
+### Step 2: Add Node.js Compatibility Flag
 
 OpenTelemetry requires the Node.js compatibility flag to be enabled at the top level of your `wrangler.toml`.
 
@@ -101,7 +99,7 @@ OpenTelemetry requires the Node.js compatibility flag to be enabled at the top l
 compatibility_flags = [ "nodejs_compat" ]
 ```
 
-**Step 3: Configure tracer in Cloudflare Workers project**
+### Step 3: Configure tracer in Cloudflare Workers project
 
 Navigate to the wrangler project directory, and add the following code to your `src/index.ts` file.
 
@@ -131,7 +129,7 @@ export default instrument(handler, config)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - Replace `<service-name>` with the name of the service associated with this trace
 
-**Step 4: Deploy the project**
+### Step 4: Deploy the project
 
 Deploy the project to Cloudflare Worker.
 
@@ -166,7 +164,10 @@ You can click on a particular `TraceID` in the `Traces` view to get the detailed
   caption="Sample Cloudflare Trace"
 />
 
+<details>
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
 ### Traces not appearing in SigNoz
 
@@ -206,6 +207,8 @@ You can click on a particular `TraceID` in the `Traces` view to get the detailed
    - Verify your OTel collector is accessible from Cloudflare Workers
 
 **Verification**: Check the destination status in Cloudflare dashboard (Workers Observability > Destinations) to see delivery status and any errors.
+
+</details>
 
 ## Next steps
 

@@ -1,0 +1,362 @@
+---
+date: 2025-12-02
+id: traces
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Traces/APM from Datadog
+description: Learn how to migrate your distributed tracing/APM from Datadog to SigNoz using OpenTelemetry.
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through migrating distributed tracing and APM from Datadog to SigNoz. You will:
+
+1. Check your Datadog services and trace sources
+2. Replace Datadog APM libraries with OpenTelemetry instrumentation
+3. Validate traces are flowing correctly to SigNoz
+
+SigNoz is built natively on OpenTelemetry, so migration involves replacing Datadog tracing libraries with OTel instrumentation.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Key Differences: Datadog vs SigNoz
+
+| Aspect | Datadog | SigNoz |
+|--------|---------|--------|
+| **Instrumentation** | dd-trace libraries (proprietary) | OpenTelemetry SDKs (open standard) |
+| **Protocol** | Datadog Agent protocol | OTLP (OpenTelemetry Protocol) |
+| **Auto-instrumentation** | Language-specific dd-trace auto-instrumenters | OTel auto-instrumenters |
+| **Context Propagation** | Datadog headers + W3C | W3C Trace Context (standard) |
+| **Sampling** | Datadog Agent sampling | OTel SDK or Collector sampling |
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your Datadog account to review current APM services
+- Access to your application source code and deployment configuration
+
+## Step 1: Assess Your Current Tracing Setup
+
+Before migrating, inventory what you're collecting in Datadog.
+
+### List Your Instrumented Services
+
+1. Navigate to **APM → Services** in Datadog.
+2. List all services sending traces.
+3. Note the language/runtime for each service.
+
+### Categorize Your Services
+
+Group services by how they're instrumented:
+
+| Instrumentation Type | How to Identify | Migration Path |
+|---------------------|-----------------|----------------|
+| **dd-trace-java** | Java services with `dd-java-agent.jar` | [Replace with OTel Java Agent](#from-dd-trace-java) |
+| **dd-trace-js** | Node.js services with `dd-trace` package | [Replace with OTel Node.js SDK](#from-dd-trace-js-nodejs) |
+| **dd-trace-py** | Python services with `ddtrace` package | [Replace with OTel Python SDK](#from-dd-trace-py-python) |
+| **dd-trace-dotnet** | .NET services with Datadog .NET tracer | [Replace with OTel .NET SDK](#from-dd-trace-dotnet) |
+| **dd-trace-go** | Go services with `gopkg.in/DataDog/dd-trace-go.v1` | [Replace with OTel Go SDK](#from-dd-trace-go) |
+| **dd-trace-rb** | Ruby services with `ddtrace` gem | [Replace with OTel Ruby SDK](#from-dd-trace-rb-ruby) |
+| **dd-trace-php** | PHP services with Datadog PHP tracer | [Replace with OTel PHP SDK](#from-dd-trace-php) |
+
+## Step 2: Migrate Each Service
+
+Work through each service from your inventory.
+
+### From dd-trace-java
+
+**Step 1: Remove the Datadog agent**
+
+- Remove the `-javaagent:/path/to/dd-java-agent.jar` JVM argument
+- Remove Datadog-specific environment variables (`DD_*`)
+
+**Step 2: Add the OpenTelemetry Java agent**
+
+Download the agent:
+
+```bash
+curl -L -o opentelemetry-javaagent.jar \
+  https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+**Step 3: Configure and run**
+
+```bash
+java -javaagent:/path/to/opentelemetry-javaagent.jar \
+     -Dotel.service.name=your-service-name \
+     -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443 \
+     -Dotel.exporter.otlp.headers=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> \
+     -jar your-application.jar
+```
+
+Replace:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+For detailed configuration options, see [Java Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-java/).
+
+### From dd-trace-js (Node.js)
+
+**Step 1: Remove the Datadog tracer**
+
+```bash
+npm uninstall dd-trace
+```
+
+Remove `require('dd-trace').init()` from your application entry point and delete any `DD_*` environment variables.
+
+**Step 2: Add OpenTelemetry**
+
+```bash
+npm install @opentelemetry/auto-instrumentations-node
+```
+
+**Step 3: Configure and run**
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+
+node app.js
+```
+
+For detailed configuration, see [Node.js Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-nodejs/).
+
+### From dd-trace-py (Python)
+
+**Step 1: Remove the Datadog tracer**
+
+```bash
+pip uninstall ddtrace
+```
+
+Remove `ddtrace-run` from your startup command and delete any `DD_*` environment variables.
+
+**Step 2: Add OpenTelemetry**
+
+```bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+opentelemetry-bootstrap -a install
+```
+
+**Step 3: Configure and run**
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+
+opentelemetry-instrument python app.py
+```
+
+For detailed configuration, see [Python Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-python/).
+
+### From dd-trace-dotnet
+
+**Step 1: Remove the Datadog tracer**
+
+- Uninstall the Datadog .NET tracer from your system
+- Remove `DD_*` environment variables
+
+**Step 2: Add OpenTelemetry**
+
+For automatic instrumentation, download the OpenTelemetry .NET automatic instrumentation:
+
+```bash
+# Linux
+curl -L -o otel-dotnet-install.sh https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh
+chmod +x otel-dotnet-install.sh
+./otel-dotnet-install.sh
+```
+
+**Step 3: Configure and run**
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+
+# Source the instrumentation script
+. $HOME/.otel-dotnet-auto/instrument.sh
+
+dotnet run
+```
+
+For detailed configuration, see [.NET Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/).
+
+### From dd-trace-go
+
+**Step 1: Remove the Datadog tracer**
+
+Remove `gopkg.in/DataDog/dd-trace-go.v1` imports and delete tracer initialization code:
+
+```go
+// Remove this
+import "gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+tracer.Start()
+defer tracer.Stop()
+```
+
+**Step 2: Install OpenTelemetry packages**
+
+```bash
+go get go.opentelemetry.io/otel \
+  go.opentelemetry.io/otel/sdk \
+  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc \
+  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
+```
+
+**Step 3: Set environment variables**
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_SERVICE_NAME="your-service-name"
+```
+
+**Step 4: Initialize and instrument**
+
+See [Go Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-golang/) for complete setup including:
+- Tracer initialization code
+- Framework-specific instrumentation (Gin, Echo, Chi, Fiber, Gorilla)
+- Database instrumentation (GORM, MongoDB, Redis)
+- gRPC instrumentation
+
+### From dd-trace-rb (Ruby)
+
+**Step 1: Remove the Datadog tracer**
+
+Remove from your Gemfile:
+
+```ruby
+# Remove this line
+gem 'ddtrace'
+```
+
+Run `bundle install` and remove Datadog configuration.
+
+**Step 2: Add OpenTelemetry**
+
+Add to your Gemfile:
+
+```ruby
+gem 'opentelemetry-sdk'
+gem 'opentelemetry-exporter-otlp'
+gem 'opentelemetry-instrumentation-all'
+```
+
+Run `bundle install`.
+
+**Step 3: Configure**
+
+Create an initializer `config/initializers/opentelemetry.rb`:
+
+```ruby
+require 'opentelemetry/sdk'
+require 'opentelemetry/exporter/otlp'
+require 'opentelemetry/instrumentation/all'
+
+OpenTelemetry::SDK.configure do |c|
+  c.service_name = 'your-service-name'
+  c.use_all
+end
+```
+
+Set environment variables:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+```
+
+For detailed configuration, see [Ruby Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-ruby/).
+
+### From dd-trace-php
+
+**Step 1: Remove the Datadog tracer**
+
+Disable or uninstall the Datadog PHP extension from your PHP configuration.
+
+**Step 2: Add OpenTelemetry**
+
+Install the OpenTelemetry PHP extension and SDK following the [PHP Instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-php/).
+
+**Step 3: Configure**
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+```
+
+### Other Languages and Frameworks
+
+For languages not covered above or specific frameworks, see the complete [Instrumentation Guide](https://signoz.io/docs/instrumentation/) which covers:
+
+- All supported languages and frameworks
+- Framework-specific auto-instrumentation
+- Manual instrumentation options
+
+## Validate
+
+Verify traces are flowing correctly by comparing against your service inventory.
+
+### Check Services Are Reporting
+
+1. In SigNoz, navigate to **Services** in the left sidebar.
+2. Verify each service from your inventory appears in the list.
+3. Click a service to see its metrics (latency, error rate, throughput).
+
+### Verify Traces
+
+1. Navigate to **Traces** in the left sidebar.
+2. Select a service and time range.
+3. Verify spans appear with expected attributes.
+4. Check that trace context propagates across service boundaries (parent-child relationships).
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Traces not appearing in SigNoz
+
+1. **Check connectivity**: Verify your application can reach `ingest.<region>.signoz.cloud:443`.
+2. **Verify service name**: Ensure `OTEL_SERVICE_NAME` or the equivalent config is set.
+3. **Check application logs**: Look for OpenTelemetry exporter errors.
+4. **Enable debug logging**: Set `OTEL_LOG_LEVEL=debug` to see detailed SDK logs.
+
+### Broken or incomplete traces
+
+If traces appear fragmented across services:
+
+1. **Check context propagation**: Ensure all services use W3C Trace Context propagation.
+2. **Verify all services are instrumented**: Missing instrumentation on any service breaks the trace chain.
+3. **Check HTTP headers**: Verify `traceparent` header is being passed between services.
+
+### Missing spans within a service
+
+If some operations aren't being traced:
+
+1. **Check auto-instrumentation coverage**: Some libraries may not be auto-instrumented.
+2. **Add manual instrumentation**: For custom code, add manual spans using the OTel API.
+3. **Verify sampling**: Check if sampling is dropping spans unintentionally.
+4. **Mixed Datadog/OTel**: If some services are still on Datadog, the spans will not be visible in SigNoz.
+
+</details>
+
+## Next Steps
+
+Once your traces are flowing to SigNoz:
+
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-datadog/dashboards/) with trace-based panels
+- [Set up trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) for latency and errors
+- [Correlate traces with logs](https://signoz.io/docs/logs-pipelines/guides/trace/) for debugging
+- [Explore the Service Map](https://signoz.io/docs/userguide/service-map/) to understand dependencies
+- [Migrate your logs](https://signoz.io/docs/migration/migrate-from-datadog/logs/) next

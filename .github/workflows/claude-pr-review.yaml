@@ -197,7 +197,8 @@ jobs:
 
             Labeling:
             - If this PR adds a NEW documentation file (not just modifies an existing one) that explains how to send data to SigNoz Cloud (e.g., a new instrumentation, a new collector receiver, or a new log collection method), you MUST add the label "add-to-onboarding" to the PR.
-            - To add the label, use the tool: issue_write
+            - DO NOT use `gh` CLI commands for labeling. They will fail.
+            - You MUST use the tool: mcp__github__issue_write
             - Arguments for the tool:
               - owner: ${{ github.repository_owner }}
               - repo: ${{ github.event.repository.name }}
@@ -206,4 +207,4 @@ jobs:
               - labels: ["add-to-onboarding"]
 
           claude_args: |
-            --allowedTools "WebSearch,WebFetch,mcp__github_inline_comment__create_inline_comment,issue_write,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(cat:*),Bash(curl:*),Bash(grep:*),Bash(head:*),Bash(tail:*)"
+            --allowedTools "WebSearch,WebFetch,mcp__github_inline_comment__create_inline_comment,mcp__github__issue_write,mcp__github__issue_read,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(cat:*),Bash(curl:*),Bash(grep:*),Bash(head:*),Bash(tail:*)"

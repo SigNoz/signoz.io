@@ -19,17 +19,21 @@ const Tabs = ({ children, entityName }) => {
   }
 
   const firstValidChild = childrenArray.find(isValidElement)
-  const defaultChild = childrenArray.find((child): child is React.ReactElement => 
-    isValidElement(child) && child.props.default
+  const defaultChild = childrenArray.find(
+    (child): child is React.ReactElement => isValidElement(child) && child.props.default
   )
   const defaultActiveTab = defaultChild?.props.value ?? firstValidChild?.props.value ?? null
-  
+
   let selectedTab
   if (entityName === 'plans') {
     selectedTab = defaultActiveTab
-  } else if (environment && childrenArray.some((child): child is React.ReactElement => 
-    isValidElement(child) && child.props.value === environment
-  )) {
+  } else if (
+    environment &&
+    childrenArray.some(
+      (child): child is React.ReactElement =>
+        isValidElement(child) && child.props.value === environment
+    )
+  ) {
     // If environment matches a tab value directly, use it
     selectedTab = environment
   } else if (environment) {
@@ -54,7 +58,7 @@ const Tabs = ({ children, entityName }) => {
             <button
               key={value}
               data-tab-value={value}
-              className={`px-4 py-2 text-sm font-medium focus:outline-none border-b-2 ${
+              className={`border-b-2 px-4 py-2 text-sm font-medium focus:outline-none ${
                 activeTab === value
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
@@ -66,7 +70,7 @@ const Tabs = ({ children, entityName }) => {
           )
         })}
       </div>
-      <div className="p-4">
+      <div className="mt-4">
         {childrenArray.map((child) => {
           if (!isValidElement(child) || (hideSelfHostTab && child.props.value === 'self-host')) {
             return null
@@ -74,11 +78,7 @@ const Tabs = ({ children, entityName }) => {
 
           const isActive = child.props.value === activeTab
           return (
-            <div
-              key={child.props.value}
-              data-tab-value={child.props.value}
-              hidden={!isActive}
-            >
+            <div key={child.props.value} data-tab-value={child.props.value} hidden={!isActive}>
               {child.props.children}
             </div>
           )

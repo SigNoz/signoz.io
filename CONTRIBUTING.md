@@ -72,10 +72,14 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 
 ## General Guidelines
 
+- Assume basic language/library knowledge
+  - Readers know their programming language and framework basics.
+  - Do not explain language fundamentals (e.g., how to install dependencies, what environment variables are, basic syntax).
+  - However, assume **no prior OpenTelemetry knowledge**. Briefly explain OTel concepts when introduced (spans, traces, collectors, exporters, etc.) and link to reference docs. Do not go deep into explanation.
 - Be complete and practical
   - Cover end-to-end use cases. Link to related topics: ingestion, dashboard templates, alerts, query builder, and relevant features.
-  - Do not assume prior knowledge. Add brief context when needed and define terms on first use.
-  - Cross-link existing SigNoz docs instead of duplicating content. For example, when describing OTel Collector receivers or pipelines, reference the [configuration guide](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/)
+  - Add brief context for OpenTelemetry-specific terms and define them on first use.
+  - Cross-link existing SigNoz docs instead of duplicating content. For example, when describing OTel Collector receivers or pipelines, reference the [configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
 - Be concise and direct
   - Avoid filler and marketing fluff. Get to the point.
   - Avoid generic intros like “In today’s digital landscape…” and adjectives like “powerful,” “robust,” “seamless.”
@@ -163,7 +167,7 @@ Every doc should be skimmable and actionable.
   - Use `tags` consistently. Supported tags include `SigNoz Cloud` and `Self-Host`.
   - Use `doc_type` to match the main intent of the page (see [Documentation types and Diátaxis](#documentation-types-and-diátaxis)).
 - Standard sections (H2 level)
-  - `## Overview` – what the doc covers and when to use it.
+  - `## Overview` – what the doc covers and when to use it. Skip this section if the overview is only 1-2 lines.
   - `## Prerequisites` – versions, accounts, keys, cluster access, etc. Include links.
   - `## Steps` or specific setup sections – ordered, with subheadings for clarity.
   - `## Validate` – how to confirm it worked (UI path, endpoint, example output).
@@ -217,6 +221,10 @@ Every doc should be skimmable and actionable.
     - `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
     - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
 
+  - **Append, don't replace**: When showing OpenTelemetry Collector configuration (e.g., adding a new receiver or exporter), show only the specific snippet to add and instruct the user to **append** it to their existing `otel-collector-config.yaml` and **enable** it in the pipeline. Avoid showing a full `otel-collector-config.yaml` that users might copy-paste, overwriting their existing setup (like resource detectors or other processors).
+    - ✅ "Add the `filelog` receiver to your `receivers` section and enable it in `service.pipelines.logs`."
+    - ❌ "Replace your `otel-collector-config.yaml` with the following content:"
+
 - Hyperlinks
 
   - Internal links should open in the new tab. Always prefer `[Text](https://signoz.io/endpoint)` over site-relative `[Text](/endpoint)`.
@@ -238,21 +246,15 @@ Every doc should be skimmable and actionable.
 
 - Cloud vs Self-Host
   - Add the relevant tags in frontmatter.
-  - Prefer a single flow and include a small info note that links to the comparison page instead of duplicating with tabs.
+  - **Default to SigNoz Cloud** in all examples and instructions.
+  - Include a collapsible `KeyPointCallout` for self-hosted users instead of duplicating with tabs.
   - Use the Cloud vs Self-Hosted comparison doc when a guide only shows one environment and the other only differs by endpoint/auth/TLS: https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud
-  - Drop-in snippets you can copy into guides:
-    - For Cloud-only guides:
-      ```mdx
-      <Admonition type="info">
-        Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-      </Admonition>
-      ```
-    - For Self-Hosted-only guides:
-      ```mdx
-      <Admonition type="info">
-        Using SigNoz Cloud? Most steps are identical. To adapt this guide, point to the Cloud endpoint and add the ingestion key header as shown in [Self-Hosted → Cloud](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud).
-      </Admonition>
-      ```
+  - Drop-in snippet for Cloud-first guides (copy this into your docs):
+    ```mdx
+    <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+    Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+    </KeyPointCallout>
+    ```
   - Only use tabs if instructions materially diverge (e.g., different components/flows), not for small endpoint/header differences.
 - Images and media
   - Store images under `public/img/docs/<topic>/...` and reference as `/img/docs/<topic>/...`.
@@ -270,6 +272,12 @@ Every doc should be skimmable and actionable.
   ```mdx
   <Admonition type="info">Short, actionable note.</Admonition>
   ```
+- Use `KeyPointCallout` for collapsible supplementary info:
+  ```mdx
+  <KeyPointCallout title="Optional details" defaultCollapsed={true}>
+  Content that users can expand if needed.
+  </KeyPointCallout>
+  ```
 - Use `Tabs`/`TabItem` to branch by platform, OS, or materially different flows. For Cloud vs Self-Host, prefer the drop-in snippet + comparison page.
 - Use numbered steps for procedures and bullets for reference content.
 - Keep headings short and meaningful. Prefer H2 for main sections.
@@ -280,7 +288,9 @@ Every doc should be skimmable and actionable.
 - Ingestion keys for SigNoz Cloud: <https://signoz.io/docs/ingestion/signoz-cloud/keys/>
 - Cloud → Self-Hosted anchor: <https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted>
 - OpenTelemetry Collector docs: link the specific receiver/exporter you use.
-- OTel Collector configuration guide: <https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/>
+- OTel Collector configuration guide: <https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/>
+- Why use the OTel Collector: <https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/>
+- Switch from direct export to Collector: <https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/>
 
 ### Happy path vs troubleshooting
 
@@ -354,15 +364,110 @@ These are the top-level “Overview” pages for a module or feature area (for e
 
 ### Send Data docs (instrumentation and pipelines)
 
+Send Data docs guide users through instrumenting their applications to send telemetry to SigNoz. These are the most common entry points for new users.
+
+#### Audience assumptions
+
+- **Knows**: Their programming language, framework basics, and general development workflow.
+- **Doesn't know**: OpenTelemetry concepts, instrumentation patterns, or how observability data flows.
+
+Explain OTel-specific terms (spans, traces, exporters, collectors) when first introduced. Add brief context and reference other docs; do not go deep into explanation. Don't explain language basics.
+
+#### URL and naming
+
 - Explicitly mention OpenTelemetry in the URL/slug, title, and overview.
   - Example slug and file name: `data/docs/instrumentation/<tech>/opentelemetry-<tech>.mdx`.
 - Specify the tested versions of SDKs/agents/collectors up front.
-- Prefer a single flow; add a brief Cloud vs Self-Hosted note linking to the comparison doc. Use tabs only if steps materially diverge (not for minor endpoint/header differences).
+
+#### Default to direct export to SigNoz Cloud
+
+All Send Data docs should default to sending telemetry **directly to SigNoz Cloud** (not through a Collector). This is the simplest path for getting started.
+
+- Show the direct OTLP export configuration as the primary method.
+- Include the optional Collector setup as a collapsible section at the end (see template below).
+
+#### Deployment types
+
+Send Data docs should cover **four deployment types** using tabs:
+
+1. **VM** – Virtual machines and bare metal servers
+2. **Kubernetes** – Container orchestration
+3. **Docker** – Containerized applications
+4. **Windows** – Windows servers and environments
+
+Include a VM explanation callout at the start of the VM section:
+
+```mdx
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+</KeyPointCallout>
+```
+
+#### Self-hosted callout
+
+Include this callout near the top of each Send Data doc:
+
+```mdx
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+```
+
+#### Optional Collector setup section
+
+Include this collapsible section at the end of Send Data docs which by default don't mandatorily need OTel collector, before Troubleshooting:
+
+```mdx
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+```
+
+#### Code and configuration
+
 - Explain each code snippet: what it configures, where it lives, and how it works.
-- Provide validation steps in SigNoz (Traces/Logs/Metrics, etc. views) with screenshots where possible.
-- Add a `## Troubleshooting` section with symptoms, causes, exact fixes, and verification. Provide as much context as possible to make it clear to readers where exactly the troubleshooting instructions are applicable
-  - Include network/endpoint checks, auth/ingestion key pitfalls, TLS notes, and version mismatches.
-  - Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO (e.g., "Why don’t I see traces for <service-name>?", or include the exact error message).
+- Provide validation steps in SigNoz (Traces/Logs/Metrics views) with screenshots where possible.
+
+#### Troubleshooting section
+
+- Add a `## Troubleshooting` section with symptoms, causes, exact fixes, and verification.
+- Provide as much context as possible to make it clear where the troubleshooting instructions apply.
+- Include network/endpoint checks, auth/ingestion key pitfalls, TLS notes, and version mismatches.
+- Phrase troubleshooting titles/headings as questions or problem statements and include exact error strings where relevant to improve search/SEO.
+- Use `<ToggleHeading>` to collapse troubleshooting sections:
+  ```mdx
+  <details>
+  <ToggleHeading>
+  ## Troubleshooting
+  </ToggleHeading>
+
+  ### Issue 1...
+  </details>
+  ```
+
 - Don’t stop at “Data Sent”. Close the loop with next steps: Link to relevant dashboards or dashboard templates, example alerts, service and trace views, and deeper user guides so the doc completes an end-to-end workflow.
 - `doc_type` is usually `howto` for Send Data docs.
 
@@ -452,11 +557,12 @@ Set `doc_type: reference` for these pages.
 
 - [ ] Frontmatter includes `date`, `id`, `title`, `description`, appropriate `tags`, and a `doc_type` (`tutorial`, `howto`, `reference`, or `explanation`).
 - [ ] SEO: primary keywords appear in `title`, `description`, URL/slug, and the first paragraph. For Send Data docs, include "OpenTelemetry" in slug/title.
-- [ ] If the guide is Cloud-only or Self-Hosted-only, include the Cloud vs Self-Hosted drop-in snippet linking to the comparison page; use tabs only if steps materially diverge.
+- [ ] For Send Data docs: includes self-hosted `KeyPointCallout` near the top and optional Collector setup section before Troubleshooting.
+- [ ] For Send Data docs: covers all four deployment types (VM, Kubernetes, Docker, Windows) where applicable, with VM explanation callout.
 - [ ] Commands explain what they do and where to run them.
 - [ ] Code/config snippets are annotated and explained; placeholders are defined.
 - [ ] “Validate” section shows how to confirm success.
-- [ ] Troubleshooting covers common failures with concrete fixes.
+- [ ] Troubleshooting covers common failures with concrete fixes. For Send Data docs, use `<ToggleHeading>` to collapse this section.
 - [ ] The content matches the chosen `doc_type` (tutorial / howto / reference / explanation).
 - [ ] Included a short “Next steps” section linking to adjacent features or deeper guides when applicable.
 - [ ] For Send Data docs: include follow-through links (dashboards, alert examples, relevant user guides) so the doc completes an end-to-end workflow.

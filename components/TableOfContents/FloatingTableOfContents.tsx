@@ -39,22 +39,9 @@ const FloatingTableOfContents: React.FC = () => {
   useEffect(() => {
     // Function to get text content without nested elements
     const getTextContent = (element: Element): string => {
-      // Find the Link element inside the heading
-      const linkElement = element.querySelector('a')
-      if (linkElement) {
-        // Get all text nodes within the link, excluding the LinkIcon
-        return Array.from(linkElement.childNodes)
-          .filter((node) => node.nodeType === Node.TEXT_NODE)
-          .map((node) => node.textContent)
-          .join('')
-          .trim()
-      }
-      // Fallback to original behavior
-      return Array.from(element.childNodes)
-        .filter((node) => node.nodeType === Node.TEXT_NODE)
-        .map((node) => node.textContent)
-        .join('')
-        .trim()
+      const cloned = element.cloneNode(true) as Element
+      cloned.querySelectorAll('a').forEach((link) => link.remove())
+      return cloned.textContent?.trim() || ''
     }
 
     // Function to build TOC structure

@@ -1,24 +1,88 @@
 ---
-date: 2025-09-01
+date: 2025-11-30
 id: migrate-from-opentelemetry-to-signoz
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: Migrate from existing OpenTelemetry
-description: Migrating from OpenTelemetry to SigNoz. How to migrate metrics, traces, and logs from OpenTelemetry to SigNoz.
+description: Migrating from OpenTelemetry to SigNoz. How to migrate metrics, traces/APM, and logs from OpenTelemetry to SigNoz.
+doc_type: howto
 ---
 
-If you already have OpenTelemetry instrumentation in your applications, you can easily switch to SigNoz as your observability backend. This guide will walk you through the simple configuration changes needed to start sending your metrics, traces, and logs to either SigNoz Cloud or Self-Hosted SigNoz.
+If you already have OpenTelemetry instrumentation in your applications, you can easily switch to SigNoz as your observability backend. This guide will walk you through the simple configuration changes needed to start sending your metrics, traces/APM, and logs to either SigNoz Cloud or Self-Hosted SigNoz.
 
-## Why Use SigNoz as Your OpenTelemetry Backend?
+## Prerequisites
 
-While you may currently be using other backends for your OpenTelemetry data, SigNoz offers several advantages:
+- Applications instrumented with [OpenTelemetry SDKs](https://opentelemetry.io/docs/languages/) or [OpenTelemetry Collectors](https://opentelemetry.io/docs/collector/)
+- An active [SigNoz account](https://signoz.io/teams/) (for Cloud) or a running SigNoz instance (for Self-Hosted)
+- Access to modify your application configuration or environment variables
 
-- **Unified Platform**: Single interface for metrics, traces, and logs without context switching
-- **High Performance**: Optimized for handling large volumes of OpenTelemetry data
-- **Advanced Features**: Comprehensive querying, alerting, and visualization capabilities specifically designed for OpenTelemetry data
+## Configuration
 
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-## Migration Guides
+### Step 1: Obtain Connection Details
 
-Follow the guide that matches your preferred SigNoz deployment:
-- **[Migrate to SigNoz Cloud](https://signoz.io/docs/migration/migrate-from-opentelemetry/cloud/)** - is the fastest way to get started. It's a fully managed service available in multiple regions with built-in high availability - you just need an ingestion key to start sending data.
-- **[Migrate to Self-Hosted SigNoz](https://signoz.io/docs/migration/migrate-from-opentelemetry/self-hosted/)** - gives you complete control over your observability infrastructure. Deploy it on your own servers or cloud with customizable configuration and no external dependencies.
+1. Log into your [SigNoz Cloud account](https://signoz.io/teams/).
+2. Navigate to **Settings** → **Ingestion Settings**.
+3. Note your **Ingestion Key** and **Ingestion URL**.
+
+### Step 2: Update OpenTelemetry Configuration
+
+Set the following environment variables for your application:
+
+```bash
+# Replace with your SigNoz cloud region
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+
+# Replace with your SigNoz ingestion key
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
+```
+
+If you are using an **OpenTelemetry Collector**, update your exporter configuration:
+
+```yaml
+exporters:
+  otlp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "SIGNOZ_INGESTION_KEY"
+    tls:
+      insecure: false
+```
+
+Replace the following placeholders:
+- `<region>`: Your SigNoz Cloud region (e.g., `us`, `eu`, `in`).
+- `SIGNOZ_INGESTION_KEY`: Your SigNoz Ingestion Key.
+
+<Admonition type="tip">
+  We also recommend configuring the [Resource Detection Processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) to automatically detect resource attributes from the host environment.
+</Admonition>
+
+## Validate
+
+1. **Restart your application** (and Collector if applicable) with the new configuration.
+2. **Generate test data** by using your application.
+3. **Access SigNoz Dashboard**:
+   - Cloud: [https://signoz.io/login/](https://signoz.io/login/)
+   - Self-Hosted: `http://your-signoz-host:3301`
+4. **Verify data flow**:
+   - Check **Traces**, **Metrics**, **Logs** in SigNoz.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Data not appearing?
+
+1. **Check connectivity**: Ensure your application can reach the SigNoz OTLP endpoint.
+2. **Verify configuration**: Double-check endpoint URLs and Ingestion Keys (for Cloud).
+3. **Review logs**: Check application logs for OTel export errors.
+
+</details>
+
+## Next Steps
+
+- [Set up Alerts](https://signoz.io/docs/userguide/alerts-management/)
+- [Create Dashboards](https://signoz.io/docs/userguide/manage-dashboards/)
