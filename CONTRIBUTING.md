@@ -167,7 +167,7 @@ Every doc should be skimmable and actionable.
   - Use `tags` consistently. Supported tags include `SigNoz Cloud` and `Self-Host`.
   - Use `doc_type` to match the main intent of the page (see [Documentation types and Diátaxis](#documentation-types-and-diátaxis)).
 - Standard sections (H2 level)
-  - `## Overview` – what the doc covers and when to use it.
+  - `## Overview` – what the doc covers and when to use it. Skip this section if the overview is only 1-2 lines.
   - `## Prerequisites` – versions, accounts, keys, cluster access, etc. Include links.
   - `## Steps` or specific setup sections – ordered, with subheadings for clarity.
   - `## Validate` – how to confirm it worked (UI path, endpoint, example output).
