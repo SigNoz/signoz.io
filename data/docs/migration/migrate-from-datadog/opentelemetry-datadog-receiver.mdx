@@ -102,7 +102,9 @@ DD_ADDITIONAL_ENDPOINTS='{"http://<OTEL_COLLECTOR_HOST>:8126": ["signoz"]}'
 **Or update `datadog.yaml`:**
 
 ```yaml:datadog.yaml
-additional_endpoints: http://<OTEL_COLLECTOR_HOST>:8126
+additional_endpoints:
+  "http://<OTEL_COLLECTOR_HOST>:8126":
+    - "signoz"
 ```
 
 Replace `<OTEL_COLLECTOR_HOST>` with the hostname or IP where your OTel Collector is running (e.g., `localhost`, `otel-collector.default.svc.cluster.local`).
@@ -123,30 +125,13 @@ DD_DD_URL=http://<OTEL_COLLECTOR_HOST>:8126
 dd_url: http://<OTEL_COLLECTOR_HOST>:8126
 ```
 
-### DogStatsD Configuration
-
-For custom DogStatsD metrics, configure the Datadog Agent's DogStatsD to forward:
-
-**Update `datadog.yaml`:**
-
-```yaml:datadog.yaml
-dogstatsd_mapper_profiles:
-  - name: signoz
-    prefix: ""
-    mappings: []
-
-# Forward DogStatsD to OTel Collector
-use_dogstatsd: true
-dogstatsd_port: 8125
-```
-
 ## Step 5: Restart Services
 
 After making configuration changes:
 
-1. **Restart the OpenTelemetry Collector:**
+1. Restart the OpenTelemetry Collector
 
-2. **Restart the Datadog Agent:**
+2. Restart the Datadog Agent
    
 ## Validate
 
