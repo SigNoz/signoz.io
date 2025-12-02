@@ -75,7 +75,7 @@ You can run Envoy using the official Docker image. For more details, see the <a 
 Save the above configuration as `envoy.yaml` and run the following command:
 
 ```bash
-docker run --name=envoy -p 9901:9901 -p 10000:10000 -v $(pwd)/envoy.yaml:/etc/envoy/envoy.yaml envoyproxy/envoy:v1.30-latest
+docker run --name=envoy -p 9901:9901 -p 10000:10000 -v $(pwd)/envoy.yaml:/etc/envoy/envoy.yaml envoyproxy/envoy:v1.36-latest
 ```
 
 ### Step 3: Configure OpenTelemetry Collector
@@ -106,7 +106,7 @@ stats_sinks:
 
 stats_config:
   stats_tags:
-    - tag_name: service_name
+    - tag_name: service.name
       fixed_value: envoy-proxy
     - tag_name: namespace
       fixed_value: default
@@ -283,7 +283,7 @@ data:
 
     stats_config:
       stats_tags:
-      - tag_name: service_name
+      - tag_name: service.name
         fixed_value: envoy-proxy
       - tag_name: namespace
         fixed_value: default
@@ -312,7 +312,7 @@ spec:
     spec:
       containers:
         - name: envoy
-          image: envoyproxy/envoy:v1.35.3
+          image: envoyproxy/envoy:v1.36-latest
           ports:
             - containerPort: 10000
               name: proxy
