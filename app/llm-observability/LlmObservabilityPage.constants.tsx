@@ -60,22 +60,22 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     feature: 'LLM Tracing',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Full traces with OpenTelemetry
+        <Check size={20} className="text-green-400" /> Full traces with OpenTelemetry
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> OpenTelemetry-based
+        <Check size={20} className="text-green-400" /> OpenTelemetry-based
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Async distributed tracing
+        <Check size={20} className="text-green-400" /> Async distributed tracing
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Request-level tracing
+        <Check size={20} className="text-green-400" /> Request-level tracing
       </span>
     ),
   },
@@ -83,22 +83,22 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     feature: 'Production Alerts',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Any metric
+        <Check size={20} className="text-green-400" /> Any metric
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" /> No alerting
+        <X size={20} className="text-red-400" /> No alerting
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> LLM metrics only
+        <Check size={20} className="text-green-400" /> LLM metrics only
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> LLM metrics only
+        <Check size={20} className="text-green-400" /> LLM metrics only
       </span>
     ),
   },
@@ -106,22 +106,22 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     feature: 'Prompt Management',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Via integrations
+        <Check size={20} className="text-green-400" /> Via integrations
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Version control with caching
+        <Check size={20} className="text-green-400" /> Version control with caching
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> A/B testing built-in
+        <Check size={20} className="text-green-400" /> A/B testing built-in
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Side-by-side comparison
+        <Check size={20} className="text-green-400" /> Side-by-side comparison
       </span>
     ),
   },
@@ -129,22 +129,22 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     feature: 'Evaluation/Scoring',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Via integrations
+        <Check size={20} className="text-green-400" /> Via integrations
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> LLM-as-judge, custom evals
+        <Check size={20} className="text-green-400" /> LLM-as-judge, custom evals
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Built-in evaluators
+        <Check size={20} className="text-green-400" /> Built-in evaluators
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Dataset/task/scorer framework
+        <Check size={20} className="text-green-400" /> Dataset/task/scorer framework
       </span>
     ),
   },
@@ -152,22 +152,22 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     feature: 'Infra Correlation',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Metrics, logs, traces together
+        <Check size={20} className="text-green-400" /> Metrics, logs, traces together
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" /> LLM-only
+        <X size={20} className="text-red-400" /> LLM-only
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" /> LLM-only
+        <X size={20} className="text-red-400" /> LLM-only
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" /> LLM-only
+        <X size={20} className="text-red-400" /> LLM-only
       </span>
     ),
   },
@@ -175,22 +175,22 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     feature: 'Kubernetes/Docker Monitoring',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Native support
+        <Check size={20} className="text-green-400" /> Native support
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" />{' '}
+        <X size={20} className="text-red-400" />{' '}
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" />{' '}
+        <X size={20} className="text-red-400" />{' '}
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" />{' '}
+        <X size={20} className="text-red-400" />{' '}
       </span>
     ),
   },
@@ -198,22 +198,22 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     feature: 'Database Query Tracking',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Built-in
+        <Check size={20} className="text-green-400" /> Built-in
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" />{' '}
+        <X size={20} className="text-red-400" />{' '}
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" />{' '}
+        <X size={20} className="text-red-400" />{' '}
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" />{' '}
+        <X size={20} className="text-red-400" />{' '}
       </span>
     ),
   },
@@ -221,22 +221,22 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     feature: 'Network/API Gateway Metrics',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Full APM
+        <Check size={20} className="text-green-400" /> Full APM
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" />{' '}
+        <X size={20} className="text-red-400" />{' '}
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" />{' '}
+        <X size={20} className="text-red-400" />{' '}
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" />{' '}
+        <X size={20} className="text-red-400" />{' '}
       </span>
     ),
   },
@@ -244,22 +244,22 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     feature: 'OTel-Native',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> Built on OTel
+        <Check size={20} className="text-green-400" /> Built on OTel
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <Check size={14} className="text-signoz_vanilla-400" /> OTel compatible
+        <Check size={20} className="text-green-400" /> OTel compatible
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" /> Proprietary SDK
+        <X size={20} className="text-red-400" /> Proprietary SDK
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <X size={14} className="text-signoz_vanilla-400" /> Custom instrumentation
+        <X size={20} className="text-red-400" /> Custom instrumentation
       </span>
     ),
   },

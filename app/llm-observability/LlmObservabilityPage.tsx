@@ -93,48 +93,44 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({ rows, className = '' 
     <div
       className={`overflow-x-auto border border-signoz_slate-400 bg-signoz_ink-500/50 ${className}`}
     >
-      <div className="min-w-[800px]">
-        <table className="m-0 w-full border-collapse text-left">
-          <tbody className="text-sm text-signoz_vanilla-300">
-            <tr>
-              <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-left font-semibold text-signoz_vanilla-400">
-                Feature
+      <table className="m-0 h-fit w-fit border-collapse text-left">
+        <tbody className="text-sm text-signoz_vanilla-300">
+          <tr>
+            <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-left font-semibold text-signoz_vanilla-400">
+              Feature
+            </td>
+            <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
+              SigNoz
+            </th>
+            <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
+              Langfuse
+            </th>
+            <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
+              LangSmith
+            </th>
+            <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
+              Braintrust
+            </th>
+          </tr>
+          {rows.map((row, index) => (
+            <tr key={index} className="transition-colors hover:bg-signoz_ink-400/30">
+              <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-sm text-signoz_robin-400">
+                {row.feature}
               </td>
-              <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
-                SigNoz
-              </th>
-              <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
-                Langfuse
-              </th>
-              <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
-                LangSmith
-              </th>
-              <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
-                Braintrust
-              </th>
+              <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">{row.signoz}</td>
+              <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
+                {row.langfuse}
+              </td>
+              <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
+                {row.langsmith}
+              </td>
+              <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
+                {row.braintrust}
+              </td>
             </tr>
-            {rows.map((row, index) => (
-              <tr key={index} className="transition-colors hover:bg-signoz_ink-400/30">
-                <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-sm text-signoz_robin-400">
-                  {row.feature}
-                </td>
-                <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
-                  {row.signoz}
-                </td>
-                <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
-                  {row.langfuse}
-                </td>
-                <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
-                  {row.langsmith}
-                </td>
-                <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
-                  {row.braintrust}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
@@ -259,7 +255,10 @@ const HowSigNozCompares: React.FC = () => {
                 <h2 className="mb-6 py-10 text-center text-4xl font-semibold text-signoz_sienna-100">
                   How SigNoz Compares to <br /> LLM-Only Tools
                 </h2>
-                <SectionLayout variant="no-border" className="!mx-auto px-10">
+                <SectionLayout
+                  variant="no-border"
+                  className="!mx-auto flex items-center justify-center"
+                >
                   <ComparisonTable rows={LLM_COMPARISON_TABLE_ROWS} />
                 </SectionLayout>
               </div>
