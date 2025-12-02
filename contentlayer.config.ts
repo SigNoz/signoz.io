@@ -38,6 +38,50 @@ const icon = fromHtmlIsomorphic(
   { fragment: true }
 )
 
+const DEFAULT_DOC_TAGS = ['SigNoz Cloud', 'Self-Host']
+
+type PlainArr<T> = {
+  _array?: T[]
+  toArray?: () => T[]
+}
+
+const isPlainArr = (value: unknown): value is PlainArr<unknown> => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  return '_array' in value || 'toArray' in value
+}
+
+const extractPlainArrayValues = <T>(value: T[] | PlainArr<T> | undefined): T[] | undefined => {
+  if (!value) {
+    return undefined
+  }
+
+  if (Array.isArray(value)) {
+    return value
+  }
+
+  if (isPlainArr(value)) {
+    if (Array.isArray(value._array)) {
+      return value._array
+    }
+
+    const convertedArray = value.toArray?.()
+    if (Array.isArray(convertedArray)) {
+      return convertedArray
+    }
+  }
+
+  return undefined
+}
+
+const sanitizeDocTags = (tags: string[]) => {
+  return tags
+    .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
+    .filter((tag): tag is string => Boolean(tag))
+}
+
 const computedFields: ComputedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
   slug: {
@@ -445,7 +489,7 @@ export const Doc = defineDocumentType(() => ({
     id: { type: 'string', required: true },
     slug: { type: 'string', required: false },
     date: { type: 'date', required: false },
-    tags: { type: 'list', of: { type: 'string' }, default: [], required: false },
+    tags: { type: 'list', of: { type: 'string' }, required: false },
     lastmod: { type: 'date', required: false },
     draft: { type: 'boolean', required: false },
     summary: { type: 'string', required: false },
@@ -462,6 +506,20 @@ export const Doc = defineDocumentType(() => ({
   },
   computedFields: {
     ...computedFields,
+    docTags: {
+      type: 'json',
+      resolve: (doc) => {
+        const resolvedTags = extractPlainArrayValues<string>(doc?.tags)
+
+        if (resolvedTags === undefined) {
+          return DEFAULT_DOC_TAGS
+        }
+
+        const sanitizedTags = sanitizeDocTags(resolvedTags)
+
+        return sanitizedTags
+      },
+    },
     structuredData: {
       type: 'json',
       resolve: (doc) => ({

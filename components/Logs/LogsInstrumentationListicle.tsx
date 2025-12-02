@@ -12,6 +12,7 @@ import {
   SiApachetomcat,
   SiAmazonwebservices,
   SiGo,
+  SiCloudflare,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
 import { FaAws, FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
@@ -102,6 +103,12 @@ export default function LogsInstrumentationListicle({
             icon: <FaWindows className="h-7 w-7 text-blue-500" />,
             clickName: 'Windows Logs Link',
           },
+          {
+            name: 'Cloudflare',
+            href: '/docs/logs-management/send-logs/cloudflare-logs',
+            icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
+            clickName: 'Cloudflare Logs Link',
+          },
         ]}
         sectionName="Platform Logs"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
@@ -132,6 +139,12 @@ export default function LogsInstrumentationListicle({
             href: '/docs/userguide/collecting_application_logs_otel_sdk_java',
             icon: <FaJava className="h-7 w-7 text-red-600" />,
             clickName: 'Java SDK Logs Link',
+          },
+          {
+            name: 'Bunyan (Node.js)',
+            href: '/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs',
+            icon: <SiNodedotjs className="h-7 w-7 text-green-600" />,
+            clickName: 'Bunyan Logs Link',
           },
           {
             name: 'Winston (Node.js)',
@@ -262,6 +275,12 @@ export default function LogsInstrumentationListicle({
               </span>
             ),
             clickName: 'Vercel Cloud Logs Link',
+          },
+          {
+            name: 'Cloudflare',
+            href: '/docs/logs-management/send-logs/cloudflare-logs',
+            icon: <SiCloudflare className="h-7 w-7 text-orange-500" />,
+            clickName: 'Cloudflare Cloud Logs Link',
           },
         ]}
         sectionName="Cloud Logs"

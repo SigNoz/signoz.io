@@ -7,7 +7,9 @@ import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer
 import { allAuthors, allComparisons } from 'contentlayer/generated'
 import type { Authors, Comparison } from 'contentlayer/generated'
 import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
+import OpenTelemetryHubLayout from '@/layouts/OpenTelemetryHubLayout'
 import BlogLayout from '@/layouts/BlogLayout'
+import { getHubContextForRoute } from '@/utils/opentelemetryHub'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
@@ -30,7 +32,6 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
   const post = allComparisons.find((p) => p.slug === slug)
-
 
   if (!post) {
     return notFound()
@@ -87,6 +88,7 @@ export const generateStaticParams = async () => {
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
+  const currentRoute = `/comparisons/${slug}`
   // Filter out drafts in production
   const sortedCoreContents = allCoreContent(sortPosts(allComparisons))
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
@@ -102,6 +104,34 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
+
+  const hubContext = getHubContextForRoute(currentRoute)
+
+  if (hubContext) {
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <OpenTelemetryHubLayout
+          content={mainContent}
+          authorDetails={authorDetails}
+          authors={authorList}
+          toc={post.toc}
+          navItems={hubContext.items}
+          currentHubPath={hubContext.pathKey}
+          pathMeta={hubContext.firstRouteByPath}
+          defaultLanguage={hubContext.defaultLanguage}
+          availableLanguages={hubContext.languages}
+          currentRoute={currentRoute}
+        >
+          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+          <PageFeedback />
+        </OpenTelemetryHubLayout>
+      </>
+    )
+  }
 
   // Choose layout based on slug or post layout
   let layoutName = post.layout || defaultLayout
@@ -123,7 +153,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
-        authors={post?.authors}
+        authors={authorList}
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
