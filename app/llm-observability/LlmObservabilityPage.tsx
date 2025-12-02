@@ -360,7 +360,7 @@ const StartMonitoring: React.FC = () => {
     >
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%] flex-1 md:!w-[300px]">
-          <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+          <p className="sticky top-[100px] px-10 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:px-12">
             Start Monitoring Your LLM Apps in <span className="text-red-500">Minutes</span>
           </p>
         </div>
