@@ -13,6 +13,12 @@ import GetHelp from '@/components/shared/get-help.md'
 
 Envoy is a high-performance edge and service proxy. This guide will help you send metrics from Envoy to SigNoz using the OpenTelemetry (OTel) Collector.
 
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
 ## Prerequisites
 
 - **SigNoz OTel Collector installed**: You need the OpenTelemetry Collector running in your environment. See [Installation Guides](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
@@ -64,7 +70,7 @@ static_resources:
 
 ### Step 2: Run Envoy with Docker
 
-You can run Envoy using the official Docker image. For more details, see the [Envoy Docker Installation Guide](https://www.envoyproxy.io/docs/envoy/latest/start/install#install-envoy-using-docker).
+You can run Envoy using the official Docker image. For more details, see the <a href="https://www.envoyproxy.io/docs/envoy/latest/start/install#install-envoy-using-docker" target="_blank" rel="noopener noreferrer nofollow">Envoy Docker Installation Guide</a>.
 
 Save the above configuration as `envoy.yaml` and run the following command:
 
@@ -84,7 +90,7 @@ For more details on configuring the collector, refer to the [OpenTelemetry Colle
 
 If you're deploying Envoy on Kubernetes, follow these steps to set up the complete monitoring stack.
 
-### Configure Envoy with Stats Tags
+### Step 1: Configure Envoy with Stats Tags
 
 Add custom tags to your Envoy metrics for better filtering and grouping in SigNoz:
 
@@ -110,13 +116,13 @@ stats_config:
       fixed_value: k8s-cluster
 ```
 
-### Deploy the OTel Collector on Kubernetes
+### Step 2: Deploy the OTel Collector on Kubernetes
 
 You'll need to deploy the OpenTelemetry Collector in your Kubernetes cluster to receive metrics from Envoy. The collector should expose port `4317` for gRPC connections, which Envoy will use to send metrics.
 
 For detailed instructions on deploying the OTel Collector on Kubernetes, including configuration examples and best practices, refer to the [Kubernetes OpenTelemetry Collector Guide](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
-### Mount Envoy Configuration
+### Step 3: Mount Envoy Configuration
 
 Mount your Envoy configuration as a ConfigMap in the Envoy deployment:
 
@@ -132,9 +138,9 @@ volumes:
       name: envoy-config
 ```
 
-### Complete Kubernetes Example
+#### Complete Kubernetes Example
 
-For a complete working example including a test application (httpbin), Envoy proxy, traffic generator, and the OTel collector, expand the section below:
+For a complete working example including a test application (httpbin), Envoy proxy, traffic generator, and the OTel collector, check the section below:
 
 <details>
 <summary>Click to see the full Kubernetes Manifest</summary>
@@ -533,7 +539,7 @@ This manifest includes:
 
 </details>
 
-### Deploy to Kubernetes
+### Step 4: Deploy to Kubernetes
 
 Apply the complete manifest:
 
@@ -577,6 +583,51 @@ After setting up the collector, go to the **[Metrics Explorer](https://signoz.io
 
 - **Create Dashboards**: Visualize your Envoy metrics by creating custom dashboards. [Learn more](https://signoz.io/docs/userguide/dashboards/).
 - **Set Alerts**: Configure alerts to get notified when metrics cross a threshold. [Learn more](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Metrics not appearing in SigNoz
+
+- **Check Envoy Logs**: Ensure Envoy is starting correctly and not reporting errors related to the `open_telemetry` sink.
+- **Verify OTel Collector**: Check if the OTel Collector is running and accessible from the Envoy container/pod.
+- **Check Endpoint**: Verify that the `socket_address` in the Envoy config matches the OTel Collector's address and port (default 4317 for gRPC).
+
+### Connection Refused Errors
+
+If you see connection refused errors in Envoy logs:
+
+- Ensure the OTel Collector is listening on port 4317.
+- If running in Docker, ensure both containers are on the same network.
+- If running in Kubernetes, ensure the Service name and namespace are correct.
+
+</details>
 
 ## Get Help
 
