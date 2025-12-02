@@ -1,42 +1,283 @@
 ---
-date: 2025-05-06
+date: 2025-12-01
 id: logs
-tags : [SigNoz Cloud, Self-Host]
-title: Migrate logs from ELK Stack
-description: Migrating logs from ELK Stack to SigNoz. How to migrate logs from ELK to SigNoz.
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Logs from ELK Stack
+description: Learn how to migrate your logs from ELK Stack (Filebeat, Logstash) to SigNoz using OpenTelemetry.
+doc_type: howto
 ---
 
-Migrating logs involves replacing [Filebeat](https://www.elastic.co/beats/filebeat) and/or [Logstash](https://www.elastic.co/logstash) with the [OpenTelemetry](https://signoz.io/why-opentelemetry/) (OTel) Collector, configured to collect, process, and forward logs to SigNoz.
+## Overview
 
-## Replacing Log Shippers and Processors:
+This guide walks you through migrating logs from the ELK Stack (Elasticsearch, Logstash, Kibana) and Beats to SigNoz. You will:
 
-Several strategies can be employed, depending on the complexity of the existing ELK logging pipeline:
+1. Assess your current log collection (Filebeat, Logstash)
+2. Set up log collection with OpenTelemetry
+3. Configure log parsing to match your formats
+4. Validate logs are flowing correctly to SigNoz
 
-* **Strategy 1: Replacing Filebeat with OTel agent:**  
-  * This is the most direct approach for collecting logs from files, replacing Filebeat's role.
-  * Deploy the OTel Collector as an agent(e.g., [DaemonSet in Kubernetes](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) , standalone [binary on VMs](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) ) where logs are generated.
-  * Configure the [logs in SigNoz](https://signoz.io/docs/userguide/logs/) to target the necessary log files. 
-  * Key configurations include:  
-    * include: Glob patterns for log file paths (e.g., `/var/log/app/*.log`).  
-    * exclude: Glob patterns to exclude specific files.  
-    * start_at: end (tail new logs) or beginning (read from start).  
-    * multiline: For logs spanning multiple lines (e.g., stack traces), using `line_start_pattern` or `line_end_pattern`.  
-    * [operators](https://signoz.io/blog/opentelemetry-operator-complete-guide/): A pipeline of parsing and transformation steps applied within the receiver itself (e.g., `regex_parser`, `json_parser`, `timestamp`, `severity`, `attribute`).This can handle basic parsing previously done by Filebeat modules or simple Logstash filters.  
-* **Strategy 2: Forwarding from Logstash to SigNoz(Transitional):**  
-  * If you have complex Logstash pipelines you wish to retain temporarily, you can [configure Logstash to forward logs](https://signoz.io/docs/userguide/logstash_to_signoz/) to an SigNoz.
-  * The OTel Collector then forwards the received logs to SigNoz.  
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-**Verification:**
+## Key Differences: ELK vs SigNoz
 
-* Ensure logs are appearing in the SigNoz [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/). 
-* Verify that timestamps, severity levels, and attributes are parsed correctly according to the processor configurations.  
-* Check that filters are working as expected (e.g., debug logs are dropped).  
-* If trace context (trace IDs, span IDs) is expected in logs, confirm it's being parsed and that log-trace correlation works in the SigNoz UI.
+| Aspect | ELK Stack | SigNoz |
+|--------|-----------|--------|
+| **Collection** | Filebeat, Logstash, Elastic Agent | OpenTelemetry Collector, FluentBit |
+| **Query Language** | KQL, Lucene | Query Builder, ClickHouse SQL |
+| **Storage** | Elasticsearch (Indices) | ClickHouse (Columnar) |
+| **Log Processing** | Logstash pipelines, Ingest Node pipelines | Log pipelines, OTel processors |
 
+SigNoz uses the OpenTelemetry Collector for log collection, which provides flexible parsing and routing capabilities similar to Logstash but with a unified agent approach.
 
-## Signoz logs features
+## Prerequisites
 
-- **[Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/)**: Parse and structure logs with processors like JSON, regex, and grok
-- **[Log Querying](https://signoz.io/docs/userguide/logs_query_builder/)**: Advanced query capabilities for searching and filtering logs
-- **[Log-Trace Correlation](https://signoz.io/opentelemetry/correlating-traces-logs-metrics-nodejs/)**: Link logs with related traces for contextual debugging
+Before starting, ensure you have:
 
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your ELK configuration (Filebeat.yml, Logstash.conf)
+- Access to your log sources (servers, containers)
+
+## Step 1: Assess Your Current Log Sources
+
+Before migrating, inventory what's sending logs to Elasticsearch.
+
+### Identify Log Shippers
+
+Check your infrastructure for:
+- **Filebeat**: Look for `filebeat.yml` configurations. Note the `paths` (inputs) and `processors`.
+- **Logstash**: Look for `logstash.conf` pipelines. Note the `input` plugins (beats, tcp, file) and `filter` sections.
+- **Elastic Agent**: Check for Fleet policies.
+
+### Categorize Your Log Sources
+
+Group logs by how they're being collected:
+
+| Source Type | ELK Component | Migration Path |
+|-------------|---------------|----------------|
+| **File Logs** | Filebeat (`log` input) | [Use filelog receiver](#from-filebeat-file-logs) |
+| **Kubernetes** | Filebeat (DaemonSet) | [Kubernetes log collection](#from-kubernetes) |
+| **Docker** | Filebeat (`docker` input) | [Docker log collection](#from-docker-containers) |
+| **Logstash Pipelines** | Logstash | [Forward to OTel Collector](#from-logstash) |
+| **Syslog** | Logstash/Filebeat syslog input | [Use syslog receiver](#from-syslog) |
+
+## Step 2: Set Up the OpenTelemetry Collector
+
+Install the OpenTelemetry Collector if you haven't already:
+
+1. [Install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) in your environment.
+
+2. Configure the OTLP exporter for logs
+
+## Step 3: Migrate Each Log Source
+
+Work through each source type from your inventory. For all available log collection methods, see the [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/) central guide.
+
+### From Filebeat (File Logs)
+
+Replace Filebeat's file input with the OpenTelemetry Collector's `filelog` receiver.
+
+**Before (Filebeat):**
+```yaml
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/myapp/*.log
+```
+
+**After (OTel Collector):**
+```yaml:otel-collector-config.yaml
+receivers:
+  filelog:
+    include:
+      - /var/log/myapp/*.log
+    start_at: end
+    include_file_path: true
+    include_file_name: true
+    operators:
+      # Optional: Parse JSON logs if applicable
+      - type: json_parser
+        if: 'body matches "^\\{"'
+```
+
+Enable it in the pipeline:
+```yaml:otel-collector-config.yaml {4}
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+See [Collect Logs from File](https://signoz.io/docs/userguide/collect_logs_from_file/) for more details.
+
+### From Kubernetes
+
+If you were using Filebeat as a DaemonSet, replace it with the SigNoz K8s Infra Helm chart.
+
+<Admonition type="tip">
+If you're using the [SigNoz Kubernetes Infra Helm chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/), **all pod logs are automatically collected**, including application logs. You don't need separate application log configuration—stdout/stderr from all containers will appear in SigNoz immediately after deploying the chart.
+</Admonition>
+
+### From Docker Containers
+
+If you were using Filebeat's Docker input, use the OTel Collector to collect logs from all containers.
+
+<Admonition type="tip">
+By mounting Docker's log directory, you automatically collect logs from every container. See [Collect Docker Container Logs](https://signoz.io/docs/userguide/collect_docker_logs/).
+</Admonition>
+
+### From Logstash
+
+If you have complex Logstash pipelines you wish to retain temporarily, you can configure Logstash to forward logs to the OpenTelemetry Collector.
+
+**Logstash Configuration:**
+```ruby
+output {
+  http {
+    url => "http://<otel-collector-host>:4318/v1/logs"
+    http_method => "post"
+    format => "json_batch"
+  }
+}
+```
+
+**OTel Collector Configuration:**
+Ensure the `otlp` receiver is enabled on HTTP (port 4318).
+
+```yaml:otel-collector-config.yaml
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+```
+
+Enable it in the pipeline:
+```yaml:otel-collector-config.yaml {4}
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+See [Logstash to SigNoz](https://signoz.io/docs/userguide/logstash_to_signoz/) for detailed setup.
+
+### From Syslog
+
+Replace Logstash/Filebeat syslog inputs with the `syslog` receiver in your [OpenTelemetry Collector configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+```yaml:otel-collector-config.yaml
+receivers:
+  syslog:
+    tcp:
+      listen_address: '0.0.0.0:54527'
+    protocol: rfc3164
+    location: UTC
+    operators:
+      - type: move
+        from: attributes.message
+        to: body
+```
+
+Enable it in the pipeline:
+```yaml:otel-collector-config.yaml {4}
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, syslog]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+See [Syslog to SigNoz](https://signoz.io/docs/userguide/collecting_syslogs/) for detailed setup.
+
+## Step 4: Log Parsing
+
+SigNoz provides two approaches for parsing logs, similar to Logstash filters or Ingest Node pipelines.
+
+### Option 1: Log Pipelines (Recommended)
+
+SigNoz includes a **UI-based Log Pipelines** feature that lets you parse and transform logs without modifying collector configuration. This is the recommended approach.
+
+| Processor | ELK Equivalent | Use Case |
+|-----------|----------------|----------|
+| **Regex** | Grok / Dissect | Extract fields using regex |
+| **Grok** | Grok | Use predefined patterns |
+| **JSON Parser** | JSON filter | Parse JSON log bodies |
+| **Timestamp Parser** | Date filter | Extract and normalize timestamps |
+| **Add/Remove** | Mutate filter | Transform log attributes |
+
+See [Log Pipelines Processors](https://signoz.io/docs/logs-pipelines/processors/) for details.
+
+### Option 2: Collector-Level Parsing
+
+For high-volume parsing, configure parsing in the OpenTelemetry Collector using operators in the `filelog` receiver or processors.
+
+```yaml
+operators:
+  - type: regex_parser
+    regex: '^(?P<time>[^ ]*) (?P<severity>[^ ]*) (?P<msg>.*)$'
+    timestamp:
+      parse_from: attributes.time
+      layout: '%Y-%m-%d %H:%M:%S'
+```
+
+## Validate
+
+Verify logs are flowing correctly by comparing against your source inventory.
+
+### Check Logs Are Arriving
+
+1. In SigNoz, navigate to **Logs** in the left sidebar.
+2. Use the **Logs Explorer** to browse recent logs.
+3. Verify logs from each source in your inventory appear.
+
+### Verify Log Attributes
+
+1. Click on a log entry to expand it.
+2. Check that parsed fields (timestamp, severity, service name) are correct.
+3. Verify file paths or container names match your sources.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Logs not appearing in SigNoz
+
+1. **Check Collector status**: Verify the OpenTelemetry Collector is running and check its logs for errors.
+2. **Verify file permissions**: Ensure the Collector has read access to log files.
+3. **Check include paths**: Confirm the `include` patterns in `filelog` receiver match your log file paths.
+4. **Test connectivity**: Verify the Collector can reach `ingest.<region>.signoz.cloud:443`.
+
+### Logs appear but are unparsed
+
+If logs show as raw text without parsed fields:
+
+1. **Check pipeline configuration**: Ensure your Log Pipeline processors are correctly configured in SigNoz UI.
+2. **Verify regex/grok**: Test your patterns against sample log lines.
+3. **Check timestamp format**: Ensure the `layout` matches your actual timestamp format.
+
+### Duplicate logs
+
+If you see the same log multiple times:
+
+1. **Check for multiple collectors**: Ensure only one Collector instance is reading each log file.
+2. **Review include patterns**: Overlapping patterns can cause duplicates.
+
+</details>
+
+## Next Steps
+
+Once your logs are flowing to SigNoz:
+
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-elk/dashboards) with log-based panels
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) for error patterns
+- [Configure log pipelines](https://signoz.io/docs/logs-pipelines/introduction/) for advanced processing
+- [Correlate logs with traces](https://signoz.io/docs/logs-pipelines/guides/trace/) using trace IDs

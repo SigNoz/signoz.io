@@ -1,0 +1,122 @@
+---
+date: 2025-12-02
+id: alerts
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Alerts from Datadog
+description: Learn how to migrate your alerts from Datadog to SigNoz.
+doc_type: howto
+---
+
+While migrating your observability stack from Datadog to SigNoz, you'll need to recreate your alerts in SigNoz's alert management system.
+
+## Prerequisites
+
+- A SigNoz account (SigNoz Cloud or Self-Hosted).
+- List of existing monitors and notification channels from Datadog.
+- Data flowing to SigNoz (metrics, traces, or logs depending on your alerts).
+
+## Migration Steps
+
+### Setting Up Notification Channels
+
+Before migrating your alerts, set up the notification channels you want to use.
+
+<details>
+<ToggleHeading>
+#### Supported Notification Channels
+</ToggleHeading>
+
+Below is a list of notification channels supported by Datadog and SigNoz:
+
+| Notification Channel | Datadog               | SigNoz               |
+|----------------------|-----------------------|----------------------|
+| Email                | ✓                     | ✓                    |
+| Slack                | ✓                     | ✓                    |
+| Microsoft Teams      | ✓                     | ✓                    |
+| PagerDuty            | ✓                     | ✓                    |
+| OpsGenie             | ✓                     | ✓                    |
+| Webhook              | ✓                     | ✓                    |
+| Incident.io          | Via Webhook           | ✓ (via Webhook)      |
+| Rootly               | Via Webhook           | ✓ (via Webhook)      |
+| Zenduty              | Via Webhook           | ✓ (via Webhook)      |
+| ServiceNow           | ✓                     | Via Webhook          |
+| Jira                 | ✓                     | Via Webhook          |
+| AWS SNS              | ✓                     | Via Webhook          |
+| VictorOps/Splunk     | ✓                     | Via Webhook          |
+
+</details>
+
+If the notification channel you need is not listed, you can use the **Webhook** channel to integrate with other tools.
+
+For detailed setup instructions, see the [Alerts Notification Channel documentation](https://signoz.io/docs/alerts-management/notification-channel).
+
+### Setting Up Alert Rules
+
+SigNoz provides a comprehensive alert management system. Migrate your existing Datadog monitors by mapping them to the corresponding alert types in SigNoz:
+
+#### Alert Rule Mapping
+
+| Datadog Monitor Type | SigNoz Alert Type | Notes |
+| :--- | :--- | :--- |
+| **Metric Monitor** | [Metric Alert](https://signoz.io/docs/alerts-management/metrics-based-alerts/) | Convert Datadog query to PromQL |
+| **Log Monitor** | [Log Alert](https://signoz.io/docs/alerts-management/log-based-alerts/) | Use Query Builder to recreate log filters |
+| **APM Monitor** (Trace Analytics) | [Trace Alert](https://signoz.io/docs/alerts-management/trace-based-alerts/) | Alert on latency, error rates, or span attributes |
+| **Anomaly Monitor** | [Anomaly Alert](https://signoz.io/docs/alerts-management/anomaly-based-alerts/) | Detects deviations without static thresholds |
+| **Composite Monitor** | Multiple Alerts | Create separate alerts, consider using labels for grouping |
+| **Forecast Monitor** | - | Not currently supported |
+| **Outlier Monitor** | - | Not currently supported |
+| **Watchdog Monitor** | - | Use Anomaly Alert as alternative |
+
+### Infrastructure as Code (Terraform)
+
+If you define alert rules as code in Datadog (using the Datadog Terraform provider), you can continue using the same approach with SigNoz.
+
+Use the <a href="https://registry.terraform.io/providers/SigNoz/signoz/latest/docs" target="_blank" rel="noopener noreferrer nofollow">SigNoz Terraform Provider</a> to manage your alerts and notification channels programmatically.
+
+## Validate
+
+To confirm that your alerts are migrated correctly:
+
+1. Test alerts by temporarily lowering thresholds or triggering test conditions.
+2. Verify that notifications are sent to the configured channels.
+3. Monitor for any missed alerts during the transition period.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Alerts not triggering
+
+- **Check Data**: Ensure that the data (metrics, logs, traces) required for the alert is being received by SigNoz.
+- **Verify Query**: Use the Query Builder to verify that your alert query returns the expected values.
+- **Check Thresholds**: Ensure that the threshold conditions are met by your current data.
+- **Evaluation Interval**: Check the evaluation interval and ensure the condition persists long enough to trigger the alert.
+- **Metric Names**: Verify you're using OpenTelemetry metric names, not Datadog names.
+
+### Notifications not received
+
+- **Test Channel**: Use the "Test" button in the alert channel configuration to verify connectivity.
+- **Check Spam Folder**: If using email, check your spam folder.
+- **Verify Webhook URL**: If using webhooks, ensure the URL is correct and accessible from the SigNoz instance.
+- **Check Network**: For self-hosted, ensure SigNoz can reach external notification services.
+
+### Query errors in alerts
+
+- **Validate PromQL**: Test your PromQL query in the Metrics Explorer first.
+- **Check attribute names**: Ensure you're using OpenTelemetry attribute naming conventions.
+- **Verify metric availability**: Confirm the metric exists in your SigNoz instance.
+
+### Alert too noisy/quiet
+
+- **Adjust thresholds**: Fine-tune thresholds based on your SigNoz data patterns.
+- **Modify evaluation window**: Increase evaluation window to reduce noise.
+- **Add filters**: Add more specific filters to reduce alert scope.
+
+</details>
+
+## Next Steps
+
+- [Migrate Dashboards](https://signoz.io/docs/migration/migrate-from-datadog/dashboards/)
+- [Explore Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)
+- [Learn about Alert Types](https://signoz.io/docs/alerts-management/)

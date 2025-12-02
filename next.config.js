@@ -106,6 +106,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/migration/opentelemetry-datadog-receiver/',
+          destination: '/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/',
+          permanent: true,
+        },
+        {
           source: '/security/',
           destination: 'https://trust.signoz.io/',
           permanent: true,
@@ -993,6 +998,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/tutorial/setting-up-sso-saml-with-keycloak/',
+          destination: '/docs/manage/administrator-guide/sso/user-guides/saml-keycloak',
+          permanent: true,
+        },
+        {
           source: '/docs/install/troubleshooting/',
           destination: '/docs/setup/docker/troubleshooting/faq',
           permanent: true,
@@ -1020,6 +1030,16 @@ module.exports = () => {
         {
           source: '/docs/operate/docker-standalone/',
           destination: '/docs/install/docker/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-opentelemetry/cloud/',
+          destination: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/migration/migrate-from-opentelemetry/self-hosted/',
+          destination: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
           permanent: true,
         },
       ]

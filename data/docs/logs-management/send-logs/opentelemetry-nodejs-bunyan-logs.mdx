@@ -1,0 +1,689 @@
+---
+date: 2025-12-01
+tags: [SigNoz Cloud, Self-Host]
+title: Send logs from Node.js Bunyan logger to SigNoz using OpenTelemetry
+id: opentelemetry-nodejs-bunyan-logs
+doc_type: howto
+description: Learn how to send logs from Node.js Bunyan logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Node.js version 14 or higher
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- A Node.js application that uses the Bunyan logger
+
+## Send logs to SigNoz
+
+<Tabs>
+<TabItem value="automatic" label="No Code Auto-Instrumentation (recommended)" default>
+
+Auto-instrumentation automatically captures:
+
+- **Bunyan logs** with trace correlation
+- **HTTP requests** (incoming and outgoing)
+
+### Step 1: Install dependencies
+
+Install the required OpenTelemetry dependencies:
+
+<Tabs>
+<TabItem value="npm" label="npm" default>
+
+```bash
+npm install --save @opentelemetry/api \
+  @opentelemetry/auto-instrumentations-node
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn add @opentelemetry/api \
+  @opentelemetry/auto-instrumentations-node
+```
+
+</TabItem>
+</Tabs>
+
+### Step 2: Run the application
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+Set the environment variables and run your application using the `NODE_OPTIONS` environment variable:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<service_name>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node index.js # Replace with your entry file
+```
+
+Replace the following:
+
+- `<service_name>`: Your service name.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+If using a local OTel Collector (VM), use:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<service_name>"
+# Do not set OTEL_EXPORTER_OTLP_HEADERS when using the local collector
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+node index.js # Replace with your entry file
+```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_NODE_RESOURCE_DETECTORS
+    value: 'env,host,os'
+  - name: OTEL_SERVICE_NAME
+    value: '<service_name>'
+  - name: NODE_OPTIONS
+    value: '--require @opentelemetry/auto-instrumentations-node/register'
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>`: Your service name.
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies including OpenTelemetry auto-instrumentation
+RUN npm install
+RUN npm install @opentelemetry/api @opentelemetry/auto-instrumentations-node
+
+# Copy application code
+COPY . .
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+ENV OTEL_SERVICE_NAME="<service_name>"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+
+# Expose application port
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "index.js"]
+```
+
+Build and run the container:
+
+```bash
+# Build the image
+docker build -t nodejs-bunyan-app .
+
+# Run the container
+docker run -p 3000:3000 nodejs-bunyan-app
+```
+
+Replace the placeholders in the Dockerfile:
+
+- `<service_name>`: Your service name.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_NODE_RESOURCE_DETECTORS = "env,host,os"
+$env:OTEL_SERVICE_NAME = "<service_name>"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:NODE_OPTIONS = "--require @opentelemetry/auto-instrumentations-node/register"
+node index.js # Replace with your entry file
+```
+
+Replace the placeholders:
+
+- `<service_name>`: Your service name.
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+</Tabs>
+
+#### Note
+
+By default, auto-instrumentation collects traces and metrics. If you want to collect only logs, you can disable traces and metrics by setting the following environment variables:
+
+```bash
+export OTEL_TRACES_EXPORTER="none"
+export OTEL_METRICS_EXPORTER="none"
+```
+
+</TabItem>
+<TabItem value="code-level" label="Code Level Instrumentation (advanced)">
+
+### Step 1: Install dependencies
+
+Install the required OpenTelemetry dependencies:
+
+<Tabs>
+<TabItem value="npm" label="npm" default>
+
+```bash
+npm install @opentelemetry/auto-instrumentations-node@^0.67.2 \
+  @opentelemetry/sdk-node@^0.208.0 \
+  @opentelemetry/exporter-logs-otlp-http@^0.208.0 \
+  @opentelemetry/instrumentation-bunyan@^0.54.0 \
+  bunyan@^1.8.15 \
+  express@^5.1.0
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn add @opentelemetry/auto-instrumentations-node@^0.67.2 \
+  @opentelemetry/sdk-node@^0.208.0 \
+  @opentelemetry/exporter-logs-otlp-http@^0.208.0 \
+  @opentelemetry/instrumentation-bunyan@^0.54.0 \
+  bunyan@^1.8.15 \
+  express@^5.1.0
+```
+
+</TabItem>
+</Tabs>
+
+### Step 2: Set environment variables
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+Set the following environment variables to configure the OpenTelemetry exporter:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_SERVICE_NAME="nodejs-bunyan-logger"
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+If using a local OTel Collector (VM), use:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+# Do not set OTEL_EXPORTER_OTLP_HEADERS
+```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>'
+  - name: OTEL_SERVICE_NAME
+    value: 'nodejs-bunyan-logger'
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy instrumentation file and application code
+COPY logging-instrumentation.js ./
+COPY . .
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+ENV OTEL_SERVICE_NAME="nodejs-bunyan-logger"
+
+# Expose application port
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "index.js"]
+```
+
+Build and run the container:
+
+```bash
+# Build the image
+docker build -t nodejs-bunyan-app .
+
+# Run the container
+docker run -p 3000:3000 nodejs-bunyan-app
+```
+
+Replace the placeholders in the Dockerfile:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+$env:OTEL_SERVICE_NAME = "nodejs-bunyan-logger"
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+</Tabs>
+
+### Step 3: Configure OpenTelemetry SDK
+
+Create a file named `logging-instrumentation.js` or `logging-instrumentation.ts` in your project root. This code reads the configuration from the environment variables set in the previous step.
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```javascript:logging-instrumentation.js
+const { NodeSDK } = require("@opentelemetry/sdk-node");
+const { OTLPLogExporter } = require("@opentelemetry/exporter-logs-otlp-http");
+const {
+  BunyanInstrumentation,
+} = require("@opentelemetry/instrumentation-bunyan");
+const { resourceFromAttributes } = require("@opentelemetry/resources");
+const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
+const { BatchLogRecordProcessor } = require("@opentelemetry/sdk-logs");
+
+// Configure the OTLP log exporter
+// It automatically reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS
+const logExporter = new OTLPLogExporter({});
+
+// Initialize the OpenTelemetry SDK
+const sdk = new NodeSDK({
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]:
+      process.env.OTEL_SERVICE_NAME || "nodejs-bunyan-logger",
+  }),
+  logRecordProcessor: new BatchLogRecordProcessor(logExporter),
+  instrumentations: [
+    new BunyanInstrumentation({
+      // configure the instrumentation
+    }),
+  ],
+});
+
+sdk.start();
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  sdk
+    .shutdown()
+    .then(() => console.log("OpenTelemetry SDK shut down successfully"))
+    .catch((error) => console.error("Error shutting down SDK", error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+
+</TabItem>
+
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:logging-instrumentation.ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
+import { BunyanInstrumentation } from "@opentelemetry/instrumentation-bunyan";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
+
+// Configure the OTLP log exporter
+// It automatically reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS
+const logExporter = new OTLPLogExporter({});
+
+// Initialize the OpenTelemetry SDK
+const sdk = new NodeSDK({
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]:
+      process.env.OTEL_SERVICE_NAME || "nodejs-bunyan-logger",
+  }),
+  logRecordProcessor: new BatchLogRecordProcessor(logExporter),
+  instrumentations: [
+    new BunyanInstrumentation({
+      // configure the instrumentation
+    }),
+  ],
+});
+
+sdk.start();
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  sdk
+    .shutdown()
+    .then(() => console.log("OpenTelemetry SDK shut down successfully"))
+    .catch((error) => console.error("Error shutting down SDK", error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+
+</TabItem>
+</Tabs>
+
+Check out the Bunyan instrumentation options <a href="https://www.npmjs.com/package/@opentelemetry/instrumentation-bunyan#bunyan-instrumentation-options" target="_blank" rel="noopener noreferrer nofollow">here</a>.
+
+### Step 4: Initialize OpenTelemetry SDK
+
+Import the instrumentation at the very top of your main application file (e.g., `index.js` or `index.ts`).
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```javascript:index.js
+require("./logging-instrumentation"); // Must be imported first
+
+---
+
+const bunyan = require("bunyan");
+const express = require("express");
+
+// Create your Bunyan logger as usual
+const logger = bunyan.createLogger({
+  name: "express-app",
+  level: "info",
+});
+
+// Your application code
+const app = express();
+
+app.get("/", (req, res) => {
+  logger.info({ path: req.path, method: req.method }, "Request received");
+  res.send("Hello World!");
+});
+
+app.get("/error-log", (req, res) => {
+  logger.error(
+    { path: req.path, method: req.method },
+    "Error log endpoint hit",
+  );
+  res.status(500).send("Error log endpoint");
+});
+
+app.listen(3000, () => {
+  logger.info("Server listening on port 3000");
+});
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:index.ts
+import "./logging-instrumentation"; // Must be first!
+
+---
+
+import * as bunyan from "bunyan";
+import express, { Request, Response } from "express";
+
+// Now create your Bunyan logger as usual
+const logger = bunyan.createLogger({
+  name: "express-app",
+  level: "info",
+});
+
+// Your application code
+const app: express.Express = express();
+
+app.get("/", (req: Request, res: Response) => {
+  logger.info({ path: req.path, method: req.method }, "Request received");
+  res.send("Hello World!");
+});
+
+app.get("/error-log", (req: Request, res: Response) => {
+  logger.error(
+    { path: req.path, method: req.method },
+    "Error log endpoint hit",
+  );
+  res.status(500).send("Error log endpoint");
+});
+
+app.listen(3000, () => {
+  logger.info("Server listening on port 3000");
+});
+```
+
+</TabItem>
+</Tabs>
+
+### Step 5: Log Correlation (Optional)
+
+Bunyan logs created within a tracing span are automatically enriched with span and trace IDs, enabling [correlation](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/). The added fields are:
+
+- `trace_id`
+- `span_id`
+- `trace_flags`
+
+You can use `tracer.startActiveSpan` to correlate logs with traces. Here is an example:
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```javascript:index.js
+const api = require('@opentelemetry/api')
+
+const tracer = api.trace.getTracer('example')
+tracer.startActiveSpan('process-order', (span) => {
+  logger.info({ orderId: '12345' }, 'Processing order')
+  // Log record will include: trace_id, span_id, trace_flags
+
+  span.end()
+})
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:index.ts
+import * as api from '@opentelemetry/api'
+
+const tracer = api.trace.getTracer('example')
+tracer.startActiveSpan('process-order', (span) => {
+  logger.info({ orderId: '12345' }, 'Processing order')
+  // Log record will include: trace_id, span_id, trace_flags
+
+  span.end()
+})
+```
+
+</TabItem>
+</Tabs>
+
+### Step 6: Run the Application
+
+Run your application:
+
+```bash
+npm run dev
+# or your application's start command
+```
+
+</TabItem>
+</Tabs>
+
+## Validate Logs
+
+Open your SigNoz instance and navigate to the Logs section to view the logs sent from your application.
+
+<Figure
+  src="/img/docs/logs-management/send-logs/nodejs-bunyan-logs.webp"
+  alt="Node.js Bunyan Logs"
+  caption="Node.js Bunyan Logs"
+/>
+
+<Figure
+  src="/img/docs/logs-management/send-logs/nodejs-bunyan-logs-detailed.webp"
+  alt="Node.js Bunyan Logs"
+  caption="Node.js Bunyan Logs Detailed View"
+/>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+#### Why do I see "404 Not Found" errors?
+
+This usually happens if the endpoint URL is incorrect.
+
+- Cloud: `https://ingest.<region>.signoz.cloud:443`
+- Self-Hosted: `http://localhost:4318`
+
+#### Why are my logs not appearing in SigNoz?
+
+- Check if the application started successfully and is actually generating logs.
+- Verify your `<region>` and `<SIGNOZ_INGESTION_KEY>` are correct.
+
+</details>
+
+## Next Steps
+
+- [Traces Instrumentation guide](https://signoz.io/docs/instrumentation/)
+- [Log Query/Filtering guides](https://signoz.io/docs/userguide/logs/)
+- [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
+
+## Get Help
+
+<GetHelp />

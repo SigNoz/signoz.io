@@ -1,0 +1,380 @@
+---
+date: 2025-12-02
+id: logs
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Logs from Datadog
+description: Learn how to migrate your logs from Datadog to SigNoz using OpenTelemetry.
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through migrating logs from Datadog to SigNoz. You will:
+
+1. Check your current log sources in Datadog
+2. Set up log collection with OpenTelemetry
+3. Configure log parsing to match your formats
+4. Validate logs are flowing correctly to SigNoz
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Key Differences: Datadog vs SigNoz
+
+| Aspect | Datadog | SigNoz |
+|--------|---------|--------|
+| **Collection** | Datadog Agent, Log Forwarders, Log API | OpenTelemetry Collector, OTel receivers |
+| **Query Language** | Datadog Log Query Syntax | Query Builder, ClickHouse SQL |
+| **Storage** | Proprietary | ClickHouse (open source) |
+| **Log Processing** | Pipelines, Grok Parser, Remapper | Log Pipelines, OTel processors |
+| **Log Forwarding** | Datadog Agent integrations | FluentBit, Fluentd, OTel receivers |
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your Datadog account to review current log sources
+- Access to your log sources (servers, containers, applications)
+
+## Step 1: Assess Your Current Log Sources
+
+Before migrating, inventory what's sending logs to Datadog.
+
+### List Your Log Sources
+
+1. Navigate to **Logs → Configuration** in Datadog.
+2. Review the **Pipelines** section to see which log sources are configured.
+3. Check **Indexes** to see log volume by source.
+
+Alternatively, run a query in Log Explorer:
+
+```
+* | count by service, source, host
+```
+
+### Categorize Your Log Sources
+
+Group logs by how they're being collected:
+
+| Source Type | How to Identify | Migration Path |
+|-------------|-----------------|----------------|
+| **Kubernetes** | `kube_*` tags, pod/container metadata | [Kubernetes log collection](#from-kubernetes) |
+| **Docker** | `docker.*` source, container tags | [Docker log collection](#from-docker-containers) |
+| **Application logs** | Service name tags, `source:` values | [Application logs via OTel SDK](#from-application-logs) |
+| **Datadog Agent (file tailing)** | `source:file`, file path tags | [File logs via filelog receiver](#from-datadog-agent-file-tailing) |
+| **Syslog** | `source:syslog` | [Syslog receiver](#from-syslog) |
+| **AWS CloudWatch** | `source:cloudwatch`, AWS tags | [AWS integration](#from-cloud-provider-logs) |
+| **Log API** | Direct API calls in your code | [HTTP/OTLP direct send](#from-log-api) |
+
+Save this inventory. You'll use it to validate your migration is complete.
+
+## Step 2: Set Up the OpenTelemetry Collector
+
+Install the OpenTelemetry Collector if you haven't already:
+
+1. [Install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) in your environment.
+
+2. Configure the OTLP exporter for Logs
+
+## Step 3: Migrate Each Log Source
+
+### From Kubernetes
+
+For Kubernetes environments, the easiest approach is to use the SigNoz K8s Infra Helm chart which automatically collects logs from all pods.
+
+<Admonition type="tip">
+If you're using the [SigNoz Kubernetes Infra Helm chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/), **all pod logs are automatically collected**, including application logs. You don't need separate application log configuration—stdout/stderr from all containers will appear in SigNoz immediately after deploying the chart.
+</Admonition>
+
+**Manual setup (if not using the Helm chart)**
+
+Deploy the OpenTelemetry Collector as a DaemonSet and configure the `filelog` receiver for container logs.
+
+See [Kubernetes Logging](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) for complete setup instructions.
+
+### From Docker Containers
+
+For standalone Docker environments, you can collect logs from all containers using the OpenTelemetry Collector.
+
+<Admonition type="tip">
+By mounting Docker's log directory, you automatically collect logs from every container. If your apps write to stdout/stderr (Docker's default logging), no additional application-level log configuration is needed.
+</Admonition>
+
+See [Collect Docker Container Logs](https://signoz.io/docs/userguide/collect_docker_logs/) for complete setup instructions including:
+- Running the OTel Collector as a Docker container
+- Configuring the `filelog` receiver for `/var/lib/docker/containers/*/*.log`
+- Parsing container metadata
+- Filtering specific containers
+
+### From Application Logs
+
+If you were using Datadog APM automatic log injection or dd-trace log forwarding, migrate to OpenTelemetry log collection.
+
+**Java: Use the OpenTelemetry Java Agent**
+
+The OTel Java agent can collect logs automatically from Logback and Log4j:
+
+```bash
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+java -javaagent:/path/opentelemetry-javaagent.jar -jar <myapp>.jar
+```
+
+See [Collecting Application Logs Using OTEL Java Agent](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/) for Logback/Log4j configuration options.
+
+**Python: Enable logs auto-instrumentation**
+
+```bash
+OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> \
+opentelemetry-instrument --logs_exporter otlp python app.py
+```
+
+See [Python Logs Auto-Instrumentation](https://signoz.io/docs/userguide/python-logs-auto-instrumentation/) for details.
+
+**Node.js: Use Pino or Winston**
+
+For Node.js applications, use OpenTelemetry-compatible logging libraries:
+
+- **Pino**: Install `pino-opentelemetry-transport` and configure the transport. See [Node.js Pino Logs](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs/).
+- **Winston**: Install `@opentelemetry/winston-transport` and add the transport. See [Node.js Winston Logs](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/).
+
+**Other languages and methods**
+
+For all available log collection methods, see the [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/) guide.
+
+### From Datadog Agent (File Tailing)
+
+Replace Datadog Agent file log collection with the `filelog` receiver.
+
+**Step 1: Add the filelog receiver**
+
+```yaml:otel-collector-config.yaml
+receivers:
+  filelog:
+    include:
+      - /var/log/myapp/*.log
+      - /var/log/syslog
+    start_at: end
+    include_file_path: true
+    include_file_name: true
+```
+
+**Step 2: Enable it in the logs pipeline**
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+See [Collect Logs from File](https://signoz.io/docs/userguide/collect_logs_from_file/) for more configuration options.
+
+### From Syslog
+
+If you were forwarding syslog to Datadog, configure the OTel Collector's syslog receiver:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  syslog:
+    tcp:
+      listen_address: '0.0.0.0:54527'
+    protocol: rfc3164
+    location: UTC
+    operators:
+      - type: move
+        from: attributes.message
+        to: body
+```
+
+Enable it in your logs pipeline by modifying the `otel-collector-config.yaml` file:
+
+```yaml:otel-collector-config.yaml
+service:
+    ...
+    logs:
+        receivers: [otlp, syslog]
+        processors: [batch]
+        exporters: [otlp]
+```
+
+See [Collect Syslogs](https://signoz.io/docs/userguide/collecting_syslogs/) for detailed setup.
+
+### From Cloud Provider Logs
+
+If you were using Datadog's cloud integrations for AWS, Azure, or GCP logs, SigNoz provides native integrations:
+
+| Provider | Log Sources | Setup Guide |
+|----------|-------------|-------------|
+| **AWS** | CloudWatch Logs, S3, Lambda | [AWS Cloud Integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/) |
+| **Azure** | Azure Monitor, Event Hubs | [Azure Monitoring](https://signoz.io/docs/azure-monitoring/) |
+| **GCP** | Cloud Logging, Pub/Sub | [GCP Monitoring](https://signoz.io/docs/gcp-monitoring/) |
+
+### From Log API
+
+If you were sending logs directly to Datadog's Log API, switch to SigNoz's HTTP endpoint.
+
+**Before (Datadog Log API):**
+
+```bash
+curl -X POST "https://http-intake.logs.datadoghq.com/v1/input" \
+  -H "Content-Type: application/json" \
+  -H "DD-API-KEY: <DD_API_KEY>" \
+  -d '{"message": "Log message", "ddsource": "myapp", "service": "my-service"}'
+```
+
+**After (HTTP to SigNoz):**
+
+```bash
+curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json' \
+  --header 'Content-Type: application/json' \
+  --header 'signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>' \
+  --data '[
+    {
+        "severity_text": "info",
+        "severity_number": 9,
+        "attributes": {
+            "source": "myapp"
+        },
+        "resources": {
+            "service.name": "my-service"
+        },
+        "message": "Log message"
+    }
+  ]'
+```
+
+Replace `<REGION>` with your SigNoz Cloud region (`us`, `eu`, or `in`) and `<SIGNOZ_INGESTION_KEY>` with your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+See [Send Logs via HTTP](https://signoz.io/docs/userguide/send-logs-http/) for detailed setup.
+
+## Step 4: Migrate Log Parsing
+
+If you had Datadog log pipelines with parsing rules, migrate them to SigNoz.
+
+### Option 1: Log Pipelines (Recommended)
+
+SigNoz includes a **UI-based Log Pipelines** feature that lets you parse and transform logs without modifying collector configuration:
+
+- No collector restarts required
+- Visual interface for building parsers
+- Test patterns against sample logs before applying
+
+Log Pipelines support multiple processors:
+
+| Processor | Use Case |
+|-----------|----------|
+| **Regex** | Extract fields using regular expressions |
+| **Grok** | Use predefined patterns for common formats |
+| **JSON Parser** | Parse JSON log bodies into attributes |
+| **Timestamp Parser** | Extract and normalize timestamps |
+| **Severity Parser** | Map log levels to standard severity |
+| **Add/Remove/Move/Copy** | Transform log attributes |
+
+See [Log Pipelines Processors](https://signoz.io/docs/logs-pipelines/processors/) for detailed documentation.
+
+### Option 2: Collector-Level Parsing
+
+You can also configure parsing in the OpenTelemetry Collector using operators in the `filelog` receiver.
+
+**Example: Parsing Apache access logs**
+
+**Datadog Grok pattern:**
+
+```
+%{IP:client_ip} - %{USERNAME:remote_user} \[%{HTTPDATE:time_local}\] "%{WORD:method} %{URIPATHPARAM:request} HTTP/%{NUMBER:http_version}" %{NUMBER:status} %{NUMBER:body_bytes_sent}
+```
+
+**OTel Collector equivalent:**
+
+```yaml:otel-collector-config.yaml
+receivers:
+  filelog:
+    include:
+      - /var/log/apache2/access.log
+    operators:
+      - type: regex_parser
+        regex: '^(?P<client_ip>[^ ]*) - (?P<remote_user>[^ ]*) \[(?P<time_local>[^\]]*)\] "(?P<method>[^ ]*) (?P<request>[^ ]*) HTTP/(?P<http_version>[^"]*)" (?P<status>[^ ]*) (?P<body_bytes_sent>[^ ]*)'
+        timestamp:
+          parse_from: attributes.time_local
+          layout: '%d/%b/%Y:%H:%M:%S %z'
+```
+
+## Validate
+
+Verify logs are flowing correctly by comparing against your source inventory.
+
+### Check Logs Are Arriving
+
+1. In SigNoz, navigate to **Logs** in the left sidebar.
+2. Use the **Logs Explorer** to browse recent logs.
+3. Verify logs from each source in your inventory appear.
+
+### Verify Log Attributes
+
+1. Click on a log entry to expand it.
+2. Check that parsed fields (timestamp, severity, service name) are correct.
+3. Verify file paths or container names match your sources.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Logs not appearing in SigNoz
+
+1. **Check Collector status**: Verify the OpenTelemetry Collector is running and check its logs for errors.
+2. **Verify file permissions**: Ensure the Collector has read access to log files.
+3. **Check include paths**: Confirm the `include` patterns in `filelog` receiver match your log file paths.
+4. **Test connectivity**: Verify the Collector can reach `ingest.<region>.signoz.cloud:443`.
+
+### Logs appear but are unparsed
+
+If logs show as raw text without parsed fields:
+
+1. **Use Log Pipelines**: Configure parsing in SigNoz UI instead of at the collector level.
+2. **Verify operator order**: Parsers must be in the correct sequence.
+3. **Check regex patterns**: Test your regex against sample log lines using a regex tester.
+
+### Missing logs from some sources
+
+1. **Check start_at setting**: Use `start_at: end` for new logs only, `start_at: beginning` to include existing logs.
+2. **Verify exclude patterns**: Ensure you're not accidentally excluding wanted log files.
+3. **Check file rotation**: The Collector handles rotation, but verify log files aren't being truncated.
+
+### Duplicate logs
+
+If you see the same log multiple times:
+
+1. **Check for multiple collectors**: Ensure only one Collector instance is reading each log file.
+2. **Disable Datadog Agent**: Make sure the Datadog Agent isn't still running alongside the OTel Collector.
+3. **Review include patterns**: Overlapping patterns can cause duplicates.
+
+### Missing trace correlation
+
+If logs don't link to traces:
+
+1. **Verify trace context injection**: Ensure your application is injecting trace/span IDs into logs.
+2. **Check attribute names**: SigNoz expects `trace_id` and `span_id` attributes.
+3. **Review Log Pipelines**: Add processors to extract/rename trace context fields.
+
+Read more about trace correlation [here](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/).
+</details>
+
+## Next Steps
+
+Once your logs are flowing to SigNoz:
+
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-datadog/dashboards/) with log-based panels
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) for error patterns
+- [Configure log pipelines](https://signoz.io/docs/logs-pipelines/introduction/) for advanced processing
+- [Correlate logs with traces](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) using trace IDs
+- [Explore Logs Explorer features](https://signoz.io/docs/product-features/logs-explorer/) for analysis

@@ -1,131 +1,420 @@
 ---
-date: 2025-05-12
+date: 2025-11-30
 id: traces
-tags : [SigNoz Cloud, Self-Host]
-title: Migrate Traces from New Relic
-description: Migrating traces from New Relic to SigNoz. How to migrate APM traces from New Relic to SigNoz.
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Traces/APM from New Relic
+description: Learn how to migrate your distributed tracing/APM from New Relic to SigNoz using OpenTelemetry.
+doc_type: howto
 ---
 
-Migrating distributed tracing from New Relic to SigNoz involves replacing New Relic APM agents with OpenTelemetry instrumentation. This guide will walk you through the process for different scenarios.
+## Overview
 
-## Understanding Trace Collection Differences
+This guide walks you through migrating distributed tracing and APM from New Relic to SigNoz. You will:
 
-Before migrating, it's important to understand the key differences between New Relic and SigNoz tracing:
+1. Check your New Relic services and trace sources
+2. Replace New Relic agents with OpenTelemetry instrumentation
+3. Validate traces are flowing correctly to SigNoz
+4. Map New Relic attributes to OpenTelemetry conventions
 
-| Feature                | New Relic                                | SigNoz                                | Notes                                               |
-|------------------------|------------------------------------------|---------------------------------------|-----------------------------------------------------|
-| **Collection Method**      | Proprietary APM agents, OpenTelemetry support | OpenTelemetry native                 | SigNoz is built specifically for OpenTelemetry      |
-| **Sampling**               | Head-based and tail-based sampling       | Head-based and tail-based sampling    | Both support similar sampling approaches            |
-| **Visualization**          | Distributed tracing UI                   | Comprehensive trace analysis UI       | Similar capabilities with different interfaces       |
-| **Service Maps**           | Available                                | Available                             | Both provide dependency visualization                |
-| **Span Attributes**        | Custom attributes & dimensions           | OpenTelemetry attributes              | Different naming conventions                         |
+SigNoz is built natively on OpenTelemetry, so migration involves replacing New Relic agents with OTel instrumentation.
 
-## Migration Approaches
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-The approach for migrating traces depends on how you're currently collecting traces in New Relic.
+## Prerequisites
 
-### 1. For Applications Already Using OpenTelemetry with New Relic
+Before starting, ensure you have:
 
-If your applications are already instrumented with OpenTelemetry and sending data to New Relic:
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your New Relic account to review current APM services
+- Access to your application source code and deployment configuration
 
-1. Update your OpenTelemetry configuration to point to SigNoz instead of New Relic
-2. Modify your exporter configuration. Here's a generic example:
+## Step 1: Assess Your Current Tracing Setup
 
-```yaml
-# Before: New Relic OTLP endpoint
+Before migrating, inventory what you're collecting in New Relic.
+
+### List Your Instrumented Services
+
+Run this NRQL query in New Relic's Query Builder to list all services sending traces:
+
+```sql
+SELECT uniques(entity.name) FROM Span SINCE 7 days ago LIMIT MAX
+```
+
+For a breakdown by language/agent type:
+
+```sql
+SELECT count(*)
+FROM Span
+SINCE 7 days ago
+FACET entity.name, instrumentation.provider, language
+LIMIT MAX
+```
+
+### Categorize Your Services
+
+Group services by how they're instrumented:
+
+| Instrumentation Type | How to Identify | Migration Path |
+|---------------------|-----------------|----------------|
+| **OpenTelemetry SDK** | `instrumentation.provider = 'opentelemetry'` | [Redirect OTLP exporter](#from-opentelemetry-sdk) |
+| **New Relic Java Agent** | `language = 'java'`, `instrumentation.provider = 'newRelic'` | [Replace with OTel Java Agent](#from-new-relic-java-agent) |
+| **New Relic Node.js Agent** | `language = 'nodejs'` | [Replace with OTel Node.js SDK](#from-new-relic-nodejs-agent) |
+| **New Relic Python Agent** | `language = 'python'` | [Replace with OTel Python SDK](#from-new-relic-python-agent) |
+| **New Relic .NET Agent** | `language = 'dotnet'` | [Replace with OTel .NET SDK](#from-new-relic-net-agent) |
+| **New Relic Go Agent** | `language = 'go'` | [Replace with OTel Go SDK](#from-new-relic-go-agent) |
+| **New Relic Ruby Agent** | `language = 'ruby'` | [Replace with OTel Ruby SDK](#from-new-relic-ruby-agent) |
+| **New Relic PHP Agent** | `language = 'php'` | [Replace with OTel PHP SDK](#from-new-relic-php-agent) |
+| **New Relic Browser Agent** | `entity.type = 'BROWSER'` or Browser app in New Relic | [Replace with OTel Browser SDK](#from-new-relic-browser-agent) |
+
+## Step 2: Migrate Each Service
+
+Work through each service from your inventory.
+
+### From OpenTelemetry SDK
+
+If you're already using OpenTelemetry with New Relic's OTLP endpoint, redirect to SigNoz:
+
+**Before (New Relic):**
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.nr-data.net
+OTEL_EXPORTER_OTLP_HEADERS=api-key=<NEW_RELIC_LICENSE_KEY>
+```
+
+**After (SigNoz Cloud):**
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+```
+
+Replace:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+For collector-based setups, update the exporter in your `otel-collector-config.yaml`:
+
+```yaml:otel-collector-config.yaml
+exporters:
 otlp:
-  endpoint: "https://otlp.nr-data.net:4317"
+    endpoint: ingest.<region>.signoz.cloud:443
   headers:
-    "api-key": "NEW_RELIC_LICENSE_KEY"
-
-# After: SigNoz OTLP endpoint
-otlp:
-  # For SigNoz Cloud
-  endpoint: "ingest.{region}.signoz.cloud:443"
-  headers:
-    "signoz-ingestion-key": "<your-ingestion-key>"
+      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
   tls:
     insecure: false
 
-  # For Self-hosted SigNoz
-  # endpoint: "<signoz-otel-collector>:4317"
-  # tls:
-  #   insecure: true
+service:
+  pipelines:
+    traces:
+      exporters: [otlp]
 ```
 
-### 2. Replacing New Relic APM Agents with OpenTelemetry
+### From New Relic Java Agent
 
-For applications using New Relic's proprietary APM agents:
+**Step 1: Remove the New Relic agent**
 
-1. Remove the New Relic agent from your application
-2. Follow the appropriate [SigNoz instrumentation guide](/docs/instrumentation/) for your programming language
-3. Configure the OpenTelemetry SDK to send trace data to SigNoz
-
-SigNoz provides detailed instrumentation guides for various languages and frameworks including:
-- [Java](/docs/instrumentation/java)
-- [Python](/docs/instrumentation/python)
-- [Node.js](/docs/instrumentation/nodejs)
-- [Go](/docs/instrumentation/golang)
-- [Ruby on Rails](/docs/instrumentation/ruby-on-rails)
-- [.NET](/docs/instrumentation/dotnet)
-- [PHP](/docs/instrumentation/php)
-Check this [document](https://signoz.io/docs/instrumentation/) for a list of languages and frameworks
-#### Example: Migrating from New Relic Java Agent to OpenTelemetry
-
-**Step 1**: Remove the New Relic Java agent configuration from your application:
 - Remove the `-javaagent:/path/to/newrelic.jar` JVM argument
-- Remove any New Relic configuration files (e.g., `newrelic.yml`)
+- Remove `newrelic.yml` and the `newrelic/` directory
 
-**Step 2**: Add the OpenTelemetry Java agent:
-- Download the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases)
-- Add the agent to your JVM arguments:
+**Step 2: Add the OpenTelemetry Java agent**
+
+Download the agent:
+
+```bash
+curl -L -o opentelemetry-javaagent.jar \
+  https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+**Step 3: Configure and run**
 
 ```bash
 java -javaagent:/path/to/opentelemetry-javaagent.jar \
      -Dotel.service.name=your-service-name \
-     -Dotel.exporter.otlp.endpoint=http://<SigNoz endpoint>:4317 \
+     -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443 \
+     -Dotel.exporter.otlp.headers=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> \
      -jar your-application.jar
 ```
 
-For more detailed instructions, see the [SigNoz Java Instrumentation document](/docs/instrumentation/java).
+For detailed configuration options, see [Java Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-java/).
 
-## Attribute Mapping
+### From New Relic Node.js Agent
 
-When migrating from New Relic to SigNoz, you'll need to map [New Relic's span attributes](https://docs.newrelic.com/attribute-dictionary/) to [OpenTelemetry's semantic conventions](https://opentelemetry.io/docs/specs/semconv/general/trace/). Here are some common mappings:
+**Step 1: Remove the New Relic agent**
 
-| New Relic Attribute           | OpenTelemetry Attribute           |
-|-------------------------------|------------------------------------|
-| `entity.name`                 | `service.name`                     |
-| `entity.type`                 | `service.namespace`                |
-| `transactionName`             | `http.route`                       |
-| `http.method`                 | `http.request.method`              |
-| `http.url`                    | `url.full`                         |
-| `http.statusCode`             | `http.response.status_code`        |
-| `error.message`               | `exception.message`                |
-| `error.class`                 | `exception.type`                   |
-| `error.stack`                 | `exception.stacktrace`             |
-| `db.statement`                | `db.statement`                     |
-| `db.instance`                 | `db.name`                          |
-| `span.kind`                   | `span.kind`                        |
-| `peer.hostname`               | `server.address`                   |
+```bash
+npm uninstall newrelic
+```
 
-## Verifying Trace Migration
+Remove `require('newrelic')` from your application entry point and delete `newrelic.js` config file.
 
-After migrating your instrumentation, verify that traces are being received correctly:
+**Step 2: Add OpenTelemetry**
 
-1. Navigate to the **APM** section in SigNoz
-2. Look for your service in the list of services
-3. Check basic metrics like p99 latency, error rate, and requests per second
-4. Click on your service to view traces
-5. Verify that spans are being captured correctly with the expected attributes
+```bash
+npm install @opentelemetry/auto-instrumentations-node
+```
 
-Compare key metrics between New Relic and SigNoz during the migration period to ensure data consistency.
+**Step 3: Configure and run**
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+
+node app.js
+```
+
+For detailed configuration, see [Node.js Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-nodejs/).
+
+### From New Relic Python Agent
+
+**Step 1: Remove the New Relic agent**
+
+```bash
+pip uninstall newrelic
+```
+
+Remove `import newrelic.agent` and `newrelic.agent.initialize()` from your code. Delete `newrelic.ini`.
+
+**Step 2: Add OpenTelemetry**
+
+```bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+opentelemetry-bootstrap -a install
+```
+
+**Step 3: Configure and run**
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+
+opentelemetry-instrument python app.py
+```
+
+For detailed configuration, see [Python Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-python/).
+
+### From New Relic .NET Agent
+
+**Step 1: Remove the New Relic agent**
+
+- Uninstall the New Relic .NET agent from your system
+- Remove `newrelic.config` and any New Relic environment variables
+
+**Step 2: Add OpenTelemetry**
+
+For automatic instrumentation, download the OpenTelemetry .NET automatic instrumentation:
+
+```bash
+# Linux
+curl -L -o otel-dotnet-install.sh https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh
+chmod +x otel-dotnet-install.sh
+./otel-dotnet-install.sh
+```
+
+**Step 3: Configure and run**
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+
+# Source the instrumentation script
+. $HOME/.otel-dotnet-auto/instrument.sh
+
+dotnet run
+```
+
+For detailed configuration, see [.NET Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/).
+
+### From New Relic Go Agent
+
+**Step 1: Remove the New Relic agent**
+
+Remove `github.com/newrelic/go-agent/v3/newrelic` from your imports and delete New Relic initialization code.
+
+**Step 2: Install OpenTelemetry packages**
+
+```bash
+go get go.opentelemetry.io/otel \
+  go.opentelemetry.io/otel/sdk \
+  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc \
+  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp
+```
+
+**Step 3: Set environment variables**
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_SERVICE_NAME="<service-name>"
+```
+
+Replace:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service-name>`: A descriptive name for your service
+
+**Step 4: Initialize and instrument**
+
+The Go SDK reads configuration from environment variables. See [Go Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-golang/) for complete setup including:
+- Tracer initialization code
+- Framework-specific instrumentation (Gin, Echo, Chi, Fiber, Gorilla)
+- Database instrumentation (GORM, MongoDB, Redis)
+- gRPC instrumentation
+
+### From New Relic Ruby Agent
+
+**Step 1: Remove the New Relic agent**
+
+Remove from your Gemfile:
+
+```ruby
+# Remove this line
+gem 'newrelic_rpm'
+```
+
+Run `bundle install` and delete `newrelic.yml`.
+
+**Step 2: Add OpenTelemetry**
+
+Add to your Gemfile:
+
+```ruby
+gem 'opentelemetry-sdk'
+gem 'opentelemetry-exporter-otlp'
+gem 'opentelemetry-instrumentation-all'
+```
+
+Run `bundle install`.
+
+**Step 3: Configure**
+
+Create an initializer `config/initializers/opentelemetry.rb`:
+
+```ruby
+require 'opentelemetry/sdk'
+require 'opentelemetry/exporter/otlp'
+require 'opentelemetry/instrumentation/all'
+
+OpenTelemetry::SDK.configure do |c|
+  c.service_name = 'your-service-name'
+  c.use_all
+end
+```
+
+Set environment variables:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+```
+
+For detailed configuration, see [Ruby Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-ruby/).
+
+### From New Relic PHP Agent
+
+**Step 1: Remove the New Relic agent**
+
+Disable or uninstall the New Relic PHP extension from your PHP configuration.
+
+**Step 2: Add OpenTelemetry**
+
+Install the OpenTelemetry PHP extension and SDK following the [PHP Instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-php/).
+
+**Step 3: Configure**
+
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+```
+
+### From New Relic Browser Agent
+
+If you were using New Relic Browser for frontend monitoring, migrate to OpenTelemetry browser instrumentation.
+
+**For frontend applications:**
+
+See [Frontend Monitoring](https://signoz.io/docs/frontend-monitoring/) for setup instructions.
+
+### Other Languages and Frameworks
+
+For languages not covered above (Elixir, Rust, C++, Swift) or specific frameworks (Django, FastAPI, Spring Boot, Laravel, etc.), see the complete [Instrumentation Guide](https://signoz.io/docs/instrumentation/) which covers:
+
+- All supported languages and frameworks
+- Framework-specific auto-instrumentation
+- Manual instrumentation options
+
+## Step 3: Attribute Mapping Reference
+
+When migrating, be aware that New Relic and OpenTelemetry use different attribute names. If you have dashboards or alerts that reference specific attributes, you'll need to update them.
+
+For a complete list, see [New Relic attribute dictionary](https://docs.newrelic.com/attribute-dictionary/) and [OpenTelemetry semantic conventions](https://opentelemetry.io/docs/specs/semconv/general/trace/).
+
+## Validate
+
+Verify traces are flowing correctly by comparing against your service inventory.
+
+### Check Services Are Reporting
+
+1. In SigNoz, navigate to **Services** in the left sidebar.
+2. Verify each service from your inventory appears in the list.
+3. Click a service to see its metrics (latency, error rate, throughput).
+
+### Verify Traces
+
+1. Navigate to **Traces** in the left sidebar.
+2. Select a service and time range.
+3. Verify spans appear with expected attributes.
+4. Check that trace context propagates across service boundaries (parent-child relationships).
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Traces not appearing in SigNoz
+
+1. **Check connectivity**: Verify your application can reach `ingest.<region>.signoz.cloud:443`.
+2. **Verify service name**: Ensure `OTEL_SERVICE_NAME` or the equivalent config is set.
+3. **Check application logs**: Look for OpenTelemetry exporter errors.
+4. **Enable debug logging**: Set `OTEL_LOG_LEVEL=debug` to see detailed SDK logs.
+
+### Broken or incomplete traces
+
+If traces appear fragmented across services:
+
+1. **Check context propagation**: Ensure all services use compatible propagation (W3C Trace Context is recommended).
+2. **Verify all services are instrumented**: Missing instrumentation on any service breaks the trace chain.
+3. **Check HTTP headers**: Verify `traceparent` header is being passed between services.
+
+### Missing spans within a service
+
+If some operations aren't being traced:
+
+1. **Check auto-instrumentation coverage**: Some libraries may not be auto-instrumented.
+2. **Add manual instrumentation**: For custom code, add manual spans using the OTel API.
+3. **Verify sampling**: Check if sampling is dropping spans unintentionally.
+
+### High cardinality warnings
+
+If you see warnings about high cardinality:
+
+1. **Review custom attributes**: Avoid adding unique IDs (user IDs, request IDs) as span attributes.
+2. **Use span events**: For high-cardinality data, consider span events instead of attributes.
+
+</details>
 
 ## Next Steps
 
-Once your traces are successfully migrating to SigNoz, consider:
+Once your traces are flowing to SigNoz:
 
-- [Creating dashboards](/docs/migration/migrate-from-newrelic/dashboards) with trace-based panels
-- [Setting up trace-based alerts](/docs/alerts-management/trace-based-alerts/) for performance and error monitoring
-- [Correlating traces with logs](/docs/logs-pipelines/guides/trace/) for comprehensive troubleshooting
-- [Exploring the Service Map](/docs/userguide/service-map/) to better understand your application architecture
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-newrelic/dashboards) with trace-based panels
+- [Set up trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) for latency and errors
+- [Correlate traces with logs](https://signoz.io/docs/logs-pipelines/guides/trace/) for debugging
+- [Explore the Service Map](https://signoz.io/docs/userguide/service-map/) to understand dependencies
+- [Migrate your logs](https://signoz.io/docs/migration/migrate-from-newrelic/logs) next

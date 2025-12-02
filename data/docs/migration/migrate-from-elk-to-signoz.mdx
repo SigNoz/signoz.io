@@ -1,29 +1,42 @@
 ---
-date: 2025-05-06
+date: 2025-11-30
 id: migrate-from-elk-to-signoz
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: Migrate from ELK Stack
-description: Migrating from ELK Stack to SigNoz. How to migrate metrics, traces, and logs from Elasticsearch, Logstash, and Kibana to SigNoz.
+description: Learn how to migrate your metrics, traces/APM, logs, dashboards, and alerts from ELK Stack to SigNoz.
+doc_type: explanation
 ---
 
-SigNoz provides a unified [OpenTelemetry](https://signoz.io/why-opentelemetry/) (OTel) native solution for monitoring metrics, traces, and logs, offering a modern alternative with greater flexibility and control over your data compared to the traditional ELK stack. This guide will walk you through the steps to migrate your existing ELK stack (Elasticsearch, Logstash, Kibana, potentially with Elastic APM) setup to SigNoz, covering all essential signals: metrics, traces, and logs.
+SigNoz provides a unified OpenTelemetry-native solution for monitoring metrics, traces/APM, and logs, allowing for greater flexibility and control over your data. This guide outlines the process of migrating your existing ELK Stack (Elasticsearch, Logstash, Kibana) setup to SigNoz.
 
 ## Why Migrate to SigNoz?
 
-While the ELK stack has been a popular choice, migrating to SigNoz offers several advantages:
+While the ELK Stack is a powerful platform, migrating to SigNoz offers several distinct advantages:
 
--   **Unified Platform**: SigNoz provides a single, cohesive platform that eliminates the complexity of managing multiple components such as Elasticsearch clusters, Logstash pipelines, and Kibana.
--   **Native OpenTelemetry Support**: Built from the ground up to support OpenTelemetry, ensuring seamless integration with modern instrumentation standards and future-proof observability. ELK requires adapters or specific agents (like Elastic APM) that may not be purely OTel native.
--   **Simplified Operations**: Simple installation and upgrade process reduces the operational overhead and complexity associated with managing and scaling individual ELK components.
--   **Integrated Signals**: SigNoz correlates logs, metrics, and traces out-of-the-box, providing a more seamless debugging experience compared to correlating data across Kibana and potentially separate APM UIs.
--   **Resource Efficiency**: SigNoz often requires fewer resources compared to a similarly scaled Elasticsearch cluster, potentially lowering infrastructure costs.
+- **Unified Platform**: SigNoz provides a single, cohesive platform that eliminates the complexity of managing multiple components such as Elasticsearch clusters, Logstash pipelines, and Kibana.
+- **Native OpenTelemetry Support**: Built from the ground up to support OpenTelemetry, ensuring seamless integration with modern instrumentation standards and future-proof observability.
+- **Integrated Signals**: SigNoz correlates logs, metrics, and traces out-of-the-box, providing a more seamless debugging experience compared to correlating data across Kibana and separate APM UIs.
+- **Resource Efficiency**: SigNoz (built on ClickHouse) often requires fewer resources and offers faster query performance compared to Elasticsearch for observability workloads.
+- **Cost Efficiency**: SigNoz often provides significant cost savings with transparent pricing for both Cloud and Self-Hosted options.
+
+## Prerequisites
+
+Before starting your migration, ensure you have:
+
+- A SigNoz account (Cloud) or a running SigNoz instance (Self-Hosted).
+- Access to your ELK configuration (Filebeat, Logstash, Kibana) to view existing configurations.
+- Permissions to modify your application's instrumentation and infrastructure configuration.
 
 ## Migration Guides
 
-Please refer to the following guides for instructions on migrating different signals from your ELK Stack setup to SigNoz:
+Follow these specific guides to migrate each aspect of your observability stack:
 
--   [Metrics](https://signoz.io/docs/migration/migrate-from-elk/metrics) 
--   [Traces](https://signoz.io/docs/migration/migrate-from-elk/traces)
--   [Logs](https://signoz.io/docs/migration/migrate-from-elk/logs)
--   [Dashboards](https://signoz.io/docs/migration/migrate-from-elk/dashboards) 
--   [Alerts](https://signoz.io/docs/migration/migrate-from-elk/alerts)
+- **[Migrate Metrics](https://signoz.io/docs/migration/migrate-from-elk/metrics)**: Transition your Metricbeat modules and infrastructure metrics to OpenTelemetry and SigNoz.
+
+- **[Migrate Traces/APM](https://signoz.io/docs/migration/migrate-from-elk/traces)**: Replace Elastic APM agents with OpenTelemetry instrumentation for distributed tracing/APM.
+
+- **[Migrate Logs](https://signoz.io/docs/migration/migrate-from-elk/logs)**: Configure log collection using OpenTelemetry Collector or FluentBit to send logs to SigNoz.
+
+- **[Migrate Dashboards](https://signoz.io/docs/migration/migrate-from-elk/dashboards)**: Recreate your Kibana dashboards in SigNoz using our powerful query builder and visualization options.
+
+- **[Migrate Alerts](https://signoz.io/docs/migration/migrate-from-elk/alerts)**: Set up alerts in SigNoz to match your existing Kibana or ElastAlert rules.
