@@ -1590,6 +1590,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/userguide/envoy-metrics',
+                label: 'Envoy Metrics',
+              },
+              {
+                type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
                 label: 'Traefik Observability',
               },
