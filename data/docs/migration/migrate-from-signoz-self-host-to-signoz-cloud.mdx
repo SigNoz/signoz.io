@@ -1,150 +1,291 @@
 ---
-date: 2025-03-27
+date: 2025-12-01
 id: migrate-from-signoz-self-host-to-signoz-cloud
-tags : [SigNoz Cloud, Self-Host]
 title: Migrate from Self-Hosted SigNoz to SigNoz Cloud
-description: Process about how to migrate from Self-Hosted SigNoz to SigNoz Cloud
+description: Step-by-step guide to migrate your observability setup from self-hosted SigNoz to SigNoz Cloud, including telemetry pipelines, dashboards, alerts, and pipelines.
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
 ---
 
-## Why Migrate to SigNoz Cloud?
+## Overview
 
-Migrating to SigNoz Cloud offers a range of benefits that enhance your monitoring and observability experience:
+This guide walks you through migrating from a self-hosted SigNoz instance to SigNoz Cloud. The migration involves:
 
-- **Simplified Management**: By moving to the cloud, you eliminate the need for manual updates, scaling, and maintenance, ensuring a hassle-free experience.
+1. **Telemetry pipeline**: Redirecting your applications and collectors to send data to SigNoz Cloud
+2. **Dashboards and configuration**: Migrating dashboards, alerts, pipelines, saved views, and user settings via SigNoz support
 
-- **Scalability**: SigNoz Cloud automatically adjusts to your growing data needs, ensuring that you can scale up or down effortlessly without worrying about infrastructure limitations.
+<Admonition type="warning">
+Historical telemetry data (traces, logs, metrics) cannot be migrated. Only metadata and configurations are transferred. Plan your migration timeline accordingly if you need to retain access to historical data in your self-hosted instance.
+</Admonition>
 
-- **Security and Compliance**: The cloud version provides enhanced security features and compliance with industry standards, giving you peace of mind when it comes to data safety.
+## Prerequisites
 
-- **High Availability and Reliability**: Enjoy the benefits of cloud infrastructure's built-in redundancy and uptime guarantees, ensuring your monitoring setup is always available.
+Before starting the migration:
 
-- **Access to New Features**: Get access to the latest SigNoz features and updates automatically with no need to worry about migrations.
+- **SigNoz Cloud account**: [Sign up for SigNoz Cloud](https://signoz.io/teams/) if you haven't already
+- **Ingestion key**: Obtain your ingestion key from [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- **Region**: Note your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (`us`, `eu`, or `in`)
+- **Self-hosted access**: Admin access to your self-hosted SigNoz instance and its SQLite database
 
-## Steps to Migrate from Self-Hosted SigNoz to SigNoz Cloud
+## Migration Approach
+
+The recommended approach is to run both systems in parallel during migration:
+
+1. Configure your telemetry pipeline to send data to SigNoz Cloud
+2. Validate data is flowing correctly
+3. Migrate dashboards and configurations
+4. Continue running self-hosted until you're confident in the cloud setup
+5. Decommission self-hosted when ready
+
+This approach ensures zero data loss during the transition.
+
+## Step 1: Update Your Telemetry Pipeline
+
+Choose the tab that matches your current setup:
 
 <Tabs>
-<TabItem value="own-collector" label="Using OTel Collector Agent" default>
+<TabItem value="own-collector" label="Using Your Own OTel Collector" default>
 
-If you're using your own OpenTelemetry Collector [agent](https://opentelemetry.io/docs/collector/deployment/agent/) that forwards data to SigNoz self-hosted, you need to update both the endpoint and add the ingestion key.
+If you're using your own OpenTelemetry Collector that forwards data to SigNoz self-hosted, update the exporter configuration.
 
-### 1. Update Your OTel Collector Configuration
+### Update OTel Collector Configuration
 
-In your OpenTelemetry Collector configuration file (usually `config.yaml`), update the exporters section:
+In your OpenTelemetry Collector configuration file, update the `exporters` section to point to SigNoz Cloud:
 
-```yaml
+```yaml:otel-collector-config.yaml {3-6}
 exporters:
-  otlp:
-    endpoint: https://ingest.<region>.signoz.cloud:443
+  otlp/signoz-cloud:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
     headers:
-      signoz-ingestion-key: <your-ingestion-key>
+      signoz-ingestion-key: "SIGNOZ_INGESTION_KEY"
+    tls:
+      insecure: false
 ```
 
-Replace:
-- `<region>` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>` with your actual ingestion key from [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+Replace the following placeholders:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoint reference](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-### 2. Restart Your Collector
-Restart your OpenTelemetry Collector to apply the new configuration.
+Then update your `service.pipelines` to use the new exporter:
+
+```yaml:otel-collector-config.yaml {4,6,8}
+service:
+  pipelines:
+    traces:
+      exporters: [otlp/signoz-cloud]
+    metrics:
+      exporters: [otlp/signoz-cloud]
+    logs:
+      exporters: [otlp/signoz-cloud]
+```
+
+### Restart Your Collector
+
+Restart the OpenTelemetry Collector to apply the configuration changes.
 
 </TabItem>
-<TabItem value="direct-to-signoz" label="Direct to Self-Hosted SigNoz">
+<TabItem value="direct-to-signoz" label="Sending Directly to Self-Hosted SigNoz">
 
-If you're sending telemetry data directly from your applications to SigNoz self-hosted's [built-in collector](https://signoz.io/docs/architecture/), you have two migration options:
+If your applications send telemetry directly to SigNoz self-hosted's [built-in collector](https://signoz.io/docs/architecture/), you have two options:
 
-### Option A: Set up your own OTel Collector (Recommended)
+### Option A: Send Directly to SigNoz Cloud
 
-**Step 1: Deploy OpenTelemetry Collector**
+Update your application's OpenTelemetry SDK configuration to send directly to SigNoz Cloud. Set these environment variables:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+```
+
+Replace `<region>` and `<SIGNOZ_INGESTION_KEY>` with your values from [SigNoz Cloud settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+For language-specific configuration, see the [instrumentation guides](https://signoz.io/docs/instrumentation/).
+
+### Option B: Deploy Your Own OTel Collector (Recommended)
+
+Deploying a dedicated collector gives you more control over data processing, batching, and routing.
 
 <Tabs>
 <TabItem value="k8s" label="Kubernetes">
 
-Follow the [Kubernetes OTel Collector installation guide](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) to install OpenTelemetry Collector in your Kubernetes infrastructure. Make sure to configure it with the proper [ingestion endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for SigNoz Cloud.
+Follow the [Kubernetes OTel Collector guide](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) to deploy a collector in your cluster. Configure the exporter to send to SigNoz Cloud:
+
+```yaml:override-values.yaml
+global:
+  cloud: others
+  clusterName: <CLUSTER_NAME>
+  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+otelInsecure: false
+signozApiKey: <SIGNOZ_INGESTION_KEY>
+presets:
+  otlpExporter:
+    enabled: true
+  loggingExporter:
+    enabled: false
+```
+
+Then update your applications to send data to the collector instead of directly to SigNoz:
+- **gRPC**: `http://<collector-service>:4317`
+- **HTTP**: `http://<collector-service>:4318`
 
 </TabItem>
-<TabItem value="vm" label="VM/Server">
+<TabItem value="vm" label="VM / Bare Metal">
 
-Follow the [VM OTel Collector installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install OpenTelemetry Collector on your VM/server. Make sure to configure it with the proper [ingestion endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for SigNoz Cloud.
+Follow the [VM OTel Collector guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the collector. Configure the exporter to send to SigNoz Cloud:
+
+```yaml:otel-collector-config.yaml
+exporters:
+  otlp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    headers:
+      signoz-ingestion-key: "SIGNOZ_INGESTION_KEY"
+    tls:
+      insecure: false
+```
+
+Then update your applications to send data to the local collector:
+- **gRPC**: `http://localhost:4317`
+- **HTTP**: `http://localhost:4318`
 
 </TabItem>
 </Tabs>
 
-**Step 2: Update Application Configuration**
-Point your applications to send data to your new collector (for example `http://localhost:4317` for gRPC or `http://localhost:4318` for HTTP).
-
-### Option B: Send directly to SigNoz Cloud
-
-Update your application's telemetry configuration using [OpenTelemetry instrumentation](https://signoz.io/docs/instrumentation/) to send directly to SigNoz Cloud:
-
-```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-```
-
-Replace:
-- `<region>` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- `<your-ingestion-key>` with your actual ingestion key from [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-
 </TabItem>
 </Tabs>
 
-## Migrate Dashboards & Metadata
+## Step 2: Validate Data Flow
 
-Regardless of your setup, you'll need to migrate your dashboards and configurations:
+Before migrating dashboards, confirm that telemetry data is reaching SigNoz Cloud:
 
-- SigNoz support will handle the migration of your metadata, including dashboards, alerts, views, pipelines, users, and other configurations from your self-hosted instance to the cloud.
-- To begin the migration, provide the SQLite DB file from your self-hosted SigNoz instance. This can typically be found in the location where your SigNoz instance stores the database (usually `/path/to/sigNoz/database.db`).
-- Compress the SQLite DB file and send it to [SigNoz support](https://signoz.io/support/). Our team will manually import the necessary data from selected tables to ensure a smooth migration of your metadata.
-- Once the process is complete, you will have all your dashboards and metadata in SigNoz Cloud, ready for use.
+1. **Open SigNoz Cloud**
+3. **Check each signal type**:
+   - **Traces**: Go to Traces Explorer and filter by your service names
+   - **Metrics**: Go to Metrics Explorer and search for your application metrics
+   - **Logs**: Go to Logs Explorer and verify log ingestion
 
-## Verify Migration
+If data is not appearing, see the [Troubleshooting](#troubleshooting) section.
 
-- Confirm that data is flowing to SigNoz Cloud
-- Verify all dashboards and metadata have been migrated correctly by checking your cloud tenant.
+## Step 3: Migrate Dashboards and Configuration
 
-## Estimate SigNoz Cloud bill
+SigNoz support handles the migration of metadata from your self-hosted instance, including:
 
-To estimate your SigNoz Cloud bill on the basis of your SigNoz Self-Hosted usage, follow the steps below:
+- Dashboards
+- Alerts
+- Log pipelines
+- Saved views
+- User accounts and settings
 
-1. Truncate your usage tables:
+### How to Request Migration
+
+1. **Locate your SQLite database file**  
+
+2. **Export and compress the file**  
+   ```bash
+   # For Docker
+   cp ./signoz/deploy/docker/clickhouse-setup/data/signoz/signoz.db ./signoz-backup.db
+   gzip signoz-backup.db
+   ```
+
+3. **Submit to SigNoz support**  
+   Send the compressed file to [SigNoz support](https://signoz.io/support/) with your SigNoz Cloud organization details. The team will import your dashboards, alerts, and configurations.
+
+4. **Receive confirmation**  
+   Once the migration is complete, you'll receive confirmation and can verify your configurations in SigNoz Cloud.
+
+## Step 4: Verify Complete Migration
+
+After receiving confirmation from support:
+
+1. **Review dashboards**: Open each migrated dashboard and verify panels display data correctly
+2. **Test alerts**: Check that alert rules are configured and evaluate against incoming data
+3. **Verify pipelines**: If you use log pipelines, confirm they're processing logs as expected
+4. **Check saved views**: Verify your saved views in Traces, Logs, and Metrics explorers
+
+## Step 5: Decommission Self-Hosted (Optional)
+
+Once you're confident the migration is complete:
+
+1. **Set a cutover date**: Communicate to your team when self-hosted access will end
+2. **Update documentation**: Update internal runbooks to reference SigNoz Cloud
+3. **Shut down self-hosted**: Stop the SigNoz services and reclaim infrastructure resources
+
+## Estimate Your SigNoz Cloud Costs
+
+To estimate your SigNoz Cloud bill based on current self-hosted usage, collect usage data from your existing instance.
+
+### Reset Usage Tables
+
+Connect to your self-hosted ClickHouse instance and truncate the usage tables to start fresh measurement:
+
+```sql
+TRUNCATE TABLE signoz_traces.usage ON CLUSTER cluster;
+TRUNCATE TABLE signoz_metrics.usage ON CLUSTER cluster;
+TRUNCATE TABLE signoz_logs.usage ON CLUSTER cluster;
 ```
-truncate table signoz_metrics.usage on cluster cluster;
-truncate table signoz_metrics.usage on cluster cluster;
-truncate table signoz_logs.usage on cluster cluster;
-```
 
-2. Restart your SigNoz OTel collectors
+### Collect Usage Data
 
-3. Keep on running and ingesting normal volumes for over 24hrs
+1. Restart your SigNoz OTel collectors to begin fresh tracking
+2. Let the system run with normal traffic for **at least 24 hours**
+3. Connect to ClickHouse following the [connection guide](https://signoz.io/docs/operate/clickhouse/connect-to-clickhouse/)
+4. Export usage data to CSV files:
 
-4. Now connect to ClickHouse
-
-Follow this [documentation](https://signoz.io/docs/operate/clickhouse/connect-to-clickhouse/)
-
-Run below queries to get dump of usage tables:
-
-The below query retrieves all records from the `signoz_logs.usage` table into a CSV file named `logs_usage.csv` with column names as headers.
-
-```
-SELECT *
-FROM signoz_logs.usage
-INTO OUTFILE 'logs_usage.csv'
-FORMAT CSVWithNames
-```
-
-The below query retrieves all records from the `signoz_traces.usage` table into a CSV file named `traces_usage.csv` with column names as headers.
-
-```
-SELECT *
-FROM signoz_traces.usage
+```sql
+-- Export traces usage
+SELECT * FROM signoz_traces.usage
 INTO OUTFILE 'traces_usage.csv'
-FORMAT CSVWithNames
-```
+FORMAT CSVWithNames;
 
-The below query retrieves all records from the `signoz_metrics.usage` table into a CSV file named `metrics_usage.csv` with column names as headers.
-```
-SELECT *
-FROM signoz_metrics.usage
+-- Export metrics usage  
+SELECT * FROM signoz_metrics.usage
 INTO OUTFILE 'metrics_usage.csv'
-FORMAT CSVWithNames
+FORMAT CSVWithNames;
+
+-- Export logs usage
+SELECT * FROM signoz_logs.usage
+INTO OUTFILE 'logs_usage.csv'
+FORMAT CSVWithNames;
 ```
 
+Contact [SigNoz support](https://signoz.io/support/) with these CSV files for a cost estimate
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Data not appearing in SigNoz Cloud
+
+**Symptoms**: Services or telemetry data not visible in SigNoz Cloud after updating configuration.
+
+**Check the following**:
+
+1. **Verify endpoint format** — Ensure you're using `https://ingest.<region>.signoz.cloud:443` with the correct region
+2. **Check ingestion key** — Confirm the key is valid and hasn't been revoked in SigNoz Cloud settings
+3. **Test network connectivity** — From your collector/application host:
+   ```bash
+   curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+   ```
+   You should receive an HTTP response (even if it's an error about missing data)
+4. **Check collector logs** — Look for export errors in your OTel Collector logs
+5. **Verify TLS** — SigNoz Cloud requires HTTPS. Ensure your exporter is configured for secure connections
+
+### Dashboards showing "No Data" after migration
+
+**Symptoms**: Migrated dashboards exist but panels show no data.
+
+**Likely causes**:
+- Service names or metric names differ between environments
+- Time range is set to before migration started
+
+**Resolution**:
+1. Adjust the dashboard time range to after you started sending data to SigNoz Cloud
+2. Edit panel queries to match the service/metric names in your new environment
+</details>
+
+## Next Steps
+
+- [Configure alerts in SigNoz Cloud](https://signoz.io/docs/alerts-management/)
+- [Set up SSO for your organization](https://signoz.io/docs/userguide/sso-authentication/)
+- [Explore SigNoz Cloud features](https://signoz.io/docs/cloud/)

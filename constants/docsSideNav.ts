@@ -2427,6 +2427,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/litellm-observability',
+        label: 'LiteLLM',
+        type: 'doc',
+      },
+      {
         route: '/docs/llamaindex-observability',
         label: 'LlamaIndex',
         type: 'doc',
@@ -2988,8 +2993,33 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/migration/opentelemetry-datadog-receiver',
-            label: 'Using Datadog OTLP receiver',
+            route: '/docs/migration/migrate-from-datadog/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/alerts',
+            label: 'Migrating Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver',
+            label: 'Using Datadog Receiver',
           },
         ],
       },
@@ -3116,22 +3146,9 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'From OpenTelemetry',
-        type: 'category',
-        isExpanded: false,
+        type: 'doc',
         route: '/docs/migration/migrate-from-opentelemetry-to-signoz',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/migration/migrate-from-opentelemetry/cloud',
-            label: 'Migrate to SigNoz Cloud',
-          },
-          {
-            type: 'doc',
-            route: '/docs/migration/migrate-from-opentelemetry/self-hosted',
-            label: 'Migrate to Self-Hosted SigNoz',
-          },
-        ],
+        label: 'From OpenTelemetry',
       },
       {
         type: 'doc',

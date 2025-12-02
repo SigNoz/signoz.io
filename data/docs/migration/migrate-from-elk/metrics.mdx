@@ -1,279 +1,258 @@
 ---
-date: 2025-05-06
+date: 2025-12-01
 id: metrics
-tags : [SigNoz Cloud, Self-Host]
-title: Migrate metrics from ELK Stack
-description: Migrating metrics from ELK Stack to SigNoz. How to migrate metrics from ELK to SigNoz.
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Metrics from ELK Stack
+description: Learn how to migrate your metrics from ELK Stack (Metricbeat) to SigNoz using OpenTelemetry.
+doc_type: howto
 ---
 
-Migrating metrics from an existing ELK stack (specifically Elastic Metricbeat) to SigNoz involves configuring the [OpenTelemetry](https://signoz.io/why-opentelemetry/) (OTel) Collector to replicate your metric collection and send data to SigNoz. The exact steps depend on how Metricbeat was configured, particularly which modules were in use.
+## Overview
 
-This documentation outlines common migration paths.
+This guide walks you through migrating metrics from the ELK Stack (specifically Metricbeat) to SigNoz. You will:
 
-## Option 1: Leveraging Existing Prometheus Exporters
+1. Check your Metricbeat modules and configuration
+2. Set up metric collection with OpenTelemetry
+3. Map Metricbeat modules to OpenTelemetry receivers
+4. Validate metrics are flowing correctly to SigNoz
 
-If your Metricbeat setup primarily used the `prometheus` module to scrape existing Prometheus exporters (like `kube-state-metrics` or application-specific exporters), the transition can be straightforward. You can configure the OpenTelemetry Collector to scrape these same endpoints.
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-1.  **Install the OpenTelemetry Collector:** If you haven't already, install the Collector in your environment.
-    *   [Instructions for VMs/Bare Metal](/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)
-    *   [Instructions for Kubernetes](/docs/install/kubernetes/)
-2.  **Configure the Prometheus Receiver:** Add the Prometheus receiver configuration to your OpenTelemetry Collector (`config.yaml`) to scrape your existing targets.
-    *   [Configuration steps for SigNoz Cloud](/docs/userguide/send-metrics-cloud/#enable-a-prometheus-receiver)
-    *   [Configuration steps for Self-Hosted SigNoz](/docs/userguide/send-metrics/#enable-a-prometheus-receiver)
+## Key Differences: ELK vs SigNoz
 
-This approach allows you to switch the backend to SigNoz without immediately changing your existing metric exposition setup.
+| Aspect | ELK Stack | SigNoz |
+|--------|-----------|--------|
+| **Collection** | Metricbeat, Elastic Agent | OpenTelemetry Collector |
+| **Data Model** | Elasticsearch Documents | OpenTelemetry Metrics |
+| **Query Language** | KQL, Lucene, TSVB | Query Builder, PromQL, ClickHouse SQL |
+| **Storage** | Elasticsearch (Indices) | ClickHouse (Columnar) |
 
-## Option 2: Mapping Metricbeat Modules to OTel Collector 
+SigNoz uses the OpenTelemetry Collector for metric collection, which offers a wide range of receivers to replace Metricbeat modules.
 
-The core of the migration involves translating the configuration of each Metricbeat module currently in use to an equivalent OpenTelemetry Collector receiver configuration, along with necessary processors and the exporter for SigNoz.
+## Prerequisites
 
-If you were using specific Metricbeat modules (like `system`, `docker`, `kubernetes`), you need to replace them with equivalent OpenTelemetry Collector receivers.
+Before starting, ensure you have:
 
-Here are some common Metricbeat modules and their OpenTelemetry Collector counterparts:
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your Metricbeat configuration (`metricbeat.yml`, `modules.d/`)
+- Administrative access to deploy the OpenTelemetry Collector
 
-| Metricbeat Module                                                                                            | OTel Collector                                                                                                                               | Purpose                                                                 |
-| :----------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- |
-| [`system`](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-system.html)           | [`hostmetrics`](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver)                             | Collects OS-level metrics (CPU, Mem, Disk, Net, Filesystem, Load)       |
-| [`docker`](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-docker.html)           | [`docker_stats`](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/dockerstatsreceiver)                           | Collects container stats from Docker daemon API                         |
-| [`kubernetes`](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-kubernetes.html) (kubelet source) | [`kubeletstats`](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kubeletstatsreceiver)                           | Collects node/pod/container/volume stats from Kubelet API               |
-| [`prometheus`](https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-prometheus.html)     | [`prometheus`](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver)                             | Scrapes Prometheus-formatted metrics endpoints (like Kube-State-Metrics) |
+## Step 1: Assess Your Current Metrics
 
-You can find many other receivers in the [OpenTelemetry Collector Contrib repository](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver) or the [OpenTelemetry Registry](https://opentelemetry.io/ecosystem/registry/?component=receiver).
+Before migrating, inventory what you're collecting with Metricbeat.
 
-### Step 1: Plan Your Migration
+### Identify Active Modules
 
-Before configuring the OpenTelemetry Collector, follow these planning steps:
+Review your `metricbeat.yml` and `modules.d/` directory to see which modules are enabled. Common modules include:
 
-1.  **Identify Active Metricbeat Modules:** Review your `metricbeat.yml` and `modules.d/` directory to determine which modules (system, docker, kubernetes, prometheus, etc.) are enabled and collecting metrics.
-2.  **Analyze Module Configuration:** For each active module, note its specific configuration: metricsets enabled, collection period, connection endpoints, authentication details, and any processors applied.
-3.  **Find Equivalent OTel Receiver:** Consult the OpenTelemetry Collector Contrib registry or documentation to find the receiver that provides similar functionality.
-4.  **Identify Necessary Processors:** Determine which OTel processors are needed to replicate Metricbeat's metadata enrichment (like `add_host_metadata`, `add_cloud_metadata`, `add_kubernetes_metadata`) and ensure robust operation (like `batch`, `memory_limiter`). Common OTel processors include `resourcedetection`, `k8sattributes`, `batch`, and `memory_limiter`.
-5.  **Determine Exporter Needs:** Confirm the endpoint and authentication details required for your SigNoz instance (Cloud or Self-hosted) to configure the `otlp` or `otlphttp` exporter.
+- `system` (CPU, memory, disk)
+- `docker` (Container stats)
+- `kubernetes` (Kubelet stats)
+- `prometheus` (Scraping endpoints)
+- `nginx`, `redis`, `mysql`, etc.
 
-### Step 2: Configure OTel Receivers (Replacing Metricbeat Modules)
+### Categorize Your Metrics
 
-Now, configure the OTel receivers identified in Step 1 to match the functionality of your active Metricbeat modules. Add these configurations under the `receivers:` section in your Collector's `config.yaml`.
+Group your metrics by source type:
 
-Here are common mappings and example configurations:
+| Metricbeat Module | OTel Receiver | Migration Path |
+|-------------------|---------------|----------------|
+| **system** | `hostmetrics` | [Use Host Metrics Receiver](#from-system-metrics) |
+| **docker** | `docker_stats` | [Use Docker Stats Receiver](#from-docker-metrics) |
+| **kubernetes** | K8s Infra Chart | [Use K8s Infra Chart](#from-kubernetes-metrics) |
+| **prometheus** | `prometheus` | [Use Prometheus Receiver](#from-prometheus-endpoints) |
+| **Other Modules** | Various | Check [OTel Registry](https://opentelemetry.io/ecosystem/registry/?component=receiver) to configure [OTel receivers](https://signoz.io/docs/userguide/otel-metrics-receivers/) |
 
-#### Metricbeat `system` -> OTel `hostmetrics` Receiver
+## Step 2: Set Up the OpenTelemetry Collector
 
-*   **Purpose:** The `hostmetrics` receiver collects OS-level metrics like CPU, memory, disk I/O, network I/O, filesystem usage, and system load, directly replacing the core functionality of the Metricbeat `system` module. Process and paging/swap metrics can also be collected.
-*   **Configuration:** Enable the receiver under the `receivers:` section. Set the `collection_interval` to match the `period` used in Metricbeat. Configure the specific metrics to gather using the `scrapers:` block, enabling entries like `cpu`, `memory`, `disk`, `network`, `filesystem`, and `load`. Filters can be applied within scrapers, for instance, to include/exclude specific filesystem types or network interfaces. If running the Collector in a container to monitor the host OS, mount the host's root filesystem (or relevant parts like `/proc`, `/sys/fs/cgroup`) into the container and set `root_path: /hostfs` in the receiver config. The `process` scraper can be enabled but might require the Collector to run with elevated permissions.
-*   **Example YAML (collecting core system metrics every 60s):**
-    ```yaml
-    receivers:
-      hostmetrics:
-        collection_interval: 60s # Match Metricbeat's 'period' setting
-        # root_path: /hostfs # Uncomment if Collector runs in a container monitoring the host OS
-        scrapers:
-          cpu:      # Collects CPU utilization, time, etc.
-          memory:   # Collects memory usage (RAM, swap)
-          disk:     # Collects disk I/O operations, time, etc.
-          network:  # Collects network I/O bytes, packets, errors, connections
-          filesystem: # Collects filesystem usage (space used/free)
-            # Example: Exclude specific filesystem types if needed (e.g., virtual/temporary)
-            # include_fs_types:
-            #   match_type: strict
-            #   fs_types: [ext4, xfs, btrfs] # List desired filesystem types
-          load:     # Collects system load average (1m, 5m, 15m)
-          # Optional scrapers:
-          # process: # Collects per-process CPU/memory (may require elevated permissions)
-          #   mute_process_name_error: true # Mute errors if process name can't be read
-          #   mute_process_exe_error: true  # Mute errors if executable path can't be read
-          #   mute_process_io_error: true   # Mute errors if I/O stats can't be read
-          # paging: # Collects paging/swap activity
-    ```
+Install the OpenTelemetry Collector if you haven't already:
 
-#### Metricbeat `docker` -> OTel `docker_stats` Receiver
+1. [Install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) in your environment.
 
-*   **Purpose:** Replaces the Metricbeat `docker` module by querying the Docker daemon API for container statistics (CPU, memory, network, block I/O). Requires Docker API v1.22+ and runs on Linux.
-*   **Configuration:** Specify the Docker daemon endpoint, typically `unix:///var/run/docker.sock`. Set the `collection_interval` and `timeout`. Use `container_labels_to_metric_labels` or `env_vars_to_metric_labels` to map container metadata onto metric labels, similar to Metricbeat's `add_docker_metadata` processor. Filter which containers are monitored using `excluded_images` (supports strings, regex, globs). Set `api_version` if the Docker daemon requires a specific version. The `metrics` section allows enabling/disabling specific metrics; importantly, ensure `container.cpu.utilization` is enabled as `container.cpu.percent` is deprecated. The Collector needs access to the Docker socket, usually via a volume mount in containerized deployments.
-*   **Example YAML (collecting every 10s, mapping label 'app'):**
-    ```yaml
-    receivers:
-      docker_stats:
-        endpoint: "unix:///var/run/docker.sock" # Default Docker socket path
-        collection_interval: 10s # Match Metricbeat's 'period'
-        timeout: 5s # Timeout for Docker API calls
-        # api_version: "1.41" # Specify only if non-default API version is needed
-        # Example: Map container label 'app' to metric label 'service_name'
-        container_labels_to_metric_labels:
-          app: service_name # Key is container label, value is desired metric label
-        # Example: Map environment variable 'SERVICE_TIER' to metric label 'tier'
-        # env_vars_to_metric_labels:
-        #   SERVICE_TIER: tier
-        # Example: Exclude containers with image names matching 'test-*' or exactly 'debug-tools'
-        # excluded_images:
-        #   - 'test-*'
-        #   - 'debug-tools'
-        # Ensure standard metrics are enabled (defaults are usually sufficient)
-        # Explicitly enable the current standard CPU metric:
-        metrics:
-          container.cpu.utilization:
-            enabled: true
-          # Optional: Explicitly disable the deprecated CPU metric if causing issues
-          # container.cpu.percent:
-          #  enabled: false
-    ```
+2. Configure the OTLP exporter for metrics
 
-#### Metricbeat `kubernetes` (kubelet source) -> OTel `kubeletstats` Receiver
+## Step 3: Migrate Each Metric Source
 
-*   **Purpose:** Replaces the Metricbeat `kubernetes` module functionality that collects metrics directly from the kubelet's `/stats/summary` API endpoint. This includes metrics for nodes, pods, containers, and volumes running on that specific node.
-*   **Configuration:** Set the `collection_interval`. Configure authentication using `auth_type`. Common options are `serviceAccount` (uses the pod's service account token and CA cert found at `/var/run/secrets/kubernetes.io/serviceaccount/`) or `kubeConfig` (uses `~/.kube/config` or `KUBECONFIG` env var, often for collectors outside the cluster). The `tls` option allows specifying explicit certificate paths. Set the `endpoint`, typically targeting the secure kubelet port 10250 (e.g., `https://${env:K8S_NODE_NAME}:10250`). The `K8S_NODE_NAME` environment variable must be passed into the Collector pod using the Downward API (`fieldRef: spec.nodeName`) when running as a DaemonSet. Use `insecure_skip_verify: true` if the kubelet certificate is not signed by a trusted CA (common in some managed K8s like EKS or self-signed setups). Specify which `metric_groups` to collect: `node`, `pod`, `container`, `volume`. Use `extra_metadata_labels` to add useful identifiers like `container.id` to the metrics. Requires a ServiceAccount with appropriate RBAC permissions (ClusterRole allowing GET access to `/nodes/proxy` and `/nodes/stats`). This receiver is almost always deployed as a DaemonSet.
-*   **Example YAML (DaemonSet, secure port 10250, service account auth, 10s interval):**
-    ```yaml
-    receivers:
-      kubeletstats:
-        collection_interval: 10s # Match Metricbeat's 'period'
-        auth_type: serviceAccount # Use pod's service account token
-        # Endpoint uses K8S_NODE_NAME env var injected via Downward API in DaemonSet spec
-        endpoint: "https://${env:K8S_NODE_NAME}:10250"
-        # Set to true only if necessary, e.g., self-signed certs or EKS default setup
-        insecure_skip_verify: true
-        # Specify which groups of metrics to collect
-        metric_groups:
-          - node      # Node-level metrics (CPU, memory, filesystem, network)
-          - pod       # Pod-level metrics (CPU, memory, network)
-          - container # Container-level metrics (CPU, memory)
-          - volume    # Volume metrics (available, used bytes, etc.)
-        # Optional: Add container ID as a label to container metrics
-        # extra_metadata_labels:
-        #  - container.id
-    ```
+Work through each module from your inventory. For a complete list of supported receivers, see [Send Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/).
 
-### Step 3: Configure Essential OTel Processors
+### From System Metrics
 
-Processors transform or enrich telemetry data. Add these configurations under the `processors:` section in your `config.yaml` to replicate Metricbeat metadata addition and ensure stability.
+Replace the Metricbeat `system` module with the `hostmetrics` receiver. See [Host Metrics](https://signoz.io/docs/userguide/hostmetrics/) for detailed configuration.
 
-#### `batch` Processor (Recommended for Performance)
-
-*   **Purpose:** This is crucial for performance and efficiency. It groups metrics (and traces/logs) into batches before sending them to the exporter, significantly reducing the number of outbound network connections and improving throughput. Recommended defaults often work well, but `send_batch_size` and `timeout` can be tuned.
-*   **Example YAML:**
-    ```yaml
-    processors:
-      batch:
-        # Sends batch if size reaches 8192 or 1 second passes
-        send_batch_size: 8192
-        timeout: 1s
-        # Optional: Limit max batch size in bytes (e.g., 1MB) if needed for backend limits
-        # send_batch_max_size: 1048576
-    ```
-
-#### `memory_limiter` Processor (Recommended for Stability)
-
-*   **Purpose:** While not directly replacing a Metricbeat feature, this processor is a best practice for Collector stability. It prevents the Collector process from consuming excessive memory and crashing under heavy load by checking memory usage periodically and forcing garbage collection or dropping data if limits are exceeded.
-*   **Example YAML:**
-    ```yaml
-    processors:
-      memory_limiter:
-        # Check memory usage every second
-        check_interval: 1s
-        # Set memory limit (e.g., 1 GiB). Adjust based on available resources.
-        limit_mib: 1024
-        # Set spike limit (e.g., 25% of limit_mib). Allows temporary spikes.
-        spike_limit_mib: 256
-        # Recommended for metrics pipeline: use % of limit rather than fixed MiB
-        # limit_percentage: 75
-        # spike_limit_percentage: 25
-    ```
-
-#### `resourcedetection` Processor (Replaces `add_host_metadata`, `add_cloud_metadata`)
-
-*   **Purpose:** This processor automatically adds resource attributes identifying the environment where the Collector is running. It replaces Metricbeat's `add_host_metadata` and `add_cloud_metadata` processors. Enable the detectors relevant to your environment (`env`, `system`, `ec2`, `gcp`, `azure`, etc.).
-*   **Example YAML:**
-    ```yaml
-    processors:
-      resourcedetection:
-        # Detectors to use: 'env' reads OTEL_RESOURCE_ATTRIBUTES, 'system' gets hostname/OS.
-        # Add cloud provider detectors (ec2, gcp, azure) if applicable.
-        detectors: [env, system, ec2] # Example for AWS EC2
-        # Timeout for detection process
-        timeout: 2s
-        # By default, detected attributes won't override existing ones. Set to true if needed.
-        # override: false
-    ```
-
-#### `k8sattributes` Processor (Replaces `add_kubernetes_metadata`)
-
-*   **Purpose:** Essential in Kubernetes environments. It enriches telemetry data with Kubernetes metadata like pod name, namespace, node name, deployment name, etc., by correlating the data source (e.g., pod IP) with Kubernetes API information. This replaces Metricbeat's `add_kubernetes_metadata`. It's crucial for filtering and grouping metrics by K8s objects in SigNoz. Requires RBAC permissions for the Collector's ServiceAccount. When running as a DaemonSet, it needs the node name (via `filter.node_from_env_var`) to associate data correctly.
-*   **Example YAML:**
-    ```yaml
-    processors:
-      k8sattributes:
-        # How the processor authenticates to the K8s API server
-        auth_type: serviceAccount # Or 'kubeConfig' if running outside the cluster
-        # When running as DaemonSet/agent, pod IP is usually available directly from connection.
-        # Set passthrough: true if receiver already provides pod IP (less common for metrics).
-        passthrough: false
-        # Required when running as DaemonSet: Specify env var holding the node name
-        filter:
-          node_from_env_var: K8S_NODE_NAME # Must match the env var name in the pod spec
-        # Define which metadata to extract and add as resource attributes
-        extract:
-          metadata:
-            # Standard recommended fields
-            - k8s.pod.name
-            - k8s.pod.uid
-            - k8s.namespace.name
-            - k8s.node.name
-            - k8s.pod.start_time
-            # Add owner references if needed (e.g., deployment, replicaset)
-            - k8s.deployment.name
-            - k8s.replicaset.name
-            - k8s.statefulset.name
-            - k8s.daemonset.name
-            - k8s.cronjob.name
-            - k8s.job.name
-          # Example: Extract specific pod labels (e.g., 'app' label)
-          # labels:
-          #   - key: app # Extracts label with key 'app'
-          #     from: pod # Source is the pod object
-          # Example: Extract specific pod annotations
-          # annotations:
-          #   - key: mycompany.com/owner # Extracts annotation with this key
-          #     from: pod
-    ```
-
-### Step 4: Configure the OTLP Exporter for SigNoz
-
-To configure a specific receiver and add it to your Collector's pipeline, follow the instructions for your SigNoz setup:
-
-*   [Adding Receivers for Self-Hosted SigNoz](/docs/userguide/send-metrics/#enable-a-specific-metric-receiver)
-*   [Adding Receivers for SigNoz Cloud](/docs/userguide/send-metrics-cloud/#adding-a-new-receiver-to-your-otel-collector-config)
-
-## Option 3: Switching to Native OTLP Metrics
-
-For new applications, or as a long-term goal when migrating away from legacy exporters, instrument your applications directly using OpenTelemetry SDKs and export metrics via the OpenTelemetry Protocol (OTLP).
-
-1.  [Instrument your applications with OpenTelemetry SDKs](/docs/instrumentation/) for your specific language.
-2.  Configure the SDK's OTLP exporter to send metrics directly to your OpenTelemetry Collector (or the SigNoz OTLP endpoint). Example for Python:
-
-```python
-from opentelemetry import metrics
-from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
-
-# Service name helps identify your metrics in SigNoz
-resource = Resource(attributes={
-    SERVICE_NAME: "your-service-name"
-})
-
-# Configure the OTLP exporter endpoint
-# For SigNoz Cloud: Use the region-specific OTLP endpoint and include headers for auth
-# For Self-Hosted SigNoz: Use your Collector's OTLP endpoint (e.g., http://otel-collector:4317)
-reader = PeriodicExportingMetricReader(
-    OTLPMetricExporter(endpoint="http://<SigNoz-OTLP-Endpoint-Address>:4317") # Adjust endpoint/protocol (grpc/http)
-    # headers=("signoz-ingestion-key", "<YOUR_SIGNOZ_INGESTION_KEY>") # Required for SigNoz Cloud
-)
-provider = MeterProvider(resource=resource, metric_readers=[reader])
-metrics.set_meter_provider(provider)
+**Metricbeat `system`:**
+```yaml
+- module: system
+  period: 10s
+  metricsets: ["cpu", "memory", "network", "filesystem"]
 ```
 
-To confirm that the metrics are being sent to SigNoz, you can use the Metrics Explorer in SigNoz. To navigate to Metrics Explorer, simply click `Metrics` on the left sidebar.
+**OTel `hostmetrics`:**
+```yaml:otel-collector-config.yaml
+receivers:
+  hostmetrics:
+    collection_interval: 10s
+    scrapers:
+      cpu:
+      memory:
+      network:
+      filesystem:
+      load:
+      disk:
+```
 
-The Metrics Explorer page will allow you to easily query metrics using built-in visual query builder. This will enable you to verify that the metrics are being sent correctly to SigNoz, including visualizing them, seeing their descriptions, types, and more.
+Enable it in the pipeline:
+```yaml:otel-collector-config.yaml {4}
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [batch, resourcedetection]
+      exporters: [otlp]
+```
 
-<Figure src="/img/docs/migration/metrics-explorer.webp" alt="Metrics Explorer in SigNoz" caption="A query in SigNoz Metrics Explorer" />
+### From Docker Metrics
+
+Replace the Metricbeat `docker` module with the `docker_stats` receiver. See [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/) for detailed configuration.
+
+**Metricbeat `docker`:**
+```yaml
+- module: docker
+  period: 10s
+  hosts: ["unix:///var/run/docker.sock"]
+```
+
+**OTel `docker_stats`:**
+```yaml:otel-collector-config.yaml
+receivers:
+  docker_stats:
+    endpoint: "unix:///var/run/docker.sock"
+    collection_interval: 10s
+    timeout: 5s
+    metrics:
+      container.cpu.utilization:
+        enabled: true
+```
+
+### From Kubernetes Metrics
+
+For Kubernetes environments, we recommend using the **SigNoz K8s Infra Helm chart**.
+
+When installed, it automatically collects all necessary metrics (node, pod, container, volume) without requiring manual receiver configuration.
+
+See [Install K8s Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) for setup instructions.
+
+### From Prometheus Endpoints
+
+If you used Metricbeat's `prometheus` module to scrape endpoints, use the OTel `prometheus` receiver. See [Prometheus Metrics](https://signoz.io/docs/userguide/prometheus-metrics/) for detailed configuration.
+
+**Metricbeat `prometheus`:**
+```yaml
+- module: prometheus
+  period: 10s
+  hosts: ["localhost:9090"]
+  metrics_path: /metrics
+```
+
+**OTel `prometheus`:**
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'my-app'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['localhost:9090']
+```
+
+### From Application Custom Metrics
+
+If you were sending custom metrics using Elastic APM agents, migrate to OpenTelemetry Metrics SDKs.
+
+1. Initialize the MeterProvider in your application.
+2. Create instruments (Counters, Gauges, Histograms).
+3. Record values.
+
+See [Send Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/) for language-specific guides.
+
+### From Cloud Integrations
+
+If you were using Metricbeat modules for cloud providers (AWS, Azure, GCP), use SigNoz's native cloud integrations or the OpenTelemetry Collector's cloud receivers.
+
+- **AWS**: [AWS Cloud Integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/)
+- **Azure**: [Azure Monitoring](https://signoz.io/docs/azure-monitoring/)
+- **GCP**: [GCP Monitoring](https://signoz.io/docs/gcp-monitoring/)
+
+### From Synthetics
+
+If you were using Elastic Uptime (Heartbeat), migrate to SigNoz HTTP Host Metrics.
+
+SigNoz supports monitoring HTTP endpoints for availability and latency. See [Monitor HTTP Endpoints](https://signoz.io/docs/monitor-http-endpoints/).
+
+## Step 4: Configure Processors
+
+To replicate Metricbeat's metadata enrichment (like `add_host_metadata`, `add_kubernetes_metadata`), configure OTel processors.
+
+### Resource Detection
+
+Replaces `add_host_metadata` and `add_cloud_metadata`.
+
+```yaml:otel-collector-config.yaml
+processors:
+  resourcedetection:
+    detectors: [env, system, ec2, gcp, azure]
+    timeout: 2s
+```
+
+
+
+## Validate
+
+Verify metrics are flowing correctly by comparing against your source inventory.
+
+### Check Metrics Are Arriving
+
+1. In SigNoz, navigate to **Metrics** in the left sidebar.
+2. Use the **List View** to browse available metrics.
+3. Search for metrics like `system_cpu_time`, `container_cpu_usage_seconds`, etc.
+
+<Figure src="/img/docs/migration/metrics-explorer.webp" alt="SigNoz Metrics Explorer showing list of available metrics" caption="SigNoz Metrics Explorer interface" />
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Metrics not appearing in SigNoz
+
+1. **Check Collector status**: Verify the OpenTelemetry Collector is running.
+2. **Verify endpoint**: Confirm `ingest.<region>.signoz.cloud:443` matches your account region.
+3. **Check ingestion key**: Ensure `signoz-ingestion-key` header is set correctly.
+4. **Test connectivity**: Verify outbound HTTPS (port 443) is allowed.
+
+### Missing attributes
+
+If metrics appear but lack expected attributes (like `host.name` or `k8s.pod.name`):
+
+1. **Check processors**: Ensure `resourcedetection` processor is enabled in the pipeline.
+2. **Verify permissions**: Ensure the Collector ServiceAccount has permissions to read K8s metadata.
+
+### Metric names differ
+
+OpenTelemetry metric names may differ from Metricbeat names.
+- Metricbeat: `system.cpu.total.pct`
+- OTel: `system.cpu.utilization`
+
+Use the [OpenTelemetry Registry](https://opentelemetry.io/ecosystem/registry/) to find exact metric names for each receiver.
+
+</details>
+
+## Next Steps
+
+Once your metrics are flowing to SigNoz:
+
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-elk/dashboards) to visualize metrics
+- [Set up alerts](https://signoz.io/docs/migration/migrate-from-elk/alerts) based on your metrics
+- [Migrate traces](https://signoz.io/docs/migration/migrate-from-elk/traces) for end-to-end observability

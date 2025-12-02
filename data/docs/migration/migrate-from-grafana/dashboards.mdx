@@ -1,42 +1,54 @@
 ---
-date: 2025-04-22
+date: 2025-11-30
 id: migrate-from-grafana-dashboards
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: Migrate Dashboards from LGTM Stack
-description: Migrating dashboards from LGTM Stack to SigNoz. How to migrate dashboards from LGTM Stack to SigNoz.
+description: Learn how to migrate your Grafana dashboards to SigNoz using templates or custom creation.
+doc_type: howto
 ---
 
-Grafana dashboards need to be recreated in SigNoz due to differences in the dashboard JSON schemas between the platforms.
+Grafana dashboards need to be recreated in SigNoz due to differences in the dashboard JSON schemas between the platforms. However, SigNoz provides tools and templates to make this process smoother.
+
+## Prerequisites
+
+- A SigNoz account (SigNoz Cloud or Self-Hosted).
+- Access to your existing Grafana dashboards (for reference).
+
+## Migration Strategies
 
 ### Using Dashboard Templates
 
-SigNoz provides several pre-built dashboard templates:
+SigNoz provides several pre-built dashboard templates that match common Grafana dashboards:
 
-1. Find the dashboard you want to migrate in [SigNoz Dashboard Templates repository](https://github.com/SigNoz/dashboards)
-2. Navigate to **Dashboards** in SigNoz
-3. Click **+ New Dashboard**
-4. Click **Import JSON**
-5. Either paste or upload the dashboard JSON file
+1. **Find Template**  
+   Browse the [SigNoz Dashboard Templates repository](https://github.com/SigNoz/dashboards) to find a matching dashboard.
+
+2. **Import Dashboard**  
+   - Navigate to **Dashboards** in SigNoz.
+   - Click **+ New Dashboard**.
+   - Click **Import JSON**.
+   - Either paste the JSON content or upload the file from the repository.
 
 ### Creating Custom Dashboards
 
-In case there is no existing dashboard template that you can use, you can create a custom dashboard in SigNoz. Please follow [Manage Dashboards in SigNoz documentation](/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard/) for more details.
+If there is no existing template, you can create a custom dashboard in SigNoz.
 
-### Requesting Custom Dashboards
+- Follow the [Manage Dashboards guide](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard/) for step-by-step instructions.
+- Use the **Query Builder** to replicate your PromQL queries from Grafana.
 
-You can also request SigNoz to help you with creating custom dashboards. To request a custom dashboard, please create a [GitHub issue](https://github.com/SigNoz/signoz/issues/new?assignees=&labels=dashboard-template&template=request_dashboard.md&title=%5BDashboard+Request%5D+) providing details about the dashboard you want to create.
+## Feature Comparison
 
 ### Dashboard Features
 
 SigNoz supports essential dashboard features including:
 
-- **[Variables](/docs/userguide/manage-variables/)**: Create template variables for dynamic dashboards
-- **[Panel Types](/docs/dashboards/panel-types/)**: Various visualization options (time series, bar charts, tables, etc.)
-- **[Query Builder](/docs/product-features/query-builder/)**: Construct queries visually or using PromQL
+- **[Variables](https://signoz.io/docs/userguide/manage-variables/)**: Create template variables for dynamic dashboards.
+- **[Panel Types](https://signoz.io/docs/dashboards/panel-types/)**: Various visualization options (time series, bar charts, tables, etc.).
+- **[Query Builder](https://signoz.io/docs/product-features/query-builder/)**: Construct queries visually or using PromQL.
 
 ### Panel Types
 
-SigNoz supports most of the common panel types supported by Grafana:
+SigNoz supports most of the common panel types found in Grafana:
 
 | Panel Type      | Grafana | SigNoz | Notes                                                                                                    |
 |-----------------|---------|--------|----------------------------------------------------------------------------------------------------------|
@@ -46,11 +58,11 @@ SigNoz supports most of the common panel types supported by Grafana:
 | Table           | ✓       | ✓      | Both support tabular data display                                                                        |
 | Histogram       | ✓       | ✓      | Both support distribution visualization                                                                  |
 | Value/Stat      | ✓       | ✓      | Single value display with thresholds                                                                     |
-| Gauge           | ✓       | -      | Similar functionality available via [Value panels](/docs/dashboards/panel-types/value/) with thresholds  |
-| Node Graph      | ✓       | -      | [Service Map](/docs/userguide/service-map/) provides similar functionality for service dependencies      |
-| Logs            | ✓       | ✓      | Dedicated [List panel type](/docs/dashboards/panel-types/list/) for logs visualization                   |
-| Traces          | ✓       | ✓      | Advanced trace visualization through [APM features](/docs/userguide/traces/)                             |
-| Flame Graph     | ✓       | ✓      | Flame graphs are available in [APM](/docs/userguide/span-details/#navigating-the-trace-detail-interface) |
+| Gauge           | ✓       | -      | Similar functionality available via [Value panels](https://signoz.io/docs/dashboards/panel-types/value/) with thresholds  |
+| Node Graph      | ✓       | -      | [Service Map](https://signoz.io/docs/userguide/service-map/) provides similar functionality for service dependencies      |
+| Logs            | ✓       | ✓      | Dedicated [List panel type](https://signoz.io/docs/dashboards/panel-types/list/) for logs visualization                   |
+| Traces          | ✓       | ✓      | Advanced trace visualization through [APM features](https://signoz.io/docs/userguide/traces/)                             |
+| Flame Graph     | ✓       | ✓      | Flame graphs are available in [APM](https://signoz.io/docs/userguide/span-details/#navigating-the-trace-detail-interface) |
 | State Timeline  | ✓       | -      | Not currently supported                                                                                  |
 | Status History  | ✓       | -      | Not currently supported                                                                                  |
 | Candlestick     | ✓       | -      | Not currently supported                                                                                  |
@@ -59,6 +71,14 @@ SigNoz supports most of the common panel types supported by Grafana:
 | Canvas          | ✓       | -      | Not currently supported                                                                                  |
 | News            | ✓       | -      | Not currently supported                                                                                  |
 
-SigNoz does not currently support plugins, so in case you are using any plugins that provide additional panel types in your Grafana, you will need to find an alternative or recreate the same functionality using SigNoz's features.
 
-Please refer to [Panel Types](/docs/dashboards/panel-types/) documentation for more details on the panel types supported by SigNoz.
+Please refer to the [Panel Types documentation](https://signoz.io/docs/dashboards/panel-types/) for more details.
+
+## Infrastructure as Code (Terraform)
+
+You can manage your dashboards as code using the [SigNoz Terraform Provider](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs). This allows you to version control your dashboards and automate their deployment, similar to how you might manage Grafana dashboards with Terraform.
+
+## Next Steps
+
+- [Migrate Alerts](https://signoz.io/docs/migration/migrate-from-grafana/alerts/)
+- [Explore Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)

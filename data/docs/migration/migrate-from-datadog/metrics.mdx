@@ -1,0 +1,330 @@
+---
+date: 2025-12-02
+id: metrics
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Metrics from Datadog
+description: Learn how to migrate your application and infrastructure metrics from Datadog to SigNoz using OpenTelemetry.
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through migrating metrics from Datadog to SigNoz. You will:
+
+1. Check your Datadog metrics sources
+2. Choose the right migration path for each metric source
+3. Set up collection in SigNoz using OpenTelemetry
+4. Validate that all metrics are flowing correctly
+
+You cannot import historical metrics from Datadog. This guide focuses on redirecting your metric streams to SigNoz going forward.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Key Differences: Datadog vs SigNoz
+
+Before migrating, understand how metric collection differs between the two platforms:
+
+| Aspect | Datadog | SigNoz |
+|--------|---------|--------|
+| **Collection** | Datadog Agent, DogStatsD, Prometheus integration | OpenTelemetry Collector, Prometheus Receiver |
+| **Data Model** | Dimensional metrics with tags | OpenTelemetry metrics model |
+| **Query Language** | Datadog Query Language | Query Builder, PromQL, ClickHouse SQL |
+| **Storage** | Proprietary | ClickHouse (open source) |
+| **Custom Metrics** | DogStatsD protocol | OpenTelemetry SDK or StatsD receiver |
+
+SigNoz uses open standards (OpenTelemetry, Prometheus) for collection, so your migration involves replacing Datadog agents with OpenTelemetry instrumentation or collectors.
+
+## Prerequisites
+
+Before starting, ensure you have:
+
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your Datadog account to review current metric sources
+- Access to your application code or infrastructure configuration
+- Administrative access to deploy the OpenTelemetry Collector (if needed)
+
+## Step 1: Assess Your Current Metrics
+
+Before migrating, create an inventory of what you're collecting in Datadog. This ensures nothing gets lost.
+
+### Export Your Metrics List from Datadog
+
+1. Navigate to **Metrics → Summary** in Datadog.
+2. Export the list of metric names you're actively using.
+3. Note which integrations are sending metrics (visible in the metric metadata).
+
+Alternatively, use the Datadog API to list metrics:
+
+```bash
+curl -X GET "https://api.datadoghq.com/api/v1/metrics" \
+  -H "DD-API-KEY: <DD_API_KEY>" \
+  -H "DD-APPLICATION-KEY: <DD_APP_KEY>"
+```
+
+### Categorize Your Metrics
+
+Group your metrics by source type. Check which of these you're using:
+
+| Source Type | How to Identify | Migration Path |
+|-------------|-----------------|----------------|
+| **Datadog Agent (Host Metrics)** | Metrics like `system.cpu.*`, `system.mem.*`, `system.disk.*` | [Use Host Metrics Receiver](#from-datadog-agent-host-metrics) |
+| **DogStatsD (Custom Metrics)** | Custom metrics sent via DogStatsD client libraries | [Use OTel SDK or Datadog Receiver](#from-dogstatsd-custom-metrics) |
+| **Datadog APM** | APM metrics like `trace.*` | [Replace with OTel instrumentation](#from-datadog-apm-metrics) |
+| **Prometheus Exporters** | Metrics scraped from `/metrics` endpoints | [Use Prometheus Receiver](#from-prometheus-exporters) |
+| **AWS CloudWatch** | Metrics prefixed with `aws.*` | [Use SigNoz AWS integration](#from-cloud-integrations) |
+| **Azure Monitor** | Metrics prefixed with `azure.*` | [Use SigNoz Azure integration](#from-cloud-integrations) |
+| **GCP** | Metrics prefixed with `gcp.*` | [Use SigNoz GCP integration](#from-cloud-integrations) |
+| **Datadog Integrations** | Integration-specific metrics (MySQL, Redis, etc.) | [Use OTel receivers](#from-datadog-integrations) |
+
+Save this inventory. You'll use it to validate your migration is complete.
+
+## Step 2: Set Up the OpenTelemetry Collector
+
+Most migration paths require the OpenTelemetry Collector. Set it up first:
+
+1. [Install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) in your environment.
+
+2. Configure the OTLP exporter to send metrics to SigNoz Cloud
+
+## Step 3: Migrate Each Metric Source
+
+### From Datadog Agent (Host Metrics)
+
+Replace Datadog Agent with the OpenTelemetry Collector's Host Metrics Receiver for infrastructure metrics.
+
+**Step 1: Add the hostmetrics receiver**
+
+```yaml:otel-collector-config.yaml
+receivers:
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+      filesystem:
+      load:
+      network:
+      process:
+        include:
+          match_type: regexp
+          names: ['.*']
+```
+
+**Step 2: Enable it in the metrics pipeline**
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+See <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver" target="_blank" rel="noopener noreferrer nofollow">Host Metrics Receiver</a> for all available scrapers.
+
+### From DogStatsD (Custom Metrics)
+
+You have two options for migrating custom DogStatsD metrics:
+
+#### Option A: Replace with OpenTelemetry SDK (Recommended)
+
+Replace DogStatsD client libraries with OpenTelemetry SDKs for better integration and standardization.
+
+**Example in Python:**
+
+**Before (DogStatsD):**
+```python
+from datadog import statsd
+
+statsd.increment('page.views', tags=['page:home'])
+statsd.gauge('users.online', 42)
+statsd.histogram('request.latency', 0.5)
+```
+
+**After (OpenTelemetry):**
+```python
+from opentelemetry import metrics
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+
+# Setup
+exporter = OTLPMetricExporter(
+    endpoint="ingest.<region>.signoz.cloud:443",
+    headers={"signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"}
+)
+reader = PeriodicExportingMetricReader(exporter)
+provider = MeterProvider(metric_readers=[reader])
+metrics.set_meter_provider(provider)
+
+meter = metrics.get_meter("my_app")
+
+# Create instruments
+page_views = meter.create_counter("page.views")
+users_online = meter.create_up_down_counter("users.online")
+request_latency = meter.create_histogram("request.latency")
+
+# Record metrics
+page_views.add(1, {"page": "home"})
+users_online.add(42)
+request_latency.record(0.5)
+```
+
+#### Option B: Use Datadog Receiver (Bridge Approach)
+
+If you need to continue using DogStatsD during migration, configure the OpenTelemetry Collector to receive DogStatsD metrics.
+
+See [Using Datadog Receiver](https://signoz.io/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/) for detailed setup instructions.
+
+### From Datadog APM Metrics
+
+APM metrics (like `trace.servlet.request.hits`, `trace.servlet.request.duration`) are generated from traces. When you migrate traces to SigNoz using OpenTelemetry (see [Migrate Traces](https://signoz.io/docs/migration/migrate-from-datadog/traces/)), SigNoz automatically generates equivalent APM metrics.
+
+SigNoz generates these metrics from traces:
+- Request rate (calls per second)
+- Error rate (errors per second)
+- P50, P90, P99 latency
+- Apdex score
+
+### From Prometheus Exporters
+
+If you have Prometheus exporters configured with the Datadog Agent, migrate them to the OpenTelemetry Collector's Prometheus Receiver.
+
+**Step 1: Add the Prometheus receiver**
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'your-app'
+          scrape_interval: 60s
+          static_configs:
+            - targets: ['localhost:8080']
+        - job_name: 'node-exporter'
+          scrape_interval: 60s
+          static_configs:
+            - targets: ['localhost:9100']
+```
+
+**Step 2: Enable it in the metrics pipeline**
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+See [Prometheus Metrics in SigNoz](https://signoz.io/docs/userguide/prometheus-metrics/) for advanced configuration.
+
+### From Cloud Integrations
+
+SigNoz provides native integrations for major cloud providers:
+
+| Provider | Migration Guide |
+|----------|-----------------|
+| **AWS** | [AWS Cloud Integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/) - One-click setup for CloudWatch metrics |
+| **Azure** | [Azure Cloud Integrations](https://signoz.io/docs/azure-monitoring/) |
+| **GCP** | [GCP Cloud Integrations](https://signoz.io/docs/gcp-monitoring/) |
+
+These integrations collect the same cloud service metrics you were getting through Datadog.
+
+### From Datadog Integrations
+
+For Datadog integrations (MySQL, Redis, PostgreSQL, MongoDB, etc.), use OpenTelemetry receivers:
+
+| Datadog Integration | OpenTelemetry Receiver |
+|---------------------|------------------------|
+| MySQL | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mysqlreceiver" target="_blank" rel="noopener noreferrer nofollow">MySQL Receiver</a> |
+| PostgreSQL | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/postgresqlreceiver" target="_blank" rel="noopener noreferrer nofollow">PostgreSQL Receiver</a> |
+| Redis | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/redisreceiver" target="_blank" rel="noopener noreferrer nofollow">Redis Receiver</a> |
+| MongoDB | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mongodbreceiver" target="_blank" rel="noopener noreferrer nofollow">MongoDB Receiver</a> |
+| Kafka | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kafkametricsreceiver" target="_blank" rel="noopener noreferrer nofollow">Kafka Metrics Receiver</a> |
+| Nginx | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver" target="_blank" rel="noopener noreferrer nofollow">Nginx Receiver</a> |
+| Apache | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/apachereceiver" target="_blank" rel="noopener noreferrer nofollow">Apache Receiver</a> |
+| Elasticsearch | <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/elasticsearchreceiver" target="_blank" rel="noopener noreferrer nofollow">Elasticsearch Receiver</a> |
+
+For integrations not listed, check the <a href="https://opentelemetry.io/ecosystem/registry/?s=&component=receiver" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Receiver Registry</a> for available receivers.
+
+## Step 4: Import Dashboard Templates
+
+SigNoz provides pre-built dashboards for common metrics:
+
+1. **Access the Dashboards Repository:**
+   Visit the <a href="https://github.com/SigNoz/dashboards" target="_blank" rel="noopener noreferrer nofollow">SigNoz Dashboards Repository</a>.
+
+2. **Choose Dashboards:**
+   - Host Metrics Dashboard
+   - JVM Metrics Dashboard
+   - MySQL/PostgreSQL Dashboards
+   - And more...
+
+3. **Import Dashboards:**
+   - Navigate to **Dashboards** in SigNoz
+   - Click **+ New Dashboard** → **Import JSON**
+   - Paste the JSON from the repository
+
+See [Migrate Dashboards](https://signoz.io/docs/migration/migrate-from-datadog/dashboards/) for detailed instructions on recreating custom dashboards.
+
+## Validate
+
+Compare your SigNoz metrics against your original inventory to ensure migration is complete.
+
+1. In SigNoz, navigate to **Metrics** in the left sidebar.
+2. Use the **List View** to browse available metrics.
+3. Click a metric name to see its attributes and values.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Metrics not appearing in SigNoz
+
+1. **Check Collector status**: Verify the OpenTelemetry Collector is running.
+2. **Verify endpoint**: Confirm `ingest.<region>.signoz.cloud:443` matches your account region.
+3. **Check ingestion key**: Ensure `signoz-ingestion-key` header is set correctly.
+4. **Test connectivity**: Verify outbound HTTPS (port 443) is allowed to SigNoz Cloud.
+
+### Missing attributes/tags on metrics
+
+If metrics appear but lack expected tags:
+
+1. Check your SDK's resource attribute configuration.
+2. Verify no Collector processors are dropping attributes.
+3. For Prometheus metrics, ensure labels are being scraped correctly.
+
+### Metric values don't match Datadog
+
+When comparing the same metric in both systems:
+
+1. **Align time ranges**: Ensure both queries cover the exact same period.
+2. **Match aggregations**: Datadog and PromQL may use different default aggregations.
+3. **Check collection intervals**: Different scrape intervals can cause slight variations.
+4. **Verify units**: Some Datadog metrics use different units than OpenTelemetry conventions.
+
+### DogStatsD metrics not received
+
+If using the Datadog receiver for DogStatsD:
+
+1. **Check port binding**: Ensure the receiver is listening on the correct port (default: 8125).
+2. **Verify agent configuration**: Confirm the Datadog Agent is forwarding to the correct endpoint.
+3. **Check firewall rules**: Ensure UDP traffic is allowed on the configured port.
+
+</details>
+
+## Next Steps
+
+Once your metrics are flowing to SigNoz:
+
+- [Migrate your dashboards](https://signoz.io/docs/migration/migrate-from-datadog/dashboards/) to visualize metrics in SigNoz
+- [Set up alerts](https://signoz.io/docs/migration/migrate-from-datadog/alerts/) based on your metrics
+- [Migrate traces](https://signoz.io/docs/migration/migrate-from-datadog/traces/) for end-to-end observability
+- [Migrate logs](https://signoz.io/docs/migration/migrate-from-datadog/logs/) to complete your observability stack
