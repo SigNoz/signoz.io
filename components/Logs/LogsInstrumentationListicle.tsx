@@ -141,6 +141,12 @@ export default function LogsInstrumentationListicle({
             clickName: 'Java SDK Logs Link',
           },
           {
+            name: 'Node.js',
+            href: '/docs/logs-management/send-logs/nodejs-logs',
+            icon: <SiNodedotjs className="h-7 w-7 text-green-600" />,
+            clickName: 'Node.js Logs Link',
+          },
+          {
             name: 'Bunyan (Node.js)',
             href: '/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs',
             icon: <SiNodedotjs className="h-7 w-7 text-green-600" />,
