@@ -20,6 +20,7 @@ import {
   SiAnthropic,
   SiAmazonwebservices,
   SiPydantic,
+  SiGo,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -213,6 +214,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/google-gemini',
     icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
     clickName: 'Google Gemini Dashboard Template',
+  },
+  {
+    name: 'Go Runtime',
+    href: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
+    icon: <SiGo className="h-7 w-7 text-cyan-500" />,
+    clickName: 'Go Runtime Dashboard Template',
   },
   {
     name: 'Hadoop',

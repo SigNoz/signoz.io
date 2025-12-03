@@ -1569,6 +1569,19 @@ const docsSideNav = [
         route: '/docs/metrics-management/send-metrics',
         items: [
           {
+            type: 'category',
+            label: 'Application Metrics',
+            route: '/docs/metrics-management/send-metrics#applications',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/golang',
+                label: 'Golang',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/userguide/otel-metrics-receivers',
             label: 'OpenTelemetry Receivers',
@@ -1932,6 +1945,11 @@ const docsSideNav = [
                 label: 'Hostmetrics (K8s)',
               },
             ],
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
+            label: 'Go Runtime',
           },
           {
             type: 'doc',
