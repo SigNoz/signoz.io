@@ -2,13 +2,13 @@
 date: 2025-12-03
 id: telemetry-data-requirements
 title: Telemetry Data Requirements for Infrastructure Monitoring
-description: Mandatory resource attributes, metric dependencies, and known platform limitations that control the Infrastructure page UI.
+description: Mandatory resource attributes, metric dependencies, and known platform limitations that control the Infrastructure Monitoring.
 tags: [SigNoz Cloud, Self-Host]
 ---
 
 ## Overview
 
-The Infrastructure page depends on a set of resource attributes and metric types. When those attributes are missing or mis-typed, SigNoz cannot link list views (Hosts, Pods, Nodes, Deployments, etc.) with their details and queries fail silently. Use this guide to verify the required attributes, understand data source dependencies, and identify platform-specific gaps (for example, AWS EKS or Fargate).
+The Infrastructure Monitoring depends on a set of resource attributes and metric types. When those attributes are missing or mis-typed, SigNoz cannot link list views (Hosts, Pods, Nodes, Deployments, etc.) with their details and queries fail silently. Use this guide to verify the required attributes, understand data source dependencies, and identify platform-specific gaps (for example, AWS EKS or Fargate).
 
 ## Prerequisites
 
@@ -18,12 +18,12 @@ The Infrastructure page depends on a set of resource attributes and metric types
 
 ## Mandatory attributes and their impact
 
-### Hosts listing page
+### Hosts listing Monitoring
 
 - **Required**: `host.name`. It must be unique per host. When the attribute is missing, the host still appears in the grid but is not clickable because detail queries cannot filter on the host name.
 - **Recommendation**: also collect `host.id`. The page prefers `host.name`, but `host.id` is a reliable fallback and helps disambiguate duplicate hostnames (common with cloned VMs or ephemeral EC2 instances).
 
-### Kubernetes entity pages
+### Kubernetes entity Monitoring
 
 - **Required per entity**: a unique identifier attribute `[entity].uid` (for example, `pod.uid`, `node.uid`, `deployment.uid`) and a human-readable `[entity].name`.
 - **Impact**: clicking a Pod/Node/Deployment without its UID causes the UI to raise an internal error because follow-up queries always include the UID filter.
