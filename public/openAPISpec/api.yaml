@@ -679,7 +679,7 @@ paths:
         '500':
           description: Internal server error
 
-  /channels:
+  /api/v1/channels:
     get:
       tags:
         - channels
@@ -729,7 +729,7 @@ paths:
         '500':
           description: Internal server error
 
-  /channels/{id}:
+  /api/v1/channels/{id}:
     get:
       tags:
         - channels
@@ -833,7 +833,7 @@ paths:
         '500':
           description: Internal server error
 
-  /testChannel:
+  /api/v1/testChannel:
     post:
       tags:
         - channels
@@ -3178,6 +3178,8 @@ components:
       required:
         - name
         - expression
+        - channels
+        - kind
       properties:
         name:
           type: string
@@ -3195,6 +3197,13 @@ components:
             Operators: `=`, `!=`, `CONTAINS`, `REGEXP`, `IN`, `AND`, `OR`.
             Example: `service.name = "checkout" AND type = "application"`
           example: "service.name == \"something\""
+        kind:
+          type: string
+          description: Type of route policy. Accepted values are `policy` and `rule`.
+          enum:
+            - policy
+            - rule
+          example: "policy"
         channels:
           type: array
           description: List of notification channels associated with this policy
