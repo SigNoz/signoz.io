@@ -288,6 +288,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'LiteLLM Dashboard Template',
   },
   {
+    name: 'LiveKit',
+    href: '/docs/dashboards/dashboard-templates/livekit-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/livekit-icon.svg"
+        alt="LiveKit Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'LiveKit Dashboard Template',
+  },
+  {
     name: 'LLM Observability',
     href: 'https://github.com/SigNoz/dashboards/tree/main/llm-observability',
     icon: <Brain className="h-7 w-7 text-purple-600" />,
