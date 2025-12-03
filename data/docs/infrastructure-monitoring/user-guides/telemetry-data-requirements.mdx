@@ -19,23 +19,22 @@ The Infrastructure Monitoring depends on a set of resource attributes and metric
 
 ## Mandatory attributes and their impact
 
-### Hosts listing Monitoring
+### Hosts Monitoring
 
 - **Required**: `host.name`. It must be unique per host. When the attribute is missing, the host still appears in the grid but is not clickable because detail queries cannot filter on the host name.
 - **Recommendation**: also collect `host.id`. The page prefers `host.name`, but `host.id` is a reliable fallback and helps disambiguate duplicate hostnames (common with cloned VMs or ephemeral EC2 instances).
 
-### Kubernetes entity Monitoring
+### Kubernetes Monitoring
 
 - **Required per entity**: a unique identifier attribute `[entity].uid` (for example, `pod.uid`, `node.uid`, `deployment.uid`) and a human-readable `[entity].name`.
 - **Impact**: clicking a Pod/Node/Deployment without its UID causes the UI to raise an internal error because follow-up queries always include the UID filter.
-- **Recommendation**: keep name and UID pairs in sync with upstream control-plane sources to avoid mismatch errors when pods restart or nodes are recycled.
 
 ## Data source dependencies for Kubernetes metrics
 
-- The Pods listing page relies on `pod.cpu.usage` for both `pod.uid` and `pod.name`. If kubelet metrics are absent (a common EKS restriction), SigNoz cannot populate those attributes even if cluster-level metrics exist.
+- The Pods listing page relies on `pod.cpu.usage` for both `pod.uid` and `pod.name`. If kubelet metrics are absent, SigNoz cannot populate those attributes even if cluster-level metrics exist.
 - Collectors must therefore scrape:
-  - **Cluster metrics** for scheduling data.
-  - **Kubelet metrics** on every node to expose per-pod CPU usage (and the associated UID + name labels).
+  - Cluster metrics for scheduling data.
+  - Kubelet metrics on every node to expose per-pod CPU usage (and the associated UID + name labels).
 - If Pods are missing in the UI, start by verifying whether `pod.cpu.usage` arrives with the `pod.uid` + `pod.name` labels.
 
 <Admonition type="warning">
@@ -44,9 +43,9 @@ EKS Fargate and some managed clusters block kubelet metric scraping by default. 
 
 ## Troubleshooting checklist
 
-1. **Verify required attributes**: Use the Metrics Explorer to query `pod.cpu.usage` or `host.cpu.usage` and confirm that `host.name`, `[entity].uid`, and `[entity].name` labels exist and are populated.
-2. **Confirm data sources**: Ensure both cluster-level and kubelet scrape jobs are enabled.
-3. **Look for platform warnings**: On AWS, confirm security groups/roles allow kubelet scraping. For Fargate-only clusters, document the limitation for stakeholders.
+1. Verify required attributes: Use the Metrics Explorer to query `pod.cpu.usage` or `host.cpu.usage` and confirm that `host.name`, `[entity].uid`, and `[entity].name` labels exist and are populated.
+2. Confirm Metrics Data Sources: Ensure both cluster-level and kubelet scrape jobs are enabled.
+3. Check if kubelet scraping is allowed on the platform.
 
 ## Next Steps
 - [OpenTelemetry Collection Agents Overview](/docs/collection-agents/overview/)
