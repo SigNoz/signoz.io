@@ -2460,6 +2460,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/livekit-observability',
+        label: 'LiveKit',
+        type: 'doc',
+      },
+      {
         route: '/docs/llamaindex-observability',
         label: 'LlamaIndex',
         type: 'doc',

@@ -1,0 +1,544 @@
+---
+date: 2025-11-25
+id: livekit-observability-with-opentelemetry
+tags: [SigNoz Cloud, Self-Host]
+title: LiveKit Observability with SigNoz
+description: Observability and monitoring for LiveKit performance and usage with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through setting up observability and monitoring for LiveKit using [OpenTelemetry](https://opentelemetry.io/) and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe the performance of various models, capture request/response details, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your LiveKit applications.
+
+Instrumenting LiveKit in your AI applications with telemetry ensures full observability across your voice agent workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Internet access to send telemetry data to SigNoz Cloud
+- Python 3.10+ with LiveKit installed
+- For Python: `uv` installed for managing Python packages
+- [LiveKit Cloud Account](https://cloud.livekit.io/)
+- Installed [LiveKit CLI](https://docs.livekit.io/home/cli/)
+
+## Monitoring LiveKit
+
+For more detailed info on instrumenting your LiveKit applications with OpenTelemetry click <a href="https://docs.livekit.io/agents/observability/data/" target="_blank" rel="noopener noreferrer nofollow">here</a>.
+
+<Tabs>
+<TabItem value="python" label="Python" default>
+
+Get started with a sample LiveKit starter project by following the <a href="https://docs.livekit.io/agents/start/voice-ai/" target="_blank" rel="noopener noreferrer nofollow">LiveKit Getting Started Docs</a>
+
+<Tabs>
+<TabItem value="No Code" label="No Code(Recommended)" default>
+
+No-code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
+
+### **Step 1:** Clone the sample voice agent project and setup dependencies
+
+```bash
+git clone https://github.com/livekit-examples/agent-starter-python
+cd agent-starter-python
+uv sync
+```
+### **Step 2:** Setup Credentials
+
+Copy .env.example to .env.local and filling in the required keys:
+
+- `LIVEKIT_URL`
+- `LIVEKIT_API_KEY`
+- `LIVEKIT_API_SECRET`
+
+Load the LiveKit environment automatically using the LiveKit CLI:
+```bash
+lk cloud auth
+lk app env -w -d .env.local
+```
+
+### **Step 3:** Add Automatic Instrumentation
+
+```bash
+uv pip install opentelemetry-distro opentelemetry-exporter-otlp
+uv run opentelemetry-bootstrap -a requirements | uv pip install --requirement -
+```
+
+### **Step 4:** Instrument your LiveKit application
+
+**Metrics:**
+
+```python
+from livekit.agents import metrics
+from livekit.agents.voice import MetricsCollectedEvent
+
+@session.on("metrics_collected")
+def _on_metrics_collected(ev: MetricsCollectedEvent):
+    metrics.log_metrics(ev.metrics)
+```
+
+**Traces:**
+
+```python
+from livekit.agents.telemetry import set_tracer_provider
+from opentelemetry import trace
+
+set_tracer_provider(trace.get_tracer_provider())
+```
+
+See this <a href="https://github.com/livekit/agents/blob/main/examples/voice_agents/langfuse_trace.py" target="_blank" rel="noopener noreferrer nofollow">example repo</a> for more details on how to configure instrumentation.
+
+### **Step 5:** Your `agent.py` should look something like this:
+
+```python
+import logging
+
+from dotenv import load_dotenv
+from livekit import rtc
+from livekit.agents import (
+    Agent,
+    AgentServer,
+    AgentSession,
+    JobContext,
+    JobProcess,
+    cli,
+    inference,
+    room_io,
+    metrics,
+)
+from livekit.plugins import noise_cancellation, silero
+from livekit.plugins.turn_detector.multilingual import MultilingualModel
+
+from livekit.agents.telemetry import set_tracer_provider
+from opentelemetry import trace
+
+from livekit.agents.voice import MetricsCollectedEvent
+
+logger = logging.getLogger("agent")
+
+load_dotenv(".env.local")
+
+
+class Assistant(Agent):
+    def __init__(self) -> None:
+        super().__init__(
+            instructions="""You are a helpful voice AI assistant. The user is interacting with you via voice, even if you perceive the conversation as text.
+            You eagerly assist users with their questions by providing information from your extensive knowledge.
+            Your responses are concise, to the point, and without any complex formatting or punctuation including emojis, asterisks, or other symbols.
+            You are curious, friendly, and have a sense of humor.""",
+        )
+
+server = AgentServer()
+
+
+def prewarm(proc: JobProcess):
+    proc.userdata["vad"] = silero.VAD.load()
+
+
+server.setup_fnc = prewarm
+
+
+@server.rtc_session()
+async def my_agent(ctx: JobContext):
+    set_tracer_provider(trace.get_tracer_provider())
+
+    # Logging setup
+    # Add any other context you want in all log entries here
+    ctx.log_context_fields = {
+        "room": ctx.room.name,
+    }
+
+    # Set up a voice AI pipeline using OpenAI, Cartesia, AssemblyAI, and the LiveKit turn detector
+    session = AgentSession(
+        # Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
+        # See all available models at https://docs.livekit.io/agents/models/stt/
+        stt=inference.STT(model="assemblyai/universal-streaming", language="en"),
+        # A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
+        # See all available models at https://docs.livekit.io/agents/models/llm/
+        llm=inference.LLM(model="openai/gpt-4.1-mini"),
+        # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
+        # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
+        tts=inference.TTS(
+            model="cartesia/sonic-3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc"
+        ),
+        # VAD and turn detection are used to determine when the user is speaking and when the agent should respond
+        # See more at https://docs.livekit.io/agents/build/turns
+        turn_detection=MultilingualModel(),
+        vad=ctx.proc.userdata["vad"],
+        # allow the LLM to generate a response while waiting for the end of turn
+        # See more at https://docs.livekit.io/agents/build/audio/#preemptive-generation
+        preemptive_generation=True,
+    )
+    @session.on("metrics_collected")
+    def _on_metrics_collected(ev: MetricsCollectedEvent):
+        metrics.log_metrics(ev.metrics)
+
+    # Start the session, which initializes the voice pipeline and warms up the models
+    await session.start(
+        agent=Assistant(),
+        room=ctx.room,
+        room_options=room_io.RoomOptions(
+            audio_input=room_io.AudioInputOptions(
+                noise_cancellation=lambda params: noise_cancellation.BVCTelephony()
+                if params.participant.kind == rtc.ParticipantKind.PARTICIPANT_KIND_SIP
+                else noise_cancellation.BVC(),
+            ),
+        ),
+    )
+
+    # Join the room and connect to the user
+    await ctx.connect()
+
+
+if __name__ == "__main__":
+    cli.run_app(server)
+
+```
+
+### **Step 6:** Run your application with auto-instrumentation
+
+Before your first run, you must download certain models such as Silero VAD and the LiveKit turn detector:
+
+```bash
+uv run python src/agent.py download-files
+```
+
+
+Next, run this command to speak to your agent directly in your terminal:
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your_ingestion_key>" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_METRICS_EXPORTER=otlp \
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_PYTHON_LOG_CORRELATION=true \
+OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
+<your_run_command with opentelemetry-instrument>
+```
+- **`<service_name>`** is the name of your service
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your_ingestion_key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `uv run opentelemetry-instrument python src/agent.py console`
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
+
+</TabItem>
+
+<TabItem value="Code" label="Code" default>
+
+Code-based instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
+
+### **Step 1:** Clone the sample voice agent project and setup dependencies
+
+```bash
+git clone https://github.com/livekit-examples/agent-starter-python
+cd agent-starter-python
+uv sync
+```
+### **Step 2:** Setup Credentials
+
+Copy .env.example to .env.local and filling in the required keys:
+
+- `LIVEKIT_URL`
+- `LIVEKIT_API_KEY`
+- `LIVEKIT_API_SECRET`
+
+Load the LiveKit environment automatically using the LiveKit CLI:
+```bash
+lk cloud auth
+lk app env -w -d .env.local
+```
+
+
+### **Step 3:** Install additional OpenTelemetry dependencies
+
+```bash
+uv pip install \
+  opentelemetry-api \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics
+```
+
+### **Step 4:** Import the necessary modules in your Python application
+
+**Traces:**
+
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+```
+
+**Logs:**
+
+```python
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry._logs import set_logger_provider
+import logging
+```
+
+**Metrics:**
+
+```python
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+```
+
+### **Step 5:** Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry import trace
+import os
+
+
+resource = Resource.create({"service.name": "<service_name>"})
+provider = TracerProvider(resource=resource)
+span_exporter = OTLPSpanExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_TRACES_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+processor = BatchSpanProcessor(span_exporter)
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
+
+### **Step 6**: Setup Logs
+
+```python
+import logging
+from opentelemetry.sdk.resources import Resource
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+logger_provider = LoggerProvider(resource=resource)
+set_logger_provider(logger_provider)
+
+otlp_log_exporter = OTLPLogExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_LOGS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(otlp_log_exporter)
+)
+# Attach OTel logging handler to root logger
+handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+logger = logging.getLogger(__name__)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
+
+### **Step 7**: Setup Metrics
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+import os
+
+resource = Resource.create({"service.name": "<service-name>"})
+metric_exporter = OTLPMetricExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+reader = PeriodicExportingMetricReader(metric_exporter)
+metric_provider = MeterProvider(metric_readers=[reader], resource=resource)
+metrics.set_meter_provider(metric_provider)
+
+meter = metrics.get_meter(__name__)
+
+# turn on out-of-the-box metrics
+SystemMetricsInstrumentor().instrument()
+HTTPXClientInstrumentor().instrument()
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
+</Admonition>
+
+> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your LiveKit application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+
+### **Step 8:** Instrument your LiveKit application
+
+**Metrics:**
+
+```python
+from livekit.agents import metrics
+from livekit.agents.voice import MetricsCollectedEvent
+
+@session.on("metrics_collected")
+def _on_metrics_collected(ev: MetricsCollectedEvent):
+    metrics.log_metrics(ev.metrics)
+```
+
+**Traces:**
+
+```python
+from livekit.agents.telemetry import set_tracer_provider
+from opentelemetry import trace
+
+set_tracer_provider(trace.get_tracer_provider())
+```
+
+See this <a href="https://github.com/livekit/agents/blob/main/examples/voice_agents/langfuse_trace.py" target="_blank" rel="noopener noreferrer nofollow">example repo</a> for more details on how to configure instrumentation.
+
+### **Step 9:** Run your example `agent.py`
+
+Before your first run, you must download certain models such as Silero VAD and the LiveKit turn detector:
+
+```bash
+uv run python src/agent.py download-files
+```
+
+Next, run this command to speak to your agent directly in your terminal:
+
+```bash
+uv run python src/agent.py console
+```
+
+</TabItem>
+
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## View Traces, Logs, and Metrics in SigNoz
+
+Your LiveKit voice agent usage should now automatically emit traces, logs, and metrics.
+
+You should be able to view traces in Signoz Cloud under the traces tab:
+
+<Figure
+  src="/img/docs/llm/livekit/livekit-traces.webp"
+  alt="LiveKit Trace View"
+  caption="LiveKit Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure
+  src="/img/docs/llm/livekit/livekit-detailed-traces.webp"
+  alt="LiveKit Detailed Trace View"
+  caption="LiveKit Detailed Trace View"
+/>
+
+You should be able to view logs in Signoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/livekit/related-logs.webp" alt="Related logs" width="300" />
+  <figcaption>
+    <i>Related logs button</i>
+  </figcaption>
+</figure>
+
+<Figure
+  src="/img/docs/llm/livekit/livekit-logs.webp"
+  alt="LiveKit Logs View"
+  caption="LiveKit Logs View"
+/>
+
+When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+
+<Figure
+  src="/img/docs/llm/livekit/livekit-detailed-logs.webp"
+  alt="LiveKit Detailed Log View"
+  caption="LiveKit Detailed Logs View"
+/>
+
+You should be able to see LiveKit related metrics in Signoz Cloud under the metrics tab:
+
+<Figure
+  src="/img/docs/llm/livekit/livekit-metrics.webp"
+  alt="LiveKit Metrics View"
+  caption="LiveKit Metrics View"
+/>
+
+When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+
+<Figure
+  src="/img/docs/llm/livekit/livekit-detailed-metrics.webp"
+  alt="LiveKit Detailed Metrics View"
+  caption="LiveKit Detailed Metrics View"
+/>
+
+## Troubleshooting
+
+If you don't see your telemetry data:
+
+1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
+2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
+3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+
+
+
+## Next Steps
+
+You can also check out our custom LiveKit dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/livekit-dashboard/) which provides specialized visualizations for monitoring your LiveKit usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/livekit/livekit-dashboard.webp"
+  alt="LiveKit Dashboard"
+  caption="LiveKit Dashboard Template"
+/>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/product-features/trace-explorer)
+- Explore [log correlation](https://signoz.io/docs/product-features/logs-explorer)
+
+
