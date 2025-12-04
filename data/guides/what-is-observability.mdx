@@ -1,0 +1,318 @@
+---
+title: 'What Is Observability? And How to Get Started'
+slug: what-is-observability
+date: '2025-12-02'
+tags: [observability, opentelemetry]
+authors: [saurabh_patil]
+description: "Observability is the ability to understand a system's internal state from its external outputs. Learn how it differs from monitoring and how to implement it."
+keywords:
+  [
+    what is observability,
+    observability vs monitoring,
+    three pillars of observability,
+    opentelemetry,
+    distributed tracing,
+    signoz,
+  ]
+---
+
+Engineering teams are scaling their applications with microservices, distributed APIs, and fast-moving CI/CD pipelines.
+
+As these architectures are expanding, complexity is expanding with them. Issues surface in ways that are harder to predict, and the impact on customers is felt faster than ever. Traditional monitoring struggles to keep pace because it can show that something is failing, but not what’s driving the failure.
+
+This gap has pushed teams toward observability, a way to understand system behaviour across services, identify issues before they escalate and keep modern, distributed environments running smoothly.
+
+But what exactly is observability, and what does it take to implement it effectively?
+
+## What is Observability?
+
+Observability is defined as the ability to understand the internal state of a system by examining its external outputs. The complexity of system doesn’t matter, all it needs is the external outputs emitted by the system.
+
+To help you understand observability better, let’s take a look at an analogy from the physical world.
+
+### The Car Dashboard Analogy
+
+Imagine driving a car. You have a dashboard with gauges for speed, fuel, and engine temperature.
+
+- **Monitoring** is the check engine light. It tells you that something is wrong (a boolean state: broken/not broken).
+- **Observability** is hooking the car up to a diagnostic computer. It allows a mechanic to see the rich, granular data from every sensor in the engine to understand why the light turned on, was it a loose gas cap, a misfiring cylinder, or a bad oxygen sensor?
+
+<Figure
+  src="/img/guides/2025/12/car_analogy_observability.webp"
+  alt="Illustration describing the difference between monitoring vs observability"
+  caption="Illustration describing the difference between monitoring vs observability"
+/>
+
+In distributed software systems, you cannot simply "open the hood" to look at the code running on a server, especially in containerized or serverless environments where that server might disappear in minutes. You rely entirely on the diagnostic data the system emits to recreate what happened.
+
+To achieve this visibility, observability relies on three primary types of telemetry data, often called the "Three Pillars".
+
+### The Three Pillars of Observability - Metrics, Logs, and Traces
+
+1. **Metrics:** The numerical measurements aggregated over time to provide data, such as request rates, error percentages, resource usage and key performance indicators(KPI).
+
+   - **Example:** "CPU usage is at 80%" or "Error rate is 2%."
+   - **Purpose:** Detecting trends and answering "Is the system healthy?"
+
+   Here’s what these metrics often look like when plotted on an operational dashboard:
+
+   <Figure
+     src="/img/guides/2025/12/metrics_what_is_observability.webp"
+     alt="SigNoz’s dashboard showing out of the box RED metrics."
+     caption="SigNoz’s dashboard showing out of the box RED metrics."
+   />
+
+2. **Logs:** Discrete, timestamped records of events, collected and stored to get context of incident to answer questions like “What was the error message?”, “Which function caused the error?”, etc.
+
+   - **Example:** `2025-12-02 14:00:01 ERROR Connection failed to DB-1`
+   - **Purpose:** Providing specific context and error details.
+
+   This is how logs typically appear when viewed in a standard logging dashboard. You can click on a log line and explore its attributes and body text.
+
+   <Figure
+     src="/img/guides/2025/12/logs_what_is_observability.webp"
+     alt="SigNoz’s log management module showing a detailed view of a log along with its attributes."
+     caption="SigNoz’s log management module showing a detailed view of a log along with its attributes."
+   />
+
+3. **Traces:** The journey of a single request as it hops between services.
+
+   - **Example:** User clicked "Buy" → Load Balancer → Auth Service → Payment Gateway → Database.
+   - **Purpose:** Understanding latency and dependencies in microservices.
+
+   Here’s what traces often look like when inspected through a typical tracing interface.
+
+   <Figure
+     src="/img/guides/2025/12/traces_what_is_observability.webp"
+     alt="Example trace showing the journey of a request."
+     caption="Example trace showing the journey of a request."
+   />
+
+   <KeyPointCallout title="Are these three pillars enough?" defaultCollapsed="true">
+     Observability is often explained using the “Three Pillars” model, but the goal is not to manage
+     these signals separately. Unified observability platforms, especially those built on
+     OpenTelemetry, treat metrics, logs, and traces as interconnected telemetry that shares context.
+     This correlation is what enables true end-to-end debugging. Read more about this in our blog on
+     “[**Not 3 pillars but a single whole to help customers solve issues
+     faster**](https://signoz.io/blog/observability-net/)”.
+   </KeyPointCallout>
+
+Even though observability has become a necessity of modern software architecture, there is still one big misconception around it. Let’s take a look at it now.
+
+### Monitoring vs Observability - Key Differences Explained
+
+One of the most common misconception most engineering teams have is that “Having monitoring is as good as having observability”. They tend to ask questions like “Why should we move to observability if we already have monitoring?” The answer to this in simple terms is as follows:
+
+**Monitoring** is applied for **known unknowns**. You know that disks fill up, so you set a monitor for disk usage. You know APIs can get slow, so you monitor latency. You are checking for failure modes that you predicted in advance.
+
+**Observability** is applied for **unknown unknowns**. In complex microservices, things break in ways you cannot predict. You might have an issue that only affects iOS users in the EU region when a specific feature flag is active. You couldn't have written a preset alert for that specific combination. Observability allows you to explore the data to find that answer dynamically.
+
+| **Feature**      | **Monitoring**                     | **Observability**                      |
+| ---------------- | ---------------------------------- | -------------------------------------- |
+| **Primary Goal** | Health Checking                    | Debugging & Investigation              |
+| **Key Question** | "Is the system facing a slowdown?" | "Why is the system facing a slowdown?" |
+| **Workflow**     | Passive (Wait for alerts)          | Active (Query and explore)             |
+| **Data Nature**  | Aggregates / Averages              | High-cardinality / Raw Events          |
+
+## How Observability Works: A Debugging Example
+
+To see how observability works in practice, let's walk through debugging a slow checkout page using an observable system.
+
+### The Symptom (Metrics)
+
+Your dashboard alerts you: Checkout Latency > 2s. This is the "Monitoring" part. It tells you something is wrong, but not what.
+
+### The Investigation (Traces)
+
+You open your observability platform and click on the spike in the graph. You select a specific Trace from that time window. The trace visualization shows a "waterfall" view of the request.
+
+- You see the request hit the API Gateway (5ms) ✅
+- It hit the Order Service (10ms) ✅
+- It hit the **Inventory Service** (1900ms) ❌
+
+Now you know the Inventory Service is the bottleneck.
+
+### The Root Cause (Logs & Context)
+
+You look at the Logs correlated with that specific trace span in the Inventory Service. You see a log entry:
+
+```bash
+WARN: Full table scan detected on 'products' table.
+```
+
+### The Fix
+
+You realize a recent deployment dropped a database index. You restore the index, and latency returns to normal.
+
+Without observability, you might have spent hours guessing if the issue was the network, the payment gateway, or the database. With observability, the data led you straight to the answer.
+
+Now let’s take a look at the steps involved in setting up observability.
+
+## The 4 Steps to Implement Observability
+
+Understanding observability is the easy part. The real challenge begins when teams try to implement it. Many add a few logs, spin up a dashboard, and assume they have implemented observability.
+
+But an observability platform isn't just one tool, it's a pipeline that handles data in four stages:
+
+<Figure
+  src="/img/guides/2025/12/4_step_instrumentation.webp"
+  alt="Illustration showing 4 steps of implementing observability"
+  caption="Illustration showing 4 steps of implementing observability"
+/>
+
+### 1. Instrumentation (SDKs & Agents)
+
+This is the code that lives inside your application to generate data.
+
+- **Agents:** Run alongside your app (like a sidecar or host agent) to capture system-level metrics (CPU, RAM).
+- **SDKs:** Libraries imported into your code (like OpenTelemetry, Java, or Python SDKs) to capture application-specific traces and logs.
+
+### 2. Collection
+
+The **Collector** receives data from thousands of services, processes it (filtering out noise or scrubbing sensitive data), and batches it for storage. The **OpenTelemetry Collector** is the industry standard for this layer.
+
+### 3. Storage (The Database)
+
+This is where the data resides. Traditional monitoring tools used Time-Series Databases (TSDBs) are vital for metrics but are limited when comes to traces and logs. So, modern platforms use **Columnar Databases** (like ClickHouse), which can store billions of logs and traces and allow you to slice them by any tag (like `user_id` or `version`) instantly.
+
+### 4. Visualization & Correlation
+
+The [UI where you query data](https://signoz.io/blog/opentelemetry-ui/). A good platform doesn't just show distinct tabs for "Logs" and "Metrics", it links them. When you view a trace, it should automatically show you the logs from that timeframe.
+
+## Popular Observability Tools And How to Pick One
+
+The observability ecosystem is vast, but most teams generally choose between three distinct architectural approaches. Understanding the trade-offs of each is crucial in deciding what tool or set of tools works best for your usecase.
+
+### 1. The "Do It Yourself" Assembly (Prometheus, Jaeger, ELK)
+
+Many engineering teams start by stitching together separate open-source tools: Prometheus for metrics, Jaeger for traces, and the ELK stack for logs.
+
+**The upside:** It uses open-source standards and avoids software licensing fees.
+
+**The downside:** You essentially become a vendor to your own internal teams. You have to manage, scale, and secure multiple distinct backends. More importantly, your data remains siloed. Correlating a spike in a Prometheus graph to a trace in Jaeger often involves manual tab-switching and timestamp matching, which slows down root cause analysis.
+
+### 2. The Proprietary SaaS Platform (Datadog, New Relic)
+
+On the other end of the spectrum are proprietary, all-in-one SaaS platforms.
+
+**The upside:** They provide a unified view out of the box and handle the infrastructure management for you.
+
+**The downside:** The costs can become unpredictable and prohibitive as you scale. Furthermore, they often rely on proprietary agents. If you instrument your code with their specific agents, you are locked into their ecosystem. Switching vendors later requires rewriting your instrumentation code.
+
+### 3. The Open Standards Native (SigNoz)
+
+The third approach combines the control of open source with the unified experience of SaaS, built entirely on **OpenTelemetry (OTel)**. This is where SigNoz fits in.
+
+SigNoz is an open-source, OTel-native platform that provides metrics, logs, and traces in a single pane of glass. Under the hood, it runs on a columnar database designed for high-performance analytics.
+
+**The upside:** You get the unified correlation of a SaaS tool without the data tax. Because it is native to OpenTelemetry, you own your data. You can switch backends at any time without changing your application code.
+
+**The downside:** You still have to manage the infrastructure if you choose to go with the self-hosted version of SigNoz.
+
+For a deeper dive, check out our list of the [Top 11 Observability Tools for 2025](https://signoz.io/blog/observability-tools/).
+
+## How to Get Started with Observability
+
+Implementing observability works best when you treat metrics, logs, and traces as interconnected signals rather than isolated pillars.
+
+At SigNoz, we believe you shouldn't have to tab-switch between three different tools to find a root cause during an outage. We built SigNoz with a unified columnar data store to treat observability as a single data problem. This allows you to run high-cardinality queries (like filtering latency by a specific `user_id`) and jump immediately from a log line to the trace context that generated it.
+
+To achieve this level of visibility, we recommend a two-step process: standardizing on OpenTelemetry for instrumentation and using SigNoz as your unified backend.
+
+### 1. Instrument with OpenTelemetry
+
+[OpenTelemetry](https://signoz.io/opentelemetry/) is the industry-standard framework for generating telemetry data. It is vendor-agnostic, meaning you instrument your application once and can send that data to any backend.
+
+You don't need to change your application code significantly. For most languages, OTel offers auto-instrumentation agents that attach to your running application and automatically capture HTTP requests, database queries, and errors.
+
+Select your language below to see the specific setup guide:
+
+- **Node.js:** [Send traces and metrics from your Node.js application](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/)
+- **Python:** [Configure OpenTelemetry for Python applications](https://signoz.io/docs/instrumentation/opentelemetry-python/)
+- **Java:** [Auto-instrument Java applications using the OTel Java agent](https://signoz.io/docs/instrumentation/opentelemetry-java/)
+- **Go:** [Instrument your Golang services](https://signoz.io/docs/instrumentation/opentelemetry-golang/)
+- **.NET:** [Set up OpenTelemetry for .NET applications](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/)
+
+For other languages and frameworks, refer to our [complete instrumentation documentation](https://signoz.io/docs/introduction/).
+
+### 2. Connect to SigNoz
+
+Once your application is generating data, point the OpenTelemetry exporter to SigNoz.
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz Cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either the [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+By using OTel with SigNoz, you future-proof your observability stack. You get deep, correlated visibility today, with the flexibility to adapt your architecture tomorrow without rewriting a single line of instrumentation code.
+
+## Case Studies: How Companies Adopt Observability
+
+Let’s see how some popular companies like Uber and Twitter (X) used observability to solve business problems and even ended up inventing tools.
+
+### Uber - I/O observability at petabyte scale
+
+**Problem:**
+
+Uber’s data ecosystem generated massive I/O(Input/Output), and the lack of visibility into who was reading or writing created huge cross-zone cost and performance blindspots.
+
+**Resolution:**
+
+Uber implemented fine-grained I/O observability so storage traffic can be attributed to teams, applications, and zones.
+
+**Result:**
+
+Uber gained full visibility into data-access patterns, enabling cost-saving optimizations (reducing cross-zone network egress), smarter dataset placement, and early detection of noisy-neighbour I/O behaviours that could degrade performance, long before end users or analysts noticed.
+
+You can deep dive into it at <a href="https://www.uber.com/en-IN/blog/i-o-observability-for-ubers-massive-petabyte-scale-data-lake" rel="noopener noreferrer nofollow" target="_blank">Uber Engineering Blogs</a>.
+
+### Twitter (X) - the birth of distributed tracing with Zipkin
+
+**Problem:**
+
+When Twitter moved from a Ruby monolith to a distributed and service-oriented architecture, a simple user request used to traverse through dozens of services, making it nearly impossible to debug performance or latency issues using logs or metrics alone.
+
+**Resolution:**
+
+To solve this challenge, Twitter developed Zipkin, a distributed tracing system inspired by Dapper to track each request end-to-end, capture timing data across all services, and visualize request lifecycles as waterfall diagrams.
+
+**Result:**
+
+By sampling traces and propagating trace identifiers through service calls, Zipkin made it possible to detect latency bottlenecks, dependency issues, and inefficient service interactions, enabling Twitter engineers to optimize path-specific performance (“this API call took 200 ms because Service A was waiting on Service B”) and improve overall request throughput.
+
+You can explore more about it at <a href="https://blog.x.com/engineering/en_us/a/2013/observability-at-twitter" rel="noopener noreferrer nofollow" target="_blank">Twitter Engineering Blogs</a>.
+
+## Benefits of Observability
+
+Observability shifts your team from reactive firefighting to proactive engineering. Here are the benefits of a fully observable system:
+
+**Faster detection and resolution of issues (lower MTTD/MTTR):** Observability surfaces anomalies and failures in real time, enabling faster problem detection and quicker mean-time-to-repair.
+
+**Better root-cause analysis across distributed systems:** Connected traces, logs, and metrics pinpoint the exact service or dependency causing failures, eliminating guesswork and blame loops.
+
+**Better performance optimization:** Deep visibility into latency, throughput, errors, and resource usage helps teams optimize slow code paths, DB queries, and noisy workloads.
+
+**Higher engineering productivity & stronger collaboration:** Engineers spend less time debugging or reproducing issues and more time delivering features. A shared source of truth aligns teams by providing consistent telemetry and unified trace context.
+
+**Data-driven capacity planning & cost optimization:** Insight into real usage and resource patterns helps teams right-size infrastructure, control cloud spend, and predict capacity needs accurately.
+
+## Observability Best Practices
+
+Like any engineering discipline, observability works best when teams follow a few proven practices. To get the most value out of your setup, here are the key best practices to keep in mind:
+
+**Set clear objectives to create a clear strategy:** Before implementing observability, teams should understand their business needs, define goals like reducing MTTD/MTTR, and build a strategy aligned to those objectives.
+
+**Standardize Process:** Teams should adopt standards like OpenTelemetry to stay vendor-neutral and avoid reinstrumenting applications when switching observability tools.
+
+**Consider three pillars as interconnected signals rather than isolated pillars:** Modern observability links logs, metrics, and traces through shared context (e.g., trace IDs) to enable automatic correlation and faster debugging.
+
+**Telemetry Collection:** Collect high-cardinality and high-dimensional telemetry to improve debugging speed and gain deeper insight into system behaviour.
+
+**Alert fatigue:** Avoid creating excessive alerts, as too many notifications cause teams to lose focus and overlook what truly matters.
+
+---
+
+Hope we answered all your questions regarding Observability. If you have more questions, feel free to use the SigNoz AI chatbot, or join our [slack community](https://signoz.io/slack/).
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.
