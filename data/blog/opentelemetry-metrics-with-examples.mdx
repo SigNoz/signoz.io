@@ -129,27 +129,11 @@ Histograms are synchronous instruments that record the distribution of non-negat
 
 As an example, think of the time a customer spends on a product page. Majority customers spending minutes viewing a product might indicate desirable features — it might be a good indicator to rank that product higher in your search results.
 
-Histogram’s [`record` method](https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-sdk/src/opentelemetry/sdk/metrics/_internal/instrument.py#L251) implementation is similar to the Counter’s `add` method, where it processes only non-negative values:
-
-```py
-class Histogram(_Synchronous, APIHistogram):
-    def record(
-        self, amount: Union[int, float], attributes: Dict[str, str] = None
-    ):
-        if amount < 0:
-            _logger.warning(
-                "Record amount must be non-negative on Histogram %s.",
-                self.name,
-            )
-            return
-        self._measurement_consumer.consume_measurement(
-            Measurement(amount, self, attributes)
-        )
-```
+Histogram’s [`record` method](https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-sdk/src/opentelemetry/sdk/metrics/_internal/instrument.py#L251) implementation is similar to the Counter’s `add` method, where it processes only non-negative values.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2025/03/instrument.webp" alt="Metric instruments"/>
-    <figcaption><i>OTel metric instruments</i></figcaption>
+    <img src="/img/blog/2025/03/instrument.webp" alt="A Quick Overview of OTel Metric Instruments"/>
+    <figcaption><i>A Quick Overview of OTel Metric Instruments</i></figcaption>
 </figure>
 
 ## How to Select the Right Instrument?
