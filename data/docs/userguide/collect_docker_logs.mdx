@@ -56,6 +56,8 @@ service:
       exporters: [otlp]
 ```
 
+These operators extract `service.name` from JSON-formatted log bodies and move it to the resource level. This is useful when your application emits structured JSON logs with an explicit `service.name` field. If the field is missing, these operators are safely skipped.
+
 <Admonition type="note">
 If your logs originate from Kubernetes pod log file paths (for example, `/var/log/pods/...` or `/var/log/containers/...`) instead of Docker container log files on the host, set `add_metadata_from_filepath: true` in the container parser operator. 
 This enables automatic extraction of Kubernetes metadata such as pod name, namespace, and container name from the log file path.
