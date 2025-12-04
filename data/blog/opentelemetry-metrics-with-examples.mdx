@@ -66,45 +66,99 @@ Currently OTel metrics support seven different instruments. Let’s try to under
 
 ### Counter
 
-A synchronous instrument which measures values that only increase over time.
+A synchronous instrument that measures values that only increase over time. OpenTelemetry counters provide an `add` method that accept a non-negative value, to be added to the current total.
+
+Looking at the [code implementation](https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-sdk/src/opentelemetry/sdk/metrics/_internal/instrument.py#L154), we can see it logs a warning for negative values:
+
+```py
+class Counter(_Synchronous, APICounter):
+    def add(
+        self, amount: Union[int, float], attributes: Dict[str, str] = None
+    ):
+        if amount < 0:
+            _logger.warning(
+                "Add amount must be non-negative on Counter %s.", self.name
+            )
+            return
+        self._measurement_consumer.consume_measurement(
+            Measurement(amount, self, attributes)
+        )
+```
 
 ### Asynchronous Counter
 
-Same as a counter but reports values only when demanded.
+Asynchronous counters are used to report monotonically increasing values on demand. It is recommended that callback functions registered with asynchronous counters should report total values, rather than increments, allowing aggregations to perform these calculations between current and previous measurements.
 
-### UpDown counter
+### UpDown Counter
 
-A synchronous instrument which measures values that can increase or decrease over time.
+A synchronous instrument that measures values that can increase or decrease. As an UpDown Counter is non-monotonic, it allows reporting positive or negative deltas to the current value. This is inherently different from the counter that always represents an overall total, because of its monotonic nature.
 
-### Asynchronous UpDown counter
+The UpDown Counter also exposes an add method, but doesn’t reject negative values:
 
-Similar to an upDown counter, but reports measurements only on demand.
+```py
+class UpDownCounter(_Synchronous, APIUpDownCounter):
+    def add(
+        self, amount: Union[int, float], attributes: Dict[str, str] = None
+    ):
+        self._measurement_consumer.consume_measurement(
+            Measurement(amount, self, attributes)
+        )
+```
+
+### Asynchronous UpDown Counter
+
+Similar to an UpDown counter, but reports measurements only on demand; its usage is recommended when values can be logically represented across a time series, and their computation is trivial. Asynchronous UpDown Counter is commonly used to measure metrics like memory usage for user applications in a system.
 
 ### Gauge
 
-A synchronous instrument for taking measurements or snapshots of a metric at a single point in time. The value can arbitrarily increase or decrease over time.
+An OpenTelemetry gauge is a synchronous instrument that measures arbitrary values at the time of recording, meaning these measurements can go up or down over time. Values of a gauge are non-additive across measurements. Consider CPU usage- their sum might produce a value greater than 100%.
 
-### Asynchronous gauge
+<KeyPointCallout title=”Synchronous Gauge Stability”>
 
-A gauge which reports values only when observed.
+After [being experimental](https://github.com/open-telemetry/opentelemetry-specification/issues/3893) for a long time, OpenTelemetry [stabilized the synchronous gauge](https://github.com/open-telemetry/opentelemetry-specification/pull/4019) implementation in mid-2024. Depending on the language and SDK version you are using, you may need to upgrade to a newer version to access the OTel gauge meter implementation.
+
+</KeyPointCallout>
+
+### Asynchronous Gauge
+
+A gauge that reports values only when observed. You should use an asynchronous gauge when non-summable data needs to be measured at regular intervals, rather than in a continuous stream.
 
 ### Histogram
 
-A synchronous instrument that records the distribution of values.
+Histograms are synchronous instruments that record the distribution of non-negative values across pre-defined *buckets*, that represent ranges. These help make sense of data points that must be studied in groups across a distribution. Each value added to the histogram is placed in the bucket based on a defined unit of measurement, such as *time in seconds*.
+
+As an example, think of the time a customer spends on a product page. Majority customers spending minutes viewing a product might indicate desirable features — it might be a good indicator to rank that product higher in your search results.
+
+Histogram’s [`record` method](https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-sdk/src/opentelemetry/sdk/metrics/_internal/instrument.py#L251) implementation is similar to the Counter’s `add` method, where it processes only non-negative values:
+
+```py
+class Histogram(_Synchronous, APIHistogram):
+    def record(
+        self, amount: Union[int, float], attributes: Dict[str, str] = None
+    ):
+        if amount < 0:
+            _logger.warning(
+                "Record amount must be non-negative on Histogram %s.",
+                self.name,
+            )
+            return
+        self._measurement_consumer.consume_measurement(
+            Measurement(amount, self, attributes)
+        )
+```
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/03/instrument.webp" alt="Metric instruments"/>
     <figcaption><i>OTel metric instruments</i></figcaption>
 </figure>
 
-
-## How to choose your instrument?
+## How to Select the Right Instrument?
 
 Deciding which OpenTelemetry metric instrument to use can be challenging. Selecting the right instrument is crucial, as it determines how measurements are collected and the type of metric exported, ultimately affecting how you can query and analyse the data.
 
 So, how do you choose the right instrument?
 
-The simple answer is that there's no one-size-fits-all solution. Multiple instruments can often be applicable for a given use case. However, by considering specific aspects of your measurement needs, you can narrow down the pool of suitable instruments. 
+The simple answer is that there's no one-size-fits-all solution. Multiple instruments can often be applicable for a given use case. However, by considering specific aspects of your measurement needs, you can narrow down the pool of suitable instruments.
 
 Before proceeding, we will try to understand two important properties of metrics that will help us in choosing the right instrument.
 
@@ -209,7 +263,48 @@ Now, with this knowledge, you can use the table below to make a list of instrume
 
 Now that we have understood each instrument in depth and when to use them, let’s see how to use it in our applications!
 
-## Instrument parameters
+## Modify Aggregations Through Views
+
+Views allow you to manipulate metric data streams before they are aggregated and exported through the application. They enable renaming instrumentations, modifying aggregation behavior, reducing metric cardinality, or even dropping entire metrics when needed.
+
+The following is a simple example of using views to modify metrics streams:
+
+```py
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import ConsoleMetricExporter, PeriodicExportingMetricReader
+from opentelemetry.sdk.metrics.view import View
+
+exporter = ConsoleMetricExporter()
+reader = PeriodicExportingMetricReader(exporter, export_interval_millis=5000)
+
+# Rename a metric instrument
+name_changer_view = View(
+    instrument_name="total_requests",
+    name="renamed_total_requests", # new name
+)
+
+# Keep / drop specific attribute dimensions
+drop_view = View(
+    instrument_name="external_requests",
+    attribute_keys=["http.method", "http.status_code"],  # drop all others
+)
+
+provider = MeterProvider(
+    metric_readers=[reader],
+    views=[name_changer_view, drop_view],
+)
+
+meter = provider.get_meter("sample")
+
+requests_counter = meter.create_counter("total_requests")
+external_requests_counter = meter.create_counter("external_requests")
+
+# example usage
+requests_counter.add(1)
+external_requests_counter.add(1, {"http.method": "GET", "http.status_code": "200", "user.id": "123"})
+```
+
+## Adding Metadata to Metric Instruments
 
 When registering an instrument, we associate it with a *meter* and identify it with a set of *parameters* passed to the instrument.
 
@@ -219,13 +314,12 @@ Each instrument will have the following parameters,
 - The <u>**kind**</u> of the Instrument
     - if it’s a counter, gauge or any other instrument
     - if it’s asynchronous or synchronous
-- An <u>**unit**</u> of measure [optional]
+- A <u>**unit**</u> of measure [optional]
 - A <u>**description**</u> [optional]
 - Advisory parameters [optional]
     
     Currently, OTel supports two advisory parameters including *Attributes* and ExplicitBucketBoundaries
     
-
 Let’s try registering a simple counter with some parameters which counts the number of database queries made,
 
 ```python
@@ -261,7 +355,7 @@ def execute_query(query_type, table, query_time_ms):
 
 Having understood how to create an instrument and define it with parameters, let’s explore some pratical ways to leverage these instruments for measuring custom metrics.
 
-## Metric code examples
+## Metric Code Examples
 
 Let’s look at some fun examples of measuring items using the above instruments. For the purpose of demonstration, we will assume the context of a simple, e-commerce application coded in Python.
 
@@ -407,7 +501,7 @@ meter.create_observable_gauge(
 
 Voila, you are now ready to add custom metrics to your applications!
 
-## Visualise your custom metrics with an OpenTelemetry-native backend
+## Visualizing OpenTelemetry Metrics
 
 OpenTelemetry helps you in generating metrics. If you want to store and visualize them, you need to send them to an OpenTelemetry-compatible backend like SigNoz. 
 
@@ -422,7 +516,6 @@ SigNoz cloud is the easiest way to run SigNoz. [Sign up](https://signoz.io/teams
 account and get 30 days of unlimited access to all features. 
 
 [![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/) 
-
 
 ## Key takeaways
 
