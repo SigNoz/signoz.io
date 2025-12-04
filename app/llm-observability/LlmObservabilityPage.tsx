@@ -36,7 +36,7 @@ const Header: React.FC = () => {
     },
     {
       text: 'Read Documentation',
-      href: '/docs/trace-funnels/overview/',
+      href: '/docs/llm-observability/',
       variant: 'secondary' as const,
       className: 'flex-center',
       tracking: {
