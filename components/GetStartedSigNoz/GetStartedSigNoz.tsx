@@ -6,7 +6,7 @@ export default function GetStartedSigNoz() {
   return (
     <div className="get-started-signoz">
       <p>
-        SigNoz cloud is the easiest way to run SigNoz.{' '}
+        SigNoz Cloud is the easiest way to run SigNoz.{' '}
         <TrackingLink
           href="https://signoz.io/teams/"
           clickType="Nav Click"
