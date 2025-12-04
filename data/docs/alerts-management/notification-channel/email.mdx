@@ -68,6 +68,45 @@ The resolve alerts toggle is switched on by default. To turn-off receiveing the 
 
 <Figure src="/img/docs/alerts/resolved-alerts.webp" alt="Turn off receiveing resolved alerts notifications." caption="Turn off receiveing resolved alerts notifications." />
 
+## Configure programmatically
+
+You can also configure the Email notification channel programmatically using the SigNoz API.
+
+**API Endpoint:** `POST /api/v1/channels`
+
+To create a new Email notification channel, send a `POST` request to the `/api/v1/channels` endpoint with the following `curl` command:
+
+```bash
+curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
+  -H 'SIGNOZ-API-KEY: YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "Email Example",
+    "email_configs": [
+        {
+            "send_resolved": true,
+            "to": "test@email.com",
+            "html": "<h1>Alert Body HTML</h1>",
+            "headers": {
+                "Subject": "Alert Notification"
+            }
+        }
+    ]
+}'
+```
+
+**Request Body Attributes:**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The name of the receiver/channel. |
+| `email_configs` | `array` | List of email configurations. |
+| `email_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. |
+| `email_configs[].to` | `string` | The email address to which the alerts are sent. |
+| `email_configs[].html` | `string` | The HTML body of the email. |
+| `email_configs[].headers` | `object` | HTTP headers as stringified key/value pairs. |
+
+
 ## Troubleshooting
 If you encounter issues with the Email integration:
 
