@@ -93,7 +93,7 @@ Asynchronous counters are used to report monotonically increasing values on dema
 
 A synchronous instrument that measures values that can increase or decrease. As an UpDown Counter is non-monotonic, it allows reporting positive or negative deltas to the current value. This is inherently different from the counter that always represents an overall total, because of its monotonic nature.
 
-The UpDown Counter also exposes an add method, but doesn’t reject negative values:
+The UpDown Counter also exposes an `add` method, but doesn’t reject negative values:
 
 ```py
 class UpDownCounter(_Synchronous, APIUpDownCounter):
@@ -113,7 +113,7 @@ Similar to an UpDown counter, but reports measurements only on demand; its usage
 
 An OpenTelemetry gauge is a synchronous instrument that measures arbitrary values at the time of recording, meaning these measurements can go up or down over time. Values of a gauge are non-additive across measurements. Consider CPU usage- their sum might produce a value greater than 100%.
 
-<KeyPointCallout title=”Synchronous Gauge Stability”>
+<KeyPointCallout title="Synchronous Gauge Stability">
 
 After [being experimental](https://github.com/open-telemetry/opentelemetry-specification/issues/3893) for a long time, OpenTelemetry [stabilized the synchronous gauge](https://github.com/open-telemetry/opentelemetry-specification/pull/4019) implementation in mid-2024. Depending on the language and SDK version you are using, you may need to upgrade to a newer version to access the OTel gauge meter implementation.
 
