@@ -56,7 +56,7 @@ const Header: React.FC = () => {
       {/* Main content */}
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
-          Monitor LLM Apps and Agents, <br className="hidden md:block" /> Correlate with Infra
+          Monitor LLM Apps and Agents, <br className="hidden md:block" /> Correlate with Logs &
           Metrics
         </h1>
 
@@ -205,7 +205,6 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
       <SectionLayout variant="bordered" className="!mx-auto mt-10 p-0">
         <GridLayout variant="split" className="!gap-y-0">
           {LLM_TOOLS_DATA.map((section, index) => {
-            const isLast = index === LLM_TOOLS_DATA.length - 1
             // Desktop border logic (2 columns)
             const isDesktopRow1 = index < 2
             const isDesktopCol1 = index % 2 === 0

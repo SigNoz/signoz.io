@@ -51,7 +51,7 @@ export const LLM_OBSERVABILITY_CARDS: IconTitleDescriptionCardData[] = [
     iconText: 'PRE-BUILT FRAMEWORK INTEGRATIONS',
     title: 'Start Monitoring in Minutes, Not Days',
     description:
-      'One-line setup for LangChain, Llamalndex, CrewAI. Automatic instrumentation for OpenAI, Anthropic, Bedrock. Framework-specific dashboards included.',
+      'Instant setup for LangChain, LlamaIndex, CrewAI. Automatic instrumentation for OpenAI, Anthropic, Bedrock. Framework-specific dashboards included.',
   },
 ]
 
@@ -218,10 +218,10 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     ),
   },
   {
-    feature: 'Network/API Gateway Metrics',
+    feature: 'Application Correlation',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Full APM
+        <Check size={20} className="text-green-400" /> Cross-service tracing
       </span>
     ),
     langfuse: (
@@ -241,25 +241,25 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     ),
   },
   {
-    feature: 'OTel-Native',
+    feature: 'Dashboards',
     signoz: (
       <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Built on OTel
+        <Check size={20} className="text-green-400" /> Advanced query builder
       </span>
     ),
     langfuse: (
       <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> OTel compatible
+        <Check size={20} className="text-green-400" /> Limited presets
       </span>
     ),
     langsmith: (
       <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" /> Proprietary SDK
+        <Check size={20} className="text-green-400" /> Limited presets
       </span>
     ),
     braintrust: (
       <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" /> Custom instrumentation
+        <Check size={20} className="text-green-400" /> Basic charts
       </span>
     ),
   },
@@ -302,10 +302,7 @@ export const LLM_TOOLS_DATA = [
         Observe <strong>Google Vertex AI</strong> Gemini and PaLM inference
       </>,
       <>
-        Monitor Command, Embed, and Rerank operations from <strong>Cohere</strong>
-      </>,
-      <>
-        Track <strong>Hugging Face</strong> Inference endpoint performance
+        Monitor real-time voice AI pipelines with <strong>Pipecat</strong>
       </>,
     ],
   },
@@ -319,13 +316,10 @@ export const LLM_TOOLS_DATA = [
         Monitor hybrid search queries and filters with <strong>Weaviate</strong>
       </>,
       <>
-        Track embedding storage and retrieval in <strong>Chroma</strong>
+        Route and monitor any model through <strong>LiteLLM</strong> proxy
       </>,
       <>
         Observe vector similarity search performance using <strong>Qdrant</strong>
-      </>,
-      <>
-        Monitor combined SQL and vector queries in <strong>PostgreSQL/pgvector</strong>
       </>,
     ],
   },
@@ -333,16 +327,16 @@ export const LLM_TOOLS_DATA = [
     title: 'Tools & APIs',
     items: [
       <>
-        Track web search API calls and results from <strong>Serper</strong>
+        Track real-time communication infrastructure with <strong>LiveKit</strong>
       </>,
       <>
-        Monitor research and search operations with <strong>Tavily</strong>
+        Monitor voice AI application flows in <strong>Vapi</strong>
       </>,
       <>
-        Trace code interpreter session execution in <strong>E2B</strong>
+        Observe workflow automation and LLM chains in <strong>n8n</strong>
       </>,
       <>
-        Observe web scraping and browser automation using <strong>Browserbase</strong>
+        Validate data structures and responses with <strong>Pydantic</strong>
       </>,
     ],
   },
