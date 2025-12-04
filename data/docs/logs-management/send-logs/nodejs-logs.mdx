@@ -1,0 +1,660 @@
+---
+date: 2025-12-01
+tags: [SigNoz Cloud, Self-Host]
+title: Send logs from Node.js default logger to SigNoz using OpenTelemetry
+id: opentelemetry-nodejs-logs
+doc_type: howto
+description: Learn how to send logs from Node.js default console logger to SigNoz using the OpenTelemetry SDK for OTLP log export.
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Node.js [version 18 or higher](https://github.com/open-telemetry/opentelemetry-js/blob/main/README.md#supported-runtimes)
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- An existing Node.js application
+
+## Send logs to SigNoz
+
+This guide will walk you through instrumenting your Node.js application to send logs from the default `console` logger to SigNoz using the OpenTelemetry (OTel) SDK.
+
+### Step 1: Install dependencies
+
+Install the required OpenTelemetry packages:
+
+<Tabs>
+<TabItem value="npm" label="npm" default>
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```bash
+npm install --save @opentelemetry/api-logs \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions \
+  express
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```bash
+npm install --save @opentelemetry/api-logs \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions \
+  express \
+  typescript \
+  ts-node \
+  @types/node \
+  @types/express
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```bash
+yarn add @opentelemetry/api-logs \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions \
+  express
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```bash
+yarn add @opentelemetry/api-logs \
+  @opentelemetry/sdk-logs \
+  @opentelemetry/exporter-logs-otlp-http \
+  @opentelemetry/resources \
+  @opentelemetry/semantic-conventions \
+  express \
+  typescript \
+  ts-node \
+  @types/node \
+  @types/express
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+### Step 2: Set environment variables
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+Set the following environment variables to configure the OpenTelemetry exporter:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_SERVICE_NAME="nodejs-console-app"
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+If using a local OTel Collector (VM), use:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+# Do not set OTEL_EXPORTER_OTLP_HEADERS
+```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>'
+  - name: OTEL_SERVICE_NAME
+    value: 'nodejs-console-app'
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy instrumentation files and application code
+COPY logger.js ./
+COPY console-instrumentation.js ./
+COPY . .
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+ENV OTEL_SERVICE_NAME="nodejs-console-app"
+
+# Expose application port
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "index.js"]
+```
+
+Build and run the container:
+
+```bash
+# Build the image
+docker build -t nodejs-console-app .
+
+# Run the container
+docker run -p 3000:3000 nodejs-console-app
+```
+
+Replace the placeholders in the Dockerfile:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+$env:OTEL_SERVICE_NAME = "nodejs-console-app"
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud, see [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+</Tabs>
+
+### Step 3: Configure OpenTelemetry Logger
+
+Create a new file called `logger.js` or `logger.ts` in your project root. This file reads the configuration from the environment variables set in the previous step.
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```javascript:logger.js
+const {
+  LoggerProvider,
+  BatchLogRecordProcessor,
+} = require("@opentelemetry/sdk-logs");
+const { OTLPLogExporter } = require("@opentelemetry/exporter-logs-otlp-http");
+const { resourceFromAttributes } = require("@opentelemetry/resources");
+const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
+
+// Create a resource with your service information
+const resource = resourceFromAttributes({
+  [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME || "nodejs-console-app",
+});
+
+// Configure the OTLP exporter
+// It automatically reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS
+const logExporter = new OTLPLogExporter({});
+
+// Create and configure the logger provider
+const loggerProvider = new LoggerProvider({
+  resource,
+  processors: [new BatchLogRecordProcessor(logExporter)], // Configure batch processor
+});
+module.exports = loggerProvider;
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:logger.ts
+import {
+  LoggerProvider,
+  BatchLogRecordProcessor,
+} from "@opentelemetry/sdk-logs";
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+
+// Create a resource with your service information
+const resource = resourceFromAttributes({
+  [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME || "nodejs-console-app",
+});
+
+// Configure the OTLP exporter
+// It automatically reads OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS
+const logExporter = new OTLPLogExporter({});
+
+// Create and configure the logger provider
+const loggerProvider = new LoggerProvider({
+  resource,
+  processors: [new BatchLogRecordProcessor(logExporter)], // Configure batch processor
+});
+
+export default loggerProvider;
+```
+
+</TabItem>
+</Tabs>
+
+### Step 4: Instrument the Default Console Logger
+
+Create a new file called `console-instrumentation.js` or `console-instrumentation.ts` in your project root. This file wraps the default console methods to send logs to OpenTelemetry:
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```javascript:console-instrumentation.js
+require("@opentelemetry/api-logs");
+const loggerProvider = require("./logger");
+
+// Get a logger instance
+const logger = loggerProvider.getLogger("default", "1.0.0");
+
+// Store original console methods
+const originalConsole = {
+  log: console.log,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+  debug: console.debug,
+};
+
+// Map severity levels
+const SeverityNumber = {
+  DEBUG: 5,
+  INFO: 9,
+  WARN: 13,
+  ERROR: 17,
+};
+
+// Override console methods
+console.log = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.log.apply(console, args);
+};
+
+console.info = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.info.apply(console, args);
+};
+
+console.warn = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.WARN,
+    severityText: "WARN",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.warn.apply(console, args);
+};
+
+console.error = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.ERROR,
+    severityText: "ERROR",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.error.apply(console, args);
+};
+
+console.debug = function (...args) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.DEBUG,
+    severityText: "DEBUG",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.debug.apply(console, args);
+};
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:console-instrumentation.ts
+import "@opentelemetry/api-logs";
+import loggerProvider from "./logger";
+
+// Get a logger instance
+const logger = loggerProvider.getLogger("default", "1.0.0");
+
+// Store original console methods
+const originalConsole = {
+  log: console.log,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+  debug: console.debug,
+};
+
+// Map severity levels
+const SeverityNumber = {
+  DEBUG: 5,
+  INFO: 9,
+  WARN: 13,
+  ERROR: 17,
+};
+
+// Override console methods
+console.log = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.log.apply(console, args);
+};
+
+console.info = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.INFO,
+    severityText: "INFO",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.info.apply(console, args);
+};
+
+console.warn = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.WARN,
+    severityText: "WARN",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.warn.apply(console, args);
+};
+
+console.error = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.ERROR,
+    severityText: "ERROR",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.error.apply(console, args);
+};
+
+console.debug = function (...args: any[]) {
+  const message = args
+    .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg)))
+    .join(" ");
+
+  logger.emit({
+    severityNumber: SeverityNumber.DEBUG,
+    severityText: "DEBUG",
+    body: message,
+    attributes: {},
+  });
+
+  originalConsole.debug.apply(console, args);
+};
+```
+
+</TabItem>
+</Tabs>
+
+### Step 5: Initialize Instrumentation in Your Application
+
+Import the instrumentation at the very top of your main application file (e.g., `index.js` or `index.ts`):
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```javascript:index.js
+// This must be the first import
+require('./console-instrumentation')
+
+// Your application code follows
+const express = require('express')
+const app = express()
+
+console.log('Application started')
+console.error('This is an error message')
+
+app.listen(3000, () => {
+  console.info('Server listening on port 3000')
+})
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```typescript:index.ts
+// This must be the first import
+import './console-instrumentation';
+
+// Your application code follows
+import express from 'express';
+const app = express();
+
+console.log('Application started');
+console.error('This is an error message');
+
+app.listen(3000, () => {
+  console.info('Server listening on port 3000');
+});
+```
+
+</TabItem>
+</Tabs>
+
+### Step 6: Run Your Application
+
+Run your application:
+
+<Tabs>
+<TabItem value="javascript" label="JavaScript" default>
+
+```bash
+node index.js
+```
+
+</TabItem>
+<TabItem value="typescript" label="TypeScript">
+
+```bash
+npx ts-node index.ts
+```
+
+</TabItem>
+</Tabs>
+
+## Validate Logs
+
+Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/userguide/logs/) section.
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/logs-management/send-logs/nodejs-logs.webp" alt="Node.js Logs" />
+  <figcaption>
+    <i>Node.js Logs</i>
+  </figcaption>
+</figure>
+
+<figure data-zoomable align="center">
+  <img
+    src="/img/docs/logs-management/send-logs/nodejs-logs-detailed-view.webp"
+    alt="Node.js Logs Detailed View"
+  />
+  <figcaption>
+    <i>Node.js Logs Detailed View</i>
+  </figcaption>
+</figure>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+#### Why do I see "404 Not Found" errors?
+
+This usually happens if the endpoint URL is incorrect.
+
+- Cloud: `https://ingest.<region>.signoz.cloud:443`
+- Self-Hosted: `http://localhost:4318`
+
+#### Why are my logs not appearing in SigNoz?
+
+- Check if the application started successfully and is actually generating logs.
+- Verify your `<region>` and `<SIGNOZ_INGESTION_KEY>` are correct.
+- If using `console.log`, ensure `console-instrumentation.js` is required **before** any other code in your application.
+
+</details>
+
+## Next Steps
+
+- [Send Logs from Node.js Pino Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs)
+- [Send Logs from Node.js Winston Logger to SigNoz](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs)
+- [Log Query/Filtering guides](https://signoz.io/docs/userguide/logs/)
+- [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
+
+## Get Help
+
+<GetHelp />

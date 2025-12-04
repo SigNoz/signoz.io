@@ -167,7 +167,7 @@ Every doc should be skimmable and actionable.
   - Use `tags` consistently. Supported tags include `SigNoz Cloud` and `Self-Host`.
   - Use `doc_type` to match the main intent of the page (see [Documentation types and Diátaxis](#documentation-types-and-diátaxis)).
 - Standard sections (H2 level)
-  - `## Overview` – what the doc covers and when to use it.
+  - `## Overview` – what the doc covers and when to use it. Skip this section if the overview is only 1-2 lines.
   - `## Prerequisites` – versions, accounts, keys, cluster access, etc. Include links.
   - `## Steps` or specific setup sections – ordered, with subheadings for clarity.
   - `## Validate` – how to confirm it worked (UI path, endpoint, example output).
@@ -220,6 +220,10 @@ Every doc should be skimmable and actionable.
     Replace the following placeholders:
     - `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
     - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
+
+  - **Append, don't replace**: When showing OpenTelemetry Collector configuration (e.g., adding a new receiver or exporter), show only the specific snippet to add and instruct the user to **append** it to their existing `otel-collector-config.yaml` and **enable** it in the pipeline. Avoid showing a full `otel-collector-config.yaml` that users might copy-paste, overwriting their existing setup (like resource detectors or other processors).
+    - ✅ "Add the `filelog` receiver to your `receivers` section and enable it in `service.pipelines.logs`."
+    - ❌ "Replace your `otel-collector-config.yaml` with the following content:"
 
 - Hyperlinks
 

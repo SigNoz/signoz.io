@@ -28,11 +28,15 @@ import {
   SiNginx,
   SiReact,
   SiLaravel,
+  SiKotlin,
+  SiFlutter,
+  SiAndroid,
+  SiWordpress,
 } from 'react-icons/si'
 import IconCardGrid from '../Card/IconCardGrid'
 
 interface APMInstrumentationListicleProps {
-  language?: 'python' | 'java' | 'javascript' | 'other' | 'additional' | 'all'
+  language?: 'python' | 'java' | 'javascript' | 'other' | 'mobile' | 'additional' | 'all'
 }
 
 export default function APMInstrumentationListicle({
@@ -45,6 +49,7 @@ export default function APMInstrumentationListicle({
     { id: 'python', label: 'Python' },
     { id: 'java', label: 'Java' },
     { id: 'other', label: 'Other Languages' },
+    { id: 'mobile', label: 'Mobile' },
     { id: 'additional', label: 'Additional' },
   ]
 
@@ -294,6 +299,43 @@ export default function APMInstrumentationListicle({
     </div>
   )
 
+  // Mobile frameworks
+  const renderMobileSection = () => (
+    <div className="mb-10">
+      <h2 className="mb-4 text-2xl font-semibold">Mobile</h2>
+      <IconCardGrid
+        cards={[
+          {
+            name: 'Android (Java)',
+            href: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java',
+            icon: <SiAndroid className="h-7 w-7 text-green-500" />,
+            clickName: 'Android (Java) Instrumentation Link',
+          },
+          {
+            name: 'Android (Kotlin)',
+            href: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin',
+            icon: <SiKotlin className="h-7 w-7 text-purple-500" />,
+            clickName: 'Android (Kotlin) Instrumentation Link',
+          },
+          {
+            name: 'iOS (SwiftUI)',
+            href: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui',
+            icon: <SiSwift className="h-7 w-7 text-orange-500" />,
+            clickName: 'iOS (SwiftUI) Instrumentation Link',
+          },
+          {
+            name: 'Flutter',
+            href: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter',
+            icon: <SiFlutter className="h-7 w-7 text-blue-400" />,
+            clickName: 'Flutter Instrumentation Link',
+          },
+        ]}
+        sectionName="Mobile Frameworks"
+        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+      />
+    </div>
+  )
+
   // Additional options
   const renderAdditionalSection = () => (
     <div className="mb-10">
@@ -312,6 +354,12 @@ export default function APMInstrumentationListicle({
             icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
             clickName: 'Manual JavaScript Instrumentation Link',
           },
+          {
+            name: 'WordPress',
+            href: '/docs/instrumentation/opentelemetry-wordpress',
+            icon: <SiWordpress className="h-7 w-7 text-blue-600" />,
+            clickName: 'WordPress Instrumentation Link',
+          },
         ]}
         sectionName="Additional Options"
         gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
@@ -329,6 +377,7 @@ export default function APMInstrumentationListicle({
       {(activeSection === 'all' || activeSection === 'python') && renderPythonSection()}
       {(activeSection === 'all' || activeSection === 'java') && renderJavaSection()}
       {(activeSection === 'all' || activeSection === 'other') && renderOtherLanguagesSection()}
+      {(activeSection === 'all' || activeSection === 'mobile') && renderMobileSection()}
       {(activeSection === 'all' || activeSection === 'additional') && renderAdditionalSection()}
     </div>
   )

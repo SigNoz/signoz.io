@@ -1,84 +1,198 @@
 ---
-date: 2025-05-12
+date: 2025-11-30
 id: logs
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: Migrate Logs from New Relic
-description: Migrating logs from New Relic to SigNoz. How to migrate logs from New Relic to SigNoz.
+description: Learn how to migrate your logs from New Relic to SigNoz using OpenTelemetry.
+doc_type: howto
 ---
 
-Migrating logs from New Relic to SigNoz involves reconfiguring your log collection pipeline to send data to SigNoz instead. This guide covers different approaches based on your current setup.
+## Overview
 
-## Understanding Log Collection Differences
+This guide walks you through migrating logs from New Relic to SigNoz. You will:
 
-Before migrating, it's important to understand the key differences between New Relic and SigNoz logs:
+1. Check your current log sources in New Relic
+2. Set up log collection with OpenTelemetry
+3. Configure log parsing to match your formats
+4. Validate logs are flowing correctly to SigNoz
 
-| Feature             | New Relic                               | SigNoz                                | Notes                                               |
-|---------------------|----------------------------------------|---------------------------------------|-----------------------------------------------------|
-| **Collection Methods**  | APM agents, Infrastructure agent, Fluentd, API | OpenTelemetry Collector, FluentBit | Different collection methods                        |
-| **Query Language**      | NRQL, Lucene-like                      | ClickHouse SQL, Query Builder         | Different query syntax                              |
-| **Storage**             | NRDB                                   | ClickHouse                            | Different backend storage                           |
-| **Log Processing**      | Pattern detection, attribute extraction | Log pipelines, structured logging     | Similar capabilities with different implementation  |
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-## Migration Approaches
+## Key Differences: New Relic vs SigNoz
 
-### 1. Using OpenTelemetry Collector for Logs
+| Aspect | New Relic | SigNoz |
+|--------|-----------|--------|
+| **Collection** | APM agents, Infrastructure agent, Fluentd, Log API | OpenTelemetry Collector and OTel receivers like FluentBit |
+| **Query Language** | NRQL, Lucene-like | Query Builder, ClickHouse SQL |
+| **Storage** | NRDB (proprietary) | ClickHouse (open source) |
+| **Log Processing** | Parsing rules, drop filters | Log pipelines, OTel processors |
 
-The most straightforward approach is to use the OpenTelemetry Collector to collect logs directly from files, containers, or other sources.
+SigNoz uses the OpenTelemetry Collector for log collection, which provides flexible parsing and routing capabilities.
 
-#### Setting Up the OpenTelemetry Collector for Logs
+## Prerequisites
 
-1. [Install the OpenTelemetry Collector](/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) if not already done
-2. Configure log collection using the filelog receiver:
+Before starting, ensure you have:
 
-```yaml
-receivers:
-  filelog:
-    include: [ /var/log/*.log ]
-    start_at: beginning
-    operators:
-      - type: regex_parser
-        regex: '^(?P<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<severity>[A-Z]*) (?P<message>.*)$'
-        timestamp:
-          parse_from: attributes.time
-          layout: '2006-01-02 15:04:05'
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your New Relic account to review current log sources
+- Access to your log sources (servers, containers, applications)
+
+## Step 1: Assess Your Current Log Sources
+
+Before migrating, inventory what's sending logs to New Relic.
+
+### List Your Log Sources
+
+Run this NRQL query in New Relic's Query Builder:
+
+```sql
+SELECT uniques(entity.name), uniques(hostname), uniques(filePath)
+FROM Log 
+SINCE 7 days ago 
+LIMIT MAX
 ```
 
-3. Add the receiver to your logs pipeline:
+For a breakdown by source type:
 
-```yaml
-service:
-  pipelines:
-    logs:
-      receivers: [filelog]
-      processors: [batch]
-      exporters: [otlp]
+```sql
+SELECT count(*) 
+FROM Log
+SINCE 7 days ago
+FACET instrumentation.provider, entity.name
+LIMIT MAX
 ```
 
-4. Configure the exporter to send logs to SigNoz:
+### Categorize Your Log Sources
 
-```yaml
+Group logs by how they're being collected:
+
+| Source Type | How to Identify | Migration Path |
+|-------------|-----------------|----------------|
+| **Kubernetes** | `k8s.cluster.name`, `k8s.pod.name` attributes | [Kubernetes log collection](#from-kubernetes) |
+| **Docker** | `container.name`, `container.id` attributes | [Docker log collection](#from-docker-containers) |
+| **APM agent logs** | `instrumentation.provider` contains agent name | [Application logs via OTel SDK](#from-new-relic-apm-agent-log-forwarding) |
+| **Fluentd/Fluent Bit** | You have Fluentd/Fluent Bit configured | [Redirect to OTel Collector](#from-fluentdfluentbit) |
+| **Log API** | Direct API calls in your code | [Use OTLP exporter](#from-log-api) |
+| **Cloud Provider Logs** | `cloud.provider` attribute | [Cloud provider log collection](#from-cloud-provider-logs) |
+| **Infrastructure agent** | `hostname` populated, file paths like `/var/log/*` | [File logs via filelog receiver](#from-infrastructure-agent-file-logs) |
+
+
+Save this inventory. You'll use it to validate your migration is complete.
+
+## Step 2: Set Up the OpenTelemetry Collector
+
+Install the OpenTelemetry Collector if you haven't already:
+
+1. [Install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) in your environment.
+
+2. Configure the OTLP exporter for logs:
+
+```yaml:otel-collector-config.yaml
 exporters:
   otlp:
-    # For SigNoz Cloud
-    endpoint: "ingest.{region}.signoz.cloud:443"
+    endpoint: ingest.<region>.signoz.cloud:443
     headers:
-      "signoz-ingestion-key": "<your-ingestion-key>"
+      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
     tls:
       insecure: false
 
-    # For Self-hosted SigNoz
-    # endpoint: "<signoz-otel-collector>:4317"
-    # tls:
-    #   insecure: true
+service:
+  pipelines:
+    logs:
+      exporters: [otlp]
 ```
 
-For more detailed instructions, follow the [SigNoz Logs Management guide](/docs/logs-management/send-logs-to-signoz/).
+Replace:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [Settings → Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-### 2. Using FluentBit with OpenTelemetry
+## Step 3: Migrate Each Log Source
 
-If you're already using FluentBit to forward logs to New Relic, you can reconfigure it to work with OpenTelemetry. First, configure FluentBit to forward logs to the OpenTelemetry Collector:
+Work through each source type from your inventory.
 
-```yaml
+### From Kubernetes
+
+For Kubernetes environments, the easiest approach is to use the SigNoz K8s Infra Helm chart which automatically collects logs from all pods—including your application logs.
+
+<Admonition type="tip">
+If you're using the [SigNoz Kubernetes Infra Helm chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/), **all pod logs are automatically collected**, including application logs. You don't need separate application log configuration—stdout/stderr from all containers will appear in SigNoz immediately after deploying the chart.
+</Admonition>
+
+This means if your application writes logs to stdout (which is the standard practice in Kubernetes), they're already being collected. No additional instrumentation needed.
+
+**Manual setup (if not using the Helm chart)**
+
+If you prefer manual setup, deploy the OpenTelemetry Collector as a DaemonSet and configure the `filelog` receiver for container logs.
+
+### From Docker Containers
+
+For standalone Docker environments, you can collect logs from **all containers at once**—including your application logs—using the OpenTelemetry Collector.
+
+<Admonition type="tip">
+By mounting Docker's log directory, you automatically collect logs from every container, including application containers. If your apps write to stdout/stderr (Docker's default logging), no additional application-level log configuration is needed.
+</Admonition>
+
+See [Collect Docker Container Logs](https://signoz.io/docs/userguide/collect_docker_logs/) for complete setup instructions including:
+- Running the OTel Collector as a Docker container
+- Configuring the `filelog` receiver for `/var/lib/docker/containers/*/*.log`
+- Parsing container metadata
+- Filtering specific containers
+
+### From New Relic APM Agent Log Forwarding
+
+If logs were forwarded via New Relic APM agents, you have several options depending on your language.
+
+**Java: Use the OpenTelemetry Java Agent**
+
+The OTel Java agent can collect logs automatically from Logback and Log4j without code changes:
+
+```bash
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+java -javaagent:/path/opentelemetry-javaagent.jar -jar <myapp>.jar
+```
+
+See [Collecting Application Logs Using OTEL Java Agent](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/) for Logback/Log4j configuration options.
+
+**Python: Enable logs auto-instrumentation**
+
+Python logs can be collected automatically without SDK code changes—just add an environment variable:
+
+```bash
+OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> \
+opentelemetry-instrument --logs_exporter otlp python app.py
+```
+
+See [Python Logs Auto-Instrumentation](https://signoz.io/docs/userguide/python-logs-auto-instrumentation/) for details.
+
+**Node.js: Use Pino or Winston**
+
+For Node.js applications, use OpenTelemetry-compatible logging libraries:
+
+- **Pino**: Install `pino-opentelemetry-transport` and configure the transport. See [Node.js Pino Logs](https://signoz.io/docs/logs-management/send-logs/nodejs-pino-logs/).
+- **Winston**: Install `@opentelemetry/winston-transport` and add the transport. See [Node.js Winston Logs](https://signoz.io/docs/logs-management/send-logs/nodejs-winston-logs/).
+
+**Other languages and methods**
+
+For all available log collection methods, see the [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/) central guide which covers:
+- File-based collection
+- Syslog
+- HTTP/OTLP direct send
+- Language-specific integrations
+
+### From Fluentd/FluentBit
+
+If you're using Fluentd or FluentBit, redirect output to the OpenTelemetry Collector.
+
+**FluentBit configuration:**
+
+```ini
 [OUTPUT]
   Name        forward
   Match       *
@@ -86,110 +200,229 @@ If you're already using FluentBit to forward logs to New Relic, you can reconfig
   Port        8006
 ```
 
-Once FluentBit is configured to forward logs to the OpenTelemetry Collector, you can configure the OpenTelemetry Collector to receive logs from FluentBit following [this guide](/docs/userguide/fluentbit_to_signoz/).
+**OTel Collector configuration to receive:**
 
-### 3. Migrating from New Relic APM Agent Log Forwarding
+```yaml:otel-collector-config.yaml
+receivers:
+  fluentforward:
+    endpoint: 0.0.0.0:8006
 
-If your logs were being collected via New Relic APM agents:
+service:
+  pipelines:
+    logs:
+      receivers: [fluentforward]
+      exporters: [otlp]
+```
 
-1. Remove the New Relic agent configuration for log forwarding
-2. Implement one of these approaches:
-   - Configure application to write logs to files and collect using the filelog receiver
-   - Use a log forwarder like FluentBit or Fluentd to collect and forward logs
-   - If using Java, Node.js, or other languages with OpenTelemetry logging support, consider using the [OpenTelemetry Logging SDK](/docs/instrumentation/)
+See [FluentBit to SigNoz](https://signoz.io/docs/userguide/fluentbit_to_signoz/) for detailed setup.
 
-## Log Parsing and Enrichment
+### From Log API
 
-SigNoz provides powerful log processing capabilities through log pipelines. Here are some examples of common log parsing configurations. For more detailed examples and advanced techniques, see [Parsing Logs with the OpenTelemetry Collector](https://signoz.io/blog/parsing-logs-with-the-opentelemetry-collector/):
+If you're sending logs directly to New Relic's Log API, you send logs to SigNoz using HTTP.
 
-### JSON Log Parsing
+**Before (New Relic Log API):**
 
-For applications that output logs in JSON format:
+```bash
+curl -X POST https://log-api.newrelic.com/log/v1 \
+  -H "Content-Type: application/json" \
+  -H "Api-Key: <NEW_RELIC_LICENSE_KEY>" \
+  -d '{"message": "Log message", "level": "info"}'
+```
+
+**After (HTTP to SigNoz):**
+
+```bash
+curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json' \
+--header 'Content-Type: application/json' \
+--header 'signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>' \
+--data '[
+    {
+        "trace_id": "000000000000000018c51935df0b93b9",
+        "span_id": "18c51935df0b93b9",
+        "trace_flags": 0,
+        "severity_text": "info",
+        "severity_number": 4,
+        "attributes": {
+            "method": "GET",
+            "path": "/api/users"
+        },
+        "resources": {
+            "host": "myhost",
+            "namespace": "prod"
+        },
+        "message": "This is a log line"
+    }
+]'
+
+```
+
+See [Send Logs to SigNoz](https://signoz.io/docs/userguide/send-logs-http//) for detailed setup.
+
+### From Cloud Provider Logs
+
+If you were using New Relic's cloud integrations for AWS, Azure, or GCP logs, SigNoz provides native integrations:
+
+| Provider | Log Sources | Setup Guide |
+|----------|-------------|-------------|
+| **AWS** | CloudWatch Logs, S3, Lambda | [AWS Cloud Integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/) |
+| **Azure** | Azure Monitor, Event Hubs | [Azure Monitoring](https://signoz.io/docs/azure-monitoring/) |
+| **GCP** | Cloud Logging, Pub/Sub | [GCP Monitoring](https://signoz.io/docs/gcp-monitoring/) |
+
+### From Infrastructure Agent (File Logs)
+
+Replace New Relic Infrastructure agent file log collection with the `filelog` receiver.
+
+**Step 1: Add the filelog receiver**
+
+```yaml:otel-collector-config.yaml
+receivers:
+  filelog:
+    include:
+      - /var/log/myapp/*.log
+      - /var/log/syslog
+    start_at: end
+    include_file_path: true
+    include_file_name: true
+```
+
+**Step 2: Enable in the logs pipeline**
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+See [Collect Logs from File](https://signoz.io/docs/userguide/collect_logs_from_file/) for more information.
+
+
+### Finding More Log Sources
+
+For a complete list of all supported log collection methods, see [Send Logs to SigNoz](https://signoz.io/docs/logs-management/send-logs-to-signoz/) - this central guide covers:
+
+- Application logs (by language)
+- Infrastructure logs (syslog, journald)
+- Cloud provider logs
+- Container and Kubernetes logs
+- Third-party integrations
+
+## Step 4: Log Parsing
+
+SigNoz provides two approaches for parsing logs:
+
+### Option 1: Log Pipelines (Recommended)
+
+SigNoz includes a **UI-based Log Pipelines** feature that lets you parse and transform logs without modifying collector configuration. This is the recommended approach because:
+
+- No collector restarts required
+- Visual interface for building parsers
+- Test patterns against sample logs before applying
+- Easy to modify and maintain
+
+Log Pipelines support multiple processors:
+
+| Processor | Use Case |
+|-----------|----------|
+| **Regex** | Extract fields using regular expressions |
+| **Grok** | Use predefined patterns (like `%{IP:client_ip}`) for common formats |
+| **JSON Parser** | Parse JSON log bodies into attributes |
+| **Timestamp Parser** | Extract and normalize timestamps |
+| **Severity Parser** | Map log levels to standard severity |
+| **Add/Remove/Move/Copy** | Transform log attributes |
+
+See [Log Pipelines Processors](https://signoz.io/docs/logs-pipelines/processors/) for detailed documentation on each processor.
+
+### Option 2: Collector-Level Parsing
+
+For high-volume parsing or when you need to reduce data before it reaches SigNoz, configure parsing in the OpenTelemetry Collector using operators in the `filelog` receiver.
+
+Example for Apache/Nginx access logs:
 
 ```yaml
-processors:
-  - json_parser:
-      source: body
-      preserve_to: raw_body
+operators:
+  - type: regex_parser
+    regex: '^(?P<remote_addr>[^ ]*) - (?P<remote_user>[^ ]*) \[(?P<time_local>[^\]]*)\] "(?P<request>[^"]*)" (?P<status>[^ ]*) (?P<body_bytes_sent>[^ ]*)'
+    timestamp:
+      parse_from: attributes.time_local
+      layout: '%d/%b/%Y:%H:%M:%S %z'
 ```
 
-This configuration will:
-- Parse the JSON in the `body` field
-- Extract all JSON fields as top-level attributes
-- Preserve the original log in the `raw_body` field
+For collector-level parsing patterns, see [Parsing Logs with the OpenTelemetry Collector](https://signoz.io/blog/parsing-logs-with-the-opentelemetry-collector/).
 
-### Structured Logs with Regex Parser
+## Validate
 
-For logs with a common pattern like `[2023-04-22 15:04:05] ERROR: Database connection failed`:
+Verify logs are flowing correctly by comparing against your source inventory.
 
-```yaml
-processors:
-  - regex_parser:
-      source: body
-      regex: '^\[(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (?P<level>\w+): (?P<message>.*)$'
-      timestamp:
-        source: timestamp
-        format: '%Y-%m-%d %H:%M:%S'
-```
+### Check Logs Are Arriving
 
-This configuration will:
-- Extract timestamp, log level, and message as separate fields
-- Parse the timestamp into a standard format
+1. In SigNoz, navigate to **Logs** in the left sidebar.
+2. Use the **Logs Explorer** to browse recent logs.
+3. Verify logs from each source in your inventory appear.
 
-### New Relic APM Log Format
+### Verify Log Attributes
 
-If you're migrating logs from New Relic APM agents, you may have logs in this format:
+1. Click on a log entry to expand it.
+2. Check that parsed fields (timestamp, severity, service name) are correct.
+3. Verify file paths or container names match your sources.
 
-```
-2023-04-22 15:04:05 [INFO] [MyApp] [txn=WebTransaction/Controller/users/show] [traceId=abc123] Message content
-```
+### Test Search and Filtering
 
-Use this pipeline configuration:
+1. Search for a known log message using full-text search.
+2. Filter by severity level (e.g., `severity_text = 'ERROR'`).
+3. Filter by service or source (e.g., `service.name = 'your-service'`).
 
-```yaml
-processors:
-  - regex_parser:
-      source: body
-      regex: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] \[(?P<service>\w+)\] \[txn=(?P<transaction>[^\]]+)\] \[traceId=(?P<trace_id>[^\]]+)\] (?P<message>.*)$'
-      timestamp:
-        source: timestamp
-        format: '%Y-%m-%d %H:%M:%S'
-```
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
 
-This configuration extracts all the relevant fields from your New Relic logs, enabling easy filtering and correlation in SigNoz.
+### Logs not appearing in SigNoz
 
-## Using the SigNoz Logs Explorer
+1. **Check Collector status**: Verify the OpenTelemetry Collector is running and check its logs for errors.
+2. **Verify file permissions**: Ensure the Collector has read access to log files.
+3. **Check include paths**: Confirm the `include` patterns in `filelog` receiver match your log file paths.
+4. **Test connectivity**: Verify the Collector can reach `ingest.<region>.signoz.cloud:443`.
 
-The [Logs Explorer](/docs/product-features/logs-explorer/) in SigNoz provides a powerful interface for searching, filtering, and analyzing your logs.
+### Logs appear but are unparsed
 
-<Figure src="/img/docs/product-features/logs-explorer/logs-explorer-views.gif" alt="Logs Explorer in SigNoz" caption="Viewing logs in the SigNoz Logs Explorer" />
+If logs show as raw text without parsed fields:
 
-Key features of the Logs Explorer include:
+1. **Check regex patterns**: Test your regex against sample log lines using a regex tester.
+2. **Verify operator order**: Parsers must be in the correct sequence.
+3. **Check timestamp format**: Ensure the `layout` matches your actual timestamp format.
 
-- **Full-text search**: Search across the `body` of all logs
-- **Advanced filtering**: Filter logs by any attribute or field
-- **Live Tail**: Watch logs in real-time as they arrive
-- **Trace correlation**: Connect logs to related traces for context
+### Missing logs from some sources
 
-For detailed information on how to use all the features of the Logs Explorer, refer to the [Logs Explorer documentation](/docs/product-features/logs-explorer/).
+1. **Check start_at setting**: Use `start_at: end` for new logs only, `start_at: beginning` to include existing logs.
+2. **Verify exclude patterns**: Ensure you're not accidentally excluding wanted log files.
+3. **Check file rotation**: The Collector handles rotation, but verify log files aren't being truncated.
 
-In case you will be querying logs from dashboards using ClickHouse SQL, you can refer to the [Logs Schema](/docs/userguide/logs_clickhouse_queries/).
+### Duplicate logs
 
-## Verifying Log Migration
+If you see the same log multiple times:
 
-After setting up log collection in SigNoz, verify that logs are being collected correctly:
+1. **Check for multiple collectors**: Ensure only one Collector instance is reading each log file.
+2. **Review include patterns**: Overlapping patterns can cause duplicates.
 
-1. Navigate to the `Logs` section in SigNoz
-2. Check that logs are appearing with the expected fields and format
-3. Verify that any custom attributes are being extracted correctly
-4. Test queries to ensure they return the expected results
-5. Compare with New Relic to ensure all logs are being captured
+### Timestamp parsing issues
+
+If logs appear with wrong timestamps:
+
+1. **Verify timezone**: Ensure the `layout` includes timezone if present in logs.
+2. **Check layout format**: Go time layouts use reference time `2006-01-02 15:04:05` (not strftime).
+3. **Test with sample**: Parse a single log line first to verify the pattern.
+
+</details>
 
 ## Next Steps
 
-Once your logs are successfully migrating to SigNoz, consider:
+Once your logs are flowing to SigNoz:
 
-- [Creating dashboards](/docs/migration/migrate-from-newrelic/dashboards) with log-based panels
-- [Setting up log-based alerts](/docs/alerts-management/log-based-alerts/) for important log patterns
-- [Configuring log processing pipelines](/docs/logs-pipelines/introduction/) for advanced log enrichment and structuring
-- [Correlating logs with traces](/docs/logs-pipelines/guides/trace/) for comprehensive observability
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-newrelic/dashboards) with log-based panels
+- [Set up log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) for error patterns
+- [Configure log pipelines](https://signoz.io/docs/logs-pipelines/introduction/) for advanced processing
+- [Correlate logs with traces](https://signoz.io/docs/logs-pipelines/guides/trace/) using trace IDs
+- [Explore Logs Explorer features](https://signoz.io/docs/product-features/logs-explorer/) for analysis

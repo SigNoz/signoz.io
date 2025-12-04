@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   SiDocker,
   SiKubernetes,
@@ -22,6 +22,9 @@ import {
   SiAmazon,
   SiGooglecloud,
   SiSnowflake,
+  SiFlydotio,
+  SiEnvoyproxy,
+  SiGo,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -36,31 +39,54 @@ interface MetricsQuickStartOverviewProps {
     | 'runtimes'
     | 'collection'
     | 'cloud-platforms'
+    | 'applications'
 }
 
 type SectionId = NonNullable<MetricsQuickStartOverviewProps['category']>
 
+// Define sections outside component to avoid recreation on every render
+const SECTIONS: { id: SectionId; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'collection', label: 'Collection' },
+  { id: 'infrastructure', label: 'Infrastructure' },
+  { id: 'applications', label: 'Applications' },
+  { id: 'databases', label: 'Databases' },
+  { id: 'web-servers', label: 'Web Servers' },
+  { id: 'messaging', label: 'Messaging' },
+  { id: 'runtimes', label: 'Runtimes' },
+  { id: 'cloud-platforms', label: 'Cloud Platforms' },
+]
+
 export default function MetricsQuickStartOverview({
   category = 'all',
 }: MetricsQuickStartOverviewProps) {
-  const sections: { id: SectionId; label: string }[] = [
-    { id: 'all', label: 'All' },
-    { id: 'collection', label: 'Collection' },
-    { id: 'infrastructure', label: 'Infrastructure' },
-    { id: 'databases', label: 'Databases' },
-    { id: 'web-servers', label: 'Web Servers' },
-    { id: 'messaging', label: 'Messaging' },
-    { id: 'runtimes', label: 'Runtimes' },
-    { id: 'cloud-platforms', label: 'Cloud Platforms' },
-  ]
-
   const [activeSection, setActiveSection] = useState<SectionId>(
     category === 'all' ? 'all' : category
   )
 
+  // Check for hash in URL on mount and when hash changes
+  useEffect(() => {
+    const checkHash = () => {
+      const hash = window.location.hash.replace('#', '') as SectionId
+      if (hash && SECTIONS.some((s) => s.id === hash)) {
+        setActiveSection(hash)
+      }
+    }
+
+    // Check on mount
+    checkHash()
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', checkHash)
+
+    return () => {
+      window.removeEventListener('hashchange', checkHash)
+    }
+  }, [])
+
   const NavigationPills = () => (
     <div className="mb-8 flex flex-wrap gap-2">
-      {sections.map((section) => (
+      {SECTIONS.map((section) => (
         <button
           key={section.id}
           onClick={() => setActiveSection(section.id)}
@@ -158,6 +184,18 @@ export default function MetricsQuickStartOverview({
             href: '/docs/integrations/nomad',
             icon: <SiHashicorp className="h-7 w-7 text-purple-600" />,
             clickName: 'Nomad Metrics Link',
+          },
+          {
+            name: 'Fly.io',
+            href: '/docs/metrics-management/fly-metrics',
+            icon: <SiFlydotio className="h-7 w-7 text-purple-500" />,
+            clickName: 'Fly.io Metrics Link',
+           },
+          {
+            name: 'Envoy',
+            href: '/docs/userguide/envoy-metrics',
+            icon: <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
+            clickName: 'Envoy Metrics Link',
           },
         ]}
         sectionName="Infrastructure Metrics"
@@ -472,12 +510,31 @@ export default function MetricsQuickStartOverview({
     </div>
   )
 
+  const renderApplicationSection = () => (
+    <div className="mb-10">
+      <h2 className="mb-4 text-2xl font-semibold">Applications</h2>
+      <IconCardGrid
+        cards={[
+          {
+            name: 'Golang',
+            href: '/docs/metrics-management/send-metrics/applications/golang',
+            icon: <SiGo className="h-7 w-7 text-cyan-500" />,
+            clickName: 'Golang Metrics Link',
+          },
+        ]}
+        sectionName="Application Metrics"
+        gridCols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+      />
+    </div>
+  )
+
   return (
     <div>
       <NavigationPills />
       {(activeSection === 'all' || activeSection === 'collection') && renderCollectionSection()}
       {(activeSection === 'all' || activeSection === 'infrastructure') &&
         renderInfrastructureSection()}
+      {(activeSection === 'all' || activeSection === 'applications') && renderApplicationSection()}
       {(activeSection === 'all' || activeSection === 'databases') && renderDatabasesSection()}
       {(activeSection === 'all' || activeSection === 'web-servers') && renderWebServersSection()}
       {(activeSection === 'all' || activeSection === 'messaging') && renderMessagingSection()}

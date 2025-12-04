@@ -1,180 +1,115 @@
 ---
-date: 2025-05-06
+date: 2025-12-01
 id: alerts
-tags : [SigNoz Cloud, Self-Host]
-title: Migrate alerts from ELK Stack to SigNoz
-description: A comprehensive guide for translating alerting mechanisms and configurations from the Elastic Stack (ELK Stack) to SigNoz.
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Alerts from ELK Stack
+description: Learn how to migrate your alerts from ELK Stack (Kibana, ElastAlert) to SigNoz.
+doc_type: howto
 ---
 
+## Overview
 
-Translating alerting mechanisms from the Elastic Stack (ELK), encompassing [Kibana native alerting](https://www.elastic.co/kibana/alerting) and [ElastAlert](https://elastalert.readthedocs.io/en/latest/), to SigNoz presents a common challenge for organizations evolving their observability strategies. This guide provides a comprehensive approach to re-implementing established alerting logic, addressing differences in architectures, data models, and query languages.
+Migrating alerts from the ELK Stack (Kibana Alerting, ElastAlert) to SigNoz involves translating your alert logic from Elasticsearch queries to SigNoz's OpenTelemetry-native alerting engine (powered by Prometheus Alertmanager).
 
-The ELK Stack offers alerting through Kibana's integrated features and the flexible ElastAlert framework, both leveraging Elasticsearch data. SigNoz, an [OpenTelemetry](https://signoz.io/why-opentelemetry/) (OTel) native observability platform, provides unified monitoring of logs, metrics, and traces, with alerting built upon this foundation. Migrating alerts is often part of a broader shift towards an OpenTelemetry native model, requiring a re-evaluation of telemetry collection and analysis pipelines. This guide aims to bridge the gap, enabling users to effectively migrate their alerting strategies.
+This guide helps you map your existing alert rules and notification channels to SigNoz.
 
-### High-Level Comparison: ELK Stack vs. SigNoz Alerting
+## Prerequisites
 
-Understanding the fundamental differences is key to a successful migration.
+- A SigNoz account (SigNoz Cloud or Self-Hosted).
+- List of existing alert rules and notification channels from Kibana or ElastAlert.
 
-*   **ELK Stack Alerting:**
-    *   **Kibana Native Alerting:** UI-driven, integrated with Kibana. Rules are typically created from data exploration contexts (APM, Metrics, Logs). Uses KQL or Lucene for queries.
-    *   **ElastAlert Framework:** External Python-based service. Highly flexible, configured via YAML files. Uses full Elasticsearch Query DSL.
-    *   **Data Source:** Primarily Elasticsearch indices.
-*   **SigNoz Alerting:**
-    *   **Core Engine:** Utilizes Prometheus Alertmanager (managed by SigNoz) for rule evaluation and notification dispatch.
-    *   **Data Source:** ClickHouse database, storing OpenTelemetry-native logs, metrics, traces, and exceptions.
-    *   **Rule Definition:** SigNoz UI (Query Builder, PromQL for metrics, ClickHouse Queries for all signals) or [SigNoz Terraform Provider](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/resources/alert).
+## Migration Steps
 
-**Key Architectural Differences:**
+### Step 1: Set Up Notification Channels
 
-| Alerting Aspect         | ELK Stack (Kibana / ElastAlert)                                     | SigNoz Equivalent                                                                      | Key Translation Notes & Considerations                                                                                                                               |
-| :---------------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Primary Alert Engine** | Kibana: Built-in rules engine. ElastAlert: Separate Python framework. | Prometheus Alertmanager (managed by SigNoz).                                          | SigNoz leverages a mature, widely-used engine. ELK offers integrated UI-driven (Kibana) or a separate, highly configurable framework (ElastAlert).                 |
-| **Data Source for Alerts**| Elasticsearch indices (logs, metrics, APM data).                   | ClickHouse database (OpenTelemetry-native logs, metrics, traces, exceptions).         | Shift from Elasticsearch-centric data to ClickHouse. SigNoz's OTel-native approach means data is inherently structured for all signals.                               |
-| **Rule Definition Method**| Kibana: UI-driven, KQL/Lucene. ElastAlert: YAML configuration files. | SigNoz UI: Query Builder, PromQL (metrics), ClickHouse Queries (all signals), Terraform. | SigNoz offers multiple abstraction levels. ElastAlert's YAML provides programmatic control. Kibana offers UI simplicity.                                           |
-| **Query Language**      | Kibana: KQL, Lucene. ElastAlert: Lucene, Elasticsearch Query DSL.   | PromQL (metrics), ClickHouse SQL (logs, traces, metrics, exceptions).                  | Significant shift. KQL/Lucene are document-search oriented. PromQL is time-series metric-oriented. ClickHouse SQL is powerful analytical SQL.                        |
-| **Alert Grouping & Silencing** | Kibana: Basic grouping. ElastAlert: `aggregation`, `realert`. | Prometheus Alertmanager capabilities (grouping by labels, inhibition, silences).     | SigNoz inherits Alertmanager's powerful grouping/silencing. ElastAlert offers rule-level control. Kibana's is more basic.                                          |
+Before migrating rules, configure your notification channels in SigNoz.
 
-**Feature Comparison Table:**
+<details>
+<ToggleHeading>
+### Supported Notification Channels
+</ToggleHeading>
 
-| Feature                 | Kibana Alerting                   | ElastAlert                         | SigNoz Alerting                                                                  |
-| :---------------------- | :-------------------------------- | :--------------------------------- | :------------------------------------------------------------------------------- |
-| **Rule Definition**     | UI-driven                         | YAML files                         | UI (Query Builder, PromQL, ClickHouse Query), Terraform                            |
-| **Query Language**      | KQL, Lucene, ES SQL (limited)     | Elasticsearch Query DSL            | Query Builder, PromQL, ClickHouse SQL                                            |
-| **Data Sources**        | Logs, Metrics, Traces, Uptime etc | Elasticsearch Indices              | Metrics, Logs, Traces, Exceptions                                                |
-| **Common Rule Types**   | Threshold, Log, Metric, APM, etc. | Frequency, Spike, Flatline, etc.   | Threshold, Rate, Anomaly (Metric, Log, Trace, Exception based)                   |
-| **Notification Mgmt**   | Kibana Actions                    | ElastAlert Alerters                | Prometheus Alertmanager                                                          |
-| **Common Notifications**| Index, Log, Slack, Email, Webhook*| Email, Slack, Jira, PagerDuty etc  | Email, Slack, Webhook, PagerDuty, Opsgenie, MS Teams, Incident.io, Rootly, Zenduty |
-| **Configuration**       | Kibana UI                         | YAML Files                         | SigNoz UI, Env Vars (Alertmanager SMTP), Terraform                               |
-| **Open Source**         | Core features free, some paid     | Yes                                | Yes (Core)                                                                       |
-_(*Some Kibana connectors might require specific license tiers.)_
+| Channel | ELK Stack | SigNoz | Notes |
+|---------|-----------|--------|-------|
+| Email | ✓ | ✓ | Standard integration |
+| Slack | ✓ | ✓ | Standard integration |
+| MS Teams | ✓ | ✓ | Standard integration |
+| PagerDuty | ✓ | ✓ | Standard integration |
+| OpsGenie | ✓ | ✓ | Standard integration |
+| Webhook | ✓ | ✓ | Generic integration |
+| Incident.io | Via Webhook | ✓ | Native or Webhook |
+| Index | ✓ | - | Not supported |
 
-###  Translating Alert Logic
+</details>
 
-This is the most critical part of the migration, involving re-thinking your alert conditions for SigNoz's architecture.
+See [Alerts Notification Channel documentation](https://signoz.io/docs/alerts-management/notification-channel) for setup details.
 
-####  Translating Common ELK/ElastAlert Rule Types to SigNoz
+### Step 2: Translate Alert Logic
 
-| ELK/ElastAlert Rule Type                     | Description                                                 | SigNoz Approach (Signal & Query Type)                                          | Conceptual SigNoz Query/Logic Example                                                                                                                                 |
-| :------------------------------------------- | :---------------------------------------------------------- | :----------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `frequency` (ElastAlert) / Index Threshold (Kibana) | X events in Y time.                                         | Log-based (ClickHouse SQL) or Metric-based (PromQL on derived metric).       | ClickHouse: `SELECT count() FROM logs WHERE ... GROUP BY tumble(timestamp, INTERVAL 'Y' MINUTE) HAVING count() > X`                                                |
-| `spike` (ElastAlert)                         | Event rate changes significantly.                           | Metric-based (PromQL on event rate metric).                                    | PromQL: `rate(event_count_metric[Ym]) > (spike_factor * avg_over_time(rate(event_count_metric[Ym])[Xh:Ym] offset Ym))`                                              |
-| `flatline` (ElastAlert)                      | Less than X events in Y time.                               | Log-based (ClickHouse SQL) or Metric-based (PromQL on derived metric).       | ClickHouse: `SELECT count() FROM logs WHERE ... GROUP BY tumble(timestamp, INTERVAL 'Y' MINUTE) HAVING count() < X`                                                |
-| `change` (ElastAlert)                        | Field value changes for a unique key.                       | Log-based (ClickHouse SQL with window functions).                              | ClickHouse: `SELECT ... WHERE current_value != neighbor(current_value, -1) OVER (PARTITION BY key ORDER BY timestamp)` (May require complex query or metric transformation) |
-| `new_term` (ElastAlert)                      | New value appears in a field.                               | Log-based (ClickHouse SQL comparing against known terms) or Metric-based (monitoring cardinality changes). | ClickHouse: `SELECT term FROM logs WHERE term NOT IN (SELECT known_term FROM known_terms_table)` (Often complex)                                                     |
-| `cardinality` (ElastAlert)                   | Number of unique values for a field above/below threshold.    | Log-based (ClickHouse SQL `uniqCombined`) or Metric-based (PromQL `count(count by (label) (metric_name))`). | ClickHouse: `SELECT uniqCombined(field) FROM logs HAVING uniqCombined(field) > N`                                                                                      |
-| Kibana Elasticsearch query / ElastAlert `any`  | Any event matches a specific query.                         | Log-based (ClickHouse SQL translating KQL/Lucene).                             | ClickHouse: `SELECT * FROM logs WHERE <translated_conditions> LIMIT 1` (alert if result exists)                                                                         |
+You need to map your ELK alert types to SigNoz alert types.
 
-#### Query Language Conversion (KQL/Lucene to ClickHouse SQL/PromQL)
+| ELK Rule Type | SigNoz Alert Type | Description |
+|---------------|-------------------|-------------|
+| **Metric Threshold** | [Metric Alert](https://signoz.io/docs/alerts-management/metrics-based-alerts/) | Alert when a metric crosses a threshold (e.g., CPU > 90%) |
+| **Log Threshold** | [Log Alert](https://signoz.io/docs/alerts-management/log-based-alerts/) | Alert on count of logs matching a query (e.g., > 10 errors/min) |
+| **APM Latency/Error** | [Trace Alert](https://signoz.io/docs/alerts-management/trace-based-alerts/) | Alert on span duration or error status |
+| **Spike/Anomaly** | [Anomaly Alert](https://signoz.io/docs/alerts-management/anomaly-based-alerts/) | Detect deviations from normal patterns |
+| **ElastAlert Frequency** | Log Alert | Count events in a time window |
+| **ElastAlert Flatline** | Log/Metric Alert | Alert when count drops below threshold |
 
-Migrating from KQL/Lucene (text-search oriented) to ClickHouse SQL (analytical SQL) and PromQL (time-series functional language) is a significant shift.
+### Step 3: Convert Queries
 
-**Common KQL/Lucene to SigNoz ClickHouse SQL (for Logs):**
+Translate your KQL/Lucene queries to SigNoz queries.
 
-*   **Field-Value Equality:**
-    *   KQL/Lucene: `response_status:200`
-    *   SigNoz (ClickHouse SQL): `attributes_string['response_status'] = '200'` or `body.response_status = 200` (if parsed into log body structure). Check your OTel Collector parsing.
-*   **Phrase Matching:**
-    *   KQL/Lucene: `message:"login failed"`
-    *   SigNoz: `body LIKE '%login failed%'` or `attributes_string['message'] LIKE '%login failed%'`
-*   **Boolean Operators:**
-    *   KQL/Lucene: `level:ERROR AND http.method:POST`
-    *   SigNoz: `attributes_string['level'] = 'ERROR' AND attributes_string['http.method'] = 'POST'`
-    *   KQL/Lucene: `level:WARN OR level:ERROR`
-    *   SigNoz: `attributes_string['level'] IN ('WARN', 'ERROR')`
-    *   KQL/Lucene: `NOT http.response_code:200`
-    *   SigNoz: `attributes_string['http.response_code'] != '200'`
-*   **Existence of a Field:**
-    *   KQL/Lucene: `user.id:*`
-    *   SigNoz: `has(attributes_string, 'user.id')` or `isNotNull(attributes_map['user.id'])` (depending on how it's stored)
-*   **Range Queries (Numeric):**
-    *   KQL/Lucene: `response_time_ms:[1000 TO 5000]`
-    *   SigNoz: `attributes_float['response_time_ms'] >= 1000 AND attributes_float['response_time_ms'] <= 5000`
-*   **Wildcards:**
-    *   KQL/Lucene: `hostname:webserver*`
-    *   SigNoz: `startsWith(attributes_string['hostname'], 'webserver')` or `attributes_string['hostname'] LIKE 'webserver%'`
+| Query Logic | Kibana (KQL) | SigNoz (ClickHouse SQL) |
+|-------------|--------------|-------------------------|
+| **Field Match** | `status:500` | `attributes_string['status'] = '500'` |
+| **Text Match** | `message:"failed"` | `body ILIKE '%failed%'` |
+| **Boolean** | `env:prod AND level:error` | `attributes_string['env']='prod' AND attributes_string['level']='error'` |
+| **Range** | `duration:>1000` | `attributes_int['duration'] > 1000` |
 
-**For Metrics (PromQL):**
-If ELK alerts were on metrics (e.g., from Metricbeat), ensure equivalent metrics are collected via OpenTelemetry and use PromQL in SigNoz. Example: Alerting on high CPU usage: `node_cpu_seconds_total{mode="idle", instance="myhost"}` -> `avg_over_time(rate(node_cpu_seconds_total{mode="idle", instance="myhost"}[5m])[1m:]) < 0.2` (meaning less than 20% idle).
+### Step 4: Create Alert Rules
 
-#### Defining Conditions and Thresholds
+1. Navigate to **Alerts** in SigNoz.
+2. Click **+ New Alert**.
+3. Select the alert type (Metric, Log, Trace, etc.).
+4. Build your query using the Query Builder or enter the translated SQL/PromQL.
+5. Set the threshold and evaluation window.
+6. Select your notification channel.
 
-*   **Evaluation Windows:** Both systems use time windows. SigNoz defines an "Evaluation window" (e.g., "Last 5 minutes") for data querying.
-*   **Thresholds:** SigNoz UI allows setting threshold values with standard operators (> < =).
-*   **SigNoz "Occurrence" Condition:** This is a key feature, specifying how the threshold must be met:
-    *   `at least once`: Condition true at least once in the window.
-    *   `all the times`: Condition true for every data point/sub-interval.
-    *   `on average`: Average value over the window meets the threshold.
-    *   `in total`: Sum or total count over the window meets the threshold.
-    This helps reduce alert fatigue from transient spikes.
+## Infrastructure as Code (Terraform)
 
-### Setting up Notification Channels
+If you managed ELK alerts with Terraform or ElastAlert YAMLs, you can use the [SigNoz Terraform Provider](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs) to manage SigNoz alerts as code.
 
-Before migrating alerts, configure your desired notification channels in SigNoz (Settings > Alert Channels).
+## Validate
 
-| Notification Channel | SigNoz             | ELK Stack (Alerting) | Notes                                                                                                 |
-|----------------------|--------------------|----------------------|-------------------------------------------------------------------------------------------------------|
-| Email                | ✓                  | ✓                    | Standard. SigNoz uses Alertmanager SMTP settings (env vars like `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP_SMARTHOST`). |
-| Slack                | ✓                  | ✓                    | Standard.                                                                                             |
-| Microsoft Teams      | ✓                  | ✓                    | Supported by both.                                                                                    |
-| PagerDuty            | ✓                  | ✓                    | Standard integration.                                                                                 |
-| Opsgenie             | ✓                  | ✓                    | Standard integration.                                                                                 |
-| Webhook              | ✓                  | ✓                    | Generic channel for custom integrations.                                                              |
-| Incident.io          | ✓ (Webhook)        | ✓ (Webhook)          | Requires Webhook integration for both.                                                                    |
-| Rootly               | ✓ (Webhook)        | ✓ (Webhook)          | Requires Webhook integration for both.                                                                    |
-| Zenduty              | ✓ (Webhook)        | ✓ (Webhook)          | Requires Webhook integration for both.                                                                    |
-| Telegram             | ✓ (Webhook)        | ✓ (Webhook)          | Requires Webhook integration for both.                                                                |
-| **Other ELK**        |                    |                      |                                                                                                       |
-| Index                | -                  | ✓                    | ELK can write alerts back to an Elasticsearch index. Not a direct SigNoz feature.                     |
-| Server Log           | -                  | ✓                    | ELK can write alerts to its server logs.                                                              |
+To confirm that your alerts are migrated correctly:
 
-**Configuration Notes:**
-*   **ELK:** Kibana connectors are configured in the UI. ElastAlert alerters are per-rule in YAML.
-*   **SigNoz:** Channels are centrally configured in the UI. Alertmanager SMTP settings (for email) are via environment variables. The external URL for Alertmanager (used in notification links) is also set via an environment variable (e.g., `SIGNOZ_ALERTMANAGER_SIGNOZ_EXTERNAL_URL`).
+1. **Test Trigger**: Temporarily lower thresholds to trigger the alert.
+2. **Verify Notification**: Check if the notification is received on the configured channel.
+3. **Check Alert Status**: Verify the alert shows as "Firing" in the SigNoz UI.
 
-###  Practical Migration Strategies & Best Practices
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
 
-1.  **Inventory and Prioritize:**
-    *   Document all existing ELK alerts: purpose, query, conditions, notifications, frequency.
-    *   Prioritize critical alerts. Deprecate noisy or irrelevant ones.
-2.  **Phased Migration:**
-    *   **Pilot Phase:** Migrate a small, representative subset of alerts first to understand the process and identify challenges.
-    *   **Iterative Rollout:** Migrate remaining alerts in batches (by service, type, criticality).
-3.  **Query Translation Focus:**
-    *   Understand the *intent* of the original ELK query.
-    *   Use SigNoz's Logs Explorer and Metrics Explorer to test translated queries before creating alert rules.
-4.  **Leverage SigNoz Strengths:**
-    *   **Re-evaluate Alert Types:** Consider if ELK log-based alerts (e.g., error counts) can become more efficient metric-based alerts in SigNoz.
-    *   **Utilize All Signals:** Explore alerting on traces and exceptions, which SigNoz natively supports.
-    *   **Query Builder:** Use for simpler alerts to reduce manual query writing.
-5.  **Handling Complex ElastAlert Rules:**
-    *   Simplify logic if possible.
-    *   Re-implement using advanced ClickHouse SQL (window functions, etc.).
-    *   Evaluate if an alternative SigNoz alert type (e.g., anomaly detection) can meet the need.
-6.  **Testing and Validation:**
-    *   Run ELK and SigNoz alerts in parallel for a period.
-    *   Compare behavior, verify triggers, and ensure reliable notification delivery.
-    *   Fine-tune SigNoz thresholds and queries based on observations.
-7.  **Documentation:**
-    *   Document migrated SigNoz alerts: original ELK rule, new SigNoz definition (query, settings), rationale for changes.
+### Alerts not triggering
 
-###  Setting Up Alert Rules in SigNoz
+- **Check Data**: Ensure the underlying data (logs/metrics) is present.
+- **Verify Query**: Run the query in Query Builder to ensure it returns results.
+- **Check Thresholds**: Ensure the condition is actually met.
+- **Evaluation Window**: Ensure the condition persists for the duration of the evaluation window.
 
-Once your alert logic has been translated and notification channels are configured, you can create the alert rules in SigNoz. This is done via the SigNoz UI ("Alerts" section) or programmatically using the [SigNoz Terraform Provider](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/resources/alert).
+### Notifications not received
 
-SigNoz supports various alert types based on your queries:
+- **Test Channel**: Use the "Test" button in channel configuration.
+- **Check Spam**: For email, check spam folders.
+- **Verify Webhook**: Ensure webhook URLs are reachable from SigNoz.
 
-*   **[Metrics-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/)**: Monitor metric values (thresholds, rates using PromQL or ClickHouse Query).
-*   **[Trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/)**: Alert on trace metrics like latency or error rates (ClickHouse Query).
-*   **[Log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/)**: Create alerts based on log patterns or frequencies (ClickHouse Query).
-*   **[Anomaly-based alerts](https://signoz.io/docs/alerts-management/anomaly-based-alerts/)**: Trigger alerts when metrics deviate from normal patterns (PromQL).
-*   **[Exceptions-based alerts](https://signoz.io/docs/alerts-management/exceptions-based-alerts/)**: Alert on application exceptions (ClickHouse Query).
+</details>
 
-Refer to the specific SigNoz documentation pages for detailed steps on creating each type of alert.
+## Next Steps
 
-Migrating alerting from the ELK Stack to SigNoz involves a shift from Elasticsearch-centric querying to an OpenTelemetry-native approach using ClickHouse and Prometheus Alertmanager. While this requires translating query logic (KQL/Lucene to ClickHouse SQL/PromQL) and understanding new concepts, SigNoz offers powerful advantages:
-
-*   **Unified Alerting:** Define alerts across logs, metrics, and traces from a single platform.
-*   **Flexible Querying:** Leverage the Query Builder for ease of use, PromQL for robust metric alerting, and ClickHouse SQL for complex analytical queries across all signals.
-*   **OpenTelemetry-Native:** Aligns with modern observability best practices and enriches alerts with comprehensive telemetry data.
-
-By following a structured migration process, teams can not only replicate existing alerts but also enhance their overall observability posture, leading to faster issue detection and resolution. This transition is an opportunity to refine your alerting strategy and harness the full potential of an OpenTelemetry-centric observability platform.
+- [Migrate Dashboards](https://signoz.io/docs/migration/migrate-from-elk/dashboards/)
+- [Explore Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)

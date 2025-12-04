@@ -1,0 +1,151 @@
+---
+date: 2025-12-02
+id: dashboards
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Dashboards from Datadog
+description: Learn how to migrate your Datadog dashboards to SigNoz using templates or custom creation.
+doc_type: howto
+---
+
+Datadog dashboards need to be recreated in SigNoz due to differences in query languages and dashboard schemas. However, SigNoz provides tools and templates to make this process smoother.
+
+## Prerequisites
+
+- A SigNoz account (SigNoz Cloud or Self-Hosted).
+- Access to your existing Datadog dashboards (for reference).
+- Data flowing to SigNoz (metrics, traces, or logs depending on your dashboards).
+
+## Migration Strategies
+
+### Using Dashboard Templates
+
+SigNoz provides several pre-built dashboard templates that match common Datadog dashboards:
+
+1. **Find Template**  
+   Browse the <a href="https://github.com/SigNoz/dashboards" target="_blank" rel="noopener noreferrer nofollow">SigNoz Dashboard Templates repository</a> to find a matching dashboard.
+
+   <Admonition type="info">
+   SigNoz provides a built-in [Infrastructure Monitoring module](https://signoz.io/docs/infrastructure-monitoring/overview/) that covers both host and Kubernetes monitoring. Pre-built dashboards are optional and can be used for additional customization.
+   </Admonition>
+
+2. **Import Dashboard**  
+   - Navigate to **Dashboards** in SigNoz.
+   - Click **+ New Dashboard**.
+   - Click **Import JSON**.
+   - Either paste the JSON content or upload the file from the repository.
+
+### Using the Automated Migration Tool
+
+For faster dashboard migration, try the [SigNoz Datadog Migration Tool](https://signoz.io/datadog-migration-tool/). This tool helps translate Datadog dashboard JSON to SigNoz format.
+
+### Creating Custom Dashboards
+
+If there is no existing template, create a custom dashboard in SigNoz.
+
+- Follow the [Manage Dashboards guide](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard/) for step-by-step instructions.
+- Use the **Query Builder** to translate your Datadog queries
+
+### Infrastructure as Code (Terraform)
+
+You can manage your dashboards as code using the <a href="https://registry.terraform.io/providers/SigNoz/signoz/latest/docs" target="_blank" rel="noopener noreferrer nofollow">SigNoz Terraform Provider</a>. This allows you to version control your dashboards and automate their deployment.
+
+## Feature Comparison
+
+### Dashboard Features
+
+SigNoz supports essential dashboard features including:
+
+- **[Variables](https://signoz.io/docs/userguide/manage-variables/)**: Create template variables for dynamic dashboards.
+- **[Panel Types](https://signoz.io/docs/dashboards/panel-types/)**: Various visualization options.
+- **[Query Builder](https://signoz.io/docs/product-features/query-builder/)**: Construct queries visually or using PromQL/ClickHouse SQL.
+
+### Panel Types
+
+SigNoz supports most common panel types found in Datadog:
+
+| Panel Type      | Datadog | SigNoz | Notes |
+|-----------------|---------|--------|-------|
+| Time Series     | ✓       | ✓      | Both support time series visualization |
+| Bar Chart       | ✓       | ✓      | Both support categorical data |
+| Pie Chart       | ✓       | ✓      | Both support proportional data |
+| Table           | ✓       | ✓      | Both support tabular data |
+| Histogram       | ✓       | ✓      | Distribution visualization |
+| Value/Query Value | ✓     | ✓      | Single value display with thresholds |
+| Top List        | ✓       | ✓      | Use Table panel with sorting |
+| Heatmap         | ✓       | -      | Coming soon |
+| Log Stream      | ✓       | ✓      | [List panel type](https://signoz.io/docs/dashboards/panel-types/list/) |
+| Trace Flame Graph | ✓     | ✓      | Built-in Traces Explorer |
+| SLO Widget      | ✓       | -      | Not directly supported in SigNoz |
+
+Please refer to the [Panel Types documentation](https://signoz.io/docs/dashboards/panel-types/) for more details.
+
+### Variables
+
+Both Datadog and SigNoz support dashboard variables:
+
+| Feature | Datadog | SigNoz |
+|---------|---------|--------|
+| Custom variable | ✓ | ✓ |
+| Query-based variable | ✓ | ✓ |
+| Multi-value selection | ✓ | ✓ |
+| All option | ✓ | ✓ |
+
+See [Manage Variables](https://signoz.io/docs/userguide/manage-variables/) for setup instructions.
+
+## Validate
+
+To confirm that your dashboards are migrated correctly:
+
+1. Navigate to **Dashboards** in SigNoz.
+2. Open your newly created dashboard.
+3. Verify that all panels are populating with data.
+4. Check that variables are working as expected.
+5. Compare visualizations with the original Datadog dashboard.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Empty Charts
+
+If your charts are empty:
+
+- Verify that the metrics used in the query are being received by SigNoz.
+- Check the time range of the dashboard.
+- Ensure that any variables used have valid values selected.
+- Confirm metric names match OpenTelemetry conventions (not Datadog names).
+
+### Query Errors
+
+If you see query errors:
+
+- Check the syntax of your query.
+- Use the Query Builder to construct valid queries interactively.
+- Verify that the metric names and labels used are correct.
+- Check that attributes are using OpenTelemetry naming conventions.
+
+### Metric Values Don't Match
+
+If values differ from Datadog:
+
+- **Check aggregation functions**: Datadog and SigNoz may use different defaults.
+- **Verify time alignment**: Ensure both dashboards use the same time range.
+- **Check collection intervals**: Different scrape intervals can cause variations.
+- **Review metric types**: Counter vs gauge handling may differ.
+
+### Variables Not Working
+
+If dashboard variables don't populate:
+
+- Check the variable query syntax.
+- Verify the metric/attribute exists in your data.
+- Test the query directly in the Query Builder.
+
+</details>
+
+## Next Steps
+
+- [Migrate Alerts](https://signoz.io/docs/migration/migrate-from-datadog/alerts/)
+- [Explore Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)
+- [Learn about Panel Types](https://signoz.io/docs/dashboards/panel-types/)

@@ -102,6 +102,14 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'LiteLLM Monitoring',
   },
   {
+    name: 'LiveKit',
+    href: '/docs/livekit-observability',
+    icon: (
+      <img src="/img/docs/llm/livekit/livekit-icon.svg" alt="LiveKit Icon" className="h-7 w-7" />
+    ),
+    clickName: 'LiveKit Monitoring',
+  },
+  {
     name: 'LlamaIndex',
     href: '/docs/llamaindex-observability',
     icon: (

@@ -1326,6 +1326,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-logs',
+                label: 'Node.js logs',
+              },
+              {
+                type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-pino-logs',
                 label: 'Pino Node.js logs',
               },
@@ -1333,6 +1338,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/logs-management/send-logs/nodejs-winston-logs',
                 label: 'Winston Node.js logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/opentelemetry-nodejs-bunyan-logs',
+                label: 'Bunyan Node.js logs',
               },
             ],
           },
@@ -1559,6 +1569,19 @@ const docsSideNav = [
         route: '/docs/metrics-management/send-metrics',
         items: [
           {
+            type: 'category',
+            label: 'Application Metrics',
+            route: '/docs/metrics-management/send-metrics#applications',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/golang',
+                label: 'Golang',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/userguide/otel-metrics-receivers',
             label: 'OpenTelemetry Receivers',
@@ -1580,8 +1603,18 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/userguide/envoy-metrics',
+                label: 'Envoy Metrics',
+              },
+              {
+                type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
                 label: 'Traefik Observability',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/fly-metrics',
+                label: 'Fly.io metrics',
               },
             ],
           },
@@ -1915,6 +1948,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
+            label: 'Go Runtime',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/jvm-metrics',
             label: 'JVM',
           },
@@ -1945,6 +1983,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/key-operations',
             label: 'Key Operations',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/livekit-dashboard',
+            label: 'LiveKit',
           },
           {
             type: 'doc',
@@ -2414,6 +2457,16 @@ const docsSideNav = [
       {
         route: '/docs/langchain-observability',
         label: 'LangChain/LangGraph',
+        type: 'doc',
+      },
+      {
+        route: '/docs/litellm-observability',
+        label: 'LiteLLM',
+        type: 'doc',
+      },
+      {
+        route: '/docs/livekit-observability',
+        label: 'LiveKit',
         type: 'doc',
       },
       {
@@ -2978,8 +3031,33 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/migration/opentelemetry-datadog-receiver',
-            label: 'Using Datadog OTLP receiver',
+            route: '/docs/migration/migrate-from-datadog/metrics',
+            label: 'Migrating Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/traces',
+            label: 'Migrating Traces',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/logs',
+            label: 'Migrating Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/dashboards',
+            label: 'Migrating Dashboards',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/alerts',
+            label: 'Migrating Alerts',
+          },
+          {
+            type: 'doc',
+            route: '/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver',
+            label: 'Using Datadog Receiver',
           },
         ],
       },
@@ -3106,22 +3184,9 @@ const docsSideNav = [
         ],
       },
       {
-        label: 'From OpenTelemetry',
-        type: 'category',
-        isExpanded: false,
+        type: 'doc',
         route: '/docs/migration/migrate-from-opentelemetry-to-signoz',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/migration/migrate-from-opentelemetry/cloud',
-            label: 'Migrate to SigNoz Cloud',
-          },
-          {
-            type: 'doc',
-            route: '/docs/migration/migrate-from-opentelemetry/self-hosted',
-            label: 'Migrate to Self-Hosted SigNoz',
-          },
-        ],
+        label: 'From OpenTelemetry',
       },
       {
         type: 'doc',

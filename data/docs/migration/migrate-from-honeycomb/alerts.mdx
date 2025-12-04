@@ -1,262 +1,62 @@
 ---
-date: 2025-11-11
+date: 2025-11-30
 id: migrate-alerts-from-honeycomb
 title: Migrate Alerts from Honeycomb to SigNoz
-description: Learn how to migrate Honeycomb triggers and SLOs to SigNoz alert rules with notification channels.
+description: Learn how to migrate Honeycomb triggers and SLOs to SigNoz alert rules.
 tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
 ---
 
-While migrating your observability stack from Honeycomb to SigNoz, you'll also need to recreate your alerts in SigNoz's alert management system. Since Honeycomb is now OpenTelemetry-native (post-August 2025), the migration path is simplified - you can keep your existing OpenTelemetry instrumentation and primarily focus on recreating alert logic in SigNoz's unified observability platform.
-This guide will help you migrate your alerting system from Honeycomb triggers to SigNoz alert rules.
+This guide helps you migrate Honeycomb triggers and SLOs to SigNoz alert rules.
 
-## Understanding Alert Differences
+## Prerequisites
 
-**Honeycomb** uses proprietary query syntax with triggers and SLO burn alerts, while **SigNoz** uses standard PromQL for metrics and ClickHouse SQL for logs/traces with Prometheus Alertmanager.
+- SigNoz account (Cloud or Self-Hosted) with permissions to create alert channels and rules
+- List of Honeycomb triggers/SLOs you plan to recreate
+
+## Alert Differences
 
 | Feature            | Honeycomb                 | SigNoz                            |
 | ------------------ | ------------------------- | --------------------------------- |
-| **Query Language** | Proprietary syntax        | PromQL, ClickHouse SQL            |
+| **Query Language** | Proprietary syntax        | Query Builder, PromQL, ClickHouse SQL            |
 | **Alert Engine**   | Honeycomb native          | Prometheus Alertmanager           |
 | **SLO Management** | Built-in SLOs             | Custom PromQL-based rules         |
-| **Configuration**  | UI only                   | UI, Terraform, API                |
+| **Configuration**   | UI only                   | UI, Terraform, API                |
 | **Alert Types**    | Triggers, SLO burn alerts | Metrics, logs, traces, exceptions |
+## Notification Channels
 
-The main migration advantage is SigNoz's **unified alerting** across all telemetry types and Infrastructure as Code capabilities.
+Set up channels in **Settings** > **Alert Channel**.
 
-## Prepare for Migration
-
-Before creating alerts in SigNoz, document your current Honeycomb setup:
-
-**Document each trigger:**
-
-- Alert name and purpose
-- Honeycomb query used
-- Threshold values and frequency
-- Current notification channels
-
-**Group alerts by priority:**
-
-- **Critical**: Production incidents, service availability
-- **Important**: SLO monitoring, performance degradation
-- **Operational**: Debugging, business metrics
-
-This inventory helps you migrate systematically and identify which alerts to improve during the process.
-
-## Set Up Notification Channels
-
-Before migrating alerts from Honeycomb, you'll need to set up notification channels in SigNoz. Both Honeycomb and SigNoz support various notification channels, though SigNoz provides more native integrations while Honeycomb relies more heavily on webhooks for advanced integrations.
-
-### Notification Channel Comparison
-
-| Notification Channel | Honeycomb   | SigNoz |
+| Channel              | Honeycomb   | SigNoz |
 | -------------------- | ----------- | ------ |
-| Email                | ✓           | ✓      |
-| Slack                | ✓           | ✓      |
-| Microsoft Teams      | ✓           | ✓      |
-| PagerDuty            | ✓           | ✓      |
-| Webhook              | ✓           | ✓      |
-| OpsGenie             | Via Webhook | ✓      |
-| Incident.io          | Via Webhook | ✓      |
-| Rootly               | Via Webhook | ✓      |
-| Zenduty              | Via Webhook | ✓      |
+| Email                | ✓           | ✓          |
+| Slack                | ✓           | ✓          |
+| Microsoft Teams      | ✓           | ✓          |
+| PagerDuty            | ✓           | ✓          |
+| Webhook              | ✓           | ✓          |
+| OpsGenie             | Via Webhook | ✓          |
+| Incident.io          | Via Webhook | Via Webhook|
+| Rootly               | Via Webhook | Via Webhook|
+| Zenduty              | Via Webhook | Via Webhook|
 
-Honeycomb natively supports only **Email, Slack, Microsoft Teams, PagerDuty, and Webhook** integrations. SigNoz provides more native integrations out of the box.
+See [Alert Notification Channels](https://signoz.io/docs/alerts-management/notification-channel/).
 
-### Setting Up Notification Channels in SigNoz
+## Translating Queries
 
-To set up a notification channel in SigNoz:
+Translate Honeycomb queries to PromQL for metrics-based alerts.
 
-1. Navigate to `Settings → Alert Channel`
-2. Click `+ New Alert Channel`
-3. Select the channel type and configure the required settings
+| Honeycomb Query            | SigNoz Equivalent                                  |
+| -------------------------- | -------------------------------------------------- |
+| `COUNT`                    | `sum(rate(metric[5m]))` or `count()` in ClickHouse |
+| `COUNT WHERE condition`    | `sum(rate(metric{condition}[5m]))`                 |
+| `AVG(field)`               | `avg(metric)` or `avg(column)`                     |
+| `P95(field)`, `P99(field)` | `histogram_quantile(0.95, ...)`                    |
 
-For detailed setup instructions, refer to the [Alerts Notification Channel](https://signoz.io/docs/alerts-management/notification-channel/) documentation.
+## Infrastructure as Code (Terraform)
 
-## Translate Honeycomb Queries to SigNoz
-
-This is the most critical aspect of migration, requiring translation from Honeycomb's query syntax to PromQL for alert conditions.
-
-### Understanding Query Translation Patterns
-
-#### Honeycomb Query Structure to SigNoz Mapping
-
-| Honeycomb Query Element    | SigNoz Equivalent                                  | Notes                      |
-| -------------------------- | -------------------------------------------------- | -------------------------- |
-| `COUNT`                    | `sum(rate(metric[5m]))` or `count()` in ClickHouse | Depends on data type       |
-| `COUNT WHERE condition`    | `sum(rate(metric{condition}[5m]))`                 | Use PromQL label filtering |
-| `AVG(field)`               | `avg(metric)` or `avg(column)`                     | Direct mapping             |
-| `P95(field)`, `P99(field)` | `histogram_quantile(0.95, ...)`                    | Requires histogram metrics |
-| `GROUP BY field`           | `by (label)` in PromQL or `GROUP BY` in ClickHouse | Label-based grouping       |
-| `RATE PER SECOND`          | `rate(metric[5m])`                                 | Built-in PromQL function   |
-| `COMPARE TO [time] ago`    | `offset` in PromQL                                 | Time-shift comparison      |
-
-### Basic Alert Translation Examples
-
-#### High Error Rate Alert
-
-**Honeycomb Trigger:**
-
-```
-Query: COUNT WHERE status_code >= 400 | RATE PER SECOND
-Threshold: > 10 errors/second
-```
-
-**SigNoz Alert Rule:**
-
-```yaml
-alert: HighErrorRate
-expr: sum(rate(http_requests_total{status_code=~"4..|5.."}[5m])) > 10
-for: 2m
-labels:
-  severity: warning
-annotations:
-  summary: 'High error rate detected'
-  description: 'Error rate: {{ $value }}/sec exceeds threshold'
-```
-
-## Convert Honeycomb SLOs to SigNoz
-
-Honeycomb's built-in SLO functionality requires manual recreation using SigNoz's alert rules and PromQL queries.
-
-### SLO Migration Approach
-
-| SLO Element          | Honeycomb             | SigNoz                        |
-| -------------------- | --------------------- | ----------------------------- |
-| **SLO Definition**   | Built-in UI           | Custom PromQL recording rules |
-| **Burn Rate Alerts** | Automated thresholds  | Manual alert rule creation    |
-| **Time Windows**     | Predefined options    | Flexible PromQL time ranges   |
-| **Error Budget**     | Automatic calculation | Custom PromQL expressions     |
-
-### Basic SLO Example
-
-**Honeycomb SLO:**
-
-- Target: 99.9% availability
-- Time Window: 30 days
-- Burn Rate Alert: Fast burn detection
-
-**SigNoz Alert Rule:**
-
-```yaml
-alert: AvailabilitySLOBreach
-expr: |
-  (
-    sum(rate(http_requests_total{status_code=~"2.."}[5m])) /
-    sum(rate(http_requests_total[5m]))
-  ) < 0.999
-for: 5m
-labels:
-  severity: critical
-  slo_type: availability
-annotations:
-  summary: 'Availability SLO breached'
-  description: 'Current availability: {{ $value | humanizePercentage }}'
-```
-
-## Create Alert Rules in SigNoz
-
-Once your alert logic has been translated from Honeycomb and notification channels are configured, you can create the alert rules in SigNoz. This is done via the SigNoz UI ("Alerts" section) or programmatically using the [SigNoz Terraform Provider](https://signoz.io/docs/alerts-management/terraform-provider-signoz/).
-
-SigNoz supports various alert types that expand beyond Honeycomb's trigger-based approach:
-
-- **[Metrics-based alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/)**: Monitor metric values using PromQL (equivalent to Honeycomb COUNT, AVG, P95 queries).
-- **[Trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/)**: Alert on trace metrics like latency or error rates using ClickHouse Query.
-- **[Log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/)**: Create alerts based on log patterns or frequencies using ClickHouse Query.
-- **[Anomaly-based alerts](https://signoz.io/docs/alerts-management/anomaly-based-alerts/)**: Trigger alerts when metrics deviate from normal patterns using PromQL.
-- **[Exceptions-based alerts](https://signoz.io/docs/alerts-management/exceptions-based-alerts/)**: Alert on application exceptions using ClickHouse Query.
-
-Most Honeycomb triggers will translate to **metrics-based alerts** using PromQL expressions. SigNoz's additional alert types provide enhanced observability capabilities beyond what's available in Honeycomb.
-
-## Using Terraform for Alert Management
-
-For infrastructure as code approach, use the [SigNoz Terraform Provider](/docs/alerts-management/terraform-provider-signoz/) to version control your alert configurations.
-
-### Terraform Provider Setup
-
-```hcl
-terraform {
-  required_providers {
-    signoz = {
-      source  = "signoz/signoz"
-      version = "~> 0.1"
-    }
-  }
-}
-
-provider "signoz" {
-  base_url = "https://your-signoz-instance.com"
-  api_key  = var.signoz_api_key
-}
-```
-
-### Alert Rule Example
-
-**Original Honeycomb Trigger:**
-
-```
-Query: COUNT WHERE status_code >= 400 | RATE PER SECOND
-Threshold: > 10 errors/second
-```
-
-**Terraform Configuration:**
-
-```hcl
-resource "signoz_alert_rule" "high_error_rate" {
-  name        = "high-error-rate"
-  description = "Alert when error rate exceeds threshold"
-
-  condition {
-    query_type   = "metrics"
-    promql_query = "sum(rate(http_requests_total{status_code=~\"4..|5..\"}[5m]))"
-    compare_op   = "greater_than"
-    target_value = 10
-  }
-
-  evaluation {
-    evaluation_window = "5m"
-  }
-
-  labels = {
-    severity = "warning"
-    team     = "backend"
-  }
-
-  annotations = {
-    summary     = "High error rate detected"
-    description = "Error rate: {{ $value }}/sec exceeds threshold"
-  }
-}
-```
-
-### YAML Alert Rule Sample
-
-```yaml
-# high-error-rate-alert.yaml
-apiVersion: v1
-kind: AlertRule
-metadata:
-  name: high-error-rate
-  labels:
-    severity: warning
-    team: backend
-spec:
-  condition:
-    query_type: metrics
-    promql_query: 'sum(rate(http_requests_total{status_code=~"4..|5.."}[5m]))'
-    compare_op: greater_than
-    target_value: 10
-  evaluation:
-    evaluation_window: 5m
-  annotations:
-    summary: 'High error rate detected'
-    description: 'Error rate: {{ $value }}/sec exceeds threshold'
-```
-
-This infrastructure as code approach allows you to version control your migrated Honeycomb alerts and apply them consistently across environments.
+Use the [SigNoz Terraform Provider](https://signoz.io/docs/alerts-management/terraform-provider-signoz/) to manage alerts.
 
 ## Next Steps
 
-With your complete Honeycomb to SigNoz migration finished:
-
-- **Monitor alert performance** - Review alert frequency and accuracy using [SigNoz alerts management](/docs/userguide/alerts-management/), adjusting thresholds as needed
-- **Set up maintenance windows** - Configure [alert silencing](https://signoz.io/docs/alerts-management/planned-maintenance/) for planned maintenance periods
+- [Monitor Alert Performance](/docs/userguide/alerts-management/)
+- [Configure Maintenance Windows](https://signoz.io/docs/alerts-management/planned-maintenance/)

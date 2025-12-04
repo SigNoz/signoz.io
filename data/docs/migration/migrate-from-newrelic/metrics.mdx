@@ -1,207 +1,275 @@
 ---
-date: 2025-05-12
+date: 2025-11-30
 id: metrics
-tags : [SigNoz Cloud, Self-Host]
+tags: [SigNoz Cloud, Self-Host]
 title: Migrate Metrics from New Relic
-description: Migrating metrics from New Relic to SigNoz. How to migrate metrics from New Relic to SigNoz.
+description: Learn how to migrate your application and infrastructure metrics from New Relic to SigNoz using OpenTelemetry.
+doc_type: howto
 ---
 
-Migrating metrics from New Relic to SigNoz involves reconfiguring your metrics collection to work with OpenTelemetry. This guide provides several approaches depending on your current setup.
+## Overview
 
-## Understanding Metric Collection Differences
+This guide walks you through migrating metrics from New Relic to SigNoz. You will:
 
-Before migrating, it's important to understand the key differences between New Relic and SigNoz metrics:
+1. Check your New Relic metrics sources
+2. Choose the right migration path for each metric source
+3. Set up collection in SigNoz
+4. Validate that all metrics are flowing correctly
 
-| Feature             | New Relic                               | SigNoz                                  | Notes                                                 |
-|---------------------|----------------------------------------|-----------------------------------------|-------------------------------------------------------|
-| **Collection Method**   | Proprietary agents, Prometheus integration | OpenTelemetry, Prometheus Receiver    | SigNoz uses open standards                            |
-| **Data Model**          | Dimensional metrics in NRDB            | OpenTelemetry metrics model             | Similar concept, different implementation             |
-| **Query Language**      | NRQL                                   | PromQL, ClickHouse SQL                  | Migration requires query translation                  |
-| **Storage**             | NRDB                                   | ClickHouse                              | Different backend storage technology                  |
+You cannot import historical metrics from New Relic. This guide focuses on redirecting your metric streams to SigNoz going forward.
 
-## Migration Approaches
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-SigNoz offers multiple ways to migrate your metrics from New Relic. Choose the approach that best fits your infrastructure and requirements.
+## Key Differences: New Relic vs SigNoz
 
-### 1. Switch to OpenTelemetry for Metrics Collection
+Before migrating, understand how metric collection differs between the two platforms:
 
-The recommended approach is to adopt OpenTelemetry for metrics collection. OpenTelemetry is an open-source standard that provides vendor-neutral instrumentation.
+| Aspect | New Relic | SigNoz |
+|--------|-----------|--------|
+| **Collection** | Proprietary agents, Prometheus integration | OpenTelemetry Collector, Prometheus Receiver |
+| **Data Model** | Dimensional metrics in NRDB | OpenTelemetry metrics model |
+| **Query Language** | NRQL | Query Builder, PromQL, ClickHouse SQL |
+| **Storage** | NRDB (proprietary) | ClickHouse (open source) |
 
-#### Setting Up the OpenTelemetry Collector
+SigNoz uses open standards (OpenTelemetry, Prometheus) for collection, so your migration involves replacing New Relic agents with OpenTelemetry instrumentation or collectors.
 
-1. [Install the OpenTelemetry Collector](/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your environment
-2. Configure appropriate receivers based on your infrastructure
-3. Configure the collector to send metrics to SigNoz:
+## Prerequisites
 
-```yaml
-exporters:
-  otlp:
-    # For SigNoz Cloud
-    endpoint: "ingest.{region}.signoz.cloud:443"
-    headers:
-      "signoz-ingestion-key": "<your-ingestion-key>"
-    tls:
-      insecure: false
+Before starting, ensure you have:
 
-    # For Self-hosted SigNoz
-    # endpoint: "<signoz-otel-collector>:4317"
-    # tls:
-    #   insecure: true
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your New Relic account to review current metric sources
+- Access to your application code or infrastructure configuration
+- Administrative access to deploy the OpenTelemetry Collector (if needed)
+
+## Step 1: Assess Your Current Metrics
+
+Before migrating, create an inventory of what you're collecting in New Relic. This ensures nothing gets lost.
+
+### Export Your Metrics List from New Relic
+
+Run this NRQL query in New Relic's Query Builder to list all metric names:
+
+```sql
+SELECT uniques(metricName) FROM Metric SINCE 7 days ago LIMIT MAX
 ```
 
-### 2. Use Prometheus Receiver for Existing Exporters
+For a breakdown by source, run:
 
-If you're using Prometheus with New Relic, you can redirect those metrics to SigNoz:
+```sql
+SELECT count(*) 
+FROM Metric 
+SINCE 7 days ago 
+FACET metricName, instrumentation.provider 
+LIMIT MAX
+```
 
-1. Configure the Prometheus Receiver in your OpenTelemetry Collector:
-   - [Configuration for SigNoz Cloud](/docs/userguide/send-metrics-cloud/#enable-a-prometheus-receiver)
-   - [Configuration for Self-Hosted SigNoz](/docs/userguide/send-metrics/#enable-a-prometheus-receiver)
+### Categorize Your Metrics
 
-Example configuration:
+Group your metrics by source type. Check which of these you're using:
 
-```yaml
+| Source Type | How to Identify | Migration Path |
+|-------------|-----------------|----------------|
+| **OpenTelemetry SDK** | `instrumentation.provider = 'opentelemetry'` | [Redirect OTLP exporter](#from-opentelemetry-sdk) |
+| **Prometheus exporters** | You have Prometheus scrapers or remote_write configured | [Use Prometheus Receiver](#from-prometheus-exporters) |
+| **New Relic APM agents** | Java, Node, Python, .NET, Ruby, Go, PHP agents installed | [Replace with OTel instrumentation](#from-new-relic-apm-agents) |
+| **New Relic Infrastructure** | Host metrics like `SystemSample`, `ProcessSample` | [Use Host Metrics Receiver](#from-new-relic-infrastructure) |
+| **AWS CloudWatch** | Metrics prefixed with `aws.*` | [Use SigNoz AWS integration](#from-cloud-integrations) |
+| **Azure Monitor** | Metrics prefixed with `azure.*` | [Use SigNoz Azure integration](#from-cloud-integrations) |
+| **GCP** | Metrics prefixed with `gcp.*` | [Use SigNoz GCP integration](#from-cloud-integrations) |
+| **Synthetics** | Synthetic monitors for uptime/availability | [Use HTTP monitoring](#from-synthetics) |
+
+Save this inventory. You'll use it to validate your migration is complete.
+
+## Step 2: Set Up the OpenTelemetry Collector
+
+Most migration paths require the OpenTelemetry Collector. Set it up first:
+
+1. [Install the OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) in your environment.
+
+2. Configure the OTLP exporter to send metrics to SigNoz Cloud
+
+## Step 3: Migrate Each Metric Source
+
+Work through each source type from your inventory.
+
+### From OpenTelemetry SDK
+
+If you're already using OpenTelemetry SDKs with New Relic's OTLP endpoint, redirect to SigNoz:
+
+**Before (New Relic):**
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.nr-data.net
+OTEL_EXPORTER_OTLP_HEADERS=api-key=<NEW_RELIC_LICENSE_KEY>
+```
+
+**After (SigNoz Cloud):**
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+```
+
+For detailed configuration, see [Migrate from OpenTelemetry to SigNoz](https://signoz.io/docs/migration/migrate-from-opentelemetry-to-signoz/).
+
+### From Prometheus Exporters
+
+If you have Prometheus exporters (node_exporter, application metrics via `/metrics` endpoints), use the Prometheus Receiver:
+
+1. Add the Prometheus receiver to your collector config:
+
+```yaml:otel-collector-config.yaml
 receivers:
   prometheus:
     config:
       scrape_configs:
-        - job_name: 'prometheus'
-          scrape_interval: 10s
+        - job_name: 'your-app'
+          scrape_interval: 60s
           static_configs:
-            - targets: ['localhost:9090']
+            - targets: ['localhost:8080']  # Your metrics endpoint
 ```
 
-2. Point your existing Prometheus exporters to the OpenTelemetry Collector instead of New Relic.
+2. Enable it in the metrics pipeline:
 
-### 3. Replace New Relic Agents with OpenTelemetry Instrumentation
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      exporters: [otlp]
+```
 
-For applications using New Relic agents:
+See [Prometheus Metrics in SigNoz](https://signoz.io/docs/userguide/prometheus-metrics/) for advanced configuration.
 
-1. Remove the New Relic agent from your application
-2. Follow the appropriate language-specific instrumentation guide from the [SigNoz instrumentation documentation](/docs/instrumentation/)
-3. Configure the OpenTelemetry SDK to send metrics to your OpenTelemetry Collector
+### From New Relic APM Agents
 
-SigNoz provides detailed instrumentation guides for various languages and frameworks including:
-- [Java](/docs/instrumentation/java)
-- [Python](/docs/instrumentation/python)
-- [Javascript](/docs/instrumentation/javascript)
-- [Go](/docs/instrumentation/golang)
-- [Ruby on Rails](/docs/instrumentation/ruby-on-rails)
-- [.NET](/docs/instrumentation/dotnet)
-- [PHP](/docs/instrumentation/php)
-- [Rust](/docs/instrumentation/rust)
+Replace New Relic language agents with OpenTelemetry instrumentation.
 
-### 4. Migrate Infrastructure Metrics
+**Migration by language:**
 
-For infrastructure metrics previously collected by New Relic Infrastructure:
+| Language | Remove | Add |
+|----------|--------|-----|
+| Java | `newrelic.jar` agent | [OTel Java Agent](https://signoz.io/docs/instrumentation/opentelemetry-java/) |
+| Node.js | `newrelic` npm package | [OTel Node.js SDK](https://signoz.io/docs/instrumentation/opentelemetry-nodejs/) |
+| Python | `newrelic` package | [OTel Python SDK](https://signoz.io/docs/instrumentation/opentelemetry-python/) |
+| .NET | New Relic .NET agent | [OTel .NET SDK](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/) |
+| Go | `go-agent` | [OTel Go SDK](https://signoz.io/docs/instrumentation/opentelemetry-golang/) |
+| Ruby | `newrelic_rpm` gem | [OTel Ruby SDK](https://signoz.io/docs/instrumentation/opentelemetry-ruby-on-rails/) |
+| PHP | New Relic PHP agent | [OTel PHP SDK](https://signoz.io/docs/instrumentation/opentelemetry-php/) |
 
-1. Configure the OpenTelemetry [Host Metrics Receiver](/docs/userguide/hostmetrics/):
+**General steps:**
 
-```yaml
+1. Remove the New Relic agent/SDK from your application.
+2. Add OpenTelemetry instrumentation following the language-specific guide above.
+3. Configure the SDK to export to SigNoz (directly or via Collector).
+4. Deploy and verify metrics appear in SigNoz.
+
+### From New Relic Infrastructure
+
+Replace New Relic Infrastructure agent with the OpenTelemetry Collector's Host Metrics Receiver:
+
+1. Add the hostmetrics receiver to your collector config:
+
+```yaml:otel-collector-config.yaml
 receivers:
   hostmetrics:
-    collection_interval: 30s
+    collection_interval: 60s
     scrapers:
       cpu:
-      disk:
-      load:
-      filesystem:
       memory:
+      disk:
+      filesystem:
+      load:
       network:
-      paging:
       process:
+        include:
+          match_type: regexp
+          names: ['.*']
 ```
 
-2. Add the receiver to your metrics pipeline in the OpenTelemetry Collector configuration:
+2. Enable it in the metrics pipeline:
 
-```yaml
+```yaml:otel-collector-config.yaml
 service:
   pipelines:
     metrics:
       receivers: [hostmetrics]
-      processors: [batch]
       exporters: [otlp]
 ```
 
-This configuration will collect system metrics similar to those gathered by New Relic Infrastructure, including CPU usage, memory utilization, disk I/O, and network statistics.
+See [Send Metrics to SigNoz](https://signoz.io/docs/metrics-management/send-metrics/) for more receiver options including Docker, Kubernetes, and process metrics.
 
-### 5. Migrating Cloud Infrastructure Integrations
+### From Cloud Integrations
 
-If you were using New Relic to monitor cloud infrastructure (AWS, Azure, GCP), SigNoz provides [native integrations)(/docs/cloud/) to help you migrate your cloud monitoring setup.
+SigNoz provides native integrations for major cloud providers:
 
-SigNoz offers a one-click integration for AWS, making it easy to bring in metrics from your AWS services. Integrations for Azure and GCP are coming soon, but in the meantime, you can use the OpenTelemetry Collector with the appropriate receivers or Prometheus exporters to collect metrics from these platforms.
+| Provider | Migration Guide |
+|----------|-----------------|
+| **AWS** | [AWS Cloud Integrations](https://signoz.io/docs/integrations/aws/one-click-aws-integrations/) - One-click setup for CloudWatch metrics |
+| **Azure** | [Azure Cloud Integrations](https://signoz.io/docs/azure-monitoring/) |
+| **GCP** | [GCP Cloud Integrations](https://signoz.io/docs/gcp-monitoring/) |
 
-### 6. Migrating Synthetics/Availability Monitoring
+These integrations collect the same cloud service metrics you were getting through New Relic.
 
-New Relic Synthetics provides advanced synthetic monitoring features such as scripted browser checks and API tests. SigNoz currently supports HTTP endpoint monitoring, which allows you to track the availability and response time of your web services and APIs.
+### From Synthetics
 
-To migrate basic uptime and HTTP check monitoring from New Relic Synthetics to SigNoz, you can use the built-in HTTP endpoint monitoring feature. This enables you to set up periodic checks for your endpoints and receive alerts if they become unavailable or respond slowly.
+New Relic Synthetics provides scripted browser and API tests. SigNoz offers HTTP endpoint monitoring for availability and latency.
 
-For more details and setup instructions, refer to the [Monitor HTTP Endpoints documentation](/docs/monitor-http-endpoints/).
+To migrate basic health checks:
 
-## Using the SigNoz Metrics Explorer
+1. List your New Relic synthetic monitors
+2. Create equivalent HTTP monitors in SigNoz following the [Monitor HTTP Endpoints](https://signoz.io/docs/monitor-http-endpoints/) guide
+3. Set up alerts for failures and slow responses
 
-The Metrics Explorer in SigNoz provides a powerful interface for querying and visualizing your metrics data.
+## Validate
 
-<Figure src="/img/docs/migration/metrics-explorer.webp" alt="SigNoz Metrics Explorer" caption="SigNoz Metrics Explorer interface" />
+Compare your SigNoz metrics against your original inventory to ensure migration is complete.
 
-To explore your metrics in SigNoz:
+### Check Metrics Are Arriving
 
-1. In the SigNoz UI, click on `Metrics` in the left sidebar
-2. Find a metric from the `List View`
-3. Check metric attributes by clicking on the metric name
-4. Alternatively, use the `Search Filter` to find metrics with specific attributes
+1. In SigNoz, navigate to **Metrics** in the left sidebar.
+2. Use the **List View** to browse available metrics.
+3. Click a metric name to see its attributes and values.
 
-### Using the SigNoz Query Builder
+<Figure src="/img/docs/migration/metrics-explorer.webp" alt="SigNoz Metrics Explorer showing list of available metrics" caption="SigNoz Metrics Explorer interface" />
 
-In addition to supporting PromQL and ClickHouse SQL, SigNoz provides a powerful UI-based Query Builder. This tool allows you to build complex queries and visualizations without writing code, making it easy to explore your data and create dashboards. You can access the Query Builder from the Metrics and Logs Explorer sections in the SigNoz UI.
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
 
-For more details, see the [Query Builder documentation](/docs/userguide/query-builder/).
+### Metrics not appearing in SigNoz
 
+1. **Check Collector status**: Verify the OpenTelemetry Collector is running:
+2. **Verify endpoint**: Confirm `https://ingest.<region>.signoz.cloud:443` matches your account region.
+3. **Check ingestion key**: Ensure `signoz-ingestion-key` header is set correctly.
+4. **Test connectivity**: Verify outbound HTTPS (port 443) is allowed to SigNoz Cloud.
 
-### Translating NRQL Queries to SigNoz
+### Missing attributes on metrics
 
-Here are examples of translating common New Relic NRQL queries to SigNoz:
+If metrics appear but lack expected attributes (like `service.name` or custom dimensions):
 
-| Metric Type        | New Relic NRQL                                                               | SigNoz PromQL Query                                                                  |
-|--------------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| Response Time      | `SELECT average(duration) FROM Transaction WHERE appName = 'MyApp'`          | `avg(http_server_duration_milliseconds{service_name="MyApp"})`                       |
-| Throughput         | `SELECT count(*) FROM Transaction WHERE appName = 'MyApp'`                   | `sum(rate(http_server_request_count{service_name="MyApp"}[5m]))`                     |
-| Error Rate         | `SELECT percentage(count(*), WHERE error IS true) FROM Transaction`          | `sum(rate(http_server_request_count{status_code=~"5.."}[5m])) / sum(rate(http_server_request_count[5m])) * 100` |
-| Host CPU Usage     | `SELECT average(cpuPercent) FROM SystemSample WHERE hostname = 'host1'`     | `avg(system_cpu_usage{host="host1"})`                                                |
-| Memory Usage       | `SELECT average(memoryUsedPercent) FROM SystemSample`                        | `avg(system_memory_usage{state="used"} / (system_memory_usage{state="used"} + system_memory_usage{state="free"}) * 100)` |
+1. Check your SDK's resource attribute configuration.
+2. Verify no Collector processors are dropping attributes.
+3. For Prometheus metrics, ensure labels are being scraped correctly.
 
-In case you will be querying metrics from dashboards using ClickHouse SQL, you can refer to the [Metrics Schema](/docs/userguide/write-a-metrics-clickhouse-query/).
+### Metric values don't match New Relic
 
+When comparing the same metric in both systems:
 
-## Common Metrics Mapping
+1. **Align time ranges**: Ensure both queries cover the exact same period.
+2. **Match aggregations**: NRQL and PromQL may use different default aggregations. For example:
+3. **Check collection intervals**: Different scrape intervals can cause slight variations.
+4. **Verify units**: Some New Relic metrics use different units than OpenTelemetry conventions.
 
-When migrating from New Relic to SigNoz, you'll need to map New Relic metric names to their OpenTelemetry equivalents. Here are some common mappings:
-
-| New Relic Metric               | OpenTelemetry Metric                          |
-|--------------------------------|-----------------------------------------------|
-| `httpResponseTime`             | `http.server.duration`                        |
-| `throughput`                   | `http.server.request.count`                   |
-| `errorRate`                    | Calculated from `http.server.request.count`   |
-| `cpuPercent`                   | `system.cpu.usage`                            |
-| `memoryUsedPercent`            | `system.memory.usage`                         |
-| `diskUtilizationPercent`       | `system.filesystem.usage`                     |
-| `garbageCollectionTime`        | `process.runtime.jvm.gc.duration`             |
-| `heapMemoryUsage`              | `process.runtime.jvm.memory.heap`             |
-
-## Verifying Metrics in SigNoz
-
-After migrating your metrics collection to SigNoz, it's important to verify that everything is working correctly:
-
-1. Check that metrics are being received in SigNoz
-2. Verify that the metrics have the correct labels and values
-3. Compare with New Relic to ensure data consistency
-4. Set up dashboards to monitor key metrics
+</details>
 
 ## Next Steps
 
-Once your metrics are successfully migrated to SigNoz, consider:
+Once your metrics are flowing to SigNoz:
 
-- [Creating dashboards](/docs/migration/migrate-from-newrelic/dashboards) for your most important metrics
-- [Setting up alerts](/docs/migration/migrate-from-newrelic/alerts) based on these metrics
-- [Migrating your traces](/docs/migration/migrate-from-newrelic/traces) for end-to-end observability
-- [Migrating your logs](/docs/migration/migrate-from-newrelic/logs) to complete your observability stack
+- [Migrate your dashboards](https://signoz.io/docs/migration/migrate-from-newrelic/dashboards) to visualize metrics in SigNoz
+- [Set up alerts](https://signoz.io/docs/migration/migrate-from-newrelic/alerts) based on your metrics
+- [Migrate traces](https://signoz.io/docs/migration/migrate-from-newrelic/traces) for end-to-end observability
+- [Migrate logs](https://signoz.io/docs/migration/migrate-from-newrelic/logs) to complete your observability stack

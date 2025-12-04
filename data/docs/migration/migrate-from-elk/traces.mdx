@@ -1,65 +1,216 @@
 ---
-date: 2025-05-06
+date: 2025-12-01
 id: traces
-tags : [SigNoz Cloud, Self-Host]
-title: Migrate traces from ELK Stack
-description: Migrating traces from ELK Stack to SigNoz. How to migrate traces from ELK to SigNoz.
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Traces/APM from ELK Stack
+description: Learn how to migrate your distributed tracing/APM from ELK Stack (Elastic APM) to SigNoz using OpenTelemetry.
+doc_type: howto
 ---
 
-Migrating distributed traces involves replacing the proprietary [Elastic APM agents](https://www.elastic.co/docs/solutions/observability/apm/elastic-apm-agents) within your applications with standard [OpenTelemetry SDKs](https://opentelemetry.io/docs/languages/) and configuring them to send trace data to SigNoz.
+## Overview
 
-## Replacing Elastic APM Agents
+This guide walks you through migrating distributed tracing and APM from the ELK Stack (Elastic APM) to SigNoz. You will:
 
-* **Core Task:** The fundamental step is to remove the Elastic APM agent dependencies and initialization code from your applications and replace them with the equivalent OpenTelemetry SDKs and instrumentation libraries for the specific [programming languages](https://opentelemetry.io/docs/languages/java/instrumentation/).
-* **Instrumentation Approach:**  
-  * **Automatic Instrumentation:** OpenTelemetry offers automatic instrumentation capabilities for many popular frameworks and libraries, similar to Elastic APM's approach. Examples include the **OTel Java agent** for Java, `auto-instrumentations-node` for Node.js and various SDKs for other [languages](https://signoz.io/docs/instrumentation/). This often provides the quickest path to getting traces with minimal code changes.  
-  * **Manual Instrumentation:** For custom code sections or frameworks not covered by auto-instrumentation, use the OpenTelemetry SDK's [Tracer API](/docs/traces-management/trace-api/overview) to manually create and manage spans. This involves obtaining a Tracer, starting spans, setting attributes, recording events, and ensuring spans are ended correctly. Elastic APM's concepts of "transactions" generally map to [root spans](https://signoz.io/blog/distributed-tracing-span/) in OpenTelemetry. Here's how you can manually instrument your [NodeJS application](https://signoz.io/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/).
+1. Assess your current Elastic APM services
+2. Replace Elastic APM agents with OpenTelemetry instrumentation
+3. Validate traces are flowing correctly to SigNoz
 
-## Migration Steps
+SigNoz is built natively on OpenTelemetry, so migration involves replacing proprietary Elastic APM agents with standard OpenTelemetry SDKs.
 
-### 1. **Remove and Replace Dependencies**
-- Uninstall Elastic APM libraries
-- Install OpenTelemetry SDK, API, auto-instrumentation, and exporters for your [language](https://signoz.io/docs/instrumentation/)
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-### 2. **Configure OpenTelemetry**
-- Create configuration file to initialize OpenTelemetry SDK
-- Set up exporters and automatic instrumentation
-- Configure service name and telemetry destination
+## Prerequisites
 
-### 3. **Update Code**
-- Replace APM tracing calls with OpenTelemetry equivalents
-- Update HTTP middleware/handlers to use OpenTelemetry versions
-- Ensure proper context propagation between spans
+Before starting, ensure you have:
 
-### 4. **Deploy and Validate**
-- Set environment variables (`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`)
-- Update application startup to load OpenTelemetry first
-- Test that telemetry data flows correctly to your observability platform
+- A SigNoz account ([Cloud](https://signoz.io/teams/)) or a running SigNoz instance (Self-Hosted)
+- Access to your application source code
+- List of services currently instrumented with Elastic APM
 
-## Elastic OpenTelemetry Bridge for Go
+## Step 1: Assess Your Current Tracing Setup
 
-For applications where a migration is too risky, Elastic provides a [bridge library](https://pkg.go.dev/go.elastic.co/apm/module/apmotel/v2) for Go applications. This bridge allows the OTel Go SDK to coexist with the Elastic APM Go agent. When configured, spans created using the OTel SDK are captured and exported via the existing Elastic APM agent pipeline. This enables an [atomic migration](https://www.elastic.co/docs/solutions/security/get-started/automatic-migration).
+Inventory which services are using Elastic APM agents.
 
-  
-* When configured, spans created using the OTel SDK are captured and exported via the existing Elastic APM agent pipeline.  
-  **Steps to follow: **
-  1. Add the bridge [configuration](https://pkg.go.dev/go.elastic.co/apm/module/apmotel/v2)
-  2. Incrementally replace Elastic APM instrumentation with OTel SDK instrumentation, deploying changes piece by piece. Traces continue to flow via the Elastic agent.  
-  3. Once all instrumentation is migrated, remove the Elastic APM agent and the bridge, and configure the OTel SDK to export directly or via a standard OTel Collector. 
-* While this specific bridge is for Go, the concept of gradual migration or dual instrumentation might be possible in other languages using community tools or custom solutions.
+### Identify Instrumented Services
 
-## Verification
+Check your applications for Elastic APM dependencies:
+- **Java**: `elastic-apm-agent.jar`
+- **Node.js**: `elastic-apm-node` package
+- **Python**: `elastic-apm` package
+- **Go**: `go.elastic.co/apm` module
+- **.NET**: Elastic APM .NET Agent
 
-* Generate traffic/requests in the newly instrumented application. OpenTelemetry SDKs often buffer data, so ensure sufficient activity occurs.
-* Navigate to the SigNoz UI. Check the "Services" list for your application.
-* Explore the "Traces" tab, applying filters as needed, to confirm traces are being received.
-* Examine individual traces using flamegraphs and Gantt charts to ensure spans are correctly nested and timed.
-* Check the Service Map for dependencies.
+### Categorize Your Services
 
+Group services by language to plan the migration path:
 
-The migration of tracing is often the most involved part of moving from ELK to SigNoz because it directly impacts application code and dependencies. Unlike metrics or logs, where changes can sometimes be confined to agent or collector configurations, trace migration necessitates re-instrumentation using OpenTelemetry SDKs.This requires developer effort, careful testing, and a solid understanding of OpenTelemetry concepts like spans, context propagation, and resource attributes. Strategies like phased rollouts or bridging mechanisms (where available) are essential to manage the inherent risks.
+| Language | Elastic Agent | Migration Path |
+|----------|---------------|----------------|
+| **Java** | Java Agent | [Replace with OTel Java Agent](#from-elastic-apm-java-agent) |
+| **Node.js** | Node.js Agent | [Replace with OTel Node.js SDK](#from-elastic-apm-nodejs-agent) |
+| **Python** | Python Agent | [Replace with OTel Python SDK](#from-elastic-apm-python-agent) |
+| **Go** | Go Agent | [Replace with OTel Go SDK](#from-elastic-apm-go-agent) |
+| **.NET** | .NET Agent | [Replace with OTel .NET SDK](#from-elastic-apm-net-agent) |
 
-## Signoz Traces Features
-- **[Trace Explorer](/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces
-- **[Service Map](/docs/userguide/service-map/)**: Visualize dependencies between services
-- **[Exceptions Monitoring](/docs/userguide/exceptions/)**: Track and analyze application exceptions
+## Step 2: Migrate Each Service
+
+Work through each service from your inventory.
+
+### From Elastic APM Java Agent
+
+**Step 1: Remove Elastic APM**
+- Remove the `-javaagent:/path/to/elastic-apm-agent.jar` flag.
+- Remove `elasticapm.properties` if present.
+
+**Step 2: Add OpenTelemetry Java Agent**
+Download the agent:
+```bash
+curl -L -o opentelemetry-javaagent.jar \
+  https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+**Step 3: Configure and Run**
+```bash
+java -javaagent:/path/to/opentelemetry-javaagent.jar \
+     -Dotel.service.name=your-service-name \
+     -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443 \
+     -Dotel.exporter.otlp.headers=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> \
+     -jar your-application.jar
+```
+
+See [Java Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-java/) for details.
+
+### From Elastic APM Node.js Agent
+
+**Step 1: Remove Elastic APM**
+```bash
+npm uninstall elastic-apm-node
+```
+Remove `require('elastic-apm-node').start(...)` from your code.
+
+**Step 2: Add OpenTelemetry**
+```bash
+npm install @opentelemetry/auto-instrumentations-node
+```
+
+**Step 3: Configure and Run**
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+
+node app.js
+```
+
+See [Node.js Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-nodejs/) for details.
+
+### From Elastic APM Python Agent
+
+**Step 1: Remove Elastic APM**
+```bash
+pip uninstall elastic-apm
+```
+Remove `elasticapm` imports and initialization from your code.
+
+**Step 2: Add OpenTelemetry**
+```bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+opentelemetry-bootstrap -a install
+```
+
+**Step 3: Configure and Run**
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+
+opentelemetry-instrument python app.py
+```
+
+See [Python Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-python/) for details.
+
+### From Elastic APM Go Agent
+
+**Step 1: Remove Elastic APM**
+Remove `go.elastic.co/apm` imports and initialization code.
+
+**Step 2: Install OpenTelemetry**
+```bash
+go get go.opentelemetry.io/otel \
+  go.opentelemetry.io/otel/sdk \
+  go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
+```
+
+**Step 3: Instrument Code**
+Initialize the OTel tracer and replace Elastic transactions with OTel spans.
+
+See [Go Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-golang/) for complete setup.
+
+### From Elastic APM .NET Agent
+
+**Step 1: Remove Elastic APM**
+Uninstall the Elastic APM .NET agent and remove `Elastic.Apm` packages.
+
+**Step 2: Add OpenTelemetry**
+Use the [OpenTelemetry .NET Automatic Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/).
+
+**Step 3: Configure and Run**
+```bash
+export OTEL_SERVICE_NAME=your-service-name
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>
+. $HOME/.otel-dotnet-auto/instrument.sh
+dotnet run
+```
+
+### Other Languages
+
+For languages not listed above (Ruby, PHP, Rust, Elixir, etc.), please refer to the [SigNoz Instrumentation Documentation](https://signoz.io/docs/instrumentation/) to find the specific guide for your application.
+
+## Validate
+
+Verify traces are flowing correctly by comparing against your service inventory.
+
+### Check Services Are Reporting
+
+1. In SigNoz, navigate to **Services** in the left sidebar.
+2. Verify each service from your inventory appears in the list.
+3. Click a service to see its metrics (latency, error rate, throughput).
+
+### Verify Traces
+
+1. Navigate to **Traces** in the left sidebar.
+2. Select a service and time range.
+3. Verify spans appear with expected attributes.
+4. Check that trace context propagates across service boundaries.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Traces not appearing in SigNoz
+
+1. **Check connectivity**: Verify your application can reach `ingest.<region>.signoz.cloud:443`.
+2. **Verify service name**: Ensure `OTEL_SERVICE_NAME` is set.
+3. **Check application logs**: Look for OpenTelemetry exporter errors.
+4. **Enable debug logging**: Set `OTEL_LOG_LEVEL=debug` to see detailed SDK logs.
+
+### Broken or incomplete traces
+
+1. **Check context propagation**: Ensure all services use compatible propagation (W3C Trace Context).
+2. **Verify all services are instrumented**: Missing instrumentation on any service breaks the trace chain.
+
+</details>
+
+## Next Steps
+
+Once your traces are flowing to SigNoz:
+
+- [Create dashboards](https://signoz.io/docs/migration/migrate-from-elk/dashboards) with trace-based panels
+- [Set up trace-based alerts](https://signoz.io/docs/alerts-management/trace-based-alerts/) for latency and errors
+- [Correlate traces with logs](https://signoz.io/docs/logs-pipelines/guides/trace/) for debugging
+- [Explore the Service Map](https://signoz.io/docs/userguide/service-map/)

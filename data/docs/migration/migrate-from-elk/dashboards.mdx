@@ -1,99 +1,112 @@
 ---
-date: 2025-05-06
+date: 2025-12-01
 id: dashboards
-tags : [SigNoz Cloud, Self-Host]
-title: Migrate dashboards from ELK Stack
-description: Migrating dashboards from ELK Stack to SigNoz. How to migrate dashboards from ELK to SigNoz.
+tags: [SigNoz Cloud, Self-Host]
+title: Migrate Dashboards from ELK Stack
+description: Learn how to migrate your Kibana dashboards to SigNoz using templates or custom creation.
+doc_type: howto
 ---
 
-Migrating dashboards from [Kibana](https://github.com/elastic/kibana) to SigNoz requires manual recreation due to fundamental differences in the underlying data storage, query languages, and dashboard schemas.There is no direct import mechanism for Kibana dashboards into SigNoz.
+## Overview
 
-**Understanding the Differences:**
+Migrating dashboards from Kibana to SigNoz requires manual recreation due to fundamental differences in data storage (Elasticsearch vs ClickHouse) and query languages (KQL/Lucene vs ClickHouse SQL/PromQL).
 
-* **Query Language:**  
-  * **Kibana:** Relies on [KQL (Kibana Query Language)](https://www.elastic.co/docs/explore-analyze/query-filter/languages/kql) or the more powerful Lucene syntax to query data stored in Elasticsearch. These languages are optimized for searching and filtering text within potentially semi-structured JSON documents stored in an inverted index. Key syntax elements include `field:value`, range queries like field:, boolean operators (AND, OR, NOT), existence checks (_exists_:field), and wildcards (\*, ?).Lucene offers advanced features like regex and fuzzy search. 
-  * **SigNoz:** Primarily uses ClickHouse SQL for querying metrics, traces, and logs stored in its columnar database. It also provides a visual Query Builder that generates ClickHouse SQL or PromQL compatible queries, and supports direct PromQL for metrics. ClickHouse SQL is designed for fast analytical processing (aggregations, filtering, joins) over large structured datasets.
-* **Data Model:**  
-  * **Kibana:** Visualizations query Elasticsearch indices containing JSON documents. The structure can be flexible but querying often relies on specific field names within those documents.  
-  * **SigNoz:** Visualizations query structured tables within ClickHouse (e.g., signoz_index_v2, signoz_metrics, logs) with predefined columns and flexible tag maps (attributes_string, attributes_number, etc.). Understanding the target SigNoz ClickHouse schema is necessary for writing effective queries.  
-* **Visualization Capabilities:**  
-  * Both platforms offer common visualization types like time series charts, bar charts, pie charts, tables, and single value displays (Value/Stat in SigNoz).  
-  * SigNoz provides specialized observability visualizations like Flamegraphs and Gantt charts for traces, and Service Maps for dependencies. Kibana has its own specific visualizations like Tag Clouds, Heat Maps, and potentially more advanced map layers or custom Vega/TSVB charts.  
-  * SigNoz currently lacks support for custom visualization plugins, which might be used in some Kibana setups.
+This guide helps you translate your Kibana visualizations to SigNoz dashboards.
 
-**Query Translation Process:**
+## Prerequisites
 
-Manually recreating dashboards involves translating the **intent** of each Kibana panel's query and visualization into SigNoz.
+- A SigNoz account (SigNoz Cloud or Self-Hosted).
+- Access to your existing Kibana dashboards (for reference).
 
-1. **Identify Data Source:** Determine what data the Kibana panel is visualizing (e.g., logs matching a query, aggregated metrics, trace latency) and find a suitable template in [SigNoz Dashboard Templates repository](https://github.com/SigNoz/dashboards)
-2. **Analyze Kibana Query:** Understand the [KQL or Lucene query ](https://www.elastic.co/docs/explore-analyze/query-filter/languages/lucene-query-syntax)used for filtering and the aggregation applied by the visualization itself (e.g., count of documents, average of a field, terms aggregation).  
-3. **Map to SigNoz Data:** Locate the corresponding data in SigNoz (e.g., specific logs table, metrics table like `signoz_metrics`, or trace table like `signoz_index_v2`). Identify the relevant fields/attributes/tags in the SigNoz schema. 
-4. **Rewrite Query in SigNoz:**  
-   * Use the SigNoz Query Builder for simpler queries involving filtering, aggregation (Count, Sum, Avg, P95, P99, etc.), and grouping by attributes. 
-   * For more complex logic, write ClickHouse SQL queries directly against the appropriate SigNoz tables. This offers the most flexibility for complex aggregations or joins.  
-   * Use PromQL for metric-based panels if preferred.
+## Migration Strategies
 
-**Table: KQL/Lucene vs. SigNoz (ClickHouse SQL/Query Builder) - Query Comparison**
+### Using Dashboard Templates
 
-This table illustrates how common query patterns translate:
+SigNoz provides pre-built dashboard templates that match common use cases:
 
-| Query Task | Kibana (KQL Example) | Kibana (Lucene Example) | SigNoz (ClickHouse SQL Example - Simplified Schema) | SigNoz (Query Builder Approach) |
-| :---- | :---- | :---- | :---- | :---- |
-| Filter by field value | http.response.status_code: 200 | http.response.status_code:200 | SELECT... FROM logs WHERE attributes_string['http.response.status_code'] = '200' | Use Filters: attribute http.response.status_code, operator =, value 200|
-| Filter by field existence | user.name:* | _exists_:user.name | SELECT... FROM logs WHERE mapContains(attributes\_string, 'user.name') | Use Filters: attribute user.name, operator Exists |
-| Range query (numeric) | bytes: > 1024 | bytes:[1024 TO *] | SELECT... FROM metrics WHERE value > 1024 (if value is numeric column) | Use Filters: select metric, operator >, value 1024 |
-| Boolean logic | status:active AND region:us-west-1 | status:active AND region:us-west-1 | SELECT... WHERE attributes_string['status']='active' AND attributes_string['region']='us-west-1' | Add multiple filters connected by AND |
-| Text search (substring) | message: "error occurred" | message:"error occurred" | SELECT... FROM logs WHERE body ILIKE '%error occurred%' | Use Search bar (searches body) or Filter body CONTAINS error occurred|
-| Aggregation (count by status) | (Via Kibana Viz Aggregation) | (Via Kibana Viz Aggregation) | SELECT attributes_string['status'] as status, count() FROM logs GROUP BY status | Use Query Builder: Aggregation Count, Group By status attribute|
-| Aggregation (P99 latency) | (Via Kibana Viz Aggregation) | (Via Kibana Viz Aggregation) | SELECT quantile(0.99)(durationNano) FROM signoz\_index\_v2 WHERE... GROUP BY... | Use Query Builder: Aggregation P99, select durationNano metric |
+1. **Find Template**
+   Browse the [SigNoz Dashboard Templates repository](https://github.com/SigNoz/dashboards) to find a matching dashboard (e.g., Host Metrics, Kubernetes, Nginx, Redis).
 
+2. **Import Dashboard**
+   - Navigate to **Dashboards** in SigNoz.
+   - Click **+ New Dashboard**.
+   - Click **Import JSON**.
+   - Paste the JSON content or upload the file.
 
 ### Creating Custom Dashboards
 
-In case there is no existing dashboard template that you can use, you can create a custom dashboard in SigNoz. Please follow [Manage Dashboards in SigNoz documentation](/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard/) for more details.
+For custom Kibana dashboards, you'll need to recreate them in SigNoz.
 
-### Requesting Custom Dashboards
+1. **Identify Data Source**: Determine if the panel visualizes logs, metrics, or traces.
+2. **Translate Query**: Convert the KQL/Lucene query to SigNoz Query Builder or ClickHouse SQL.
+3. **Select Visualization**: Choose the matching panel type in SigNoz.
 
-You can also request SigNoz to help you with creating custom dashboards. To request a custom dashboard, please create a [GitHub issue](https://github.com/SigNoz/signoz/issues/new?assignees=&labels=dashboard-template&template=request_dashboard.md&title=%5BDashboard+Request%5D+) providing details about the dashboard you want to create.
+## Query Translation Guide
 
-### Dashboard Features
+Use this table to translate common KQL/Lucene patterns to SigNoz queries.
 
-SigNoz supports essential dashboard features including:
+| Query Task | Kibana (KQL/Lucene) | SigNoz (Query Builder/ClickHouse SQL) |
+|------------|---------------------|---------------------------------------|
+| **Filter by field** | `status:200` | **Builder**: Filter `status` = `200`<br/>**SQL**: `attributes_string['status'] = '200'` |
+| **Text search** | `message:"error"` | **Builder**: Search bar "error"<br/>**SQL**: `body ILIKE '%error%'` |
+| **Boolean logic** | `env:prod AND level:error` | **Builder**: Add multiple filters<br/>**SQL**: `attributes_string['env']='prod' AND attributes_string['level']='error'` |
+| **Existence check** | `_exists_:user_id` | **Builder**: Filter `user_id` Exists<br/>**SQL**: `mapContains(attributes_string, 'user_id')` |
+| **Range query** | `bytes:>1024` | **Builder**: Filter `bytes` > `1024`<br/>**SQL**: `attributes_int['bytes'] > 1024` |
+| **Aggregation** | Count by status | **Builder**: Aggregate `Count`, Group By `status` |
+| **Percentiles** | P99 latency | **Builder**: Aggregate `P99`, Select `latency` metric |
 
-- **[Variables](/docs/userguide/manage-variables/)**: Create template variables for dynamic dashboards
-- **[Panel Types](/docs/dashboards/panel-types/)**: Various visualization options (time series, bar charts, tables, etc.)
-- **[Query Builder](/docs/product-features/query-builder/)**: Construct queries visually or using PromQL or using Clickhouse queries
+## Feature Comparison
 
 ### Panel Types
-Signoz supports most of the common panel types supported by ELK
 
-| Panel Type       | Signoz | ELK (Kibana) | Notes                                                                                                                                        |
-|------------------|--------|--------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| Time Series      | ✓      | ✓            | Both platforms excel at time series visualization (e.g., Kibana Lens, TSVB). Support thresholds, units.                                        |
-| Bar Chart        | ✓      | ✓            | Both support categorical data visualization (vertical, horizontal, stacked).                                                                 |
-| Pie Chart        | ✓      | ✓            | Both support proportional data visualization.                                                                                                |
-| Table            | ✓      | ✓            | Both support tabular data display. Kibana's 'Discover' tab is also highly optimized for raw data/log exploration in table format.            |
-| Histogram        | ✓      | ✓            | Both support distribution visualization. Kibana often uses this within time series or bar charts via aggregations.                         |
-| Value/Stat       | ✓      | ✓            | Single value display (Kibana 'Metric' visualization, Lens Metric). Both support thresholds/coloring.                                         |
-| Gauge            | -      | ✓            | Kibana has dedicated Gauge panels. Signoz uses [Value panels](/docs/dashboards/panel-types/value/) with thresholds for similar functionality. |
-| Node Graph       | ✓      | ✓            | Signoz has [Service Map](/docs/userguide/service-map/). Kibana has Service Maps within its APM feature. Both show service dependencies.       |
-| Logs             | ✓      | ✓            | Signoz uses a [List panel](/docs/dashboards/panel-types/list/) and a dedicated Logs explorer. ELK/Kibana's core strength is log analysis (Discover, Logs UI). |
-| Traces           | ✓      | ✓            | Both provide dedicated APM features for trace visualization and exploration.                                                                 |
-| Flame Graph      | ✓      | ✓            | Both offer flame graphs as part of their APM trace detail views.                                                                             |
-| XY Chart/Scatter | -      | ✓            | Kibana Lens supports Scatter plots directly.                                                                                                 |
-| Geomap           | -      | ✓            | Kibana has powerful 'Elastic Maps' for geospatial data visualization.                                                                        |
-| Canvas           | -      | ✓            | Kibana 'Canvas' allows for free-form, infographic-style dashboard design.                                                                    |
-| Tag Cloud        | -      | ✓            | Kibana offers Tag Clouds, often used for visualizing term frequency in text data.                                                            |
-| Heat Map         | -      | ✓            | Kibana offers Heat Map visualizations.                                                                                                       |
-| Vega Viz         | -      | ✓            | Kibana supports custom Vega/Vega-Lite visualizations for advanced charting needs.                                                            |
-**Importing Dashboards:**
+SigNoz supports most common panel types found in Kibana:
 
-While Kibana dashboards cannot be imported, SigNoz does support importing dashboards from JSON files.This is useful for:
+| Panel Type | Kibana | SigNoz | Notes |
+|------------|--------|--------|-------|
+| Time Series | ✓ | ✓ | Standard line/area charts |
+| Bar Chart | ✓ | ✓ | Vertical/horizontal/stacked |
+| Pie Chart | ✓ | ✓ | Proportional data |
+| Table | ✓ | ✓ | Tabular data display |
+| Metric/Stat | ✓ | ✓ | Single value display |
+| Logs | ✓ | ✓ | [List panel](https://signoz.io/docs/dashboards/panel-types/list/) for raw logs |
+| Traces | ✓ | ✓ | Dedicated APM views |
+| Heat Map | ✓ | - | Use Time Series or Bar Charts |
+| Tag Cloud | ✓ | - | Use Table or Bar Chart |
 
-* Sharing dashboards created in SigNoz.  
-* Using pre-built dashboard templates provided by SigNoz (e.g., for APM metrics, HTTP monitoring, DB calls).  
-* Importing Grafana dashboards (if they use Prometheus data sources), although variables might need adjustment.
+### Infrastructure as Code (Terraform)
 
-SigNoz does not currently support plugins, so in case you are using any plugins that provide additional panel types in your Grafana, you will need to find an alternative or recreate the same functionality using SigNoz's features.
+You can manage your dashboards as code using the [SigNoz Terraform Provider](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs). This allows you to version control your dashboards, similar to managing Kibana objects.
 
-Please refer to Panel Types [documentation](/docs/dashboards/panel-types/) for more details on the panel types supported by SigNoz.
+## Validate
+
+To confirm that your dashboards are migrated correctly:
+
+1. Navigate to **Dashboards** in SigNoz.
+2. Open your newly created dashboard.
+3. Verify that all panels are populating with data.
+4. Check that variables are working as expected.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Empty Charts
+
+If your charts are empty:
+- **Check Data**: Verify the metrics/logs are actually being received (use Explore view).
+- **Check Time Range**: Ensure the dashboard time range covers existing data.
+- **Verify Filters**: Check if filters are too restrictive or using incorrect attribute names.
+
+### Query Errors
+
+If you see query errors:
+- **Syntax**: Check ClickHouse SQL syntax if using custom queries.
+- **Attribute Types**: Ensure you're accessing attributes correctly (e.g., `attributes_string` vs `attributes_int`).
+
+</details>
+
+## Next Steps
+
+- [Migrate Alerts](https://signoz.io/docs/migration/migrate-from-elk/alerts/)
+- [Explore Query Builder](https://signoz.io/docs/userguide/query-builder-v5/)
