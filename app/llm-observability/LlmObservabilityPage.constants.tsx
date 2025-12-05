@@ -172,6 +172,29 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     ),
   },
   {
+    feature: 'Application Correlation',
+    signoz: (
+      <span className="flex items-center gap-2">
+        <Check size={20} className="text-green-400" /> Cross-service tracing
+      </span>
+    ),
+    langfuse: (
+      <span className="flex items-center gap-2">
+        <X size={20} className="text-red-400" />{' '}
+      </span>
+    ),
+    langsmith: (
+      <span className="flex items-center gap-2">
+        <X size={20} className="text-red-400" />{' '}
+      </span>
+    ),
+    braintrust: (
+      <span className="flex items-center gap-2">
+        <X size={20} className="text-red-400" />{' '}
+      </span>
+    ),
+  },
+  {
     feature: 'Kubernetes/Docker Monitoring',
     signoz: (
       <span className="flex items-center gap-2">
@@ -199,29 +222,6 @@ export const LLM_COMPARISON_TABLE_ROWS = [
     signoz: (
       <span className="flex items-center gap-2">
         <Check size={20} className="text-green-400" /> Built-in
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
-  },
-  {
-    feature: 'Application Correlation',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Cross-service tracing
       </span>
     ),
     langfuse: (
@@ -284,6 +284,9 @@ export const LLM_TOOLS_DATA = [
       <>
         Trace conversational agent interactions in <strong>AutoGen</strong>
       </>,
+      <>
+        Monitor real-time voice AI pipelines with <strong>Pipecat</strong>
+      </>,
     ],
   },
   {
@@ -300,9 +303,6 @@ export const LLM_TOOLS_DATA = [
       </>,
       <>
         Observe <strong>Google Vertex AI</strong> Gemini and PaLM inference
-      </>,
-      <>
-        Monitor real-time voice AI pipelines with <strong>Pipecat</strong>
       </>,
     ],
   },
