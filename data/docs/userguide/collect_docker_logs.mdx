@@ -1,5 +1,5 @@
 ---
-date: 2025-11-07
+date: 2025-12-04
 title: Collecting Docker Container Logs
 tags : [SigNoz Cloud, Self-Host]
 description: Collecting Docker Container Logs using OpenTelemetry Collector
@@ -37,6 +37,15 @@ receivers:
         type: container
         format: docker
         add_metadata_from_filepath: false
+      - id: extract-service-name
+        type: regex_parser
+        parse_from: body
+        regex: 'service.name":\s*"(?P<svc>[^"]+)"'
+      - id: set-service-name
+        type: move
+        from: attributes.svc
+        to: resource["service.name"]
+        if: 'attributes.svc != nil'
 
 service:
   pipelines:
@@ -46,6 +55,8 @@ service:
       processors: [batch]
       exporters: [otlp]
 ```
+
+These operators extract `service.name` from JSON-formatted log bodies and move it to the resource level. This is useful when your application emits structured JSON logs with an explicit `service.name` field. If the field is missing, these operators are safely skipped.
 
 <Admonition type="note">
 If your logs originate from Kubernetes pod log file paths (for example, `/var/log/pods/...` or `/var/log/containers/...`) instead of Docker container log files on the host, set `add_metadata_from_filepath: true` in the container parser operator. 
@@ -117,7 +128,9 @@ The Docker container logs will be visible in the `Logs` tab of SigNoz.
 
 2. **Verify collector has access:**
    ```bash
-   docker exec opentelemetry-collector ls /var/lib/docker/containers/
+   docker run --rm \
+     -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+     alpine ls /var/lib/docker/containers/
    ```
 
 3. **Check collector logs for errors:**
