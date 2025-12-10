@@ -30,7 +30,7 @@ For more detailed info on instrumenting your Agno applications with OpenTelemetr
 <Tabs>
 <TabItem value="No Code" label="No Code(Recommended)" default>
 
-No-code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
+No code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
 
 ### **Step 1:** Install the necessary packages in your Python environment.
 
@@ -76,6 +76,8 @@ agent.print_response("What is news on the stock market?")
 
 ### **Step 4:** Run your application with auto-instrumentation
 
+Run your application with the following environment variables set. This configures OpenTelemetry to export traces, logs, and metrics to SigNoz Cloud and enables automatic log correlation:
+
 ```bash
 OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>" \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
@@ -86,12 +88,12 @@ OTEL_METRICS_EXPORTER=otlp \
 OTEL_LOGS_EXPORTER=otlp \
 OTEL_PYTHON_LOG_CORRELATION=true \
 OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
-<your_run_command with opentelemetry-instrument>
+opentelemetry-instrument <your_run_command>
 ```
 - **`<service_name>`** is the name of your service
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your_ingestion_key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `opentelemetry-instrument python main.py`
+- Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `python main.py`
 
 <Admonition type="info">
   Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
@@ -101,7 +103,7 @@ OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
 
 </TabItem>
 
-<TabItem value="Code" label="Code" default>
+<TabItem value="Code" label="Code(Manual)" default>
 
 Code-based instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
 
