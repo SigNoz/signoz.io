@@ -58,6 +58,14 @@ interface IconCardData {
 
 const DashboardTemplatesData: IconCardData[] = [
   {
+    name: 'Agno',
+    href: '/docs/dashboards/dashboard-templates/agno-dashboard',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Agno Dashboard Template',
+  },
+  {
     name: 'Amazon Bedrock',
     href: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
     icon: <SiAmazonwebservices className="h-7 w-7 text-white" />,
