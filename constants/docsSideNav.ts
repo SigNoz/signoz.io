@@ -2415,6 +2415,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/agno-monitoring',
+        label: 'Agno',
+        type: 'doc',
+      },
+      {
         route: '/docs/amazon-bedrock-monitoring',
         label: 'Amazon Bedrock',
         type: 'doc',
