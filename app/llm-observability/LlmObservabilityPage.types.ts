@@ -1,7 +1,5 @@
-export type SupportStatus = 'check' | 'cross'
-
 export type ComparisonCell = {
-  support: SupportStatus
+  supported: boolean
   text: string
 }
 
