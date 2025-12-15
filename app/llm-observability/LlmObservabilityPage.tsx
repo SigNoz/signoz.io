@@ -393,7 +393,7 @@ const StartMonitoring: React.FC = () => {
               </div>
               <div className="relative col-span-1 h-full min-h-[400px] w-full">
                 <Image
-                  src="/img/llm-observability/start-monitoring-section.png"
+                  src="/img/llm-observability/start-monitoring-section.webp"
                   alt="Start Monitoring"
                   fill
                   className="object-contain"
