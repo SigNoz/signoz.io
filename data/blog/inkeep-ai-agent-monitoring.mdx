@@ -1,0 +1,281 @@
+---
+
+title: How Inkeep Monitors Their AI Agent Framework with SigNoz
+slug: inkeep-ai-agent-monitoring
+date: 2025-12-15
+tags: [AI & LLM Observability]
+authors: [anushka_karmakar]
+description: Learn how Inkeep integrated SigNoz into their AI agent framework to provide automatic observability for developers. See how the Trace API, ClickHouse architecture, and OpenTelemetry-native instrumentation enable monitoring of complex multi-agent workflows.
+image: /img/blog/2025/12/inkeep-signoz-monitoring.webp
+keywords: [AI agent monitoring, LLM observability, Inkeep, SigNoz, OpenTelemetry for AI, AI agent framework, trace API, ClickHouse observability, agent debugging, AI monitoring tools]
+
+---
+
+AI agents are fundamentally different beasts to monitor compared to traditional applications. A single user request can trigger a cascade of 10+ internal operations: sub-agent transfers, tool executions, LLM calls, API requests, each with unpredictable latency and failure modes. When something goes wrong (and with LLMs, things go wrong in creative ways), you need to see the entire execution flow to debug effectively.
+
+<a href="https://inkeep.com/" rel="noopener noreferrer nofollow" target="_blank">**InKeep**</a> builds an agent framework that developers use to create production AI agents. When you're providing a framework, observability isn't optional because it's a product feature. Developers building agents with your framework will hit issues and need to debug them. If your framework doesn't provide visibility into what's happening, you're forcing every developer to figure out observability on their own.
+
+That's why Inkeep integrated SigNoz directly into their framework. Agents built with Inkeep come with observability out of the box.
+
+## The Inkeep Agent Framework
+
+Inkeep's framework is an open-source TypeScript SDK for building AI agents. What makes it interesting is the bidirectional development workflow between code and visual tools:
+
+**Code-to-Visual (`inkeep push`)**: Developers define agents in TypeScript and deploy them to the platform via CLI. The framework compiles the local definition and updates the remote configuration, making code changes instantly available in Inkeep's Visual Builder.
+
+**Visual-to-Code (`inkeep pull`)**: Changes made visually (say, by a product manager tweaking agent behavior) can be synchronized back to the codebase. The CLI detects differences, generates new component files, and refactors existing code to match the visual state.
+
+This creates an interesting observability challenge: developers working locally need the same visibility into their agents as they have in production. The observability tooling can't be an afterthought you add only in production; it needs to work everywhere the framework works.
+
+### Framework Architecture
+
+Here's what developers get when they build agents with Inkeep:
+
+**State Management**: SQLite with Drizzle ORM as the single source of truth. Conversation history, agent state, and configuration data are strongly typed and portable between local dev and production.
+
+**Agent Definition**: Agents are defined in TypeScript using a composable architecture:
+
+- **Sub-Agents**: Modular, domain-specific agent units (like "Troubleshooter" or "Code Generator") that hand off control via a state machine
+- **Tools**: Executable functions exposed to the LLM, both local TypeScript functions and remote Model Context Protocol (MCP) tools
+
+**MCP Integration**: The framework uses MCP for standardized tool integrations, with managed OAuth (via Nango) for "1-click" authentication with services like Slack, GitHub, and Zendesk. Credentials are securely scoped to specific tenants for enterprise deployments.
+
+For Inkeep, the question was: how do you give developers visibility into this entire stack (from agent state machines to tool executions to MCP calls) without making them implement observability themselves?
+
+## Why Inkeep Chose SigNoz
+
+When evaluating observability solutions to integrate into their framework, Inkeep had specific requirements:
+
+### Trace API for Programmatic Access
+
+Most observability tools give you a UI to browse traces. That's fine if you're debugging one off issues, but it doesn't work when you're building a framework. Developers need to query traces programmatically to build custom dashboards, automate alerts, analyze patterns across thousands of agent runs.
+
+SigNoz's [REST-based Trace API](https://signoz.io/docs/traces-management/trace-api/overview/) enables exactly this. As [Shagun Singh](https://www.linkedin.com/in/shagunsingh11/), Software Engineer at Inkeep, explains: "The Trace API lets us programmatically query traces and build custom dashboards, while ClickHouse ensures we can actually query at scale without timeouts. For debugging complex AI agent workflows, you need both programmatic access and query speed - SigNoz delivers both."
+
+The Trace API provides:
+
+- Programmatic trace search by duration, span attributes, tags, and custom filters
+- Custom dashboards that integrate trace data
+- Aggregation queries for analytics
+- Complex filtering for production debugging
+
+For developers using Inkeep's framework, this means they can build their own observability tooling on top: dashboards that automatically surface problematic agent runs, scripts that track performance regressions, cost analysis tools that extract token usage from traces.
+
+### ClickHouse for Query Performance
+
+Trace data from AI agents is high-cardinality: lots of unique spans, lots of custom attributes, lots of variance in execution patterns. Many observability backends choke on this. You try to query traces from the last week and hit timeouts.
+
+SigNoz runs on ClickHouse, which handles high-cardinality data well. Robert Tran, CTO of Inkeep, explains: "We're storing detailed traces for every agent interaction. With other solutions, we hit query timeouts when trying to analyze patterns across thousands of traces. ClickHouse keeps queries fast even as our data grows."
+
+ClickHouse provides:
+
+- Fast ingestion without bottlenecks
+- Low-latency queries over large datasets
+- Efficient columnar storage for time-series data
+- Reliable retrieval of historical data for analysis
+
+For developers building agents with Inkeep, this means their production traces remain queryable even as volume grows. No timeouts, no degraded dashboards.
+
+### OpenTelemetry-Native
+
+Inkeep's framework uses standard OpenTelemetry libraries for instrumentation, which was a deliberate choice. Developers deploy agents across wildly different environments (local Docker, various cloud platforms, enterprise on-prem), and proprietary instrumentation would be a nightmare to support.
+
+Since SigNoz is OpenTelemetry-native, the integration is straightforward. No proprietary agents, no vendor-specific SDKs. The framework emits OpenTelemetry spans, SigNoz ingests them. Done.
+
+### Local and Production Parity
+
+Developers building with Inkeep's framework typically start locally. They run the framework, a local database, and local observability all on their laptop. They debug, iterate, then deploy to production. If the observability experience is different between local and production, that's friction.
+
+[Robert Tran](https://www.linkedin.com/in/robert-tran-profile/) emphasizes why this mattered: "The parity between local development and production was the deciding factor for us. Our engineers can spin up SigNoz locally with Docker to debug agent loops on their laptops, and then get that exact same visibility in production. It aligns perfectly with our 'push/pull' workflow - you can fix a performance bottleneck locally and be confident it's solved in the cloud."
+
+In practice, switching from local SigNoz to SigNoz Cloud is an environment variable change. Same traces, same dashboards, same debugging experience.
+
+## How the Framework Instruments Agents
+
+Inkeep's approach was to make observability automatic. Developers using the framework shouldn't need to manually add spans or figure out what to instrument because the framework handles it.
+
+### Automatic Span Creation
+
+The framework automatically creates spans for operations that matter when debugging agents:
+
+**Sub-Agent Transfers**: When one agent hands off to another, a span captures the transfer with context about why it happened and what state was passed. This makes it obvious when an agent transfer isn't happening when it should.
+
+**Tool Execution**: Every tool call gets its own span tracking inputs, outputs, and execution time. This is critical for identifying slow external API calls or failed tool invocations.
+
+**Artifact Generation**: Multi-step processes like generating code files or diagrams are instrumented as nested spans, making it easy to see where generation bottlenecks occur.
+
+Here's how the framework instruments a tool call:
+
+```
+import { trace } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('inkeep-agent');
+
+async function executeTool(toolName: string, input: any) {
+  return await tracer.startActiveSpan(`tool.${toolName}`, async (span) => {
+    span.setAttribute('tool.name', toolName);
+    span.setAttribute('tool.input', JSON.stringify(input));
+    
+    try {
+      const result = await callTool(toolName, input);
+      span.setAttribute('tool.output', JSON.stringify(result));
+      span.setStatus({ code: SpanStatusCode.OK });
+      return result;
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
+}
+```
+
+This pattern repeats throughout the framework. Every significant operation gets its own span with relevant attributes.
+
+### LLM Call Instrumentation
+
+LLM calls are automatically instrumented with model used, token counts (prompt + completion), latency, and success/retry status.
+
+This is critical for developers monitoring both performance (LLM latency) and cost (token usage).
+
+### Context Propagation
+
+Since agents often make chained calls (Agent → Tool → External API → Database), the framework ensures trace context propagates across all boundaries. OpenTelemetry's context propagation keeps all related spans in the same trace, even when calls span multiple services.
+
+The framework automatically injects trace context into outgoing requests and extracts it from incoming requests.
+
+## What Developers See in SigNoz
+
+When developers using Inkeep's framework open SigNoz, here's what they get:
+
+<Figure
+
+src="/img/blog/2025/12/ingestion-performance.webp"
+
+alt="*SigNoz metrics showing telemetry ingestion performance*"
+
+/>
+
+### Trace Explorer
+
+<Figure
+
+src="/img/blog/2025/12/signoz-trace-explorer-inkeep-framework.webp"
+
+alt="*Trace explorer showing spans from an agent built with Inkeep's framework*"
+
+/>
+
+The trace explorer provides:
+
+**Filtering**: Filter by duration, deployment environment, service name, and custom span attributes. Find "all agent runs that took longer than 5 seconds" or "all traces with tool execution errors."
+
+**Time Range Selection**: Preset ranges or custom time periods for investigating specific incidents or analyzing long-term patterns.
+
+**Real-time Updates**: Traces refresh automatically, useful during active debugging or monitoring a new deployment.
+
+### Flamegraph for Debugging
+
+<Figure
+
+src="/img/blog/2025/12/signoz-flamegraph-for-debugging.webp"
+
+alt="*Flamegraph showing a complex agent execution with 231 spans and 60 errors*"
+
+/>
+
+The flamegraph view is where most debugging happens. Each horizontal bar represents a span, with width proportional to duration. This makes bottlenecks visually obvious.
+
+For multi-agent workflows built with Inkeep, the flamegraph reveals:
+
+**Sequential vs. Parallel Execution**: See which operations block the critical path versus which run concurrently. This helps identify parallelization opportunities.
+
+**Error Cascades**: Red bars indicate failed operations. Multiple red bars in a vertical line show an error propagating through the call stack.
+
+**Tool Call Overhead**: Compare tool span durations to their parent agent spans to see if external API latency is dominating execution time.
+
+**Sub-Agent Boundaries**: Transfers between sub-agents show up as distinct sections, making it clear where control changed and what state was passed.
+
+The span details panel provides:
+
+- Span name and unique ID
+- Timing (start time and duration)
+- Service and span kind (Server, Client, Internal)
+- Status code
+- Attributes, events, and links - all the custom data the framework attached
+
+### Key Metrics Developers Track
+
+Beyond traces, developers building agents typically monitor:
+
+**LLM Response Time**: Per model and per agent type. Identifies when specific models are slow or particular agent configurations cause performance issues.
+
+**Token Usage**: Prompt and completion tokens, broken down by agent and conversation. Critical for cost monitoring and identifying agents generating verbose prompts.
+
+**Error Rates by Agent Type**: Which sub-agents fail most often? Are errors correlated with specific tools or external services?
+
+**Tool Execution Latency**: How long do external tool calls take? Are there specific tools that need caching or optimization?
+
+**Agent Transfer Frequency**: How often do agents hand off to other agents? High transfer rates might indicate poor agent design or unclear user intents.
+
+## What Inkeep Learned Building This
+
+Building observability into a framework taught Inkeep's team several lessons:
+
+### 1. Instrument Everything by Default
+
+The framework instruments comprehensively from the start. Developers can filter out noisy spans later, but you can't add instrumentation after you're already debugging a production issue.
+
+Singh notes: "We instrumented everything from day one. It's much easier to filter out noise later than to add instrumentation when you're firefighting."
+
+### 2. Semantic Attributes Matter
+
+Raw traces showing function calls aren't enough. The framework attaches semantic attributes to spans:
+
+- Agent IDs and types
+- Tool names and parameters
+- Model names and token counts
+- Error types and messages
+
+These attributes make filtering and aggregation meaningful. Developers can find "all traces where the GitHub tool failed" or "all requests that took longer than 10 seconds."
+
+### 3. Enable Programmatic Analysis
+
+Rather than expecting developers to manually browse traces, Inkeep built automation using SigNoz's Trace API. They created automated alerts for traces with high error counts, daily reports on P95 latency by agent type, and cost analysis based on token usage.
+
+Singh explains: "The Trace API changed how we think about observability. It's not just about debugging issues manually; we can build tooling that surfaces problems proactively."
+
+### 4. Local Development Matters
+
+Running SigNoz locally with Docker isn't just convenient; it's fundamental. Developers building with Inkeep's framework can test agent configurations with full observability before deploying, debug performance issues with realistic trace volumes, and develop custom observability tooling without touching production.
+
+Tran emphasizes: "This workflow alignment is huge. Developers aren't flying blind when they deploy because they've already seen the traces locally."
+
+### 5. Separate LLM Time from Execution Time
+
+For AI agents, distinguish between time spent on LLM generation (optimize with different models or prompts) versus time spent on external operations (optimize with caching or parallelization).
+
+The framework's instrumentation makes this distinction clear in flamegraphs. Developers instantly see: "Is this slow request caused by the LLM, or by a slow database query?"
+
+## The Bottom Line
+
+AI agents aren't like traditional applications. The non-deterministic behavior, multi-step workflows, and external dependencies create observability challenges that standard monitoring tools don't address well.
+
+For Inkeep, integrating SigNoz into their framework solved this by providing:
+
+- Programmatic trace access via the Trace API
+- Fast queries over high-cardinality data with ClickHouse
+- OpenTelemetry-native instrumentation
+- Seamless local and production deployment
+
+But more importantly, it's about treating observability as a product feature, not an afterthought. Developers building agents with Inkeep's framework get comprehensive observability automatically. They don't need to instrument their agents manually or figure out how to deploy an observability stack - it just works.
+
+If you're building a framework or platform and wondering how to provide observability to your users, Inkeep's approach is worth studying: comprehensive automatic instrumentation, meaningful span attributes, programmatic access via APIs, and identical local/production experiences.
+
+---
+
+*Want to add similar observability to your AI applications? Check out our [LLM Observability documentation](https://signoz.io/docs/llm-observability/) or sign up for [SigNoz Cloud](https://signoz.io/teams/) to get started in minutes.*
+
+*Building AI agents and want observability built in? Check out <a href="https://inkeep.com/" rel="noopener noreferrer nofollow" target="_blank">**Inkeep's agent framework**</a> and their <a href="https://docs.inkeep.com/overview" rel="noopener noreferrer nofollow" target="_blank">**documentation**</a> to see how they've made monitoring seamless.*
