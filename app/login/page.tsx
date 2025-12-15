@@ -2,7 +2,7 @@
 
 import './login.styles.css'
 
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, ArrowUpRight, Dot, Loader2, Pencil } from 'lucide-react'
 import { useLogEvent } from '../../hooks/useLogEvent'
@@ -57,6 +57,16 @@ export default function Login() {
   const router = useRouter()
   const logEvent = useLogEvent()
 
+  useEffect(() => {
+    logEvent({
+      eventName: 'Login Page View',
+      eventType: 'track',
+      attributes: {
+        page: 'login',
+      },
+    })
+  }, [logEvent])
+
   const handleEmailUpdate = (event) => {
     const { value } = event.target
     setWorkEmail(value)
@@ -94,6 +104,14 @@ export default function Login() {
   const handleSubmit = (event) => {
     event.preventDefault()
 
+    logEvent({
+      eventName: 'Login Attempt',
+      eventType: 'track',
+      attributes: {
+        email: workEmail,
+      },
+    })
+
     setSubmitFailed(false)
 
     const isFormValid = validateForm()
@@ -112,6 +130,13 @@ export default function Login() {
   }
 
   const handleNoDeployments = () => {
+    logEvent({
+      eventName: 'Login No Deployments',
+      eventType: 'track',
+      attributes: {
+        email: workEmail,
+      },
+    })
     setNoDeployments(true)
   }
 
@@ -145,6 +170,14 @@ export default function Login() {
         },
       })
 
+      logEvent({
+        eventName: 'Login Success',
+        eventType: 'track',
+        attributes: {
+          email: workEmail,
+        },
+      })
+
       // --- Segment Group Call ---
       const domain = workEmail.split('@')[1] || 'unknown_domain'
       logEvent({
@@ -167,6 +200,14 @@ export default function Login() {
 
       setIsSubmitting(false)
     } else if (data.status === 'error') {
+      logEvent({
+        eventName: 'Login Failed',
+        eventType: 'track',
+        attributes: {
+          email: workEmail,
+          error: 'API Error',
+        },
+      })
       setSubmitFailed(true)
       setIsSubmitting(false)
     }
@@ -210,9 +251,9 @@ export default function Login() {
 
                   <Button
                     type="submit"
-                    variant={"default"}
-                    rounded={"full"} 
-                    className='w-full mt-6'
+                    variant={'default'}
+                    rounded={'full'}
+                    className="mt-6 w-full"
                     isButton={true}
                     onClick={() => window.location.reload()}
                   >
@@ -220,10 +261,10 @@ export default function Login() {
                   </Button>
 
                   <Button
-                    variant={"secondary"}
-                    rounded={"full"}
+                    variant={'secondary'}
+                    rounded={'full'}
                     type="submit"
-                    className='w-full mt-3'
+                    className="mt-3 w-full"
                     href="mailto:cloud-support@signoz.io"
                   >
                     <span className="text-xs leading-5">Contact cloud support</span>
@@ -251,8 +292,8 @@ export default function Login() {
 
                       {workEmail && submitSuccess && (
                         <Button
-                          variant={"secondary"}
-                          rounded={"default"}
+                          variant={'secondary'}
+                          rounded={'default'}
                           isButton={true}
                           type="button"
                           onClick={handleChangeEmail}
@@ -312,11 +353,11 @@ export default function Login() {
                   {!submitSuccess && (
                     <Button
                       isButton={true}
-                      variant={"default"}
-                      rounded={"full"}
+                      variant={'default'}
+                      rounded={'full'}
                       disabled={isSubmitting || !isValid}
                       onClick={handleSubmit}
-                      className='w-full mb-4'
+                      className="mb-4 w-full"
                     >
                       <span className="flex items-center gap-1.5 px-px text-sm">
                         Next
@@ -335,11 +376,11 @@ export default function Login() {
                 <div className="text-sm text-signoz_vanilla-400">
                   No deployments are currently associated with this email. You can get started now
                   with a free trial account for 30 days.
-                  <Button 
+                  <Button
                     isButton={true}
                     rounded={'full'}
-                    variant={"default"}
-                    className='my-4 w-full'
+                    variant={'default'}
+                    className="my-4 w-full"
                     onClick={handleGetStarted}
                   >
                     <span className="flex items-center gap-1.5 px-px text-sm">
@@ -356,9 +397,12 @@ export default function Login() {
 
       <div className="absolute bottom-0 m-auto mt-8 flex w-full items-center justify-center">
         <div className="flex w-[70%] items-center justify-center max-sm:w-[90%]">
-          <section className="b mb-6 grid grid-cols-2 md:flex md:flex-wrap items-center gap-4 self-stretch rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-4 md:p-2 max-md:max-w-full max-md:w-full">
+          <section className="b mb-6 grid grid-cols-2 items-center gap-4 self-stretch rounded-md border border-signoz_slate-400 bg-signoz_ink-400 p-4 max-md:w-full max-md:max-w-full md:flex md:flex-wrap md:p-2">
             {trustBadges.map((badge, index) => (
-              <div className="my-auto flex items-center gap-2.5 self-stretch justify-center md:justify-start" key={index}>
+              <div
+                className="my-auto flex items-center justify-center gap-2.5 self-stretch md:justify-start"
+                key={index}
+              >
                 {badge.icon && (
                   <img
                     loading="lazy"

@@ -1,6 +1,7 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ReactGA from 'react-ga4'
+import { useLogEvent } from '../../hooks/useLogEvent'
 import styles from './styles.module.css'
 
 interface ErrorsProps {
@@ -24,6 +25,17 @@ export default function SignozCloudSignUpForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitFailed, setSubmitFailed] = useState(false)
+  const logEvent = useLogEvent()
+
+  useEffect(() => {
+    logEvent({
+      eventName: 'Signup Form Viewed',
+      eventType: 'track',
+      attributes: {
+        page: 'signoz-cloud-signup',
+      },
+    })
+  }, [logEvent])
 
   const handleInputChange = (event) => {
     const { name, value } = event.target
@@ -69,6 +81,14 @@ export default function SignozCloudSignUpForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault()
+
+    logEvent({
+      eventName: 'Signup Form Submit Attempt',
+      eventType: 'track',
+      attributes: {
+        ...formData,
+      },
+    })
 
     setSubmitFailed(false)
 
@@ -138,6 +158,14 @@ export default function SignozCloudSignUpForm() {
         setSubmitSuccess(true)
         handleGTMCustomEventTrigger(payload)
 
+        logEvent({
+          eventName: 'Signup Form Success',
+          eventType: 'track',
+          attributes: {
+            ...payload,
+          },
+        })
+
         setFormData({
           fullName: '',
           workEmail: '',
@@ -149,6 +177,16 @@ export default function SignozCloudSignUpForm() {
         window.location.href = 'https://signoz.io/verify-email'
       } else {
         // To do, handle other errors apart from invalid email
+        logEvent({
+          eventName: 'Signup Form Error',
+          eventType: 'track',
+          attributes: {
+            errorType: 'API Error',
+            status: response.status,
+            ...payload,
+          },
+        })
+
         if (response.status === 400) {
           setErrors({
             workEmail: 'Please enter a valid work email.',
@@ -156,6 +194,15 @@ export default function SignozCloudSignUpForm() {
         }
       }
     } catch (error) {
+      logEvent({
+        eventName: 'Signup Form Error',
+        eventType: 'track',
+        attributes: {
+          errorType: 'Network/Code Error',
+          errorMessage: error instanceof Error ? error.message : String(error),
+          ...payload,
+        },
+      })
       handleError()
     } finally {
       setIsSubmitting(false)
