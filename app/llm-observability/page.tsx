@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: 'Monitor LLM Apps and Agents, Correlate with Logs & Metrics | SigNoz',
     description:
       'Track AI workflows, RAG pipelines, and agents alongside microservices. Get unified alerting, dashboards, and correlation across your entire stack.',
-    images: '/img/platform/LlmObservabilityMeta.png',
+    images: '/img/platform/LlmObservabilityMeta.webp',
   },
   description:
     'Track AI workflows, RAG pipelines, and agents alongside microservices. Get unified alerting, dashboards, and correlation across your entire stack.',
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: 'Monitor LLM Apps and Agents, Correlate with Logs & Metrics | SigNoz',
     description:
       'Track AI workflows, RAG pipelines, and agents alongside microservices. Get unified alerting, dashboards, and correlation across your entire stack.',
-    images: '/img/platform/LlmObservabilityMeta.png',
+    images: '/img/platform/LlmObservabilityMeta.webp',
   },
 }
 

@@ -19,7 +19,6 @@ import IconTitleDescriptionCardGrid from '@/shared/components/molecules/FeatureP
 import TrackingLink from '@/components/TrackingLink'
 import { ComparisonTableProps } from './LlmObservabilityPage.types'
 
-// Main Component Sections
 const Header: React.FC = () => {
   const headerButtons = [
     {
@@ -50,10 +49,8 @@ const Header: React.FC = () => {
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
-      {/* Border decorations */}
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
 
-      {/* Main content */}
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
           Monitor LLM Apps and Agents, <br className="hidden md:block" /> Correlate with Logs &
@@ -67,16 +64,14 @@ const Header: React.FC = () => {
         </p>
       </div>
 
-      {/* Buttons */}
       <div className="relative z-[1] !mx-auto mx-2 !w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw]">
         <ButtonGroup buttons={headerButtons} />
       </div>
 
-      {/* Hero image */}
       <SectionLayout variant="no-border" className="!mt-0 max-md:-mb-[3rem]">
         <div className="w-100 mx-[-28px]">
           <Image
-            src="/img/platform/LlmObservabilityMeta.png"
+            src="/img/platform/LlmObservabilityMeta.webp"
             alt="Llm observability hero"
             className="w-full rounded-xl"
             width={10000}
@@ -205,7 +200,6 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
       <SectionLayout variant="bordered" className="!mx-auto mt-10 p-0">
         <GridLayout variant="split" className="!gap-y-0">
           {LLM_TOOLS_DATA.map((section, index) => {
-            // Desktop border logic (2 columns)
             const isDesktopRow1 = index < 2
             const isDesktopCol1 = index % 2 === 0
 
@@ -272,7 +266,6 @@ const HowSigNozCompares: React.FC = () => {
 const CustomerStories: React.FC = () => {
   return (
     <>
-      {/* Featured testimonial */}
       <section className="relative mx-auto w-[100vw] overflow-hidden border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw]">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-signoz_ink-500/50 via-signoz_ink-500/25 to-signoz_ink-500/90" />
 
@@ -300,7 +293,6 @@ const CustomerStories: React.FC = () => {
         </div>
       </section>
 
-      {/* Testimonials grid */}
       <SectionLayout variant="bordered" className="!mx-auto p-0 max-md:-mb-[3rem]">
         <div className="container pb-16">
           <TestimonialCards />
@@ -407,18 +399,15 @@ const StartMonitoring: React.FC = () => {
   )
 }
 
-// Main Component
 const LlmObservabilityPage: React.FC = () => {
   return (
     <main className="!mt-[-10px] mb-auto">
       <ProductNav />
 
       <div className="relative bg-signoz_ink-500">
-        {/* Background decorations */}
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
         <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
 
-        {/* Main sections */}
         <Header />
 
         <SectionLayout variant="bordered" className="!px-0">
