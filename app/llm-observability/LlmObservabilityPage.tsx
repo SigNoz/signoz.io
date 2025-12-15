@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, BookOpen, CircleArrowRight } from 'lucide-react'
+import { ArrowRight, BookOpen, CircleArrowRight, Check, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import ProductNav from '@/components/ProductNav/ProductNav'
 import Image from 'next/image'
@@ -8,6 +8,7 @@ import {
   LLM_OBSERVABILITY_CARDS,
   LLM_COMPARISON_TABLE_ROWS,
   LLM_TOOLS_DATA,
+  VENDORS,
 } from './LlmObservabilityPage.constants'
 import SectionLayout from '@/shared/components/molecules/FeaturePages/SectionLayout'
 import GridLayout from '@/shared/components/molecules/FeaturePages/GridLayout'
@@ -94,34 +95,39 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({ rows, className = '' 
             <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-left font-semibold text-signoz_vanilla-400">
               Feature
             </td>
-            <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
-              SigNoz
-            </th>
-            <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
-              Langfuse
-            </th>
-            <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
-              LangSmith
-            </th>
-            <th className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400">
-              Braintrust
-            </th>
+            {VENDORS.map((vendor) => (
+              <th
+                key={vendor.key}
+                className="border-b border-signoz_slate-400 px-4 py-4 text-left font-semibold text-signoz_vanilla-400"
+              >
+                {vendor.label}
+              </th>
+            ))}
           </tr>
           {rows.map((row, index) => (
             <tr key={index} className="transition-colors hover:bg-signoz_ink-400/30">
               <td className="border-b border-signoz_slate-400 bg-signoz_slate-400/50 px-6 py-4 text-sm text-signoz_robin-400">
                 {row.feature}
               </td>
-              <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">{row.signoz}</td>
-              <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
-                {row.langfuse}
-              </td>
-              <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
-                {row.langsmith}
-              </td>
-              <td className="border-b border-signoz_slate-400 px-4 py-4 text-left">
-                {row.braintrust}
-              </td>
+              {VENDORS.map((vendor) => {
+                const cellData = row.vendors[vendor.key]
+
+                return (
+                  <td
+                    key={vendor.key}
+                    className="border-b border-signoz_slate-400 px-4 py-4 text-left"
+                  >
+                    <span className="flex items-center gap-2">
+                      {cellData.status === 'check' ? (
+                        <Check size={20} className="text-green-400" />
+                      ) : (
+                        <X size={20} className="text-red-400" />
+                      )}
+                      {cellData.text}
+                    </span>
+                  </td>
+                )
+              })}
             </tr>
           ))}
         </tbody>

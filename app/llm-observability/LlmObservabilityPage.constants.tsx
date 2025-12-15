@@ -5,10 +5,10 @@ import {
   DraftingCompass,
   ChartNoAxesColumn,
   DatabaseZap,
-  Check,
-  X,
 } from 'lucide-react'
 import { IconTitleDescriptionCardData } from '@/shared/components/molecules/FeaturePages/IconTitleDescriptionCard'
+import { ComparisonTableRow, VendorKey } from './LlmObservabilityPage.types'
+import React from 'react'
 
 export const LLM_OBSERVABILITY_CARDS: IconTitleDescriptionCardData[] = [
   {
@@ -55,213 +55,94 @@ export const LLM_OBSERVABILITY_CARDS: IconTitleDescriptionCardData[] = [
   },
 ]
 
-export const LLM_COMPARISON_TABLE_ROWS = [
+export const VENDORS: { key: VendorKey; label: string }[] = [
+  { key: 'signoz', label: 'SigNoz' },
+  { key: 'langfuse', label: 'Langfuse' },
+  { key: 'langsmith', label: 'LangSmith' },
+  { key: 'braintrust', label: 'Braintrust' },
+]
+
+export const LLM_COMPARISON_TABLE_ROWS: ComparisonTableRow[] = [
   {
     feature: 'LLM Tracing',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Full traces with OpenTelemetry
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> OpenTelemetry-based
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Async distributed tracing
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Request-level tracing
-      </span>
-    ),
+    vendors: {
+      signoz: { status: 'check', text: 'Full traces with OpenTelemetry' },
+      langfuse: { status: 'check', text: 'OpenTelemetry-based' },
+      langsmith: { status: 'check', text: 'Async distributed tracing' },
+      braintrust: { status: 'check', text: 'Request-level tracing' },
+    },
   },
   {
     feature: 'Production Alerts',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Any metric
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" /> No alerting
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> LLM metrics only
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> LLM metrics only
-      </span>
-    ),
+    vendors: {
+      signoz: { status: 'check', text: 'Any metric' },
+      langfuse: { status: 'cross', text: 'No alerting' },
+      langsmith: { status: 'check', text: 'LLM metrics only' },
+      braintrust: { status: 'check', text: 'LLM metrics only' },
+    },
   },
   {
     feature: 'Prompt Management',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Via integrations
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Version control with caching
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> A/B testing built-in
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Side-by-side comparison
-      </span>
-    ),
+    vendors: {
+      signoz: { status: 'check', text: 'Via integrations' },
+      langfuse: { status: 'check', text: 'Version control with caching' },
+      langsmith: { status: 'check', text: 'A/B testing built-in' },
+      braintrust: { status: 'check', text: 'Side-by-side comparison' },
+    },
   },
   {
     feature: 'Evaluation/Scoring',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Via integrations
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> LLM-as-judge, custom evals
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Built-in evaluators
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Dataset/task/scorer framework
-      </span>
-    ),
+    vendors: {
+      signoz: { status: 'check', text: 'Via integrations' },
+      langfuse: { status: 'check', text: 'LLM-as-judge, custom evals' },
+      langsmith: { status: 'check', text: 'Built-in evaluators' },
+      braintrust: { status: 'check', text: 'Dataset/task/scorer framework' },
+    },
   },
   {
     feature: 'Infra Correlation',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Metrics, logs, traces together
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" /> LLM-only
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" /> LLM-only
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" /> LLM-only
-      </span>
-    ),
+    vendors: {
+      signoz: { status: 'check', text: 'Metrics, logs, traces together' },
+      langfuse: { status: 'cross', text: 'LLM-only' },
+      langsmith: { status: 'cross', text: 'LLM-only' },
+      braintrust: { status: 'cross', text: 'LLM-only' },
+    },
   },
   {
     feature: 'Application Correlation',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Cross-service tracing
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
+    vendors: {
+      signoz: { status: 'check', text: 'Cross-service tracing' },
+      langfuse: { status: 'cross', text: '' },
+      langsmith: { status: 'cross', text: '' },
+      braintrust: { status: 'cross', text: '' },
+    },
   },
   {
     feature: 'Kubernetes/Docker Monitoring',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Native support
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
+    vendors: {
+      signoz: { status: 'check', text: 'Native support' },
+      langfuse: { status: 'cross', text: '' },
+      langsmith: { status: 'cross', text: '' },
+      braintrust: { status: 'cross', text: '' },
+    },
   },
   {
     feature: 'Database Query Tracking',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Built-in
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <X size={20} className="text-red-400" />{' '}
-      </span>
-    ),
+    vendors: {
+      signoz: { status: 'check', text: 'Built-in' },
+      langfuse: { status: 'cross', text: '' },
+      langsmith: { status: 'cross', text: '' },
+      braintrust: { status: 'cross', text: '' },
+    },
   },
   {
     feature: 'Dashboards',
-    signoz: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Advanced query builder
-      </span>
-    ),
-    langfuse: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Limited presets
-      </span>
-    ),
-    langsmith: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Limited presets
-      </span>
-    ),
-    braintrust: (
-      <span className="flex items-center gap-2">
-        <Check size={20} className="text-green-400" /> Basic charts
-      </span>
-    ),
+    vendors: {
+      signoz: { status: 'check', text: 'Advanced query builder' },
+      langfuse: { status: 'check', text: 'Limited presets' },
+      langsmith: { status: 'check', text: 'Limited presets' },
+      braintrust: { status: 'check', text: 'Basic charts' },
+    },
   },
 ]
 
@@ -272,49 +153,49 @@ export const LLM_TOOLS_DATA = [
       {
         id: 1,
         content: (
-          <>
+          <React.Fragment>
             Capture full agent execution and chain tracing with <strong>LangChain</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 2,
         content: (
-          <>
+          <React.Fragment>
             Monitor query engines and indexing pipelines in <strong>LlamaIndex</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 3,
         content: (
-          <>
+          <React.Fragment>
             Track multi-agent orchestration and delegation using <strong>CrewAI</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 4,
         content: (
-          <>
+          <React.Fragment>
             Observe complete RAG pipeline performance with <strong>Haystack</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 5,
         content: (
-          <>
+          <React.Fragment>
             Trace conversational agent interactions in <strong>AutoGen</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 6,
         content: (
-          <>
+          <React.Fragment>
             Monitor real-time voice AI pipelines with <strong>Pipecat</strong>
-          </>
+          </React.Fragment>
         ),
       },
     ],
@@ -325,33 +206,33 @@ export const LLM_TOOLS_DATA = [
       {
         id: 7,
         content: (
-          <>
+          <React.Fragment>
             Monitor <strong>OpenAI</strong> GPT-4, GPT-3.5, and embedding calls
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 8,
         content: (
-          <>
+          <React.Fragment>
             Track requests to <strong>Anthropic</strong> Claude 3 and Claude 2
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 9,
         content: (
-          <>
+          <React.Fragment>
             Cover all <strong>Amazon Bedrock</strong> models including Claude, Llama, and Titan
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 10,
         content: (
-          <>
+          <React.Fragment>
             Observe <strong>Google Vertex AI</strong> Gemini and PaLM inference
-          </>
+          </React.Fragment>
         ),
       },
     ],
@@ -362,33 +243,33 @@ export const LLM_TOOLS_DATA = [
       {
         id: 11,
         content: (
-          <>
+          <React.Fragment>
             Trace vector search operations and latency in <strong>Pinecone</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 12,
         content: (
-          <>
+          <React.Fragment>
             Monitor hybrid search queries and filters with <strong>Weaviate</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 13,
         content: (
-          <>
+          <React.Fragment>
             Route and monitor any model through <strong>LiteLLM</strong> proxy
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 14,
         content: (
-          <>
+          <React.Fragment>
             Observe vector similarity search performance using <strong>Qdrant</strong>
-          </>
+          </React.Fragment>
         ),
       },
     ],
@@ -399,33 +280,33 @@ export const LLM_TOOLS_DATA = [
       {
         id: 15,
         content: (
-          <>
+          <React.Fragment>
             Track real-time communication infrastructure with <strong>LiveKit</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 16,
         content: (
-          <>
+          <React.Fragment>
             Monitor voice AI application flows in <strong>Vapi</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 17,
         content: (
-          <>
+          <React.Fragment>
             Observe workflow automation and LLM chains in <strong>n8n</strong>
-          </>
+          </React.Fragment>
         ),
       },
       {
         id: 18,
         content: (
-          <>
+          <React.Fragment>
             Validate data structures and responses with <strong>Pydantic</strong>
-          </>
+          </React.Fragment>
         ),
       },
     ],

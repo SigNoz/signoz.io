@@ -1,9 +1,15 @@
+export type ComparisonStatus = 'check' | 'cross'
+
+export type ComparisonCell = {
+  status: ComparisonStatus
+  text: string
+}
+
+export type VendorKey = 'signoz' | 'langfuse' | 'langsmith' | 'braintrust'
+
 export type ComparisonTableRow = {
   feature: string
-  signoz: React.ReactNode
-  langfuse: React.ReactNode
-  langsmith: React.ReactNode
-  braintrust: React.ReactNode
+  vendors: Record<VendorKey, ComparisonCell>
 }
 
 export type ComparisonTableProps = {
