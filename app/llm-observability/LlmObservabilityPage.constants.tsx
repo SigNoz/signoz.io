@@ -269,75 +269,165 @@ export const LLM_TOOLS_DATA = [
   {
     title: 'LLM Frameworks',
     items: [
-      <>
-        Capture full agent execution and chain tracing with <strong>LangChain</strong>
-      </>,
-      <>
-        Monitor query engines and indexing pipelines in <strong>LlamaIndex</strong>
-      </>,
-      <>
-        Track multi-agent orchestration and delegation using <strong>CrewAI</strong>
-      </>,
-      <>
-        Observe complete RAG pipeline performance with <strong>Haystack</strong>
-      </>,
-      <>
-        Trace conversational agent interactions in <strong>AutoGen</strong>
-      </>,
-      <>
-        Monitor real-time voice AI pipelines with <strong>Pipecat</strong>
-      </>,
+      {
+        id: 1,
+        content: (
+          <>
+            Capture full agent execution and chain tracing with <strong>LangChain</strong>
+          </>
+        ),
+      },
+      {
+        id: 2,
+        content: (
+          <>
+            Monitor query engines and indexing pipelines in <strong>LlamaIndex</strong>
+          </>
+        ),
+      },
+      {
+        id: 3,
+        content: (
+          <>
+            Track multi-agent orchestration and delegation using <strong>CrewAI</strong>
+          </>
+        ),
+      },
+      {
+        id: 4,
+        content: (
+          <>
+            Observe complete RAG pipeline performance with <strong>Haystack</strong>
+          </>
+        ),
+      },
+      {
+        id: 5,
+        content: (
+          <>
+            Trace conversational agent interactions in <strong>AutoGen</strong>
+          </>
+        ),
+      },
+      {
+        id: 6,
+        content: (
+          <>
+            Monitor real-time voice AI pipelines with <strong>Pipecat</strong>
+          </>
+        ),
+      },
     ],
   },
   {
     title: 'Model Providers',
     items: [
-      <>
-        Monitor <strong>OpenAI</strong> GPT-4, GPT-3.5, and embedding calls
-      </>,
-      <>
-        Track requests to <strong>Anthropic</strong> Claude 3 and Claude 2
-      </>,
-      <>
-        Cover all <strong>Amazon Bedrock</strong> models including Claude, Llama, and Titan
-      </>,
-      <>
-        Observe <strong>Google Vertex AI</strong> Gemini and PaLM inference
-      </>,
+      {
+        id: 7,
+        content: (
+          <>
+            Monitor <strong>OpenAI</strong> GPT-4, GPT-3.5, and embedding calls
+          </>
+        ),
+      },
+      {
+        id: 8,
+        content: (
+          <>
+            Track requests to <strong>Anthropic</strong> Claude 3 and Claude 2
+          </>
+        ),
+      },
+      {
+        id: 9,
+        content: (
+          <>
+            Cover all <strong>Amazon Bedrock</strong> models including Claude, Llama, and Titan
+          </>
+        ),
+      },
+      {
+        id: 10,
+        content: (
+          <>
+            Observe <strong>Google Vertex AI</strong> Gemini and PaLM inference
+          </>
+        ),
+      },
     ],
   },
   {
     title: 'Vector Stores & Databases',
     items: [
-      <>
-        Trace vector search operations and latency in <strong>Pinecone</strong>
-      </>,
-      <>
-        Monitor hybrid search queries and filters with <strong>Weaviate</strong>
-      </>,
-      <>
-        Route and monitor any model through <strong>LiteLLM</strong> proxy
-      </>,
-      <>
-        Observe vector similarity search performance using <strong>Qdrant</strong>
-      </>,
+      {
+        id: 11,
+        content: (
+          <>
+            Trace vector search operations and latency in <strong>Pinecone</strong>
+          </>
+        ),
+      },
+      {
+        id: 12,
+        content: (
+          <>
+            Monitor hybrid search queries and filters with <strong>Weaviate</strong>
+          </>
+        ),
+      },
+      {
+        id: 13,
+        content: (
+          <>
+            Route and monitor any model through <strong>LiteLLM</strong> proxy
+          </>
+        ),
+      },
+      {
+        id: 14,
+        content: (
+          <>
+            Observe vector similarity search performance using <strong>Qdrant</strong>
+          </>
+        ),
+      },
     ],
   },
   {
     title: 'Tools & APIs',
     items: [
-      <>
-        Track real-time communication infrastructure with <strong>LiveKit</strong>
-      </>,
-      <>
-        Monitor voice AI application flows in <strong>Vapi</strong>
-      </>,
-      <>
-        Observe workflow automation and LLM chains in <strong>n8n</strong>
-      </>,
-      <>
-        Validate data structures and responses with <strong>Pydantic</strong>
-      </>,
+      {
+        id: 15,
+        content: (
+          <>
+            Track real-time communication infrastructure with <strong>LiveKit</strong>
+          </>
+        ),
+      },
+      {
+        id: 16,
+        content: (
+          <>
+            Monitor voice AI application flows in <strong>Vapi</strong>
+          </>
+        ),
+      },
+      {
+        id: 17,
+        content: (
+          <>
+            Observe workflow automation and LLM chains in <strong>n8n</strong>
+          </>
+        ),
+      },
+      {
+        id: 18,
+        content: (
+          <>
+            Validate data structures and responses with <strong>Pydantic</strong>
+          </>
+        ),
+      },
     ],
   },
 ]

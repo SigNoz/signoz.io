@@ -218,12 +218,14 @@ const WorksWithYourFavoriteLLMTools: React.FC = () => {
                 </h3>
 
                 <div className="flex flex-col gap-4">
-                  {section.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="flex items-start gap-3">
+                  {section.items.map((item) => (
+                    <div key={item.id} className="flex items-start gap-3">
                       <div className="mt-1 shrink-0">
                         <CircleArrowRight className="h-4 w-4 text-signoz_robin-400" />
                       </div>
-                      <p className="m-0 text-sm leading-6 text-signoz_vanilla-300">{item}</p>
+                      <p className="m-0 text-sm leading-6 text-signoz_vanilla-300">
+                        {item.content}
+                      </p>
                     </div>
                   ))}
                 </div>
