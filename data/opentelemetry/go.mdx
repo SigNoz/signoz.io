@@ -8,22 +8,16 @@ description: Learn how to use the language-specific implementation of OpenTeleme
 image: /img/blog/2023/07/opentelemetry_golang_cover-min.jpg
 keywords: [opentelemetry, opentelemetry golang, opentelemetry go, distributed tracing, observability, golang application monitoring, golang instrumentation, signoz]
 ---
+
 Modern Golang applications often run in distributed environments with multiple services, containers, background jobs, async processing, and external dependencies. As the complexity of these systems increases, answering basic debugging questions as below becomes complex:
 - Why is this request slow?
 - Which service introduced latency?
 - Where did the error originate?
 - What series of events led to the failure?
 
-That's where [OpenTelemetry](https://signoz.io/opentelemetry/) becomes the difference between guessing and knowing. It is an unified observability framework that enables applications to generate and collect telemetry data such as logs, metrics, and traces in a standardized format across many languages and platforms.
+That's where [OpenTelemetry](https://signoz.io/opentelemetry/) becomes the difference between guessing and knowing. It is an open-source observability framework that enables applications to generate, collect, and export telemetry data such as logs, metrics, and traces in a standardized format across many languages and platforms.
 
-In this tutorial, we will use the OpenTelemetry Golang libraries to instrument a Golang application and then visualize it with an unified observability platform - [**SigNoz**](https://signoz.io/).
-
-Steps to get started with OpenTelemetry for Go applications:
-
-- [**Instrumenting a Go Application With OpenTelemetry**](https://signoz.io/opentelemetry/go/#instrumenting-your-golang-application-with-opentelemetry)
-- [**Generating Telemetry Data From Your Application**](https://signoz.io/opentelemetry/go/#generating-telemetry-data-from-your-application)
-- [**Monitoring Your Go Application with SigNoz Dashboards**](https://signoz.io/opentelemetry/go/#monitor-your-go-application-with-signoz-dashboards)
-- [**Adding Custom Attributes and Custom Events to Spans**](https://signoz.io/opentelemetry/go/#adding-custom-attributes-and-custom-events-to-spans)
+In this tutorial, we will use the OpenTelemetry Golang libraries to instrument a Golang application and then visualize it with a unified observability platform - [**SigNoz**](https://signoz.io/).
 
 ## Instrumenting Your Golang Application With OpenTelemetry
 
@@ -48,7 +42,7 @@ cd sample-golang-app
 
 **NOTE: Make sure to install [golang](https://go.dev/doc/install) in your system before running the above application.**
 
-### Step 3: Install Dependencies
+### Step 3: Install OpenTelemetry Dependencies for Go
 
 Dependencies for the **[OpenTelemetry exporter](https://signoz.io/guides/opentelemetry-collector-vs-exporter/)** and SDK must be installed first. Note that we are assuming you are using **`gin`** request router. If you are using other request routers, check out the [**corresponding package**](https://signoz.io/docs/instrumentation/opentelemetry-golang/#request-routers).
 
@@ -78,7 +72,7 @@ Declare the following global variables in the **`main.go`** file after the impo
 
 ```go
 var (
-    serviceName = os.Getenv("SERVICE_NAME")
+    serviceName = os.Getenv("OTEL_SERVICE_NAME")
     collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
     insecure = os.Getenv("INSECURE_MODE")
 )
@@ -88,17 +82,17 @@ The environment variables used here are explained in detail in Step 8 to help yo
 
 ### Step 5: Instrument Your Go Application With OpenTelemetry
 
-To configure your application to send data, we will need a function to initialize OpenTelemetry. Add the following snippet of code to your **`main.go`** file:
+To configure your application to send data, we will need a function to initialize OpenTelemetry. 
+
+Let's start by importing the necessary packages in your **`main.go`** file:
 
 ```go
 import (
     "context"
     "log"
     "os"
-    "strings"
-    
- .....
-    
+    "strings"    
+ ...existing imports...
     "google.golang.org/grpc/credentials"
     "go.opentelemetry.io/otel"
     "go.opentelemetry.io/otel/attribute"
@@ -116,7 +110,7 @@ import (
 - **`sdktrace`**: Used to create, manage and sample spans, and sends them to the tracing backend.
 </KeyPointCallout>
 
-Add this after the variable declaration (var) block:
+Now, we will configure the OpenTelemetry tracer provider by adding the following function after the environment variable declaration (var) block that we added in Step 4:
 
 ```go
 func initTracer() func(context.Context) error {
@@ -148,7 +142,7 @@ func initTracer() func(context.Context) error {
         context.Background(),
         resource.WithAttributes(
             attribute.String("service.name", serviceName),   // logical service name
-            attribute.String("library.language", "go"),      // programming language
+            attribute.String("telemetry.sdk.language", "go"),      // programming language
  ),
  )
     if err != nil {
@@ -158,7 +152,7 @@ func initTracer() func(context.Context) error {
     // Configure OpenTelemetry tracer provider
     otel.SetTracerProvider(
         sdktrace.NewTracerProvider(
-            sdktrace.WithSampler(sdktrace.AlwaysSample()),  // capture every trace without sampling
+            sdktrace.WithSampler(sdktrace.AlwaysSample()),  // capture every trace without sampling, not advised in prod.
             sdktrace.WithBatcher(exporter),                 // batch spans for efficient delivery
             sdktrace.WithResource(resources),               // attach resource metadata to each trace
  ),
@@ -172,7 +166,7 @@ func initTracer() func(context.Context) error {
 
 The function above configures OpenTelemetry tracing for your Go service. It creates the OTLP exporter that pushes traces to your collector and assigns metadata. Hence, the backend knows which service the traces belong to and configures the tracer provider to sample, batch, and manage spans efficiently. It also returns a shutdown function that flushes all pending traces when the app stops.
 
-<KeyPointCallout title="Functions and Keywords Breakdown" defaultCollapsed={true}>
+<KeyPointCallout title="Keyword glossary for the above function" defaultCollapsed={true}>
 - **`otlptrace.New`**: creates the OTLP trace exporter
 - **`resource.WithAttributes`**: defines service metadata (`service.name`, etc.)
 - **`sdktrace.NewTracerProvider`**: main engine for tracing in the app
@@ -190,7 +184,7 @@ func main() {
     cleanup := initTracer()
     defer cleanup(context.Background())
 
- ......
+ ...existing code...
 }
 ```
 
@@ -202,14 +196,14 @@ Configure Gin to use the middleware by adding the following lines in **`main.go
 
 ```go
 import (
- ....
+ ...existing imports...
   "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 func main() {
- ......
+ ...existing code...
     r.Use(otelgin.Middleware(serviceName))
- ......
+ ...existing code...
 }
 ```
 
@@ -252,10 +246,10 @@ import (
 
 var (
     // App/service name sent to SigNoz
-    serviceName = os.Getenv("SERVICE_NAME")
+    serviceName = os.Getenv("OTEL_SERVICE_NAME")
 
     // SigNoz / OTLP endpoint
-    collectorUR = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+    collectorURL = os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
 
     // Whether to use TLS or not
     insecure = os.Getenv("INSECURE_MODE")
@@ -334,20 +328,20 @@ func main() {
 }
 ```
 
-If you still face any dependencies related error, run the below command to install all the dependencies:
+If you still face any dependency-related errors, run the following command to install all the dependencies:
 ```go
 go mod tidy
 ```
 
 ### Step 8: Run Your Go Gin Application
 
-Now that youhave fully set up the application, it's time to run some CRUD operations. Run the following command to set the environment variables and start the application:
+Now that you have fully set up the application, it's time to run some CRUD operations. Run the following command to set the environment variables and start the application:
 
 ```bash
-SERVICE_NAME=goApp INSECURE_MODE=false go run main.go
+OTEL_SERVICE_NAME=goApp INSECURE_MODE=false go run main.go
 ```
 
-- **`SERVICE_NAME`**: This variable defines the name of your Golang application and helps in identifying telemetry data from this specific service. You can name it as you prefer.
+- **`OTEL_SERVICE_NAME`**: This variable defines the name of your Golang application and helps in identifying telemetry data from this specific service. You can name it as you prefer.
 - **`INSECURE_MODE`**: When set to `false`, this ensures that the connection between your application and backend service is secure (using TLS). It's recommended to keep it set to `false` in production environments.
 
 And congratulations! You have successfully instrumented and started your sample Golang application.
@@ -358,93 +352,40 @@ And congratulations! You have successfully instrumented and started your sample 
   caption="Go App started successfully"
 />
 
-## Generating Telemetry Data From Your Application
+### Step 9: Generate Traffic
 
-To ensure that telemetry data is generated, interact with your application by hitting the **`/books`** endpoint of the bookstore app. You can do this by navigating to [**http://localhost:8090/books**](http://localhost:8090/books) in your browser or using a tool like **`curl`** or Postman.
+To verify the instrumentation, you need to interact with the application. Since the OpenTelemetry middleware is active, every request you make now creates a span internally.
 
-Refresh the endpoint multiple times to simulate load. Wait for 1–2 minutes, and the telemetry data will appear on your SigNoz dashboard, providing insights into your application’s performance.
+The application supports a full set of CRUD operations, including:
+- `GET /books`
+- `GET /books/:id`
+- `POST /books`
+- `PATCH /books/:id`
+- `DELETE /books/:id`
 
-Alternatively, you can explore the application's functionality by performing CRUD operations. Below are examples to interact with the bookstore app:
-
-### 1. Retrieve All Books
-
-Send a `GET` request to fetch the list of books:
-
-```bash
-curl http://localhost:8090/books
-```
-
-Output:
+You can test the endpoints manually using `curl`:
 
 ```bash
-{"data":[]}% 
-```
-
-Since there are no books yet, the response will be empty.
-
-### 2. Create a New Book
-
-Send a `POST` request to add a new book:
-
-```bash
+# Create a book
 curl -X POST http://localhost:8090/books \
  -H "Content-Type: application/json" \
-     -d '{"title":"Go Programming", "author":"John Doe"}'
-```
+  -d '{"title":"Go Programming", "author":"John Doe"}'
 
-Output:
+# Get all books
+curl http://localhost:8090/books
+```
+You can also use the `generate_traffic.sh` script to simulate continuous traffic as follows:
 
 ```bash
-{"data":[{"id":1,"title":"Go Programming","author":"John Doe"}]}%  
+chmod +x generate_traffic.sh
+./generate_traffic.sh
 ```
 
-### 3. Retrieve a Specific Book
+Now that your application is instrumented and generating traces, let's configure the backend to collect and visualize them.
 
-Send a `GET` request to fetch the details of a specific book by its ID:
+## Monitoring Your Go Application
 
-```bash
-curl http://localhost:8090/books/1
-```
-
-Output:
-
-```bash
-{"data":{"id":1,"title":"Go Programming","author":"John Doe"}}
-```
-
-### 4. Update a Book
-
-Send a `PATCH` request to update the title of the book:
-
-```bash
-curl -X PATCH http://localhost:8090/books/1 \
- -H "Content-Type: application/json" \
-     -d '{"title":"Updated Title"}'
-```
-
-Output:
-
-```bash
-{"data":{"id":1,"title":"Updated Title","author":"John Doe"}}% 
-```
-
-### 5. Delete a Book
-
-Send a `DELETE` request to remove the book by its ID:
-
-```bash
-curl -X DELETE http://localhost:8090/books/1
-```
-
-Output:
-
-```bash
-{"data":true}% 
-```
-
-By performing these interactions, your application will generate telemetry data, which OpenTelemetry will process and forward to an observability backend for visualization and analysis. 
-
-## Monitor Your Go Application
+To visualize and analyze the telemetry data we are generating, we need a backend that supports the OpenTelemetry Protocol (OTLP). We will use SigNoz, which ingests this data natively.
 
 ### Setting Up SigNoz
 
@@ -454,73 +395,73 @@ Those who have data privacy concerns and can't send their data outside their inf
 
 Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [**community edition**](https://signoz.io/docs/install/self-host/).
 
+Once you have your SigNoz account, you need two details to configure your application:
+
+- **Ingestion Key**: You can find this in the SigNoz dashboard under Settings > General.
+- **Region**: The region you selected during sign-up (US, IN, or EU).
+
+**Note:** 
+ Read the detailed guide on [how to get ingestion key and region from the SigNoz cloud dashboard](/docs/ingestion/signoz-cloud/keys/).
+
+Now that you have your credentials, restart the application with the environment variables required to send data to SigNoz Cloud:
+
+```bash
+OTEL_SERVICE_NAME=goApp INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ-INGESTION-KEY> OTEL_EXPORTER_OTLP_ENDPOINT=ingest.{region}.signoz.cloud:443 go run main.go
+```
+
+<KeyPointCallout title="Configuration Breakdown" defaultCollapsed={true}>
+
+* **`OTEL_EXPORTER_OTLP_HEADERS`**: Replace `<SIGNOZ_INGESTION_KEY>` with the key you retrieved from the settings page.
+* **`OTEL_EXPORTER_OTLP_ENDPOINT`**: Update `{region}` to match your account location:
+  - US: `ingest.us.signoz.cloud:443`
+  - IN: `ingest.in.signoz.cloud:443`
+  - EU: `ingest.eu.signoz.cloud:443`
+</KeyPointCallout>
+
+With the application running, ensure your traffic generator (from Step 9) is still active, or manually hit the endpoints a few times.
+
 ### Visualizing With SigNoz
 
-With the above steps, you have instrumented your Go application with OpenTelemetry. Let’s see how SigNoz can help you monitor your Go application. 
-
-Restart the application with the following command to set the environment variables:
-
-```bash
-SERVICE_NAME=goApp INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ-INGESTION-KEY> OTEL_EXPORTER_OTLP_ENDPOINT=ingest.{region}.signoz.cloud:443 go run main.go
-```
-
-- **`OTEL_EXPORTER_OTLP_HEADERS`**: This header contains the SigNoz ingestion key for authentication. Replace `<SIGNOZ_INGESTION_KEY>` with your actual [ingestion token](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`OTEL_EXPORTER_OTLP_ENDPOINT`**: This defines the endpoint where your application will send telemetry data, `ingest.{region}.signoz.cloud:443`. Depending on the region you choose for SigNoz cloud, the ingest endpoint will vary as shown in below table:
-
- | Region | Endpoint |
- | --- | --- |
- | US | ingest.us.signoz.cloud:443 |
- | IN | ingest.in.signoz.cloud:443 |
- | EU | ingest.eu.signoz.cloud:443 |
-
-To see meaningful results in SigNoz, we need the application to process OpenTelemetry requests. Since we are using a local sample app without real users, we need to generate synthetic traffic to simulate real-world API usage. Once the application is running, simply execute the provided **`generate_traffic.sh`** script to start producing telemetry data that you can immediately observe inside SigNoz using the below command:
-
-```bash
-chmod +x generate_traffic.sh
-./generate_traffic.sh
-```
-
-The script performs a repeated sequence of CRUD operations on the `/books` API, producing spans and events that appear in SigNoz dashboards, allowing us to visualise service latency, error behaviour, and trace flows through the system as if it were receiving real user requests.
-
-Navigate to our SigNoz cloud account. On the service page, you should see your **`goApp`** service.
+Navigate to the **Services** tab in your SigNoz dashboard. You should see `goApp` listed.
 
 <Figure
-  src="/img/blog/2025/11/services-tab-go.webp"
-  alt="Go app being monitored under services tab"
-  caption="Your Go Gin application being monitored on the SigNoz dashboard"
+src="/img/blog/2025/11/services-tab-go.webp"
+alt="Go app being monitored under services tab"
+caption="Your Go Gin application being monitored on the SigNoz dashboard"
 />
 
-You can monitor application metrics such as latency, requests per second, error rate, and more in SigNoz's Metrics tab.
-
-Click on the `goApp` service, and you should be redirected to the metrics page.
+Click on the `goApp` service to view the **Metrics** page, where you can monitor application latency, requests per second, and error rates.
 
 <Figure
-  src="/img/blog/2025/11/metrics-page-go.webp"
-  alt="Metrics from Go app"
-  caption="Monitor your Go Gin application metrics like application latency, requests per second, error percentage, etc."
+src="/img/blog/2025/11/metrics-page-go.webp"
+alt="Metrics from Go app"
+caption="Monitor your Go Gin application metrics like application latency, requests per second, error percentage, etc."
 />
 
-OpenTelemetry also captures tracing data from your Gin application. Tracing data can help you visualize how user requests perform across services in a multi-service application.
-
-In the **`Traces`** tab of SigNoz, you can analyze the tracing data using filters based on tags, status codes, service names, operations, etc.
+To dive deeper, switch to the **Traces** tab. Here you can analyze individual requests using filters for status codes, service names, and operation duration.
 
 <Figure
-  src="/img/blog/2025/11/traces-tab-go.webp"
-  alt="Traces tab"
-  caption="Use powerful filters to analyze your tracing data from the Gin application"
+src="/img/blog/2025/11/traces-tab-go.webp"
+alt="Traces tab"
+caption="Use powerful filters to analyze your tracing data from the Gin application"
 />
 
-You can also visualize your tracing data with the help of [**flamegraphs and Gantt charts**](https://signoz.io/blog/flamegraphs/).
+You can also visualize your tracing data with [flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to identify exactly which part of a request caused a delay.
 
 <Figure
-  src="/img/blog/2025/11/flamegraphs-go.webp"
-  alt="Flamegraphs and Gantt charts visualization"
-  caption="Flamegraphs and Gantt charts on SigNoz dashboard"
+src="/img/blog/2025/11/flamegraphs-go.webp"
+alt="Flamegraphs and Gantt charts visualization"
+caption="Flamegraphs and Gantt charts on SigNoz dashboard"
 />
 
-## Adding Custom Attributes and Custom Events to Spans
+## Adding OpenTelemetry Custom Attributes and Events in Go Applications
 
-In OpenTelemetry, [**spans**](https://signoz.io/blog/distributed-tracing-span/) represent a single unit of work in a distributed trace. You can enrich these spans with **custom attributes** and **custom events** to capture additional context and insights into the operations your application performs, which is helpful for observability and debugging. This lets you track specific details in the trace and provides more valuable insights into your system's behaviour.
+Auto-instrumentation captures technical details like latency, HTTP methods, and status codes. However, effective debugging often requires business context. For example, knowing that a request took 2 seconds is useful; knowing it took 2 seconds for user_id: 105 while processing book_id: 88 allows you to reproduce and fix the issue.
+
+OpenTelemetry allows you to attach this context using **Attributes** and **Events**:
+- Attributes: Key-value pairs representing state (e.g., `user_id`, `region`, `app_version`). These are indexed by backends like SigNoz, enabling you to filter traces (e.g., "Show me all failed requests for `book_id: 88`").
+- Events: Time-stamped logs attached to a span. Use these to record specific moments in the execution flow, such as "Cache miss" or "Validation failed".
+
 
 Here’s how you can add **custom attributes** and **custom events** to spans in your Go application:
 
@@ -559,7 +500,7 @@ span.SetAttributes(attribute.String("controller", "books"))
 
 This adds an attribute **`"controller" = "books"`** to the span, helping you identify which part of the application (in this case, the "books" controller) is responsible for the span.
 
-### Step 4: Add Custom Events to the Span
+### Step 4: Add Custom Events to the OpenTelemetry Span
 
 Events provide a way to track specific actions or errors within the span’s context. You can add events to a span using **`span.AddEvent()`**:
 
@@ -575,7 +516,6 @@ In your project folder directory, open the **`controllers/books.go`** file and a
 
 ```go
 ...
-
 func FindBooks(c *gin.Context) {
     span := trace.SpanFromContext(c.Request.Context())
     span.SetAttributes(attribute.String("controller", "books"))
@@ -703,28 +643,34 @@ Once you've updated your application, restart it and generate new telemetry data
 <Figure
   src="/img/blog/2025/11/custom-attributes.webp"
   alt="Custom attributes"
-  caption="Custom attributes can seen under **`Attributes`** section on SigNoz trace detail page"
+  caption="Custom attributes can be seen under the Attributes section on the SigNoz trace detail page"
 />
 
 <Figure
   src="/img/blog/2025/11/events.webp"
   alt="Events"
-  caption="Events can be seen under `Events` section on the SigNoz trace detail page"
+  caption="Events can be seen under the Events section on the SigNoz trace detail page"
 />
 
-## Conclusion
+Yes, that is a great idea. A "Next Steps" section is often more high-value for technical tutorials because it keeps the reader in an "action-oriented" mindset rather than signalling "the end."
 
-Using OpenTelemetry libraries, you can instrument your Go applications for setting up observability. OpenTelemetry is the future of observability for cloud-native apps. It is backed by a large community and covers a wide range of technologies and frameworks. Using OpenTelemetry, engineering teams can instrument polyglot and distributed applications with confidence.
-
-You can then use an open-source APM tool like SigNoz to ensure the smooth performance of your Go applications. SigNoz is an open-source observability tool that comes with a SaaS-like experience. [SigNoz cloud](https://signoz.io/teams/) provides guided onboarding for instrumenting applications with OpenTelemetry.
-
-If you want to read more about how to integrate Metrics and Logs using Golang 👇
-
-- [**Golang Monitoring Guide - Traces, Logs, APM and Go Runtime Metrics**](https://signoz.io/blog/golang-monitoring/)
-- [**Complete Guide to Logging in Go - Golang Log**](https://signoz.io/guides/golang-log/)
+Here is the replacement section:
 
 ---
 
-**Further Reading**
+## Next Steps
 
-[**SigNoz - an open-source alternative to DataDog**](https://signoz.io/blog/open-source-datadog-alternative/)
+Now that your Go application is sending traces to SigNoz, here is what you should do next to get the most value out of your observability stack:
+
+* **[Create Custom Dashboard](https://signoz.io/docs/userguide/manage-dashboards/)**: Use the attributes you added (like `book_id`) to build charts that track specific business KPIs, such as "Most requested books" or "Error rates by controller."
+* **[Set Up Alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/)**: Configure alerts in SigNoz to notify your team via Slack or PagerDuty whenever the error rate exceeds a threshold or latency spikes.
+
+
+Distributed tracing is just one piece of the puzzle. Enhance your visibility by correlating traces with logs and metrics.
+
+* **[Golang Monitoring Guide - Traces, Logs, APM and Go Runtime Metrics](https://signoz.io/blog/monitoring-your-go-application-with-signoz/)**
+* **[Complete Guide to Logging in Go - Golang Log](https://signoz.io/guides/golang-log/)**
+
+Hope we answered all your questions regarding OpenTelemetry in Go. If you have more questions, feel free to use the SigNoz AI chatbot or join our [Slack community](https://signoz.io/slack/).
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.
