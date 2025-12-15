@@ -4,7 +4,7 @@ id: pipecat-monitoring-with-opentelemetry
 tags: [SigNoz Cloud, Self-Host]
 title: Pipecat Monitoring with SigNoz
 description: Monitoring and observability for Pipecat performance and usage with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
-doc_type: howto
+doc_type: tutorial
 ---
 
 ## Overview
@@ -37,14 +37,14 @@ Get started with a sample Pipecat starter project by following the <a href="http
 
 No-code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
 
-### **Step 1:** Clone the sample voice agent project and setup dependencies
+### Step 1: Clone the sample voice agent project and setup dependencies
 
 ```bash
 git clone https://github.com/pipecat-ai/pipecat-quickstart.git
 cd agent-starter-python
 uv sync
 ```
-### **Step 2:** Setup Credentials
+### Step 2: Setup Credentials
 
 Copy .env.example to .env and filling in the required keys:
 
@@ -53,14 +53,14 @@ Copy .env.example to .env and filling in the required keys:
 - `CARTESIA_API_KEY`
 
 
-### **Step 3:** Add Automatic Instrumentation
+### Step 3: Add Automatic Instrumentation
 
 ```bash
 uv pip install opentelemetry-distro opentelemetry-exporter-otlp
 uv run opentelemetry-bootstrap -a requirements | uv pip install --requirement -
 ```
 
-### **Step 4:** Instrument your Pipecat application
+### Step 4: Instrument your Pipecat application
 
 ```python
 task = PipelineTask(
@@ -77,9 +77,9 @@ task = PipelineTask(
 
 See this <a href="https://github.com/pipecat-ai/pipecat-examples/blob/main/open-telemetry/langfuse/bot.py" target="_blank" rel="noopener noreferrer nofollow">example repo</a> for more details on how to configure instrumentation.
 
-### **Step 5:** Your `bot.py` should look something like this:
+### Step 5: Your `bot.py` should look something like this:
 
-```python
+```python:bot.py
 #
 # Copyright (c) 2024–2025, Daily
 #
@@ -241,7 +241,7 @@ if __name__ == "__main__":
 
 ```
 
-### **Step 6:** Run your application with auto-instrumentation
+### Step 6: Run your application with auto-instrumentation
 
 
 ```bash
@@ -276,14 +276,14 @@ Open http://localhost:7860 in your browser and click `Connect` to start talking 
 
 Code-based instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
 
-### **Step 1:** Clone the sample voice agent project and setup dependencies
+### Step 1: Clone the sample voice agent project and setup dependencies
 
 ```bash
 git clone https://github.com/pipecat-ai/pipecat-quickstart.git
 cd agent-starter-python
 uv sync
 ```
-### **Step 2:** Setup Credentials
+### Step 2: Setup Credentials
 
 Copy .env.example to .env and filling in the required keys:
 
@@ -292,7 +292,7 @@ Copy .env.example to .env and filling in the required keys:
 - `CARTESIA_API_KEY`
 
 
-### **Step 3:** Install additional OpenTelemetry dependencies
+### Step 3: Install additional OpenTelemetry dependencies
 
 ```bash
 uv pip install \
@@ -303,7 +303,7 @@ uv pip install \
   opentelemetry-instrumentation-system-metrics
 ```
 
-### **Step 4:** Import the necessary modules in your Python application
+### Step 4: Import the necessary modules in your Python application
 
 **Traces:**
 
@@ -332,7 +332,7 @@ from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrument
 from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
 ```
 
-### **Step 5:** Set up the OpenTelemetry Span Exporter to send traces directly to SigNoz Cloud
+### Step 5: Set up the OpenTelemetry Span Exporter to send traces directly to SigNoz Cloud
 
 ```python
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -354,7 +354,7 @@ span_exporter = OTLPSpanExporter(
   <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
 </Admonition>
 
-### **Step 6**: Setup Logs
+### Step 6: Setup Logs
 
 ```python
 import logging
@@ -393,7 +393,7 @@ logger = logging.getLogger(__name__)
   <a href="/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted">Cloud → Self-Hosted</a>.
 </Admonition>
 
-### **Step 7**: Setup Metrics
+### Step 7: Setup Metrics
 
 ```python
 from opentelemetry.sdk.resources import Resource
@@ -432,9 +432,9 @@ HTTPXClientInstrumentor().instrument()
 
 > 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your Pipecat application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
 
-### **Step 8:** Instrument your Pipecat application
+### Step 8: Instrument your Pipecat application
 
-```python
+```python:bot.py
 #
 # Copyright (c) 2024–2025, Daily
 #
@@ -600,7 +600,7 @@ if __name__ == "__main__":
     main()
 ```
 
-### **Step 9:** Run your example `bot.py`
+### Step 9: Run your example `bot.py`
 
 ```bash
 uv run bot.py
