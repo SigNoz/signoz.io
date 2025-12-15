@@ -73,7 +73,7 @@ const Header: React.FC = () => {
           <Image
             src="/img/platform/LlmObservabilityMeta.webp"
             alt="Llm observability hero"
-            className="w-full rounded-xl"
+            className="relative z-10 w-full rounded-xl"
             width={10000}
             height={10000}
           />
