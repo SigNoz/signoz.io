@@ -1,5 +1,5 @@
 ---
-date: 2025-12-04
+date: 2025-12-15
 id: pagerduty
 tags: [SigNoz Cloud, Self-Host]
 title: Configure PagerDuty Channel
@@ -115,7 +115,7 @@ curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
             "routing_key": "PagerDutyRoutingKey",
             "client": "SigNoz Alert Manager",
             "client_url": "https://enter-signoz-host-n-port-here/alerts",
-            "description": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}\n\t{{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n\t  {{\" \"}}(\n\t  {{- with .CommonLabels.Remove .GroupLabels.Names }}\n\t\t{{- range $index, $label := .SortedPairs -}}\n\t\t  {{ if $index }}, {{ end }}\n\t\t  {{- $label.Name }}=\"{{ .Value -}}\"\n\t\t{{- end }}\n\t  {{- end -}}\n\t  )\n\t{{- end }}",
+            "description": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}\n\t{{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n\t {{\" \"}}(\n\t {{- with .CommonLabels.Remove .GroupLabels.Names }}\n\t\t{{- range $index, $label := .SortedPairs -}}\n\t\t {{ if $index }}, {{ end }}\n\t\t {{- $label.Name }}=\"{{ $label.Value -}}\"\n\t\t{{- end }}\n\t {{- end -}}\n\t )\n\t{{- end }}",
             "severity": "{{ (index .Alerts 0).Labels.severity }}",
             "class": "class1",
             "component": "Component1",

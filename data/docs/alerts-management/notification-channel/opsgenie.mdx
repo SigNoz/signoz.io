@@ -1,5 +1,5 @@
 ---
-date: 2025-12-04
+date: 2025-12-15
 id: opsgenie
 tags: [SigNoz Cloud, Self-Host]
 title: Configure Opsgenie Channel
@@ -71,7 +71,7 @@ curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
     "opsgenie_configs": [
         {
             "api_key": "APIKey",
-            "description": "{{ if gt (len .Alerts.Firing) 0 -}}\n\tAlerts Firing:\n\t{{ range .Alerts.Firing }}\n\t - Message: {{ .Annotations.description }}\n\tLabels:\n\t{{ range .Labels.SortedPairs }}   - {{ .Name }} = {{ .Value }}\n\t{{ end }}   Annotations:\n\t{{ range .Annotations.SortedPairs }}   - {{ .Name }} = {{ .Value }}\n\t{{ end }}   Source: {{ .GeneratorURL }}\n\t{{ end }}\n\t{{- end }}\n\t{{ if gt (len .Alerts.Resolved) 0 -}}\n\tAlerts Resolved:\n\t{{ range .Alerts.Resolved }}\n\t - Message: {{ .Annotations.description }}\n\tLabels:\n\t{{ range .Labels.SortedPairs }}   - {{ .Name }} = {{ .Value }}\n\t{{ end }}   Annotations:\n\t{{ range .Annotations.SortedPairs }}   - {{ .Name }} = {{ .Value }}\n\t{{ end }}   Source: {{ .GeneratorURL }}\n\t{{ end }}\n\t{{- end }}",
+            "description": "{{ if gt (len .Alerts.Firing) 0 -}}\n\tAlerts Firing:\n\t{{ range .Alerts.Firing }}\n\t - Message: {{ .Annotations.description }}\n\tLabels:\n\t{{ range .Labels.SortedPairs }} - {{ .Name }} = {{ .Value }}\n\t{{ end }} Annotations:\n\t{{ range .Annotations.SortedPairs }} - {{ .Name }} = {{ .Value }}\n\t{{ end }} Source: {{ .GeneratorURL }}\n\t{{ end }}\n\t{{- end }}\n\t{{ if gt (len .Alerts.Resolved) 0 -}}\n\tAlerts Resolved:\n\t{{ range .Alerts.Resolved }}\n\t - Message: {{ .Annotations.description }}\n\tLabels:\n\t{{ range .Labels.SortedPairs }} - {{ .Name }} = {{ .Value }}\n\t{{ end }} Annotations:\n\t{{ range .Annotations.SortedPairs }} - {{ .Name }} = {{ .Value }}\n\t{{ end }} Source: {{ .GeneratorURL }}\n\t{{ end }}\n\t{{- end }}",
             "priority": "{{ if eq (index .Alerts 0).Labels.severity \"critical\" }}P1{{ else if eq (index .Alerts 0).Labels.severity \"warning\" }}P2{{ else if eq (index .Alerts 0).Labels.severity \"info\" }}P3{{ else }}P4{{ end }}",
             "message": "{{ .CommonLabels.alertname }}",
             "details": {}
