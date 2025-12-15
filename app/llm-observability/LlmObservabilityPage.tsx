@@ -118,7 +118,7 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({ rows, className = '' 
                     className="border-b border-signoz_slate-400 px-4 py-4 text-left"
                   >
                     <span className="flex items-center gap-2">
-                      {cellData.status === 'check' ? (
+                      {cellData.support === 'check' ? (
                         <Check size={20} className="text-green-400" />
                       ) : (
                         <X size={20} className="text-red-400" />
