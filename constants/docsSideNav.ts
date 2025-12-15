@@ -983,9 +983,22 @@ const docsSideNav = [
             route: '/docs/instrumentation/opentelemetry-laravel',
           },
           {
-            type: 'doc',
+            type: 'category',
+            isExpanded: false,
             label: '.NET',
             route: '/docs/instrumentation/opentelemetry-dotnet',
+            items: [
+              {
+                type: 'doc',
+                label: 'Automatic Code-level Instrumentation',
+                route: '/docs/instrumentation/dotnet/automatic-instrumentation',
+              },
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/manual-instrumentation/dotnet/manual-instrumentation',
+              },
+            ],
           },
           {
             type: 'doc',
