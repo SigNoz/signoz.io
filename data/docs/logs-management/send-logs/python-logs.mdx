@@ -1,0 +1,295 @@
+---
+date: 2025-12-14
+title: Send logs from Python to SigNoz using OpenTelemetry
+id: opentelemetry-python-logs
+doc_type: howto
+tags: [SigNoz Cloud, Self-Host]
+description: Learn how to send logs from Python to SigNoz using the OpenTelemetry SDK for OTLP log export.
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Python 3.8 or higher
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+- A Python application
+
+## Send logs to SigNoz
+
+<Tabs>
+<TabItem value="automatic" label="No Code Auto-Instrumentation (recommended)" default>
+
+Auto-instrumentation automatically captures logs from your Python application and sends them to SigNoz without significant code changes.
+
+### Step 1: Install dependencies
+
+Install the OpenTelemetry distro, OTLP exporter, and the application dependencies:
+
+```bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp fastapi uvicorn
+```
+
+Install the instrumentation packages using the bootstrap command:
+
+```bash
+opentelemetry-bootstrap -a install
+```
+
+### Step 2: Create Application
+
+Create a file named `main.py` with the following code:
+
+```python:main.py
+from typing import Union
+import logging
+from fastapi import FastAPI
+
+app = FastAPI()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@app.get("/")
+def read_root():
+    logger.info("read_root endpoint called")
+    return {"Hello": "World"}
+
+@app.get("/items/{item_id}")
+def read_item(item_id: int, q: Union[str, None] = None):
+    logger.info(f"read_item endpoint called with item_id={item_id} and q={q}")
+    return {"item_id": item_id, "q": q}
+```
+
+### Step 3: Run the application
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+Set the environment variables and run your application using `opentelemetry-instrument`:
+
+```bash
+export OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="python-logs-example"
+
+opentelemetry-instrument \
+    uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+If using a local OTel Collector (VM), use:
+
+```bash
+export OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+export OTEL_SERVICE_NAME="python-logs-example"
+
+opentelemetry-instrument \
+    uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest. Note that the command to run your container must be wrapped with `opentelemetry-instrument`.
+
+```yaml
+env:
+  - name: OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED
+    value: 'true'
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_SERVICE_NAME
+    value: 'python-logs-example'
+  - name: OTEL_TRACES_EXPORTER
+    value: 'otlp'
+  - name: OTEL_METRICS_EXPORTER
+    value: 'otlp'
+  - name: OTEL_LOGS_EXPORTER
+    value: 'otlp'
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+Ensure your container's entrypoint or command executes:
+`opentelemetry-instrument uvicorn main:app --host 0.0.0.0 --port 8000`
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile:Dockerfile
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install dependencies
+RUN pip install opentelemetry-distro opentelemetry-exporter-otlp fastapi uvicorn
+RUN opentelemetry-bootstrap -a install
+
+# Copy application code
+COPY main.py .
+
+# Set OpenTelemetry environment variables
+ENV OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="python-logs-example"
+ENV OTEL_TRACES_EXPORTER="otlp"
+ENV OTEL_METRICS_EXPORTER="otlp"
+ENV OTEL_LOGS_EXPORTER="otlp"
+
+# Expose application port
+EXPOSE 8000
+
+# Start the application with auto-instrumentation
+CMD ["opentelemetry-instrument", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Build and run the container:
+
+```bash
+# Build the image
+docker build -t python-logs-app .
+
+# Run the container
+docker run -p 8000:8000 python-logs-app
+```
+
+Replace the placeholders in the Dockerfile:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell and run with `opentelemetry-instrument`:
+
+```powershell
+$env:OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED="true"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "python-logs-example"
+
+opentelemetry-instrument `
+    uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+</Tabs>
+
+### Note
+
+By default, auto-instrumentation collects traces, metrics, and logs. If you want to collect **only logs**, you can disable traces and metrics by setting the following environment variables:
+
+```bash
+export OTEL_TRACES_EXPORTER="none"
+export OTEL_METRICS_EXPORTER="none"
+```
+
+</TabItem>
+</Tabs>
+
+## Validate Logs
+
+Generate some traffic by visiting `http://localhost:8000/` and `http://localhost:8000/items/1?q=test` in your browser.
+
+Open your SigNoz instance and navigate to the **Logs** section to view the logs sent from your application.
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+#### Why do I see "404 Not Found" errors?
+
+This usually happens if the endpoint URL is incorrect.
+
+- Cloud: `https://ingest.<region>.signoz.cloud:443`
+- Self-Hosted: `http://localhost:4318`
+
+#### Why are my logs not appearing in SigNoz?
+
+- Check if the application started successfully and is actually generating logs.
+- Verify your `<region>` and `<your-ingestion-key>` are correct.
+- Ensure `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` is set to `true`.
+
+</details>
+
+## Next Steps
+
+- [Log Query/Filtering guides](https://signoz.io/docs/userguide/logs/)
+- [Alerts setup for logs](https://signoz.io/docs/alerts-management/log-based-alerts/)
+
+## Get Help
+
+<GetHelp />
