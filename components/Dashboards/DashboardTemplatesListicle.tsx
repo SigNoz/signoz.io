@@ -20,6 +20,7 @@ import {
   SiAnthropic,
   SiAmazonwebservices,
   SiPydantic,
+  SiGo,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -56,6 +57,14 @@ interface IconCardData {
 }
 
 const DashboardTemplatesData: IconCardData[] = [
+  {
+    name: 'Agno',
+    href: '/docs/dashboards/dashboard-templates/agno-dashboard',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Agno Dashboard Template',
+  },
   {
     name: 'Amazon Bedrock',
     href: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
@@ -215,6 +224,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Google Gemini Dashboard Template',
   },
   {
+    name: 'Go Runtime',
+    href: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
+    icon: <SiGo className="h-7 w-7 text-cyan-500" />,
+    clickName: 'Go Runtime Dashboard Template',
+  },
+  {
     name: 'Hadoop',
     href: 'https://github.com/SigNoz/dashboards/tree/main/hadoop',
     icon: <Server className="h-7 w-7 text-yellow-600" />,
@@ -281,6 +296,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'LiteLLM Dashboard Template',
   },
   {
+    name: 'LiveKit',
+    href: '/docs/dashboards/dashboard-templates/livekit-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/livekit-icon.svg"
+        alt="LiveKit Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'LiveKit Dashboard Template',
+  },
+  {
     name: 'LLM Observability',
     href: 'https://github.com/SigNoz/dashboards/tree/main/llm-observability',
     icon: <Brain className="h-7 w-7 text-purple-600" />,
@@ -323,6 +350,18 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/nomad',
     icon: <Layers className="h-7 w-7 text-purple-600" />,
     clickName: 'Nomad Dashboard Template',
+  },
+  {
+    name: 'Pipecat',
+    href: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/pipecat-logo.webp"
+        alt="Pipecat Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Pipecat Dashboard Template',
   },
   {
     name: 'PostgreSQL',

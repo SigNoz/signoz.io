@@ -1581,6 +1581,19 @@ const docsSideNav = [
         route: '/docs/metrics-management/send-metrics',
         items: [
           {
+            type: 'category',
+            label: 'Application Metrics',
+            route: '/docs/metrics-management/send-metrics#applications',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/golang',
+                label: 'Golang',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/userguide/otel-metrics-receivers',
             label: 'OpenTelemetry Receivers',
@@ -1826,6 +1839,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/agno-dashboard',
+            label: 'Agno',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
             label: 'Amazon Bedrock API',
           },
@@ -1947,6 +1965,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
+            label: 'Go Runtime',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/jvm-metrics',
             label: 'JVM',
           },
@@ -1980,6 +2003,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/livekit-dashboard',
+            label: 'LiveKit',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/mastra-dashboard',
             label: 'Mastra',
           },
@@ -1997,6 +2025,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/nginx',
             label: 'NGINX',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
+            label: 'Pipecat',
           },
           {
             type: 'doc',
@@ -2404,6 +2437,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/agno-monitoring',
+        label: 'Agno',
+        type: 'doc',
+      },
+      {
         route: '/docs/amazon-bedrock-monitoring',
         label: 'Amazon Bedrock',
         type: 'doc',
@@ -2454,6 +2492,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/livekit-observability',
+        label: 'LiveKit',
+        type: 'doc',
+      },
+      {
         route: '/docs/llamaindex-observability',
         label: 'LlamaIndex',
         type: 'doc',
@@ -2466,6 +2509,11 @@ const docsSideNav = [
       {
         route: '/docs/openai-monitoring',
         label: 'OpenAI',
+        type: 'doc',
+      },
+      {
+        route: '/docs/pipecat-monitoring',
+        label: 'Pipecat',
         type: 'doc',
       },
       {
