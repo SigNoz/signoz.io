@@ -1044,12 +1044,12 @@ module.exports = () => {
         },
         {
           source: '/docs/userguide/collecting_application_logs_otel_sdk_python/',
-          destination: '/docs/logs-management/send-logs/python-logs',
+          destination: '/docs/logs-management/send-logs/python-logs/',
           permanent: true,
         },
         {
           source: '/docs/userguide/python-logs-auto-instrumentation/',
-          destination: '/docs/logs-management/send-logs/python-logs',
+          destination: '/docs/logs-management/send-logs/python-logs/',
           permanent: true,
         },
       ]
