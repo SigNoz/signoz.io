@@ -2495,6 +2495,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/pipecat-monitoring',
+        label: 'Pipecat',
+        type: 'doc',
+      },
+      {
         route: '/docs/pydantic-ai-observability',
         label: 'Pydantic AI',
         type: 'doc',

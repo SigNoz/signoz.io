@@ -142,6 +142,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'OpenAI Monitoring',
   },
   {
+    name: 'Pipecat',
+    href: '/docs/pipecat-monitoring',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/pipecat-logo.webp"
+        alt="Pipecat Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Pipecat Monitoring',
+  },
+  {
     name: 'Pydantic AI',
     href: '/docs/pydantic-ai-observability',
     icon: <SiPydantic className="h-7 w-7 text-pink-600" />,
