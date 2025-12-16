@@ -26,7 +26,7 @@ import GetHelp from '@/components/shared/get-help.md'
 <Tabs>
 <TabItem value="automatic" label="No Code Auto-Instrumentation (recommended)" default>
 
-Auto-instrumentation automatically captures logs from your Python application and sends them to SigNoz without significant code changes.
+Auto-instrumentation automatically captures logs from your Python application with trace correlation.
 
 ### Step 1: Install dependencies
 
@@ -104,7 +104,7 @@ If using a local OTel Collector (VM), use:
 
 ```bash
 export OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
 export OTEL_SERVICE_NAME="python-logs-example"
 
 opentelemetry-instrument \
@@ -223,7 +223,15 @@ Replace the placeholders:
 </TabItem>
 </Tabs>
 
-### Note
+### Log Correlation
+
+OpenTelemetry auto-instrumentation automatically injects `trace_id` and `span_id` into your logs when a tracing context is active. This allows you to correlate logs with traces in SigNoz.
+
+Ensure `OTEL_PYTHON_LOG_CORRELATION` is set to `true` (default in newer versions, or implied by `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED`).
+
+For example, when a request hits your FastAPI endpoint, the auto-instrumentation starts a span. Any logs generated during that request will automatically include the trace context.
+
+#### Note
 
 By default, auto-instrumentation collects traces, metrics, and logs. If you want to collect **only logs**, you can disable traces and metrics by setting the following environment variables:
 
@@ -233,11 +241,186 @@ export OTEL_METRICS_EXPORTER="none"
 ```
 
 </TabItem>
+
+<TabItem value="manual" label="Code Level Instrumentation (advanced)">
+
+### Step 1: Install dependencies
+
+Install the OpenTelemetry SDK and OTLP exporter:
+
+```bash
+pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp opentelemetry-exporter-otlp-proto-grpc
+```
+
+### Step 2: Configure Logger
+
+Update your application code to configure the `LoggerProvider` and attach the `LoggingHandler` to your Python logger.
+
+```python:main.py
+import logging
+from opentelemetry import trace
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.propagate import set_global_textmap
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
+# 1. Setup Resource
+resource = Resource.create({
+    "service.name": "python-manual-logs-example",
+    "service.instance.id": "instance-01",
+})
+
+# 2. Setup Trace Provider with OTLP exporter
+trace_provider = TracerProvider(resource=resource)
+trace.set_tracer_provider(trace_provider)
+
+# Add OTLP span exporter (sends traces to SigNoz)
+trace_provider.add_span_processor(
+    BatchSpanProcessor(OTLPSpanExporter(insecure=True))
+)
+
+# 3. Setup trace context propagation (for distributed tracing)
+set_global_textmap(TraceContextTextMapPropagator())
+
+# 4. Setup Logger Provider
+logger_provider = LoggerProvider(resource=resource)
+set_logger_provider(logger_provider)
+
+# 5. Setup OTLP Log Exporter
+exporter = OTLPLogExporter(insecure=True)
+logger_provider.add_log_record_processor(BatchLogRecordProcessor(exporter))
+
+# 6. Setup Logging Handler
+handler = LoggingHandler(level=logging.NOTSET, logger_provider=logger_provider)
+logging.getLogger().setLevel(logging.NOTSET)
+logging.getLogger().addHandler(handler)
+
+# --- Application Logic ---
+logger = logging.getLogger("myapp")
+tracer = trace.get_tracer(__name__)
+
+def process_order(order_id: str):
+    """Simulates order processing with trace correlation"""
+    # Create a parent span
+    with tracer.start_as_current_span("process_order") as span:
+        span.set_attribute("order.id", order_id)
+        logger.info(f"Processing order {order_id}")  # This log is correlated!
+
+        # Simulate sub-operations
+        validate_order(order_id)
+        charge_payment(order_id)
+        ship_order(order_id)
+
+def validate_order(order_id: str):
+    """Child span - logs here are also correlated"""
+    with tracer.start_as_current_span("validate_order") as span:
+        span.set_attribute("order.id", order_id)
+        logger.info(f"Validating order {order_id}")  # Correlated with parent span
+
+        # Simulate validation logic
+        if order_id == "invalid":
+            logger.error(f"Order validation failed for {order_id}")  # Error correlated!
+            span.set_status(trace.Status(trace.StatusCode.ERROR))
+        else:
+            logger.info(f"Order {order_id} validated successfully")
+
+def charge_payment(order_id: str):
+    """Another child span"""
+    with tracer.start_as_current_span("charge_payment") as span:
+        span.set_attribute("order.id", order_id)
+        logger.info(f"Charging payment for order {order_id}")  # Correlated
+
+def ship_order(order_id: str):
+    """Another child span"""
+    with tracer.start_as_current_span("ship_order") as span:
+        span.set_attribute("order.id", order_id)
+        logger.info(f"Shipping order {order_id}")  # Correlated
+
+def simulate_incoming_request_with_context():
+    """Simulates receiving a request with trace context from another service"""
+    # In real HTTP scenarios, you'd extract this from HTTP headers
+    carrier = {
+        "traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
+    }
+
+    # Extract context from incoming request
+    ctx = TraceContextTextMapPropagator().extract(carrier=carrier)
+
+    # Use the extracted context
+    with tracer.start_as_current_span("handle_request", context=ctx) as span:
+        logger.info("Handling request with propagated trace context")
+        # This log will be part of the distributed trace!
+
+def run_app():
+    logger.info("Application started")
+
+    # Example 1: Normal operation
+    process_order("order-123")
+
+    # Example 2: Error scenario
+    process_order("invalid")
+
+    # Example 3: Distributed tracing
+    simulate_incoming_request_with_context()
+
+    logger.info("Application finished")
+
+if __name__ == "__main__":
+    try:
+        run_app()
+    finally:
+        logger_provider.shutdown()
+        trace_provider.shutdown()
+```
+
+### Step 3: Run the application
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+Set the OTLP endpoint variables and run your script directly:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+python main.py
+```
+
+Replace placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Configure environment variables in your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+```
+
+</TabItem>
+
+</Tabs>
+
+</TabItem>
 </Tabs>
 
 ## Validate Logs
 
-Generate some traffic by visiting `http://localhost:8000/` and `http://localhost:8000/items/1?q=test` in your browser.
+Generate some traffic by visiting your application or running the script.
 
 Open your SigNoz instance and navigate to the **Logs** section to view the logs sent from your application.
 
@@ -281,7 +464,7 @@ This usually happens if the endpoint URL is incorrect.
 
 - Check if the application started successfully and is actually generating logs.
 - Verify your `<region>` and `<your-ingestion-key>` are correct.
-- Ensure `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` is set to `true`.
+- Ensure `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` is set to `true` (if using auto-instrumentation).
 
 </details>
 
