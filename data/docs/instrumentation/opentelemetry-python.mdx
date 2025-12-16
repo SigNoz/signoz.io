@@ -35,20 +35,13 @@ A VM is a virtual computer that runs on physical hardware. This includes:
 Use this section if you're deploying your Python application directly on a server or VM without containerization.
 </KeyPointCallout>
 
-### Step 1. Create a virtual environment
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### Step 2. Install OpenTelemetry packages
+### Step 1. Install OpenTelemetry packages
 
 ```bash
 pip install opentelemetry-distro opentelemetry-exporter-otlp
 ```
 
-### Step 3. Install instrumentation for your dependencies
+### Step 2. Install instrumentation for your dependencies
 
 This command detects your installed packages and adds the corresponding instrumentation libraries:
 
@@ -60,7 +53,7 @@ opentelemetry-bootstrap --action=install
 Run this after installing all your application dependencies. It will only instrument packages that are already installed.
 </Admonition>
 
-### Step 4. Set environment variables
+### Step 3. Set environment variables
 
 ```bash
 export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
@@ -74,9 +67,13 @@ Replace the following:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
-### Step 5. Run your application
+### Step 4. Run your application
 
-See the [Framework instrumentation](#framework-instrumentation) section below for framework-specific run commands.
+```bash
+opentelemetry-instrument <your_run_command>
+```
+
+See [Framework instrumentation](#framework-instrumentation) below for framework-specific commands.
 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
@@ -231,21 +228,14 @@ CMD ["opentelemetry-instrument", "python", "app.py"]
 </TabItem>
 <TabItem value="windows" label="Windows">
 
-### Step 1. Create a virtual environment
-
-```bash
-python3 -m venv .venv
-.venv\Scripts\activate
-```
-
-### Step 2. Install OpenTelemetry packages
+### Step 1. Install OpenTelemetry packages
 
 ```bash
 pip install opentelemetry-distro opentelemetry-exporter-otlp
 opentelemetry-bootstrap --action=install
 ```
 
-### Step 3. Set environment variables
+### Step 2. Set environment variables
 
 ```powershell
 $env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>"
@@ -254,9 +244,13 @@ $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_EXPORTER_OTLP_PROTOCOL = "grpc"
 ```
 
-### Step 4. Run your application
+### Step 3. Run your application
 
-See the [Framework instrumentation](#framework-instrumentation) section below for framework-specific run commands.
+```bash
+opentelemetry-instrument <your_run_command>
+```
+
+See [Framework instrumentation](#framework-instrumentation) below for framework-specific commands.
 
 </TabItem>
 <TabItem value="docker" label="Docker">
@@ -293,6 +287,7 @@ docker run -d -p <host-port>:<container-port> <image-name>
 Choose your framework below to see the specific run command. The setup steps above are the same for all frameworks.
 
 <LibraryTabs
+    className="mb-8"
     defaultCategory="all"
     defaultLibrary="django"
     categoryLabels={{
