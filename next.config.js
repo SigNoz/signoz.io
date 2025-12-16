@@ -294,6 +294,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/monitoring-your-go-application-with-signoz/',
+          destination: '/blog/golang-monitoring/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/nodejs/',
           destination: '/docs/instrumentation/javascript/',
           permanent: true,
