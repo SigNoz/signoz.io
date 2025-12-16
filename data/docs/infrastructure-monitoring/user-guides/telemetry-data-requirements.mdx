@@ -1,0 +1,51 @@
+---
+date: 2025-12-16
+id: telemetry-data-requirements
+title: Telemetry Data Requirements for Infrastructure Monitoring
+description: Mandatory resource attributes, metric dependencies, and known platform limitations that control the Infrastructure Monitoring.
+tags: [SigNoz Cloud, Self-Host]
+doc_type: reference
+---
+
+## Overview
+
+The Infrastructure Monitoring depends on a set of resource attributes and metric types. When those attributes are missing or mis-typed, SigNoz cannot link list views (Hosts, Pods, Nodes, Deployments, etc.) with their details and queries fail silently. Use this guide to verify the required attributes, understand data source dependencies, and identify platform-specific gaps.
+
+## Prerequisites
+
+- Host and Kubernetes workloads must export metrics to SigNoz through an OpenTelemetry (OTel) Collector or a supported agent.
+- For Kubernetes, you need both cluster-level metrics (from `kube-state-metrics` or similar) **and** kubelet metrics scraped per node. Missing either source breaks entity resolution.
+
+## Mandatory attributes
+
+### Hosts Monitoring
+
+- **Required**: `host.name`. It must be unique per host. When the attribute is missing, the host still appears in the grid but is not clickable because detail queries cannot filter on the host name.
+- **Recommendation**: also collect `host.id`. The page prefers `host.name`, but `host.id` is a reliable fallback and helps disambiguate duplicate hostnames (common with cloned VMs or ephemeral EC2 instances).
+
+### Kubernetes Monitoring
+
+- **Required per entity**: a unique identifier attribute `[entity].uid` (for example, `pod.uid`, `node.uid`, `deployment.uid`) and a human-readable `[entity].name`.
+- **Impact**: clicking a Pod/Node/Deployment without its UID causes the UI to raise an internal error because follow-up queries always include the UID filter.
+
+## Data source dependencies for Kubernetes metrics
+
+- The Pods listing page relies on `pod.cpu.usage` for both `pod.uid` and `pod.name`. If kubelet metrics are absent, SigNoz cannot populate those attributes even if cluster-level metrics exist.
+- Collectors must therefore scrape:
+  - Cluster metrics for scheduling data.
+  - Kubelet metrics on every node to expose per-pod CPU usage (and the associated UID + name labels).
+- If Pods are missing in the UI, start by verifying whether `pod.cpu.usage` arrives with the `pod.uid` + `pod.name` labels.
+
+<Admonition type="warning">
+EKS Fargate and some managed Kubernetes clusters block kubelet metric scraping by default. This causes Pods to fail resolution in Listings even when Services or Deployments appear healthy. To enable kubelet stats collection, follow our [k8s-infra OpenTelemetry agent guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/)
+</Admonition>
+
+## Troubleshooting checklist
+
+1. Verify required attributes: Use the Metrics Explorer to query `pod.cpu.usage` or `host.cpu.usage` and confirm that `host.name`, `[entity].uid`, and `[entity].name` labels exist and are populated.
+2. Confirm Metrics Data Sources: Ensure both cluster-level and kubelet scrape jobs are enabled.
+3. Check if kubelet scraping is allowed on the platform.
+
+## Next Steps
+- [OpenTelemetry Collection Agents Overview](/docs/collection-agents/overview/)
+- [k8s-infra OpenTelemetry Collection Agent Guide](/docs/collection-agents/k8s/k8s-infra/overview/)

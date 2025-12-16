@@ -1239,6 +1239,18 @@ const docsSideNav = [
         route: '/docs/userguide/k8s-metrics',
         label: 'Kubernetes Metrics',
       },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'User Guides',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements',
+            label: 'Telemetry Data Requirements for Infrastructure Monitoring',
+          },
+        ],
+      },
     ],
   },
   {
