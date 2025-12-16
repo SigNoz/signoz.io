@@ -16,7 +16,7 @@ The Infrastructure Monitoring depends on a set of resource attributes and metric
 - Host and Kubernetes workloads must export metrics to SigNoz through an OpenTelemetry (OTel) Collector or a supported agent.
 - For Kubernetes, you need both cluster-level metrics (from `kube-state-metrics` or similar) **and** kubelet metrics scraped per node. Missing either source breaks entity resolution.
 
-## Mandatory attributes and their impact
+## Mandatory attributes
 
 ### Hosts Monitoring
 
@@ -37,7 +37,7 @@ The Infrastructure Monitoring depends on a set of resource attributes and metric
 - If Pods are missing in the UI, start by verifying whether `pod.cpu.usage` arrives with the `pod.uid` + `pod.name` labels.
 
 <Admonition type="warning">
-EKS Fargate and some managed clusters block kubelet metric scraping by default. Without kubelet access, Pods will not resolve even though Services or Deployments appear healthy.
+EKS Fargate and some managed Kubernetes clusters block kubelet metric scraping by default. This causes Pods to fail resolution in Listings even when Services or Deployments appear healthy. To enable kubelet stats collection, follow our [k8s-infra OpenTelemetry agent guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/serverless/install/)
 </Admonition>
 
 ## Troubleshooting checklist

@@ -1247,7 +1247,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements',
-            label: 'Infrastructure Monitoring Telemetry Data Requirements',
+            label: 'Telemetry Data Requirements for Infrastructure Monitoring',
           },
         ],
       },
