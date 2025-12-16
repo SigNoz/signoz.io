@@ -2984,6 +2984,8 @@ components:
 
     WebhookConfig:
       type: object
+      required:
+        - url
       properties:
         send_resolved:
           type: boolean
@@ -2991,6 +2993,7 @@ components:
           description: Whether to send notifications when an alert is resolved.
         url:
           type: string
+          format: uri
           description: The Webhook URL endpoint.
         http_config:
           type: object
@@ -3006,12 +3009,15 @@ components:
 
     SlackConfig:
       type: object
+      required:
+        - api_url
       properties:
         send_resolved:
           type: boolean
           description: Whether to send notifications when an alert is resolved.
         api_url:
           type: string
+          format: uri
           description: The Slack Incoming Webhook URL.
         channel:
           type: string
@@ -3025,6 +3031,8 @@ components:
 
     EmailConfig:
       type: object
+      required:
+        - to
       properties:
         send_resolved:
           type: boolean
@@ -3042,6 +3050,8 @@ components:
 
     PagerdutyConfig:
       type: object
+      required:
+        - routing_key
       properties:
         send_resolved:
           type: boolean
@@ -3077,6 +3087,8 @@ components:
 
     OpsgenieConfig:
       type: object
+      required:
+        - api_key
       properties:
         api_key:
           type: string
@@ -3097,12 +3109,15 @@ components:
 
     MSTeamsV2Config:
       type: object
+      required:
+        - webhook_url
       properties:
         send_resolved:
           type: boolean
           description: Whether to send notifications when an alert is resolved.
         webhook_url:
           type: string
+          format: uri
           description: The Microsoft Teams Incoming Webhook URL.
         title:
           type: string
@@ -3153,7 +3168,7 @@ components:
             
             Operators: `=`, `!=`, `CONTAINS`, `REGEXP`, `IN`, `AND`, `OR`.
             Example: `service.name = "checkout" AND type = "application"`
-          example: "service.name == \"something\""
+          example: "service.name = \"something\""
         kind:
           type: string
           description: The kind of the resource
@@ -3191,7 +3206,6 @@ components:
         - name
         - expression
         - channels
-        - kind
       properties:
         name:
           type: string
@@ -3208,7 +3222,7 @@ components:
             
             Operators: `=`, `!=`, `CONTAINS`, `REGEXP`, `IN`, `AND`, `OR`.
             Example: `service.name = "checkout" AND type = "application"`
-          example: "service.name == \"something\""
+          example: "service.name = \"something\""
         kind:
           type: string
           description: Type of route policy. Accepted values are `policy` and `rule`.
