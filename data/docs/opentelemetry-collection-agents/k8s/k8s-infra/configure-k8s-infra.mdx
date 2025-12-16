@@ -290,6 +290,40 @@ presets:
 - Monitor specific namespaces by listing them
 - Useful for compliance and security monitoring
 
+### 8. Prometheus Metrics Scraping
+
+Prometheus preset allows to scrapes metrics from pods that have the appropriate annotations. This enables collecting metrics from applications that expose Prometheus endpoints without manual configuration.
+
+```yaml
+presets:
+  prometheus:
+    enabled: true
+    annotationsPrefix: signoz.io    # Prefix for pod annotations
+    scrapeInterval: 60s              # How often to scrape metrics
+    namespaceScoped: false           # Limit to same namespace only
+    namespaces: []                   # Specific namespaces to scrape
+    includePodLabel: false           # Include pod labels (may increase cardinality)
+    includeContainerName: false      # Include container name in metrics
+    scrapeConfigs: []                # Custom scrape configurations
+```
+
+#### Custom Scrape Configurations
+
+For more advanced use cases, you can define custom scrape configurations using the `scrapeConfigs` field. This allows you to specify Prometheus-compatible scrape configs directly:
+
+```yaml
+presets:
+  prometheus:
+    enabled: true
+    scrapeConfigs:
+      # Scrape metrics from a specific service
+      - job_name: 'my-custom-service'
+        static_configs:
+          - targets: ['my-service.default.svc.cluster.local:9090']
+            labels:
+              environment: 'production'
+```
+
 ## Common Deployment Scenarios
 
 ### Production Cluster with Full Monitoring
