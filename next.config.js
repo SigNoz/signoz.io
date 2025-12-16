@@ -294,7 +294,7 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/blog/data/blog/monitoring-your-go-application-with-signoz/',
+          source: '/blog/monitoring-your-go-application-with-signoz/',
           destination: '/blog/golang-monitoring/',
           permanent: true,
         },
