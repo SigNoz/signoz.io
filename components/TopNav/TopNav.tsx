@@ -5,7 +5,17 @@ import { Button, Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowBigLeft, ArrowRight, BookOpenText, Brain, ChevronDown, Cone, Logs, PenSquare, WorkflowIcon } from 'lucide-react'
+import {
+  ArrowBigLeft,
+  ArrowRight,
+  BookOpenText,
+  Brain,
+  ChevronDown,
+  Cone,
+  Logs,
+  PenSquare,
+  WorkflowIcon,
+} from 'lucide-react'
 import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
@@ -46,7 +56,7 @@ const productDropdownItems = [
     key: 'Alerts',
     url: '/alerts-management',
     icon: '/img/index_features/concierge-bell_feature.svg',
-    description: "Multiple thresholds and dynamic routing at scale",
+    description: 'Multiple thresholds and dynamic routing at scale',
     name: 'Alerts',
     order: 5,
   },
@@ -124,7 +134,7 @@ const productDropdownItems = [
   },
   {
     key: 'llm-observability',
-    url: '/docs/llm-observability/',
+    url: '/llm-observability/',
     icon: <Brain className="text-signoz_robin-400" size={20} />,
     description: 'Monitor AI and LLM workflows',
     name: 'LLM Observability',
@@ -381,7 +391,7 @@ export default function TopNav() {
                               <TrackingLink
                                 href={item.url || ''}
                                 disabled={item.url === undefined}
-                                className={`group flex h-auto items-center gap-4 ${item.url === undefined ? 'opacity-80 cursor-not-allowed' : ''}`}
+                                className={`group flex h-auto items-center gap-4 ${item.url === undefined ? 'cursor-not-allowed opacity-80' : ''}`}
                                 key={item.key}
                                 clickType="Nav Click"
                                 clickName={`${item.name} Product Link`}
@@ -389,14 +399,16 @@ export default function TopNav() {
                                 clickLocation="Top Navbar"
                                 onClick={handleProductDropdownClick}
                               >
-                                {
-                                  typeof item.icon === 'string' && item.icon !== null ? <Image
+                                {typeof item.icon === 'string' && item.icon !== null ? (
+                                  <Image
                                     src={item.icon}
                                     alt={`${item.name}`}
                                     width={20}
                                     height={20}
-                                  /> : <div className="h-5 w-5">{item.icon}</div>
-                                }
+                                  />
+                                ) : (
+                                  <div className="h-5 w-5">{item.icon}</div>
+                                )}
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
                                     <span>{item.name}</span>{' '}
