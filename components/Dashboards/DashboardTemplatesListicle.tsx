@@ -352,6 +352,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Nomad Dashboard Template',
   },
   {
+    name: 'Pipecat',
+    href: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/pipecat-logo.webp"
+        alt="Pipecat Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Pipecat Dashboard Template',
+  },
+  {
     name: 'PostgreSQL',
     href: '/docs/dashboards/dashboard-templates/postgresql',
     icon: <SiPostgresql className="h-7 w-7 text-blue-600" />,

@@ -2016,6 +2016,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
+            label: 'Pipecat',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/postgresql',
             label: 'PostgreSQL',
           },
