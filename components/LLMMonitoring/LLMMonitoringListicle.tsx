@@ -20,6 +20,14 @@ interface IconCardData {
 
 const LLMMonitoringData: IconCardData[] = [
   {
+    name: 'Agno',
+    href: '/docs/agno-monitoring',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Agno Monitoring',
+  },
+  {
     name: 'Amazon Bedrock',
     href: '/docs/amazon-bedrock-monitoring',
     icon: <SiAmazonwebservices className="h-7 w-7 text-white" />,
