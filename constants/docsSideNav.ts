@@ -1827,6 +1827,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/agno-dashboard',
+            label: 'Agno',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
             label: 'Amazon Bedrock API',
           },
