@@ -449,95 +449,71 @@ chmod +x generate_traffic.sh
 
 Now that your application is instrumented and generating traces, let's configure the backend to collect and visualize them.
 
-## Monitor your Go application with SigNoz
+## Monitor Your Go Application with SigNoz
 
-The script we ran in the previous section repeatedly calls the `/products`, `/orders`, `/checkInventory`, `/cpuTest`, and `/concurrencyTest` endpoints, generating traces, metrics, and logs. This simulates real user activity, enabling SigNoz to visualise request latency, business metrics, and Go runtime behaviour in real time.
+To generate sufficient data for visualization, we rely on the script which you ran in the previous section. The above script repeatedly calls the `/products`, `/orders`, `/checkInventory`, `/cpuTest`, and `/concurrencyTest` endpoints. This process generates a steady stream of traces, metrics, and logs, simulating real user activity and enabling SigNoz to visualize request latency, business metrics, and Go runtime behaviour in real time.
 
-Navigate to our SigNoz cloud account. On the service page, you should see your **`goApp`** service.
+### Accessing the Service Dashboard
 
-<Figure
-  src="/img/blog/2025/11/services-tab-go.webp"
-  alt="Go app being monitored under services tab"
-  caption="Your Go application being monitored on the SigNoz dashboard"
-/>
+Navigate to your SigNoz account.
 
-You can monitor application metrics such as latency, requests per second, error rate, and more in SigNoz's Metrics tab.
+On the Services page, you should see your instrumented service, named `goApp`.
 
-Click on the `goApp` service, and you should be redirected to the metrics page.
+<Figure src="/img/blog/2025/11/services-tab-go.webp" alt="Go app being monitored under services tab" caption="Your Go application being monitored on the SigNoz dashboard" />
 
-You can monitor application metrics such as application latency, requests per second, error percentage, and more in the **`Metrics`** tab of SigNoz. 
+Click on the `goApp` service to view the main **Service Metrics** page. This dashboard displays crucial application metrics like application latency, requests per second (RPS), and error percentage.
 
-Click on the **`goApp`** service, and you should be redirected to the metrics page.
+<Figure src="/img/blog/2025/11/go-monitoring-service-metrics-page.webp" alt="Metrics from Go app" caption="Monitor your Go application metrics like application latency, requests per second, error percentage, etc." />
 
-<Figure
-  src="/img/blog/2025/11/go-monitoring-service-metrics-page.webp"
-  alt="Metrics from Go app"
-  caption="Monitor your Go application metrics like application latency, requests per second, error percentage, etc."
-/>
+### Analyzing Go Runtime and Infrastructure Metrics
 
-### System & Infrastructure Metrics
+OpenTelemetry's runtime instrumentation provides deep visibility into the Go Virtual Machine (VM) and resource usage.
 
-### Goroutines
-Shows the number of active goroutines in your application. Tracking goroutine counts helps identify concurrency spikes, leaks, or unusually high thread usage.
+#### Goroutines
 
-<Figure
-  src="/img/blog/2025/11/go-monitoring-goroutines.webp"
-  alt="Goroutines metric on SigNoz"
-  caption="Monitoring Goroutine from the sample golang application"
-/>
+Shows the number of active `goroutines` in your application. Tracking goroutine counts helps identify concurrency spikes, leaks, or unusually high thread usage.
 
-### Heap Memory Usage
+<Figure src="/img/blog/2025/11/go-monitoring-goroutines.webp" alt="Goroutines metric on SigNoz" caption="Monitoring Goroutine from the sample golang application" />
+
+#### Heap Memory Usage
+
 Reflects the bytes currently allocated on the Go heap. Monitoring this helps understand memory consumption patterns and the impact of garbage collection.
 
-<Figure
-  src="/img/blog/2025/11/go-monitoring-gomemory.webp"
-  alt="Go Memory metric on SigNoz"
-  caption="Monitoring Heap memory from the sample golang application"
-/>
+<Figure src="/img/blog/2025/11/go-monitoring-gomemory.webp" alt="Go Memory metric on SigNoz" caption="Monitoring Heap memory from the sample golang application" />
 
-### Request Latency & Throughput
-- Latency: How long each request takes to complete. SigNoz shows percentiles like p50, p90, and p99 to highlight slow requests.
-- Throughput: Number of requests served per second, helping understand application load handling.
+#### Request Latency & Throughput
 
-<Figure
-  src="/img/blog/2025/11/go-monitoring-latency.webp"
-  alt="Request Latency & Throughput on SigNoz"
-  caption="Monitoring latency and throughput from the sample golang application"
-/>
+These are standard HTTP metrics collected by the otelgin middleware.
+- Latency: Measuring how long each request takes to complete. SigNoz shows percentiles like `p50`, `p90`, and `p99` to highlight slow requests.
+- Throughput: The number of requests served per second, helping understand application load handling.
 
-### Application & Business Metrics
+<Figure src="/img/blog/2025/11/go-monitoring-latency.webp" alt="Request Latency & Throughput on SigNoz" caption="Monitoring latency and throughput from the sample golang application" />
 
-### Business Counters
-Custom counters that represent real user actions (e.g., orders_total, product_order_total) provide visibility into business events alongside system metrics.
+### Analyzing Application & Business Metrics
 
-<Figure
-  src="/img/blog/2025/11/go-monitoring-orders-total.webp"
-  alt="Custom metrics from Go app"
-  caption="Monitoring Orders Total metrics from the sample golang application."
-/>
+These dashboards highlight the custom counters we defined in the application's business logic.
 
-<Figure
-  src="/img/blog/2025/11/go-monitoring-products-total.webp"
-  alt="Custom metrics from Go app"
-  caption="Monitoring Product Order Total metrics from the sample golang application."
-/>
+#### Business Counters
 
-### Tracing & Logs
-Traces visualize the execution path of requests across HTTP handlers, database calls, and Redis operations. Logs enriched with trace_id and span_id can be directly correlated to traces, simplifying debugging.
-- Traces: Spans from otelgin.Middleware and manual spans in handlers (e.g., db_process_order)
-- Logs: Structured logs enriched via otellogrus hook
+Custom counters that represent real user actions (e.g., `orders_total`, `product_order_total`) provide immediate visibility into business events alongside system metrics.
 
-<Figure
-  src="/img/blog/2025/11/go-monitoring-trace.webp"
-  alt="Traces from Go app"
-  caption="Traces tab for golang application on SigNoz"
-/>
+<Figure src="/img/blog/2025/11/go-monitoring-orders-total.webp" alt="Custom metrics from Go app" caption="Monitoring Orders Total metrics from the sample golang application." /> <Figure src="/img/blog/2025/11/go-monitoring-products-total.webp" alt="Custom metrics from Go app" caption="Monitoring Product Order Total metrics from the sample golang application." />
 
-<Figure
-  src="/img/blog/2025/11/go-monitoring-logs.webp"
-  alt="Logs from Go app"
-  caption="Logs tab for golang application on SigNoz"
-/>
+### Correlating Traces and Logs
+
+OpenTelemetry unifies tracing and logging, allowing you to move seamlessly between signals for powerful debugging.
+
+#### Traces
+
+The Traces tab visualizes the execution path of requests across components like HTTP handlers, database calls, and Redis operations. Spans are generated automatically by otelgin.Middleware and manually in handlers (e.g., `create_order`).
+
+<Figure src="/img/blog/2025/11/go-monitoring-trace.webp" alt="Traces from Go app" caption="Traces tab for golang application on SigNoz" />
+
+#### Logs
+
+Logs are structured and enriched via the otellogrus hook. Critically, these logs include `trace_id` and `span_id` and can be directly correlated to the respective traces, simplifying root cause analysis.
+
+<Figure src="/img/blog/2025/11/go-monitoring-logs.webp" alt="Logs from Go app" caption="Logs tab for golang application on SigNoz" />
 
 ## Conclusion
 Effective Golang monitoring means understanding your application's runtime behavior. This includes tracking goroutines, memory usage, garbage collection, API latency, and interactions with external systems like databases or caches. By monitoring these aspects, you can detect performance bottlenecks, prevent resource leaks, and ensure your services remain reliable under load.
