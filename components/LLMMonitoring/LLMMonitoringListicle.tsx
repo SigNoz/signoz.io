@@ -20,6 +20,14 @@ interface IconCardData {
 
 const LLMMonitoringData: IconCardData[] = [
   {
+    name: 'Agno',
+    href: '/docs/agno-monitoring',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Agno Monitoring',
+  },
+  {
     name: 'Amazon Bedrock',
     href: '/docs/amazon-bedrock-monitoring',
     icon: <SiAmazonwebservices className="h-7 w-7 text-white" />,
@@ -132,6 +140,18 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/openai-monitoring',
     icon: <SiOpenai className="h-7 w-7 text-green-400" />,
     clickName: 'OpenAI Monitoring',
+  },
+  {
+    name: 'Pipecat',
+    href: '/docs/pipecat-monitoring',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/pipecat-logo.webp"
+        alt="Pipecat Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Pipecat Monitoring',
   },
   {
     name: 'Pydantic AI',
