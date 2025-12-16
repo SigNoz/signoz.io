@@ -155,7 +155,11 @@ function WorkspaceSetupHome() {
       {isWorkspaceReady ? (
         <WorkspaceReady workspaceData={workspaceData} userEmail={email} />
       ) : (
-        <WorkspaceSetup isWorkspaceSetupDelayed={isWorkspaceSetupDelayed} />
+        <WorkspaceSetup
+          isWorkspaceSetupDelayed={isWorkspaceSetupDelayed}
+          email={decodeURIComponent(email || '')}
+          workspaceData={workspaceData}
+        />
       )}
     </Suspense>
   )

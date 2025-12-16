@@ -167,14 +167,7 @@ export default function Login() {
         eventName: 'User Logged In',
         attributes: {
           email: workEmail,
-        },
-      })
-
-      logEvent({
-        eventName: 'Login Success',
-        eventType: 'track',
-        attributes: {
-          email: workEmail,
+          workspaceData: data?.data,
         },
       })
 
@@ -186,6 +179,7 @@ export default function Login() {
         groupId: domain,
         attributes: {
           domain: domain,
+          workspaceData: data?.data,
         },
       })
       // --- End Segment Calls ---

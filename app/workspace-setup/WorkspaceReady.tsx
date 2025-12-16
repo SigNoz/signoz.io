@@ -47,10 +47,13 @@ function WorkspaceReady({
 
   const handleSetPassword = () => {
     logEvent({
-      eventName: 'Set Password Clicked',
+      eventName: 'Set Password and go to Workspace Clicked',
       eventType: 'track',
       attributes: {
         workspaceUrl: workspaceData?.invite_link,
+        location: 'Workspace Ready',
+        email: decodedEmail,
+        workspaceData: workspaceData,
       },
     })
   }
@@ -61,6 +64,18 @@ function WorkspaceReady({
       eventType: 'track',
       attributes: {
         location: 'Workspace Ready',
+      },
+    })
+  }
+
+  const handleWorkspaceLinkClick = () => {
+    logEvent({
+      eventName: 'Workspace Link Clicked',
+      eventType: 'track',
+      attributes: {
+        workspaceUrl: workspaceData?.invite_link,
+        location: 'Workspace Ready',
+        email: decodedEmail,
       },
     })
   }
@@ -90,7 +105,12 @@ function WorkspaceReady({
             </div>
 
             <div className="flex flex-1 items-center gap-4 text-sm text-signoz_robin-500">
-              <a className="flex-1" href={workspaceData?.invite_link} target="_blank">
+              <a
+                className="flex-1"
+                href={workspaceData?.invite_link}
+                target="_blank"
+                onClick={handleWorkspaceLinkClick}
+              >
                 {workspaceData?.invite_link}
               </a>
 

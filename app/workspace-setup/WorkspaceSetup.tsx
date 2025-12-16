@@ -1,11 +1,11 @@
 import { ArrowRight } from 'lucide-react'
 import { CheckCircleIcon, HouseIcon, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import './workspace-setup.styles.css'
 
-function WorkspaceSetup({ isWorkspaceSetupDelayed }) {
+function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
   const logEvent = useLogEvent()
 
   useEffect(() => {
@@ -25,6 +25,8 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed }) {
       attributes: {
         location: `Workspace Setup Loading - ${location}`,
         isDelayed: isWorkspaceSetupDelayed,
+        email: email || '',
+        workspaceData: workspaceData,
       },
     })
   }
@@ -36,6 +38,8 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed }) {
       attributes: {
         location: 'Workspace Setup Loading',
         isDelayed: isWorkspaceSetupDelayed,
+        email: email || '',
+        workspaceData: workspaceData,
       },
     })
   }
@@ -46,6 +50,8 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed }) {
       eventType: 'track',
       attributes: {
         location: 'Workspace Setup Loading',
+        email: email || '',
+        workspaceData: workspaceData,
       },
     })
   }

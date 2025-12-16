@@ -805,13 +805,35 @@ const TeamsVariant: React.FC = () => {
           )
         } else {
           const errorData = await response.json()
+
+          logEvent({
+            eventName: 'Social Signup Error',
+            eventType: 'track',
+            attributes: {
+              errorData: errorData,
+              errorType: 'API Error',
+              status: response.status,
+              ...payload,
+            },
+          })
+
           setErrors({
             apiError: errorData.error,
           })
           handleError()
         }
       } catch (error) {
-        console.error(error)
+        logEvent({
+          eventName: 'Social Signup Error',
+          eventType: 'track',
+          attributes: {
+            errorType: 'Catch Block Error',
+            error,
+            errorMessage: error instanceof Error ? error.message : String(error),
+            ...payload,
+          },
+        })
+
         handleError()
       } finally {
         setIsSubmitting(false)
