@@ -1827,6 +1827,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/agno-dashboard',
+            label: 'Agno',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
             label: 'Amazon Bedrock API',
           },
@@ -2008,6 +2013,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/nginx',
             label: 'NGINX',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
+            label: 'Pipecat',
           },
           {
             type: 'doc',
@@ -2415,6 +2425,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/agno-monitoring',
+        label: 'Agno',
+        type: 'doc',
+      },
+      {
         route: '/docs/amazon-bedrock-monitoring',
         label: 'Amazon Bedrock',
         type: 'doc',
@@ -2482,6 +2497,11 @@ const docsSideNav = [
       {
         route: '/docs/openai-monitoring',
         label: 'OpenAI',
+        type: 'doc',
+      },
+      {
+        route: '/docs/pipecat-monitoring',
+        label: 'Pipecat',
         type: 'doc',
       },
       {

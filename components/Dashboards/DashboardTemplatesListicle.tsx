@@ -58,6 +58,14 @@ interface IconCardData {
 
 const DashboardTemplatesData: IconCardData[] = [
   {
+    name: 'Agno',
+    href: '/docs/dashboards/dashboard-templates/agno-dashboard',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/agno-logo.webp" alt="Agno Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Agno Dashboard Template',
+  },
+  {
     name: 'Amazon Bedrock',
     href: '/docs/dashboards/dashboard-templates/amazon-bedrock-dashboard',
     icon: <SiAmazonwebservices className="h-7 w-7 text-white" />,
@@ -342,6 +350,18 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/nomad',
     icon: <Layers className="h-7 w-7 text-purple-600" />,
     clickName: 'Nomad Dashboard Template',
+  },
+  {
+    name: 'Pipecat',
+    href: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/pipecat-logo.webp"
+        alt="Pipecat Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Pipecat Dashboard Template',
   },
   {
     name: 'PostgreSQL',
