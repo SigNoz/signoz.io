@@ -229,6 +229,7 @@ Use this section if you're deploying your application directly on a server or VM
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="python-app"
 ```
 
 Replace the following:
@@ -248,6 +249,8 @@ env:
     value: 'https://ingest.<region>.signoz.cloud:443'
   - name: OTEL_EXPORTER_OTLP_HEADERS
     value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_SERVICE_NAME
+    value: 'python-app'
 ```
 
 Replace the placeholders:
@@ -266,7 +269,11 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install dependencies
+# Copy and install application dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Install OpenTelemetry dependencies
 RUN pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc
 
 # Copy application code
@@ -275,6 +282,7 @@ COPY . .
 # Set OpenTelemetry environment variables
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="python-app"
 
 # Start the application
 CMD ["python", "main.py"]
@@ -301,6 +309,7 @@ Set environment variables in PowerShell:
 ```powershell
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "python-app"
 ```
 
 Replace the placeholders:
@@ -333,14 +342,14 @@ resource = Resource.create({"service.name": "python-app"})
 # Setup TracerProvider for trace correlation
 trace_provider = TracerProvider(resource=resource)
 trace.set_tracer_provider(trace_provider)
-trace_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(insecure=True)))
+trace_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
 
 # Configure logger provider
 logger_provider = LoggerProvider(resource=resource)
 set_logger_provider(logger_provider)
 
 # Add OTLP exporter (reads endpoint/headers from environment variables)
-exporter = OTLPLogExporter(insecure=True)
+exporter = OTLPLogExporter()
 logger_provider.add_log_record_processor(BatchLogRecordProcessor(exporter))
 
 # Attach OTel handler to Python's root logger
@@ -406,6 +415,8 @@ Think of the OTel Collector as a middleman between your app and SigNoz. Instead 
 - **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
 
 See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
 
 </details>
 
