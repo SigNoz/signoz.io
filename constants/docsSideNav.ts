@@ -891,7 +891,7 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/manual-instrumentation/python/manual-instrumentation',
+                route: '/docs/instrumentation/python/manual-instrumentation',
                 label: 'Manual Instrumentation',
               },
             ],
@@ -1068,19 +1068,6 @@ const docsSideNav = [
                     label: 'Enable/disable Instrumentation',
                     route:
                       '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation',
-                  },
-                ],
-              },
-              {
-                type: 'category',
-                isExpanded: false,
-                label: 'Python',
-                items: [
-                  {
-                    type: 'doc',
-                    label: 'Manual Instrumentation',
-                    route:
-                      '/docs/instrumentation/manual-instrumentation/python/manual-instrumentation',
                   },
                 ],
               },
