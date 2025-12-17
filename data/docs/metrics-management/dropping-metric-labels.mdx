@@ -1,0 +1,184 @@
+---
+date: 2025-12-17
+title: Dropping labels
+description: Doc explaining the misconceptions about droppping metric labels
+tags : ["SigNoz Cloud", "Self-Host"]
+id: dropping-metric-labels
+---
+
+## Overview
+
+A common misconception when working with metrics in OpenTelemetry is that removing labels (attributes) using processors like `attributes` will reduce metric cardinality and, consequently, the number of samples ingested. This document explains why this approach doesn't work as expected and can actually lead to incorrect query results.
+
+## Understanding Samples and Cardinality
+
+**Sample**: A single measurement value at a specific point in time for a specific time series.
+
+**Time Series**: A unique combination of metric name + label set. For example, `{"k8s.pod.cpu.usage", "k8s.pod.name"="nginx-abc", "k8s.node.name"="worker-1"}` is one time series.
+
+**Cardinality**: The total number of unique time series for a metric.
+
+When a metric is scraped or collected, the instrumentation creates samples *at the source*. Each unique combination of labels produces a distinct sample. The key insight is: **samples are created before they reach your processor in the collector pipeline**.
+
+## Why Dropping Labels Doesn't Reduce Samples
+
+### scenario 1
+
+Consider this scenario with `k8s.pod.network.io`:
+
+```
+# Original data points (3 samples created at source)
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-420", "k8s.pod.uid"="121-426-20", interface="eth0"} 1000
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-240", "k8s.pod.uid"="132-245-23", interface="eth0"} 500
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-69", "k8s.pod.uid"="120-693-69", interface="lo"}   200
+```
+
+If you use an attributes processor to delete the `k8s.pod.uid` label:
+
+```yaml
+processors:
+  attributes/drop:
+    actions:
+      - key: k8s.pod.uid
+        action: delete
+```
+
+You now have:
+
+```
+# After dropping the label (still 3 samples!)
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-420", interface="eth0"} 1000
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-240", interface="eth0"} 500
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-69", interface="lo"}   200
+```
+
+**The number of samples hasn't changed**:you still have 3 data points. You've only removed the label.
+
+### scenario 2
+
+Consider this scenario with `k8s.pod.network.io`:
+
+```
+# Original data points (3 samples created at source)
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-420", "k8s.pod.uid"="121-426-20", interface="eth0"} 1000
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-240", "k8s.pod.uid"="132-245-23", interface="eth0"} 500
+{"k8s.pod.network.io", "k8s.pod.name"="nginx-69", "k8s.pod.uid"="120-693-69", interface="lo"}   200
+```
+
+If you use an attributes processor to delete the `k8s.pod.uid` and `k8s.pod.name` labels:
+
+```yaml
+processors:
+  attributes/drop:
+    actions:
+      - key: k8s.pod.uid
+        action: delete
+      - key: k8s.pod.name
+        action: delete
+```
+
+You now have:
+
+```
+# After dropping the label (still 3 samples!)
+{"k8s.pod.network.io", interface="eth0"} 1000
+{"k8s.pod.network.io", interface="eth0"} 500
+{"k8s.pod.network.io", interface="lo"}   200
+```
+
+**The number of samples hasn't changed**:you still have 3 data points. You've only removed the labels and as a consequence the data has duplicate series.
+
+## How This Leads to Incorrect Results
+
+When multiple samples share the same label set after dropping a distinguishing label, you create **duplicate time series**. This causes several problems:
+
+### 1. Data Collision and Ambiguity
+
+The metrics backend now receives multiple values for what appears to be the same time series. Depending on the backend:
+- Values may overwrite each other
+- Values may be arbitrarily selected
+- Queries may return unpredictable results
+
+On the SigNoz backend, all values are stored, which means the result may not be correct depending on the aggregation used.
+
+### 2. Incorrect Aggregations
+
+When you query and aggregate these metrics, the math becomes meaningless:
+
+Without the `k8s.pod.*` label, you can't properly distinguish between pods. The aggregation may double-count, miss data, or produce values that don't reflect reality.
+
+## The Correct Approach: Aggregation
+
+If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. Use the `metricstransformprocessor`:
+
+```yaml
+processors:
+  metricstransform/aggregate:
+    transforms:
+      - include: k8s.pod.network.io
+        action: update
+        operations:
+          - action: aggregate_labels
+            label_set: [interface]  # Labels to KEEP
+            aggregation_type: sum
+```
+
+This produces:
+
+```
+# After aggregation (2 samples with mathematically correct value)
+{"k8s.pod.network.io", "interface"="eth0"} 1500  # 1000 + 500
+{"k8s.pod.network.io", "interface"="lo"} 200
+```
+
+Now you have:
+- Reduced cardinality (2 time series instead of 3)
+- Reduced sample count
+- Mathematically correct values
+- Proper query behavior
+
+## Applying This to UID Labels
+
+For labels like `k8s.pod.uid`, `k8s.node.uid`, and similar identifiers:
+
+```yaml
+# This does NOT reduce cardinality or samples
+attributes/drop-ids:
+  actions:
+    - key: k8s.pod.uid
+      action: delete
+    - key: k8s.node.uid
+      action: delete
+```
+
+These UID labels often serve as unique identifiers. Dropping them without aggregation means:
+
+1. **Samples remain unchanged**: The collector already received N samples; removing the UID doesn't reduce N.
+
+2. **Potential data issues**: If the UID was the only distinguishing label between otherwise identical label sets, you now have duplicate series.
+
+3. **No cost savings**: Since billing is based on samples ingested, removing labels without reducing sample count has no impact on cost.
+
+## When Is It Safe to Drop Labels?
+
+Dropping labels (without aggregation) is only safe when:
+
+1. **The label is purely informational**: It doesn't distinguish between different sources of data (e.g., a `version` label that's the same across all pods).
+
+2. **The label doesn't affect uniqueness**: Removing it won't create duplicate time series.
+
+3. **You don't need the label for querying**: You're certain you'll never need to filter or group by this label.
+
+## Summary
+
+| Action | Effect on Samples | Effect on Labels | Data Correctness |
+|--------|-------------------|------------------|------------------|
+| Drop label with `attributes` processor | No change | Label removed | Potentially incorrect |
+| Aggregate with `metricstransform` | Reduced | Labels aggregated away | Correct |
+| Filter/drop entire metric | Reduced | N/A | Correct (data removed) |
+| Control at source | Reduced | Labels never created | Correct |
+
+## References
+
+- [MetricsTransform Processor - Aggregate Labels](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md#aggregate-labels)
+- [Prometheus Users Discussion on Label Dropping](https://groups.google.com/g/prometheus-users/c/WjjWMAbLcK8/m/HQyyN2I9AgAJ)
