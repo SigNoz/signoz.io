@@ -248,6 +248,14 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Host Metrics Dashboard Template',
   },
   {
+    name: 'Inkeep',
+    href: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Inkeep Dashboard Template',
+  },
+  {
     name: 'Jenkins',
     href: 'https://github.com/SigNoz/dashboards/tree/main/jenkins',
     icon: <SiJenkins className="h-7 w-7 text-blue-700" />,
