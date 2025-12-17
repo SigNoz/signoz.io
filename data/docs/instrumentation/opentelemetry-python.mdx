@@ -17,7 +17,6 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 - Python 3.8 or newer
 - A SigNoz Cloud account or self-hosted SigNoz instance
-- Your application code
 
 Tested with Python 3.11 and OpenTelemetry Python SDK v1.27.0.
 
@@ -78,73 +77,15 @@ See [Framework instrumentation](#framework-instrumentation) below for framework-
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 
-For Python applications on Kubernetes, you can use:
-- **K8s OTel Operator** (recommended) — Auto-injects instrumentation without code changes
-- **OTel Collector Agent** — Manual instrumentation with collector handling forwarding
+Use the [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) to inject instrumentation into your Python pods.
 
-<Tabs entityName="k8s-method">
-<TabItem value="k8s-otel-operator" label="K8s OTel Operator" default>
+### Step 1. Set up the OpenTelemetry Operator
 
-The <a href="https://opentelemetry.io/docs/kubernetes/operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator</a> manages collectors and auto-instrumentation in Kubernetes.
+Install the Operator and Collector following the [K8s OTel Operator installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/).
 
-### Step 1. Install cert-manager
+### Step 2. Create the Instrumentation resource
 
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
-kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
-```
-
-### Step 2. Install OpenTelemetry Operator
-
-```bash
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
-```
-
-### Step 3. Create the OpenTelemetry Collector instance
-
-Create `otel-collector.yaml`:
-
-```yaml:otel-collector.yaml
-apiVersion: opentelemetry.io/v1alpha1
-kind: OpenTelemetryCollector
-metadata:
-  name: otel-collector
-spec:
-  mode: deployment
-  config: |
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
-    processors:
-      batch: {}
-    exporters:
-      otlp:
-        endpoint: "ingest.<region>.signoz.cloud:443"
-        tls:
-          insecure: false
-        headers:
-          "signoz-ingestion-key": "<your-ingestion-key>"
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
-```
-
-Replace `<region>` and `<your-ingestion-key>` with your SigNoz Cloud values.
-
-```bash
-kubectl apply -f otel-collector.yaml
-```
-
-### Step 4. Create the Instrumentation instance
-
-Create `instrumentation.yaml`:
+Create `instrumentation.yaml` to configure Python auto-instrumentation:
 
 ```yaml:instrumentation.yaml
 apiVersion: opentelemetry.io/v1alpha1
@@ -161,69 +102,16 @@ spec:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
 ```
 
-```bash
-kubectl apply -f instrumentation.yaml
+Deploy this resource to your cluster.
+
+### Step 3. Add annotations to your deployment
+
+Add these annotations to your pod template's `metadata.annotations`:
+
+```yaml
+instrumentation.opentelemetry.io/inject-python: "true"
+instrumentation.opentelemetry.io/otel-python-platform: "glibc"  # or "musl" for Alpine
 ```
-
-### Step 5. Add annotations to your deployment
-
-```yaml:deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: python-app
-spec:
-  selector:
-    matchLabels:
-      app: python-app
-  template:
-    metadata:
-      labels:
-        app: python-app
-      annotations:
-        instrumentation.opentelemetry.io/inject-python: "true"
-        instrumentation.opentelemetry.io/otel-python-platform: "glibc"  # or "musl" for Alpine
-        resource.opentelemetry.io/service.name: "python-app"
-    spec:
-      containers:
-      - name: app
-        image: python-app:latest
-        ports:
-        - containerPort: 8080
-```
-
-```bash
-kubectl apply -f deployment.yaml
-```
-
-</TabItem>
-<TabItem value="otel-collector-agent" label="OTel Collector Agent">
-
-Install the OTel Collector agent in your cluster first. See [Kubernetes infrastructure metrics](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/). The collector handles forwarding to SigNoz, so your app doesn't need the ingestion key.
-
-### Step 1. Add OpenTelemetry to requirements.txt
-
-```txt
-opentelemetry-distro
-opentelemetry-exporter-otlp
-```
-
-### Step 2. Update your Dockerfile
-
-```dockerfile:Dockerfile
-RUN pip install --no-cache-dir -r requirements.txt
-RUN opentelemetry-bootstrap --action=install
-
-ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
-ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-
-# See Framework instrumentation section for the correct CMD
-CMD ["opentelemetry-instrument", "python", "app.py"]
-```
-
-</TabItem>
-</Tabs>
 
 </TabItem>
 <TabItem value="windows" label="Windows">
