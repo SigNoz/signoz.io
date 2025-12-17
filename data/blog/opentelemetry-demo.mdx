@@ -15,21 +15,22 @@ keywords: [opentelemetry, opentelemetry demo application, signoz, monitoring, de
 — Brian W. Kernighan and P. J. Plauge, *The Elements of Programming Style*, 2nd ed.
 
 Maybe you can let SigNoz do some heavy lifting for you!
-	
 
-## Introducing The OpenTelemetery [OTel] Demo Application
+## Introducing the OpenTelemetry [OTel] Demo Application
 
-OpenTelemetry Demo Application is a robust project created and maintained by the OpenTelemetry community as a quick start for anyone trying to experiment with [OpenTelemetry](https://opentelemetry.io/docs/what-is-opentelemetry/), the open-source observability standard. It is also a great reference as it presents a distributed system with **15 core micro-services** in a **polyglot environment**, with services written in Go, Python, .NET, Java, etc., talking to each other over **gRPC and HTTP**.
+OpenTelemetry Demo Application is a robust project created and maintained by the OpenTelemetry community as a quick start for anyone trying to experiment with [OpenTelemetry](https://opentelemetry.io/docs/what-is-opentelemetry/), the open-source observability standard.
+
+The <a href="https://github.com/open-telemetry/opentelemetry-demo/tree/main/src" rel="noopener noreferrer nofollow" target="_blank">source code</a>  serves as a great reference as it provides OpenTelemetry examples for **15 core microservices** written in Go, Python, .NET, Java, etc., talking to each other over **gRPC and HTTP**, and their idiomatic instrumentation methods. Developers can use it to understand the rationale behind the instrumentation process on a per-service level, and apply the same patterns in their codebases.
 
 What appears to be a *simple astronomy online shop* to purchase stargazing tools is a full-fledged project developed with the intention of allowing developers to explore a *production-lite* deployment with built-in capability to simulate failures with flags and a load generator to fake user traffic. It comes fully instrumented with **OpenTelemetry client libraries** and an **OpenTelemetry Collector** to collect all the telemetry data, aggregate, process it, and forward it to a backend of your choice. Here, we will be using SigNoz as our backend for observability.
 
 ## Architecture Overview for OpenTelemetry Example App
 
 <KeyPointCallout title="Skip to Setup" defaultCollapsed={false}>
-If you are not interested in the architecture, you can skip to the [Send OpenTelemetry Demo App Telemetry to SigNoz](#send-opentelemetry-demo-app-telemetry-to-signoz) section.
+If you want to jump directly to the implementation, skip to the [Send OpenTelemetry Demo App Telemetry to SigNoz](#send-opentelemetry-demo-app-telemetry-to-signoz) section.
 </KeyPointCallout>
 
-Before we start sending data, it helps to understand the architecture we are dealing with. Understanding the service dependencies is key when using this project as an opentelemetry example for debugging.
+Before we start sending data, it helps to understand the architecture we are dealing with. Understanding the service dependencies is key when using this project as an OpenTelemetry example for debugging.
 
 The application simulates an e-commerce store with a complex flow:
 - **Frontend (Next.js/TypeScript)**: Handles user requests and forwards them to backend services via HTTP and gRPC.
