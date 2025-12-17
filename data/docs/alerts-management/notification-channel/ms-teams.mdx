@@ -1,8 +1,9 @@
 ---
-date: 2024-06-06
+date: 2025-12-15
 id: ms-teams
 tags: [SigNoz Cloud, Self-Host]
 title: Configure Microsoft Teams Channel
+description: Configure Microsoft Teams as a notification channel in SigNoz to receive alerts in your teams' channels.
 ---
 
 ## Prerequisite
@@ -60,6 +61,43 @@ The resolve alerts toggle is switched on by default. To turn-off receiveing the 
 - Toggle off the **Send resolved alerts** button and hit `Save`.
 
 <Figure src="/img/docs/alerts/resolved-alerts.webp" alt="Turn off receiveing resolved alerts notifications." caption="Turn off receiveing resolved alerts notifications." />
+
+## Configure programmatically
+
+You can also configure the MS Teams notification channel programmatically using the SigNoz API.
+
+**API Endpoint:** `POST /api/v1/channels`
+
+To create a new MS Teams notification channel, send a `POST` request to the `/api/v1/channels` endpoint with the following `curl` command:
+
+```bash
+curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
+  -H 'SIGNOZ-API-KEY: YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "Prod Critical Alerts - MSTeams",
+    "msteamsv2_configs": [
+        {
+            "send_resolved": true,
+            "webhook_url": "https://examplewebhhook.com",
+            "title": "[{{ .Status | toUpper }}{{ if eq .Status \"firing\" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}\n {{- if gt (len .CommonLabels) (len .GroupLabels) -}}\n {{\" \"}}(\n {{- with .CommonLabels.Remove .GroupLabels.Names }}\n {{- range $index, $label := .SortedPairs -}}\n {{ if $index }}, {{ end }}\n {{- $label.Name }}=\"{{ $label.Value -}}\"\n {{- end }}\n {{- end -}}\n )\n {{- end }}",
+            "text": "{{ range .Alerts -}}\n *Alert:* {{ .Labels.alertname }}{{ if .Labels.severity }} - {{ .Labels.severity }}{{ end }}\n\n *Summary:* {{ .Annotations.summary }}\n *Description:* {{ .Annotations.description }}\n *RelatedLogs:* {{ if gt (len .Annotations.related_logs) 0 -}} View in <{{ .Annotations.related_logs }}|logs explorer> {{- end}}\n *RelatedTraces:* {{ if gt (len .Annotations.related_traces) 0 -}} View in <{{ .Annotations.related_traces }}|traces explorer> {{- end}}\n\n *Details:*\n {{ range .Labels.SortedPairs }} • *{{ .Name }}:* {{ .Value }}\n {{ end }}\n {{ end }}"
+        }
+    ]
+}'
+```
+
+**Request Body Attributes:**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The name of the receiver/channel. **Required**; must be unique in all the config. |
+| `msteamsv2_configs` | `array` | List of MS Teams V2 configurations. |
+| `msteamsv2_configs[].send_resolved` | `boolean` | Whether to send notifications when an alert is resolved. |
+| `msteamsv2_configs[].webhook_url` | `string` | The MS Teams Incoming Webhook URL. **Mandatory**. Must be a valid URL. |
+| `msteamsv2_configs[].title` | `string` | Templated title of the message. Go templates are supported. |
+| `msteamsv2_configs[].text` | `string` | Templated text of the message. Go templates are supported. |
+
 
 ## Troubleshooting
 If you encounter issues with the Microsoft Teams integration:
