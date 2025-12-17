@@ -2,7 +2,7 @@
 date: 2025-12-16
 id: inkeep-monitoring-with-opentelemetry
 tags: [SigNoz Cloud, Self-Host]
-title: Inkeep Monitoring with SigNoz
+title: Inkeep Monitoring with OpenTelemetry and SigNoz
 description: Monitoring and observability for Inkeep performance and usage with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
 doc_type: howto
 ---
@@ -77,11 +77,16 @@ You'll need to collect three pieces of information from your SigNoz dashboard:
 ```bash:.env
 # SigNoz
 SIGNOZ_URL=https://<your-organization>.signoz.cloud
-SIGNOZ_API_KEY=<your-api-key>
+SIGNOZ_API_KEY=<your-signoz-api-key>
 
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://ingest.us.signoz.cloud:443/v1/traces
-OTEL_EXPORTER_OTLP_TRACES_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/traces
+OTEL_EXPORTER_OTLP_TRACES_HEADERS="signoz-ingestion-key=<your_ingestion_key>"
 ```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-organization>` with your SigNoz Cloud instance name
+- Replace `<your-signoz-api-key>` with your SigNoz API Key. 
+- Replace `<your_ingestion_key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 </TabItem>
 
@@ -89,13 +94,17 @@ OTEL_EXPORTER_OTLP_TRACES_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 
 ```bash:.env
 # SigNoz Configuration
-SIGNOZ_URL=http://localhost:8080
-SIGNOZ_API_KEY=your-signoz-api-key
+SIGNOZ_URL=<your-local-signoz-instance>
+SIGNOZ_API_KEY=<your-signoz-api-key>
 
 # IMPORTANT: Comment out the OTEL Configuration
-# OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://ingest.us.signoz.cloud:443/v1/traces
-# OTEL_EXPORTER_OTLP_TRACES_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+# OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/traces
+# OTEL_EXPORTER_OTLP_TRACES_HEADERS="signoz-ingestion-key=<your_ingestion_key>"
 ```
+
+- Replace `<your-local-signoz-instance>` with the localhost and port you are runnign SigNoz on. For example: `http://localhost:8080`
+- Replace `<your-organization>` with your SigNoz Cloud instance name
+- Replace <your-signoz-api-key> with your SigNoz API Key. 
 
 </TabItem>
 </Tabs>
