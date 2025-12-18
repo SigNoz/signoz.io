@@ -1,5 +1,5 @@
 ---
-date: 2025-12-11
+date: 2025-12-17
 id: nodejs
 
 title: Node.js OpenTelemetry Instrumentation
@@ -32,16 +32,10 @@ A VM is a virtual computer that runs on physical hardware. This includes:
 Use this section if you're deploying your Node.js application directly on a server or VM without containerization.
 </KeyPointCallout>
 
-<Tabs entityName="instrumentation">
+<Tabs entityName="instrumentation-method">
 <TabItem value="no-code" label="No Code (Recommended)" default>
 
-### Step 1. Install OpenTelemetry packages
-
-```bash
-npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
-```
-
-### Step 2. Run the application
+### Step 1. Set environment variables
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
@@ -50,13 +44,24 @@ export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<service-name>"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
-node app.js
 ```
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `<service-name>`: Name of your service (e.g., `payment-service`).
+
+### Step 2. Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
+```
+
+### Step 3. Run the application
+
+```bash
+node app.js
+```
 
 </TabItem>
 <TabItem value="code-level" label="Code Level">
@@ -138,7 +143,7 @@ sdk.start();
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `<service-name>`: Name of your service (e.g., `payment-service`).
 
 ### Step 3. Run the application
 
@@ -175,7 +180,54 @@ npx ts-node src/index.ts
 
 <TabItem value="k8s" label="Kubernetes">
 
-Use the [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) to inject instrumentation into your Node.js pods.
+<Tabs entityName="k8s-method">
+<TabItem value="direct" label="Direct" default>
+
+<KeyPointCallout title="Managing multiple services?">
+Consider using the [OTel Operator](#otel-operator) for centralized instrumentation management across your cluster.
+</KeyPointCallout>
+
+### Step 1. Set environment variables
+
+Add OpenTelemetry environment variables to your Kubernetes deployment manifest:
+
+```yaml
+env:
+- name: OTEL_TRACES_EXPORTER
+  value: 'otlp'
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_NODE_RESOURCE_DETECTORS
+  value: 'env,host,os'
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: NODE_OPTIONS
+  value: '--require @opentelemetry/auto-instrumentations-node/register'
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: Name of your service (e.g., `payment-service`).
+
+### Step 2. Install OpenTelemetry packages
+
+Ensure your application image includes the OpenTelemetry packages:
+
+```bash
+npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
+```
+
+### Step 3. Deploy and run
+
+Apply your deployment to the cluster. The environment variables will configure OpenTelemetry automatically when your application starts.
+
+</TabItem>
+<TabItem value="otel-operator" label="OTel Operator">
+
+The [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) auto-injects instrumentation into your Node.js pods without modifying your application image.
 
 ### Step 1. Set up the OpenTelemetry Operator
 
@@ -211,19 +263,16 @@ instrumentation.opentelemetry.io/inject-nodejs: "true"
 ```
 
 </TabItem>
+</Tabs>
+
+</TabItem>
 
 <TabItem value="windows" label="Windows">
 
-<Tabs entityName="instrumentation">
+<Tabs entityName="instrumentation-method">
 <TabItem value="no-code" label="No Code (Recommended)" default>
 
-### Step 1. Install OpenTelemetry packages
-
-```bash
-npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
-```
-
-### Step 2. Run the application (PowerShell)
+### Step 1. Set environment variables (PowerShell)
 
 ```powershell
 $env:OTEL_TRACES_EXPORTER = "otlp"
@@ -232,13 +281,24 @@ $env:OTEL_NODE_RESOURCE_DETECTORS = "env,host,os"
 $env:OTEL_SERVICE_NAME = "<service-name>"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:NODE_OPTIONS = "--require @opentelemetry/auto-instrumentations-node/register"
-node app.js
 ```
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: A descriptive name for your service.
+- `<service-name>`: Name of your service.
+
+### Step 2. Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/api @opentelemetry/auto-instrumentations-node
+```
+
+### Step 3. Run the application
+
+```powershell
+node app.js
+```
 
 </TabItem>
 <TabItem value="code-level" label="Code Level">
@@ -328,7 +388,7 @@ process.on('SIGTERM', () => {
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: A descriptive name for your service.
+- `<service-name>`: Name of your service.
 
 ### Step 3. Run the application
 
@@ -378,7 +438,7 @@ docker run \
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+- `<service-name>`: Name of your service (e.g., `payment-service`).
 
 ### Step 2. Build and run
 
@@ -437,10 +497,11 @@ Look for span output like this in your console:
 
 ### Short-lived applications (Lambda/Serverless)
 
-If your application exits quickly, explicitly shutdown the tracer to flush all spans:
+If your application exits quickly, explicitly shutdown the SDK to flush all spans:
 
 ```javascript
-opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutdown()
+// Assumes 'sdk' is your NodeSDK instance from the setup
+await sdk.shutdown();
 ```
 
 ### Service not appearing in SigNoz
@@ -462,10 +523,10 @@ The OTel Collector acts as a middleman between your app and SigNoz. Instead of s
 
 ### Why use it?
 
-- **Cleaning up data** - Filter out noisy traces or remove sensitive info before it leaves your servers.
-- **Keeping your app lightweight** - Let the Collector handle batching, retries, and compression.
-- **Adding context automatically** - Tag data with Kubernetes pod info or cloud region.
-- **Future flexibility** - Send data to multiple backends without changing your app.
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
 
 See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions.
 

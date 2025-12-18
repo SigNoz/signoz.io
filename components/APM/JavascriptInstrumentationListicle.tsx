@@ -132,15 +132,15 @@ export default function JavascriptInstrumentationListicle({
         cards={[
           {
             name: 'Manual Node.js Instrumentation',
-            href: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs',
+            href: '/docs/instrumentation/javascript/nodejs-manual-instrumentation',
             icon: <SiJavascript className="h-7 w-7 text-yellow-500" />,
             clickName: 'Manual Node.js Instrumentation Link',
           },
           {
             name: 'Selective Auto-Instrumentation',
-            href: '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation',
+            href: '/docs/instrumentation/javascript/nodejs-selective-instrumentation',
             icon: <SiNodedotjs className="h-7 w-7 text-green-500" />,
-            clickName: 'Selective Instrumentation Link',
+            clickName: 'Selective Auto-Instrumentation Link',
           },
           {
             name: 'Enable OTLP HTTP CORS',
