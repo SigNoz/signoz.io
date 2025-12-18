@@ -1108,6 +1108,16 @@ module.exports = () => {
           destination: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
           permanent: true,
         },
+        {
+          source: '/docs/userguide/collecting_application_logs_otel_sdk_python/',
+          destination: '/docs/logs-management/send-logs/python-logs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/python-logs-auto-instrumentation/',
+          destination: '/docs/logs-management/send-logs/python-logs/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
