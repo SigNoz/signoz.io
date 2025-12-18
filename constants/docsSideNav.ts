@@ -2450,6 +2450,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/inkeep-monitoring',
+        label: 'Inkeep',
+        type: 'doc',
+      },
+      {
         route: '/docs/langchain-observability',
         label: 'LangChain/LangGraph',
         type: 'doc',
