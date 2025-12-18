@@ -1,6 +1,6 @@
 ---
 
-title: Prometheus Node Exporter - Running in Production [Part 2] 
+title: Prometheus Node Exporter - Metrics Configuration & Alerting
 slug: prometheus-node-exporter-metrics 
 date: 2025-12-17
 tags: [prometheus, node-exporter] 
@@ -10,7 +10,18 @@ keywords: [prometheus node exporter, linux monitoring, node exporter, kubernetes
 
 ---
 
-In [Part 1 - Prometheus Node Exporter: Install, Run & Visualize](https://signoz.io//guides/prometheus-node-exporter/), you set up Prometheus Node Exporter, configured Prometheus to scrape host-level metrics, and verified that your system was emitting and collecting data correctly. While this setup works well for learning and small environments, production systems demand a more deliberate approach.
+<ArticleSeriesTop
+  seriesName="Prometheus Node Exporter Tutorial"
+  seriesOverviewHref="/guides/prometheus-node-exporter"
+  currentPart={2}
+  totalParts={2}
+  previous={{
+    title: 'Prometheus Node Exporter - Install, Run & Visualize',
+    href: '/guides/prometheus-node-exporter',
+  }}
+/>
+
+In earlier part, [Prometheus Node Exporter: Install, Run & Visualize](/guides/prometheus-node-exporter/), you set up Prometheus Node Exporter, configured Prometheus to scrape host-level metrics, and verified that your system was emitting and collecting data correctly. While this setup works well for learning and small environments, production systems demand a more deliberate approach.
 
 As infrastructure scales, Node Exporter can quickly become a high-volume, high-cardinality signal source. Running it effectively in production isn’t about collecting every available metric, it’s about reducing noise, focusing on the signals that matter, and turning raw metrics into actionable insights. In this part, we’ll dive into tuning collectors, identifying critical host metrics, exposing custom signals, and configuring alerting rules that reflect real-world operational risks.
 
@@ -29,9 +40,9 @@ In production, every metric should serve a purpose (dashboards, alerts, or capac
 
 ## Configuring Node Exporter Collectors
 
-Node Exporter ships with 70+ collectors, most of which are enabled by default. You can explore the complete list of collectors and the metrics they expose in the <a href="https://github.com/prometheus/node_exporter" rel="noopener noreferrer nofollow" target="_blank">official Node Exporter GitHub repository</a>. 
-
 Collectors determine which categories of system metrics Node Exporter exposes, such as CPU, memory, disks, networking, thermal sensors, filesystem stats, etc.
+
+Node Exporter ships numerous collectors, most of which are enabled by default. You can explore the complete list of collectors and the metrics they expose in the <a href="https://github.com/prometheus/node_exporter" rel="noopener noreferrer nofollow" target="_blank">Official Node Exporter GitHub repository</a>. 
 
 You can control collectors at startup time using flags such as:
 
@@ -41,19 +52,19 @@ You can control collectors at startup time using flags such as:
 
 **For Example**
 
-- Enable the processes collector (disabled by default)
+Enable the processes collector (disabled by default)
     
     ```bash
     ./node_exporter --collector.processes
     ```
     
-- Disable the entropy collector
+Disable the entropy collector
     
     ```bash
     ./node_exporter --no-collector.entropy
     ```
     
-- Minimal mode: enable only CPU and memory collectors:
+Minimal mode: enable only CPU and memory collectors:
     
     ```bash
     ./node_exporter \
@@ -133,6 +144,12 @@ echo "custom_failed_ssh_logins_total $(grep -c 'Failed password' /var/log/auth.l
 curl http://localhost:9100/metrics | grep custom_failed
 ```
 
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporte-custom-collector.webp"
+  alt="Custom Node Exporter metric exposed via textfile collector"
+  caption="Custom Node Exporter metric exposed via textfile collector"
+/>
+
 Now that you have both built-in and custom host metrics available, the next step is to set up alerting rules so Prometheus can notify you when your system enters an unhealthy state.
 
 ## Setting Up Most Common Node Exporter Alerting Rules
@@ -160,7 +177,7 @@ groups:
     rules:
       # CPU
       - alert: HighCPUUsage
-        # Triggers when average non-idle CPU usage exceeds 80% across all cores.
+        # Triggers when average non-idle CPU usage exceeds 85% across all cores.
         expr: (100 - avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[5m]) * 100)) > 85
         for: 5m
         labels:
@@ -170,7 +187,7 @@ groups:
 
       # Memory
       - alert: HighMemoryUsage
-        # Triggers when available memory drops below 10% of total memory.
+        # Triggers when available memory drops below 15% of total memory.
         expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
               / node_memory_MemTotal_bytes > 0.85
         for: 5m
@@ -200,7 +217,7 @@ groups:
         annotations:
           summary: "Low disk space on {{ $labels.instance }}"
 ```
-<KeyPointCallout defaultcollapsed="true" title="Alert Rule File: Technical Breakdown">
+<KeyPointCallout defaultCollapsed="true" title="Alert Rule File: Technical Breakdown">
 
 `alert`: Unique, stable name used by Prometheus and Alertmanager to identify, deduplicate, and track the alert.
 
@@ -248,7 +265,7 @@ scrape_configs:
 Once your `prometheus.yml` file is updated, reload Prometheus using the command below:
 
 ```bash
-curl -X POST http://localhost:9090/-/reload
+prometheus --config.file=./prometheus.yml
 ```
 
 **Step 4:** Verify That Prometheus Loaded Your Configuration
@@ -257,9 +274,29 @@ Once Prometheus is running, you can verify that your scrape targets and alert ru
 
 To do this, navigate to the following paths on your Prometheus server:
 
-- **Loaded rules page:** `/rules`
-- **Active alerts page:** `/alerts`
-- **Scrape the target's page:** `/targets`
+**Loaded rules page:** `/rules`
+
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporter-rules.webp"
+  alt="Prometheus Rule Health view showing Node Exporter alerting rules loaded successfully"
+  caption="Prometheus Rule Health view showing Node Exporter alerting rules loaded successfully"
+/>
+
+**Active alerts page:** `/alerts`
+
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporter-alerts.webp"
+  alt="Prometheus Alerts view showing Node Exporter alerting rules loaded and currently inactive"
+  caption="Prometheus Alerts view showing Node Exporter alerting rules loaded and currently inactive"
+/>
+
+**Scrape the target's page:** `/targets`
+
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporter-targets.webp"
+  alt="Prometheus Target Health view confirming the Node Exporter scrape target"
+  caption="Prometheus Target Health view confirming the Node Exporter scrape target"
+/>
 
 For example, if Prometheus is running locally on `port 9090`, these pages will be available at: `http://<your-prometheus-host>:9090/rules`, `/alerts`, and `/targets`.
 
@@ -273,7 +310,7 @@ When the configuration is correct, you should see:
 
 In this part, you moved beyond a default Node Exporter setup and focused on running it effectively in production. You learned how to tune collectors to reduce noise, identify the host metrics that actually matter, expose custom operational signals, and configure alerting rules that reflect real-world failure modes.
 
-By being intentional about what you collect and alert on, Node Exporter becomes a reliable signal for host health rather than a source of metric sprawl and alert fatigue. With these foundations in place, you’re now equipped to scale host monitoring confidently and integrate it into a broader observability strategy using OpenTelemetry and SigNoz.
+By being intentional about what you collect and alert on, Node Exporter becomes a reliable signal for host health rather than a source of metric sprawl and alert fatigue.
 
 ---
 
