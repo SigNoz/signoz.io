@@ -1938,6 +1938,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
+            label: 'Inkeep',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/jvm-metrics',
             label: 'JVM',
           },
