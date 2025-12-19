@@ -1711,7 +1711,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/metrics-management/dropping-metric-labels',
-        label: 'Dropping metric attributes/labels',
+        label: 'Dropping Metric Labels (Attributes)',
       },
       {
         type: 'category',

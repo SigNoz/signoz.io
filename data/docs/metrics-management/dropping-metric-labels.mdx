@@ -1,7 +1,7 @@
 ---
 date: 2025-12-17
-title: Dropping labels
-description: Doc explaining the misconceptions about dropping metric labels
+title: Dropping Metric Labels (Attributes)
+description: Explains why dropping metric labels (attributes) does not reduce cardinality or sample count and provides correct alternatives.
 doc_type: explanation
 tags: ["SigNoz Cloud", "Self-Host"]
 id: dropping-metric-labels
@@ -11,23 +11,24 @@ id: dropping-metric-labels
 
 A common misconception when working with metrics in OpenTelemetry is that removing labels (attributes) using processors like `attributes` will reduce metric cardinality and, consequently, the number of samples ingested. This document explains why this approach doesn't work as expected and can actually lead to incorrect query results.
 
-## Understanding Samples and Cardinality
+If you are looking to drop entire metrics (not just labels), see [How to Drop and Filter OpenTelemetry Metrics](https://signoz.io/docs/userguide/drop-metrics/).
+## Understanding Samples vs. Cardinality
 
-**Sample**: A single measurement value at a specific point in time for a specific time series.
+To understand why dropping labels doesn't work as an optimization strategy, we need to distinguish between **samples** and **cardinality**:
 
-**Time Series**: A unique combination of metric name + label set. For example, `{"k8s.pod.cpu.usage", "k8s.pod.name"="nginx-abc", "k8s.node.name"="worker-1"}` is one time series.
+- **Sample (Data Point)**: A single measurement value at a specific timestamp. Billing and network load are typically proportional to the number of samples processed.
+- **Time Series**: A unique combination of metric name + label set. For example, `{"k8s.pod.cpu.usage", "k8s.pod.name"="nginx-abc", "k8s.node.name"="worker-1"}` is one time series.
+- **Cardinality**: The total number of unique time series for a metric.
 
-**Cardinality**: The total number of unique time series for a metric.
-
-When a metric is scraped or collected, the instrumentation creates samples *at the source*. Each unique combination of labels produces a distinct sample. The key insight is: **samples are created before they reach your processor in the collector pipeline**.
+**Crucial Concept**: Samples are generated **at the source** (the application or scraper). If your scraper collects 1,000 samples per minute, your collector receives 1,000 samples per minute. Using a processor to remove a label *after* reception does not delete the sample itself, it only modifies the metadata attached to it.
 
 ## Why Dropping Labels Doesn't Reduce Samples
 
-### Scenario 1
+### Case 1: Removing a Non-Identifying Label
 
-Consider this scenario with `k8s.pod.network.io`:
+Suppose you have 3 distinct pods sending network metrics. The source generates 3 samples:
 
-```
+```text
 # Original data points (3 samples created at source)
 {"k8s.pod.network.io", "k8s.pod.name"="nginx-420", "k8s.pod.uid"="121-426-20", interface="eth0"} 1000
 {"k8s.pod.network.io", "k8s.pod.name"="nginx-240", "k8s.pod.uid"="132-245-23", interface="eth0"} 500
@@ -55,7 +56,7 @@ You now have:
 
 **The number of samples hasn't changed**: you still have 3 data points. You've only removed the label.
 
-### Scenario 2
+### Case 2: Removing an Identifying Label
 
 Consider this scenario with `k8s.pod.network.io`:
 
@@ -79,9 +80,8 @@ processors:
 ```
 
 You now have:
-
-```
-# After dropping the label (still 3 samples!)
+```text
+# Processed data points (Still 3 samples, but now colliding)
 {"k8s.pod.network.io", interface="eth0"} 1000
 {"k8s.pod.network.io", interface="eth0"} 500
 {"k8s.pod.network.io", interface="lo"}   200
@@ -110,7 +110,9 @@ Without the `k8s.pod.*` label, you can't properly distinguish between pods. The 
 
 ## The Correct Approach: Aggregation
 
-If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. Use the `metricstransformprocessor`:
+If you genuinely don't need granularity at a certain attribute level, the correct approach is to **aggregate** the values mathematically, not just drop the label. Use the [Metrics Transform Processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md) for this:
+
+For example, to view network traffic *per interface* (ignoring individual pods), you should `sum` the values of all pods for each interface. 
 
 ```yaml
 processors:
@@ -120,23 +122,21 @@ processors:
         action: update
         operations:
           - action: aggregate_labels
-            label_set: [interface]  # Labels to KEEP
+            label_set: [interface]  # List ONLY the labels you want to KEEP
             aggregation_type: sum
 ```
 
 This produces:
-
-```
+```text
 # After aggregation (2 samples with mathematically correct value)
-{"k8s.pod.network.io", "interface"="eth0"} 1500  # 1000 + 500
-{"k8s.pod.network.io", "interface"="lo"} 200
+{"k8s.pod.network.io", "interface"="eth0"} 1500  # Sum of 1000 + 500
+{"k8s.pod.network.io", "interface"="lo"} 200     # Sum of 200
 ```
 
 Now you have:
-- Reduced cardinality (2 time series instead of 3)
-- Reduced sample count
-- Mathematically correct values
-- Proper query behavior
+- **Reduced Cardinality**: 2 series instead of 3.
+- **Reduced Sample Count**: 2 samples stored instead of 3 (Lower cost).
+- **Correct Data**: The sum represents the total traffic accurately.
 
 ## Applying This to UID Labels
 
@@ -181,5 +181,5 @@ Dropping labels (without aggregation) is only safe when:
 
 ## References
 
-- [MetricsTransform Processor - Aggregate Labels](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md#aggregate-labels)
-- [Prometheus Users Discussion on Label Dropping](https://groups.google.com/g/prometheus-users/c/WjjWMAbLcK8/m/HQyyN2I9AgAJ)
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md#aggregate-labels" target="_blank" rel="noopener noreferrer nofollow">MetricsTransform Processor - Aggregate Labels</a>
+- <a href="https://groups.google.com/g/prometheus-users/c/WjjWMAbLcK8/m/HQyyN2I9AgAJ" target="_blank" rel="noopener noreferrer nofollow">Prometheus Users Discussion on Label Dropping</a>
