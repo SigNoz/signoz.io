@@ -1,0 +1,183 @@
+---
+date: 2025-12-16
+id: inkeep-monitoring-with-opentelemetry
+tags: [SigNoz Cloud, Self-Host]
+title: Inkeep Monitoring with OpenTelemetry and SigNoz
+description: Monitoring and observability for Inkeep performance and usage with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through setting up monitoring and observability for Inkeep using [OpenTelemetry](https://opentelemetry.io/) and exporting traces to SigNoz. With this integration, you can observe the performance of various models, capture request/response details, and track system-level metrics in SigNoz, giving you real-time visibility into latency, error rates, and usage trends for your Inkeep applications.
+
+Instrumenting Inkeep agents in your AI applications with telemetry ensures full observability across your agent workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces in dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+## Prerequisites
+Before getting started, ensure you have the following installed on your system:
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Node.js version 22 or higher
+- Docker
+- pnpm version 10 or higher
+
+
+You can verify by running:
+
+```bash
+node --version
+pnpm --version
+docker --version
+```
+
+## Monitoring Inkeep
+
+For more information on getting started with Inkeep, visit the [Inkeep Quick Start Guide](https://docs.inkeep.com/get-started/quick-start). To learn more about setting up traces in Inkeep and sending them to SigNoz, see the [Inkeep Traces Documentation](https://docs.inkeep.com/get-started/traces).
+
+### Step 1: Create a new agents project
+Run the Inkeep quickstart script on a target folder:
+
+```bash
+npx @inkeep/create-agents my-agents
+```
+
+Navigate to the folder
+
+```bash
+cd my-agents
+```
+
+Open the folder using your coding editor. To open with Cursor, you can run `cursor .`
+
+### Step 2: Save Your SigNoz Credentials
+
+You'll need to collect three pieces of information from your SigNoz dashboard:
+
+**API Key:**
+
+1. Navigate to Settings → Workspace Settings → API Keys → New Key
+2. Choose any role (Admin, Editor, or Viewer) - Viewer is sufficient for observability
+3. Set the expiration field to "No Expiry" to prevent the key from expiring
+4. Copy the generated API key
+
+**Ingestion Key:**
+
+1. Navigate to Settings → Workspace Settings → Ingestion
+2. Set the expiration field to "No Expiry" to prevent the key from expiring
+3. Copy the ingestion key
+
+**SigNoz URL:**
+
+1. Copy the URL from your browser's address bar
+2. It will look like: `https://<your-organization>.signoz.cloud`
+
+### Step 3: Configure Your Root .env File
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+```bash:.env
+# SigNoz
+SIGNOZ_URL=https://<your-organization>.signoz.cloud
+SIGNOZ_API_KEY=<your-signoz-api-key>
+
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/traces
+OTEL_EXPORTER_OTLP_TRACES_HEADERS=signoz-ingestion-key=<your_ingestion_key>
+```
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-organization>` with your SigNoz Cloud instance name
+- Replace `<your-signoz-api-key>` with your SigNoz API Key. 
+- Replace `<your_ingestion_key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
+
+<TabItem value="self-hosted" label="SigNoz Self-Hosted">
+
+```bash:.env
+# SigNoz Configuration
+SIGNOZ_URL=<your-local-signoz-instance>
+SIGNOZ_API_KEY=<your-signoz-api-key>
+```
+
+- Replace `<your-local-signoz-instance>` with the localhost and port you are running SigNoz on. For example: `http://localhost:8080`
+- Replace `<your-signoz-api-key>` with your SigNoz API Key. 
+
+</TabItem>
+</Tabs>
+
+
+
+### Step 4: Run the setup script
+Ensure Docker Desktop (or Docker daemon) is running before running the setup script.
+
+```bash
+pnpm setup-dev
+```
+
+Or if you are using a cloud database, you can skip the docker database startup by running:
+
+```bash
+pnpm setup-dev --skip-docker
+```
+
+Make sure your DATABASE_URL environment variable is configured for your cloud database.
+
+### Step 5: Launch the dev environment
+
+```bash
+pnpm dev
+```
+
+The Visual Builder will auto-open at http://localhost:3000.
+
+
+## View Traces in SigNoz
+
+Your Inkeep agents usage should now automatically emit traces.
+
+You should be able to view traces in Signoz Cloud under the traces tab:
+
+<Figure
+  src="/img/docs/llm/inkeep/inkeep-traces.webp"
+  alt="Inkeep Trace View"
+  caption="Inkeep Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure
+  src="/img/docs/llm/inkeep/inkeep-detailed-traces.webp"
+  alt="Inkeep Detailed Trace View"
+  caption="Inkeep Detailed Trace View"
+/>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+If you don't see your telemetry data:
+
+1. **Verify network connectivity** - Ensure your application can reach SigNoz ingestion endpoints
+2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
+3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+
+</details>
+
+## Next Steps
+
+You can also check out our custom Inkeep dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/inkeep-dashboard/) which provides specialized visualizations for monitoring your Inkeep usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/inkeep/inkeep-dashboard.webp"
+  alt="Inkeep Dashboard"
+  caption="Inkeep Dashboard Template"
+/>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/product-features/trace-explorer)
+- Explore [log correlation](https://signoz.io/docs/product-features/logs-explorer)
+
+

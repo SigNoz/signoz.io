@@ -123,16 +123,10 @@ export default function LogsInstrumentationListicle({
       <IconCardGrid
         cards={[
           {
-            name: 'Python OTel SDK',
-            href: '/docs/userguide/collecting_application_logs_otel_sdk_python',
+            name: 'Python',
+            href: '/docs/logs-management/send-logs/python-logs',
             icon: <SiPython className="h-7 w-7 text-blue-500" />,
-            clickName: 'Python OTel SDK Logs Link',
-          },
-          {
-            name: 'Python Auto-Instrumentation',
-            href: '/docs/userguide/python-logs-auto-instrumentation',
-            icon: <SiPython className="h-7 w-7 text-blue-600" />,
-            clickName: 'Python Auto Logs Link',
+            clickName: 'Python Logs Link',
           },
           {
             name: 'Java OTel SDK',

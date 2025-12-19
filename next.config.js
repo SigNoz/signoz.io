@@ -294,6 +294,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/blog/monitoring-your-go-application-with-signoz/',
+          destination: '/blog/golang-monitoring/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/nodejs/',
           destination: '/docs/instrumentation/javascript/',
           permanent: true,
@@ -367,12 +372,12 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/celery/',
-          destination: '/docs/instrumentation/opentelemetry-celery/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/django/',
-          destination: '/docs/instrumentation/opentelemetry-django/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
@@ -392,17 +397,17 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/falcon/',
-          destination: '/docs/instrumentation/opentelemetry-falcon/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/fastapi/',
-          destination: '/docs/instrumentation/opentelemetry-fastapi/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/flask/',
-          destination: '/docs/instrumentation/opentelemetry-flask/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
         {
@@ -497,6 +502,67 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/python/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-django/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-flask/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-fastapi/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-falcon/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-celery/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        // Python framework-specific redirects to consolidated page
+        {
+          source: '/docs/instrumentation/opentelemetry-python/django/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/flask/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/fastapi/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/falcon/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/celery/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-python/python/',
           destination: '/docs/instrumentation/opentelemetry-python/',
           permanent: true,
         },
@@ -1040,6 +1106,16 @@ module.exports = () => {
         {
           source: '/docs/migration/migrate-from-opentelemetry/self-hosted/',
           destination: '/docs/migration/migrate-from-opentelemetry-to-signoz/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/collecting_application_logs_otel_sdk_python/',
+          destination: '/docs/logs-management/send-logs/python-logs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/python-logs-auto-instrumentation/',
+          destination: '/docs/logs-management/send-logs/python-logs/',
           permanent: true,
         },
       ]

@@ -1,8 +1,9 @@
 ---
-date: 2024-06-06
+date: 2025-12-15
 id: opsgenie
 tags: [SigNoz Cloud, Self-Host]
 title: Configure Opsgenie Channel
+description: Integrate SigNoz with Opsgenie to manage alerts and on-call schedules effectively.
 ---
 
 ## Prerequisites
@@ -52,6 +53,45 @@ The resolve alerts toggle is switched on by default. To turn-off receiveing the 
 - Toggle off the **Send resolved alerts** button and hit `Save`.
 
 <Figure src="/img/docs/alerts/resolved-alerts.webp" alt="Turn off receiveing resolved alerts notifications." caption="Turn off receiveing resolved alerts notifications." />
+
+## Configure programmatically
+
+You can also configure the Opsgenie notification channel programmatically using the SigNoz API.
+
+**API Endpoint:** `POST /api/v1/channels`
+
+To create a new Opsgenie notification channel, send a `POST` request to the `/api/v1/channels` endpoint with the following `curl` command:
+
+```bash
+curl 'YOUR_SIGNOZ_CLOUD_URL/api/v1/channels' \
+  -H 'SIGNOZ-API-KEY: YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "name": "Platform Alerts - Opsgenie",
+    "opsgenie_configs": [
+        {
+            "api_key": "APIKey",
+            "description": "{{ if gt (len .Alerts.Firing) 0 -}}\n\tAlerts Firing:\n\t{{ range .Alerts.Firing }}\n\t - Message: {{ .Annotations.description }}\n\tLabels:\n\t{{ range .Labels.SortedPairs }} - {{ .Name }} = {{ .Value }}\n\t{{ end }} Annotations:\n\t{{ range .Annotations.SortedPairs }} - {{ .Name }} = {{ .Value }}\n\t{{ end }} Source: {{ .GeneratorURL }}\n\t{{ end }}\n\t{{- end }}\n\t{{ if gt (len .Alerts.Resolved) 0 -}}\n\tAlerts Resolved:\n\t{{ range .Alerts.Resolved }}\n\t - Message: {{ .Annotations.description }}\n\tLabels:\n\t{{ range .Labels.SortedPairs }} - {{ .Name }} = {{ .Value }}\n\t{{ end }} Annotations:\n\t{{ range .Annotations.SortedPairs }} - {{ .Name }} = {{ .Value }}\n\t{{ end }} Source: {{ .GeneratorURL }}\n\t{{ end }}\n\t{{- end }}",
+            "priority": "{{ if eq (index .Alerts 0).Labels.severity \"critical\" }}P1{{ else if eq (index .Alerts 0).Labels.severity \"warning\" }}P2{{ else if eq (index .Alerts 0).Labels.severity \"info\" }}P3{{ else }}P4{{ end }}",
+            "message": "{{ .CommonLabels.alertname }}",
+            "details": {}
+        }
+    ]
+}'
+```
+
+**Request Body Attributes:**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | `string` | The name of the receiver/channel. **Required**; must be unique in all the config. |
+| `opsgenie_configs` | `array` | List of Opsgenie configurations. |
+| `opsgenie_configs[].api_key` | `string` | The Opsgenie API Key. **Mandatory**. |
+| `opsgenie_configs[].description` | `string` | Templated description of the alert. Go templates are supported. |
+| `opsgenie_configs[].priority` | `string` | Priority of the alert (P1, P2, P3, P4, P5). Go templates are supported. |
+| `opsgenie_configs[].message` | `string` | Templated message of the alert. Go templates are supported. |
+| `opsgenie_configs[].details` | `object` | Additional details to include in the alert. |
+
 
 ## Troubleshooting
 If you encounter issues with the Opsgenie integration:
