@@ -652,7 +652,7 @@ git checkout -b add-new-content
      id: <unique-id-or-slug>
      title: <Title in Sentence Case>
      description: <1–2 line summary>
-     tags: [SigNoz Cloud, Self-Host]
+     # tags are optional — see Content Structure section above
      ---
      ```
      Then follow the “Content Structure” guidelines in this document for sections like Overview, Prerequisites, Steps, Validate, and Troubleshooting.
