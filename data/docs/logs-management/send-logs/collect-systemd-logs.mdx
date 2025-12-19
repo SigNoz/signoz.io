@@ -1,263 +1,148 @@
 ---
-date: 2025-06-25
-title: Collecting SystemD Logs (JournalD) 
-tags : [SigNoz Cloud, Self-Host]
+date: 2025-12-18
+title: Collecting systemd logs (journald)
+description: Configure OpenTelemetry Collector to collect systemd journal logs and send them to SigNoz. Learn about filtering by units, priority levels, and combining multiple criteria.
+tags: [SigNoz Cloud, Self-Host]
 id: collect-systemd-logs
-hide_table_of_contents: true
+doc_type: howto
 ---
 
 ## Overview
 
-This documentation provides detailed instructions on configuring the OpenTelemetry Collector to read logs from SystemD's journal (JournalD) and push them to SigNoz. SystemD logs are structured and contain rich metadata that can help you monitor system services, troubleshoot issues, and track service performance.
+This documentation provides detailed instructions on configuring the OpenTelemetry Collector to read logs from systemd's journal (journald) and push them to SigNoz. Logs from systemd are structured and contain rich metadata that can help you monitor system services, troubleshoot issues, and track service performance.
 
 ## Prerequisites
 
-Before proceeding, ensure that:
 - Linux-based operating system
-- `journalctl` binary is available in the `$PATH`
+- The `journalctl` binary is available in your `$PATH`
+- Systemd logs are available. Verify this by running:
+  ```bash
+  sudo journalctl -n 10
+  ```
 
-## Sample SystemD Logs
-
-SystemD generates structured logs for all services managed by it. Here's what typical journal entries look like:
+The systemd journal contains structured logs for all services managed by it. Typical journal entries look like this:
 
 ```plaintext
 Jun 25 10:30:45 hostname systemd[1]: Started myapp.service.
 Jun 25 10:30:46 hostname myapp[1234]: Application started successfully
-Jun 25 10:30:47 hostname myapp[1234]: Processing user request
 ```
 
-These logs contain rich metadata including timestamps, hostnames, process IDs, service names, and priority levels.
-
-You can check the SystemD logs using the following command:
-
-```bash
-sudo journalctl -n 10
-```
 ## Setup
-
-<Tabs entityName="plans">
-
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
 ### Step 1: Install OpenTelemetry Collector Contrib
 
-The [JournalD receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md) is available in the OpenTelemetry Collector Contrib distribution.
+Follow the [installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector. The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">journald receiver</a> is available in the OpenTelemetry Collector Contrib distribution.
 
-Follow this [documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector.
+<KeyPointCallout title="Running the Collector in a container?" defaultCollapsed={true}>
+The `journald` receiver shells out to `journalctl`, so the Collector needs access to the `journalctl` binary (in `$PATH`) and the host journal files. The simplest setup is running the OTel Collector on the host. If you run the Collector in a container, ensure you mount the journal directory and make `journalctl` available in the container. See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">journald receiver documentation</a> for container-specific requirements and examples.
 
-### Step 2: Configure JournalD Receiver
+**Note:** The official `otelcol` images don't include `journalctl`, so you must provide it (for example, by bundling it into a custom image or mounting a compatible `journalctl` binary). See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md#docker--kubernetes" target="_blank" rel="noopener noreferrer nofollow">Docker & Kubernetes notes</a>.
+</KeyPointCallout>
 
-Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `journald` receiver:
+### Step 2: Configure the journald receiver
+
+Add the `journald` receiver to your `config.yaml` file and enable it in the logs pipeline:
 
 ```yaml:config.yaml
 receivers:
   journald:
     directory: /var/log/journal
     start_at: end
+```
 
-  # Keep your existing receivers
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-processors:
-  batch: {}
-exporters:
-  otlp:
-    endpoint: "ingest.<region>.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      "signoz-ingestion-key": "<your-ingestion-key>"
+If `/var/log/journal` doesn't exist on your host, try `directory: /run/journal` or `directory: /run/log/journal` (common default).
+
+Then enable the receiver in your logs pipeline:
+
+```yaml:config.yaml {4}
 service:
   pipelines:
     logs:
-      receivers: [otlp, journald]        #Add the journald receiver to pipelines
+      receivers: [otlp, journald]
       processors: [batch]
       exporters: [otlp]
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+If you don't already have an OTLP exporter configured for SigNoz Cloud, add the following snippet (or update your existing `otlp` exporter):
 
-<Admonition type="info">
-You can also include the below configuration options for JournalD receiver:
+```yaml:config.yaml
+exporters:
+  otlp:
+    endpoint: ingest.<region>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+```
 
-**Configuration Options:**
-- `start_at: end` - Only collect new logs after the collector starts
-- `start_at: beginning` - Include historical logs from the journal
-- `units` - Filter logs from specific SystemD services
+Replace the placeholders:
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (e.g., `us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+**Additional Configuration Options:**
+- `start_at: end` - Only collect new logs after the collector starts (default)
+- `start_at: beginning` - Read all messages from the current boot
+- `units` - Filter logs from specific systemd services
 - `priority` - Filter by log level (debug, info, notice, warning, err, crit, alert, emerg)
 - `matches` - Advanced filtering using journalctl match syntax
+- `storage` - Track cursor position across restarts to avoid reading the entries again (see <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md#cursor-tracking" target="_blank" rel="noopener noreferrer nofollow">Cursor tracking</a>)
 
-More options available [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md)
-</Admonition>
+See the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md" target="_blank" rel="noopener noreferrer nofollow">journald receiver documentation</a> for all available options.
 
 ### Step 3: Start the OTel Collector
 
-Start the OpenTelemetry Collector using the above `config.yaml` file:
+Start the OpenTelemetry Collector:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml
 ```
-</TabItem>
-
-<TabItem value='self-host' label='Self-Host'>
-
-#### Step 1: Install SigNoz
-
-Follow this [documentation](https://signoz.io/docs/install/docker/) to install self-hosted SigNoz.
-
-Note that if you are using the Docker-based installation for SigNoz, you will need to stop the `signoz-otel-collector` container, and run the 
-SigNoz OTel Collector locally. This is because the OTel Collector process will run the JournalD receiver. Journald receiver requires that the 
-`journalctl` binary is present in the $PATH of the agent. This is not feasible within the docker container. And hence, we need to run the 
-OTel Collector on the Linux OS machine from which the SystemD logs need to be collected.
-
-In order to stop the `signoz-otel-collector` container, and start the SigNoz OTel Collector on the Linux machine, we will:
-
-1. First list all the docker containers using the command:
-
-```bash
-docker ps
-```
-
-The output should look similar to the following:
-
-```output
-CONTAINER ID   IMAGE                                        COMMAND                  CREATED          STATUS                    PORTS                                    NAMES
-afd3e434e853   signoz/signoz-otel-collector:0.111.24        "/signoz-collector -…"   47 minutes ago   Up 45 minutes             0.0.0.0:4317-4318->4317-4318/tcp         signoz-otel-collector
-c0b6e58d3d18   signoz/signoz:0.69.0                         "./query-service --c…"   47 minutes ago   Up 46 minutes (healthy)   8080/tcp                                 signoz-signoz
-69431900f6ef   clickhouse/clickhouse-server:24.1.2-alpine   "/entrypoint.sh"         47 minutes ago   Up 47 minutes (healthy)   8123/tcp, 9000/tcp, 9009/tcp             signoz-clickhouse
-8b69f876a3c7   signoz/zookeeper:3.7.1                      "/opt/bitnami/script…"   47 minutes ago   Up 47 minutes (healthy)   2181/tcp, 2888/tcp, 3888/tcp, 8080/tcp   signoz-zookeeper-1
-```
-
-2. Find the container ID of the `signoz-otel-collector`, in the above example: `afd3e434e853`, and use it in the below command to stop the 
-container:
-
-```bash
-docker stop <container-id>
-```
-
-3. Next, download and extract the latest release of SigNoz Otel Collector:
-
-```bash
-curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
-tar -xzf signoz-otel-collector.tar.gz
-```
-
-4. Navigate to the appropriate directory.
-
-```bash
-cd signoz-otel-collector/bin
-```
-
-#### Step 2: Configure JournalD Receiver
-
-Create `otel-collector-config.yaml` with the following configuration:
-
-```yaml
-receivers:
-  journald:
-    directory: /var/log/journal
-    start_at: end
-    priority: info
-
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-
-processors:
-  batch:
-    send_batch_size: 10000
-    timeout: 10s
-
-exporters:
-  clickhouselogsexporter:
-    dsn: tcp://clickhouse:9000/signoz_logs
-    timeout: 5s
-    sending_queue:
-      queue_size: 100
-    retry_on_failure:
-      enabled: true
-      initial_interval: 5s
-      max_interval: 30s
-      max_elapsed_time: 300s
-
-service:
-  pipelines:
-    logs:
-      receivers: [otlp, journald]           #Add the journald receiver to pipelines
-      processors: [batch]
-      exporters: [clickhouselogsexporter]
-```
 
 <Admonition type="warning">
-Note: Running the collector as root (`user: "0:0"`) is required to access journal files. In production, consider creating a dedicated user with journal access permissions.
+Running the collector as root may be required to access journal files. In production, consider creating a dedicated user with journal access permissions by adding the user to the `systemd-journal` group.
 </Admonition>
 
+## Validate
 
-<Admonition type="info">
-You can also include the below configuration options for JournalD receiver:
+After starting the collector, verify that systemd logs are being ingested:
 
-**Configuration Options:**
-- `start_at: end` - Only collect new logs after the collector starts
-- `start_at: beginning` - Include historical logs from the journal
-- `units` - Filter logs from specific SystemD services
-- `priority` - Filter by log level (debug, info, notice, warning, err, crit, alert, emerg)
-- `matches` - Advanced filtering using journalctl match syntax
+1. Navigate to **Logs Explorer** in SigNoz from Sidebar
+2. You should see logs with systemd-specific fields like `_SYSTEMD_UNIT`, `PRIORITY`, and `_PID`
 
-More options available [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/journaldreceiver/README.md)
-</Admonition>
+<Figure
+  src="/img/docs/logs-management/send-logs/systemd-logs-signoz.webp"
+  alt="systemd journal logs in SigNoz Logs Explorer"
+  caption="systemd journal logs in SigNoz Logs Explorer"
+/>
 
-#### Step 3: Start the SigNoz OTel Collector
+If you don't see logs within a few minutes, check the [Troubleshooting](#troubleshooting) section.
 
-Start the SigNoz OTel collector to start receiving the SystemD logs:
+### Log fields from systemd
 
-```bash
-./signoz-otel-collector --config otel-collector-config.yaml
-```
-
-You should now be able to see the SystemD logs on SigNoz.
-
-</TabItem>
-
-</Tabs>
-
-## Visualizing Logs in SigNoz
-
-The SystemD logs will be visible in the `Logs` tab of SigNoz.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/send-logs/systemd-logs-signoz.webp" alt="SystemD logs visible in SigNoz"/>
-    <figcaption><i>SystemD journal logs in SigNoz Logs Explorer</i></figcaption>
-</figure>
-
-### Understanding SystemD Log Fields
-
-SystemD logs include rich metadata. Common fields include:
+Logs from systemd include rich metadata. Common fields include:
 
 - `MESSAGE` - The actual log message
-- `_SYSTEMD_UNIT` - SystemD unit that generated the log
+- `_SYSTEMD_UNIT` - systemd unit that generated the log
 - `PRIORITY` - Log priority (0-7, where 0 is emergency, 7 is debug)
 - `_PID` - Process ID
 - `_HOSTNAME` - System hostname
-- `_TIMESTAMP` - Timestamp when the log was generated
 - `SYSLOG_IDENTIFIER` - Program name
 - `_COMM` - Command name
 
+<details>
+<ToggleHeading>
 ## Advanced Configuration
+</ToggleHeading>
 
 ### Filtering Logs
 
-You can filter SystemD logs in several ways:
+You can filter systemd logs in several ways:
 
-#### By SystemD Units
-```yaml
+#### By systemd units
+```yaml:config.yaml
 receivers:
   journald:
     directory: /var/log/journal
@@ -268,7 +153,7 @@ receivers:
 ```
 
 #### By Priority Level
-```yaml
+```yaml:config.yaml
 receivers:
   journald:
     directory: /var/log/journal
@@ -276,16 +161,144 @@ receivers:
 ```
 
 #### By Custom Matches
-```yaml
+
+The `matches` option allows advanced filtering using journalctl match fields. Each entry in the `matches` list is a **map of field-value pairs**. Entries in the list are OR'd together, and within each entry, the field-value pairs are AND'd.
+
+```yaml:config.yaml
 receivers:
   journald:
     directory: /var/log/journal
     matches:
-      - "_TRANSPORT=kernel"
-      - "PRIORITY=6"
+      - _TRANSPORT: kernel
+      - _SYSTEMD_UNIT: ssh
+        _UID: "1000"
 ```
 
+This configuration collects logs that match **either**:
+- `_TRANSPORT` is `kernel`, **OR**
+- `_SYSTEMD_UNIT` is `ssh` **AND** `_UID` is `1000`
+
+<Admonition type="info">
+Common journald fields for matching include:
+- `_SYSTEMD_UNIT`: systemd unit name (e.g., `nginx.service`)
+- `_TRANSPORT`: Log transport method (`kernel`, `syslog`, `journal`, `stdout`, `audit`)
+- `_UID`: User ID that generated the log
+- `_GID`: Group ID that generated the log
+- `_COMM`: Command name (executable name)
+- `_PID`: Process ID
+- `PRIORITY`: Log priority level (0-7)
+
+For a complete list, see the <a href="https://www.freedesktop.org/software/systemd/man/systemd.journal-fields.html" target="_blank" rel="noopener noreferrer nofollow">systemd.journal-fields documentation</a>.
+</Admonition>
+
+### Combining Multiple Filter Options
+
+When using multiple filter options (`units`, `priority`, `matches`, `identifiers`, `grep`, `dmesg`), the conditions between different options are logically AND'd, while conditions within each option are logically OR'd:
+
+```
+( dmesg )
+AND
+( priority )
+AND
+( units[0] OR units[1] OR units[2] ... )
+AND
+( identifiers[0] OR identifiers[1] OR identifiers[2] ... )
+AND
+( matches[0] OR matches[1] OR matches[2] ... )
+AND
+( grep )
+```
+
+**Example: Filtering by units, priority, and custom matches:**
+
+```yaml:config.yaml
+receivers:
+  journald:
+    directory: /var/log/journal
+    priority: info
+    units:
+      - ssh
+      - nginx
+    matches:
+      - _SYSTEMD_UNIT: ssh
+      - _SYSTEMD_UNIT: nginx
+        _UID: "0"
+```
+
+This configuration collects logs where:
+- Priority is `info` or higher (0-6), **AND**
+- Unit is `ssh` or `nginx`, **AND**
+- Entry matches either: `_SYSTEMD_UNIT` is `ssh` **OR** (`_SYSTEMD_UNIT` is `nginx` **AND** `_UID` is `0`)
+
+<Admonition type="warning">
+When combining `units` with `matches`, ensure the unit names are consistent. Since conditions are AND'd together, using different unit names in `units` and `matches` (e.g., `units: [kubelet]` with `matches: [{_SYSTEMD_UNIT: ssh}]`) will result in no logs being collected because no entry can match both `kubelet` (from `units`) and `ssh` (from `matches`) simultaneously.
+</Admonition>
+
+### Different Log Levels for Different Services
+
+A common requirement is to collect logs at different priority levels for different services. For example, you might want:
+- All logs (including debug) for your application service
+- Only warning and above for system services
+
+Since the journald receiver applies a single `priority` filter to all units, you can achieve this by using **multiple receiver instances**:
+
+```yaml:config.yaml
+receivers:
+  # Receiver for application logs - collect all logs including info and debug
+  journald/app:
+    directory: /var/log/journal
+    priority: debug
+    units:
+      - myapp.service
+
+  # Receiver for system services - only warning and above
+  journald/system:
+    directory: /var/log/journal
+    priority: warning
+    units:
+      - nginx.service
+      - postgresql.service
+
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch: {}
+
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, journald/app, journald/system]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+In this configuration:
+- `journald/app` collects all logs from `myapp.service` at priority `debug` and above (all logs)
+- `journald/system` collects only `warning` and above from `nginx.service` and `postgresql.service`
+
+<Admonition type="tip">
+The receiver instance name after the `/` (e.g., `journald/app`, `journald/system`) can be any descriptive string that helps identify the receiver's purpose. Each instance operates independently with its own filter configuration.
+</Admonition>
+
+</details>
+
+<details>
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
 ### Permission Issues
 
@@ -297,8 +310,21 @@ sudo journalctl --verify
 
 ### Log Generation
 
-Check if SystemD is generating logs:
+Check if systemd is generating logs:
 ```bash
 sudo journalctl -n 10
 ```
 
+</details>
+
+## Next Steps
+
+Now that you're collecting systemd logs, explore these related features:
+
+- [Set up log pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to parse, transform, and enrich your logs
+- [Create alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) based on specific log patterns or error rates
+- [Build custom dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize system service health
+- Explore other log collection methods:
+  - [Collect application logs](https://signoz.io/docs/logs-management/send-logs/application-logs/)
+  - [Collect Docker container logs](https://signoz.io/docs/userguide/collect_docker_logs/)
+  - [Collect Kubernetes logs](https://signoz.io/docs/logs-management/send-logs/kubernetes/)

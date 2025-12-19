@@ -1,5 +1,5 @@
 ---
-date: 2025-11-30
+date: 2025-12-18
 id: migrate-from-opentelemetry-to-signoz
 tags: [SigNoz Cloud, Self-Host]
 title: Migrate from existing OpenTelemetry
@@ -11,7 +11,7 @@ If you already have OpenTelemetry instrumentation in your applications, you can 
 
 ## Prerequisites
 
-- Applications instrumented with [OpenTelemetry SDKs](https://opentelemetry.io/docs/languages/) or [OpenTelemetry Collectors](https://opentelemetry.io/docs/collector/)
+- Applications instrumented with <a href="https://opentelemetry.io/docs/languages/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry SDKs</a> or <a href="https://opentelemetry.io/docs/collector/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Collectors</a>
 - An active [SigNoz account](https://signoz.io/teams/) (for Cloud) or a running SigNoz instance (for Self-Hosted)
 - Access to modify your application configuration or environment variables
 
@@ -36,24 +36,32 @@ Set the following environment variables for your application:
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 
 # Replace with your SigNoz ingestion key
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
 ```
+
+If you are defining the OTLP configuration directly in your code (instead of using environment variables), update the OTLP exporter settings:
+
+- **Endpoint**: `https://ingest.<region>.signoz.cloud:443`
+- **Headers**: Set `signoz-ingestion-key` to `<SIGNOZ_INGESTION_KEY>`
+
+*Note: The exact syntax depends on the language SDK. Check the [SigNoz Instrumentation docs](https://signoz.io/docs/instrumentation/) for examples.*
+
 
 If you are using an **OpenTelemetry Collector**, update your exporter configuration:
 
 ```yaml
 exporters:
   otlp:
-    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    endpoint: ingest.<region>.signoz.cloud:443
     headers:
-      signoz-ingestion-key: "SIGNOZ_INGESTION_KEY"
+      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
     tls:
       insecure: false
 ```
 
 Replace the following placeholders:
 - `<region>`: Your SigNoz Cloud region (e.g., `us`, `eu`, `in`).
-- `SIGNOZ_INGESTION_KEY`: Your SigNoz Ingestion Key.
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Ingestion Key.
 
 <Admonition type="tip">
   We also recommend configuring the [Resource Detection Processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) to automatically detect resource attributes from the host environment.
@@ -64,7 +72,7 @@ Replace the following placeholders:
 1. **Restart your application** (and Collector if applicable) with the new configuration.
 2. **Generate test data** by using your application.
 3. **Access SigNoz Dashboard**:
-   - Cloud: [https://signoz.io/login/](https://signoz.io/login/)
+   - Cloud: [SigNoz Cloud login](https://signoz.io/login/)
    - Self-Hosted: `http://your-signoz-host:3301`
 4. **Verify data flow**:
    - Check **Traces**, **Metrics**, **Logs** in SigNoz.
@@ -84,5 +92,8 @@ Replace the following placeholders:
 
 ## Next Steps
 
+- [Send Traces](https://signoz.io/docs/instrumentation)
+- [Send Logs](https://signoz.io/docs/logs-management/send-logs-to-signoz/)
+- [Send Metrics](https://signoz.io/docs/metrics-management/send-metrics/)
 - [Set up Alerts](https://signoz.io/docs/userguide/alerts-management/)
 - [Create Dashboards](https://signoz.io/docs/userguide/manage-dashboards/)
