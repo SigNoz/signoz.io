@@ -3,7 +3,6 @@ date: 2025-12-17
 title: Dropping Metric Labels (Attributes)
 description: Explains why dropping metric labels (attributes) does not reduce cardinality or sample count and provides correct alternatives.
 doc_type: explanation
-tags: ["SigNoz Cloud", "Self-Host"]
 id: dropping-metric-labels
 ---
 
@@ -24,7 +23,9 @@ To understand why dropping labels doesn't work as an optimization strategy, we n
 
 ## Why Dropping Labels Doesn't Reduce Samples
 
-### Case 1: Removing a Non-Identifying Label
+### Case 1: Removing a Specific Identifying Label
+
+It is generally recommended avoiding high-cardinality IDs (like `k8s.pod.uid`) in metrics to keep cardinality under control. Users often attempt to remove these IDs to reduce "noise".
 
 Suppose you have 3 distinct pods sending network metrics. The source generates 3 samples:
 
@@ -47,27 +48,22 @@ processors:
 
 You now have:
 
-```
+```text
 # After dropping the label (still 3 samples!)
 {"k8s.pod.network.io", "k8s.pod.name"="nginx-420", interface="eth0"} 1000
 {"k8s.pod.network.io", "k8s.pod.name"="nginx-240", interface="eth0"} 500
 {"k8s.pod.network.io", "k8s.pod.name"="nginx-69", interface="lo"}   200
 ```
 
-**The number of samples hasn't changed**: you still have 3 data points. You've only removed the label.
+**Outcome**:
+- **Risk**: While `k8s.pod.name` often appears unique (e.g., in a Deployment), it is **not guaranteed** to be unique globally (e.g. across namespaces or clusters). If you rely on `k8s.pod.name` after dropping the true identifier (`k8s.pod.uid`), you risk future collisions.
+- **Samples**: You still have 3 samples. No cost is saved.
 
-### Case 2: Removing an Identifying Label
+### Case 2: Removing All Identifying Labels
 
-Consider this scenario with `k8s.pod.network.io`:
+Now consider if you remove *both* the UID and the Pod Name, perhaps thinking "I just want to see network traffic by interface".
 
-```
-# Original data points (3 samples created at source)
-{"k8s.pod.network.io", "k8s.pod.name"="nginx-420", "k8s.pod.uid"="121-426-20", interface="eth0"} 1000
-{"k8s.pod.network.io", "k8s.pod.name"="nginx-240", "k8s.pod.uid"="132-245-23", interface="eth0"} 500
-{"k8s.pod.network.io", "k8s.pod.name"="nginx-69", "k8s.pod.uid"="120-693-69", interface="lo"}   200
-```
-
-If you use an attributes processor to delete the `k8s.pod.uid` and `k8s.pod.name` labels:
+If you use an attributes processor to delete both `k8s.pod.uid` and `k8s.pod.name`:
 
 ```yaml
 processors:
@@ -80,6 +76,7 @@ processors:
 ```
 
 You now have:
+
 ```text
 # Processed data points (Still 3 samples, but now colliding)
 {"k8s.pod.network.io", interface="eth0"} 1000
@@ -87,7 +84,9 @@ You now have:
 {"k8s.pod.network.io", interface="lo"}   200
 ```
 
-**The number of samples hasn't changed**: you still have 3 data points. You've only removed the labels and as a consequence the data has duplicate series.
+**Outcome**:
+- **Duplicate Time Series**: You now have multiple samples (1000 and 500) that look exactly the same: `{"k8s.pod.network.io", interface="eth0"}`.
+- **Samples**: You still have 3 samples. No cost is saved.
 
 ## How This Leads to Incorrect Results
 
