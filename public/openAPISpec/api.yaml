@@ -39,6 +39,10 @@ tags:
       <SchemaDefinition schemaRef="#/components/schemas/Dashboard" />
   - name: fields
     description: Fields of Logs, Traces
+  - name: channels
+    description: Operations related to notification channels
+  - name: route_policies
+    description: Operations related to notification routing policies
 x-tagGroups:
   - name: General
     tags:
@@ -49,6 +53,10 @@ x-tagGroups:
     tags:
       - alerts_model
       - dashboards_model
+  - name: Notification
+    tags:
+      - channels
+      - route_policies
 paths:
   '/api/v1/logs/fields':
     post:
@@ -668,6 +676,333 @@ paths:
                 $ref: '#/components/schemas/QueryRangeResponseV5'
         '400':
           description: Bad request parameters
+        '500':
+          description: Internal server error
+
+  /api/v1/channels:
+    get:
+      tags:
+        - channels
+      summary: List all notification channels
+      description: Retrieve a list of all configured notification channels.
+      operationId: listChannels
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Channel'
+        '500':
+          description: Internal server error
+
+    post:
+      tags:
+        - channels
+      summary: Create a new notification channel
+      description: Create a new notification channel with the provided configuration.
+      operationId: createChannel
+      security:
+        - api_key: []
+      requestBody:
+        description: Channel configuration object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Receiver'
+      responses:
+        '204':
+          description: Channel created successfully
+        '400':
+          description: Bad request parameters
+        '500':
+          description: Internal server error
+
+  /api/v1/channels/{id}:
+    get:
+      tags:
+        - channels
+      summary: Get a notification channel by ID
+      description: Retrieve details of a specific notification channel by its ID.
+      operationId: getChannelById
+      security:
+        - api_key: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the channel to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Channel'
+        '404':
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+
+    put:
+      tags:
+        - channels
+      summary: Update a notification channel
+      description: Update an existing notification channel by its ID.
+      operationId: updateChannel
+      security:
+        - api_key: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the channel to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Updated channel configuration object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Receiver'
+      responses:
+        '204':
+          description: Channel updated successfully
+        '400':
+          description: Bad request parameters
+        '404':
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+
+    delete:
+      tags:
+        - channels
+      summary: Delete a notification channel
+      description: Delete a notification channel by its ID.
+      operationId: deleteChannel
+      security:
+        - api_key: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the channel to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Channel deleted successfully
+        '404':
+          description: Channel not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+
+  /api/v1/testChannel:
+    post:
+      tags:
+        - channels
+      summary: Test a notification channel
+      description: Test a notification channel configuration by sending a test alert.
+      operationId: testChannel
+      security:
+        - api_key: []
+      requestBody:
+        description: Channel configuration to test
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Receiver'
+      responses:
+        '204':
+          description: Test alert sent successfully
+        '400':
+          description: Bad request parameters
+        '500':
+          description: Internal server error
+
+  /api/v1/route_policies:
+    get:
+      tags:
+        - route_policies
+      summary: Get all route policies
+      description: Retrieve a list of all configured route policies.
+      operationId: getAllRoutePolicies
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePoliciesResponse'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    post:
+      tags:
+        - route_policies
+      summary: Create route policy
+      description: Create a new route policy.
+      operationId: createRoutePolicy
+      security:
+        - api_key: []
+      requestBody:
+        description: Route policy to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutePolicyInput'
+      responses:
+        '201':
+          description: Route policy created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePolicyResponse'
+        '400':
+          description: Bad request parameters
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /api/v1/route_policies/{id}:
+    get:
+      tags:
+        - route_policies
+      summary: Get route policy by ID
+      description: Retrieve a single route policy by its ID.
+      operationId: getRoutePolicyById
+      security:
+        - api_key: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the route policy to retrieve
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "019ae364-e7ab-785e-a208-cacc8c39e752"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePolicyResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Route policy not found
+        '500':
+          description: Internal server error
+
+    put:
+      tags:
+        - route_policies
+      summary: Update route policy
+      description: Update an existing route policy by its ID.
+      operationId: updateRoutePolicy
+      security:
+        - api_key: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the route policy to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "019ae364-e7ab-785e-a208-cacc8c39e752"
+      requestBody:
+        description: Route policy data to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutePolicyInput'
+      responses:
+        '200':
+          description: Route policy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePolicyResponse'
+        '400':
+          description: Bad request parameters
+        '401':
+          description: Unauthorized
+        '404':
+          description: Route policy not found
+        '500':
+          description: Internal server error
+
+    delete:
+      tags:
+        - route_policies
+      summary: Delete route policy
+      description: Delete a route policy by its ID.
+      operationId: deleteRoutePolicy
+      security:
+        - api_key: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the route policy to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "019ae364-e7ab-785e-a208-cacc8c39e752"
+      responses:
+        '204':
+          description: Route policy deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Route policy not found
         '500':
           description: Internal server error
 
@@ -2559,6 +2894,372 @@ components:
             properties:
               message:
                 type: string
+
+    Channel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique identifier of the channel.
+        createdAt:
+          type: string
+          format: date-time
+          description: The timestamp when the channel was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The timestamp when the channel was last updated.
+        name:
+          type: string
+          description: The name of the channel.
+        type:
+          type: string
+          description: The type of the channel. Supported types include `webhook`, `slack`, `email`, `pagerduty`, `opsgenie`, `msteams`. Third-party integrations use the `webhook` type.
+        data:
+          type: string
+          description: JSON string containing the channel configuration.
+        org_id:
+          type: string
+          description: The organization ID associated with the channel.
+      example:
+        id: "019a15f4-0938-718c-916b-214a99569b69"
+        createdAt: "2025-10-24T11:21:46.040101Z"
+        updatedAt: "2025-12-03T09:25:58.592418Z"
+        name: "test webhook alert"
+        type: "webhook"
+        data: "{\"name\":\"test webhook alert\",\"webhook_configs\":[{\"send_resolved\":true,\"http_config\":{\"tls_config\":{\"insecure_skip_verify\":false},\"follow_redirects\":true,\"enable_http2\":true,\"proxy_url\":null},\"url\":\"https://play.webhook.com/in/SOME_WEBHOOK_URL/\",\"url_file\":\"\",\"max_alerts\":0,\"timeout\":0}]}"
+        org_id: "0199f1fa-b0b9-7292-a0ca-700abcbb744c"
+
+    Receiver:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: The name of the receiver/channel.
+        webhook_configs:
+          type: array
+          description: |
+            Configuration for Webhook integrations.
+            See documentation: https://signoz.io/docs/alerts-management/notification-channel/webhook/#configure-programmatically
+          items:
+            $ref: '#/components/schemas/WebhookConfig'
+        slack_configs:
+          type: array
+          description: |
+            Configuration for Slack integrations.
+            See documentation: https://signoz.io/docs/alerts-management/notification-channel/slack/#configure-programmatically
+          items:
+            $ref: '#/components/schemas/SlackConfig'
+        email_configs:
+          type: array
+          description: |
+            Configuration for Email notifications.
+            See documentation: https://signoz.io/docs/alerts-management/notification-channel/email/#configure-programmatically
+          items:
+            $ref: '#/components/schemas/EmailConfig'
+        pagerduty_configs:
+          type: array
+          description: |
+            Configuration for PagerDuty integrations.
+            See documentation: https://signoz.io/docs/alerts-management/notification-channel/pagerduty/#configure-programmatically
+          items:
+            $ref: '#/components/schemas/PagerdutyConfig'
+        opsgenie_configs:
+          type: array
+          description: |
+            Configuration for Opsgenie integrations.
+            See documentation: https://signoz.io/docs/alerts-management/notification-channel/opsgenie/#configure-programmatically
+          items:
+            $ref: '#/components/schemas/OpsgenieConfig'
+        msteamsv2_configs:
+          type: array
+          description: |
+            Configuration for Microsoft Teams integrations.
+            See documentation: https://signoz.io/docs/alerts-management/notification-channel/ms-teams/#configure-programmatically
+          items:
+            $ref: '#/components/schemas/MSTeamsV2Config'
+
+    WebhookConfig:
+      type: object
+      required:
+        - url
+      properties:
+        send_resolved:
+          type: boolean
+          default: true
+          description: Whether to send notifications when an alert is resolved.
+        url:
+          type: string
+          format: uri
+          description: The Webhook URL endpoint.
+        http_config:
+          type: object
+          description: HTTP configuration for the webhook, such as basic auth.
+          properties:
+            basic_auth:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+
+    SlackConfig:
+      type: object
+      required:
+        - api_url
+      properties:
+        send_resolved:
+          type: boolean
+          description: Whether to send notifications when an alert is resolved.
+        api_url:
+          type: string
+          format: uri
+          description: The Slack Incoming Webhook URL.
+        channel:
+          type: string
+          description: The channel to send notifications to. Use #channel-name.
+        title:
+          type: string
+          description: Templated title of the message. Go templates are supported.
+        text:
+          type: string
+          description: Templated text of the message. Go templates are supported.
+
+    EmailConfig:
+      type: object
+      required:
+        - to
+      properties:
+        send_resolved:
+          type: boolean
+          description: Whether to send notifications when an alert is resolved.
+        to:
+          type: string
+          description: The email address to which the alerts are sent.
+        html:
+          type: string
+          description: The HTML body of the email.
+        headers:
+          type: object
+          description: http headers stringified key/value pairs.
+          additionalProperties: true
+
+    PagerdutyConfig:
+      type: object
+      required:
+        - routing_key
+      properties:
+        send_resolved:
+          type: boolean
+          description: Whether to send notifications when an alert is resolved.
+        routing_key:
+          type: string
+          description: The PagerDuty Integration Key (Routing Key). This is the "Integration Key" listed on the Events API V2 integration's detail page.
+        client:
+          type: string
+          description: The name of the monitoring client that is triggering this event. 
+        client_url:
+          type: string
+          description: The URL of the client sending the alert.
+        description:
+          type: string
+          description: Templated description of the alert. Go templates are supported.
+        severity:
+          type: string
+          description: The perceived severity of the status the event is describing withrespect to the affected system. Allowed values are; ["critical", "warning", "error", "info"]
+        class:
+          type: string
+          description: The class/type of the event.
+        component:
+          type: string
+          description: Component of the source machine that is responsible for the event.
+        group:
+          type: string
+          description: Logical grouping of components of a service.
+        details:
+          type: object
+          description: Additional details for the alert.
+          additionalProperties: true
+
+    OpsgenieConfig:
+      type: object
+      required:
+        - api_key
+      properties:
+        api_key:
+          type: string
+          description: The Opsgenie API Key.
+        description:
+          type: string
+          description: Templated description of the alert. Go templates are supported.
+        priority:
+          type: string
+          description: Priority of the alert.
+        message:
+          type: string
+          description: Templated message of the alert.
+        details:
+          type: object
+          description: Additional details for the alert.
+          additionalProperties: true
+
+    MSTeamsV2Config:
+      type: object
+      required:
+        - webhook_url
+      properties:
+        send_resolved:
+          type: boolean
+          description: Whether to send notifications when an alert is resolved.
+        webhook_url:
+          type: string
+          format: uri
+          description: The Microsoft Teams Incoming Webhook URL.
+        title:
+          type: string
+          description: Templated title of the message. Go templates are supported.
+        text:
+          type: string
+          description: Templated text of the message. Go templates are supported.
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: unknown
+            message:
+              type: string
+              example: 'error message'
+
+    RoutePolicy:
+      type: object
+      required:
+        - id
+        - name
+        - expression
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "019ae364-e7ab-785e-a208-cacc8c39e752"
+        name:
+          type: string
+          description: Name of the route policy
+          example: "Test Route policy"
+        expression:
+          type: string
+          description: |
+            The expression logic for the route policy.
+            Supported labels:
+            - User-defined labels (e.g., `type`, `team`)
+            - Platform labels (`threshold.name`, `alertname`)
+            - Dynamic labels from query (`service.name`, `k8s.pod.name`, etc.)
+            
+            Operators: `=`, `!=`, `CONTAINS`, `REGEXP`, `IN`, `AND`, `OR`.
+            Example: `service.name = "checkout" AND type = "application"`
+          example: "service.name = \"something\""
+        kind:
+          type: string
+          description: The kind of the resource
+          example: "policy"
+        channels:
+          type: array
+          description: List of notification channels associated with this policy
+          items:
+            type: string
+          example: ["test webhook alert"]
+        description:
+          type: string
+          description: Description of the route policy
+          example: "Some description"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-12-03T08:47:12.299548Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-12-03T08:47:12.299548Z"
+        createdBy:
+          type: string
+          description: User who created the policy
+          example: "user@email.io"
+        updatedBy:
+          type: string
+          description: User who last updated the policy
+          example: "user@email.io"
+
+    RoutePolicyInput:
+      type: object
+      required:
+        - name
+        - expression
+        - channels
+      properties:
+        name:
+          type: string
+          description: Name of the route policy
+          example: "Test Route policy"
+        expression:
+          type: string
+          description: |
+            The expression logic for the route policy.
+            Supported labels:
+            - User-defined labels (e.g., `type`, `team`)
+            - Platform labels (`threshold.name`, `alertname`)
+            - Dynamic labels from query (`service.name`, `k8s.pod.name`, etc.)
+            
+            Operators: `=`, `!=`, `CONTAINS`, `REGEXP`, `IN`, `AND`, `OR`.
+            Example: `service.name = "checkout" AND type = "application"`
+          example: "service.name = \"something\""
+        kind:
+          type: string
+          description: Type of route policy. Accepted values are `policy` and `rule`.
+          enum:
+            - policy
+            - rule
+          example: "policy"
+        channels:
+          type: array
+          description: List of notification channels associated with this policy
+          items:
+            type: string
+          example: ["test webhook alert"]
+        description:
+          type: string
+          description: Description of the route policy
+          example: "Some description"
+
+    RoutePoliciesResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutePolicy'
+
+    RoutePolicyResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          $ref: '#/components/schemas/RoutePolicy'
 
   requestBodies:
     Field:
