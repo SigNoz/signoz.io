@@ -1,7 +1,7 @@
 ---
-title: Exploring OpenTelemetry Demo Application with SigNoz
+title: Setup and Explore OpenTelemetry Demo Application (with Examples)
 slug: opentelemetry-demo
-date: 2025-03-26
+date: 2025-12-16
 tags: [OpenTelemetry]
 authors: [elizabeth_mathew]
 description: OpenTelemetry Demo Application is a sample application that demonstrates how to use OpenTelemetry to instrument an application and send telemetry data to a backend. In this blog post, we will explore the OpenTelemetry Demo Application and see how to use SigNoz to monitor the application with popular debugging scenarios.
@@ -15,15 +15,40 @@ keywords: [opentelemetry, opentelemetry demo application, signoz, monitoring, de
 — Brian W. Kernighan and P. J. Plauge, *The Elements of Programming Style*, 2nd ed.
 
 Maybe you can let SigNoz do some heavy lifting for you!
-	
 
-## Introducing The OpenTelemetery [OTel] Demo Application
+## Introducing the OpenTelemetry [OTel] Demo Application
 
-OpenTelemetry Demo Application is a robust project created and maintained by the OpenTelemetry community as a quick start for anyone trying to experiment with [OpenTelemetry](https://opentelemetry.io/docs/what-is-opentelemetry/), the open-source observability standard. It is also a great reference as it presents a distributed system with **15 core micro-services** in a **polyglot environment**, with services written in Go, Python, .NET, Java, etc., talking to each other over **gRPC and HTTP**.
+OpenTelemetry Demo Application is a robust project created and maintained by the OpenTelemetry community as a quick start for anyone trying to experiment with [OpenTelemetry](https://opentelemetry.io/docs/what-is-opentelemetry/), the open-source observability standard.
 
-What appears to be a *simple astronomy online shop* to purchase stargazing tools is a full-fledged project developed with the intention of allowing developers to explore a *production-lite* deployment with built-in capability to simulate failures with flags and a load generator to fake user traffic. It comes fully instrumented with **OpenTelemetry client libraries** and an **OpenTelemetry Collector** to collect all the telemetry data, aggregate, process it, and forward it to a backend of your choice. 
+The <a href="https://github.com/open-telemetry/opentelemetry-demo/tree/main/src" rel="noopener noreferrer nofollow" target="_blank">source code</a>  serves as a great reference as it provides OpenTelemetry examples for **15 core microservices** written in Go, Python, .NET, Java, etc., talking to each other over **gRPC and HTTP**, and their idiomatic instrumentation methods. Developers can use it to understand the rationale behind the instrumentation process on a per-service level, and apply the same patterns in their codebases.
 
-Here, we will be using SigNoz as our backend for observability.
+What appears to be a *simple astronomy online shop* to purchase stargazing tools is a full-fledged project developed with the intention of allowing developers to explore a *production-lite* deployment with built-in capability to simulate failures with flags and a load generator to fake user traffic. It comes fully instrumented with **OpenTelemetry client libraries** and an **OpenTelemetry Collector** to collect all the telemetry data, aggregate, process it, and forward it to a backend of your choice. Here, we will be using SigNoz as our backend for observability.
+
+## Architecture Overview for OpenTelemetry Example App
+
+<KeyPointCallout title="Skip to Setup" defaultCollapsed={false}>
+If you want to jump directly to the implementation, skip to the [Send OpenTelemetry Demo App Telemetry to SigNoz](#send-opentelemetry-demo-app-telemetry-to-signoz) section.
+</KeyPointCallout>
+
+Before we start sending data, it helps to understand the architecture we are dealing with. Understanding the service dependencies is key when using this project as an OpenTelemetry example for debugging.
+
+The application simulates an e-commerce store with a complex flow:
+- **Frontend (Next.js/TypeScript)**: Handles user requests and forwards them to backend services via HTTP and gRPC.
+- **Checkout Service (Go)**: Orchestrates orders, communicating with Payment, Shipping, and Email services.
+- **Ad Service (Java)**: Provides text ads based on context tags.
+- **Recommendation Service (Python)**: Suggests products based on user activity.
+- **Shipping Service (Rust)**: Calculates shipping costs and provides estimates.
+- **Accounting Service (.NET)**: Processes incoming orders and tracks sales.
+
+Beyond the core flow, it includes:
+- **Fraud Detection (Kotlin)**: Detects fraudulent activities.
+- **Currency Conversion (C++)**: Converts currencies.
+- **Email Service (Ruby)**: Sends emails.
+- **Quote Service (PHP)**: Provides quotes.
+- **Feature Flag UI (Elixir)**: Manages feature flags.
+- **Infrastructure**: It relies on Valkey (a Redis fork) for caching, PostgreSQL for persistent storage, and Kafka for message queuing.
+
+If the "Place Order" button fails, the error could originate in the Go service, the downstream C# Cart service, or a database lock in the Product Catalog. Observability tools allow you to pinpoint exactly where that break happens. This polyglot nature ensures you can see how trace context propagates across different languages and protocols, making it a realistic example application for observability.
 
 ## Why SigNoz?
 
@@ -117,7 +142,7 @@ When you navigate to the Service Map tab, you see an automatically generated vis
 
 <Figure src="/img/blog/2025/03/otel-demo-map.gif" alt="SigNoz service map" caption="Service architecture as visualised by SigNoz Service map" />
 
-## Debugging Real-life Scenarios with SigNoz Simulated by the OTel Demo App
+## Debugging Real-life Scenarios with SigNoz Simulated by the OTel Example App
 
 As developers, we are often paged for a bug and spend hours drowning in logs and metrics trying to figure out the root cause, only to realise after 7 hours of effort that it was a missed semi-colon. At SigNoz, we’ve made an honest attempt to make your debugging and monitoring strides a tad bit easier (or a whole lot more).
 
@@ -128,7 +153,7 @@ We will enable appropriate flags to simulate errors, in each of the following sc
 <Figure src="/img/blog/2025/03/otel-demo-flags.webp" alt="Feature page of OTel Demo App" caption="Feature page of OTel Demo App" />
 
 
-With the three scenarios below, we will look at how SigNoz implements traces, logs, metrics with dashboards and alerts, exceptions etc.
+With the three scenarios below, we will look at how SigNoz implements traces, logs, metrics with dashboards and alerts, exceptions etc. using this robust opentelemetry example.
 
 ### Monitoring a Kafka Consumer Lag
 

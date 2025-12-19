@@ -888,43 +888,11 @@ const docsSideNav = [
             isExpanded: false,
             label: 'Python',
             route: '/docs/instrumentation/opentelemetry-python',
-            // link: {
-            // type: 'doc',
-            // route: '/docs/instrumentation/opentelemetry-python',
-            // title: 'Python',
-            // description: 'Learn how to instrument Python applications with OpenTelemetry',
-            // slug: 'instrumentation/python',
-            // },
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-django',
-                label: 'Django ',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-fastapi',
-                label: 'FastAPI ',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-flask',
-                label: 'Flask ',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-falcon',
-                label: 'Falcon ',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support',
-                label: 'Hypercorn/Unicorn ',
-              },
-              {
-                type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-celery',
-                label: 'Celery Worker OpenTelemetry Setup',
+                route: '/docs/instrumentation/python/manual-instrumentation',
+                label: 'Manual Instrumentation',
               },
             ],
           },
@@ -1318,13 +1286,8 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/userguide/python-logs-auto-instrumentation',
-                label: 'Python Logs Auto-Instrumentation',
-              },
-              {
-                type: 'doc',
-                route: '/docs/userguide/collecting_application_logs_otel_sdk_python',
-                label: 'Using OTel Python SDK',
+                route: '/docs/logs-management/send-logs/python-logs',
+                label: 'Python logs',
               },
               {
                 type: 'doc',
@@ -1414,7 +1377,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/logs-management/send-logs/collect-systemd-logs',
-            label: 'SystemD logs',
+            label: 'Systemd/journald logs',
           },
           {
             type: 'doc',
@@ -1827,7 +1790,7 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'category',
+        type: 'doc',
         route: '/docs/dashboards/interactivity',
         label: 'Interactivity',
       },
@@ -1972,6 +1935,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/go-runtime-metrics',
             label: 'Go Runtime',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
+            label: 'Inkeep',
           },
           {
             type: 'doc',
@@ -2484,6 +2452,11 @@ const docsSideNav = [
       {
         route: '/docs/google-gemini-monitoring',
         label: 'Google Gemini',
+        type: 'doc',
+      },
+      {
+        route: '/docs/inkeep-monitoring',
+        label: 'Inkeep',
         type: 'doc',
       },
       {

@@ -96,6 +96,14 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Google Gemini Monitoring',
   },
   {
+    name: 'Inkeep',
+    href: '/docs/inkeep-monitoring',
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/inkeep-logo.webp" alt="Inkeep Icon" className="h-7 w-7" />
+    ),
+    clickName: 'Inkeep Monitoring',
+  },
+  {
     name: 'LangChain/LangGraph',
     href: '/docs/langchain-observability',
     icon: <SiLangchain className="h-7 w-7 text-white" />,
