@@ -231,7 +231,7 @@ This configuration collects logs where:
 - Entry matches either: `_SYSTEMD_UNIT` is `ssh` **OR** (`_SYSTEMD_UNIT` is `nginx` **AND** `_UID` is `0`)
 
 <Admonition type="warning">
-When combining `units` with `matches`, ensure the unit names are consistent. Since conditions are AND'd together, using different unit names in `units` and `matches` (e.g., `units: [kubelet]` with `matches: [{_SYSTEMD_UNIT: ssh}]`) will result in no logs being collected.
+When combining `units` with `matches`, ensure the unit names are consistent. Since conditions are AND'd together, using different unit names in `units` and `matches` (e.g., `units: [kubelet]` with `matches: [{_SYSTEMD_UNIT: ssh}]`) will result in no logs being collected because no entry can match both `kubelet` (from `units`) and `ssh` (from `matches`) simultaneously.
 </Admonition>
 
 ### Different Log Levels for Different Services
