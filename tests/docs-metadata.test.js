@@ -77,23 +77,6 @@ tags: ["SigNoz Cloud", "Self-Host"]
       assert.strictEqual(warnings.length, 0)
     })
 
-    it('should warn when tags are missing', () => {
-      const today = new Date().toISOString().split('T')[0]
-      const content = `---
-title: No Tags Document
-date: ${today}
-description: A document without tags
----
-
-# Content
-`
-      const filePath = createTestFile('no-tags.mdx', content)
-      const { errors, warnings } = validateMetadata(filePath)
-
-      assert.strictEqual(errors.length, 0)
-      assert.ok(warnings.includes('missing tags'))
-    })
-
     it('should error when date is missing', () => {
       const content = `---
 title: No Date Document
@@ -336,7 +319,7 @@ tags: test
       assert.ok(warnings.includes('tags must be an array'))
     })
 
-    it('should warn when tags array is empty', () => {
+    it('should allow empty tags array', () => {
       const today = new Date().toISOString().split('T')[0]
       const content = `---
 title: Empty Tags
@@ -351,7 +334,7 @@ tags: []
       const { errors, warnings } = validateMetadata(filePath)
 
       assert.strictEqual(errors.length, 0)
-      assert.ok(warnings.includes('tags array cannot be empty'))
+      assert.strictEqual(warnings.length, 0)
     })
 
     it('should handle files with no frontmatter', () => {
@@ -379,10 +362,9 @@ date: invalid-date
 # Content
 `
       const filePath = createTestFile('multiple-issues.mdx', content)
-      const { errors, warnings } = validateMetadata(filePath)
+      const { errors } = validateMetadata(filePath)
 
       assert.ok(errors.length > 1)
-      assert.ok(warnings.includes('missing tags'))
       assert.ok(errors.includes('missing title'))
       assert.ok(errors.includes('missing description'))
       assert.ok(errors.includes('invalid date format - use YYYY-MM-DD'))
