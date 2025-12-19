@@ -1,0 +1,245 @@
+---
+title: Prometheus Node Exporter - Install, Run & Visualize
+slug: prometheus-node-exporter
+date: 2025-12-15
+tags: [prometheus, node-exporter]
+authors: [saurabh_patil]
+description: A step-by-step guide to install and run Prometheus Node Exporter on Linux/Unix systems, configuring Prometheus to scrape host metrics, and exploring them using the Prometheus UI.
+keywords:
+  [
+    prometheus node exporter,
+    linux monitoring,
+    node exporter kubernetes,
+    node exporter dashboard,
+    node exporter alerts,
+  ]
+---
+
+<ArticleSeriesTop
+  seriesName="Prometheus Node Exporter Tutorial"
+  seriesOverviewHref="/guides/prometheus-node-exporter"
+  currentPart={1}
+  totalParts={2}
+  next={{
+    title: 'Prometheus Node Exporter - Metrics Configuration & Alerting',
+    href: '/guides/prometheus-node-exporter-metrics',
+  }}
+/>
+
+Prometheus Node Exporter is a lightweight monitoring agent that runs on Linux and Unix-based systems to collect and expose host-level metrics. These metrics help you detect critical system issues such as CPU throttling, memory leaks, disk I/O saturation, network bottlenecks, and more, making Node Exporter a foundational component in the infrastructure monitoring stack.
+
+A standard monitoring pipeline for Linux systems involves three components: Node Exporter agent to collect metrics, a Prometheus server to store them, and a visualization tool (such as Grafana or SigNoz) to analyze the data.
+
+In this part, you’ll learn:
+
+- How to install and run Prometheus Node Exporter
+- How to scrape and visualize host metrics with Prometheus
+- How to set up effective host-level alerts and integrate with OpenTelemetry
+
+And in the next part, [Prometheus Node Exporter: Running in Production](guides/prometheus-node-exporter-metrics/), we go beyond the basics and focus on production readiness by tuning collectors and exposing custom host metrics.
+
+
+## Prerequisites
+
+- **Prometheus** - A monitoring and alerting toolkit that collects and stores metrics as time series data. Download and install Prometheus from the <a href="https://prometheus.io/download/" rel="noopener noreferrer nofollow" target="_blank">official website</a>.
+
+## Install & Run the Prometheus Node Exporter
+
+The easiest way to install Node Exporter is to download the precompiled binary from the Prometheus <a href="https://prometheus.io/download/#node_exporter" rel="noopener noreferrer nofollow" target="_blank">official downloads page</a>. The tarball contains a single static executable that can be extracted and run directly on any Linux/Unix-based system.
+
+If you prefer not to leave the terminal, you can also use the following commands to download and extract Node Exporter:
+
+```bash
+# Download the latest version (adjust version number, OS, and ARCH).
+wget https://github.com/prometheus/node_exporter/releases/download/v<VERSION>/node_exporter-<VERSION>.<OS>-<ARCH>.tar.gz
+
+# Extract binary
+tar xvfz node_exporter-<VERSION>.<OS>-<ARCH>.tar.gz
+
+# Change directory to the extracted folder
+cd node_exporter-<VERSION>.<OS>-<ARCH>
+
+# Start the node exporter
+./node_exporter
+```
+
+Once Node Exporter is running, your terminal output should look similar to the screenshot below:
+
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporte-cli-output.webp"
+  alt="Command-line output after starting Node Exporter"
+  caption="Command-line output after starting Node Exporter"
+/>
+
+<KeyPointCallout title="Exporter for Windows OS." defaultCollapsed="true">
+  For Windows-based systems, host metrics can be collected using the <a href="https://github.com/prometheus-community/windows_exporter" rel="noopener noreferrer nofollow" target="_blank">Windows Exporter</a>. 
+  
+  It is a Prometheus community-maintained exporter that provides functionality similar to Node Exporter, but is specifically designed for Windows environments.
+</KeyPointCallout>
+
+Once Node Exporter is running, it begins exposing host-level metrics on `port 9100` by default. You can verify this by hitting the `/metrics` endpoint.
+
+```bash
+# Verify that Node Exporter is exposing metrics on port 9100
+curl http://localhost:9100/metrics | grep node_
+```
+
+All host and system metrics exposed by Node Exporter are prefixed with `node_`, which makes them easy to identify and filter.
+
+You should now see output similar to the screenshot below, confirming that Node Exporter is successfully exposing your machine's CPU, memory, disk, network, and other system metrics.
+
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporter-host-metrics.webp"
+  alt="Hostmetrics exported by Node Exporter"
+  caption="Hostmetrics exported by Node Exporter"
+/>
+
+## Setting Up Prometheus
+
+Prometheus reads all scrape targets from its main configuration file: `prometheus.yml`. If you don’t already have one, you can create it now and update it with the below configs.
+
+<KeyPointCallout title="Do you already have a prometheus.yml file?" defaultCollapsed="true">
+
+Do not replace your existing `prometheus.yml` with the example shown below. Overwriting it will remove your current Prometheus settings, which is not intended.
+
+Instead, simply add the Node Exporter configuration block under the `scrape_configs` section and set the appropriate `static_configs` target.
+
+</KeyPointCallout>
+
+```yaml
+global:
+  # How frequently Prometheus scrapes all targets unless overridden
+  scrape_interval: 15s
+
+scrape_configs:
+  # === Scrape Node Exporter Metrics ===
+  - job_name: 'node' # A name to identify this scrape job
+    static_configs:
+      - targets: ['localhost:9100']
+        # Node Exporter exposes metrics on port 9100 by default
+        # Replace 'localhost' with the server IP if scraping remotely
+```
+
+<KeyPointCallout title="Breakdown of Prometheus.yml file" defaultCollapsed="true">
+
+`global` : Defines default settings that apply to all scrape jobs unless a job overrides them.
+
+`scrape_interval: 15s`: Tells Prometheus to collect metrics from each target every 15 seconds.
+
+`scrape_configs`: This section defines what Prometheus should scrape. Each entry under scrape_configs is a scrape job (a logical group of targets).
+
+`static_configs`: Tells Prometheus, "These targets are manually defined and fixed."
+
+</KeyPointCallout>
+
+Once your `prometheus.yml` file is updated, start Prometheus using the command below:
+
+```bash
+prometheus --config.file=./prometheus.yml --web.enable-lifecycle
+```
+
+This will load your scrape targets. Now that Prometheus is running, let’s move on to visualizing the metrics using the Prometheus Expression Browser.
+
+## Visualize Metrics in Prometheus UI
+
+Prometheus includes a built-in expression browser, available at the `/graph` endpoint on `port 9090`. You can access it directly using localhost. This interface, commonly known as the Prometheus UI, is ideal for running ad hoc queries, exploring metric names, and quickly debugging issues.
+
+Once you open the expression browser, run a simple query to visualize CPU usage trends.
+
+For example, you can graph the 1-minute rate of the CPU metric `node_cpu_seconds_total` by entering the following expression and switching to the Graph tab.
+
+```scss
+rate(node_cpu_seconds_total{mode="system"}[1m])
+```
+
+This gives you a real-time view of how your system’s CPU is behaving, directly sourced from Node Exporter.
+
+<Figure
+  src="/img/guides/2025/12/prometheus-node-exporter-cpu-usage.webp"
+  alt="CPU usage calculated from `node_cpu_seconds_total` over a 1-minute window"
+  caption="CPU usage calculated from `node_cpu_seconds_total` over a 1-minute window"
+/>
+
+Congratulations!! You’ve successfully set up Node Exporter and verified that Prometheus is scraping host-level metrics. While the Prometheus expression browser is great for quick queries and debugging, it’s limited for building rich, interactive dashboards or correlating host metrics with application behaviour. This is where the next step in modern monitoring comes in.
+
+## Monitoring Prometheus Node Exporter Metrics with OpenTelemetry
+
+Before we dive into how to monitor Node Exporter metrics using OpenTelemetry, let’s first understand what OpenTelemetry is and why it’s becoming the preferred choice for modern infrastructure monitoring.
+
+### What is OpenTelemetry (OTel)?
+
+[OpenTelemetry](https://signoz.io/opentelemetry/) is an open-source, vendor-neutral observability framework that provides a unified way to collect metrics, logs, and traces from your applications and infrastructure.
+
+Instead of relying on multiple exporters, agents, or collectors, OpenTelemetry lets you consolidate everything into a single, consistent pipeline.
+
+At its core is the OpenTelemetry Collector, a service that can:
+
+- Scrape Prometheus metrics (like Node Exporter)
+- Collect host metrics directly (without Node Exporter)
+- Receive OTLP, Prometheus, StatsD, Jaeger, Zipkin, and more
+- Process, batch, transform, and enrich data
+- Export to many backends (SigNoz, Prometheus, Grafana Mimir, Datadog, New Relic, etc.)
+
+### Why Choose OpenTelemetry instead of Prometheus?
+
+OpenTelemetry and Prometheus are both widely used in observability, but they address different layers of the telemetry stack. Prometheus is a metrics-focused system built around scraping, storing, and alerting on time-series data, whereas OpenTelemetry provides a unified, vendor-neutral framework for collecting metrics, logs, and traces across applications and infrastructure.
+
+You should choose OpenTelemetry when you want a single, flexible telemetry pipeline that decouples data collection from storage and analysis. It lets you standardize instrumentation once and decide later where the data should go, including Prometheus, making it easier to evolve your observability stack as systems grow.
+
+For a deeper, side-by-side comparison and real-world usage patterns, see our detailed [OpenTelemetry vs Prometheus - Key Differences Explained](https://signoz.io/blog/opentelemetry-vs-prometheus/).
+
+### SigNoz - OpenTelemetry Native Backend
+
+SigNoz is an all-in-one observability platform built natively on OpenTelemetry, providing metrics, logs, and traces in a single unified experience. It serves as the backend and visualization layer for your telemetry data, offering powerful dashboards, alerts, and service insights.
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz Cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those with data privacy concerns who can't send their data outside their infrastructure can sign up for either the [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those with the expertise to manage SigNoz themselves, or who want to start with a free, self-hosted option, can use our [community edition](https://signoz.io/docs/install/self-host/).
+
+Now, let’s look at two approaches to sending host metrics (including Node Exporter metrics) to SigNoz.
+
+### Approach 1: Using the Prometheus Receiver
+In this approach, the OpenTelemetry Collector scrapes Prometheus-format metrics directly from Node Exporter’s `/metrics` endpoint and forwards them to SigNoz. This is ideal if you already have Node Exporter running or want to keep Prometheus-style metric names.
+
+To implement this, you modify your OpenTelemetry Collector configuration to:
+
+ 1. **Enable the prometheus receiver:** This tells the collector to look for Prometheus-formatted metrics. 
+ 2. **Define the target:** Point the receiver to `localhost:9100` (or your Node Exporter IP). 
+ 3. **Set the exporter:** Route the data to SigNoz via the standard OTLP exporter.
+ 4. **Verify in SigNoz:** Once the collector is running and exporting data, open the `Metrics` tab in SigNoz Cloud and confirm that `node_` metrics are visible.
+
+    <Figure src="/img/guides/2025/12/prometheus-node-exporter-metrics.webp" alt="Metrics tab in SigNoz Cloud with node_ metrics" caption="Metrics tab in SigNoz Cloud with node_ metrics" />
+
+For the complete copy-paste configuration file, refer to the [SigNoz Prometheus Receiver Guide](https://signoz.io/docs/userguide/prometheus-metrics/).
+
+### Approach 2: Using the Hostmetrics Receiver
+This approach does not require Node Exporter.
+
+The OpenTelemetry Collector uses the `hostmetrics` receiver to collect system-level metrics, CPU, memory, disk, network, and more, directly from the host. This is a cleaner setup if you want a single agent for all observability signals.
+
+To implement this, configure your OpenTelemetry Collector to:
+
+ 1. **Install and run the OpenTelemetry Collector.**
+ 2. **Enable the hostmetrics receiver:** This allows the collector to collect host-level metrics directly from the system.
+ 3. **Set the exporter:** Send the collected metrics to SigNoz using the standard OTLP exporter.
+ 4. **Verify in SigNoz:** Once the collector is running, open the `Infrastructure` tab and confirm that host metrics are visible.
+
+    <Figure src="/img/guides/2025/12/prometheus-node-exporter-infrastructure.webp" alt="Host Level Metrics Visualized in SigNoz Cloud Dashboard" caption="Host Level Metrics Visualized in SigNoz Cloud Dashboard" />
+
+For the complete copy-paste configuration file, refer to the [SigNoz Host Metrics Guide](https://signoz.io/docs/userguide/hostmetrics/).
+
+## Next Steps
+
+In this first part of the guide, you set up the core of host-level monitoring by installing Prometheus Node Exporter, configuring Prometheus to scrape system metrics, and validating the setup using the Prometheus UI. You also saw how these components fit into a modern observability stack, and why tools like OpenTelemetry and SigNoz are used to extend basic metrics into richer, production-ready monitoring.
+
+In [next part](/guides/prometheus-node-exporter-metrics/), we go beyond basic setup and focus on running Node Exporter in production, tuning collectors to reduce noise, identifying the most important host metrics, exposing custom signals, and configuring practical alerting rules that map to real-world operational risks.
+
+---
+
+Hope we answered all your questions about setting up Prometheus Node Exporter and visualizing it using the Prometheus UI & SigNoz.
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.
+
+<ArticleSeriesBottom title="Prometheus Node Exporter Tutorial" seriesOverviewHref="/guides/prometheus-node-exporter" currentPart={1} totalParts={2} next={{ title: "Prometheus Node Exporter - Metrics Configuration & Alerting", href: '/guides/prometheus-node-exporter-metrics' }} />
