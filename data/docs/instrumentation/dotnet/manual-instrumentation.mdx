@@ -1,5 +1,5 @@
 ---
-date: 2025-12-14
+date: 2026-01-03
 id: dotnet-manual-instrumentation
 title: Manual instrumentation for .NET
 description: Add OpenTelemetry instrumentation to your .NET application using code for fine-grained control over traces
@@ -197,6 +197,8 @@ activity?.AddEvent(new ActivityEvent("PaymentCompleted", DateTimeOffset.UtcNow,
 Mark spans as failed and attach exception details:
 
 ```csharp
+using OpenTelemetry.Trace;
+
 public async Task<Result> RiskyOperationAsync()
 {
     using var activity = _instrumentation.ActivitySource.StartActivity("RiskyOperation");
@@ -216,7 +218,7 @@ public async Task<Result> RiskyOperationAsync()
 }
 ```
 
-The `RecordException` method adds the exception as an event with stack trace details.
+The `RecordException` method is an extension method from `OpenTelemetry.Trace` that adds the exception as an event with stack trace details.
 
 ## Step 8. Access the current span
 
@@ -232,20 +234,10 @@ This is useful for adding context from code that doesn't have direct access to t
 
 ## Validate
 
-1. Run your application:
-   ```bash
-   dotnet run
-   ```
-
-2. Trigger the code paths that create custom spans.
-
-3. In SigNoz, navigate to **Traces** and filter by your service name.
-
-4. Verify:
-   - Custom spans appear with correct names
-   - Attributes contain your business context
-   - Events show up at the right timestamps
-   - Errors display with exception details
+1. Generate traffic by making requests to your application.
+2. Open SigNoz and go to **Services**.
+3. Look for your service name in the list.
+4. Click on your service to view traces, latency, and error rates.
 
 <details>
 <ToggleHeading>
@@ -289,6 +281,4 @@ dotnet add package OpenTelemetry.Exporter.Console
 
 ## Next steps
 
-- Return to the [.NET instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/) for automatic instrumentation setup
-- [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) based on span attributes
-- [Send logs from .NET](https://signoz.io/docs/logs-management/send-logs/collect-dotnet-logs/) and correlate with traces
+- [Setup alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your traces to get notified on errors and latency

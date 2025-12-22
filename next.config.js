@@ -386,6 +386,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/manual-instrumentation/dotnet/manual-instrumentation/',
+          destination: '/docs/instrumentation/dotnet/manual-instrumentation/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/elixir/',
           destination: '/docs/instrumentation/opentelemetry-elixir/',
           permanent: true,
