@@ -17,7 +17,6 @@ Most steps are identical. To adapt this guide, update the endpoint and remove th
 
 - Python 3.8 or newer
 - A SigNoz Cloud account or self-hosted SigNoz instance
-- Your application code
 
 Tested with Python 3.11 and OpenTelemetry Python SDK v1.27.0.
 
@@ -35,25 +34,7 @@ A VM is a virtual computer that runs on physical hardware. This includes:
 Use this section if you're deploying your Python application directly on a server or VM without containerization.
 </KeyPointCallout>
 
-### Step 1. Install OpenTelemetry packages
-
-```bash
-pip install opentelemetry-distro opentelemetry-exporter-otlp
-```
-
-### Step 2. Install instrumentation for your dependencies
-
-This command detects your installed packages and adds the corresponding instrumentation libraries:
-
-```bash
-opentelemetry-bootstrap --action=install
-```
-
-<Admonition type="info">
-Run this after installing all your application dependencies. It will only instrument packages that are already installed.
-</Admonition>
-
-### Step 3. Set environment variables
+### Step 1. Set environment variables
 
 ```bash
 export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
@@ -67,6 +48,24 @@ Replace the following:
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
 
+### Step 2. Install OpenTelemetry packages
+
+```bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+```
+
+### Step 3. Install instrumentation for your dependencies
+
+This command detects your installed packages and adds the corresponding instrumentation libraries:
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+
+<Admonition type="info">
+Run this after installing all your application dependencies. It will only instrument packages that are already installed.
+</Admonition>
+
 ### Step 4. Run your application
 
 ```bash
@@ -78,73 +77,72 @@ See [Framework instrumentation](#framework-instrumentation) below for framework-
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 
-For Python applications on Kubernetes, you can use:
-- **K8s OTel Operator** (recommended) — Auto-injects instrumentation without code changes
-- **OTel Collector Agent** — Manual instrumentation with collector handling forwarding
-
 <Tabs entityName="k8s-method">
-<TabItem value="k8s-otel-operator" label="K8s OTel Operator" default>
+<TabItem value="direct" label="Direct" default>
 
-The <a href="https://opentelemetry.io/docs/kubernetes/operator" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Operator</a> manages collectors and auto-instrumentation in Kubernetes.
+<KeyPointCallout title="Managing multiple services?" defaultCollapsed={true}>
+For centralized instrumentation management or auto-injection without code changes, see the OTel Operator tab.
+</KeyPointCallout>
 
-### Step 1. Install cert-manager
+### Step 1. Set environment variables
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.name=<service-name>'
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_EXPORTER_OTLP_PROTOCOL
+  value: 'grpc'
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+
+### Step 2. Install OpenTelemetry packages
 
 ```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
-kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
+pip install opentelemetry-distro opentelemetry-exporter-otlp
 ```
 
-### Step 2. Install OpenTelemetry Operator
+### Step 3. Install instrumentation for your dependencies
+
+This command detects your installed packages and adds the corresponding instrumentation libraries:
 
 ```bash
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
+opentelemetry-bootstrap --action=install
 ```
 
-### Step 3. Create the OpenTelemetry Collector instance
+<Admonition type="info">
+Run this after installing all your application dependencies. It will only instrument packages that are already installed.
+</Admonition>
 
-Create `otel-collector.yaml`:
-
-```yaml:otel-collector.yaml
-apiVersion: opentelemetry.io/v1alpha1
-kind: OpenTelemetryCollector
-metadata:
-  name: otel-collector
-spec:
-  mode: deployment
-  config: |
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
-    processors:
-      batch: {}
-    exporters:
-      otlp:
-        endpoint: "ingest.<region>.signoz.cloud:443"
-        tls:
-          insecure: false
-        headers:
-          "signoz-ingestion-key": "<your-ingestion-key>"
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp]
-```
-
-Replace `<region>` and `<your-ingestion-key>` with your SigNoz Cloud values.
+### Step 4. Run your application
 
 ```bash
-kubectl apply -f otel-collector.yaml
+opentelemetry-instrument <your_run_command>
 ```
 
-### Step 4. Create the Instrumentation instance
+See [Framework instrumentation](#framework-instrumentation) below for framework-specific commands.
 
-Create `instrumentation.yaml`:
+</TabItem>
+<TabItem value="otel-operator" label="OTel Operator">
+
+The [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) auto-injects instrumentation into your Python pods without modifying your application image.
+
+### Step 1. Set up the OpenTelemetry Operator
+
+Install the Operator and Collector following the [K8s OTel Operator installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/).
+
+### Step 2. Create the Instrumentation resource
+
+Create `instrumentation.yaml` to configure Python auto-instrumentation:
 
 ```yaml:instrumentation.yaml
 apiVersion: opentelemetry.io/v1alpha1
@@ -161,65 +159,15 @@ spec:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
 ```
 
-```bash
-kubectl apply -f instrumentation.yaml
-```
+Deploy this resource to your cluster.
 
-### Step 5. Add annotations to your deployment
+### Step 3. Add annotations to your deployment
 
-```yaml:deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: python-app
-spec:
-  selector:
-    matchLabels:
-      app: python-app
-  template:
-    metadata:
-      labels:
-        app: python-app
-      annotations:
-        instrumentation.opentelemetry.io/inject-python: "true"
-        instrumentation.opentelemetry.io/otel-python-platform: "glibc"  # or "musl" for Alpine
-        resource.opentelemetry.io/service.name: "python-app"
-    spec:
-      containers:
-      - name: app
-        image: python-app:latest
-        ports:
-        - containerPort: 8080
-```
+Add these annotations to your pod template's `metadata.annotations`:
 
-```bash
-kubectl apply -f deployment.yaml
-```
-
-</TabItem>
-<TabItem value="otel-collector-agent" label="OTel Collector Agent">
-
-Install the OTel Collector agent in your cluster first. See [Kubernetes infrastructure metrics](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/). The collector handles forwarding to SigNoz, so your app doesn't need the ingestion key.
-
-### Step 1. Add OpenTelemetry to requirements.txt
-
-```txt
-opentelemetry-distro
-opentelemetry-exporter-otlp
-```
-
-### Step 2. Update your Dockerfile
-
-```dockerfile:Dockerfile
-RUN pip install --no-cache-dir -r requirements.txt
-RUN opentelemetry-bootstrap --action=install
-
-ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
-ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-
-# See Framework instrumentation section for the correct CMD
-CMD ["opentelemetry-instrument", "python", "app.py"]
+```yaml
+instrumentation.opentelemetry.io/inject-python: "true"
+instrumentation.opentelemetry.io/otel-python-platform: "glibc"  # or "musl" for Alpine
 ```
 
 </TabItem>
@@ -228,14 +176,7 @@ CMD ["opentelemetry-instrument", "python", "app.py"]
 </TabItem>
 <TabItem value="windows" label="Windows">
 
-### Step 1. Install OpenTelemetry packages
-
-```bash
-pip install opentelemetry-distro opentelemetry-exporter-otlp
-opentelemetry-bootstrap --action=install
-```
-
-### Step 2. Set environment variables
+### Step 1. Set environment variables
 
 ```powershell
 $env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>"
@@ -244,7 +185,30 @@ $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_EXPORTER_OTLP_PROTOCOL = "grpc"
 ```
 
-### Step 3. Run your application
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+
+### Step 2. Install OpenTelemetry packages
+
+```bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+```
+
+### Step 3. Install instrumentation for your dependencies
+
+This command detects your installed packages and adds the corresponding instrumentation libraries:
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+
+<Admonition type="info">
+Run this after installing all your application dependencies. It will only instrument packages that are already installed.
+</Admonition>
+
+### Step 4. Run your application
 
 ```bash
 opentelemetry-instrument <your_run_command>
@@ -255,29 +219,55 @@ See [Framework instrumentation](#framework-instrumentation) below for framework-
 </TabItem>
 <TabItem value="docker" label="Docker">
 
-### Step 1. Update your Dockerfile
+### Step 1. Set environment variables in Dockerfile
 
 ```dockerfile
-RUN pip install opentelemetry-distro opentelemetry-exporter-otlp
-RUN opentelemetry-bootstrap --action=install
-
 ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
 ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-
-# See Framework instrumentation section for the correct CMD
-CMD ["opentelemetry-instrument", "python", "app.py"]
 ```
 
-Replace `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
-
-### Step 2. Build and run
+Or pass them at runtime using `docker run`:
 
 ```bash
-docker build -t <image-name> .
-docker run -d -p <host-port>:<container-port> <image-name>
+docker run -e OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>" \
+    -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_EXPORTER_OTLP_PROTOCOL="grpc" \
+    your-image:latest
 ```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+
+### Step 2. Install OpenTelemetry packages
+
+```bash
+pip install opentelemetry-distro opentelemetry-exporter-otlp
+```
+
+### Step 3. Install instrumentation for your dependencies
+
+This command detects your installed packages and adds the corresponding instrumentation libraries:
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+
+<Admonition type="info">
+Run this after installing all your application dependencies. It will only instrument packages that are already installed.
+</Admonition>
+
+### Step 4. Run your application
+
+```bash
+opentelemetry-instrument <your_run_command>
+```
+
+See [Framework instrumentation](#framework-instrumentation) below for framework-specific commands.
 
 </TabItem>
 </Tabs>
