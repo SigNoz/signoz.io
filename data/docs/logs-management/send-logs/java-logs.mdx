@@ -167,6 +167,11 @@ $env:OTEL_SERVICE_NAME = "java-app"
 java -javaagent:./opentelemetry-javaagent.jar -jar your-app.jar
 ```
 
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
 </TabItem>
 
 </Tabs>
@@ -183,24 +188,44 @@ Add the following OpenTelemetry dependencies to your project.
 <TabItem value="maven" label="Maven" default>
 
 ```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-bom</artifactId>
+      <version>1.45.0</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+      <version>2.11.0-alpha</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
 <dependencies>
   <!-- OpenTelemetry SDK -->
   <dependency>
     <groupId>io.opentelemetry</groupId>
     <artifactId>opentelemetry-sdk</artifactId>
-    <version>1.38.0</version>
   </dependency>
   <dependency>
     <groupId>io.opentelemetry</groupId>
     <artifactId>opentelemetry-exporter-otlp</artifactId>
-    <version>1.38.0</version>
   </dependency>
-
+  <!-- Semantic Conventions -->
+  <dependency>
+    <groupId>io.opentelemetry.semconv</groupId>
+    <artifactId>opentelemetry-semconv</artifactId>
+  </dependency>
   <!-- Logback Appender -->
   <dependency>
     <groupId>io.opentelemetry.instrumentation</groupId>
     <artifactId>opentelemetry-logback-appender-1.0</artifactId>
-    <version>2.4.0-alpha</version>
   </dependency>
 </dependencies>
 ```
@@ -210,9 +235,12 @@ Add the following OpenTelemetry dependencies to your project.
 
 ```groovy
 dependencies {
-    implementation 'io.opentelemetry:opentelemetry-sdk:1.38.0'
-    implementation 'io.opentelemetry:opentelemetry-exporter-otlp:1.38.0'
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0:2.4.0-alpha'
+    implementation platform('io.opentelemetry:opentelemetry-bom:1.45.0')
+    implementation platform('io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.11.0-alpha')
+    implementation 'io.opentelemetry:opentelemetry-sdk'
+    implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+    implementation 'io.opentelemetry.semconv:opentelemetry-semconv'
+    implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0'
 }
 ```
 
@@ -231,9 +259,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
-
-import java.util.concurrent.TimeUnit;
+import io.opentelemetry.semconv.ResourceAttributes;
 
 public class OpenTelemetryConfig {
 
