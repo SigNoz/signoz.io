@@ -1,0 +1,125 @@
+---
+
+title: OpenTelemetry Agents - The Complete Beginner's Guide (2025)
+slug: opentelemetry-agent
+date: 2025-12-17
+tags: [OpenTelemetry]
+authors: [dhruv_ahuja]
+description: Understand what OpenTelemetry Agents are, how they work, and the best practices for instrumenting your applications
+keywords: [opentelemetry, opentelemetry agent, observability, instrumentation, signoz]
+
+---
+
+If you search for “OpenTelemetry Agent”, you will likely encounter two completely different definitions. This ambiguity often leads to confusion between infrastructure teams and application developers. SREs and DevOps engineers would describe it as a component deployed as a sidecar, whereas application developers would understand it as a language-specific library. Let’s break it down in the next section.
+
+## The Two Meanings of “Agents” in OpenTelemetry
+
+Both definitions are technically correct, and that is the problem. Within the context of OpenTelemetry (OTel), the definition of an “agent” can be:
+
+- **OpenTelemetry Collector as Agents:** This involves deploying the OpenTelemetry Collector as a component that receives telemetry from application services. Since the collector runs in the same network as the rest of services, transmission of telemetry has little network overhead in this deployment pattern.
+- **OpenTelemetry Auto-Instrumentation Agent:** A convenience wrapper that generates and exports telemetry from applications by modifying their runtime behavior to generate traces, metrics and logs.
+
+If you want to understand the differences between the two entities in more detail, check out [our guide](https://signoz.io/comparisons/opentelemetry-collector-vs-agent/) on the topic.
+
+This blog will exclusively focus on auto-instrumentation agents and will refer to them as “agents” moving forward for convenience. We will explore how these agents inject themselves in your code, what auto-instrumentation signifies, the performance tradeoffs involved, and the best practices for using agents to instrument your applications.
+
+## What is an OpenTelemetry Auto-Instrumentation Agent?
+
+An OpenTelemetry Agent is a runtime library that automatically bootstraps the OpenTelemetry SDK and its components (like exporters), enabling your app to emit telemetry with minimal or zero-code changes.
+
+Although agent implementations differ across languages, they implement the same APIs and follow the same set of semantic conventions, ensuring consistent telemetry generation across the OTel ecosystem. Depending on the configuration, agents forward the data to an observability backend (when running SigNoz Cloud, for example) or an OpenTelemetry Collector instance.
+
+Because the agent handles this setup automatically, it shifts developer effort from writing manual instrumentation to actually understanding system behavior. Most popular languages like Java and Python have mature agent libraries: Java applications use a pre-built JAR passed via the `-javaagent` flag, while Python applications are typically started through the `opentelemetry-instrument` wrapper.
+
+## How do OTel Agents Instrument Applications?
+
+<Figure src="/img/blog/2025/12/opentelemetry-agent-functionality.webp" alt="Auto-instrumentation creates spans, propagates trace context across services, and controls telemetry output via configuration" caption="Auto-instrumentation creates spans, propagates trace context across services, and controls telemetry output via configuration" />
+
+An OpenTelemetry agent attaches to your running application and loads hooks that listen for specific operations. When your code makes database queries, serves a web request, or publishes to a message broker, the hooks automatically create a span to record that activity.
+
+Beyond generating individual spans, the agent is responsible for maintaining trace context across logical boundaries. It must capture the context from the current thread or function and propagate it to downstream services. For instance, an instrumented HTTP library will automatically add a `traceparent` header to outgoing requests. The agent on the receiving service parses this header and uses the `trace_id` and parent `span_id` to link the new span to its own request context, ensuring the distributed trace remains unbroken.
+
+Although agents instrument most libraries out of the box, you can often fine-tune this behavior using environment variables. This is particularly useful for excluding noisy endpoints or adjusting telemetry verbosity. For example, within a Python application using the `requests` library, you can prevent health checks from cluttering your traces by setting:
+
+```bash
+export OTEL_PYTHON_REQUESTS_EXCLUDED_URLS="client/.*/info,healthcheck"
+```
+
+Let’s understand how agents perform auto-instrumentation internally, for two of the most popularly used languages.
+
+### Java: Bytecode Manipulation
+
+Within the Java ecosystem, agent is a formalized term and refers to a software that runs within the Java Virtual Machine (JVM) to observe and manipulate the behavior of Java applications. 
+
+When instrumenting Java applications, users must inject `opentelemetry-javaagent` at application startup, this invokes a special `premain` method within the agent and allows it to register a `ClassFileTransformer`:
+
+```bash
+java -javaagent:path/to/opentelemetry-javaagent.jar -jar myapp.jar
+```
+
+This allows the agent to intercept your application's code (classes) as they are being loaded from the disk into memory. Before the code actually runs, the agent modifies the raw bytecode—injecting new instructions to capture telemetry. Effectively, it rewrites your application in memory to include observability, whether that code comes from your own source files or third-party libraries like Spring Boot.
+
+Learn how to download the JAR and attach it to your JVM in our official [Java Instrumentation](https://signoz.io/docs/instrumentation/java/) documentation.
+
+### Python: Monkey Patching
+
+Dynamic languages like Python do not use pre-compiled binaries for instrumentation. Instead, the OpenTelemetry Agent is a set of packages that performs runtime code manipulation. This technique is often called “monkey patching”.
+
+In Python, functions are first-class objects that can be replaced or reassigned at runtime. Running the application with the `opentelemetry-instrument` wrapper invokes the agent, which runs before the entrypoint function of the application (typically `main`):
+
+```bash
+opentelemetry-instrument python main.py
+```
+
+It scans all compatible installed libraries (like FastAPI or Jinja) and replaces key functions with instrumented wrappers.
+
+See how to install the package and run your app with the `opentelemetry-instrument` wrapper in our [Python Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-python/) documentation.
+
+## Performance and Tradeoffs
+
+As OpenTelemetry agents run in memory alongside the application, they consume resources from the application’s available resource pool to manage and export telemetry. Although the agent overhead is minimal, it ultimately depends on factors like the hardware, resource contention status, containerization, system configuration, etc.
+
+The more telemetry your application emits the more the overhead is going to be. As a rough guideline:
+
+- **CPU Overhead:** It is fair to expect auto-instrumentation to incur a <a href="https://www.sciencedirect.com/science/article/pii/S0164121225002420#:~:text=Overall%20throughput%20decreased%20by%20up%20to%208.40%20%25" rel="noopener noreferrer nofollow" target="_blank">minor performance penalty</a>, that might be higher in extreme cases. A high throughput service tracing every request will see significant degradation in performance, as the agent consumes CPU cycles to manage trace data for the entire request’s lifecycle.
+- **Memory Consumption:** The agent introduces additional object allocations for spans, attributes and context propagation. This increases heap usage in Java, potentially triggering garbage collection cycles more frequently, which may lead to longer GC pauses and spikes in p95/p99 latencies. Depending on the criticality of your services, these spikes may not be acceptable.
+- **Cold Start Latencies:** Since the agent must allocate load objects into memory and perform necessary instrumentation during initialization, it causes noticeable delays in application startup times. Applications running in serverless environments like AWS Lambda might experience increased response times serving intermittent bursts of traffic, and potentially higher costs.
+
+## Best Practices for Using OTel Agents
+
+### Complement Auto-Instrumentation with Manual Instrumentation
+
+While OpenTelemetry Agents and auto-instrumentation cover most infrastructure-level telemetry, such as databases, web requests, message queues, and more, they do not capture application-specific business logic by default. To gain visibility into critical user journeys and domain-specific workflows, developers should manually instrument key parts of their codebase using [custom spans and attributes](https://signoz.io/opentelemetry/python/#capturing-custom-traces-for-application-specific-flows).
+
+As an example, consider a business-critical flow where an application generates a bill and facilitates user payments. Auto-instrumentation may capture the HTTP request from the billing service to the payment service, but will not observe the internal bill-generation logic unless explicitly instrumented.
+
+### Sample Generated Telemetry Data
+
+Generating and processing telemetry data for all incoming requests leads to not only performance degradations but can also cause contextual overhead and increase billing costs in your observability platform. Observability platform users face contextual overhead when attempting to debug problems or observe a system and must go through multiple instances of similar telemetry recorded by the application; capturing 100 instances of `200 OK` responses for a `GET /users` endpoint serves little purpose when attempting to find anomalies or debug a particular problem.
+
+By sampling the telemetry generated by the agent, you reduce the performance impact on the instrumented application, and prevent developer fatigue by reducing the data volume to contextualize. You can enable sampling by setting these environment variables before running your apps:
+
+```bash
+export OTEL_TRACES_SAMPLER=parentbased_traceidratio # ensure consistent sampling behaviour across the trace lifespan 
+export OTEL_TRACES_SAMPLER_ARG=0.1 # record only 10% of traces; tweak this number to fit your needs
+```
+
+### Offload Complex Processing to the OTel Collector
+
+Performing complex telemetry data transformations, redactions or filtering affects the performance of the application. This also locks you into re-deploying the entire application to apply any changes made to the agent logic. The OTel collector is a Go binary optimized for data processing at scale. Instead of configuring telemetry processing functions at the agent level, keeping the agent configuration minimal and defining complex processing logic as [collector pipelines](https://signoz.io/blog/opentelemetry-collector-complete-guide/#opentelemetry-collector-architecture-receivers-processors-exporters) will provide significantly better performance and make your observability systems maintainable.
+
+When offloading the data processing to the collector, also consider deploying it as a sidecar. Having a locally running collector instance allows the agent to efficiently export telemetry data and free up network resources for the main application.
+
+## Next Step: Getting Started with OpenTelemetry Agents
+
+Now that you understand what OpenTelemetry agents are, how they operate under the hood, and the best practices for using them effectively, you can get started by following our documentation for [Java instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-java/) or [Python instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-python/).
+
+You will also require an observability platform to ingest and visualize your telemetry data when implementing auto-instrumentation agents for your applications. SigNoz is built from the ground up to be OpenTelemetry native. This means we fully leverage OTel's semantic conventions, providing deeper, out-of-the-box insights.
+
+SigNoz emphasizes [External API Monitoring](https://signoz.io/docs/application-monitoring/api-monitoring/) ensuring you have visibility into the performance of 3rd party APIs that your applications depend on.
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).

@@ -159,12 +159,16 @@ Every doc should be skimmable and actionable.
     id: <unique-id-or-slug>
     title: <Title in Sentence Case>
     description: <1–2 line summary with key terms>
-    tags: [SigNoz Cloud, Self-Host] # choose both if applicable
     doc_type: howto # one of: tutorial | howto | reference | explanation
+    # tags are optional — see below
     ---
     ```
   - Use `id` as a stable unique slug (no spaces); update links if it changes.
-  - Use `tags` consistently. Supported tags include `SigNoz Cloud` and `Self-Host`.
+  - **Tags**: Default tags (`SigNoz Cloud`, `Self-Host`) are automatically applied to all docs. You only need to specify `tags` in frontmatter when the doc applies to a **subset** of the defaults:
+    - Use `tags: [Self-Host]` if the doc is **only** relevant to self-hosted users.
+    - Use `tags: [SigNoz Cloud]` if the doc is **only** relevant to SigNoz Cloud users.
+    - Use `tags: []` (empty array) if the doc is **not** relevant to any tags.
+    - Omit `tags` entirely if the doc applies to both (the defaults will be applied automatically).
   - Use `doc_type` to match the main intent of the page (see [Documentation types and Diátaxis](#documentation-types-and-diátaxis)).
 - Standard sections (H2 level)
   - `## Overview` – what the doc covers and when to use it. Skip this section if the overview is only 1-2 lines.
@@ -245,7 +249,7 @@ Every doc should be skimmable and actionable.
   - Prefer cross-linking existing SigNoz docs where possible (ingestion, collectors, dashboards, alerts) to reduce duplication and keep docs consistent.
 
 - Cloud vs Self-Host
-  - Add the relevant tags in frontmatter.
+  - Add the relevant tags in frontmatter only if the content is specific to one platform (e.g., `tags: ["Self-Host"]`).
   - **Default to SigNoz Cloud** in all examples and instructions.
   - Include a collapsible `KeyPointCallout` for self-hosted users instead of duplicating with tabs.
   - Use the Cloud vs Self-Hosted comparison doc when a guide only shows one environment and the other only differs by endpoint/auth/TLS: https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#self-hosted-to-cloud
@@ -648,7 +652,7 @@ git checkout -b add-new-content
      id: <unique-id-or-slug>
      title: <Title in Sentence Case>
      description: <1–2 line summary>
-     tags: [SigNoz Cloud, Self-Host]
+     # tags are optional — see Content Structure section above
      ---
      ```
      Then follow the “Content Structure” guidelines in this document for sections like Overview, Prerequisites, Steps, Validate, and Troubleshooting.

@@ -148,14 +148,10 @@ function validateMetadata(filePath) {
   }
 
   // Validate tags field (warning only)
-  if (!fieldMap.has('tags')) {
-    warnings.push('missing tags')
-  } else {
+  if (fieldMap.has('tags')) {
     const tagsValue = fieldMap.get('tags')
     if (!tagsValue.includes('[')) {
       warnings.push('tags must be an array')
-    } else if (/^\[\s*\]$/.test(tagsValue)) {
-      warnings.push('tags array cannot be empty')
     }
   }
 

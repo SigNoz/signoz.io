@@ -1377,7 +1377,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/logs-management/send-logs/collect-systemd-logs',
-            label: 'SystemD logs',
+            label: 'Systemd/journald logs',
           },
           {
             type: 'doc',
@@ -1785,7 +1785,7 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'category',
+        type: 'doc',
         route: '/docs/dashboards/interactivity',
         label: 'Interactivity',
       },
