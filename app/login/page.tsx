@@ -57,16 +57,6 @@ export default function Login() {
   const router = useRouter()
   const logEvent = useLogEvent()
 
-  useEffect(() => {
-    logEvent({
-      eventName: 'Login Page View',
-      eventType: 'track',
-      attributes: {
-        page: 'login',
-      },
-    })
-  }, [logEvent])
-
   const handleEmailUpdate = (event) => {
     const { value } = event.target
     setWorkEmail(value)
@@ -105,9 +95,11 @@ export default function Login() {
     event.preventDefault()
 
     logEvent({
-      eventName: 'Login Attempt',
+      eventName: 'Website Form Submitted',
       eventType: 'track',
       attributes: {
+        formName: 'Login Form',
+        formLocation: 'Login Page',
         email: workEmail,
       },
     })

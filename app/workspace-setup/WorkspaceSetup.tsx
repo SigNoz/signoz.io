@@ -1,12 +1,14 @@
 import { ArrowRight } from 'lucide-react'
 import { CheckCircleIcon, HouseIcon, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import React, { useEffect } from 'react'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import './workspace-setup.styles.css'
 
 function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
   const logEvent = useLogEvent()
+  const pathname = usePathname()
 
   useEffect(() => {
     logEvent({
@@ -20,10 +22,14 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
 
   const handleContactSupport = (location) => {
     logEvent({
-      eventName: 'Contact Support Clicked',
+      eventName: 'Website Click',
       eventType: 'track',
       attributes: {
-        location: `Workspace Setup Loading - ${location}`,
+        clickType: location === 'button' ? 'Button Click' : 'Link Click',
+        clickName: 'Contact Support',
+        clickLocation: 'Workspace Setup Loading',
+        clickText: 'Contact cloud support',
+        pageLocation: pathname,
         isDelayed: isWorkspaceSetupDelayed,
         email: email || '',
         workspaceData: workspaceData,
@@ -33,10 +39,14 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
 
   const handleSlackClick = () => {
     logEvent({
-      eventName: 'Slack Community Clicked',
+      eventName: 'Website Click',
       eventType: 'track',
       attributes: {
-        location: 'Workspace Setup Loading',
+        clickType: 'Link Click',
+        clickName: 'Slack Community',
+        clickLocation: 'Workspace Setup Loading',
+        clickText: 'Slack Community',
+        pageLocation: pathname,
         isDelayed: isWorkspaceSetupDelayed,
         email: email || '',
         workspaceData: workspaceData,
@@ -46,10 +56,14 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed, email, workspaceData }) {
 
   const handleReadDocs = () => {
     logEvent({
-      eventName: 'Read Docs Clicked',
+      eventName: 'Website Click',
       eventType: 'track',
       attributes: {
-        location: 'Workspace Setup Loading',
+        clickType: 'Button Click',
+        clickName: 'Read Docs',
+        clickLocation: 'Workspace Setup Loading',
+        clickText: 'Read the docs',
+        pageLocation: pathname,
         email: email || '',
         workspaceData: workspaceData,
       },

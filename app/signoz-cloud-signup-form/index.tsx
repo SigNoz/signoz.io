@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import ReactGA from 'react-ga4'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import styles from './styles.module.css'
+import { usePathname } from 'next/navigation'
 
 interface ErrorsProps {
   fullName?: string
@@ -26,16 +27,7 @@ export default function SignozCloudSignUpForm() {
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitFailed, setSubmitFailed] = useState(false)
   const logEvent = useLogEvent()
-
-  useEffect(() => {
-    logEvent({
-      eventName: 'Signup Form Viewed',
-      eventType: 'track',
-      attributes: {
-        page: 'signoz-cloud-signup',
-      },
-    })
-  }, [logEvent])
+  const pathname = usePathname()
 
   const handleInputChange = (event) => {
     const { name, value } = event.target
@@ -83,9 +75,12 @@ export default function SignozCloudSignUpForm() {
     event.preventDefault()
 
     logEvent({
-      eventName: 'Signup Form Submit Attempt',
+      eventName: 'Website Form Submitted',
       eventType: 'track',
       attributes: {
+        formName: 'SigNoz Cloud Signup Form',
+        formLocation: 'Cloud Signup Page',
+        pageLocation: pathname,
         ...formData,
       },
     })
