@@ -129,10 +129,10 @@ export default function LogsInstrumentationListicle({
             clickName: 'Python Logs Link',
           },
           {
-            name: 'Java OTel SDK',
-            href: '/docs/userguide/collecting_application_logs_otel_sdk_java',
+            name: 'Java',
+            href: '/docs/logs-management/send-logs/java-logs',
             icon: <FaJava className="h-7 w-7 text-red-600" />,
-            clickName: 'Java SDK Logs Link',
+            clickName: 'Java Logs Link',
           },
           {
             name: 'Node.js',

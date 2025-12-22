@@ -1118,6 +1118,11 @@ module.exports = () => {
           destination: '/docs/logs-management/send-logs/python-logs/',
           permanent: true,
         },
+        {
+          source: '/docs/userguide/collecting_application_logs_otel_sdk_java/',
+          destination: '/docs/logs-management/send-logs/java-logs/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {

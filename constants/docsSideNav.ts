@@ -1291,8 +1291,8 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/userguide/collecting_application_logs_otel_sdk_java',
-                label: 'Using OTel Java SDK',
+                route: '/docs/logs-management/send-logs/java-logs',
+                label: 'Java Logs',
               },
               {
                 type: 'doc',
