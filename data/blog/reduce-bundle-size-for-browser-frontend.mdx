@@ -64,7 +64,7 @@ If you don’t need, say, user interaction tracking or certain network instrumen
 
 Tree-shaking works best when libraries declare that they have no side effects on import. Many OTel packages now include `sideEffects: false` in their package.json, which helps Web-pack/Rollup know it can safely drop unused exports. 
 
-This was more of an issue in the previous versions. A user noted that manually adding `sideEffects: false` to OTel packages reduced bundle size by ~40KB, and the OTel maintainers addressed this in later releases. You can view the [Github discussions](https://github.com/open-telemetry/opentelemetry-js/issues/2855) here. Using OpenTelemetry JS v1.2+ or v2.x **is recommended, as newer versions have improved in this area. In fact, the OTel JS SDK 2.0 [released in 2025] **explicitly removed certain patterns [like extensive classes or namespaces] to improve tree-shakability and minification.
+This was more of an issue in the previous versions. A user noted that manually adding `sideEffects: false` to OTel packages reduced bundle size by ~40KB, and the OTel maintainers addressed this in later releases. You can view the [Github discussions](https://github.com/open-telemetry/opentelemetry-js/issues/2855) here. Using OpenTelemetry JS v1.2+ or v2.x is recommended, as newer versions have improved in this area. In fact, the OTel JS SDK 2.0 [released in 2025] explicitly removed certain patterns [like extensive classes or namespaces] to improve tree-shakability and minification.
 
  Upgrading to the latest version can yield a smaller bundle thanks to these optimisations!
 
@@ -78,7 +78,7 @@ In summary, *tree-shake aggressively.* That means prune everything optional — 
 
 ## Lazy-Loading the OpenTelemetry SDK
 
-This is the next concept you can explore. Lazy-load the OTel code, so it isn’t even downloaded or executed until after the critical page content is loaded. ****This strategy has perhaps the biggest positive impact on LCP and initial load performance. The idea is to defer the initialisation of OpenTelemetry modules to a non-critical moment [for example, after the page’s main content is on screen or when the user interacts], rather than blocking the main thread early.
+This is the next concept you can explore. Lazy-load the OTel code, so it isn’t even downloaded or executed until after the critical page content is loaded. This strategy has perhaps the biggest positive impact on LCP and initial load performance. The idea is to defer the initialisation of OpenTelemetry modules to a non-critical moment [for example, after the page’s main content is on screen or when the user interacts], rather than blocking the main thread early.
 
 ### Dynamic import() in Single-Page Apps
 
