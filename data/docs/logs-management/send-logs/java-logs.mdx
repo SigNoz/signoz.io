@@ -382,9 +382,11 @@ Replace the placeholders:
 
 ### Step 3: Initialize OpenTelemetry SDK
 
-Create a class to initialize the OpenTelemetry SDK. You must initialize both the **LoggerProvider** (for logs) and the **TracerProvider** (for correlation).
+Create a file named `src/main/java/com/example/OpenTelemetryConfig.java` to initialize the OpenTelemetry SDK. You must initialize both the **LoggerProvider** (for logs) and the **TracerProvider** (for correlation).
 
-```java:OpenTelemetryConfig.java
+```java:src/main/java/com/example/OpenTelemetryConfig.java
+package com.example;
+
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 
@@ -399,9 +401,9 @@ public class OpenTelemetryConfig {
 
 ### Step 4: Configure Logback
 
-Add the `OpenTelemetryAppender` to your `logback.xml` or `logback-spring.xml` to bridge logs to the OpenTelemetry SDK.
+Create a file named `src/main/resources/logback.xml` and add the `OpenTelemetryAppender` to bridge logs to the OpenTelemetry SDK.
 
-```xml:logback.xml
+```xml:src/main/resources/logback.xml
 <configuration>
   <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
     <captureExperimentalAttributes>true</captureExperimentalAttributes>
@@ -423,9 +425,13 @@ Add the `OpenTelemetryAppender` to your `logback.xml` or `logback-spring.xml` to
 
 ### Step 5: Instrument usage with Log Correlation
 
-Initialize the SDK at the start of your application. When you create spans and make them current, the OpenTelemetry appender will automatically automatically add the `trace_id` and `span_id` to your logs.
+Initialize the SDK at the start of your application. When you create spans and make them current, the OpenTelemetry appender will automatically add the `trace_id` and `span_id` to your logs.
 
-```java:Application.java
+Create or update your main application file `src/main/java/com/example/Application.java`.
+
+```java:src/main/java/com/example/Application.java
+package com.example;
+
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
@@ -465,6 +471,29 @@ public class Application {
 }
 ```
 
+### Step 6: Build and Run
+
+Build your project and run the application.
+
+<Tabs>
+<TabItem value="maven" label="Maven" default>
+
+```bash
+mvn clean package
+java -jar target/your-app-1.0-SNAPSHOT.jar
+```
+
+</TabItem>
+<TabItem value="gradle" label="Gradle">
+
+```bash
+./gradlew build
+java -jar build/libs/your-app-1.0-SNAPSHOT.jar
+```
+
+</TabItem>
+</Tabs>
+
 </TabItem>
 </Tabs>
 
@@ -472,12 +501,11 @@ public class Application {
 
 Captured logs can be viewed in the [Logs Explorer](https://signoz.io/docs/userguide/logs/) section.
 
-<figure data-zoomable align="center">
-  <img src="/img/docs/logs-management/send-logs/java-logs.webp" alt="Java Logs" />
-  <figcaption>
-    <i>Java Application Logs</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/logs-management/send-logs/java-logs.webp"
+  alt="Java Application Logs in SigNoz Logs Explorer"
+  caption="Java Application Logs"
+/>
 
 <details>
 <ToggleHeading>
@@ -498,6 +526,8 @@ Think of the OTel Collector as a middleman between your app and SigNoz. Instead 
 - **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
 
 See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
 
 </details>
 
