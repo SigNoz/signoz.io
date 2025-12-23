@@ -1,0 +1,355 @@
+---
+date: 2026-01-03
+id: java-springboot
+
+title: Java / Spring Boot OpenTelemetry Instrumentation
+description: Send traces from Java and Spring Boot applications to SigNoz using the OpenTelemetry Java agent.
+doc_type: howto
+---
+
+This guide walks you through instrumenting your Java or Spring Boot application with OpenTelemetry and sending traces to SigNoz. The Java agent handles most popular libraries and frameworks automatically—Spring, JDBC, HTTP clients, message queues, and more.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Java 8 or higher
+- A SigNoz Cloud account or self-hosted SigNoz instance
+
+## Send traces to SigNoz
+
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your Java application directly on a server or VM without containerization.
+</KeyPointCallout>
+
+### Step 1. Download the OpenTelemetry Java agent
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+### Step 2. Set environment variables
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+
+### Step 3. Run your application
+
+For Spring Boot applications:
+
+```bash
+java -javaagent:./opentelemetry-javaagent.jar -jar your-app.jar
+```
+
+For generic Java applications, you can also pass config as system properties:
+
+```bash
+java -javaagent:./opentelemetry-javaagent.jar \
+  -Dotel.service.name=my-service \
+  -Dotel.exporter.otlp.endpoint=https://ingest.us.signoz.cloud:443 \
+  -Dotel.exporter.otlp.headers=signoz-ingestion-key=<key> \
+  -jar your-app.jar
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+<Tabs entityName="k8s-method">
+<TabItem value="direct" label="Direct" default>
+
+<KeyPointCallout title="Managing multiple services?" defaultCollapsed={true}>
+For centralized instrumentation management or auto-injection without code changes, see the OTel Operator tab.
+</KeyPointCallout>
+
+### Step 1. Add the agent to your Dockerfile
+
+```dockerfile
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+COPY target/<my-app>.jar app.jar
+
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
+
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
+```
+
+### Step 2. Deploy to Kubernetes
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.name=<service-name>'
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+
+</TabItem>
+<TabItem value="otel-operator" label="OTel Operator">
+
+The [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) auto-injects the Java agent into your pods without modifying your container image.
+
+### Step 1. Set up the OpenTelemetry Operator
+
+Install the Operator and Collector following the [K8s OTel Operator installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/).
+
+### Step 2. Create the Instrumentation resource
+
+Create `instrumentation.yaml` to configure Java auto-instrumentation:
+
+```yaml:instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: java-instrumentation
+spec:
+  exporter:
+    endpoint: http://otel-collector-collector:4318
+  propagators:
+    - tracecontext
+    - baggage
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+```
+
+Deploy this resource to your cluster.
+
+### Step 3. Add annotations to your deployment
+
+Add these annotations to your pod template's `metadata.annotations`:
+
+```yaml
+instrumentation.opentelemetry.io/inject-java: "true"
+resource.opentelemetry.io/service.name: "<service-name>"
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+### Step 1. Download the OpenTelemetry Java agent
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar" -OutFile "opentelemetry-javaagent.jar"
+```
+
+### Step 2. Set environment variables
+
+```powershell
+$env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Replace `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+
+### Step 3. Run your application
+
+For Spring Boot applications:
+
+```powershell
+java -javaagent:.\opentelemetry-javaagent.jar -jar your-app.jar
+```
+
+For generic Java applications, you can also pass config as system properties:
+
+```powershell
+java -javaagent:.\opentelemetry-javaagent.jar `
+  -Dotel.service.name=my-service `
+  -Dotel.exporter.otlp.endpoint=https://ingest.us.signoz.cloud:443 `
+  -Dotel.exporter.otlp.headers=signoz-ingestion-key=<key> `
+  -jar your-app.jar
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+### Step 1. Add the agent to your Dockerfile
+
+```dockerfile
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+COPY target/<my-app>.jar app.jar
+
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
+
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
+```
+
+Replace `<my-app>.jar`, `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+
+### Step 2. Build and run
+
+```bash
+docker build -t my-java-app .
+docker run -p 8080:8080 my-java-app
+```
+
+Or pass environment variables at runtime:
+
+```bash
+docker run -p 8080:8080 \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-service" \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
+  my-java-app
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+With your application running, verify traces are being sent to SigNoz:
+
+1. Make a few requests to your application endpoints.
+2. In SigNoz, open the **Services** tab and click **Refresh**. Your application should appear.
+3. Go to the **Traces** tab to see your application's traces.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Traces not showing up in SigNoz?
+
+**Check environment variables:**
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+echo $OTEL_RESOURCE_ATTRIBUTES
+```
+
+**Enable debug logging:**
+```bash
+OTEL_LOG_LEVEL=debug java -javaagent:./opentelemetry-javaagent.jar -jar app.jar
+```
+
+Look for span output in stdout. If spans appear locally but not in SigNoz, check your endpoint URL and ingestion key.
+
+**Test connectivity:**
+```bash
+curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+### Agent not attaching?
+
+Make sure `-javaagent` comes before `-jar`:
+```bash
+# Correct
+java -javaagent:./agent.jar -jar app.jar
+
+# Wrong - agent flag after -jar is ignored
+java -jar app.jar -javaagent:./agent.jar
+```
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Configuring the agent (Optional)
+
+</ToggleHeading>
+
+### What can you configure?
+
+The Java agent auto-instruments most libraries out of the box. Configuration lets you fine-tune what gets captured and how traces are exported.
+
+### Why configure?
+
+- **Reduce noise** — Disable instrumentation for internal health checks or chatty libraries
+- **Control costs** — Sample a percentage of traces instead of capturing everything
+- **Add context** — Tag traces with environment, version, or team info for easier filtering
+
+### Common options
+
+**Disable specific instrumentations:**
+```bash
+-Dotel.instrumentation.jdbc-datasource.enabled=false
+```
+
+Some instrumentations are disabled by default because they're noisy:
+- `jdbc-datasource` — creates spans for every `DataSource.getConnection()` call
+- `dropwizard-metrics` — limited attribute support in Dropwizard's metrics API
+
+**Sample traces:**
+```bash
+export OTEL_TRACES_SAMPLER=parentbased_traceidratio
+export OTEL_TRACES_SAMPLER_ARG=0.1  # Sample 10% of traces
+```
+
+**Add resource attributes:**
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="service.name=my-app,deployment.environment=production,service.version=1.2.3"
+```
+
+See the <a href="https://opentelemetry.io/docs/languages/java/automatic/agent-config/" target="_blank" rel="noopener noreferrer nofollow">full configuration reference</a> for all available options.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Setup OpenTelemetry Collector (Optional)
+
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+The Collector sits between your app and SigNoz. Your app sends traces to the Collector, which then forwards them to SigNoz.
+
+### Why use it?
+
+- **Filter and transform** - Drop noisy traces or redact sensitive data before it leaves your network
+- **Reduce app overhead** - Let the Collector handle batching, retries, and compression
+- **Add metadata** - Automatically tag traces with Kubernetes pod info, cloud region, etc.
+- **Multi-backend** - Send to multiple observability tools without changing your app
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for setup instructions.
+
+</details>
+
+## Next steps
+
+- [Add manual instrumentation](https://signoz.io/docs/instrumentation/java/manual-instrumentation) for custom spans and business context
+- [Collect Java application logs](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java) with OpenTelemetry
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your Java application
+
+**Sample applications**:
+- <a href="https://github.com/SigNoz/distributed-tracing-java-sample" target="_blank" rel="noopener noreferrer nofollow">Distributed tracing Java sample</a>
