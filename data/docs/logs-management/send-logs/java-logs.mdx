@@ -193,14 +193,14 @@ Add the following OpenTelemetry dependencies to your project.
     <dependency>
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-bom</artifactId>
-      <version>1.45.0</version>
+      <version>1.57.0</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
     <dependency>
       <groupId>io.opentelemetry.instrumentation</groupId>
       <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
-      <version>2.11.0-alpha</version>
+      <version>2.23.0-alpha</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
@@ -247,18 +247,123 @@ dependencies {
 </TabItem>
 </Tabs>
 
-### Step 2: Initialize OpenTelemetry SDK
+### Step 2: Set environment variables
 
-Create a class to initialize the OpenTelemetry SDK. This must run before your application starts logging.
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="java-manual-app"
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="kubernetes" label="Kubernetes">
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: 'https://ingest.<region>.signoz.cloud:443'
+  - name: OTEL_EXPORTER_OTLP_HEADERS
+    value: 'signoz-ingestion-key=<your-ingestion-key>'
+  - name: OTEL_SERVICE_NAME
+    value: 'java-manual-app'
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+
+Create a `Dockerfile` in your project root:
+
+```dockerfile:Dockerfile
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+# Copy your application JAR
+COPY target/your-app.jar /app/app.jar
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="java-manual-app"
+
+CMD ["java", "-jar", "/app/app.jar"]
+```
+
+Build and run the container:
+
+```bash
+docker build -t java-manual-app .
+docker run java-manual-app
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables in PowerShell:
+
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "java-manual-app"
+```
+
+Replace the placeholders:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+</TabItem>
+</Tabs>
+
+### Step 3: Initialize OpenTelemetry SDK
+
+Create a class to initialize the OpenTelemetry SDK. You must initialize both the **LoggerProvider** (for logs) and the **TracerProvider** (for correlation).
 
 ```java:OpenTelemetryConfig.java
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.otlp.logs.OtlpGrpcLogRecordExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.logs.SdkLoggerProvider;
 import io.opentelemetry.sdk.logs.export.BatchLogRecordProcessor;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.semconv.ResourceAttributes;
 
 public class OpenTelemetryConfig {
@@ -268,8 +373,8 @@ public class OpenTelemetryConfig {
                 Attributes.of(ResourceAttributes.SERVICE_NAME, "java-manual-app")
         ));
 
-        // Read endpoint/headers from env vars or set directly
-        // Defaults to localhost:4317 if not set
+        // 1. Configure Log Exporter
+        // (reads endpoint/headers from environment variables by default)
         OtlpGrpcLogRecordExporter logExporter = OtlpGrpcLogRecordExporter.builder()
                 .build();
 
@@ -278,21 +383,30 @@ public class OpenTelemetryConfig {
                 .addLogRecordProcessor(BatchLogRecordProcessor.builder(logExporter).build())
                 .build();
 
+        // 2. Configure Tracer Provider (required for log correlation)
+        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+                .setResource(resource)
+                .setSampler(Sampler.alwaysOn())
+                .build();
+
+        // 3. Build OpenTelemetry SDK
         OpenTelemetrySdk sdk = OpenTelemetrySdk.builder()
                 .setLoggerProvider(loggerProvider)
+                .setTracerProvider(tracerProvider)
+                .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
                 .buildAndRegisterGlobal();
 
-        // Add hook to shutdown SDK
-        Runtime.getRuntime().addShutdownHook(new Thread(loggerProvider::shutdown));
+        // 4. Add shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(sdk::close));
 
         return sdk;
     }
 }
 ```
 
-### Step 3: Configure Logback
+### Step 4: Configure Logback
 
-Add the `OpenTelemetryAppender` to your `logback.xml` or `logback-spring.xml`.
+Add the `OpenTelemetryAppender` to your `logback.xml` or `logback-spring.xml` to bridge logs to the OpenTelemetry SDK.
 
 ```xml:logback.xml
 <configuration>
@@ -314,24 +428,50 @@ Add the `OpenTelemetryAppender` to your `logback.xml` or `logback-spring.xml`.
 </configuration>
 ```
 
-### Step 4: Run Application
+### Step 5: Instrument usage with Log Correlation
 
-Call the initialization in your `main` method:
+Initialize the SDK at the start of your application. When you create spans and make them current, the OpenTelemetry appender will automatically automatically add the `trace_id` and `span_id` to your logs.
 
-```java
-public static void main(String[] args) {
-    OpenTelemetryConfig.init(); // Initialize OTel SDK
+```java:Application.java
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    Logger logger = LoggerFactory.getLogger(Application.class);
-    logger.info("Application started");
+public class Application {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+
+    public static void main(String[] args) {
+        // 1. Initialize OpenTelemetry
+        OpenTelemetryConfig.init();
+
+        logger.info("Application started (no active span)");
+
+        // 2. Log with Correlation
+        Tracer tracer = GlobalOpenTelemetry.getTracer("my-app");
+        Span span = tracer.spanBuilder("my-business-logic").startSpan();
+
+        // Scope.makeCurrent() activates the span in the current thread context
+        try (Scope scope = span.makeCurrent()) {
+
+            // This log will automatically carry the trace_id and span_id
+            logger.info("Processing data within a span...");
+
+            doWork();
+
+        } finally {
+            span.end();
+        }
+
+        logger.info("Application finished");
+    }
+
+    private static void doWork() {
+        logger.warn("Simulated work log - also correlated!");
+    }
 }
-```
-
-Set the standard OTel environment variables to point to SigNoz:
-
-```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ```
 
 </TabItem>
