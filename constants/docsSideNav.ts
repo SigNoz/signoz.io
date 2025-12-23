@@ -2500,7 +2500,7 @@ const docsSideNav = [
         type: 'doc',
       },
       {
-        route: '/docs/temporal-monitoring',
+        route: '/docs/temporal-observability',
         label: 'Temporal',
         type: 'doc',
       },
