@@ -3,15 +3,15 @@ date: 2025-12-23
 id: temporal-observability-with-opentelemetry
 tags: [SigNoz Cloud, Self-Host]
 title: Temporal Monitoring with OpenTelemetry and SigNoz
-description: Observability and monitoring for Temporal performance and usage with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
+description: Observability and monitoring for AI and LLM usage leveraging Temporal with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
 doc_type: howto
 ---
 
 ## Overview
 
-This guide walks you through setting up observability and monitoring for Temporal using [OpenTelemetry](https://opentelemetry.io/) and exporting logs, traces, and metrics to SigNoz. With this integration, you can observe various different metrics for your Temporal applications and agent usage.
+This guide demonstrates how to set up observability and monitoring for OpenAI Agent SDK applications running on Temporal using [OpenTelemetry](https://opentelemetry.io/) to export traces, logs, and metrics to SigNoz. This integration allows for monitoring of your Temporal workflows and agent execution patterns.
 
-Instrumenting Temporal in your AI applications with telemetry ensures full observability across your agent workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+Instrumenting your Temporal-based AI applications with OpenTelemetry ensures full observability across your agent workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
 
 ## Prerequisites
 
@@ -26,15 +26,10 @@ Instrumenting Temporal in your AI applications with telemetry ensures full obser
 <TabItem value="python" label="Python" default>
 
 <Tabs>
-<TabItem value="No Code" label="No Code(Recommended)" default>
+<TabItem value="auto-instrumentation" label="Auto-instrumentation (Recommended)" default>
 
 No code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
-For more information on getting started with Temporal in your Python environment, refer to the [Temporal Python Setup Guide](https://docs.temporal.io/develop/python/set-up-your-local-python)
-
-
-### Step 1: Install the Temporal Python SDK
-
-
+For more information on getting started with Temporal in your Python environment, refer to the <a href="https://docs.temporal.io/develop/python/set-up-your-local-python" target="_blank" rel="noopener noreferrer nofollow">Temporal Python Setup Guide</a>
 
 ### Step 1: Install the necessary packages in your Python environment.
 
@@ -46,7 +41,9 @@ pip install \
   opentelemetry-instrumentation-httpx \
   opentelemetry-instrumentation-system-metrics \
   temporalio \
-  openinference-instrumentation-openai-agents
+  openinference-instrumentation-openai-agents \
+  openai \
+  openai-agents
 ```
 
 ### Step 2: Add Automatic Instrumentation
@@ -88,172 +85,36 @@ TEMPORAL_TLS=true
 ```python:main.py
 from __future__ import annotations
 from dotenv import load_dotenv
-
- 
 import asyncio
-from temporalio import workflow
-from agents import Agent, RunConfig, Runner, WebSearchTool, custom_span, gen_trace_id, trace
-from agents.model_settings import ModelSettings
-from pydantic import BaseModel
-
-
-load_dotenv()
-
-
-#Activities
-
-# Planner Agent Models
-class WebSearchItem(BaseModel):
-    reason: str
-    "Your reasoning for why this search is important to the query."
- 
-    query: str
-    "The search term to use for the web search."
- 
-class WebSearchPlan(BaseModel):
-    searches: list[WebSearchItem]
-    """A list of web searches to perform to best answer the query."""
- 
-# Writer Agent Models
-class ReportData(BaseModel):
-    short_summary: str
-    """A short 2-3 sentence summary of the findings."""
- 
-    markdown_report: str
-    """The final report"""
- 
-    follow_up_questions: list[str]
-    """Suggested topics to research further"""
- 
-# Agent factory functions
-def new_planner_agent():
-    return Agent(
-        name="PlannerAgent",
-        instructions=(
-            "You are a helpful research assistant. Given a query, come up with a set of web searches "
-            "to perform to best answer the query. Output between 5 and 20 terms to query for."
-        ),
-        model="gpt-5",
-        output_type=WebSearchPlan,
-    )
- 
-def new_search_agent():
-    return Agent(
-        name="Search agent",
-        instructions=(
-            "You are a research assistant. Given a search term, you search the web for that term and "
-            "produce a concise summary of the results. The summary must 2-3 paragraphs and less than 300 "
-            "words. Capture the main points. Write succinctly, no need to have complete sentences or good "
-            "grammar. This will be consumed by someone synthesizing a report, so its vital you capture the "
-            "essence and ignore any fluff. Do not include any additional commentary other than the summary "
-            "itself."
-        ),
-        tools=[WebSearchTool()],
-        model_settings=ModelSettings(tool_choice="required"),
-    )
- 
-def new_writer_agent():
-    return Agent(
-        name="WriterAgent",
-        instructions=(
-            "You are a senior researcher tasked with writing a cohesive report for a research query. "
-            "You will be provided with the original query, and some initial research done by a research "
-            "assistant.\n"
-            "You should first come up with an outline for the report that describes the structure and "
-            "flow of the report. Then, generate the report and return that as your final output.\n"
-            "The final output should be in markdown format, and it should be lengthy and detailed. Aim "
-            "for 5-10 pages of content, at least 1000 words."
-        ),
-        model="o3-mini",
-        output_type=ReportData,
-    )
-
-
-#Workflow
-class ResearchManager:
-    def __init__(self):
-        self.run_config = RunConfig()
-        self.search_agent = new_search_agent()
-        self.planner_agent = new_planner_agent()
-        self.writer_agent = new_writer_agent()
- 
-    async def run(self, query: str) -> str:
-        trace_id = gen_trace_id()
-        with trace("Research trace", trace_id=trace_id):
-            search_plan = await self._plan_searches(query)
-            search_results = await self._perform_searches(search_plan)
-            report = await self._write_report(query, search_results)
- 
-        return report.markdown_report
- 
-    async def _plan_searches(self, query: str) -> WebSearchPlan:
-        result = await Runner.run(
-            self.planner_agent,
-            f"Query: {query}",
-            run_config=self.run_config,
-        )
-        return result.final_output_as(WebSearchPlan)
- 
-    async def _perform_searches(self, search_plan: WebSearchPlan) -> list[str]:
-        with custom_span("Search the web"):
-            num_completed = 0
-            tasks = [
-                asyncio.create_task(self._search(item)) for item in search_plan.searches
-            ]
-            results = []
-            for task in workflow.as_completed(tasks):
-                result = await task
-                if result is not None:
-                    results.append(result)
-                num_completed += 1
-            return results
- 
-    async def _search(self, item: WebSearchItem) -> str | None:
-        input = f"Search term: {item.query}\nReason for searching: {item.reason}"
-        try:
-            result = await Runner.run(
-                self.search_agent,
-                input,
-                run_config=self.run_config,
-            )
-            return str(result.final_output)
-        except Exception:
-            return None
- 
-    async def _write_report(self, query: str, search_results: list[str]) -> ReportData:
-        input = f"Original query: {query}\nSummarized search results: {search_results}"
-        result = await Runner.run(
-            self.writer_agent,
-            input,
-            run_config=self.run_config,
-        )
- 
-        return result.final_output_as(ReportData)
-
-
-from temporalio import workflow
- 
-@workflow.defn
-class ResearchWorkflow:
-    @workflow.run
-    async def run(self, query: str) -> str:
-        return await ResearchManager().run(query)
-
-
-#Running Workflow
-import sys
 import os
+from temporalio import workflow
 from temporalio.client import Client
 from temporalio.worker import Worker
 from temporalio.contrib.openai_agents import OpenAIAgentsPlugin
 from temporalio.worker import UnsandboxedWorkflowRunner
- 
+from agents import Agent, Runner
+
+load_dotenv()
+
+@workflow.defn
+class HelloWorldAgent:
+    @workflow.run
+    async def run(self, prompt: str) -> str:
+        agent = Agent(
+            name="Assistant",
+            model="gpt-5",
+            instructions="You only respond in haikus.",
+        )
+
+        result = await Runner.run(agent, input=prompt)
+        return result.final_output
+
 async def main():
     tls = os.environ.get("TEMPORAL_TLS", "").lower() in ("1", "true", "yes")
     api_key = os.environ.get("TEMPORAL_API_KEY")
- 
+
     plugin = OpenAIAgentsPlugin()
- 
+
     client = await Client.connect(
         target_host=os.environ.get("TEMPORAL_ADDRESS", "localhost:7233"),
         namespace=os.environ.get("TEMPORAL_NAMESPACE", "default"),
@@ -261,25 +122,23 @@ async def main():
         tls=tls,
         plugins=[plugin]
     )
- 
+
     worker = Worker(
         client,
         task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
-        workflows=[ResearchWorkflow],
+        workflows=[HelloWorldAgent],
         workflow_runner=UnsandboxedWorkflowRunner()
     )
- 
+
     async with worker:
         handle = await client.start_workflow(
-            ResearchWorkflow.run,
-            id="research-workflow-01",
+            HelloWorldAgent.run,
+            id="hello-world-workflow-01",
             task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
-            args=["SigNoz vs Dash0x for open source application monitoring"],
+            args=["Tell me about SigNoz"],
         )
         result = await handle.result()
         print("\nWorkflow result:\n", result)
- 
-
 
 asyncio.run(main())
 ```
@@ -508,177 +367,43 @@ TEMPORAL_TLS=true
 
 ### Step 7: Run an example Temporal agent workflow
 
-> 📌 Note: Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
+<Admonition type="warning">
+  Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
+</Admonition>
 
 ```python:main.py
 from __future__ import annotations
 from dotenv import load_dotenv
-
- 
 import asyncio
-from temporalio import workflow
-from agents import Agent, RunConfig, Runner, WebSearchTool, custom_span, gen_trace_id, trace
-from agents.model_settings import ModelSettings
-from pydantic import BaseModel
-
-
-load_dotenv()
-
-
-#Activities
-
-# Planner Agent Models
-class WebSearchItem(BaseModel):
-    reason: str
-    "Your reasoning for why this search is important to the query."
- 
-    query: str
-    "The search term to use for the web search."
- 
-class WebSearchPlan(BaseModel):
-    searches: list[WebSearchItem]
-    """A list of web searches to perform to best answer the query."""
- 
-# Writer Agent Models
-class ReportData(BaseModel):
-    short_summary: str
-    """A short 2-3 sentence summary of the findings."""
- 
-    markdown_report: str
-    """The final report"""
- 
-    follow_up_questions: list[str]
-    """Suggested topics to research further"""
- 
-# Agent factory functions
-def new_planner_agent():
-    return Agent(
-        name="PlannerAgent",
-        instructions=(
-            "You are a helpful research assistant. Given a query, come up with a set of web searches "
-            "to perform to best answer the query. Output between 5 and 20 terms to query for."
-        ),
-        model="gpt-5",
-        output_type=WebSearchPlan,
-    )
- 
-def new_search_agent():
-    return Agent(
-        name="Search agent",
-        instructions=(
-            "You are a research assistant. Given a search term, you search the web for that term and "
-            "produce a concise summary of the results. The summary must 2-3 paragraphs and less than 300 "
-            "words. Capture the main points. Write succinctly, no need to have complete sentences or good "
-            "grammar. This will be consumed by someone synthesizing a report, so its vital you capture the "
-            "essence and ignore any fluff. Do not include any additional commentary other than the summary "
-            "itself."
-        ),
-        tools=[WebSearchTool()],
-        model_settings=ModelSettings(tool_choice="required"),
-    )
- 
-def new_writer_agent():
-    return Agent(
-        name="WriterAgent",
-        instructions=(
-            "You are a senior researcher tasked with writing a cohesive report for a research query. "
-            "You will be provided with the original query, and some initial research done by a research "
-            "assistant.\n"
-            "You should first come up with an outline for the report that describes the structure and "
-            "flow of the report. Then, generate the report and return that as your final output.\n"
-            "The final output should be in markdown format, and it should be lengthy and detailed. Aim "
-            "for 5-10 pages of content, at least 1000 words."
-        ),
-        model="o3-mini",
-        output_type=ReportData,
-    )
-
-
-#Workflow
-class ResearchManager:
-    def __init__(self):
-        self.run_config = RunConfig()
-        self.search_agent = new_search_agent()
-        self.planner_agent = new_planner_agent()
-        self.writer_agent = new_writer_agent()
- 
-    async def run(self, query: str) -> str:
-        trace_id = gen_trace_id()
-        with trace("Research trace", trace_id=trace_id):
-            search_plan = await self._plan_searches(query)
-            search_results = await self._perform_searches(search_plan)
-            report = await self._write_report(query, search_results)
- 
-        return report.markdown_report
- 
-    async def _plan_searches(self, query: str) -> WebSearchPlan:
-        result = await Runner.run(
-            self.planner_agent,
-            f"Query: {query}",
-            run_config=self.run_config,
-        )
-        return result.final_output_as(WebSearchPlan)
- 
-    async def _perform_searches(self, search_plan: WebSearchPlan) -> list[str]:
-        with custom_span("Search the web"):
-            num_completed = 0
-            tasks = [
-                asyncio.create_task(self._search(item)) for item in search_plan.searches
-            ]
-            results = []
-            for task in workflow.as_completed(tasks):
-                result = await task
-                if result is not None:
-                    results.append(result)
-                num_completed += 1
-            return results
- 
-    async def _search(self, item: WebSearchItem) -> str | None:
-        input = f"Search term: {item.query}\nReason for searching: {item.reason}"
-        try:
-            result = await Runner.run(
-                self.search_agent,
-                input,
-                run_config=self.run_config,
-            )
-            return str(result.final_output)
-        except Exception:
-            return None
- 
-    async def _write_report(self, query: str, search_results: list[str]) -> ReportData:
-        input = f"Original query: {query}\nSummarized search results: {search_results}"
-        result = await Runner.run(
-            self.writer_agent,
-            input,
-            run_config=self.run_config,
-        )
- 
-        return result.final_output_as(ReportData)
-
-
-from temporalio import workflow
- 
-@workflow.defn
-class ResearchWorkflow:
-    @workflow.run
-    async def run(self, query: str) -> str:
-        return await ResearchManager().run(query)
-
-
-#Running Workflow
-import sys
 import os
+from temporalio import workflow
 from temporalio.client import Client
 from temporalio.worker import Worker
 from temporalio.contrib.openai_agents import OpenAIAgentsPlugin
 from temporalio.worker import UnsandboxedWorkflowRunner
- 
+from agents import Agent, Runner
+
+load_dotenv()
+
+@workflow.defn
+class HelloWorldAgent:
+    @workflow.run
+    async def run(self, prompt: str) -> str:
+        agent = Agent(
+            name="Assistant",
+            model="gpt-5",
+            instructions="You only respond in haikus.",
+        )
+
+        result = await Runner.run(agent, input=prompt)
+        return result.final_output
+
 async def main():
     tls = os.environ.get("TEMPORAL_TLS", "").lower() in ("1", "true", "yes")
     api_key = os.environ.get("TEMPORAL_API_KEY")
- 
+
     plugin = OpenAIAgentsPlugin()
- 
+
     client = await Client.connect(
         target_host=os.environ.get("TEMPORAL_ADDRESS", "localhost:7233"),
         namespace=os.environ.get("TEMPORAL_NAMESPACE", "default"),
@@ -686,29 +411,30 @@ async def main():
         tls=tls,
         plugins=[plugin]
     )
- 
+
     worker = Worker(
         client,
         task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
-        workflows=[ResearchWorkflow],
+        workflows=[HelloWorldAgent],
         workflow_runner=UnsandboxedWorkflowRunner()
     )
- 
+
     async with worker:
         handle = await client.start_workflow(
-            ResearchWorkflow.run,
-            id="research-workflow-01",
+            HelloWorldAgent.run,
+            id="hello-world-workflow-01",
             task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
-            args=["SigNoz vs Dash0x for open source application monitoring"],
+            args=["Tell me about SigNoz"],
         )
         result = await handle.result()
         print("\nWorkflow result:\n", result)
- 
-
 
 asyncio.run(main())
 ```
-> 📌 Note: Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
+
+<Admonition type="warning">
+  Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
+</Admonition>
 
 </TabItem>
 
@@ -811,7 +537,7 @@ If you don't see your telemetry data:
 
 ## Next Steps
 
-You can also check out our custom Temporal dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/temporal-dashboard/) which provides specialized visualizations for monitoring your Temporal usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+You can also check out our custom [Temporal dashboard](https://signoz.io/docs/dashboards/dashboard-templates/temporal-dashboard/) which provides specialized visualizations for monitoring your Temporal usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
 
 <Figure
   src="/img/docs/llm/temporal/temporal-dashboard.webp"
