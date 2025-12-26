@@ -19,6 +19,26 @@ import GetHelp from '@/components/shared/get-help.md'
 - Java 8 or higher
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 
+## Choosing a Log Collection Method
+
+There are two primary ways to send logs from your Java application to SigNoz:
+
+1. **Application-level Collection (OTLP)**:  
+   Your application sends logs directly to SigNoz using the OpenTelemetry Java Agent.  
+   **Recommended for**: Most users. It provides automatic **trace-log correlation**, rich metadata, and requires no changing of infrastructure.
+
+2. **Infrastructure-level Collection (Stdout/Stderr)**:  
+   Your application writes logs to the console, and an agent running on the node/cluster collects them.  
+   **Recommended for**: Kubernetes environments, legacy applications you can't reconfigure, or when you want strictly separated logging concerns.
+
+This guide focuses on **Application-level Collection (OTLP)**.
+
+<Admonition type="tip" title="Use Infrastructure Collection?">
+  If you prefer **Infrastructure-level Collection**, see our guides for [Kubernetes Pod
+  Logs](/docs/userguide/collect_kubernetes_pod_logs) or [Docker Container
+  Logs](/docs/userguide/collect_docker_logs).
+</Admonition>
+
 ## Send logs to SigNoz
 
 <Tabs>
@@ -151,6 +171,13 @@ Replace the placeholders:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If you have a log driver or a collector picking up Docker container logs (stdout), you might see duplicate logs in SigNoz. To avoid this, either disable container log collection for this service or use only one method.
+
+</Admonition>
 
 </TabItem>
 
@@ -326,6 +353,15 @@ Replace the placeholders:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If using the `k8s-infra` chart (which auto-collects container logs), disable log collection for this application to prevent duplicates.
+
+[See how to disable log collection →](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/#disable-log-collection)
+
+</Admonition>
+
 </TabItem>
 
 <TabItem value="docker" label="Docker">
@@ -359,6 +395,13 @@ Replace the placeholders:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="warning">
+**Avoiding Duplicate Logs**
+
+If you have a log driver or a collector picking up Docker container logs (stdout), you might see duplicate logs in SigNoz. To avoid this, either disable container log collection for this service or use only one method.
+
+</Admonition>
 
 </TabItem>
 
