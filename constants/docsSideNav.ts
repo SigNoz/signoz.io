@@ -1240,6 +1240,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/logs-management/send-logs/choosing-log-collection-method',
+            label: 'Choosing a Collection Method',
+          },
+          {
+            type: 'doc',
             route: '/docs/userguide/collect_kubernetes_pod_logs',
             label: 'Kubernetes pod logs',
           },

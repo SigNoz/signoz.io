@@ -1,0 +1,113 @@
+---
+date: 2025-12-27
+title: Choosing a Log Collection Method
+id: choosing-log-collection-method
+description: Understand the difference between Application-level and Infrastructure-level log collection and choose the right strategy for your platform.
+doc_type: Explanation
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+SigNoz provides various options for sending logs, allowing you to choose the best method based on your infrastructure, control requirements, and desired telemetry richness.
+
+Overall, there are two primary approaches to log collection: **[Application-level](#application-level-collection-otlp)** and **[Infrastructure-level](#infrastructure-level-collection-agent)**.
+
+## Application-level Collection (OTLP)
+
+In this method, your application uses an OpenTelemetry SDK or Agent to send logs directly to SigNoz.
+
+### How it works
+
+The OpenTelemetry SDK runs inside your application process. It intercepts logs from your logging library (like Log4j2, Logback, Winston, Pino) and exports them via OTLP.
+
+### Why choose this?
+
+- **Trace-Log Correlation**: Automatic injection of `trace_id` and `span_id` which allows you to jump from a trace to the exact logs generated during that request.
+- **Rich Context**: Automatically captures application-level metadata (functions, classes, thread IDs).
+- **No Sidecar/DeamonSet**: Doesn't require separate infrastructure agents, the app is self-contained.
+
+### When to use
+
+- You have control over the application code/startup.
+- You need deep observability and correlation with traces.
+
+## Infrastructure-level Collection (Agent)
+
+In this method, your application writes logs to `stdout`/`stderr` or a file, and a separate agent (running on the host, node, or sidecar) collects, parses, and sends them to SigNoz.
+
+### How it works
+
+Your app knows nothing about SigNoz. It just logs to console or disk. An OpenTelemetry Collector (or FluentBit/Vector) reads these streams, parses them, and forwards them.
+
+### Why choose this?
+
+- **Non-intrusive**: No code changes or dependencies required in the application.
+- **Centralized Management**: Configure log collection rules (filtering, masking) in one place for all apps.
+- **Polyglot Support**: Works for any process that writes logs, including legacy apps, databases, and third-party software.
+
+### When to use
+
+- You are running on Kubernetes or Docker.
+- You cannot modify the application (legacy/vendor apps).
+
+## Recommended Collection Method
+
+Choose your platform to see the recommended collection strategy.
+
+<Tabs>
+  <TabItem value="k8s" label="Kubernetes" default>
+    
+    **Recommended: Cluster-wide Method (Infrastructure)**
+    - **What**: Collects logs from all pods automatically using an agent daemonset.
+    - **Use For**: Standard logging, ease of management.
+    - **Guide**: [Install k8s-infra Chart](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs)
+
+    **Alternative: App Instrumentation (Application)**
+    - **What**: SDK runs inside the pod sidecar or app process.
+    - **Use For**: Specific apps needing deep trace correlation.
+    - **Guides**: [Java](https://signoz.io/docs/logs-management/send-logs/java-logs) • [Python](https://signoz.io/docs/logs-management/send-logs/python-logs) • [Node.js](https://signoz.io/docs/logs-management/send-logs/nodejs-logs)
+
+  </TabItem>
+  <TabItem value="docker" label="Docker">
+
+    **Option 1: Docker Log Driver**
+    - **Use For**: Simple setups where you want to stick to standard docker logging.
+    - **Guide**: [Docker Log Driver](https://signoz.io/docs/userguide/collect_docker_logs)
+
+    **Option 2: OTel Collector (Filelog)**
+    - **Use For**: Reading mapped log files from host volume.
+    - **Guide**: [Collect from File](https://signoz.io/docs/userguide/collect_logs_from_file)
+
+  </TabItem>
+  <TabItem value="vm" label="VM / Bare Metal">
+
+    **Option 1: OTel Collector (Filelog)**
+    - **Use For**: Linux services (systemd) or apps writing to files (e.g., `/var/log`).
+    - **Guide**: [Collect from File](https://signoz.io/docs/userguide/collect_logs_from_file)
+
+    **Option 2: App Instrumentation**
+    - **Use For**: Direct OTLP export from the app code.
+    - **Guides**: [Java](https://signoz.io/docs/logs-management/send-logs/java-logs) • [Python](https://signoz.io/docs/logs-management/send-logs/python-logs) • [Go](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz)
+
+  </TabItem>
+  <TabItem value="aws" label="AWS & Serverless">
+
+    **AWS Lambda**
+    - **Guide**: [AWS Lambda Logs](https://signoz.io/docs/logs-management/send-logs/aws-lambda-nodejs)
+
+    **CloudWatch**
+    - **Use For**: Logs that are already being sent to CloudWatch.
+    - **Guide**: [Send CloudWatch Logs](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz)
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Next Steps
+
+Once you've chosen your method, proceed to the specific setup guide. If you are unsure, start with **Infrastructure-level collection** for Kubernetes/Docker environments, and **Application-level collection** for standalone services.
+
+## Get Help
+
+<GetHelp />
