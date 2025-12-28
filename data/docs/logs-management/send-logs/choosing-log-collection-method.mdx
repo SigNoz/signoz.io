@@ -24,12 +24,20 @@ The OpenTelemetry SDK runs inside your application process. It intercepts logs f
 
 - **Trace-Log Correlation**: Automatic injection of `trace_id` and `span_id` which allows you to jump from a trace to the exact logs generated during that request.
 - **Rich Context**: Automatically captures application-level metadata (functions, classes, thread IDs).
-- **No Sidecar/DeamonSet**: Doesn't require separate infrastructure agents, the app is self-contained.
+- **No Sidecar/DaemonSet**: Doesn't require separate infrastructure agents, the app is self-contained.
 
 ### When to use
 
 - You have control over the application code/startup.
 - You need deep observability and correlation with traces.
+
+### Guides
+
+- **Java** — Auto-instrumentation with the OTel Java Agent. → [Java Logs](https://signoz.io/docs/logs-management/send-logs/java-logs/)
+- **Python** — Auto-instrumentation with opentelemetry-instrument. → [Python Logs](https://signoz.io/docs/logs-management/send-logs/python-logs/)
+- **Node.js** — Console instrumentation with OTel SDK. → [Node.js Logs](https://signoz.io/docs/logs-management/send-logs/nodejs-logs/)
+- **Go** — Zap logger integration. → [Go Logs](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz/)
+- **AWS Lambda** — Serverless function logs via OpenTelemetry. → [AWS Lambda Logs](https://signoz.io/docs/logs-management/send-logs/aws-lambda-nodejs/)
 
 ## Infrastructure-level Collection (Agent)
 
@@ -50,59 +58,62 @@ Your app knows nothing about SigNoz. It just logs to console or disk. An OpenTel
 - You are running on Kubernetes or Docker.
 - You cannot modify the application (legacy/vendor apps).
 
-## Recommended Collection Method
-
-Choose your platform to see the recommended collection strategy.
+### Guides
 
 <Tabs>
   <TabItem value="k8s" label="Kubernetes" default>
-    
-    **Recommended: Cluster-wide Method (Infrastructure)**
-    - **What**: Collects logs from all pods automatically using an agent daemonset.
-    - **Use For**: Standard logging, ease of management.
-    - **Guide**: [Install k8s-infra Chart](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs)
 
-    **Alternative: App Instrumentation (Application)**
-    - **What**: SDK runs inside the pod sidecar or app process.
-    - **Use For**: Specific apps needing deep trace correlation.
-    - **Guides**: [Java](https://signoz.io/docs/logs-management/send-logs/java-logs) • [Python](https://signoz.io/docs/logs-management/send-logs/python-logs) • [Node.js](https://signoz.io/docs/logs-management/send-logs/nodejs-logs)
+    - **Kubernetes Pod Logs** — Collects logs from all pods automatically using a daemonset. Recommended for most users. → [Install k8s-infra Chart](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/)
 
   </TabItem>
   <TabItem value="docker" label="Docker">
 
-    **Option 1: Docker Log Driver**
-    - **Use For**: Simple setups where you want to stick to standard docker logging.
-    - **Guide**: [Docker Log Driver](https://signoz.io/docs/userguide/collect_docker_logs)
-
-    **Option 2: OTel Collector (Filelog)**
-    - **Use For**: Reading mapped log files from host volume.
-    - **Guide**: [Collect from File](https://signoz.io/docs/userguide/collect_logs_from_file)
+    - **Docker Log Driver** — Simple setup using standard docker logging. → [Docker Logs](https://signoz.io/docs/userguide/collect_docker_logs/)
+    - **OTel Collector (Filelog)** — Read mapped log files from host volume. → [Collect from File](https://signoz.io/docs/userguide/collect_logs_from_file/)
 
   </TabItem>
   <TabItem value="vm" label="VM / Bare Metal">
 
-    **Option 1: OTel Collector (Filelog)**
-    - **Use For**: Linux services (systemd) or apps writing to files (e.g., `/var/log`).
-    - **Guide**: [Collect from File](https://signoz.io/docs/userguide/collect_logs_from_file)
-
-    **Option 2: App Instrumentation**
-    - **Use For**: Direct OTLP export from the app code.
-    - **Guides**: [Java](https://signoz.io/docs/logs-management/send-logs/java-logs) • [Python](https://signoz.io/docs/logs-management/send-logs/python-logs) • [Go](https://signoz.io/docs/logs-management/send-logs/zap-to-signoz)
+    - **OTel Collector (Filelog)** — Collect logs from files (e.g., `/var/log`). → [Collect from File](https://signoz.io/docs/userguide/collect_logs_from_file/)
+    - **Syslogs** — Collect system logs via syslog protocol. → [Syslogs](https://signoz.io/docs/userguide/collecting_syslogs/)
 
   </TabItem>
-  <TabItem value="aws" label="AWS & Serverless">
+  <TabItem value="aws" label="AWS">
 
-    **AWS Lambda**
-    - **Guide**: [AWS Lambda Logs](https://signoz.io/docs/logs-management/send-logs/aws-lambda-nodejs)
+    - **CloudWatch** — Forward logs already in CloudWatch to SigNoz. → [CloudWatch Logs](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/)
 
-    **CloudWatch**
-    - **Use For**: Logs that are already being sent to CloudWatch.
-    - **Guide**: [Send CloudWatch Logs](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz)
+  </TabItem>
+  <TabItem value="azure" label="Azure">
+
+    - **Virtual Machines** — Monitor Azure VM logs and metrics. → [Azure VMs](https://signoz.io/docs/azure-monitoring/virtual-machines/)
+    - **App Service** — Web apps on Azure App Service. → [App Service](https://signoz.io/docs/azure-monitoring/app-service/)
+    - **AKS** — Azure Kubernetes Service monitoring. → [AKS](https://signoz.io/docs/azure-monitoring/aks/)
+    - **Container Apps** — Azure Container Apps monitoring. → [Container Apps](https://signoz.io/docs/azure-monitoring/az-container-app/)
+    - **Functions** — Azure Functions (serverless). → [Azure Functions](https://signoz.io/docs/azure-monitoring/az-fns/)
+    - **Blob Storage** — Storage logs and metrics. → [Blob Storage](https://signoz.io/docs/azure-monitoring/az-blob-storage/)
+
+  </TabItem>
+  <TabItem value="gcp" label="GCP">
+
+    - **Cloud Functions** — Serverless function monitoring. → [Cloud Functions](https://signoz.io/docs/gcp-monitoring/gcp-fns/)
+    - **Compute Engine** — VM instance logs and metrics. → [Compute Engine](https://signoz.io/docs/gcp-monitoring/compute-engine/)
+    - **GKE** — Google Kubernetes Engine monitoring. → [GKE](https://signoz.io/docs/gcp-monitoring/gke/)
+    - **Cloud Run** — Serverless container monitoring. → [Cloud Run](https://signoz.io/docs/gcp-monitoring/cloud-run/)
+    - **App Engine** — PaaS application monitoring. → [App Engine](https://signoz.io/docs/gcp-monitoring/app-engine/)
+    - **Cloud Storage** — Storage logs and metrics. → [Cloud Storage](https://signoz.io/docs/gcp-monitoring/gcs/)
+
+  </TabItem>
+  <TabItem value="paas" label="PaaS & Other">
+
+    - **Heroku** — Heroku app logs via drain. → [Heroku Logs](https://signoz.io/docs/userguide/heroku_logs_to_signoz/)
+    - **Vercel** — Vercel serverless logs. → [Vercel Logs](https://signoz.io/docs/userguide/vercel_logs_to_signoz/)
+    - **HTTP Logs** — Send logs directly via HTTP API. → [HTTP Logs](https://signoz.io/docs/userguide/send-logs-http/)
+    - **FluentBit** — Forward logs from FluentBit. → [FluentBit](https://signoz.io/docs/userguide/fluentbit_to_signoz/)
+    - **Fluentd** — Forward logs from Fluentd. → [Fluentd](https://signoz.io/docs/userguide/fluentd_to_signoz/)
+    - **Logstash** — Forward logs from Logstash. → [Logstash](https://signoz.io/docs/userguide/logstash_to_signoz/)
 
   </TabItem>
 </Tabs>
-
----
 
 ## Next Steps
 
