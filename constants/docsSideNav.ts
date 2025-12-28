@@ -2533,14 +2533,9 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'One Click Integrations (AWS)',
+        label: 'AWS One Click Integrations',
+        route: '/docs/integrations/aws/one-click-aws-integrations',
         items: [
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/one-click-aws-integrations',
-
-            label: 'Overview',
-          },
           {
             type: 'doc',
             route: '/docs/integrations/aws/ecs',
