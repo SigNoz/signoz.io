@@ -1,0 +1,142 @@
+---
+date: 2025-12-26
+id: api-gateway
+title: Monitor AWS API Gateway with SigNoz
+description: Collect API Gateway metrics and logs using one-click integration or manual setup.
+doc_type: howto
+---
+
+## Overview
+
+Amazon API Gateway is a fully managed service for creating and publishing APIs. SigNoz helps you monitor API performance, error rates, and latency.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration (Recommended)
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the <a href="https://signoz.io/docs/integrations/aws/aws-api-gateway/" rel="noopener noreferrer">One-Click AWS Integrations Guide</a> to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable API Gateway Monitoring
+
+Once connected, SigNoz will auto-discover your API Gateway APIs and begin collecting:
+- **CloudWatch Metrics**: Request count, latency, error rates
+- **Access Logs**: (if enabled and published to CloudWatch)
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `Count` | Total API requests |
+| `Latency` | Time from request to response |
+| `IntegrationLatency` | Backend integration time |
+| `4XXError` | Client error count |
+| `5XXError` | Server error count |
+| `CacheHitCount` / `CacheMissCount` | Cache performance |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "API Gateway" to find automatically imported dashboards.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup (OpenTelemetry)">
+
+## Manual Setup
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to set up your own dashboards.
+</Admonition>
+
+### Using Prometheus CloudWatch Exporter
+
+1. **Download the exporter**:
+   ```bash
+   wget https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
+   ```
+
+2. **Create a config file** `api-gateway-metrics.yaml`:
+
+```yaml
+region: us-east-1
+metrics:
+  - aws_namespace: AWS/ApiGateway
+    aws_metric_name: Count
+    aws_dimensions: [ApiName, Stage]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/ApiGateway
+    aws_metric_name: Latency
+    aws_dimensions: [ApiName, Stage]
+    aws_statistics: [Average, p99]
+
+  - aws_namespace: AWS/ApiGateway
+    aws_metric_name: IntegrationLatency
+    aws_dimensions: [ApiName, Stage]
+    aws_statistics: [Average, p99]
+
+  - aws_namespace: AWS/ApiGateway
+    aws_metric_name: 4XXError
+    aws_dimensions: [ApiName, Stage]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/ApiGateway
+    aws_metric_name: 5XXError
+    aws_dimensions: [ApiName, Stage]
+    aws_statistics: [Sum]
+```
+
+3. **Run the exporter**:
+   ```bash
+   java -jar cloudwatch_exporter-0.16.0-jar-with-dependencies.jar 9106 api-gateway-metrics.yaml
+   ```
+
+4. **Configure OTel Collector** to scrape the exporter:
+   ```yaml
+   receivers:
+     prometheus:
+       config:
+         scrape_configs:
+           - job_name: 'api-gateway-cloudwatch'
+             static_configs:
+               - targets: ['localhost:9106']
+   ```
+
+See [Prometheus Metrics](https://signoz.io/docs/userguide/prometheus-metrics/) for more details on configuring the Prometheus receiver.
+
+### Collecting Access Logs
+
+If API Gateway access logs are enabled and sent to CloudWatch, use the `awscloudwatch` receiver:
+
+```yaml
+receivers:
+  awscloudwatch:
+    region: us-east-1
+    logs:
+      poll_interval: 1m
+      groups:
+        named:
+          /aws/api-gateway/my-api:
+```
+
+See <a href="https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/" rel="noopener noreferrer">Send CloudWatch Logs to SigNoz</a> for full configuration.
+
+</TabItem>
+</Tabs>
+
+## Related Resources
+
+- <a href="https://signoz.io/docs/integrations/aws/aws-api-gateway/" rel="noopener noreferrer">One-Click AWS Integrations</a>
+- <a href="https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/" rel="noopener noreferrer">Send CloudWatch Logs to SigNoz</a>

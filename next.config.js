@@ -657,6 +657,22 @@ module.exports = () => {
           destination: '/docs/aws-monitoring/lambda/lambda-logs',
           permanent: true,
         },
+        // AWS Monitoring renamed/deleted docs
+        {
+          source: '/docs/aws-monitoring/getting-started/',
+          destination: '/docs/aws-monitoring/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/rds-logs/',
+          destination: '/docs/aws-monitoring/rds/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/vpc-logs/',
+          destination: '/docs/aws-monitoring/vpc/',
+          permanent: true,
+        },
         {
           source: '/docs/userguide/collecting_nodejs_winston_logs',
           destination: '/docs/logs-management/send-logs/nodejs-winston-logs',

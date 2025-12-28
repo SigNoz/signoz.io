@@ -1,0 +1,116 @@
+---
+date: 2025-12-26
+id: alb
+title: Monitor AWS Application Load Balancer with SigNoz
+description: Collect ALB metrics and access logs using one-click integration or manual setup.
+doc_type: howto
+---
+
+## Overview
+
+AWS Application Load Balancer (ALB) operates at the application layer (Layer 7) and routes HTTP/HTTPS traffic. SigNoz helps you monitor ALB performance, request patterns, and error rates.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the <a href="https://signoz.io/docs/integrations/aws/aws-alb/" rel="noopener noreferrer">One-Click AWS Integrations Guide</a> to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable ALB Monitoring
+
+Once connected, SigNoz will auto-discover your ALBs and begin collecting:
+- **CloudWatch Metrics**: Request count, latency, HTTP error codes, active connections
+- **Access Logs**: (if enabled and published to CloudWatch)
+
+### What's Collected
+
+| Data Type | Source | Examples |
+|-----------|--------|----------|
+| Metrics | CloudWatch | `RequestCount`, `TargetResponseTime`, `HTTPCode_Target_2XX_Count`, `ActiveConnectionCount` |
+| Logs | CloudWatch/S3 | Access logs with request details |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "ALB" to find automatically imported dashboards.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup (OpenTelemetry)">
+
+## Manual Setup
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to set up your own dashboards.
+</Admonition>
+
+### Collecting ALB Metrics
+
+Use the Prometheus CloudWatch Exporter to collect ALB metrics:
+
+```yaml
+# alb-metrics.yaml
+region: us-east-1
+metrics:
+  - aws_namespace: AWS/ApplicationELB
+    aws_metric_name: RequestCount
+    aws_dimensions: [LoadBalancer]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/ApplicationELB
+    aws_metric_name: TargetResponseTime
+    aws_dimensions: [LoadBalancer]
+    aws_statistics: [Average, p99]
+
+  - aws_namespace: AWS/ApplicationELB
+    aws_metric_name: HTTPCode_Target_2XX_Count
+    aws_dimensions: [LoadBalancer]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/ApplicationELB
+    aws_metric_name: HTTPCode_Target_4XX_Count
+    aws_dimensions: [LoadBalancer]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/ApplicationELB
+    aws_metric_name: HTTPCode_Target_5XX_Count
+    aws_dimensions: [LoadBalancer]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/ApplicationELB
+    aws_metric_name: ActiveConnectionCount
+    aws_dimensions: [LoadBalancer]
+    aws_statistics: [Sum]
+```
+
+Then configure your OTel Collector to scrape these metrics. See <a href="https://signoz.io/docs/integrations/aws-rds-postgres/" rel="noopener noreferrer">AWS RDS PostgreSQL Integration</a> for the full CloudWatch Exporter setup pattern.
+
+### Collecting ALB Access Logs
+
+ALB access logs are typically stored in S3. Use the S3 Lambda Forwarder pattern:
+
+1. Enable ALB access logging to an S3 bucket
+2. Create a Lambda function triggered by S3 events
+3. Parse and forward logs to SigNoz
+
+See <a href="https://signoz.io/docs/aws-monitoring/elb-logs/" rel="noopener noreferrer">ELB Logs</a> for the detailed S3 Lambda Forwarder setup.
+
+</TabItem>
+</Tabs>
+
+## Related Resources
+
+- <a href="https://signoz.io/docs/aws-monitoring/elb-logs/" rel="noopener noreferrer">ELB Logs</a> - Classic/Network Load Balancer logs
+- <a href="https://signoz.io/docs/integrations/aws/aws-alb/" rel="noopener noreferrer">One-Click AWS Integrations</a>

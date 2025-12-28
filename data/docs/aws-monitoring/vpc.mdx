@@ -1,0 +1,171 @@
+---
+date: 2025-12-26
+id: vpc
+title: Monitor AWS VPC with SigNoz
+description: Collect VPC Flow Logs using one-click integration or manual OpenTelemetry setup.
+doc_type: howto
+---
+
+## Overview
+
+Amazon VPC Flow Logs capture information about IP traffic going to and from network interfaces in your VPC. SigNoz helps you analyze network traffic patterns, troubleshoot connectivity issues, and monitor security.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the <a href="https://signoz.io/docs/integrations/aws/one-click-aws-integrations/" rel="noopener noreferrer">One-Click AWS Integrations Guide</a> to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable VPC Flow Logs Monitoring
+
+Once connected, SigNoz will begin collecting VPC Flow Logs if they are published to CloudWatch Logs.
+
+### What's Collected
+
+| Data Type | Source | Examples |
+|-----------|--------|----------|
+| Logs | CloudWatch Logs | Flow log records with source/dest IPs, ports, protocols, actions |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "VPC" to find automatically imported dashboards showing:
+- Network traffic patterns
+- Accepted vs rejected traffic
+- Top talkers by IP address
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup (OpenTelemetry)">
+
+## Manual Setup
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to set up your own dashboards.
+</Admonition>
+
+### Option 1: CloudWatch Receiver
+
+If VPC Flow Logs are published to CloudWatch Logs, use the `awscloudwatch` receiver:
+
+```yaml
+receivers:
+  awscloudwatch:
+    region: us-east-1
+    logs:
+      poll_interval: 1m
+      groups:
+        named:
+          /aws/vpc/flow-logs:
+```
+
+See <a href="https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/" rel="noopener noreferrer">Send CloudWatch Logs to SigNoz</a> for full configuration.
+
+---
+
+### Option 2: S3 Lambda Forwarder
+
+If VPC Flow Logs are exported to S3, use a Lambda function to forward them to SigNoz.
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+#### VPC Flow Log Format
+
+VPC Flow Logs follow this header format:
+
+```jsx
+vpc_headers = ["version","account-id","interface-id","srcaddr","dstaddr","srcport",
+"dstport","protocol","packets","bytes","start","end","action","log-status"]
+```
+
+Sample log line:
+```
+2 842928376651 eni-0660f9815e9e8d140 192.3.0.225 192.3.0.154 43276 6319 6 1 52 1701285848 1701215902 ACCEPT OK
+```
+
+#### Creating a Lambda Function
+
+**Step 1:** Go to AWS Lambda console and create a new function with Python 3.x runtime.
+
+**Step 2:** Configure IAM policies to allow S3 access (`AmazonS3FullAccess` or scoped permissions).
+
+**Step 3:** Add an S3 trigger for your VPC Flow Logs bucket.
+
+**Step 4:** Add the `requests` module as a Lambda Layer (see <a href="https://signoz.io/docs/aws-monitoring/rds/#adding-request-layer" rel="noopener noreferrer">detailed instructions</a>).
+
+**Step 5:** Use the following Lambda code:
+
+```python
+import json
+import gzip
+import boto3 
+import requests
+import shlex
+
+s3 = boto3.client('s3')
+
+def convert_log_line_to_json(line):
+    headers = ["version","account-id","interface-id","srcaddr","dstaddr","srcport",
+               "dstport","protocol","packets","bytes","start","end","action","log-status"]
+    res = shlex.split(line, posix=False)
+    return dict(zip(headers, res))
+
+def lambda_handler(event, context):
+    bucket_name = '<name_of_your_bucket>'
+    response = s3.list_objects_v2(Bucket=bucket_name)
+
+    for obj in response['Contents']:
+        if obj['Key'].endswith('.log.gz'):
+            file_key = obj['Key']
+            file_obj = s3.get_object(Bucket=bucket_name, Key=file_key)
+            file_content = file_obj['Body'].read()
+            decompressed_content = gzip.decompress(file_content)
+            json_data = str(decompressed_content, encoding='utf-8')
+            lines = json_data.strip().split('\n')
+            result = json.dumps(lines, indent=2)
+            list_of_strings = json.loads(result)
+            json_data = [convert_log_line_to_json(line) for line in list_of_strings]
+            
+            req_headers = {
+                'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+                'Content-Type': 'application/json'
+            }
+            http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'  # Replace <region> with us, eu, or in
+            response = requests.post(http_url, json=json_data, headers=req_headers)
+            print(f"Sent data to {http_url}. Response: {response.status_code}")
+```
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
+For Self-Hosted SigNoz, use the same Lambda code but update the endpoint:
+
+```python
+http_url = 'http://<YOUR_SIGNOZ_HOST>:4318/v1/logs'
+```
+
+Remove the `signoz-ingestion-key` header.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## Related Resources
+
+- <a href="https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/" rel="noopener noreferrer">Send CloudWatch Logs to SigNoz</a>
+- <a href="https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html" target="_blank" rel="noopener noreferrer nofollow">AWS VPC Flow Logs Documentation</a>

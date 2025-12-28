@@ -1,0 +1,86 @@
+---
+date: 2025-12-26
+id: s3
+title: Monitor Amazon S3 with SigNoz
+description: Sync S3 logs and collect S3 metrics using one-click integration or manual setup.
+doc_type: howto
+---
+
+## Overview
+
+Amazon S3 is object storage for the cloud. SigNoz helps you monitor S3 bucket metrics and ingest log files stored in S3.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click-sync" label="S3 Sync (One-Click)" default>
+
+## S3 Sync (One-Click)
+
+<Admonition type="info">
+S3 Sync is available for **SigNoz Cloud** only. It automatically ingests log files from your S3 buckets.
+</Admonition>
+
+S3 Sync uses EventBridge and Lambda to forward log files to SigNoz whenever new objects are created in your S3 buckets.
+
+### Use Cases
+
+- Ingest ELB access logs stored in S3
+- Ingest VPC Flow Logs stored in S3
+- Ingest CloudTrail logs stored in S3
+- Ingest any custom log files stored in S3
+
+### Setup
+
+See the detailed guide: <a href="https://signoz.io/docs/integrations/aws/s3-sync/" rel="noopener noreferrer">**Sync Logs from S3 Buckets**</a>
+
+This covers:
+1. Installing the AWS Integration Agent
+2. Enabling S3 Sync in the SigNoz UI
+3. Configuring bucket and prefix filters
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**.
+</Admonition>
+
+### S3 Storage Metrics
+
+Use the CloudWatch Exporter:
+
+```yaml
+# s3-metrics.yaml
+region: us-east-1
+metrics:
+  - aws_namespace: AWS/S3
+    aws_metric_name: BucketSizeBytes
+    aws_dimensions: [BucketName, StorageType]
+    aws_statistics: [Average]
+
+  - aws_namespace: AWS/S3
+    aws_metric_name: NumberOfObjects
+    aws_dimensions: [BucketName, StorageType]
+    aws_statistics: [Average]
+```
+
+### Log File Ingestion
+
+For ingesting log files from S3, use the S3 Lambda Forwarder pattern described in:
+- <a href="https://signoz.io/docs/aws-monitoring/rds/" rel="noopener noreferrer">RDS Logs</a>
+- <a href="https://signoz.io/docs/aws-monitoring/vpc/" rel="noopener noreferrer">VPC Flow Logs</a>
+- <a href="https://signoz.io/docs/aws-monitoring/elb-logs/" rel="noopener noreferrer">ELB Logs</a>
+
+</TabItem>
+</Tabs>
+
+## Related Resources
+
+- <a href="https://signoz.io/docs/integrations/aws/s3-sync/" rel="noopener noreferrer">Sync Logs from S3 Buckets</a> - One-click S3 log sync
+- <a href="https://signoz.io/docs/integrations/aws/s3-sync/" rel="noopener noreferrer">One-Click AWS Integrations</a>

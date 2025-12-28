@@ -1,9 +1,9 @@
 ---
-date: 2024-12-19
+date: 2025-12-26
 id: elb-logs
-tags : [SigNoz Cloud]
 title: Send your ELB logs to SigNoz
-hide_table_of_contents: true
+description: Collect Elastic Load Balancer logs from S3 and forward them to SigNoz using Lambda.
+doc_type: howto
 ---
 
 ## Overview
@@ -11,6 +11,10 @@ hide_table_of_contents: true
 This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect Elastic Load Balancer (ELB) logs stored in an AWS S3 bucket 
 and forward them to SigNoz. This will enable you to automatically sends your ELB logs to SigNoz, enabling you to visualize and 
 monitor your application's load balancing performance and health.
+
+<Admonition type="tip">
+**SigNoz Cloud users**: You can also use the <a href="https://signoz.io/docs/integrations/aws/aws-alb/" target="_blank" rel="noopener noreferrer">One-Click AWS Integration</a> for automated setup with pre-built dashboards. See the <a href="https://signoz.io/docs/aws-monitoring/one-click-vs-manual/" rel="noopener noreferrer">comparison guide</a> to choose the best approach.
+</Admonition>
 
 **Here’s a quick summary of what we’ll be doing in this documentation.** 
 
@@ -40,7 +44,7 @@ To accomplish the task described, please follow these steps:
    - Click **Create bucket** to finalize the creation process.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-create_bucket_2.webp" alt=""/>
+    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-create_bucket_2.webp" alt="S3 bucket creation form"/>
     <figcaption><i>Fill up bucket details</i></figcaption>
 </figure>
 
@@ -120,7 +124,7 @@ Follow these steps to create the lambda function:
 **Step 1:** Go to your AWS console and search for AWS Lambda, go to **Functions** and click on **Create Function**. 
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image"  src="/img/docs/elb/elb-logs-lambda_1.webp" alt=""/>
+    <img className="box-shadowed-image"  src="/img/docs/elb/elb-logs-lambda_1.webp" alt="Create Lambda function from AWS Console"/>
     <figcaption><i>Create Lambda function from AWS Console</i></figcaption>
 </figure>
 
@@ -128,7 +132,7 @@ Follow these steps to create the lambda function:
 **Step 2:** Choose the `Author from scratch` checkbox and proceed to fill in the function name. 
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_2.webp" alt=""/>
+    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_2.webp" alt="Lambda function creation with Author from scratch selected"/>
     <figcaption><i>Choose the Author from scratch and fill up other details</i></figcaption>
 </figure>
 
@@ -136,7 +140,7 @@ Follow these steps to create the lambda function:
 **Step 3:** Choose `Python 3.x` as the Runtime version, `x86_64` as Architecture (preferably), and keep other settings as default. Select `Create a new role with basic Lambda permissions`for now, we’ll requiring more permissions down the lane. So for now, select this option. 
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_3.webp" alt=""/>
+    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_3.webp" alt="Lambda runtime and role configuration"/>
     <figcaption><i>Choose Create a new role here</i></figcaption>
 </figure>
 
@@ -144,7 +148,7 @@ Follow these steps to create the lambda function:
 **Step 4:** Once you are done configuring the lambda function, you Lambda function is created.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_4.webp" alt=""/>
+    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_4.webp" alt="Lambda function created successfully"/>
     <figcaption><i>Your barebones Lambda function is created now</i></figcaption>
 </figure>
 
@@ -351,7 +355,7 @@ def lambda_handler(event, context):
                      'Content-Type': 'application/json'
                 }
             # Specify the HTTP endpoint for sending the data
-            http_url = 'https://ingest.in.signoz.cloud:443/logs/json'  # Replace with your actual URL
+            http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'  # Replace <region> with us, eu, or in
 
             # Send the JSON data to the specified HTTP endpoint
             response = requests.post(http_url, json=json_data, headers=req_headers)
@@ -447,7 +451,7 @@ def process_log_file(file_path):
                      'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
                      'Content-Type': 'application/json'
                 }
-        http_url = 'https://ingest.in.signoz.cloud:443/logs/json'  # Replace with your actual URL
+        http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'  # Replace <region> with us, eu, or in
         response = requests.post(http_url, json=json_data, headers=req_headers)
 
 def main():

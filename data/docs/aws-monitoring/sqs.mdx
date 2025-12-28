@@ -1,0 +1,126 @@
+---
+date: 2025-12-26
+id: sqs
+title: Monitor Amazon SQS with SigNoz
+description: Collect SQS metrics using one-click integration or CloudWatch receiver.
+doc_type: howto
+---
+
+## Overview
+
+Amazon Simple Queue Service (SQS) is a fully managed message queuing service. SigNoz helps you monitor queue depth, message age, and throughput.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration (Recommended)
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the <a href="https://signoz.io/docs/integrations/aws/aws-sqs/" rel="noopener noreferrer">One-Click AWS Integrations Guide</a> to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable SQS Monitoring
+
+Once connected, SigNoz will auto-discover your SQS queues and begin collecting CloudWatch metrics.
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `ApproximateNumberOfMessagesVisible` | Messages available for retrieval |
+| `ApproximateNumberOfMessagesNotVisible` | Messages in flight |
+| `ApproximateNumberOfMessagesDelayed` | Delayed messages |
+| `ApproximateAgeOfOldestMessage` | Age of oldest message |
+| `NumberOfMessagesSent` | Messages sent to queue |
+| `NumberOfMessagesReceived` | Messages received from queue |
+| `NumberOfMessagesDeleted` | Messages deleted |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "SQS" to find automatically imported dashboards.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup (OpenTelemetry)">
+
+## Manual Setup
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to set up your own dashboards.
+</Admonition>
+
+SQS metrics are only available via CloudWatch. Use the CloudWatch Exporter or `awscloudwatch` receiver.
+
+### Using Prometheus CloudWatch Exporter
+
+1. **Download the exporter**:
+   ```bash
+   wget https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
+   ```
+
+2. **Create a config file** `sqs-metrics.yaml`:
+
+```yaml
+region: us-east-1
+metrics:
+  - aws_namespace: AWS/SQS
+    aws_metric_name: ApproximateNumberOfMessagesVisible
+    aws_dimensions: [QueueName]
+    aws_statistics: [Average, Maximum]
+
+  - aws_namespace: AWS/SQS
+    aws_metric_name: ApproximateAgeOfOldestMessage
+    aws_dimensions: [QueueName]
+    aws_statistics: [Maximum]
+
+  - aws_namespace: AWS/SQS
+    aws_metric_name: NumberOfMessagesSent
+    aws_dimensions: [QueueName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/SQS
+    aws_metric_name: NumberOfMessagesReceived
+    aws_dimensions: [QueueName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/SQS
+    aws_metric_name: NumberOfMessagesDeleted
+    aws_dimensions: [QueueName]
+    aws_statistics: [Sum]
+```
+
+3. **Run the exporter**:
+   ```bash
+   java -jar cloudwatch_exporter-0.16.0-jar-with-dependencies.jar 9106 sqs-metrics.yaml
+   ```
+
+4. **Configure OTel Collector** to scrape the exporter:
+   ```yaml
+   receivers:
+     prometheus:
+       config:
+         scrape_configs:
+           - job_name: 'sqs-cloudwatch'
+             static_configs:
+               - targets: ['localhost:9106']
+   ```
+
+See [Prometheus Metrics](https://signoz.io/docs/userguide/prometheus-metrics/) for more details on configuring the Prometheus receiver.
+
+</TabItem>
+</Tabs>
+
+## Related Resources
+
+- <a href="https://signoz.io/docs/integrations/aws/aws-sqs/" rel="noopener noreferrer">One-Click AWS Integrations</a>
+- <a href="https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/" rel="noopener noreferrer">Send CloudWatch Logs to SigNoz</a>

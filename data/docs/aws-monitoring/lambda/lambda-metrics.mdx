@@ -1,0 +1,141 @@
+---
+date: 2025-12-27
+id: lambda-metrics
+title: Monitor AWS Lambda Metrics with SigNoz
+description: Collect AWS Lambda metrics such as Invocations, Errors, and Duration using OpenTelemetry and send them to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+This documentation provides details on how to collect AWS Lambda metrics (like Invocations, Errors, Duration, Throttles) and send them to **SigNoz**.
+
+## Prerequisites
+
+- AWS account with appropriate permissions to access CloudWatch.
+- SigNoz Cloud account or Self-Hosted SigNoz.
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards.
+</Admonition>
+
+The One-Click AWS Integration automatically configures the collection of Lambda metrics and logs. It uses CloudWatch Metric Streams to stream data to SigNoz.
+
+### Setup
+
+See the detailed guide: <a href="https://signoz.io/docs/integrations/aws/aws-lambda/" rel="noopener noreferrer">**AWS Lambda Integration**</a>
+
+This covers:
+1. Connecting your AWS Account.
+2. Enabling Lambda metric collection.
+3. Accessing pre-built dashboards for Invocations, Errors, Duration, and more.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup (CloudWatch Exporter)
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**.
+</Admonition>
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+To collect AWS Lambda metrics manually, you can use the **Prometheus CloudWatch Exporter**. This tools scrapes metrics from AWS CloudWatch and exposes them in Prometheus format, which the OpenTelemetry Collector can then scrape and forward to SigNoz.
+
+### Step 1: Download the Exporter
+
+Download the CloudWatch Exporter JAR file:
+
+```bash
+wget https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
+```
+
+### Step 2: Create Configuration File
+
+Create a file named `lambda-metrics.yaml` with the following configuration. This defines which metrics to fetch from the `AWS/Lambda` namespace.
+
+```yaml
+region: us-east-1
+metrics:
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Invocations
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Errors
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Duration
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Average, p99, Maximum]
+
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: Throttles
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/Lambda
+    aws_metric_name: ConcurrentExecutions
+    aws_dimensions: [FunctionName]
+    aws_statistics: [Maximum]
+```
+
+<Admonition type="note">
+Replace `region: us-east-1` with your actual AWS region. You can add more metrics or change statistics as needed.
+</Admonition>
+
+### Step 3: Run the Exporter
+
+Run the exporter using Java. You will need to provide your AWS credentials (e.g., via environment variables or `~/.aws/credentials`).
+
+```bash
+java -jar cloudwatch_exporter-0.16.0-jar-with-dependencies.jar 9106 lambda-metrics.yaml
+```
+
+The exporter will now expose metrics at `http://localhost:9106/metrics`.
+
+### Step 4: Configure OpenTelemetry Collector
+
+Configure your OpenTelemetry Collector to scrape the CloudWatch Exporter. Add a `prometheus` receiver to your `config.yaml`:
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'lambda-cloudwatch'
+          scrape_interval: 60s
+          static_configs:
+            - targets: ['localhost:9106']
+```
+
+Ensure the `prometheus` receiver is enabled in your metrics pipeline.
+
+```yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+</TabItem>
+</Tabs>
+
+## Related Resources
+
+- <a href="https://signoz.io/docs/integrations/aws/aws-lambda/" rel="noopener noreferrer">One-Click AWS Integration for Lambda</a>
+- <a href="https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/" rel="noopener noreferrer">Collect Lambda Logs</a>
+- <a href="https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/" rel="noopener noreferrer">Collect Lambda Traces</a>

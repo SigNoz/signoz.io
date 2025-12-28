@@ -2550,8 +2550,62 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/integrations/aws/s3-sync',
-
             label: 'S3 Sync',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-alb',
+            label: 'ALB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-api-gateway',
+            label: 'API Gateway',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-dynamodb',
+            label: 'DynamoDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-ec2',
+            label: 'EC2',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-eks',
+            label: 'EKS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-elasticache',
+            label: 'ElastiCache',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-lambda',
+            label: 'Lambda',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-msk',
+            label: 'MSK',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-rds',
+            label: 'RDS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-sns',
+            label: 'SNS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/aws-sqs',
+            label: 'SQS',
           },
         ],
       },
@@ -2940,18 +2994,18 @@ const docsSideNav = [
     label: 'AWS Monitoring',
     type: 'category',
     isExpanded: false,
+    route: '/docs/aws-monitoring/overview',
     items: [
-      //'aws/getting-started',
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/one-click-vs-manual',
+        label: 'One-Click vs Manual',
+      },
       {
         type: 'category',
         isExpanded: false,
         label: 'EC2',
         route: '/docs/ec2-monitoring',
-        // link: {
-        // type: 'generated-index',
-        // title: 'EC2 Monitoring',
-        // slug: '/docs/ec2-monitoring',
-        // },
         items: [
           {
             type: 'doc',
@@ -2970,11 +3024,6 @@ const docsSideNav = [
         isExpanded: false,
         label: 'ECS',
         route: '/docs/ecs-monitoring',
-        // link: {
-        // type: 'generated-index',
-        // title: 'ECS Monitoring',
-        // slug: '/docs/ecs-monitoring',
-        // },
         items: [
           {
             type: 'doc',
@@ -2994,36 +3043,82 @@ const docsSideNav = [
         label: 'EKS',
       },
       {
+        type: 'category',
+        isExpanded: false,
+        label: 'Lambda',
+        route: '/docs/aws-monitoring/lambda',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-logs',
+            label: 'Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-traces',
+            label: 'Traces',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/alb',
+        label: 'ALB',
+      },
+      {
         type: 'doc',
         route: '/docs/aws-monitoring/elb-logs',
         label: 'ELB',
       },
       {
         type: 'doc',
-        route: '/docs/aws-monitoring/vpc-logs',
+        route: '/docs/aws-monitoring/vpc',
         label: 'VPC',
       },
       {
         type: 'doc',
-        route: '/docs/aws-monitoring/rds-logs',
+        route: '/docs/aws-monitoring/api-gateway',
+        label: 'API Gateway',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/rds',
         label: 'RDS',
       },
       {
-        type: 'category',
-        isExpanded: false,
-        label: 'AWS Lambda',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/aws-monitoring/lambda/lambda-logs',
-            label: 'Logging',
-          },
-          {
-            type: 'doc',
-            route: '/docs/aws-monitoring/lambda/lambda-traces',
-            label: 'APM & Tracing',
-          },
-        ],
+        type: 'doc',
+        route: '/docs/aws-monitoring/dynamodb',
+        label: 'DynamoDB',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/elasticache',
+        label: 'ElastiCache',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/msk',
+        label: 'MSK',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/sns',
+        label: 'SNS',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/sqs',
+        label: 'SQS',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/s3',
+        label: 'S3',
       },
     ],
   },
