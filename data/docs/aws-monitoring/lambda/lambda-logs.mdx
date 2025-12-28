@@ -330,13 +330,13 @@ def lambda_handler(event, context):
 
 Replace `<region>` in the URL with your SigNoz Cloud region (`us`, `eu`, or `in`). You can find ingestion details (REGION and SIGNOZ_INGESTION_KEY) in the SigNoz dashboard.
 
-Other than the above explanation and the code comments, in a nutshell, what the this code does is: 
+Other than the above explanation and the code comments, in a nutshell, what this code does is: 
 
 Sends the parsable content of **ENTIRE** S3 bucket whenever the lambda function gets triggered. It gets triggered by the condition you set above. Let’s mention that again here. 
 
 > **Step 3:** For the Event types field, you can select any number of options you wish. The trigger will occur depending upon what option(s) you choose here. By default, the `All object create events` will be selected.
 
-Lets say you add something to your S3 bucket, it may / may not trigger this lambda function or if you have setup your s3 as if it automatically stores all your ELB/VPC/Lambda logs, segregated in different folders, so whenever any new log gets added, the function will get triggered and send all the S3 data. 
+Lets say you add something to your S3 bucket, it may / may not trigger this lambda function or if you have setup your s3 as if it automatically stores all your Lambda logs, segregated in different folders, so whenever any new log gets added, the function will get triggered and send all the S3 data. 
 
 This is obviously not what everyone expects, ideal case would be to have a mass log transfer once the first connection is made to SigNoz otel-collector (which then they later get stored in gp2/gp3 storageClass of EBS), and then send logs lines of only the recently logged one. 
 
