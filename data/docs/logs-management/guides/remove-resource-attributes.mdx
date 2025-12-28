@@ -8,10 +8,10 @@ doc_type: howto
 
 import GetHelp from '@/components/shared/get-help.md'
 
-import GetHelp from '@/components/shared/get-help.md'
-
 <KeyPointCallout defaultCollapsed={true}>
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 Resource attributes provide additional contextual information about the source of your logs, such as service name, host details, and process information. You can remove unwanted resource attributes either at the source (Agent/SDK) or at the OpenTelemetry Collector level.
@@ -62,9 +62,9 @@ This configuration will ensure `process.command_line` is removed from all logs p
 
 For more details on configuring the OpenTelemetry Collector, see the [OTel Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
 
-## Java SDK
+## OpenTelemetry Java (SDK & Agent)
 
-The OpenTelemetry Java Agent supports filtering out specific resource attributes using the `otel.resource.disabled.keys` configuration property.
+The `otel.resource.disabled.keys` configuration property allows you to filter out specific resource attributes. This is a general SDK configuration property that works for both the **OpenTelemetry Java SDK** and the **OpenTelemetry Java Agent**.
 
 ### Using System Properties
 
@@ -98,9 +98,19 @@ export OTEL_RESOURCE_DISABLED_KEYS=process.command_line,process.command_args
 
 </Admonition>
 
+<Admonition type="warning">
+  **Limitations:** Certain mandatory resource attributes defined by the OpenTelemetry specification
+  (such as `telemetry.sdk.name`, `telemetry.sdk.version`, etc.) cannot be disabled through this
+  configuration. Removing these requires a custom agent extension.
+</Admonition>
+
+## Other Languages
+
+The OTEL_RESOURCE_DISABLED_KEYS configuration is currently specific to the OpenTelemetry Java SDK and Agent. Other SDKs do not support filtering specific attributes via this environment variable. For these languages, use the [Collector-level approach](#removing-resource-attributes-at-the-collector-level) described above, which works universally for all SDKs.
+
 ## Validate
 
-To verify that the attributes have been removed:
+To verify that the resource attributes have been removed:
 
 1. Generate some logs from your application.
 2. Go to the **Logs** tab in SigNoz.
