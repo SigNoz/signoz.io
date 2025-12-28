@@ -13,8 +13,6 @@ import {
 // Using generic Material Design icons for services without Simple Icons
 import {
   MdRouter,
-  MdSecurity,
-  MdStorage,
   MdMessage,
   MdCloudQueue,
   MdMemory,
