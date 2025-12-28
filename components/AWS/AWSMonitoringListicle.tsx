@@ -14,7 +14,6 @@ import {
 import {
   MdRouter,
   MdSecurity,
-  MdStorage,
   MdMessage,
   MdCloudQueue,
   MdMemory,
