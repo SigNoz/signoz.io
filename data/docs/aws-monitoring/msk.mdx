@@ -48,10 +48,10 @@ Once connected, SigNoz will auto-discover your MSK clusters and begin collecting
 
 ### Pre-built Dashboards
 
-Navigate to **Dashboards** and search for "MSK" or "Kafka" to find automatically imported dashboards.
+Navigate to **Dashboards** and search for "MSK" to find automatically imported dashboards.
 
 </TabItem>
-<TabItem value="manual" label="Manual Setup (OpenTelemetry)">
+<TabItem value="manual" label="Manual Setup">
 
 ## Manual Setup
 
@@ -61,7 +61,7 @@ Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to
 
 For comprehensive MSK monitoring with consumer lag tracking and traces, see the detailed guide:
 
-<a href="https://signoz.io/docs/messaging-queues/msk/" rel="noopener noreferrer">**Monitor MSK Service**</a>
+[Monitor MSK Service](https://signoz.io/docs/messaging-queues/msk/)
 
 This guide covers:
 - Enabling JMX/Node exporter endpoints on MSK
@@ -81,39 +81,5 @@ MSK Cluster (JMX:11001, Node:11002)
       SigNoz
 ```
 
-### Quick Start OTel Config
-
-```yaml
-receivers:
-  prometheus:
-    config:
-      scrape_configs:
-        - job_name: 'msk-broker'
-          file_sd_configs:
-            - files:
-              - 'targets.json'
-
-exporters:
-  otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
-    tls:
-      insecure: false
-    headers:
-      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
-
-service:
-  pipelines:
-    metrics:
-      receivers: [prometheus]
-      exporters: [otlp]
-```
-
-See <a href="https://signoz.io/docs/messaging-queues/msk/" rel="noopener noreferrer">Monitor MSK Service</a> for complete `targets.json` setup and application instrumentation.
-
 </TabItem>
 </Tabs>
-
-## Related Resources
-
-- <a href="https://signoz.io/docs/messaging-queues/msk/" rel="noopener noreferrer">Monitor MSK Service</a> - Full manual setup with consumer lag
-- <a href="https://signoz.io/docs/integrations/aws/aws-msk/" rel="noopener noreferrer">One-Click AWS Integrations</a>

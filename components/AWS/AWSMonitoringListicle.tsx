@@ -19,6 +19,7 @@ import {
   MdCloudQueue,
   MdMemory,
   MdHttp,
+  MdNotifications,
 } from 'react-icons/md'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -59,13 +60,13 @@ export default function AWSMonitoringListicle() {
         cards={[
           {
             name: 'EC2',
-            href: '/docs/aws-monitoring/ec2-logs',
+            href: '/docs/ec2-monitoring/',
             icon: <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
             clickName: 'EC2 Monitoring Link',
           },
           {
             name: 'ECS',
-            href: '/docs/aws-monitoring/ecs-ec2-external',
+            href: '/docs/ecs-monitoring/',
             icon: <SiAmazonecs className="h-7 w-7 text-orange-500" />,
             clickName: 'ECS Monitoring Link',
           },
@@ -174,7 +175,7 @@ export default function AWSMonitoringListicle() {
           {
             name: 'SNS',
             href: '/docs/aws-monitoring/sns',
-            icon: <MdMessage className="h-7 w-7 text-pink-500" />,
+            icon: <MdNotifications className="h-7 w-7 text-pink-500" />,
             clickName: 'SNS Monitoring Link',
           },
         ]}

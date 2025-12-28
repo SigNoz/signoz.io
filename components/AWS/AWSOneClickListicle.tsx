@@ -19,6 +19,7 @@ import {
   MdCloudQueue,
   MdMemory,
   MdHttp,
+  MdNotifications,
 } from 'react-icons/md'
 import IconCardGrid from '../Card/IconCardGrid'
 
@@ -161,7 +162,7 @@ export default function AWSOneClickListicle() {
           {
             name: 'SNS',
             href: '/docs/integrations/aws/aws-sns',
-            icon: <MdMessage className="h-7 w-7 text-pink-500" />,
+            icon: <MdNotifications className="h-7 w-7 text-pink-500" />,
             clickName: 'SNS Integration Link',
           },
         ]}

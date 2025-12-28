@@ -1,5 +1,5 @@
 ---
-date: 2025-12-26
+date: 2025-12-28
 id: sqs
 title: Monitor Amazon SQS with SigNoz
 description: Collect SQS metrics using one-click integration or CloudWatch receiver.
@@ -18,7 +18,7 @@ Amazon Simple Queue Service (SQS) is a fully managed message queuing service. Si
 <Tabs>
 <TabItem value="one-click" label="One-Click Integration" default>
 
-## One-Click Integration (Recommended)
+## One-Click Integration
 
 <Admonition type="info">
 One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
@@ -26,7 +26,7 @@ One-Click Integration is available for **SigNoz Cloud** only and includes pre-bu
 
 ### Step 1: Connect Your AWS Account
 
-Follow the <a href="https://signoz.io/docs/integrations/aws/aws-sqs/" rel="noopener noreferrer">One-Click AWS Integrations Guide</a> to:
+Follow the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/aws-sqs/) to:
 1. Deploy the CloudFormation stack
 2. Connect your AWS account to SigNoz
 
@@ -51,27 +51,44 @@ Once connected, SigNoz will auto-discover your SQS queues and begin collecting C
 Navigate to **Dashboards** and search for "SQS" to find automatically imported dashboards.
 
 </TabItem>
-<TabItem value="manual" label="Manual Setup (OpenTelemetry)">
+<TabItem value="manual" label="Manual Setup">
 
-## Manual Setup
+## Manual Setup (CloudWatch Exporter)
 
 <Admonition type="info">
 Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to set up your own dashboards.
 </Admonition>
 
-SQS metrics are only available via CloudWatch. Use the CloudWatch Exporter or `awscloudwatch` receiver.
+SQS metrics are only available via CloudWatch. To collect SQS metrics manually, you can use the <a href="https://github.com/prometheus/cloudwatch_exporter" target="_blank" rel="noopener noreferrer nofollow">Prometheus CloudWatch Exporter</a>. This tool scrapes metrics from AWS CloudWatch and exposes them in Prometheus format, which the OpenTelemetry Collector can then scrape and forward to SigNoz.
 
-### Using Prometheus CloudWatch Exporter
+### Prerequisites
 
-1. **Download the exporter**:
-   ```bash
-   wget https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
-   ```
+Before proceeding, ensure you have:
 
-2. **Create a config file** `sqs-metrics.yaml`:
+- **OpenTelemetry Collector** installed and configured. See [Get Started with OTel Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+- **Java 11 or higher** installed on the host machine (for JAR-based setup), or **Docker** (for container-based setup).
+- **AWS credentials** configured via environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`), IAM role, or `~/.aws/credentials`.
+- **IAM permissions** for the credentials:
+  - `cloudwatch:ListMetrics`
+  - `cloudwatch:GetMetricStatistics`
 
-```yaml
-region: us-east-1
+### Where to Run the CloudWatch Exporter
+
+The CloudWatch Exporter should run on a machine that:
+1. Has network access to AWS CloudWatch APIs.
+2. Has AWS credentials configured.
+3. Is network-accessible from your OpenTelemetry Collector.
+
+For **SigNoz Cloud** users, run the exporter on any EC2 instance, VM, or container with AWS credentials. The OTel Collector on the same host will forward metrics to SigNoz Cloud.
+
+For **Self-Hosted** users, run the exporter on the same host as your OTel Collector, or ensure network connectivity between them.
+
+### Step 1: Create Configuration File
+
+Create a file named `sqs-metrics.yaml` with the following configuration:
+
+```yaml:sqs-metrics.yaml
+region: <aws-region>
 metrics:
   - aws_namespace: AWS/SQS
     aws_metric_name: ApproximateNumberOfMessagesVisible
@@ -99,28 +116,107 @@ metrics:
     aws_statistics: [Sum]
 ```
 
-3. **Run the exporter**:
-   ```bash
-   java -jar cloudwatch_exporter-0.16.0-jar-with-dependencies.jar 9106 sqs-metrics.yaml
-   ```
+Replace the following:
+- `<aws-region>`: Your AWS region where SQS queues are deployed (e.g., `us-east-1`, `eu-west-1`, `ap-south-1`).
 
-4. **Configure OTel Collector** to scrape the exporter:
-   ```yaml
-   receivers:
-     prometheus:
-       config:
-         scrape_configs:
-           - job_name: 'sqs-cloudwatch'
-             static_configs:
-               - targets: ['localhost:9106']
-   ```
+### Step 2: Download and Run the Exporter
 
-See [Prometheus Metrics](https://signoz.io/docs/userguide/prometheus-metrics/) for more details on configuring the Prometheus receiver.
+<Tabs>
+<TabItem value="jar" label="JAR File" default>
+
+Download the CloudWatch Exporter JAR file using `curl`:
+
+```bash
+curl -LO https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
+```
+
+Run the exporter with Java:
+
+```bash
+java -jar cloudwatch_exporter-0.16.0-jar-with-dependencies.jar 9106 sqs-metrics.yaml
+```
+
+This starts the exporter on port `9106`.
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Run the CloudWatch Exporter as a <a href="https://github.com/prometheus/cloudwatch_exporter#docker-images" target="_blank" rel="noopener noreferrer nofollow">Docker container</a>:
+
+```bash
+docker run -d \
+  --name cloudwatch-exporter \
+  -p 9106:9106 \
+  -v $(pwd)/sqs-metrics.yaml:/config/config.yml \
+  -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+  -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+  prom/cloudwatch-exporter
+```
+
+Replace the AWS credential environment variables with your actual credentials or use an IAM role if running on EC2.
 
 </TabItem>
 </Tabs>
 
-## Related Resources
+Verify the exporter is running by checking the metrics endpoint:
 
-- <a href="https://signoz.io/docs/integrations/aws/aws-sqs/" rel="noopener noreferrer">One-Click AWS Integrations</a>
-- <a href="https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/" rel="noopener noreferrer">Send CloudWatch Logs to SigNoz</a>
+```bash
+curl http://localhost:9106/metrics | grep aws_sqs
+```
+
+You should see metrics like `aws_sqs_approximate_number_of_messages_visible_average`, `aws_sqs_number_of_messages_sent_sum`, etc.
+
+### Step 3: Configure OpenTelemetry Collector
+
+Add the following `prometheus` receiver to your existing `otel-collector-config.yaml` to scrape the CloudWatch Exporter:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'sqs-cloudwatch'
+          scrape_interval: 60s
+          static_configs:
+            - targets: ['<exporter-host>:9106']
+```
+
+Replace the following:
+- `<exporter-host>`: The hostname or IP where the CloudWatch Exporter is running. Use `localhost` if running on the same machine.
+
+Enable the `prometheus` receiver in your metrics pipeline by updating the `service` section:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+<Admonition type="note">
+Append these configurations to your existing `otel-collector-config.yaml`. Do not replace your entire configuration file.
+</Admonition>
+
+Restart your OpenTelemetry Collector to apply the changes.
+
+### Validate
+
+To confirm that SQS metrics are flowing to SigNoz:
+
+1. Navigate to **Dashboards** → **New Dashboard** → **New Panel** in SigNoz.
+2. In the query builder, search for metrics starting with `aws_sqs_` (e.g., `aws_sqs_approximate_number_of_messages_visible_average`).
+3. Verify that metrics appear with `queue_name` labels matching your SQS queues.
+
+If you see metrics with labels like `queue_name`, your setup is working correctly.
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+Once SQS metrics are flowing to SigNoz, you can:
+
+- **Set up alerts** for critical metrics like queue depth or message age. See [Alerts](https://signoz.io/docs/alerts/).
+- **Create dashboards** to visualize SQS performance. See [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/).

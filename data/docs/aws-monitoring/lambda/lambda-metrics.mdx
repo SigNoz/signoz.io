@@ -1,5 +1,5 @@
 ---
-date: 2025-12-27
+date: 2025-12-28
 id: lambda-metrics
 title: Monitor AWS Lambda Metrics with SigNoz
 description: Collect AWS Lambda metrics such as Invocations, Errors, and Duration using OpenTelemetry and send them to SigNoz.
@@ -28,7 +28,7 @@ The One-Click AWS Integration automatically configures the collection of Lambda 
 
 ### Setup
 
-See the detailed guide: <a href="https://signoz.io/docs/integrations/aws/aws-lambda/" rel="noopener noreferrer">**AWS Lambda Integration**</a>
+See the detailed guide: [**AWS Lambda Integration**](https://signoz.io/docs/integrations/aws/aws-lambda/)
 
 This covers:
 1. Connecting your AWS Account.
@@ -48,22 +48,36 @@ Manual setup works for both **SigNoz Cloud** and **Self-Hosted**.
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
-To collect AWS Lambda metrics manually, you can use the **Prometheus CloudWatch Exporter**. This tools scrapes metrics from AWS CloudWatch and exposes them in Prometheus format, which the OpenTelemetry Collector can then scrape and forward to SigNoz.
+To collect AWS Lambda metrics manually, you can use the <a href="https://github.com/prometheus/cloudwatch_exporter" target="_blank" rel="noopener noreferrer nofollow">Prometheus CloudWatch Exporter</a>. This tool scrapes metrics from AWS CloudWatch and exposes them in Prometheus format, which the OpenTelemetry Collector can then scrape and forward to SigNoz.
 
-### Step 1: Download the Exporter
+### Prerequisites
 
-Download the CloudWatch Exporter JAR file:
+Before proceeding, ensure you have:
 
-```bash
-wget https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
-```
+- **OpenTelemetry Collector** installed and configured. See [Get Started with OTel Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+- **Java 11 or higher** installed on the host machine (for JAR-based setup), or **Docker** (for container-based setup).
+- **AWS credentials** configured via environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`), IAM role, or `~/.aws/credentials`.
+- **IAM permissions** for the credentials:
+  - `cloudwatch:ListMetrics`
+  - `cloudwatch:GetMetricStatistics`
 
-### Step 2: Create Configuration File
+### Where to Run the CloudWatch Exporter
+
+The CloudWatch Exporter should run on a machine that:
+1. Has network access to AWS CloudWatch APIs.
+2. Has AWS credentials configured.
+3. Is network-accessible from your OpenTelemetry Collector.
+
+For **SigNoz Cloud** users, run the exporter on any EC2 instance, VM, or container with AWS credentials. The OTel Collector on the same host will forward metrics to SigNoz Cloud.
+
+For **Self-Hosted** users, run the exporter on the same host as your OTel Collector, or ensure network connectivity between them.
+
+### Step 1: Create Configuration File
 
 Create a file named `lambda-metrics.yaml` with the following configuration. This defines which metrics to fetch from the `AWS/Lambda` namespace.
 
-```yaml
-region: us-east-1
+```yaml:lambda-metrics.yaml
+region: <aws-region>
 metrics:
   - aws_namespace: AWS/Lambda
     aws_metric_name: Invocations
@@ -91,25 +105,65 @@ metrics:
     aws_statistics: [Maximum]
 ```
 
-<Admonition type="note">
-Replace `region: us-east-1` with your actual AWS region. You can add more metrics or change statistics as needed.
+Replace the following:
+- `<aws-region>`: Your AWS region where Lambda functions are deployed (e.g., `us-east-1`, `eu-west-1`, `ap-south-1`).
+
+<Admonition type="tip">
+You can add more Lambda metrics like `DeadLetterErrors`, `DestinationDeliveryFailures`, or `ProvisionedConcurrencyInvocations` as needed. See the [AWS Lambda metrics documentation](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics-types.html) for a full list.
 </Admonition>
 
-### Step 3: Run the Exporter
+### Step 2: Download and Run the Exporter
 
-Run the exporter using Java. You will need to provide your AWS credentials (e.g., via environment variables or `~/.aws/credentials`).
+<Tabs>
+<TabItem value="jar" label="JAR File" default>
+
+Download the CloudWatch Exporter JAR file using `curl`:
+
+```bash
+curl -LO https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
+```
+
+Run the exporter with Java:
 
 ```bash
 java -jar cloudwatch_exporter-0.16.0-jar-with-dependencies.jar 9106 lambda-metrics.yaml
 ```
 
-The exporter will now expose metrics at `http://localhost:9106/metrics`.
+This starts the exporter on port `9106`.
 
-### Step 4: Configure OpenTelemetry Collector
+</TabItem>
+<TabItem value="docker" label="Docker">
 
-Configure your OpenTelemetry Collector to scrape the CloudWatch Exporter. Add a `prometheus` receiver to your `config.yaml`:
+Run the CloudWatch Exporter as a <a href="https://github.com/prometheus/cloudwatch_exporter#docker-images" target="_blank" rel="noopener noreferrer nofollow">Docker container</a>:
 
-```yaml
+```bash
+docker run -d \
+  --name cloudwatch-exporter \
+  -p 9106:9106 \
+  -v $(pwd)/lambda-metrics.yaml:/config/config.yml \
+  -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+  -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+  prom/cloudwatch-exporter
+```
+
+Replace the AWS credential environment variables with your actual credentials or use an IAM role if running on EC2.
+
+</TabItem>
+</Tabs>
+
+Verify the exporter is running by checking the metrics endpoint:
+
+```bash
+curl http://localhost:9106/metrics | grep aws_lambda
+```
+
+You should see metrics like `aws_lambda_invocations_sum`, `aws_lambda_errors_sum`, etc.
+
+### Step 3: Configure OpenTelemetry Collector
+
+Add the following `prometheus` receiver to your existing `otel-collector-config.yaml` to scrape the CloudWatch Exporter:
+
+```yaml:otel-collector-config.yaml
 receivers:
   prometheus:
     config:
@@ -117,12 +171,15 @@ receivers:
         - job_name: 'lambda-cloudwatch'
           scrape_interval: 60s
           static_configs:
-            - targets: ['localhost:9106']
+            - targets: ['<exporter-host>:9106']
 ```
 
-Ensure the `prometheus` receiver is enabled in your metrics pipeline.
+Replace the following:
+- `<exporter-host>`: The hostname or IP where the CloudWatch Exporter is running. Use `localhost` if running on the same machine.
 
-```yaml
+Enable the `prometheus` receiver in your metrics pipeline by updating the `service` section:
+
+```yaml:otel-collector-config.yaml
 service:
   pipelines:
     metrics:
@@ -131,11 +188,31 @@ service:
       exporters: [otlp]
 ```
 
+<Admonition type="note">
+Append these configurations to your existing `otel-collector-config.yaml`. Do not replace your entire configuration file.
+</Admonition>
+
+Restart your OpenTelemetry Collector to apply the changes.
+
+### Validate
+
+To confirm that Lambda metrics are flowing to SigNoz:
+
+1. Navigate to **Dashboards** → **New Dashboard** → **New Panel** in SigNoz.
+2. In the query builder, search for metrics starting with `aws_lambda_` (e.g., `aws_lambda_invocations_sum`).
+3. Verify that metrics appear with `function_name` labels matching your Lambda functions.
+
+If you see metrics with labels like `function_name`, your setup is working correctly.
+
 </TabItem>
 </Tabs>
 
-## Related Resources
+## Next Steps
 
-- <a href="https://signoz.io/docs/integrations/aws/aws-lambda/" rel="noopener noreferrer">One-Click AWS Integration for Lambda</a>
-- <a href="https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/" rel="noopener noreferrer">Collect Lambda Logs</a>
-- <a href="https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/" rel="noopener noreferrer">Collect Lambda Traces</a>
+Once Lambda metrics are flowing to SigNoz, you can:
+
+- **Set up alerts** for critical metrics like error rates or throttles. See [Alerts](https://signoz.io/docs/alerts/).
+- **Create dashboards** to visualize Lambda performance. See [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/).
+- **Collect Lambda logs and traces** for complete observability:
+  - [Collect Lambda Logs](https://signoz.io/docs/aws-monitoring/lambda/lambda-logs/)
+  - [Collect Lambda Traces](https://signoz.io/docs/aws-monitoring/lambda/lambda-traces/)
