@@ -2536,6 +2536,21 @@ const docsSideNav = [
         label: 'One-Click vs Manual',
       },
       {
+        type: 'doc',
+        route: '/docs/aws-monitoring/alb',
+        label: 'ALB',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/api-gateway',
+        label: 'API Gateway',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/dynamodb',
+        label: 'DynamoDB',
+      },
+      {
         type: 'category',
         isExpanded: false,
         label: 'EC2',
@@ -2577,6 +2592,16 @@ const docsSideNav = [
         label: 'EKS',
       },
       {
+        type: 'doc',
+        route: '/docs/aws-monitoring/elasticache',
+        label: 'ElastiCache',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/elb-logs',
+        label: 'ELB',
+      },
+      {
         type: 'category',
         isExpanded: false,
         label: 'Lambda',
@@ -2601,23 +2626,8 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/aws-monitoring/alb',
-        label: 'ALB',
-      },
-      {
-        type: 'doc',
-        route: '/docs/aws-monitoring/elb-logs',
-        label: 'ELB',
-      },
-      {
-        type: 'doc',
-        route: '/docs/aws-monitoring/vpc',
-        label: 'VPC',
-      },
-      {
-        type: 'doc',
-        route: '/docs/aws-monitoring/api-gateway',
-        label: 'API Gateway',
+        route: '/docs/aws-monitoring/msk',
+        label: 'MSK',
       },
       {
         type: 'doc',
@@ -2626,18 +2636,8 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/aws-monitoring/dynamodb',
-        label: 'DynamoDB',
-      },
-      {
-        type: 'doc',
-        route: '/docs/aws-monitoring/elasticache',
-        label: 'ElastiCache',
-      },
-      {
-        type: 'doc',
-        route: '/docs/aws-monitoring/msk',
-        label: 'MSK',
+        route: '/docs/aws-monitoring/s3',
+        label: 'S3',
       },
       {
         type: 'doc',
@@ -2651,8 +2651,8 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/aws-monitoring/s3',
-        label: 'S3',
+        route: '/docs/aws-monitoring/vpc',
+        label: 'VPC',
       },
     ],
   },
@@ -2670,9 +2670,53 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/integrations/aws/alb',
+            label: 'ALB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/api-gateway',
+            label: 'API Gateway',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/dynamodb',
+            label: 'DynamoDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/ec2',
+            label: 'EC2',
+          },
+          {
+            type: 'doc',
             route: '/docs/integrations/aws/ecs',
-
             label: 'ECS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/eks',
+            label: 'EKS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/elasticache',
+            label: 'ElastiCache',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/lambda',
+            label: 'Lambda',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/msk',
+            label: 'MSK',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/rds',
+            label: 'RDS',
           },
           {
             type: 'doc',
@@ -2681,57 +2725,12 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/integrations/aws/aws-alb',
-            label: 'ALB',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/aws-api-gateway',
-            label: 'API Gateway',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/aws-dynamodb',
-            label: 'DynamoDB',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/aws-ec2',
-            label: 'EC2',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/aws-eks',
-            label: 'EKS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/aws-elasticache',
-            label: 'ElastiCache',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/aws-lambda',
-            label: 'Lambda',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/aws-msk',
-            label: 'MSK',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/aws-rds',
-            label: 'RDS',
-          },
-          {
-            type: 'doc',
-            route: '/docs/integrations/aws/aws-sns',
+            route: '/docs/integrations/aws/sns',
             label: 'SNS',
           },
           {
             type: 'doc',
-            route: '/docs/integrations/aws/aws-sqs',
+            route: '/docs/integrations/aws/sqs',
             label: 'SQS',
           },
         ],

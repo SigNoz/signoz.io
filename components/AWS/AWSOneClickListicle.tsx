@@ -59,7 +59,7 @@ export default function AWSOneClickListicle() {
         cards={[
           {
             name: 'EC2',
-            href: '/docs/integrations/aws/aws-ec2',
+            href: '/docs/integrations/aws/ec2',
             icon: <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
             clickName: 'EC2 Integration Link',
           },
@@ -71,13 +71,13 @@ export default function AWSOneClickListicle() {
           },
           {
             name: 'EKS',
-            href: '/docs/integrations/aws/aws-eks',
+            href: '/docs/integrations/aws/eks',
             icon: <SiAmazoneks className="h-7 w-7 text-orange-500" />,
             clickName: 'EKS Integration Link',
           },
           {
             name: 'Lambda',
-            href: '/docs/integrations/aws/aws-lambda',
+            href: '/docs/integrations/aws/lambda',
             icon: <SiAwslambda className="h-7 w-7 text-orange-500" />,
             clickName: 'Lambda Integration Link',
           },
@@ -95,19 +95,19 @@ export default function AWSOneClickListicle() {
         cards={[
           {
             name: 'RDS',
-            href: '/docs/integrations/aws/aws-rds',
+            href: '/docs/integrations/aws/rds',
             icon: <SiAmazonrds className="h-7 w-7 text-blue-500" />,
             clickName: 'RDS Integration Link',
           },
           {
             name: 'DynamoDB',
-            href: '/docs/integrations/aws/aws-dynamodb',
+            href: '/docs/integrations/aws/dynamodb',
             icon: <SiAmazondynamodb className="h-7 w-7 text-blue-500" />,
             clickName: 'DynamoDB Integration Link',
           },
           {
             name: 'ElastiCache',
-            href: '/docs/integrations/aws/aws-elasticache',
+            href: '/docs/integrations/aws/elasticache',
             icon: <MdMemory className="h-7 w-7 text-blue-500" />,
             clickName: 'ElastiCache Integration Link',
           },
@@ -125,13 +125,13 @@ export default function AWSOneClickListicle() {
         cards={[
           {
             name: 'ALB',
-            href: '/docs/integrations/aws/aws-alb',
+            href: '/docs/integrations/aws/alb',
             icon: <MdRouter className="h-7 w-7 text-purple-500" />,
             clickName: 'ALB Integration Link',
           },
           {
             name: 'API Gateway',
-            href: '/docs/integrations/aws/aws-api-gateway',
+            href: '/docs/integrations/aws/api-gateway',
             icon: <MdHttp className="h-7 w-7 text-purple-500" />,
             clickName: 'API Gateway Integration Link',
           },
@@ -149,19 +149,19 @@ export default function AWSOneClickListicle() {
         cards={[
           {
             name: 'MSK',
-            href: '/docs/integrations/aws/aws-msk',
+            href: '/docs/integrations/aws/msk',
             icon: <MdCloudQueue className="h-7 w-7 text-black dark:text-white" />,
             clickName: 'MSK Integration Link',
           },
           {
             name: 'SQS',
-            href: '/docs/integrations/aws/aws-sqs',
+            href: '/docs/integrations/aws/sqs',
             icon: <MdMessage className="h-7 w-7 text-pink-500" />,
             clickName: 'SQS Integration Link',
           },
           {
             name: 'SNS',
-            href: '/docs/integrations/aws/aws-sns',
+            href: '/docs/integrations/aws/sns',
             icon: <MdNotifications className="h-7 w-7 text-pink-500" />,
             clickName: 'SNS Integration Link',
           },
