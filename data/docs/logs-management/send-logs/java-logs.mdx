@@ -72,7 +72,6 @@ Use this section if you're deploying your application directly on a server or VM
 Set the environment variables and run your application:
 
 ```bash
-export OTEL_LOGS_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="java-app"
@@ -88,7 +87,6 @@ Replace the following:
 If using a local OTel Collector (e.g., self-hosted), use:
 
 ```bash
-export OTEL_LOGS_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
 export OTEL_SERVICE_NAME="java-app"
 
@@ -103,8 +101,6 @@ Add these environment variables to your deployment manifest:
 
 ```yaml
 env:
-  - name: OTEL_LOGS_EXPORTER
-    value: 'otlp'
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
     value: 'https://ingest.<region>.signoz.cloud:443'
   - name: OTEL_EXPORTER_OTLP_HEADERS
@@ -149,7 +145,6 @@ ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/release
 COPY target/your-app.jar /app/app.jar
 
 # Set environment variables
-ENV OTEL_LOGS_EXPORTER=otlp
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_SERVICE_NAME="java-app"
@@ -186,7 +181,6 @@ If you have a log driver or a collector picking up Docker container logs (stdout
 Set environment variables in PowerShell:
 
 ```powershell
-$env:OTEL_LOGS_EXPORTER = "otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "java-app"
