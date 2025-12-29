@@ -70,7 +70,9 @@ const AWSSignupContent = () => {
           Your AWS Marketplace subscription has been successfully connected to your SigNoz Cloud
           account.
         </p>
-        <Button onClick={() => (window.location.href = '/')}>Go to Dashboard</Button>
+        <Button to="/" variant="default" rounded="default">
+          Home
+        </Button>
       </div>
     )
   }
@@ -81,10 +83,10 @@ const AWSSignupContent = () => {
         <div className="mb-4 inline-flex items-center rounded border border-yellow-600 bg-yellow-600/10 px-2 py-1 text-xs text-yellow-500">
           AWS Marketplace
         </div>
-        <h1 className="mb-2 text-3xl font-medium text-white">
+        <h1 className="mb-2 font-medium text-signoz_vanilla-100">
           Activate Your AWS Marketplace Subscription
         </h1>
-        <p className="text-base text-signoz_vanilla-100/70">
+        <p className="text-sm text-signoz_vanilla-100/70">
           Connect your SigNoz Cloud account to start billing through AWS marketplace
         </p>
       </div>
@@ -153,7 +155,9 @@ const AWSSignupContent = () => {
             )}
 
             <Button
-              className="w-full bg-signoz_robin-500 text-white hover:bg-signoz_robin-600"
+              className="w-full"
+              variant="default"
+              rounded="default"
               onClick={handleActivate}
               disabled={loading}
               isButton
@@ -177,7 +181,9 @@ const AWSSignupContent = () => {
 const Instructions = () => {
   return (
     <div className="w-full max-w-2xl space-y-8 p-8">
-      <h2 className="m-0 font-medium text-white">How to get SigNoz Cloud License Key</h2>
+      <h2 className="m-0 font-medium text-signoz_vanilla-100">
+        How to get SigNoz Cloud License Key
+      </h2>
       <p className="text-sm text-signoz_vanilla-100/70">
         Follow these steps to retrieve your license key from your SigNoz account
       </p>
