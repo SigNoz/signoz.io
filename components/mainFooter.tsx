@@ -42,6 +42,21 @@ function Footer() {
                 <Link href="/api_reference/" className="mt-5 hover:underline">
                   SigNoz API
                 </Link>
+                <div className="mt-10 text-sm font-semibold uppercase leading-5 tracking-wide">
+                  OpenTelemetry
+                </div>
+                <Link href="/opentelemetry/" className="mt-5 hover:underline">
+                  What is OpenTelemetry
+                </Link>
+                <Link
+                  href="/blog/opentelemetry-collector-complete-guide/"
+                  className="mt-5 hover:underline"
+                >
+                  OpenTelemetry Collector Guide
+                </Link>
+                <Link href="/blog/opentelemetry-demo/" className="mt-5 hover:underline">
+                  OpenTelemetry Demo
+                </Link>
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
