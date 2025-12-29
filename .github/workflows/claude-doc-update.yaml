@@ -92,19 +92,22 @@ jobs:
           prompt: |
             You are updating documentation in this repo.
 
-            Docs root: ${DOCS_ROOT}
+            Docs root: ${{env.DOCS_ROOT}}
 
             Task:
             - Read the issue request below.
-            - Scan ${DOCS_ROOT} to decide where the text belongs.
-              - If an existing page is the right home, update that page.
-              - Otherwise create a new page under ${DOCS_ROOT} in an appropriate folder.
-            - Keep the docs consistent with surrounding files (frontmatter/metadata, headings, tone, formatting).
-            - If you add a new page, make sure it's reachable from navigation (update constants/docsSideNav.ts if needed).
-            - Limit changes strictly to documentation-related paths.
-
+            - Scan ${{ env.DOCS_ROOT }} to decide where the text belongs.
+              - Prefer updating an existing page (add a new section if needed).
+              - Only create a new page if no existing page is a good home.
+            - When searching, use case-insensitive search and synonyms:
+              - Use rg -i / grep -i
+              - When searching, prioritize content search: rg -i, ${{ env.DOCS_ROOT }}/faqs/ are preferred when it comes to include: billing, invoice(s), payment(s), subscription(s), plan(s), pricing, usage
+            - If you add a new page, ensure it is reachable from navigation.
+              IMPORTANT: constants/docsSideNav.ts is large — do NOT read it fully.
+              Use Grep to find the relevant nav section and only read a small window around it.
+            
             Allowed paths to modify:
-            - ${DOCS_ROOT}/**
+            - ${{env.DOCS_ROOT}}/**
             - public/img/docs/**
             - constants/docsSideNav.ts
             - scripts/check-doc-redirects.js
@@ -133,15 +136,7 @@ jobs:
             exit 0
           fi
 
-          ALLOW_REGEX='^(
-            data/docs/|
-            public/img/docs/|
-            constants/docsSideNav\.ts|
-            next\.config\.js|
-            scripts/check-doc-redirects\.js|
-            scripts/check-docs-metadata\.js
-          )' || true
-
+          ALLOW_REGEX='^(data/docs/|public/img/docs/|constants/docsSideNav\.ts$|next\.config\.js$|scripts/check-doc-redirects\.js$|scripts/check-docs-metadata\.js$)'
           BAD="$(echo "$CHANGED" | tr -d ' ' | grep -vE "$ALLOW_REGEX" || true)"
           if [ -n "$BAD" ]; then
             echo "ERROR: Non-doc files modified:"
@@ -164,10 +159,15 @@ jobs:
           git commit -m "docs: update from issue #${{ github.event.issue.number }}"
 
       - name: Push branch
+        env:
+          GH_TOKEN: ${{ steps.mint_identity_token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          # If nothing committed, push will no-op / fail; ignore gracefully
-          git push -u origin "${BRANCH_NAME}" --force-with-lease || true
+
+          # Claude action may have removed git auth; re-add it explicitly.
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git push -u origin "${BRANCH_NAME}" --force-with-lease
 
       - name: Create or update PR and comment back on the issue
         env:
