@@ -49,7 +49,7 @@ export const WhyOpenTelemetry = () => {
               Kubernetes being more active.
             </p>
             <TrackingLink
-              href="/opentelemetry/#why-developers-choose-opentelemetry/"
+              href="/opentelemetry/#why-developers-choose-opentelemetry"
               clickType="Secondary CTA"
               clickName="Why Developers choose OpenTelemetry Link"
               clickText="Learn why Developers choose OpenTelemetry"
