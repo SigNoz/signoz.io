@@ -32,7 +32,7 @@ const AWSSignupContent = () => {
 
     try {
       const endpoint = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL
-      const response = await fetch(`${endpoint}/v2/subscriptions/suger`, {
+      const response = await fetch(`${endpoint}/subscriptions/suger`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const AWSSignupContent = () => {
   if (success) {
     return (
       <div className="flex h-full flex-col items-center justify-center p-8 text-center text-signoz_vanilla-100">
-        <h2 className="mb-4 text-2xl font-bold">Subscription Activated!</h2>
+        <h2 className="mb-4 font-bold">Subscription Activated!</h2>
         <p className="mb-6 text-signoz_vanilla-100/70">
           Your AWS Marketplace subscription has been successfully connected to your SigNoz Cloud
           account.
@@ -177,7 +177,7 @@ const AWSSignupContent = () => {
 const Instructions = () => {
   return (
     <div className="w-full max-w-2xl space-y-8 p-8">
-      <h2 className="text-xl font-medium text-white">How to get SigNoz Cloud License Key</h2>
+      <h2 className="m-0 font-medium text-white">How to get SigNoz Cloud License Key</h2>
       <p className="text-sm text-signoz_vanilla-100/70">
         Follow these steps to retrieve your license key from your SigNoz account
       </p>
