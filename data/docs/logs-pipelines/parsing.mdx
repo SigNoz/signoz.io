@@ -189,8 +189,11 @@ Once your logs are parsed, you can ensure standard fields like Timestamps and Se
 
 </ToggleHeading>
 
-- **Pattern not matching**: Test your pattern with sample logs using the [Grok Debugger](https://grokdebugger.com/) or [regex101](https://regex101.com/). Check for extra whitespace or special characters.
-- **Syntax errors**: Verify your pattern follows [RE2 syntax rules](https://github.com/google/re2/wiki/Syntax).
+- **Parser not matching any logs**: Use the **Simulate** feature in the pipeline editor to test with real log entries. Check that `Parse From` points to the correct field (`body` vs `attributes.message`). Test patterns with [regex101](https://regex101.com/) (Go flavor) or [Grok Debugger](https://grokdebugger.com/).
+
+- **Extracted attributes not appearing**: Ensure pipeline is **deployed** after saving. Check pipeline order—parsers should run before processors that modify the same fields. Use unique attribute names to avoid conflicts.
+
+- **Performance issues with complex patterns**: Replace greedy `.*` with specific patterns like `[^\]]+`. Use `%{IP}` instead of `%{GREEDYDATA}` in Grok. Add filter conditions to apply parsers only to relevant logs.
 
 </details>
 
