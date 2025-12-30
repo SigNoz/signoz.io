@@ -21,37 +21,37 @@ including CPU, disk, load, filesystem, memory, network, paging, and process metr
 The manual setup using OpenTelemetry Hostmetrics receiver provides **comprehensive EC2 monitoring**, collecting detailed host metrics. This method works for both **SigNoz Cloud** and **Self-Hosted**.
 </Admonition>
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
-
 ### Prerequisites
 
 - An EC2 instance
+- SSH Access to the instance
 
-### Configuring Hostmetrics Receiver
+### Setup
 
-To see your infrastructure metrics in SigNoz, you need to configure the hostmetrics receiver. Follow [this documentation](https://signoz.io/docs/userguide/hostmetrics/) to configure hostmetrics receiver and creating the Hostmetrics Dashboard.
+To collect infrastructure metrics, you need to install the OpenTelemetry Collector on your EC2 instance. The collector's `hostmetrics` receiver is enabled by default in the SigNoz distribution.
+
+Follow the **[Install OpenTelemetry Collector on VM](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)** guide.
 
 ### What's Collected
 
 | Data Type | Description |
 |-----------|-------------|
-| **CPU Metrics** | CPU usage, load averages |
-| **Memory Metrics** | Memory usage, available memory |
-| **Disk Metrics** | Disk usage, I/O operations |
-| **Network Metrics** | Network bytes sent/received |
-| **Filesystem Metrics** | Filesystem usage and capacity |
-| **Process Metrics** | Process-level resource usage |
+| **CPU** | Usage, load averages, utilization per core |
+| **Memory** | Used, available, free, and cached memory |
+| **Disk** | I/O operations, throughput, filesystem usage |
+| **Network** | Bytes sent/received, packet drops, errors |
 
 ### Validate
 
-After setting up your Hostmetrics Dashboard, here's what it might look like:
+Once installed, your EC2 infrastructure metrics will be visible in SigNoz:
+
+1. Navigate to **Infrastructure Monitoring** -> **Hosts**.
+2. You will see your EC2 instance listed.
 
 <Figure
-  src="/img/ec2-infra.webp"
-  alt="Hostmetrics Dashboard for EC2 instance"
-  caption="Hostmetrics Dashboard for AWS EC2 instance"
+  src="/img/docs/aws-monitoring/ec2/ec2-host-metrics-list.webp"
+  alt="EC2 Instances in SigNoz Host Monitoring"
+  caption="List of EC2 instances in SigNoz Infrastructure Monitoring"
 />
 
 </TabItem>

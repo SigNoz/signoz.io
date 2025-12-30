@@ -1,80 +1,52 @@
 ---
 date: 2025-12-30
 id: ec2-logs
-title: Send Application/Server Logs from EC2 to SigNoz
+title: Collect EC2 Application/Server Logs
 description: Collect application and server logs from EC2 instances using OpenTelemetry Collector and send them to SigNoz.
 doc_type: howto
 ---
 
-## Introduction
+## Overview
 
-This documentation provides detailed instructions on how to send application and server logs from an EC2 instance to **SigNoz**. By integrating with SigNoz, you can 
-efficiently collect, monitor, and analyze your logs for better insights into your applications and servers.
+This guide explains how to collect application and server logs from your EC2 instances using the OpenTelemetry Collector.
+
+<Admonition type="info">
+This guide assumes you have already installed the OpenTelemetry Collector on your EC2 instance. If not, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+</Admonition>
 
 ## Prerequisites
 
-- A Linux-based EC2 instance 
+- A Linux-based EC2 instance
+- OpenTelemetry Collector installed and running
+- Access to modify the collector's configuration file (usually `config.yaml`)
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
+## Setup
 
-## Install OpenTelemetry Collector
+To collect logs from your EC2 instance, you will need to configure the `filelog` receiver in your OpenTelemetry Collector.
 
-You can install OpenTelemetry collector as an agent on your Virtual Machine by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
-The OpenTelemetry collector provides a vendor-neutral way to collect, process, and export telemetry data such as logs, metrics, and traces.
+For complete configuration instructions, follow the **[Collect Logs from File](https://signoz.io/docs/userguide/collect_logs_from_file/)** guide.
 
-### Dummy Log File
+The setup involves:
 
-As an example, use a sample log file called `app.log` with the following dummy data:
+1.  **Defining the input**: Specifying the path to your log files (e.g., `/var/log/myapp.log`) in the `filelog` receiver configuration.
+2.  **Enabling the pipeline**: Adding the receiver to a logs pipeline in the `config.yaml` file.
+3.  **Restarting the Collector**: Applying the new configuration.
 
-```
-This is log line 1
-This is log line 2
-This is log line 3
-This is log line 4
-This is log line 5
-```
+## Validate
 
-This file represents a log file of your application/server.
+Once you have updated the configuration and restarted the collector:
 
-### Configure Filelog Receiver
+1.  Generate some logs in your application or log file.
+2.  Go to the **[Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/)** in SigNoz.
+3.  You should see your logs appearing. You can filter by `host.name` (which usually defaults to the EC2 instance ID or hostname) to find logs from this specific instance.
 
-Receivers are used to get data into the collector. A filelog receiver collects logs from files. Modify the `config.yaml` file that you created while installing 
-the OTel collector to include the filelog receiver. Specify the path to your `app.log` file (or your actual log file) and set the `start_at` parameter.
+<Figure
+  src="/img/docs/logs-explorer.webp"
+  alt="Logs Explorer showing logs from EC2"
+  caption="View EC2 logs in the Logs Explorer"
+/>
 
-```yaml:config.yaml
-receivers:
-  filelog/app:
-    include: [ /tmp/app.log ] # include the full path to your log file
-    start_at: end
-```
+## Next Steps
 
-<Admonition>
-The `start_at: end` configuration ensures that only newly added logs are transmitted. If you wish to include historical logs from the file, set `start_at` to 
-`beginning`.
-</Admonition>
-
-### Update Pipeline Configuration
-
-Receivers must be enabled via pipelines within the `service` section of the collector config file. Update the pipeline configuration in `config.yaml`:
-
-```yaml:config.yaml
-service:
-  pipelines:
-    logs:
-      receivers: [otlp, filelog/app]
-      processors: [batch]
-      exporters: [otlp]
-```
-
-Restart the OpenTelemetry Collector by following the steps outlined in [this guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
-
-### Verifying the Exported Logs
-
-The logs will be exported to the SigNoz Cloud UI. If you add more entries to your `app.log` file, they will also appear in the SigNoz Logs Explorer.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/ec2-application-server-logs.webp" alt="Logs of the dummy app.log file visible in SigNoz"/>
-    <figcaption><i>Dummy log file data shown in SigNoz Logs Explorer</i></figcaption>
-</figure>
+- [Collect Logs from File](https://signoz.io/docs/userguide/collect_logs_from_file/)
+- [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)

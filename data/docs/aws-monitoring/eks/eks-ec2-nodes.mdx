@@ -25,55 +25,7 @@ Amazon EKS (Elastic Kubernetes Service) is a managed Kubernetes service that mak
 The K8s-Infra Helm chart provides **comprehensive EKS monitoring**, collecting all logs and metrics including pod-level metrics, node metrics, container logs, and more. This method works for both **SigNoz Cloud** and **Self-Hosted**.
 </Admonition>
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
-
-### Step 1: Add SigNoz Helm Repository
-
-```bash
-helm repo add signoz https://charts.signoz.io
-helm repo update
-```
-
-### Step 2: Create Configuration File
-
-Create an `override-values.yaml` file with EKS-specific configuration:
-
-```yaml
-global:
-  cloud: aws
-  clusterName: <CLUSTER_NAME>
-  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
-otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
-otelInsecure: false
-signozApiKey: <SIGNOZ_INGESTION_KEY>
-presets:
-  otlpExporter:
-    enabled: true
-  loggingExporter:
-    enabled: false
-  resourceDetection:
-    detectors:
-      - eks
-      - system
-```
-
-Replace the following placeholders:
-- `<CLUSTER_NAME>`: Name of your EKS cluster or a unique identifier.
-- `<DEPLOYMENT_ENVIRONMENT>`: Deployment environment (e.g., "staging", "production").
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `{region}`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) (e.g., `us`, `eu`, `in`).
-
-For complete installation instructions with all configuration options, see the [K8s-Infra Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
-
-### Step 3: Install the Chart
-
-```bash
-helm install my-release signoz/k8s-infra -f override-values.yaml
-```
-
-### What's Collected
+## What You Can Collect
 
 | Data Type | Description |
 |-----------|-------------|
@@ -83,7 +35,24 @@ helm install my-release signoz/k8s-infra -f override-values.yaml
 | **Cluster Metrics** | Overall cluster health and resources |
 | **Kubernetes Events** | Cluster events and state changes |
 
-### Validate
+## Setup
+
+For complete installation instructions, follow the [K8s-Infra Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+
+The setup involves:
+
+1. **Add the SigNoz Helm repository** and update your local cache
+2. **Create an override-values.yaml** with EKS-specific configuration (set `global.cloud: aws` to enable EKS resource detection)
+3. **Install the chart** using Helm
+4. **Verify data** in SigNoz
+
+### Dashboard Templates
+
+Explore pre-built [Kubernetes Dashboards](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-dashboards/) for pod, node, and cluster metrics.
+
+For advanced configuration (filtering logs, Prometheus scraping, etc.), see the [K8s-Infra Configuration Guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+
+## Validate
 
 Once installed, your EKS data will appear in:
 - **Logs**: Navigate to **Logs** tab → [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/)
@@ -95,11 +64,11 @@ Once installed, your EKS data will appear in:
   caption="View your EKS cluster in SigNoz Infrastructure Monitoring"
 />
 
-### Dashboard Templates
+### Next Steps
 
-Explore pre-built [Kubernetes Dashboards](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-dashboards/) for pod, node, and cluster metrics.
-
-For advanced configuration (filtering logs, Prometheus scraping, etc.), see the [K8s-Infra Configuration Guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+- [K8s-Infra Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) – Detailed installation instructions.
+- [Configure K8s-Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/) – Customize log filtering, metrics collection, and more.
+- [Infrastructure Monitoring Overview](https://signoz.io/docs/infrastructure-monitoring/overview/) – Learn about the Infrastructure Monitoring module features.
 
 </TabItem>
 <TabItem value="one-click" label="One-Click Integration">
@@ -145,11 +114,3 @@ Navigate to **Dashboards** and search for "EKS" to find automatically imported d
 
 </TabItem>
 </Tabs>
-
-## Next Steps
-
-- [Configure K8s-Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/) – Customize log filtering, metrics collection, and more.
-- [Infrastructure Monitoring Overview](https://signoz.io/docs/infrastructure-monitoring/overview/) – Learn about the Infrastructure Monitoring module features.
-- [Kubernetes Dashboards](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-dashboards/) – Import pre-built dashboards for your EKS cluster.
-- [Monitor Multiple K8s Clusters](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/user-guides/k8s-infra-multi-cluster/) – Set up monitoring for multiple clusters.
-- [One-Click vs Manual Setup](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) – Compare integration approaches.
