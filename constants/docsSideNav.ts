@@ -2455,6 +2455,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/grok-monitoring',
+        label: 'Grok',
+        type: 'doc',
+      },
+      {
         route: '/docs/inkeep-monitoring',
         label: 'Inkeep',
         type: 'doc',
