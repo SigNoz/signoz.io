@@ -801,6 +801,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/aws-monitoring/elb-logs/',
+          destination: '/docs/aws-monitoring/elb/',
+          permanent: true,
+        },
+        {
           source: '/docs/troubleshooting/signoz-cloud/logs-troubleshooting/',
           destination: '/docs/logs-management/troubleshooting/troubleshooting/',
           permanent: true,
