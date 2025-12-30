@@ -1,0 +1,198 @@
+---
+date: 2025-12-30
+id: parsing
+title: Log Parsing in Pipelines
+description: Complete guide to parsing logs using SigNoz Pipelines including Regex, Grok, and JSON.
+doc_type: howto
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+Log parsing is an important step in observability. It transforms unstructured log messages into structured data, allowing you to filter, aggregate, and analyze your logs efficiently.
+
+## Why Parse Logs in Pipelines?
+
+- **Centralized Management:** Define parsing rules at one place rather than configuring every agent.
+- **Legacy Support:** Handle logs from legacy applications that cannot be easily modified.
+- **Performance:** Offload processing from application containers.
+- **Standardization:** Enforce a consistent schema across different services.
+
+## Prerequisites
+
+- You are sending logs to SigNoz.
+- You have access to the **Logs Pipelines** section in SigNoz UI.
+
+Learn more about SigNoz [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
+
+## Choosing the Right Parser
+
+SigNoz offers several processors to handle different types of logs. Choosing the right one depends on your log format:
+
+| Log Format            | Recommended Parser                                                                                                                                        | Why?                                                                                             |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| **JSON**              | [JSON Parser](https://signoz.io/docs/logs-pipelines/guides/json/)                                                                                         | **Fastest & Easiest.** If your logs are already in JSON format, this parser simply expands them. |
+| **Unstructured Text** | [Regex Parser](#regex-parser)                                                                                                                             | **Flexible.** Best for custom log formats where you can define a specific pattern.               |
+| **Common Formats**    | [Grok Parser](#grok-parser)                                                                                                                               | **Convenient.** Uses pre-defined patterns for common systems like Nginx, Apache, Syslog.         |
+| **Specific Fields**   | [Timestamp](https://signoz.io/docs/logs-pipelines/guides/timestamp-parsing/) / [Severity](https://signoz.io/docs/logs-pipelines/guides/severity-parsing/) | Specialized processors to map these critical fields to the OpenTelemetry schema.                 |
+
+<Admonition type="tip">
+  For the best performance, configure your applications to output logs in **JSON** format. This
+  avoids the overhead of regex processing and is less brittle to format changes.
+</Admonition>
+
+## Parsing Unstructured Logs
+
+If your logs are plain text, you need to extract structure using pattern matching. SigNoz provides **Regex** and **Grok** processors for this.
+
+### Regex Parser
+
+The Regex processor uses [Regular Expressions](https://github.com/google/re2/wiki/Syntax) to extract information. It relies on **Named Capture Groups** to map parts of your log message to attribute names.
+
+**The Concept:**
+You define a pattern containing groups like `(?P<attribute_name>pattern)`. Whatever matches inside the parentheses becomes the value of `attribute_name`.
+
+#### Example Scenario
+
+Suppose you have a legacy application log:
+
+```text
+2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5
+```
+
+We want to extract:
+
+- `level`: INFO
+- `user_id`: 123
+- `ip`: 192.168.1.5
+
+#### Step-by-Step Configuration
+
+1.  **Add a Processor**: In your pipeline, add a new processor and select **Regex Parser**.
+2.  **Configure Fields**:
+    - **Name**: `parse_app_log`
+    - **Parse From**: `body` (This is where the raw message lies).
+    - **Parse To**: `attributes` (We want to add these directly to the log attributes).
+    - **Pattern**:
+      ```regex
+      ^.*\[(?P<level>\w+)\].*User (?P<user_id>\d+) logged in from (?P<ip>[\d\.]+)
+      ```
+3.  **Validate**:
+    After processing, your log will have new attributes:
+    - `attributes.level`: "INFO"
+    - `attributes.user_id`: "123"
+    - `attributes.ip`: "192.168.1.5"
+
+<Figure
+  src="/img/docs/logs-pipelines/regex-parser-config.webp"
+  alt="Regex Parser Configuration Example"
+  caption="Configuring the Regex Parser"
+/>
+
+### Grok Parser
+
+Grok simplifies the creation of complex regular expressions by using pre-defined, reusable patterns. It allows you to use human-readable aliases for common data formats, making your parsing rules significantly easier to read and maintain.
+
+**The Concept:**
+Instead of writing complex regex for an IP address, you simply use `%{IP:ip_address}`. The syntax is `%{PATTERN_NAME:capture_name}`.
+
+#### Example Scenario
+
+Parsing a standard web access log:
+
+```text
+127.0.0.1 - - [27/Dec/2025:10:00:00 +0000] "GET /api/v1/users HTTP/1.1" 200 1234
+```
+
+#### Step-by-Step Configuration
+
+1.  **Add a Processor**: Select **Grok Parser**.
+2.  **Configure Fields**:
+
+    - **Name**: `access_log_parser`
+    - **Parse From**: `body`
+    - **Parse To**: `attributes`
+    - **Pattern**:
+
+      ```grok
+      %{IP:client_ip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:method} %{URIPATHPARAM:request} HTTP/%{NUMBER:http_version}" %{NUMBER:response_code} %{NUMBER:bytes}
+      ```
+
+3.  **Validate**:
+    After processing, your log will have new attributes:
+    - `attributes.client_ip`: "127.0.0.1"
+    - `attributes.ident`: "-"
+    - `attributes.auth`: "-"
+    - `attributes.timestamp`: "27/Dec/2025:10:00:00 +0000"
+    - `attributes.method`: "GET"
+    - `attributes.request`: "/api/v1/users"
+    - `attributes.http_version`: "1.1"
+    - `attributes.response_code`: "200"
+    - `attributes.bytes`: "1234"
+
+<Admonition type="info">
+  The `HTTPDATE` pattern captures timestamps in their raw format (e.g., `27/Dec/2025:10:00:00
+  +0000`). To convert to ISO 8601 format for proper time-based querying, apply the [Timestamp
+  Parser](https://signoz.io/docs/logs-pipelines/guides/timestamp-parsing/) after extracting the
+  field.
+</Admonition>
+
+If you are using standard web servers like **Nginx** or **Apache**, you can use built-in patterns
+like `%{COMMONAPACHELOG}` or `%{COMBINEDAPACHELOG}` directly, instead of manually constructing the
+full pattern.
+
+You can find the complete list of built-in patterns at [Grok patterns](https://github.com/vjeantet/grok/blob/master/patterns.go).
+
+<Figure
+  src="/img/docs/logs-pipelines/grok-parser-config.webp"
+  alt="Grok Parser Configuration Example"
+  caption="Configuring the Grok Parser"
+/>
+
+<Admonition type="info">
+  You can verify and debug your Grok patterns using the [Grok Debugger](https://grokdebugger.com/).
+</Admonition>
+
+## Validate
+
+After you have configured your parser, you can validate it by sending a sample log to SigNoz.
+
+<Figure
+  src="/img/docs/logs-pipelines/logs-after-regex-parser.webp"
+  alt="Logs after Regex Parser"
+  caption="Logs after Regex Parser"
+/>
+
+<Figure
+  src="/img/docs/logs-pipelines/logs-after-grok-parser.webp"
+  alt="Logs after Grok Parser"
+  caption="Logs after Grok Parser"
+/>
+
+## Next Steps
+
+Once your logs are parsed, you can ensure standard fields like Timestamps and Severity are correctly populated:
+
+- [Parse Time Information](https://signoz.io/docs/logs-pipelines/guides/timestamp-parsing/)
+- [Parse Severity Levels](https://signoz.io/docs/logs-pipelines/guides/severity-parsing/)
+- [Correlate with Traces](https://signoz.io/docs/logs-pipelines/guides/trace/)
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+- **Pattern not matching**: Test your pattern with sample logs using the [Grok Debugger](https://grokdebugger.com/) or [regex101](https://regex101.com/). Check for extra whitespace or special characters.
+- **Syntax errors**: Verify your pattern follows [RE2 syntax rules](https://github.com/google/re2/wiki/Syntax).
+  </details>
+
+## Get Help
+
+<GetHelp />

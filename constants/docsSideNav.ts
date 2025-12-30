@@ -1402,6 +1402,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/logs-pipelines/parsing',
+            label: 'Log Parsing',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-pipelines/processors',
             label: 'Log Processors',
           },
