@@ -59,7 +59,7 @@ export default function Monitor() {
       internalLinks: [
         {
           name: 'AWS',
-          href: '/docs/ec2-monitoring/',
+          href: '/docs/aws-monitoring/overview/',
           icon: <SiAmazonwebservices className="h-5 w-5 text-orange-500" />,
           clickName: 'AWS Monitoring Link',
         },
