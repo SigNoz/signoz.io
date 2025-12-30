@@ -1,0 +1,99 @@
+---
+date: 2025-12-30
+id: ec2-infra-metrics
+title: Infrastructure Metrics of EC2 Instance
+description: Collect EC2 infrastructure metrics using the OpenTelemetry Hostmetrics receiver and send them to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+This documentation guides you through integrating AWS EC2 infrastructure metrics into SigNoz using the Hostmetrics receiver in OpenTelemetry Collector. 
+The Hostmetrics receiver is designed to collect metrics about the host system from various sources. It supports various scrapers for collecting different metrics, 
+including CPU, disk, load, filesystem, memory, network, paging, and process metrics.
+
+<Tabs>
+<TabItem value="manual" label="Manual Setup (Recommended)" default>
+
+## Manual Setup with OpenTelemetry
+
+<Admonition type="info">
+The manual setup using OpenTelemetry Hostmetrics receiver provides **comprehensive EC2 monitoring**, collecting detailed host metrics. This method works for both **SigNoz Cloud** and **Self-Hosted**.
+</Admonition>
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+### Prerequisites
+
+- An EC2 instance
+
+### Configuring Hostmetrics Receiver
+
+To see your infrastructure metrics in SigNoz, you need to configure the hostmetrics receiver. Follow [this documentation](https://signoz.io/docs/userguide/hostmetrics/) to configure hostmetrics receiver and creating the Hostmetrics Dashboard.
+
+### What's Collected
+
+| Data Type | Description |
+|-----------|-------------|
+| **CPU Metrics** | CPU usage, load averages |
+| **Memory Metrics** | Memory usage, available memory |
+| **Disk Metrics** | Disk usage, I/O operations |
+| **Network Metrics** | Network bytes sent/received |
+| **Filesystem Metrics** | Filesystem usage and capacity |
+| **Process Metrics** | Process-level resource usage |
+
+### Validate
+
+After setting up your Hostmetrics Dashboard, here's what it might look like:
+
+<Figure
+  src="/img/ec2-infra.webp"
+  alt="Hostmetrics Dashboard for EC2 instance"
+  caption="Hostmetrics Dashboard for AWS EC2 instance"
+/>
+
+</TabItem>
+<TabItem value="one-click" label="One-Click Integration">
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/ec2/) to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable EC2 Monitoring
+
+Once connected, SigNoz will auto-discover your EC2 instances and begin collecting CloudWatch metrics.
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `CPUUtilization` | CPU usage percentage |
+| `DiskReadBytes` | Disk read bytes |
+| `DiskWriteBytes` | Disk write bytes |
+| `NetworkIn` | Network bytes received |
+| `NetworkOut` | Network bytes sent |
+| `StatusCheckFailed` | Instance status check failures |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "EC2" to find automatically imported dashboards.
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+- [Hostmetrics Configuration Guide](https://signoz.io/docs/userguide/hostmetrics/) – Complete hostmetrics setup instructions
+- [Send Logs from EC2](https://signoz.io/docs/aws-monitoring/ec2/ec2-logs/) – Configure application and server log collection
+- [Infrastructure Monitoring Overview](https://signoz.io/docs/infrastructure-monitoring/overview/) – View your infrastructure metrics in SigNoz
+- [One-Click vs Manual Setup](https://signoz.io/docs/aws-monitoring/one-click-vs-manual/) – Compare integration approaches

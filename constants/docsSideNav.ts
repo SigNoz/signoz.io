@@ -2554,17 +2554,17 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         label: 'EC2',
-        route: '/docs/ec2-monitoring',
+        route: '/docs/aws-monitoring/ec2',
         items: [
           {
             type: 'doc',
-            route: '/docs/aws-monitoring/ec2-logs',
-            label: 'Application/Server logs',
+            route: '/docs/aws-monitoring/ec2/ec2-infra-metrics',
+            label: 'Infrastructure Metrics',
           },
           {
             type: 'doc',
-            route: '/docs/aws-monitoring/ec2-infra-metrics',
-            label: 'Infrastructure Metrics',
+            route: '/docs/aws-monitoring/ec2/ec2-logs',
+            label: 'Application/Server Logs',
           },
         ],
       },
@@ -2572,24 +2572,37 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         label: 'ECS',
-        route: '/docs/ecs-monitoring',
+        route: '/docs/aws-monitoring/ecs',
         items: [
           {
             type: 'doc',
-            route: '/docs/aws-monitoring/ecs-ec2-external',
+            route: '/docs/aws-monitoring/ecs/ecs-ec2-external',
             label: 'EC2/External',
           },
           {
             type: 'doc',
-            route: '/docs/aws-monitoring/ecs-fargate',
+            route: '/docs/aws-monitoring/ecs/ecs-fargate',
             label: 'Fargate',
           },
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/aws-monitoring/eks',
+        type: 'category',
+        isExpanded: false,
         label: 'EKS',
+        route: '/docs/aws-monitoring/eks',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/eks/eks-ec2-nodes',
+            label: 'EC2 Nodes',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/eks/eks-fargate',
+            label: 'Fargate',
+          },
+        ],
       },
       {
         type: 'doc',

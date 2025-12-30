@@ -743,6 +743,53 @@ module.exports = () => {
           destination: '/docs/dashboards/dashboard-templates/overview/',
           permanent: true,
         },
+        // ECS and EKS folder restructuring redirects
+        {
+          source: '/docs/ecs-monitoring/',
+          destination: '/docs/aws-monitoring/ecs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ecs-monitoring-overview/',
+          destination: '/docs/aws-monitoring/ecs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ecs-ec2-external/',
+          destination: '/docs/aws-monitoring/ecs/ecs-ec2-external/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ecs-fargate/',
+          destination: '/docs/aws-monitoring/ecs/ecs-fargate/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/eks-monitoring-overview/',
+          destination: '/docs/aws-monitoring/eks/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/eks-fargate/',
+          destination: '/docs/aws-monitoring/eks/eks-fargate/',
+          permanent: true,
+        },
+        // EC2 folder restructuring redirects
+        {
+          source: '/docs/ec2-monitoring/',
+          destination: '/docs/aws-monitoring/ec2/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ec2-logs/',
+          destination: '/docs/aws-monitoring/ec2/ec2-logs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ec2-infra-metrics/',
+          destination: '/docs/aws-monitoring/ec2/ec2-infra-metrics/',
+          permanent: true,
+        },
         {
           source: '/docs/tutorial/kubernetes-infra-metrics/',
           destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/',
