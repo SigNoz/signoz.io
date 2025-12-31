@@ -1,38 +1,38 @@
 ---
 date: 2025-12-29
 id: grok-monitoring-with-opentelemetry
-tags: [SigNoz Cloud, Self-Host]
-title: xAi Monitoring with OpenTelemetry and SigNoz
-description: Monitoring and observability for xAi Grok performance and usage with OpenTelemetry instrumentation to send traces and metrics to SigNoz
+title: xAI Grok Monitoring with OpenTelemetry and SigNoz
+description: Monitoring and observability for xAI Grok performance and usage with OpenTelemetry instrumentation to send traces and metrics to SigNoz
 doc_type: howto
 ---
 
 ## Overview
 
-This guide walks you through setting up monitoring and observability for xAi Grok using [OpenTelemetry](https://opentelemetry.io/) and exporting traces and metrics to SigNoz. With this integration, you can observe various different metrics for your xAi Grok applications and llm usage.
+This guide walks you through setting up monitoring and observability for xAI Grok using [OpenTelemetry](https://opentelemetry.io/) and exporting traces and metrics to SigNoz. With this integration, you can observe various metrics for your xAI Grok applications and llm usage.
 
-Monitoring xAi Grok in your AI applications with telemetry ensures full observability across your agent workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+Monitoring xAI Grok in your AI applications with telemetry ensures full observability across your AI and LLM workflows. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
 
 ## Prerequisites
 
 - A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
 - Internet access to send telemetry data to SigNoz Cloud
-- Python 3.10+ with ` xai-sdk` installed
+- Python 3.10+ with `xai-sdk` installed
 - For Python: `pip` installed for managing Python packages
-- A Grok API key. You can get it from [xAi platform](https://platform.x.ai/)
+- A Grok API key. You can get it from <a href="https://platform.x.ai/" target="_blank" rel="noopener noreferrer nofollow">xAi platform</a>
 
-## Monitoring xAi Grok
+
+## Monitoring xAI Grok
+
 
 <Tabs>
 <TabItem value="python" label="Python" default>
+
+For more information on getting started with Grok in your Python environment, refer to the [Grok Python README](https://github.com/xai-org/xai-sdk-python).
 
 <Tabs>
 <TabItem value="No Code" label="No Code(Recommended)" default>
 
 No code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
-For more information on getting started with Grok in your Python environment, refer to the [Grok Python README](https://github.com/xai-org/xai-sdk-python).
-
-
 
 ### Step 1: Install the necessary packages in your Python environment.
 
@@ -43,7 +43,7 @@ pip install \
   httpx \
   opentelemetry-instrumentation-httpx \
   opentelemetry-instrumentation-system-metrics \
-  grok
+  xai-sdk
 ```
 
 ### Step 2: Add Automatic Instrumentation
@@ -52,7 +52,7 @@ pip install \
 opentelemetry-bootstrap --action=install
 ```
 
-### Step 3: Create an example xAi Grok application
+### Step 3: Create an example xAI Grok application
 
 ```python:main.py
 import os
@@ -119,7 +119,7 @@ pip install \
   opentelemetry-exporter-otlp \
   opentelemetry-instrumentation-httpx \
   opentelemetry-instrumentation-system-metrics \
-  grok
+  xai-sdk
 ```
 
 ### Step 2: Import the necessary modules in your Python application
@@ -329,6 +329,29 @@ You can also check out our custom Grok dashboard [here](https://signoz.io/docs/
   alt="Grok Dashboard"
   caption="Grok Dashboard Template"
 />
+
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
 
 Additional resources:
 - Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
