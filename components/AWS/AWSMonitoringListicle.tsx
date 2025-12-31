@@ -59,13 +59,13 @@ export default function AWSMonitoringListicle() {
         cards={[
           {
             name: 'EC2',
-            href: '/docs/ec2-monitoring/',
+            href: '/docs/aws-monitoring/ec2/',
             icon: <SiAmazonec2 className="h-7 w-7 text-orange-500" />,
             clickName: 'EC2 Monitoring Link',
           },
           {
             name: 'ECS',
-            href: '/docs/ecs-monitoring/',
+            href: '/docs/aws-monitoring/ecs/',
             icon: <SiAmazonecs className="h-7 w-7 text-orange-500" />,
             clickName: 'ECS Monitoring Link',
           },
