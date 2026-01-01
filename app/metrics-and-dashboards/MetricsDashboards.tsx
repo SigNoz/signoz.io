@@ -167,13 +167,13 @@ const Header = () => {
           </Link>
         </Button>
       </div>
-      <div className="section-container !mx-auto !mt-0 -mb-[9rem] !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
+      <div className="section-container !mx-auto !mt-0 -mb-[9rem] !w-full border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
         <div className="w-full">
-          <div className="product-explainer-video hero-figure rounded-lg p-3">
+          <div className="product-explainer-video hero-figure rounded-none p-0 md:rounded-lg md:p-3">
             <Image
               src="/img/features/metrics/metrics-overview1.webp"
               alt="Custom Thumbnail"
-              className="h-auto w-full rounded-lg"
+              className="h-auto w-full rounded-none md:rounded-lg"
               height={10000}
               width={10000}
               priority
