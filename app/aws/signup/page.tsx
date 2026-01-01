@@ -225,7 +225,7 @@ const Instructions = () => {
             <Image
               width={1000}
               height={1000}
-              src="/img/aws/signup/show-account-settings.png"
+              src="/img/aws/signup/show-account-settings.webp"
               alt="License Details"
             />
           </div>
