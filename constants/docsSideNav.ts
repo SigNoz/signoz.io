@@ -1672,6 +1672,11 @@ const docsSideNav = [
         label: 'Drop Metrics',
       },
       {
+        type: 'doc',
+        route: '/docs/metrics-management/dropping-metric-labels',
+        label: 'Dropping Metric Labels (Attributes)',
+      },
+      {
         type: 'category',
         route: '/docs/metrics-management/troubleshooting/troubleshooting',
         label: 'Troubleshooting',
