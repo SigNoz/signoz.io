@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 import { ExternalLink, Loader2, Mail } from 'lucide-react'
 import { VariantNavbar } from '../../teams/TeamsVariant'
 import { Button } from '@/components/ui/Button'
 import Image from 'next/image'
+import { useLogEvent } from '@/hooks/useLogEvent'
 
 const AWSSignupContent = () => {
   const [licenseKey, setLicenseKey] = useState('')
@@ -14,6 +15,8 @@ const AWSSignupContent = () => {
   const [success, setSuccess] = useState(false)
   const searchParams = useSearchParams()
   const entitlementId = searchParams.get('suger_entitlement_id')
+  const logEvent = useLogEvent()
+  const pathname = usePathname()
 
   const handleActivate = async () => {
     setError(null)
@@ -29,6 +32,15 @@ const AWSSignupContent = () => {
     }
 
     setLoading(true)
+
+    logEvent({
+      eventName: 'AWS Activation Initiated',
+      eventType: 'track',
+      attributes: {
+        entitlementId,
+        pageLocation: pathname,
+      },
+    })
 
     try {
       const endpoint = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL
@@ -50,13 +62,50 @@ const AWSSignupContent = () => {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'Failed to activate subscription')
-        throw new Error(data.error)
+        const errorMessage = data.error || 'Failed to activate subscription'
+
+        logEvent({
+          eventName: 'AWS Activation Failed',
+          eventType: 'track',
+          attributes: {
+            entitlementId,
+            error: errorMessage,
+            pageLocation: pathname,
+          },
+        })
+
+        setError(errorMessage)
+        throw new Error(errorMessage)
       }
+
+      logEvent({
+        eventName: 'AWS Activation Success',
+        eventType: 'track',
+        attributes: {
+          entitlementId,
+          pageLocation: pathname,
+        },
+      })
 
       setSuccess(true)
     } catch (err: any) {
-      setError('An unexpected error occurred.')
+      if (
+        !err.message ||
+        (err.message !== 'Failed to activate subscription' &&
+          !err.message.includes('activate subscription'))
+      ) {
+        logEvent({
+          eventName: 'AWS Activation Exception',
+          eventType: 'track',
+          attributes: {
+            entitlementId,
+            error: err.message || 'Unknown error',
+            pageLocation: pathname,
+          },
+        })
+      }
+
+      setError((prev) => prev || 'An unexpected error occurred.')
     } finally {
       setLoading(false)
     }
@@ -83,9 +132,9 @@ const AWSSignupContent = () => {
         <div className="mb-4 inline-flex items-center rounded border border-yellow-600 bg-yellow-600/10 px-2 py-1 text-xs text-yellow-500">
           AWS Marketplace
         </div>
-        <h1 className="mb-2 font-bold text-signoz_vanilla-100">
+        <h2 className="mb-2 font-bold text-signoz_vanilla-100">
           Activate Your AWS Marketplace Subscription
-        </h1>
+        </h2>
         <p className="m-0 text-sm text-signoz_vanilla-100/70">
           Connect your SigNoz Cloud account to start billing through AWS marketplace
         </p>
@@ -103,7 +152,23 @@ const AWSSignupContent = () => {
                 Most AWS Marketplace customers need to create a SigNoz Cloud account first to get
                 their license key.
               </p>
-              <Button to="/teams/" variant="secondary" rounded="default">
+              <Button
+                to="/teams/"
+                variant="secondary"
+                rounded="default"
+                onClick={() => {
+                  logEvent({
+                    eventName: 'Website Click',
+                    eventType: 'track',
+                    attributes: {
+                      clickType: 'Button Click',
+                      clickName: 'Create SigNoz Account',
+                      clickLocation: 'AWS Signup Content',
+                      pageLocation: pathname,
+                    },
+                  })
+                }}
+              >
                 <span className="flex items-center gap-2">
                   Create SigNoz Account
                   <ExternalLink className="h-4 w-4" />
@@ -155,7 +220,6 @@ const AWSSignupContent = () => {
             )}
 
             <Button
-              className="w-full"
               variant="default"
               rounded="default"
               onClick={handleActivate}
@@ -179,14 +243,19 @@ const AWSSignupContent = () => {
 }
 
 const Instructions = () => {
+  const logEvent = useLogEvent()
+  const pathname = usePathname()
+
   return (
     <div className="w-full max-w-4xl space-y-8 px-8 py-6">
-      <h2 className="m-0 font-medium text-signoz_vanilla-100">
-        How to get SigNoz Cloud License Key
-      </h2>
-      <p className="m-0 text-sm text-signoz_vanilla-100/70">
-        Follow these steps to retrieve your license key from your SigNoz account
-      </p>
+      <div>
+        <h2 className="m-0 font-bold text-signoz_vanilla-100">
+          How to get SigNoz Cloud License Key
+        </h2>
+        <p className="m-0 text-sm text-signoz_vanilla-100/70">
+          Follow these steps to retrieve your license key from your SigNoz account
+        </p>
+      </div>
 
       <div className="space-y-6">
         <div className="rounded-lg border border-signoz_slate-500 bg-signoz_ink-400/30 p-4">
@@ -201,7 +270,23 @@ const Instructions = () => {
               Create a SigNoz Cloud account if you don't have one. If you already have an account
               that you want to bill through AWS Marketplace, proceed to step 2.
             </p>
-            <Button to="/teams/" variant="default" rounded="default">
+            <Button
+              to="/teams/"
+              variant="default"
+              rounded="default"
+              onClick={() => {
+                logEvent({
+                  eventName: 'Website Click',
+                  eventType: 'track',
+                  attributes: {
+                    clickType: 'Button Click',
+                    clickName: 'Create SigNoz Account',
+                    clickLocation: 'AWS Signup Instructions',
+                    pageLocation: pathname,
+                  },
+                })
+              }}
+            >
               <span className="flex items-center gap-2">
                 Create account
                 <ExternalLink className="h-3 w-3" />
@@ -251,12 +336,25 @@ const Instructions = () => {
         </div>
       </div>
 
-      <div className="mt-8 border-t border-signoz_slate-500 pt-6">
+      <div className="border-t border-signoz_slate-500 pt-2">
         <p className="m-0 text-sm text-signoz_vanilla-100/70">
           Need help? Reach out to
           <Button
             href="mailto:cloud-support@signoz.io"
             className="text-signoz_robin-500 hover:text-signoz_robin-400"
+            onClick={() => {
+              logEvent({
+                eventName: 'Website Click',
+                eventType: 'track',
+                attributes: {
+                  clickType: 'Link Click',
+                  clickName: 'Contact Support',
+                  clickLocation: 'AWS Signup Instructions',
+                  pageLocation: pathname,
+                  target: 'cloud-support@signoz.io',
+                },
+              })
+            }}
           >
             <span className="flex items-center gap-1">
               cloud-support@signoz.io
@@ -274,7 +372,7 @@ export default function AWSSignupPage() {
     <div className="bg-signoz_ink-600 min-h-screen font-sans">
       <VariantNavbar className="bg-signoz_ink-300" />
       <div className="flex min-h-[calc(100vh-56px)] flex-col lg:flex-row">
-        <div className="flex w-full flex-col items-center justify-center p-8 lg:w-1/2 lg:border-r lg:border-signoz_slate-500 lg:p-6">
+        <div className="flex w-full flex-col p-8 px-4 md:px-12 lg:w-1/2 lg:w-5/12 lg:border-r lg:border-signoz_slate-500 lg:px-16">
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center">
@@ -286,7 +384,7 @@ export default function AWSSignupPage() {
           </Suspense>
         </div>
 
-        <div className="bg-signoz_ink-600 hidden w-full items-center justify-center p-6 lg:flex lg:w-1/2 lg:bg-black/20">
+        <div className="bg-signoz_ink-600 hidden w-full items-center justify-center p-6 lg:flex lg:w-1/2">
           <Instructions />
         </div>
       </div>
