@@ -14,7 +14,7 @@ const AWSSignupContent = () => {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const searchParams = useSearchParams()
-  const entitlementId = searchParams.get('suger_entitlement_id')
+  const entitlementId = searchParams.get('sugerEntitlementId')
   const logEvent = useLogEvent()
   const pathname = usePathname()
 
