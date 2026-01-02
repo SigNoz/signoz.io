@@ -1,0 +1,387 @@
+---
+
+title: Kube State Metrics - Production Grade Kubernetes Monitoring with Helm & OpenTelemetry
+slug: kube-state-metrics
+date: 2026-01-02
+tags: [kubernetes, observability]
+authors: [saurabh_patil]
+description: Learn what Kube State Metrics is, how it works, and how to use it for production-grade Kubernetes monitoring. Compare it with Node Exporter and Metrics Server, deploy it with Helm, scrape it using OpenTelemetry, and build dashboards and alerts in SigNoz.
+keywords: [kube state metrics, kubernetes monitoring, ksm vs metrics server, prometheus metrics]
+
+---
+
+In Kubernetes observability, understanding the state of your cluster's resources is crucial for maintaining reliability, troubleshooting issues, and setting up effective alerts. Tools like the Host Metrics Receiver, Metrics Server, or Node Exporter provide resource usage data (CPU and memory), but they don't capture detailed object states, like how many replicas are available in a Deployment, pod restart counts, or node conditions. 
+
+Kube State Metrics (KSM) bridges this gap by exposing rich, structured metrics directly derived from the Kubernetes API, enabling deeper insights when combined with backend tools like Signoz, Prometheus, and Grafana.
+
+## What is Kube State Metrics?
+
+In simple terms, Kube State Metrics (KSM) is an <a href="https://github.com/kubernetes/kube-state-metrics" rel="noopener noreferrer nofollow" target="_blank">open-source add-on service</a> that listens to the Kubernetes API server and generates metrics about the current state of Kubernetes objects.
+
+KSM exposes these raw, unmodified data as Prometheus-compatible metrics over a plain-text HTTP endpoint (usually at `/metrics` on `port 8080`), making it easy for scrapers like Prometheus or OpenTelemetry Collector to collect and forward this data.
+
+It focuses on metadata and status information for resources like Pods, Nodes, Deployments, StatefulSets, DaemonSets, Jobs, PersistentVolumes, and Services of a k8s cluster to help you answer questions like:
+
+- How many replicas are currently available in my deployment?
+- Which pods are stuck in a `CrashLoopBackOff` or `Pending` phase?
+- What is the condition of the Node?
+- Are there any Persistent Volume Claims (PVCs) that are not yet bound?
+
+In summary, kube-state-metrics is essential for state-based monitoring, complementing resource-usage monitoring to give a complete picture of cluster health.
+
+## How Kube State Metrics Works?
+
+Kube-state-metrics (KSM) is a lightweight Go-based service that runs as a Deployment in your Kubernetes cluster. Here is its core workflow:
+
+<Figure
+  src="/img/guides/2026/01/kube-state-metrics-ksm-workflow.webp"
+  alt="Workflow of Kube State Metrics"
+  caption="Workflow of Kube State Metrics"
+/>
+
+1. **Connection to API Server**: KSM uses the Kubernetes client-go library to establish an informer-based connection. It performs initial **LIST** calls to fetch all relevant objects (e.g., Pods, Deployments) and sets up **WATCH** streams for real-time updates.
+2. **Resource Watching**: It monitors a predefined set of Kubernetes resources via informers. On events (add, update, delete), it caches the object states in memory without persisting data.
+3. **Metric Generation**: For each watched object, KSM generates Prometheus-compatible metrics by extracting metadata and status fields (e.g., pod phase, replica counts). This is done via generator functions that produce key-value pairs like `kube_pod_status_phase{phase="Running"} 1`.
+
+<Figure
+  src="/img/guides/2026/01/kube-state-metrics-generated-metrics.webp"
+  alt="Generated metrics, exposed over /metrics endpoint"
+  caption="Generated metrics, exposed over /metrics endpoint"
+/>
+
+4. **Exposure**: An HTTP server (default port 8080) serves these metrics at `/metrics` endpoint. Prometheus scrapes this endpoint periodically (e.g., every 30s) and stores the results for querying/alerting.
+
+It uses Kubernetes informer resyncs to maintain cache consistency in case of any missed events, and supports scaling in large clusters by running multiple instances with deterministic sharding using `--shard` and `--total-shards` flags.
+
+## Differences: Kube State Metrics vs Others
+
+Kube-State-Metrics (KSM) generates metrics from the Kubernetes API server's object states, enabling insights into cluster orchestration health without resource usage details. This contrasts with other exporters that focus on hardware, container runtime, or aggregated metrics, as discussed in the detailed comparisons below.
+
+### Kube-State-Metrics (KSM) vs Node Exporter
+
+KSM focuses on the logical state and metadata of Kubernetes API objects (e.g., deployment replica counts, pod phases, node conditions), derived directly from the Kubernetes control plane, whereas Node Exporter is a Prometheus exporter that runs as a DaemonSet on each node to collect low-level hardware and operating system metrics (e.g., CPU idle time, disk I/O, filesystem usage, network stats) from the host OS kernel, providing infrastructure-level insights independent of Kubernetes orchestration.
+
+### Kube-State-Metrics (KSM) vs Metrics Server
+
+Kube-state-metrics exposes detailed object state metrics for advanced monitoring and alerting (e.g., available replicas, pod restart counts), sourced from the API server without aggregation, while Metrics Server is a cluster-wide aggregator that collects short-term CPU and memory usage metrics from each node's Kubelet (primarily via summarized data), exposing them through the Kubernetes Metrics API mainly for autoscaling and commands like `kubectl top`, without historical storage or rich state details.
+
+### Kube-State-Metrics (KSM) vs cAdvisor(Container Advisor)
+
+Kube-state-metrics provides high-level Kubernetes object state information (e.g., deployment status, job completions) from the API server, reflecting orchestration health, in contrast to cAdvisor, which is embedded in the Kubelet on every node and collects detailed real-time container-specific resource usage and performance metrics (e.g., container CPU throttling, memory working set, filesystem usage, network bytes), focusing on runtime-level container behaviour rather than Kubernetes object semantics.
+
+### Summary Table: Kube-State-Metrics (KSM) vs Node Exporter vs Metrics Server vs cAdvisor
+
+| Component | Primary Focus | Metric Source | Key Metrics Examples | Typical Use Cases |
+| --- | --- | --- | --- | --- |
+| **Kube-State-Metrics** | Kubernetes object states and metadata | Kubernetes API server | Deployment replicas available, pod phase (Running/Pending), container restarts, node conditions | State-based alerting, rollout monitoring, cluster health dashboards |
+| **Node Exporter** | Host OS and hardware | Linux kernel (/proc, /sys) | CPU usage per core, disk I/O, memory available, network interfaces, filesystem space | Infrastructure monitoring, capacity planning, host-level troubleshooting |
+| **Metrics Server** | Aggregated pod/node resource usage | Kubelet summary on each node | Current CPU/memory usage for pods/nodes | Autoscaling (HPA), `kubectl top`, short-term resource visibility |
+| **cAdvisor** | Container runtime performance | Container runtime (via Kubelet) | Container CPU cores used, memory RSS/working set, filesystem usage, network RX/TX | Detailed container profiling, resource bottleneck detection |
+
+## Hands-On Production-Grade Demo: Deploy Kube State Metrics with Helm and Monitor Cluster State Using OpenTelemetry
+
+### Prerequisites
+
+- **SigNoz Cloud account:** Used as the backend for ingesting and visualizing metrics, logs, and traces, visit the [SigNoz Cloud](https://signoz.io/teams/) for account setup.
+- **SigNoz ingestion API keys:** Required to authenticate telemetry sent to SigNoz Cloud. Follow the official [SigNoz API Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) documentation.
+- **Docker (latest stable):** Ensure Docker is running, install from the official <a href="https://www.docker.com/get-started/" rel="noopener noreferrer nofollow" target="_blank">Docker documentation</a>.
+- **A running Kubernetes cluster:** Minikube recommended for local testing. See the <a href="https://minikube.sigs.k8s.io/docs/start/" rel="noopener noreferrer nofollow" target="_blank">Minikube installation guide</a>.
+- **kubectl:** Install via the official <a href="https://kubernetes.io/docs/tasks/tools/" rel="noopener noreferrer nofollow" target="_blank">kubectl documentation</a>.
+- **Helm v3.10+:** Install Helm from the official <a href="https://helm.sh/docs/intro/install/" rel="noopener noreferrer nofollow" target="_blank">Helm documentation</a>.
+    
+    Run these commands to add the required repositories in Helm:
+    
+    ```bash
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+    helm repo update
+    ```
+    
+
+### Step 1: Starting a Minikube Cluster
+
+We'll use Minikube to create a local Kubernetes environment that closely mimics production behaviour.
+
+1. Start Minikube with reasonable resources:
+    
+    ```bash
+    minikube start \
+      --cpus=4 \
+      --memory=6144 \
+      --driver=docker
+    ```
+    
+2. Enable the built-in metrics-server addon (useful for collecting basic resource metrics like CPU & memory usage):
+    
+    ```bash
+    minikube addons enable metrics-server
+    ```
+
+3. Verify everything is ready:
+
+    ```bash
+    kubectl get nodes
+    # Output
+    # NAME       STATUS   ROLES           AGE     VERSION
+    # minikube   Ready    control-plane   7h22m   v1.34.0
+    
+    minikube status
+    # Output
+    # minikube
+    # type: Control Plane
+    # host: Running
+    # kubelet: Running
+    # apiserver: Running
+    # kubeconfig: Configured
+    ```
+
+    This cluster will host kube-state-metrics and the OpenTelemetry Collector agent.
+
+### Step 2: Deploy Kube-State-Metrics using Helm
+
+Now we'll install **`kube-state-metrics`** into the cluster.
+
+1. Create a dedicated namespace for monitoring components (good production practice for organization and RBAC isolation):
+
+    ```bash
+    kubectl create namespace monitoring
+    ```
+
+2. Install the official kube-state-metrics using Helm:
+
+    ```bash
+    helm install ksm prometheus-community/kube-state-metrics \
+      --namespace monitoring \
+      --set replicaCount=2 \
+      --set resources.requests.cpu=100m \
+      --set resources.requests.memory=200Mi \
+      --set resources.limits.cpu=200m \
+      --set resources.limits.memory=400Mi
+    ```
+
+    <KeyPointCallout defaultCollapsed="true" title="Explanation of the flags used">
+
+    - `namespace monitoring`: Deploys everything into the monitoring namespace.
+    - `replicaCount=2`: Runs two instances for high availability (production-grade redundancy). Metrics from both are identical, so scraping either is fine.
+    - `Resource requests/limits`: Prevents pods from consuming excessive resources in our local cluster while ensuring stable operation.
+
+    </KeyPointCallout>
+
+3. Verify that metrics are being exposed:
+
+    ```bash
+    kubectl port-forward -n monitoring svc/ksm-kube-state-metrics 8080:8080
+    ```
+
+    Then open `http://localhost:8080/metrics` in your browser, you should see a long list of Prometheus-format metrics starting with `kube_`.
+
+    ```yaml
+    Press Ctrl+C to stop the port-forward when done.
+    ```
+
+### Step 3: Deploy the OpenTelemetry Collector
+
+Now that kube-state-metrics is running and exposing metrics, we need a component to scrape them and export them to SigNoz Cloud periodically.
+
+We will use the [OpenTelemetry Collector (OTel Collector)](https://signoz.io/blog/opentelemetry-collector-complete-guide/) for this. The OpenTelemetry Collector is a vendor-agnostic agent that receives, processes, and exports telemetry data (metrics, traces, logs). In our case, we will use a Prometheus receiver to scrape the `/metrics` endpoint of kube-state-metrics and  `OTLP exporter` to send the scraped metrics directly to SigNoz Cloud over HTTPS.
+
+We'll deploy it as a Deployment (single pod for simplicity in local testing, but scalable to multiple replicas in production) in the same monitoring namespace.
+
+1. Create a file named `otel-collector-values.yaml` on your machine with the following content. Replace the placeholders with your actual values:
+
+    ```yaml
+    mode: deployment
+    replicaCount: 1  # Increase to 2-3 for production HA
+    
+    config:
+      exporters:
+        otlp:
+          endpoint: "ingest.<YOUR-REGION>.signoz.cloud:443"  # e.g., ingest.us.signoz.cloud:443
+          tls:
+            insecure: false
+          headers:
+            signoz-ingestion-key: "<YOUR-INGESTION-KEY>"  # Replace with your key
+    
+      receivers:
+        prometheus:
+          config:
+            scrape_configs:
+              - job_name: 'kube-state-metrics'
+                scrape_interval: 30s
+                static_configs:
+                  - targets: ['ksm-kube-state-metrics.monitoring.svc.cluster.local:8080']
+    
+      service:
+        pipelines:
+          metrics:
+            receivers: [prometheus]
+            exporters: [otlp]
+    ```
+
+    <KeyPointCallout defaultCollapsed="true" title="Yaml File Explained">
+
+    - `mode: deployment`: Runs as a regular Deployment.
+    - `prometheus receiver`: Scrapes the kube-state-metrics service every 30 seconds.
+    - `otlp exporter`: Sends metrics securely to SigNoz Cloud using your ingestion key.
+
+    </KeyPointCallout>
+
+2. Install the OpenTelemetry Collector using Helm:
+
+    ```yaml
+    helm install otel-collector open-telemetry/opentelemetry-collector \
+      --namespace monitoring \
+      -f otel-collector-values.yaml \
+      --set image.repository=otel/opentelemetry-collector-k8s \
+      --set mode=deployment \
+      --set resources.requests.cpu=100m \
+      --set resources.requests.memory=256Mi
+    ```
+
+3. Verify the deployment:
+
+    ```yaml
+    kubectl get pods -n monitoring
+    ```
+
+    You should see a pod named something like `otel-collector-opentelemetry-collector-XXXXX` in Running state.
+
+Metrics should start appearing in your SigNoz Cloud dashboard within 1-2 minutes.
+
+### Step 4: Creating a Production-Grade Dashboard
+
+In production, a dedicated dashboard provides you with at-a-glance cluster health. We have created a dashboard for this demo, as shown below.
+
+<Figure
+  src="/img/guides/2026/01/kube-state-metrics-demo-dashboard.webp"
+  alt="Kube State Metrics Demo Dashboard"
+  caption="Kube State Metrics Demo Dashboard"
+/>
+
+You can import this dashboard as JSON from <a href="https://github.com/SigNoz/examples/blob/main/dashboards/kubernetes/kube-state-metrics/k8s-state-metrics.json" rel="noopener noreferrer nofollow" target="_blank">Kube-State-Metrics: Dashboard</a>.
+
+**Panels Breakdown:**
+
+| **Panel** | **Panel Name** | **Description** |
+| --- | --- | --- |
+| Panel 1 | Total Pods in Running State | Shows the total number of pods currently in the Running state. |
+| Panel 2 | Total Pods in Failed State | Shows the total number of pods currently in the Failed state. |
+| Panel 3 | Node Conditions | Shows the current conditions and status of nodes in the cluster. |
+| Panel 4 | Pod Phase Overview | Shows cluster-wide pod phases such as Running, Pending, Failed, etc. |
+| Panel 5 | Total Active Namespaces | Shows the total number of active namespaces in the cluster. |
+| Panel 6 | Deployment Replica Health | Highlights mismatches between desired and available deployment replicas (e.g., desired = 3, available = 2, mismatch = 3-2). |
+| Panel 7 | Container Restarts | Shows the restart count for containers within each pod. |
+
+This dashboard mimics production Kubernetes monitoring setups, focused on availability, stability, and early issue detection. If you want to explore how to create a dashboard like this, you can check out our [Create Custom Dashboard Guide](https://signoz.io/docs/userguide/manage-dashboards/)
+
+### Step 5: Setting Up Production-Grade Alerts in SigNoz Cloud
+
+Now that we have a dashboard visualizing kube-state-metrics data, let's configure alerts. In production, alerts based on state metrics catch issues like crashing pods, unavailable replicas, or node problems early, often before users notice.
+
+SigNoz Cloud supports Prometheus-style queries (PromQL) for alert rules, with severity levels, notification channels (Slack, email, webhook, etc.), and runbook links.
+
+You can follow our [Setup Alerts Notifications Channel](https://signoz.io/docs/setup-alerts-notification/) for one-time setup of notification channels. In this demo, we have set up an email notification channel.
+
+Let’s set up alerts now. Go to `Alerts` → `Rules` → `+ New Alert`. We'll create one example essential production alert using kube-state-metrics queries:
+
+**Alert for Pod in Failed State**
+
+- Once you click  the `+ New Alert` button, you will be prompted with a form to define your metrics and alert conditions. You can create a query in our case to monitor the pods in a failed state. You can set an alert on this query to check for pods in a failed state in the last 5 minutes and generate an alert.
+
+<Figure
+  src="/img/guides/2026/01/kube-state-metrics-define-alert.webp"
+  alt="Defining the Metric and Alert Conditions"
+  caption="Defining the Metric and Alert Conditions"
+/>
+- Below you will see an Alert Configuration box. You can configure your alert severity, name, description and notification channels here.
+
+<Figure
+  src="/img/guides/2026/01/kube-state-metrics-config-alert.webp"
+  alt="Configuring Alert with Threshold and Notification Channel"
+  caption="Configuring Alert with Threshold and Notification Channel"
+/>
+- Save the rule.
+
+SigNoz provides different types of alerts, including Anomaly, Metrics, Logs, Traces, and Exception-based alerts. You can read more about them in [Creating a New Alert in SigNoz](https://signoz.io/docs/userguide/alerts-management/#creating-a-new-alert-in-signoz).
+
+### Step 6: Test the Alerts (Simulation)
+
+To confirm everything works, deploy a crashing pod:
+
+```bash
+kubectl run crash-pod --image=busybox --restart=Never -- /bin/sh -c "exit 1"
+```
+
+(Delete after testing: `kubectl delete pod crash-pod`)
+
+Wait 1-5 minutes → Check Alerts → Triggered tab in SigNoz for fired alerts and notifications.
+
+An alert will be generated, and you will receive an email if selected as a notification channel, similar to below.
+
+<Figure 
+  src="/img/guides/2026/01/kube-state-metrics-email-notification.webp"
+  alt="Example Email Alert for Pod in Failed State"
+  caption="Example Email Alert for Pod in Failed State"
+/>
+
+Congratulations! You've successfully built a production-grade Kubernetes monitoring setup using kube-state-metrics, Helm, OpenTelemetry Collector, and SigNoz Cloud.
+
+### Step 7: Cleanup (For Your Local Minikube Setup)
+
+When you're done experimenting:
+
+```bash
+# Delete the test resources
+kubectl delete namespace monitoring
+
+# Or individually:
+helm uninstall ksm -n monitoring
+helm uninstall otel-collector -n monitoring
+
+# Stop Minikube
+minikube stop
+# Or delete entirely
+minikube delete
+```
+
+## Best Practices for Using Kube-State-Metrics Effectively
+
+While KSM is relatively simple to run, following best practices will ensure it operates efficiently and reliably, especially as your cluster grows:
+
+### Right-size Resource Requests
+
+Allocate CPU/memory to KSM based on cluster size, around 0.1 CPU and 250 MiB for ~100 nodes. Larger clusters or many objects may require more. If KSM shows high usage or slow `/metrics` responses, increase limits to avoid slow updates or OOM kills.
+
+### Scale Horizontally for Large Clusters
+
+Very large clusters may need horizontal sharding using `--shard` and `--total-shards` to split the load across multiple KSM instances. Each shard handles a subset of objects, improving memory usage and scrape latency. Use sharding only when necessary, and monitor that all shards are healthy and complete.
+
+### Use Allow/Deny Lists to Control Metric Volume
+
+KSM exports all metrics by default, which can explode the time-series count in large or dynamic clusters. Use `--resources`, `--metric-allowlist`, or `--namespaces` to limit metrics, reduce storage, and reduce scrape load. Filtering noisy metrics, like rapidly changing Job metrics, can significantly reduce monitoring overhead.
+
+### Ensure Proper RBAC (or Limited Scope if Needed)
+
+KSM needs broad read access across the cluster, typically via a ClusterRole. In restricted setups, scope access using specific Roles and `--namespaces`, or run multiple namespace-scoped KSM instances. Missing RBAC permissions will simply result in missing metrics, so ensure access aligns with expected coverage.
+
+### Integrate with Alerts and Dashboards
+
+KSM is most useful when paired with alerts. For example, detecting `Failed` pods, long-pending pods, or rising container restart counts. Use dashboards to visualize pod phases, replicas, node statuses, and namespace-level health. Combining KSM with other metrics helps identify issues like resource pressure or scheduling failures.
+
+### High Availability
+
+Kube State Metrics should be run in a highly available configuration using deterministic sharding. Multiple KSM instances can be deployed, each responsible for a subset of Kubernetes objects using the `--shard` and `--total-shards` flags. Prometheus scrapes all shards to maintain full metric coverage, avoiding duplicate time series while preventing KSM from becoming a single point of failure.
+
+## Common Troubleshooting Tips
+
+**Missing Metrics:** If you cannot see metrics for a specific resource, check the RBAC permissions of the KSM service account. It needs cluster-wide read access to the API objects it monitors.
+
+**OOMKills:** If the KSM pod restarts frequently, it is likely running out of memory due to the number of objects in the cluster. Increase the memory limits or implement sharding.
+
+**Stale Data:** KSM reflects the API state. If a pod is deleted, the metric is gone. Use a Prometheus-compatible backend like SigNoz to store and query historical data.
+
+---
+
+Hope we answered all your questions regarding Kube State Metrics.
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

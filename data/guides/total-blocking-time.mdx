@@ -1,0 +1,320 @@
+---
+
+title: Total Blocking Time (TBT) - All You Need to Know
+slug: total-blocking-time
+date: 2025-12-22
+tags: [frontend, monitoring]
+authors: [saurabh_patil]
+description: Total Blocking Time (TBT) measures how long your page is unresponsive during load. Learn how it is calculated, why it impacts Core Web Vitals, and how to reduce it.
+keywords: [total blocking time, TBT, core web vitals, main thread blocking, web performance metrics]
+
+---
+
+Total Blocking Time (TBT) is one of the key web performance metrics that captures the webpage’s unresponsiveness after the First Contentful Paint (FCP), i.e., when the first content appears. The metric is captured in milliseconds (ms). Values below 200 ms for mobile or 150 ms for desktop indicate good responsiveness, while higher values signal potential unreliability.
+
+In this guide, you will learn what TBT is, how it is calculated, which tools can be used to capture the TBT metric, and how to reduce its score.
+
+## What is Total Blocking Time (TBT)?
+
+Total Blocking Time (TBT) measures how much the main thread is blocked between First Contentful Paint (FCP) and Time to Interactive (TTI). In that window, the browser identifies "long tasks" (any main-thread task lasting more than 50 ms). For each long task, only the portion beyond 50 ms is counted as blocking time and finally TBT is calculated as the sum of these blocking portions across all long tasks in the window.
+
+For instance, imagine you opened a webpage, you can see its contents are loaded, but when you try to interact, nothing happens, and the webpage feels "frozen". This is because the site is not fully responsive yet. This unresponsiveness occurs when the browser's main thread is occupied by tasks that blocks interactions (e.g., heavy JavaScript running) and the time spent in these unresponsive period contributes towards the total blocking time.
+
+<KeyPointCallout defaultCollapsed="true" title="Why is 50 ms the threshold for TBT?">
+
+The 50 ms rule is derived from the limits of human perception, specifically the fact that people feel an interaction is "instant" only if the visual response happens within 100 milliseconds. As the browser is single-threaded i.e., it can only do one thing at a time, it needs a limit to ensure it doesn't get clogged up.
+
+Google’s RAIL model splits this 100 ms perception window in half: 50 ms is allocated to finish whatever background task is currently running, leaving the remaining 50 ms for the browser to process the user's click and update the screen.
+
+If a background task hogs the CPU for longer than 50 ms, it eats into the time needed to respond to the user, pushing the total wait time over that critical 100 ms limit. When this happens, the illusion of instantaneity breaks, and the user perceives lag.
+
+</KeyPointCallout>
+
+## How TBT is Calculated?
+
+TBT is the sum of the excess time spent on long tasks (tasks longer than 50 ms). For every task that runs between FCP (when content first appears) and TTI (when the page is fully reliable), we apply this formula:
+
+```bash
+Blocking Time = Task Duration - 50 ms
+```
+
+**For example:**
+
+Imagine a page load has three tasks after FCP:
+
+<Figure 
+  src="/img/guides/2025/12/total-blocking-time-three-tasks.webp"
+  alt="Task A, B & C on MainThread after FCP."
+  caption="Task A, B & C on MainThread after FCP."
+/>
+
+1. Task A takes 250 ms. Since it is above 50 ms, we can apply the formula (250 - 50), so it contributes 200 ms to TBT.
+
+<Figure
+  src="/img/guides/2025/12/total-blocking-time-task-a.webp"
+  alt="Task A TBT time breakdown"
+  caption="Task A TBT time breakdown"
+/>
+
+2. Task B takes 30 ms. As it's not more than 50 ms, it is not significant. Hence, its contribution to TBT will be 0 ms.
+
+<Figure
+  src="/img/guides/2025/12/total-blocking-time-task-b.webp"
+  alt="Task B less than 50 ms"
+  caption="Task B less than 50 ms"
+/>
+
+3. Task C takes 60 ms, similar to above, we can apply the formula (60 - 50), so it contributes 10 ms to TBT.
+
+<Figure
+  src="/img/guides/2025/12/total-blocking-time-task-c.webp"
+  alt="Task C TBT time breakdown"
+  caption="Task C TBT time breakdown"
+/>
+
+Total Blocking Time is simply the sum of all these blocking portions, i.e, `200 + 10 =  210 ms`.
+
+This calculation reveals why TBT is an effective metric.  It penalizes "monolithic" execution. If we split Task A (250 ms) into five separate 50 ms tasks, the total execution time remains the same, but the TBT drops to 0 ms, because the browser has gaps between smaller tasks that process user input, making the page feel responsive.
+
+## What Is a Good TBT Score?
+
+Lighthouse defines Total Blocking Time (TBT) thresholds separately for mobile and desktop to reflect real-world CPU differences. Since most users experience slower CPUs and constrained resources on mobile devices, mobile thresholds should be the primary target for optimization.
+
+### Mobile TBT thresholds (Lighthouse default)
+
+| **TBT (ms)** | **Rating** | **User Experience** |
+| --- | --- | --- |
+| **0–200 ms** | **Good** (Green) | Interactions feel instant and responsive. |
+| **200–600 ms** | **Needs Improvement** (Orange) | Input delay is noticeable, but usable. |
+| **> 600 ms** | **Poor** (Red) | Severe main-thread blocking; the page may feel frozen. |
+
+### Desktop TBT thresholds
+
+| **TBT (ms)** | **Rating** | **User Experience** |
+| --- | --- | --- |
+| **0–150 ms** | **Good** (Green) | Smooth, responsive interactions. |
+| **150–350 ms** | **Needs Improvement** (Orange) | Minor interaction lag under load. |
+| **> 350 ms** | **Poor** (Red) | Frequent jank and delayed responses. |
+
+## Most Common Causes of High Total Blocking Time
+
+High Total Blocking Time can be viewed as a congestion problem. It happens when the sheer volume of tasks from your framework and third-party tools exceeds the 50 ms threshold, creating a 'traffic jam' on the main thread. This blockage renders the browser unable to respond to user interactions. Let’s explore the most common causes behind elevated TBT.
+
+### 1. JavaScript Execution and Hydration Overhead
+
+The dominant source of TBT is **JavaScript execution**. Before any script can run, the browser must parse it into an internal representation, compile it, and execute it, all on the main thread.
+
+- **Hydration cost in modern frameworks:**
+
+    Frameworks such as React, Vue, and Next.js often deliver HTML from the server quickly, giving the impression of a fast load. However, the page remains non-interactive until the client-side JavaScript runs and wires up event handlers and state. This hydration phase is CPU-intensive and often creates long-running tasks right after the page becomes visible, leading to a period when the UI appears ready but ignores user input.
+
+- **Large, single-bundle JavaScript files:**
+
+    When most application logic is shipped in one large bundle (for example, a multi-megabyte `main.js`). The browser must evaluate it in one pass. On mobile hardware, this can block the main thread for hundreds of milliseconds or even seconds, directly inflating TBT.
+
+### 2. Third-Party Script Contention
+
+Third-party code is a common and often underestimated contributor to high TBT. Scripts for analytics, advertising, personalization, and chat tools frequently:
+
+- Run as soon as they are injected into the page
+- Compete with application code for main-thread execution time
+- Perform expensive work such as DOM manipulation, iframe injection, cookie access, or event tracking
+
+As a result, real-user environments often show higher TBT than lab tests, where ads may be mocked, delayed, or blocked. This gap explains why pages can score well in Lighthouse but still feel sluggish in production.
+
+### 3. Layout Thrashing and Forced Reflows
+
+Another subtle but impactful cause of high TBT is layout thrashing. This occurs when JavaScript alternates between mutating the DOM and reading layout-dependent values such as element dimensions or positions.
+
+When this pattern occurs, the browser is forced to recalculate the layout to return accurate values synchronously. These forced reflows interrupt JavaScript execution and can significantly extend main-thread blocking, especially when repeated inside loops or during initial rendering.
+
+## How to Reduce Total Blocking Time (TBT)?
+
+Now that you understand what causes high TBT, the next step is to minimise the main-thread pressure during load. You can do that with a few targeted optimizations:
+
+**Break up long JavaScript tasks:** Any task longer than 50 ms contributes directly to TBT. Split heavy work (parsing, loops, rendering logic) into smaller chunks using techniques like `requestIdleCallback`, `setTimeout`, or scheduler APIs, so that the browser can process user input between tasks.
+
+**Reduce JavaScript execution and bundle size:** Large bundles increase parse, compile, and execution time, especially on mobile CPUs. Remove unused code, enable tree-shaking, and split bundles so only critical JavaScript runs during initial load.
+
+**Defer or delay non-critical JavaScript:** Third-party scripts, analytics, and feature code that isn’t required for initial interaction should be loaded with `defer`, `async`, or after user interaction. Every script that runs during page load competes for main-thread time.
+
+**Move heavy work off the main thread:** CPU-intensive tasks such as data processing, JSON parsing, or complex calculations should run in Web Workers. This prevents long tasks from blocking rendering and input handling.
+
+**Optimize third-party scripts:** Third-party code is a common TBT killer because it executes synchronously and is hard to control. Audit what you load, remove low-value scripts, and lazy-load or isolate them where possible.
+
+## How to Measure TBT?
+
+TBT (Total Blocking Time) is a lab metric and can be measured under a controlled environment. You can use below two common tools by google to calculate the TBT. 
+
+1. **LightHouse**
+
+    It is a "lab-based" diagnostic tool that runs a series of audits in a controlled, simulated environment.
+
+2. **Page Speed Insights (PSI)**
+
+    It is an all-in-one performance reporter that combines "lab data" (powered by Lighthouse) with "field data" (real-world user data from the Chrome User Experience Report, or CrUX).
+
+<KeyPointCallout defaultCollapsed="true" title="Setting Up Continuous Observability In Production">
+
+As TBT (Total Blocking Time) is a lab metric, it needs to be measured under a controlled environment. Your applications don’t have any specific API, callback or webhook to measure this metric internally or export it.
+
+However, browsers do provide performance entries, or Core Web Vitals, that reveal when long tasks occur, which makes it possible to see how often the main thread gets blocked and how that affects responsiveness.
+
+You can instrument the Core Web Vitals with [OpenTelemetry](https://signoz.io/opentelemetry/) to capture this data from actual user sessions. This data can be exported to a backend like [SigNoz](https://signoz.io/), where you can visualize these metrics in dashboards. For a step-by-step guide, you can refer to [Web Vitals Monitoring with OpenTelemetry](https://signoz.io/docs/frontend-monitoring/web-vitals-with-metrics/)**.**
+
+</KeyPointCallout>
+
+### Using Lighthouse to Measure Total Blocking Time (TBT)
+
+The following example intentionally blocks the main thread to demonstrate how TBT appears in a Lighthouse report. 
+
+**Step 1: Create a Page That Triggers High TBT**
+
+Create an `index.html` file with JavaScript that intentionally blocks the main thread after the page has rendered.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lighthouse TBT Demo</title>
+</head>
+<body>
+  <h1>High TBT Demo</h1>
+  <button>Click me</button>
+
+  <script>
+    // Delay execution until after paint
+    setTimeout(() => {
+      function block(ms) {
+        const start = performance.now();
+        while (performance.now() - start < ms) {}
+      }
+
+      for (let i = 0; i < 5; i++) {
+        block(300);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
+```
+
+**Step 2: Serve the Page Over HTTP**
+
+Lighthouse cannot audit `file://` URLs. Serve the page locally using any HTTP server. Run the command below in the same directory as index.html.
+
+```python
+python3 -m http.server 8000
+```
+
+Open the page at:
+
+```python
+http://localhost:8000
+```
+
+**Step 3: Run Lighthouse**
+
+Open Chrome DevTools → Lighthouse, select Performance, and click `Analyze page load`.
+
+Lighthouse will now surface Total Blocking Time.
+
+<Figure
+  src="/img/guides/2025/12/total-blocking-time-unoptimize-lighthouse.webp"
+  alt="High TBT as a result of java script blocking main thread"
+  caption="High TBT as a result of java script blocking main thread"
+/>
+
+**Step 4: Reduce TBT by Breaking Up Long Tasks**
+
+Replace long synchronous tasks with smaller chunks that yield control back to the browser.
+
+```html
+<script>
+  function runChunk() {
+    const start = performance.now();
+    while (performance.now() - start < 50) {}
+  }
+
+  function runInChunks(remaining) {
+    if (remaining === 0) return;
+    runChunk();
+    setTimeout(() => runInChunks(remaining - 1), 0);
+  }
+
+  runInChunks(30);
+</script>
+```
+
+Re-running Lighthouse after this change shows a significant drop in Total Blocking Time.
+
+<Figure
+  src="/img/guides/2025/12/total-blocking-time-imporved-lighthouse.webp"
+  alt="Improved TBT after splitting the java script tasks"
+  caption="Improved TBT after splitting the java script tasks"
+/>
+
+### Measuring TBT Using PageSpeed Insights (PSI)
+
+It is a free web-based performance analysis tool that provides a comprehensive report on the user experience of a specific page on both mobile and desktop devices. Its primary focus is measuring Core Web Vitals, the specific metrics Google uses as official ranking signals to judge if a page feels fast, stable, and responsive to human users.
+
+It is best used for monitoring live site performance and validating how real users are actually experiencing the page over the last 28 days.
+
+You can run a test and inspect the Total Blocking Time directly at <a href="https://pagespeed.web.dev/" rel="noopener noreferrer nofollow" target="_blank">Page Speed Insights</a>.
+
+## TBT vs Other Related Metrics
+
+### TBT vs TTI (Time To Interactive)
+
+Both metrics, TBT and TTI, measure the unresponsiveness of the webpage. The difference lies in how they measure it. TBT adds up the blocking portion of all long tasks that occur before the page becomes fully responsive. TTI, on the other hand, marks the timestamp when the page was fully responsive. In simple terms, TTI tells when the page was fully ready, and TBT evaluates how bad the delays were before the page was fully ready.
+
+### TBT vs INP (Interaction to Next Paint)
+
+TBT is a lab metric, whereas INP is a field metric. TBT sums the excess blocking time for each task in the main thread before the page is fully responsive to the user. INP measures the delay a user faces from the time when the user clicks or presses a key until they see a visual response on the screen. In simple terms, INP shows how long it takes from the time you click the “go" button until you can see the result.
+
+### TBT vs FID (First Input Delay)
+
+TBT and FID both solve the same problem. However, TBT is a lab metric, and FID is a field metric. When the TBT is calculated, there is no human interaction involved. The browser measures all the blocking time the user would have faced if they had interacted during the page load. FID, on the other hand, measures the experience of real users on actual devices. It only records the value when a person actually interacts for the first time during the page load.
+
+<KeyPointCallout title="Note: FID is deprecated">
+
+As of **March 2024**, **Interaction to Next Paint (INP)** has replaced **First Input Delay (FID)** as the official **Core Web Vital** for responsiveness. FID is still a useful field metric, but Google now uses INP as the primary signal for evaluating real-world interactivity.
+
+</KeyPointCallout>
+
+### Summary Table: TBT vs TTI vs INP vs FID
+
+|**Metric**|**Type & Source**|**When It Measures**|**What It Measures**|**Relationship to TBT**|
+| --- | --- | --- | --- | --- |
+|**TBT**| Lab (Simulated) | During page load (FCP to TTI) | Total duration of "long tasks" that block the main thread. | It is the primary diagnostic for why a page feels unresponsive during load. |
+|**TTI**| Lab (Simulated) | The end point of page load | The specific moment the page is reliably interactive. | TBT measures the "bad" time that occurs until TTI is reached. |
+|**INP**| Field (Real User) | Entire session duration | The delay for all clicks, taps, and keyboard inputs. | High TBT usually leads to high INP because busy threads can't process user clicks. |
+|**FID**| Field (Real User) | The first interaction only | The delay specifically for the very first thing a user clicks. | TBT is often used in labs as a "proxy" to predict what a user's FID will be. |
+
+## FAQ
+
+### Why is Total Blocking Time important?
+
+TBT matters because it measures how long the browser is unable to respond to user input. High TBT means clicks, taps, and scrolls are delayed, making the page feel slow or frozen. Although TBT is a lab metric, it is a strong early warning signal for real user interaction issues, especially on mobile devices.
+
+### Is high TBT caused by HTML or CSS rendering?
+
+High Total Blocking Time is rarely caused directly by HTML or CSS rendering because browsers are highly optimized to parse these languages incrementally without locking up the main thread. Instead, TBT is almost exclusively a JavaScript execution problem (including JS execution, script parsing/compilation, hydration, third-party tags). HTML and CSS only become significant contributors in specific edge cases, such as extreme DOM size, expensive layout-inducing animations, or "layout thrashing" where JavaScript forces the browser to synchronously recalculate styles.
+
+### How does JavaScript size affect TBT?
+
+Every JavaScript file must be parsed, compiled, and executed before it can run. Large bundles such as a single 2 MB `main.js`. It can block the main thread for hundreds of milliseconds, directly increasing TBT before any user interaction occurs.
+
+### Why does my page look loaded but still feel unresponsive?
+
+This usually happens due to hydration costs in frameworks like React or Next.js. While the server-rendered HTML appears quickly (fast FCP), the page remains non-interactive until the JavaScript bundle hydrates the UI. Hydration involves attaching event listeners and rebuilding application state, often creating a large Long Task immediately after the page becomes visible.
+
+### Why does mobile TBT matter more?
+
+The same JavaScript workload can behave very differently across devices. A task that completes in ~100 ms on a high-end desktop CPU (Good TBT) can take 700–800 ms on a mid-range mobile device, pushing it into Poor TBT territory. For this reason, TBT optimization should always be validated using mobile emulation with CPU throttling (typically 4× slowdown). If your page is responsive under mobile constraints, it will almost always perform well on desktop.
+
+---
+
+Hope we answered all your questions regarding Total Blocking Time.
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

@@ -1,0 +1,199 @@
+name: Claude Doc Update (from issue)
+
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: doc-automation-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  doc_update:
+    # Only run when the issue has label "doc-automation" and the author is trusted
+    if: >-
+      contains(github.event.issue.labels.*.name, 'doc-automation') &&
+      (
+        github.event.issue.author_association == 'OWNER' ||
+        github.event.issue.author_association == 'MEMBER' ||
+        github.event.issue.author_association == 'COLLABORATOR'
+      )
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DOCS_ROOT: data/docs
+      BRANCH_NAME: claude/doc-automation-${{ github.event.issue.number }}
+      BASE_BRANCH: ${{ github.event.repository.default_branch }}
+
+    steps:
+      # ---- Optional: reuse the same "GitHub App token" pattern you already have in repo ----
+      - name: Check GitHub App private key
+        id: check_app_private_key
+        run: |
+          set -euo pipefail
+          if [ -n "${APP_PRIVATE_KEY}" ]; then
+            echo "has_private_key=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_private_key=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Mint identity token (GitHub App)
+        id: mint_identity_token
+        if: ${{ vars.APP_ID && steps.check_app_private_key.outputs.has_private_key == 'true' }}
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-issues: write
+          permission-pull-requests: write
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          token: ${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}
+          fetch-depth: 0
+
+      - name: Create/update working branch
+        id: branch
+        run: |
+          set -euo pipefail
+
+          git fetch origin "${BASE_BRANCH}" --depth=1
+
+          # If branch exists remotely, reuse it; else create from base
+          if git ls-remote --exit-code --heads origin "${BRANCH_NAME}" >/dev/null 2>&1; then
+            git fetch origin "${BRANCH_NAME}:${BRANCH_NAME}"
+            git checkout "${BRANCH_NAME}"
+            git rebase "origin/${BASE_BRANCH}"
+          else
+            git checkout -B "${BRANCH_NAME}" "origin/${BASE_BRANCH}"
+          fi
+
+          echo "branch=${BRANCH_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Claude to update docs (edits files only)
+        uses: anthropics/claude-code-action@v1
+        env:
+          # Ensure Claude has a token if it needs to call GitHub APIs for progress tracking, etc.
+          GITHUB_TOKEN: ${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are updating documentation in this repo.
+
+            Docs root: ${{env.DOCS_ROOT}}
+
+            Task:
+            - Read the issue request below.
+            - Scan ${{ env.DOCS_ROOT }} to decide where the text belongs.
+              - Prefer updating an existing page (add a new section if needed).
+              - Only create a new page if no existing page is a good home.
+            - When searching, use case-insensitive search and synonyms:
+              - Use rg -i / grep -i
+              - When searching, prioritize content search: rg -i, ${{ env.DOCS_ROOT }}/faqs/ are preferred when it comes to include: billing, invoice(s), payment(s), subscription(s), plan(s), pricing, usage
+            - If you add a new page, ensure it is reachable from navigation.
+              IMPORTANT: constants/docsSideNav.ts is large — do NOT read it fully.
+              Use Grep to find the relevant nav section and only read a small window around it.
+            
+            Allowed paths to modify:
+            - ${{env.DOCS_ROOT}}/**
+            - public/img/docs/**
+            - constants/docsSideNav.ts
+            - scripts/check-doc-redirects.js
+            - scripts/check-docs-metadata.js
+            - next.config.js
+
+            Do NOT modify application code.
+
+            Issue: #${{ github.event.issue.number }} — "${{ github.event.issue.title }}"
+
+            === Issue body ===
+            ${{ github.event.issue.body }}
+          claude_args: |
+            --max-turns 40
+            --allowedTools "Read,Edit,Write,Glob,Grep,LS,Bash(rg:*),Bash(find:*),Bash(tree:*),Bash(cat:*),Bash(ls:*),Bash(pwd:*),Bash(git status:*),Bash(git diff:*)"
+
+      - name: Guardrail - fail if non-doc files were modified
+        run: |
+          set -euo pipefail
+          CHANGED="$(git diff --name-only || true)"
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          if [ -z "$CHANGED" ]; then
+            echo "No changes made."
+            exit 0
+          fi
+
+          ALLOW_REGEX='^(data/docs/|public/img/docs/|constants/docsSideNav\.ts$|next\.config\.js$|scripts/check-doc-redirects\.js$|scripts/check-docs-metadata\.js$)'
+          BAD="$(echo "$CHANGED" | tr -d ' ' | grep -vE "$ALLOW_REGEX" || true)"
+          if [ -n "$BAD" ]; then
+            echo "ERROR: Non-doc files modified:"
+            echo "$BAD"
+            exit 1
+          fi
+
+      - name: Commit changes (if any)
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "docs: update from issue #${{ github.event.issue.number }}"
+
+      - name: Push branch
+        env:
+          GH_TOKEN: ${{ steps.mint_identity_token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+
+          # Claude action may have removed git auth; re-add it explicitly.
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git push -u origin "${BRANCH_NAME}" --force-with-lease
+
+      - name: Create or update PR and comment back on the issue
+        env:
+          GH_TOKEN: ${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+
+          # If there are no commits compared to base, skip.
+          if git log --oneline "origin/${BASE_BRANCH}..HEAD" | grep -q .; then
+            :
+          else
+            echo "No new commits vs base; skipping PR."
+            exit 0
+          fi
+
+          EXISTING_URL="$(gh pr list --head "${BRANCH_NAME}" --json url -q '.[0].url' || true)"
+          if [ -n "$EXISTING_URL" ]; then
+            echo "PR already exists: $EXISTING_URL"
+            gh issue comment "${{ github.event.issue.number }}" --body "Updated existing PR: ${EXISTING_URL}"
+            exit 0
+          fi
+
+          PR_URL="$(gh pr create \
+            --title "Docs update (issue #${{ github.event.issue.number }})" \
+            --body "Automated docs update from issue #${{ github.event.issue.number }}.\n\nCloses #${{ github.event.issue.number }}" \
+            --base "${BASE_BRANCH}" \
+            --head "${BRANCH_NAME}")"
+
+          gh issue comment "${{ github.event.issue.number }}" --body "Opened PR: ${PR_URL}"
