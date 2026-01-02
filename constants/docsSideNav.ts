@@ -1499,6 +1499,11 @@ const docsSideNav = [
             route: '/docs/logs-management/guides/set-resource-attributes-for-logs',
             label: 'Set Resource Attributes',
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/remove-resource-attributes',
+            label: 'Remove Resource Attributes',
+          },
         ],
       },
       {
