@@ -2,7 +2,7 @@
 
 title: Kube State Metrics - Production Grade Kubernetes Monitoring with Helm & OpenTelemetry
 slug: kube-state-metrics
-date: 2026-01-01
+date: 2026-01-02
 tags: [kubernetes, observability]
 authors: [saurabh_patil]
 description: Learn what Kube State Metrics is, how it works, and how to use it for production-grade Kubernetes monitoring. Compare it with Node Exporter and Metrics Server, deploy it with Helm, scrape it using OpenTelemetry, and build dashboards and alerts in SigNoz.
@@ -348,17 +348,29 @@ minikube delete
 
 While KSM is relatively simple to run, following best practices will ensure it operates efficiently and reliably, especially as your cluster grows:
 
-**Right-size Resource Requests:** Allocate CPU/memory to KSM based on cluster size, around 0.1 CPU and 250 MiB for ~100 nodes. Larger clusters or many objects may require more. If KSM shows high usage or slow `/metrics` responses, increase limits to avoid slow updates or OOM kills.
+### Right-size Resource Requests
 
-**Scale Horizontally for Large Clusters:** Very large clusters may need horizontal sharding using `--shard` and `--total-shards` to split the load across multiple KSM instances. Each shard handles a subset of objects, improving memory usage and scrape latency. Use sharding only when necessary, and monitor that all shards are healthy and complete.
+Allocate CPU/memory to KSM based on cluster size, around 0.1 CPU and 250 MiB for ~100 nodes. Larger clusters or many objects may require more. If KSM shows high usage or slow `/metrics` responses, increase limits to avoid slow updates or OOM kills.
 
-**Use Allow/Deny Lists to Control Metric Volume:** KSM exports all metrics by default, which can explode the time-series count in large or dynamic clusters. Use `--resources`, `--metric-allowlist`, or `--namespaces` to limit metrics, reduce storage, and reduce scrape load. Filtering noisy metrics, like rapidly changing Job metrics, can significantly reduce monitoring overhead.
+### Scale Horizontally for Large Clusters
 
-**Ensure Proper RBAC (or Limited Scope if Needed):** KSM needs broad read access across the cluster, typically via a ClusterRole. In restricted setups, scope access using specific Roles and `--namespaces`, or run multiple namespace-scoped KSM instances. Missing RBAC permissions will simply result in missing metrics, so ensure access aligns with expected coverage.
+Very large clusters may need horizontal sharding using `--shard` and `--total-shards` to split the load across multiple KSM instances. Each shard handles a subset of objects, improving memory usage and scrape latency. Use sharding only when necessary, and monitor that all shards are healthy and complete.
 
-**Integrate with Alerts and Dashboards:** KSM is most useful when paired with alerts. For example, detecting `Failed` pods, long-pending pods, or rising container restart counts. Use dashboards to visualize pod phases, replicas, node statuses, and namespace-level health. Combining KSM with other metrics helps identify issues like resource pressure or scheduling failures.
+### Use Allow/Deny Lists to Control Metric Volume
 
-**High Availability:** Kube State Metrics should be run in a highly available configuration using deterministic sharding. Multiple KSM instances can be deployed, each responsible for a subset of Kubernetes objects using the `--shard` and `--total-shards` flags. Prometheus scrapes all shards to maintain full metric coverage, avoiding duplicate time series while preventing KSM from becoming a single point of failure.
+KSM exports all metrics by default, which can explode the time-series count in large or dynamic clusters. Use `--resources`, `--metric-allowlist`, or `--namespaces` to limit metrics, reduce storage, and reduce scrape load. Filtering noisy metrics, like rapidly changing Job metrics, can significantly reduce monitoring overhead.
+
+### Ensure Proper RBAC (or Limited Scope if Needed)
+
+KSM needs broad read access across the cluster, typically via a ClusterRole. In restricted setups, scope access using specific Roles and `--namespaces`, or run multiple namespace-scoped KSM instances. Missing RBAC permissions will simply result in missing metrics, so ensure access aligns with expected coverage.
+
+### Integrate with Alerts and Dashboards
+
+KSM is most useful when paired with alerts. For example, detecting `Failed` pods, long-pending pods, or rising container restart counts. Use dashboards to visualize pod phases, replicas, node statuses, and namespace-level health. Combining KSM with other metrics helps identify issues like resource pressure or scheduling failures.
+
+### High Availability
+
+Kube State Metrics should be run in a highly available configuration using deterministic sharding. Multiple KSM instances can be deployed, each responsible for a subset of Kubernetes objects using the `--shard` and `--total-shards` flags. Prometheus scrapes all shards to maintain full metric coverage, avoiding duplicate time series while preventing KSM from becoming a single point of failure.
 
 ## Common Troubleshooting Tips
 
