@@ -66,7 +66,7 @@ const AWSSignupContent = () => {
     return (
       <div className="flex h-full flex-col items-center justify-center p-8 text-center text-signoz_vanilla-100">
         <h2 className="mb-4 font-bold">Subscription Activated!</h2>
-        <p className="mb-6 text-signoz_vanilla-100/70">
+        <p className="m-0 mb-6 text-signoz_vanilla-100/70">
           Your AWS Marketplace subscription has been successfully connected to your SigNoz Cloud
           account.
         </p>
@@ -78,15 +78,15 @@ const AWSSignupContent = () => {
   }
 
   return (
-    <div className="w-full max-w-xl space-y-8">
+    <div className="w-full max-w-2xl space-y-8">
       <div>
         <div className="mb-4 inline-flex items-center rounded border border-yellow-600 bg-yellow-600/10 px-2 py-1 text-xs text-yellow-500">
           AWS Marketplace
         </div>
-        <h1 className="mb-2 font-medium text-signoz_vanilla-100">
+        <h1 className="mb-2 font-bold text-signoz_vanilla-100">
           Activate Your AWS Marketplace Subscription
         </h1>
-        <p className="text-sm text-signoz_vanilla-100/70">
+        <p className="m-0 text-sm text-signoz_vanilla-100/70">
           Connect your SigNoz Cloud account to start billing through AWS marketplace
         </p>
       </div>
@@ -98,8 +98,8 @@ const AWSSignupContent = () => {
               1
             </div>
             <div className="flex-1 space-y-4">
-              <h3 className="font-medium text-signoz_vanilla-100">New to SigNoz?</h3>
-              <p className="text-sm text-signoz_vanilla-100/70">
+              <h3 className="m-0 font-medium text-signoz_vanilla-100">New to SigNoz?</h3>
+              <p className="m-0 text-sm text-signoz_vanilla-100/70">
                 Most AWS Marketplace customers need to create a SigNoz Cloud account first to get
                 their license key.
               </p>
@@ -124,9 +124,9 @@ const AWSSignupContent = () => {
             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-signoz_robin-500/20 text-xs font-medium text-signoz_robin-500">
               2
             </div>
-            <h3 className="font-medium text-signoz_vanilla-100">Already have a license key?</h3>
+            <h3 className="m-0 font-medium text-signoz_vanilla-100">Already have a license key?</h3>
           </div>
-          <p className="pl-8 text-sm text-signoz_vanilla-100/70">
+          <p className="m-0 pl-8 text-sm text-signoz_vanilla-100/70">
             Enter it below to activate billing through AWS
           </p>
 
@@ -143,7 +143,7 @@ const AWSSignupContent = () => {
                 placeholder="Enter your license key"
                 className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-300 px-4 py-2.5 text-sm text-signoz_vanilla-100 placeholder-signoz_vanilla-100/50 focus:border-signoz_robin-500 focus:outline-none focus:ring-1 focus:ring-signoz_robin-500"
               />
-              <p className="text-xs text-signoz_vanilla-100/50">
+              <p className="m-0 text-xs text-signoz_vanilla-100/50">
                 Find this in Settings → Account Settings → License
               </p>
             </div>
@@ -180,11 +180,11 @@ const AWSSignupContent = () => {
 
 const Instructions = () => {
   return (
-    <div className="w-full max-w-2xl space-y-8 p-8">
+    <div className="w-full max-w-4xl space-y-8 px-8 py-6">
       <h2 className="m-0 font-medium text-signoz_vanilla-100">
         How to get SigNoz Cloud License Key
       </h2>
-      <p className="text-sm text-signoz_vanilla-100/70">
+      <p className="m-0 text-sm text-signoz_vanilla-100/70">
         Follow these steps to retrieve your license key from your SigNoz account
       </p>
 
@@ -197,7 +197,7 @@ const Instructions = () => {
             <h3 className="m-0 font-medium text-signoz_vanilla-100">Signup for SigNoz Cloud</h3>
           </div>
           <div className="space-y-3 pl-9">
-            <p className="text-sm text-signoz_vanilla-100/70">
+            <p className="m-0 text-sm text-signoz_vanilla-100/70">
               Create a SigNoz Cloud account if you don't have one. If you already have an account
               that you want to bill through AWS Marketplace, proceed to step 2.
             </p>
@@ -218,16 +218,18 @@ const Instructions = () => {
             <h3 className="m-0 font-medium text-signoz_vanilla-100">Navigate to License Details</h3>
           </div>
           <div className="space-y-3 pl-9">
-            <p className="text-sm text-signoz_vanilla-100/70">
+            <p className="m-0 text-sm text-signoz_vanilla-100/70">
               In your SigNoz account, navigate to the license details by going to Settings → Account
               Settings → License
             </p>
-            <Image
-              width={1000}
-              height={1000}
-              src="/img/aws/signup/show-account-settings.webp"
-              alt="License Details"
-            />
+            <div className="flex items-center justify-center">
+              <Image
+                width={500}
+                height={500}
+                src="/img/aws/signup/show-account-settings.webp"
+                alt="License Details"
+              />
+            </div>
           </div>
         </div>
 
@@ -241,7 +243,7 @@ const Instructions = () => {
             </h3>
           </div>
           <div className="pl-9">
-            <p className="text-sm text-signoz_vanilla-100/70">
+            <p className="m-0 text-sm text-signoz_vanilla-100/70">
               Copy your license key from the License section and paste it in the activation form on
               the left to complete the setup.
             </p>
@@ -250,8 +252,8 @@ const Instructions = () => {
       </div>
 
       <div className="mt-8 border-t border-signoz_slate-500 pt-6">
-        <p className="text-sm text-signoz_vanilla-100/70">
-          Need help? Reach out to{' '}
+        <p className="m-0 text-sm text-signoz_vanilla-100/70">
+          Need help? Reach out to
           <Button
             href="mailto:cloud-support@signoz.io"
             className="text-signoz_robin-500 hover:text-signoz_robin-400"
@@ -272,7 +274,7 @@ export default function AWSSignupPage() {
     <div className="bg-signoz_ink-600 min-h-screen font-sans">
       <VariantNavbar className="bg-signoz_ink-300" />
       <div className="flex min-h-[calc(100vh-56px)] flex-col lg:flex-row">
-        <div className="flex w-full flex-col items-center justify-center p-8 lg:w-1/2 lg:border-r lg:border-signoz_slate-500 lg:p-8">
+        <div className="flex w-full flex-col items-center justify-center p-8 lg:w-1/2 lg:border-r lg:border-signoz_slate-500 lg:p-6">
           <Suspense
             fallback={
               <div className="flex h-full items-center justify-center">
@@ -284,7 +286,7 @@ export default function AWSSignupPage() {
           </Suspense>
         </div>
 
-        <div className="bg-signoz_ink-600 hidden w-full items-center justify-center p-8 lg:flex lg:w-1/2 lg:bg-black/20">
+        <div className="bg-signoz_ink-600 hidden w-full items-center justify-center p-6 lg:flex lg:w-1/2 lg:bg-black/20">
           <Instructions />
         </div>
       </div>
