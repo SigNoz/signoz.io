@@ -8,12 +8,6 @@ doc_type: howto
 
 import GetHelp from '@/components/shared/get-help.md'
 
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
-  header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
-
 Resource attributes provide additional contextual information about the source of your logs, such as service name, host details, and process information. You can remove unwanted resource attributes either at the source (Agent/SDK) or at the OpenTelemetry Collector level.
 
 ## Why remove Resource Attributes?
@@ -29,7 +23,7 @@ The OpenTelemetry Collector provides a [Resource Processor](https://github.com/o
 
 ### 1. Add Resource Processor
 
-In your OpenTelemetry Collector configuration file, add a resource processor with delete action to remove specific attributes.
+In your [OpenTelemetry Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/) configuration file, add a resource processor with delete action to remove specific attributes.
 
 ```yaml:otel-collector-config.yaml {4,5}
 processors:
@@ -116,6 +110,11 @@ To verify that the resource attributes have been removed:
 2. Go to the **Logs** tab in SigNoz.
 3. Select a log line and check the **Resource Attributes** section in the details pane.
 4. Confirm that `process.command_line` (or your filtered attribute) is no longer present.
+
+## Related Content
+
+- [Set Resource Attributes for Logs](/docs/logs-management/guides/set-resource-attributes-for-logs/) - Learn how to add resource attributes to your logs
+- [Drop Logs](/docs/logs-management/guides/drop-logs/) - Filter and drop unwanted logs at the Collector level
 
 ## Get Help
 
