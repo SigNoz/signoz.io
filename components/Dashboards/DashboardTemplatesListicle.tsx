@@ -21,6 +21,7 @@ import {
   SiAmazonwebservices,
   SiPydantic,
   SiGo,
+  SiTemporal,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -424,6 +425,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
+  },
+  {
+    name: 'Temporal Agents',
+    href: '/docs/dashboards/dashboard-templates/temporal-dashboard',
+    icon: <SiTemporal className="h-7 w-7 text-purple-600" />,
+    clickName: 'Temporal Agents Dashboard Template',
   },
   {
     name: 'Temporal.io',

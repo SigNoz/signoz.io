@@ -2041,6 +2041,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/temporal-dashboard',
+            label: 'Temporal',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/vercel-ai-sdk-dashboard',
             label: 'Vercel AI SDK',
           },
