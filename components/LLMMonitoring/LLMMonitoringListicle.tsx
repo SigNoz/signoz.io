@@ -9,6 +9,7 @@ import {
   SiAnthropic,
   SiAmazonwebservices,
   SiPydantic,
+  SiTemporal,
 } from 'react-icons/si'
 
 interface IconCardData {
@@ -184,6 +185,12 @@ const LLMMonitoringData: IconCardData[] = [
       />
     ),
     clickName: 'Semantic Kernel Monitoring',
+  },
+  {
+    name: 'Temporal',
+    href: '/docs/temporal-observability',
+    icon: <SiTemporal className="h-7 w-7 text-purple-600" />,
+    clickName: 'Temporal Monitoring',
   },
   {
     name: 'Vercel AI SDK',

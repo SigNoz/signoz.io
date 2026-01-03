@@ -1,0 +1,547 @@
+---
+date: 2026-01-02
+id: temporal-observability-with-opentelemetry
+tags: [SigNoz Cloud, Self-Host]
+title: Temporal Monitoring with OpenTelemetry and SigNoz
+description: Observability and monitoring for AI and LLM usage leveraging Temporal with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
+doc_type: howto
+---
+
+## Overview
+
+This guide demonstrates how to set up observability and monitoring for OpenAI Agent SDK applications running on Temporal using [OpenTelemetry](https://opentelemetry.io/) to export traces, logs, and metrics to SigNoz. This integration allows for monitoring of your Temporal workflows and agent execution patterns.
+
+Instrumenting your Temporal-based AI applications with OpenTelemetry ensures full observability across your agent workflows, making it easier to debug issues, optimize performance, and understand user interactions. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Internet access to send telemetry data to SigNoz Cloud
+- Python 3.10+ with `temporalio` installed
+- For Python: `pip` installed for managing Python packages
+
+## Monitoring Temporal
+
+<Tabs>
+<TabItem value="auto-instrumentation" label="Auto-instrumentation (Recommended)" default>
+
+No code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
+For more information on getting started with Temporal in your Python environment, refer to the <a href="https://docs.temporal.io/develop/python/set-up-your-local-python" target="_blank" rel="noopener noreferrer nofollow">Temporal Python Setup Guide</a>
+
+### Step 1: Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  opentelemetry-distro \
+  opentelemetry-exporter-otlp \
+  httpx \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  temporalio \
+  openinference-instrumentation-openai-agents \
+  openai \
+  openai-agents
+```
+
+### Step 2: Add Automatic Instrumentation
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+
+### Step 3: Set up environment variables
+
+Create a `.env` file in your project root and add the following environment variables based on your Temporal deployment:
+
+<Tabs>
+<TabItem value="self-hosted" label="Self Hosted Temporal" default>
+
+```bash:.env
+OPENAI_API_KEY=<your-openai-api-key>
+TEMPORAL_ADDRESS=<local-temporal-server>
+```
+-  **`<local-temporal-server>`** is the location where your local Temporal server is hosted(default: `localhost:7233`)
+
+</TabItem>
+
+<TabItem value="cloud" label="Temporal Cloud">
+
+```bash:.env
+OPENAI_API_KEY=<your-openai-api-key>
+TEMPORAL_ADDRESS=<your-temporal-cloud-address>
+TEMPORAL_NAMESPACE=<your-temporal-namespace-name>
+TEMPORAL_API_KEY=<your-temporal-api-key>
+TEMPORAL_TLS=true
+```
+
+</TabItem>
+</Tabs>
+
+### Step 4: Create an example Temporal agent workflow
+
+```python:main.py
+from __future__ import annotations
+from dotenv import load_dotenv
+import asyncio
+import os
+from temporalio import workflow
+from temporalio.client import Client
+from temporalio.worker import Worker
+from temporalio.contrib.openai_agents import OpenAIAgentsPlugin
+from temporalio.worker import UnsandboxedWorkflowRunner
+from agents import Agent, Runner
+
+load_dotenv()
+
+@workflow.defn
+class HelloWorldAgent:
+    @workflow.run
+    async def run(self, prompt: str) -> str:
+        agent = Agent(
+            name="Assistant",
+            model="gpt-5",
+            instructions="You only respond in haikus.",
+        )
+
+        result = await Runner.run(agent, input=prompt)
+        return result.final_output
+
+async def main():
+    tls = os.environ.get("TEMPORAL_TLS", "").lower() in ("1", "true", "yes")
+    api_key = os.environ.get("TEMPORAL_API_KEY")
+
+    plugin = OpenAIAgentsPlugin()
+
+    client = await Client.connect(
+        target_host=os.environ.get("TEMPORAL_ADDRESS", "localhost:7233"),
+        namespace=os.environ.get("TEMPORAL_NAMESPACE", "default"),
+        api_key=api_key or None,
+        tls=tls,
+        plugins=[plugin]
+    )
+
+    worker = Worker(
+        client,
+        task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
+        workflows=[HelloWorldAgent],
+        workflow_runner=UnsandboxedWorkflowRunner()
+    )
+
+    async with worker:
+        handle = await client.start_workflow(
+            HelloWorldAgent.run,
+            id="hello-world-workflow-01",
+            task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
+            args=["Tell me about SigNoz"],
+        )
+        result = await handle.result()
+        print("\nWorkflow result:\n", result)
+
+asyncio.run(main())
+```
+
+### Step 5: Run your application with auto-instrumentation
+
+Run your application with the following environment variables set. This configures OpenTelemetry to export traces, logs, and metrics to SigNoz Cloud and enables automatic log correlation:
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your_ingestion_key>" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_METRICS_EXPORTER=otlp \
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_PYTHON_LOG_CORRELATION=true \
+OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
+opentelemetry-instrument <your_run_command>
+```
+- **`<service_name>`** is the name of your service
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your_ingestion_key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `python main.py`
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+</TabItem>
+
+<TabItem value="Manual" label="Manual" default>
+
+Code-based manual instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
+
+### Step 1: Install additional OpenTelemetry dependencies
+
+```bash
+pip install \
+  opentelemetry-api \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  temporalio \
+  openinference-instrumentation-openai-agents
+```
+
+### Step 2: Import the necessary modules in your Python application
+
+**Traces:**
+
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+```
+
+**Logs:**
+
+```python
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry._logs import set_logger_provider
+import logging
+```
+
+**Metrics:**
+
+```python
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+```
+
+### Step 3: Set up the OpenTelemetry Tracer Provider to send traces directly to SigNoz Cloud
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry import trace
+import os
+
+from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+
+
+resource = Resource.create({"service.name": "<service_name>"})
+provider = TracerProvider(resource=resource)
+span_exporter = OTLPSpanExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_TRACES_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+processor = BatchSpanProcessor(span_exporter)
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+
+# Start instrumenting Temporal Agents
+OpenAIAgentsInstrumentor().instrument()
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+### Step 4: Setup Logs
+
+```python
+import logging
+from opentelemetry.sdk.resources import Resource
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+logger_provider = LoggerProvider(resource=resource)
+set_logger_provider(logger_provider)
+
+otlp_log_exporter = OTLPLogExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_LOGS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(otlp_log_exporter)
+)
+# Attach OTel logging handler to root logger
+handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+logger = logging.getLogger(__name__)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+### Step 5: Setup Metrics
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+import os
+
+resource = Resource.create({"service.name": "<service-name>"})
+metric_exporter = OTLPMetricExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+reader = PeriodicExportingMetricReader(metric_exporter)
+metric_provider = MeterProvider(metric_readers=[reader], resource=resource)
+metrics.set_meter_provider(metric_provider)
+
+meter = metrics.get_meter(__name__)
+
+# turn on out-of-the-box metrics
+SystemMetricsInstrumentor().instrument()
+HTTPXClientInstrumentor().instrument()
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+> 📌 Note: SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your Temporal application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+
+### Step 6: Set up environment variables
+
+Create a `.env` file in your project root and add the following environment variables based on your Temporal deployment:
+
+<Tabs>
+<TabItem value="self-hosted" label="Self Hosted Temporal" default>
+
+```bash:.env
+OPENAI_API_KEY=<your-openai-api-key>
+TEMPORAL_ADDRESS=<local-temporal-server>
+```
+-  **`<local-temporal-server>`** is the location where your local Temporal server is hosted(default: `localhost:7233`)
+
+</TabItem>
+
+<TabItem value="cloud" label="Temporal Cloud">
+
+```bash:.env
+OPENAI_API_KEY=<your-openai-api-key>
+TEMPORAL_ADDRESS=<your-temporal-cloud-address>
+TEMPORAL_NAMESPACE=<your-temporal-namespace-name>
+TEMPORAL_API_KEY=<your-temporal-api-key>
+TEMPORAL_TLS=true
+```
+
+</TabItem>
+</Tabs>
+
+### Step 7: Run an example Temporal agent workflow
+
+<Admonition type="warning">
+  Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
+</Admonition>
+
+```python:main.py
+from __future__ import annotations
+from dotenv import load_dotenv
+import asyncio
+import os
+from temporalio import workflow
+from temporalio.client import Client
+from temporalio.worker import Worker
+from temporalio.contrib.openai_agents import OpenAIAgentsPlugin
+from temporalio.worker import UnsandboxedWorkflowRunner
+from agents import Agent, Runner
+
+load_dotenv()
+
+@workflow.defn
+class HelloWorldAgent:
+    @workflow.run
+    async def run(self, prompt: str) -> str:
+        agent = Agent(
+            name="Assistant",
+            model="gpt-5",
+            instructions="You only respond in haikus.",
+        )
+
+        result = await Runner.run(agent, input=prompt)
+        return result.final_output
+
+async def main():
+    tls = os.environ.get("TEMPORAL_TLS", "").lower() in ("1", "true", "yes")
+    api_key = os.environ.get("TEMPORAL_API_KEY")
+
+    plugin = OpenAIAgentsPlugin()
+
+    client = await Client.connect(
+        target_host=os.environ.get("TEMPORAL_ADDRESS", "localhost:7233"),
+        namespace=os.environ.get("TEMPORAL_NAMESPACE", "default"),
+        api_key=api_key or None,
+        tls=tls,
+        plugins=[plugin]
+    )
+
+    worker = Worker(
+        client,
+        task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
+        workflows=[HelloWorldAgent],
+        workflow_runner=UnsandboxedWorkflowRunner()
+    )
+
+    async with worker:
+        handle = await client.start_workflow(
+            HelloWorldAgent.run,
+            id="hello-world-workflow-01",
+            task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
+            args=["Tell me about SigNoz"],
+        )
+        result = await handle.result()
+        print("\nWorkflow result:\n", result)
+
+asyncio.run(main())
+```
+
+<Admonition type="warning">
+  Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated API key.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+
+## View Traces, Logs, and Metrics in SigNoz
+
+Your Temporal agent usage should now automatically emit traces, logs, and metrics.
+
+You should be able to view traces in Signoz Cloud under the traces tab:
+
+<Figure
+  src="/img/docs/llm/temporal/temporal-traces.webp"
+  alt="Temporal Trace View"
+  caption="Temporal Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure
+  src="/img/docs/llm/temporal/temporal-detailed-traces.webp"
+  alt="Temporal Detailed Trace View"
+  caption="Temporal Detailed Trace View"
+/>
+
+You should be able to view logs in Signoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/temporal/related-logs.webp" alt="Related logs" width="300" />
+  <figcaption>
+    <i>Related logs button</i>
+  </figcaption>
+</figure>
+
+<Figure
+  src="/img/docs/llm/temporal/temporal-logs.webp"
+  alt="Temporal Logs View"
+  caption="Temporal Logs View"
+/>
+
+When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+
+<Figure
+  src="/img/docs/llm/temporal/temporal-detailed-logs.webp"
+  alt="Temporal Detailed Log View"
+  caption="Temporal Detailed Logs View"
+/>
+
+You should be able to see Temporal related metrics in Signoz Cloud under the metrics tab:
+
+<Figure
+  src="/img/docs/llm/temporal/temporal-metrics.webp"
+  alt="Temporal Metrics View"
+  caption="Temporal Metrics View"
+/>
+
+When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+
+<Figure
+  src="/img/docs/llm/temporal/temporal-detailed-metrics.webp"
+  alt="Temporal Detailed Metrics View"
+  caption="Temporal Detailed Metrics View"
+/>
+
+If you're using Temporal Cloud, you can also monitor cloud-specific metrics. For detailed information on setting up Temporal Cloud metrics monitoring, see the [Temporal Cloud Metrics integration guide](https://signoz.io/docs/integrations/temporal-cloud-metrics/).
+
+You should be able to see Temporal Cloud metrics in SigNoz Cloud under the metrics tab:
+
+<Figure
+  src="/img/docs/llm/temporal/temporal-cloud-metrics.webp"
+  alt="Temporal Cloud Metrics View"
+  caption="Temporal Cloud Metrics View"
+/>
+
+When you click on any of these Temporal Cloud metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+
+<Figure
+  src="/img/docs/llm/temporal/temporal-cloud-detailed-metrics.webp"
+  alt="Temporal Cloud Detailed Metrics View"
+  caption="Temporal Cloud Detailed Metrics View"
+/>
+
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+If you don't see your telemetry data:
+
+1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
+2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
+3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+
+</details>
+
+## Next Steps
+
+You can also check out our custom [Temporal dashboard](https://signoz.io/docs/dashboards/dashboard-templates/temporal-dashboard/) which provides specialized visualizations for monitoring your Temporal usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/temporal/temporal-dashboard.webp"
+  alt="Temporal Dashboard"
+  caption="Temporal Dashboard Template"
+/>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/product-features/trace-explorer)
+- Explore [log correlation](https://signoz.io/docs/product-features/logs-explorer)
+
+
