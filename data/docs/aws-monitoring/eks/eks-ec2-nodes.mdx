@@ -1,0 +1,116 @@
+---
+date: 2025-12-30
+id: eks-ec2-nodes
+title: Monitor EKS Logs and Metrics using SigNoz
+description: Collect AWS EKS logs and metrics using OpenTelemetry and send them to SigNoz for monitoring.
+doc_type: howto
+---
+
+## Overview
+
+Amazon EKS (Elastic Kubernetes Service) is a managed Kubernetes service that makes it easy to run Kubernetes on AWS. SigNoz helps you monitor cluster health, pod performance, and container metrics.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+- An EKS cluster running
+
+<Tabs>
+<TabItem value="helm-chart" label="K8s-Infra Helm Chart (Recommended)" default>
+
+## K8s-Infra Helm Chart
+
+<Admonition type="info">
+The K8s-Infra Helm chart provides **comprehensive EKS monitoring**, collecting all logs and metrics including pod-level metrics, node metrics, container logs, and more. This method works for both **SigNoz Cloud** and **Self-Hosted**.
+</Admonition>
+
+## What You Can Collect
+
+| Data Type | Description |
+|-----------|-------------|
+| **Logs** | Container logs from all pods |
+| **Pod Metrics** | CPU, memory, network usage per pod |
+| **Node Metrics** | Node-level CPU, memory, disk, network |
+| **Cluster Metrics** | Overall cluster health and resources |
+| **Kubernetes Events** | Cluster events and state changes |
+
+## Setup
+
+For complete installation instructions, follow the [K8s-Infra Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/).
+
+The setup involves:
+
+1. **Add the SigNoz Helm repository** and update your local cache
+2. **Create an override-values.yaml** with EKS-specific configuration (set `global.cloud: aws` to enable EKS resource detection)
+3. **Install the chart** using Helm
+4. **Verify data** in SigNoz
+
+### Dashboard Templates
+
+Explore pre-built [Kubernetes Dashboards](https://signoz.io/docs/dashboards/dashboard-templates/kubernetes-dashboards/) for pod, node, and cluster metrics.
+
+For advanced configuration (filtering logs, Prometheus scraping, etc.), see the [K8s-Infra Configuration Guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/).
+
+## Validate
+
+Once installed, your EKS data will appear in:
+- **Logs**: Navigate to **Logs** tab → [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/)
+- **Metrics**: Navigate to **Infrastructure Monitoring** → **Kubernetes** to see pods, nodes, namespaces, and deployments
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/kubernetes-list.webp"
+  alt="Kubernetes view in SigNoz Infrastructure Monitoring"
+  caption="View your EKS cluster in SigNoz Infrastructure Monitoring"
+/>
+
+### Next Steps
+
+- [K8s-Infra Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) – Detailed installation instructions.
+- [Configure K8s-Infra](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/) – Customize log filtering, metrics collection, and more.
+- [Infrastructure Monitoring Overview](https://signoz.io/docs/infrastructure-monitoring/overview/) – Learn about the Infrastructure Monitoring module features.
+
+</TabItem>
+<TabItem value="one-click" label="One-Click Integration">
+
+## One-Click Integration
+
+<Admonition type="warning">
+One-Click Integration is available for **SigNoz Cloud** only. It collects only **cluster-level metrics** via AWS Container Insights and does not collect pod logs, node metrics, or detailed container metrics. For comprehensive EKS monitoring, use the **K8s-Infra Helm Chart** instead. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/eks/) to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable EKS Monitoring
+
+Once connected, SigNoz will auto-discover your EKS clusters and begin collecting Container Insights metrics from CloudWatch.
+
+<Admonition>
+Ensure [Container Insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-setup-EKS.html) is enabled on your EKS cluster for metrics to be available.
+</Admonition>
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `pod_status_running` | Number of running pods |
+| `pod_status_pending` | Number of pending pods |
+| `pod_status_failed` | Number of failed pods |
+| `pod_number_of_container_restarts` | Container restart counts |
+| `pod_number_of_containers` | Total container count |
+| `status_replicas_available` | Available replicas |
+| `status_replicas_unavailable` | Unavailable replicas |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "EKS" to find automatically imported dashboards:
+
+- **EKS Control Plane Overview**: Monitor control plane health
+- **EKS Container Insights Overview**: Track pod and container status
+
+</TabItem>
+</Tabs>

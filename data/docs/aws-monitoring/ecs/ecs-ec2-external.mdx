@@ -1,0 +1,94 @@
+---
+date: 2025-12-30
+id: ecs-ec2-external
+title: Monitor ECS EC2 and External Launch Types
+description: Monitor ECS EC2 and External launch type instances using SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+Amazon ECS with EC2 or External launch types runs containers on EC2 instances or external servers that you manage. SigNoz helps you monitor container performance, host metrics, and application logs using a daemon service deployed across your ECS cluster.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+- An ECS cluster with EC2 or External launch type
+
+<Tabs>
+<TabItem value="daemon-service" label="Daemon Service (Recommended)" default>
+
+## Daemon Service Setup
+
+<Admonition type="info">
+The daemon service method provides **comprehensive ECS monitoring**, collecting host metrics, container logs, and OTLP telemetry from all nodes in your cluster. This method works for both **SigNoz Cloud** and **Self-Hosted**.
+</Admonition>
+
+For complete setup instructions, see the [ECS Daemon Service Guide](https://signoz.io/docs/userguide/collecting-ecs-logs-and-metrics/).
+
+### Quick Overview
+
+The setup involves:
+
+1. **Download the CloudFormation template** for daemon service deployment
+2. **Create OTel Collector config** in AWS Parameter Store
+3. **Deploy the CloudFormation stack** to create the daemon service
+4. **Verify data** in SigNoz dashboards
+
+### What's Collected
+
+| Data Type | Description |
+|-----------|-------------|
+| **Host Metrics** | CPU, memory, disk, network from EC2/external instances |
+| **Container Logs** | Logs from Docker containers on each node |
+| **OTLP Telemetry** | Traces and metrics from instrumented applications |
+| **ECS Metrics** | Task and service-level metrics |
+
+### Validate
+
+Once deployed, your ECS data will appear in:
+- **Logs**: Navigate to **Logs** tab → [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/)
+- **Metrics**: Import [ECS Infra Metrics](https://github.com/SigNoz/dashboards/tree/main/ecs-infra-metrics) dashboards
+
+</TabItem>
+<TabItem value="one-click" label="One-Click Integration">
+
+## One-Click Integration
+
+<Admonition type="warning">
+One-Click Integration is available for **SigNoz Cloud** only. It collects **CloudWatch metrics** but does not collect container logs or application telemetry. For comprehensive ECS monitoring, use the **Daemon Service** method instead. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/ecs/) to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable ECS Monitoring
+
+Once connected, SigNoz will auto-discover your ECS clusters and begin collecting CloudWatch metrics.
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `CPUUtilization` | CPU usage percentage |
+| `MemoryUtilization` | Memory usage percentage |
+| `NetworkRxBytes` | Network bytes received |
+| `NetworkTxBytes` | Network bytes transmitted |
+| `StorageReadBytes` | Storage read bytes |
+| `StorageWriteBytes` | Storage write bytes |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "ECS" to find automatically imported dashboards.
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+- [ECS Fargate Guide](https://signoz.io/docs/aws-monitoring/ecs/ecs-fargate/) – Monitor Fargate launch type
+- [Infrastructure Monitoring Overview](https://signoz.io/docs/infrastructure-monitoring/overview/) – View your infrastructure metrics in SigNoz

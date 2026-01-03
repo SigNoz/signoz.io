@@ -1,0 +1,73 @@
+---
+date: 2025-12-30
+id: ecs-fargate
+title: Monitor ECS Fargate with SigNoz
+description: Collect logs, metrics, and traces from ECS Fargate services using OpenTelemetry sidecar collectors.
+doc_type: howto
+---
+
+## Overview
+
+ECS Fargate runs containers on serverless compute without exposing the underlying infrastructure. Because you don't have access to the host instances, you need to deploy an OpenTelemetry Collector as a sidecar container within each task you want to observe.
+
+<Admonition type="info">
+This guide is specific to **ECS Fargate**. For ECS clusters running on EC2 or External launch types, see [Monitor ECS EC2/External](https://signoz.io/docs/aws-monitoring/ecs/ecs-ec2-external/) which uses a daemon service for host-level collection.
+</Admonition>
+
+## Prerequisites
+
+- An ECS cluster with Fargate launch type
+- SigNoz Cloud account or Self-Hosted SigNoz
+- AWS CLI access to update task definitions
+
+## Why Sidecar on Fargate?
+
+- **No host access**: Fargate abstracts the underlying infrastructure
+- **No daemon services**: Cannot deploy cluster-wide agents like with EC2 launch type
+- The sidecar provides a **local OTLP endpoint** (`localhost`) for your app to send traces, metrics, and logs
+
+### Architecture
+
+```
+ECS Task (Fargate)
+├─ app container(s)
+│  └─ sends OTLP telemetry data to the sidecar
+├─ signoz-collector sidecar
+│  ├─ receives OTLP data from the app container(s)
+│  ├─ collects container metrics via AWS ECS metadata
+│  └─ exports telemetry to SigNoz (cloud or self-hosted)
+└─ log-router (optional, for Fluent Bit log forwarding)
+```
+
+## What You Can Collect
+
+| Data Type | Description |
+|-----------|-------------|
+| **Container Metrics** | CPU, memory, network usage from ECS metadata |
+| **Application Traces** | Distributed traces from instrumented applications |
+| **Application Logs** | Logs forwarded via Fluent Bit log router |
+
+## Setup
+
+For complete setup instructions, follow the [ECS Sidecar Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/).
+
+The setup involves:
+
+1. **Create OTel Collector config** in AWS Parameter Store
+2. **Add the sidecar container** to your ECS task definition
+3. **Update IAM roles** (Task Execution Role and Task Role) with required permissions
+4. **Configure log routing** (optional, for application logs via Fluent Bit)
+5. **Deploy the updated task definition** and verify data in SigNoz
+
+## Validate
+
+Once set up, verify your data appears in SigNoz:
+
+- **Logs**: Navigate to **Logs** tab → [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/)
+- **Metrics**: Navigate to **Metrics** tab → [Metrics Explorer](https://signoz.io/docs/metrics-management/overview/)
+- **Traces**: Navigate to **Services** tab to see your instrumented applications
+
+## Next Steps
+
+- [ECS Sidecar Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/ecs/sidecar/install/) – Complete sidecar setup instructions
+- [Send Traces from Applications](https://signoz.io/docs/instrumentation/) – Configure application instrumentation

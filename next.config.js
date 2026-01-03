@@ -657,6 +657,22 @@ module.exports = () => {
           destination: '/docs/aws-monitoring/lambda/lambda-logs',
           permanent: true,
         },
+        // AWS Monitoring renamed/deleted docs
+        {
+          source: '/docs/aws-monitoring/getting-started/',
+          destination: '/docs/aws-monitoring/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/rds-logs/',
+          destination: '/docs/aws-monitoring/rds/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/vpc-logs/',
+          destination: '/docs/aws-monitoring/vpc/',
+          permanent: true,
+        },
         {
           source: '/docs/userguide/collecting_nodejs_winston_logs',
           destination: '/docs/logs-management/send-logs/nodejs-winston-logs',
@@ -727,6 +743,53 @@ module.exports = () => {
           destination: '/docs/dashboards/dashboard-templates/overview/',
           permanent: true,
         },
+        // ECS and EKS folder restructuring redirects
+        {
+          source: '/docs/ecs-monitoring/',
+          destination: '/docs/aws-monitoring/ecs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ecs-monitoring-overview/',
+          destination: '/docs/aws-monitoring/ecs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ecs-ec2-external/',
+          destination: '/docs/aws-monitoring/ecs/ecs-ec2-external/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ecs-fargate/',
+          destination: '/docs/aws-monitoring/ecs/ecs-fargate/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/eks-monitoring-overview/',
+          destination: '/docs/aws-monitoring/eks/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/eks-fargate/',
+          destination: '/docs/aws-monitoring/eks/eks-fargate/',
+          permanent: true,
+        },
+        // EC2 folder restructuring redirects
+        {
+          source: '/docs/ec2-monitoring/',
+          destination: '/docs/aws-monitoring/ec2/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ec2-logs/',
+          destination: '/docs/aws-monitoring/ec2/ec2-logs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ec2-infra-metrics/',
+          destination: '/docs/aws-monitoring/ec2/ec2-infra-metrics/',
+          permanent: true,
+        },
         {
           source: '/docs/tutorial/kubernetes-infra-metrics/',
           destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/',
@@ -735,6 +798,11 @@ module.exports = () => {
         {
           source: '/docs/metrics-management/k8s-infra-otel-config/',
           destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/elb-logs/',
+          destination: '/docs/aws-monitoring/elb/',
           permanent: true,
         },
         {

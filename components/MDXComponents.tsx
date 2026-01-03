@@ -70,6 +70,8 @@ import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
 import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
 import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 import ToggleHeading from './Headings/ToggleHeading'
+import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
+import AWSOneClickListicle from './AWS/AWSOneClickListicle'
 
 export const components: MDXComponents = {
   ToggleHeading,
@@ -140,4 +142,6 @@ export const components: MDXComponents = {
   ProductFeatureShowcase,
   MetricsQuickStartOverview,
   CICDMonitoringListicle,
+  AWSMonitoringListicle,
+  AWSOneClickListicle,
 }
