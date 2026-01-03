@@ -96,6 +96,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Google Gemini Monitoring',
   },
   {
+    name: 'Grok',
+    href: '/docs/grok-monitoring',
+    icon: <img src="/svgs/icons/LLMMonitoring/grok-logo.svg" alt="Grok Icon" className="h-7 w-7" />,
+    clickName: 'Grok Monitoring',
+  },
+  {
     name: 'Inkeep',
     href: '/docs/inkeep-monitoring',
     icon: (
