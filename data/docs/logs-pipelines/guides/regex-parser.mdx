@@ -203,6 +203,47 @@ You can track the deployment status of your pipelines using the **Change History
   caption="Pipelines Change History"
 />
 
+## Final Output
+
+After deploying the pipeline, the final output will look like this:
+
+```json
+{
+  "body": "2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5",
+  "attributes": {
+    "level": "INFO",
+    "user_id": "123",
+    "ip": "192.168.1.5"
+  }
+}
+```
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Parser not matching any logs
+
+- Use the **Simulate** feature in the pipeline editor to test with real log entries.
+- Check that `Parse From` points to the correct field (`body` vs `attributes.message`).
+- Test patterns with [regex101](https://regex101.com/) (select Go flavor)
+
+### Extracted attributes not appearing
+
+- Ensure the pipeline is **deployed** after saving.
+- Check pipeline order—parsers should run before processors that modify the same fields.
+- Use unique attribute names to avoid conflicts.
+
+### Performance issues with complex patterns
+
+- Replace greedy `.*` with specific patterns like `[^\]]+`.
+- Add filter conditions to apply parsers only to relevant logs.
+
+</details>
+
 ## Get Help
 
 <GetHelp />
