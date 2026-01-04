@@ -25,6 +25,37 @@ The Regex processor uses [Regular Expressions](https://github.com/google/re2/wik
 
 You define a pattern containing groups like `(?P<attribute_name>pattern)`. Whatever matches inside the parentheses becomes the value of `attribute_name`.
 
+## Example Log
+
+Throughout this guide, we'll use the following example of a legacy application log entry:
+
+```text
+2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5
+```
+
+## Desired Outcome
+
+After parsing, we want to extract specific information into structured attributes.
+
+| Attribute | Value       |
+| --------- | ----------- |
+| `level`   | INFO        |
+| `user_id` | 123         |
+| `ip`      | 192.168.1.5 |
+
+The final processed log should look like this:
+
+```json
+{
+  "body": "2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5",
+  "attributes": {
+    "level": "INFO",
+    "user_id": "123",
+    "ip": "192.168.1.5"
+  }
+}
+```
+
 ## Creating a Pipeline
 
 Before you can parse logs, you need to create a pipeline that will filter and process them.
@@ -82,42 +113,11 @@ Press the **"Create"** button to create the pipeline.
 
 ## Configuring Regex Parser
 
-Now after creating the pipeline, you can configure the regex parser.
+Now that we have a pipeline, we will add the Regex Parser processor to extract attributes from our log line.
 
-### Example Log
+### Step 1: Add a Processor
 
-Suppose you have a legacy application producing this log:
-
-```text
-2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5
-```
-
-### Desired Outcome
-
-After parsing, we want to extract these attributes:
-
-| Attribute | Value       |
-| --------- | ----------- |
-| `level`   | INFO        |
-| `user_id` | 123         |
-| `ip`      | 192.168.1.5 |
-
-The final log should look like this:
-
-```json
-{
-  "body": "2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5",
-  "attributes": {
-    "level": "INFO",
-    "user_id": "123",
-    "ip": "192.168.1.5"
-  }
-}
-```
-
-### Step-by-Step Configuration
-
-1. **Add a Processor**: Expand your pipeline and click the **"Add Processor"** button.
+Expand your pipeline and click the **"Add Processor"** button.
 
 <Figure
   src="/img/docs/logs-management/logs-pipelines/regex-parsing-step1.webp"
@@ -131,15 +131,31 @@ The final log should look like this:
   caption="Add Processors Button"
 />
 
-2. **Select Regex Parser** and configure the fields:
+### Step 2: Configure Regex Parser
 
-   - **Name**: `parse_app_log`
-   - **Parse From**: `body` (This is where the raw message resides)
-   - **Parse To**: `attributes` (We want to add these directly to log attributes)
-   - **Pattern**:
-     ```regex
-     ^.*\[(?P<level>\w+)\].*User (?P<user_id>\d+) logged in from (?P<ip>[\d\.]+)
-     ```
+We will now configure the processor to parse the log message.
+
+#### Before Parsing
+
+At this stage, your log typically contains the raw message in the `body` field:
+
+```json
+{
+  "body": "2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5"
+}
+```
+
+#### Processor Configuration
+
+Select **Regex Parser** and configure the fields:
+
+- **Name**: `parse_app_log`
+- **Parse From**: `body` (This is where the raw message resides)
+- **Parse To**: `attributes` (We want to add extracted values directly to log attributes)
+- **Pattern**:
+  ```regex
+  ^.*\[(?P<level>\w+)\].*User (?P<user_id>\d+) logged in from (?P<ip>[\d\.]+)
+  ```
 
 <Figure
   src="/img/docs/logs-management/logs-pipelines/regex-parsing-step3.webp"
@@ -147,9 +163,29 @@ The final log should look like this:
   caption="Configuring the Regex Parser"
 />
 
-3. **Press "Create"** to add the processor.
+Press **"Create"** to add the processor.
 
-### Simulate and Validate
+#### After Parsing
+
+Once the processor is applied, the log structure changes. The captured groups from the regex are added as keys in the `attributes` object.
+
+```json
+{
+  "body": "2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5",
+  "attributes": {
+    "level": "INFO",
+    "user_id": "123",
+    "ip": "192.168.1.5"
+  }
+}
+```
+
+#### Key Observations
+
+- The original `body` remains unchanged.
+- New fields `level`, `user_id`, and `ip` are now available in `attributes`, making them queryable in SigNoz.
+
+## Simulate and Validate
 
 Before deploying, use the **Simulate** feature to test your parser:
 
@@ -187,7 +223,9 @@ Before deploying, use the **Simulate** feature to test your parser:
 
 ## Deploy the Pipeline
 
-After verifying the simulated logs in Pipeline Preview Dialog, to save the pipeline, press the **Save Configuration** button at the bottom of the pipelines list to save pipelines. This will store the latest state of your pipelines and will deploy them for pre-processing.
+After verifying the simulated logs in Pipeline Preview Dialog, your pipeline is ready.
+
+1. Press the **Save Configuration** button at the bottom of the pipelines list. This will store the latest state of your pipelines and deploy them for pre-processing.
 
 <Figure
   src="/img/docs/logs-management/logs-pipelines/regex-parsing-step8.webp"
@@ -195,7 +233,7 @@ After verifying the simulated logs in Pipeline Preview Dialog, to save the pipel
   caption="Save Configuration Button"
 />
 
-You can track the deployment status of your pipelines using the **Change History** tab at the top of pipelines.
+2. You can track the deployment status using the **Change History** tab at the top of pipelines.
 
 <Figure
   src="/img/docs/logs-management/logs-pipelines/regex-parsing-step9.webp"
@@ -205,7 +243,7 @@ You can track the deployment status of your pipelines using the **Change History
 
 ## Final Output
 
-After deploying the pipeline, the final output will look like this:
+Once deployed, your incoming logs will be transformed automatically.
 
 ```json
 {
@@ -229,7 +267,7 @@ After deploying the pipeline, the final output will look like this:
 
 - Use the **Simulate** feature in the pipeline editor to test with real log entries.
 - Check that `Parse From` points to the correct field (`body` vs `attributes.message`).
-- Test patterns with [regex101](https://regex101.com/) (select Go flavor)
+- Test patterns with [regex101](https://regex101.com/) (select Go flavor).
 
 ### Extracted attributes not appearing
 
@@ -239,7 +277,7 @@ After deploying the pipeline, the final output will look like this:
 
 ### Performance issues with complex patterns
 
-- Replace greedy `.*` with specific patterns like `[^\]]+`.
+- Replace greedy `.*` with specific patterns like `[^\]]+` where possible to improve performance.
 - Add filter conditions to apply parsers only to relevant logs.
 
 </details>
