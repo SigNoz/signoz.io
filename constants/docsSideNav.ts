@@ -1429,6 +1429,16 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/logs-pipelines/guides/grok-parser',
+                label: 'Parse Logs with Grok Parser',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/regex-parser',
+                label: 'Parse Logs with Regex Parser',
+              },
+              {
+                type: 'doc',
                 route: '/docs/logs-pipelines/guides/trace',
                 label: 'Parse Trace Information',
               },
