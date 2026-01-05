@@ -1,13 +1,11 @@
 ---
-
 title: What is OTLP and How It Works Behind the Scenes
 slug: what-is-otlp
 date: 2026-01-05
-tags: [opentelemetry, observability]
+tags: [Observability, OpenTelemetry]
 authors: [dhruv_ahuja]
 description: "A comprehensive guide to OTLP - the vendor-neutral protocol unifying traces, metrics, and logs transmission. Learn about its goals, architecture, and how it helps solve observability fragmentation."
 keywords: [otlp, opentelemetry]
-
 ---
 
 If you have worked with observability tools in the last decade, you have likely managed, and been burnt by, a fragmented collection of tools and libraries. Each observability signal required its own tool, data formats were incompatible and had little or no correlation. For example, log records would not link to traces, meaning you had to guess which traces led to which events.
@@ -24,11 +22,11 @@ It acts as the universal language between clients (applications) and servers ([O
 
 Before OTLP arrived, the observability landscape was fragmented because different signals required entirely different tools. This lack of a common standard meant vital context was lost as data formats were incompatible across the stack.
 
-Further, engineers also found themselves **vendor-locked**. Because the application code used vendor-specific instrumentation agents, switching providers required weeks of effort. **The prevailing mindset was just make it work** with the current toolset, rather than trying to improve it.
+Further, engineers also found themselves **vendor-locked**. Because the application code used vendor-specific instrumentation agents, switching providers required weeks of effort. **The prevailing mindset was just to make it work** with the current toolset, rather than trying to improve it.
 
 The daily routine of using these tools was equally frustrating. Since telemetry data was sent to isolated platforms, like Jaeger for tracing and Filebeat for logs, debugging a single incident led to frequent context switching. Anyone who has debugged a high-pressure production issue knows how difficult tracking moving parts is. Imagine doing that with minimal context on cause-and-effect!
 
-OTLP’s unified standard gives teams the flexibility to use a single backend for all their observability needs. With the vendor lock-in barrier removed, observability tools must deliver better features. Consider [SigNoz](https://signoz.io/), which leverages OTLP to provide out-of-the-box APM dashboards for each service. Using the standardized data formats, SigNoz easily correlates traces, metrics, and logs across the entire platform, giving users the holistic view that wasn’t possible earlier.
+OTLP’s unified standard gives teams the flexibility to use a single backend for all their observability needs. With the vendor lock-in barrier removed, observability tools must deliver better features. Consider [SigNoz](https://signoz.io/), which leverages OTLP to provide out-of-the-box APM dashboards for each service. Using the standardized data formats, SigNoz easily correlates traces, metrics, and logs across the entire platform, giving users a holistic view that wasn’t possible earlier.
 
 <Figure src="/img/blog/2026/01/what-is-otlp-image.webp" alt="SigNoz correlates all ingested telemetry data; here, we access traces or logs from dashboards" caption="SigNoz correlates all ingested telemetry data; here, we access traces or logs from dashboards" />
 
@@ -52,7 +50,7 @@ OTLP leverages these features to efficiently transfer binary messages that are f
 
 Core OpenTelemetry libraries also enjoy the flexibility to iterate quickly on smaller changes, without being blocked by the protocol versioning. Similarly, minor <a href="https://github.com/open-telemetry/opentelemetry-java/discussions/6802#discussioncomment-11006580" rel="noopener noreferrer nofollow" target="_blank">changes to OTLP do not force dependency updates</a>, allowing libraries to develop at their own pace.
 
-<KeyPointCallout title="JSON compatibility”>
+<KeyPointCallout title="JSON Compatibility">
 
 While Protobuf is the preferred (and the default) message schema, OTLP also supports JSON encoding for messages over HTTP networks. This is particularly useful in web environments where loading a full Protobuf library can <a href="https://github.com/open-telemetry/oteps/pull/122" rel="noopener noreferrer nofollow" target="_blank">balloon the JavaScript bundle size</a>. It is also commonly used to maintain compatibility with existing ingestion solutions already on JSON, or for ease of debugging (due to JSON’s human-readable nature).
 
@@ -72,7 +70,7 @@ OTLP servers can return one of three response types, with each response affectin
 -**Partial Success:** A critical feature of OTLP, where servers ingest valid data while **rejecting only the specific malformed items**. The response includes <a href="https://github.com/open-telemetry/opentelemetry-proto/blob/v1.9.0/opentelemetry/proto/collector/trace/v1/trace_service.proto#L76" rel="noopener noreferrer nofollow" target="_blank">details on the failure</a> so the client knows exactly what went wrong. Since these rejections occur due to deterministic issues (like invalid formatting), the client does not retry such requests, saving CPU and network resources.
 - **Failure:** Indicates that the server failed to process the data. Clients retry requests for transient errors such as network timeout. In case of permanent errors like data validation, the client drops the data to prevent blocking the pipeline with malformed requests.
 
-<Figure src="/img/blog/2026/01/what-is-otlp-image%203.webp" alt="Clients process the next batch of data after acknowledgement, or retry on transient failures" caption="Clients process the next batch of data after acknowledgement, or retry on transient failures" />
+<Figure src="/img/blog/2026/01/what-is-otlp-image%203.webp" alt="OTLP servers can respond to client requests in three ways: full success- where server accepts entire payload, partial success- subset of data is accepted, rest is deterministically rejected, and failure response- clients retry if transient errors else drop the data on permanent errors (such as validation failure)." caption="Clients process the next batch of data after acknowledgement, or retry on transient failures" />
 
 ### Smart Batching and Data Organization
 
