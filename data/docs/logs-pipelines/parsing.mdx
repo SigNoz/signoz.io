@@ -10,6 +10,37 @@ import GetHelp from '@/components/shared/get-help.md'
 
 Log parsing transforms unstructured log messages into structured data, allowing you to filter, aggregate, and analyze your logs efficiently in SigNoz.
 
+## Why Parse Logs?
+
+Consider this raw application log:
+
+```text
+2025-12-27 10:00:00 [ERROR] User 456 failed login from 10.0.0.5 - invalid password
+```
+
+Without parsing, you can only search the full text. You cannot filter by log level, count errors per user, or identify suspicious IPs.
+
+After parsing, the log becomes structured:
+
+```json
+{
+  "body": "2025-12-27 10:00:00 [ERROR] User 456 failed login from 10.0.0.5 - invalid password",
+  "attributes": {
+    "level": "ERROR",
+    "user_id": "456",
+    "ip": "10.0.0.5",
+    "reason": "invalid password"
+  }
+}
+```
+
+With structured attributes, you can:
+
+- **Filter** logs by `level = ERROR` or `user_id = 456`
+- **Aggregate** failed logins by IP address to detect brute-force attempts
+- **Build dashboards** showing error rates over time
+- **Create alerts** when a specific user exceeds failed login thresholds
+
 ## Prerequisites
 
 - You are sending logs to SigNoz.
@@ -112,11 +143,22 @@ If your logs follow common standard formats (like Apache, Nginx, or Syslog), use
 
 </ToggleHeading>
 
-### Parser not working?
+### Error: "could not simulate log pipelines processing"
 
-- **Simulate**: Always use the "Simulate" button in the pipeline editor to test your changes against real data.
-- **Order matters**: Processors run sequentially. Ensure your parser runs before any other processor that expects the parsed fields.
-- **Filters**: Check that your pipeline filter correctly matches the incoming logs.
+Your pattern must include at least one named capture group:
+
+- Regex: `(?P<name>pattern)`
+- Grok: `%{PATTERN_NAME:capture_name}`
+
+Test patterns using <a href="https://regex101.com/" target="_blank" rel="noopener noreferrer nofollow">regex101</a> (Go flavor) or <a href="https://grokdebugger.com/" target="_blank" rel="noopener noreferrer nofollow">Grok Debugger</a>.
+
+### Pipeline not processing logs
+
+Check deployment status in **Logs** → **Pipelines** → **Change History** tab. If status shows "Failed", review the error and fix. If "In Progress", wait for completion.
+
+### Filter not matching logs
+
+Verify the filter expression matches your log attributes. Check available attributes by expanding a log in **Logs Explorer**. Use `=` for exact match or `contains` for partial match.
 
 </details>
 

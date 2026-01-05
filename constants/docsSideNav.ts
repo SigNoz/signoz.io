@@ -1403,7 +1403,7 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/logs-pipelines/parsing',
-            label: 'Log Parsing',
+            label: 'Logs Parsing',
           },
           {
             type: 'doc',
