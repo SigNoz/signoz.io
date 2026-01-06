@@ -1,0 +1,85 @@
+---
+date: 2025-12-26
+id: msk
+title: Monitor Amazon MSK with SigNoz
+description: Collect MSK metrics using one-click integration or manual OpenTelemetry setup.
+doc_type: howto
+---
+
+## Overview
+
+Amazon Managed Streaming for Apache Kafka (MSK) is a fully managed Kafka service. SigNoz helps you monitor broker health, consumer lag, and throughput.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/msk/) to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable MSK Monitoring
+
+Once connected, SigNoz will auto-discover your MSK clusters and begin collecting CloudWatch metrics.
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `BytesInPerSec` | Incoming bytes per second |
+| `BytesOutPerSec` | Outgoing bytes per second |
+| `MessagesInPerSec` | Incoming messages per second |
+| `PartitionCount` | Number of partitions |
+| `UnderReplicatedPartitions` | Under-replicated partitions |
+| `OfflinePartitionsCount` | Offline partitions |
+| `ActiveControllerCount` | Active controller count |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "MSK" to find automatically imported dashboards.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to set up your own dashboards.
+</Admonition>
+
+For comprehensive MSK monitoring with consumer lag tracking and traces, see the detailed guide:
+
+[Monitor MSK Service](https://signoz.io/docs/messaging-queues/msk/)
+
+This guide covers:
+- Enabling JMX/Node exporter endpoints on MSK
+- Configuring OpenTelemetry Collector to scrape broker metrics
+- Instrumenting Java producer/consumer applications with OTel Java Agent
+- Visualizing data in SigNoz Messaging Queues tab
+
+### MSK Monitoring Architecture
+
+```
+MSK Cluster (JMX:11001, Node:11002)
+         │
+         ▼
+   OTel Collector (Prometheus receiver)
+         │
+         ▼
+      SigNoz
+```
+
+</TabItem>
+</Tabs>

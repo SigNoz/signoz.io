@@ -1,8 +1,8 @@
 ---
-date: 2024-06-06
+date: 2026-01-02
 id: drop-logs
-
 title: Guide to drop logs
+description: Learn how to drop unwanted logs at the Collector level to reduce storage and billing.
 ---
 
 import GetHelp from '@/components/shared/get-help.md'
@@ -15,16 +15,19 @@ The filter processor is configured in the `processors::filter` section of the `o
 
 <Admonition>
 
-The processor needs to be added to the logs pipeline to take effect. 
+The processor needs to be added to the logs pipeline to take effect.
+
 ```
 logs:
   receivers: [otlp]
   processors: [filter/drop_logs_by_severity_text, batch]
   exporters: [otlp]
 ```
+
 </Admonition>
 
-## Drop Logs 
+## Drop Logs
+
 1. Drop logs by log level / severity text
 
 ```yaml
@@ -90,11 +93,16 @@ processors:
 For Kubernetes environments, you can also configure log exclusion/inclusion using the k8s-infra chart configuration. This provides a simpler way to exclude or include logs based on namespaces, pods, or containers without writing custom OpenTelemetry processors.
 
 See our [Kubernetes pod logs collection guide](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/#excludeincludefilter-logs-collection) for detailed configuration examples including:
+
 - Excluding logs from specific namespaces, pods, or containers
-- Including only logs from specific namespaces, pods, or containers  
+- Including only logs from specific namespaces, pods, or containers
 - Using filter operators for expression-based filtering
 
 Refer to the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor) for more details on how to configure the filter processor.
+
+## Related Guides
+
+- [Remove Resource Attributes](https://signoz.io/docs/logs-management/guides/remove-resource-attributes/) - Remove unwanted resource attributes from your logs
 
 ## Get Help
 

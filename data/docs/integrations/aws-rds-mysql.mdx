@@ -1,12 +1,17 @@
 ---
-date: 2024-08-03
+date: 2025-12-29
 id: aws-rds-mysql
-
 title: AWS RDS (MySQL) Metrics and Logs
+description: Collect AWS RDS MySQL metrics and logs using OpenTelemetry Collector and send them to SigNoz for monitoring and analysis.
+doc_type: howto
 ---
 ## Overview
 
 This integration helps you monitor key AWS RDS (MySQL) metrics and logs, view them with an out-of-the-box dashboards, and parse MySQL logs for better querying and aggregation.
+
+<Admonition type="tip">
+**SigNoz Cloud users**: You can also use the [One-Click AWS Integration](https://signoz.io/docs/integrations/aws/rds/) for automated setup with pre-built dashboards.
+</Admonition>
 
 ## Prerequisites
 
@@ -31,6 +36,10 @@ Before you begin, ensure you have:
 
 4. OTEL collector access to the MySQL server (optional, for MySQL engine metrics)
 
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
 ## Collecting RDS MySQL Metrics
 
 ### Step 1: Set up the Prometheus CloudWatch Exporter
@@ -40,7 +49,7 @@ Before you begin, ensure you have:
    curl -sLSO https://github.com/prometheus/cloudwatch_exporter/releases/download/v0.15.5/cloudwatch_exporter-0.15.5-jar-with-dependencies.jar
    ```
 2. Configure the Prometheus exporter
-Save the following config for collecting AWS RDS metrics in a file named `aws-rds-mysql-metrics.yaml` and update the region key with relevant value.
+Save the following config for collecting AWS RDS MySQL metrics in a file named `aws-rds-mysql-metrics.yaml` and update the region key with relevant value.
 
 ```yaml
 ---
@@ -322,8 +331,6 @@ service:
 ### Step 3: Set Environment Variables
 
 ```bash
-
-
 # The accessible endpoint where MySQL server is running
 export MYSQL_ENDPOINT="<mysql-server-endpoint>"
 
@@ -333,15 +340,20 @@ export MYSQL_USERNAME="<username>"
 export MYSQL_PASSWORD="<PASSWORD>"
 
 # region specific SigNoz cloud ingestion endpoint
-export OTLP_DESTINATION_ENDPOINT="ingest.{REGION}.signoz.cloud:443"
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
 
 # your SigNoz ingestion key
-export SIGNOZ_INGESTION_KEY="signoz-ingestion-key"
+export SIGNOZ_INGESTION_KEY="<SIGNOZ_INGESTION_KEY>"
 ```
 
-You can find more details about ingestion keys and Regions [here](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
+Replace the following placeholders:
+- `<mysql-server-endpoint>`: The hostname and port of your MySQL RDS instance (e.g., `mydb.xxxx.us-east-1.rds.amazonaws.com:3306`)
+- `<username>`: Your MySQL database username
+- `<PASSWORD>`: Your MySQL database password
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key from [Settings > Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-### Step 3: Use the Collector Config File
+### Step 4: Use the Collector Config File
 
 Add the following flag to your collector run command:
 ```bash
@@ -406,13 +418,15 @@ service:
 
 ```bash
 # region specific SigNoz cloud ingestion endpoint
-export OTLP_DESTINATION_ENDPOINT="ingest.{REGION}.signoz.cloud:443"
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
 
 # your SigNoz ingestion key
-export SIGNOZ_INGESTION_KEY="signoz-ingestion-key"
+export SIGNOZ_INGESTION_KEY="<SIGNOZ_INGESTION_KEY>"
 ```
 
-You can find more details about ingestion keys and Regions [here](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
+Replace the following placeholders:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key from [Settings > Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3: Run the Collector
 
@@ -445,7 +459,7 @@ To stop this, you can select the `Remove from SigNoz` button.
 &nbsp;
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/aws-rds-mysql/aws-rds-mysql-integration-listening.webp" alt="Listening for data from RedAWS RDS (MySQL)is"/>
+    <img src="/img/docs/integrations/aws-rds-mysql/aws-rds-mysql-integration-listening.webp" alt="Listening for data from AWS RDS MySQL"/>
     <figcaption><i>Listening for data from AWS RDS (MySQL)</i></figcaption>
 </figure>
 

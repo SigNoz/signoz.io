@@ -1,0 +1,217 @@
+---
+date: 2025-12-28
+id: sns
+title: Monitor Amazon SNS with SigNoz
+description: Collect SNS metrics using one-click integration or CloudWatch receiver.
+doc_type: howto
+---
+
+## Overview
+
+Amazon Simple Notification Service (SNS) is a fully managed pub/sub messaging service. SigNoz helps you monitor message delivery, publishing rates, and failures.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/sns/) to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable SNS Monitoring
+
+Once connected, SigNoz will auto-discover your SNS topics and begin collecting CloudWatch metrics.
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `NumberOfMessagesPublished` | Messages published to topic |
+| `NumberOfNotificationsDelivered` | Successful deliveries |
+| `NumberOfNotificationsFailed` | Failed deliveries |
+| `PublishSize` | Size of published messages |
+| `SMSSuccessRate` | SMS delivery success rate |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "SNS" to find automatically imported dashboards.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup (CloudWatch Exporter)
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to set up your own dashboards.
+</Admonition>
+
+SNS metrics are only available via CloudWatch. To collect SNS metrics manually, you can use the <a href="https://github.com/prometheus/cloudwatch_exporter" target="_blank" rel="noopener noreferrer nofollow">Prometheus CloudWatch Exporter</a>. This tool scrapes metrics from AWS CloudWatch and exposes them in Prometheus format, which the OpenTelemetry Collector can then scrape and forward to SigNoz.
+
+### Prerequisites
+
+Before proceeding, ensure you have:
+
+- **OpenTelemetry Collector** installed and configured. See [Get Started with OTel Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+- **Java 11 or higher** installed on the host machine (for JAR-based setup), or **Docker** (for container-based setup).
+- **AWS credentials** configured via environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`), IAM role, or `~/.aws/credentials`.
+- **IAM permissions** for the credentials:
+  - `cloudwatch:ListMetrics`
+  - `cloudwatch:GetMetricStatistics`
+
+### Where to Run the CloudWatch Exporter
+
+The CloudWatch Exporter should run on a machine that:
+1. Has network access to AWS CloudWatch APIs.
+2. Has AWS credentials configured.
+3. Is network-accessible from your OpenTelemetry Collector.
+
+For **SigNoz Cloud** users, run the exporter on any EC2 instance, VM, or container with AWS credentials. The OTel Collector on the same host will forward metrics to SigNoz Cloud.
+
+For **Self-Hosted** users, run the exporter on the same host as your OTel Collector, or ensure network connectivity between them.
+
+### Step 1: Create Configuration File
+
+Create a file named `sns-metrics.yaml` with the following configuration:
+
+```yaml:sns-metrics.yaml
+region: <aws-region>
+metrics:
+  - aws_namespace: AWS/SNS
+    aws_metric_name: NumberOfMessagesPublished
+    aws_dimensions: [TopicName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/SNS
+    aws_metric_name: NumberOfNotificationsDelivered
+    aws_dimensions: [TopicName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/SNS
+    aws_metric_name: NumberOfNotificationsFailed
+    aws_dimensions: [TopicName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/SNS
+    aws_metric_name: PublishSize
+    aws_dimensions: [TopicName]
+    aws_statistics: [Average, Sum]
+```
+
+Replace the following:
+- `<aws-region>`: Your AWS region where SNS topics are deployed (e.g., `us-east-1`, `eu-west-1`, `ap-south-1`).
+
+See <a href="https://github.com/prometheus/cloudwatch_exporter/tree/master/examples" target="_blank" rel="noopener noreferrer nofollow">example configurations</a> for more service templates.
+
+### Step 2: Download and Run the Exporter
+
+<Tabs>
+<TabItem value="jar" label="JAR File" default>
+
+Download the CloudWatch Exporter JAR file using `curl`:
+
+```bash
+curl -LO https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
+```
+
+Run the exporter with Java:
+
+```bash
+java -jar cloudwatch_exporter-0.16.0-jar-with-dependencies.jar 9106 sns-metrics.yaml
+```
+
+This starts the exporter on port `9106`.
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Run the CloudWatch Exporter as a <a href="https://github.com/prometheus/cloudwatch_exporter#docker-images" target="_blank" rel="noopener noreferrer nofollow">Docker container</a>:
+
+```bash
+docker run -d \
+  --name cloudwatch-exporter \
+  -p 9106:9106 \
+  -v $(pwd)/sns-metrics.yaml:/config/config.yml \
+  -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+  -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+  prom/cloudwatch-exporter
+```
+
+Replace the AWS credential environment variables with your actual credentials or use an IAM role if running on EC2.
+
+</TabItem>
+</Tabs>
+
+Verify the exporter is running by checking the metrics endpoint:
+
+```bash
+curl http://localhost:9106/metrics | grep aws_sns
+```
+
+You should see metrics like `aws_sns_number_of_messages_published_sum`, `aws_sns_number_of_notifications_delivered_sum`, etc.
+
+### Step 3: Configure OpenTelemetry Collector
+
+Add the following `prometheus` receiver to your existing `otel-collector-config.yaml` to scrape the CloudWatch Exporter:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'sns-cloudwatch'
+          scrape_interval: 60s
+          static_configs:
+            - targets: ['<exporter-host>:9106']
+```
+
+Replace the following:
+- `<exporter-host>`: The hostname or IP where the CloudWatch Exporter is running. Use `localhost` if running on the same machine.
+
+Enable the `prometheus` receiver in your metrics pipeline by updating the `service` section:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+<Admonition type="note">
+Append these configurations to your existing `otel-collector-config.yaml`. Do not replace your entire configuration file.
+</Admonition>
+
+Restart your OpenTelemetry Collector to apply the changes.
+
+### Validate
+
+To confirm that SNS metrics are flowing to SigNoz:
+
+1. Navigate to **Dashboards** → **New Dashboard** → **New Panel** in SigNoz.
+2. In the query builder, search for metrics starting with `aws_sns_` (e.g., `aws_sns_number_of_messages_published_sum`).
+3. Verify that metrics appear with `topic_name` labels matching your SNS topics.
+
+If you see metrics with labels like `topic_name`, your setup is working correctly.
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+Once SNS metrics are flowing to SigNoz, you can:
+
+- **Set up alerts** for critical metrics like failed deliveries. See [Alerts](https://signoz.io/docs/alerts/).
+- **Create dashboards** to visualize SNS performance. See [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/).
