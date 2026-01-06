@@ -1718,6 +1718,11 @@ const docsSideNav = [
         label: 'Dropping Metric Labels (Attributes)',
       },
       {
+        type: 'doc',
+        route: '/docs/metrics-management/reducing-costs',
+        label: 'Understanding Metrics Billing and Reducing Costs',
+      },
+      {
         type: 'category',
         route: '/docs/metrics-management/troubleshooting/troubleshooting',
         label: 'Troubleshooting',

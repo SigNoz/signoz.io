@@ -1,0 +1,87 @@
+---
+date: 2026-01-06
+title: Understanding Metrics Billing and Reducing Costs
+id: reducing-metrics-costs
+description: Learn how metrics billing works based on cardinality and discover strategies to reduce costs effectively.
+doc_type: explanation
+---
+
+## Overview
+
+Metrics billing is based on **cardinality** - the number of unique time series created by your metrics. Understanding how attributes affect cardinality is key to managing costs effectively.
+
+## How Attributes Affect Billing
+
+There are two types of attributes that affect your metrics differently:
+
+1. **Identifying attributes** - These create new time series and contribute to cost. For example, adding a new `host.name` creates a new series.
+2. **Non-identifying/descriptive attributes** - These enrich existing metrics without creating new series. Examples include host family or EC2 tags.
+
+You can add as many non-identifying attributes as needed without additional cost, but each new identifying attribute with unique values increases your bill, often exponentially.
+
+## Common Cost Drivers
+
+### High Cardinality Attributes
+
+Avoid including random IDs or unique identifiers in your metric attributes. For example, instead of:
+
+```
+/bitcoin-mainnet-esplora/scripthash/20fd0a38027a2eeb14fd50fcbd94934f832bef4cc279958c30c72704338eb065/txs
+```
+
+Use a templated approach:
+
+```
+/bitcoin-mainnet-esplora/scripthash/${id}/txs
+```
+
+### Histogram Metrics
+
+Histogram metrics are particularly costly because:
+
+1. **Bucket configuration** - Each bucket distribution creates a separate series. Optimize your bucket configuration based on your workload's latency patterns.
+2. **Cumulative nature** - With cumulative histogram metrics, values continue to be sent even when there's no recent activity, especially problematic when combined with high-cardinality attributes like method names containing IDs.
+
+## Cost Reduction Strategies
+
+### 1. Remove or Template High-Cardinality Attributes
+
+Replace unique IDs with templated values to reduce the number of unique time series being created.
+
+### 2. Optimize Histogram Buckets
+
+Reduce the number of buckets while maintaining meaningful data. See [Configure Custom Buckets](https://signoz.io/docs/metrics-management/configure-custom-buckets/) for more details.
+
+### 3. Implement Sampling
+
+Reduce the volume of metrics sent from your application. This directly reduces the number of data points ingested.
+
+### 4. Review Attribute Necessity
+
+Ensure all identifying attributes are essential for your monitoring needs. Remove any attributes that don't provide actionable insights.
+
+### 5. Aggregate or Drop Metrics
+
+Consider using the following techniques:
+
+- **Aggregate labels** - Use the [MetricsTransform Processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/metricstransformprocessor/README.md) to aggregate metrics, which actually reduces cardinality and sample count.
+- **Drop entire metrics** - See [How to Drop and Filter OpenTelemetry Metrics](https://signoz.io/docs/userguide/drop-metrics/) to remove unnecessary metrics entirely.
+
+<Admonition type="warning">
+Note that simply dropping metric labels/attributes does **not** reduce cardinality or costs. See [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) for a detailed explanation of why this doesn't work and what to do instead.
+</Admonition>
+
+## Monitoring Your Costs
+
+Use the [Cost Meter](https://signoz.io/docs/cost-meter/overview/) to:
+
+- Monitor costs across different telemetry signals
+- Understand the cost breakdown and key contributors
+- Track metric datapoint ingestion over time
+- Set up [alerts](https://signoz.io/docs/cost-meter/alerts/) to notify you when costs exceed thresholds
+
+## Additional Resources
+
+- <a href="https://www.robustperception.io/cardinality-is-key/" rel="noopener noreferrer nofollow" target="_blank">Comprehensive guide on cardinality</a>
+- [Dropping Metric Labels](https://signoz.io/docs/metrics-management/dropping-metric-labels/) - Why dropping labels doesn't reduce costs
+- [Cost Meter Overview](https://signoz.io/docs/cost-meter/overview/) - Monitor your observability costs
