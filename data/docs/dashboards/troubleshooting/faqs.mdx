@@ -87,6 +87,29 @@ If you have a query like `max(last_seen) AS bucket_completed` which contains tim
 **Alternative visualization:**
 
 If you only need to display aggregate data without time-based visualization, consider using a table view or other chart types that don't require time-based x-axis data.
+### Q. Why is my formula query (A/B) not showing any data?
+
+A. When using formula queries like `A/B` in dashboards, the most common reason for missing data is mismatched timestamps and label sets between the queries.
+
+<details>
+
+<summary> Show detailed explanation and solution </summary>
+
+**Common Issue: Mismatched timestamps and label sets**
+
+For a formula like `A/B` to work, both queries A and B must have:
+- Matching timestamps
+- Matching label sets
+
+If your queries A and B have different filter conditions (especially different states or grouping labels), there may be no common label set to evaluate the formula against, resulting in no data.
+
+**To resolve this issue:**
+
+1. **Set the correct aggregation interval**: If you're reporting metrics at 5-minute intervals, manually set the aggregation interval to 300 seconds instead of leaving it on auto.
+
+2. **Ensure compatible label sets**: Make sure your queries A and B can produce data points with matching timestamps and label combinations. If they have different filter conditions that prevent overlap, consider adjusting your queries to have compatible label sets.
+
+3. **Check for zero or near-zero values**: While near-zero values shouldn't prevent formula evaluation, ensure your data contains the expected values for both queries.
 
 </details>
 
