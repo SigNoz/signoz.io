@@ -9,13 +9,14 @@ import {
   type Guide,
 } from 'contentlayer/generated'
 import { coreContent, type CoreContent } from 'pliny/utils/contentlayer'
+import type { MDXContent } from '@/utils/strapi'
 import BlogPostCard from '../Shared/BlogPostCard'
 import SearchInput from '../Shared/Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
 
-type HubDoc = CoreContent<Blog | Comparison | Guide> | any
+type HubDoc = CoreContent<Blog | Comparison | Guide | MDXContent>
 
 type HubChapterGroup = {
   key: string
@@ -136,7 +137,7 @@ export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
       const normalizedDocMap = new Map<string, HubDoc>()
 
       // Merge collections
-      const allDocs = [...docCollections]
+      const allDocs: (Blog | Comparison | Guide | HubDoc)[] = [...docCollections]
 
       // Add Strapi opentelemetry articles
       articles.forEach((article) => {
@@ -144,7 +145,7 @@ export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
       })
 
       allDocs.forEach((doc) => {
-        const content = 'path' in doc ? doc : coreContent(doc as any)
+        const content = ('path' in doc ? doc : coreContent(doc)) as HubDoc
         const normalizedPath = normalizeRoute(`/${content.path}`)
         normalizedDocMap.set(normalizedPath, content)
       })

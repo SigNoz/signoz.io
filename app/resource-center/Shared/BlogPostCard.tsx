@@ -6,11 +6,7 @@ import Link from 'next/link'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { formatDate } from 'pliny/utils/formatDate'
 
-export default function BlogPostCard({
-  blog,
-}: {
-  blog: CoreContent<Blog | Comparison | Guide> | any
-}) {
+export default function BlogPostCard({ blog }: { blog: CoreContent<Blog | Comparison | Guide> }) {
   const { path, date, title, authors } = blog
 
   const getAuthorDetails = (authorID) => {

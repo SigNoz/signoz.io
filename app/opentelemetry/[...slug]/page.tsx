@@ -24,7 +24,7 @@ import readingTime from 'reading-time'
 import GithubSlugger from 'github-slugger'
 import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
 import { CoreContent } from 'pliny/utils/contentlayer'
-// import type { Authors, Opentelemetry } from 'contentlayer/generated'
+// import type { Authors } from 'contentlayer/generated'
 
 // Remark and rehype plugins
 import remarkGfm from 'remark-gfm'
@@ -328,7 +328,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         )}
         <OpenTelemetryHubLayout
           content={mainContent}
-          authorDetails={authorDetails as any}
+          authorDetails={authorDetails}
           authors={content.authors?.map((author) => author?.key) || []}
           toc={toc}
           navItems={hubContext.items}
