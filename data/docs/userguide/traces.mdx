@@ -66,6 +66,28 @@ Sometimes it's possible that there are gaps between consequent spans. This happe
 Example of span gaps:
 ![Span Gap](/img/docs/span-gap.png)
 
+## Understanding Trace Duration Discrepancies
+
+When analyzing latency metrics in the traces list, you may notice that the duration shown differs from what appears in the trace details. This is because:
+
+**The duration column in the traces list shows the duration of the root span, not the entire trace duration.**
+
+This can lead to apparent discrepancies for several reasons:
+
+- **The root span may complete before all child spans finish** - The root operation might return a response while background tasks continue processing
+- **Asynchronous operations** - Child spans can run longer than the root span when operations are performed asynchronously
+- **Total trace duration** - The trace details view shows the complete duration including all spans, which may be longer than just the root span
+
+### Example Scenario
+
+You might see a trace listed as **38.9 seconds** in the traces page, but when you open the trace details, it shows a total duration of **1 minute**. This happens when:
+
+1. The root span (the initial request handler) completed in 38.9 seconds
+2. Other spans in the trace (such as background jobs, async tasks, or queued operations) continued running
+3. The total time from the first span start to the last span end was 1 minute
+
+This behavior is expected and reflects how distributed systems actually work. If you need to measure specific service-to-service latencies rather than root span duration, see the [writing ClickHouse queries documentation](/docs/userguide/writing-clickhouse-traces-query/#querying-for-specific-service-latencies) for guidance on using `kind_string = 'Client'` filters.
+
 ## Get Help
 
 <GetHelp />
