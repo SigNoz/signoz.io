@@ -11,6 +11,7 @@ import Tag from '@/components/Tag'
 import Button from '@/components/Button/Button'
 import siteMetadata from '@/data/siteMetadata'
 import tagData from 'app/tag-data.json'
+import { RegionProvider } from '@/components/Region/RegionContext'
 
 interface PaginationProps {
   totalPages: number
@@ -78,7 +79,7 @@ export default function ListLayoutWithTags({
   const displayPosts = initialDisplayPosts.length > 0 ? initialDisplayPosts : posts
 
   return (
-    <>
+    <RegionProvider>
       <div className="container mx-auto">
         <div className="pb-6 pt-6">
           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:hidden sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
@@ -175,6 +176,6 @@ export default function ListLayoutWithTags({
           </div>
         </div>
       </div>
-    </>
+    </RegionProvider>
   )
 }

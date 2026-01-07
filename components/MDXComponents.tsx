@@ -1,5 +1,4 @@
 import TOCInline from 'pliny/ui/TOCInline'
-import Pre from 'pliny/ui/Pre'
 import BlogNewsletterForm from 'pliny/ui/BlogNewsletterForm'
 import type { MDXComponents } from 'mdx/types'
 import Image from './Image'
@@ -72,13 +71,18 @@ import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 import ToggleHeading from './Headings/ToggleHeading'
 import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
 import AWSOneClickListicle from './AWS/AWSOneClickListicle'
+import Region from './Region/Region'
+import { RegionAwarePre, RegionAwareCode } from './Region/RegionAwareComponents'
 
 export const components: MDXComponents = {
+  Region,
+  region: Region,
   ToggleHeading,
   Image,
   TOCInline,
   a: CustomLink,
-  pre: Pre,
+  pre: RegionAwarePre,
+  code: RegionAwareCode,
   table: TableWrapper,
   BlogNewsletterForm,
   YouTube,

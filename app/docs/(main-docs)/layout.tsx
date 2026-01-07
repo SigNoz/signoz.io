@@ -11,6 +11,7 @@ import { useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { QUERY_PARAMS } from '@/constants/queryParams'
+import { RegionProvider } from '@/components/Region/RegionContext'
 
 export interface tocItemProps {
   url: string
@@ -49,26 +50,28 @@ export default function DocLayout({ children }: LayoutProps) {
   }, [])
 
   return (
-    <main ref={mainRef} className="">
-      <SectionContainer>
-        {source !== ONBOARDING_SOURCE && <ProgressBar target={mainRef} />}
+    <RegionProvider>
+      <main ref={mainRef} className="">
+        <SectionContainer>
+          {source !== ONBOARDING_SOURCE && <ProgressBar target={mainRef} />}
 
-        <div className="doc overflow-clip max-sm:px-4">
-          {source !== ONBOARDING_SOURCE && (
-            <div className="doc-sidenav border-r border-signoz_slate-500">
-              <DocsSidebar />
+          <div className="doc overflow-clip max-sm:px-4">
+            {source !== ONBOARDING_SOURCE && (
+              <div className="doc-sidenav border-r border-signoz_slate-500">
+                <DocsSidebar />
+              </div>
+            )}
+
+            <div
+              className={`doc-content py-6 md:px-0 lg:px-4 ${
+                source === ONBOARDING_SOURCE ? 'product-onboarding' : ''
+              }`}
+            >
+              {children}
             </div>
-          )}
-
-          <div
-            className={`doc-content md:px-0 lg:px-4 py-6 ${
-              source === ONBOARDING_SOURCE ? 'product-onboarding' : ''
-            }`}
-          >
-            {children}
           </div>
-        </div>
-      </SectionContainer>
-    </main>
+        </SectionContainer>
+      </main>
+    </RegionProvider>
   )
 }

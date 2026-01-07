@@ -14,6 +14,7 @@ import { ArrowRight, ExternalLink } from 'lucide-react'
 import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
 import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 import { useScrollToHash } from '@/hooks/useScrollToHash'
+import { RegionProvider } from '@/components/Region/RegionContext'
 
 // Extend the Blog type to include CTA fields
 interface BlogContent extends Blog {
@@ -79,121 +80,123 @@ export default function BlogLayout({
   }, [])
 
   return (
-    <main ref={mainRef}>
-      <ScrollTopAndComment />
+    <RegionProvider>
+      <main ref={mainRef}>
+        <ProgressBar target={mainRef} />
+        <ScrollTopAndComment />
 
-      <BlogBanner title={title} date={date} readingTime={readingTime.text} tags={tags} />
+        <BlogBanner title={title} date={date} readingTime={readingTime.text} tags={tags} />
 
-      <SectionContainer>
-        <div className="post relative flex 2xl:max-w-[90rem]">
-          {/* Main content area centered in the remaining space */}
-          <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
-            {/* Mobile author info - Visible only on mobile/tablet */}
-            <MobileAuthorInfo authors={authors} />
+        <SectionContainer>
+          <div className="post relative flex 2xl:max-w-[90rem]">
+            {/* Main content area centered in the remaining space */}
+            <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
+              {/* Mobile author info - Visible only on mobile/tablet */}
+              <MobileAuthorInfo authors={authors} />
 
-            <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
-              {children}
-            </article>
+              <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
+                {children}
+              </article>
 
-            {/* Newsletter Section */}
-            <div className="mb-16">
-              <NewsletterSubscription />
+              {/* Newsletter Section */}
+              <div className="mb-16">
+                <NewsletterSubscription />
+              </div>
             </div>
-          </div>
 
-          {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
-          <div className="post-toc hidden lg:fixed lg:right-0 lg:top-[120px] lg:flex lg:h-[calc(100vh-140px)] lg:w-64 lg:flex-col lg:border-l lg:border-signoz_ink-300 lg:pl-8">
-            {/* SigNoz Docs Card */}
-            <TrackingLink
-              href="/docs/cloud/"
-              target="_blank"
-              clickType="Card Click"
-              clickName="Blog Sidebar Docs Card"
-              clickText="Set Up Observability with OTel and SigNoz"
-              clickLocation="Blog Right Sidebar"
-              className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
-            >
-              <h3 className="text-sm font-medium text-white">
-                Set Up Observability with OTel and SigNoz
-              </h3>
-              <div className="flex items-center gap-1 text-[11px] text-gray-400 transition-colors group-hover:text-white">
-                <span>Explore docs</span>
-                <ArrowRight
-                  size={12}
-                  className="transition-transform group-hover:translate-x-0.5"
+            {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
+            <div className="post-toc hidden lg:fixed lg:right-0 lg:top-[120px] lg:flex lg:h-[calc(100vh-140px)] lg:w-64 lg:flex-col lg:border-l lg:border-signoz_ink-300 lg:pl-8">
+              {/* SigNoz Docs Card */}
+              <TrackingLink
+                href="/docs/cloud/"
+                target="_blank"
+                clickType="Card Click"
+                clickName="Blog Sidebar Docs Card"
+                clickText="Set Up Observability with OTel and SigNoz"
+                clickLocation="Blog Right Sidebar"
+                className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
+              >
+                <h3 className="text-sm font-medium text-white">
+                  Set Up Observability with OTel and SigNoz
+                </h3>
+                <div className="flex items-center gap-1 text-[11px] text-gray-400 transition-colors group-hover:text-white">
+                  <span>Explore docs</span>
+                  <ArrowRight
+                    size={12}
+                    className="transition-transform group-hover:translate-x-0.5"
+                  />
+                </div>
+              </TrackingLink>
+
+              {/* TOC with internal scroll */}
+              <div ref={tocContainerRef} className="mb-4 h-[calc(100%-180px)] overflow-y-auto">
+                <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                  On this page
+                </h3>
+                <TableOfContents
+                  toc={toc}
+                  activeSection={activeSection}
+                  setActiveSection={setActiveSection}
+                  scrollableContainerRef={tocContainerRef}
                 />
               </div>
-            </TrackingLink>
 
-            {/* TOC with internal scroll */}
-            <div ref={tocContainerRef} className="mb-4 h-[calc(100%-180px)] overflow-y-auto">
-              <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                On this page
-              </h3>
-              <TableOfContents
-                toc={toc}
-                activeSection={activeSection}
-                setActiveSection={setActiveSection}
-                scrollableContainerRef={tocContainerRef}
-              />
-            </div>
-
-            {/* Author info fixed at bottom */}
-            <div className="mt-auto">
-              <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                {authors.length === 1 ? 'Author' : 'Authors'}
-              </h3>
-              <SidebarAuthorInfo authors={authors} />
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom sections */}
-        <div className="my-12 px-4 md:px-6">
-          {/* Related Articles Section */}
-          {relatedArticles && Array.isArray(relatedArticles) && relatedArticles.length > 0 && (
-            <div className="pt-16">
-              <div className="mx-auto flex max-w-4xl flex-col items-start justify-between lg:flex-row">
-                <h2 className="mb-6 w-full text-xl font-semibold text-white lg:mb-0 lg:w-1/3">
-                  Related Articles
-                </h2>
-                <div className="w-full space-y-4 lg:w-2/3">
-                  {relatedArticles.slice(0, 2).map((article, index) => (
-                    <TrackingLink
-                      key={index}
-                      href={article.url}
-                      target="_blank"
-                      clickType="Nav Click"
-                      clickName="Related Article Link"
-                      clickText={article.title}
-                      clickLocation="Blog Related Articles"
-                      className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500 md:p-6"
-                    >
-                      <div>
-                        <h3 className="text-base font-medium text-white md:text-lg">
-                          {article.title}
-                        </h3>
-                        <p className="mt-2 text-sm text-gray-400">
-                          {new Date(article.publishedOn).toLocaleDateString('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </p>
-                      </div>
-                      <ExternalLink
-                        size={20}
-                        className="text-gray-400 transition-colors group-hover:text-white"
-                      />
-                    </TrackingLink>
-                  ))}
-                </div>
+              {/* Author info fixed at bottom */}
+              <div className="mt-auto">
+                <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                  {authors.length === 1 ? 'Author' : 'Authors'}
+                </h3>
+                <SidebarAuthorInfo authors={authors} />
               </div>
             </div>
-          )}
-        </div>
-      </SectionContainer>
-      <ProgressBar target={mainRef} />
-    </main>
+          </div>
+
+          {/* Bottom sections */}
+          <div className="my-12 px-4 md:px-6">
+            {/* Related Articles Section */}
+            {relatedArticles && Array.isArray(relatedArticles) && relatedArticles.length > 0 && (
+              <div className="pt-16">
+                <div className="mx-auto flex max-w-4xl flex-col items-start justify-between lg:flex-row">
+                  <h2 className="mb-6 w-full text-xl font-semibold text-white lg:mb-0 lg:w-1/3">
+                    Related Articles
+                  </h2>
+                  <div className="w-full space-y-4 lg:w-2/3">
+                    {relatedArticles.slice(0, 2).map((article, index) => (
+                      <TrackingLink
+                        key={index}
+                        href={article.url}
+                        target="_blank"
+                        clickType="Nav Click"
+                        clickName="Related Article Link"
+                        clickText={article.title}
+                        clickLocation="Blog Related Articles"
+                        className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500 md:p-6"
+                      >
+                        <div>
+                          <h3 className="text-base font-medium text-white md:text-lg">
+                            {article.title}
+                          </h3>
+                          <p className="mt-2 text-sm text-gray-400">
+                            {new Date(article.publishedOn).toLocaleDateString('en-US', {
+                              month: 'long',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </p>
+                        </div>
+                        <ExternalLink
+                          size={20}
+                          className="text-gray-400 transition-colors group-hover:text-white"
+                        />
+                      </TrackingLink>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </SectionContainer>
+      </main>
+    </RegionProvider>
   )
 }
