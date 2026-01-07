@@ -422,7 +422,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/java/',
-          destination: '/docs/instrumentation/java/overview/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         {
@@ -609,7 +609,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/opentelemetry-java/',
-          destination: '/docs/instrumentation/java/overview/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         // Java manual instrumentation redirect

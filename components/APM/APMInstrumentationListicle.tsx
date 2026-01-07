@@ -18,7 +18,6 @@ import {
   SiFastapi,
   SiGunicorn,
   SiCelery,
-  SiSpringboot,
   SiQuarkus,
   SiApachetomcat,
   SiNodedotjs,
@@ -137,16 +136,10 @@ export default function APMInstrumentationListicle({
       <IconCardGrid
         cards={[
           {
-            name: 'Java',
-            href: '/docs/instrumentation/java',
+            name: 'Java / Spring Boot',
+            href: '/docs/instrumentation/java/opentelemetry-java',
             icon: <img src="/img/icons/java-icon.svg" alt="Java" className="h-5 w-5" />,
             clickName: 'Java Instrumentation Link',
-          },
-          {
-            name: 'Spring Boot',
-            href: '/docs/instrumentation/springboot',
-            icon: <SiSpringboot className="h-7 w-7 text-green-600" />,
-            clickName: 'Spring Boot Instrumentation Link',
           },
           {
             name: 'Quarkus',
