@@ -1,0 +1,369 @@
+---
+
+title: Implementing Native Sidecars in Kubernetes
+slug: kubernetes-sidecar
+date: 2026-01-06
+tags: [kubernetes, opentelemetry]
+authors: [saurabh_patil]
+description: Learn how the Kubernetes sidecar pattern separates auxiliary tasks from main applications, including native sidecar support and real-world use cases.
+keywords: [kubernetes sidecar, pod design patterns, sidecar container, k8s native sidecar, auxiliary container]
+
+---
+
+Production applications often require additional capabilities such as log shipping, metrics collection, traffic management, or security controls. Embedding all of this logic directly into the application increases complexity and operational risk. The Kubernetes Sidecar pattern addresses this by offloading these concerns to a dedicated sidecar container, allowing teams to extend application behaviour while keeping core logic clean and maintainable.
+
+In this guide, you’ll learn how sidecars share a Pod’s network/storage, what changes with native sidecars (restartable init containers), and you’ll deploy a working log-tailing sidecar and a Job that exits cleanly.
+
+## What is a Kubernetes Sidecar?
+
+In simple terms, a Kubernetes Sidecar is a design pattern in which an additional container runs alongside the main application container within the same Pod, sharing the same network and storage context, to provide supporting functionality like log shipping, metrics collection, traffic proxying, or security enforcement without modifying application code.
+
+A sidecar shares the pod's resources, termination signals, and scheduling decisions with the primary container. However, each container has its own lifecycle. With native sidecar containers (restartable init containers), sidecars start before application containers, can restart independently, and are terminated after the main containers exit (for example, when a Job completes).
+
+<Figure
+  src="/img/guides/2026/01/kubernetes-sidecar-metrics.webp"
+  alt="Diagram of sidecar container scraping and forwarding metrics from main application container to backend"
+  caption="Diagram of sidecar container scraping and forwarding metrics from main application container to backend" 
+/>
+
+## Kubernetes Native Sidecar Support
+
+Historically, Kubernetes did not have a native sidecar field. Developers simply added multiple containers to the `spec.containers` list. This created a significant pain point for Kubernetes Jobs: if the main task finished but the sidecar kept running, the Pod would never reach a Completed state, causing Jobs to hang.
+
+Kubernetes introduced native sidecar support to solve this. The feature graduated to stable in v1.33 (released April 23, 2025). Native sidecars are implemented as **restartable init containers**. By setting `restartPolicy: Always` on an entry in `spec.initContainers`, Kubernetes treats it as a sidecar that:
+
+1. Starts before the main application containers.
+2. Stays running throughout the Pod lifecycle.
+3. Terminates automatically once all regular containers in the Pod have exited.
+
+This native coordination ensures that sidecars in Job workloads shut down gracefully, allowing the Job to finish correctly.
+
+## Comparing Kubernetes Container Patterns
+
+While sidecars are common, they are one of several patterns used to manage auxiliary processes.
+
+### Sidecar vs Init Container
+
+An Init Container runs and completes before the main application starts. It is used for setup tasks, like waiting for a database to be ready or running migration scripts. A Sidecar runs concurrently with the main application throughout the Pod's lifetime.
+
+### Sidecar vs DaemonSet
+
+A DaemonSet runs one Pod per node (or a subset of nodes), independent of individual applications. It’s best for node-level concerns like log shippers, node monitoring agents, or security scanners, where coverage across nodes matters more than per-app coupling.
+
+### Sidecar vs Service Mesh
+
+A service mesh injects a proxy (often via a sidecar) and adds cluster-wide traffic management capabilities like mTLS (Mutual Transport Layer Security), retries, circuit breaking, and observability. It’s suited for managing service-to-service communication at scale, but introduces operational and performance overhead.
+
+### Sidecar vs DaemonSet vs Init Container vs Service Mesh
+
+| Pattern | Lifecycle | Scope | Best For | Key Limitation |
+| --- | --- | --- | --- | --- |
+| Sidecar | Runs with app container | Per Pod | App-specific logging, metrics, proxies | Tightly coupled to app |
+| DaemonSet | Runs continuously | Per Node | Node-level agents and monitoring | Not app-aware |
+| Init Container | Runs once, then exits | Per Pod (startup) | Setup, migrations, pre-checks | No runtime role |
+| Service Mesh | Runs continuously | Cluster / Services | Traffic control, security, observability | Added complexity & cost |
+
+## Common Kubernetes Sidecar Patterns
+
+The Sidecar container pattern approach allows developers to extend application functionality without modifying the core container, promoting modularity and separation of concerns. Let's explore and examine common sidecar patterns.
+
+### Ambassador Pattern
+
+The Ambassador pattern is a specific type of sidecar focused on networking. It acts as a proxy for outbound traffic. The application sends a request to localhost, and the ambassador forwards it to the correct external service, handling retries or authentication transparency.
+
+### Adapter Pattern
+
+The Adapter pattern is a sidecar used to standardize output. If you have 10 applications generating logs in 10 different formats, you can attach an Adapter sidecar to each one. The Adapter transforms the logs into a single standard format before sending them to your monitoring system.
+
+## How does a Kubernetes Sidecar Work?
+
+The sidecar runs alongside the primary container within the same Pod, sharing the same network namespace, IP address, and it can share data through Pod volumes (e.g., `emptyDir`) mounted into both containers. This shared execution environment allows the sidecar to communicate with the main application over `localhost` with negligible latency or read from common file paths, effectively intercepting network traffic or harvesting telemetry data without requiring any code changes to the primary application itself.
+
+To implement sidecar effectively, we must understand the specific Kubernetes primitives that enable it. Let’s break down the technical mechanics into three core areas: network and resource sharing, configuration structure, and lifecycle synchronization.
+
+### Network and Resource Sharing
+
+All containers in a Pod share the same network namespace. This means the primary container and the sidecar can communicate over `localhost`. If a web server runs on port 8080, a sidecar proxy can reach it at `http://localhost:8080`.
+
+For storage, containers have separate image filesystems. To share data, you must define a Pod volume (like an `emptyDir`) and mount it into both containers. For example, the app writes logs to `/var/log/app`, and the sidecar reads from the same path.
+
+### Configuration in YAML Manifests
+
+You can define a sidecar in the `initContainers` section of your YAML manifest. Each container has its own image, command, ports, and volume mounts, but all share the pod's `volumes` section to share data.
+
+The following snippet shows how to configure a sidecar using the `restartPolicy: Always` field.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-example
+spec:
+  initContainers:
+  - name: sidecar-proxy
+    image: envoyproxy/envoy:v1.22.0
+    restartPolicy: Always # This marks it as a native sidecar
+  containers:
+  - name: main-app
+    image: my-app:latest
+```
+
+<KeyPointCallout defaultCollapsed="true" title="Note">
+
+Note that if you mount a volume over a path already used by the container image (like `/var/log/nginx`), it will override the existing contents and symlinks.
+
+</KeyPointCallout>
+
+### Lifecycle Synchronization
+
+Although containers share the same Pod, they follow independent lifecycles managed by the Kubelet.
+
+- **Startup Order:** Native sidecars (configured as `initContainers`) are guaranteed to start before the main application. Kubelet starts the built-in sidecar early, once the sidecar is marked started, kubelet continues with the rest of init containers and later starts app containers.
+- **Restarts:** Pod-level `restartPolicy` controls app containers and regular init containers. Built-in sidecars ignore Pod-level restartPolicy and restart according to `initContainers[].restartPolicy: Always`.
+- **Probes:** Liveness and Readiness probes are configured per-container. Repeated `Liveness probe` failures trigger a restart of that specific container. However, if any container fails its `Readiness probe`, the entire Pod is marked `NotReady` and stops receiving traffic.
+
+## Hands-on Demo: Implementing Kubernetes Sidecar Container
+
+In the following demo, we will build the Sidecar, focusing on a logging scenario. We will deploy two containers into a single pod, a main contianer to write logs to a shared file and sidecar container to tail (read) those logs and send them to standard output.
+
+### Prerequisites
+
+- **Minikube:** You can install it from the <a href="https://minikube.sigs.k8s.io/docs/start/" rel="noopener noreferrer nofollow" target="_blank">official installation guide</a>.
+- **kubectl:** You can follow the installation steps in the <a href="https://kubernetes.io/docs/tasks/tools/" rel="noopener noreferrer nofollow" target="_blank">Official Kubernetes Documentation</a>.
+- **Docker Desktop:** Get Docker from the <a href="https://docs.docker.com/get-started/get-docker/" rel="noopener noreferrer nofollow" target="_blank">Official Docker Docs</a>.
+
+### Step 1: Start the Local Cluster
+
+Run the following command to start Minikube in your terminal:
+
+```bash
+minikube start
+```
+
+Verify the installation by running the following commands:
+
+```bash
+minikube version
+kubectl version
+```
+
+### Step 2: Create Pod manifest
+
+Create a file named `sidecar-demo.yaml` and add below content into it. This manifest defines a shared volume, a native sidecar that reads logs, and a main app that writes them.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: native-sidecar-demo
+spec:
+  # 1. The Shared Volume
+  volumes:
+  - name: var-logs
+    emptyDir: {}
+
+  # 2. The Native Sidecar (Defined as an initContainer!)
+  initContainers:
+  - name: log-shipper
+    image: busybox:1.36
+    restartPolicy: Always   # Native Sidecar Support
+    command: ["sh", "-c", "tail -F /var/log/app.log"]
+    volumeMounts:
+    - name: var-logs
+      mountPath: /var/log
+
+  # 3. The Main Application
+  containers:
+  - name: main-app
+    image: busybox:1.36
+    command: ["sh", "-c", "while true; do date >> /var/log/app.log; sleep 5; done"]
+    volumeMounts:
+    - name: var-logs
+      mountPath: /var/log
+```
+
+<KeyPointCallout defaultCollapsed="true" title="Breakdown of sidecar-demo.yaml file">
+
+- **Volume (`var-logs`):** A shared folder for both containers to access the same file.
+- **Main Container (`main-app`):** Simulates an app by writing the current date to a log file every 5 seconds.
+- **Sidecar (`log-shipper`):** Using the new native feature, we define this as an `initContainer` with `restartPolicy: Always`. It will continuously "tail" (read) that log file.
+
+</KeyPointCallout>
+
+### Step 3: Deploy and Verify
+
+Apply the manifest to your cluster:
+
+```yaml
+kubectl apply -f sidecar-demo.yaml
+```
+
+Wait a few seconds and check the Pod status. You should see `READY 2/2`, indicating both the main app and the restartable init container (the sidecar) are running.
+
+```yaml
+kubectl get pods
+# Output
+# NAME                  READY   STATUS    RESTARTS   AGE
+# native-sidecar-demo   2/2     Running   0          22s
+```
+
+### Step 4: Verify the Sidecar Logic
+
+To verify the sidecar is successfully reading data from the main app through the shared volume, check the logs of the `log-shipper` container.
+
+```bash
+kubectl logs native-sidecar-demo -c log-shipper
+```
+
+You should be able to see a stream of timestamps (dates) in your terminal, similar to the image below:
+
+<Figure
+ src="/img/guides/2026/01/kubernetes-sidecar-terminal-logs.webp"
+ alt="Sidecar demo : Stream of timestamps (dates) in terminal"
+ caption="Sidecar demo : Stream of timestamps (dates) in terminal"
+/>
+
+### Step 5: Testing Job Termination
+
+One of the benefits of native sidecars is clean termination for Jobs. Before native sidecars, a long-running sidecar defined under `spec.containers` could keep the Pod running forever because it had no idea the main job was done. The job would effectively hang and never report "Completed."
+
+With Native Sidecars, Kubernetes will monitor the `main-job`. As soon as that container finished its 10-second sleep:
+
+- Kubernetes will mark the main task as done.
+- It will automatically send a termination signal to the `log-shipper` sidecar.
+- The whole Pod shut down cleanly.
+
+Follow the steps below to see it in action.
+
+1. Create a file named `sidecar-job.yaml` with the following content:
+
+    ```yaml
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: sidecar-job-demo
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          volumes:
+          - name: var-logs
+            emptyDir: {}
+    
+          # The Native Sidecar
+          initContainers:
+          - name: log-shipper
+            image: busybox:1.36
+            restartPolicy: Always  # Keeps it alive... until the main app is done!
+            command: ["sh", "-c", "tail -F /var/log/app.log"]
+            volumeMounts:
+            - name: var-logs
+              mountPath: /var/log
+    
+          # The Main App (Exits after 10 seconds)
+          containers:
+          - name: main-job
+            image: busybox:1.36
+            command: ["sh", "-c", "echo 'Job started'; sleep 10; echo 'Job finished'; date >> /var/log/app.log"]
+            volumeMounts:
+            - name: var-logs
+              mountPath: /var/log
+    ```
+
+2. Apply the `sidecar-job.yaml`:
+
+    ```bash
+    kubectl apply -f sidecar-job.yaml
+    ```
+
+3. Wait for about 30-40 seconds and run this command:
+
+    ```bash
+    kubectl get jobs
+    ```
+
+    You should be able to see `1/1` under Completions, it means the Job successfully finished.
+
+<Figure
+  src="/img/guides/2026/01/kubernetes-sidecar-job-demo.webp"
+  alt="Sidecar-job-demo completed successfully"
+  caption="Sidecar-job-demo completed successfully"
+/>
+
+### Step 6: Clean up
+
+To keep your cluster tidy, let's remove the resources we created. Run this command to delete both the Pod:
+
+```bash
+kubectl delete -f sidecar-demo.yaml -f sidecar-job.yaml
+```
+
+That concludes the Native Sidecar demo! You have successfully deployed a logging sidecar and verified it handles Job termination correctly.
+
+## Monitoring Kubernetes Pods in Production with OpenTelemetry
+
+When using multi-container pods in production, observability becomes critical. You need to know if the sidecar container is consuming too much memory or if the main application is failing to connect to the proxy.
+
+[OpenTelemetry (OTel)](https://signoz.io/opentelemetry/) simplifies data collection by providing a vendor-agnostic standard for gathering metrics, logs, and traces. Running an OpenTelemetry Collector as a sidecar can provide a consistent in-Pod telemetry pipeline (receive → process → export) for data that your workloads emit (via SDKs/auto-instrumentation or other agents) and that the Collector is configured to receive.
+
+[SigNoz](https://signoz.io/) consumes this data directly as a native OpenTelemetry platform, converting raw signals into clear, actionable graphs. Its pre-built Kubernetes dashboards let you visualize the interaction between main containers and sidecars, making it easy to spot lifecycle issues or resource bottlenecks at a glance.
+
+<Figure
+  src="/img/guides/2026/01/kubernetes-sidecar-dashboard.webp"
+  alt="Out of the box visibility core signal provided by SigNoz"
+  caption="Out of the box visibility core signal provided by SigNoz"
+/>
+
+To start capturing this telemetry data from your Native Sidecars, refer to the official SigNoz guides. You can follow the steps to [**collect Kubernetes metrics**](https://signoz.io/docs/userguide/k8s-metrics/) for resource monitoring and set up [**Pod log collection**](https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/) to unify your application and sidecar logs in one place.
+
+## Common Use Cases of Kubernetes Sidecar
+
+The sidecar pattern is ideal for offloading "cross-cutting concerns", tasks that affect multiple parts of a system but are distinct from the business logic.
+
+### Logging and Monitoring Agents
+
+Applications often write logs to `stdout` or local files. A logging sidecar (like Fluentd or Logstash) can read these logs from a shared volume and ship them to a centralized backend like Elasticsearch or SigNoz. This keeps the main application small and agnostic about where logs are stored.
+
+### Service Mesh Proxies
+
+This is the most widespread use of sidecars. Tools like Istio or Linkerd inject a proxy (often Envoy) as a sidecar into every Pod. This proxy intercepts all inbound and outbound network traffic, handling mTLS encryption, traffic routing, and circuit breaking. The application talks to "localhost," unaware of the complex networking logic occurring in the sidecar.
+
+### Configuration and Data Synchronization
+
+A sidecar can act as a content manager. For example, a `git-sync` sidecar can pull the latest HTML or configuration files from a Git repository into a shared volume. The web server in the main container serves these files. This allows you to update content without rebuilding the web server image or restarting the Pod.
+
+### Database Proxies and Adapters
+
+Sidecars can act as adapters to standardize connections. For example, a sidecar might handle authentication and connection pooling to a cloud database. The main application connects to the sidecar via localhost without needing to manage database credentials directly.
+
+## Kubernetes Sidecar Tradeoffs
+
+Implementing sidecars involves a "give and take" relationship between modularity and complexity. The primary advantage is the separation of concerns, allowing platform teams to update a log shipper or proxy image without rebuilding the main application. If you patch a running Pod, updating a native sidecar image restarts that container (not the whole Pod). In controller-managed workloads (Deployment/StatefulSet), changing the template triggers a rolling update that replaces Pods.
+
+However, sidecars introduce resource overhead because you are running extra containers for every Pod. They also complicate debugging, as a Pod failure could be caused by any container in the unit. Since sidecars scale with the app, you cannot scale a resource-heavy sidecar independently of the workload it supports.
+
+## FAQ
+
+### What is SideCar in Pod?
+
+A sidecar is an additional container in a Kubernetes Pod that runs alongside the main application container, sharing the same network namespace, storage volumes, and Pod lifecycle.
+
+### What is the purpose of a sidecar container?
+
+The purpose of a sidecar container is to add supporting features like logging, monitoring, proxying, or configuration management to the main application without changing its code.
+
+### What is the difference between a sidecar and a service mesh?
+
+A sidecar is a single auxiliary container in a Pod for various helper tasks. A service mesh is an infrastructure layer that automatically injects specialized sidecar proxies (usually Envoy) into every Pod to manage service-to-service communication, providing advanced traffic control, security, and observability across the entire cluster.
+
+### What’s new with native sidecar containers in Kubernetes?
+
+Native sidecar containers were introduced as alpha in v1.28, became beta and enabled by default in v1.29, and graduated to stable in v1.33 (April 2025). Implemented as init containers with `restartPolicy: Always`, they now natively start before main application containers, run throughout the Pod's lifecycle, and terminate gracefully afterwards eliminating previous workarounds for lifecycle management, especially in logging proxies, service meshes, and Jobs. 
+
+In practice,  `SidecarContainers` is enabled by default on modern Kubernetes versions, but some distributions or clusters may disable it, verify your cluster configuration if you see validation errors for `initContainers[].restartPolicy`.
+
+---
+
+Hope we answered all your questions regarding Kubernetes Sidecar.
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

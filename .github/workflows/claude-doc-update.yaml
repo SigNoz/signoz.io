@@ -3,6 +3,8 @@ name: Claude Doc Update (from issue)
 on:
   issues:
     types: [opened, edited, labeled]
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: write
@@ -20,9 +22,24 @@ jobs:
     if: >-
       contains(github.event.issue.labels.*.name, 'doc-automation') &&
       (
-        github.event.issue.author_association == 'OWNER' ||
-        github.event.issue.author_association == 'MEMBER' ||
-        github.event.issue.author_association == 'COLLABORATOR'
+      (
+        github.event_name == 'issues' &&
+        (
+          github.event.issue.author_association == 'OWNER' ||
+          github.event.issue.author_association == 'MEMBER' ||
+          github.event.issue.author_association == 'COLLABORATOR'
+        )
+      )
+      ||
+      (
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '@claude edit') &&
+      (
+        github.event.comment.author_association == 'OWNER' ||
+        github.event.comment.author_association == 'MEMBER' ||
+        github.event.comment.author_association == 'COLLABORATOR'
+      )
+      )
       )
 
     runs-on: ubuntu-latest
@@ -93,6 +110,13 @@ jobs:
             You are updating documentation in this repo.
 
             Docs root: ${{env.DOCS_ROOT}}
+
+            Issue: 
+            === Issue body ===
+            ${{ github.event.issue.body }}
+
+            === Trigger comment (if any) ===
+            ${{ github.event.comment.body }}
 
             Task:
             - Read the issue request below.
