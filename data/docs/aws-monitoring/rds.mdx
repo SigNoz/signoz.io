@@ -1,0 +1,521 @@
+---
+date: 2025-12-28
+id: rds
+title: Monitor AWS RDS with SigNoz
+description: Collect RDS logs and metrics using one-click integration or manual OpenTelemetry setup.
+doc_type: howto
+---
+
+## Overview
+
+Amazon RDS provides managed relational database services for PostgreSQL, MySQL, Oracle, SQL Server, and MariaDB. SigNoz helps you monitor RDS performance, query logs, and database health.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/rds/) to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable RDS Monitoring
+
+Once connected, SigNoz will auto-discover your RDS instances and begin collecting:
+- **CloudWatch Metrics**: CPU, memory, connections, IOPS, replication lag
+- **CloudWatch Logs**: Error logs, slow query logs (if enabled in RDS)
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "RDS" to find automatically imported dashboards showing:
+- Database performance overview
+- Query latency and throughput
+- Connection pool utilization
+- Storage and IOPS metrics
+
+### What's Collected
+
+| Data Type | Source | Examples |
+|-----------|--------|----------|
+| Metrics | CloudWatch | `CPUUtilization`, `DatabaseConnections`, `ReadIOPS`, `WriteLatency` |
+| Logs | CloudWatch Logs | Error logs, slow query logs, audit logs |
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to set up your own dashboards.
+</Admonition>
+
+Choose one of the following approaches based on your needs:
+
+### Option 1: CloudWatch Exporter (Recommended)
+
+This approach collects both CloudWatch metrics and native database metrics using OpenTelemetry.
+
+**For PostgreSQL RDS:**
+See the complete guide: [AWS RDS PostgreSQL Integration](https://signoz.io/docs/integrations/aws-rds-postgres/)
+
+**For MySQL RDS:**
+See the complete guide: [AWS RDS MySQL Integration](https://signoz.io/docs/integrations/aws-rds-mysql/)
+
+These guides cover:
+- Setting up the Prometheus CloudWatch Exporter
+- Configuring the PostgreSQL/MySQL receiver
+- Collecting CloudWatch logs via the `awscloudwatch` receiver
+
+---
+
+### Option 2: S3 Lambda Forwarder (For Log Files)
+
+If your RDS logs are exported to S3, use a Lambda function to forward them to SigNoz.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+#### Creating / Configuring your S3 bucket
+
+To accomplish the task described, please follow these steps:
+
+1. **Creating an S3 Bucket:**
+   - Sign in to the AWS Management Console.
+   - Navigate to the Amazon S3 service.
+   - Click on **Create bucket**.
+   - Enter a unique bucket name, select the region, and configure any additional settings if needed (such as versioning, logging, etc.).
+   - Click **Create bucket** to finalize the creation process.
+
+<Figure
+  src="/img/docs/elb/elb-logs-create_bucket_2.webp"
+  alt="S3 bucket creation form with bucket name and region fields"
+  caption="Fill up bucket details"
+  className="box-shadowed-image"
+/>
+
+
+
+2. **Uploading Data to the S3 Bucket:**
+   - After creating the bucket, navigate to the S3 Management Console.
+   - Click on the **Upload** button.
+   - Select the files you wish to upload from your local machine.
+   - Optionally, configure settings like encryption, permissions, etc.
+   - Click **Upload** to upload the selected files to the bucket.
+
+3. **File Formats:**
+   - You can upload files in various formats such as .json, .csv, .log, .gz, .zip, etc.
+   - If you have configured RDS logging, RDS logs for various DB's are either saved in `.gzip` (compressed) format or any of the format mentioned in the previous point in your S3 bucket.
+
+
+<Admonition>
+Please be advised that all logs will undergo conversion to JSON format before transmission. Consequently, it may be necessary to perform supplementary preprocessing of the logs as part of this conversion process. Here preprocessing of the logs means getting them from S3 bucket, separating each log line based on the delimiter (",\" or based on quotes or whitespaces) and assigning them to respective keys. Thus making a key, value pair before sending to SigNoz. 
+</Admonition>
+
+To move forward, we assume that you already have some data in your S3 bucket.
+
+<Admonition type="info">
+For the scope of this documentation, we assume that all the data in S3 bucket is in the same format. For example, if one file is in `.csv` format, then all files within the bucket will be in `.csv` format.  For files in different formats, you will have to use different parsing functions for each format or update the existing function accordingly.
+</Admonition>
+
+
+#### Understanding how lambda function work
+
+When you successfully attach your lambda function with the S3 bucket and configure it correctly, any new addition / deletion / copy / PUT etc, requests made to the S3 bucket will trigger the lambda function and the code written in the lambda function will get executed.
+
+#### Creating a lambda function
+
+Follow these steps to create the lambda function:
+
+**Step 1:** Go to your AWS console and search for AWS Lambda, go to **Functions** and click on **Create Function**. 
+
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_1.webp"
+  alt="AWS Lambda Console showing Create function button"
+  caption="Create Lambda function from AWS Console"
+  className="box-shadowed-image"
+/>
+
+
+**Step 2:** Choose the `Author from scratch` checkbox and proceed to fill in the function name. 
+
+<Figure
+  src="/img/docs/rds-docs/create_function.webp"
+  alt="Lambda function creation form with Author from scratch option selected"
+  caption="Choose the Author from scratch and fill up other details"
+  className="box-shadowed-image"
+/>
+
+
+
+**Step 3:** Choose `Python 3.x` as the Runtime version, `x86_64` as Architecture (preferably), and keep other settings as default. Select `Create a new role with basic Lambda permissions` for now, we'll require more permissions later on. So for now, select this option. 
+
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_3.webp"
+  alt="Lambda runtime and permissions configuration options"
+  caption="Choose Create a new role here"
+  className="box-shadowed-image"
+/>
+
+
+**Step 4:** Once you are done configuring the lambda function, the function will get created.
+
+<Figure
+  src="/img/docs/rds-docs/lambda_function.webp"
+  alt="Newly created Lambda function overview page"
+  caption="Your barebones Lambda function is created now"
+  className="box-shadowed-image"
+/>
+
+
+
+
+#### Configuring Policies for Lambda function
+
+As said in Step 3 previously, we need extra permissions in order to access the S3 Bucket for execution of our Lambda code, follow along to set it up. 
+
+**Step 1:** Scroll down from your Lambda page, you'll see a few tabs there. Go to `Configurations` and select `Permissions` from the left sidebar. 
+
+<Figure
+  src="/img/docs/rds-docs/execution_role.webp"
+  alt="Lambda function Configuration tab showing Permissions section"
+  caption="Choosing execution role from Configurations tab"
+  className="box-shadowed-image"
+/>
+
+
+**Step 2:** Click on the `Execution Role name` link just under Role name, it will take us to AWS IAM page. Here we will add policies to get full S3 access. Once here, click on the `Add permissions` button and select `Attach policies` from the drop down list. 
+
+<Figure
+  src="/img/docs/rds-docs/attach_policy.webp"
+  alt="IAM page showing Add permissions dropdown with Attach policies option"
+  caption="Attach policies to your Lambda function"
+  className="box-shadowed-image"
+/>
+
+
+**Step 3:** Search "S3" and you'll see a policy named `AmazonS3FullAccess` select that and proceed. 
+
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_7.webp"
+  alt="IAM Attach policies page with AmazonS3FullAccess policy selected"
+  caption="Policies you'll need to run your Lambda function"
+  className="box-shadowed-image"
+/>
+
+
+<Admonition type="warning" >
+It's advisable to proceed with caution when granting full S3 access, particularly in a production environment. Before deploying your Lambda function with such extensive permissions, it's essential to consult with your system administrator or designated authority to ensure compliance with security protocols and best practices. This step helps mitigate potential risks and ensures that access permissions align with organizational guidelines and requirements.
+</Admonition>
+
+<Figure
+  src="/img/docs/elb/elb-logs-policies-used.webp"
+  alt="List of IAM policies required for Lambda function execution"
+  caption="Extra policies you might require to execute your Lambda function"
+  className="box-shadowed-image"
+/>
+
+
+Please refer to the image above as a comprehensive guide to the policy names that you may consider adding to your Lambda function. Failure to include these policies could result in insufficient privileges, potentially hindering the function's ability to perform necessary operations within the AWS environment.
+
+Congrats, you are just done with one of the major hurdles in running your code. Now, let's add a trigger. 
+
+#### Adding Triggers
+
+You need to use the Lambda console to build a trigger so that your function can be called immediately by another AWS service (S3, in our case). A trigger is a resource you set up to enable your function to be called by another AWS service upon the occurrence of specific events or conditions. 
+
+A function may have more than one trigger. Every trigger functions as a client, independently calling your method, and Lambda transfers data from a single trigger to each event it passes to your function.
+
+To setup the trigger, follow these steps:
+
+**Step 1:** Click on the `+ Add trigger` button from the Lambda console. 
+
+<Figure
+  src="/img/docs/rds-docs/add_trigger_2.webp"
+  alt="Lambda function console showing Add trigger button"
+  caption="Add a trigger to the function."
+  className="box-shadowed-image"
+/>
+
+
+**Step 2:** Select `S3` from the first drop down of AWS services list. Pick your S3 bucket for the second field. 
+
+**Step 3:** For the Event types field, you can select any number of options you wish. The trigger will occur depending upon what option(s) you choose here. By default, the `All object create events` will be selected. 
+
+<Figure
+  src="/img/docs/rds-docs/add_trigger.webp"
+  alt="S3 trigger configuration showing event type selection dropdown"
+  caption="Choose event types from the drop down menu"
+  className="box-shadowed-image"
+/>
+
+
+Verify the settings and click on `Add` button at bottom right to add this trigger.
+
+#### Adding Request Layer
+
+We will be using Python's `requests` module which is <a href="https://aws.amazon.com/blogs/compute/upcoming-changes-to-the-python-sdk-in-aws-lambda/" target="_blank" rel="noopener noreferrer nofollow">not included by default</a> in Lambda.
+
+To utilize Python's `requests` module within a Lambda function, it's necessary to explicitly add it as a layer. While there may be alternative approaches, it's advisable to adhere to established practices that have been thoroughly tested and proven effective. Therefore, we will proceed with adding `requests` as a layer to ensure reliable functionality within the Lambda environment.
+
+**Step 1:** Follow the steps below to create a zip of the request module and add it as a layer to make it work on AWS lambda.
+
+The commands you'd need:
+
+```py
+# make a new directory
+mkdir python
+# move into that directory
+cd python
+
+# install requests module
+pip install --target . requests
+# zip the contents under the name dependencies.zip
+zip -r dependencies.zip ../python 
+
+```
+
+**Step 2:** To upload your zip file, go to AWS Lambda > Layers and click on `Create Layer`. [Not inside your specific Lambda function, just the landing page of AWS Lambda]. 
+
+<Figure
+  src="/img/docs/elb/elb-logs-layer_3.webp"
+  alt="AWS Lambda Layers page with Create Layer button"
+  caption="Creating a new Layer"
+  className="box-shadowed-image"
+/>
+
+
+**Step 3:** You'll be redirected to Layer configurations page, here, give a name to your layer, an optional description, select `Upload a .zip file` , click on `Upload` and locate the requirements.zip file. 
+
+**Step 4:** Select your desired architecture and pick `Python 3.x` as your runtime. Hit `Create`. Your layer has now been created. Now lets connect it to our Lambda function which we created to send logs to SigNoz. 
+
+<Figure
+  src="/img/docs/elb/elb-logs-layer_4.webp"
+  alt="Layer configuration page with upload zip file option"
+  caption="Uploading the requirements.zip file to later add it as a layer "
+  className="box-shadowed-image"
+/>
+
+
+**Step 5:** Go to your Lambda function, scroll down to Layers section and on the right of it, you'll find a button that says `Add a layer` to click on. 
+
+<Figure
+  src="/img/docs/elb/elb-logs-layer_5.webp"
+  alt="Lambda function Layers section with Add a layer button"
+  caption="Add a layer to your Lambda function"
+  className="box-shadowed-image"
+/>
+
+
+**Step 6:** Pick `Custom layers` from the checkbox and select your custom layer from the given drop down below and then click on the button `Add`. 
+
+<Figure
+  src="/img/docs/elb/elb-logs-layer_6.webp"
+  alt="Add layer dialog showing Custom layers option and layer selection dropdown"
+  caption="Choose your layer name"
+  className="box-shadowed-image"
+/>
+
+
+Congratulations, the `requests` module has been successfully integrated into your code area. By adding this layer, you have resolved the 'request module not found error' that would have otherwise occurred.
+
+---
+
+#### The Lambda Function
+
+Now, we come to the pivotal section of this document: the code implementation. 
+
+The Python script's primary function revolves around retrieving gzipped log files stored within an Amazon S3 bucket. Subsequently, it decompresses these files, transforms individual log entries into JSON objects, and transmits the resultant JSON data to a predetermined HTTP endpoint.
+
+Below is the comprehensive code along with detailed comments for clarity:
+
+<Admonition type="info">
+The below code assumes your log files are already in compressed form, if they are not, feel free to remove the decompressing of log files and match the file type you have for you logs (if not already `.log`).
+</Admonition>
+
+```python:lambda_function.py
+import json
+import gzip
+import boto3 
+import requests
+import shlex
+
+# Create an S3 client
+s3 = boto3.client('s3')
+
+# Function to convert a log line into a JSON object
+def convert_log_line_to_json(line):
+    # Define the headers to be used for the JSON keys
+    postgres_headers = ["timestamp", "user", "dbname", "pid", "remote_host", "remote_port", "session_id", "line_num", "ps", "session_start", "vxid", "txid", "error_severity", "state_code", "message", "detail", "hint", "internal_query", "internal_position", "context", "statement", "cursor_position", "func_name", "file_name", "file_line_num", "application_name", "backend_type", "leader_pid", "query_id"]
+
+    # Split the log line using shell-like syntax (keeping quotes, etc.)
+    res = shlex.split(line, posix=False)
+
+    # Create a dictionary by zipping headers and log line parts
+    return dict(zip(postgres_headers, res))
+
+# Lambda function handler
+def lambda_handler(event, context):
+    # S3 bucket name
+    bucket_name = '<name_of_your_bucket>'
+
+    # List all objects in the specified S3 bucket
+    response = s3.list_objects_v2(Bucket=bucket_name)
+
+    # Iterate through each object in the bucket
+    for obj in response['Contents']:
+        # Check if the object is a gzipped log file
+        if obj['Key'].endswith('.log.gz'):
+            file_key = obj['Key']
+
+            # Download the gzipped file content
+            file_obj = s3.get_object(Bucket=bucket_name, Key=file_key)
+            file_content = file_obj['Body'].read()
+
+            # Decompress the gzipped content
+            decompressed_content = gzip.decompress(file_content)
+
+            # Convert bytes to string
+            json_data = str(decompressed_content, encoding='utf-8')
+
+            # Split the string into lines
+            lines = json_data.strip().split('\n')
+
+            # Convert the list of strings into a JSON-formatted string
+            result = json.dumps(lines, indent=2)
+
+            # Load the JSON-formatted string into a list of strings
+            list_of_strings = json.loads(result)
+
+            # Convert each log line string into a JSON object
+            json_data = [convert_log_line_to_json(line) for line in list_of_strings]
+            
+            req_headers = {
+                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+                     'Content-Type': 'application/json'
+                }
+            # Specify the HTTP endpoint for sending the data
+            http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'  # Replace <region> with us, eu, or in
+
+            # Send the JSON data to the specified HTTP endpoint
+            response = requests.post(http_url, json=json_data, headers=req_headers)
+
+            # Print information about the sent data and the response received
+            print(f"Sent data to {http_url}. Response: {response.status_code}")
+```
+
+
+Replace the following placeholders:
+- `<name_of_your_bucket>`: The name of your S3 bucket containing RDS logs.
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key. See [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for details.
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [SigNoz Cloud endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for details.
+
+Here's how a raw, unprocessed Postgres RDS log line looks like:
+
+```python
+2017-06-12 19:09:49 UTC:...:rds_test@postgres:[11701]:LOG: AUDIT: OBJECT,1,1,READ,SELECT,TABLE,public.t1,select * from t1;
+```
+
+In the code, each field corresponds to a header. The purpose of the code above is to transmit the logs to the SigNoz endpoint. Here, we have used `postgres_headers`, feel free to change that to any other RDS Database header format.
+
+
+<Admonition type="warning" >
+The provided code is functional, but exercise caution when copying and pasting it in its entirety. Incorrect configuration could result in the unintentional ingestion of a large volume of data. If you have limited you log collection or configured it to collect less information, make the suitable changes to the headers as well to match the correct log values.
+</Admonition>
+
+
+#### Testing your Lambda function
+
+Once you've finished writing your code, it's crucial to deploy it and conduct thorough testing to ensure its functionality. Before proceeding with deployment and testing, it's important to consider adjusting the timeout setting for your Lambda function. This adjustment is necessary because the process of transferring data from S3 to an external endpoint may take several minutes, exceeding the default Lambda timeout of 3 seconds.
+
+To extend the timeout duration, follow these steps:
+
+1. Navigate to the Lambda function configuration.
+2. Access the "General Configuration" section.
+3. Click on the "Edit" button to modify settings.
+4. Increase the timeout value to a duration exceeding 10 minutes. Typically, the code execution completes within 1-4 minutes at most.
+
+By adjusting the timeout setting, you ensure that your Lambda function has sufficient time to complete the data transfer process without encountering timeouts. This proactive measure enhances the reliability and effectiveness of your deployed solution.
+
+
+<Figure
+  src="/img/docs/elb/elb-logs-timeout_increase.webp"
+  alt="Lambda function General Configuration showing timeout setting"
+  caption="Configuring execution timeout of Lambda function"
+  className="box-shadowed-image"
+/>
+
+
+Once you've finished adjusting the timeout setting, navigate to the code editor for your Lambda function. Locate the 'test' button, and from the dropdown menu, select the option labeled 'Configure test events.' Create a new test case by specifying it as an S3 PUT event, then save your configuration.
+
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_test_event.webp"
+  alt="Lambda test event configuration dialog with S3 PUT event template"
+  caption="Creating Sample event"
+  className="box-shadowed-image"
+/>
+
+You're now prepared to proceed. Whenever you make alterations to the code and wish to evaluate them, follow these steps: Deploy the code first (equivalent to pressing 'Save'), and once it's fully deployed, proceed to click on the 'Test' button.
+
+Below is an image showing the process of transmitting the RDS logs to the SigNoz endpoint.
+
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_10.webp"
+  alt="Lambda function code editor showing the RDS log forwarding code"
+  caption="Visual representation of code in Lambda function"
+  className="box-shadowed-image"
+/>
+
+
+#### Test Case and Output
+
+If the logs are sent successfully, here's how they'll be transmitted. The following output displays the JSON-formatted data as we've printed it to visualize the sent information.
+
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_output.webp"
+  alt="Lambda function execution output showing successful log transmission"
+  caption="Visual representation of code output of Lambda function"
+  className="box-shadowed-image"
+/>
+
+
+#### Validate
+
+To verify that your RDS logs are being sent correctly to SigNoz:
+
+1. Navigate to **Logs** > **Logs Explorer** in SigNoz.
+2. You should see your RDS logs appearing in the logs list.
+3. Click on any log line to view its detailed information and verify the fields.
+
+<Figure
+  src="/img/docs/elb/elb-logs-lambda_12.webp"
+  alt="SigNoz Logs Explorer showing RDS logs with parsed fields"
+  caption="A sample RDS log line in SigNoz Logs Explorer"
+  className="box-shadowed-image"
+/>
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) based on your RDS logs to monitor for database errors or slow queries
+- [Build dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your database performance metrics
+- Explore [Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to further process and enrich your RDS logs
+
+## Related Resources
+
+- [AWS RDS PostgreSQL Integration](https://signoz.io/docs/integrations/aws-rds-postgres/)
+- [AWS RDS MySQL Integration](https://signoz.io/docs/integrations/aws-rds-mysql/)
+- [Send CloudWatch Logs to SigNoz](https://signoz.io/docs/userguide/send-cloudwatch-logs-to-signoz/)

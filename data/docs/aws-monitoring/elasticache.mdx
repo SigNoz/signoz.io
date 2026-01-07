@@ -1,0 +1,73 @@
+---
+date: 2025-12-26
+id: elasticache
+title: Monitor AWS ElastiCache with SigNoz
+description: Collect ElastiCache metrics using one-click integration or manual OpenTelemetry setup.
+doc_type: howto
+---
+
+## Overview
+
+Amazon ElastiCache provides managed Redis and Memcached clusters. SigNoz helps you monitor cache performance, memory utilization, and replication health.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/elasticache/) to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable ElastiCache Monitoring
+
+Once connected, SigNoz will auto-discover your ElastiCache clusters and begin collecting CloudWatch metrics.
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `CPUUtilization` | CPU usage percentage |
+| `FreeableMemory` | Available memory |
+| `CacheHits` / `CacheMisses` | Cache hit/miss counts |
+| `CacheHitRate` | Hit rate percentage |
+| `CurrConnections` | Current client connections |
+| `ReplicationLag` | Replication delay (Redis) |
+| `Evictions` | Evicted items count |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "ElastiCache" or "Redis" to find automatically imported dashboards.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**. You'll need to set up your own dashboards.
+</Admonition>
+
+For comprehensive ElastiCache monitoring, see the detailed guide:
+
+[**AWS ElastiCache Redis Integration**](https://signoz.io/docs/integrations/aws-elasticache-redis/)
+
+This guide covers:
+- Setting up the Prometheus CloudWatch Exporter for AWS metrics
+- Configuring the Redis receiver for native Redis metrics
+- Collecting ElastiCache logs via CloudWatch
+- Pre-built dashboard JSON files
+
+</TabItem>
+</Tabs>

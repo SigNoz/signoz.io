@@ -1,0 +1,227 @@
+---
+date: 2025-12-30
+id: sqs
+title: Monitor Amazon SQS with SigNoz
+description: Collect SQS metrics using one-click integration or CloudWatch receiver.
+doc_type: howto
+---
+
+## Overview
+
+Amazon Simple Queue Service (SQS) is a fully managed message queuing service. SigNoz helps you monitor queue depth, message age, and throughput.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click" label="One-Click Integration" default>
+
+## One-Click Integration
+
+<Admonition type="info">
+One-Click Integration is available for **SigNoz Cloud** only and includes pre-built dashboards. This method uses AWS CloudFormation and CloudWatch, which may incur additional AWS charges.
+</Admonition>
+
+### Step 1: Connect Your AWS Account
+
+Follow the [One-Click AWS Integrations Guide](https://signoz.io/docs/integrations/aws/sqs/) to:
+1. Deploy the CloudFormation stack
+2. Connect your AWS account to SigNoz
+
+### Step 2: Enable SQS Monitoring
+
+Once connected, SigNoz will auto-discover your SQS queues and begin collecting CloudWatch metrics.
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `ApproximateNumberOfMessagesVisible` | Messages available for retrieval |
+| `ApproximateNumberOfMessagesNotVisible` | Messages in flight |
+| `ApproximateNumberOfMessagesDelayed` | Delayed messages |
+| `ApproximateAgeOfOldestMessage` | Age of oldest message |
+| `NumberOfMessagesSent` | Messages sent to queue |
+| `NumberOfMessagesReceived` | Messages received from queue |
+| `NumberOfMessagesDeleted` | Messages deleted |
+
+### Pre-built Dashboards
+
+Navigate to **Dashboards** and search for "SQS" to find automatically imported dashboards.
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup (SQS Exporter)
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**.
+</Admonition>
+
+This guide uses the <a href="https://github.com/jmal98/sqs-exporter" target="_blank" rel="noopener noreferrer nofollow">SQS Exporter</a>, a Prometheus exporter that queries SQS directly (not via CloudWatch). This approach is simpler, more cost-effective, and provides real-time queue metrics.
+
+### Prerequisites
+
+Before proceeding, ensure you have:
+
+- **OpenTelemetry Collector** installed and configured. See [Get Started with OTel Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+- **Docker** installed on the host machine.
+- **AWS credentials** configured via environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`), IAM role, or instance profile.
+- **IAM permissions** for the credentials:
+  - `sqs:ListQueues`
+  - `sqs:GetQueueAttributes`
+
+### Where to Run the SQS Exporter
+
+The SQS Exporter should run on a machine that:
+1. Has network access to AWS SQS APIs.
+2. Has AWS credentials configured.
+3. Is network-accessible from your OpenTelemetry Collector.
+
+For **SigNoz Cloud** users, run the exporter on any EC2 instance, VM, or container with AWS credentials. The OTel Collector on the same host will forward metrics to SigNoz Cloud.
+
+For **Self-Hosted** users, run the exporter on the same host as your OTel Collector, or ensure network connectivity between them.
+
+### Step 1: Run the SQS Exporter
+
+Run the SQS Exporter as a Docker container:
+
+```bash
+docker run -d \
+  --name sqs-exporter \
+  -p 9384:9384 \
+  -e AWS_ACCESS_KEY_ID=<your-access-key> \
+  -e AWS_SECRET_ACCESS_KEY=<your-secret-key> \
+  -e AWS_REGION=<aws-region> \
+  jmal98/sqs-exporter:0.2.0
+```
+
+Replace the following:
+- `<your-access-key>`: Your AWS access key ID.
+- `<your-secret-key>`: Your AWS secret access key.
+- `<aws-region>`: Your AWS region where SQS queues are deployed (e.g., `us-east-1`, `eu-west-1`, `ap-south-1`).
+
+<KeyPointCallout title="Optional: Filter specific queues" defaultCollapsed={true}>
+By default, the exporter monitors all SQS queues visible to the AWS account. To filter specific queues, use one of these environment variables:
+- `SQS_QUEUE_NAMES`: Comma-separated list of queue names (e.g., `queue1,queue2`)
+- `SQS_QUEUE_NAME_PREFIX`: A single queue name prefix to match
+- `SQS_QUEUE_URLS`: Comma-separated list of full queue URLs
+
+Example with queue name filter:
+```bash
+docker run -d \
+  --name sqs-exporter \
+  -p 9384:9384 \
+  -e AWS_ACCESS_KEY_ID=<your-access-key> \
+  -e AWS_SECRET_ACCESS_KEY=<your-secret-key> \
+  -e AWS_REGION=<aws-region> \
+  -e SQS_QUEUE_NAME_PREFIX=prod- \
+  jmal98/sqs-exporter:0.2.0
+```
+</KeyPointCallout>
+
+<Admonition type="tip">
+If running on an EC2 instance with an IAM role, you can omit the AWS credential environment variables. The exporter will use the instance profile credentials automatically.
+</Admonition>
+
+Verify the exporter is running by checking the metrics endpoint:
+
+```bash
+curl http://localhost:9384/metrics | grep sqs_
+```
+
+You should see metrics like:
+- `sqs_approximatenumberofmessages` – Messages available for retrieval
+- `sqs_approximatenumberofmessagesdelayed` – Messages waiting to be available
+- `sqs_approximatenumberofmessagesnotvisible` – Messages currently being processed (in-flight)
+
+### Step 2: Configure OpenTelemetry Collector
+
+1. **Add Prometheus Receiver**
+
+   Add the following `prometheus` receiver to your `otel-collector-config.yaml` to scrape the SQS Exporter:
+
+   ```yaml:otel-collector-config.yaml
+   receivers:
+     prometheus:
+       config:
+         scrape_configs:
+           - job_name: 'aws-sqs'
+             scrape_interval: 60s
+             static_configs:
+               - targets: ['<exporter-host>:9384']
+   ```
+
+   Replace `<exporter-host>` with the IP/hostname where the SQS Exporter is running (use `localhost` if on the same machine).
+
+2. **Add Resource Processor**
+
+   The dashboard requires a `deployment.environment` label to filter metrics. Add this `resource` processor to tag your metrics:
+
+   ```yaml:otel-collector-config.yaml
+   processors:
+     resource/env:
+       attributes:
+         - key: deployment.environment
+           value: production  # Replace with your environment name
+           action: upsert
+   ```
+
+3. **Update Pipeline**
+
+   Enable both the `prometheus` receiver and the `resource/env` processor in your metrics pipeline:
+
+   ```yaml:otel-collector-config.yaml
+   service:
+     pipelines:
+       metrics:
+         receivers: [otlp, prometheus]
+         processors: [resource/env, batch]
+         exporters: [otlp]
+   ```
+
+<Admonition type="note">
+Append the `receivers` and `processors` blocks to your existing configuration. For the `service` pipeline, update your existing metrics pipeline to include the new components.
+</Admonition>
+
+Restart your OpenTelemetry Collector to apply the changes.
+
+### Validate
+
+To confirm that SQS metrics are flowing to SigNoz:
+
+1. **Import the Dashboard**: Navigate to [AWS SQS Prometheus Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aws-sqs-prometheus/) and Import Dashboard.
+2. **Verify Metrics**: Open the imported dashboard. You should see charts populated with data like queue depth and message age.
+3. **Alternative - Query Builder**: 
+    - Go to **Dashboards** → **New Dashboard** → **New Panel**.
+    - Search for metrics starting with `sqs_` (e.g., `sqs_approximatenumberofmessages`).
+    - Verify that metrics have `queue_name` labels matching your SQS queues.
+
+If the dashboard is populated or you see metrics in the query builder, your setup is working correctly.
+
+### What's Collected
+
+| Metric | Description |
+|--------|-------------|
+| `sqs_approximatenumberofmessages` | Messages available for retrieval from the queue |
+| `sqs_approximatenumberofmessagesdelayed` | Messages waiting to be added to the queue |
+| `sqs_approximatenumberofmessagesnotvisible` | Messages currently being processed (in-flight) |
+
+### Pre-built Dashboard
+
+Import the **AWS SQS Prometheus Dashboard** for a comprehensive view of your SQS queues:
+
+- [AWS SQS Prometheus Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/aws-sqs-prometheus/)
+
+This dashboard provides queue health monitoring, message flow analysis, and multi-environment support.
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+Once SQS metrics are flowing to SigNoz, you can:
+
+- **Set up alerts** for critical metrics like queue depth or message age. See [Alerts](https://signoz.io/docs/alerts/).
+- **Create dashboards** to visualize SQS performance. See [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/).

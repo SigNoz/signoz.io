@@ -1,0 +1,476 @@
+---
+
+title: "OpenTelemetry Collector Contrib - A Hands-on Guide"
+slug: opentelemetry-collector-contrib
+date: 2026-01-05
+tags: ["opentelemetry", "observability"]
+authors: ["dhruv_ahuja"]
+description: "A comprehensive guide to the OpenTelemetry Collector Contrib distribution. Learn how it differs from Core, its architecture, and how to build your own."
+keywords: ["opentelemetry"]
+
+---
+
+As application systems grow more complex, it becomes ever more important to understand how services interact across distributed systems. Observability sheds light on the behavior of instrumented applications and the infrastructure they run on. This enables engineering teams to gain better track system health and prevent critical failures.
+
+OpenTelemetry (OTel) has standardized how we generate and transmit telemetry, and the OpenTelemetry Collector is the engine that processes and export this data. However, when deploying the Collector, you will encounter two distinct variants: the **Core** and **Contrib** distributions.
+
+Choosing the right distribution is a key step in setting up your observability pipeline. This article explains what the OpenTelemetry Collector Contrib distribution is, why it exists, and how to navigate its ecosystem of plug-and-play components.
+
+## What is OpenTelemetry Collector Contrib?
+
+The Collector is a high-performance component that handles data ingestion from multiple sources, performs in-flight processing, and exports data to observability platforms. OpenTelemetry Collector Contrib is a <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib" rel="noopener noreferrer nofollow" target="_blank">companion repository</a> to the main OpenTelemetry Collector that houses a vast library of community-contributed components. To put things into perspective:
+
+- **Collector Core:** the standard, “official” distribution that is designed to be lightweight and stable. It contains only the essential components maintained and distributed by the OTel maintainers.
+- **Collector Contrib:** the extended, “batteries-included” distribution; it ships with dozens of integrations for third-party vendors, specific technologies and advanced processing needs. Added components are entirely community-managed and have different levels of stability. Eg., a new component might initially release in the `alpha` stage.
+
+<KeyPointCallout title="Versioning and Release Cadence">
+
+Since Contrib is a superset of Core, OpenTelemetry releases new versions in sync with the same version scheme. <a href="https://github.com/open-telemetry/opentelemetry-collector-releases/releases/tag/v0.142.0" rel="noopener noreferrer nofollow" target="_blank">Version 0.142.0</a>’s GitHub release page contains release binaries and links to the change logs for both distributions, in one place.
+
+</KeyPointCallout>
+
+### OTel Collector Core vs Contrib
+
+The following matrix shows the major differences between the two distributions:
+
+| **Feature** | **Collector Core (otelcol)** | **Collector Contrib (otelcol-contrib)** |
+| --- | --- | --- |
+| **Scope** | Essential components only | Massive library of community components |
+| **Binary Size** | Small (typically ~50MB) | Large (typically 120MB+) |
+| **Maintenance** | Managed by core OTel maintainers | Community-driven |
+| **Stability** | High- strict compatibility guarantees | Mixed- contains components with varying stability |
+| **Use Case** | Pure OTLP environments, high-security requirements | Integrating with varied stacks (AWS, K8s, Redis, etc.) |
+
+Contrib is the practical choice for most teams, as it likely supports the specific frameworks and cloud providers they need. The Core distribution is recommended only when you need a slim binary or have strict security constraints.
+
+## OTel Collector Contrib Architecture
+
+The OTel Collector features a plug-and-play design where users configure specific components and define pipelines that control how data flows between those components. Let’s understand each component one-by-one.
+
+<Figure src="/img/blog/2026/01/opentelemetry-collector-contrib-image.webp" alt="Data moves through an OTel Collector Contrib pipeline; extensions enhance the Collector’s behavior and allow monitoring the Collector's health itself. Components not added to a pipeline are not initialized and are ignored." caption="Data moves through an OTel Collector Contrib pipeline; extensions enhance the Collector’s behavior" />
+
+### Receivers
+
+Receivers are the entry point for telemetry data into the Collector. They listen on ports and receive telemetry data or actively scrape data from external sources. Receivers convert incoming telemetry data into the Collector’s native OTLP format before passing it down the pipeline. They are classified as push-based (eg., listening for traces via gRPC/HTTP ports) or pull-based (eg., scraping Prometheus metrics).
+
+Some commonly used receivers are:
+
+- `filelog`: Follows log files on disk and ingests new entries as log records.
+- `hostmetrics`: Periodically collects the host machine’s metrics (CPU, memory, disk usage stats, etc.).
+- `k8s_cluster` <a href="https://opentelemetry.io/docs/platforms/kubernetes/collector/components/#kubernetes-cluster-receiver" rel="noopener noreferrer nofollow" target="_blank">Collects cluster-level events</a> and metadata from the Kubernetes API server.
+
+Users requiring more specialized receivers can build their own by following the <a href="https://opentelemetry.io/docs/collector/extend/custom-component/receiver/" rel="noopener noreferrer nofollow" target="_blank">comprehensive documentation</a> provided by OpenTelemetry.
+
+### Processors
+
+Processors prepare telemetry data for final storage and analysis by OTel platforms. They perform operations like transformation, sampling and aggregation on ingested data. Processors in a pipeline must be defined carefully, as they run in sequence- we will see this in action later.
+
+Contrib includes some powerful processors:
+
+- `transform`: Uses the OpenTelemetry Transform Language (OTTL) to modify data, such as rewriting metric names or sanitizing PII.
+- `resourcedetection`: Detects the cloud environment (AWS, GCP, Azure) and enriches telemetry data with relevant metadata like region or instance ID.
+- `tail_sampling`: Buffers complete traces in memory to apply sampling rules like “keep 100% of errors and only 1% of successful requests”.
+
+### Exporters
+
+Exporters transmit data out of the Collector to observability backends like [SigNoz](https://signoz.io/) or other Collector instances. They can push the data to an endpoint or expose an endpoint for scraping.
+
+Some useful exporters included in Contrib are:
+
+- `file`: Writes data to a file on the disk in the JSON/OTLP format and supports essential features like file rotation, data compression, etc.
+- `prometheusremotewrite`: Pushes metrics to endpoints that support Prometheus Remote Write.
+- `kakfa`: Pushes telemetry data to a Kafka topic, typically used in large-scale setups.
+
+### Extensions
+
+Extensions provide additional capabilities to the Collector itself, rather than interacting with telemetry data directly.
+
+Some commonly used extensions are:
+
+- `health_check`: An HTTP endpoint (default `:13133`) that reports Collector health. It is often used for liveness/readiness probes in Kubernetes.
+- `pprof`: Enables performance profiling of the Collector using Go’s `pprof` tooling (default `:1777`). This can be helpful to diagnose issues like high memory usage.
+- `zpages`: Provides debug pages (default `:55679`) containing real-time information about the Collector’s internal state. For example, `/debug/tracez` offers a tabular view of trace spans currently inside the Collector.
+
+<Figure src="/img/blog/2026/01/opentelemetry-collector-contrib-image%201.webp" alt="The TraceZ page categories spans into latency buckets and distinctly lists error samples" caption="The TraceZ page categories spans into latency buckets and distinctly lists error samples" />
+
+### Pipelines
+
+Pipelines are configurations that define the flow of data through the Collector- from data reception, to processing, and export to a compatible backend. Components are **lazy-loaded**- the Collector does not initialize components unless they are explicitly added to a pipeline. This prevents unused components from consuming resources.
+
+The following configuration showcases a complete setup that monitors Collector health, scrapes metrics, adds host tags, and exports to an OpenTelemetry-compatible backend:
+
+```yaml
+receivers:
+  hostmetrics:
+    collection_interval: 10s
+    scrapers:
+      cpu:
+      memory:
+      filesystem:
+
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  resourcedetection:
+    detectors: [system]
+
+  resource:
+    attributes:
+      - key: service.name
+        value: "otelcol-contrib-demo"
+        action: upsert
+
+      - key: service.namespace
+        value: "infra"
+        action: upsert
+
+      - key: deployment.environment
+        value: "demo"
+        action: upsert
+
+  # explicit object definitions prevent k8s validation errors
+  batch: {}
+  
+exporters:
+  otlp:
+    # replace <region> with your host region
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      # add your ingestion key here
+      signoz-ingestion-key: "<SIGNOZ-INGESTION-KEY>"
+  debug:
+    verbosity: normal
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics, otlp]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp, debug]
+    
+    traces:
+      receivers: [otlp]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp, debug]
+
+  # extensions are configured separately from pipelines
+  extensions: [health_check, pprof, zpages]
+```
+
+## How to Setup OTel Collector Contrib
+
+While Contrib is available as a binary, it’s recommended to deploy it via Docker or Kubernetes, as these tools provide logical isolation and streamline the software lifecycle process.
+
+For this guide, we will use SigNoz as the observability backend to store and visualize our telemetry data efficiently.
+
+### Prerequisites
+
+We need to perform a few initial steps before deploying the Collector.
+
+**Clone the Example Repository**
+
+We have a [GitHub repository](https://github.com/SigNoz/examples) containing all the configuration files and scripts used in this guide. Clone it by running:
+
+```bash
+git clone git@github.com:SigNoz/examples.git
+cd examples/opentelemetry-collector/otelcol-contrib-demo
+```
+
+**Setting up SigNoz Cloud**
+
+As discussed, we’ll be sending telemetry to [SigNoz](https://signoz.io/), an OpenTelemetry-native APM.
+
+- [Sign up](https://signoz.io/teams/) for a free SigNoz Cloud account (includes 30 days of unlimited access).
+- Navigate to `Settings -> Account Settings -> Ingestion` from the sidebar.
+- Set the deployment **Region** and **Ingestion Key** values in the `otel-config.yaml` file, at lines 40 and 45 respectively.
+
+Once you’ve signed up, access `Settings -> Account Settings` from the sidebar. From there, select the `Ingestion` option on the left, and create an ingestion key.
+
+<Figure src="/img/blog/2026/01/opentelemetry-collector-contrib-image%202.webp" alt="Find your Region and Ingestion Key from the Ingestion tab" caption="Find your Region and Ingestion Key from the Ingestion tab" />
+
+### Deploy Contrib with Docker
+
+The Docker image for OTel Collector Contrib comes pre-packaged with all the community components discussed earlier.
+
+The `otel-config.yaml` file in the repo contains the pipeline configuration we defined in the <a href="https://www.notion.so/draft-v1-2d3fcc6bcd19807e9cc5ea7401a117c9?pvs=21" rel="noopener noreferrer nofollow" target="_blank">previous section</a>. To deploy Contrib using Docker, execute:
+
+```bash
+docker run \
+-v ./otel-config.yaml:/etc/otelcol-contrib/config.yaml \
+-p 4317:4317 -p 4318:4318 -p 13133:13133 -p 1777:1777 -p 55679:55679  \
+--rm --name otelcol-contrib \
+--rm --name otelcol-contrib otel/opentelemetry-collector-contrib:0.142.0
+```
+
+This command mounts your local config file to the container, exposes the necessary ports, and starts the Contrib Collector.
+
+To verify the container is running correctly, query the health check endpoint in a new terminal window. Expect a `Server available` response:
+
+```bash
+curl localhost:13133
+```
+
+### Deploy Contrib with Kubernetes (with Helm)
+
+The official <a href="https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-collector" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Helm chart</a> is the standard way to deploy the Collector on Kubernetes.
+
+We will run the Collector as a `Deployment` for convenience, though `values.yaml` can be modified to use it as a `DaemonSet` or a `StatefulSet`, if needed.
+
+Run the following to add the parent Helm repo and install the chart:
+
+```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts  
+helm install -f values.yaml otelcol-contrib open-telemetry/opentelemetry-collector
+```
+
+Once installed, use `port-forward` to access the Collector services over `localhost` (run this in a separate terminal):
+
+```bash
+kubectl port-forward svc/otelcol-contrib-opentelemetry-collector \
+  4317:4317 \
+  4318:4318 \
+  13133:13133 \
+  1777:1777 \
+  55679:55679
+```
+
+### Generating Telemetry & Visualizing It in SigNoz
+
+The GitHub repo contains a load generator script to generate sample telemetry data. It generates spans for various CRUD API calls and pushes them to your Collector at port `4318`. 
+
+This allows you to see exactly how the observability backend represents data processed by your Collector pipeline.
+
+First make the script executable, then run it:
+
+```bash
+chmod +x contrib_load_generator.sh
+./contrib_load_generator.sh
+```
+
+The script will run for 30 seconds, generating a mix of success and error spans to simulate real-world scenarios. You can run it multiple times to generate a healthy amount of data.
+
+This video shows you how to interact with the generated data in SigNoz:
+
+<figure data-zoomable align='center'>
+    <iframe
+        className="box-shadowed-image"
+        src="https://www.youtube.com/embed/piUwO61JbE8"
+        width="100%"
+        height="540"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+    />
+</figure>
+
+## Build Your Own Collector
+
+OpenTelemetry allows us to build custom Collector distributions to suit our needs. Let’s understand how we can do so, and then look at the steps for the build process.
+
+### What is OpenTelemetry Collector Builder?
+
+The <a href="https://opentelemetry.io/docs/collector/extend/ocb/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector Builder</a> (OCB) is a CLI tool that lets you create a custom Collector distribution that includes only the components you explicitly need. Users create a manifest file listing specific Contrib components. OCB then compiles a custom binary that including just components.
+
+Building custom distributions has multiple benefits:
+
+- **Smaller size:** OCB keeps the binary size to an absolute minimum, ensuring you only ship the necessary code.
+- **Adheres to security requirements:** By limiting the number of included third-party components, teams can reduce attack vectors and meet strict compliance requirements.
+
+### Initial Checks
+
+OCB requires Go for compiling your desired components into a binary.
+
+- <a href="https://go.dev/doc/install" rel="noopener noreferrer nofollow" target="_blank">Download the Go binary here</a>.
+- For easier setup, you can use <a href="https://go.dev/wiki/Ubuntu#using-ppa" rel="noopener noreferrer nofollow" target="_blank">apt on Linux</a> or <a href="https://formulae.brew.sh/formula/go" rel="noopener noreferrer nofollow" target="_blank">brew on Mac</a>.
+
+The rest of the prerequisites (SigNoz account, etc.) are the same as [defined earlier](#prerequisites).
+
+### Step 1: Setting Up OCB
+
+The recommended way to use OCB is to download the pre-compiled binary for your system. First, identify your machine’s architecture using `uname -m`.
+
+<Figure src="/img/blog/2026/01/opentelemetry-collector-contrib-e2f7b107-0a82-40d5-a189-203b036a997b.webp" alt="The uname command helps find architecture details for your machine." caption="The uname command helps find architecture details for your machine." />
+
+`cd` into the `builder` directory in our example repo and download the binary based on your machine’s OS and architecture:
+
+<Tabs>
+<TabItem value="linux-amd64" label="Linux (AMD 64)" default>
+
+```bash
+curl --proto '=https' --tlsv1.2 -fL -o ocb \
+  https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/cmd%2Fbuilder%2Fv0.142.0/ocb_0.142.0_linux_amd64
+
+chmod +x ocb
+```
+
+To verify the installation, run:
+
+```bash
+./ocb help
+```
+
+</TabItem>
+
+<TabItem value="linux-arm64" label="Linux (ARM 64)">
+
+```bash
+curl --proto '=https' --tlsv1.2 -fL -o ocb \
+  https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/cmd%2Fbuilder%2Fv0.142.0/ocb_0.142.0_linux_arm64
+
+chmod +x ocb
+```
+
+To verify the installation, run:
+
+```bash
+./ocb help
+```
+
+</TabItem>
+
+<TabItem value="linux-ppc64le" label="Linux (ppc64le)">
+
+```bash
+curl --proto '=https' --tlsv1.2 -fL -o ocb \
+  https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/cmd%2Fbuilder%2Fv0.142.0/ocb_0.142.0_linux_ppc64le
+
+chmod +x ocb
+```
+
+To verify the installation, run:
+
+```bash
+./ocb help
+```
+
+</TabItem>
+
+<TabItem value="macos-amd64" label="macOS (AMD 64)">
+
+```bash
+curl --proto '=https' --tlsv1.2 -fL -o ocb \
+  https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/cmd%2Fbuilder%2Fv0.142.0/ocb_0.142.0_darwin_amd64
+
+chmod +x ocb
+```
+
+To verify the installation, run:
+
+```bash
+./ocb help
+```
+
+</TabItem>
+
+<TabItem value="macos-arm64" label="macOS (ARM 64)">
+
+```bash
+curl --proto '=https' --tlsv1.2 -fL -o ocb \
+  https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/cmd%2Fbuilder%2Fv0.142.0/ocb_0.142.0_darwin_arm64
+
+chmod +x ocb
+```
+
+To verify the installation, run:
+
+```bash
+./ocb help
+```
+
+</TabItem>
+
+<TabItem value="windows-amd64" label="Windows (AMD 64)">
+
+```powershell
+Invoke-WebRequest -Uri `
+  "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/cmd%2Fbuilder%2Fv0.142.0/ocb_0.142.0_windows_amd64.exe" `
+  -OutFile "ocb.exe"
+
+Unblock-File -Path "ocb.exe"
+```
+
+To verify the installation, run:
+
+```cmd
+ocb help
+```
+
+</TabItem>
+</Tabs>
+
+### Step 2: Compiling the Contrib Binary
+
+As discussed, OCB requires a configuration file to define which components to include. We have prepared a `builder-config.yaml` that includes the Go modules for all the components we used in the Docker/Kubernetes examples.
+
+To compile the custom binary, run:
+
+```bash
+./ocb --config builder-config.yaml
+```
+
+OCB will download the defined Go components, compile them and save the output binary in the `_build` directory.
+
+Now, let’s run our custom binary with our existing Collector configuration file:
+
+```bash
+./_build/custom-contrib-collector --config ../otel-config.yaml
+```
+
+You should start seeing the Collector’s log entries in your terminal. You can use the <a href="https://www.notion.so/draft-v1-2d3fcc6bcd19807e9cc5ea7401a117c9?pvs=21" rel="noopener noreferrer nofollow" target="_blank">load generator script</a> to send data and visualize it with SigNoz. Feel free to experiment with the configurations and see how things work under the hood.
+
+Congratulations, you have successfully created your own optimized Collector distribution! Now, let’s look at the common use cases for Contrib.
+
+## Common Use Cases
+
+You will almost certainly need Contrib (or a custom build using OCB) if your requirements include:
+
+- **Kubernetes Observability:** While Core handles OTLP data, it doesn’t natively understand Kubernetes objects. Contrib provides the `k8sattributes` processor and `k8s_cluster` receiver, which are essential for tagging your telemetry with Pod names, Namespaces, and Deployment IDs.
+- **Data Sampling:** As distributed systems scale, sampling becomes critical to control costs. The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/probabilisticsamplerprocessor" rel="noopener noreferrer nofollow" target="_blank">probabilistic sampling</a> and <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/tailsamplingprocessor" rel="noopener noreferrer nofollow" target="_blank">tail sampling</a> processors are only available in Contrib.
+- **Telemetry Transformation**: Often, telemetry generated by an application doesn’t match naming conventions, has verbose metadata or contains redundant data. The <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor" rel="noopener noreferrer nofollow" target="_blank">transform processor</a> allows you to modify incoming telemetry to address such issues.
+- **Vendor Flexibility:** If you are migrating away from a vendor, but still have agents running (eg., legacy/proprietary agents or Prometheus scrapers), Contrib provides receivers to accept those formats.
+
+## FAQs
+
+### What is OpenTelemetry Collector Contrib?
+
+**OpenTelemetry Collector Contrib** is the “batteries-included” distribution of OpenTelemetry Collector. While the Core project provides the basic framework for processing telemetry data, the Contrib repository houses the vast majority of community-written integrations. It allows you to collect data from virtually any data source and send it to any backend without writing custom code.
+
+### Can I mix Core and Contrib components?
+
+Yes. If you use the Contrib binary, it already includes all Core components. If you use OCB, you can mix and match them as you please. You can use components present in a distribution by configuring them under `receivers`, `processors`, or `exporters` and adding them to your `pipelines`.
+
+### Is Contrib less stable than Core?
+
+The **Core components** inside the Contrib binary are just as stable as they are in the Core binary. However, the **additional** components in Contrib vary in stability. Always check the README of the specific receiver or exporter you plan to use to see if it is marked Alpha, Beta, or Stable.
+
+### Does Contrib impact performance?
+
+Having extra code in the binary increases file size slightly, but it **does not** degrade runtime performance. Unused components sit dormant and do not consume CPU or memory unless you explicitly enable them in your configuration pipelines.
+
+## Ingesting Data from the Collector
+
+We have now understood what the OpenTelemetry Collector Contrib is, its advantages over the Core distribution, and its setup process. Once you set up the Collector for your observability needs, you need a reliable observability backend to interact with your telemetry data.
+
+SigNoz is an open-source observability platform built natively on OpenTelemetry. Because SigNoz uses the OTel native format, it integrates seamlessly with the Contrib collector's OTLP exporters.
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
+

@@ -1,0 +1,730 @@
+---
+date: 2025-12-30
+id: elb
+title: Monitor AWS ELB (Classic) with SigNoz
+description: Collect ELB logs and metrics using AWS Lambda and CloudWatch Exporter.
+doc_type: howto
+---
+
+## Overview
+
+SigNoz allows you to monitor your AWS Elastic Load Balancers (Classic) by collecting both request logs and performance metrics.
+
+- **Logs**: Collect access logs via S3 and Lambda to analyze traffic patterns and errors.
+- **Metrics**: Collect CloudWatch metrics like Latency, RequestCount, and HealthyHostCount.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="logs" label="Logs" default>
+
+## Log Collection
+
+This logs setup uses an AWS Lambda function to forward ELB logs from S3 to SigNoz.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+### Creating / Configuring Your S3 Bucket
+
+To accomplish the task described, please follow these steps:
+
+1. **Creating an S3 Bucket:**
+   - Sign in to the AWS Management Console.
+   - Navigate to the Amazon S3 service.
+   - Click on **Create bucket**.
+   - Enter a unique bucket name, select the region, and configure any additional settings if needed (such as versioning, logging, etc.).
+   - Click **Create bucket** to finalize the creation process.
+
+<Figure
+    src="/img/docs/elb/elb-logs-create_bucket_2.webp"
+    alt="S3 bucket creation form"
+    caption="Fill up bucket details"
+/>
+
+2. **Uploading Data to the S3 Bucket:**
+   - After creating the bucket, navigate to the S3 Management Console.
+   - Click on the **Upload** button.
+   - Select the files you wish to upload from your local machine.
+   - Optionally, configure settings like encryption, permissions, etc.
+   - Click **Upload** to upload the selected files to the bucket.
+
+3. **File Formats:**
+   - You can upload files in various formats such as .json, .csv, .log, .gz, .zip, etc.
+   - If you have configured Elastic Load Balancer (ELB) logging, ELB logs are automatically saved in `.gzip` format in your S3 bucket.
+
+<Admonition type="info">
+Ensure that you have appropriate permissions and follow AWS best practices for security and cost optimization when creating and using S3 buckets. Refer to the <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html#enable-access-logs" target="_blank" rel="noopener noreferrer nofollow">AWS documentation on enabling access logs</a> to learn more about setting up your S3 bucket to automatically collect ELB logs.
+</Admonition>
+
+<Admonition>
+Please be advised that all logs will undergo conversion to JSON format before transmission. Consequently, it may be necessary to perform supplementary preprocessing of the logs as part of this conversion process. Here preprocessing of the logs means getting them from S3 bucket, separating each log line based on the delimiter ("," or based on quotes) and assigning them to respective keys. Thus making a key, value pair before sending to SigNoz. 
+</Admonition>
+
+To move forward, we assume that you already have some data in your S3 bucket.
+
+<Admonition type="info">
+For the scope of this documentation, we assume that all the data in S3 bucket is in the same format. For example, if one file is in `.csv` format, then all files within the bucket will be in `.csv` format.  For files in different formats, you will have to use different parsing functions for each format or update the existing function accordingly.
+</Admonition>
+
+
+The general header(table) format of ELB logs is:
+
+```jsx
+elb_headers= ["type","time","elb","client_port","target_port",
+"request_processing_time","target_processing_time","response_processing_time",
+"elb_status_code","target_status_code","received_bytes","sent_bytes","request",
+"user_agent","ssl_cipher","ssl_protocol","target_group_arn","trace_idd",
+"domain_name","chosen_cert_arn","matched_rule_priority",
+"request_creation_time","actions_executed","redirect_url",
+"error_reason","target_port_list","target_status_code_list",
+"classification","classification_reason"]
+```
+
+<Admonition type="info">
+Note that these headers are placeholders, you can change them if you wish to, but it is not advisable. You might have noticed in the `elb_headers`, We have mentioned `trace_idd` with two 'd's and not `trace_id`. This is not a typo, by default, ELB logs have `trace_id` as the header name but payload structure SigNoz recommends is shown below:
+</Admonition>
+
+```json
+[
+	{
+		"timestamp": <uint64>,
+		"trace_id": <hex string>,
+		"span_id": <hex string>,
+		"trace_flags": <int>
+		"severity_text": <string>,
+		"severity_number": <int>,
+		"attributes": <map>,
+		"resources": <map>,
+		"body": <string>,
+	}
+]
+```
+
+For more details, see [Exporting logs to SigNoz using HTTP](https://signoz.io/docs/userguide/send-logs-http/).
+
+`trace_id` here is of the format `<hex string>` and because we are sending everything as string json for simplicity and less data processing and parsing, hence the change in field name from trace_id to trace_idd. If you use `trace_id` and send the trace_id as a string, you’ll get 400 error, this can be resolved by further logs formatting
+
+### Understanding How Lambda Function Works
+
+When you successfully attach your lambda function with the S3 bucket and configure it correctly, any new addition / deletion / copy / PUT etc, requests made to the S3 bucket will trigger the lambda function and the code written in the lambda function will get executed.
+
+### Creating a Lambda Function
+
+Follow these steps to create the lambda function:
+
+**Step 1:** Go to your AWS console and search for AWS Lambda, go to **Functions** and click on **Create Function**. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_1.webp"
+    alt="Create Lambda function from AWS Console"
+    caption="Create Lambda function from AWS Console"
+/>
+
+
+**Step 2:** Choose the `Author from scratch` checkbox and proceed to fill in the function name. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_2.webp"
+    alt="Lambda function creation with Author from scratch selected"
+    caption="Choose the Author from scratch and fill up other details"
+/>
+
+
+**Step 3:** Choose `Python 3.x` as the Runtime version, `x86_64` as Architecture (preferably), and keep other settings as default. Select `Create a new role with basic Lambda permissions`for now, we’ll requiring more permissions down the lane. So for now, select this option. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_3.webp"
+    alt="Lambda runtime and role configuration"
+    caption="Choose Create a new role here"
+/>
+
+
+**Step 4:** Once you are done configuring the lambda function, you Lambda function is created.
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_4.webp"
+    alt="Lambda function created successfully"
+    caption="Your barebones Lambda function is created now"
+/>
+
+### Configuring Policies for Lambda Function
+
+As said in Step 4 previously, we need extra permissions in order to access the S3 Bucket for execution of our Lambda code, follow along to set it up. 
+
+**Step 1:** Scroll down from your Lambda page, you’ll see a few tabs there. Go to `Configurations` and select `Permissions` from the left sidebar. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_5.webp"
+    alt="Lambda function Configuration tab showing Permissions section"
+    caption="Choosing execution role from Configurations tab"
+/>
+
+
+**Step 2:** Click on the `Execution Role name` link just under Role name, it will take us to AWS IAM page. Here we will add policies to get full S3 access. Once here, click on the `Add permissions` button and select `Attach policies` from the drop down list. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_6.webp"
+    alt="IAM page showing Add permissions dropdown with Attach policies option"
+    caption="Attach policies to your Lambda function"
+/>
+
+
+**Step 3:** Search “S3” and you’ll a policy named `AmazonS3FullAccess`select that and proceed. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_7.webp"
+    alt="IAM Attach policies page with AmazonS3FullAccess policy selected"
+    caption="Policies you'll need to run your Lambda function"
+/>
+
+
+<Admonition type="warning" >
+It's advisable to proceed with caution when granting full S3 access, particularly in a production environment. Before deploying your Lambda function with such extensive permissions, it's essential to consult with your system administrator or designated authority to ensure compliance with security protocols and best practices. This step helps mitigate potential risks and ensures that access permissions align with organizational guidelines and requirements.
+</Admonition>
+
+<Figure
+    src="/img/docs/elb/elb-logs-policies-used.webp"
+    alt="List of IAM policies required for Lambda function execution"
+    caption="Extra policies you might require to execute your Lambda function"
+/>
+
+
+Please refer to the image above as a comprehensive guide to the policy names that you may consider adding to your Lambda function. Failure to include these policies could result in insufficient privileges, potentially hindering the function's ability to perform necessary operations within the AWS environment.
+
+Congrats, you are just done with one of the major hurdle in running your code. Now, let’s add a trigger. 
+
+### Adding Triggers
+
+You need to use the Lambda console to build a trigger so that your function can be called immediately by another AWS service (S3, in our case). A trigger is a resource you set up to enable your function to be called by another AWS service upon the occurrence of specific events or conditions. 
+
+A function may have more than one trigger. Every trigger functions as a client, independently calling your method, and Lambda transfers data from a single trigger to each event it passes to your function.
+
+To setup the trigger, follow these steps:
+
+**Step 1:** Click on the `+ Add trigger` button from the Lambda console. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_8.webp"
+    alt="Lambda function console showing Add trigger button"
+    caption="Add a trigger to the function."
+/>
+
+
+**Step 2:** Select `S3` from the first drop down of AWS services list. Pick your S3 bucket for the second field. 
+
+**Step 3:** For the Event types field, you can select any number of options you wish. The trigger will occur depending upon what option(s) you choose here. By default, the `All object create events` will be selected. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_9.webp"
+    alt="S3 trigger configuration showing event type selection dropdown"
+    caption="Choose event types from the drop down menu"
+/>
+
+
+Verify the settings and click on `Add` button at bottom right to add this trigger.
+
+### Adding Request Layer
+
+We will be using Python's `requests` module which is <a href="https://aws.amazon.com/blogs/compute/upcoming-changes-to-the-python-sdk-in-aws-lambda/" target="_blank" rel="noopener noreferrer nofollow">not included by default</a> in Lambda.
+
+To utilize Python's `requests` module within a Lambda function, it's necessary to explicitly add it as a layer. While there may be alternative approaches, it's advisable to adhere to established practices that have been thoroughly tested and proven effective. Therefore, we will proceed with adding `requests` as a layer to ensure reliable functionality within the Lambda environment.
+
+**Step 1:** Follow the steps below to create a zip of the request module and add it as a layer to make it work on AWS lambda.
+
+The commands you’d need:
+
+```py
+# make a new directory
+mkdir python
+# move into that directory
+cd python
+
+# install requests module
+pip install --target . requests
+# zip the contents under the name dependencies.zip
+zip -r dependencies.zip ../python 
+
+```
+
+**Step 2:** To upload your zip file, go to AWS Lambda > Layers and click on `Create Layer`. [Not inside your specific Lambda function, just the landing page of AWS Lambda]. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-layer_3.webp"
+    alt="AWS Lambda Layers page with Create Layer button"
+    caption="Creating a new Layer"
+/>
+
+
+**Step 3:** You’ll be redirected to Layer configurations page, here, give a name to your layer, an optional description, select `Upload a .zip file` , click on `Upload` and locate the requirements.zip file. 
+
+**Step 4:** Select your desired architecture and pick `Python 3.x` as your runtime. Hit `Create`. Your layer has now been created. Now lets connect it to our Lambda function which we created to send logs to SigNoz. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-layer_4.webp"
+    alt="Layer configuration page with upload zip file option"
+    caption="Uploading the requirements.zip file to later add it as a layer"
+/>
+
+
+**Step 5:** Go to your Lambda function, scroll down to Layers section and on the right of it, you’ll find a button that says `Add a layer` to click on. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-layer_5.webp"
+    alt="Lambda function Layers section with Add a layer button"
+    caption="Add a layer to your Lambda function"
+/>
+
+
+**Step 6:** Pick `Custom layers` from the checkbox and select your custom layer from the given drop down below and then click on the button `Add`. 
+
+<Figure
+    src="/img/docs/elb/elb-logs-layer_6.webp"
+    alt="Add layer dialog showing Custom layers option and layer selection dropdown"
+    caption="Choose your layer name"
+/>
+
+
+Congratulations, the `requests` module has been successfully integrated into your code area. By adding this layer, you have resolved the 'request module not found error' that would have otherwise occurred.
+
+---
+
+### The Lambda Function
+
+Now, we come to the pivotal section of this document: the code implementation. 
+
+The Python script's primary function revolves around retrieving gzipped log files stored within an Amazon S3 bucket. Subsequently, it decompresses these files, transforms individual log entries into JSON objects, and transmits the resultant JSON data to a predetermined HTTP endpoint.
+
+Below is the comprehensive code along with detailed comments for clarity:
+
+```python:lambda_function.py
+import json
+import gzip
+import boto3 
+import requests
+import shlex
+
+# Create an S3 client
+s3 = boto3.client('s3')
+
+# Function to convert a log line into a JSON object
+def convert_log_line_to_json(line):
+    # Define the headers to be used for the JSON keys
+    headers = ["type", "time", "elb", "client:port", "target:port", "request_processing_time", "target_processing_time", "response_processing_time", "elb_status_code", "target_status_code", "received_bytes", "sent_bytes", "request","user_agent", "ssl_cipher", "ssl_protocol", "target_group_arn", "trace_idd", "domain_name", "chosen_cert_arn", "matched_rule_priority", "request_creation_time", "actions_executed", "redirect_url", "error_reason", "target:port_list", "target_status_code_list", "classification", "classification_reason"]
+
+    # Split the log line using shell-like syntax (keeping quotes, etc.)
+    res = shlex.split(line, posix=False)
+
+    # Create a dictionary by zipping headers and log line parts
+    return dict(zip(headers, res))
+
+# Lambda function handler
+def lambda_handler(event, context):
+    # S3 bucket name
+    bucket_name = '<name_of_your_bucket>'
+
+    # List all objects in the specified S3 bucket
+    response = s3.list_objects_v2(Bucket=bucket_name)
+
+    # Iterate through each object in the bucket
+    for obj in response['Contents']:
+        # Check if the object is a gzipped log file
+        if obj['Key'].endswith('.log.gz'):
+            file_key = obj['Key']
+
+            # Download the gzipped file content
+            file_obj = s3.get_object(Bucket=bucket_name, Key=file_key)
+            file_content = file_obj['Body'].read()
+
+            # Decompress the gzipped content
+            decompressed_content = gzip.decompress(file_content)
+
+            # Convert bytes to string
+            json_data = str(decompressed_content, encoding='utf-8')
+
+            # Split the string into lines
+            lines = json_data.strip().split('\n')
+
+            # Convert the list of strings into a JSON-formatted string
+            result = json.dumps(lines, indent=2)
+
+            # Load the JSON-formatted string into a list of strings
+            list_of_strings = json.loads(result)
+
+            # Convert each log line string into a JSON object
+            json_data = [convert_log_line_to_json(line) for line in list_of_strings]
+            
+            req_headers = {
+                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+                     'Content-Type': 'application/json'
+                }
+            # Specify the HTTP endpoint for sending the data
+            http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'  # Replace <region> with us, eu, or in
+
+            # Send the JSON data to the specified HTTP endpoint
+            response = requests.post(http_url, json=json_data, headers=req_headers)
+
+            # Print information about the sent data and the response received
+            print(f"Sent data to {http_url}. Response: {response.status_code}")
+```
+
+
+Replace the following placeholders:
+- `<name_of_your_bucket>`: The name of your S3 bucket containing ELB logs.
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key. See [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for details.
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [SigNoz Cloud endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for details.
+
+Here’s how a raw, unprocessed ELB log line looks like:
+
+```python
+https 2024-01-01T23:58:03.391277Z app/abc-prod-alb/0b46e552ds5b44da 35.244.22.76:41802 192.1.0.114:80 0.000 1.077 0.000 200 200 1430 923 "POST https://api.abcs.com:4463/suporodv2/v1/get-result/ HTTP/1.1" "SFDC-Callout/59.0" ECDHE-RSA-AES128-GCM-SHA256 TLSv1.2 arn:aws:elasticloadbalancing:ap-south-1:8429181216651:targetgroup/ecs-Sabc-P-Private-SU-API/02f1623fsddec2691ce "Root=1-65343518a-72123e913f71cb2e20213a3ea9" "api.example-sabcs.com" "session-reused" 98 2024-01-01T23:58:02.313000Z "forward" "-" "-" "192.1.1.114:80” "200" "-" "-"
+```
+
+In the code, each field corresponds to a header. The purpose of the code above is to transmit Elastic Load Balancer (ELB) logs to the SigNoz endpoint.
+
+<Admonition type="warning" >
+The provided code is functional, but exercise caution when copying and pasting it in its entirety. Incorrect configuration could result in the unintentional ingestion of a large volume of data.
+</Admonition>
+
+
+Other than the above explanation and the code comments, in a nutshell, what this code does is: 
+
+Sends the parsable content of **ENTIRE** S3 bucket whenever the lambda function gets triggered. It gets triggered by the condition you set above. Let’s mention that again here. 
+
+> **Step 3:** For the Event types field, you can select any number of options you wish. The trigger will occur depending upon what option(s) you choose here. By default, the `All object create events` will be selected.
+
+
+Lets say you add something to your S3 bucket, it may / may not trigger this lambda function or if you have setup your s3 as if it automatically stores all your ELB/VPC logs, segregated in different folders, so whenever any new log gets added, the function will get triggered and send all the S3 data. 
+
+This is obviously not what everyone expects, ideal case would be to have a mass log transfer once the first connection is made to SigNoz otel-collector (which then they later get stored in gp2/gp3 storageClass of EBS), and then send logs lines of only the recently logged one. 
+
+To achieve this functionality, you need to add few conditions to the code. 
+
+1. Assuming all standard log lines have a timestamp field.
+2. Parse and select the timestamp field from the log line and add it before the `response = requests.post(http_url, json=json_data)` line as a if else condition to only send logs which are x days older (say 3 days). 
+
+So, the function now will first check the log timestamp and only send those logs which are 3 days older (say) or even a few hours old. 
+
+Let’s consider the below pseudo code for better understanding:
+
+```python
+   from datetime import datetime, timedelta
+
+   # Your given timestamp
+   given_timestamp_str = "2024-01-01T23:58:02.231919Z"
+   given_timestamp = datetime.fromisoformat(given_timestamp_str.replace('Z', '+00:00'))
+
+   # Current time
+   current_time = datetime.utcnow()
+
+   # Calculate the time difference
+   time_difference = current_time - given_timestamp
+
+   # Check if the time difference is less than 3 days
+   if time_difference < timedelta(days=3):
+       # Run your specific function here
+       print("Running the specific function.")
+   # ADD THE response = requests.post(http_url, json=json_data) LINE HERE
+
+   else:
+       print("Time difference exceeds 3 days. Function will not run.")
+```
+
+Feel free to modify any part of the code according to your requirements. 
+
+---
+
+### Running the Code Locally
+
+If you want to run the entire setup locally in your laptop for testing purposes. Here’s the reference code for you: 
+
+```python:local_test.py
+import os
+import gzip
+import json
+import requests
+import shlex
+
+def convert_log_line_to_json(line):
+    headers= ["type","time","elb","client_port","target_port","request_processing_time","target_processing_time","response_processing_time","elb_status_code","target_status_code","received_bytes","sent_bytes","request","user_agent","ssl_cipher","ssl_protocol","target_group_arn","trace_idd","domain_name","chosen_cert_arn","matched_rule_priority","request_creation_time","actions_executed","redirect_url","error_reason","target_port_list","target_status_code_list","classification","classification_reason"]
+    res = shlex.split(line, posix = False)
+    return dict(zip(headers, res))
+
+def process_log_file(file_path):
+    with gzip.open(file_path, 'r') as f:
+        log_data = f.read().decode('utf-8') 
+        lines = log_data.strip().split('\n')
+        result = json.dumps(lines, indent=2)
+        list_of_strings = json.loads(result)
+        json_data = [convert_log_line_to_json(line) for line in list_of_strings]
+        req_headers = {
+                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+                     'Content-Type': 'application/json'
+                }
+        http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'
+        response = requests.post(http_url, json=json_data, headers=req_headers)
+
+def main():
+    root_folder = '<folder_name>'
+
+    for root, _, files in os.walk(root_folder):
+        for file in files:
+            if file.endswith('.log.gz'):
+                file_path = os.path.join(root, file)
+                process_log_file(file_path)
+
+if __name__ == '__main__':
+    main()
+```
+
+<Admonition type="info">
+To incorporate log files into the folder, including nested directories, the code systematically examines all sub-folders to identify files ending with the `.log.gz` extension. Should you wish to target different file types, you have the flexibility to modify the code accordingly.
+</Admonition>
+
+### Testing Your Lambda Function
+
+Once you've finished writing your code, it's crucial to deploy it and conduct thorough testing to ensure its functionality. Before proceeding with deployment and testing, it's important to consider adjusting the timeout setting for your Lambda function. This adjustment is necessary because the process of transferring data from S3 to an external endpoint may take several minutes, exceeding the default Lambda timeout of 3 seconds.
+
+To extend the timeout duration, follow these steps:
+
+1. Navigate to the Lambda function configuration.
+2. Access the "General Configuration" section.
+3. Click on the "Edit" button to modify settings.
+4. Increase the timeout value to a duration exceeding 10 minutes. Typically, the code execution completes within 1-4 minutes at most.
+
+By adjusting the timeout setting, you ensure that your Lambda function has sufficient time to complete the data transfer process without encountering timeouts. This proactive measure enhances the reliability and effectiveness of your deployed solution.
+
+
+<Figure
+    src="/img/docs/elb/elb-logs-timeout_increase.webp"
+    alt="Lambda function General Configuration showing timeout setting"
+    caption="Configuring execution timeout of Lambda function"
+/>
+
+
+Once you've finished adjusting the timeout setting, navigate to the code editor for your Lambda function. Locate the 'test' button, and from the dropdown menu, select the option labeled 'Configure test events.' Create a new test case by specifying it as an S3 PUT event, then save your configuration.
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_test_event.webp"
+    alt="Lambda test event configuration dialog with S3 PUT event template"
+    caption="Creating Sample event"
+/>
+
+You're now prepared to proceed. Whenever you make alterations to the code and wish to evaluate them, follow these steps: Deploy the code first (equivalent to pressing 'Save'), and once it's fully deployed, proceed to click on the 'Test' button.
+
+Below is an image showing the process of transmitting VPC logs (excluding ELB logs) to the SigNoz endpoint.
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_10.webp"
+    alt="Lambda function code editor showing the ELB log forwarding code"
+    caption="Visual representation of code in Lambda function"
+/>
+
+
+### Test Case and Output
+
+If the logs are sent successfully, here's how they'll be transmitted. The following output displays the JSON-formatted data as we've printed it to visualize the sent information.
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_output.webp"
+    alt="Lambda function execution output showing successful log transmission"
+    caption="Visual representation of code output of Lambda function"
+/>
+
+
+### Validate
+
+To verify that your ELB logs are being sent correctly to SigNoz:
+
+1. Navigate to **Logs** > **Logs Explorer** in SigNoz.
+2. You should see your ELB logs appearing in the logs list.
+3. Click on any log line to view its detailed information and verify the fields.
+
+<Figure
+    src="/img/docs/elb/elb-logs-lambda_12.webp"
+    alt="SigNoz Logs Explorer showing ELB logs with parsed fields"
+    caption="A sample ELB log line in SigNoz Logs Explorer"
+/>
+
+</TabItem>
+<TabItem value="metrics" label="Metrics">
+
+## Metrics Collection
+
+To collect ELB metrics manually, you can use the <a href="https://github.com/prometheus/cloudwatch_exporter" target="_blank" rel="noopener noreferrer nofollow">Prometheus CloudWatch Exporter</a>.
+
+### Prerequisites
+
+Before proceeding, ensure you have:
+
+- **OpenTelemetry Collector** installed and configured. See [Get Started with OTel Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+- **Java 11 or higher** installed on the host machine (for JAR-based setup), or **Docker** (for container-based setup).
+- **AWS credentials** configured via environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`), IAM role, or `~/.aws/credentials`.
+- **IAM permissions** for the credentials:
+  - `cloudwatch:ListMetrics`
+  - `cloudwatch:GetMetricStatistics`
+
+### Where to Run the CloudWatch Exporter
+
+The CloudWatch Exporter should run on a machine that:
+1. Has network access to AWS CloudWatch APIs.
+2. Has AWS credentials configured.
+3. Is network-accessible from your OpenTelemetry Collector.
+
+For **SigNoz Cloud** users, run the exporter on any EC2 instance, VM, or container with AWS credentials. The OTel Collector on the same host will forward metrics to SigNoz Cloud.
+
+For **Self-Hosted** users, run the exporter on the same host as your OTel Collector, or ensure network connectivity between them.
+
+### Step 1: Create Configuration File
+
+Create a file named `elb-metrics.yaml` with the following configuration:
+
+```yaml:elb-metrics.yaml
+region: <aws-region>
+metrics:
+  - aws_namespace: AWS/ELB
+    aws_metric_name: RequestCount
+    aws_dimensions: [LoadBalancerName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/ELB
+    aws_metric_name: Latency
+    aws_dimensions: [LoadBalancerName]
+    aws_statistics: [Average]
+    aws_extended_statistics: [p99]
+
+  - aws_namespace: AWS/ELB
+    aws_metric_name: HealthyHostCount
+    aws_dimensions: [LoadBalancerName]
+    aws_statistics: [Average]
+
+  - aws_namespace: AWS/ELB
+    aws_metric_name: UnHealthyHostCount
+    aws_dimensions: [LoadBalancerName]
+    aws_statistics: [Average]
+
+  - aws_namespace: AWS/ELB
+    aws_metric_name: HTTPCode_Backend_2XX
+    aws_dimensions: [LoadBalancerName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/ELB
+    aws_metric_name: HTTPCode_Backend_4XX
+    aws_dimensions: [LoadBalancerName]
+    aws_statistics: [Sum]
+
+  - aws_namespace: AWS/ELB
+    aws_metric_name: HTTPCode_Backend_5XX
+    aws_dimensions: [LoadBalancerName]
+    aws_statistics: [Sum]
+```
+
+Replace the following:
+- `<aws-region>`: Your AWS region where ELBs are deployed (e.g., `us-east-1`, `eu-west-1`, `ap-south-1`).
+
+See <a href="https://github.com/prometheus/cloudwatch_exporter/tree/master/examples" target="_blank" rel="noopener noreferrer nofollow">example configurations</a> for more service templates.
+
+### Step 2: Download and Run the Exporter
+
+<Tabs>
+<TabItem value="jar" label="JAR File" default>
+
+Download the CloudWatch Exporter JAR file using `curl`:
+
+```bash
+curl -LO https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
+```
+
+Run the exporter with Java:
+
+```bash
+java -jar cloudwatch_exporter-0.16.0-jar-with-dependencies.jar 9106 elb-metrics.yaml
+```
+
+This starts the exporter on port `9106`.
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Run the CloudWatch Exporter as a <a href="https://github.com/prometheus/cloudwatch_exporter#docker-images" target="_blank" rel="noopener noreferrer nofollow">Docker container</a>:
+
+```bash
+docker run -d \
+  --name cloudwatch-exporter \
+  -p 9106:9106 \
+  -v $(pwd)/elb-metrics.yaml:/config/config.yml \
+  -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+  -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+  prom/cloudwatch-exporter
+```
+
+Replace the AWS credential environment variables with your actual credentials or use an IAM role if running on EC2.
+
+</TabItem>
+</Tabs>
+
+Verify the exporter is running by checking the metrics endpoint:
+
+```bash
+curl http://localhost:9106/metrics | grep aws_elb
+```
+
+You should see metrics like `aws_elb_request_count_sum`, `aws_elb_latency_average`, etc.
+
+### Step 3: Configure OpenTelemetry Collector
+
+Add the following `prometheus` receiver to your existing `otel-collector-config.yaml` to scrape the CloudWatch Exporter:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'elb-cloudwatch'
+          scrape_interval: 60s
+          static_configs:
+            - targets: ['<exporter-host>:9106']
+```
+
+Replace the following:
+- `<exporter-host>`: The hostname or IP where the CloudWatch Exporter is running. Use `localhost` if running on the same machine.
+
+Enable the `prometheus` receiver in your metrics pipeline by updating the `service` section:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+<Admonition type="note">
+Append these configurations to your existing `otel-collector-config.yaml`. Do not replace your entire configuration file.
+</Admonition>
+
+Restart your OpenTelemetry Collector to apply the changes.
+
+### Validate
+
+To confirm that ELB metrics are flowing to SigNoz:
+
+1. Navigate to **Dashboards** → **New Dashboard** → **New Panel** in SigNoz.
+2. In the query builder, search for metrics starting with `aws_elb_` (e.g., `aws_elb_request_count_sum`).
+3. Verify that metrics appear with `load_balancer_name` labels matching your ELBs.
+
+If you see metrics with these labels, your setup is working correctly.
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+- [Create alerts](https://signoz.io/docs/alerts/) based on your ELB logs and metrics
+- [Build dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your load balancer performance
+- Explore [Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to further process and enrich your ELB logs

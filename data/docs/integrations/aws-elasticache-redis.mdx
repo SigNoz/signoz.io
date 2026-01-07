@@ -1,12 +1,17 @@
 ---
-date: 2024-08-03
+date: 2025-12-29
 id: aws-elasticache-redis
-
-title: AWS Elasticache (redis) Metrics and Logs
+title: AWS Elasticache (Redis) Metrics and Logs
+description: Collect AWS ElastiCache Redis metrics and logs using OpenTelemetry Collector and send them to SigNoz for monitoring and analysis.
+doc_type: howto
 ---
 ## Overview
 
-This integration helps you monitor key AWS Elasticache (redis) metrics and logs, view them with an out-of-the-box dashboard, and parse MySQL logs for better querying and aggregation.
+This integration helps you monitor key AWS Elasticache (Redis) metrics and logs, view them with an out-of-the-box dashboard, and parse Redis logs for better querying and aggregation.
+
+<Admonition type="tip">
+**SigNoz Cloud users**: You can also use the [One-Click AWS Integration](https://signoz.io/docs/integrations/aws/elasticache/) for automated setup with pre-built dashboards.
+</Admonition>
 
 ## Prerequisites
 
@@ -31,6 +36,10 @@ Before you begin, ensure you have:
 
 4. To collect Redis native metrics, the collector must be able to access the Redis server as a client (optional).
 
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
 ## Collecting Elasticache Metrics
 
 ### Step 1: Set up the Prometheus CloudWatch Exporter
@@ -40,7 +49,7 @@ Before you begin, ensure you have:
    curl -sLSO https://github.com/prometheus/cloudwatch_exporter/releases/download/v0.15.5/cloudwatch_exporter-0.15.5-jar-with-dependencies.jar
    ```
 2. Configure the Prometheus exporter
-Save the following config for collecting AWS RDS metrics in a file named `aws-elasticache-metrics.yaml` and update the region key with relevant value.
+Save the following config for collecting AWS ElastiCache metrics in a file named `aws-elasticache-metrics.yaml` and update the region key with relevant value.
 
 ```yaml
 ---
@@ -244,15 +253,19 @@ export REDIS_ENDPOINT="<redis-server-endpoint>"
 export REDIS_PASSWORD="<PASSWORD>"
 
 # region specific SigNoz cloud ingestion endpoint
-export OTLP_DESTINATION_ENDPOINT="ingest.{REGION}.signoz.cloud:443"
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
 
 # your SigNoz ingestion key
-export SIGNOZ_INGESTION_KEY="signoz-ingestion-key"
+export SIGNOZ_INGESTION_KEY="<SIGNOZ_INGESTION_KEY>"
 ```
 
-You can find more details about ingestion keys and Regions [here](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
+Replace the following placeholders:
+- `<redis-server-endpoint>`: The hostname and port of your ElastiCache Redis instance (e.g., `my-redis.xxxx.cache.amazonaws.com:6379`)
+- `<PASSWORD>`: Your Redis AUTH password (if configured)
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key from [Settings > Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-### Step 3: Use the Collector Config File
+### Step 4: Use the Collector Config File
 
 Add the following flag to your collector run command:
 ```bash
@@ -261,11 +274,11 @@ Add the following flag to your collector run command:
 
 **Note:** The collector can use multiple config files by specifying multiple `--config` flags.
 
-## Collecting ElastCache Logs
+## Collecting ElastiCache Logs
 
-Use the [log delivery](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Log_Delivery.html) instructions to send redis logs to CloudWatch Logs
+Use the <a href="https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Log_Delivery.html" target="_blank" rel="noopener noreferrer nofollow">log delivery</a> instructions to send Redis logs to CloudWatch Logs.
 
-The log collection of RDS instance requires specifying the list of log group names. From the AWS CloudWatch console, please find the log group(s) relevant to the integration.
+The log collection of ElastiCache instance requires specifying the list of log group names. From the AWS CloudWatch console, please find the log group(s) relevant to the integration.
 
 ### Step 1: Create the Collector Config File
 
@@ -319,13 +332,15 @@ service:
 
 ```bash
 # region specific SigNoz cloud ingestion endpoint
-export OTLP_DESTINATION_ENDPOINT="ingest.{REGION}.signoz.cloud:443"
+export OTLP_DESTINATION_ENDPOINT="ingest.<region>.signoz.cloud:443"
 
 # your SigNoz ingestion key
-export SIGNOZ_INGESTION_KEY="signoz-ingestion-key"
+export SIGNOZ_INGESTION_KEY="<SIGNOZ_INGESTION_KEY>"
 ```
 
-You can find more details about ingestion keys and Regions [here](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
+Replace the following placeholders:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key from [Settings > Ingestion Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3: Run the Collector
 
@@ -358,8 +373,8 @@ To stop this, you can select the `Remove from SigNoz` button.
 &nbsp;
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/aws-elasticache-redis/aws-elasticache-redis-integration-listening.webp" alt="Listening for data from RedAWS Elasticache (redis)is"/>
-    <figcaption><i>Listening for data from AWS Elasticache (redis)</i></figcaption>
+    <img src="/img/docs/integrations/aws-elasticache-redis/aws-elasticache-redis-integration-listening.webp" alt="Listening for data from AWS Elasticache Redis"/>
+    <figcaption><i>Listening for data from AWS Elasticache (Redis)</i></figcaption>
 </figure>
 
 
@@ -367,10 +382,12 @@ To stop this, you can select the `Remove from SigNoz` button.
 Once SigNoz has started listening to your AWS Elasticache (redis) data, head over to the Dashboards tab and search for redis, this will show you a newly created dashboard which shows
 different AWS Elasticache (redis) metrics.
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/integrations/aws-elasticache-redis/aws-elasticache-redis-integration-dashboard.webp" alt="Dashboard for monitoring AWS Elasticache (redis) Metrics"/>
-    <figcaption><i>Dashboards for monitoring AWS Elasticache (redis) Metrics</i></figcaption>
-</figure>
+<Figure 
+  src="/img/docs/integrations/aws-elasticache-redis/elasticache-overview-dashboard.webp" 
+  alt="Dashboard for monitoring AWS Elasticache (redis) Metrics" 
+  caption="Dashboards for monitoring AWS Elasticache (redis) Metrics"
+  className="box-shadowed-image"
+/>
 
 ### Dashboard asset
 
