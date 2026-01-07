@@ -355,6 +355,8 @@ These are the top-level “Overview” pages for a module or feature area (for e
   - Step-by-step setup instructions.
   - Large configuration tables or API/field listings.
   - Deep theory or long troubleshooting sections.
+- **Components**:
+  - Prefer using a "Listicle" component (e.g., `<AWSMonitoringListicle />` or `<APMInstrumentationListicle />`) to display supported integrations/services in a grid with category tabs. This improves navigation and visual appeal compared to long lists.
 
 `doc_type` for overview pages is usually `explanation`.
 

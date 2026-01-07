@@ -1,8 +1,9 @@
 ---
-date: 2024-06-06
+date: 2025-12-26
 id: span-details
 
 title: Trace Details
+description: Explanation of the trace detail page
 ---
 
 ## Overview
@@ -17,7 +18,7 @@ The Trace Details Page enables you to:
   Render large traces seamlessly using synchronized flame graphs and waterfall charts.
   
 - **Drills Down Into Details:**  
-  Inspect individual spans to view metadata, context, attributes and events associated with each span.
+  Inspect individual spans to view metadata, span percentile, context, attributes and events associated with each span.
   
 - **Efficient Navigation and Search:**  
   Use the dynamic search bar and filtering options to quickly jump to specific spans or error events making it easier to analyze and troubleshoot.
@@ -68,13 +69,30 @@ Provides a detailed timeline view, illustrating the sequence and duration of eac
 
 ### Detailed Span Inspection
 
-**Expand Span Details:**  
+#### Expand Span Details: 
 Click on a specific span in either the flame graph or waterfall view to inspect detailed information, including:
 - Span context and attributes.
 - Related span links and events.
 - The kind of the span (e.g., client, server, service, producer, or consumer etc.).
 
-**Synchronized Navigation:**  
+
+#### Span Percentile:
+  When you view a span's details, you can see its percentile compared to other spans from the same service over the past hour (for example, p50, p90, p95, p99).
+  The percentile information may take a few seconds to appear after opening the span details.
+  This helps you quickly identify performance outliers and understand where the span falls within the typical latency distribution.
+  
+  <Figure src="/img/docs/apm-and-distributed-tracing/span-percentile.webp" alt="span-percentile" caption="Span Percentile" />
+
+  Click on the percentile to view more details, including the exact p50, p90, and p99 values for the matching spans
+  <Figure src="/img/docs/apm-and-distributed-tracing/span-percentile-details.webp" alt="span-percentile-details" caption="Span Percentile Details" />
+
+
+  You can further refine this analysis by adding more resource attributes to narrow down the set of similar spans, 
+  or by increasing the time range to observe percentile behavior over a longer period. 
+  This flexibility enables deeper, more targeted performance analysis.
+  <Figure src="/img/docs/apm-and-distributed-tracing/span-percentile-custom.webp" alt="span-percentile-with-custom-attribute" caption="Span Percentile With Custom Attribute" />
+
+#### Synchronized Navigation:
 The flame graph and waterfall views remain perfectly synchronized. Navigating in one view automatically updates the other, so you can always see where a span fits 
 into the overall trace timeline.
 

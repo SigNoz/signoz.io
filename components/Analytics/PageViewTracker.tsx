@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
 import { getPageType } from '../../utils/getPageType'
+import { detectBotClientSide } from '../../utils/logEvent'
 
 export default function PageViewTracker() {
   const pathname = usePathname()
@@ -22,17 +23,33 @@ export default function PageViewTracker() {
     }
 
     const pageType = getPageType(pathname || '') // Ensure pathname is defined
+    const botDetection = detectBotClientSide()
 
-    logEvent({
-      eventName: 'Website Page View',
-      eventType: 'track',
-      attributes: {
-        pageLocation: pathname, // Use pathname for consistency with rules
-        pageType: pageType,
-        // $current_url: currentUrl, // Optionally log full URL if needed
-        // Add other relevant attributes here if derivable, e.g., based on pageType
-      },
-    })
+    if (botDetection.isBot) {
+      // Log a separate event for bots that execute JavaScript (like Googlebot)
+      // This helps distinguish simple bots from advanced ones that render JS content
+      // Useful for SEO debugging - verifies if search engine bots are rendering your pages
+      logEvent({
+        eventName: 'Bot Page View',
+        eventType: 'track',
+        attributes: {
+          pageLocation: pathname,
+          pageType: pageType,
+          botType: botDetection.botType,
+          botDetectionReason: botDetection.reason,
+        },
+      })
+    } else {
+      // Log regular page view for human visitors
+      logEvent({
+        eventName: 'Website Page View',
+        eventType: 'track',
+        attributes: {
+          pageLocation: pathname,
+          pageType: pageType,
+        },
+      })
+    }
 
     // Update the previous path
     previousPath.current = currentUrl

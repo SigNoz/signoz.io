@@ -1,252 +1,257 @@
 ---
-date: 2024-12-17
+date: 2026-01-02
 id: send-cloudwatch-logs-to-signoz
-
-title: Send Cloudwatch Logs to SigNoz
-description: Send your AWS Cloudwatch logs to SigNoz Cloud/Self-Host
-
+title: Send CloudWatch logs to SigNoz
+description: Learn how to forward AWS CloudWatch logs to SigNoz using the OpenTelemetry Collector with step-by-step configuration and validation.
+doc_type: howto
 ---
-
-
-
 
 ## Overview
 
-AWS CloudWatch is a monitoring service that helps users keep tabs on their AWS resources. There are some challenges that users encounter on Cloudwatch, such as the absence of a unified observability experience, slightly higher costs, a focus on AWS-centric environments, and user experience limitations.
+This guide walks you through forwarding AWS CloudWatch logs to SigNoz using the OpenTelemetry (OTel) Collector's `awscloudwatch` receiver. By the end, you'll have CloudWatch logs flowing into SigNoz where you can search, filter, and correlate them with traces and metrics.
 
-SigNoz effectively addresses these challenges, and in the following steps, we'll outline how to forward logs from AWS CloudWatch to SigNoz seamlessly.
+<KeyPointCallout title="What is the OpenTelemetry Collector?" defaultCollapsed={true}>
+The OpenTelemetry Collector is a vendor-agnostic agent that collects, processes, and exports telemetry data (logs, metrics, traces). In this setup, it pulls logs from CloudWatch and forwards them to SigNoz. Learn more in the [OTel Collector documentation](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/).
+</KeyPointCallout>
 
-## Setup
+## Prerequisites
 
-<Tabs entityName="plans">
-<TabItem value="SigNoz Cloud" label="SigNoz Cloud" default>
+Before you begin, make sure you have:
 
-**Step 1** : Setup the OTel Collector
+- **SigNoz account**: A [SigNoz Cloud](https://signoz.io/teams/) account or a running [self-hosted SigNoz instance](https://signoz.io/docs/install/)
+- **AWS account**: Access to AWS with permissions to create IAM policies
+- **CloudWatch log groups**: At least one log group with logs you want to forward
+- **VM or server**: A machine (Linux recommended) where you can run the OTel Collector
 
-Follow the instructions in the SigNoz Cloud section of [this tutorial](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)  to setup the OpenTelemetry Collector.
+## Step 1: Install the OpenTelemetry Collector
 
+First, install the OpenTelemetry Collector on the machine that will pull logs from CloudWatch. Follow the installation guide for your environment: [Install OpenTelemetry Collection Agent](https://signoz.io/docs/opentelemetry-collection-agents/get-started/)
 
-**Step 2** : Configure AWS 
+<Admonition type="info">
+The OTel Collector must have network access to both AWS (to poll CloudWatch) and your SigNoz instance (to export logs).
+</Admonition>
 
-Create a `~/.aws/credentials` file in the machine  which should have `aws_access_key_id` and the  `aws_secret_access_key` in the default section of credentials file.
+## Step 2: Configure AWS credentials
 
-The below snippet shows an example of the credentials file.
+The OTel Collector needs AWS credentials to access CloudWatch. Create or update the credentials file at `~/.aws/credentials` on the machine running the collector:
 
-```bash
+```bash:~/.aws/credentials
 [default]
-aws_access_key_id=AKIAIOSFODNN7EXAMPLE
-aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-
-[user1]
-aws_access_key_id=AKIAI44QH8DHBEXAMPLE
-aws_secret_access_key=je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY
+aws_access_key_id=<YOUR_AWS_ACCESS_KEY_ID>
+aws_secret_access_key=<YOUR_AWS_SECRET_ACCESS_KEY>
 ```
 
-The account corresponding to these credentials should have the below-mentioned AWS Identity and Access Management (IAM) policy. This policy allows the account associated with these permissions to describe and filter log events within all log groups in the specified AWS account, which is crucial for setting up the necessary permissions to forward CloudWatch logs to SigNoz.
+Replace the placeholders:
+- `<YOUR_AWS_ACCESS_KEY_ID>`: Your AWS access key ID
+- `<YOUR_AWS_SECRET_ACCESS_KEY>`: Your AWS secret access key
 
-```bash
+<KeyPointCallout title="Using named profiles?" defaultCollapsed={true}>
+If you use multiple AWS profiles, you can specify a named profile like this:
+
+```bash:~/.aws/credentials
+[my-cloudwatch-profile]
+aws_access_key_id=<YOUR_AWS_ACCESS_KEY_ID>
+aws_secret_access_key=<YOUR_AWS_SECRET_ACCESS_KEY>
+```
+
+Then reference it in your receiver config with `profile: 'my-cloudwatch-profile'` (shown in Step 4).
+</KeyPointCallout>
+
+## Step 3: Create the required IAM policy
+
+The AWS credentials you use need permission to read CloudWatch logs. Create an IAM policy with the following permissions and attach it to the user or role associated with your credentials:
+
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "VisualEditor0",
+            "Sid": "CloudWatchLogsReadAccess",
             "Effect": "Allow",
             "Action": [
                 "logs:DescribeLogGroups",
                 "logs:FilterLogEvents"
             ],
-            "Resource": "arn:aws:logs:*:090340947446:log-group:*"
+            "Resource": "arn:aws:logs:<REGION>:<AWS_ACCOUNT_ID>:log-group:*"
         }
     ]
 }
 ```
-<Admonition>
-Make sure you have AWS configured on the machine where otel-collector is running
+
+Replace the placeholders:
+- `<REGION>`: Your AWS region (e.g., `us-east-1`, `eu-west-1`), or use `*` to allow all regions
+- `<AWS_ACCOUNT_ID>`: Your 12-digit AWS account ID (find it in the AWS Console under your account dropdown)
+
+<Admonition type="tip">
+To restrict access to specific log groups, replace `log-group:*` with `log-group:/your/log/group/name:*`.
 </Admonition>
 
-**Step 3** : Configure the awscloudwatch receiver
+## Step 4: Configure the awscloudwatch receiver
 
-We’ll add an awscloudwatch receiver inside the receivers section of the `config.yaml` that we created in Step 1 for the OTel collector.
+Add the `awscloudwatch` receiver to your OTel Collector configuration file (`config.yaml`). This receiver polls CloudWatch at regular intervals and forwards logs to SigNoz.
 
-You can configure your receiver to collect logs with different conditions. To see the different parameters, some sample configurations and more details about the awscloudwatch receiver, check out this <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/awscloudwatchreceiver" rel="noopener noreferrer nofollow" target="_blank" >GitHub link</a>.
+Choose one of the following configurations based on your needs:
 
-Here are two sample configurations:
+### Option A: Autodiscover log groups
 
-1. This configuration below will do autodiscovery and collect 100 log groups starting with prefix application.
+This configuration automatically discovers and collects logs from log groups matching a prefix:
 
-```yaml
-
+```yaml:config.yaml
 receivers:
-...
-	awscloudwatch:
-	    region: us-east-1
-	    logs:
-	      poll_interval: 1m
-	      groups:
-	        autodiscover:
-	          limit: 100
-	          prefix: application
-...
-```
-2. This configuration below will not do autodiscovery and specifies the names of the log groups to collect.
-
-```yaml
-receivers:
-...
-awscloudwatch:
-  profile: 'my-profile'
-  region: us-west-1
-  logs:
-    poll_interval: 5m
-    groups:
-      named:
-        /aws/eks/dev-0/cluster:
-
-...
+  awscloudwatch:
+    region: us-east-1
+    logs:
+      poll_interval: 1m
+      groups:
+        autodiscover:
+          limit: 100
+          prefix: /aws/lambda/
 ```
 
+Configuration breakdown:
+- `region`: The AWS region where your log groups are located
+- `poll_interval`: How often to check for new logs (e.g., `1m` for every minute, `5m` for every 5 minutes)
+- `limit`: Maximum number of log groups to discover (up to 100)
+- `prefix`: Only collect log groups whose names start with this prefix (e.g., `/aws/lambda/` for Lambda function logs)
 
-**Step 4** : Send logs to SigNoz <br></br>
-To test out the receiver, create a pipeline in the pipeline section of the `config.yaml` created in Step 1 for Otel Collector.
+### Option B: Specify log groups by name
 
-```yaml
-...
+This configuration explicitly lists which log groups to collect:
+
+```yaml:config.yaml
+receivers:
+  awscloudwatch:
+    region: us-west-1
+    profile: my-cloudwatch-profile  # Optional: use if you have a named AWS profile
+    logs:
+      poll_interval: 5m
+      groups:
+        named:
+          /aws/eks/my-cluster/cluster:
+          /aws/rds/instance/my-database/postgresql:
+```
+
+Configuration breakdown:
+- `profile`: (Optional) The AWS credentials profile to use from `~/.aws/credentials`
+- `named`: List specific log group names to collect (each name ends with a colon)
+
+<Admonition type="info">
+For more configuration options (filtering by stream prefix, time ranges, etc.), see the <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/awscloudwatchreceiver" target="_blank" rel="noopener noreferrer nofollow">awscloudwatch receiver documentation</a>.
+</Admonition>
+
+## Step 5: Configure the logs pipeline
+
+Enable the `awscloudwatch` receiver in your OTel Collector pipeline. Add or update the `logs` pipeline in the `service.pipelines` section of your `config.yaml`:
+
+```yaml {4}:config.yaml
+service:
   pipelines:
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    metrics/internal:
-      receivers: [prometheus, hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
     logs:
       receivers: [otlp, awscloudwatch]
       processors: [batch]
       exporters: [otlp]
 ```
 
-This will log out everything from the receiver and you should be able to see your Cloudwatch logs in the logs tabs of SigNoz Cloud UI.
+The highlighted line shows the `awscloudwatch` receiver added to the logs pipeline. If you have existing receivers like `otlp`, keep them in the array.
 
-</TabItem>
+<Admonition type="warning">
+Make sure your `exporters` section includes the correct SigNoz endpoint. For SigNoz Cloud, this should be configured as:
 
-<TabItem value='self-host' label='Self-Host'>
-
-**Step 1** : Setup the OTel Collector
-
-Follow the instructions in the Self-Host section of [this tutorial](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)  to setup the OpenTelemetry Collector.
-
-
-**Step 2** : Configure AWS 
-
-Create a `~/.aws/credentials` file in the machine  which should have `aws_access_key_id` and the  `aws_secret_access_key` in the default section of credentials file.
-
-The below snippet shows an example of the credentials file.
-
-```bash
-[default]
-aws_access_key_id=AKIAIOSFODNN7EXAMPLE
-aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-
-[user1]
-aws_access_key_id=AKIAI44QH8DHBEXAMPLE
-aws_secret_access_key=je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY
+```yaml:config.yaml
+exporters:
+  otlp:
+    endpoint: ingest.<REGION>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
 ```
 
-The account corresponding to these credentials should have the below-mentioned AWS Identity and Access Management (IAM) policy. This policy allows the account associated with these permissions to describe and filter log events within all log groups in the specified AWS account, which is crucial for setting up the necessary permissions to forward CloudWatch logs to SigNoz.
-
-```bash
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": [
-                "logs:DescribeLogGroups",
-                "logs:FilterLogEvents"
-            ],
-            "Resource": "arn:aws:logs:*:090340947446:log-group:*"
-        }
-    ]
-}
-```
-<Admonition>
-Make sure you have AWS configured on the machine where otel-collector is running
+Replace:
+- `<REGION>`: Your SigNoz Cloud region (`us`, `eu`, or `in`)
+- `<SIGNOZ_INGESTION_KEY>`: Your ingestion key from [SigNoz Settings](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 </Admonition>
 
-**Step 3** : Configure the awscloudwatch receiver
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-We’ll add an awscloudwatch receiver inside the receivers section of the `config.yaml` that we created in Step 1 for the OTel collector.
+## Step 6: Restart the collector
 
-You can configure your receiver to collect logs with different conditions. To see the different parameters, some sample configurations and more details about the awscloudwatch receiver, check out this <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/awscloudwatchreceiver" rel="noopener noreferrer nofollow" target="_blank" >GitHub link</a>.
+After updating the configuration, restart the OTel Collector to apply changes:
 
-Here are two sample configurations:
+```bash
+# If running as a systemd service
+sudo systemctl restart otelcol-contrib
 
-1. This configuration below will do autodiscovery and collect 100 log groups starting with prefix application.
-
-```yaml
-
-receivers:
-...
-	awscloudwatch:
-	    region: us-east-1
-	    logs:
-	      poll_interval: 1m
-	      groups:
-	        autodiscover:
-	          limit: 100
-	          prefix: application
-...
-```
-2. This configuration below will not do autodiscovery and specifies the names of the log groups to collect.
-
-```yaml
-receivers:
-...
-awscloudwatch:
-  profile: 'my-profile'
-  region: us-west-1
-  logs:
-    poll_interval: 5m
-    groups:
-      named:
-        /aws/eks/dev-0/cluster:
-
-...
+# If running directly
+# Stop the current process (Ctrl+C) and restart with:
+./otelcol-contrib --config config.yaml
 ```
 
+## Validate
 
-**Step 4** : Send logs to SigNoz <br></br>
-To test out the receiver, create a pipeline in the pipeline section of the `config.yaml` created in Step 1 for Otel Collector.
+After a few minutes (based on your `poll_interval`), verify that logs are appearing in SigNoz:
 
-```yaml
-...
- pipelines:
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    metrics/internal:
-      receivers: [prometheus, hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    logs:
-      receivers: [otlp, awscloudwatch]
-      processors: [batch]
-      exporters: [clickhouselogsexporter]
-```
+1. Open your SigNoz instance and navigate to **Logs** → **Logs Explorer**
+2. Look for logs with attributes matching your CloudWatch log groups
+3. You should see logs with fields like:
+   - `aws.cloudwatch.log_group_name`
+   - `aws.cloudwatch.log_stream_name`
 
-This will log out everything from the receiver and you should be able to see your Cloudwatch logs in the logs tabs of SigNoz UI.
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
 
-</TabItem>
+### Logs are not appearing in SigNoz
 
-</Tabs>
+**Symptoms**: No CloudWatch logs visible in SigNoz after waiting several poll intervals.
+
+**Possible causes and fixes**:
+
+1. **AWS credentials not found or invalid**
+   - Verify the credentials file exists at `~/.aws/credentials`
+   - Check that the file is readable by the user running the OTel Collector
+   - Test credentials with: `aws logs describe-log-groups --region <your-region>`
+
+2. **Insufficient IAM permissions**
+   - Ensure the IAM policy includes both `logs:DescribeLogGroups` and `logs:FilterLogEvents`
+   - Verify the policy is attached to the correct user/role
+
+3. **Wrong region configured**
+   - Confirm the `region` in your receiver config matches where your log groups exist
+
+4. **Log group prefix doesn't match**
+   - If using autodiscover with a prefix, verify your log groups actually start with that prefix
+   - Try listing log groups: `aws logs describe-log-groups --log-group-name-prefix /aws/lambda/ --region <your-region>`
+
+5. **Collector can't reach SigNoz**
+   - Check network connectivity to `ingest.<region>.signoz.cloud:443`
+   - Verify your ingestion key is correct
+
+### Error: "failed to filter log events"
+
+**Symptoms**: Collector logs show errors like `failed to filter log events`.
+
+**Fix**: This usually indicates a permissions issue. Verify your IAM policy includes `logs:FilterLogEvents` and the resource ARN is correct.
+
+### Collector uses too much memory
+
+**Symptoms**: OTel Collector memory usage grows over time when collecting many log groups.
+
+**Fix**: 
+- Reduce the number of log groups by using a more specific prefix
+- Increase the `poll_interval` to reduce polling frequency
+- Use named log groups instead of autodiscovery to limit scope
+
+</details>
+
+## Next steps
+
+Now that CloudWatch logs are flowing into SigNoz, explore these related features:
+
+- [Search and filter logs](https://signoz.io/docs/userguide/logs/) - Learn to query your CloudWatch logs in SigNoz
+- [Create log-based alerts](https://signoz.io/docs/alerts-management/log-based-alerts/) - Set up alerts based on log patterns
+- [Correlate logs with traces](https://signoz.io/docs/userguide/logs/#related-trace) - Connect logs to distributed traces for debugging
+- [AWS monitoring overview](https://signoz.io/docs/aws-monitoring/overview/) - Explore other AWS integrations for metrics and traces
