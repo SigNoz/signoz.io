@@ -980,8 +980,8 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                label: 'Automatic Code-level Instrumentation',
-                route: '/docs/instrumentation/dotnet/automatic-instrumentation',
+                label: 'NuGet based Instrumentation',
+                route: '/docs/instrumentation/dotnet/nuget-instrumentation',
               },
               {
                 type: 'doc',
