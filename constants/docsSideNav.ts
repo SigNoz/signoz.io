@@ -900,34 +900,32 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Java',
-            route: '/docs/instrumentation/opentelemetry-java',
-            // link: {
-            // type: 'doc',
-            // route: '/docs/instrumentation/opentelemetry-java',
-            // title: 'Java',
-            // description: 'Learn how to instrument Java applications with OpenTelemetry',
-            // slug: 'instrumentation/java',
-            // },
+            route: '/docs/instrumentation/java/overview',
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-springboot',
-                label: 'Spring Boot',
+                route: '/docs/instrumentation/java/opentelemetry-java',
+                label: 'Java / Spring Boot',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-quarkus',
+                route: '/docs/instrumentation/java/opentelemetry-quarkus',
                 label: 'Quarkus',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-tomcat',
+                route: '/docs/instrumentation/java/opentelemetry-tomcat',
                 label: 'Tomcat',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-jboss',
-                label: 'JBoss',
+                route: '/docs/instrumentation/java/opentelemetry-jboss',
+                label: 'JBoss / WildFly',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/java/manual-instrumentation',
+                label: 'Manual Instrumentation',
               },
             ],
           },
@@ -1036,18 +1034,6 @@ const docsSideNav = [
             // type: 'doc',
             // },
             items: [
-              {
-                type: 'category',
-                isExpanded: false,
-                label: 'Java',
-                items: [
-                  {
-                    type: 'doc',
-                    route: '/docs/instrumentation/manual-instrumentation/java/annotations',
-                    label: 'Using Annotations',
-                  },
-                ],
-              },
               {
                 type: 'category',
                 isExpanded: false,
