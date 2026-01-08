@@ -971,6 +971,24 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'category',
+            isExpanded: false,
+            label: '.NET',
+            route: '/docs/instrumentation/opentelemetry-dotnet',
+            items: [
+              {
+                type: 'doc',
+                label: 'NuGet based Instrumentation',
+                route: '/docs/instrumentation/dotnet/nuget-instrumentation',
+              },
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/dotnet/manual-instrumentation',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'PHP',
             route: '/docs/instrumentation/opentelemetry-php',
@@ -979,11 +997,6 @@ const docsSideNav = [
             type: 'doc',
             label: 'Laravel',
             route: '/docs/instrumentation/opentelemetry-laravel',
-          },
-          {
-            type: 'doc',
-            label: '.NET',
-            route: '/docs/instrumentation/opentelemetry-dotnet',
           },
           {
             type: 'doc',

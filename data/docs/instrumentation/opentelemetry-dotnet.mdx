@@ -1,1151 +1,331 @@
 ---
-date: 2024-06-06
+date: 2026-01-03
 id: dotnet
-
 title: .NET OpenTelemetry Instrumentation
 description: Send events from your .NET application to SigNoz
-hide_table_of_contents: true
+doc_type: howto
 ---
 
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
+This guide shows you how to instrument your .NET application with OpenTelemetry and send traces to SigNoz using zero-code automatic instrumentation. This approach requires no code changes to your application.
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your .NET applications and view your application traces in SigNoz.
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
 
-{/* This document contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your .NET application.  */}
-{/* OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your .NET application. */}
-{/* 
-OpenTelemetry .NET is the language-specific implementation of OpenTelemetry in .NET.
+## Prerequisites
 
-Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
+- [.NET SDK](https://dotnet.microsoft.com/en-us/download) 5.0 or later
+- A SigNoz Cloud account or self-hosted SigNoz instance
 
-There are three major steps to using OpenTelemetry:
+## Send traces to SigNoz
 
-- Instrumenting your .NET application with OpenTelemetry
-- Configuring the exporter to send data to SigNoz
-- Validating that configuration to ensure that data is being sent as expected.
-
-In this tutorial, we will instrument a .NET application for traces and send it to SigNoz. */}
-
-## Requirements
-
-[.NET SDK](https://dotnet.microsoft.com/en-us/download) (.NET 5.0 or Later)
-
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-## Send Traces to SigNoz Cloud
-
-Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
-
-<Tabs>
+<Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
 
-There are two ways to send data to SigNoz Cloud.
+Use this section if you're deploying your .NET application directly on a server or VM without containerization.
+</KeyPointCallout>
 
-- Send traces directly to SigNoz Cloud
-  - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended) (recommended)
-  - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic-instrumentation)
-- Send traces via OTel Collector binary (recommended)
-  - [No Code Automatic Instrumentation](#send-traces-via-otel-collector-binary---no-code-automatic-instrumentation) (recommended)
-  - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation)
+### Step 1. Install the instrumentation
 
-#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
-
-**Step 1: Create a shell script with the following content**
+Download and run the OpenTelemetry .NET automatic instrumentation installer:
 
 ```bash
-# Download the bash script
 curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh -O
 
-# Install core files
 sh ./otel-dotnet-auto-install.sh
 
-# Enable execution for the instrumentation script
 chmod +x $HOME/.otel-dotnet-auto/instrument.sh
+```
 
-# Setup the instrumentation for the current shell session
+<Admonition type="info">
+On macOS, install `coreutils` first: `brew install coreutils`
+</Admonition>
+
+### Step 2. Run your application with zero-code instrumentation
+
+<KeyPointCallout title="What is zero-code instrumentation?" defaultCollapsed={true}>
+Zero-code instrumentation uses an external agent to automatically instrument your application without any code changes. It works by injecting instrumentation at runtime via environment variables.
+
+If you prefer more control or need to configure OpenTelemetry directly in your code, see [NuGet based instrumentation](https://signoz.io/docs/instrumentation/dotnet/nuget-instrumentation/) which uses NuGet packages and `Program.cs` configuration.
+</KeyPointCallout>
+
+```bash
 . $HOME/.otel-dotnet-auto/instrument.sh
 
-# Run your application with instrumentation
-OTEL_SERVICE_NAME=<service_name> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> ./MyNetApp
-```
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
-
-<Admonition>
-If you are doing it on mac os , you will need to install `coreutils`, you can do it by using the following command
-
-```bash
-brew install coreutils
-```
-</Admonition>
-
-
-#### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
-
-**Step 1: Installing the OpenTelemetry dependency packages:**
-
-```bash
-dotnet add package OpenTelemetry
-dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol 
-dotnet add package OpenTelemetry.Extensions.Hosting
-dotnet add package OpenTelemetry.Instrumentation.Runtime
-dotnet add package OpenTelemetry.Instrumentation.AspNetCore 
-dotnet add package OpenTelemetry.AutoInstrumentation
-```
-
-**Step 2: Adding OpenTelemetry as a service and configuring exporter options in `Program.cs`:**
-
-In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configuring these variables:
-
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
-
-Here’s a sample `Program.cs` file with the configured variables.
-
-```bash
-using System.Diagnostics;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Configure OpenTelemetry with tracing and auto-start.
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => 
-		resource.AddService(serviceName: "sample-net-app"))
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter(otlpOptions =>
-        {
-						//SigNoz Cloud Endpoint 
-            otlpOptions.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
-
-            otlpOptions.Protocol = OtlpExportProtocol.Grpc;
-						
-						//SigNoz Cloud account Ingestion key
-            string headerKey = "signoz-ingestion-key";
-            string headerValue = "<your-ingestion-key>";
-
-            string formattedHeader = $"{headerKey}={headerValue}";
-            otlpOptions.Headers = formattedHeader;
-        }));
-
-var app = builder.Build();
-
-// The index route ("/") is set up to write out the OpenTelemetry trace information on the response:
-app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}");
-
-app.Run();
-```
-
-The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/getting-started-aspnetcore/README.md" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
-
-The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter is going to send traces. Here, we’re configuring it to send traces to the SigNoz cloud. The target must be a valid Uri with the scheme (`http` or `https`) and host and may contain a port and a path.
-
-This is done by configuring an OpenTelemetry <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/customizing-the-sdk/README.md" rel="noopener noreferrer nofollow" target="_blank" >TracerProvider</a> using extension methods and setting it to auto-start when the host is started.
-
-<Admonition>
-You can find your SigNoz cloud address and ingestion key under the settings of your SigNoz cloud account.
-</Admonition>
-
-{/* 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/ingestion_key_details.webp" alt="Access the ingestion key details in SigNoz UI"/>
-    <figcaption><i>Access the ingestion key details in SigNoz UI</i></figcaption>
-</figure> */}
-
-
-**Step 3. Running the .NET application:**
-
-```bash
-dotnet build
+OTEL_SERVICE_NAME=<service-name> \
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> \
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production,service.version=1.0.0 \
 dotnet run
 ```
 
-**Step 4: Generating some load data and checking your application in SigNoz UI**
-
-Once your application is running, generate some traffic by interacting with it.
-
-In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner. You might have to wait for a few seconds before the data appears on SigNoz UI.
-
-
-
-{/* <figure data-zoomable align='center'>
-    <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
-    <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure> */}
-
----
-
-### Send traces via OTel Collector binary
-
-#### Send traces via OTel Collector binary - No Code Automatic Instrumentation
-
-**Step 1: Create a shell script with the following content**
-
-```bash
-# Download the bash script
-curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh -O
-
-# Install core files
-sh ./otel-dotnet-auto-install.sh
-
-# Enable execution for the instrumentation script
-chmod +x $HOME/.otel-dotnet-auto/instrument.sh
-
-# Setup the instrumentation for the current shell session
-. $HOME/.otel-dotnet-auto/instrument.sh
-
-# Run your application with instrumentation
-OTEL_SERVICE_NAME=<service_name> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces ./MyNetApp
-```
-
-
-- `<service_name>` is name of your service
-
-
-<Admonition>
-If you are doing it on mac os , you will need to install `coreutils`, you can do it by using the following command
-
-```bash
-brew install coreutils
-```
-</Admonition>
-
-#### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
-
-**Step 1: Setting up OpenTelemetry Collector binary as an agent in your machine**
-
-OpenTelemetry Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install OTel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
-
-Go to [setup OTel Collector binary](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install Otel Collector as agent that will collect telemetry data from your sample dotnet app and send it to SigNoz cloud.  
-
-
-**Step 2: Installing the OpenTelemetry dependency packages:**
-
-Install the following dependencies in your application. 
-
-```bash
-dotnet add package OpenTelemetry
-dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol 
-dotnet add package OpenTelemetry.Extensions.Hosting
-dotnet add package OpenTelemetry.Instrumentation.Runtime
-dotnet add package OpenTelemetry.Instrumentation.AspNetCore 
-dotnet add package OpenTelemetry.AutoInstrumentation
-```
-
-**Step 2: Adding OpenTelemetry as a service and configuring exporter options in `Program.cs`:**
-
-In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configuring these variables:
-
-- `serviceName` - It is the name of your service.
-- `otlpOptions.Endpoint` - It is the endpoint for your OTel Collector binary agent.
-
-Here’s a sample `Program.cs` file with the configured variables. 
-
-```bash
-using System.Diagnostics;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Configure OpenTelemetry with tracing and auto-start.
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => 
-		resource.AddService(serviceName: "sample-net-app"))
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter(otlpOptions =>
-        {
-            otlpOptions.Endpoint = new Uri("http://localhost:4317");
-
-            otlpOptions.Protocol = OtlpExportProtocol.Grpc;
-        }));
-
-var app = builder.Build();
-
-//The index route ("/") is set up to write out the OpenTelemetry trace information on the response:
-app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}");
-
-app.Run();
-```
-
-
-The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/getting-started-aspnetcore/README.md" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
-
-The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter is going to send traces. Here, we’re configuring it to send traces to the OTel collector agent. The target must be a valid Uri with the scheme (`http` or `https`) and host and may contain a port and a path.
-
-This is done by configuring an OpenTelemetry <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/customizing-the-sdk/README.md" rel="noopener noreferrer nofollow" target="_blank" >TracerProvider</a> using extension methods and setting it to auto-start when the host is started.
-
-
-
-**Step 4. Running the .NET application:**
-
-```bash
-dotnet build
-dotnet run
-```
-
-**Step 5: Generating some load data and checking your application in SigNoz UI**
-
-After the Otel collector is all set and running, and your too application is running, generate some traffic by interacting with it.
-
-In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner. You might have to wait for a few seconds before the data appears on SigNoz UI.
-
-
-
-{/* <figure data-zoomable align='center'>
-    <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
-    <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure> */}
+Replace:
+- `<service-name>`: Your service name (e.g., `payment-service`)
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 </TabItem>
+
 <TabItem value="k8s" label="Kubernetes">
-You can auto-instrument sending traces from the .NET application using one of the following methods:
 
-1. Using Kubernetes OTel Operator (recommended)
-2. Using OTel Collector Agent
+<Tabs entityName="k8s-method">
+<TabItem value="direct" label="Direct" default>
 
-<Tabs>
-<TabItem value="k8s-otel-operator" label="K8s OTel Operator" default>
-### K8s OTel Operator Based Automatic Instrumentation (recommended)
+<KeyPointCallout title="Managing multiple services?" defaultCollapsed={true}>
+For centralized instrumentation management or auto-injection without code changes, see the OTel Operator tab.
+</KeyPointCallout>
 
-#### Send traces directly to SigNoz Cloud - Using K8s OTel Operator
+### Step 1. Install the instrumentation
 
-For .NET application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
+Add the OpenTelemetry instrumentation to your Dockerfile:
 
-An [OpenTelemetry Operator](https://opentelemetry.io/docs/kubernetes/operator) is a Kubernetes Operator that manages 
-[OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) and auto-instrumentation of 
-workloads. It basically simplifies the deployment and management of OpenTelemetry in a Kubernetes environment.
-
-The OpenTelemetry Operator provides two Custom Resource Definitions (CRDs):
-
-- `OpenTelemetryCollector`
-- `Instrumentation`
-
-The `OpenTelemetryCollector` CRD allows you to deploy and manage OpenTelemetry Collectors in your Kubernetes cluster.
-
-The `Instrumentation` CRD allows you to configure and inject OpenTelemetry auto-instrumentation libraries into your workloads.
-
-Here are the steps you need to follow to auto-instrument .NET application using OTel Operator:
-
-**Step 1.** Install cert-manager
-
-Run the following commands to apply cert manager.
-
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
-
-kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
+```dockerfile
+RUN apt-get update && apt-get install -y curl unzip \
+    && curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh -o otel-dotnet-auto-install.sh \
+    && sh ./otel-dotnet-auto-install.sh \
+    && chmod +x $HOME/.otel-dotnet-auto/instrument.sh \
+    && rm otel-dotnet-auto-install.sh \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 ```
 
-**Step 2.** Install OpenTelemetry Operator
+### Step 2. Set environment variables in your deployment
 
-To install the operator in the existing K8s cluster, run the following command:
+Add these environment variables to your deployment manifest:
 
-```bash
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.116.0/opentelemetry-operator.yaml
+```yaml
+env:
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+- name: OTEL_TRACES_EXPORTER
+  value: 'otlp'
+- name: OTEL_EXPORTER_OTLP_PROTOCOL
+  value: 'http/protobuf'
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'deployment.environment=production,service.version=1.0.0'
 ```
 
-Installing the OpenTelemetry Operator sets up the necessary components and configurations to enable the observability and monitoring of applications running in the cluster.
+Replace:
+- `<service-name>`: Your service name (e.g., `payment-service`)
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-**Step 3.** Setup the OpenTelemetry Collector instance
+### Step 3. Update your Dockerfile entrypoint
 
-Once the `opentelemetry-operator` has been deployed, you can proceed with the creation of the OpenTelemetry Collector (`otelcol`) instance. The OpenTelemetry Collector collects, processes, and exports telemetry data.
-
-There are different deployment modes for the `OpenTelemetryCollector`, and you can specify them in the spec.mode section of the custom resource. The available deployment modes are:
-
-- [Daemonset](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
-- [Sidecar](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
-- [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
-- [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) (default mode)
-
-The default method - the `Deployment` mode, will be used here.
-
-To create a simple instance of the OpenTelemetry Collector, create a file `otel-collector.yaml` with the following contents:
-
-```yaml:otel-collector.yaml
-apiVersion: opentelemetry.io/v1alpha1
-kind: OpenTelemetryCollector
-metadata:
-  name: otel-collector
-spec:
-  mode: deployment
-  config: |
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
-    processors:
-      batch: {}
-      resource/env:
-        attributes:
-        - key: deployment.environment
-          value: prod # can be dev, prod, staging etc. based on your environment
-          action: upsert
-    exporters:
-      debug: {}
-      otlp:
-        endpoint: "ingest.<region>.signoz.cloud:443" # replace <region> with your region of SigNoz Cloud
-        tls:
-          insecure: false
-        headers:
-          "signoz-ingestion-key": "<your-ingestion-key>" # Obtain from https://{your-signoz-tenant-url}/settings/ingestion-settings
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [batch, resource/env]
-          exporters: [otlp]
+```dockerfile
+CMD . $HOME/.otel-dotnet-auto/instrument.sh && dotnet MyApp.dll
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+</TabItem>
+<TabItem value="otel-operator" label="OTel Operator">
 
-Apply the above yaml file using the following command:
+The [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) auto-injects instrumentation into your .NET pods without modifying your application image.
 
-```bash
-kubectl apply -f otel-collector.yaml
-```
+### Step 1. Set up the OpenTelemetry Operator
 
-**Step 4.** Setup the Instrumentation instance
+Install the Operator and Collector following the [K8s OTel Operator installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/).
 
-Once the OpenTelemetry Collector instance has been deployed, the next step will be to create an instrumentation instance, which will be responsible for sending OTLP data to the OTel Collector.
+### Step 2. Create the Instrumentation resource
 
-Create a file `instrumentation.yaml` with the following contents:
+Create `instrumentation.yaml` to configure .NET auto-instrumentation:
 
 ```yaml:instrumentation.yaml
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
 metadata:
-  name: traces-instrumentation
+  name: dotnet-instrumentation
 spec:
   exporter:
-    endpoint: https://ingest.<region>.signoz.cloud:443  # replace <region> with your region of SigNoz Cloud
-  env:
-    - name: OTEL_EXPORTER_OTLP_HEADERS
-      value: signoz-ingestion-key="<signoz-token>"  # Obtain from https://{your-signoz-url}/settings/ingestion-settings
-    - name: OTEL_EXPORTER_OTLP_INSECURE
-      value: "false"
+    endpoint: http://otel-collector-collector:4318
   propagators:
     - tracecontext
     - baggage
-    - b3
-  sampler:
-    type: parentbased_traceidratio
-    argument: "1"
   dotnet:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
-    env:
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://otel-collector-collector:4318 #This is formed as: "http://<OpenTelemetryCollector name>-collector:4318"
 ```
 
-Apply the above instrumentation using the following command:
+Deploy this resource to your cluster.
 
-```bash
-kubectl apply -f instrumentation.yaml
-```
+### Step 3. Add annotations to your deployment
 
-**Step 5.** Auto-instrument your .NET app with OpenTelemetry
+Add these annotations to your pod template's `metadata.annotations`:
 
-Create `deployment.yaml` file for your .NET application as follows:
-
-```yaml:deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: dotnet-app
-spec:
-  selector:
-    matchLabels:
-      app: dotnet-app
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: dotnet-app
-      annotations:
-        instrumentation.opentelemetry.io/inject-dotnet: "true"
-        resource.opentelemetry.io/service.name: "dotnet-app"
-    spec:
-      containers:
-      - name: app
-        image: dotnet-app:latest
-        ports:
-        - containerPort: 8080
-```
-
-It is important to add the following annotation under `spec > template > metadata > annotations`:
-
-```
+```yaml
 instrumentation.opentelemetry.io/inject-dotnet: "true"
 ```
 
-This helps in auto-instrumenting the traces from the .NET application.
-
-Apply the deployment using the following command:
-
-```bash
-kubectl apply -f deployment.yaml
-```
-
-With this, the auto-instrumentation of traces for .NET application is ready.
-
-**Step 6.** Running the .NET application
-
-In order to run the application on port 8080, run the following commands:
-
-```bash
-export POD_NAME=$(kubectl get pod -l app=<service-name> -o jsonpath="{.items[0].metadata.name}")  # service name is `dotnet-app` in this case.   
-
-kubectl port-forward ${POD_NAME} 8080:8080
-```
-
-You can now access the application on port 8080.
-
-You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
-
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
-
-</TabItem>
-<TabItem value="otel-collector-agent" label="OTel Collector Agent">
-For .NET application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
-
-Once you have set up OTel Collector agent, you can proceed with OpenTelemetry .NET instrumentation by following either of the two:
-
-1. [No Code Automatic Instrumentation](#no-code-automatic-instrumentation-recommended) (recommended)
-2. [Code Level Automatic Instrumentation](#code-level-automatic-instrumentation)
-
-
-### No Code Automatic Instrumentation (recommended)
-
-
-#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
-
-**Step 1: Create a shell script with the following content**
-
-```bash
-# Download the bash script
-curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh -O
-
-# Install core files
-sh ./otel-dotnet-auto-install.sh
-
-# Enable execution for the instrumentation script
-chmod +x $HOME/.otel-dotnet-auto/instrument.sh
-
-# Setup the instrumentation for the current shell session
-. $HOME/.otel-dotnet-auto/instrument.sh
-
-# Run your application with instrumentation
-OTEL_SERVICE_NAME=<service_name> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces ./MyNetApp
-```
-
-- `<service_name>` is name of your service
-
-### Code Level Automatic Instrumentation
-
-**Step 1: Installing the OpenTelemetry dependency packages:**
-
-Install the following dependencies in your application. 
-
-```bash
-dotnet add package OpenTelemetry
-dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol 
-dotnet add package OpenTelemetry.Extensions.Hosting
-dotnet add package OpenTelemetry.Instrumentation.Runtime
-dotnet add package OpenTelemetry.Instrumentation.AspNetCore 
-dotnet add package OpenTelemetry.AutoInstrumentation
-```
-
-**Step 2: Adding OpenTelemetry as a service and configuring exporter options in `Program.cs`:**
-
-In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configuring these variables:
-
-- `serviceName` - It is the name of your service.
-- `otlpOptions.Endpoint` - It is the endpoint for your OTel Collector agent.
-
-Here’s a sample `Program.cs` file with the configured variables. 
-
-```bash
-using System.Diagnostics;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Configure OpenTelemetry with tracing and auto-start.
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => 
-		resource.AddService(serviceName: "sample-net-app"))
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter(otlpOptions =>
-        {
-            otlpOptions.Endpoint = new Uri("http://localhost:4317");
-
-            otlpOptions.Protocol = OtlpExportProtocol.Grpc;
-        }));
-
-var app = builder.Build();
-
-//The index route ("/") is set up to write out the OpenTelemetry trace information on the response:
-app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}");
-
-app.Run();
-```
-
-
-The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/getting-started-aspnetcore/README.md" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
-
-The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter is going to send traces. Here, we’re configuring it to send traces to the OTel Collector agent. The target must be a valid Uri with the scheme (`http` or `https`) and host and may contain a port and a path.
-
-This is done by configuring an OpenTelemetry <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/customizing-the-sdk/README.md" rel="noopener noreferrer nofollow" target="_blank" >TracerProvider</a> using extension methods and setting it to auto-start when the host is started.
-
-
-
-**Step 4. Running the .NET application:**
-
-```bash
-dotnet build
-dotnet run
-```
-
-**Step 5: Generating some load data and checking your application in SigNoz UI**
-
-After the Otel collector is all set and running, and your too application is running, generate some traffic by interacting with it.
-
-In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner. You might have to wait for a few seconds before the data appears on SigNoz UI.
-
-
-
-{/* <figure data-zoomable align='center'>
-    <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
-    <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure> */}
 </TabItem>
 </Tabs>
 
 </TabItem>
-<TabItem value="windows" label="Windows">
 
-There are two ways to send data to SigNoz Cloud.
+<TabItem value="docker" label="Docker">
 
-- Send traces directly to SigNoz Cloud
-  - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended-2) (recommended)
-  - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic-instrumentation-1)
-- Send traces via OTel Collector binary (recommended)
-  - [No Code Automatic Instrumentation](#send-traces-via-otel-collector-binary---no-code-automatic-instrumentation-1) (recommended)
-  - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation-1)
+### Step 1. Update your Dockerfile
 
-### Send traces directly to SigNoz Cloud
+```dockerfile:Dockerfile
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet publish -c Release -o /app/publish
 
-#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
 
-**Step 1: Download installation scripts**
-
-```powershell
-$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/OpenTelemetry.DotNet.Auto.psm1"
-$download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
-Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
-```
-
-**Step 2: Execute following script to download automatic instrumentation for your development environment**
-
-```powershell
-Import-Module $download_path
-Install-OpenTelemetryCore
-```
-
-**Step 3: Set variables and execute auto instrumentation**
-
-```powershell
-$env:OTEL_TRACES_EXPORTER="otlp"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="ingest.<region>.signoz.cloud:443"
-$env:OTEL_SERVICE_NAME="<service_name>"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-$env:OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED="true"
-$env:OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED="true"
-Register-OpenTelemetryForCurrentSession -OTelServiceName "<service_name>"
-dotnet run
-```
-  
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
-- Replace `dotnet run` with the run command of your application
-
-#### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
-
-**Step 1: Installing the OpenTelemetry dependency packages:**
-
-```bash
-dotnet add package OpenTelemetry
-dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol 
-dotnet add package OpenTelemetry.Extensions.Hosting
-dotnet add package OpenTelemetry.Instrumentation.Runtime
-dotnet add package OpenTelemetry.Instrumentation.AspNetCore 
-dotnet add package OpenTelemetry.AutoInstrumentation
-```
-
-**Step 2: Adding OpenTelemetry as a service and configuring exporter options in `Program.cs`:**
-
-In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configuring these variables:
-
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
-
-Here’s a sample `Program.cs` file with the configured variables.
-
-```bash
-using System.Diagnostics;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Configure OpenTelemetry with tracing and auto-start.
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => 
-		resource.AddService(serviceName: "sample-net-app"))
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter(otlpOptions =>
-        {
-						//SigNoz Cloud Endpoint 
-            otlpOptions.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
-
-            otlpOptions.Protocol = OtlpExportProtocol.Grpc;
-						
-						//SigNoz Cloud account Ingestion key
-            string headerKey = "signoz-ingestion-key";
-            string headerValue = "<your-ingestion-key>";
-
-            string formattedHeader = $"{headerKey}={headerValue}";
-            otlpOptions.Headers = formattedHeader;
-        }));
-
-var app = builder.Build();
-
-// The index route ("/") is set up to write out the OpenTelemetry trace information on the response:
-app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}");
-
-app.Run();
-```
-
-The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/getting-started-aspnetcore/README.md" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
-
-The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter is going to send traces. Here, we’re configuring it to send traces to the SigNoz cloud. The target must be a valid Uri with the scheme (`http` or `https`) and host and may contain a port and a path.
-
-This is done by configuring an OpenTelemetry <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/customizing-the-sdk/README.md" rel="noopener noreferrer nofollow" target="_blank" >TracerProvider</a> using extension methods and setting it to auto-start when the host is started.
-
-{/* <Admonition>
-You can find your SigNoz cloud address and ingestion key under the settings of your SigNoz cloud account.
-</Admonition> */}
-
-
-{/* <figure data-zoomable align='center'>
-    <img src="/img/docs/ingestion_key_details.webp" alt="Access the ingestion key details in SigNoz UI"/>
-    <figcaption><i>Access the ingestion key details in SigNoz UI</i></figcaption>
-</figure> */}
-
-
-**Step 3. Running the .NET application:**
-
-```bash
-dotnet build
-dotnet run
-```
-
-**Step 4: Generating some load data and checking your application in SigNoz UI**
-
-Once your application is running, generate some traffic by interacting with it.
-
-In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner. You might have to wait for a few seconds before the data appears on SigNoz UI.
-
-
-{/* 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
-    <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure> */}
-
----
-
-### Send traces via OTel Collector binary
-
-#### Send traces via OTel Collector binary - No Code Automatic Instrumentation
-
-**Step 1: Setting up OpenTelemetry Collector binary as an agent in your machine**
-
-OpenTelemetry Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install OTel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
-
-
-Go to [setup OTel Collector binary](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install Otel Collector as agent that will collect telemetry data from your sample dotnet app and send it to SigNoz cloud.  
-
-
-**Step 2: Download installation scripts**
-
-```powershell
-$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/OpenTelemetry.DotNet.Auto.psm1"
-$download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
-Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
-```
-
-**Step 3: Execute following script to download automatic instrumentation for your development environment**
-
-```powershell
-Import-Module $download_path
-Install-OpenTelemetryCore
-```
-
-**Step 4: Set variables and execute auto instrumentation**
-
-```powershell
-$env:OTEL_TRACES_EXPORTER="otlp"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
-$env:OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED="true"
-$env:OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED="true"
-Register-OpenTelemetryForCurrentSession -OTelServiceName "<service_name>"
-dotnet run
-```
-
-- `<service_name>` is name of your service
-
-
-replace `dotnet run` with the run command of your application
-
-#### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
-
-**Step 1: Setting up OpenTelemetry Collector binary as an agent in your machine**
-
-OpenTelemetry Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install OTel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
-
-Go to [setup OTel Collector binary](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install Otel Collector as agent that will collect telemetry data from your sample dotnet app and send it to SigNoz cloud.  
-
-
-**Step 2: Installing the OpenTelemetry dependency packages:**
-
-Install the following dependencies in your application. 
-
-```bash
-dotnet add package OpenTelemetry
-dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol 
-dotnet add package OpenTelemetry.Extensions.Hosting
-dotnet add package OpenTelemetry.Instrumentation.Runtime
-dotnet add package OpenTelemetry.Instrumentation.AspNetCore 
-dotnet add package OpenTelemetry.AutoInstrumentation
-```
-
-**Step 2: Adding OpenTelemetry as a service and configuring exporter options in `Program.cs`:**
-
-In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configuring these variables:
-
-- `serviceName` - It is the name of your service.
-- `otlpOptions.Endpoint` - It is the endpoint for your OTel Collector binary agent.
-
-Here’s a sample `Program.cs` file with the configured variables. 
-
-```bash
-using System.Diagnostics;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Configure OpenTelemetry with tracing and auto-start.
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => 
-		resource.AddService(serviceName: "sample-net-app"))
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter(otlpOptions =>
-        {
-            otlpOptions.Endpoint = new Uri("http://localhost:4317");
-
-            otlpOptions.Protocol = OtlpExportProtocol.Grpc;
-        }));
-
-var app = builder.Build();
-
-//The index route ("/") is set up to write out the OpenTelemetry trace information on the response:
-app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}");
-
-app.Run();
-```
-
-
-The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet-contrib/blob/main/src/OpenTelemetry.Instrumentation.AspNetCore/README.md" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
-
-The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter is going to send traces. Here, we’re configuring it to send traces to the OTel collector agent. The target must be a valid Uri with the scheme (`http` or `https`) and host and may contain a port and a path.
-
-This is done by configuring an OpenTelemetry <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/customizing-the-sdk/README.md" rel="noopener noreferrer nofollow" target="_blank" >TracerProvider</a> using extension methods and setting it to auto-start when the host is started.
-
-
-
-**Step 4. Running the .NET application:**
-
-```bash
-dotnet build
-dotnet run
-```
-
-**Step 5: Generating some load data and checking your application in SigNoz UI**
-
-After the Otel collector is all set and running, and your too application is running, generate some traffic by interacting with it.
-
-In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner. You might have to wait for a few seconds before the data appears on SigNoz UI.
-
-
-{/* 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
-    <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure> */}
-
-</TabItem>
-<TabItem value="Docker" label="Docker">
-
-There are two ways to send data to SigNoz Cloud. You can containerize the images in both the cases.
-
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud-1)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
-
-#### Send traces directly to SigNoz Cloud
-
-**Step 1.** Configure OpenTelemetry to run in Docker Container
-
-Add the following in your Dockerfile.
-
-```bash
-...
-
-# Download the installer script
 RUN apt-get update && apt-get install -y curl unzip \
     && curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh -o otel-dotnet-auto-install.sh \
     && sh ./otel-dotnet-auto-install.sh \
-    && chmod +x $HOME/.otel-dotnet-auto/instrument.sh
+    && chmod +x $HOME/.otel-dotnet-auto/instrument.sh \
+    && rm otel-dotnet-auto-install.sh \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-...
+COPY --from=build /app/publish .
 
-# Set OpenTelemetry environment variables
-ENV OTEL_SERVICE_NAME="<service_name>"
+ENV OTEL_SERVICE_NAME="<service-name>"
 ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-ENV OTEL_RESOURCE_ATTRIBUTES="deployment.environment=staging,service.version=1.0.0"
+ENV OTEL_RESOURCE_ATTRIBUTES="deployment.environment=production,service.version=1.0.0"
 
-...
-
-CMD . $HOME/.otel-dotnet-auto/instrument.sh && <run_command>
-
+CMD . $HOME/.otel-dotnet-auto/instrument.sh && dotnet MyApp.dll
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
-- `<service_name>` is name of your service
+Replace `<service-name>`, `<region>`, and `<your-ingestion-key>` with your values.
 
-The above steps install OpenTelemetry dependencies directly inside the Docker container without altering `composer.json` of project & sets environment variables to export the traces.
-
-**Step 2.** Run your Docker container
-
-Here's how you can run your docker container:
+### Step 2. Build and run
 
 ```bash
-docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+docker build -t my-dotnet-app .
+docker run -d -p 8080:8080 my-dotnet-app
 ```
 
-- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+</TabItem>
 
-- `-d` runs the container in detached mode
-- `-p` maps a host port to a container port
+<TabItem value="windows" label="Windows">
 
+### Step 1. Download the instrumentation module
 
-**Step 3.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
-
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
-
----
-
-#### Send traces via OTel Collector binary
-
-**Step 1.** Configure OpenTelemetry to run in Docker Container
-
-Add the following in your Dockerfile.
-
-```bash
-# -------- Stage 1: Get OpenTelemetry Collector --------
-FROM otel/opentelemetry-collector-contrib:0.131.0 AS otel
-
-...
-
-# Download the installer script
-RUN apt-get update && apt-get install -y curl unzip \
-    && curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh -o otel-dotnet-auto-install.sh \
-    && sh ./otel-dotnet-auto-install.sh \
-    && chmod +x $HOME/.otel-dotnet-auto/instrument.sh
-
-...
-
-# Copy OpenTelemetry Collector binary + config from first stage
-COPY --from=otel /otelcol-contrib /otelcol-contrib
-COPY --from=otel /etc/otelcol-contrib /etc/otelcol-contrib
-COPY config.yaml /etc/otelcol-contrib/config.yaml
-
-# Expose ports (App + Collector)
-EXPOSE <APP_PORT> 4317 4318
-
-...
-
-# Environment variables (point .NET to local Collector)
-ENV OTEL_SERVICE_NAME="<service_name>"
-ENV OTEL_TRACES_EXPORTER="otlp"
-ENV OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
-ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
-ENV OTEL_PROPAGATORS="baggage,tracecontext"
-
-
-# Run both Collector and PHP app in the same container
-CMD sh -c "/otelcol-contrib --config=/etc/otelcol-contrib/config.yaml & . $HOME/.otel-dotnet-auto/instrument.sh && <run_command>"
-
+```powershell
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/OpenTelemetry.DotNet.Auto.psm1"
+$download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
+Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
 ```
 
-Make sure you have `config.yaml` in `root` of the application. This config.yaml should be copied from third step of [this](https://signoz.io/docs/collection-agents/docker/install/#step-2-create-collector-configuration)
+### Step 2. Install the instrumentation
 
-- Replace `<run_command>` with the command to run your application
-- `<service_name>` is name of your service
-
-
-**Step 2.** Run your Docker container
-
-Run your docker container to start exporting.
-
-```bash
-docker build -t <image-name> . && docker run -d -p <host-port>:<container-port> <image-name>
+```powershell
+Import-Module $download_path
+Install-OpenTelemetryCore
 ```
 
-- Replace `<image-name>`, `<host-port>`, and `<container-port>` with values for your application.
+### Step 3. Run your application
 
-- `-d` runs the container in detached mode
+```powershell
+$env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_TRACES_EXPORTER = "otlp"
+$env:OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=production,service.version=1.0.0"
 
-- `-p` maps a host port to a container port
+Register-OpenTelemetryForCurrentSession -OTelServiceName "<service-name>"
+dotnet run
+```
 
-
-**Step 3.** You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
-
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
+Replace:
+- `<service-name>`: Your service name (e.g., `payment-service`)
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 </TabItem>
 </Tabs>
 
-</TabItem>
-</Tabs>
+## Validate
 
+1. Generate traffic by making requests to your application.
+2. Open SigNoz and go to **Services**.
+3. Look for your service name in the list.
+4. Click on your service to view traces, latency, and error rates.
 
+<details>
+<ToggleHeading>
 ## Troubleshooting
+</ToggleHeading>
 
-The console exporter prints data to the Console window. You can use it to verify if the instrumentation is properly set up or not.
+### How do I verify traces are being generated?
 
-Below are the steps on how to use the console exporter:
-
-**Step 1. Adding the OpenTelemetry console exporter package:**
-
-```bash
-dotnet add package OpenTelemetry.Exporter.Console 
-```
-
-**Step 2. Adding the console exporter method:**
-
-```csharp
-using System.Diagnostics;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Configure OpenTelemetry with tracing and auto-start.
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => 
-		resource.AddService(serviceName: "sample-net-app"))
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter(otlpOptions =>
-        {
-						//SigNoz Cloud Endpoint 
-            otlpOptions.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
-
-            otlpOptions.Protocol = OtlpExportProtocol.Grpc;
-						
-						//SigNoz Cloud account Ingestion key
-            string headerKey = "signoz-ingestion-key";
-            string headerValue = "<your-ingestion-key>";
-
-            string formattedHeader = $"{headerKey}={headerValue}";
-            otlpOptions.Headers = formattedHeader;
-        })
-				.AddConsoleExporter());
-
-var app = builder.Build();
-
-//The index route ("/") is set up to write out the OpenTelemetry trace information on the response:
-app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}");
-
-app.Run();
-```
-
-Monitor the application on the console. You will be able to see the trace output as below:
+Enable the console exporter to see traces in your terminal:
 
 ```bash
-info: Microsoft.Hosting.Lifetime[14]
-      Now listening on: https://localhost:7062
-info: Microsoft.Hosting.Lifetime[14]
-      Now listening on: http://localhost:5017
-info: Microsoft.Hosting.Lifetime[0]
-      Application started. Press Ctrl+C to shut down.
-info: Microsoft.Hosting.Lifetime[0]
-      Hosting environment: Development
-info: Microsoft.Hosting.Lifetime[0]
-      Content root path: C:\sample-app2
+# Linux/macOS
+OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED=true dotnet run
+
+# Windows PowerShell
+$env:OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED = "true"
+dotnet run
+```
+
+You should see output like:
+
+```
 Activity.TraceId:            e1c2b70e9f39c6cc15d5d94b75412b70
 Activity.SpanId:             17da84c0833e0075
-Activity.TraceFlags:         Recorded
-Activity.ActivitySourceName: Microsoft.AspNetCore
 Activity.DisplayName:        /
 Activity.Kind:               Server
-Activity.StartTime:          2023-11-05T19:59:39.7875151Z
-Activity.Duration:           00:00:00.2548901
-Activity.Tags:
-    net.host.name: localhost
-    net.host.port: 7062
-    http.method: GET
-    http.scheme: https
-    http.target: /
-    http.url: https://localhost:7062/
-    http.flavor: 2.0
-    http.user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
-    http.status_code: 200
-Resource associated with Activity:
-    service.name: sample-app2
-    service.instance.id: 44a34277-d46e-4758-b4f0-91b5a9435a4c
-    telemetry.sdk.name: opentelemetry
-    telemetry.sdk.language: dotnet
-    telemetry.sdk.version: 1.6.0
 ```
 
+### Traces not appearing in SigNoz?
 
-{/* <InstrumentationFAQ /> */}
+- Verify endpoint format: `https://ingest.<region>.signoz.cloud:443`
+- Check ingestion key format: `signoz-ingestion-key=<key>` with no extra spaces
+- Ensure outbound HTTPS on port 443 is allowed
+
+### Connection refused errors?
+
+- **Cloud**: Check internet connection and region
+- **Self-hosted**: Verify collector is running on port 4317 (gRPC) or 4318 (HTTP)
+- **Kubernetes**: Ensure collector service name matches instrumentation endpoint
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data**: Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight**: Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically**: The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility**: Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next steps
+
+- [NuGet based instrumentation](https://signoz.io/docs/instrumentation/dotnet/nuget-instrumentation/) to add OpenTelemetry via NuGet packages and configure in Program.cs
+- [Manual Instrumentation](https://signoz.io/docs/instrumentation/dotnet/manual-instrumentation/) to create custom spans for business operations
+- [Setup alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your traces to get notified on errors and latency
+
+**Sample application**:
+- <a href="https://github.com/SigNoz/sample-dotnet-otel" target="_blank" rel="noopener noreferrer nofollow">.NET sample app with OpenTelemetry</a>
