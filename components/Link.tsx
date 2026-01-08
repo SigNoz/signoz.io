@@ -1,14 +1,31 @@
+'use client'
+
 /* eslint-disable jsx-a11y/anchor-has-content */
 import Link from 'next/link'
 import type { LinkProps } from 'next/link'
-import { AnchorHTMLAttributes } from 'react'
+import { AnchorHTMLAttributes, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 const CustomLink = ({ href, ...rest }: LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>) => {
-  const isInternalLink = href && href.startsWith('/')
+  const searchParams = useSearchParams()
+  const [regionParam, setRegionParam] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (searchParams) {
+      setRegionParam(searchParams.get('region'))
+    }
+  }, [searchParams])
+
+  const isInternalLink = href && (href.startsWith('/') || href.startsWith('.'))
   const isAnchorLink = href && href.startsWith('#')
 
   if (isInternalLink) {
-    return <Link href={href} {...rest} />
+    const isDocsUrl = typeof href === 'string' && href.includes('/docs/')
+    const finalHref =
+      regionParam && isDocsUrl
+        ? `${href}${href.includes('?') ? '&' : '?'}region=${regionParam}`
+        : href
+    return <Link href={finalHref} {...rest} />
   }
 
   if (isAnchorLink) {

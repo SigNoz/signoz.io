@@ -30,13 +30,13 @@ export const RegionDropdown = () => {
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value
-    setSelectedRegion(value === 'none' ? null : value)
+    setSelectedRegion(value)
   }
 
   return (
     <div className="relative w-fit min-w-[180px]">
       <select
-        value={selectedRegion || 'none'}
+        value={selectedRegion || ''}
         onChange={handleChange}
         className={cn(
           'w-full appearance-none rounded-md border bg-signoz_slate-400 px-3 py-2 pr-8 text-sm text-white shadow-sm outline-none transition-all duration-200',
@@ -45,15 +45,13 @@ export const RegionDropdown = () => {
           'cursor-pointer'
         )}
       >
-        <option value="none" className="bg-signoz_slate-500">
-          Select Region
-        </option>
         {allCloudRegions.map((region) => (
           <option key={region} value={region} className="bg-signoz_slate-500">
             {region}
           </option>
         ))}
       </select>
+      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white opacity-50" />
     </div>
   )
 }

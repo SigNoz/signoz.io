@@ -40,7 +40,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     const fetchRegions = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/regions?=`)
+        const response = await fetch('https://api.staging.signoz.cloud/v2/regions?=')
         const data: RegionResponse = await response.json()
         if (data.status === 'success') {
           setRegions(data.data)
@@ -59,10 +59,12 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const regionParam = searchParams.get('region')
     if (regionParam) {
       setSelectedRegionState(regionParam)
-    } else {
-      setSelectedRegionState(null)
+    } else if (regions.length > 0) {
+      // Set default region if no param exists and regions are loaded
+      const defaultRegion = regions[0]?.clusters[0]?.cloud_region || 'us-central1'
+      setSelectedRegionState(defaultRegion)
     }
-  }, [searchParams])
+  }, [searchParams, regions])
 
   const setSelectedRegion = (region: string | null) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()))
