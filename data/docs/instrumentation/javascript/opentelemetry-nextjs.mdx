@@ -56,7 +56,7 @@ npm install --save @vercel/otel @opentelemetry/api
 
 <Admonition type="note">Skip this step if you are using Next.js 15 or later.</Admonition>
 
-```tsx
+```tsx:next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -327,8 +327,6 @@ npm run dev
 
 <TabItem value="docker" label="Docker">
 
-<Admonition type="note">For Next.js 14 and below, ensure `instrumentationHook: true` is set in your `next.config.mjs` under `experimental`.</Admonition>
-
 ### Step 1. Install OpenTelemetry packages
 
 Add the packages to your `package.json`:
@@ -415,6 +413,40 @@ Replace the following:
 
 </TabItem>
 </Tabs>
+
+<details>
+<ToggleHeading>
+## For Next.js 14 and below
+</ToggleHeading>
+
+### Why is this required?
+
+In Next.js 14 and earlier versions, the instrumentation feature was experimental and required explicit opt-in through a configuration flag.
+
+### How to enable it
+
+Add the following to your `next.config.mjs`:
+
+```tsx:next.config.mjs
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    instrumentationHook: true,
+  },
+}
+
+export default nextConfig
+```
+
+### What changed in Next.js 15?
+
+In [Next.js 15](https://nextjs.org/blog/next-15), the `instrumentation.js` API was promoted from experimental to stable. This means:
+
+- The `experimental.instrumentationHook` config option is no longer needed
+- You can simply create an `instrumentation.ts` file without any additional configuration
+- A new `onRequestError` hook was introduced for better error tracking integration
+
+</details>
 
 ## Validate
 
