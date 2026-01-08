@@ -1388,6 +1388,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/logs-pipelines/parsing',
+            label: 'Logs Parsing',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-pipelines/processors',
             label: 'Log Processors',
           },
@@ -1407,6 +1412,16 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/json',
                 label: 'Parse JSON logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/grok-parser',
+                label: 'Parse Logs with Grok Parser',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/regex-parser',
+                label: 'Parse Logs with Regex Parser',
               },
               {
                 type: 'doc',
