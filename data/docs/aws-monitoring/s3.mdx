@@ -1,0 +1,204 @@
+---
+date: 2025-12-28
+id: s3
+title: Monitor Amazon S3 with SigNoz
+description: Sync S3 logs and collect S3 metrics using one-click integration or manual setup.
+doc_type: howto
+---
+
+## Overview
+
+Amazon S3 is object storage for the cloud. SigNoz helps you monitor S3 bucket metrics and ingest log files stored in S3.
+
+## Prerequisites
+
+- AWS account with appropriate permissions
+- SigNoz Cloud account or Self-Hosted SigNoz
+
+<Tabs>
+<TabItem value="one-click-sync" label="S3 Sync (One-Click)" default>
+
+## S3 Sync (One-Click)
+
+<Admonition type="info">
+S3 Sync is available for **SigNoz Cloud** only. It automatically ingests log files from your S3 buckets.
+</Admonition>
+
+S3 Sync uses EventBridge and Lambda to forward log files to SigNoz whenever new objects are created in your S3 buckets.
+
+### Use Cases
+
+- Ingest ELB access logs stored in S3
+- Ingest VPC Flow Logs stored in S3
+- Ingest CloudTrail logs stored in S3
+- Ingest any custom log files stored in S3
+
+### Setup
+
+See the detailed guide: [**Sync Logs from S3 Buckets**](https://signoz.io/docs/integrations/aws/s3-sync/)
+
+This covers:
+1. Installing the AWS Integration Agent
+2. Enabling S3 Sync in the SigNoz UI
+3. Configuring bucket and prefix filters
+
+</TabItem>
+<TabItem value="manual" label="Manual Setup">
+
+## Manual Setup
+
+<Admonition type="info">
+Manual setup works for both **SigNoz Cloud** and **Self-Hosted**.
+</Admonition>
+
+### S3 Storage Metrics
+
+To collect S3 storage metrics, you can use the <a href="https://github.com/prometheus/cloudwatch_exporter" target="_blank" rel="noopener noreferrer nofollow">Prometheus CloudWatch Exporter</a>. This tool scrapes metrics from AWS CloudWatch and exposes them in Prometheus format, which the OpenTelemetry Collector can then scrape and forward to SigNoz.
+
+### Prerequisites
+
+Before proceeding, ensure you have:
+
+- **OpenTelemetry Collector** installed and configured. See [Get Started with OTel Collector](https://signoz.io/docs/opentelemetry-collection-agents/get-started/).
+- **Java 11 or higher** installed on the host machine (for JAR-based setup), or **Docker** (for container-based setup).
+- **AWS credentials** configured via environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`), IAM role, or `~/.aws/credentials`.
+- **IAM permissions** for the credentials:
+  - `cloudwatch:ListMetrics`
+  - `cloudwatch:GetMetricStatistics`
+
+### Step 1: Create Configuration File
+
+Create a file named `s3-metrics.yaml` with the following configuration:
+
+```yaml:s3-metrics.yaml
+region: <aws-region>
+metrics:
+  - aws_namespace: AWS/S3
+    aws_metric_name: BucketSizeBytes
+    aws_dimensions: [BucketName, StorageType]
+    aws_statistics: [Average]
+
+  - aws_namespace: AWS/S3
+    aws_metric_name: NumberOfObjects
+    aws_dimensions: [BucketName, StorageType]
+    aws_statistics: [Average]
+```
+
+Replace the following:
+- `<aws-region>`: Your AWS region where S3 buckets are located (e.g., `us-east-1`, `eu-west-1`, `ap-south-1`).
+
+See <a href="https://github.com/prometheus/cloudwatch_exporter/tree/master/examples" target="_blank" rel="noopener noreferrer nofollow">example configurations</a> for more service templates.
+
+<Admonition type="note">
+S3 storage metrics are reported once per day. Enable request metrics in S3 for more frequent monitoring of API operations.
+</Admonition>
+
+### Step 2: Download and Run the Exporter
+
+<Tabs>
+<TabItem value="jar" label="JAR File" default>
+
+Download the CloudWatch Exporter JAR file using `curl`:
+
+```bash
+curl -LO https://repo1.maven.org/maven2/io/prometheus/cloudwatch/cloudwatch_exporter/0.16.0/cloudwatch_exporter-0.16.0-jar-with-dependencies.jar
+```
+
+Run the exporter with Java:
+
+```bash
+java -jar cloudwatch_exporter-0.16.0-jar-with-dependencies.jar 9106 s3-metrics.yaml
+```
+
+This starts the exporter on port `9106`.
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+Run the CloudWatch Exporter as a <a href="https://github.com/prometheus/cloudwatch_exporter#docker-images" target="_blank" rel="noopener noreferrer nofollow">Docker container</a>:
+
+```bash
+docker run -d \
+  --name cloudwatch-exporter \
+  -p 9106:9106 \
+  -v $(pwd)/s3-metrics.yaml:/config/config.yml \
+  -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+  -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+  prom/cloudwatch-exporter
+```
+
+Replace the AWS credential environment variables with your actual credentials or use an IAM role if running on EC2.
+
+</TabItem>
+</Tabs>
+
+Verify the exporter is running by checking the metrics endpoint:
+
+```bash
+curl http://localhost:9106/metrics | grep aws_s3
+```
+
+You should see metrics like `aws_s3_bucket_size_bytes_average`, `aws_s3_number_of_objects_average`, etc.
+
+### Step 3: Configure OpenTelemetry Collector
+
+Add the following `prometheus` receiver to your existing `otel-collector-config.yaml` to scrape the CloudWatch Exporter:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 's3-cloudwatch'
+          scrape_interval: 60s
+          static_configs:
+            - targets: ['<exporter-host>:9106']
+```
+
+Replace the following:
+- `<exporter-host>`: The hostname or IP where the CloudWatch Exporter is running. Use `localhost` if running on the same machine.
+
+Enable the `prometheus` receiver in your metrics pipeline by updating the `service` section:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+<Admonition type="note">
+Append these configurations to your existing `otel-collector-config.yaml`. Do not replace your entire configuration file.
+</Admonition>
+
+Restart your OpenTelemetry Collector to apply the changes.
+
+### Validate
+
+To confirm that S3 metrics are flowing to SigNoz:
+
+1. Navigate to **Dashboards** → **New Dashboard** → **New Panel** in SigNoz.
+2. In the query builder, search for metrics starting with `aws_s3_` (e.g., `aws_s3_bucket_size_bytes_average`).
+3. Verify that metrics appear with `bucket_name` labels matching your S3 buckets.
+
+If you see metrics with labels like `bucket_name`, your setup is working correctly.
+
+### Log File Ingestion
+
+For ingesting log files from S3, use the S3 Lambda Forwarder pattern described in:
+- [RDS Logs](https://signoz.io/docs/aws-monitoring/rds/)
+- [VPC Flow Logs](https://signoz.io/docs/aws-monitoring/vpc/)
+- [ELB Logs](https://signoz.io/docs/aws-monitoring/elb/)
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+Once S3 metrics are flowing to SigNoz, you can:
+
+- **Set up alerts** for bucket size thresholds. See [Alerts](https://signoz.io/docs/alerts/).
+- **Create dashboards** to visualize S3 storage usage. See [Dashboards](https://signoz.io/docs/userguide/manage-dashboards/).
+- **Ingest S3 logs** using the [S3 Sync](https://signoz.io/docs/integrations/aws/s3-sync/) feature for SigNoz Cloud.

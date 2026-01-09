@@ -900,34 +900,32 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Java',
-            route: '/docs/instrumentation/opentelemetry-java',
-            // link: {
-            // type: 'doc',
-            // route: '/docs/instrumentation/opentelemetry-java',
-            // title: 'Java',
-            // description: 'Learn how to instrument Java applications with OpenTelemetry',
-            // slug: 'instrumentation/java',
-            // },
+            route: '/docs/instrumentation/java/overview',
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-springboot',
-                label: 'Spring Boot',
+                route: '/docs/instrumentation/java/opentelemetry-java',
+                label: 'Java / Spring Boot',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-quarkus',
+                route: '/docs/instrumentation/java/opentelemetry-quarkus',
                 label: 'Quarkus',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-tomcat',
+                route: '/docs/instrumentation/java/opentelemetry-tomcat',
                 label: 'Tomcat',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-jboss',
-                label: 'JBoss',
+                route: '/docs/instrumentation/java/opentelemetry-jboss',
+                label: 'JBoss / WildFly',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/java/manual-instrumentation',
+                label: 'Manual Instrumentation',
               },
             ],
           },
@@ -973,6 +971,24 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'category',
+            isExpanded: false,
+            label: '.NET',
+            route: '/docs/instrumentation/opentelemetry-dotnet',
+            items: [
+              {
+                type: 'doc',
+                label: 'NuGet based Instrumentation',
+                route: '/docs/instrumentation/dotnet/nuget-instrumentation',
+              },
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/dotnet/manual-instrumentation',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'PHP',
             route: '/docs/instrumentation/opentelemetry-php',
@@ -981,11 +997,6 @@ const docsSideNav = [
             type: 'doc',
             label: 'Laravel',
             route: '/docs/instrumentation/opentelemetry-laravel',
-          },
-          {
-            type: 'doc',
-            label: '.NET',
-            route: '/docs/instrumentation/opentelemetry-dotnet',
           },
           {
             type: 'doc',
@@ -1036,18 +1047,6 @@ const docsSideNav = [
             // type: 'doc',
             // },
             items: [
-              {
-                type: 'category',
-                isExpanded: false,
-                label: 'Java',
-                items: [
-                  {
-                    type: 'doc',
-                    route: '/docs/instrumentation/manual-instrumentation/java/annotations',
-                    label: 'Using Annotations',
-                  },
-                ],
-              },
               {
                 type: 'category',
                 isExpanded: false,
@@ -1407,6 +1406,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/logs-pipelines/parsing',
+            label: 'Logs Parsing',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-pipelines/processors',
             label: 'Log Processors',
           },
@@ -1426,6 +1430,16 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/json',
                 label: 'Parse JSON logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/grok-parser',
+                label: 'Parse Logs with Grok Parser',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/regex-parser',
+                label: 'Parse Logs with Regex Parser',
               },
               {
                 type: 'doc',
@@ -1503,6 +1517,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/guides/set-resource-attributes-for-logs',
             label: 'Set Resource Attributes',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/remove-resource-attributes',
+            label: 'Remove Resource Attributes',
           },
         ],
       },
@@ -1943,6 +1962,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/grok-dashboard',
+            label: 'Grok',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/inkeep-dashboard',
             label: 'Inkeep',
           },
@@ -2033,6 +2057,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/signoz-ingestion-analysis',
             label: 'SigNoz Ingestion Analysis',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/temporal-dashboard',
+            label: 'Temporal',
           },
           {
             type: 'doc',
@@ -2460,6 +2489,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/grok-monitoring',
+        label: 'Grok',
+        type: 'doc',
+      },
+      {
         route: '/docs/inkeep-monitoring',
         label: 'Inkeep',
         type: 'doc',
@@ -2510,6 +2544,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/temporal-observability',
+        label: 'Temporal',
+        type: 'doc',
+      },
+      {
         route: '/docs/vercel-ai-sdk-observability',
         label: 'Vercel AI SDK',
         type: 'doc',
@@ -2530,6 +2569,151 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'AWS Monitoring',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/aws-monitoring/overview',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/one-click-vs-manual',
+        label: 'One-Click vs Manual',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/alb',
+        label: 'ALB',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/api-gateway',
+        label: 'API Gateway',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/dynamodb',
+        label: 'DynamoDB',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'EC2',
+        route: '/docs/aws-monitoring/ec2',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/ec2/ec2-infra-metrics',
+            label: 'Infrastructure Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/ec2/ec2-logs',
+            label: 'Application/Server Logs',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'ECS',
+        route: '/docs/aws-monitoring/ecs',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/ecs/ecs-ec2-external',
+            label: 'EC2/External',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/ecs/ecs-fargate',
+            label: 'Fargate',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'EKS',
+        route: '/docs/aws-monitoring/eks',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/eks/eks-ec2-nodes',
+            label: 'EC2 Nodes',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/eks/eks-fargate',
+            label: 'Fargate',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/elasticache',
+        label: 'ElastiCache',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/elb',
+        label: 'ELB',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Lambda',
+        route: '/docs/aws-monitoring/lambda',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-logs',
+            label: 'Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-traces',
+            label: 'Traces',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/msk',
+        label: 'MSK',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/rds',
+        label: 'RDS',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/s3',
+        label: 'S3',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/sns',
+        label: 'SNS',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/sqs',
+        label: 'SQS',
+      },
+      {
+        type: 'doc',
+        route: '/docs/aws-monitoring/vpc',
+        label: 'VPC',
+      },
+    ],
+  },
+  {
     label: 'Integrations',
     type: 'category',
     isExpanded: false,
@@ -2538,25 +2722,73 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'One Click Integrations (AWS)',
+        label: 'AWS One Click Integrations',
+        route: '/docs/integrations/aws/one-click-aws-integrations',
         items: [
           {
             type: 'doc',
-            route: '/docs/integrations/aws/one-click-aws-integrations',
-
-            label: 'Overview',
+            route: '/docs/integrations/aws/alb',
+            label: 'ALB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/api-gateway',
+            label: 'API Gateway',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/dynamodb',
+            label: 'DynamoDB',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/ec2',
+            label: 'EC2',
           },
           {
             type: 'doc',
             route: '/docs/integrations/aws/ecs',
-
             label: 'ECS',
           },
           {
             type: 'doc',
+            route: '/docs/integrations/aws/eks',
+            label: 'EKS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/elasticache',
+            label: 'ElastiCache',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/lambda',
+            label: 'Lambda',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/msk',
+            label: 'MSK',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/rds',
+            label: 'RDS',
+          },
+          {
+            type: 'doc',
             route: '/docs/integrations/aws/s3-sync',
-
             label: 'S3 Sync',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/sns',
+            label: 'SNS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/sqs',
+            label: 'SQS',
           },
         ],
       },
@@ -2938,97 +3170,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/metrics-management/query-range-api',
         label: 'Metrics Query API',
-      },
-    ],
-  },
-  {
-    label: 'AWS Monitoring',
-    type: 'category',
-    isExpanded: false,
-    items: [
-      //'aws/getting-started',
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'EC2',
-        route: '/docs/ec2-monitoring',
-        // link: {
-        // type: 'generated-index',
-        // title: 'EC2 Monitoring',
-        // slug: '/docs/ec2-monitoring',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/aws-monitoring/ec2-logs',
-            label: 'Application/Server logs',
-          },
-          {
-            type: 'doc',
-            route: '/docs/aws-monitoring/ec2-infra-metrics',
-            label: 'Infrastructure Metrics',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'ECS',
-        route: '/docs/ecs-monitoring',
-        // link: {
-        // type: 'generated-index',
-        // title: 'ECS Monitoring',
-        // slug: '/docs/ecs-monitoring',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/aws-monitoring/ecs-ec2-external',
-            label: 'EC2/External',
-          },
-          {
-            type: 'doc',
-            route: '/docs/aws-monitoring/ecs-fargate',
-            label: 'Fargate',
-          },
-        ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/aws-monitoring/eks',
-        label: 'EKS',
-      },
-      {
-        type: 'doc',
-        route: '/docs/aws-monitoring/elb-logs',
-        label: 'ELB',
-      },
-      {
-        type: 'doc',
-        route: '/docs/aws-monitoring/vpc-logs',
-        label: 'VPC',
-      },
-      {
-        type: 'doc',
-        route: '/docs/aws-monitoring/rds-logs',
-        label: 'RDS',
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'AWS Lambda',
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/aws-monitoring/lambda/lambda-logs',
-            label: 'Logging',
-          },
-          {
-            type: 'doc',
-            route: '/docs/aws-monitoring/lambda/lambda-traces',
-            label: 'APM & Tracing',
-          },
-        ],
       },
     ],
   },

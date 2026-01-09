@@ -21,6 +21,7 @@ import {
   SiAmazonwebservices,
   SiPydantic,
   SiGo,
+  SiTemporal,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -230,6 +231,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'Go Runtime Dashboard Template',
   },
   {
+    name: 'Grok',
+    href: '/docs/dashboards/dashboard-templates/grok-dashboard',
+    icon: <img src="/svgs/icons/LLMMonitoring/grok-logo.svg" alt="Grok Icon" className="h-7 w-7" />,
+    clickName: 'xAi Grok Dashboard Template',
+  },
+  {
     name: 'Hadoop',
     href: 'https://github.com/SigNoz/dashboards/tree/main/hadoop',
     icon: <Server className="h-7 w-7 text-yellow-600" />,
@@ -418,6 +425,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/snowflake',
     icon: <SiSnowflake className="h-7 w-7 text-blue-400" />,
     clickName: 'Snowflake Dashboard Template',
+  },
+  {
+    name: 'Temporal Agents',
+    href: '/docs/dashboards/dashboard-templates/temporal-dashboard',
+    icon: <SiTemporal className="h-7 w-7 text-purple-600" />,
+    clickName: 'Temporal Agents Dashboard Template',
   },
   {
     name: 'Temporal.io',

@@ -39,6 +39,7 @@ import TrackingLink from './TrackingLink'
 import APMQuickStartOverview from './APM/APMQuickStartOverview'
 import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
 import JavascriptInstrumentationListicle from './APM/JavascriptInstrumentationListicle'
+import JavaInstrumentationListicle from './APM/JavaInstrumentationListicle'
 import LibraryTabs from './LibraryTabs/LibraryTabs'
 import LibraryTab from './LibraryTabs/LibraryTab'
 import MDXButton from './MDXButton/MDXButton'
@@ -70,6 +71,8 @@ import ResponseTimeVisualizer from './APMMetrics/ResponseTimeVisualizer'
 import MetricsQuickStartOverview from './Metrics/MetricsQuickStartOverview'
 import CICDMonitoringListicle from './CICD/CICDMonitoringListicle'
 import ToggleHeading from './Headings/ToggleHeading'
+import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
+import AWSOneClickListicle from './AWS/AWSOneClickListicle'
 
 export const components: MDXComponents = {
   ToggleHeading,
@@ -113,6 +116,7 @@ export const components: MDXComponents = {
   APMQuickStartOverview,
   APMInstrumentationListicle,
   JavascriptInstrumentationListicle,
+  JavaInstrumentationListicle,
   LibraryTabs,
   LibraryTab,
   MDXButton,
@@ -140,4 +144,6 @@ export const components: MDXComponents = {
   ProductFeatureShowcase,
   MetricsQuickStartOverview,
   CICDMonitoringListicle,
+  AWSMonitoringListicle,
+  AWSOneClickListicle,
 }

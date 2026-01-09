@@ -7,6 +7,7 @@ import Button from '@/components/Button/Button'
 import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 import ProductNav from '@/components/ProductNav/ProductNav'
+import Image from 'next/image'
 
 function MetricsDashboards() {
   return (
@@ -137,7 +138,6 @@ const Header = () => {
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[4rem]">
-
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
           Infrastructure monitoring, custom metrics & <br />
           dashboards to fit any use case
@@ -167,18 +167,17 @@ const Header = () => {
           </Link>
         </Button>
       </div>
-      <div className="section-container !mx-auto !mt-0 -mb-[9rem] !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
-        <div className="w-100 mx-[-28px]">
-          <div className="product-explainer-video hero-figure rounded-lg p-3">
-            <div className="embed-container">
-              <div className="absolute">
-                <img
-                  src="/img/features/metrics/metrics-overview1.webp"
-                  alt="Custom Thumbnail"
-                  className="w-full rounded-lg"
-                />
-              </div>
-            </div>
+      <div className="section-container !mx-auto !mt-0 -mb-[9rem] !w-full border !border-b-0 !border-t-0 border-none border-signoz_slate-400 max-sm:-mb-[3rem] md:!w-[80vw] md:border-dashed">
+        <div className="w-full">
+          <div className="product-explainer-video hero-figure rounded-none p-0 md:rounded-lg md:p-3">
+            <Image
+              src="/img/features/metrics/metrics-overview1.webp"
+              alt="Custom Thumbnail"
+              className="h-auto w-full rounded-none md:rounded-lg"
+              height={10000}
+              width={10000}
+              priority
+            />
           </div>
         </div>
       </div>

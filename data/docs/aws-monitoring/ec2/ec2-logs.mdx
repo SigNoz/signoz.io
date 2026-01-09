@@ -1,0 +1,52 @@
+---
+date: 2025-12-30
+id: ec2-logs
+title: Collect EC2 Application/Server Logs
+description: Collect application and server logs from EC2 instances using OpenTelemetry Collector and send them to SigNoz.
+doc_type: howto
+---
+
+## Overview
+
+This guide explains how to collect application and server logs from your EC2 instances using the OpenTelemetry Collector.
+
+<Admonition type="info">
+This guide assumes you have already installed the OpenTelemetry Collector on your EC2 instance. If not, see [Install OpenTelemetry Collector on VM](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+</Admonition>
+
+## Prerequisites
+
+- A Linux-based EC2 instance
+- OpenTelemetry Collector installed and running
+- Access to modify the collector's configuration file (usually `config.yaml`)
+
+## Setup
+
+To collect logs from your EC2 instance, you will need to configure the `filelog` receiver in your OpenTelemetry Collector.
+
+For complete configuration instructions, follow the **[Collect Logs from File](https://signoz.io/docs/userguide/collect_logs_from_file/)** guide.
+
+The setup involves:
+
+1.  **Defining the input**: Specifying the path to your log files (e.g., `/var/log/myapp.log`) in the `filelog` receiver configuration.
+2.  **Enabling the pipeline**: Adding the receiver to a logs pipeline in the `config.yaml` file.
+3.  **Restarting the Collector**: Applying the new configuration.
+
+## Validate
+
+Once you have updated the configuration and restarted the collector:
+
+1.  Generate some logs in your application or log file.
+2.  Go to the **[Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/)** in SigNoz.
+3.  You should see your logs appearing. You can filter by `host.name` (which usually defaults to the EC2 instance ID or hostname) to find logs from this specific instance.
+
+<Figure
+  src="/img/docs/logs-explorer.webp"
+  alt="Logs Explorer showing logs from EC2"
+  caption="View EC2 logs in the Logs Explorer"
+/>
+
+## Next Steps
+
+- [Collect Logs from File](https://signoz.io/docs/userguide/collect_logs_from_file/)
+- [OpenTelemetry Collector Configuration](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/)

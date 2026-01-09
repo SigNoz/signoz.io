@@ -218,7 +218,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3k8natdfr-ABxGO6tiB~YYXbkzzMWBMw',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3mkbiaxsz-QBhH_p84LIbzv2LkgkIGhQ',
           basePath: false,
           permanent: true,
         },
@@ -386,6 +386,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/manual-instrumentation/dotnet/manual-instrumentation/',
+          destination: '/docs/instrumentation/dotnet/manual-instrumentation/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/elixir/',
           destination: '/docs/instrumentation/opentelemetry-elixir/',
           permanent: true,
@@ -422,7 +427,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/java/',
-          destination: '/docs/instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         {
@@ -442,7 +447,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/jboss/',
-          destination: '/docs/instrumentation/opentelemetry-jboss/',
+          destination: '/docs/instrumentation/java/opentelemetry-jboss/',
           permanent: true,
         },
         {
@@ -583,7 +588,39 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/springboot/',
-          destination: '/docs/instrumentation/opentelemetry-springboot/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        // Java framework-specific redirects to new java/ folder structure
+        {
+          source: '/docs/instrumentation/opentelemetry-springboot/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-quarkus/',
+          destination: '/docs/instrumentation/java/opentelemetry-quarkus/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-tomcat/',
+          destination: '/docs/instrumentation/java/opentelemetry-tomcat/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-jboss/',
+          destination: '/docs/instrumentation/java/opentelemetry-jboss/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        // Java manual instrumentation redirect
+        {
+          source: '/docs/instrumentation/manual-instrumentation/java/annotations/',
+          destination: '/docs/instrumentation/java/manual-instrumentation/',
           permanent: true,
         },
         {
@@ -593,7 +630,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/tomcat/',
-          destination: '/docs/instrumentation/opentelemetry-tomcat/',
+          destination: '/docs/instrumentation/java/opentelemetry-tomcat/',
           permanent: true,
         },
         {
@@ -655,6 +692,22 @@ module.exports = () => {
         {
           source: '/docs/aws-monitoring/lambda-logs',
           destination: '/docs/aws-monitoring/lambda/lambda-logs',
+          permanent: true,
+        },
+        // AWS Monitoring renamed/deleted docs
+        {
+          source: '/docs/aws-monitoring/getting-started/',
+          destination: '/docs/aws-monitoring/overview/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/rds-logs/',
+          destination: '/docs/aws-monitoring/rds/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/vpc-logs/',
+          destination: '/docs/aws-monitoring/vpc/',
           permanent: true,
         },
         {
@@ -727,6 +780,53 @@ module.exports = () => {
           destination: '/docs/dashboards/dashboard-templates/overview/',
           permanent: true,
         },
+        // ECS and EKS folder restructuring redirects
+        {
+          source: '/docs/ecs-monitoring/',
+          destination: '/docs/aws-monitoring/ecs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ecs-monitoring-overview/',
+          destination: '/docs/aws-monitoring/ecs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ecs-ec2-external/',
+          destination: '/docs/aws-monitoring/ecs/ecs-ec2-external/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ecs-fargate/',
+          destination: '/docs/aws-monitoring/ecs/ecs-fargate/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/eks-monitoring-overview/',
+          destination: '/docs/aws-monitoring/eks/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/eks-fargate/',
+          destination: '/docs/aws-monitoring/eks/eks-fargate/',
+          permanent: true,
+        },
+        // EC2 folder restructuring redirects
+        {
+          source: '/docs/ec2-monitoring/',
+          destination: '/docs/aws-monitoring/ec2/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ec2-logs/',
+          destination: '/docs/aws-monitoring/ec2/ec2-logs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/ec2-infra-metrics/',
+          destination: '/docs/aws-monitoring/ec2/ec2-infra-metrics/',
+          permanent: true,
+        },
         {
           source: '/docs/tutorial/kubernetes-infra-metrics/',
           destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/',
@@ -735,6 +835,11 @@ module.exports = () => {
         {
           source: '/docs/metrics-management/k8s-infra-otel-config/',
           destination: '/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/elb-logs/',
+          destination: '/docs/aws-monitoring/elb/',
           permanent: true,
         },
         {

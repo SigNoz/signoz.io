@@ -1,25 +1,22 @@
-import React from 'react';
+import React from 'react'
+import Link from 'next/link'
 
 interface CardProps {
-  title: string;
-  description: string;
-  href: string;
+  title: string
+  description: string
+  href: string
 }
 
 const DocCard: React.FC<CardProps> = ({ title, description, href }) => {
   return (
-    <a
+    <Link
       href={href}
-      className="block rounded overflow-hidden shadow-lg  p-6 bg-gray-900 dark:bg-gray-800 border border-gray-700 hover:border-blue-500 transition-all duration-200 ease-in-out no-underline"
+      className="block overflow-hidden rounded border  border-gray-700 bg-gray-900 p-6 no-underline shadow-lg transition-all duration-200 ease-in-out hover:border-blue-500 dark:bg-gray-800"
     >
-      <div className="font-bold text-xl mb-2 text-white dark:text-gray-100">
-        {title}
-      </div>
-      <p className="text-gray-400 dark:text-gray-300 text-base">
-        {description}
-      </p>
-    </a>
-  );
-};
+      <div className="mb-2 text-xl font-bold text-white dark:text-gray-100">{title}</div>
+      <p className="text-base text-gray-400 dark:text-gray-300">{description}</p>
+    </Link>
+  )
+}
 
-export default DocCard;
+export default DocCard
