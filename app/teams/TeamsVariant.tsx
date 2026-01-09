@@ -368,10 +368,17 @@ const SignupFormIsolated: React.FC<{
     (selectedRegion: string) => {
       logEvent({
         eventType: 'track',
-        eventName: 'Region Selected',
+        eventName: 'Website Click',
         attributes: {
+          location: 'Teams Page',
+          clickType: 'Button Click',
+          clickName: 'Region Select Button Click',
+          clickLocation: 'Teams Form',
+          clickText: 'Select Region',
+          dataRegion: selectedRegion,
+          termsOfServiceAccepted: formState.termsOfServiceAccepted,
+          email: formState.workEmail,
           region: selectedRegion,
-          location: 'Teams Form',
         },
       })
       setFormState((prev) => ({ ...prev, dataRegion: selectedRegion }))
@@ -651,7 +658,7 @@ const TeamsVariant: React.FC = () => {
       if (!isValid) {
         logEvent({
           eventType: 'track',
-          eventName: 'Sign Up Validation Failed',
+          eventName: 'Teams Page Sign Up Validation Failed',
           attributes: {
             errors: newErrors,
             email: payload.email,
@@ -677,7 +684,7 @@ const TeamsVariant: React.FC = () => {
       if (!isValid) {
         logEvent({
           eventType: 'track',
-          eventName: 'Social Sign Up Validation Failed',
+          eventName: 'Teams Page Social Sign Up Validation Failed',
           attributes: {
             errors: newErrors,
             connector: payload.connector,
@@ -770,7 +777,7 @@ const TeamsVariant: React.FC = () => {
 
           logEvent({
             eventType: 'track',
-            eventName: 'Sign Up API Error',
+            eventName: 'Teams Page Sign Up API Error',
             attributes: {
               error: errorData.error,
               status: response.status,
@@ -787,7 +794,7 @@ const TeamsVariant: React.FC = () => {
       } catch (error) {
         logEvent({
           eventType: 'track',
-          eventName: 'Sign Up Exception',
+          eventName: 'Teams Page Sign Up Exception',
           attributes: {
             errorMessage: error instanceof Error ? error.message : String(error),
             email: payload.email,
@@ -811,7 +818,7 @@ const TeamsVariant: React.FC = () => {
 
       logEvent({
         eventType: 'track',
-        eventName: 'Social Signup Redirect Initiated',
+        eventName: 'Teams Page Social Signup Redirect Initiated',
         attributes: {
           connector: payload.connector,
           region: payload.region.name,
