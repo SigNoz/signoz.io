@@ -22,6 +22,7 @@ import {
   SiPydantic,
   SiGo,
   SiTemporal,
+  SiOpenai,
 } from 'react-icons/si'
 import {
   Monitor,
@@ -365,6 +366,12 @@ const DashboardTemplatesData: IconCardData[] = [
     href: 'https://github.com/SigNoz/dashboards/tree/main/nomad',
     icon: <Layers className="h-7 w-7 text-purple-600" />,
     clickName: 'Nomad Dashboard Template',
+  },
+  {
+    name: 'OpenAI',
+    href: '/docs/dashboards/dashboard-templates/openai-dashboard',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'OpenAI Dashboard Template',
   },
   {
     name: 'Pipecat',
