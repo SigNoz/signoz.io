@@ -1199,7 +1199,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
-        label: 'Host Setup',
+        label: 'Host Metrics',
       },
       {
         type: 'doc',
