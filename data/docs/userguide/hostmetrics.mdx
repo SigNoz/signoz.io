@@ -23,6 +23,16 @@ The OpenTelemetry hostmetrics receiver collects metrics on CPU, memory, disk, ne
 
 <TabItem value="vm" label="Virtual Machine" default>
 
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
 ## Prerequisites
 
 To collect host metrics, you must have the OpenTelemetry Collector installed on your virtual machine.
@@ -179,19 +189,21 @@ docker run -d \
 ```
 
 </TabItem>
-<TabItem value="k8s" label="Kubernetes Nodes" default>
+<TabItem value="k8s" label="Kubernetes Nodes">
 
 ## Prerequisites
 
-To collect host metrics from your Kubernetes nodes, you need to have the SigNoz `k8s-infra` [Helm chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) installed on your Kubernetes cluster.
+To collect host metrics from your Kubernetes nodes, you need to have the SigNoz `k8s-infra` Helm chart installed on your Kubernetes cluster.
 
-### Step 1: Deploy the SigNoz Helm Chart
+If you haven't installed it yet, follow the [Kubernetes Infrastructure Metrics Guide](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) to deploy the chart.
 
-To collect host metrics from your Kubernetes nodes, use the SigNoz `k8s-infra` [Helm chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/). This chart deploys an agent on every node to gather and forward system metrics.
+## Step 1: Verify Host Metrics Collection
 
-### Step 2: Customize Host Metrics Collection
+Host metrics collection is enabled by default when using the `k8s-infra` Helm chart. The chart deploys an agent on every node to gather and forward system metrics.
 
-Host metrics collection is enabled by default and can be customized via the `hostMetrics` preset in your `values.yaml`.
+## Step 2: Customize Collection (Optional)
+
+You can customize host metrics collection via the `hostMetrics` preset in your `values.yaml`.
 
 ```yaml
 hostMetrics:
@@ -204,9 +216,81 @@ hostMetrics:
 ```
 
 </TabItem>
+<TabItem value="windows" label="Windows">
+
+## Prerequisites
+
+To collect host metrics on Windows, you must have the OpenTelemetry Collector installed on your Windows server.
+
+If you haven't installed it yet, follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) to install the collector as a Windows service.
+
+## Step 1: Configure the Collector
+
+1.  **Locate your `config.yaml` file.**
+
+    - **Default:** `C:\Program Files\OpenTelemetry Collector\config.yaml`
+
+2.  **Update `config.yaml`** with the following configuration.
+
+Replace `<region>` and `<SIGNOZ_INGESTION_KEY>` with your actual values.
+
+```yaml
+receivers:
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      system: {}
+
+processors:
+  batch:
+  resourcedetection:
+    detectors: [env, system]
+
+exporters:
+  otlp:
+    endpoint: 'ingest.<region>.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>'
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+- **Region:** Your SigNoz Cloud region (e.g., `us`, `eu`, `in`).
+- **Ingestion Key:** Find it in **Settings > Ingestion Settings** in the SigNoz UI.
+
+## Step 2: Run the Collector
+
+After saving the configuration, restart the collector service to apply changes.
+
+```powershell
+Restart-Service otelcol-contrib
+Get-Service otelcol-contrib
+```
+
+</TabItem>
 </Tabs>
 
-### Configure Different Frequencies (Optional)
+## Advanced Configuration
+
+### Configure Different Frequencies
 
 You can configure different collection intervals for different metrics by defining multiple `hostmetrics` receivers. This is useful if you want frequently changing metrics (like CPU/Memory) to be collected more often than stable ones (like Filesystem).
 
