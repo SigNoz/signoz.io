@@ -88,13 +88,27 @@ export const getJSCapabilitySignals = () => {
 }
 
 // Analytics health check signals
+// Returns 3 possible states:
+// - "pending": Page still loading, we don't know yet if GTM will load
+// - "loaded": GTM loaded successfully
+// - "never_loaded": Page finished loading but GTM was blocked or failed
 export const getAnalyticsHealthSignals = () => {
   if (typeof window === 'undefined') return {}
 
+  const pageFullyLoaded = document.readyState === 'complete'
+  const gtmExists = typeof (window as any).google_tag_manager !== 'undefined'
+
+  let gtmStatus: 'pending' | 'loaded' | 'never_loaded'
+  if (gtmExists) {
+    gtmStatus = 'loaded'
+  } else if (pageFullyLoaded) {
+    gtmStatus = 'never_loaded'
+  } else {
+    gtmStatus = 'pending'
+  }
+
   return {
-    custom_browser_gtm_loaded: typeof (window as any).google_tag_manager !== 'undefined',
-    custom_browser_ga_loaded:
-      typeof (window as any).gtag !== 'undefined' || typeof (window as any).ga !== 'undefined',
+    custom_browser_gtm_status: gtmStatus,
   }
 }
 
