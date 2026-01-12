@@ -5,7 +5,7 @@ import Pre from 'pliny/ui/Pre'
 import { useRegion } from './RegionContext'
 
 const replaceInText = (text: string, replacement: string) => {
-  return text.replace(/.<region>./g, replacement)
+  return text.replace(/<region>/g, replacement)
 }
 
 const recursiveReplace = (children: ReactNode, replacement: string): ReactNode => {
@@ -32,7 +32,7 @@ const recursiveReplace = (children: ReactNode, replacement: string): ReactNode =
 
 export const RegionAwarePre = (props: any) => {
   const { selectedRegion } = useRegion()
-  const replacement = `.${selectedRegion}.` || '.<region>.'
+  const replacement = `${selectedRegion}` || '<region>'
 
   const modifiedChildren = React.useMemo(() => {
     return recursiveReplace(props.children, replacement)
@@ -43,7 +43,7 @@ export const RegionAwarePre = (props: any) => {
 
 export const RegionAwareCode = (props: any) => {
   const { selectedRegion } = useRegion()
-  const replacement = `.${selectedRegion}.` || '.<region>.'
+  const replacement = `${selectedRegion}` || '<region>'
 
   const modifiedChildren = React.useMemo(() => {
     return recursiveReplace(props.children, replacement)
