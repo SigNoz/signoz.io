@@ -89,6 +89,8 @@ export const BOT_USER_AGENT_PATTERNS = [
   /statuscake/i,
 
   // SEO & Marketing Tools
+  /ahrefsbot/i, // Ahrefs crawler
+  /ahrefssiteaudit/i, // Ahrefs site audit
   /semrush/i,
   /dotbot/i, // Moz's crawler
   /rogerbot/i, // Moz's crawler
