@@ -16,7 +16,8 @@ const CustomLink = ({ href, ...rest }: LinkProps & AnchorHTMLAttributes<HTMLAnch
     }
   }, [searchParams])
 
-  const isInternalLink = href && (href.startsWith('/') || href.startsWith('.'))
+  const isInternalLink =
+    (href && (href.startsWith('/') || href.startsWith('.'))) || href.startsWith('https://signoz.io') // Docs has complete URL as href, so we need to check for complete url, this is hardcoded for now
   const isAnchorLink = href && href.startsWith('#')
 
   if (isInternalLink) {
