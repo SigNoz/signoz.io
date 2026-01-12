@@ -74,11 +74,21 @@ export const BOT_USER_AGENT_PATTERNS = [
   /httpie/i,
   /insomnia/i,
 
-  // Mixpanel-aligned additions
+  // Mixpanel-aligned additions (from mixpanel-js BLOCKED_UA_STRS)
   /petalbot/i, // Huawei search
   /screaming frog/i, // SEO tool
   /bingpreview/i, // Bing Preview
   /storebot-google/i, // Google Store crawler
+  /adsbot-google/i, // Google Ads bot
+  /apis-google/i, // Google APIs
+  /duplexweb-google/i, // Google Duplex
+  /feedfetcher-google/i, // Google Feed Fetcher
+  /google favicon/i, // Google Favicon fetcher
+  /google web preview/i, // Google Web Preview
+  /google-read-aloud/i, // Google Read Aloud
+  /googleweblight/i, // Google Web Light
+  /mediapartners-google/i, // Google AdSense
+  /pinterest/i, // Pinterest crawler
 
   // Monitoring & Uptime Bots
   /uptimerobot/i,
