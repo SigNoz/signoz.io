@@ -17,148 +17,37 @@ This guide explains how to configure the OpenTelemetry Collector binary running 
 Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
-## OpenTelemetry Collector Configuration
-
-Create `config.yaml` in folder `otelcol-contrib` with the below content. The configuration defines how the OpenTelemetry Collector receives, processes, and exports telemetry data to SigNoz.
-
-**For SigNoz Cloud:** Replace `{region}` with your SigNoz Cloud region (us, in, or eu) and `<SIGNOZ_INGESTION_KEY>` with your ingestion key.
-
-**For self-hosted SigNoz:** Replace `<IP of machine hosting SigNoz>` with the address of your SigNoz instance.
-
-```yaml
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-      processes: {}
-  prometheus:
-    config:
-      global:
-        scrape_interval: 60s
-      scrape_configs:
-        - job_name: otel-collector-binary
-          static_configs:
-            - targets:
-              # - localhost:8888
-processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
-  resourcedetection:
-    detectors: [env, system]
-    timeout: 2s
-    system:
-      hostname_sources: [os]
-extensions:
-  health_check: {}
-  zpages: {}
-exporters:
-  otlp:
-    # For SigNoz Cloud: use ingest.{region}.signoz.cloud:443
-    # For self-hosted: use <IP of machine hosting SigNoz>:4317
-    endpoint: "ingest.{region}.signoz.cloud:443"  # Replace with your endpoint
-    tls:
-      # For SigNoz Cloud: set to false
-      # For self-hosted: set to true
-      insecure: false
-    headers:
-      # For SigNoz Cloud: include this section with your ingestion key
-      # For self-hosted: remove this entire headers section
-      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
-  debug:
-    verbosity: normal
-service:
-  telemetry:
-    metrics:
-      address: 0.0.0.0:8888
-  extensions: [health_check, zpages]
-  pipelines:
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    metrics/internal:
-      receivers: [prometheus, hostmetrics]
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    logs:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-```
-
-### SigNoz Cloud Endpoints
-
-Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US | ingest.us.signoz.cloud:443 |
-| IN | ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
-
-### Configuration Overview
-
-In the configuration above, we enable three receivers: `OTLP`, `hostmetrics` and `prometheus`.
-
-- **OTLP receiver** is configured to receive all types of telemetry data: traces, metrics, and logs. These data would be forwarded to SigNoz via OTLP gRPC endpoint.
-
-- **hostmetrics receiver** is configured to collect various metrics of the virtual machine. It consists of metrics related to CPU, memory, disk, file system, network, and others.
-
-- **prometheus receiver** is configured to collect the internal metrics of the `otelcol`. You can update it as per your need to include additional scrape targets accessible from the VM or remove existing targets.
-
 ## OpenTelemetry Collector Usage
 
 You copy the configuration file to the respective config paths as per your installation methods. Followed by respective instructions to start, restart, and view logs of the `otelcol` binary.
 
 ### Systemd
 
-To copy the updated `config.yaml` file:
+To copy the update the otel-collector configuration with your own `config.yaml` file:
 
 ```bash
-sudo cp config.yaml /etc/otelcol-contrib/config.yaml
+sudo cp your-config.yaml /etc/otelcol-contrib/config.yaml
 ```
 
-To restart `otelcol` with updated config:
+To restart `otelcol-contrib` with updated config:
 
 ```bash
 sudo systemctl restart otelcol-contrib.service
 ```
 
-To check the status of `otelcol`:
+To check the status of `otelcol-contrib`:
 
 ```bash
 sudo systemctl status otelcol-contrib.service
 ```
 
-To view logs of `otelcol`:
+To view logs of `otelcol-contrib`:
 
 ```bash
 sudo journalctl -u otelcol-contrib.service
 ```
 
-To stop `otelcol`:
+To stop `otelcol-contrib`:
 
 ```bash
 sudo systemctl stop otelcol-contrib.service
@@ -166,12 +55,12 @@ sudo systemctl stop otelcol-contrib.service
 
 ### Plain Binary
 
-It is recommended to use the `otelcol` binary inside the terminal multiplexer tools like `tmux` or `screen`, since plain binary usage is ephemeral.
+It is recommended to use the `otelcol-contrib` binary inside the terminal multiplexer tools like `tmux` or `screen`, since plain binary usage is ephemeral.
 
 To copy the updated `config.yaml` file:
 
 ```bash
-cp config.yaml ./otelcol-contrib/config.yaml
+cp your-config.yaml ./otelcol-contrib/config.yaml
 ```
 
 To change the directory inside the `otelcol-contrib` folder:
@@ -180,59 +69,20 @@ To change the directory inside the `otelcol-contrib` folder:
 cd otelcol-contrib
 ```
 
-To view the last 50 lines of `otelcol` logs:
+To view the last 50 lines of `otelcol-contrib` logs:
 
 ```bash
 tail -f -n 50 otelcol-output.log
 ```
 
-To stop `otelcol`:
+To stop `otelcol-contrib`:
 
 ```bash
 kill "$(< otel-pid)"
 ```
-
-## Test Sending Traces
-
-OpenTelemetry collector binary should be able to forward all types of telemetry data received: traces, metrics, and logs, to SigNoz OTLP endpoint via gRPC.
-
-Let's send sample traces to the `otelcol` using `telemetrygen`.
-
-To install telemetrygen binary:
-
-```bash
-go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/telemetrygen@latest
-```
-
-To send trace data using `telemetrygen`, execute the command below:
-
-```bash
-telemetrygen traces --traces 1 --otlp-endpoint localhost:4317 --otlp-insecure
-```
-
-Output should look like this:
-
-```
-...
-2023-03-15T11:04:38.967+0545    INFO    channelz/funcs.go:340   [core][Channel #1] Channel Connectivity change to READY {"system": "grpc", "grpc_log": true}
-2023-03-15T11:04:38.968+0545    INFO    traces/traces.go:124    generation of traces isn't being throttled
-2023-03-15T11:04:38.968+0545    INFO    traces/worker.go:90     traces generated        {"worker": 0, "traces": 1}
-2023-03-15T11:04:38.969+0545    INFO    traces/traces.go:87     stop the batch span processor
-2023-03-15T11:04:38.983+0545    INFO    channelz/funcs.go:340   [core][Channel #1] Channel Connectivity change to SHUTDOWN      {"system": "grpc", "grpc_log": true}
-2023-03-15T11:04:38.984+0545    INFO    channelz/funcs.go:340   [core][Channel #1 SubChannel #2] Subchannel Connectivity change to SHUTDOWN     {"system": "grpc", "grpc_log": true}
-2023-03-15T11:04:38.984+0545    INFO    channelz/funcs.go:340   [core][Channel #1 SubChannel #2] Subchannel deleted     {"system": "grpc", "grpc_log": true}
-2023-03-15T11:04:38.984+0545    INFO    channelz/funcs.go:340   [core][Channel #1] Channel deleted      {"system": "grpc", "grpc_log": true}
-2023-03-15T11:04:38.984+0545    INFO    traces/traces.go:79     stopping the exporter
-```
-
-If the SigNoz endpoint in the configuration is set correctly and accessible, you should be able to see the traces sent via OpenTelemetry collector in VM from `telemetrygen` in the SigNoz UI.
-
-![traces generated by telemetrygen][2]
 
 ## Next Steps
 
 - [VM Collection Agent Overview](/docs/collection-agents/vm/overview)
 - [Telemetry Data Requirements for Infrastructure Monitoring](/docs/infrastructure-monitoring/user-guides/telemetry-data-requirements/)
 - [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)
-
-[2]: /img/docs/telemetrygen-output.webp
