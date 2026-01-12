@@ -1,0 +1,276 @@
+---
+date: 2026-01-12
+title: VM Collection Agent - Install
+id: install
+description: Install the OpenTelemetry Collector binary on your virtual machine to collect telemetry data.
+---
+
+This guide walks you through installing the OpenTelemetry Collector binary on your virtual machine.
+
+## Prerequisites
+
+- SigNoz application up and running (SigNoz Cloud or self-hosted)
+- SigNoz endpoint accessible from the VM
+- Availability of ports: `4317`, `4318`, `8888`, `1777`, `13133`
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Installation
+
+<Tabs>
+<TabItem value="systemd" label="Systemd" default>
+
+Using the `deb` file, OpenTelemetry Collector will be installed as a `systemd` service and default configuration prepopulated at the `/etc/otelcol-contrib` path. This method would be preferable in case you want the OpenTelemetry collector to always be running in the background.
+
+<Admonition type="info">
+Systemd installation is only available for Linux systems.
+</Admonition>
+
+To download the `deb` file of release version `0.139.0`:
+
+<Tabs groupId="systemd-arch">
+<TabItem value="amd" label="amd64" default>
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_amd64.deb
+```
+
+To install `otelcol` as `systemd` using `dpkg`:
+
+
+```bash
+sudo dpkg -i otelcol-contrib_0.139.0_linux_amd64.deb
+```
+
+</TabItem>
+<TabItem value="arm" label="arm64">
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_arm64.deb
+```
+
+To install `otelcol` as `systemd` using `dpkg`:
+
+
+```bash
+sudo dpkg -i otelcol-contrib_0.139.0_linux_arm64.deb
+```
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="binary" label="Binary">
+
+Using the `tar.gz` release asset, we can extract the OpenTelemetry collector binary and default configuration at our desired path. We can run the binary directly with flags or use `tmux` or `screen` for persistent execution.
+
+Here are the steps to set up OpenTelemetry binary as an agent:
+
+<Tabs groupId="os-arch">
+<TabItem value="linux-amd" label="Linux (amd64)" default>
+
+1. Download otel-collector tar.gz for your architecture:
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_amd64.tar.gz
+```
+
+2. Extract otel-collector tar.gz to the `otelcol-contrib` folder:
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.139.0_linux_amd64.tar.gz -C otelcol-contrib
+```
+
+3. Create `config.yaml` in folder `otelcol-contrib` with the configuration (see [Configuration guide](/docs/collection-agents/vm/configure)).
+
+4. Once we are done with the above configurations, we can now run the collector service with the following command:
+
+From the `otelcol-contrib` folder, run the following command:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+### Run in background
+
+If you want to run otel collector process in the background:
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
+
+If you want to see the output of the logs you've just set up for the background process, you may look it up with:
+
+```bash
+tail -f -n 50 otelcol-output.log
+```
+
+`tail -n 50` will give the last 50 lines from the file `otelcol-output.log`.
+
+You can stop the collector service `otelcol` when running in background, with the following command:
+
+```bash
+kill "$(< otel-pid)"
+```
+
+</TabItem>
+<TabItem value="linux-arm" label="Linux (arm64)">
+
+1. Download otel-collector tar.gz for your architecture:
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_linux_arm64.tar.gz
+```
+
+2. Extract otel-collector tar.gz to the `otelcol-contrib` folder:
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.139.0_linux_arm64.tar.gz -C otelcol-contrib
+```
+
+3. Create `config.yaml` in folder `otelcol-contrib` with the configuration (see [Configuration guide](/docs/collection-agents/vm/configure)).
+
+4. Once we are done with the above configurations, we can now run the collector service with the following command:
+
+From the `otelcol-contrib` folder, run the following command:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+### Run in background
+
+If you want to run otel collector process in the background:
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
+
+If you want to see the output of the logs you've just set up for the background process, you may look it up with:
+
+```bash
+tail -f -n 50 otelcol-output.log
+```
+
+`tail -n 50` will give the last 50 lines from the file `otelcol-output.log`.
+
+You can stop the collector service `otelcol` when running in background, with the following command:
+
+```bash
+kill "$(< otel-pid)"
+```
+
+</TabItem>
+<TabItem value="macos-amd" label="MacOS (amd64)">
+
+1. Download otel-collector tar.gz for your architecture:
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_darwin_amd64.tar.gz
+```
+
+2. Extract otel-collector tar.gz to the `otelcol-contrib` folder:
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.139.0_darwin_amd64.tar.gz -C otelcol-contrib
+```
+
+3. Create `config.yaml` in folder `otelcol-contrib` with the configuration (see [Configuration guide](/docs/collection-agents/vm/configure)).
+
+4. Once we are done with the above configurations, we can now run the collector service with the following command:
+
+From the `otelcol-contrib` folder, run the following command:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+### Run in background
+
+If you want to run otel collector process in the background:
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
+
+If you want to see the output of the logs you've just set up for the background process, you may look it up with:
+
+```bash
+tail -f -n 50 otelcol-output.log
+```
+
+`tail -n 50` will give the last 50 lines from the file `otelcol-output.log`.
+
+You can stop the collector service `otelcol` when running in background, with the following command:
+
+```bash
+kill "$(< otel-pid)"
+```
+
+</TabItem>
+<TabItem value="macos-arm" label="MacOS (arm64)">
+
+1. Download otel-collector tar.gz for your architecture:
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.139.0/otelcol-contrib_0.139.0_darwin_arm64.tar.gz
+```
+
+2. Extract otel-collector tar.gz to the `otelcol-contrib` folder:
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.139.0_darwin_arm64.tar.gz -C otelcol-contrib
+```
+
+3. Create `config.yaml` in folder `otelcol-contrib` with the configuration (see [Configuration guide](/docs/collection-agents/vm/configure)).
+
+4. Once we are done with the above configurations, we can now run the collector service with the following command:
+
+From the `otelcol-contrib` folder, run the following command:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+### Run in background
+
+If you want to run otel collector process in the background:
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running otel collector process to the otel-pid file.
+
+If you want to see the output of the logs you've just set up for the background process, you may look it up with:
+
+```bash
+tail -f -n 50 otelcol-output.log
+```
+
+`tail -n 50` will give the last 50 lines from the file `otelcol-output.log`.
+
+You can stop the collector service `otelcol` when running in background, with the following command:
+
+```bash
+kill "$(< otel-pid)"
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+## Next Steps
+
+- [Configure the Collector](/docs/collection-agents/vm/configure)
+- [VM Collection Agent Overview](/docs/collection-agents/vm/overview)
+- [Collector Configuration Best Practices](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#best-practices)

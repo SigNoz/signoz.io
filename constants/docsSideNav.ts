@@ -713,9 +713,19 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
-                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+                route: '/docs/opentelemetry-collection-agents/vm/overview',
                 type: 'doc',
                 label: 'Overview',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/vm/install',
+                type: 'doc',
+                label: 'Install',
+              },
+              {
+                route: '/docs/opentelemetry-collection-agents/vm/configure',
+                type: 'doc',
+                label: 'Configure',
               },
             ],
           },
