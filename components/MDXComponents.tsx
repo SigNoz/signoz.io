@@ -72,11 +72,13 @@ import ToggleHeading from './Headings/ToggleHeading'
 import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
 import AWSOneClickListicle from './AWS/AWSOneClickListicle'
 import Region from './Region/Region'
+import RegionTable from './Region/RegionTable'
 import { RegionAwarePre, RegionAwareCode } from './Region/RegionAwareComponents'
 
 export const components: MDXComponents = {
   Region,
   region: Region,
+  RegionTable,
   ToggleHeading,
   Image,
   TOCInline,
