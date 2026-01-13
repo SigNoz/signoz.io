@@ -900,34 +900,32 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Java',
-            route: '/docs/instrumentation/opentelemetry-java',
-            // link: {
-            // type: 'doc',
-            // route: '/docs/instrumentation/opentelemetry-java',
-            // title: 'Java',
-            // description: 'Learn how to instrument Java applications with OpenTelemetry',
-            // slug: 'instrumentation/java',
-            // },
+            route: '/docs/instrumentation/java/overview',
             items: [
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-springboot',
-                label: 'Spring Boot',
+                route: '/docs/instrumentation/java/opentelemetry-java',
+                label: 'Java / Spring Boot',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-quarkus',
+                route: '/docs/instrumentation/java/opentelemetry-quarkus',
                 label: 'Quarkus',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-tomcat',
+                route: '/docs/instrumentation/java/opentelemetry-tomcat',
                 label: 'Tomcat',
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/opentelemetry-jboss',
-                label: 'JBoss',
+                route: '/docs/instrumentation/java/opentelemetry-jboss',
+                label: 'JBoss / WildFly',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/java/manual-instrumentation',
+                label: 'Manual Instrumentation',
               },
             ],
           },
@@ -973,6 +971,24 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'category',
+            isExpanded: false,
+            label: '.NET',
+            route: '/docs/instrumentation/opentelemetry-dotnet',
+            items: [
+              {
+                type: 'doc',
+                label: 'NuGet based Instrumentation',
+                route: '/docs/instrumentation/dotnet/nuget-instrumentation',
+              },
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/dotnet/manual-instrumentation',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'PHP',
             route: '/docs/instrumentation/opentelemetry-php',
@@ -981,11 +997,6 @@ const docsSideNav = [
             type: 'doc',
             label: 'Laravel',
             route: '/docs/instrumentation/opentelemetry-laravel',
-          },
-          {
-            type: 'doc',
-            label: '.NET',
-            route: '/docs/instrumentation/opentelemetry-dotnet',
           },
           {
             type: 'doc',
@@ -1036,18 +1047,6 @@ const docsSideNav = [
             // type: 'doc',
             // },
             items: [
-              {
-                type: 'category',
-                isExpanded: false,
-                label: 'Java',
-                items: [
-                  {
-                    type: 'doc',
-                    route: '/docs/instrumentation/manual-instrumentation/java/annotations',
-                    label: 'Using Annotations',
-                  },
-                ],
-              },
               {
                 type: 'category',
                 isExpanded: false,
@@ -1402,6 +1401,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/logs-pipelines/parsing',
+            label: 'Logs Parsing',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-pipelines/processors',
             label: 'Log Processors',
           },
@@ -1421,6 +1425,16 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/json',
                 label: 'Parse JSON logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/grok-parser',
+                label: 'Parse Logs with Grok Parser',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/regex-parser',
+                label: 'Parse Logs with Regex Parser',
               },
               {
                 type: 'doc',
@@ -2008,6 +2022,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/nginx',
             label: 'NGINX',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openai-dashboard',
+            label: 'OpenAI',
           },
           {
             type: 'doc',

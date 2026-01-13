@@ -364,9 +364,27 @@ const SignupFormIsolated: React.FC<{
     setFormState((prev) => ({ ...prev, [name]: newValue }))
   }, [])
 
-  const handleRegionChange = useCallback((selectedRegion: string) => {
-    setFormState((prev) => ({ ...prev, dataRegion: selectedRegion }))
-  }, [])
+  const handleRegionChange = useCallback(
+    (selectedRegion: string) => {
+      logEvent({
+        eventType: 'track',
+        eventName: 'Website Click',
+        attributes: {
+          location: 'Teams Page',
+          clickType: 'Button Click',
+          clickName: 'Region Select Button Click',
+          clickLocation: 'Teams Form',
+          clickText: 'Select Region',
+          dataRegion: selectedRegion,
+          termsOfServiceAccepted: formState.termsOfServiceAccepted,
+          email: formState.workEmail,
+          region: selectedRegion,
+        },
+      })
+      setFormState((prev) => ({ ...prev, dataRegion: selectedRegion }))
+    },
+    [logEvent]
+  )
 
   const handleSubmit = useCallback(
     (event) => {
@@ -621,32 +639,64 @@ const TeamsVariant: React.FC = () => {
     return emailRegex.test(email)
   }
 
-  const validatePayload = useCallback((payload) => {
-    let newErrors = {}
+  const validatePayload = useCallback(
+    (payload) => {
+      let newErrors = {}
 
-    if (!payload.email.trim()) {
-      newErrors['workEmail'] = 'Work email is required'
-    } else if (!isValidEmail(payload.email)) {
-      newErrors['workEmail'] = 'Please enter a valid company email'
-    }
+      if (!payload.email.trim()) {
+        newErrors['workEmail'] = 'Work email is required'
+      } else if (!isValidEmail(payload.email)) {
+        newErrors['workEmail'] = 'Please enter a valid company email'
+      }
 
-    if (!payload.preferences.terms_of_service_accepted) {
-      newErrors['termsOfService'] = 'You must accept the Terms of Service to continue'
-    }
+      if (!payload.preferences.terms_of_service_accepted) {
+        newErrors['termsOfService'] = 'You must accept the Terms of Service to continue'
+      }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }, [])
+      const isValid = Object.keys(newErrors).length === 0
 
-  const validateSocialSignupPayload = useCallback((payload) => {
-    let newErrors = {}
-    if (!payload.preferences.terms_of_service_accepted) {
-      newErrors['termsOfService'] = 'You must accept the Terms of Service to continue'
-    }
+      if (!isValid) {
+        logEvent({
+          eventType: 'track',
+          eventName: 'Teams Page Sign Up Validation Failed',
+          attributes: {
+            errors: newErrors,
+            email: payload.email,
+          },
+        })
+      }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }, [])
+      setErrors(newErrors)
+      return isValid
+    },
+    [logEvent]
+  )
+
+  const validateSocialSignupPayload = useCallback(
+    (payload) => {
+      let newErrors = {}
+      if (!payload.preferences.terms_of_service_accepted) {
+        newErrors['termsOfService'] = 'You must accept the Terms of Service to continue'
+      }
+
+      const isValid = Object.keys(newErrors).length === 0
+
+      if (!isValid) {
+        logEvent({
+          eventType: 'track',
+          eventName: 'Teams Page Social Sign Up Validation Failed',
+          attributes: {
+            errors: newErrors,
+            connector: payload.connector,
+          },
+        })
+      }
+
+      setErrors(newErrors)
+      return isValid
+    },
+    [logEvent]
+  )
 
   const handleError = useCallback(() => {
     setSubmitFailed(true)
@@ -724,12 +774,32 @@ const TeamsVariant: React.FC = () => {
         } else {
           // To do, handle other errors apart from invalid email
           const errorData = await response.json()
+
+          logEvent({
+            eventType: 'track',
+            eventName: 'Teams Page Sign Up API Error',
+            attributes: {
+              error: errorData.error,
+              status: response.status,
+              email: payload.email,
+              region: payload.region.name,
+            },
+          })
+
           setErrors({
             apiError: errorData.error,
           })
           handleError()
         }
       } catch (error) {
+        logEvent({
+          eventType: 'track',
+          eventName: 'Teams Page Sign Up Exception',
+          attributes: {
+            errorMessage: error instanceof Error ? error.message : String(error),
+            email: payload.email,
+          },
+        })
         handleError()
       } finally {
         setIsSubmitting(false)
@@ -745,10 +815,20 @@ const TeamsVariant: React.FC = () => {
         return
       }
       setIsSubmitting(true)
+
+      logEvent({
+        eventType: 'track',
+        eventName: 'Teams Page Social Signup Redirect Initiated',
+        attributes: {
+          connector: payload.connector,
+          region: payload.region.name,
+        },
+      })
+
       localStorage.setItem('region', payload.region.name)
       window.location.href = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/connectors/${payload.connector}/url`
     },
-    [validateSocialSignupPayload]
+    [validateSocialSignupPayload, logEvent]
   )
 
   const handleSocialSignupCallback = useCallback(

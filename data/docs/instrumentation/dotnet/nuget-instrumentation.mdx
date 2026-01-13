@@ -1,0 +1,218 @@
+---
+date: 2026-01-08
+id: dotnet-nuget-instrumentation
+title: NuGet based Instrumentation for .NET
+description: Add OpenTelemetry to your .NET application using NuGet packages and configure in Program.cs
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+This guide shows you how to add OpenTelemetry to your .NET application by installing NuGet packages and configuring the SDK in your code. Use this approach when you need more control over instrumentation than zero-code provides, or when zero-code instrumentation isn't available for your deployment.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- [.NET SDK](https://dotnet.microsoft.com/en-us/download) 5.0 or later
+- A SigNoz Cloud account or self-hosted SigNoz instance
+
+## Step 1. Install OpenTelemetry packages
+
+Add the core packages to your project:
+
+```bash
+dotnet add package OpenTelemetry.Extensions.Hosting
+dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore
+```
+
+Add instrumentation packages based on what your application uses:
+
+```bash
+# HTTP client calls
+dotnet add package OpenTelemetry.Instrumentation.Http
+
+# SQL Server
+dotnet add package OpenTelemetry.Instrumentation.SqlClient
+
+# Entity Framework Core
+dotnet add package OpenTelemetry.Instrumentation.EntityFrameworkCore
+
+# gRPC
+dotnet add package OpenTelemetry.Instrumentation.GrpcNetClient
+```
+
+## Step 2. Configure OpenTelemetry in Program.cs
+
+```csharp:Program.cs
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: "my-dotnet-service")
+        .AddAttributes(new Dictionary<string, object>
+        {
+            ["deployment.environment"] = builder.Environment.EnvironmentName,
+            ["service.version"] = "1.0.0"
+        }))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter(options =>
+        {
+            options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
+            options.Protocol = OtlpExportProtocol.Grpc;
+            options.Headers = "signoz-ingestion-key=<your-ingestion-key>";
+        }));
+
+var app = builder.Build();
+
+app.MapGet("/", () => "Hello World!");
+
+app.Run();
+```
+
+Replace:
+- `my-dotnet-service`: Your service name
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+## Step 3. Configure using environment variables (optional)
+
+Instead of hardcoding values, use environment variables:
+
+```csharp:Program.cs
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "my-service"))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter());
+```
+
+Then set environment variables when running:
+
+```bash
+OTEL_SERVICE_NAME=my-dotnet-service \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> \
+dotnet run
+```
+
+## Step 4. Add database instrumentation (optional)
+
+### SQL Server
+
+```bash
+dotnet add package OpenTelemetry.Instrumentation.SqlClient
+```
+
+```csharp:Program.cs {5-9}
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddSqlClientInstrumentation(options =>
+        {
+            options.SetDbStatementForText = true;
+            options.RecordException = true;
+        })
+        .AddOtlpExporter(/* ... */));
+```
+
+### Entity Framework Core
+
+```bash
+dotnet add package OpenTelemetry.Instrumentation.EntityFrameworkCore
+```
+
+```csharp:Program.cs {5}
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddEntityFrameworkCoreInstrumentation()
+        .AddOtlpExporter(/* ... */));
+```
+
+### Redis (StackExchange.Redis)
+
+```bash
+dotnet add package OpenTelemetry.Instrumentation.StackExchangeRedis
+```
+
+```csharp:Program.cs
+var redis = ConnectionMultiplexer.Connect("localhost:6379");
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddRedisInstrumentation(redis)
+        .AddOtlpExporter(/* ... */));
+```
+
+## Validate
+
+1. Generate traffic by making requests to your application.
+2. Open SigNoz and go to **Services**.
+3. Look for your service name in the list.
+4. Click on your service to view traces, latency, and error rates.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### How do I debug locally?
+
+Add the console exporter to see traces in your terminal:
+
+```bash
+dotnet add package OpenTelemetry.Exporter.Console
+```
+
+```csharp
+.WithTracing(tracing => tracing
+    .AddAspNetCoreInstrumentation()
+    .AddConsoleExporter()
+    .AddOtlpExporter(/* ... */));
+```
+
+### Traces not appearing?
+
+- Check the endpoint URL format (include protocol and port)
+- Verify the ingestion key has no extra spaces
+- Ensure your firewall allows outbound traffic to the endpoint
+
+### Missing spans for certain libraries?
+
+- Verify you've added the correct instrumentation package
+- Check the package is compatible with your library version
+- Some libraries need explicit configuration (like SQL statement capture)
+
+### gRPC vs HTTP export
+
+By default, `AddOtlpExporter()` uses gRPC. If you're behind a proxy that doesn't support HTTP/2:
+
+```csharp
+.AddOtlpExporter(options =>
+{
+    options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443/v1/traces");
+    options.Protocol = OtlpExportProtocol.HttpProtobuf;
+    options.Headers = "signoz-ingestion-key=<your-key>";
+});
+```
+
+</details>
+
+## Next steps
+
+- [Manual Instrumentation](https://signoz.io/docs/instrumentation/dotnet/manual-instrumentation/) to create custom spans for business operations
+- [Setup alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your traces to get notified on errors and latency
