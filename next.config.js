@@ -386,6 +386,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/manual-instrumentation/dotnet/manual-instrumentation/',
+          destination: '/docs/instrumentation/dotnet/manual-instrumentation/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/elixir/',
           destination: '/docs/instrumentation/opentelemetry-elixir/',
           permanent: true,
@@ -422,7 +427,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/java/',
-          destination: '/docs/instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
           permanent: true,
         },
         {
@@ -442,7 +447,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/jboss/',
-          destination: '/docs/instrumentation/opentelemetry-jboss/',
+          destination: '/docs/instrumentation/java/opentelemetry-jboss/',
           permanent: true,
         },
         {
@@ -583,7 +588,39 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/springboot/',
-          destination: '/docs/instrumentation/opentelemetry-springboot/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        // Java framework-specific redirects to new java/ folder structure
+        {
+          source: '/docs/instrumentation/opentelemetry-springboot/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-quarkus/',
+          destination: '/docs/instrumentation/java/opentelemetry-quarkus/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-tomcat/',
+          destination: '/docs/instrumentation/java/opentelemetry-tomcat/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-jboss/',
+          destination: '/docs/instrumentation/java/opentelemetry-jboss/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-java/',
+          destination: '/docs/instrumentation/java/opentelemetry-java/',
+          permanent: true,
+        },
+        // Java manual instrumentation redirect
+        {
+          source: '/docs/instrumentation/manual-instrumentation/java/annotations/',
+          destination: '/docs/instrumentation/java/manual-instrumentation/',
           permanent: true,
         },
         {
@@ -593,7 +630,7 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/tomcat/',
-          destination: '/docs/instrumentation/opentelemetry-tomcat/',
+          destination: '/docs/instrumentation/java/opentelemetry-tomcat/',
           permanent: true,
         },
         {

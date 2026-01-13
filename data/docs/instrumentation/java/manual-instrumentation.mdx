@@ -1,0 +1,344 @@
+---
+date: 2026-01-03
+id: java-manual-instrumentation
+title: How to add manual instrumentation in Java
+description: Create custom spans, add attributes and events, and record errors in Java applications with OpenTelemetry and SigNoz
+
+doc_type: howto
+---
+
+Manual instrumentation lets you capture business operations that automatic instrumentation misses. Use it to track order processing, payment workflows, or any domain-specific logic that matters for debugging and monitoring.
+
+## Prerequisites
+
+- Complete the [Java OpenTelemetry instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-java/) so your app is already sending traces
+- Add the OpenTelemetry API dependency to your project
+
+<Tabs>
+<TabItem value="maven" label="Maven" default>
+```xml
+<dependency>
+  <groupId>io.opentelemetry</groupId>
+  <artifactId>opentelemetry-api</artifactId>
+  <version>1.57.0</version>
+</dependency>
+<dependency>
+  <groupId>io.opentelemetry.instrumentation</groupId>
+  <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+  <version>2.23.0</version>
+</dependency>
+```
+</TabItem>
+<TabItem value="gradle" label="Gradle">
+```groovy
+implementation 'io.opentelemetry:opentelemetry-api:1.57.0'
+implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.23.0'
+```
+</TabItem>
+</Tabs>
+
+<Admonition type="info">
+The versions above are current as of this writing. Check the <a href="https://github.com/open-telemetry/opentelemetry-java/releases" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Java releases</a> for the latest versions.
+</Admonition>
+
+## Step 1. Create manual spans
+
+### Using annotations (simplest approach)
+
+Annotate methods with `@WithSpan` to automatically create spans:
+
+```java:OrderService.java
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+
+public class OrderService {
+
+    @WithSpan("process-order")
+    public void processOrder(@SpanAttribute("order.id") String orderId) {
+        // A span wraps this entire method
+        validateOrder(orderId);
+        chargePayment(orderId);
+        shipOrder(orderId);
+    }
+
+    @WithSpan
+    public void validateOrder(@SpanAttribute("order.id") String orderId) {
+        // Child span created automatically
+    }
+}
+```
+
+- `@WithSpan` creates a span for the method's lifetime
+- `@SpanAttribute` captures method parameters as span attributes
+- Nested `@WithSpan` methods become child spans automatically
+
+### Using the SDK (more control)
+
+For fine-grained control, use the tracer API directly:
+
+```java:PaymentService.java
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+
+public class PaymentService {
+    private static final Tracer tracer = GlobalOpenTelemetry.getTracer("payment-service");
+
+    public void processPayment(String paymentId, double amount) {
+        Span span = tracer.spanBuilder("process-payment").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            span.setAttribute("payment.id", paymentId);
+            span.setAttribute("payment.amount", amount);
+
+            // Your payment logic here
+            chargeCard(paymentId, amount);
+
+        } finally {
+            span.end();
+        }
+    }
+}
+```
+
+Key points:
+- `GlobalOpenTelemetry.getTracer()` gets a tracer from the agent's configured provider
+- `span.makeCurrent()` sets this span as the parent for any child spans
+- Always call `span.end()` in a finally block
+
+### Creating nested spans
+
+Child spans link to their parent automatically when you use `makeCurrent()`:
+
+```java:OrderProcessor.java
+public void processOrder(String orderId) {
+    Span parentSpan = tracer.spanBuilder("process-order").startSpan();
+    try (Scope parentScope = parentSpan.makeCurrent()) {
+        parentSpan.setAttribute("order.id", orderId);
+
+        // This span becomes a child of process-order
+        Span validateSpan = tracer.spanBuilder("validate-inventory").startSpan();
+        try (Scope validateScope = validateSpan.makeCurrent()) {
+            validateSpan.setAttribute("warehouse", "WH-001");
+            checkInventory(orderId);
+        } finally {
+            validateSpan.end();
+        }
+
+        // Another child span
+        Span chargeSpan = tracer.spanBuilder("charge-payment").startSpan();
+        try (Scope chargeScope = chargeSpan.makeCurrent()) {
+            processPayment(orderId);
+        } finally {
+            chargeSpan.end();
+        }
+
+    } finally {
+        parentSpan.end();
+    }
+}
+```
+
+## Step 2. Add attributes and events
+
+Attributes are key-value pairs that show up in SigNoz so you can filter and search traces. Events mark notable moments within a span.
+
+### Adding attributes
+
+```java
+import io.opentelemetry.api.common.AttributeKey;
+
+Span span = Span.current();
+
+// String attributes
+span.setAttribute("user.id", userId);
+span.setAttribute("order.status", "processing");
+
+// Numeric attributes
+span.setAttribute(AttributeKey.longKey("item.count"), 5L);
+span.setAttribute(AttributeKey.doubleKey("total.amount"), 149.99);
+
+// Boolean attributes
+span.setAttribute(AttributeKey.booleanKey("premium.customer"), true);
+```
+
+### Adding events
+
+Events capture specific moments during span execution:
+
+```java
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributeKey;
+
+Span span = Span.current();
+
+// Simple event
+span.addEvent("order.validated");
+
+// Event with attributes
+span.addEvent("payment.processed", Attributes.of(
+    AttributeKey.stringKey("payment.method"), "credit_card",
+    AttributeKey.stringKey("transaction.id"), "txn_abc123",
+    AttributeKey.doubleKey("amount"), 99.99
+));
+
+// Event with timestamp
+span.addEvent("inventory.reserved", Attributes.empty(), Instant.now());
+```
+
+Use events for:
+- Cache hits/misses
+- Retry attempts
+- State transitions
+- External API calls
+
+## Step 3. Record errors
+
+Flag failures so they surface in SigNoz error views and alerts:
+
+```java
+import io.opentelemetry.api.trace.StatusCode;
+
+public void riskyOperation() {
+    Span span = Span.current();
+
+    try {
+        doSomethingRisky();
+        span.setStatus(StatusCode.OK);
+
+    } catch (Exception e) {
+        // Record the exception with full stack trace
+        span.recordException(e);
+
+        // Mark the span as errored
+        span.setStatus(StatusCode.ERROR, e.getMessage());
+
+        // Re-throw so calling code can handle it
+        throw e;
+    }
+}
+```
+
+- `recordException()` captures the stack trace and exception details
+- `setStatus(StatusCode.ERROR)` marks the span red in SigNoz
+- Always re-throw exceptions unless you're intentionally swallowing them
+
+### Getting the current span
+
+From anywhere in your code, grab the active span to add context:
+
+```java
+import io.opentelemetry.api.trace.Span;
+
+public void someUtilityMethod(String customerId) {
+    Span currentSpan = Span.current();
+
+    if (currentSpan.isRecording()) {
+        currentSpan.setAttribute("customer.id", customerId);
+        currentSpan.addEvent("utility.invoked");
+    }
+}
+```
+
+## Step 4. Add span links (optional)
+
+Links connect spans that are causally related but not in a parent-child relationship. Common use cases:
+- Batch processing where one trigger creates multiple independent operations
+- Fan-out/fan-in patterns
+- Async message processing
+
+```java
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.context.Context;
+
+// Save the context from the triggering operation
+SpanContext triggerContext = Span.current().getSpanContext();
+
+// Later, create a linked span
+Span batchItemSpan = tracer.spanBuilder("process-batch-item")
+    .addLink(triggerContext)
+    .startSpan();
+
+try (Scope scope = batchItemSpan.makeCurrent()) {
+    // Process the batch item
+} finally {
+    batchItemSpan.end();
+}
+```
+
+## Validate
+
+With your application running, verify traces are being sent to SigNoz:
+
+1. Trigger the code paths with your manual instrumentation.
+2. In SigNoz, open the **Services** tab and click **Refresh**. Your application should appear.
+3. Go to the **Traces** tab to see your application's traces.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Custom spans not appearing?
+
+**Check the tracer is initialized:**
+```java
+Tracer tracer = GlobalOpenTelemetry.getTracer("my-service");
+// If this returns a no-op tracer, the agent isn't running
+```
+
+Make sure you're running with the Java agent attached.
+
+**Verify spans are ended:**
+```java
+// Wrong - span never ends
+Span span = tracer.spanBuilder("my-span").startSpan();
+doWork();
+
+// Correct - span ends in finally
+Span span = tracer.spanBuilder("my-span").startSpan();
+try {
+    doWork();
+} finally {
+    span.end();
+}
+```
+
+### Child spans not linking to parent?
+
+Use `makeCurrent()` to set the parent context:
+
+```java
+// Wrong - no parent link
+Span child = tracer.spanBuilder("child").startSpan();
+
+// Correct - parent span is current
+Span parent = tracer.spanBuilder("parent").startSpan();
+try (Scope scope = parent.makeCurrent()) {
+    Span child = tracer.spanBuilder("child").startSpan();
+    // child is now linked to parent
+}
+```
+
+### Attributes not showing up?
+
+- Set attributes before calling `span.end()`
+- Use the correct attribute types (strings, longs, doubles, booleans)
+- Check attribute names don't have typos
+
+### @WithSpan not creating spans?
+
+Make sure:
+1. The Java agent is attached (annotations only work with the agent)
+2. The annotated method is called from outside the class (self-invocation skips the proxy)
+3. You have `opentelemetry-instrumentation-annotations` in your dependencies
+
+</details>
+
+## Next steps
+
+- [Java traces instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-java/) for auto-instrumentation setup
+- [Collect Java application logs](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java) with OpenTelemetry
+- Check <a href="https://opentelemetry.io/docs/languages/java/api/" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Java API reference</a> for advanced usage for manual instrumentation

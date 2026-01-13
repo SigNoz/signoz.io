@@ -1,0 +1,316 @@
+---
+date: 2026-01-02
+title: Parsing Logs with Grok Parser
+id: grok-parser
+doc_type: tutorial
+description: Learn how to parse logs using the Grok Parser with Logs Pipelines in SigNoz.
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Logs are unstructured data, and analyzing them can be challenging. SigNoz provides the **Grok Parser** to parse unstructured logs using pre-defined patterns, making it simple to quickly analyze and extract information from your logs.
+
+## Prerequisites
+
+- You are sending logs to SigNoz.
+- You have access to the **Logs Pipelines** section in SigNoz UI.
+
+Learn more about SigNoz [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
+
+## About Grok Parser
+
+Grok works by combining text patterns into something that matches your logs. It uses <a href="https://github.com/vjeantet/grok/blob/master/patterns.go" target="_blank" rel="noopener noreferrer nofollow">
+pre-defined patterns</a> for common data types like IP addresses, timestamps, and numbers, and allows you to assign named captures to them.
+
+**The Concept:**
+
+Instead of writing a complex regex for an IP address (like `\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}`), you simply use `%{IP:ip_address}`. The syntax is `%{PATTERN_NAME:capture_name}`.
+
+## Example Log
+
+Throughout this guide, we'll use the following example of a standard web access log:
+
+```text
+127.0.0.1 - - [27/Dec/2025:10:00:00 +0000] "GET /api/v1/users HTTP/1.1" 200 1234
+```
+
+## Desired Outcome
+
+After parsing, we want to extract specific information into structured attributes.
+
+| Attribute       | Value                      |
+| --------------- | -------------------------- |
+| `client_ip`     | 127.0.0.1                  |
+| `timestamp`     | 27/Dec/2025:10:00:00 +0000 |
+| `method`        | GET                        |
+| `request`       | /api/v1/users              |
+| `response_code` | 200                        |
+| `bytes`         | 1234                       |
+
+The final processed log should look like this:
+
+```json
+{
+  "body": "127.0.0.1 - - [27/Dec/2025:10:00:00 +0000] \"GET /api/v1/users HTTP/1.1\" 200 1234",
+  "attributes": {
+    "client_ip": "127.0.0.1",
+    "timestamp": "27/Dec/2025:10:00:00 +0000",
+    "method": "GET",
+    "request": "/api/v1/users",
+    "response_code": "200",
+    "bytes": "1234"
+  }
+}
+```
+
+## Creating a Pipeline
+
+Before you can parse logs, you need to create a pipeline that will filter and process them.
+
+### Step 1: Navigate to Pipelines Page
+
+In SigNoz, go to **Logs** → **Pipelines**
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step1.webp"
+  alt="Navigate to Log Pipelines"
+  caption="Navigate to Log Pipelines"
+/>
+
+### Step 2: Create a New Pipeline
+
+- If you do not have existing pipelines, press the **"New Pipeline"** button.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/logs-parsing-pipeline-step2.webp"
+  alt="New Pipeline Button"
+  caption="New Pipeline Button"
+/>
+
+- If you already have some pipelines, press the **"Enter Edit Mode"** button and then click the **"Add a New Pipeline"** button at the bottom of the list.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step3.webp"
+  alt="Enter Edit Mode button"
+  caption="Enter Edit Mode button"
+/>
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step4.webp"
+  alt="Add a New Pipeline button"
+  caption="Add a New Pipeline button"
+/>
+
+### Step 3: Configure the Pipeline
+
+Provide details about the pipeline in the Create Pipeline Dialog:
+
+- **Name:** Provide a descriptive pipeline name.
+- **Description:** Add a detailed description for your pipeline (optional).
+- **Filter:** Use the filter field to select the logs you want to process. For example, `service.name = my-app` or `log.file.name = access.log`.
+- **Filtered Logs Preview:** Verify that the logs you want to process are selected.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-pipeline-step5.webp"
+  alt="Create New Pipeline dialog"
+  caption="Create New Pipeline dialog"
+/>
+
+Press the **"Create"** button to create the pipeline.
+
+## Configuring Grok Parser
+
+Now that we have a pipeline, we will add the Grok Parser processor to extract attributes from our log line.
+
+### Step 1: Add a Processor
+
+Expand your pipeline and click the **"Add Processor"** button.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-step1.webp"
+  alt="Expand Pipeline to access Processors"
+  caption="Expand Pipeline to access Processors"
+/>
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-step2.webp"
+  alt="Add Processors Button"
+  caption="Add Processors Button"
+/>
+
+### Step 2: Configure Grok Parser
+
+We will now configure the processor to parse the log message.
+
+#### Before Parsing
+
+At this stage, your log typically contains the raw message in the `body` field:
+
+```json
+{
+  "body": "127.0.0.1 - - [27/Dec/2025:10:00:00 +0000] \"GET /api/v1/users HTTP/1.1\" 200 1234"
+}
+```
+
+#### Processor Configuration
+
+Select **Grok Parser** and configure the fields:
+
+- **Name**: `access_log_parser`
+- **Parse From**: `body` (This is where the raw message resides)
+- **Parse To**: `attributes` (We want to add extracted values directly to log attributes)
+- **Pattern**:
+  ```grok
+  %{IP:client_ip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:method} %{URIPATHPARAM:request} HTTP/%{NUMBER:http_version}" %{NUMBER:response_code} %{NUMBER:bytes}
+  ```
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-step3.webp"
+  alt="Grok Parser Configuration Example"
+  caption="Configuring the Grok Parser"
+/>
+
+Press **"Create"** to add the processor.
+
+#### After Parsing
+
+Once the processor is applied, the log structure changes. The captured groups from the Grok pattern are added as keys in the `attributes` object.
+
+```json
+{
+  "body": "127.0.0.1 - - [27/Dec/2025:10:00:00 +0000] \"GET /api/v1/users HTTP/1.1\" 200 1234",
+  "attributes": {
+    "client_ip": "127.0.0.1",
+    "ident": "-",
+    "auth": "-",
+    "timestamp": "27/Dec/2025:10:00:00 +0000",
+    "method": "GET",
+    "request": "/api/v1/users",
+    "http_version": "1.1",
+    "response_code": "200",
+    "bytes": "1234"
+  }
+}
+```
+
+#### Key Observations
+
+- The original `body` remains unchanged.
+- New fields like `client_ip`, `method`, and `response_code` are now available in `attributes`, making them queryable in SigNoz.
+
+## Simulate and Validate
+
+Before deploying, use the **Simulate** feature to test your parser:
+
+1. Click the **"eye" icon** in the actions column for the pipeline to open the Pipeline Preview Dialog.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-step4.webp"
+  alt="Pipeline with the parser"
+  caption="Pipeline with the parser"
+/>
+
+2. Press the **"Simulate Processing"** button to see the output.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-step5.webp"
+  alt="Pipeline Preview with Sample Logs"
+  caption="Pipeline Preview with Sample Logs"
+/>
+
+3. Click the expand button next to processed log line to view the log details.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-step6.webp"
+  alt="Pipeline Preview with Processed Logs"
+  caption="Pipeline Preview with Processed Logs"
+/>
+
+4. Verify that the extracted attributes (`client_ip`, `method`, `response_code`) appear correctly.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-step7.webp"
+  alt="Logs after Grok Parser"
+  caption="Logs after Grok Parser with extracted attributes"
+/>
+
+## Deploy the Pipeline
+
+After verifying the simulated logs in Pipeline Preview Dialog, your pipeline is ready.
+
+1. Press the **Save Configuration** button at the bottom of the pipelines list. This will store the latest state of your pipelines and deploy them for pre-processing.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-step8.webp"
+  alt="Save Configuration Button"
+  caption="Save Configuration Button"
+/>
+
+2. You can track the deployment status using the **Change History** tab at the top of pipelines.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/grok-parsing-step9.webp"
+  alt="Pipelines Change History"
+  caption="Pipelines Change History"
+/>
+
+## Final Output
+
+Once deployed, your incoming logs will be transformed automatically.
+
+```json
+{
+  "body": "127.0.0.1 - - [27/Dec/2025:10:00:00 +0000] \"GET /api/v1/users HTTP/1.1\" 200 1234",
+  "attributes": {
+    "client_ip": "127.0.0.1",
+    "ident": "-",
+    "auth": "-",
+    "timestamp": "27/Dec/2025:10:00:00 +0000",
+    "method": "GET",
+    "request": "/api/v1/users",
+    "http_version": "1.1",
+    "response_code": "200",
+    "bytes": "1234"
+  }
+}
+```
+
+## Related Guides
+
+- [Parsing JSON Logs with JSON Parser](https://signoz.io/docs/logs-pipelines/guides/json/)
+- [Parsing Unstructured Logs with Regex Parser](https://signoz.io/docs/logs-pipelines/guides/regex-parser/)
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Parser not matching any logs
+
+- Use the **Simulate** feature in the pipeline editor to test with real log entries.
+- Check that `Parse From` points to the correct field (`body` vs `attributes.message`).
+- Test patterns with <a href="https://grokdebugger.com/" target="_blank" rel="noopener noreferrer nofollow">
+  Grok Debugger
+  </a>.
+
+### Extracted attributes not appearing
+
+- Ensure the pipeline is **deployed** after saving.
+- Check pipeline order—parsers should run before processors that modify the same fields.
+- Use unique attribute names to avoid conflicts.
+
+### Missing patterns
+
+- SigNoz supports a wide range of default patterns (similar to Logstash).
+- If a pattern is missing, try defining the specific regex part or see if a composite pattern exists.
+- You can refer to <a href="https://github.com/vjeantet/grok/blob/master/patterns.go" target="_blank" rel="noopener noreferrer nofollow">
+  common Grok patterns
+  </a> for a list of available definitions.
+
+</details>
+
+## Get Help
+
+<GetHelp />

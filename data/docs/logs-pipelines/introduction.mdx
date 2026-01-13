@@ -1,71 +1,62 @@
 ---
-date: 2024-06-06
+date: 2026-01-08
 id: introduction
-
-title: Unleash the Potential of Your Logs with Logs Pipelines
+description: Learn how to use Logs Pipelines to transform logs to suit your querying and aggregation needs before they get stored in the database.
+title: Logs Pipelines Overview
+doc_type: explanation
 ---
 
-
-With Logs Pipelines, you can transform logs to suit your querying
-and aggregation needs before they get stored in the database.
-
+Logs Pipelines transform your raw logs into structured, queryable data before storage. Extract fields, parse JSON, normalize attributes, and enrich your logs from the SigNoz UI without redeploying your applications.
 
 <YouTube id="OneENGNmLd0" mute={false} />
 
+## Why Use Logs Pipelines?
 
-Once you start sending logs to SigNoz, you can start searching their text
-and create basic reports based on standard fields. For example, you can find logs
-with text containing a particular user's id or plot the count of error logs by service name.  
-However, the text in your logs will typically contain a lot of other valuable information,
-and it can be inefficient or outright impossible to query and aggregate on
-that information.
+Raw logs contain valuable information, but it's often buried in unstructured text. Without parsing, you can only search the full log body, making filtering and aggregation difficult or impossible.
 
-Logs pipelines enable you to unleash the full potential of your logs by
-pre-processing them to suit your needs before they get stored. This unlocks
-valuable logs based queries and dashboards that wouldn't be possible otherwise.  
-You can also use logs preprocessing to achieve other goals like cleaning sensitive
-information in your logs or normalizing names of fields across services.
+With Logs Pipelines, you can extract fields like user agent, status code, or IP address into structured attributes. These attributes become queryable columns you can filter, group by, and aggregate.
 
-<figure data-zoomable align="center">
-  <img
-    alt="Raw Nginx Log"
-    src="/img/logs/pipelines/raw-nginx-log.webp "
-  />
-  <figcaption>
-    <i>
-      A raw Nginx log
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/parsed-nginx-log.webp"
+  alt="Nginx Log with/without parsing"
+  caption="Nginx Log with/without parsing"
+/>
 
+Once fields are extracted, you can build dashboards and reports like tracking requests by user agent or analyzing error rates by endpoint.
 
-<figure data-zoomable align="center">
-  <img
-    alt="Parsed Nginx Log"
-    src="/img/logs/pipelines/parsed-nginx-log.webp "
-  />
-  <figcaption>
-    <i>
-      A parsed Nginx log
-    </i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/logs/pipelines/nginx-requests-by-user-agent.webp"
+  alt="Nginx Requests Count by User Agent"
+  caption="Aggregation by User Agent, enabled by extracting fields from raw logs"
+/>
 
+---
 
-<figure data-zoomable align="center">
-  <img
-    alt="Nginx Requests Count by User Agent"
-    src="/img/logs/pipelines/nginx-requests-by-user-agent.webp"
-  />
-  <figcaption>
-    <i>
-      A Report for Requests by User Agent, made possible by a pipeline that extracts User Agent from Nginx text logs
-    </i>
-  </figcaption>
-</figure>
+## Getting Started
 
+- [Concepts](https://signoz.io/docs/logs-pipelines/concepts) — Understand pipelines and processors
+- [Logs Parsing](https://signoz.io/docs/logs-pipelines/parsing) — Learn to create pipelines and choose the right parser
 
+---
 
-While you can achieve these goals by changing your application code or by changing config
-for your otel collectors, logs pipelines allow you to do it in SigNoz UI without having to ship changes
-or redeploy your applications and collectors.
+## Parsing Guides
+
+- [JSON Parser](https://signoz.io/docs/logs-pipelines/guides/json) — Parse structured JSON log bodies
+- [Regex Parser](https://signoz.io/docs/logs-pipelines/guides/regex-parser) — Extract fields using regular expressions
+- [Grok Parser](https://signoz.io/docs/logs-pipelines/guides/grok-parser) — Use pre-defined patterns for common log formats
+- [Nested JSON](https://signoz.io/docs/logs-pipelines/guides/nested-json) — Flatten deeply nested JSON structures
+
+---
+
+## Log Enrichment
+
+- [Timestamp Parsing](https://signoz.io/docs/logs-pipelines/guides/log-pipelines-timestamp-parsing) — Extract timestamps from log messages
+- [Severity Parsing](https://signoz.io/docs/logs-pipelines/guides/severity-parsing) — Map log levels to OpenTelemetry severity
+- [Trace Correlation](https://signoz.io/docs/logs-pipelines/guides/trace) — Link logs to traces for end-to-end debugging
+- [Resource Attributes](https://signoz.io/docs/logs-pipelines/guides/resource) — Set service names from container metadata
+
+---
+
+## Reference
+
+- [All Processors](https://signoz.io/docs/logs-pipelines/processors) — Complete list of available log processors

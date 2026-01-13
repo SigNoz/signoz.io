@@ -1,0 +1,409 @@
+---
+date: 2026-01-03
+id: jboss
+
+title: JBoss / WildFly OpenTelemetry Instrumentation
+description: Send traces from JBoss EAP and WildFly applications to SigNoz using the OpenTelemetry Java agent.
+doc_type: howto
+---
+
+This guide walks you through instrumenting your JBoss EAP or WildFly application server with OpenTelemetry and sending traces to SigNoz. JBoss and WildFly use `standalone.conf` (Linux/Mac) or `standalone.conf.bat` (Windows) to configure JVM options, making it straightforward to attach the OpenTelemetry Java agent.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Java 8 or higher
+- JBoss EAP or WildFly installed and configured
+- A SigNoz Cloud account or self-hosted SigNoz instance
+
+## Send traces to SigNoz
+
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying JBoss/WildFly directly on a server or VM without containerization.
+</KeyPointCallout>
+
+### Step 1. Download the OpenTelemetry Java agent
+
+```bash
+wget -P /opt/jboss/lib/ https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+### Step 2. Edit standalone.conf
+
+Open your JBoss/WildFly configuration file:
+- JBoss EAP: `/opt/jboss-eap-7.x/bin/standalone.conf`
+- WildFly: `/opt/wildfly/bin/standalone.conf`
+
+Add the following lines:
+
+```bash
+JAVA_OPTS="$JAVA_OPTS -javaagent:/opt/jboss/lib/opentelemetry-javaagent.jar"
+JAVA_OPTS="$JAVA_OPTS -Dotel.service.name=<service-name>"
+JAVA_OPTS="$JAVA_OPTS -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443"
+JAVA_OPTS="$JAVA_OPTS -Dotel.exporter.otlp.headers=signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `jboss-app`).
+
+### Step 3. Restart JBoss/WildFly
+
+```bash
+# For JBoss EAP
+/opt/jboss-eap-7.x/bin/standalone.sh
+
+# For WildFly
+/opt/wildfly/bin/standalone.sh
+```
+
+<KeyPointCallout title="Running in background mode" defaultCollapsed={true}>
+To run JBoss/WildFly in the background with logs:
+```bash
+/opt/jboss-eap-7.x/bin/standalone.sh > /opt/jboss/nohup.out 2>&1 &
+```
+
+Or use `nohup`:
+```bash
+nohup /opt/jboss-eap-7.x/bin/standalone.sh &
+```
+
+Check the logs:
+```bash
+tail -f /opt/jboss/nohup.out
+```
+</KeyPointCallout>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+<Tabs entityName="k8s-method">
+<TabItem value="direct" label="Direct" default>
+
+<KeyPointCallout title="Managing multiple services?" defaultCollapsed={true}>
+For centralized instrumentation management or auto-injection without code changes, see the OTel Operator tab.
+</KeyPointCallout>
+
+### Step 1. Create a Dockerfile with the agent
+
+```dockerfile:Dockerfile
+FROM jboss/wildfly:latest
+WORKDIR /opt/jboss
+
+# Download the OpenTelemetry Java agent
+RUN curl -L https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -o /opt/jboss/opentelemetry-javaagent.jar
+
+# Copy your application
+COPY target/<my-app>.war /opt/jboss/wildfly/standalone/deployments/
+
+# Set JAVA_OPTS for OpenTelemetry
+ENV JAVA_OPTS="-javaagent:/opt/jboss/opentelemetry-javaagent.jar"
+
+EXPOSE 8080
+
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0"]
+```
+
+Replace `<my-app>.war` with your application WAR file.
+
+### Step 2. Deploy to Kubernetes
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.name=<service-name>'
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `jboss-app`).
+
+</TabItem>
+<TabItem value="otel-operator" label="OTel Operator">
+
+The [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) auto-injects the Java agent into your pods without modifying your container image.
+
+### Step 1. Set up the OpenTelemetry Operator
+
+Install the Operator and Collector following the [K8s OTel Operator installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/).
+
+### Step 2. Create the Instrumentation resource
+
+Create `instrumentation.yaml` to configure Java auto-instrumentation:
+
+```yaml:instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: java-instrumentation
+spec:
+  exporter:
+    endpoint: http://otel-collector-collector:4318
+  propagators:
+    - tracecontext
+    - baggage
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+```
+
+Deploy this resource to your cluster:
+
+```bash
+kubectl apply -f instrumentation.yaml
+```
+
+### Step 3. Add annotations to your deployment
+
+Add these annotations to your pod template's `metadata.annotations`:
+
+```yaml:deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jboss-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jboss-app
+  template:
+    metadata:
+      labels:
+        app: jboss-app
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+        resource.opentelemetry.io/service.name: "<service-name>"
+    spec:
+      containers:
+      - name: jboss
+        image: jboss/wildfly:latest
+        ports:
+        - containerPort: 8080
+```
+
+Apply the deployment:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+### Step 1. Download the OpenTelemetry Java agent
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar" -OutFile "C:\jboss\lib\opentelemetry-javaagent.jar"
+```
+
+### Step 2. Edit standalone.conf.bat
+
+Open your JBoss/WildFly configuration file:
+- JBoss EAP: `C:\jboss-eap-7.x\bin\standalone.conf.bat`
+- WildFly: `C:\wildfly\bin\standalone.conf.bat`
+
+Add the following lines:
+
+```batch
+set "JAVA_OPTS=%JAVA_OPTS% -javaagent:C:\jboss\lib\opentelemetry-javaagent.jar"
+set "JAVA_OPTS=%JAVA_OPTS% -Dotel.service.name=<service-name>"
+set "JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443"
+set "JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.headers=signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Replace `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+
+### Step 3. Restart JBoss/WildFly
+
+```powershell
+# For JBoss EAP
+C:\jboss-eap-7.x\bin\standalone.bat
+
+# For WildFly
+C:\wildfly\bin\standalone.bat
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+### Step 1. Create a Dockerfile
+
+```dockerfile:Dockerfile
+FROM jboss/wildfly:latest
+
+# Download the OpenTelemetry Java agent
+RUN curl -L https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -o /opt/jboss/opentelemetry-javaagent.jar
+
+# Copy your application WAR file
+COPY target/<my-app>.war /opt/jboss/wildfly/standalone/deployments/
+
+# Set OpenTelemetry environment variables
+ENV JAVA_OPTS="-javaagent:/opt/jboss/opentelemetry-javaagent.jar"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
+EXPOSE 8080
+
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0"]
+```
+
+Replace `<my-app>.war`, `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+
+### Step 2. Build and run
+
+```bash
+docker build -t my-jboss-app .
+docker run -p 8080:8080 my-jboss-app
+```
+
+Or pass environment variables at runtime:
+
+```bash
+docker run -p 8080:8080 \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-jboss-app" \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
+  my-jboss-app
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+With JBoss/WildFly running, verify traces are being sent to SigNoz:
+
+1. Deploy an application to JBoss/WildFly and make a few requests to its endpoints.
+2. In SigNoz, open the **Services** tab and click **Refresh**. Your application should appear.
+3. Go to the **Traces** tab to see your application's traces.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Traces not showing up in SigNoz?
+
+**Verify standalone.conf changes:**
+
+Check that your `JAVA_OPTS` modifications are being loaded:
+```bash
+ps aux | grep java | grep javaagent
+```
+
+You should see the `-javaagent` flag in the process arguments.
+
+**Enable debug logging:**
+
+Add the following to `standalone.conf`:
+```bash
+JAVA_OPTS="$JAVA_OPTS -Dotel.javaagent.debug=true"
+```
+
+Then restart JBoss and check the logs for OpenTelemetry output.
+
+**Test connectivity:**
+```bash
+curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+### Agent not loading?
+
+Make sure the agent JAR path is correct and the file exists:
+```bash
+ls -la /opt/jboss/lib/opentelemetry-javaagent.jar
+```
+
+Verify the path in `standalone.conf` matches the actual location.
+
+### JBoss fails to start?
+
+Check for syntax errors in `standalone.conf`. Each `JAVA_OPTS` line should be on its own line without trailing spaces or special characters.
+
+Review the JBoss server log:
+```bash
+tail -f /opt/jboss-eap-7.x/standalone/log/server.log
+```
+
+### Domain mode configuration
+
+If running JBoss in domain mode, configure `JAVA_OPTS` in `domain.conf` instead of `standalone.conf`, or set JVM options in the domain controller's host configuration.
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Configuring the agent (Optional)
+
+</ToggleHeading>
+
+### What can you configure?
+
+The Java agent auto-instruments most libraries out of the box. Configuration lets you fine-tune what gets captured and how traces are exported.
+
+### Why configure?
+
+- **Reduce noise** — Disable instrumentation for internal health checks or chatty libraries
+- **Control costs** — Sample a percentage of traces instead of capturing everything
+- **Add context** — Tag traces with environment, version, or team info for easier filtering
+
+### Common options
+
+Add these to `standalone.conf`:
+
+**Disable specific instrumentations:**
+```bash
+JAVA_OPTS="$JAVA_OPTS -Dotel.instrumentation.jdbc.enabled=false"
+```
+
+**Sample traces:**
+```bash
+JAVA_OPTS="$JAVA_OPTS -Dotel.traces.sampler=parentbased_traceidratio"
+JAVA_OPTS="$JAVA_OPTS -Dotel.traces.sampler.arg=0.1"  # Sample 10%
+```
+
+**Add resource attributes:**
+```bash
+JAVA_OPTS="$JAVA_OPTS -Dotel.resource.attributes=service.name=my-app,deployment.environment=production"
+```
+
+See the <a href="https://opentelemetry.io/docs/languages/java/automatic/agent-config/" target="_blank" rel="noopener noreferrer nofollow">full configuration reference</a> for all available options.
+
+</details>
+
+## Next steps
+
+- [Add manual instrumentation](https://signoz.io/docs/instrumentation/java/manual-instrumentation) for custom spans and business context
+- [Collect Java application logs](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java) with OpenTelemetry
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your JBoss/WildFly application
+
+**Related resources**:
+- <a href="https://github.com/SigNoz/distributed-tracing-java-sample" target="_blank" rel="noopener noreferrer nofollow">Distributed tracing Java sample</a>
+- <a href="https://docs.wildfly.org/" target="_blank" rel="noopener noreferrer nofollow">WildFly Documentation</a>
+- <a href="https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/" target="_blank" rel="noopener noreferrer nofollow">JBoss EAP Documentation</a>
