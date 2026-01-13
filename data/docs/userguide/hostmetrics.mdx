@@ -1,7 +1,7 @@
 ---
 date: 2026-01-10
 title: Collect Host Metrics with OpenTelemetry
-id: hostmetrics
+id: opentelemetry-hostmetrics
 description: Collect host metrics like CPU, memory, disk, and network from your servers using the OpenTelemetry hostmetrics receiver and send them to SigNoz.
 doc_type: howto
 hide_table_of_contents: true
@@ -95,6 +95,11 @@ Replace the following:
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
+<Admonition type="info">
+  The `resourcedetection` processor automatically adds resource attributes like hostname and OS
+  information to your metrics.
+</Admonition>
+
 ## Step 2: Run the Collector
 
 After saving the configuration, restart the collector service to apply changes.
@@ -171,6 +176,12 @@ Replace the following:
 
 - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+<Admonition type="note">
+  The `mute_process_*_error` settings suppress common errors when the collector can't access certain
+  process information due to permissions. This is normal in containerized or restricted
+  environments.
+</Admonition>
 
 ## Step 2: Run the Collector
 
@@ -314,8 +325,14 @@ Once configured, verify that metrics are flowing to SigNoz.
 
 <Figure
   src="/img/docs/infrastructure-monitoring/host-setup-output.webp"
-  alt="Host List in SigNoz Infrastructure Monitoring"
-  caption="Host List in SigNoz Infrastructure Monitoring"
+  alt="List of Hosts in SigNoz Infrastructure Tab"
+  caption="List of Hosts in SigNoz Infrastructure Tab"
+/>
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-setup-output-detailed.webp"
+  alt="Detailed View of a Host"
+  caption="Detailed View of a Host"
 />
 
 <details>
