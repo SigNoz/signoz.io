@@ -13,18 +13,18 @@ Host metrics are fundamental performance indicators collected directly from a sy
 
 The OpenTelemetry hostmetrics receiver collects metrics on CPU, memory, disk, network, paging, and system performance.
 
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+  header as shown in [Cloud →
+  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
 ## Prerequisites
 
 - An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
 - OpenTelemetry Collector installed on the host.
 
 Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) to install OpenTelemetry Collector.
-
-<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
-  header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
-</KeyPointCallout>
 
 <Tabs entityName="platform">
 
@@ -137,12 +137,12 @@ receivers:
       filesystem: {}
       memory: {}
       network: {}
-      nfs: {} # Linux only
       paging: {}
       process:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       processes: {}
       system: {}
 
