@@ -15,10 +15,10 @@ export const RegionDropdown = () => {
         cloudRegions.add(cluster.cloud_region)
       })
 
-      // // TODO@M: Remove this
-      // cloudRegions.add('us-central2')
-      // cloudRegions.add('eu-central2')
-      // cloudRegions.add('ap-south2')
+      // TODO@M: Remove this
+      cloudRegions.add('us-central2')
+      cloudRegions.add('eu-central2')
+      cloudRegions.add('ap-south2')
     })
 
     return Array.from(cloudRegions)
