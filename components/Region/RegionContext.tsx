@@ -40,7 +40,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     const fetchRegions = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/regions?=`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/regions`)
         const data: RegionResponse = await response.json()
         if (data.status === 'success') {
           setRegions(data.data)
