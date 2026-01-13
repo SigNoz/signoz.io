@@ -58,8 +58,8 @@ export const generateRssItem = (config, post) => {
     ${config.email ? `<author>${config.email} (${config.author ?? ''})</author>` : ''}
     ${link?.includes('/docs/') ? 
       (post.docTags ? post.docTags.map((t) => `<category>${t}</category>`).join('') : '') 
-      :Array.isArray(post.tags)
-      ? post.tags.map((t) => `<category>${escape(t)}</category>`).join('')
+      : Array.isArray(post.tags)
+      ? post.tags.map((t) => typeof t === 'object' ? `<category>${escape(t?.value ?? '')}</category>` : `<category>${escape(t)}</category>`).join('')
       : ''
     }
     }

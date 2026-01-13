@@ -4,20 +4,19 @@ import {
   allBlogs,
   allComparisons,
   allGuides,
-  allOpentelemetries,
   type Blog,
   type Comparison,
   type Guide,
-  type Opentelemetry,
 } from 'contentlayer/generated'
 import { coreContent, type CoreContent } from 'pliny/utils/contentlayer'
+import type { MDXContent } from '@/utils/strapi'
 import BlogPostCard from '../Shared/BlogPostCard'
 import SearchInput from '../Shared/Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
 import { Frown } from 'lucide-react'
 
-type HubDoc = CoreContent<Blog | Comparison | Guide | Opentelemetry>
+type HubDoc = CoreContent<Blog | Comparison | Guide | MDXContent>
 
 type HubChapterGroup = {
   key: string
@@ -51,21 +50,9 @@ type HubConfigPath = {
   articles?: HubConfigArticle[]
 }
 
-const docCollections = [
-  ...allBlogs,
-  ...allComparisons,
-  ...allGuides,
-  ...allOpentelemetries,
-] as Array<Blog | Comparison | Guide | Opentelemetry>
-
-const normalizedDocMap = new Map<string, HubDoc>()
-const docLanguageMap = new Map<string, string>()
-
-docCollections.forEach((doc) => {
-  const content = coreContent(doc) as HubDoc
-  const normalizedPath = normalizeRoute(`/${content.path}`)
-  normalizedDocMap.set(normalizedPath, content)
-})
+const docCollections = [...allBlogs, ...allComparisons, ...allGuides] as Array<
+  Blog | Comparison | Guide
+>
 
 function normalizeRoute(route: string) {
   if (!route) return '/'
@@ -77,120 +64,39 @@ function normalizeRoute(route: string) {
   return withLeadingSlash
 }
 
-function setDocLanguage(doc: HubDoc | null, language?: string) {
-  if (!doc || !language) return
-  docLanguageMap.set(doc.path, language)
+function normalizeLanguageKey(label: string) {
+  return label.trim().toLowerCase()
 }
 
-function getDocLanguage(doc: HubDoc): string | undefined {
-  return docLanguageMap.get(doc.path)
+function formatLanguageLabel(label: string) {
+  if (!label) return ''
+  return label
 }
 
-function findDocByUrl(url: string, language?: string): HubDoc | null {
-  const normalized = normalizeRoute(url)
-  const doc = normalizedDocMap.get(normalized) ?? null
-  if (doc) {
-    setDocLanguage(doc, language)
+function transformStrapiArticle(article: any): HubDoc {
+  let path = article.path || ''
+  if (path.startsWith('/')) {
+    path = path.slice(1)
   }
-  return doc
-}
-
-function flattenGroups(group: HubConfigGroup): HubChapterGroup[] {
-  const groups: HubChapterGroup[] = []
-
-  if (group.articles?.length) {
-    const docs = group.articles
-      .map((article) => findDocByUrl(article.url, article.language))
-      .filter(Boolean) as HubDoc[]
-    if (docs.length) {
-      groups.push({
-        key: group.key,
-        label: group.label,
-        docs,
-      })
-    }
+  if (!path.startsWith('opentelemetry/')) {
+    path = `opentelemetry/${path}`
   }
-
-  if (group.sections?.length) {
-    group.sections.forEach((section) => {
-      groups.push(...flattenGroups(section))
-    })
-  }
-
-  return groups
-}
-
-function buildHubContent() {
-  const docRegistry = new Map<string, HubDoc>()
-  const chapters: HubChapterContent[] = []
-
-  const paths = hubConfig.paths as HubConfigPath[]
-  const learnPath = paths.find((path) => path.key === 'learn')
-
-  const sortedChapters = (learnPath?.chapters ?? [])
-    .filter((chapter) => chapter.key !== 'comparisons')
-    .sort((a, b) => {
-      const aIdx = LEARN_CHAPTER_ORDER.indexOf(a.key)
-      const bIdx = LEARN_CHAPTER_ORDER.indexOf(b.key)
-      return (
-        (aIdx === -1 ? Number.MAX_SAFE_INTEGER : aIdx) -
-        (bIdx === -1 ? Number.MAX_SAFE_INTEGER : bIdx)
-      )
-    })
-
-  sortedChapters.forEach((chapter) => {
-    const groups = flattenGroups(chapter).filter((group) => group.docs.length)
-    if (!groups.length) return
-
-    groups.forEach((group) => {
-      group.docs.forEach((doc) => docRegistry.set(doc.path, doc))
-    })
-
-    chapters.push({
-      key: chapter.key,
-      label: chapter.label,
-      groups,
-    })
-  })
-
-  const quickStartPath = paths.find((path) => path.key === 'quick-start')
-  const quickStartDocs = (quickStartPath?.articles
-    ?.map((article) => findDocByUrl(article.url, article.language))
-    .filter(Boolean) ?? []) as HubDoc[]
-
-  quickStartDocs.forEach((doc) => docRegistry.set(doc.path, doc))
 
   return {
-    chapters,
-    quickStartDocs,
-    searchableDocs: Array.from(docRegistry.values()),
+    ...article,
+    path,
+    date: article.publishedAt,
+    readingTime: { text: article.readingTime?.text || '5 min read' },
+    authors:
+      article.authors?.map((author: any) => ({
+        name: author.name,
+        image_url: author.image_url || author.avatar,
+      })) || [],
+    title: article.title,
+    description: article.description,
+    summary: article.summary || article.description,
   }
 }
-
-const {
-  chapters: HUB_CHAPTERS,
-  quickStartDocs: QUICK_START_DOCS,
-  searchableDocs: HUB_DOCS,
-} = buildHubContent()
-
-type LanguageOption = {
-  key: string
-  label: string
-}
-
-const AVAILABLE_LANGUAGES: LanguageOption[] = (() => {
-  const map = new Map<string, string>()
-  Array.from(docLanguageMap.values()).forEach((lang) => {
-    const key = normalizeLanguageKey(lang)
-    if (!key) return
-    if (!map.has(key)) {
-      map.set(key, formatLanguageLabel(lang))
-    }
-  })
-  return Array.from(map.entries())
-    .sort((a, b) => a[1].localeCompare(b[1]))
-    .map(([key, label]) => ({ key, label }))
-})()
 
 interface OpenTelemetryPageHeaderProps {
   onSearch: (e) => void
@@ -214,11 +120,139 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
   )
 }
 
-export default function OpenTelemetry() {
+interface OpenTelemetryProps {
+  articles?: any[]
+}
+
+export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
   const [searchValue, setSearchValue] = React.useState('')
   const [activeLanguageKey, setActiveLanguageKey] = React.useState('ALL')
   const trimmedSearch = searchValue.trim()
   const hasSearchValue = trimmedSearch.length > 0
+
+  const { HUB_CHAPTERS, QUICK_START_DOCS, HUB_DOCS, AVAILABLE_LANGUAGES, getDocLanguage } =
+    React.useMemo(() => {
+      const docRegistry = new Map<string, HubDoc>()
+      const docLanguageMap = new Map<string, string>()
+      const normalizedDocMap = new Map<string, HubDoc>()
+
+      // Merge collections
+      const allDocs: (Blog | Comparison | Guide | HubDoc)[] = [...docCollections]
+
+      // Add Strapi opentelemetry articles
+      articles.forEach((article) => {
+        allDocs.push(transformStrapiArticle(article))
+      })
+
+      allDocs.forEach((doc) => {
+        const content = ('path' in doc ? doc : coreContent(doc)) as HubDoc
+        const normalizedPath = normalizeRoute(`/${content.path}`)
+        normalizedDocMap.set(normalizedPath, content)
+      })
+
+      function setDocLanguage(doc: HubDoc | null, language?: string) {
+        if (!doc || !language) return
+        docLanguageMap.set(doc.path, language)
+      }
+
+      function findDocByUrl(url: string, language?: string): HubDoc | null {
+        const normalized = normalizeRoute(url)
+        const doc = normalizedDocMap.get(normalized) ?? null
+        if (doc) {
+          setDocLanguage(doc, language)
+        }
+        return doc
+      }
+
+      function flattenGroups(group: HubConfigGroup): HubChapterGroup[] {
+        const groups: HubChapterGroup[] = []
+
+        if (group.articles?.length) {
+          const docs = group.articles
+            .map((article) => findDocByUrl(article.url, article.language))
+            .filter(Boolean) as HubDoc[]
+          if (docs.length) {
+            groups.push({
+              key: group.key,
+              label: group.label,
+              docs,
+            })
+          }
+        }
+
+        if (group.sections?.length) {
+          group.sections.forEach((section) => {
+            groups.push(...flattenGroups(section))
+          })
+        }
+
+        return groups
+      }
+
+      const chapters: HubChapterContent[] = []
+      const paths = hubConfig.paths as HubConfigPath[]
+      const learnPath = paths.find((path) => path.key === 'learn')
+
+      const sortedChapters = (learnPath?.chapters ?? [])
+        .filter((chapter) => chapter.key !== 'comparisons')
+        .sort((a, b) => {
+          const aIdx = LEARN_CHAPTER_ORDER.indexOf(a.key)
+          const bIdx = LEARN_CHAPTER_ORDER.indexOf(b.key)
+          return (
+            (aIdx === -1 ? Number.MAX_SAFE_INTEGER : aIdx) -
+            (bIdx === -1 ? Number.MAX_SAFE_INTEGER : bIdx)
+          )
+        })
+
+      sortedChapters.forEach((chapter) => {
+        const groups = flattenGroups(chapter).filter((group) => group.docs.length)
+        if (!groups.length) return
+
+        groups.forEach((group) => {
+          group.docs.forEach((doc) => docRegistry.set(doc.path, doc))
+        })
+
+        chapters.push({
+          key: chapter.key,
+          label: chapter.label,
+          groups,
+        })
+      })
+
+      const quickStartPath = paths.find((path) => path.key === 'quick-start')
+      const quickStartDocs = (quickStartPath?.articles
+        ?.map((article) => findDocByUrl(article.url, article.language))
+        .filter(Boolean) ?? []) as HubDoc[]
+
+      quickStartDocs.forEach((doc) => docRegistry.set(doc.path, doc))
+
+      articles.forEach((article) => {
+        const transformed = transformStrapiArticle(article)
+        if (!docRegistry.has(transformed.path)) {
+          docRegistry.set(transformed.path, transformed)
+        }
+      })
+
+      const langMap = new Map<string, string>()
+      Array.from(docLanguageMap.values()).forEach((lang) => {
+        const key = normalizeLanguageKey(lang)
+        if (!key) return
+        if (!langMap.has(key)) {
+          langMap.set(key, formatLanguageLabel(lang))
+        }
+      })
+      const languages = Array.from(langMap.entries())
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([key, label]) => ({ key, label }))
+
+      return {
+        HUB_CHAPTERS: chapters,
+        QUICK_START_DOCS: quickStartDocs,
+        HUB_DOCS: Array.from(docRegistry.values()),
+        AVAILABLE_LANGUAGES: languages,
+        getDocLanguage: (doc: HubDoc) => docLanguageMap.get(doc.path),
+      }
+    }, [articles])
 
   const handleSearch = (e) => {
     setSearchValue(e.target.value)
@@ -227,7 +261,7 @@ export default function OpenTelemetry() {
   const searchResults = React.useMemo<HubDoc[]>(() => {
     if (!hasSearchValue) return []
     return filterData(HUB_DOCS, trimmedSearch) as HubDoc[]
-  }, [hasSearchValue, trimmedSearch])
+  }, [hasSearchValue, trimmedSearch, HUB_DOCS])
 
   const matchesLanguage = React.useCallback(
     (doc: HubDoc) => {
@@ -236,7 +270,7 @@ export default function OpenTelemetry() {
       if (!docLanguage) return false
       return normalizeLanguageKey(docLanguage) === activeLanguageKey
     },
-    [activeLanguageKey]
+    [activeLanguageKey, getDocLanguage]
   )
 
   const renderChapterGroups = (chapter: HubChapterContent) => {
@@ -343,15 +377,6 @@ export default function OpenTelemetry() {
       )}
     </div>
   )
-}
-
-function normalizeLanguageKey(label: string) {
-  return label.trim().toLowerCase()
-}
-
-function formatLanguageLabel(label: string) {
-  if (!label) return ''
-  return label
 }
 
 type LanguagePillProps = {
