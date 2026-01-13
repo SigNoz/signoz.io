@@ -190,7 +190,7 @@ export default function MetricsQuickStartOverview({
             href: '/docs/metrics-management/fly-metrics',
             icon: <SiFlydotio className="h-7 w-7 text-purple-500" />,
             clickName: 'Fly.io Metrics Link',
-           },
+          },
           {
             name: 'Envoy',
             href: '/docs/userguide/envoy-metrics',
@@ -520,6 +520,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/metrics-management/send-metrics/applications/golang',
             icon: <SiGo className="h-7 w-7 text-cyan-500" />,
             clickName: 'Golang Metrics Link',
+          },
+          {
+            name: 'Java',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java',
+            icon: <FaJava className="h-7 w-7 text-red-600" />,
+            clickName: 'Java Metrics Link',
           },
         ]}
         sectionName="Application Metrics"
