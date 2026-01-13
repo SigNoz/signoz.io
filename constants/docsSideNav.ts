@@ -1570,8 +1570,8 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                route: '/docs/metrics-management/send-metrics/applications/golang',
-                label: 'Golang',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet',
+                label: '.NET',
               },
             ],
           },

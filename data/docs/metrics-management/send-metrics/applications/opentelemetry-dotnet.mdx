@@ -1,0 +1,575 @@
+---
+date: 2026-01-13
+id: opentelemetry-dotnet
+title: Send Metrics from .NET Application
+description: Learn how to instrument your .NET application with OpenTelemetry to send metrics to SigNoz
+
+doc_type: howto
+---
+
+This guide shows you how to instrument your .NET application with OpenTelemetry to send metrics to SigNoz. You will learn how to collect runtime metrics, auto-instrument libraries, and create custom metrics.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+    Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- .NET SDK 8.0 or later
+- A SigNoz Cloud account or self-hosted SigNoz instance
+
+## Send metrics to SigNoz
+
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+    A VM is a virtual computer that runs on physical hardware. This includes:
+    - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+    - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+    - **Bare metal servers**: Physical servers running Linux/Unix directly
+
+    Use this section if you're deploying your .NET application directly on a server or VM without containerization.
+</KeyPointCallout>
+
+### Step 1. Set environment variables
+Set the following environment variables to configure the OpenTelemetry exporter:
+```bash
+export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+```
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+### Step 1. Set environment variables
+Add these environment variables to your deployment manifest:
+```yaml
+env:
+- name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_METRICS_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+```
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+### Step 1. Set environment variables (PowerShell)
+```powershell
+$env:OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_METRICS_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+```
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service.
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+### Step 1. Set environment variables in Dockerfile
+Add environment variables to your Dockerfile:
+```dockerfile:Dockerfile
+# ... build stages ...
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service-name>"
+
+ENTRYPOINT ["dotnet", "MyApp.dll"]
+```
+
+Or pass them at runtime using `docker run`:
+```bash
+docker run -e OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service-name>" \
+    your-image:latest
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
+</TabItem>
+</Tabs>
+
+### Step 2. Install OpenTelemetry packages
+
+Run the following commands in your project directory to install the necessary packages for metrics and OTLP export:
+
+```bash
+dotnet add package OpenTelemetry.Extensions.Hosting
+dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
+```
+
+### Step 3. Initialize the Meter Provider
+
+Configure the OpenTelemetry Meter Provider in your application. This provider is responsible for creating meters and exporting metrics. It automatically uses the environment variables configured in Step 1.
+
+<Tabs entityName="app-type">
+<TabItem value="aspnet" label="ASP.NET Core" default>
+
+For ASP.NET Core applications, configure OpenTelemetry in `Program.cs`:
+
+```csharp:Program.cs
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure OpenTelemetry Metrics
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "my-dotnet-service"))
+    .WithMetrics(metrics => metrics
+        .AddMeter("MyApp.Metrics")  // Register your custom meter
+        .AddAspNetCoreInstrumentation()  // Auto-instrument ASP.NET Core
+        .AddHttpClientInstrumentation()  // Auto-instrument HttpClient
+        .AddOtlpExporter());  // Uses OTEL_EXPORTER_OTLP_* env vars
+
+var app = builder.Build();
+
+app.MapGet("/", () => "Hello World!");
+
+app.Run();
+```
+
+</TabItem>
+<TabItem value="console" label="Console Application">
+
+For console applications, create the MeterProvider directly:
+
+```csharp:Program.cs
+using System.Diagnostics.Metrics;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+
+// Create the MeterProvider
+using var meterProvider = Sdk.CreateMeterProviderBuilder()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "my-dotnet-service")
+        .AddAttributes(new Dictionary<string, object>
+        {
+            ["deployment.environment"] = "production"
+        }))
+    .AddMeter("MyApp.Metrics")  // Register your custom meter
+    .AddOtlpExporter()  // Uses OTEL_EXPORTER_OTLP_* env vars
+    .Build();
+
+// Create a meter and instruments
+var meter = new Meter("MyApp.Metrics", "1.0.0");
+var requestCounter = meter.CreateCounter<long>("app.requests.total", description: "Total number of requests");
+
+// Use the metric
+requestCounter.Add(1, new KeyValuePair<string, object?>("endpoint", "/api/users"));
+
+Console.WriteLine("Metrics are being exported. Press any key to exit...");
+Console.ReadKey();
+```
+
+</TabItem>
+</Tabs>
+
+### Step 4. Instrument your application
+
+Here's a complete example that tracks HTTP requests with counter and histogram metrics:
+
+```csharp:Program.cs
+using System.Diagnostics.Metrics;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure OpenTelemetry Metrics
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "my-dotnet-service"))
+    .WithMetrics(metrics => metrics
+        .AddMeter("MyApp.Metrics")
+        .AddAspNetCoreInstrumentation()
+        .AddOtlpExporter());
+
+var app = builder.Build();
+
+// Create a meter and metrics
+var meter = new Meter("MyApp.Metrics", "1.0.0");
+var requestCounter = meter.CreateCounter<long>("http.requests.total", description: "Total HTTP request count");
+var requestDuration = meter.CreateHistogram<double>("http.request.duration_ms", unit: "ms", description: "HTTP request latency");
+
+app.MapGet("/hello", () =>
+{
+    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+    // Simulate work
+    Thread.Sleep(50);
+
+    stopwatch.Stop();
+
+    // Record metrics
+    requestCounter.Add(1,
+        new KeyValuePair<string, object?>("method", "GET"),
+        new KeyValuePair<string, object?>("route", "/hello"),
+        new KeyValuePair<string, object?>("status_code", 200));
+
+    requestDuration.Record(stopwatch.ElapsedMilliseconds,
+        new KeyValuePair<string, object?>("method", "GET"),
+        new KeyValuePair<string, object?>("route", "/hello"));
+
+    return "Hello, World!";
+});
+
+app.Run();
+```
+
+## Library instrumentation
+
+You can use OpenTelemetry's auto-instrumentation packages for popular .NET libraries to automatically collect metrics, or create custom metrics manually.
+
+<Tabs>
+<TabItem value="runtime" label="Runtime Metrics" default>
+
+The `OpenTelemetry.Instrumentation.Runtime` package provides auto-instrumentation for .NET runtime metrics such as GC collections, heap size, thread pool, and JIT compilation stats.
+
+### Install
+```bash
+dotnet add package OpenTelemetry.Instrumentation.Runtime
+```
+
+### Usage
+
+```csharp:Program.cs
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "my-dotnet-service"))
+    .WithMetrics(metrics => metrics
+        .AddRuntimeInstrumentation()  // Auto .NET runtime metrics
+        .AddOtlpExporter());
+
+var app = builder.Build();
+
+app.MapGet("/", () => "Hello World!");
+
+app.Run();
+```
+
+<details>
+<ToggleHeading>
+### Exported Metrics
+</ToggleHeading>
+
+The `OpenTelemetry.Instrumentation.Runtime` package automatically exports the following .NET runtime metrics:
+
+**Garbage Collection Metrics:**
+- `process.runtime.dotnet.gc.collections.count` (Counter) - Number of garbage collections
+- `process.runtime.dotnet.gc.heap.size` (UpDownCounter) - Heap size in bytes
+- `process.runtime.dotnet.gc.heap.fragmentation.size` (UpDownCounter) - Heap fragmentation size
+- `process.runtime.dotnet.gc.objects.size` (UpDownCounter) - Total object size
+- `process.runtime.dotnet.gc.allocations.size` (Counter) - Total bytes allocated
+
+**JIT Compilation Metrics:**
+- `process.runtime.dotnet.jit.il_compiled.size` (Counter) - IL bytes compiled by JIT
+- `process.runtime.dotnet.jit.methods_compiled.count` (Counter) - Number of methods JIT compiled
+- `process.runtime.dotnet.jit.compilation_time` (Counter) - Time spent in JIT compilation
+
+**Threading Metrics:**
+- `process.runtime.dotnet.threadpool.threads.count` (UpDownCounter) - Number of thread pool threads
+- `process.runtime.dotnet.threadpool.completed_items.count` (Counter) - Work items completed
+- `process.runtime.dotnet.threadpool.queue.length` (UpDownCounter) - Thread pool queue length
+- `process.runtime.dotnet.monitor.lock_contention.count` (Counter) - Monitor lock contentions
+- `process.runtime.dotnet.timer.count` (UpDownCounter) - Active timer count
+
+**Assembly and Exception Metrics:**
+- `process.runtime.dotnet.assemblies.count` (UpDownCounter) - Number of loaded assemblies
+- `process.runtime.dotnet.exceptions.count` (Counter) - Number of exceptions thrown
+
+<Admonition type="info">
+Metric names follow the OpenTelemetry semantic conventions for .NET runtime metrics. For the complete specification, see the [Runtime metrics semantic conventions](https://opentelemetry.io/docs/specs/semconv/runtime/).
+</Admonition>
+
+</details>
+
+</TabItem>
+
+<TabItem value="aspnetcore" label="ASP.NET Core Metrics">
+
+The `OpenTelemetry.Instrumentation.AspNetCore` package provides auto-instrumentation for ASP.NET Core HTTP server metrics.
+
+### Install
+```bash
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore
+```
+
+### Usage
+
+```csharp:Program.cs
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "my-dotnet-service"))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()  // Auto HTTP server metrics
+        .AddOtlpExporter());
+
+var app = builder.Build();
+
+app.MapGet("/", () => "Hello World!");
+app.MapGet("/api/users", () => new[] { "Alice", "Bob" });
+
+app.Run();
+```
+
+<details>
+<ToggleHeading>
+### Exported Metrics
+</ToggleHeading>
+
+The `OpenTelemetry.Instrumentation.AspNetCore` package automatically exports the following HTTP server metrics:
+
+- `http.server.request.duration` (Histogram) - Duration of HTTP server requests
+- `http.server.active_requests` (UpDownCounter) - Number of active HTTP server requests
+
+Metrics are tagged with attributes such as:
+- `http.request.method` - HTTP request method (GET, POST, etc.)
+- `http.response.status_code` - HTTP response status code
+- `http.route` - The matched route pattern
+- `url.scheme` - The URI scheme (http, https)
+- `server.address` - Server address
+- `server.port` - Server port
+
+<Admonition type="info">
+Metric names and attributes follow the OpenTelemetry semantic conventions. For the complete list, see the [HTTP semantic conventions](https://opentelemetry.io/docs/specs/semconv/http/http-metrics/).
+</Admonition>
+
+</details>
+
+</TabItem>
+
+<TabItem value="custom" label="Custom Instrumentation">
+
+Create custom metrics to track business logic with all metric types: Counter, UpDownCounter, Histogram, and ObservableGauge.
+
+### Metric Types
+
+- **Counter**: A value that only goes up (e.g., total requests, items sold)
+- **UpDownCounter**: A value that can go up or down (e.g., queue size, active connections)
+- **Histogram**: A distribution of values (e.g., request duration, response size)
+- **ObservableGauge**: A current value read on-demand via callback (e.g., CPU temperature, memory usage)
+
+### Usage
+
+```csharp:Program.cs
+using System.Diagnostics.Metrics;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "my-dotnet-service"))
+    .WithMetrics(metrics => metrics
+        .AddMeter("MyApp.Metrics")
+        .AddOtlpExporter());
+
+var app = builder.Build();
+
+// Create a meter
+var meter = new Meter("MyApp.Metrics", "1.0.0");
+
+// Counter - tracks values that only increase
+var requestCounter = meter.CreateCounter<long>(
+    "http.requests.total",
+    unit: "{requests}",
+    description: "Total number of HTTP requests");
+
+// UpDownCounter - tracks values that can increase or decrease
+var activeRequests = meter.CreateUpDownCounter<int>(
+    "http.requests.active",
+    unit: "{requests}",
+    description: "Number of requests currently being processed");
+
+// Histogram - tracks distribution of values
+var requestDuration = meter.CreateHistogram<double>(
+    "http.request.duration",
+    unit: "ms",
+    description: "HTTP request latency distribution");
+
+// ObservableGauge - reads current value on-demand
+var queueDepth = 0;
+meter.CreateObservableGauge(
+    "app.queue.depth",
+    () => queueDepth,
+    unit: "{items}",
+    description: "Current number of items in the processing queue");
+
+app.MapGet("/process", async () =>
+{
+    // Track active requests (UpDownCounter)
+    activeRequests.Add(1);
+    queueDepth++;
+
+    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+    try
+    {
+        // Simulate work
+        await Task.Delay(Random.Shared.Next(50, 200));
+
+        stopwatch.Stop();
+
+        // Record request count (Counter)
+        requestCounter.Add(1,
+            new KeyValuePair<string, object?>("method", "GET"),
+            new KeyValuePair<string, object?>("route", "/process"),
+            new KeyValuePair<string, object?>("status_code", 200));
+
+        // Record duration (Histogram)
+        requestDuration.Record(stopwatch.ElapsedMilliseconds,
+            new KeyValuePair<string, object?>("method", "GET"),
+            new KeyValuePair<string, object?>("route", "/process"));
+
+        return Results.Ok(new { message = "Processed successfully" });
+    }
+    finally
+    {
+        // Decrement active requests
+        activeRequests.Add(-1);
+        queueDepth--;
+    }
+});
+
+app.Run();
+```
+
+<details>
+<ToggleHeading>
+### Exported Metrics
+</ToggleHeading>
+
+The custom instrumentation example above exports the following metrics:
+
+- `http.requests.total` (Counter) - Total count of HTTP requests with attributes for method, route, and status code
+- `http.requests.active` (UpDownCounter) - Current number of requests being processed
+- `http.request.duration` (Histogram) - Distribution of HTTP request latencies in milliseconds
+- `app.queue.depth` (ObservableGauge) - Current number of items in the processing queue
+
+You can create additional metrics based on your application's needs to track business metrics, performance indicators, or any other relevant data.
+
+</details>
+
+</TabItem>
+</Tabs>
+
+
+## Validate
+
+Once you have configured your application to start sending metrics to SigNoz, you can start visualizing the metrics in the [metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Metrics not appearing?
+
+1. **Check Environment Variables**: Ensure `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` is set correctly:
+    - For gRPC (default): `https://ingest.<region>.signoz.cloud:443`
+    - For HTTP: `https://ingest.<region>.signoz.cloud:443/v1/metrics`
+
+2. **Check Meter Registration**: Ensure your meter name is registered with `AddMeter()` in the configuration:
+   ```csharp
+   .WithMetrics(metrics => metrics
+       .AddMeter("MyApp.Metrics")  // Must match your Meter name
+       .AddOtlpExporter());
+   ```
+
+3. **Check Console Output**: Add the console exporter to debug locally:
+   ```bash
+   dotnet add package OpenTelemetry.Exporter.Console
+   ```
+   ```csharp
+   .WithMetrics(metrics => metrics
+       .AddMeter("MyApp.Metrics")
+       .AddConsoleExporter()  // Prints metrics to console
+       .AddOtlpExporter());
+   ```
+
+4. **Resource Attributes**: Ensure `service.name` is set via `OTEL_SERVICE_NAME` or `ConfigureResource()`. This helps you filter metrics by service in SigNoz.
+
+### Authentication errors
+
+If you see errors like "Unauthorized" or "403 Forbidden":
+- Verify your ingestion key is correct in `OTEL_EXPORTER_OTLP_METRICS_HEADERS`
+- Ensure the header format is exactly: `signoz-ingestion-key=<your-key>` (no extra spaces)
+- Check that your ingestion key is active in the SigNoz Cloud dashboard
+
+### "Connection Refused" errors
+
+- If running locally and sending to SigNoz Cloud, check your internet connection and firewall.
+- If sending to a self-hosted collector, ensure the collector is running and listening on port 4317 (gRPC) or 4318 (HTTP).
+
+### Metrics export interval
+
+By default, metrics are exported every 60 seconds. You can customize this interval:
+
+```csharp
+.WithMetrics(metrics => metrics
+    .AddMeter("MyApp.Metrics")
+    .AddOtlpExporter(options =>
+    {
+        options.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 10000; // 10 seconds
+    }));
+```
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy metrics you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next Steps
+
+- [Create Dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your metrics.
+- [Set up Alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) on your metrics.
+- [Instrument your .NET application with traces](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/) to correlate metrics with traces for better observability.
