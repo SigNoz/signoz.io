@@ -36,6 +36,12 @@ For this guide, you can create a sample log file named `app.log` at `/tmp/app.lo
 2026-01-12T10:00:03.200Z ERROR [payment] Payment gateway timeout for transaction #12345
 ```
 
+<Admonition type="info">
+  The filelog receiver sends each line as a separate log entry. To parse structured fields like
+  timestamp, level, and message, you can use [SigNoz Logs
+  Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to parse logs after ingestion.
+</Admonition>
+
 ## Configure Filelog Receiver
 
 The following steps guide you through configuring the `filelog` receiver on different platforms.
@@ -75,6 +81,8 @@ receivers:
   transmitted. To include historical logs from the file, change this to `start_at: beginning`.
 </Admonition>
 
+The `/app` suffix in `filelog/app` is a custom identifier that allows you to configure multiple filelog receivers with different settings. You can name differently for different apps (e.g., `filelog/nginx`, `filelog/application`).
+
 ### 3. Enable in Pipeline
 
 Add the `filelog` receiver to your logs pipeline in the `service` section of your configuration.
@@ -103,6 +111,11 @@ sudo systemctl restart otel-collector
 The [SigNoz Kubernetes Infra Chart](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) automatically collects logs from all pods by default. This is managed via the [presets.logsCollection.enabled](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/configure-k8s-infra/#3-container-log-collection) property, which configures a `filelog` receiver to ingest logs from the standard Kubernetes log path (`/var/log/pods/*`).
 
 **Recommendation:** For the best experience, configure your applications to log to `stdout` and `stderr`. This ensures they are automatically captured by the standard Kubernetes logging infrastructure without additional configuration.
+
+<Admonition type="info">
+  The default configuration collects logs from all pods in the cluster. To filter specific
+  namespaces or pods, you'll need to customize the filelog receiver configuration.
+</Admonition>
 
 <KeyPointCallout title="Collecting from custom file paths" defaultCollapsed={true}>
 
@@ -143,7 +156,7 @@ service:
       exporters: [otlp]
 ```
 
-### 2. Run Collector with Mounts
+### 3. Run Collector with Mounts
 
 Run the collector container, mounting your host log file (e.g., `~/logs/app.log`) to the expected path inside the container (e.g., `/tmp/app.log`).
 
@@ -152,7 +165,8 @@ docker run -d \
   --name signoz-otel-collector \
   -v ~/logs/app.log:/tmp/app.log:ro \
   -v $(pwd)/otel-collector-config.yaml:/etc/otel/config.yaml \
-  otel/opentelemetry-collector-contrib:latest
+  otel/opentelemetry-collector-contrib:latest \
+  --config /etc/otel/config.yaml
 ```
 
 <Admonition type="info">
@@ -187,7 +201,7 @@ Add the `filelog` receiver to the `receivers` section, ensuring you use valid Wi
 ```yaml:config.yaml {2-4}
 receivers:
   filelog/app:
-    include: ["C:\\Logs\\app.log"] # Use double backslashes
+    include: ["C:/Logs/app.log"]
     start_at: end
 ```
 
@@ -228,17 +242,20 @@ echo "2026-01-12T12:00:02.100Z INFO [test] Manual log entry for verification" >>
 echo "2026-01-12T12:00:03.200Z INFO [test] Manual log entry for verification" >> /tmp/app.log
 ```
 
+For Windows, use PowerShell:
+
+```powershell
+Add-Content -Path "C:\Logs\app.log" -Value "Testing SigNoz filelog receiver $(Get-Date)"
+Add-Content -Path "C:\Logs\app.log" -Value "2026-01-12T12:00:00.000Z INFO [test] Manual log entry for verification"
+```
+
 Go to the **SigNoz UI** -> **Logs** tab. You should see your new log entries appearing.
 
-<figure data-zoomable align="center">
-  <img
-    src="/img/docs/logs-management/send-logs/sample-logs-from-file.webp"
-    alt="Logs of the dummy app.log file visible in SigNoz"
-  />
-  <figcaption>
-    <i>Sample log file data shown in SigNoz Logs Explorer</i>
-  </figcaption>
-</figure>
+<Figure
+  src="/img/docs/logs-management/send-logs/sample-logs-from-file.webp"
+  alt="Logs of the dummy app.log file visible in SigNoz"
+  caption="Sample log file data shown in SigNoz Logs Explorer"
+/>
 
 <details>
 <ToggleHeading>
@@ -271,7 +288,7 @@ Go to the **SigNoz UI** -> **Logs** tab. You should see your new log entries app
 
 <KeyPointCallout title="Storage extension for production deployments" defaultCollapsed={true}>
 
-For production use, especially when using `start_at: beginning`, configure a <a href="https://opentelemetry.io/docs/collector/storage/" target="_blank" rel="noopener noreferrer nofollow">storage extension</a> to prevent log duplication on collector restarts. The storage extension saves the read position for each file to disk.
+For production use, especially when using `start_at: beginning`, configure a <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/storage/filestorage/README.md" target="_blank" rel="noopener noreferrer nofollow">storage extension</a> to prevent log duplication on collector restarts. The storage extension saves the read position for each file to disk.
 
 ```yaml
 extensions:
