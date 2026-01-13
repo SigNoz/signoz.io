@@ -256,8 +256,8 @@ const sdk = new NodeSDK({
   }),
   instrumentations: [
     new RuntimeNodeInstrumentation({
-      // Optional configuration
-      eventLoopUtilizationMeasurementInterval: 5000,
+      // Optional: precision for event loop utilization measurements (default: 10ms)
+      monitoringPrecision: 5000,
     }),
   ],
 });
@@ -282,29 +282,24 @@ process.on('SIGTERM', () => {
 The `@opentelemetry/instrumentation-runtime-node` package automatically exports the following Node.js runtime metrics:
 
 **Event Loop Metrics:**
-- `nodejs.event_loop.delay.min` - Minimum event loop delay
-- `nodejs.event_loop.delay.max` - Maximum event loop delay
-- `nodejs.event_loop.delay.mean` - Mean event loop delay
-- `nodejs.event_loop.delay.stddev` - Standard deviation of event loop delay
-- `nodejs.event_loop.delay.p50` - 50th percentile of event loop delay
-- `nodejs.event_loop.delay.p90` - 90th percentile of event loop delay
-- `nodejs.event_loop.delay.p99` - 99th percentile of event loop delay
-- `nodejs.event_loop.utilization` - Event loop utilization
+- `nodejs.eventloop.delay.min` - Minimum event loop delay
+- `nodejs.eventloop.delay.max` - Maximum event loop delay
+- `nodejs.eventloop.delay.mean` - Mean event loop delay
+- `nodejs.eventloop.delay.stddev` - Standard deviation of event loop delay
+- `nodejs.eventloop.delay.p50` - 50th percentile of event loop delay
+- `nodejs.eventloop.delay.p90` - 90th percentile of event loop delay
+- `nodejs.eventloop.delay.p99` - 99th percentile of event loop delay
+- `nodejs.eventloop.time` - Cumulative event loop time (active/idle)
+- `nodejs.eventloop.utilization` - Event loop utilization ratio (0.0 to 1.0)
 
-**Memory Metrics:**
-- `nodejs.memory.heap.total` - Total heap memory in bytes
-- `nodejs.memory.heap.used` - Used heap memory in bytes
-- `nodejs.memory.rss` - Resident set size in bytes
-- `nodejs.memory.external` - External memory in bytes
-- `nodejs.memory.array_buffers` - Array buffers memory in bytes
+**V8 Heap Memory Metrics:**
+- `v8js.memory.heap.limit` - Total heap memory size pre-allocated
+- `v8js.memory.heap.used` - Heap memory size allocated
+- `v8js.memory.heap.space.available_size` - Heap space available size
+- `v8js.memory.heap.space.physical_size` - Committed size of a heap space
 
-**Garbage Collection Metrics:**
-- `nodejs.gc.duration` - Garbage collection duration (histogram)
-- `nodejs.gc.count` - Number of garbage collections
-
-**Active Handles/Requests:**
-- `nodejs.active_handles.total` - Total number of active handles
-- `nodejs.active_requests.total` - Total number of active requests
+**V8 Garbage Collection Metrics:**
+- `v8js.gc.duration` - Garbage collection duration (histogram)
 
 <Admonition type="info">
 Metric names follow the [OpenTelemetry semantic conventions for Node.js runtime metrics](https://opentelemetry.io/docs/specs/semconv/runtime/nodejs-metrics/).
@@ -336,19 +331,19 @@ import http from 'http';
 const meter = metrics.getMeter('custom-metrics', '1.0.0');
 
 // Counter - values that only increase
-const requestCounter = meter.createCounter('http.requests.total', {
-  description: 'Total HTTP request count',
+const requestCounter = meter.createCounter('http.server.request.count', {
+  description: 'Total HTTP server request count',
 });
 
 // UpDownCounter - values that can increase or decrease
-const activeConnections = meter.createUpDownCounter('http.connections.active', {
-  description: 'Number of active HTTP connections',
+const activeConnections = meter.createUpDownCounter('http.server.active_requests', {
+  description: 'Number of active HTTP requests',
 });
 
-// Histogram - distribution of values
-const requestDuration = meter.createHistogram('http.request.duration', {
-  description: 'HTTP request duration in milliseconds',
-  unit: 'ms',
+// Histogram - distribution of values (duration in seconds per OpenTelemetry conventions)
+const requestDuration = meter.createHistogram('http.server.request.duration', {
+  description: 'HTTP request duration',
+  unit: 's',
 });
 
 // Observable Gauge - async measurement of current values
@@ -373,10 +368,11 @@ const server = http.createServer((req, res) => {
   activeConnections.add(1);
 
   res.on('finish', () => {
-    const duration = Date.now() - startTime;
+    // Convert to seconds (OpenTelemetry semantic conventions use seconds for duration)
+    const durationSeconds = (Date.now() - startTime) / 1000;
 
     // Record request duration (Histogram)
-    requestDuration.record(duration, {
+    requestDuration.record(durationSeconds, {
       method: req.method || 'GET',
       route: req.url || '/',
       status: res.statusCode,
@@ -413,9 +409,9 @@ server.listen(PORT, () => {
 
 The custom instrumentation example above exports the following metrics:
 
-- `http.requests.total` (Counter) - Total count of HTTP requests with attributes for method, route, and status code
-- `http.request.duration` (Histogram) - Distribution of HTTP request latencies in milliseconds
-- `http.connections.active` (UpDownCounter) - Current number of active HTTP connections
+- `http.server.request.count` (Counter) - Total count of HTTP requests with attributes for method, route, and status code
+- `http.server.request.duration` (Histogram) - Distribution of HTTP request latencies in seconds
+- `http.server.active_requests` (UpDownCounter) - Current number of active HTTP requests
 - `nodejs.memory.heap.used` (Observable Gauge) - Current heap memory usage in bytes
 
 You can create additional metrics based on your application's needs by using the meter to create counters, histograms, up/down counters, and observable gauges to track business metrics, performance indicators, or any other relevant data.
