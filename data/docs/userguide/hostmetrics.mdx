@@ -45,7 +45,9 @@ Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/t
 
 ### Configure the Hostmetrics Receiver
 
-In your OpenTelemetry Collector configuration file (e.g. `/etc/otelcol-contrib/config.yaml` or `config.yaml`), add `hostmetrics` receiver to the `receivers` section:
+Open your OpenTelemetry Collector configuration file which is typically located at `/etc/otelcol-contrib/config.yaml`.
+
+Add the `hostmetrics` receiver which scrapes metrics from the host system, add it to the `receivers` section:
 
 ```yaml:config.yaml {2-18}
 receivers:
@@ -115,6 +117,54 @@ service:
       processors: [resourcedetection, batch]
       exporters: [otlp]
 ```
+
+<details>
+<summary>View Complete Configuration</summary>
+
+Here is how the complete `config.yaml` file should look:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      nfs: {} # Linux only
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+      system: {}
+
+processors:
+  batch:
+  resourcedetection:
+    detectors: [env, system]
+
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<your-ingestion-key>"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+</details>
 
 ## Step 3: Run the Collector
 
@@ -233,6 +283,55 @@ service:
   process information due to permissions. This is normal in containerized or restricted
   environments.
 </Admonition>
+
+<details>
+<summary>View Complete Configuration</summary>
+
+Here is how the complete `config.yaml` file should look:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+        mute_process_user_error: true
+      processes: {}
+      system: {}
+
+processors:
+  batch:
+  resourcedetection:
+    detectors: [env, system]
+
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<your-ingestion-key>"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+</details>
 
 ## Step 3: Run the Collector
 
