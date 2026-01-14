@@ -2030,6 +2030,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/openai-dashboard',
+            label: 'OpenAI',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/pipecat-dashboard',
             label: 'Pipecat',
           },
