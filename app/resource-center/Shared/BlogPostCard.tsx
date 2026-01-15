@@ -10,16 +10,12 @@ export default function BlogPostCard({ blog }: { blog: CoreContent<Blog | Compar
   const { path, date, title, authors } = blog
 
   const getAuthorDetails = (authorID) => {
-    if (authorID !== null) {
+    if (typeof authorID === 'object') {
       return authorID
     }
 
-    if (typeof authorID === 'object') {
-      return Authors[authorID?.key] ?? authorID
-    }
-
-    if (Authors[authorID]) {
-      return Authors[authorID]
+    if (Authors?.[authorID]) {
+      return Authors?.[authorID]
     }
 
     return {}
