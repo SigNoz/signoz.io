@@ -1,0 +1,622 @@
+---
+
+title: Apache Cassandra Monitoring with OpenTelemetry [including dashboards and alerts]
+slug: cassandra-monitoring 
+date: 2026-01-10
+tags: [monitoring, cassandra]
+authors: [saurabh_patil]
+description: A practical guide to monitoring Apache Cassandra with OpenTelemetry and SigNoz. Track latency, compaction, and GC pauses early so you can debug slowdowns before they page you.
+keywords: [cassandra monitoring, apache cassandra metrics, cassandra alert rules, cassandra troubleshooting]
+
+---
+
+Apache Cassandra is a database designed to run across many servers at once, allowing it to store huge amounts of data and stay online even if some servers fail. However, because the data is spread out everywhere, it is incredibly difficult to pinpoint exactly where a problem is coming from when things slow down. You can check your servers and see that they have plenty of CPU and memory left, yet the database still fails to save data or takes too long to respond to requests.
+
+This happens because the database performs many heavy maintenance tasks in the background, like organizing files or cleaning up old information. If these background tasks become too overwhelming, they silently eat up resources and block your actual data requests. Since standard monitoring tools often miss this internal activity, the database can seem perfectly healthy right up until the moment it stops working entirely. You need a way to see these hidden internal struggles to fix issues before they cause a total system failure.
+
+This guide will walk you through a complete monitoring setup, starting with an introduction to modern tools like OpenTelemetry for metrics collection, focusing on metrics that matter most, a hands-on demonstration to implement monitoring and finally a troubleshooting playbook.
+
+## How to Collect Key Metrics from Cassandra using OpenTelemetry?
+
+We can break down the metrics collection process into two clear steps:
+
+### Metrics inside Cassandra (JMX + Dropwizard)
+
+Cassandra runs on the Java Virtual Machine (JVM) and uses two built-in tools to handle its data:
+
+- **`Dropwizard Metrics Library`:** Cassandra uses the Dropwizard library to instrument its own code, recording metrics (like write latency or disk usage) as Java objects directly in the JVM Heap.
+
+- **`JMX (Java Management Extensions)`**: JMX is the standard interface that exposes internal Java objects (known as MBeans) over a specific network `default port: 7199`.
+
+<KeyPointCallout defaultCollapsed="true" title="JVM Heap">
+
+- **JVM Heap:** It is the memory region that the JVM uses for object allocation. Its size is controlled by `-Xms` (initial heap) and `-Xmx` (max heap). Actual heap used and committed memory can vary over time and are typically ≤ the configured max.
+
+</KeyPointCallout>
+
+### Metrics Collection using OpenTelemetry
+
+<a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry (OTel)</a> is an open-source observability framework that provides standard APIs, SDKs, and tools to generate, collect, and export telemetry data like logs, metrics, and traces from your applications and systems to any observability platforms like <a href="https://grafana.com/" rel="noopener noreferrer nofollow" target="_blank">Grafana</a> or [SigNoz](https://signoz.io/).
+
+OTel includes the [OpenTelemetry Collector](/blog/opentelemetry-collector-complete-guide/), which can scrape JMX metrics and export them to SigNoz (or Grafana, Prometheus, and others).
+
+**`OTel Collector`**: It acts as the bridge. We configure it with a JMX Receiver that connects to Cassandra's port `7199`. It queries the specific metrics we care about and translates them from internal Java Objects (MBeans) into standard OTel metrics. The OTel Collector then uses an Exporter to push this data to your observability platform for visualization.
+
+<Figure 
+  src="/img/guides/2026/01/cassandra-monitoring-gemini-cassarch.webp"
+  alt="Architecture diagram illustrating Apache Cassandra monitoring pipeline: JMX metrics moving to OpenTelemetry Collector via JMX Receiver, then exporting to SigNoz cloud backend."
+  caption="Production Architecture: JMX metrics flowing from Cassandra nodes to the OpenTelemetry Collector and SigNoz."
+/>
+
+## Cassandra Monitoring Checklist: Key Metrics for Production
+
+The sections below cover key metrics across latency, traffic, compaction, storage, and JVM health. Each metric explains why it matters and what signs to look for in production.
+
+### 1. Latency metrics (user experience)
+
+These are your "Is it slow for users?" signals.
+
+**Read latency (`cassandra.client.request.read.latency.50p`, `.99p`, `.max`)**
+
+High read latency directly impacts user experience and SLOs. Focus on the P99 line: if P50 stays flat but P99 spikes, you're usually looking at a hot partition or a single slow node dragging down the tail.
+
+**Write latency (`cassandra.client.request.write.latency.50p`, `.99p`, `.max`)**
+
+Cassandra is optimized for writes, so rising write latency is a strong signal that disks, commit logs, or compaction are under pressure. A slow, steady climb here usually points to disk I/O saturation or a cluster that isn't keeping up with incoming writes.
+
+<KeyPointCallout defaultCollapsed="true" title="What do P50, P99, and hot partition mean?">
+
+- **P50:** This is the time it takes for a request to finish. It means half of your users are getting a response faster than this.
+
+- **P99:** This is the time it takes for the slowest 1% of requests. This reveals the hidden lag spikes that most users don't see but usually signal a deeper problem.
+
+- **Hot partition:** When everyone tries to access the exact same piece of data at the same time, overloading one single node while the rest sit idle is known as Hot Partition.
+
+</KeyPointCallout>
+
+### 2. Request metrics (traffic profile)
+
+These metrics add context: is the system slow because it's broken, or because load just spiked?
+
+**Total request count (`cassandra.client.request.count`)**
+
+This shows how much traffic the cluster is actually handling. Sudden spikes in request count that line up with rising latency usually mean the cluster is healthy but undersized for the new load. Sudden drops to near zero, while users are still active, often point to network, load balancer, or client-side failures before requests even reach Cassandra.
+
+**Request errors (`cassandra.client.request.error.count`)**
+
+Any non-zero error rate deserves attention, especially timeouts and unavailables. Timeouts indicate nodes are too slow to respond within your application's window, while unavailables indicate that not enough replicas are reachable for your chosen consistency level. If unavailables spike exactly when a node goes down, it's a sign your consistency level is too strict for the current replication factor and failure pattern.
+
+### 3. Compaction metrics (the silent killer)
+
+These metrics answer a critical question: is Cassandra keeping up with data cleanup, or is hidden storage debt slowly turning into read latency?
+
+**Pending compaction tasks (`cassandra.compaction.tasks.pending`)**
+
+Compaction keeps SSTables under control by merging files, cleaning tombstones, and reducing read amplification. When pending tasks keep climbing and rarely drop, the cluster is writing faster than it can compact, and you can expect read latency to degrade as more SSTables must be scanned for every query.
+
+### 4. Storage & hints (recovery behaviour)
+
+These metrics explain whether the cluster is truly healthy or quietly compensating for unreachable replicas by buffering writes in the background.
+
+**Total hints (`cassandra.storage.total_hints.count`)**
+
+Hints represent writes buffered for replicas that were down or unreachable at the time. A rising count during known node outages is normal, but if this metric continues to grow while all nodes appear healthy, it often points to a network partition, misconfiguration, or a “zombie" node that looks up but is not actually accepting writes.
+
+<KeyPointCallout defaultCollapsed= "true" title= "What are compaction and hints?">
+
+- **Compaction** is a background process that merges multiple immutable SSTables into fewer ones, retaining the latest data versions, removing expired tombstones, reducing disk usage and read amplification for better performance.
+
+- **Hints** are temporarily stored as “write operations” on a coordinator node when a replica node is down. They are replayed later to ensure eventual consistency once the replica recovers
+
+</KeyPointCallout>
+
+### 5. JVM metrics (the engine underneath)
+
+Cassandra runs on the JVM, so JVM stress translates directly into database issues.
+
+**Heap memory usage (`jvm.memory.heap.used`)**
+
+Heap usage tells you how much space memtables, caches, and internal structures are consuming. A healthy pattern looks like a sawtooth: gradual rises followed by sharp drops when garbage collection runs. When the heap climbs to a high watermark (around 80–90%) and stays there without dropping, you're heading toward heap exhaustion, GC thrashing, and eventually `OutOfMemoryError` or node instability.
+
+**Garbage Collector (GC) pause time (`jvm.gc.collections.elapsed`)**
+
+GC pauses are “stop-the-world" events where Cassandra cannot process any requests. Occasional short pauses are normal, but frequent pauses longer than ~500 ms will show up as timeouts at the application layer. If you see major GCs happening often, or young-generation GCs firing every second or so, it usually indicates too many temporary allocations or an overloaded JVM heap that needs tuning (or simply more hardware).
+
+## Cassandra Monitoring Demo using OpenTelemetry and SigNoz
+
+In this demo, you'll run a local Cassandra node, collect its JMX metrics with the OpenTelemetry Collector, send them to SigNoz (an all-in-one, OpenTelemetry-native observability platform), build a dashboard, and set up alerts.
+
+### Prerequisites:
+
+Before starting this tutorial, ensure you have the following setup:
+
+- **Docker Engine**: You need the latest version of <a href="https://www.docker.com/get-started/" rel="noopener noreferrer nofollow" target="_blank">**Docker**</a> installed and running on your machine to host the Cassandra database and OpenTelemetry Collector.
+
+- **Command Line Tools**: Ensure <a href="https://curl.se/download.html" rel="noopener noreferrer nofollow" target="_blank">**curl**</a> is installed for downloading configuration files.
+
+- **SigNoz Cloud Account**: You need an active [SigNoz Cloud](https://signoz.io/teams/) account to visualize the data.
+  **Note:** You must have access to your Ingestion API Key. If you haven't obtained it yet, please follow this guide to [generate your ingestion key](/docs/ingestion/signoz-cloud/keys/).
+
+### Step 1: Create the project directory
+
+```bash
+mkdir cassandra-monitoring && cd cassandra-monitoring
+```
+
+### Step 2: Download the JMX Metrics Jar
+
+The OpenTelemetry JMX receiver uses a helper JAR to scrape JMX metrics from Java apps like Cassandra and convert them into OpenTelemetry metrics.
+
+```bash
+curl -L -o opentelemetry-jmx-metrics.jar \
+  https://github.com/open-telemetry/opentelemetry-java-contrib/releases/download/v1.32.0/opentelemetry-jmx-metrics.jar
+```
+
+### Step 3: Define the Cassandra service (docker-compose.yaml)
+
+Create a `docker-compose.yaml` file that starts a Cassandra container and exposes its JMX port so metrics can be scraped.
+
+<KeyPointCallout defaultCollapsed="true" title="Already running Cassandra?">
+
+If you already have a Cassandra service running and only want to scrape its metrics, you just need to **add the highlighted JMX-related configuration** in your environment and then continue with [Step 4](#step-4-start-cassandra).
+
+</KeyPointCallout>
+
+```yaml {14-21}
+services:
+  cassandra:
+    image: cassandra:4.1
+    container_name: cassandra
+    ports:
+      - "9042:9042"   # CQL native transport
+      - "7199:7199"   # JMX
+    environment:
+      - CASSANDRA_CLUSTER_NAME=DemoCluster
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=100M
+      # Enable remote JMX (demo-only settings, not for production)
+      - LOCAL_JMX=no
+      - JVM_EXTRA_OPTS=-Dcom.sun.management.jmxremote \
+                       -Dcom.sun.management.jmxremote.port=7199 \
+                       -Dcom.sun.management.jmxremote.rmi.port=7199 \
+                       -Dcom.sun.management.jmxremote.ssl=false \
+                       -Dcom.sun.management.jmxremote.authenticate=false \
+                       -Djava.rmi.server.hostname=cassandra
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe cluster'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks:
+      - monitoring
+      
+# Named volume
+volumes:
+  cassandra_data:
+
+# Shared bridge network
+networks:
+  monitoring:
+    driver: bridge # Lets the collector reach Cassandra by container name.
+```
+
+<KeyPointCallout defaultCollapsed=" true" title=" YAML breakdown">
+
+- **Remote JMX configuration**
+
+    Setting `LOCAL_JMX=no` enables remote JMX. For this local demo, we disable auth and SSL to keep things simple, but in production, you must enable authentication, use TLS, and restrict network access.
+
+    | Variable | Purpose |
+    | --- | --- |
+    | `LOCAL_JMX=no` | Allows JMX connections from other hosts, not just localhost |
+    | `-Dcom.sun.management.jmxremote` | Enables JMX remote management |
+    | `-Dcom.sun.management.jmxremote.port=7199` | JMX listening port |
+    | `-Dcom.sun.management.jmxremote.rmi.port=7199`  | Remote Method Invocation (RMI) port (same as JMX here for simplicity) |
+    | `-Dcom.sun.management.jmxremote.ssl=false` | Disables SSL (enable in production) |
+    | `-Dcom.sun.management.jmxremote.authenticate=false` | Disables auth (enable in production) |
+    | `-Djava.rmi.server.hostname=cassandra` | Hostname used for RMI callbacks |
+
+- **Persistent storage (`/var/lib/cassandra`)**
+
+    Persists SSTables (sorted string tables) and commit logs so data survives container restarts. This makes your monitoring more realistic than a stateless demo.
+
+- **Health check (`cqlsh describe cluster`)**
+
+    Verifies that Cassandra is actually queryable, not just that the container is running.
+
+</KeyPointCallout>
+
+### Step 4: Start Cassandra
+
+Bring up the Cassandra container and wait until it reports as healthy.
+
+```bash
+# Start Cassandra
+docker compose up -d cassandra
+
+# Follow logs until the node is up and stable
+docker compose logs -f cassandra
+```
+
+### Step 5: Verify Cassandra with nodetool
+
+Cassandra ships with a CLI called `nodetool` for checking cluster health and managing nodes. You can find more details in the <a href="https://cassandra.apache.org/doc/latest/cassandra/troubleshooting/use_nodetool.html" rel="noopener noreferrer nofollow" target="_blank">official nodetool docs</a>.
+
+Run this from your project directory:
+
+```bash
+docker compose exec cassandra nodetool status
+```
+
+You should see output similar to:
+
+<Figure
+  src="/img/guides/2026/01/cassandra-monitoring-nodetool-status.webp"
+  alt="Cassandra nodetool status output showing a single node in UN (Up & Normal) state"
+  caption="Cassandra nodetool status output showing a single node in UN (Up & Normal) state"
+/>
+
+The key part is the **Status/State** column:
+
+- **UN** → **Up / Normal** (node is healthy and serving traffic)
+- **DN** → **Down / Normal** (node is unreachable or dead → investigate urgently)
+- **UJ** → **Up / Joining** (node is bootstrapping into the ring)
+- **UL** → **Up / Leaving** (node is being decommissioned)
+- **UM** → **Up / Moving** (token ranges are being reassigned)
+
+For this demo, you want your single node to show **UN**.
+
+### Step 6: Build a custom OTel Collector image
+
+The standard OpenTelemetry Collector image doesn't ship with Java, but the JMX receiver needs a JVM to run the metrics JAR. So we'll build a small custom image with Java + `otelcol-contrib`.
+
+Create a file named `Dockerfile.otel`:
+
+```docker
+# Custom OTel Collector with Java for JMX receiver
+FROM eclipse-temurin:17-jre
+
+# Download the OpenTelemetry Collector Contrib
+ARG OTEL_VERSION=0.143.0
+RUN apt-get update && apt-get install -y wget && \
+    wget -O /otelcol-contrib https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTEL_VERSION}/otelcol-contrib_${OTEL_VERSION}_linux_amd64.tar.gz && \
+    mkdir -p /tmp/otel && \
+    cd /tmp/otel && \
+    tar -xzf /otelcol-contrib && \
+    mv otelcol-contrib /otelcol-contrib-binary && \
+    rm -rf /tmp/otel /otelcol-contrib && \
+    chmod +x /otelcol-contrib-binary && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the JMX metrics jar
+COPY opentelemetry-jmx-metrics.jar /opt/opentelemetry-jmx-metrics.jar
+
+# Set the entrypoint
+ENTRYPOINT ["/otelcol-contrib-binary"]
+CMD ["--config", "/etc/otel-collector-config.yaml"]
+```
+
+<KeyPointCallout defaultCollapsed="true" title="Docker File Breakdown**">
+
+- **Base image (`eclipse-temurin:17-jre`)** – Provides a small Java 17 runtime required by the JMX receiver.
+
+- **Pinned version (`ARG OTEL_VERSION`)** – Keeps your Collector builds reproducible.
+
+- **Download + extract `otelcol-contrib`** – Fetches the Linux AMD64 release and installs the `otelcol-contrib` binary into `/usr/local/bin/`.
+
+- **`COPY opentelemetry-jmx-metrics.jar`** – Adds the JMX helper JAR that the receiver uses to scrape JVM metrics.
+
+- **`ENTRYPOINT` / `CMD`** – Starts the OpenTelemetry Collector with an external config file.
+
+</KeyPointCallout>
+
+### Step 7: Configure the OpenTelemetry Collector
+
+Now create an `otel-collector-config.yaml` file that tells the Collector how to scrape Cassandra via JMX and where to send metrics in SigNoz. For an in-depth understanding, you can read our [OpenTelemetry Collector guide](/blog/opentelemetry-collector-complete-guide/).
+
+```yaml
+receivers:
+  jmx:
+    jar_path: /opt/opentelemetry-jmx-metrics.jar  # Path to metrics gatherer
+    endpoint: cassandra:7199                      # JMX endpoint (hostname:port)
+    target_system: cassandra,jvm                  # What metrics to collect
+    collection_interval: 60s                      # How often to scrape
+
+processors:
+  batch:                               # Batches telemetry for efficient export
+    timeout: 10s
+    send_batch_size: 1000
+  
+  resourcedetection:                   # Adds host information
+    detectors: [env, system]
+    timeout: 5s
+    override: false
+
+  resource:                            # Adds custom attributes
+    attributes:
+      - key: service.name
+        value: cassandra
+        action: upsert
+
+exporters:
+  otlp:                                # OpenTelemetry Protocol exporter
+    endpoint: ingest.<INGESTION_REGION>.signoz.cloud:443
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "YOUR_INGESTION_KEY_HERE"
+
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [jmx]
+      processors: [resourcedetection, resource, batch]
+      exporters: [otlp, debug]
+
+  telemetry:
+    logs:
+      level: info
+```
+
+<KeyPointCallout defaultCollapsed="true" title="Yaml Breakdown">
+
+- **`receivers.jmx`** - Uses the JMX receiver to scrape Cassandra + JVM metrics from the JMX endpoint.
+
+- **`jar_path`** - Points to the JMX metrics JAR you downloaded in Step 2.
+
+- **`endpoint: cassandra:7199`** - Connects to the Cassandra container on its JMX port.
+
+- **`target_system: cassandra,jvm`** - Enables both Cassandra-specific and generic JVM metrics.
+
+- **`processors` (`batch`, `resourcedetection`, `resource`)** - Enrich metrics with metadata and batch them for efficient export.
+
+- **`exporters.otlp`** - Sends metrics securely to SigNoz using your ingestion region + API key.
+
+- **`exporters.debug`** - Prints metrics locally to help you verify the pipeline during the demo.
+
+- **`service.pipelines.metrics`** - Wires everything together: JMX → processors → SigNoz + debug logs.
+
+- **`service.telemetry.logs.level`** - Controls how noisy the Collector's own logs are.
+
+</KeyPointCallout>
+
+### Step 8: Add the OTel Collector to docker-compose
+
+Now extend `docker-compose.yaml` to run the custom OTel Collector alongside Cassandra.
+
+```yaml {5-16}
+services:
+  cassandra:
+  # ...existing config...
+  
+  otel-collector:
+    build:
+      context: .
+      dockerfile: Dockerfile.otel
+    container_name: otel-collector
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    networks:
+      - monitoring
+
+# Named volume
+volumes:
+  cassandra_data:
+
+networks:
+  monitoring:
+    driver: bridge 
+```
+
+<KeyPointCallout defaultCollapsed="true" title=" YAML breakdown">
+
+- **Custom build (`Dockerfile.otel`)** - Uses your Java-enabled Collector image with the JMX receiver baked in.
+
+- **Config mount (`otel-collector-config.yaml`)** - Injects the pipeline config that scrapes Cassandra and sends metrics to SigNoz.
+
+- **`depends_on`** with **`service_healthy`** - Starts the Collector only after Cassandra is healthy, avoiding noisy startup errors.
+
+</KeyPointCallout>
+
+### Step 9: Start the Services
+
+With Cassandra already healthy, start the OTel Collector:
+
+```bash
+# Once healthy, start the OpenTelemetry Collector
+docker compose up -d otel-collector
+```
+
+You can tail the Collector logs to confirm it's scraping JMX metrics and exporting to SigNoz:
+
+```bash
+docker compose logs -f otel-collector
+```
+
+### Step 10: Import and configure the Cassandra dashboard in SigNoz
+
+As the metrics are being sent to SigNoz, let's visualize them using the ready-made Cassandra dashboard.
+
+1. **Import the dashboard JSON**
+
+    SigNoz provides an out-of-the-box Cassandra JMX dashboard.
+    - Follow: [Import Dashboard in SigNoz](/docs/dashboards/import-dashboard/)
+    - Use the JSON from the [Cassandra Dashboard](https://github.com/SigNoz/dashboards/tree/main/jmx)
+
+    After import, the dashboard will appear blank until you select the right `host.name`.
+
+2. **Set the `host.name` variable**
+
+    Locate the global variable **`$host.name`** at the top of the dashboard.
+
+<Figure
+  src="/img/guides/2026/01/cassandra-monitoring-dashboard-hostname.webp"
+  alt="SigNoz Cassandra dashboard showing the Token Range Read Request Latency panel"
+  caption="SigNoz Cassandra dashboard showing the Token Range Read Request Latency panel"
+/>
+
+  <KeyPointCallout defaultCollapsed="true" title="Find your hostname">
+    In SigNoz, open the `host.name` dropdown (or use Metrics Explorer) and select an existing `host.name` value emitted with your metrics.
+
+    In this Docker demo, it might look like a container name/ID, in production, it should map to your Cassandra node hostname.
+  </KeyPointCallout>
+
+Update the variable value with the correct hostname. Click the dropdown arrow to see available values and select yours. Once set, the dashboard panels will populate.
+
+<Figure
+  src="/img/guides/2026/01/cassandra-monitoring-dashboard-cassandra.webp"
+  alt="SigNoz Cassandra Dashboard with key metrics panels"
+  caption="SigNoz Cassandra Dashboard with key metrics panels"
+/>
+
+3. **Key panels in the Cassandra dashboard**
+
+    | Panel Name | What it shows |
+    | --- | --- |
+    | Token Range Read Request Latency | P50 / P99 / max latency for range-based read operations |
+    | Standard Read Request Latency | Latency for point (single-key) read requests |
+    | Data Size | Total on-disk data size over time |
+    | Total Requests by Operation | Request volume split by Read, Write, and RangeSlice |
+    | Standard Write Request Latency | P50 / P99 / max latency for write operations |
+    | Hint Messages Count | Number of hinted handoff messages |
+    | Error Requests by Operation/Status | Failed and timed-out operations by type |
+    | Compactions | Completed vs pending compactions |
+
+If you want to build similar views from scratch, see our [Create Custom Dashboard guide](/docs/userguide/manage-dashboards/#create-a-custom-dashboard).
+
+### Step 11: Set up Alerting in SigNoz
+
+SigNoz supports ClickHouse-style and Prometheus-style queries (PromQL), severity levels, notification channels (Slack, email, webhook, etc.), and runbook links.
+
+First, make sure you have at least one notification channel configured (see: [Setup Alerts Notification Channel](/docs/setup-alerts-notification/)).
+
+In this demo, we'll use an email channel.
+
+To create an alert for read request latency:
+
+1. **Open alert creation from the panel**
+
+    In the **Token Range Read Request Latency** panel, hover over the three dots in the top-right corner and click **Create alerts**. This opens the alert creation page in a new tab.
+
+  <Figure src="/img/guides/2026/01/cassandra-monitoring-read-request-alert.webp" alt="SigNoz Cassandra latency panel with the panel action menu open, showing the Create Alerts option" caption="SigNoz Cassandra latency panel with the panel action menu open, showing the Create Alerts option" />
+
+2. **Define alert conditions**
+
+    In the new tab, scroll down to define the alert condition.
+
+    - Use the metric for **read request latency P99**.
+    - Set a warning threshold, for example: **p99 > 4 ms**.
+    - Set **Severity** to `warning`.
+    - Add a clear **alert name** and **description**.
+    - Select your previously created **notification channel** (email in this demo).
+    - Optionally, send a **test notification** to verify delivery.
+
+    <Figure src="/img/guides/2026/01/cassandra-monitoring-read-request-alert%201.webp" alt="SigNoz alert rule configuration for Cassandra read request latency, defining a warning alert that triggers when latency crosses a configured threshold within a 5-minute window and sends notifications via the selected channel." caption="SigNoz alert rule configuration for Cassandra read request latency" />
+
+    Create the rule to finish alert setup.
+
+### Step 12: Test the Alerts
+
+To verify everything end-to-end, we'll generate a load against Cassandra using a sample Python script.
+
+1. **Clone the example repo**
+
+```bash
+git clone https://github.com/SigNoz/examples.git
+```
+
+2. **Move into the Cassandra monitoring example**
+
+```bash
+cd examples/python/python-cassandra-monitoring
+```
+
+3. **Generate a read load to trigger the alert**
+
+Run the script a few times (or in a loop) to push latency above your threshold:
+
+```bash
+# Test request metrics
+python3 test_metrics.py --test requests
+```
+
+Once the threshold is breached, you should receive an email alert similar to:
+
+<Figure
+src="/img/guides/2026/01/cassandra-monitoring-email-alert.webp"
+alt="SigNoz email notification showing a fired Cassandra read request latency alert, triggered when observed latency (8.24 ms) exceeded the configured 4 ms warning threshold."
+caption="SigNoz email notification showing a fired Cassandra read request latency alert"
+/>
+
+If you want to deep-dive into all the alerts provided by SigNoz, check out our [Alert Management Docs](/docs/alerts/).
+
+Try other test scenarios
+
+```bash
+# Test storage metrics
+python3 test_metrics.py --test storage
+
+# Test compaction metrics
+python3 test_metrics.py --test compaction
+
+# Test everything
+python3 test_metrics.py --test all
+```
+
+Congratulations!! You have successfully set up monitoring and alerting on your Cassandra service using OpenTelemetry and SigNoz.
+
+### Step 13: Cleanup
+
+When you're done experimenting, stop and remove all containers and volumes:
+
+```bash
+docker compose down -v
+```
+
+## Troubleshooting Cheat Sheet: Correlating Metrics
+
+Use simple "if this, then check that" patterns to quickly narrow down the root cause of Cassandra performance issues.
+
+| **The Symptom** | **Check This Metric** | **Likely Root Cause** |
+| --- | --- | --- |
+| **High Read Latency (P99)** | `cassandra.compaction.tasks.pending` | **Compaction Backlog.** If pending tasks are high (>20), your disk cannot keep up with merging SSTables, forcing Cassandra to read from too many files at once. |
+| **High Read Latency (P99)** | `jvm.gc.collections.elapsed` | **GC "Stop-the-World".** If GC pause time > 500ms, the JVM is pausing all operations to clear memory. Check your Heap Size. |
+| **High Write Latency** | `cassandra.client.request.write.latency` | **Disk Saturation.** Cassandra writes are usually fast (memory-first). If writes are slow, your Commit Log disk is likely maxed out. |
+| **Node Flapping (Up/Down)** | `cassandra.storage.total_hints.count` | **Network/Gossip Issues.** If hint counts are rising, a node is intermittently unreachable. Check network stability or "GC Death Spirals." |
+| **Disk Full Alerts** | `cassandra.storage.load.count` | **Tombstones & Snapshots.** Check if you have expired tombstones failing to compact, or old backup snapshots taking up space. |
+
+**Pro Tip:** Always check **Disk I/O Wait** first. Cassandra is I/O hungry. If your Disk I/O is above 60-70%, almost every other metric (latency, compaction, gossip) will look bad as a side effect.
+
+## Frequently Asked Questions (FAQ)
+
+### What is the most important metric in Cassandra?
+
+The most critical metrics are usually Pending Compactions (indicating disk lag) and Thread Pool Pending Tasks (indicating CPU/processing bottlenecks). These often reveal the root cause behind high latency.
+
+### How do I monitor Cassandra 5.0 Virtual Tables?
+
+While Virtual Tables in Cassandra 4.0+ allow ad-hoc querying via cqlsh, for production history and alerting, you should still use a dedicated JMX or OpenTelemetry pipeline to track trends over time.
+
+### Should I alert on "Node Down"?
+
+It is best to alert only if a node is down for more than 15 minutes or if multiple nodes fail. Instant alerts for single-node restarts can cause alert fatigue due to Cassandra's resilient nature.
+
+### Can I use Prometheus Service Discovery for Cassandra?
+
+Yes. If running on Kubernetes (e.g., K8ssandra), the Prometheus operator or OpenTelemetry Collector can automatically discover JMX endpoints for scraping.
+
+---
+
+Hope this guide has helped in setting up monitoring on your Cassandra Node.
+
+You can also subscribe to our [newsletter](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, get open source, OpenTelemetry, and devtool building stories straight to your inbox.

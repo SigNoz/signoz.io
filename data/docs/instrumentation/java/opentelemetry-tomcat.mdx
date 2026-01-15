@@ -1,0 +1,412 @@
+---
+date: 2026-01-03
+id: tomcat
+
+title: Tomcat OpenTelemetry Instrumentation
+description: Send traces from Apache Tomcat applications to SigNoz using the OpenTelemetry Java agent.
+doc_type: howto
+---
+
+This guide shows how to instrument your Apache Tomcat application server with OpenTelemetry and send traces to SigNoz. Tomcat uses `setenv.sh` (Linux/Mac) or `setenv.bat` (Windows) to configure JVM options, making it straightforward to attach the OpenTelemetry Java agent.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud -> Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- Java 8 or higher
+- Apache Tomcat installed and running
+- A SigNoz Cloud account or self-hosted SigNoz instance
+
+## Send traces to SigNoz
+
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying Tomcat directly on a server or VM without containerization.
+</KeyPointCallout>
+
+### Step 1. Download the OpenTelemetry Java agent to your Tomcat directory
+
+```bash
+wget -P /opt/tomcat/lib/ https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+Replace `/opt/tomcat` with your actual `$CATALINA_HOME` path if different.
+
+### Step 2. Create setenv.sh in Tomcat's bin folder
+
+Create a file at `$CATALINA_HOME/bin/setenv.sh` with the following contents:
+
+```bash:$CATALINA_HOME/bin/setenv.sh
+export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/opt/tomcat/lib/opentelemetry-javaagent.jar"
+export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Make the script executable:
+
+```bash
+chmod +x $CATALINA_HOME/bin/setenv.sh
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `tomcat-app`).
+
+### Step 3. Restart Tomcat
+
+```bash
+$CATALINA_HOME/bin/shutdown.sh
+$CATALINA_HOME/bin/startup.sh
+```
+
+Or if using systemd:
+
+```bash
+sudo systemctl restart tomcat
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+<Tabs entityName="k8s-method">
+<TabItem value="direct" label="Direct" default>
+
+<KeyPointCallout title="Managing multiple services?" defaultCollapsed={true}>
+For centralized instrumentation management or auto-injection without code changes, see the OTel Operator tab.
+</KeyPointCallout>
+
+### Step 1. Create a Dockerfile with the OpenTelemetry agent
+
+```dockerfile:Dockerfile
+FROM tomcat:10-jdk17
+
+# Download the OpenTelemetry Java agent
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar \
+    -O /usr/local/tomcat/lib/opentelemetry-javaagent.jar
+
+# Create setenv.sh to configure the agent
+RUN echo 'export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/usr/local/tomcat/lib/opentelemetry-javaagent.jar"' > /usr/local/tomcat/bin/setenv.sh && \
+    chmod +x /usr/local/tomcat/bin/setenv.sh
+
+# Copy your WAR file(s)
+COPY target/*.war /usr/local/tomcat/webapps/
+
+EXPOSE 8080
+CMD ["catalina.sh", "run"]
+```
+
+### Step 2. Deploy to Kubernetes
+
+Add these environment variables to your deployment manifest:
+
+```yaml
+env:
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: 'service.name=<service-name>'
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `tomcat-app`).
+
+</TabItem>
+<TabItem value="otel-operator" label="OTel Operator">
+
+The [OpenTelemetry Operator](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/overview/) auto-injects the Java agent into your pods without modifying your container image.
+
+### Step 1. Set up the OpenTelemetry Operator
+
+Install the Operator and Collector following the [K8s OTel Operator installation guide](https://signoz.io/docs/opentelemetry-collection-agents/k8s/otel-operator/install/).
+
+### Step 2. Create the Instrumentation resource
+
+Create `instrumentation.yaml` to configure Java auto-instrumentation:
+
+```yaml:instrumentation.yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: java-instrumentation
+spec:
+  exporter:
+    endpoint: http://otel-collector-collector:4318
+  propagators:
+    - tracecontext
+    - baggage
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+```
+
+Apply the instrumentation:
+
+```bash
+kubectl apply -f instrumentation.yaml
+```
+
+### Step 3. Add annotations to your Tomcat deployment
+
+Add these annotations to your pod template's `metadata.annotations`:
+
+```yaml:deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcat-app
+  template:
+    metadata:
+      labels:
+        app: tomcat-app
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+        resource.opentelemetry.io/service.name: "<service-name>"
+    spec:
+      containers:
+      - name: tomcat
+        image: tomcat:10-jdk17
+        ports:
+        - containerPort: 8080
+```
+
+Apply the deployment:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+The operator will automatically inject the Java agent into your Tomcat pods.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+### Step 1. Download the OpenTelemetry Java agent
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar" -OutFile "C:\tomcat\lib\opentelemetry-javaagent.jar"
+```
+
+Replace `C:\tomcat` with your actual Tomcat installation path.
+
+### Step 2. Create setenv.bat in Tomcat's bin folder
+
+Create a file at `%CATALINA_HOME%\bin\setenv.bat` with the following contents:
+
+```batch:%CATALINA_HOME%\bin\setenv.bat
+set "CATALINA_OPTS=%CATALINA_OPTS% -javaagent:C:\tomcat\lib\opentelemetry-javaagent.jar"
+set "OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>"
+set "OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
+set "OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `tomcat-app`).
+- Update the agent path if your Tomcat is installed elsewhere.
+
+### Step 3. Restart Tomcat
+
+Using the command prompt:
+
+```batch
+%CATALINA_HOME%\bin\shutdown.bat
+%CATALINA_HOME%\bin\startup.bat
+```
+
+Or if running as a Windows service:
+
+```powershell
+Restart-Service Tomcat10
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+### Step 1. Create a Dockerfile
+
+```dockerfile:Dockerfile
+FROM tomcat:10-jdk17
+
+# Download the OpenTelemetry Java agent
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar \
+    -O /usr/local/tomcat/lib/opentelemetry-javaagent.jar
+
+# Create setenv.sh to configure the agent
+RUN echo 'export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/usr/local/tomcat/lib/opentelemetry-javaagent.jar"' > /usr/local/tomcat/bin/setenv.sh && \
+    chmod +x /usr/local/tomcat/bin/setenv.sh
+
+# Copy your WAR file(s)
+COPY target/*.war /usr/local/tomcat/webapps/
+
+# Set default environment variables (can be overridden at runtime)
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+
+EXPOSE 8080
+CMD ["catalina.sh", "run"]
+```
+
+Replace `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+
+### Step 2. Build and run
+
+```bash
+docker build -t my-tomcat-app .
+docker run -p 8080:8080 my-tomcat-app
+```
+
+Or pass environment variables at runtime to avoid hardcoding credentials:
+
+```bash
+docker run -p 8080:8080 \
+  -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-tomcat-app" \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
+  my-tomcat-app
+```
+
+</TabItem>
+</Tabs>
+
+## Validate
+
+With your Tomcat application running, verify traces are being sent to SigNoz:
+
+1. Make a few requests to your deployed web applications.
+2. In SigNoz, open the **Services** tab and click **Refresh**. Your service should appear.
+3. Go to the **Traces** tab to see your application's traces.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Traces not showing up in SigNoz?
+
+**Check that setenv.sh/setenv.bat is being loaded:**
+
+Add a debug line to your setenv script:
+```bash
+echo "setenv.sh is being loaded" >> /tmp/tomcat-debug.log
+```
+
+Then restart Tomcat and check if the log file was created.
+
+**Verify the agent is attached:**
+
+Check your Tomcat logs (`catalina.out`) for OpenTelemetry startup messages:
+```
+[otel.javaagent] opentelemetry-javaagent - version: X.X.X
+```
+
+**Enable debug logging:**
+
+Add to your setenv.sh:
+```bash
+export OTEL_LOG_LEVEL=debug
+```
+
+Look for span output in Tomcat's logs. If spans appear locally but not in SigNoz, check your endpoint URL and ingestion key.
+
+**Test connectivity:**
+```bash
+curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+### Agent not attaching?
+
+**Check file permissions:**
+```bash
+ls -la /opt/tomcat/lib/opentelemetry-javaagent.jar
+```
+
+The Tomcat user must have read access to the agent JAR.
+
+**Verify CATALINA_HOME:**
+```bash
+echo $CATALINA_HOME
+```
+
+Make sure your setenv.sh is in the correct `bin` directory.
+
+### setenv.sh not found or not executed?
+
+On some Linux distributions, Tomcat may be configured differently. Check:
+- The file is named exactly `setenv.sh` (case-sensitive)
+- The file is in `$CATALINA_HOME/bin/` or `$CATALINA_BASE/bin/`
+- The file has execute permissions: `chmod +x setenv.sh`
+
+</details>
+
+<details>
+<ToggleHeading>
+
+## Configuring the agent (Optional)
+
+</ToggleHeading>
+
+### What can you configure?
+
+The Java agent auto-instruments most libraries out of the box. Configuration lets you fine-tune what gets captured and how traces are exported.
+
+### Why configure?
+
+- **Reduce noise** — Disable instrumentation for internal health checks or chatty libraries
+- **Control costs** — Sample a percentage of traces instead of capturing everything
+- **Add context** — Tag traces with environment, version, or team info for easier filtering
+
+### Common options
+
+Add these to your `CATALINA_OPTS` in setenv.sh:
+
+**Disable specific instrumentations:**
+```bash
+export CATALINA_OPTS="$CATALINA_OPTS -Dotel.instrumentation.jdbc-datasource.enabled=false"
+```
+
+**Sample traces:**
+```bash
+export OTEL_TRACES_SAMPLER=parentbased_traceidratio
+export OTEL_TRACES_SAMPLER_ARG=0.1  # Sample 10% of traces
+```
+
+**Add resource attributes:**
+```bash
+export OTEL_RESOURCE_ATTRIBUTES="service.name=my-tomcat-app,deployment.environment=production,service.version=1.2.3"
+```
+
+See the <a href="https://opentelemetry.io/docs/languages/java/automatic/agent-config/" target="_blank" rel="noopener noreferrer nofollow">full configuration reference</a> for all available options.
+
+</details>
+
+## Next steps
+
+- [Add manual instrumentation](https://signoz.io/docs/instrumentation/java/manual-instrumentation) for custom spans and business context
+- [Collect Java application logs](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java) with OpenTelemetry
+- [Set up alerts](https://signoz.io/docs/setup-alerts-notification/) for your Tomcat application

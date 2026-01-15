@@ -1,0 +1,292 @@
+---
+date: 2026-01-02
+title: Parsing Logs with Regex Parser
+id: regex-parser
+doc_type: tutorial
+description: Learn how to parse logs using the Regex Parser with Logs Pipelines in SigNoz.
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Logs are unstructured data, and it is not easy to analyze them. SigNoz provides easy to use **Regex Parser** to parse unstructured logs and extract information from them using Logs Pipelines.
+
+## Prerequisites
+
+- You are sending logs to SigNoz.
+- You have access to the **Logs Pipelines** section in SigNoz UI.
+
+Learn more about SigNoz [Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
+
+## About Regex Parser
+
+The Regex processor uses <a href="https://github.com/google/re2/wiki/Syntax" target="_blank" rel="noopener noreferrer nofollow">Regular Expressions</a> (based on Go's RE2 syntax) to extract information from unstructured logs. It uses **Named Capture Groups** to map parts of your log message to attribute names.
+
+**The Concept:**
+
+You define a pattern containing groups like `(?P<attribute_name>pattern)`. Whatever matches inside the parentheses becomes the value of `attribute_name`.
+
+## Example Log
+
+Throughout this guide, we'll use the following example of a legacy application log entry:
+
+```text
+2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5
+```
+
+## Desired Outcome
+
+After parsing, we want to extract specific information into structured attributes.
+
+| Attribute | Value       |
+| --------- | ----------- |
+| `level`   | INFO        |
+| `user_id` | 123         |
+| `ip`      | 192.168.1.5 |
+
+The final processed log should look like this:
+
+```json
+{
+  "body": "2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5",
+  "attributes": {
+    "level": "INFO",
+    "user_id": "123",
+    "ip": "192.168.1.5"
+  }
+}
+```
+
+## Creating a Pipeline
+
+Before you can parse logs, you need to create a pipeline that will filter and process them.
+
+### Step 1: Navigate to Pipelines Page
+
+In SigNoz, go to **Logs** → **Pipelines**
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-pipeline-step1.webp"
+  alt="Navigate to Log Pipelines"
+  caption="Navigate to Log Pipelines"
+/>
+
+### Step 2: Create a New Pipeline
+
+- If you do not have existing pipelines, press the **"New Pipeline"** button.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/logs-parsing-pipeline-step2.webp"
+  alt="New Pipeline Button"
+  caption="New Pipeline Button"
+/>
+
+- If you already have some pipelines, press the **"Enter Edit Mode"** button and then click the **"Add a New Pipeline"** button at the bottom of the list.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-pipeline-step3.webp"
+  alt="Enter Edit Mode button"
+  caption="Enter Edit Mode button"
+/>
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-pipeline-step4.webp"
+  alt="Add a New Pipeline button"
+  caption="Add a New Pipeline button"
+/>
+
+### Step 3: Configure the Pipeline
+
+Provide details about the pipeline in the Create Pipeline Dialog:
+
+- **Name:** Provide a descriptive pipeline name.
+- **Description:** Add a detailed description for your pipeline (optional).
+- **Filter:** Use the filter field to select the logs you want to process. For example, `service.name = my-app` or `log.file.name = app.log`.
+- **Filtered Logs Preview:** Verify that the logs you want to process are selected.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-pipeline-step5.webp"
+  alt="Create New Pipeline dialog"
+  caption="Create New Pipeline dialog"
+/>
+
+Press the **"Create"** button to create the pipeline.
+
+## Configuring Regex Parser
+
+Now that we have a pipeline, we will add the Regex Parser processor to extract attributes from our log line.
+
+### Step 1: Add a Processor
+
+Expand your pipeline and click the **"Add Processor"** button.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-step1.webp"
+  alt="Expand Pipeline to access Processors"
+  caption="Expand Pipeline to access Processors"
+/>
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-step2.webp"
+  alt="Add Processors Button"
+  caption="Add Processors Button"
+/>
+
+### Step 2: Configure Regex Parser
+
+We will now configure the processor to parse the log message.
+
+#### Before Parsing
+
+At this stage, your log typically contains the raw message in the `body` field:
+
+```json
+{
+  "body": "2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5"
+}
+```
+
+#### Processor Configuration
+
+Select **Regex Parser** and configure the fields:
+
+- **Name**: `parse_app_log`
+- **Parse From**: `body` (This is where the raw message resides)
+- **Parse To**: `attributes` (We want to add extracted values directly to log attributes)
+- **Pattern**:
+  ```regex
+  ^.*\[(?P<level>\w+)\].*User (?P<user_id>\d+) logged in from (?P<ip>[\d\.]+)
+  ```
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-step3.webp"
+  alt="Regex Parser Configuration Example"
+  caption="Configuring the Regex Parser"
+/>
+
+Press **"Create"** to add the processor.
+
+#### After Parsing
+
+Once the processor is applied, the log structure changes. The captured groups from the regex are added as keys in the `attributes` object.
+
+```json
+{
+  "body": "2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5",
+  "attributes": {
+    "level": "INFO",
+    "user_id": "123",
+    "ip": "192.168.1.5"
+  }
+}
+```
+
+#### Key Observations
+
+- The original `body` remains unchanged.
+- New fields `level`, `user_id`, and `ip` are now available in `attributes`, making them queryable in SigNoz.
+
+## Simulate and Validate
+
+Before deploying, use the **Simulate** feature to test your parser:
+
+1. Click the **"eye" icon** in the actions column for the pipeline to open the Pipeline Preview Dialog.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-step4.webp"
+  alt="Pipeline with the regex parser"
+  caption="Pipeline with the regex parser"
+/>
+
+2. Press the **"Simulate Processing"** button to see the output.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-step5.webp"
+  alt="Pipeline Preview with Sample Logs"
+  caption="Pipeline Preview with Sample Logs"
+/>
+
+3. Click the expand button next to processed log line to view the log details.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-step6.webp"
+  alt="Pipeline Preview with Processed Logs"
+  caption="Pipeline Preview with Processed Logs"
+/>
+
+4. Verify that the extracted attributes (`level`, `user_id`, `ip`) appear correctly.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-step7.webp"
+  alt="Logs after Regex Parser"
+  caption="Logs after Regex Parser with extracted attributes"
+/>
+
+## Deploy the Pipeline
+
+After verifying the simulated logs in Pipeline Preview Dialog, your pipeline is ready.
+
+1. Press the **Save Configuration** button at the bottom of the pipelines list. This will store the latest state of your pipelines and deploy them for pre-processing.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-step8.webp"
+  alt="Save Configuration Button"
+  caption="Save Configuration Button"
+/>
+
+2. You can track the deployment status using the **Change History** tab at the top of pipelines.
+
+<Figure
+  src="/img/docs/logs-management/logs-pipelines/regex-parsing-step9.webp"
+  alt="Pipelines Change History"
+  caption="Pipelines Change History"
+/>
+
+## Final Output
+
+Once deployed, your incoming logs will be transformed automatically.
+
+```json
+{
+  "body": "2025-12-27 10:00:00 [INFO] User 123 logged in from 192.168.1.5",
+  "attributes": {
+    "level": "INFO",
+    "user_id": "123",
+    "ip": "192.168.1.5"
+  }
+}
+```
+
+## Related Guides
+
+- [Parsing JSON logs with JSON Parser](https://signoz.io/docs/logs-pipelines/guides/json/)
+- [Parsing Unstructured Logs with Grok Parser](https://signoz.io/docs/logs-pipelines/guides/grok-parser/)
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Parser not matching any logs
+
+- Use the **Simulate** feature in the pipeline editor to test with real log entries.
+- Check that `Parse From` points to the correct field (`body` vs `attributes.message`).
+- Test patterns with <a href="https://regex101.com/" target="_blank" rel="noopener noreferrer nofollow">regex101</a> (select Go flavor).
+
+### Extracted attributes not appearing
+
+- Ensure the pipeline is **deployed** after saving.
+- Check pipeline order—parsers should run before processors that modify the same fields.
+- Use unique attribute names to avoid conflicts.
+
+### Performance issues with complex patterns
+
+- Replace greedy `.*` with specific patterns like `[^\]]+` where possible to improve performance.
+- Add filter conditions to apply parsers only to relevant logs.
+
+</details>
+
+## Get Help
+
+<GetHelp />

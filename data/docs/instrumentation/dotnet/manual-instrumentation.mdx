@@ -1,0 +1,284 @@
+---
+date: 2026-01-03
+id: dotnet-manual-instrumentation
+title: Manual Instrumentation for .NET
+description: Add OpenTelemetry instrumentation to your .NET application using code for fine-grained control over traces
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+Manual instrumentation gives you programmatic control over OpenTelemetry in your .NET application. Use this approach when you need to create custom spans, add business-specific attributes, or when zero-code automatic instrumentation doesn't cover your use case.
+
+<KeyPointCallout title="Activity and Span in .NET" defaultCollapsed={true}>
+OpenTelemetry uses the terms "Tracer" and "Span", but .NET has its own tracing API that predates OpenTelemetry. In .NET:
+- **ActivitySource** = Tracer
+- **Activity** = Span
+
+OpenTelemetry .NET reuses these existing .NET types, so you'll work with `Activity` objects rather than "Span" objects.
+</KeyPointCallout>
+
+## Prerequisites
+
+- [.NET SDK](https://dotnet.microsoft.com/en-us/download) 5.0 or later
+- A SigNoz Cloud account or self-hosted SigNoz instance
+- Familiarity with the base [.NET instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-dotnet/)
+
+## Step 1. Install dependencies
+
+Add the required packages to your project:
+
+```bash
+dotnet add package OpenTelemetry
+dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol
+dotnet add package OpenTelemetry.Extensions.Hosting
+dotnet add package OpenTelemetry.Instrumentation.AspNetCore
+```
+
+For manual instrumentation, the core dependency is `System.Diagnostics.DiagnosticSource` (included with .NET 5+).
+
+## Step 2. Create an ActivitySource
+
+Create a dedicated class to hold your `ActivitySource`. This is your entry point for creating spans:
+
+```csharp:Instrumentation.cs
+using System.Diagnostics;
+
+public class Instrumentation : IDisposable
+{
+    public const string ActivitySourceName = "MyApp.OrderService";
+    public const string ActivitySourceVersion = "1.0.0";
+
+    public ActivitySource ActivitySource { get; }
+
+    public Instrumentation()
+    {
+        ActivitySource = new ActivitySource(ActivitySourceName, ActivitySourceVersion);
+    }
+
+    public void Dispose()
+    {
+        ActivitySource.Dispose();
+    }
+}
+```
+
+Register it in your DI container:
+
+```csharp:Program.cs
+builder.Services.AddSingleton<Instrumentation>();
+```
+
+## Step 3. Configure OpenTelemetry
+
+Set up the TracerProvider and register your ActivitySource:
+
+```csharp:Program.cs
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<Instrumentation>();
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService("my-dotnet-service"))
+    .WithTracing(tracing => tracing
+        .AddSource(Instrumentation.ActivitySourceName) // Register your ActivitySource
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter(options =>
+        {
+            options.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
+            options.Headers = "signoz-ingestion-key=<your-ingestion-key>";
+        }));
+```
+
+Replace `<region>` and `<your-ingestion-key>` with your SigNoz Cloud values.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Update the endpoint and remove the headers:
+```csharp
+options.Endpoint = new Uri("http://<collector-host>:4317");
+```
+</KeyPointCallout>
+
+## Step 4. Create custom spans
+
+Use `StartActivity()` to create spans. The `using` pattern ensures spans are properly ended:
+
+```csharp:Services/OrderService.cs
+using System.Diagnostics;
+
+public class OrderService
+{
+    private readonly Instrumentation _instrumentation;
+
+    public OrderService(Instrumentation instrumentation)
+    {
+        _instrumentation = instrumentation;
+    }
+
+    public async Task<Order> ProcessOrderAsync(string orderId)
+    {
+        // Start a new span
+        using var activity = _instrumentation.ActivitySource.StartActivity("ProcessOrder");
+
+        // Add attributes
+        activity?.SetTag("order.id", orderId);
+        activity?.SetTag("order.status", "processing");
+
+        // Your business logic here
+        var order = await FetchOrder(orderId);
+
+        activity?.SetTag("order.total", order.Total);
+
+        return order;
+    }
+}
+```
+
+<Admonition type="info">
+Use `activity?` (null-conditional) because `StartActivity()` returns `null` when no listeners are registered or the activity is sampled out.
+</Admonition>
+
+## Step 5. Create nested spans
+
+Child spans automatically link to their parent when you start them within a parent's scope:
+
+```csharp:Services/DiceService.cs
+public int RollDice()
+{
+    using var parentActivity = _instrumentation.ActivitySource.StartActivity("RollDice");
+
+    int total = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        total += RollOnce();
+    }
+
+    parentActivity?.SetTag("dice.total", total);
+    return total;
+}
+
+private int RollOnce()
+{
+    // This creates a child span under the parent
+    using var childActivity = _instrumentation.ActivitySource.StartActivity("RollOnce");
+
+    int result = Random.Shared.Next(1, 7);
+    childActivity?.SetTag("dice.result", result);
+
+    return result;
+}
+```
+
+## Step 6. Add events
+
+Events mark specific moments within a span:
+
+```csharp
+using var activity = _instrumentation.ActivitySource.StartActivity("ProcessPayment");
+
+activity?.AddEvent(new ActivityEvent("PaymentInitiated"));
+
+// Process payment...
+
+activity?.AddEvent(new ActivityEvent("PaymentCompleted", DateTimeOffset.UtcNow,
+    new ActivityTagsCollection
+    {
+        { "transaction.id", "txn_123456" },
+        { "payment.method", "credit_card" }
+    }));
+```
+
+## Step 7. Record errors
+
+Mark spans as failed and attach exception details:
+
+```csharp
+using OpenTelemetry.Trace;
+
+public async Task<Result> RiskyOperationAsync()
+{
+    using var activity = _instrumentation.ActivitySource.StartActivity("RiskyOperation");
+
+    try
+    {
+        var result = await DoSomethingRisky();
+        activity?.SetStatus(ActivityStatusCode.Ok);
+        return result;
+    }
+    catch (Exception ex)
+    {
+        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+        activity?.RecordException(ex);
+        throw;
+    }
+}
+```
+
+The `RecordException` method is an extension method from `OpenTelemetry.Trace` that adds the exception as an event with stack trace details.
+
+## Step 8. Access the current span
+
+Get the active span from anywhere in your code:
+
+```csharp
+var currentActivity = Activity.Current;
+currentActivity?.SetTag("additional.context", "some-value");
+currentActivity?.AddEvent(new ActivityEvent("checkpoint-reached"));
+```
+
+This is useful for adding context from code that doesn't have direct access to the activity.
+
+## Validate
+
+1. Generate traffic by making requests to your application.
+2. Open SigNoz and go to **Services**.
+3. Look for your service name in the list.
+4. Click on your service to view traces, latency, and error rates.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Why don't my custom spans appear?
+
+- Verify your `ActivitySource` name matches what's registered with `AddSource()` in `Program.cs`
+- Ensure the `TracerProvider` is configured before your application starts handling requests
+- Check that traffic actually reaches the instrumented code paths
+
+### Why does `StartActivity()` return null?
+
+- No listener is registered for your `ActivitySource` (check `AddSource()` configuration)
+- The activity was sampled out by your sampler configuration
+- The `TracerProvider` wasn't set up correctly
+
+### How do I debug spans locally?
+
+Add the console exporter:
+
+```bash
+dotnet add package OpenTelemetry.Exporter.Console
+```
+
+```csharp
+.WithTracing(tracing => tracing
+    .AddSource(Instrumentation.ActivitySourceName)
+    .AddConsoleExporter() // Prints spans to console
+    .AddOtlpExporter(/* ... */));
+```
+
+### Why are child spans not linked to parents?
+
+- Ensure you create child activities within the `using` block of the parent
+- Don't use `Task.Run()` or thread pool operations without propagating context
+- For async operations, the context flows automatically if you use `async/await`
+
+</details>
+
+## Next steps
+
+- [Setup alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your traces to get notified on errors and latency

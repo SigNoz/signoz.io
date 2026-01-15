@@ -43,7 +43,7 @@ export default function BlogLayout({
   children,
   toc,
 }: LayoutProps) {
-  const { slug, date, title, tags, readingTime, cta_title, cta_text, relatedArticles } = content
+  const { slug, date, title, tags, readingTime, relatedArticles } = content
   const mainRef = useRef<HTMLElement | null>(null)
   const tocContainerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<string>('')
