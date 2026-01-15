@@ -2439,11 +2439,6 @@ const docsSideNav = [
 
     items: [
       {
-        route: '/docs/llm-community-integrations',
-        label: 'LLM Community Integrations',
-        type: 'doc',
-      },
-      {
         route: '/docs/agno-monitoring',
         label: 'Agno',
         type: 'doc',
