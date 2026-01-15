@@ -76,6 +76,14 @@ import Region from './Region/Region'
 import RegionTable from './Region/RegionTable'
 import { RegionAwarePre, RegionAwareCode } from './Region/RegionAwareComponents'
 
+import CardinalityExplosion from './HighCardinalityData/CardinalityExplosion'
+import MemoryGauge from './HighCardinalityData/MemoryGauge'
+import QueryRace from './HighCardinalityData/QueryRace'
+import SamplingAggregation from './HighCardinalityData/SamplingAggregation'
+import UsersAnalogy from './HighCardinalityData/UsersAnalogy'
+import Tooltip from './ui/Tooltip'
+import DatabaseTable from './HighCardinalityData/DatabaseTable'
+
 export const components: MDXComponents = {
   Region,
   region: Region,
@@ -152,4 +160,11 @@ export const components: MDXComponents = {
   CICDMonitoringListicle,
   AWSMonitoringListicle,
   AWSOneClickListicle,
+  CardinalityExplosion,
+  MemoryGauge,
+  QueryRace,
+  SamplingAggregation,
+  UsersAnalogy,
+  Tooltip,
+  DatabaseTable,
 }

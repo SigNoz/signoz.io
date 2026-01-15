@@ -955,6 +955,16 @@ const docsSideNav = [
                 route: '/docs/instrumentation/javascript/opentelemetry-nuxtjs',
                 label: 'Nuxt.js',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/javascript/nodejs-manual-instrumentation',
+                label: 'Manual Instrumentation',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/javascript/nodejs-selective-instrumentation',
+                label: 'Selective Instrumentation',
+              },
             ],
           },
           {
@@ -1037,40 +1047,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/instrumentation/opentelemetry-cloudflare',
             label: 'Cloudflare Workers',
-          },
-          {
-            type: 'category',
-            isExpanded: false,
-            label: 'Manual Instrumentation',
-            // route: '',
-            // link: {
-            // type: 'doc',
-            // },
-            items: [
-              {
-                type: 'category',
-                isExpanded: false,
-                label: 'JavaScript',
-                // route: '',
-                // link: {
-                // type: 'doc',
-                // },
-                items: [
-                  {
-                    type: 'doc',
-                    label: 'NodeJS',
-                    route:
-                      '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs',
-                  },
-                  {
-                    type: 'doc',
-                    label: 'Enable/disable Instrumentation',
-                    route:
-                      '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation',
-                  },
-                ],
-              },
-            ],
           },
           // {
           //   type: 'category',

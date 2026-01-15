@@ -191,7 +191,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
-        <PageFeedback />
       </Layout>
 
       {/* Render GrafanaVsSigNozFloatingCard if the slug contains Grafana or Prometheus */}

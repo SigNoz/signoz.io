@@ -635,8 +635,18 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/manual-instrumentation/javascript/nodejs/',
-          destination:
-            '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/nodejs-manual-instrumentation/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/nodejs-manual-instrumentation/',
+          permanent: true,
+        },
+        {
+          source:
+            '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation/',
+          destination: '/docs/instrumentation/javascript/nodejs-selective-instrumentation/',
           permanent: true,
         },
         {
