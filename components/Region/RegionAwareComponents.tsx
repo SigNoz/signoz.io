@@ -78,8 +78,8 @@ const processCodeChildren = (children: ReactNode, replacement: string): ReactNod
 }
 
 export const RegionAwarePre = (props: any) => {
-  const { selectedRegion } = useRegion()
-  const replacement = selectedRegion && selectedRegion !== 'none' ? selectedRegion : '<region>'
+  const { region } = useRegion()
+  const replacement = region && region !== 'none' ? region : '<region>'
 
   const modifiedChildren = React.useMemo(() => {
     return processCodeChildren(props.children, replacement)
@@ -89,8 +89,8 @@ export const RegionAwarePre = (props: any) => {
 }
 
 export const RegionAwareCode = (props: any) => {
-  const { selectedRegion } = useRegion()
-  const replacement = selectedRegion && selectedRegion !== 'none' ? selectedRegion : '<region>'
+  const { region } = useRegion()
+  const replacement = region && region !== 'none' ? region : '<region>'
 
   const modifiedChildren = React.useMemo(() => {
     return processCodeChildren(props.children, replacement)

@@ -9,23 +9,32 @@ import { useSearchParams } from 'next/navigation'
 const CustomLink = ({ href, ...rest }: LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>) => {
   const searchParams = useSearchParams()
   const [regionParam, setRegionParam] = useState<string | null>(null)
+  const [cloudRegionParam, setCloudRegionParam] = useState<string | null>(null)
 
   useEffect(() => {
     if (searchParams) {
       setRegionParam(searchParams.get('region'))
+      setCloudRegionParam(searchParams.get('cloud_region'))
     }
   }, [searchParams])
 
   const isInternalLink =
-    (href && (href.startsWith('/') || href.startsWith('.'))) || href.startsWith('https://signoz.io') // Docs has complete URL as href, so we need to check for complete url, this is hardcoded for now
+    (href && (href.startsWith('/') || href.startsWith('.'))) ||
+    (typeof href === 'string' && href.startsWith('https://signoz.io'))
   const isAnchorLink = href && href.startsWith('#')
 
   if (isInternalLink) {
     const isDocsUrl = typeof href === 'string' && href.includes('/docs/')
-    const finalHref =
-      regionParam && isDocsUrl
-        ? `${href}${href.includes('?') ? '&' : '?'}region=${regionParam}`
-        : href
+    let finalHref = href as string
+
+    if (isDocsUrl && regionParam) {
+      const separator = finalHref.includes('?') ? '&' : '?'
+      finalHref = `${finalHref}${separator}region=${regionParam}`
+      if (cloudRegionParam) {
+        finalHref = `${finalHref}&cloud_region=${cloudRegionParam}`
+      }
+    }
+
     return <Link href={finalHref} {...rest} />
   }
 

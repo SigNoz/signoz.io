@@ -5,23 +5,27 @@ import { ChevronDown } from 'lucide-react'
 import { cn } from 'app/lib/utils'
 import { useRegion } from './RegionContext'
 
+interface RegionOption {
+  label: string
+  value: string
+}
+
 export const RegionDropdown = () => {
-  const { regions, selectedRegion, setSelectedRegion, isLoading } = useRegion()
+  const { regions, region, cloudRegion, setRegion, isLoading } = useRegion()
 
-  const allCloudRegions = React.useMemo(() => {
-    const cloudRegions = new Set<string>()
-    regions.forEach((region) => {
-      region.clusters.forEach((cluster) => {
-        cloudRegions.add(cluster.cloud_region)
+  const regionOptions = React.useMemo(() => {
+    const options: RegionOption[] = []
+
+    regions.forEach((r) => {
+      r.clusters.forEach((c) => {
+        options.push({
+          label: `${r.name} - ${c.cloud_region}`,
+          value: `${r.name}_${c.cloud_region}`,
+        })
       })
-
-      // TODO@M: Remove this
-      cloudRegions.add('us-central2')
-      cloudRegions.add('eu-central2')
-      cloudRegions.add('ap-south2')
     })
 
-    return Array.from(cloudRegions)
+    return options
   }, [regions])
 
   if (isLoading) {
@@ -30,13 +34,18 @@ export const RegionDropdown = () => {
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value
-    setSelectedRegion(value)
+    // Parse value to split name and cloud_region
+    const [selectedName, selectedCloudRegion] = value.split('_')
+    setRegion(selectedName, selectedCloudRegion)
   }
+
+  // Construct current selected value
+  const currentValue = region && cloudRegion ? `${region}_${cloudRegion}` : ''
 
   return (
     <div className="relative w-fit min-w-[180px]">
       <select
-        value={selectedRegion || ''}
+        value={currentValue}
         onChange={handleChange}
         className={cn(
           'w-full appearance-none rounded-md border bg-signoz_slate-400 px-3 py-2 pr-8 text-sm text-white shadow-sm outline-none transition-all duration-200',
@@ -45,13 +54,12 @@ export const RegionDropdown = () => {
           'cursor-pointer'
         )}
       >
-        {allCloudRegions.map((region) => (
-          <option key={region} value={region} className="bg-signoz_slate-500">
-            {region}
+        {regionOptions.map((option) => (
+          <option key={option.value} value={option.value} className="bg-signoz_slate-500">
+            {option.label}
           </option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-4 -translate-y-1/2 text-white opacity-50" />
     </div>
   )
 }

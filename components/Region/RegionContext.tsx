@@ -21,8 +21,9 @@ interface RegionResponse {
 
 interface RegionContextType {
   regions: RegionData[]
-  selectedRegion: string | null
-  setSelectedRegion: (region: string | null) => void
+  region: string | null
+  cloudRegion: string | null
+  setRegion: (region: string | null, cloudRegion: string | null) => void
   isLoading: boolean
 }
 
@@ -30,7 +31,8 @@ const RegionContext = createContext<RegionContextType | undefined>(undefined)
 
 export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [regions, setRegions] = useState<RegionData[]>([])
-  const [selectedRegion, setSelectedRegionState] = useState<string | null>(null)
+  const [region, setRegionState] = useState<string | null>(null)
+  const [cloudRegion, setCloudRegionState] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const router = useRouter()
@@ -57,33 +59,63 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     const regionParam = searchParams.get('region')
+    const cloudRegionParam = searchParams.get('cloud_region')
+
     if (regionParam) {
-      setSelectedRegionState(regionParam)
+      setRegionState(regionParam)
+
+      if (cloudRegionParam) {
+        setCloudRegionState(cloudRegionParam)
+      } else if (regions.length > 0) {
+        // If only region is passed, find the region and select first cluster
+        const matchedRegion = regions.find((r) => r.name === regionParam)
+        if (matchedRegion && matchedRegion.clusters.length > 0) {
+          setCloudRegionState(matchedRegion.clusters[0].cloud_region)
+        } else {
+          // If region passed but no match or no clusters, what to do?
+          // Keep it null or default?
+          // If the region exists but no clusters (unlikely), null is safe.
+          // If region doesn't exist in our list, we still set it (maybe it's a new one?)
+          // But we can't infer cloud_region.
+          setCloudRegionState(null)
+        }
+      }
     } else if (regions.length > 0) {
       // Set default region if no param exists and regions are loaded
-      const defaultRegion = regions[0]?.clusters[0]?.cloud_region || 'us-central1'
-      setSelectedRegionState(defaultRegion)
+      const firstRegion = regions[0]
+      const firstCluster = firstRegion?.clusters[0]
+      if (firstRegion && firstCluster) {
+        setRegionState(firstRegion.name)
+        setCloudRegionState(firstCluster.cloud_region)
+      }
     }
   }, [searchParams, regions])
 
-  const setSelectedRegion = (region: string | null) => {
+  const setRegion = (newRegion: string | null, newCloudRegion: string | null) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()))
 
-    if (region) {
-      current.set('region', region)
+    if (newRegion) {
+      current.set('region', newRegion)
     } else {
       current.delete('region')
+    }
+
+    if (newCloudRegion) {
+      current.set('cloud_region', newCloudRegion)
+    } else {
+      current.delete('cloud_region')
     }
 
     const search = current.toString()
     const query = search ? `?${search}` : ''
 
     router.push(`${pathname}${query}`, { scroll: false })
-    setSelectedRegionState(region)
+    setRegionState(newRegion)
+    setCloudRegionState(newCloudRegion)
   }
 
   return (
-    <RegionContext.Provider value={{ regions, selectedRegion, setSelectedRegion, isLoading }}>
+    <RegionContext.Provider value={{ regions, region, cloudRegion, setRegion, isLoading }}>
       {children}
     </RegionContext.Provider>
   )

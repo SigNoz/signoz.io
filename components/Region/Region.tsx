@@ -4,10 +4,10 @@ import React from 'react'
 import { useRegion } from './RegionContext'
 
 const Region = () => {
-  const { selectedRegion } = useRegion()
+  const { region } = useRegion()
 
-  if (selectedRegion) {
-    return <>{selectedRegion}</>
+  if (region) {
+    return <>{region}</>
   }
 
   return <>&lt;region&gt;</>

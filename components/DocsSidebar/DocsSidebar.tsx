@@ -17,6 +17,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const regionParam = searchParams.get('region')
+  const cloudRegionParam = searchParams.get('cloud_region')
   const [sideNav, setSideNav] = useState(docsSideNav)
   const [isClient, setIsClient] = useState(false)
   const [activeRoute, setActiveRoute] = useState<string | null>(null)
@@ -113,6 +114,17 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     })
   }, [pathname])
 
+  const constructHref = (route: string) => {
+    let href = route
+    if (regionParam) {
+      href = `${href}${href.includes('?') ? '&' : '?'}region=${regionParam}`
+      if (cloudRegionParam) {
+        href = `${href}&cloud_region=${cloudRegionParam}`
+      }
+    }
+    return href
+  }
+
   const renderDoc = (doc: Doc) => {
     // Normalize both routes for comparison
     const normalizeRoute = (route: string) => (route.endsWith('/') ? route.slice(0, -1) : route)
@@ -136,7 +148,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
         <Link
-          href={regionParam ? `${doc.route}?region=${regionParam}` : doc.route}
+          href={constructHref(doc.route)}
           className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
             isGetStarted
               ? `font-medium ${
@@ -171,13 +183,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
 
     return (
       <li key={category.label} className="group mx-2 my-1">
-        <Link
-          href={
-            regionParam && category.route
-              ? `${category.route}?region=${regionParam}`
-              : category.route || ''
-          }
-        >
+        <Link href={category.route ? constructHref(category.route) : ''}>
           <div
             onClick={() => toggleIsExpandedByLabel(category.label)}
             className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
