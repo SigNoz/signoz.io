@@ -2,25 +2,25 @@
 
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
+import type { Comparison, Authors } from 'contentlayer/generated'
 import ArticleLayout, { TocItemProps } from './ArticleLayout'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 
-// Extend the Blog type to include CTA fields
-interface BlogContent extends Blog {
+// Extend the Comparison type to include CTA fields
+interface ComparisonContent extends Comparison {
   cta_title?: string
   cta_text?: string
 }
 
 interface LayoutProps {
-  content: CoreContent<BlogContent>
+  content: CoreContent<ComparisonContent>
   authorDetails: CoreContent<Authors>[]
   authors: string[]
   children: ReactNode
   toc: TocItemProps[]
 }
 
-export default function BlogLayout({
+export default function ComparisonsLayout({
   content,
   authorDetails,
   authors,
@@ -33,7 +33,7 @@ export default function BlogLayout({
       authorDetails={authorDetails}
       authors={authors}
       toc={toc}
-      contentType="blog"
+      contentType="comparison"
       showNewsletter={true}
       showRelatedArticles={true}
     >

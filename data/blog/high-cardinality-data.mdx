@@ -1,232 +1,295 @@
 ---
-
-title: What is High Cardinality Data?
+title: What is High Cardinality? Explained with Examples
 slug: high-cardinality-data
-date: 2024-09-05
-tags: [Opentelemetry, observability]
-authors: [nicamellifera]
-description: Defining what High Cardinality Data is and isn't, with some examples.
+date: 2026-01-15
+tags: [Observability, Databases]
+authors: [yuvraj]
+description: High cardinality crashes Prometheus servers and inflates cloud bills. Learn what causes cardinality explosion, how different databases handle it, and strategies to manage it.
 image: /img/blog/2023/06/high_cardinality_cover-min.jpg
 hide_table_of_contents: false
 keywords: [observability,opentelemetry,high cardinality]
-
 ---
 
-While reading a GitHub issue on the [OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) about trying to send <a href="https://github.com/open-telemetry/opentelemetry-collector/discussions/5308" rel="noopener noreferrer nofollow" target="_blank">two versions of a metric</a>, one with higher and one with lower cardinality, it occurred to me that we’ve never written on this blog about what *is* high-cardinality data exactly and how it matters to your [OpenTelemetry observability](https://signoz.io/blog/opentelemetry-use-cases/).
-
-High-cardinality data refers to a dataset or data attribute that contains a large number of distinct values relative to the total number of data points. In other words, it refers to data with a large number of unique or distinct entries compared to the overall size of the dataset.
+High cardinality is the silent killer of monitoring systems. It often crashes Prometheus servers, inflates cloud bills, and turns simple queries into minute-long waits. This guide explains why it happens and what you can do about it.
 
-## What is High Cardinality Data?
+## First, What is Cardinality?
 
-High cardinality data is characterized by a large number of distinct values within a dataset. In database terms, cardinality refers to the uniqueness of data values in a column. A high cardinality column contains many unique values, while a low cardinality column has few unique values.
+Cardinality is simply the count of unique values in a set.
 
-Examples of high cardinality fields include:
+Consider a simple example: you have 40 users in your system. Each user can be described by different attributes: their region, their user ID, or just counted as part of the whole.
 
-- User IDs in a large application
-- Timestamps in time-series data
-- IP addresses in network logs
-- Product SKUs in an e-commerce database
+The interactive below shows the same 40 users. Try grouping them in different ways and watch how the number of groups changes.
 
-To illustrate, consider a database of customer orders:
+<UsersAnalogy />
 
-- Low cardinality: Order status (e.g., "Pending," "Shipped," "Delivered")
-- High cardinality: Order ID (unique for each order)
+Count everyone together and you get 1 group, group by region and you get 4, and when you group by user ID and you get 40 groups, one for each unique user.
 
-[High cardinality data](https://signoz.io/blog/high-cardinality-data/#what-makes-high-cardinality-data) provides granular information but poses challenges for storage, indexing, and querying.
+That is cardinality: the number of unique values. Region has low cardinality (4). User ID has high cardinality (40, and it grows with every new user).
 
+## Low Cardinality vs. High Cardinality
 
-## What makes High Cardinality Data?
+Think of a database like a filing cabinet.
 
-1. **Uniqueness of values:** <br></br>
-High-cardinality data exhibits a wide variety of unique values. Each value occurs relatively infrequently compared to the total number of data points. For example, if you have a dataset of user logs, a high-cardinality attribute could be the IP address, where each IP address is unique or occurs with low frequency.
-2. **Granularity and dimensionality:**<br></br>
-High-cardinality data often represents attributes or dimensions that provide detailed information and granularity.
+If you organize files by **region**, you have 4 drawers: US-East, US-West, EU, and APAC. Finding a file is easy, you just open the right drawer and grab the file. The database can do this quickly because there are only 4 places to look.
 
-Here are some examples of high-cardinality data attributes in JSON format:
+Now imagine organizing by **user ID**. With 40 users, you need 40 drawers. With a million users, you need a million drawers. The filing cabinet becomes a warehouse. Finding something is still possible, but the system is working much harder to keep track of where everything is.
 
-1. User IDs:
-    
-    ```
-    {
-    "user_id": "ABC123",
-    "name": "John Doe",
-    "email": "john.doe@example.com",
-    ...
-    }
-    
-    ```
-    
-    When tracking UserID’s, there’s very little statistical summary that can be useful. While it might be interesting to see the top 10 user ID’s that have transactions on our service, it’s likely that there’s a ‘long tail’ where every single user ID occurs 1-3 times.
-    
-2. Device IDs:
-    
-    ```
-    {
-    "device_id": "DEVICE987",
-    "type": "Mobile",
-    "manufacturer": "Apple",
-    ...
-    }
-    
-    ```
-    
-    The capture of a metric like `device_id` can point out how critical it is that we understand the significance of metrics rather than just looking at the data as is. Depending on context, `device_id` might be a unique value for each device, or only unique by model. If the latter, we could offer quite useful summaries of this high cardinality data if we use a lookup table to group devices by year, size, etc.
-    
-3. Event types:
-    
-    ```
-    {
-    "event_type": "click",
-    "timestamp": "2023-06-25T10:15:00Z",
-    ...
-    }
-    
-    ```
-    
-    Timestamps are a prime example of high-cardinality data. While you can make plenty of statistical calculations about event time if your query language supports it, you can’t make simple statements about averages, sums, or median values.
-    
-    These examples demonstrate attributes that can have a large number of distinct values. Each attribute, such as user IDs, SKUs, device IDs, locations, tags, event types, etc., may have a high cardinality due to the variety and uniqueness of values.
-    
+This is the core issue with high cardinality: more unique values means more things for the database to track, organize, and search through. 
 
-### The Importance of Dimensionality in High Cardinality Data
+The table below shows different columns of a database table with varying level of cardinality, try hovering over headers to see their cardinality estimates:
 
-Dimensionality refers to the number of attributes or features in a dataset. High cardinality often correlates with high dimensionality, as datasets with many unique values typically have numerous attributes.
+<DatabaseTable />
 
-The relationship between cardinality and dimensionality impacts data analysis:
+Neither is inherently "bad." High cardinality fields like `user_id` are incredibly useful for debugging, you want to know *which specific user* had a problem. The challenge is that they require different strategies to handle efficiently. More on that later.
 
-1. Increased complexity: More dimensions mean more possible combinations of values.
-2. Sparse data: High-dimensional spaces often contain sparse data points.
-3. Curse of dimensionality: As dimensions increase, the volume of the space increases so fast that available data becomes sparse.
+## The Cardinality Explosion
 
-Despite challenges, high dimensionality in observability data can provide rich insights. It allows for more detailed analysis of system behavior, user patterns, and anomaly detection.
+To understand cardinality explosion, you first need to understand how <Tooltip text="metrics" content="A metric is a measurement collected over time, such as CPU usage, request count, or error rate." link="https://signoz.io/blog/opentelemetry-metrics-with-examples/" />  work in time-series databases like Prometheus.
 
-## Benefits of High Cardinality Data
+A metric is not just "CPU usage." A metric is CPU usage *with <Tooltip text="labels" content="Labels are key-value pairs attached to metrics that provide additional context, like host=server-1 or region=us-east." /> attached*. These labels allow you to slice and filter your metrics, but each unique combination of labels creates a separate data stream to track.
 
-Why include high-cardinality attributes? There are a number of reasons to make sure you’re grabbing unique or at least low-frequency values for some of your metrics.
+Here is how it works:
 
-### Analytical significance
+- **One server:** A metric like `cpu_usage` with a single label `host=server-1` creates 1 data stream.
+- **Two servers:** Add another host and you have 2 streams: one for `server-1`, one for `server-2`.
+- **Add users:** If you also label by `user_id`, the count multiplies. With 2 servers and 3 users, you jump to 6 streams.
 
-High-cardinality data is often significant for analytics and data exploration. Analyzing and aggregating high-cardinality attributes can provide insights into user behavior, patterns, preferences, or other dimensions of interest. For example, analyzing user IDs can help understand individual user actions and behavior patterns.
+<div className="bg-zinc-800 text-zinc-100 rounded-lg p-6 my-8 font-mono text-sm overflow-x-auto">
+  <div className="mb-4">
+    <span className="text-zinc-500"># One server = 1 time series</span><br/>
+    <span className="text-blue-400">cpu_usage</span>{`{`}<span className="text-green-400">host</span>=<span className="text-yellow-300">"server-1"</span>{`}`}
+  </div>
+  <div className="mb-4">
+    <span className="text-zinc-500"># Two servers = 2 time series</span><br/>
+    <span className="text-blue-400">cpu_usage</span>{`{`}<span className="text-green-400">host</span>=<span className="text-yellow-300">"server-1"</span>{`}`}<br/>
+    <span className="text-blue-400">cpu_usage</span>{`{`}<span className="text-green-400">host</span>=<span className="text-yellow-300">"server-2"</span>{`}`}
+  </div>
+  <div>
+    <span className="text-zinc-500"># Now add user_id... this explodes fast</span><br/>
+    <span className="text-blue-400">cpu_usage</span>{`{`}<span className="text-green-400">host</span>=<span className="text-yellow-300">"server-1"</span>, <span className="text-red-400">user_id</span>=<span className="text-yellow-300">"123"</span>{`}`}<br/>
+    <span className="text-blue-400">cpu_usage</span>{`{`}<span className="text-green-400">host</span>=<span className="text-yellow-300">"server-1"</span>, <span className="text-red-400">user_id</span>=<span className="text-yellow-300">"456"</span>{`}`}<br/>
+    <span className="text-blue-400">cpu_usage</span>{`{`}<span className="text-green-400">host</span>=<span className="text-yellow-300">"server-2"</span>, <span className="text-red-400">user_id</span>=<span className="text-yellow-300">"123"</span>{`}`}<br/>
+    <span className="text-zinc-500">... and so on for every user</span>
+  </div>
+</div>
 
-### High Cardinality for High Value Transactions
+With 2 servers and 1,000 users, you now have 2 × 1,000 = **2,000 <Tooltip text="time series" content="A time series is a sequence of data points collected for a specific metric and label combination over time. Each unique combination of labels creates a separate time series." />** from a single metric.
 
-I remember supporting the observability configuration for an enterprise client, in this case a B2B bank. They were asking for alerts any time a single transaction took more than 5 minutes.
+Each unique combination of label values creates a new time series and as we add more labels, the number of time series *multiply*. The formula is simple:
 
-While we worked to support their needs, it took me a while to realize that every transaction of this type was a payment of more than a million dollars! When every single transaction has a business impact, it’s critical to capture as much information as possible.
+<p className="text-lg text-zinc-300 leading-relaxed mb-8 text-center font-mono bg-zinc-800 py-4 rounded-lg">
+  Total Series = Label₁ × Label₂ × Label₃ × ...
+</p>
 
-In these cases low-cardinality data can become much less useful. It doesn’t matter if our average response time is fine if our most high-value client isn’t having a good experience.
+A single metric with four labels can theoretically explode into billions of time series. Try it below by clicking each label to activate it and watch the count grow.
 
-## Challenges with High Cardinality Data
+<CardinalityExplosion />
 
-- **Indexing challenges:**<br></br>
-Storing and indexing high-cardinality data can present challenges. Traditional indexing techniques, such as B-tree indexes, may not be efficient for high-cardinality attributes because the index size would be too large, resulting in slower query performance.
-- **Memory and storage considerations:**<br></br>
-Storing high-cardinality data may require additional memory and storage resources compared to low-cardinality data. The increased number of unique values can contribute to larger index sizes, more memory consumption, and potentially increased storage requirements.
-- **Lack of high-level metrics:**<br></br>
-This one is counter-intuitive; if you’re storing SKU’s of course there’s not an ‘average’ SKU, but when you’re able to present high-level metrics like average request time, most commonly used geo area, etc, it can stand out that there’s no way to present an average or even most-frequent value meaningfully. In my experience working with [APM tools](https://signoz.io/blog/open-source-apm-tools/) this came up! high-level dashboards would display ‘most frequent’ values for metrics, but on closer inspection the value had occurred three times over 2 million rows. This meant things like the ‘Number 1 userID’ on all transactions represented 0.000001% of all transactions.
 
-## Why High Cardinality Data Matters in Modern Applications
+## How High Cardinality Kills Query Performance
 
-High cardinality data plays a crucial role in various modern applications:
+Databases use something called an <Tooltip text="index" content="A lookup table that lets databases jump straight to data without scanning everything. Bigger indexes use more memory." />  to find data quickly. Think of it like the alphabetical tabs in a phone book, instead of reading every page to find "Smith," you jump straight to the "S" section.
 
-1. Time-series databases: Essential for storing and analyzing data points with unique timestamps.
-2. Analytics precision: Enables granular analysis of user behavior, system performance, and business metrics.
-3. Industrial IoT: Facilitates tracking of individual sensors and devices in large-scale deployments.
-4. Decision-making: Provides detailed insights for data-driven decision-making in business and technology.
+Indexes work beautifully when there are a small number of categories to organize by. A phone book for a small town is thin and fast to search. But a phone book for the entire world? It becomes impractical.
 
-For example, in e-commerce, high cardinality data allows for personalized product recommendations based on individual user behavior and preferences.
+When you query by a low-cardinality field like `status=200`, the database looks up "200" in the index and immediately finds all matching rows. Fast.
 
-## The Impact of High Cardinality on Time-Series Databases
+When you query by a high-cardinality field like `user_id=abc123`, the index still works but it has millions of entries to manage. This means finding your specific user requires navigating a massive index structure, which takes more time and memory.
 
-Time-series databases face unique challenges with high cardinality data:
+Watch the race below - both queries search the same dataset, but one filters by status code (~50 unique values) and the other by user ID (1 million unique values).
 
-- Increased write amplification: More unique series require more write operations.
-- Query performance degradation: Searching across numerous unique series can slow down queries.
-- Higher memory usage: Indexing high cardinality data consumes more memory.
+<QueryRace />
 
-Different time-series databases handle high cardinality data differently:
+The low-cardinality query uses a compact index and returns almost instantly. The high-cardinality query must work through a much larger index structure. In production, this difference cascades, the slow queries block other queries, consume CPU, and can spiral into a full outage.
 
-- InfluxDB uses a Time-Structured Merge Tree (TSM) to efficiently store and query high cardinality data.
-- TimescaleDB leverages PostgreSQL's indexing capabilities to manage high cardinality fields.
+This is why observability vendors often charge by cardinality as high cardinality genuinely costs more in infrastructure (more memory for indexes, more CPU for queries, more storage for data).
 
-Optimizing time-series data with high cardinality often involves trade-offs between query performance and data retention. Strategies include:
+## When Prometheus Runs Out of Memory
 
-1. Downsampling: Aggregating data points over time to reduce cardinality.
-2. Selective indexing: Carefully choosing which fields to index based on query patterns.
-3. Partitioning: Dividing data into smaller, more manageable chunks.
+<Tooltip text="Prometheus" content="A popular open-source monitoring and alerting toolkit for time-series metrics." link="https://signoz.io/guides/what-is-prometheus-for-monitoring/" />  keeps its active index entirely in memory. This is what makes it fast, but it is also its weakness when cardinality grows.
 
-## Solutions and Best Practices for Managing High Cardinality Data
+Here is what typically happens when high-cardinality labels are introduced:
 
-To effectively manage high cardinality data, consider these approaches:
+1. You add a label like `user_id` to a metric
+2. Each unique user ID creates a new time series
+3. Assuming each time series requires ~3-4 KB of memory ([source](https://www.robustperception.io/why-does-prometheus-use-so-much-ram/))
+4. With 1 million users, that is 3-4 GB of RAM, just for one metric
+5. The container runs out of memory and gets killed (OOM)
+
+Drag the slider below to specific user counts and watch how high-cardinality labels consume RAM.
+
+<MemoryGauge />
+
+ <Tooltip text="OOM (out-of-memory)" content="An Out of Memory (OOM) state occurs when the environment (might be the operating system, container, or application runtime) attempts to allocate memory but none is available." link="https://signoz.io/guides/what-is-oom/" />  kills are the most common symptom of cardinality explosion. The container gets terminated mid-operation, potentially corrupting the <Tooltip text="Write-Ahead Logging (WAL)" content="Write-Ahead Logging (WAL) is a database feature that ensures data durability by writing transactions to a log before applying them to the database." />  and you lose recent data. Teams often discover the problem only after losing visibility during an incident — exactly when they needed monitoring most.
+
+The Reddit threads are full of these stories: "I added a request_id label for debugging and my Prometheus crashed overnight." "Why does my memory usage spike every deploy?" (Answer: new <Tooltip text="pod" content="The smallest deployable unit in Kubernetes, representing one or more containers running together." link="https://signoz.io/guides/kubernetes-pod/" />  IDs creating new series with every restart.)
+
+<Figure src="/img/blog/2026/01/high-cardinality-data-reddit.webp" caption="Example of a user hitting OOM in Thanos (the query layer that reads and aggregates Prometheus data), triggered by high-cardinality per-pod metrics over large time ranges." alt="Reddit user describing Thanos query process OOM when viewing large time ranges for per-pod metrics; Grafana keeps old pod series; suggests recording rules to drop the pod label." />
+
+## How Different Databases Handle High Cardinality
+
+We have already seen why time-series databases like Prometheus struggle with high cardinality as their in-memory <Tooltip text="inverted index" content="A mapping from content (like label values) to its location in the data, enabling fast lookups." />  grows with every unique label combination until the server runs out of RAM but Prometheus is not the only option. Let us look at how different database architectures handle this problem.
+
+### Time-Series Databases (Prometheus, InfluxDB)
+
+TSDBs use an **inverted index**, a data structure that maps each unique label value to a list of matching time series. Think of it like a reverse lookup table: instead of "row → labels," it stores "label → rows."
+
+This is extremely fast for low-cardinality queries like `status=200`. The database looks up "200" in the index and immediately retrieves all matching series.
+
+The problem: this index must fit in memory. With 10 million unique `user_id` values, the index itself consumes gigabytes of RAM before you even store any actual data. When memory runs out, the database crashes.
+
+Note: InfluxDB introduced [TSI](https://docs.influxdata.com/influxdb/v1/concepts/time-series-index/) specifically to move the time-series index to disk (memory-mapped) and reduce RAM as the limiting factor, though high series cardinality can still hurt performance and memory.
+
+### Row-Oriented Databases (PostgreSQL, MySQL)
+
+Traditional relational databases store data **row by row**. All the columns for a single row are stored together on disk, one after another.
+
+<div className="bg-zinc-800 rounded-lg p-6 my-8 font-mono text-sm overflow-x-auto">
+  <div className="text-zinc-500 mb-3"># How a row store physically stores data:</div>
+  <div className="space-y-1 text-zinc-300">
+    <div className="flex gap-2 flex-wrap">
+      <span className="text-zinc-500">Row 1:</span>
+      <span className="bg-blue-900/30 px-2 rounded">timestamp</span>
+      <span className="bg-green-900/30 px-2 rounded">user_id</span>
+      <span className="bg-yellow-900/30 px-2 rounded">status</span>
+      <span className="bg-purple-900/30 px-2 rounded">latency</span>
+    </div>
+    <div className="flex gap-2 flex-wrap">
+      <span className="text-zinc-500">Row 2:</span>
+      <span className="bg-blue-900/30 px-2 rounded">timestamp</span>
+      <span className="bg-green-900/30 px-2 rounded">user_id</span>
+      <span className="bg-yellow-900/30 px-2 rounded">status</span>
+      <span className="bg-purple-900/30 px-2 rounded">latency</span>
+    </div>
+    <div className="flex gap-2 flex-wrap">
+      <span className="text-zinc-500">Row 3:</span>
+      <span className="bg-blue-900/30 px-2 rounded">timestamp</span>
+      <span className="bg-green-900/30 px-2 rounded">user_id</span>
+      <span className="bg-yellow-900/30 px-2 rounded">status</span>
+      <span className="bg-purple-900/30 px-2 rounded">latency</span>
+    </div>
+  </div>
+</div>
 
-1. Efficient indexing techniques:
-    - B-trees: Optimal for range queries on high cardinality data.
-    - Inverted indexes: Useful for full-text search in high cardinality text fields.
-2. Data modeling strategies:
-    - Denormalization: Storing redundant data to improve query performance.
-    - Bucketing: Grouping similar values to reduce cardinality.
-3. Aggregation and downsampling:
-    - Pre-aggregation: Calculating and storing aggregate values for common queries.
-    - Time-based downsampling: Reducing data resolution over time.
-4. Columnar storage:
-    - Leveraging column-oriented databases for improved compression and query performance on high cardinality data.
+Row stores don't create a new time series per label-set, so they avoid the index explosion problem. However, inserts still maintain secondary indexes (e.g., B-trees), which adds write overhead. The bigger issue for row stores is **entropy**.
 
-### Observability Tools for High Cardinality Data
+When columns with very different data types and patterns are stored together (timestamps next to random UUIDs next to short status codes), the data stream becomes chaotic. This chaos makes <Tooltip text="compression" content="Storing data in less space by finding patterns. High-cardinality columns have no patterns, so they don't compress well." />  nearly impossible. A billion random `user_id` values cannot be compressed efficiently because there are no patterns to exploit.
 
-Observability is crucial for understanding system behavior in distributed systems with high cardinality data. [SigNoz](https://signoz.io/docs/introduction/), an open-source observability platform, offers powerful capabilities for handling high cardinality data:
+Apart from compression issues, doing analytical queries in row stores also suffers from high I/O. To answer "What is the average latency for user X?" the database must read entire rows, including columns you do not need, just to extract the latency values. This wastes enormous amounts of I/O.
 
-- Efficient data ingestion and storage optimized for high cardinality fields.
-- Advanced querying and visualization tools for exploring high-dimensional data.
-- Anomaly detection and alerting based on high cardinality metrics and traces.
+### Columnar Databases (ClickHouse, Apache Parquet)
 
-<GetStartedSigNoz />
+Columnar stores flip the storage model: instead of storing rows together, they store **each column separately**.
 
-Compared to traditional monitoring solutions, SigNoz provides better scalability and performance for high cardinality scenarios, enabling deeper insights into complex systems.
+<div className="bg-zinc-800 rounded-lg p-6 my-8 font-mono text-sm overflow-x-auto">
+  <div className="text-zinc-500 mb-4"># How a column store physically stores data:</div>
+  <div className="flex gap-6 text-zinc-300 justify-start">
+    <div className="flex flex-col items-center">
+      <span className="text-zinc-500 text-xs mb-2 font-semibold">timestamp</span>
+      <div className="flex flex-col gap-1">
+        <span className="bg-blue-900/30 px-3 py-1 rounded text-center">t1</span>
+        <span className="bg-blue-900/30 px-3 py-1 rounded text-center">t2</span>
+        <span className="bg-blue-900/30 px-3 py-1 rounded text-center">t3</span>
+        <span className="bg-blue-900/30 px-3 py-1 rounded text-center">t4</span>
+        <span className="bg-blue-900/30 px-3 py-1 rounded text-center">...</span>
+      </div>
+    </div>
+    <div className="flex flex-col items-center">
+      <span className="text-zinc-500 text-xs mb-2 font-semibold">user_id</span>
+      <div className="flex flex-col gap-1">
+        <span className="bg-green-900/30 px-3 py-1 rounded text-center">abc</span>
+        <span className="bg-green-900/30 px-3 py-1 rounded text-center">xyz</span>
+        <span className="bg-green-900/30 px-3 py-1 rounded text-center">def</span>
+        <span className="bg-green-900/30 px-3 py-1 rounded text-center">ghi</span>
+        <span className="bg-green-900/30 px-3 py-1 rounded text-center">...</span>
+      </div>
+    </div>
+    <div className="flex flex-col items-center">
+      <span className="text-zinc-500 text-xs mb-2 font-semibold">status</span>
+      <div className="flex flex-col gap-1">
+        <span className="bg-yellow-900/30 px-3 py-1 rounded text-center">200</span>
+        <span className="bg-yellow-900/30 px-3 py-1 rounded text-center">200</span>
+        <span className="bg-yellow-900/30 px-3 py-1 rounded text-center">500</span>
+        <span className="bg-yellow-900/30 px-3 py-1 rounded text-center">200</span>
+        <span className="bg-yellow-900/30 px-3 py-1 rounded text-center">...</span>
+      </div>
+    </div>
+    <div className="flex flex-col items-center">
+      <span className="text-zinc-500 text-xs mb-2 font-semibold">latency</span>
+      <div className="flex flex-col gap-1">
+        <span className="bg-purple-900/30 px-3 py-1 rounded text-center">45</span>
+        <span className="bg-purple-900/30 px-3 py-1 rounded text-center">52</span>
+        <span className="bg-purple-900/30 px-3 py-1 rounded text-center">1200</span>
+        <span className="bg-purple-900/30 px-3 py-1 rounded text-center">38</span>
+        <span className="bg-purple-900/30 px-3 py-1 rounded text-center">...</span>
+      </div>
+    </div>
+  </div>
+</div>
 
-## Future Trends in High Cardinality Data Management
+This layout solves both problems we discussed:
 
-As data volumes and complexity continue to grow, several trends are emerging in high cardinality data management:
+*   **No postings index in RAM:** Columnar systems still use indexes (e.g., primary key/data-skipping), but they usually rely more on compressed column scans than a per-label postings index held fully in RAM.
+*   **Better compression:** Values of the same type are stored together. A column of `status` codes (200, 200, 200, 500, 200...) compresses beautifully because there are patterns. <Tooltip text="Dictionary encoding" content="A compression technique that replaces repeated values with shorter codes. Instead of storing 'user_abc123' a million times, the database stores it once in a dictionary and uses a small number to reference it." /> helps when values repeat often, though it works best with moderate cardinality rather than millions of unique values.
+*   **Efficient scans:** To calculate average latency, the database reads *only* the latency column. The `user_id` and other columns stay on disk, untouched.
 
-1. Advanced database technologies:
-    - Vector databases for efficient similarity search in high-dimensional spaces.
-    - Graph databases for managing complex relationships in high cardinality data.
-2. Machine learning approaches:
-    - Dimensionality reduction techniques like t-SNE and UMAP for visualizing high-dimensional data.
-    - Anomaly detection algorithms designed for high cardinality scenarios.
-3. Emerging use cases:
-    - Edge computing generating vast amounts of high cardinality data from IoT devices.
-    - Blockchain and distributed ledger technologies producing high cardinality transaction data.
-4. Evolution of data storage and analysis:
-    - Serverless data platforms for scalable processing of high cardinality data.
-    - Quantum computing potential for handling complex, high-dimensional datasets.
+This is why modern analytics databases like <Tooltip text="ClickHouse" content="An open-source columnar database designed for fast analytics over large datasets." />  can handle billions of unique values that would crash a Prometheus server. They trade the instant index lookup for fast column scans, and with modern SSDs and vectorized CPU instructions, those scans are surprisingly quick.
 
-## Conclusions
+This architectural difference explains why <Tooltip text="SigNoz" content="SigNoz is an all-in-one observability platform built from the grounds up to be OpenTelemetry native." link="https://signoz.io" />  (built on ClickHouse) can handle high-cardinality data that would bring down a traditional TSDB. For queries like "show me p99 latency grouped by service," columnar stores scan a single compressed column and vectorize the computation while an inverted-index TSDB must touch index entries for every matching series.
 
-Managing high-cardinality data efficiently often involves careful consideration of storage strategies, indexing techniques, and data modeling approaches. It's important to strike a balance between capturing the necessary granularity of data and optimizing performance and resource utilization for analysis and querying purposes.
+The tradeoff: TSDBs excel at real-time alerting on low-cardinality metrics because index lookups are instant. Columnar stores excel at analytical queries over high-cardinality data where you need to scan and aggregate. Choosing the right tool depends on your primary use case.
 
-High-cardinality data also comes with considerations, such as increased storage requirements, data management complexities, and potential privacy concerns. Platform teams should carefully evaluate the benefits and costs associated with storing high-cardinality data and implement appropriate data retention policies to ensure efficient and responsible data usage.
+## How Cardinality Affects Metrics, Logs, and Traces
 
-## FAQs
+High cardinality impacts each observability pillar differently:
 
-### What's the difference between high cardinality and high dimensionality?
+### Metrics
 
-High cardinality refers to many unique values within a single attribute, while high dimensionality involves many attributes or features in a dataset. They often occur together but are distinct concepts.
+Metrics suffer the most. Every unique label combination creates a time series that must be tracked continuously. The golden rule: **never use unbounded values as metric labels**. If you need per-user data, use traces or logs instead.
 
-### How does high cardinality affect database performance?
+### Logs
 
-High cardinality can slow down queries, increase storage requirements, and complicate indexing. It may lead to longer search times and higher resource usage, especially in large datasets.
+Logs handle high cardinality better because they are naturally event-oriented. Each log line is independent and there is no ongoing "series" to maintain. The challenge is query efficiency: searching for a specific `user_id` in billions of logs requires good indexing or brute-force scanning. Columnar stores shine here.
 
-### Can you provide examples of high cardinality data in real-world applications?
+### Traces
 
-Examples include user IDs in social media platforms, GPS coordinates in mapping applications, and unique product identifiers in e-commerce systems. Each instance represents a field with numerous unique values.
+<Tooltip text="Traces" content="Records of a request's path through distributed services, showing timing and causality across components." link="https://signoz.io/blog/opentelemetry-tracing/" />  are designed for high cardinality. Each trace has a unique `trace_id`, and spans carry rich context. The tradeoff is volume: you cannot keep every trace at scale. This is where sampling strategies become essential that is you keep representative samples, prioritize errors and slow requests, aggregate the rest.
 
-### What are the best practices for designing schemas with high cardinality fields?
+## Strategies for Managing High Cardinality
 
-Best practices include:
+You have two main options for taming high cardinality: **aggregation** and **sampling**. They serve different use cases and make different tradeoffs.
 
-1. Using appropriate data types to minimize storage.
-2. Carefully selecting indexes based on query patterns.
-3. Considering denormalization for frequently accessed data.
-4. Implementing partitioning strategies to manage large datasets.
-5. Employing columnar storage for analytical workloads.
+Toggle between the modes below to see how each strategy transforms the same raw data.
 
+<SamplingAggregation /> 
+
+**Aggregation** is best for metrics. Instead of tracking latency for each individual user, group latency values into ranges (like 0-100ms, 100-500ms, 500ms+) using <Tooltip text="histograms" content="A metric type that counts observations falling into predefined ranges or buckets, giving you distribution insights without storing every individual value." />. Instead of counting requests per `container_id`, count per service. You lose individual data points but keep statistical accuracy.
+
+**Sampling** is best for traces. Keep 1% of successful requests, 100% of errors, and 100% of slow requests. Sampling gives you full detail for the requests you keep while dramatically reducing volume.
+
+These strategies are not mutually exclusive. Use aggregated metrics for dashboards and alerting, sampled traces for debugging, and full logs for compliance. 
+
+## The Takeaway
+
+High cardinality is a fundamental constraint, not a bug to fix. Every unique value has a cost and the question becomes whether that cost is worth it for your use case or not.
+
+A few practical rules:
+
+*   **For metrics:** Never use unbounded label values. If you are tempted to add `user_id` as a label, use traces instead.
+*   **For logs:** Include high-cardinality fields freely, but choose a storage engine that handles them efficiently (columnar > inverted index).
+*   **For traces:** Embrace high cardinality but implement smart sampling. Keep errors and slow requests at 100%, sample successes aggressively.
+*   **For architecture:** If you expect high cardinality, choose columnar stores like ClickHouse over traditional TSDB architectures.
+
+Understanding cardinality helps you make better decisions about what data to collect, how to structure it, and which tools to use. The monitoring system that never crashes is the one designed with cardinality in mind from the start.
+
+## Handling High Cardinality with SigNoz
+
+If you are looking for an observability platform that handles high-cardinality data without the memory constraints of traditional TSDBs, [SigNoz](https://signoz.io) is built for exactly that. Powered by ClickHouse's columnar architecture, SigNoz handles metrics, traces, and logs at scale while keeping costs predictable.
+
+### Getting Started with SigNoz
+
+You can choose between various deployment options in SigNoz. The easiest way to get started with SigNoz is [SigNoz cloud](https://signoz.io/teams/). We offer a 30-day free trial account with access to all features.
+
+Those who have data privacy concerns and can't send their data outside their infrastructure can sign up for either [enterprise self-hosted or BYOC offering](https://signoz.io/contact-us/).
+
+Those who have the expertise to manage SigNoz themselves or just want to start with a free self-hosted option can use our [community edition](https://signoz.io/docs/install/self-host/).
