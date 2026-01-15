@@ -89,6 +89,7 @@ function transformStrapiArticle(article: any): HubDoc {
     readingTime: { text: article.readingTime?.text || '5 min read' },
     authors:
       article.authors?.map((author: any) => ({
+        ...author,
         name: author.name,
         image_url: author.image_url || author.avatar,
       })) || [],
