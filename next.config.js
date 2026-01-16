@@ -1223,6 +1223,11 @@ module.exports = () => {
           destination: '/docs/logs-management/send-logs/python-logs/',
           permanent: true,
         },
+        {
+          source: '/docs/llm-community-integrations/',
+          destination: '/docs/llm-observability/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
