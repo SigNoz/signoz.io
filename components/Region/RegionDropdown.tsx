@@ -44,7 +44,11 @@ export const RegionDropdown = () => {
 
   return (
     <div className="relative w-fit min-w-[180px]">
+      <label htmlFor="region-dropdown" className="text-xs uppercase">
+        Selected Region
+      </label>
       <select
+        id="region-dropdown"
         value={currentValue}
         onChange={handleChange}
         className={cn(

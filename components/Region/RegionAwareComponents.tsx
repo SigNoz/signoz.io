@@ -3,21 +3,31 @@
 import React, { isValidElement, cloneElement, ReactNode } from 'react'
 import Pre from 'pliny/ui/Pre'
 import { useRegion } from './RegionContext'
+import { useIngestionKey } from '@/components/IngestionKey/IngestionKeyContext'
 
-const replaceInText = (text: string, replacement: string) => {
-  return text.replace(/<region>/g, replacement)
+type Replacement = {
+  search: string
+  replace: string
 }
 
-const hasRegionPlaceholder = (node: ReactNode): boolean => {
+const replaceInText = (text: string, replacements: Replacement[]) => {
+  let newText = text
+  replacements.forEach(({ search, replace }) => {
+    newText = newText.split(search).join(replace)
+  })
+  return newText
+}
+
+const hasPlaceholder = (node: ReactNode, placeholders: string[]): boolean => {
   if (typeof node === 'string') {
-    return node.includes('<region>')
+    return placeholders.some((p) => node.includes(p))
   }
   if (Array.isArray(node)) {
-    return node.some(hasRegionPlaceholder)
+    return node.some((child) => hasPlaceholder(child, placeholders))
   }
   if (isValidElement(node)) {
     const props = node.props as { children?: ReactNode }
-    return hasRegionPlaceholder(props.children)
+    return hasPlaceholder(props.children, placeholders)
   }
   return false
 }
@@ -39,36 +49,39 @@ const getTextContent = (node: ReactNode): string => {
   return ''
 }
 
-const processCodeChildren = (children: ReactNode, replacement: string): ReactNode => {
+const processCodeChildren = (children: ReactNode, replacements: Replacement[]): ReactNode => {
+  const placeholders = replacements.map((r) => r.search)
+
   if (typeof children === 'string') {
-    return replaceInText(children, replacement)
+    return replaceInText(children, replacements)
   }
 
   if (Array.isArray(children)) {
     const combinedText = getTextContent(children)
-    if (
-      combinedText.includes('<region>') &&
-      !children.some((child) => hasRegionPlaceholder(child))
-    ) {
-      return replaceInText(combinedText, replacement)
+    const hasAnyPlaceholder = placeholders.some((p) => combinedText.includes(p))
+
+    if (hasAnyPlaceholder && !children.some((child) => hasPlaceholder(child, placeholders))) {
+      return replaceInText(combinedText, replacements)
     }
 
-    return children.map((child) => processCodeChildren(child, replacement))
+    return children.map((child) => processCodeChildren(child, replacements))
   }
 
   if (isValidElement(children)) {
     const props = children.props as { children?: ReactNode }
 
     const combinedText = getTextContent(props.children)
-    if (combinedText.includes('<region>') && !hasRegionPlaceholder(props.children)) {
+    const hasAnyPlaceholder = placeholders.some((p) => combinedText.includes(p))
+
+    if (hasAnyPlaceholder && !hasPlaceholder(props.children, placeholders)) {
       return cloneElement(children as React.ReactElement<any>, {
-        children: replaceInText(combinedText, replacement),
+        children: replaceInText(combinedText, replacements),
       })
     }
 
     if (props.children) {
       return cloneElement(children as React.ReactElement<any>, {
-        children: processCodeChildren(props.children, replacement),
+        children: processCodeChildren(props.children, replacements),
       })
     }
     return children
@@ -79,22 +92,48 @@ const processCodeChildren = (children: ReactNode, replacement: string): ReactNod
 
 export const RegionAwarePre = (props: any) => {
   const { region } = useRegion()
-  const replacement = region && region !== 'none' ? region : '<region>'
+  const { ingestionKey } = useIngestionKey()
+
+  const replacements = React.useMemo(() => {
+    const list: Replacement[] = []
+    if (region && region !== 'none') {
+      list.push({ search: '<region>', replace: region })
+    }
+    if (ingestionKey) {
+      list.push({ search: '<ingestion-key>', replace: ingestionKey })
+      list.push({ search: '<SIGNOZ_INGESTION_KEY>', replace: ingestionKey })
+    }
+    return list
+  }, [region, ingestionKey])
 
   const modifiedChildren = React.useMemo(() => {
-    return processCodeChildren(props.children, replacement)
-  }, [props.children, replacement])
+    if (replacements.length === 0) return props.children
+    return processCodeChildren(props.children, replacements)
+  }, [props.children, replacements])
 
   return <Pre {...props}>{modifiedChildren}</Pre>
 }
 
 export const RegionAwareCode = (props: any) => {
   const { region } = useRegion()
-  const replacement = region && region !== 'none' ? region : '<region>'
+  const { ingestionKey } = useIngestionKey()
+
+  const replacements = React.useMemo(() => {
+    const list: Replacement[] = []
+    if (region && region !== 'none') {
+      list.push({ search: '<region>', replace: region })
+    }
+    if (ingestionKey) {
+      list.push({ search: '<ingestion-key>', replace: ingestionKey })
+      list.push({ search: '<SIGNOZ_INGESTION_KEY>', replace: ingestionKey })
+    }
+    return list
+  }, [region, ingestionKey])
 
   const modifiedChildren = React.useMemo(() => {
-    return processCodeChildren(props.children, replacement)
-  }, [props.children, replacement])
+    if (replacements.length === 0) return props.children
+    return processCodeChildren(props.children, replacements)
+  }, [props.children, replacements])
 
   return <code {...props}>{modifiedChildren}</code>
 }
