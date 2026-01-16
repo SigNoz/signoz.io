@@ -33,7 +33,7 @@ export default function Figure({
         <figcaption className={captionClassName}>
           <i>
             {link && !sourceText ? (
-              <a href={link} target="_blank" rel="noopener noreferrer nofollow">
+              <a href={link} target="_blank" rel="noopener noreferrer">
                 {caption}
               </a>
             ) : (
@@ -42,7 +42,7 @@ export default function Figure({
                 {link && sourceText && (
                   <>
                     Source:{' '}
-                    <a href={link} target="_blank" rel="noopener noreferrer nofollow">
+                    <a href={link} target="_blank" rel="noopener noreferrer">
                       {sourceText}
                     </a>
                   </>
