@@ -54,8 +54,8 @@ Update the `.env` file in your generated module to include your generated Gemini
 GOOGLE_API_KEY=<YOUR_API_KEY>
 ```
 
-### Step 4: Import the necessary modules in your generate `agent.py`
-``
+### Step 4: Import the necessary modules in your generated `agent.py`
+
 **Traces:**
 
 ```python
@@ -115,7 +115,7 @@ GoogleADKInstrumentor().instrument()
 ```
 
 - **`<service_name>`** is the name of your service
-- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/traces`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <Admonition type="info">
@@ -136,7 +136,7 @@ from opentelemetry import metrics
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
 import os
 
-resource = Resource.create({"service.name": "<service-name>"})
+resource = Resource.create({"service.name": "<service_name>"})
 metric_exporter = OTLPMetricExporter(
     endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
     headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
@@ -153,7 +153,7 @@ HTTPXClientInstrumentor().instrument()
 ```
 
 - **`<service_name>`** is the name of your service
-- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/metrics`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <Admonition type="info">
@@ -201,7 +201,7 @@ httpx_logger.addHandler(handler)
 ```
 
 - **`<service_name>`** is the name of your service
-- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/logs`
 - **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <Admonition type="info">
@@ -237,7 +237,7 @@ adk web --port 8000
 Your Google ADK agent usage should now automatically emit traces, logs, and metrics.
 
 
-You should be able to view traces in Signoz Cloud under the traces tab:
+You should be able to view traces in SigNoz Cloud under the traces tab:
 
 <Figure
   src="/img/docs/llm/google-adk/google-adk-traces.webp"
@@ -253,7 +253,7 @@ When you click on a trace in SigNoz, you'll see a detailed view of the trace, in
   caption="Google-ADK Detailed Trace View"
 />
 
-You should be able to view logs in Signoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+You should be able to view logs in SigNoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
 
 <figure data-zoomable align="center">
   <img src="/img/docs/llm/google-adk/related-logs.webp" alt="Related logs" width="300" />
@@ -276,7 +276,7 @@ When you click on any of these logs in SigNoz, you'll see a detailed view of the
   caption="Google ADK Detailed Logs View"
 />
 
-You should be able to see Google ADK related metrics in Signoz Cloud under the metrics tab:
+You should be able to see Google ADK related metrics in SigNoz Cloud under the metrics tab:
 
 <Figure
   src="/img/docs/llm/google-adk/google-adk-metrics.webp"
