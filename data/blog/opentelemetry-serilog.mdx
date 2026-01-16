@@ -108,7 +108,7 @@ OpenTelemetry enables correlation of telemetry by propagating trace context acro
 
 Additionally, OTel creates a universal standard for telemetry. You are no longer locked to a single vendor as the same configuration works for any compatible backend. This enables you to visualize your entire telemetry stack on one platform, reducing the overhead of juggling between observability tools.
 
-<Figure src="/img/blog/2026/01/opentelemetry-serilog-distributed-trace.webp" alt="View of a distributed trace in SigNoz(a OTel-native backend), capturing data execution flow across multiple services." caption="View of a distributed trace in SigNoz(a OTel-native backend), capturing data execution flow across multiple services." />
+<Figure src="/img/blog/2026/01/opentelemetry-serilog-trace-view.webp" alt="View of a distributed trace in SigNoz (an OTel-native backend), capturing data execution flow across multiple services." caption="View of a distributed trace in SigNoz (an OTel-native backend), capturing data execution flow across multiple services." />
 
 ### Does OpenTelemetry Replace Serilog?
 
@@ -319,10 +319,11 @@ builder.Services.AddOpenTelemetry()
             Log.Warning("SigNoz not configured. Set SigNoz__Region and SigNoz__IngestionKey environment variables.");
             Log.Information("Logs and traces will only be exported to Console.");
         }
+```
     
 The `WithSpan` enricher (defined in the Serilog JSON configuration above) reads the active `Activity` and injects its `TraceId` and `SpanId` into log events. This **correlation** helps you understand how your application processes requests, and the events that happen during those requests.
 
-<Figure src="/img/blog/2026/01/opentelemetry-serilog-correlation.webp" alt="Serilog and OpenTelemetry configuration enables correlation of logs and traces." caption="Serilog and OpenTelemetry configuration enables correlation of logs and traces." />
+<Figure src="/img/blog/2026/01/opentelemetry-serilog-correlated-logs.webp" alt="Serilog and OpenTelemetry configuration enables correlation of logs and traces." caption="Serilog and OpenTelemetry configuration enables correlation of logs and traces." />
 
 This way, Serilog and OpenTelemetry work together to capture structured events, enrich them with detailed context about application behaviour, and route them to multiple output destinations, including your observability backend.
 
@@ -337,7 +338,6 @@ chmod +x load-generator.sh
 
 This video explains how to visualize this data and how telemetry correlation works in practice:
 
-```markdown
 <figure data-zoomable align='center'>
     <iframe
         className="box-shadowed-image"
@@ -349,7 +349,6 @@ This video explains how to visualize this data and how telemetry correlation wor
         allowFullScreen
     />
 </figure>
-```
 
 ## Conclusion
 
