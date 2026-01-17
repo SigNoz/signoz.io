@@ -2415,11 +2415,6 @@ const docsSideNav = [
 
     items: [
       {
-        route: '/docs/llm-community-integrations',
-        label: 'LLM Community Integrations',
-        type: 'doc',
-      },
-      {
         route: '/docs/agno-monitoring',
         label: 'Agno',
         type: 'doc',
@@ -2480,6 +2475,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/langtrace',
+        label: 'Langtrace',
+        type: 'doc',
+      },
+      {
         route: '/docs/litellm-observability',
         label: 'LiteLLM',
         type: 'doc',
@@ -2505,6 +2505,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/openlit',
+        label: 'OpenLIT',
+        type: 'doc',
+      },
+      {
         route: '/docs/pipecat-monitoring',
         label: 'Pipecat',
         type: 'doc',
@@ -2522,6 +2527,11 @@ const docsSideNav = [
       {
         route: '/docs/temporal-observability',
         label: 'Temporal',
+        type: 'doc',
+      },
+      {
+        route: '/docs/traceloop',
+        label: 'Traceloop(OpenLLMetry)',
         type: 'doc',
       },
       {
