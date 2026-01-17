@@ -1,0 +1,381 @@
+---
+title: Implementing OpenTelemetry with Serilog in a .NET Application [Practical Guide]
+slug: opentelemetry-serilog
+date: 2026-01-14
+tags: [OpenTelemetry, DotNet]
+authors: [dhruv_ahuja]
+description: Learn how to integrate Serilog with OpenTelemetry in .NET to correlate logs with traces, troubleshoot faster, and set up a production-ready observability pipeline.
+keywords: [serilog opentelemetry, serilog otlp sink, dotnet structured logging, opentelemetry logging, signoz]
+---
+
+Most .NET applications historically emitted logs as plain strings. Debugging these logs required regex-heavy searches, and sending logs to new destinations involved rewriting application code.
+
+Serilog solves this problem by treating logs as **structured data**. This eliminates most of this “parsing” work and makes it easier to define configurations like output destinations without requiring code changes.
+
+However, with OpenTelemetry (OTel) now rising in popularity, many developers are confused. Is OTel a competitor to Serilog? Should you use both or only one of them?
+
+<Figure src="/img/blog/2026/01/opentelemetry-serilog-thread.webp" alt="Reddit thread with users citing frustration over the confusion regarding Serilog and OpenTelemetry." caption="Users citing frustration over the confusion regarding Serilog and OpenTelemetry." link="https://www.reddit.com/r/dotnet/comments/1m3iysq/should_i_replace_serilog_with_opentelemetry_for/" sourceText="Reddit" />
+
+In this guide, we’ll:
+
+- Configure Serilog for structured logging with multiple sinks
+- Export logs and traces using OpenTelemetry and OTLP
+- Correlate logs with distributed traces in a real observability backend
+
+## How Serilog Standardizes Logging in .NET Apps
+
+<KeyPointCallout title="Serilog Familiarity">
+
+This section describes Serilog and its key features. Skip to the [next section](#opentelemetry-connecting-the-dots) if you are already familiar with Serilog.
+
+</KeyPointCallout>
+
+Serilog captures application events as structured data, which is typically serialized as JSON when it is being output. Compared to raw strings that contained embedded information, these structured log entries are much easier for developers to understand. Serilog also enables users to add complex objects and detailed metadata to their log statements. Because log storage systems are better equipped to process structured data, users can run complex queries on this dataset to better extract specific information.
+
+<Figure src="/img/blog/2026/01/opentelemetry-serilog-impact.webp" alt="After Serilog introduced structured logging to the .NET ecosystem, log statements became easier to process for both humans and machines." caption="Serilog introduced structured logging to the .NET ecosystem" link="https://nblumhardt.com/2013/03/serilog/" />
+
+To ensure context is maintained across the application, certain attributes must often be included across all log statements in the codebase. However, this practice is tedious and error-prone, especially when registering new attributes across existing log statements.
+
+Serilog provides **enrichers** that can include such metadata with each log statement automatically, significantly reducing the manual effort required to maintain your logs.
+
+A Serilog configuration using enrichment logic would look like:
+
+```csharp
+using Serilog;
+
+var serilogConfig = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext() // allows adding properties based on logical context
+    .Enrich.WithProperty("MachineName", System.Environment.MachineName) // add machine name to all log entries
+    .WriteTo.Console();
+```
+
+Another common pain point was the configuration and management of output destinations for your logs. Developers had to maintain large XML files that were complicated to manage and often required significant trial-and-error to configure properly.
+
+With **sinks**, Serilog makes output destinations easy to configure and manage across the application’s lifespan. For example, consider this `appsettings.json` config that writes logs to a SQLite DB.
+
+```json
+{
+  "Serilog": {
+    "Using": ["Serilog.Sinks.SQLite.Microsoft"],
+    "WriteTo": [
+      {
+        "Name": "SQLite",
+        "Args": {
+          "sqliteDbPath": "Logs/app_log.db",
+          "tableName": "Events",
+          "storeTimestampInUtc": true
+        }
+      }
+    ]
+  }
+}
+```
+
+Then, to import this configuration in your code:
+
+```csharp
+using Serilog;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// read the serilog 
+var loggerConfig = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration);
+```
+
+That’s it, upon application restart, we’ll see application logs being stored in a SQLite DB file at the defined path.
+
+<Figure src="/img/blog/2026/01/opentelemetry-serilog-db-sink.webp" alt="Serilog sinks enable us to configure multiple output destinations, such as a SQLite DB." caption="Serilog sinks enable us to configure multiple output destinations, such as a SQLite DB." />
+
+<KeyPointCallout title="Flexibility in Configuration">
+
+You might wonder why we’ve shown configurations using both C# code and JSON.
+
+Serilog enables developers to move major chunks of the logging configuration to the `appsettings.json` file, keeping only the necessary dynamic configuration within the code. This simplifies configuration as most changes, such as adding a new enricher or a sink, can be done without modifying your application files.
+
+We wanted to showcase examples of both approaches, so you can choose whichever you are most comfortable with!
+
+</KeyPointCallout>
+
+## OpenTelemetry: Connecting the Dots
+
+While Serilog standardized logging for the .NET ecosystem, OpenTelemetry aims to standardize the entire observability ecosystem.
+
+Before OTel, telemetry signals (logs, metrics, and traces) lived in silos with little or no shared context. You might see an error log in one tool and latency spikes in another, without easily knowing if they were related. Diagnosing issues could mean guessing which requests led to which errors.
+
+OpenTelemetry enables correlation of telemetry by propagating trace context across services and allowing log statements to be enriched with active span context. It defines a consistent structure for all telemetry signals, allowing you to link a specific Serilog log with a distributed trace. This lets you see a log entry alongside the exact execution flow (represented as [traces and spans](https://signoz.io/blog/distributed-tracing-span/)) that led to it.
+
+Additionally, OTel creates a universal standard for telemetry. You are no longer locked to a single vendor as the same configuration works for any compatible backend. This enables you to visualize your entire telemetry stack on one platform, reducing the overhead of juggling between observability tools.
+
+<Figure src="/img/blog/2026/01/opentelemetry-serilog-trace-view.webp" alt="View of a distributed trace in SigNoz (an OTel-native backend), capturing data execution flow across multiple services." caption="View of a distributed trace in SigNoz (an OTel-native backend), capturing data execution flow across multiple services." />
+
+### Does OpenTelemetry Replace Serilog?
+
+OpenTelemetry does not aim to replace logging libraries like Serilog. Its role is to collect, correlate and export telemetry data when it comes to logging, while Serilog is a dedicated library built for improving the **developer experience** of writing and managing logs.
+
+Rather than replace Serilog, OpenTelemetry provides integrations to **work with** Serilog. When combined, you get the power of structured logging with OpenTelemetry’s context that connects those logs to distributed traces.
+
+The following example shows how Serilog and OpenTelemetry work together in a real .NET application.
+
+## Implementing OpenTelemetry in .NET Applications with Serilog
+
+We’ve prepared a .NET web application that integrates Serilog and OpenTelemetry. It registers an OpenTelemetry output sink for logs, integrates with `builder.Services` for generating traces, and correlates trace context using an enricher. Generated telemetry is then exported via OpenTelemetry’s [OTLP standard](https://signoz.io/blog/what-is-otlp/).
+
+Let’s walk through the steps to configure it to send logs and traces to [SigNoz](https://signoz.io/).
+
+### Prerequisites
+
+Before we begin, ensure you have:
+
+- **.NET 10 SDK** installed on your machine (<a href="https://dotnet.microsoft.com/download" rel="noopener noreferrer nofollow" target="_blank">Download here</a>).
+- A [SigNoz Cloud account](https://signoz.io/teams/)
+
+The project was developed on .NET 10. For maximum compatibility, we recommend you ensure that you have .NET 10 installed.
+
+```bash
+# should output 10.x.x
+dotnet --version
+```
+
+**Setting up SigNoz**
+
+SigNoz is an OpenTelemetry-native observability platform that provides logs, traces, and metrics in a single pane of glass.
+
+- [**Sign up**](https://signoz.io/teams/) for a free SigNoz Cloud account.
+- [Follow this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to create ingestion keys for your account.
+- Ensure the region and ingestion key information is readily accessible for the next steps.
+
+## Preparing the .NET Web Application
+
+Before we proceed with the setup, let’s understand how it is structured.
+
+```bash
+serilog-opentelemetry-demo/
+├── Controllers/
+│   ├── DataController.cs      # CRUD operations with tracing
+│   ├── ExternalController.cs  # Demonstrates trace propagation
+│   └── ErrorController.cs     # Error handling and tracking
+├── Models/
+│   └── DataItem.cs            # Sample data model
+├── Properties/
+│   └── launchSettings.json    # Local development configuration
+├── Program.cs                 # Application configuration
+├── appsettings.json           # Serilog configuration
+└── load-generator.sh          # Traffic generation script
+```
+
+First, clone the repository and navigate to the appropriate folder:
+
+```bash
+git clone https://github.com/SigNoz/examples.git
+cd examples/dot-net/serilog-opentelemetry-demo
+```
+
+Now, we need to configure the region and ingestion key values to ensure the application forwards telemetry to our SigNoz instance. Open the `Properties/launchSettings.json` file and set the values at lines 11 and 12.
+
+<Figure src="/img/blog/2026/01/opentelemetry-serilog-settings.webp" alt="Set the SigNoz credentials in launchSettings.json file." caption="Set the SigNoz credentials in launchSettings.json file." />
+
+Install the application dependencies and start the application server by running:
+
+```bash
+dotnet build
+dotnet run
+```
+
+Upon successful execution, you will see a similar output:
+
+```bash
+[22:23:20 INF] Starting serilog-demo-api v1.0.0 {"MachineName": "Dhruvs-MacBook-Pro"}
+[22:23:20 INF] OpenTelemetry configured: logs and traces → SigNoz (in) {"MachineName": "Dhruvs-MacBook-Pro"}
+[22:23:20 INF] Application started successfully {"MachineName": "Dhruvs-MacBook-Pro"}
+```
+
+### Core Serilog Configuration
+
+Let’s understand how we have implemented Serilog to output log data in a structured manner across multiple sinks.
+
+To provide a separation of concerns between Serilog and the application logic, we have scoped all static configuration to the [appsettings.json](https://github.com/SigNoz/examples/blob/main/dot-net/serilog-opentelemetry-demo/appsettings.json). Let’s go through the relevant configuration:
+
+```json
+{
+	"Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft.AspNetCore": "Warning",
+        "Microsoft.Hosting.Lifetime": "Warning",
+        "Microsoft.Extensions.Hosting": "Warning",
+        "System.Net.Http.HttpClient": "Warning"
+      }
+    },
+    "Enrich": [
+      "FromLogContext",
+      "WithSpan",
+      "WithMachineName"
+    ],
+    "WriteTo": [
+      {
+        "Name": "Console"
+      },
+      {
+        "Name": "SQLite",
+        "Args": {
+          "sqliteDbPath": "Logs/app_log.db",
+          "tableName": "Events",
+          "storeTimestampInUtc": true
+        }
+      }
+    ]
+  }
+}
+```
+
+Log-level overrides minimize the “noise” generated by system libraries during application startup. The log context and machine name enrichers are standard Serilog enrichers. Log context allows us to define attributes to add to all log entries within a context (eg., an HTTP endpoint method). Next, we specify the Console and SQLite output sinks, tweaking data organization within the database. 
+
+### Stitching Serilog and OpenTelemetry Together
+
+Although the static configuration is reliably managed via the `appsettings` JSON file, we must manage the more dynamic configuration within code. In our case, this includes our OpenTelemetry logic that relies on environment variables and conditional logic. Let’s understand how it has been defined in the [Program.cs](https://github.com/SigNoz/examples/blob/main/dot-net/serilog-opentelemetry-demo/Program.cs) file.
+
+First we read the environment variables required to forward the data to the observability backend (SigNoz in this case), and determine their validity by checking against the default values:
+
+```csharp
+// Read SigNoz configuration from environment variables
+var signozRegion = builder.Configuration.GetValue<string>("SigNoz:Region");
+var signozIngestionKey = builder.Configuration.GetValue<string>("SigNoz:IngestionKey");
+
+var isValidSigNozRegion = !string.IsNullOrEmpty(signozRegion) && signozRegion != "<your-region>";
+var isValidSigNozIngestionKey = !string.IsNullOrEmpty(signozIngestionKey) && signozIngestionKey != "<your-signoz-ingestion-key>";
+var hasSigNozConfig = isValidSigNozRegion && isValidSigNozIngestionKey;
+```
+
+If valid, we configure the OpenTelemetry output sink, which will receive application logs, encode them and push them to the backend via the OTLP standard.
+
+As a recommended practice, always ensure you add `service.name` and `service.version` resource attributes to your OpenTelemetry configurations. This ensures your telemetry data can always be traced back to a unique source.
+
+```csharp
+// Add OpenTelemetry log sink if SigNoz is configured
+if (hasSigNozConfig)
+{
+    var signozLogsEndpoint = $"https://ingest.{signozRegion}.signoz.cloud:443/v1/logs";
+    loggerConfig.WriteTo.OpenTelemetry(options =>
+    {
+        options.Endpoint = signozLogsEndpoint;
+        options.Protocol = Serilog.Sinks.OpenTelemetry.OtlpProtocol.Grpc;
+        options.Headers = new Dictionary<string, string>
+        {
+            ["signoz-ingestion-key"] = signozIngestionKey!
+        };
+        options.ResourceAttributes = new Dictionary<string, object>
+        {
+            ["service.name"] = serviceName,
+            ["service.version"] = serviceVersion
+        };
+    });
+}
+```
+
+Finally, we configure auto-instrumentation of the application code to generate traces and spans that will be exported to the console, and if the env vars are configured properly, to the observability backend. We’ll enable the `ConsoleExporter` even if SigNoz credentials aren’t configured so you can debug the traces locally during development.
+
+By including HTTP client instrumentation, we ensure that all external HTTP calls we make include the [`Traceparent` header](https://signoz.io/blog/opentelemetry-context-propagation/#1-http-headers), **propagating** the current trace context across applications. Any service receiving the request can read these values and continue its own operations under the same trace.
+
+```csharp
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracerProviderBuilder =>
+    {
+        tracerProviderBuilder
+            .AddSource(serviceName)
+            .SetResourceBuilder(
+                ResourceBuilder.CreateDefault()
+                    .AddService(serviceName: serviceName, serviceVersion: serviceVersion))
+            .AddAspNetCoreInstrumentation(options =>
+            {
+                options.RecordException = true;
+                options.EnrichWithHttpRequest = (activity, request) =>
+                {
+                    activity.SetTag("http.client_ip", request.HttpContext.Connection.RemoteIpAddress?.ToString());
+                };
+            })
+            .AddHttpClientInstrumentation(options =>
+            {
+                options.RecordException = true;
+            })
+            .AddConsoleExporter();
+
+        // Add OTLP exporter for SigNoz if configured
+        if (hasSigNozConfig)
+        {
+            var signozTracesEndpoint = $"https://ingest.{signozRegion}.signoz.cloud:443";
+            tracerProviderBuilder.AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri(signozTracesEndpoint);
+                options.Protocol = OtlpExportProtocol.Grpc;
+                options.Headers = $"signoz-ingestion-key={signozIngestionKey}";
+            });
+            Log.Information("OpenTelemetry configured: logs and traces → SigNoz ({Region})", signozRegion);
+        }
+        else
+        {
+            Log.Warning("SigNoz not configured. Set SigNoz__Region and SigNoz__IngestionKey environment variables.");
+            Log.Information("Logs and traces will only be exported to Console.");
+        }
+```
+    
+The `WithSpan` enricher (defined in the Serilog JSON configuration above) reads the active `Activity` and injects its `TraceId` and `SpanId` into log events. This **correlation** helps you understand how your application processes requests, and the events that happen during those requests.
+
+<Figure src="/img/blog/2026/01/opentelemetry-serilog-correlated-logs.webp" alt="Serilog and OpenTelemetry configuration enables correlation of logs and traces." caption="Serilog and OpenTelemetry configuration enables correlation of logs and traces." />
+
+This way, Serilog and OpenTelemetry work together to capture structured events, enrich them with detailed context about application behaviour, and route them to multiple output destinations, including your observability backend.
+
+### Visualizing the Data
+
+To ensure you have enough data to experiment with, and understand how OpenTelemetry works, we have prepared a script that generates telemetry data by calling the API endpoints defined in the application.
+
+```bash
+chmod +x load-generator.sh
+./load-generator.sh
+```
+
+This video explains how to visualize this data and how telemetry correlation works in practice:
+
+<figure data-zoomable align='center'>
+    <iframe
+        className="box-shadowed-image"
+        src="https://www.youtube.com/embed/ynhun84kEHs"
+        width="100%"
+        height="540"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+    />
+</figure>
+
+## Conclusion
+
+You have now understood how Serilog and OpenTelemetry work together to create a robust observability pipeline. By combining Serilog’s structured logging with OTel’s standardized collection, you can get insights into the behaviour of your .NET applications.
+
+However, collecting telemetry is part of the observability process; you need a backend to store and visualize it.
+
+[SigNoz](https://signoz.io/) is an all-in-one, OpenTelemetry-native observability platform. It works seamlessly with the setup we just built, allowing you to search logs and correlate them with traces instantly. You can try it out with [SigNoz Cloud](https://signoz.io/teams/) or self-host the [Community Edition](https://github.com/SigNoz/signoz) for free.
+
+## Frequently Asked Questions
+
+### Is it possible to use Serilog with OpenTelemetry?
+
+Yes, it is possible to use Serilog and OpenTelemetry together. When used in combination, Serilog creates structured logs in a .NET application and OpenTelemetry transports the logs to an observability backend like SigNoz. To make them work together, you must configure Serilog to use <a href="https://github.com/serilog/serilog-sinks-opentelemetry?tab=readme-ov-file#getting-started" rel="noopener noreferrer nofollow" target="_blank">the OpenTelemetry sink</a>. Serilog will then route logs to the sink, which will encode and transfer them via its OTLP standard.
+
+### What is the difference between Serilog and OpenTelemetry?
+
+Serilog is the logging library for .NET applications — it creates the logs. OpenTelemetry (OTel) defines the standard model, SDKs and protocols for collecting and exporting logs, metrics, and traces. You use Serilog to define and structure your log events, while the OTel sink transfers the data to an observability backend, using the OTLP standard.
+
+### What is Serilog used for?
+
+It replaces unstructured text logs with structured data. Instead of a string like `User 1 paid $50`, Serilog logs a queryable object: `{"UserId": 1, "Action": "Payment", "Amount": 50}`. It also handles enrichment (automatically adding properties like Machine ID) and sinks (exporting logs to multiple destinations like console, files or cloud platforms simultaneously). 
+
+### **Where do trace_id and span_id come from in Serilog logs?**
+
+They come from the .NET `Activity` API, which was developed to support distributed tracing. When OpenTelemetry instrumentation is active, the Serilog sink automatically detects the current trace context and injects the `TraceId` and `SpanId` into every log event, enabling seamless correlation.
+
+### **Does Serilog send logs directly to the OpenTelemetry Collector?**
+
+Yes, through the `Serilog.Sinks.OpenTelemetry` package, Serilog exports logs directly to the configured endpoint via the OTLP protocol, that supports transmission via [gRPC and HTTP](https://signoz.io/blog/what-is-otlp/#transport-protocols-grpc-and-http). This allows it to communicate with any Collector or compatible backend.
