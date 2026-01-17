@@ -1,5 +1,5 @@
 ---
-date: 2026-01-10
+date: 2026-01-17
 title: Collect Host Metrics with OpenTelemetry
 id: opentelemetry-hostmetrics
 description: Collect host metrics like CPU, memory, disk, and network from your servers using the OpenTelemetry hostmetrics receiver and send them to SigNoz.
@@ -198,7 +198,7 @@ If you are running the binary manually (e.g., for testing):
 <KeyPointCallout title="Want to monitor Docker container metrics?" defaultCollapsed={true}>
   This section explains how to run the collector as a Docker container to collect **Host Metrics** (like CPU/Memory of the underlying Node).
 
-If you want to monitor the performance of your Docker containers themselves (e.g. CPU/Memory usage per container), please refer to the [Docker Container Metrics](../metrics-management/docker-container-metrics) documentation.
+If you want to monitor the performance of your Docker containers themselves (e.g. CPU/Memory usage per container), please refer to the [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/) documentation.
 
 </KeyPointCallout>
 
@@ -352,7 +352,7 @@ docker run -d \
 
 ## Step 1: Install OpenTelemetry Collector
 
-Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/windows/install/) to install OpenTelemetry Collector.
+Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install OpenTelemetry Collector.
 
 ## Step 2: Configure the Collector
 
@@ -363,7 +363,7 @@ Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/o
 
 Add the following to your `config.yaml`:
 
-```yaml:config.yaml {2-17}
+```yaml:config.yaml
 receivers:
   hostmetrics:
     collection_interval: 60s
@@ -379,6 +379,7 @@ receivers:
         mute_process_name_error: true
         mute_process_exe_error: true
         mute_process_io_error: true
+        mute_process_user_error: true
       system: {}
 ```
 
