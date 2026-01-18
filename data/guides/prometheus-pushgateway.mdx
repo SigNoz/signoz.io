@@ -1,0 +1,745 @@
+---
+
+title: Prometheus Pushgateway - How to Monitor Short Lived Batch Jobs
+slug: prometheus-pushgateway
+date: 2026-01-14
+tags: [prometheus, opentelemetry]
+authors: [saurabh_patil]
+description: Learn how Prometheus Pushgateway works, when to use it for short-lived batch jobs, and when to avoid it. This hands-on guide shows how to push metrics, scrape them with OpenTelemetry Collector, visualize them in SigNoz, and apply best practices with troubleshooting playbooks.
+keywords: [prometheus pushgateway, push metrics prometheus, prometheus batch jobs, pushgateway vs opentelemetry, pushgateway docker]
+
+---
+
+Prometheus uses a pull-based monitoring model, actively scraping exposed metrics endpoints from services at regular intervals (e.g., every 60 seconds). However, this pull-based monitoring fails to monitor the short-lived service-level batch jobs, i.e., jobs that are terminated before Prometheus can scrape them.
+
+This is where Prometheus Pushgateway is used. It acts as a metrics cache (temporary storage), where short-lived jobs push metrics before they complete, and then make them available for Prometheus to scrape later.
+
+The following guide explains what the Prometheus Pushgateway is and how it works. You will also find a hands-on demo on how to set up the Prometheus pushgateway to receive metrics from short-lived production jobs, such as database backup and ETL jobs, and how to visualise the collected metrics using OpenTelemetry and SigNoz.
+
+## What is Prometheus Pushgateway?
+
+In simple terms, the Prometheus Pushgateway is a lightweight HTTP server/service that allows short-lived jobs to push their metrics before terminating. It stores those metrics and exposes them for Prometheus to scrape later. 
+
+The official <a href="https://prometheus.io/docs/practices/pushing/" rel="noopener noreferrer nofollow" target="_blank">Prometheus documentation</a> has a distinct warning: `We only recommend using the Pushgateway in certain limited cases`.
+
+They recommend Pushgateway for a single valid scenario, i.e., capturing the outcome of a service-level batch job.
+
+<KeyPointCallout defaultCollapsed="true" title="What is Service-Level Batch Job?">
+
+Service-level batch jobs are configured or managed at the **service** (or application/module) level. These are not hardcoded at the database or individual component level.
+
+For Example:
+
+- End-of-day invoice generation or billing calculation (runs nightly for the entire billing service).
+- Monthly payroll processing (service-wide batch for all employees).
+- Nightly data cleanup / archiving job (configured at service level, e.g., "Cancel aged orders" or "Re-tag Fulfilment").
+- Scheduled report generation or ETL jobs in SaaS/microservices platforms.
+
+</KeyPointCallout>
+
+## How does the Prometheus Pushgateway work?
+
+Unlike the standard Prometheus model, where the server "pulls" data, the Pushgateway sits in the middle. It accepts "pushed" metrics from your short-lived processes and acts as a metrics cache, holding that data for Prometheus to scrape.
+
+<Figure
+  src="/img/guides/2026/01/prometheus-pushgateway-workflow.webp"
+  alt="The Batch Job pushes data once and dies. The Pushgateway holds the metric. Prometheus scrapes the Gateway later."
+  caption="This diagram illustrates the workflow where Prometheus scrapes metrics from short-lived batch jobs via a Pushgateway intermediary."
+/>
+
+1. **The Batch Job Runs:** Your backup operation or ephemeral data processing task starts, runs its logic, and calculates metrics (e.g., `backup_duration_seconds`, `records_processed`).
+2. **The Push:** Before the job exits, it sends an HTTP POST request to the Pushgateway containing these metric values.
+3. **The Holding Phase:** The job terminates and disappears. However, the metrics are now stored in the Pushgateway's memory.
+4. **The Scrape:** Prometheus wakes up on its defined schedule (e.g., every 15 seconds), connects to the Pushgateway, and scrapes the stored metrics as if they were coming from a running service.
+
+## Demo: Setting Up Prometheus Pushgateway for Receiving Metrics from Batch Jobs
+
+In this demo, you will learn how to set up the Prometheus Pushgateway to receive metrics from batch jobs, collect them using the [OpenTelemetry Collector](/blog/opentelemetry-collector-complete-guide/) (via Prometheus receiver), and set up a dashboard and alerting using [SigNoz](https://signoz.io/).
+
+### Prerequisite
+
+- `Docker`: Required to pull the images and run the scripts to simulate batch jobs. You can install it from the <a href="https://www.docker.com/get-started/" rel="noopener noreferrer nofollow" target="_blank">Official Docker Documentation</a>.
+
+- [SigNoz Cloud Account](https://signoz.io/teams/): You will need it to [generate Ingestion API keys](/docs/ingestion/signoz-cloud/keys/) and create a dashboard for visualization.
+
+### Step 1: Create the folder
+
+Create a folder name `prometheus-pushgateway-demo`. This will be our main folder
+
+```bash
+mkdir prometheus-pushgateway-demo && cd prometheus-pushgateway-demo
+```
+
+### Step 2: Create a Docker Compose file
+
+Create a `docker-compose.yml` file.
+
+```bash
+touch docker-compose.yml
+```
+
+### Step 3: Add Prometheus Pushgateway Service
+
+Copy the following code into `docker-compose.yml`.
+
+```yaml
+services:
+  # Prometheus Pushgateway
+  pushgateway:
+    image: prom/pushgateway:v1.11.2
+    container_name: pushgateway
+    restart: unless-stopped
+    ports:
+      - "9091:9091"
+    command:
+      - --persistence.file=/data/metrics
+      - --persistence.interval=5m
+    volumes:
+      - pushgateway-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9091/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      
+volumes:
+  pushgateway-data:
+```
+
+**Code Breakdown:**
+
+**`image`**: Uses the official Prometheus Pushgateway Docker image pinned to version `v1.11.2` to ensure consistent and predictable behaviour.
+
+**`--persistence.file`**: Persists pushed metrics to `/data/metrics` so they survive container restarts instead of staying only in memory.
+
+**`--persistence.interval`**: Flushes in-memory metrics to disk every 5 minutes to reduce data loss on crashes.
+
+**`volumes`**: Mounts the `pushgateway-data` Docker volume at `/data`, backing the persistence file with durable storage.
+
+### Step 4: Start the service and verify if it’s running
+
+```bash
+docker compose up -d
+```
+
+Check the logs to see if the service is listening on the `port 9091`. 
+
+```bash
+docker logs pushgateway
+```
+
+You should be able to see following output:
+
+```bash {3}
+ts=2026-01-14T04:19:07.714Z level=info caller=main.go:82 msg="starting pushgateway" version="(version=1.11.2, branch=HEAD, revision=ace6bf252df95246501059f17ace076f1081144e)"
+ts=2026-01-14T04:19:07.714Z level=info caller=main.go:83 msg="Build context" build_context="(go=go1.25.3, platform=linux/arm64, user=root@0ade354853d8, date=20251030-11:51:02, tags=unknown)"
+ts=2026-01-14T04:19:07.717Z level=info caller=tls_config.go:354 msg="Listening on" address=[::]:9091
+ts=2026-01-14T04:19:07.717Z level=info caller=tls_config.go:357 msg="TLS is disabled." http2=false address=[::]:9091
+```
+
+<KeyPointCallout defaultCollapsed="true" title="Already have Batch Job?">
+
+If you already have a batch job, feel free to skip to [Step 6: Configure the Batch Job to send Metrics](#step-6-configure-the-batch-job-to-send-metrics).
+
+</KeyPointCallout>
+
+### Step 5: Create Batch Job
+
+Create a sub-folder in `prometheus-pushgateway-demo`.
+
+```bash
+mkdir -p sample-jobs/python && cd sample-jobs/python
+```
+
+Add a Python script named `database_backup.py`. This will be used to create a job to simulate a database backup batch job in production.
+
+```bash
+touch database_backup.py
+```
+
+Copy the following code into it.
+
+```python
+#!/usr/bin/env python3
+"""
+Database Backup Job - Simulated Batch Process
+──────────────────────────────────────────────
+Key functionality:
+• Simulates periodic database backup operations
+• Randomly succeeds (95%) or fails
+• Measures duration, size, table count
+• Logs results in human-readable format
+
+"""
+
+import os
+import time
+import random
+import logging
+from datetime import datetime
+
+# Configuration
+RUN_INTERVAL = int(os.getenv('RUN_INTERVAL', '120'))  # seconds between runs
+
+# Logging setup
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+def simulate_database_backup():
+    """
+    Simulates a database backup operation.
+    Returns metrics about the backup.
+    """
+    logger.info("Starting database backup simulation...")
+    
+    # Simulate backup duration (30-180 seconds, scaled down for demo)
+    duration = random.uniform(2.0, 10.0)
+    time.sleep(duration)
+    
+    # Simulate success/failure (95% success rate)
+    success = random.random() > 0.05
+    
+    # Simulate backup size (1GB - 50GB in bytes)
+    backup_size = random.randint(1_000_000_000, 50_000_000_000) if success else 0
+    
+    # Simulate number of tables
+    tables_count = random.randint(50, 200) if success else 0
+    
+    return {
+        'duration': duration,
+        'success': success,
+        'size_bytes': backup_size,
+        'tables_count': tables_count,
+        'database': random.choice(['orders_db', 'users_db', 'inventory_db']),
+    }
+
+def main():
+    """Main loop - runs backup simulation continuously."""
+    logger.info(f"Database Backup Job started")
+        
+    while True:
+        try:
+            # Run backup simulation
+            result = simulate_database_backup()
+            
+            # Log result
+            status = "SUCCESS" if result['success'] else "FAILED"
+            logger.info(
+                f"Backup {status}: database={result['database']}, "
+                f"duration={result['duration']:.2f}s, "
+                f"size={result['size_bytes'] / 1_000_000_000:.2f}GB, "
+                f"tables={result['tables_count']}"
+            )           
+            
+        except Exception as e:
+            logger.error(f"Error in backup job: {e}")
+        
+        # Wait for next run
+        logger.info(f"Waiting {RUN_INTERVAL}s until next run...")
+        time.sleep(RUN_INTERVAL)
+
+if __name__ == '__main__':
+    main()
+```
+
+<KeyPointCallout defaultCollapsed="true" title="What does script do?">
+
+For demo convenience, this container loops and pushes periodically. In production, a CronJob / scheduled task should run once, push metrics, and exit.
+
+This script acts as a database backup job that runs at certain intervals, mimicking short-lived jobs. Every few minutes (determined by the value of RUN_INTERVAL), it selects one random database from a small list, simulates the backup process by pausing for a random duration between 2 and 10 seconds to mimic actual work, then randomly decides whether the operation “succeeded" (about 95% of the time) or “failed" (about 5% of the time). On success, it generates plausible-looking values for backup size (1–50 GB) and table count (50–200), while on failure, both values are set to 0.
+
+Finally, it logs a single clean, human-readable line summarizing the outcome, which includes the database name, status, duration, size in GB, and number of tables, before printing a wait message and sleeping until the next scheduled run.
+
+</KeyPointCallout>
+
+### Step 6: Configure the Batch Job to send Metrics
+
+To configure the batch job to send the metrics, we will need to update our script with the following changes.
+
+1. Import component to expose metrics to Prometheus
+
+    ```python
+    from prometheus_client import CollectorRegistry, Gauge, Counter, push_to_gateway
+    ```
+
+2. Add configuration to push metrics to Prometheus
+
+    ```python
+    # Configuration
+    PUSHGATEWAY_URL = os.getenv('PUSHGATEWAY_URL', 'http://localhost:9091')
+    JOB_NAME = 'database_backup'
+    INSTANCE_NAME = os.getenv('INSTANCE_NAME', 'db-primary')
+    ```
+
+    <KeyPointCallout defaultCollapsed="true" title="Code Breakdown">
+
+    - **`PUSHGATEWAY_URL`** reads the Pushgateway address from an environment variable, falling back to `http://localhost:9091` if not set.
+
+    - **`JOB_NAME`** is a fixed identifier 'database_backup' used to group all metrics from this script in Prometheus.
+
+    - **`INSTANCE_NAME`** reads a custom instance label from the environment (e.g., server name or pod name), defaulting to 'db-primary' to help distinguish metrics across different backup instances.
+
+    </KeyPointCallout>
+
+3. Add function `push_metrics()`, it creates a fresh set of Prometheus Gauge metrics for a single backup run (duration, size, status, last success time, table count), labels them with the database name and instance, and pushes them to the Prometheus Pushgateway for scraping and monitoring.
+
+    ```python
+    def push_metrics(backup_result):
+        """
+        Push backup metrics to Pushgateway.
+        """
+        registry = CollectorRegistry()
+        
+        # Gauge: Duration of backup
+        duration_gauge = Gauge(
+            'backup_job_duration_seconds',
+            'Duration of the database backup operation in seconds',
+            ['database', 'instance'],
+            registry=registry
+        )
+        duration_gauge.labels(
+            database=backup_result['database'],
+            instance=INSTANCE_NAME
+        ).set(backup_result['duration'])
+        
+        # Gauge: Backup size
+        size_gauge = Gauge(
+            'backup_job_size_bytes',
+            'Size of the backup file in bytes',
+            ['database', 'instance'],
+            registry=registry
+        )
+        size_gauge.labels(
+            database=backup_result['database'],
+            instance=INSTANCE_NAME
+        ).set(backup_result['size_bytes'])
+        
+        # Gauge: Last success timestamp (important for staleness detection)
+        if backup_result['success']:
+            last_success_gauge = Gauge(
+                'backup_job_last_success_timestamp',
+                'Unix timestamp of the last successful backup',
+                ['database', 'instance'],
+                registry=registry
+            )
+            last_success_gauge.labels(
+                database=backup_result['database'],
+                instance=INSTANCE_NAME
+            ).set(time.time())
+        
+        # Gauge: Status (1=success, 0=failure)
+        status_gauge = Gauge(
+            'backup_job_status',
+            'Status of the last backup (1=success, 0=failure)',
+            ['database', 'instance'],
+            registry=registry
+        )
+        status_gauge.labels(
+            database=backup_result['database'],
+            instance=INSTANCE_NAME
+        ).set(1 if backup_result['success'] else 0)
+        
+        # Gauge: Tables backed up
+        tables_gauge = Gauge(
+            'backup_job_tables_backed_up',
+            'Number of tables backed up',
+            ['database', 'instance'],
+            registry=registry
+        )
+        tables_gauge.labels(
+            database=backup_result['database'],
+            instance=INSTANCE_NAME
+        ).set(backup_result['tables_count'])
+        
+        # Push to gateway
+        try:
+            push_to_gateway(
+                PUSHGATEWAY_URL,
+                job=JOB_NAME,
+                registry=registry,
+                grouping_key={'instance': INSTANCE_NAME}
+            )
+            logger.info(f"Metrics pushed to {PUSHGATEWAY_URL}")
+        except Exception as e:
+            logger.error(f"Failed to push metrics: {e}")
+            raise
+    
+    ```
+
+4. Replace your `main()` with the code below. It contains a function call to `push_metrics(result)` were we are passing the results from `simulate_database_backup()`.
+
+    ```python {23-24}
+    def main():
+        """Main loop - runs backup simulation continuously."""
+        logger.info(f"Database Backup Job started")
+        logger.info(f"Pushgateway URL: {PUSHGATEWAY_URL}")
+        logger.info(f"Job Name: {JOB_NAME}")
+        logger.info(f"Instance: {INSTANCE_NAME}")
+        logger.info(f"Run Interval: {RUN_INTERVAL}s")
+        
+        while True:
+            try:
+                # Run backup simulation
+                result = simulate_database_backup()
+                
+                # Log result
+                status = "SUCCESS" if result['success'] else "FAILED"
+                logger.info(
+                    f"Backup {status}: database={result['database']}, "
+                    f"duration={result['duration']:.2f}s, "
+                    f"size={result['size_bytes'] / 1_000_000_000:.2f}GB, "
+                    f"tables={result['tables_count']}"
+                )
+                
+                # Push metrics
+                push_metrics(result)
+                
+            except Exception as e:
+                logger.error(f"Error in backup job: {e}")
+            
+            # Wait for next run
+            logger.info(f"Waiting {RUN_INTERVAL}s until next run...")
+            time.sleep(RUN_INTERVAL)
+    ```
+
+### Step 7: Create a Dockerfile & requirements file
+
+Create a `Dockerfile` & `requirements.txt` file under `prometheus-pushgateway-demo/sample-jobs`. 
+
+1. Copy following code into Dockerfile.
+
+    ```docker
+    FROM python:3.11-slim
+    
+    WORKDIR /app
+    
+    COPY requirements.txt .
+    RUN pip install --no-cache-dir -r requirements.txt
+    
+    COPY . .
+    
+    CMD ["python", "python/database_backup.py"]
+    ```
+
+    The Dockerfile builds a lightweight Python 3.11 container, installs dependencies, copies the application code, and runs `database_backup.py` when the container starts.
+
+2. Add below to `requirements.txt` .
+
+    ```
+    prometheus-client>=0.20.0
+    requests>=2.31.0
+    ```
+
+### Step 8: Add and bring up the backup-job service into Docker Compose
+
+1. Add a backup job service in `docker-compose.yml` so the backup job can run as a managed, repeatable container that starts automatically, shares networking with Pushgateway, and can push metrics reliably without manual execution.
+
+    ```yaml
+      # Sample Job: Database Backup (runs every 2 minutes for demo)
+      backup-job:
+        build:
+          context: ./sample-jobs
+          dockerfile: Dockerfile
+        container_name: backup-job
+        restart: unless-stopped
+        environment:
+          - PUSHGATEWAY_URL=http://pushgateway:9091
+          - JOB_TYPE=database_backup
+          - RUN_INTERVAL=120
+        command: ["python", "python/database_backup.py"]
+        depends_on:
+          pushgateway:
+            condition: service_healthy
+    ```
+
+    <KeyPointCallout defaultCollapsed="true" title="Code Breakdown">
+
+    **`build`**: Builds the job’s image from the local `./sample-jobs` directory using the specified Dockerfile so the job code is packaged into a container.
+
+    **`container_name`**: Assigns a fixed container name (`backup-job`) for easier identification and debugging.
+
+    **`restart`**: Automatically restarts the job container unless it is explicitly stopped, keeping the job running.
+
+    **`environment`**: Injects runtime configuration such as Pushgateway address, job identity, and execution interval without hardcoding them.
+
+    **`command`**: Overrides the Dockerfile CMD to explicitly run the database backup script.
+
+    **`depends_on`**: Ensures the backup job starts only after Pushgateway is healthy, preventing metric push failures at startup.
+
+    </KeyPointCallout>
+
+2. Bring up the service.
+
+    ```bash
+    docker compose up backup-job -d
+    ```
+
+3. Verify metrics are being sent. You can visit `port 9091` on `localhost` and you should be able to see metrics.
+
+    <Figure src="/img/guides/2026/01/prometheus-pushgateway-database-metrics-sent.webp" alt="Database backup job metrics sent to Prometheus Pushgateway" caption="Database backup job metrics sent to Prometheus Pushgateway" />
+
+### Step 9: Configure OpenTelemetry Collector to send metrics to SigNoz
+
+As verified in the previous step, metrics are being sent to the pushgateway. Now you will configure OTel Collector to scrape these metrics from Pushgateway and send them to SigNoz for visualization and alerting. You can read our [OpenTelemetry Collector](/blog/opentelemetry-collector-complete-guide/) guide to learn more.
+
+1. Create a sub-folder named `otel-collector` under `prometheus-pushgateway-demo`. 
+
+    ```bash
+    mkdir otel-collector && cd otel-collector
+    ```
+
+2. Create a `config.yaml` file. It will contain our configuration to scrape the Pushgateway and API key & path to send metrics to SigNoz.
+
+    ```bash
+    touch config.yaml
+    ```
+
+3. Copy the following code into it. 
+
+    ```yaml
+    # This configuration scrapes metrics from Prometheus Pushgateway
+    # and exports them to SigNoz Cloud.
+    
+    receivers:
+      # Prometheus receiver to scrape Pushgateway
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'pushgateway'
+              scrape_interval: 15s
+              # IMPORTANT: honor_labels must be true to preserve
+              # the original job and instance labels from pushed metrics
+              honor_labels: true
+              static_configs:
+                # Use 'pushgateway:9091' when running in docker-compose
+                # Use 'host.docker.internal:9091' if pushgateway runs on host
+                - targets: ['pushgateway:9091']
+    
+      # OTLP receiver for applications sending OTLP directly
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    
+    processors:
+      resourcedetection:
+        detectors: ["system"]
+      batch:
+    
+    exporters:
+      otlp:
+        endpoint: "https://ingest.<Region>.signoz.cloud:443"
+        tls:
+          insecure: false
+        headers:
+          "signoz-ingestion-key": "Ingestion API Key"
+      debug:
+        verbosity: normal
+    
+    extensions:
+      health_check:
+      pprof:
+      zpages:
+    
+    service:
+      extensions: [health_check, pprof, zpages]
+      pipelines:
+        metrics:
+          receivers: [prometheus, otlp]
+          processors: [resourcedetection, batch]
+          exporters: [otlp, debug]
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp]
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp]
+    
+    ```
+
+    **Code Breakdown:**
+
+    **`receivers.prometheus`**Configures the OpenTelemetry Collector to scrape Prometheus-formatted metrics from the Pushgateway.
+
+    **`honor_labels: true`**: Preserves the original `job` and `instance` labels set by the application when metrics were pushed.
+
+    **`targets: ['pushgateway:9091']`**: Points the scraper to the Pushgateway service inside the Docker network.
+
+    **`exporters.otlp`**: Sends collected telemetry to SigNoz Cloud using the OTLP protocol.
+
+    **`endpoint`**: Defines the SigNoz Cloud ingestion endpoint for your selected region.
+
+    **`signoz-ingestion-key`**: Authenticates the collector with SigNoz Cloud. Remember to replace it. You can follow [Generate Ingestion API](/docs/ingestion/signoz-cloud/keys/) Key to create it.
+
+    **`pipelines.metrics`**: Defines the metrics flow from Prometheus and OTLP receivers through processors to SigNoz.
+
+    **`pipelines.traces`**: Defines how traces received via OTLP are processed and exported.
+
+    **`pipelines.logs`**: Defines how logs received via OTLP are processed and exported.
+
+### Step 10: Add otel-collector service in docker-compose
+
+1. Add OTel-collector service to `docker-compose` so the OpenTelemetry Collector runs as a managed container that scrapes Pushgateway metrics, receives OTLP data, and reliably exports everything to SigNoz Cloud
+
+    ```yaml
+      # OpenTelemetry Collector for SigNoz Cloud
+      otel-collector:
+        image: otel/opentelemetry-collector-contrib:0.143.0
+        container_name: otel-collector
+        restart: unless-stopped
+        command: ["--config=/etc/otel-collector-config.yaml"]
+        volumes:
+          - ./otel-collector/config.yaml:/etc/otel-collector-config.yaml:ro
+        depends_on:
+          pushgateway:
+            condition: service_healthy
+    ```
+
+    YAML Breakdown:
+
+    **`image`**: Uses the official OpenTelemetry Collector Contrib image pinned to version `0.143.0` for stability and feature consistency.
+
+    **`container_name`**: Assigns a fixed name (otel-collector) for easier discovery, logs, and debugging.
+
+    **`restart`**: Keeps the collector running automatically unless explicitly stopped.
+
+    **`command`**: Starts the collector with a custom configuration file path.
+
+    **`volumes`**: Mounts the SigNoz Cloud configuration file into the container as read-only so the runtime config matches your local setup.
+
+    **`depends_on`**: Delays collector startup until Pushgateway is healthy to avoid failed scrapes at boot.
+
+2. Bring up the service.
+
+    ```bash
+    docker compose up otel-collector -d
+    ```
+
+### Step 11: Verify if metrics are being sent to SigNoz
+
+You can log in to your SigNoz cloud account and open `metrics` tab. Wait 2-3 minutes, and you should see your metrics flow in.
+
+<Figure
+  src="/img/guides/2026/01/prometheus-pushgateway-metrics-signoz.webp"
+  alt="Metrics Flowing in from Pushgateway to SigNoz Cloud via OTel Collector"
+  caption="Metrics Flowing in from Pushgateway to SigNoz Cloud via OTel Collector"
+/>
+
+### Step 12: Visualization in SigNoz Cloud
+
+You can follow our [Create Custom Dashboard](/docs/userguide/manage-dashboards/#create-a-custom-dashboard) docs to create a similar dashboard. You can also import below dashboard configurations by either downloading or copying the [prometheus-pushgateway.json](https://github.com/SigNoz/examples/tree/main/dashboards/prometheus/pushgateway) and import it while creating the dashboard. You can follow our docs on [Import Dashboard in Signoz](/docs/dashboards/import-dashboard/) for detailed steps.
+
+<Figure
+  src="/img/guides/2026/01/prometheus-pushgateway-dashboard.webp"
+  alt="Prometheus Pushgateway dashboard consisting of end-to-end visibility into backup and ETL job health—tracking duration, size, throughput, failures, and cleanup activity via Prometheus Pushgateway metrics."
+  caption="Prometheus Pushgateway Dashboard"
+/>
+
+### Step 13: Cleanup
+
+Once you are done experimenting, run the following command to stop and remove the container.
+
+```bash
+docker compose down -v
+```
+
+## Best Practice for using Prometheus Pushgateway
+
+The **current best practices** (as of 2025–2026) for using the **Prometheus Pushgateway**, based on official Prometheus documentation, community experience, and common production patterns, are as follows:
+
+### Use it only for truly short-lived jobs
+
+Pushgateway is designed for batch jobs that start, do work, and exit before Prometheus can scrape them, not for services, daemons, or request-driven workloads.
+
+### Always control the metric lifecycle explicitly
+
+Metrics pushed to the Pushgateway do not expire automatically, so jobs must delete their metrics on completion or failure to avoid stale or misleading data.
+
+### Avoid high-cardinality labels at all costs
+
+Labels such as timestamps, UUIDs, request IDs, or user IDs permanently increase time-series count and can quickly destabilize your monitoring system.
+
+### Use clear and stable grouping labels
+
+Use `job` plus stable **service-level** labels (e.g., `env`, `cluster`, `region`, `team`). Avoid `instance`/machine labels for Pushgateway’s recommended use case.
+
+### Never treat Pushgateway as a source of truth
+
+Pushgateway is a temporary cache, not a metrics database, and its data represents past executions rather than current system state.
+
+### Do not use it for real-time alerting
+
+Alerts based on Pushgateway metrics often fire incorrectly because pushed values may be hours or days old and no longer reflect reality.
+
+### Run it close to the jobs that push metrics
+
+Deploy Pushgateway in the same cluster or network as the batch jobs to reduce push failures and avoid cross-environment metric mixing.
+
+### Secure the endpoint aggressively
+
+Pushgateway accepts unauthenticated writes by default, so network policies, authentication, or a reverse proxy are essential in production setups.
+
+### Monitor Pushgateway itself
+
+Track the number of exposed metrics and scrape success to detect silent metric buildup or stuck jobs before they cause downstream issues.
+
+### Prefer pull-based or OpenTelemetry-native approaches when possible
+
+If a workload can expose metrics long enough to be scraped, or can emit telemetry via OpenTelemetry, those approaches are usually safer and more scalable than pushing.
+
+## Troubleshooting Cheat Sheet: Prometheus Pushgateway
+
+Use quick “if this happens, then check this" signals to diagnose missing metrics, label issues, persistence problems, and scrape failures in Pushgateway setups.
+
+| Symptom | Likely Cause | How to Verify | Fix |
+| --- | --- | --- | --- |
+| Metrics disappear after restart | Persistence not enabled | Restart Pushgateway and check metrics | Enable `--persistence.file` and mount a volume |
+| Metrics overwrite each other | Same `job` and `instance` labels | Inspect pushed labels in `/metrics` | Use unique `job`/`instance` per producer |
+| Old metrics never removed | Pushgateway has no TTL | Check timestamps in `/metrics` | Explicitly delete metrics via Pushgateway API |
+| Push fails with connection error | Wrong Pushgateway URL | Curl `/metrics` endpoint | Fix hostname/port or Docker network |
+| Metrics missing in SigNoz | Collector not scraping Pushgateway | Check otel-collector logs | Verify Prometheus receiver config |
+| High metric cardinality | Dynamic labels (timestamps, IDs) | Inspect label values | Remove high-cardinality labels |
+| Push succeeds but metrics stale | Job stopped pushing | Check last push time | Ensure periodic push or cleanup on exit |
+| Pushgateway unhealthy | Service not responding | Hit `/-/healthy` endpoint | Restart container or check logs |
+
+## FAQ
+
+### When should I use Pushgateway?
+
+You should only use it in very specific scenarios:
+
+- **Service-level batch jobs:** Jobs that run, complete, and disappear (e.g., a daily backup script, a cron job that processes data).
+- **Ephemeral scripts:** Processes that run for seconds or minutes, making them impossible for Prometheus to scrape reliably on a standard 15s or 30s interval.
+
+### When should I NOT use Pushgateway?
+
+- **Standard Services:** Web servers, databases, or long-running daemons (e.g., Cassandra, Nginx) should be scraped directly.
+- **Firewall Traversal:** Do not use it solely to extract metrics from a secure network. Use **PushProx** or specific remote-write configurations instead.
+- **Converting Pull to Push:** If you simply prefer push architecture, Pushgateway is not the right tool; it creates a single point of failure and bottlenecks.
+
+### Does Pushgateway automatically delete old metrics?
+
+No, if a job pushes a metric (e.g., `backup_success_timestamp`) and then never runs again, Pushgateway will continue exposing that metric forever (or until the gateway is restarted).
+
+It is best practice to manually delete metrics using the API when they are no longer relevant, or design your metrics (like timestamps) so that "stale" data is obvious in your graphs.
+
+### What happens if the Pushgateway restarts?
+
+By default, it stores metrics only in memory. If it crashes or restarts, all metrics are lost. If you have enabled persistence using the `--persistence.file` flag to save metrics to disk at regular intervals, then restarting won’t affect your data.
+
+### Can multiple instances of a job push to the same Gateway?
+
+Yes, but you must be careful with grouping. Metrics are grouped by a `grouping key` (usually `job` and `instance`). If two scripts use the same grouping key, the second one will overwrite the metrics of the first. If they use different keys (e.g., `instance=worker-1` vs `instance=worker-2`) both sets of metrics will stay in the Gateway until explicitly deleted.
+
+---
+
+Hope this guide has helped you send metrics from your batch jobs to the Prometheus Pushgateway and visualise them in SigNoz.
+
+You can also subscribe to our [**newsletter**](https://newsletter.signoz.io/) for insights from observability nerds at SigNoz, and get open-source, OpenTelemetry, and devtool-building stories straight to your inbox.
