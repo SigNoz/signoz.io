@@ -1,7 +1,8 @@
 ---
-date: 2025-01-29
+date: 2026-01-18
 title: K8s Metrics
-
+description: Learn how to set up monitoring for your Kubernetes cluster using OpenTelemetry kubeletstats and k8scluster receivers.
+doc_type: howto
 id: k8s-metrics
 ---
 
@@ -26,7 +27,7 @@ These metrics are collected directly from the Kubelet API server running on each
 
 ### Quick Start with k8s-infra Helm Chart
 
-The simplest way to get started is using the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, which automatically:
+The simplest way to get started is using the [`k8s-infra`](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) Helm chart, which automatically:
 1. Deploys agents to all cluster nodes
 2. Configures secure API access with appropriate RBAC permissions
 3. Enables essential metrics by default
@@ -60,7 +61,7 @@ The receiver supports many optional metrics that provide deeper insights into cl
 - `k8s.container.memory_request_utilization`: Monitors memory usage versus requests
 - `container.uptime`: Tracks container uptime
 
-These are enabled by default in the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart. For a complete list of available optional metrics, see the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/documentation.md#optional-metrics).
+These are enabled by default in the [`k8s-infra`](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) Helm chart. For a complete list of available optional metrics, see the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/documentation.md#optional-metrics).
 
 ## Manual Configuration Guide
 
@@ -228,11 +229,11 @@ For a comprehensive list of available metrics, conditions, and resources, refer 
 
 #### Troubleshooting
 
-1. I am using the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, but still not seeing cluster metrics
+1. I am using the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart, but still not seeing cluster metrics
 
 Check the logs of the collector pod to see if there are any errors.
 
-2. I am using the latest version of the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, and there are no errors in the logs, but still not seeing cluster metrics
+2. I am using the latest version of the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart, and there are no errors in the logs, but still not seeing cluster metrics
 
 Verify:
    - The collector has proper RBAC permissions
@@ -241,7 +242,7 @@ Verify:
 
 ## Manual Configuration Guide
 
-If you're not using the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, follow this example:
+If you're not using the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart, follow this example:
 
 ### 1. Configure the K8s Cluster Receiver
 
@@ -311,13 +312,17 @@ service:
 2. Enable optional metrics for deeper visibility into your cluster
 3. Use the k8sattributes processor to add context to your metrics
 
-## Troubleshooting
+<details>
+<ToggleHeading>
 
-1. I am using the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, but still not seeing cpu/memory requests/limits
+## Troubleshooting
+</ToggleHeading>
+
+1. I am using the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart, but still not seeing cpu/memory requests/limits
 
 Check the version of the `k8s-infra` helm chart you are using. The optional metrics are enabled by default in the latest version of the helm chart. Prior to version 0.11.10, the optional metrics were not enabled by default.
 
-2. I am using the latest version of the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, but still not seeing cpu/memory requests/limits
+2. I am using the latest version of the [`k8s-infra`](https://signoz.io/docs/opentelemetry-collection-agents/k8s/k8s-infra/install-k8s-infra/) Helm chart, but still not seeing cpu/memory requests/limits
 
 Verify:
    - The collector has proper RBAC permissions
@@ -333,3 +338,5 @@ Verify:
 4. Metric metadata is missing
 
 By default, the kubeletstats/k8scluster receivers do not have rich metadata. To enable rich metadata, you need to enable the `k8sattributes` processor.
+
+</details>
