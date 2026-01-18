@@ -992,7 +992,7 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Ruby',
-            route: '/docs/instrumentation/opentelemetry-ruby-on-rails',
+            route: '/docs/instrumentation/opentelemetry-ruby',
             items: [
               {
                 type: 'doc',

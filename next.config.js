@@ -573,12 +573,17 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/ruby/',
-          destination: '/docs/instrumentation/ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/ruby-on-rails/',
-          destination: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
           permanent: true,
         },
         {
