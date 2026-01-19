@@ -20,7 +20,6 @@ import siteMetadata from './data/siteMetadata'
 import blogRelatedArticles from './constants/blogRelatedArticles.json'
 import comparisonsRelatedArticles from './constants/comparisonsRelatedArticles.json'
 import guidesRelatedArticles from './constants/guidesRelatedArticles.json'
-import opentelemetryRelatedArticles from './constants/opentelemetryRelatedArticles.json'
 import allAuthors from './constants/authors.json'
 
 const isProduction = process.env.NODE_ENV === 'production'
