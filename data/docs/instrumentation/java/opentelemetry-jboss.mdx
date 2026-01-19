@@ -1,5 +1,5 @@
 ---
-date: 2026-01-03
+date: 2026-01-18
 id: jboss
 
 title: JBoss / WildFly OpenTelemetry Instrumentation
@@ -52,7 +52,15 @@ JAVA_OPTS="$JAVA_OPTS -javaagent:/opt/jboss/lib/opentelemetry-javaagent.jar"
 JAVA_OPTS="$JAVA_OPTS -Dotel.service.name=<service-name>"
 JAVA_OPTS="$JAVA_OPTS -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443"
 JAVA_OPTS="$JAVA_OPTS -Dotel.exporter.otlp.headers=signoz-ingestion-key=<your-ingestion-key>"
+JAVA_OPTS="$JAVA_OPTS -Dotel.metrics.exporter=none"
+JAVA_OPTS="$JAVA_OPTS -Dotel.logs.exporter=none"
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the line entirely.
+</KeyPointCallout>
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
@@ -130,7 +138,17 @@ env:
   value: 'https://ingest.<region>.signoz.cloud:443'
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_METRICS_EXPORTER
+  value: 'none'
+- name: OTEL_LOGS_EXPORTER
+  value: 'none'
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+</KeyPointCallout>
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
@@ -161,9 +179,20 @@ spec:
   propagators:
     - tracecontext
     - baggage
+  env:
+    - name: OTEL_METRICS_EXPORTER
+      value: "none"
+    - name: OTEL_LOGS_EXPORTER
+      value: "none"
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to your collector.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+</KeyPointCallout>
 
 Deploy this resource to your cluster:
 
@@ -231,7 +260,15 @@ set "JAVA_OPTS=%JAVA_OPTS% -javaagent:C:\jboss\lib\opentelemetry-javaagent.jar"
 set "JAVA_OPTS=%JAVA_OPTS% -Dotel.service.name=<service-name>"
 set "JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443"
 set "JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.headers=signoz-ingestion-key=<your-ingestion-key>"
+set "JAVA_OPTS=%JAVA_OPTS% -Dotel.metrics.exporter=none"
+set "JAVA_OPTS=%JAVA_OPTS% -Dotel.logs.exporter=none"
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the line entirely.
+</KeyPointCallout>
 
 Replace `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
 
@@ -264,11 +301,19 @@ ENV JAVA_OPTS="-javaagent:/opt/jboss/opentelemetry-javaagent.jar"
 ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_METRICS_EXPORTER="none"
+ENV OTEL_LOGS_EXPORTER="none"
 
 EXPOSE 8080
 
 CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0"]
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+</KeyPointCallout>
 
 Replace `<my-app>.war`, `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
 
@@ -286,6 +331,8 @@ docker run -p 8080:8080 \
   -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-jboss-app" \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
+  -e OTEL_METRICS_EXPORTER="none" \
+  -e OTEL_LOGS_EXPORTER="none" \
   my-jboss-app
 ```
 
