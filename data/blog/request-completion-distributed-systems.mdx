@@ -1,69 +1,100 @@
 ---
-title: Is this span actually slow? Span Percentile gives you the answer
+
+title: What percentage of requests make it from checkout to payment in your microservices?
 slug: request-completion-distributed-systems
-date: 2026-01-06
+date: 2026-01-19
 tags: [Feature]
 authors: [anushka_karmakar]
 description: A single trace shows one request. To measure how many requests complete a multi-step flow across services, you need to aggregate thousands of traces. Trace Funnels does this.
-image: /img/blog/2026/01/span-percentile.webp
+image: /img/trace-funnels/identify-problem-traces.png
 keywords: [SigNoz, Trace Funnels, Distributed Tracing, OpenTelemetry, Observability, Microservices, Request Flow, Traces, APM, Developer Tools]
+
 ---
 
-You're debugging a slow request. You drill into the trace, find a span that took 2.16 seconds, and immediately hit the question that always comes up. Is this actually slow for this operation, or is 2.16s just what this span normally takes?
+This is a specific question, but it represents a class of problems that's hard to answer with distributed tracing today.
 
-Without context, you can't tell. A database call that usually takes 50ms hitting 2 seconds is a problem. A batch job that normally runs for 3 seconds finishing in 2.16 seconds is fine, maybe even fast.
+You might want to know how many requests successfully pass from order submission to payment processing to notification delivery? Where are requests dropping off? How long does the handoff between services take on average?
 
-The typical workaround is to open another browser tab, navigate to your tracing analytics, set up filters for the same service and span name, query the percentile distribution, and then mentally map where 2.16s falls. By the time you've done this context-switch, you've lost 30 seconds and broken your debugging flow.
+A single trace shows you one request. You can see the spans, the timing, the errors. But to understand systemic patterns, you need to look at thousands of traces. And that's where things get tedious.
 
-We built Span Percentile to eliminate that friction.
+The typical approach is to manually inspect traces one by one, or export span data somewhere else and write scripts to aggregate it. Some teams keep multiple browser tabs open, correlating spans across traces by hand. It works, but it doesn't scale, and it's not something you want to do during an incident.
 
-## What it does
+## What we noticed
 
-When you open a span in the trace detail view, you'll see a percentile badge right next to the span name, something like "p78". This tells you immediately that this span's duration was slower than 78% of similar spans over the last hour.
+We saw SigNoz users trying to answer these questions repeatedly. They wanted to define a sequence of operations across their services and measure how many requests completed the full sequence versus dropped off at each step. They wanted error rates and latency percentiles for each transition, not just for individual spans.
 
-<video width="820" height="540" controls>
-   <source src="/img/blog/2026/01/span-percentile.mp4" type="video/mp4"/>
-   Your browser does not support the video tag.
-</video>
+The underlying need was aggregation across traces and not just inspection of individual requests.
 
-Click on the badge, and an expandable panel shows you the full picture.
+So we built Trace Funnels, an industry-first feature for distributed tracing. You define a sequence of spans as steps, and SigNoz computes conversion rates, error percentages, and latency distributions between each step across all matching traces.
 
-The panel displays p50, p90, p99 values with their corresponding durations. A visual indicator shows exactly where your span sits relative to these markers. You also see the evaluation window, which defaults to 1 hour from the span's start time.
+<Figure src="/img/trace-funnels/analyze-request-flows-across-multiple-trace-ids-1.png" alt="You define a sequence of spans as steps, and SigNoz computes conversion rates, error percentages, and latency distributions between each step across all matching traces." caption=""/>
 
-The comparison is scoped by default to spans with the same `service.name`, `span.name`, and `deployment.environment`. So you're comparing apples to apples, this specific operation in this specific service in this environment.
 
-### Narrowing the comparison
+If you've felt this problem, give it a try and let us know how it works for you.
 
-Sometimes the default scope is too broad. Maybe you want to know if latency is specific to a particular deployment, or a specific endpoint.
+## What Trace Funnels does
 
-Click the "+" button in the percentile panel, and you can add filters like `k8s.deployment.name` to compare only against spans from the same Kubernetes deployment, or `http.url` to compare only against spans hitting the same endpoint. Any span attribute that makes sense for your investigation works here.
+You define funnel steps by selecting service and span name combinations. For example:
 
-This lets you answer questions like "is this slow because of my new deployment, or is it slow across all deployments?"
+- Step 1: `OrderService` → `submitOrder`
+- Step 2: `PaymentService` → `processPayment`
+- Step 3: `NotificationService` → `sendConfirmation`
+
+Steps can be from different services, as long as they appear within the same trace.
+
+Once you run the funnel, [you see](https://signoz.io/trace-funnels/):
+
+<Figure src="/img/trace-funnels/see-drop-offs-between-steps.png" alt="Funnel visualization showing three-stage conversion with 1.94% overall rate. Stage 1: 100% (2254 spans). Stage 2: 60% (486.76 req/s, 678 errors). Stage 3: 33% (34.77ms avg duration, 47.8s P99 latency). Blue bars show total spans, red sections show errors." caption=""/>
+
+**Conversion rates between steps:** If 1000 traces contained Step 1 and only 850 of those also contained Step 2, that's an 85% conversion rate. A 32% drop between steps tells you something systematic is happening beyond isolated failures.
+
+**RED metrics per step transition:** For each transition (Step 1 → Step 2, Step 2 → Step 3), you get rate (requests per second), error count and percentage, and duration with p50, p90, p99 percentiles.
+
+**Drill-down to problem traces:** See the top 5 slowest traces for each transition. See all traces with errors at each step. Click any trace ID to jump to the full trace view for debugging.
+
+**Saved funnel definitions:** Save your funnels and rerun them across different time ranges. Share them with your team.
+
+## How it works under the hood
+
+The core challenge is aggregating span data across different trace IDs. Most tracing queries operate within a single trace. Trace Funnels needs to find all traces containing Span A, then check which of those also contain Span B, and compute metrics across that set.
+
+SigNoz stores trace data in ClickHouse. When you run a funnel query, the system:
+
+1. Queries for all traces containing the first step's span (filtered by service name and span name) within the selected time window
+2. For each subsequent step, filters down to traces that also contain that step's span
+3. Computes conversion by comparing trace counts between steps
+4. Calculates duration between steps using span timestamps (configurable: start-to-start, end-to-start, etc.)
+5. Aggregates error counts and latency percentiles across the matching traces
+
+This is computationally heavier than single-trace queries. We use existing indexes on span name, service name, and trace ID to keep queries performant. For the initial release, we're relying on real-time queries rather than pre-aggregated data, which means very large time windows on high-volume systems may take longer to compute.
+
+The conversion rate calculation is straightforward; if Step 1 matches 1000 traces and Step 2 matches 850 of those same traces, conversion is 85%. The "drop-off" (150 traces) represents requests that had the first span but never produced the second span within the same trace.
+
+Duration between steps is calculated per-trace, then aggregated. For each trace in the funnel, we find the relevant spans and compute the time gap (e.g., end of Span A to start of Span B). These individual durations are then aggregated into percentiles across all matching traces.
 
 ## When this helps
 
-**During incident triage -** You're paged for high latency. You pull up a slow trace and find a span that took 800ms. The percentile badge shows "p94". That's useful because this span is slower than usual, but it's not a dramatic outlier. You keep digging. Another span shows "p99.5". There's your culprit.
-
-**Validating a deployment -** You just rolled out a new version. Users are complaining about slowness, but you're not sure if it's real or confirmation bias. You find a slow trace, add `k8s.deployment.name` as a filter, and see that the span is "p97" within the new deployment but would only be "p60" compared to all deployments. The new code has a regression.
-
-**Investigating endpoint-specific issues -** Support reports that one particular API endpoint feels slow. You add `http.url` as a filter and check a few traces. Spans for this endpoint are consistently hitting p85-p95, while other endpoints hover around p50. Something's wrong with this specific code path.
+1. **Tracking critical business flows** 
+    
+    Define a funnel for your checkout process: cart → payment → confirmation. See what percentage of requests complete the full sequence. If conversion drops from 95% to 80% after a deploy, you know something broke.
+    
+2. **Validating deployments** 
+Run the same funnel definition across two time ranges like before and after a release. Compare conversion rates and latency percentiles. Did Step 2 → Step 3 latency spike? Did error rates increase at a specific step?
+3. **Finding slow handoffs between services** 
+If Step 1 → Step 2 averages 50ms but Step 2 → Step 3 averages 800ms, you know where to focus. The funnel view surfaces these bottlenecks without requiring you to inspect individual traces.
 
 ## How other tools handle this
 
-**Datadog** shows a percentile for a resource in the trace detail view. But you can't customize the comparison scope. You get what you get. If you need to narrow down to a specific deployment or endpoint, you'll need to leave the trace view and go query elsewhere.
+Datadog has funnel analysis, but it's designed for Real User Monitoring (RUM) and Product Analytics. You can track user journeys through frontend views and actions. For backend distributed traces, Datadog offers Trace Queries to find traces based on span relationships, but not funnel-style conversion metrics or step-by-step drop-off analysis.
 
-**Honeycomb** has heatmaps and BubbleUp, which are excellent for exploring distributions and finding what's different about slow requests. But these are query-level tools. When you're looking at a specific span in the trace waterfall, you don't get inline percentile context. You'd need to switch to the query builder, set up a heatmap visualization, select your region of interest, and run BubbleUp. It's powerful, but it's a different workflow.
-
-**Grafana Tempo** offers TraceQL metrics and the Traces Drilldown app for aggregate latency analysis. You can get p50/p90/p99 breakdowns grouped by attributes. But like Honeycomb, this is a separate view from the trace detail. When you're staring at a specific span, you don't see its percentile position inline.
-
-The difference with SigNoz is where the information surfaces. Percentile context appears directly in the trace detail view, right where you're already looking. And you can refine the comparison cohort without leaving that view.
-
-Context-switching during an incident costs time and mental energy. Having the percentile right there, in the same view where you're already debugging, means one less tab to open and one less mental context to maintain.
+We haven't found another observability tool that offers this capability for distributed traces. If you know of one, we'd like to hear about it.
 
 ## Try it
 
-Span Percentile is available in SigNoz Cloud and in self-hosted SigNoz from version 0.100.0 onwards.
+Trace Funnels is available in SigNoz Cloud and self-hosted SigNoz.
 
-To use it, open any trace, click on a span in the waterfall, and look for the percentile badge next to the span name. Click to expand the full breakdown. Use the "+" button to add filters if you need a narrower comparison.
+To use it, go to the ‘Traces’ module and click on the ‘Funnels’ tab. Create a new funnel, define your steps, select a time range, and run it.
 
-We're curious which filters you find yourself adding most often. That'll help us decide what to include in the default scope. Drop us a note in [GitHub Discussions](https://github.com/SigNoz/signoz/discussions) or the [SigNoz Community Slack](https://signoz.io/slack).
+Documentation: [Trace Funnels Overview](https://signoz.io/docs/trace-funnels/overview/)
+
+We want to hear how you use this. What funnels are you defining? What's missing? Let us know in [GitHub Discussions](https://github.com/SigNoz/signoz/discussions) or [SigNoz Community Slack](https://signoz.io/slack).
