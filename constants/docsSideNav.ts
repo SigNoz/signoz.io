@@ -1174,12 +1174,12 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/hostmetrics',
-        label: 'Host Setup',
+        route: '/docs/infrastructure-monitoring/hostmetrics',
+        label: 'Host Metrics',
       },
       {
         type: 'doc',
-        route: '/docs/userguide/k8s-metrics',
+        route: '/docs/infrastructure-monitoring/k8s-metrics',
         label: 'Kubernetes Metrics',
       },
       {

@@ -1238,6 +1238,16 @@ module.exports = () => {
           destination: '/docs/llm-observability/',
           permanent: true,
         },
+        {
+          source: '/docs/userguide/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/hostmetrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/k8s-metrics/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
