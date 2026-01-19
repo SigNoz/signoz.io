@@ -1,5 +1,5 @@
 ---
-date: 2026-01-12
+date: 2026-01-19
 title: Collecting Application Logs from Log File
 id: collect_logs_from_file
 description: Learn how to configure the OpenTelemetry Collector to read logs from a file and push them to SigNoz.
@@ -9,9 +9,8 @@ doc_type: howto
 import GetHelp from '@/components/shared/get-help.md'
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
-  header as shown in [Cloud →
-  Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key
+header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Overview
@@ -37,9 +36,7 @@ For this guide, you can create a sample log file named `app.log` at `/tmp/app.lo
 ```
 
 <Admonition type="info">
-  The filelog receiver sends each line as a separate log entry. To parse structured fields like
-  timestamp, level, and message, you can use [SigNoz Logs
-  Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to parse logs after ingestion.
+The filelog receiver sends each line as a separate log entry. To parse structured fields like timestamp, level, and message, you can use [SigNoz Logs Pipelines](https://signoz.io/docs/logs-pipelines/introduction/) to parse logs after ingestion.
 </Admonition>
 
 ## Configure Filelog Receiver
@@ -77,8 +74,7 @@ receivers:
 ```
 
 <Admonition type="info">
-  **start_at**: The `start_at: end` configuration ensures that only newly added logs are
-  transmitted. To include historical logs from the file, change this to `start_at: beginning`.
+**start_at**: The `start_at: end` configuration ensures that only newly added logs are transmitted. To include historical logs from the file, change this to `start_at: beginning`.
 </Admonition>
 
 The `/app` suffix in `filelog/app` is a custom identifier that allows you to configure multiple filelog receivers with different settings. You can name differently for different apps (e.g., `filelog/nginx`, `filelog/application`).
@@ -113,8 +109,7 @@ The [SigNoz Kubernetes Infra Chart](https://signoz.io/docs/opentelemetry-collect
 **Recommendation:** For the best experience, configure your applications to log to `stdout` and `stderr`. This ensures they are automatically captured by the standard Kubernetes logging infrastructure without additional configuration.
 
 <Admonition type="info">
-  The default configuration collects logs from all pods in the cluster. To filter specific
-  namespaces or pods, you'll need to customize the filelog receiver configuration.
+The default configuration collects logs from all pods in the cluster. To filter specific namespaces or pods, you'll need to customize the filelog receiver configuration.
 </Admonition>
 
 <KeyPointCallout title="Collecting from custom file paths" defaultCollapsed={true}>
@@ -170,16 +165,7 @@ docker run -d \
 ```
 
 <Admonition type="info">
-  For production deployments, pin to a specific version tag instead of `latest` to ensure
-  consistency. Check the{' '}
-  <a
-    href="https://github.com/open-telemetry/opentelemetry-collector-releases/releases"
-    target="_blank"
-    rel="noopener noreferrer nofollow"
-  >
-    releases page
-  </a>{' '}
-  for available versions.
+For production deployments, pin to a specific version tag instead of `latest` to ensure consistency. Check the <a href="https://github.com/open-telemetry/opentelemetry-collector-releases/releases" target="_blank" rel="noopener noreferrer nofollow">releases page</a> for available versions.
 </Admonition>
 
 For more examples, see the [Collect Docker Logs](https://signoz.io/docs/userguide/collect_docker_logs/) doc.
