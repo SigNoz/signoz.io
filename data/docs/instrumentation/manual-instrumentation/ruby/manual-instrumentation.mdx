@@ -1,0 +1,137 @@
+---
+date: 2026-01-17
+id: ruby-manual-instrumentation
+title: How to add manual instrumentation in Ruby
+description: Create custom spans, enrich them, and record errors in Ruby applications with OpenTelemetry and SigNoz
+
+doc_type: howto
+---
+
+Manual instrumentation gives you fine-grained control when automatic instrumentation alone cannot express important business operations. Use it to capture steps that matter for debugging, to attach business-specific attributes, or to guarantee that failures surface with the right context in SigNoz.
+
+<KeyPointCallout title="Works for both SigNoz Cloud and Self-Hosted" defaultCollapsed={true}>
+  Manual instrumentation steps are identical across deployments—only your OTLP endpoint and ingestion key differ.
+</KeyPointCallout>
+
+## Prerequisites
+
+- Finish the core Ruby setup in the [Ruby OpenTelemetry instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-ruby/) so exporters, tracer provider, and SDK are configured.
+- The `opentelemetry-sdk` gem installed in your application.
+- Tested with Ruby 3.3.0 and OpenTelemetry Ruby SDK v1.10.0.
+
+## Step 1. Create manual spans
+
+Use the SDK tracer to wrap important work inside custom spans:
+
+```ruby:app/services/order_service.rb
+class OrderService
+  def process_order(order_id)
+    tracer = OpenTelemetry.tracer_provider.tracer('order-service')
+
+    tracer.in_span('process-order') do |span|
+      span.set_attribute('order.id', order_id)
+      span.set_attribute('order.status', 'processing')
+
+      # Your order processing logic here
+      validate_inventory(order_id)
+      charge_payment(order_id)
+    end
+  end
+end
+```
+
+Tips:
+
+- Reuse tracer instances instead of creating a new one for each request.
+- Start spans with descriptive names that match business steps (`checkout`, `fetch-user`, etc.).
+- The `in_span` block automatically ends the span when the block completes.
+
+## Step 2. Add attributes and events
+
+Attributes show up as key-value pairs in SigNoz so you can filter and aggregate spans. Events capture notable moments inside a span.
+
+```ruby:app/services/payment_service.rb
+class PaymentService
+  def handle_payment(amount, currency)
+    span = OpenTelemetry::Trace.current_span
+
+    span.set_attribute('payment.amount', amount)
+    span.set_attribute('payment.currency', currency)
+    span.set_attribute('payment.method', 'credit_card')
+
+    # Process the payment
+    result = process_charge(amount, currency)
+
+    span.add_event('payment.processed', attributes: {
+      'status' => 'success',
+      'transaction.id' => result.transaction_id
+    })
+  end
+end
+```
+
+- Keep attribute keys consistent (use semantic conventions when possible).
+- Use events to mark retries, cache hits/misses, queue waits, and similar milestones.
+
+## Step 3. Record errors
+
+Flag failures on the span so they are easy to query in SigNoz.
+
+```ruby:app/services/risky_service.rb
+class RiskyService
+  def risky_operation
+    span = OpenTelemetry::Trace.current_span
+
+    begin
+      do_something_risky
+      span.status = OpenTelemetry::Trace::Status.ok
+    rescue StandardError => e
+      span.record_exception(e)
+      span.status = OpenTelemetry::Trace::Status.error(e.message)
+      raise
+    end
+  end
+end
+```
+
+- `record_exception` attaches stack trace and message details.
+- Setting status to `error` surfaces the span in SigNoz error views and alerts.
+- Continue propagating the error upstream so calling code can respond.
+
+## Validate
+
+1. Trigger the code paths that emit manual spans.
+2. In SigNoz **Traces**, filter by `service.name` or your span name.
+3. Open a trace and verify attributes, events, and error status.
+4. Check the **Errors** view to confirm failures show up with recorded exceptions.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Why don't I see my custom spans in SigNoz?
+
+- Confirm the OpenTelemetry initializer runs before your application handlers.
+- Check sampler configuration. Using a low sampling rate in development may drop most manual spans.
+- Verify traffic hits the functions where you inserted spans.
+
+### Why are child spans missing even though I create them?
+
+- Ensure you use `in_span` blocks or properly manage span context for nested spans.
+- When calling external services or databases, the instrumentation must propagate context.
+
+### Why don't attributes or events appear on the span?
+
+- Attribute values must be strings, integers, floats, booleans, or arrays of these types.
+- Call `set_attribute` or `add_event` before the span ends. Post-end mutations are ignored.
+- Avoid reusing finished spans—always create a new span for each invocation.
+
+</details>
+
+## Next steps
+
+- [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your Ruby application
+- Explore the <a href="https://opentelemetry.io/ecosystem/registry/?language=ruby&component=instrumentation" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Ruby instrumentation registry</a> for additional library instrumentations

@@ -6,6 +6,7 @@ import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '../u
 import {
   getOS,
   getTimezone,
+  getTimezoneAnalysis,
   getUserAgentString,
   getWebdriver,
   isHeadless,
@@ -13,6 +14,7 @@ import {
   getJSCapabilitySignals,
   getAnalyticsHealthSignals,
 } from '../utils/browserSignals'
+import Cookies from 'js-cookie'
 
 const INITIAL_REFERRER_KEY = 'app_initial_referrer'
 const UTM_PARAMS_KEY = 'app_utm_params'
@@ -64,11 +66,16 @@ export const useLogEvent = () => {
       const clientBotDetection = detectBotClientSide()
 
       const utmParams = getStoredUtmParams()
+      const userIp = Cookies.get('user_ip')
+      const vercelIp = Cookies.get('vercel_ip')
 
       const enhancedAttributes = {
         ...attributes,
+        custom_ip: userIp || 'unknown',
+        custom_vercel_ip: vercelIp || 'unknown',
         custom_os: getOS(),
         custom_timezone: getTimezone(),
+        ...getTimezoneAnalysis(),
         custom_initial_referrer: getInitialReferrer(),
         custom_user_agent: getUserAgentString(),
         custom_webdriver: getWebdriver(),

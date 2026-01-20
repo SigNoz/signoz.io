@@ -1,5 +1,5 @@
 ---
-date: 2026-01-03
+date: 2026-01-18
 id: tomcat
 
 title: Tomcat OpenTelemetry Instrumentation
@@ -50,7 +50,15 @@ export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/opt/tomcat/lib/opentelemetry-ja
 export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_METRICS_EXPORTER="none"
+export OTEL_LOGS_EXPORTER="none"
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the line entirely.
+</KeyPointCallout>
 
 Make the script executable:
 
@@ -118,7 +126,17 @@ env:
   value: 'https://ingest.<region>.signoz.cloud:443'
 - name: OTEL_EXPORTER_OTLP_HEADERS
   value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_METRICS_EXPORTER
+  value: 'none'
+- name: OTEL_LOGS_EXPORTER
+  value: 'none'
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+</KeyPointCallout>
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
@@ -149,9 +167,20 @@ spec:
   propagators:
     - tracecontext
     - baggage
+  env:
+    - name: OTEL_METRICS_EXPORTER
+      value: "none"
+    - name: OTEL_LOGS_EXPORTER
+      value: "none"
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to your collector.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+</KeyPointCallout>
 
 Apply the instrumentation:
 
@@ -219,7 +248,15 @@ set "CATALINA_OPTS=%CATALINA_OPTS% -javaagent:C:\tomcat\lib\opentelemetry-javaag
 set "OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>"
 set "OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443"
 set "OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>"
+set "OTEL_METRICS_EXPORTER=none"
+set "OTEL_LOGS_EXPORTER=none"
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the line entirely.
+</KeyPointCallout>
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
@@ -265,10 +302,18 @@ COPY target/*.war /usr/local/tomcat/webapps/
 ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_METRICS_EXPORTER="none"
+ENV OTEL_LOGS_EXPORTER="none"
 
 EXPOSE 8080
 CMD ["catalina.sh", "run"]
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics and logs?" defaultCollapsed={true}>
+The OpenTelemetry Java agent enables all three signals (traces, metrics, and logs) by default. Since this guide focuses on traces, we disable metrics and logs to avoid sending unwanted data to SigNoz.
+
+If you want to collect metrics or logs later, change the respective exporter to `otlp` or remove the variable entirely.
+</KeyPointCallout>
 
 Replace `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
 
@@ -286,6 +331,8 @@ docker run -p 8080:8080 \
   -e OTEL_RESOURCE_ATTRIBUTES="service.name=my-tomcat-app" \
   -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443" \
   -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
+  -e OTEL_METRICS_EXPORTER="none" \
+  -e OTEL_LOGS_EXPORTER="none" \
   my-tomcat-app
 ```
 

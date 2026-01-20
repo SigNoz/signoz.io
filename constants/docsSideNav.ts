@@ -999,6 +999,19 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'category',
+            isExpanded: false,
+            label: 'Ruby',
+            route: '/docs/instrumentation/opentelemetry-ruby',
+            items: [
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/manual-instrumentation/ruby/manual-instrumentation',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'PHP',
             route: '/docs/instrumentation/opentelemetry-php',
@@ -1007,11 +1020,6 @@ const docsSideNav = [
             type: 'doc',
             label: 'Laravel',
             route: '/docs/instrumentation/opentelemetry-laravel',
-          },
-          {
-            type: 'doc',
-            label: 'Ruby on Rails',
-            route: '/docs/instrumentation/opentelemetry-ruby-on-rails',
           },
           {
             type: 'doc',
@@ -1174,12 +1182,12 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/hostmetrics',
-        label: 'Host Setup',
+        route: '/docs/infrastructure-monitoring/hostmetrics',
+        label: 'Host Metrics',
       },
       {
         type: 'doc',
-        route: '/docs/userguide/k8s-metrics',
+        route: '/docs/infrastructure-monitoring/k8s-metrics',
         label: 'Kubernetes Metrics',
       },
       {
@@ -1905,6 +1913,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/google-adk-dashboard',
+            label: 'Google ADK',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/google-gemini-dashboard',
             label: 'Google Gemini',
           },
@@ -2415,11 +2428,6 @@ const docsSideNav = [
 
     items: [
       {
-        route: '/docs/llm-community-integrations',
-        label: 'LLM Community Integrations',
-        type: 'doc',
-      },
-      {
         route: '/docs/agno-monitoring',
         label: 'Agno',
         type: 'doc',
@@ -2460,6 +2468,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/google-adk-observability',
+        label: 'Google ADK',
+        type: 'doc',
+      },
+      {
         route: '/docs/google-gemini-monitoring',
         label: 'Google Gemini',
         type: 'doc',
@@ -2477,6 +2490,11 @@ const docsSideNav = [
       {
         route: '/docs/langchain-observability',
         label: 'LangChain/LangGraph',
+        type: 'doc',
+      },
+      {
+        route: '/docs/langtrace',
+        label: 'Langtrace',
         type: 'doc',
       },
       {
@@ -2505,6 +2523,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/openlit',
+        label: 'OpenLIT',
+        type: 'doc',
+      },
+      {
         route: '/docs/pipecat-monitoring',
         label: 'Pipecat',
         type: 'doc',
@@ -2522,6 +2545,11 @@ const docsSideNav = [
       {
         route: '/docs/temporal-observability',
         label: 'Temporal',
+        type: 'doc',
+      },
+      {
+        route: '/docs/traceloop',
+        label: 'Traceloop(OpenLLMetry)',
         type: 'doc',
       },
       {
