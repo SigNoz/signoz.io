@@ -1,0 +1,281 @@
+---
+title: OpenTelemetry Resource Attributes - What They Are and How to Use Them
+slug: otel-resource-attributes
+date: 2026-01-15
+tags: [OpenTelemetry, Observability]
+authors: [dhruv_ahuja]
+description: "Understand OpenTelemetry Resource Attributes - Learn how to set standard keys, manage precedence between sources, and enforce data quality across teams."
+image: /img/blog/2026/01/otel-resource-attributes-logs-view.webp
+keywords: [otel resource attributes, opentelemetry, opentelemetry resource]
+---
+
+Without the right context, such as knowing which service, which version, or which environment produced the data, telemetry data (logs, metrics, and traces) loses all operational value.
+
+This problem is compounded when this context is present, but varies across teams, services or languages as it leaves room for mistakes and gaps in your observability systems.
+
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) resource attributes add the necessary context required to make sense of your telemetry. It also defines strict guidelines known as Semantic Conventions to ensure these attributes remain consistent across your observability pipelines.
+
+This post explains how OpenTelemetry resource attributes work, how to configure them, and how teams can apply them consistently by following Semantic Conventions.
+
+## What are OpenTelemetry Resource Attributes?
+
+An OpenTelemetry resource describes the source generating telemetry data. The source can be an instrumented application, a [Kubernetes pod](https://signoz.io/guides/kubernetes-pod/), a host machine exposing metrics, etc. Resource attributes describe **that source**, such as the service version, pod name, or the host architecture.
+
+In OTel SDKs, resources are represented as classes or objects that store attributes as key-value pairs. Similarly, observability backends scope attributes to a `resources` key during ingestion of telemetry data.
+
+<Figure src="/img/guides/2026/01/otel-resource-attributes-logs-view.webp" alt="SigNoz view of a log record tagged with application, host and OTel SDK resources attributes" caption="SigNoz view of a log record tagged with application, host and OTel SDK resources attributes" />
+
+As the OpenTelemetry spec mandates <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#resource-operations" rel="noopener noreferrer nofollow" target="_blank">Resources to be immutable</a>, attributes registered with an active Resource object **remain static for the lifespan of the application**.
+
+
+This prevents any arbitrary modifications to these data labels that would break observability pipelines. For example, changing the `service.name` would mean that the backend recognizes the same application as a different entity. Any alerts or queries relying on the original value will no longer work.
+
+### Importance of Resource Attributes
+
+Resource attributes use “identifier” attributes like names or IDs to ensure that each telemetry data point is uniquely mapped to a single source. And since the attributes are immutable, this categorization remains consistent for the duration of the sources’ lifespan. These sources can then be mapped on the system level, such as via a service map (for instrumented components).
+
+Attributes share the same data model across telemetry signals (traces, metrics, and logs), which ensures **correlation** between telemetry ingested from a single source. So if you notice high memory usage for a `host.name`, you can filter all logs and traces belonging to that host to diagnose if a component is failing.
+
+## Defining Resource Attributes in Applications
+
+At the time of writing this blog, OpenTelemetry resource attributes can be configured in three ways: through environment variables, programmatically using the SDK, and automatically through **resource detectors**. Most production-grade applications would use a mix of all these methods.
+
+Let’s understand these methods work and how they interact with each another. 
+
+<KeyPointCallout title="Service Identity">
+
+No matter which method you decide to use, always ensure you at least define the service identity attributes: `service.name`, `service.version` and `deployment.environment.name`. These provide a unique, logical identity to your applications, ensuring they’re identifiable across telemetry pipelines, with well-defined logical separation.
+
+OpenTelemetry uses `unknown_service` as the default for all applications without a service name, which leads to a complete loss of context about the telemetry source. Versioning and environment values ensure you can group data by deployments. Visibility into `prod` is much more important than `dev`, for example.
+
+You should now be able to understand the severity of the problem we had described at the beginning — telemetry data serves little purpose without identity!
+
+</KeyPointCallout>
+
+### Via Environment Variables
+
+The easiest way to configure resource attributes in OpenTelemetry applications is via environment variables. This is ideal for infrastructure tags like `deployment.environment.name` that change depending on the application environment.
+
+You can configure attributes using their <a href="https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/" rel="noopener noreferrer nofollow" target="_blank">dedicated environment variables</a>, or include them through a comma-separated string for the `OTEL_RESOURCE_ATTRIBUTES` variable, which follows the dot notation syntax. 
+
+```bash
+# set the logical service name
+export OTEL_SERVICE_NAME=payment-service
+
+# set a list of dot-notated key-value pairs; can include custom attributes
+export OTEL_RESOURCE_ATTRIBUTES="deployment.environment.name=production,service.version=1.2.0,team.owner=checkout"
+```
+
+If you define the same attribute using its dedicated environment variable as well as via `OTEL_RESOURCE_ATTRIBUTES`, the OTel SDK will prefer the value from the dedicated variable.
+
+### Using the OpenTelemetry SDK
+
+This approach is best for application-specific logic where certain values might only be known at application runtime. It can also be a preferred option for application developers performing the observability setup.
+
+Let’s use the Python SDK as an example to understand how we can configure resource attributes programmatically. We’ll show the tracing configuration, but the same `Resource` instance can be re-used for logs and metrics.
+
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
+
+# define the Resource object
+resource = Resource.create(
+    attributes={
+        "service.name": "payment-service",
+        "service.version": "1.2.0",
+        "deployment.environment.name": "production",
+    }
+)
+
+# define exporter and processor configurations
+exporter = ConsoleSpanExporter()
+processor = SimpleSpanProcessor(exporter)
+
+# register the resource with the TracerProvider (which creates traces and spans within the application)
+tracer_provider = TracerProvider(resource=resource)
+
+# register the span processor and the tracer provider
+# all spans and traces will now inherit these resource attributes
+tracer_provider.add_span_processor(processor)
+trace.set_tracer_provider(tracer_provider)
+```
+
+The `create` method here automatically reads OpenTelemetry-specific environment variables. If you define the same attribute through environment variables and inside your application code, duplicate keys will be **merged.** This means that the value within application code will **take precedence** and overwrite the value defined in the environment. We explain more about precedence [later in this section](#how-otel-manages-resource-attributes-from-multiple-sources).
+
+<KeyPointCallout level="warning" title="SDK Initialization Sequence"> 
+
+If you choose to define resource attributes via code, you must avoid using `opentelemetry-bootstrap` (the Python [auto-instrumentation agent](https://signoz.io/blog/opentelemetry-agent/#python-monkey-patching)), as that initializes and registers its own providers. Once a provider is registered, OpenTelemetry forbids replacing it, and your changes will not be applied.
+
+You will see a similar message in your logs if you already have a registered provider:
+
+```bash
+Overriding of current TracerProvider is not allowed
+```
+
+</KeyPointCallout>
+
+### Via Resource Detectors
+
+While you can configure and define typical resource attributes via environment variables or code, it is not feasible to hard-code attributes like the OS type, or the EC2 Instance ID. To handle such scenarios, the OpenTelemetry SDK provides mechanisms to detect and set appropriate resource attributes from the environment automatically.
+
+<KeyPointCallout title="Experimental Implementation">
+
+The OTel Python SDK currently <a href="https://github.com/open-telemetry/opentelemetry-python/pull/3181" rel="noopener noreferrer nofollow" target="_blank">uses an experimental environment variable</a> to register resource detectors. Since it is not a part of the default OpenTelemetry spec, it is subject to change. In case of any issues, do cross-check against the latest docs to ensure you follow the latest standards.
+
+</KeyPointCallout>
+
+The OpenTelemetry Python SDK ships with the `otel`, `process`, and `os` resource detectors out of the box. Out of these, only the `otel` detector is enabled by default.
+
+You can use the `OTEL_EXPERIMENTAL_RESOURCE_DETECTORS` env var with a comma-separated list of the detectors you want to enable:
+
+```bash
+export OTEL_EXPERIMENTAL_RESOURCE_DETECTORS=process,os,otel
+```
+
+You can also define the list of resource detectors to use within application code. Here, you would use the `get_aggregated_resources` method, which merges the attributes found by the detectors with your custom-defined attributes, overwriting any duplicates.
+
+```python
+# rest of the imports remain the same
+from opentelemetry.sdk.resources import Resource, OsResourceDetector, OTELResourceDetector, ProcessResourceDetector, get_aggregated_resources
+
+resource = get_aggregated_resources(detectors=[
+        OsResourceDetector(),
+        OTELResourceDetector(),
+        ProcessResourceDetector(),
+    ],
+	initial_resource= Resource.create(
+    attributes={
+        "service.name": "payment-service",
+        "service.version": "1.2.0",
+        "deployment.environment.name": "production",
+    }
+	)
+)
+```
+
+Cloud platforms maintain their own detectors via third-party packages. Below is a list of commonly used resource detectors in the Python ecosystem, and the packages they ship with. These detectors are primarily useful in cloud and containerized environments. Most teams will enable only a subset based on their needs.
+
+This is not an exhaustive list; feel free to browse for more detectors on the <a href="https://pypi.org/search/?q=opentelemetry+resource+detector" rel="noopener noreferrer nofollow" target="_blank">Python package index</a>.
+
+| Detector Name | Python Package | Description |
+| --- | --- | --- |
+| `otel` | `opentelemetry-sdk` (built-in) | Provides base SDK information |
+| `process` | `opentelemetry-sdk` (built-in) | Detects process information |
+| `os` | `opentelemetry-sdk` (built-in) | Detects operating system details |
+| `aws_ec2` | `opentelemetry-sdk-extension-aws` | AWS EC2 metadata |
+| `aws_ecs` | `opentelemetry-sdk-extension-aws` | AWS ECS metadata |
+| `aws_eks` | `opentelemetry-sdk-extension-aws` | AWS EKS metadata |
+| `aws_elastic_beanstalk` | `opentelemetry-sdk-extension-aws` | AWS Elastic Beanstalk |
+| `aws_lambda` | `opentelemetry-sdk-extension-aws` | AWS Lambda metadata |
+| `azure_app_service` | `opentelemetry-resource-detector-azure` | Azure App Service |
+| `azure_functions` | `opentelemetry-resource-detector-azure` | Azure Functions |
+| `azure_vm` | `opentelemetry-resource-detector-azure` | Azure Virtual Machines |
+
+The GCP resource detector (`opentelemetry-resourcedetector-gcp`) does not support usage through environment variables, and must be configured inside the application. Read more about it on its <a href="https://github.com/GoogleCloudPlatform/opentelemetry-operations-python/tree/main/opentelemetry-resourcedetector-gcp#usage" rel="noopener noreferrer nofollow" target="_blank">GitHub page</a>.
+
+<Figure src="/img/guides/2026/01/otel-resource-attributes-resource-detectors.webp" alt="Resource attributes containing the running process and host OS details" caption="Resource attributes containing the running process and host OS details" />
+
+We have briefly mentioned the concepts of “merging” and “precedence” in the previous section. Let’s understand what precedence actually means in the context of OpenTelemetry resource attributes.
+
+### How OTel Manages Resource Attributes from Multiple Sources
+
+When configuring resource attributes, you might wonder what happens if you define the same attributes multiple times. Out of these three methods, which value would be given precedence over the others?
+
+A common **rule of thumb** in the Python SDK is:
+
+1. **Code (Highest):** Attributes explicitly defined in your application code.
+2. **Environment Variables:** Attributes defined via `OTEL_RESOURCE_ATTRIBUTES` or through their dedicated environment variables (eg., `OTEL_TRACES_EXPORTER`).
+3. **Detectors (Lowest):** Attributes automatically discovered and set by resource detectors.
+
+In practice, precedence is determined by SDK merge order and initialization timing rather than a strictly enforced hierarchy. The exact priority can also vary between languages based on the SDK’s implementation. Always validate your application’s behaviour when adding “layered” resource attributes to avoid any surprises later.
+
+## Standardizing Resource Attributes at Scale
+
+You now understand the steps to resolve the problem of “telemetry without context”. Next let’s discuss the other issue of ensuring developers and teams properly utilize resource attributes. Because while OpenTelemetry may define certain attributes, in practice:
+
+1. Defining these values across multiple applications can be error-prone. OTel doesn’t warn you when you write `service.versions` instead of `service.version`, and you might not catch a minor typo like this before deployments.
+2. Individuals and teams might not follow the same standards for defining custom resource attributes. For example, certain teams might prefer the `snake_case` naming convention, while others may choose `CamelCase`. This can cause friction if you are trying to ensure the same monitoring queries and configurations work across the entire stack.
+
+OpenTelemetry has defined standardized rules, known as <a href="https://opentelemetry.io/docs/specs/semconv/resource/" rel="noopener noreferrer nofollow" target="_blank">Semantic Conventions</a>, that define the standard attribute names for labelling OpenTelemetry resources. Attributes are grouped together logically into “namespaces” of the concept or entity that they describe, and must follow the dot-notation syntax (`{namespace}.{attribute}`).
+
+We can use OpenTelemetry’s established conventions to resolve our problems.
+
+**Preventing Errors Within Code**
+
+To prevent human errors, we can use Semantic Conventions within application code to enforce the naming schema. First install the `opentelemetry-semantic-conventions` Python package, then you can use it like this:
+
+```python
+# rest of the imports remain the same
+from opentelemetry.semconv.attributes.service_attributes import SERVICE_NAME, SERVICE_VERSION
+from opentelemetry.semconv._incubating.attributes.deployment_attributes import DEPLOYMENT_ENVIRONMENT_NAME
+
+resource = Resource.create(
+    attributes={
+        SERVICE_NAME: "payment-service",
+        SERVICE_VERSION: "1.2.0",
+        DEPLOYMENT_ENVIRONMENT_NAME: "production",
+    }
+)
+```
+
+<KeyPointCallout title="Stability Varies Between Attributes">
+
+If you are familiar with observability pipelines, you must have commonly used `deployment.environment` to define the environment the application is currently running in. While you can still use the resource attribute, Semantic Conventions <a href="https://github.com/open-telemetry/opentelemetry-python/blob/main/opentelemetry-semantic-conventions/src/opentelemetry/semconv/_incubating/attributes/deployment_attributes.py#L20" rel="noopener noreferrer nofollow" target="_blank">have deprecated it</a> in favour of `deployment.environment.name`.
+
+Since the Conventions are being actively developed, many resource attribute namespaces can undergo changes, just like the deployment environment attribute. To indicate this development cycle, the Python package stores these namespaces under the `opentelemetry.semconv._incubating.attributes` path.
+
+</KeyPointCallout>
+
+**Managing Custom Resource Attributes**
+
+When attempting to standardize the naming scheme for custom resource attributes, it would be best to involve relevant team members in the discussion from the get-go. This would help set the right tone and clarify expectations before adoption begins across teams.
+
+Similar to the attributes managed through Semantic Conventions, OpenTelemetry recommends users create custom resource attributes that are:
+
+- Unique, and that there are no similarly named attributes within the <a href="https://opentelemetry.io/docs/specs/semconv/registry/attributes/" rel="noopener noreferrer nofollow" target="_blank">Semantic Conventions Attribute Registry</a>.
+- Dot-separated and grouped via namespaces, eg., the Conventions define `http.method` where `http` is the namespace associated with the `method` attribute.
+- Follow a “standard” naming style that clearly defines their purpose, the domain they belong to (the namespace component), and are re-usable across contexts.
+    
+    For example, a custom resource attribute like `message.type` is easy to understand, and multiple services within a distributed system (such as the web app, broker, and a data analysis service) can use it.
+    
+- Industry standards, if they are domain-specific attributes. This ensures that the term can be recognized or understood even if consumers don’t have the full context of its purpose.
+
+By following these guidelines when defining your own resource attributes, you ensure they are consistent across the stack, are easy to understand in a given context, and can be re-used frequently. These standards empower developers to build observability dashboards and pipelines that scale across services with minimal maintenance.
+
+To enforce this within your codebase, you can create enums or similar objects that provide the attribute name definitions, similar to the `opentelemetry-semantic-conventions` Python implementation.
+
+## Conclusion
+
+By learning what OpenTelemetry resource attributes, how to define them, and how to enforce their usage within code and across teams, you are ready to start implementing them in your codebase. But how do you effectively derive insights from these attributes? Once resource attributes are standardized, the next challenge is using them effectively.
+
+SigNoz is an OpenTelemetry-native, all-in-one observability platform that utilizes resource attributes to derive key insights about application systems:
+
+- **Service Map:** SigNoz uses `service.name` to draw the nodes in your architecture diagram. An auto-generated graph shows how `checkout-service` talks to `payment-service`, and where the slowdowns are.
+- **Infrastructure Filtering:** You can filter telemetry by `k8s.cluster.name` or `host.type` to isolate performance issues to a specific region or instance type.
+
+<Figure src="/img/guides/2026/01/otel-resource-attributes-service-map.webp" alt="SigNoz Service Map view showcasing data flow among distributed services" caption="SigNoz Service Map view showcasing data flow among distributed services" />
+
+You can either run a SigNoz instance yourself or use the hosted version:
+
+- **SigNoz Cloud:** The easiest way to start. [30-day free trial](https://signoz.io/teams/) with no maintenance.
+- **Self-Hosted:** For strict data governance, you can host the [Community Edition](https://signoz.io/docs/install/self-host/) or the Enterprise version on your own infrastructure (BYOC).
+
+## Frequently Asked Questions
+
+### Can I change resource attributes at runtime?
+
+**No.** Resource attributes are immutable and cannot be modified once set. You must make the necessary changes and, depending on your setup, restart or redeploy the application for the changes to take effect.
+
+### What is the difference between Resource Attributes and Span Attributes?
+
+**Resource Attributes** define who you are (Service Name, Version, Host). These do not change throughout the lifespan of the application. Resource attributes should have low cardinality as they can cause “metadata explosion” and significantly increase telemetry costs.
+
+**Span Attributes** describe what you are doing (HTTP URL, DB Statement). Spans are created for each operation that the application performs within a request context. Span attributes typically have high cardinality as these capture specific context about the application’s behaviour. Eg., `transaction_id` or `user_email`.
+
+### Why is my service name `unknown_service` in OpenTelemetry?
+
+OpenTelemetry SDKs use `unknown_service` as the default service name when no service name is provided for an application.
+
+You can configure the `service.name` resource attribute for your application by setting it through environment variables or defining it inside `Resource` objects in your code.

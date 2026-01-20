@@ -56,7 +56,7 @@ export function middleware(req: NextRequest) {
           custom_source: 'server',
           custom_is_bot: true,
           custom_request_method: req.method,
-          custom_has_javascript: false, 
+          custom_has_javascript: false,
         },
         anonymousId,
       })
@@ -65,6 +65,17 @@ export function middleware(req: NextRequest) {
 
   // Prepare response
   const res = NextResponse.next()
+
+  // Set user IP in a cookie accessible to the client
+  const currentIpCookie = req.cookies.get('user_ip')?.value
+  if (currentIpCookie !== ip && ip !== 'unknown') {
+    res.cookies.set('user_ip', ip, {
+      path: '/',
+      httpOnly: false,
+      sameSite: 'lax',
+      maxAge: 60 * 60,
+    })
+  }
 
   // Set cookie if it wasn't already set
   if (shouldSetCookie && anonymousId) {

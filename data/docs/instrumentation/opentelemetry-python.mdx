@@ -1,5 +1,5 @@
 ---
-date: 2025-12-16
+date: 2026-01-14
 id: python
 
 title: Python OpenTelemetry Instrumentation
@@ -41,7 +41,16 @@ export OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
+export OTEL_METRICS_EXPORTER="none"
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed={true}>
+The bootstrap command (Step 3) installs instrumentations for all detected libraries, including HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms and optionally request/response body sizes for every outgoing HTTP call.
+
+Since `opentelemetry-distro` enables metrics by default, these HTTP metrics would be sent to SigNoz even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting this to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
@@ -98,7 +107,17 @@ env:
   value: 'signoz-ingestion-key=<your-ingestion-key>'
 - name: OTEL_EXPORTER_OTLP_PROTOCOL
   value: 'grpc'
+- name: OTEL_METRICS_EXPORTER
+  value: 'none'
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed={true}>
+The bootstrap command (Step 3) installs instrumentations for all detected libraries, including HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms and optionally request/response body sizes for every outgoing HTTP call.
+
+Since `opentelemetry-distro` enables metrics by default, these HTTP metrics would be sent to SigNoz even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting this to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
@@ -155,9 +174,20 @@ spec:
   propagators:
     - tracecontext
     - baggage
+  env:
+    - name: OTEL_METRICS_EXPORTER
+      value: "none"
   python:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed={true}>
+The OTel Operator's Python auto-instrumentation image includes instrumentations for HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms for every outgoing HTTP call.
+
+Since metrics are enabled by default, these HTTP metrics would be sent to your collector even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting `OTEL_METRICS_EXPORTER` to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
 
 Deploy this resource to your cluster.
 
@@ -183,7 +213,16 @@ $env:OTEL_RESOURCE_ATTRIBUTES = "service.name=<service-name>"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
 $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_EXPORTER_OTLP_PROTOCOL = "grpc"
+$env:OTEL_METRICS_EXPORTER = "none"
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed={true}>
+The bootstrap command (Step 3) installs instrumentations for all detected libraries, including HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms and optionally request/response body sizes for every outgoing HTTP call.
+
+Since `opentelemetry-distro` enables metrics by default, these HTTP metrics would be sent to SigNoz even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting this to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
@@ -226,6 +265,7 @@ ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
 ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+ENV OTEL_METRICS_EXPORTER=none
 ```
 
 Or pass them at runtime using `docker run`:
@@ -235,8 +275,17 @@ docker run -e OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>" \
     -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
     -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
     -e OTEL_EXPORTER_OTLP_PROTOCOL="grpc" \
+    -e OTEL_METRICS_EXPORTER="none" \
     your-image:latest
 ```
+
+<KeyPointCallout title="Why explicitly disable metrics?" defaultCollapsed={true}>
+The bootstrap command (Step 3) installs instrumentations for all detected libraries, including HTTP clients like `requests`, `urllib3`, and `httpx`. These libraries generate metrics such as request duration histograms and optionally request/response body sizes for every outgoing HTTP call.
+
+Since `opentelemetry-distro` enables metrics by default, these HTTP metrics would be sent to SigNoz even though this guide only covers traces. For apps that make frequent HTTP calls, this can add up quickly.
+
+Setting this to `none` disables metrics while keeping traces working as expected. If you want metrics later, you can change it to `otlp` or remove this variable altogether.
+</KeyPointCallout>
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).

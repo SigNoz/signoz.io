@@ -1,0 +1,222 @@
+---
+date: 2026-01-14
+id: nodejs-manual-instrumentation
+title: Manual Node.js Instrumentation
+description: Create custom spans, enrich them, and record errors in JavaScript applications with OpenTelemetry and SigNoz
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+Manual instrumentation lets you trace business operations that auto-instrumentation misses. Use it to capture checkout flows, payment processing, or any code path where you need visibility into what happened and why.
+
+<KeyPointCallout title="Works for both SigNoz Cloud and Self-Hosted" defaultCollapsed={true}>
+These steps work the same way regardless of deployment. Only your OTLP endpoint and ingestion key differ.
+</KeyPointCallout>
+
+## Prerequisites
+
+- Complete the [Node.js instrumentation guide](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/) so your tracer provider and exporters are configured.
+- Install the API package:
+  ```bash
+  npm install @opentelemetry/api
+  ```
+- Tested with Node.js 18+ and `@opentelemetry/api` v1.9.0.
+
+## Step 1. Create manual spans
+
+Get a tracer and wrap operations in spans:
+
+```javascript:manual_span.js
+const { trace } = require('@opentelemetry/api')
+
+const tracer = trace.getTracer('order-service')
+
+async function processOrder(orderId) {
+  return tracer.startActiveSpan('process-order', async (span) => {
+    try {
+      span.setAttribute('order.id', orderId)
+      span.setAttribute('order.status', 'processing')
+
+      // Business logic here
+      // Child spans in called functions link automatically
+      await validateOrder(orderId)
+
+      return { success: true }
+    } finally {
+      span.end()
+    }
+  })
+}
+```
+
+For nested operations, child spans link to the parent automatically:
+
+```javascript:nested_spans.js
+async function processOrder(orderId) {
+  return tracer.startActiveSpan('process-order', async (parentSpan) => {
+    try {
+      parentSpan.setAttribute('order.id', orderId)
+
+      // Child span tracks a sub-operation
+      await tracer.startActiveSpan('validate-inventory', async (childSpan) => {
+        try {
+          childSpan.setAttribute('warehouse.id', 'WH-001')
+          await checkInventory(orderId)
+        } finally {
+          childSpan.end()
+        }
+      })
+
+    } finally {
+      parentSpan.end()
+    }
+  })
+}
+```
+
+Tips:
+
+- Reuse tracer instances instead of creating one per request.
+- Use descriptive span names that match business steps (`checkout`, `fetch-user`).
+- Always call `span.end()` in a `finally` block.
+
+## Step 2. Add attributes and events
+
+Attributes let you filter and aggregate spans in SigNoz. Events mark notable moments within a span.
+
+```javascript:attributes.js
+const { trace } = require('@opentelemetry/api')
+
+function handlePayment(amount, currency = 'USD') {
+  const span = trace.getActiveSpan()
+  if (!span) return
+
+  span.setAttribute('payment.amount', amount)
+  span.setAttribute('payment.currency', currency)
+  span.setAttribute('payment.method', 'credit_card')
+
+  // Events mark milestones
+  span.addEvent('payment.validated')
+
+  // Process payment...
+
+  span.addEvent('payment.processed', {
+    'status': 'success',
+    'transaction.id': 'txn_123456'
+  })
+}
+```
+
+For standard attribute names, use semantic conventions:
+
+```bash
+npm install @opentelemetry/semantic-conventions
+```
+
+```javascript:semantic_attributes.js
+const { trace } = require('@opentelemetry/api')
+const { ATTR_HTTP_REQUEST_METHOD, ATTR_URL_FULL } = require('@opentelemetry/semantic-conventions')
+
+const span = trace.getActiveSpan()
+if (span) {
+  span.setAttribute(ATTR_HTTP_REQUEST_METHOD, 'GET')
+  span.setAttribute(ATTR_URL_FULL, 'https://api.example.com/users')
+}
+```
+
+- Use semantic conventions when a standard attribute exists.
+- Add events for retries, cache hits/misses, queue waits.
+
+## Step 3. Record errors
+
+Mark failures so they show up in SigNoz error views:
+
+```javascript:error_handling.js
+const { trace, SpanStatusCode } = require('@opentelemetry/api')
+
+async function riskyOperation() {
+  return tracer.startActiveSpan('risky-operation', async (span) => {
+    try {
+      const result = await doSomethingRisky()
+      span.setStatus({ code: SpanStatusCode.OK })
+      return result
+    } catch (error) {
+      span.recordException(error)
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message })
+      throw error
+    } finally {
+      span.end()
+    }
+  })
+}
+```
+
+- `recordException` attaches the stack trace.
+- `SpanStatusCode.ERROR` flags the span in SigNoz error views and alerts.
+- Re-throw so calling code can handle the failure.
+
+## Step 4. Add span links (optional)
+
+Links connect causally related spans that aren't parent-child:
+
+```javascript:span_links.js
+const { trace } = require('@opentelemetry/api')
+
+const tracer = trace.getTracer('my-service')
+
+// First operation - capture context
+let linkContext
+tracer.startActiveSpan('batch-job', (span) => {
+  linkContext = span.spanContext()
+  span.end()
+})
+
+// Later operation linked to the first
+tracer.startActiveSpan('process-result', { links: [{ context: linkContext }] }, (span) => {
+  // Linked to batch-job but not a child
+  span.end()
+})
+```
+
+## Validate
+
+1. Trigger code paths that create manual spans.
+2. In SigNoz **Traces**, filter by `service.name` or span name.
+3. Open a trace and check attributes, events, and error status.
+4. Use `hasError = true` to find spans with recorded exceptions.
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### Why don't I see my spans in SigNoz?
+
+- Tracer provider must initialize before your app code runs.
+- Check sampler settings. Ratio-based sampling may drop spans in dev.
+- Confirm traffic actually hits the instrumented functions.
+
+### Why are child spans missing?
+
+- Use `startActiveSpan` which sets parent context automatically.
+- If using `startSpan`, you must manage context manually.
+- Parent span can't end before children are created.
+
+### Why don't attributes appear?
+
+- Values must be strings, booleans, numbers, or arrays of these.
+- Set attributes before `span.end()`. Post-end mutations are ignored.
+
+### Spans disconnected across async calls?
+
+- `startActiveSpan` handles async context in most cases.
+- For complex flows, use `context.with()` to propagate context explicitly.
+
+</details>
+
+## Next steps
+
+- [Correlate traces with logs](https://signoz.io/docs/traces-management/guides/correlate-traces-and-logs/) for faster debugging
+- Return to the [Node.js instrumentation guide](https://signoz.io/docs/instrumentation/javascript/opentelemetry-nodejs/)

@@ -1,0 +1,149 @@
+---
+date: 2026-01-14
+id: signoz-with-traceloop
+title: Monitor LLM Usage with traceloop(OpenLLMetry) and SigNoz
+description: Monitoring and observability for LLM/AI usage and performance with traceloop instrumentation to send traces to SigNoz
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through integrating SigNoz with traceloop(OpenLLMetry) to gain visibility into your LLM and AI applications. By combining traceloop's specialized LLM instrumentation with SigNoz's observability platform, you can monitor and analyze traces from your AI workloads.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Internet access to send telemetry data to SigNoz Cloud
+- Python 3.10+ with `traceloop-sdk` installed
+- For Python: `pip` installed for managing Python packages
+- For this example: An OpenAI API key. You can get it from <a href="https://platform.openai.com/settings/organization/api-keys" target="_blank" rel="noopener noreferrer nofollow">OpenAI platform</a>
+
+
+## Integrate SigNoz with traceloop
+
+For more information on getting started with traceloop in your Python environment, refer to the [traceloop Quickstart Guide](https://www.traceloop.com/docs/openllmetry/getting-started-python).
+For more information on integrating SigNoz with traceloop, refer to the [traceloop SigNoz Guide](https://www.traceloop.com/docs/openllmetry/integrations/signoz).
+
+### Step 1: Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  traceloop-sdk \
+  openai
+```
+<Admonition type="important">
+  For this guide example, we are using OpenAI, but you can use any <a href="https://www.traceloop.com/docs/openllmetry/tracing/supported" target="_blank" rel="noopener noreferrer nofollow">LLM provider/framework</a> supported by traceloop.
+</Admonition>
+
+
+### Step 2: Create an example LLM application (using OpenAI in this example)
+
+```python:main.py
+from traceloop.sdk import Traceloop
+import os
+from openai import OpenAI
+
+Traceloop.init(app_name="<service_name>")
+
+client = OpenAI()
+
+chat_completion = client.chat.completions.create(
+    messages=[
+        {
+            "role": "user",
+            "content": "What is SigNoz?",
+        }
+    ],
+    model="gpt-3.5-turbo",
+)
+print(chat_completion.choices[0].message.content)
+```
+
+- `<service_name>` is the name of your service
+
+<Admonition type="important">
+  Before running this code, ensure that you have set the environment variable `OPENAI_API_KEY` with your generated OpenAI API key.
+</Admonition>
+
+### Step 3: Run your application with env variables
+
+Run your application with the following environment variables set. This configures OpenTelemetry to export traces to SigNoz.
+
+```bash
+TRACELOOP_BASE_URL=https://ingest.<region>.signoz.cloud:443 \
+TRACELOOP_HEADERS="signoz-access-token=<your_ingestion_key>" \
+<your_run_command>
+```
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your_ingestion_key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `python main.py`
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+## View Traces in SigNoz
+
+Your AI usage should now automatically emit traces.
+
+You should be able to view traces in Signoz Cloud under the traces tab:
+
+<Figure
+  src="/img/docs/llm/traceloop/traceloop-traces.webp"
+  alt="Traceloop Trace View"
+  caption="Traceloop Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure
+  src="/img/docs/llm/traceloop/traceloop-detailed-traces.webp"
+  alt="Traceloop Detailed Trace View"
+  caption="Traceloop Detailed Trace View"
+/>
+
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+If you don't see your telemetry data:
+
+1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
+2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
+3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+
+</details>
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/product-features/trace-explorer)
+- Explore [log correlation](https://signoz.io/docs/product-features/logs-explorer)
+
+

@@ -7,7 +7,6 @@ import {
   allDocs,
   allComparisons,
   allGuides,
-  allOpentelemetries,
 } from '../.contentlayer/generated/index.mjs'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
 import { filterPostsByTag, generateRss } from './rssFeed.mjs';
@@ -46,7 +45,6 @@ const rss = () => {
     ...allBlogs,
     ...allComparisons,
     ...allGuides,
-    ...allOpentelemetries,
     ...allDocs,
   ])
   console.log('RSS feed generated...')
