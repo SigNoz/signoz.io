@@ -91,6 +91,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'DeepSeek Monitoring',
   },
   {
+    name: 'Google ADK',
+    href: '/docs/google-adk-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
+        alt="Google ADK Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Google ADK Monitoring',
+  },
+  {
     name: 'Google Gemini',
     href: '/docs/google-gemini-monitoring',
     icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,

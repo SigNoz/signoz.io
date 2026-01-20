@@ -2463,6 +2463,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/google-adk-observability',
+        label: 'Google ADK',
+        type: 'doc',
+      },
+      {
         route: '/docs/google-gemini-monitoring',
         label: 'Google Gemini',
         type: 'doc',
