@@ -1913,6 +1913,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/google-adk-dashboard',
+            label: 'Google ADK',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/google-gemini-dashboard',
             label: 'Google Gemini',
           },
