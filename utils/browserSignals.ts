@@ -38,6 +38,63 @@ export const getTimezone = (): string => {
   }
 }
 
+export const getTimezoneAnalysis = () => {
+  if (typeof window === 'undefined')
+    return { custom_timezone_corrected: 'unknown', custom_is_timezone_spoofed: false }
+
+  try {
+    const intlTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const now = new Date()
+
+    const intlDateStr = now.toLocaleString('en-US', {
+      timeZone: intlTimezone,
+      timeZoneName: 'longOffset',
+    })
+
+    const match = intlDateStr.match(/GMT([+-])(\d{2}):(\d{2})/)
+    let detectedTimezone = intlTimezone
+    let isSpoofed = false
+
+    if (match) {
+      const sign = match[1] === '-' ? -1 : 1
+      const hours = parseInt(match[2], 10)
+      const minutes = parseInt(match[3], 10)
+
+      const expectedOffsetFromUTC = sign * (hours * 60 + minutes)
+
+      const actualSystemOffset = now.getTimezoneOffset()
+      const actualOffsetFromUTC = -actualSystemOffset
+
+      if (Math.abs(expectedOffsetFromUTC - actualOffsetFromUTC) > 1) {
+        isSpoofed = true
+
+        // Mismatch detected! Try to extract timezone name from Date.toString()
+        const dateString = now.toString()
+        const nameMatch = dateString.match(/\(([^)]+)\)$/)
+
+        if (nameMatch) {
+          detectedTimezone = nameMatch[1]
+        } else {
+          const offsetHours = Math.floor(Math.abs(actualOffsetFromUTC) / 60)
+          const offsetMinutes = Math.abs(actualOffsetFromUTC) % 60
+          const offsetSign = actualOffsetFromUTC >= 0 ? '+' : '-'
+          detectedTimezone = `UTC${offsetSign}${offsetHours.toString().padStart(2, '0')}:${offsetMinutes.toString().padStart(2, '0')}`
+        }
+      }
+    }
+
+    return {
+      custom_timezone_corrected: detectedTimezone,
+      custom_is_timezone_spoofed: isSpoofed,
+    }
+  } catch (error) {
+    return {
+      custom_timezone_corrected: 'unknown',
+      custom_is_timezone_spoofed: false,
+    }
+  }
+}
+
 export const getUserAgentString = (): string => {
   return getUserAgent()
 }
@@ -117,6 +174,7 @@ export const getAllBrowserSignals = () => {
   return {
     custom_os: getOS(),
     custom_timezone: getTimezone(),
+    ...getTimezoneAnalysis(),
     custom_user_agent: getUserAgentString(),
     custom_webdriver: getWebdriver(),
     custom_headless: isHeadless(),
