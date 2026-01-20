@@ -578,43 +578,20 @@ If you see JSON span output in your terminal but traces don't appear in SigNoz, 
 
 Application servers that spawn multiple worker processes require special handling because the OpenTelemetry SDK isn't fork-safe.
 
-**The problem:** When Gunicorn or Uvicorn forks worker processes, the OpenTelemetry SDK state (spans, exporters, etc.) initialized in the parent process isn't properly inherited by worker processes. This means spans created in workers often don't get exported.
+**The problem:** When Gunicorn or Uvicorn forks worker processes, the OpenTelemetry SDK state (TracerProvider, exporters, span processors) initialized in the parent process isn't properly inherited by workers. The background threads that export spans don't survive the fork, so spans created in workers never get sent.
 
-**Solutions:**
+**Quick fixes:**
 
 - **Uvicorn** with `--workers` flag is not supported. Use Gunicorn with Uvicorn workers instead:
   ```bash
   opentelemetry-instrument gunicorn -k uvicorn.workers.UvicornWorker main:app
   ```
 
-- **Gunicorn with multiple workers:** For production deployments, you need to reinitialize OpenTelemetry in each worker after forking. Create a `gunicorn_config.py`:
-
-  ```python
-  import os
-
-  def post_fork(server, worker):
-      """Reinitialize OpenTelemetry in each worker after fork"""
-      if os.getenv("OTEL_SERVICE_NAME"):
-          os.system("opentelemetry-bootstrap --action=install")
-
-  bind = "0.0.0.0:8000"
-  workers = 4
-  worker_class = "uvicorn.workers.UvicornWorker"
-  preload_app = False  # Don't preload with OpenTelemetry
-  ```
-
-  Then run:
-  ```bash
-  opentelemetry-instrument gunicorn main:app -c gunicorn_config.py
-  ```
-
-  A complete working example with Docker and production configuration is available in the [FastAPI production demo](https://github.com/adionit7/examples/tree/feat/fastapi-production-demo/fastapi/fastapi-production-demo).
-
-- **Hypercorn/Unicorn** are not supported due to fork-safety issues. See the [Hypercorn/Unicorn tab](#framework-instrumentation) for details and workarounds.
+- **Gunicorn with multiple workers:** You need to reinitialize the TracerProvider in each worker after forking using a `post_fork` hook. See [Running with Gunicorn or uWSGI](#running-with-gunicorn-or-uwsgi) for setup details and the <a href="https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples/fork-process-model" target="_blank" rel="noopener noreferrer nofollow">official post_fork example</a> for the correct implementation.
 
 - **Gunicorn with `--preload`** or **uWSGI** need extra config. See [Running with Gunicorn or uWSGI](#running-with-gunicorn-or-uwsgi).
 
-For more details, see the [OpenTelemetry Python multiprocessing documentation](https://opentelemetry-python.readthedocs.io/en/latest/instrumentation/runtime.html#multiprocessing).
+- **Hypercorn/Unicorn** are not supported due to fork-safety issues. See the [Hypercorn/Unicorn tab](#framework-instrumentation) for details and workarounds.
 
 ### Hot reload breaks instrumentation
 
