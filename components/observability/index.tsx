@@ -39,12 +39,6 @@ const Observability = () => {
                     Advanced Security
                   </span>
                 </li>
-                <li className="flex flex-row items-center gap-3">
-                  <ArrowRightSolid />
-                  <span className="text-base font-normal leading-9 text-signoz_vanilla-400">
-                    VPC Peering
-                  </span>
-                </li>
               </ul>
             </div>
           </div>
