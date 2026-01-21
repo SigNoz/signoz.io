@@ -1,0 +1,85 @@
+---
+date: 2026-01-20
+title: SLURM metrics
+id: slurm-metrics
+doc_type: howto
+description: Collect SLURM cluster metrics using a Prometheus SLURM exporter and the SigNoz OpenTelemetry Collector Prometheus receiver.
+---
+
+This document explains how to monitor a SLURM cluster using SigNoz. You'll run a Prometheus-compatible SLURM exporter and scrape it with the OpenTelemetry Collector.
+
+## Prerequisites
+
+- SLURM cluster running and accessible
+- Access to SLURM CLI commands (`sinfo`, `squeue`, `sdiag`) on the exporter host
+
+## Setup
+
+### Step 1: Run a SLURM Prometheus Exporter
+
+A commonly used option is <a href="https://github.com/vpenso/prometheus-slurm-exporter" target="_blank" rel="noopener noreferrer nofollow">prometheus-slurm-exporter</a>, which extracts metrics from SLURM CLI commands and exposes them on a `/metrics` endpoint (default port `:8080`).
+
+Run the exporter on a node that has access to SLURM commands.
+
+### Step 2: Setup OTel Collector
+
+Refer to this [documentation](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) to set up the collector.
+
+### Step 3: Configure the Prometheus Receiver
+
+Add a scrape job for the SLURM exporter in your OTel Collector config:
+
+```yaml:config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "slurm-exporter"
+          scrape_interval: 30s
+          scrape_timeout: 30s
+          static_configs:
+            - targets: ["<slurm-exporter-host>:8080"]
+```
+
+**Configuration parameters:**
+
+- `<slurm-exporter-host>`: Hostname or IP of the node running the SLURM exporter
+- `scrape_interval`/`scrape_timeout`: 30s is recommended to avoid overloading the SLURM master
+
+### Step 4: Enable the Pipeline
+
+Add the receiver to your metrics pipeline:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+## Visualizing SLURM Metrics
+
+Once configured, verify ingestion in the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/). Search for SLURM-related metrics (exact names depend on the exporter).
+
+You can use the pre-configured SLURM dashboard to monitor your cluster:
+
+<div className="flex justify-center">
+  <DashboardActions 
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/slurm/slurm.json"
+    dashboardName="SLURM"
+  />
+</div>
+
+## Troubleshooting
+
+### Common Issues
+
+1. **No metrics appearing in SigNoz**
+   - Verify the SLURM exporter is running and `/metrics` endpoint is accessible
+   - Ensure firewall allows access to the exporter port
+
+2. **Metrics showing stale or zero values**
+   - Confirm the exporter host has access to SLURM CLI commands
+   - Check if SLURM services are running correctly

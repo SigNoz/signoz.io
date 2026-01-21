@@ -1586,6 +1586,16 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/nvidia-dcgm-metrics',
+                label: 'NVIDIA GPU metrics (DCGM)',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/slurm-metrics',
+                label: 'SLURM',
+              },
+              {
+                type: 'doc',
                 route: '/docs/tutorial/traefik-observability',
                 label: 'Traefik Observability',
               },

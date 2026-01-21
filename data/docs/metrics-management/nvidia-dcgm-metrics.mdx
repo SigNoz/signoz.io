@@ -1,0 +1,109 @@
+---
+date: 2026-01-20
+title: NVIDIA GPU metrics with DCGM Exporter
+id: nvidia-dcgm-metrics
+doc_type: howto
+description: Collect NVIDIA GPU metrics using DCGM Exporter and the SigNoz OpenTelemetry Collector Prometheus receiver.
+---
+
+This document explains how to monitor NVIDIA GPUs using the DCGM Exporter and SigNoz. The exporter collects GPU metrics and exposes them for Prometheus-style scraping.
+
+## Prerequisites
+
+- NVIDIA GPU(s) with drivers installed
+- NVIDIA Container Toolkit (for Docker deployments)
+
+## Setup
+
+### Step 1: Run NVIDIA DCGM Exporter
+
+NVIDIA's official <a href="https://github.com/NVIDIA/dcgm-exporter" target="_blank" rel="noopener noreferrer nofollow">dcgm-exporter</a> exposes GPU metrics on `:9400/metrics`.
+
+**Docker (single node quickstart):**
+
+```bash
+docker run -d \
+  --gpus all \
+  --cap-add SYS_ADMIN \
+  --rm \
+  -p 9400:9400 \
+  nvcr.io/nvidia/k8s/dcgm-exporter:4.4.2-4.7.1-ubuntu22.04
+```
+
+Verify it's running:
+
+```bash
+curl localhost:9400/metrics | head
+```
+
+You should see metrics like `DCGM_FI_DEV_SM_CLOCK`, `DCGM_FI_DEV_MEM_CLOCK`, etc.
+
+**Kubernetes:** For Kubernetes deployments, NVIDIA recommends installing via the <a href="https://github.com/NVIDIA/dcgm-exporter#kubernetes" target="_blank" rel="noopener noreferrer nofollow">Helm chart</a>.
+
+### Step 2: Setup OTel Collector
+
+Refer to this [documentation](https://signoz.io/docs/opentelemetry-collection-agents/get-started/) to set up the collector.
+
+### Step 3: Configure the Prometheus Receiver
+
+Add a scrape job for the DCGM exporter in your OTel Collector config:
+
+```yaml:config.yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "dcgm-exporter"
+          scrape_interval: 15s
+          scrape_timeout: 10s
+          static_configs:
+            - targets: ["<gpu-node-host>:9400"]
+```
+
+**Configuration parameters:**
+
+- `<gpu-node-host>`: Hostname or IP of the node running the DCGM exporter
+
+<Admonition type="info">
+If the OTel Collector runs on the same machine as the exporter, use `localhost:9400` as the target.
+</Admonition>
+
+### Step 4: Enable the Pipeline
+
+Add the receiver to your metrics pipeline:
+
+```yaml:config.yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+## Visualizing GPU Metrics
+
+Once configured, verify ingestion in the [Metrics Explorer](https://signoz.io/docs/metrics-management/metrics-explorer/). Search for metrics starting with `DCGM_`.
+
+You can use the pre-configured NVIDIA DCGM dashboard to monitor your GPUs:
+
+<div className="flex justify-center">
+  <DashboardActions 
+    dashboardJsonUrl="https://raw.githubusercontent.com/SigNoz/dashboards/refs/heads/main/nvidia-dcgm/nvidia-dcgm.json"
+    dashboardName="NVIDIA DCGM"
+  />
+</div>
+
+## Troubleshooting
+
+### Common Issues
+
+1. **No metrics appearing in SigNoz**
+   - Verify the DCGM exporter is running and `/metrics` endpoint is accessible
+   - Ensure NVIDIA drivers are properly installed
+
+2. **Container fails to start**
+   - Verify NVIDIA Container Toolkit is installed
+   - Check if GPUs are visible with `nvidia-smi`
+   - Ensure `--gpus all` flag is passed to Docker
+

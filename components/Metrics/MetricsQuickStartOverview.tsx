@@ -190,12 +190,24 @@ export default function MetricsQuickStartOverview({
             href: '/docs/metrics-management/fly-metrics',
             icon: <SiFlydotio className="h-7 w-7 text-purple-500" />,
             clickName: 'Fly.io Metrics Link',
-           },
+          },
           {
             name: 'Envoy',
             href: '/docs/userguide/envoy-metrics',
             icon: <SiEnvoyproxy className="h-7 w-7 text-blue-500" />,
             clickName: 'Envoy Metrics Link',
+          },
+          {
+            name: 'NVIDIA GPU (DCGM)',
+            href: '/docs/metrics-management/nvidia-dcgm-metrics',
+            icon: <FaServer className="h-7 w-7 text-green-500" />,
+            clickName: 'NVIDIA DCGM Metrics Link',
+          },
+          {
+            name: 'SLURM',
+            href: '/docs/metrics-management/slurm-metrics',
+            icon: <FaServer className="h-7 w-7 text-blue-600" />,
+            clickName: 'SLURM Metrics Link',
           },
         ]}
         sectionName="Infrastructure Metrics"
