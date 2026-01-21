@@ -2483,6 +2483,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/groq-observability',
+        label: 'Groq',
+        type: 'doc',
+      },
+      {
         route: '/docs/inkeep-monitoring',
         label: 'Inkeep',
         type: 'doc',

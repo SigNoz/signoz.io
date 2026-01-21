@@ -115,6 +115,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Grok Monitoring',
   },
   {
+    name: 'Groq',
+    href: '/docs/groq-observability',
+    icon: <img src="/svgs/icons/LLMMonitoring/groq-logo.svg" alt="Groq Icon" className="h-7 w-7" />,
+    clickName: 'Groq Monitoring',
+  },
+  {
     name: 'Inkeep',
     href: '/docs/inkeep-monitoring',
     icon: (
