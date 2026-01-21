@@ -39,7 +39,6 @@ export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export OTEL_SERVICE_NAME="<service-name>"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_TRACES_EXPORTER="none"
-export OTEL_LOGS_EXPORTER="none"
 export OTEL_METRIC_EXPORT_INTERVAL="60000"
 ```
 Replace the following:
@@ -65,8 +64,6 @@ env:
   value: 'otlp'
 - name: OTEL_TRACES_EXPORTER
   value: 'none'
-- name: OTEL_LOGS_EXPORTER
-  value: 'none'
 - name: OTEL_METRIC_EXPORT_INTERVAL
   value: '60000'
 ```
@@ -86,7 +83,6 @@ $env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_SERVICE_NAME = "<service-name>"
 $env:OTEL_METRICS_EXPORTER = "otlp"
 $env:OTEL_TRACES_EXPORTER = "none"
-$env:OTEL_LOGS_EXPORTER = "none"
 $env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
 ```
 Replace the following:
@@ -109,7 +105,6 @@ ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ENV OTEL_SERVICE_NAME="<service-name>"
 ENV OTEL_METRICS_EXPORTER="otlp"
 ENV OTEL_TRACES_EXPORTER="none"
-ENV OTEL_LOGS_EXPORTER="none"
 ENV OTEL_METRIC_EXPORT_INTERVAL="60000"
 
 CMD ["opentelemetry-instrument", "python", "app.py"]
@@ -122,7 +117,6 @@ docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:
     -e OTEL_SERVICE_NAME="<service-name>" \
     -e OTEL_METRICS_EXPORTER="otlp" \
     -e OTEL_TRACES_EXPORTER="none" \
-    -e OTEL_LOGS_EXPORTER="none" \
     -e OTEL_METRIC_EXPORT_INTERVAL="60000" \
     your-image:latest
 ```
@@ -136,8 +130,12 @@ Replace the following:
 </TabItem>
 </Tabs>
 
-<KeyPointCallout title="Why disable traces and logs?" defaultCollapsed={true}>
-Setting `OTEL_TRACES_EXPORTER="none"` and `OTEL_LOGS_EXPORTER="none"` disables trace and log export since this guide focuses on metrics only. If you want traces, see the [Python traces instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-python/).
+<KeyPointCallout title="Why explicitly disable traces?" defaultCollapsed={true}>
+The bootstrap command (Step 3) installs instrumentations for all detected libraries, including web frameworks like Flask, Django, and FastAPI. These instrumentations generate traces (spans) for every incoming HTTP request.
+
+Since `opentelemetry-distro` enables traces by default, these traces would be sent to SigNoz even though this guide only covers metrics. For apps handling many requests, this can generate significant trace volume and costs.
+
+Setting `OTEL_TRACES_EXPORTER` to `none` disables traces while keeping metrics working as expected. If you want traces later, you can change it to `otlp` or remove this variable altogether. See the [Python traces instrumentation guide](https://signoz.io/docs/instrumentation/opentelemetry-python/) for more details.
 </KeyPointCallout>
 
 ### Step 2. Install OpenTelemetry packages
