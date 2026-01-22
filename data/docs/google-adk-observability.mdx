@@ -1,0 +1,348 @@
+---
+date: 2026-01-15
+id: google-adk-observability-with-opentelemetry
+title: Google ADK Observability & Monitoring with OpenTelemetry
+description: Observability and monitoring for Google ADK usage and performance with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through setting up observability and monitoring for Google ADK using [OpenTelemetry](https://opentelemetry.io/) and exporting traces, logs, and metrics to SigNoz. With this integration, you can observe various metrics for your Google ADK applications and llm usage.
+
+Monitoring Google ADK in your AI agent applications with telemetry ensures full observability across your AI and LLM workflows. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Internet access to send telemetry data to SigNoz Cloud
+- Python 3.10+ with `google-adk` installed
+- For Python: `pip` installed for managing Python packages
+- A Google Gemini API key. You can get it from <a href="https://aistudio.google.com/app/api-keys" target="_blank" rel="noopener noreferrer nofollow">Google AI Studio platform</a>
+
+
+## Monitoring Google ADK
+
+For more information on getting started with Google ADK in your Python environment, refer to the [Google ADK Python quickstart guide](https://google.github.io/adk-docs/get-started/python/).
+
+### Step 1: Install dependencies
+
+```bash
+pip install \
+  opentelemetry-api \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  google-adk \
+  openinference-instrumentation-google-adk
+```
+
+### Step 2: Create an agent project
+
+Run the `adk create` command to start a new agent project.
+
+```bash
+adk create my_agent
+```
+
+### Step 3: Update the .env file
+
+Update the `.env` file in your generated module to include your generated Gemini API key:
+
+```env:my_agent/.env
+GOOGLE_API_KEY=<YOUR_API_KEY>
+```
+
+### Step 4: Import the necessary modules in your generated `agent.py`
+
+**Traces:**
+
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from openinference.instrumentation.google_adk import GoogleADKInstrumentor 
+```
+
+**Logs:**
+
+```python
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+from opentelemetry._logs import set_logger_provider
+import logging
+```
+
+**Metrics:**
+
+```python
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+```
+
+### Step 5: Set up Traces
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry import trace
+from openinference.instrumentation.google_adk import GoogleADKInstrumentor 
+import os
+
+
+
+resource = Resource.create({"service.name": "<service_name>"})
+provider = TracerProvider(resource=resource)
+span_exporter = OTLPSpanExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_TRACES_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+processor = BatchSpanProcessor(span_exporter)
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+
+GoogleADKInstrumentor().instrument()
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+
+### Step 6: Set up Metrics
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+metric_exporter = OTLPMetricExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+reader = PeriodicExportingMetricReader(metric_exporter)
+metric_provider = MeterProvider(metric_readers=[reader], resource=resource)
+metrics.set_meter_provider(metric_provider)
+
+meter = metrics.get_meter(__name__)
+
+# turn on out-of-the-box metrics
+SystemMetricsInstrumentor().instrument()
+HTTPXClientInstrumentor().instrument()
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+<Admonition type="important">
+   SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your Google ADK application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+</Admonition>
+
+### Step 7: Set up Logs
+
+```python
+import logging
+from opentelemetry.sdk.resources import Resource
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+logger_provider = LoggerProvider(resource=resource)
+set_logger_provider(logger_provider)
+
+otlp_log_exporter = OTLPLogExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_LOGS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(otlp_log_exporter)
+)
+# Attach OTel logging handler to root logger
+handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+logger = logging.getLogger(__name__)
+
+# Enable httpx logging to capture HTTP requests
+httpx_logger = logging.getLogger("httpx")
+httpx_logger.setLevel(logging.DEBUG)
+httpx_logger.addHandler(handler)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+### Step 8: Run your Google ADK Agent
+
+<Admonition type="important">
+   Ensure you have completed the steps above (traces, logs, and metrics configuration) before running your agent. All OpenTelemetry instrumentation must be initialized first.
+</Admonition>
+
+#### Run with command-line interface
+
+Run your agent using the `adk run` command-line tool.
+
+```bash
+adk run my_agent
+```
+
+#### Run with web interface
+
+The ADK framework provides a web interface you can use to test and interact with your agent. You can start the web interface using the following command:
+
+```bash
+adk web --port 8000
+```
+
+## View Traces, Logs, and Metrics in SigNoz
+
+Your Google ADK agent usage should now automatically emit traces, logs, and metrics.
+
+
+You should be able to view traces in SigNoz Cloud under the traces tab:
+
+<Figure
+  src="/img/docs/llm/google-adk/google-adk-traces.webp"
+  alt="Google-ADK Trace View"
+  caption="Google-ADK Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure
+  src="/img/docs/llm/google-adk/google-adk-detailed-traces.webp"
+  alt="Google-ADK Detailed Trace View"
+  caption="Google-ADK Detailed Trace View"
+/>
+
+You should be able to view logs in SigNoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/google-adk/related-logs.webp" alt="Related logs" width="300" />
+  <figcaption>
+    <i>Related logs button</i>
+  </figcaption>
+</figure>
+
+<Figure
+  src="/img/docs/llm/google-adk/google-adk-logs.webp"
+  alt="Google ADK Logs View"
+  caption="Google ADK Logs View"
+/>
+
+When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+
+<Figure
+  src="/img/docs/llm/google-adk/google-adk-detailed-logs.webp"
+  alt="Google ADK Detailed Log View"
+  caption="Google ADK Detailed Logs View"
+/>
+
+You should be able to see Google ADK related metrics in SigNoz Cloud under the metrics tab:
+
+<Figure
+  src="/img/docs/llm/google-adk/google-adk-metrics.webp"
+  alt="Google-ADK Metrics View"
+  caption="Google-ADK Metrics View"
+/>
+
+When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+
+<Figure
+  src="/img/docs/llm/google-adk/google-adk-detailed-metrics.webp"
+  alt="Google-ADK Detailed Metrics View"
+  caption="Google-ADK Detailed Metrics View"
+/>
+
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+If you don't see your telemetry data:
+
+1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
+2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
+3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+
+</details>
+
+## Next Steps
+
+You can also check out our custom Google ADK dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/google-adk-dashboard/) which provides specialized visualizations for monitoring your Google ADK usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/google-adk/google-adk-dashboard.webp"
+  alt="Google ADK Dashboard"
+  caption="Google ADK Dashboard Template"
+/>
+
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/product-features/trace-explorer)
+- Explore [log correlation](https://signoz.io/docs/product-features/logs-explorer)
+
+

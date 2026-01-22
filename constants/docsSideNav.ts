@@ -999,6 +999,19 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'category',
+            isExpanded: false,
+            label: 'Ruby',
+            route: '/docs/instrumentation/opentelemetry-ruby',
+            items: [
+              {
+                type: 'doc',
+                label: 'Manual Instrumentation',
+                route: '/docs/instrumentation/manual-instrumentation/ruby/manual-instrumentation',
+              },
+            ],
+          },
+          {
             type: 'doc',
             label: 'PHP',
             route: '/docs/instrumentation/opentelemetry-php',
@@ -1007,11 +1020,6 @@ const docsSideNav = [
             type: 'doc',
             label: 'Laravel',
             route: '/docs/instrumentation/opentelemetry-laravel',
-          },
-          {
-            type: 'doc',
-            label: 'Ruby on Rails',
-            route: '/docs/instrumentation/opentelemetry-ruby-on-rails',
           },
           {
             type: 'doc',
@@ -1554,6 +1562,16 @@ const docsSideNav = [
                 route: '/docs/metrics-management/send-metrics/applications/golang',
                 label: 'Golang',
               },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
+                label: 'Node.js',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-python',
+                label: 'Python',
+              },
             ],
           },
           {
@@ -1907,6 +1925,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/frontend-monitoring',
             label: 'Frontend Monitoring',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/google-adk-dashboard',
+            label: 'Google ADK',
           },
           {
             type: 'doc',
@@ -2457,6 +2480,11 @@ const docsSideNav = [
       {
         route: '/docs/deepseek-monitoring',
         label: 'DeepSeek',
+        type: 'doc',
+      },
+      {
+        route: '/docs/google-adk-observability',
+        label: 'Google ADK',
         type: 'doc',
       },
       {

@@ -1,0 +1,592 @@
+---
+date: 2026-01-18
+id: opentelemetry-ruby
+title: Ruby OpenTelemetry Instrumentation
+description: Learn how to instrument your Ruby application (Rails, Sinatra, Sidekiq, Resque, Redis, PostgreSQL) with OpenTelemetry and send telemetry data to SigNoz
+
+doc_type: howto
+---
+This guide shows you how to instrument your Ruby application including Rails, Sinatra, Sidekiq, Resque, Redis, and PostgreSQL with OpenTelemetry and send traces to SigNoz. The `opentelemetry-instrumentation-all` gem provides automatic instrumentation for 53+ popular Ruby libraries.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+- Ruby 3.2 or later
+- Bundler installed
+- A SigNoz Cloud account or self-hosted SigNoz instance
+
+## Send traces to SigNoz
+<Tabs entityName="deployment">
+<TabItem value="vm" label="VM" default>
+        <KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+            A VM is a virtual computer that runs on physical hardware. This includes:
+            - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+            - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+            - **Bare metal servers**: Physical servers running Linux/Unix directly
+
+            Use this section if you're deploying your Rails application directly on a server or VM without containerization.
+        </KeyPointCallout>
+
+### Step 1. Set environment variables
+Set the following environment variables to configure the OpenTelemetry exporter:
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<service-name>"
+```
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `my-rails-app`).
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+### Step 1. Set environment variables
+Add these environment variables to your deployment manifest:
+```yaml
+env:
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+```
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `my-rails-app`).
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+### Step 1. Set environment variables (PowerShell)
+```powershell
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_SERVICE_NAME = "<service-name>"
+```
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service.
+</TabItem>
+
+<TabItem value="docker" label="Docker">
+### Step 1. Set environment variables in Dockerfile
+Add environment variables to your Dockerfile:
+```dockerfile:Dockerfile
+FROM ruby:3.3-alpine
+
+WORKDIR /app
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+COPY . .
+
+# Set OpenTelemetry environment variables
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_SERVICE_NAME="<service-name>"
+
+EXPOSE 3000
+CMD ["rails", "server", "-b", "0.0.0.0"]
+```
+
+Or pass them at runtime using `docker run`:
+```bash
+docker run -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+    -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+    -e OTEL_SERVICE_NAME="<service-name>" \
+    your-image:latest
+```
+
+Replace the following:
+- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service-name>`: A descriptive name for your service (e.g., `my-rails-app`).
+</TabItem>
+</Tabs>
+
+### Step 2. Install OpenTelemetry packages
+
+Add the following gems to your `Gemfile`:
+
+```ruby:Gemfile
+gem 'opentelemetry-sdk'
+gem 'opentelemetry-exporter-otlp'
+gem 'opentelemetry-instrumentation-all'
+```
+
+Run bundle install:
+
+```bash
+bundle install
+```
+
+The `opentelemetry-instrumentation-all` gem bundles 53+ library instrumentations including Rails, ActiveRecord, Sidekiq, Redis, and more.
+
+### Step 3. Configure OpenTelemetry SDK
+
+Create an initializer file at `config/initializers/opentelemetry.rb`:
+
+```ruby:config/initializers/opentelemetry.rb
+require 'opentelemetry/sdk'
+require 'opentelemetry/exporter/otlp'
+require 'opentelemetry/instrumentation/all'
+
+OpenTelemetry::SDK.configure do |c|
+  c.use_all  # Enables all available instrumentations
+end
+```
+
+The SDK automatically reads `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and `OTEL_EXPORTER_OTLP_HEADERS` from the environment variables you set in Step 1.
+
+### Step 4. Run your application
+
+Start your Rails server:
+
+```bash
+rails server
+```
+
+Your application is now instrumented and sending traces to SigNoz.
+
+## Library instrumentation
+
+Choose your Ruby framework or library to add automatic instrumentation without leaving this page.
+Use the categories below to pick a specific integration.
+
+<LibraryTabs
+    defaultCategory="all"
+    defaultLibrary="rails"
+    categoryLabels={{
+        web: 'Web Frameworks',
+        database: 'Databases & Caches',
+        background: 'Background Jobs',
+    }}
+>
+    <LibraryTab value="rails" label="Rails" category="web">
+
+        This guide shows you how to configure OpenTelemetry instrumentation for Rails. Complete the core Rails instrumentation setup first.
+
+        The `opentelemetry-instrumentation-all` gem automatically instruments Rails components including ActionPack, ActionView, and ActiveRecord.
+
+        ### Configure specific instrumentations
+
+        You can customize individual instrumentations by passing options:
+
+        ```ruby:config/initializers/opentelemetry.rb
+        require 'opentelemetry/sdk'
+        require 'opentelemetry/exporter/otlp'
+        require 'opentelemetry/instrumentation/all'
+
+        OpenTelemetry::SDK.configure do |c|
+          c.use_all({
+            'OpenTelemetry::Instrumentation::Rails' => {
+              enable_recognize_route: true,
+            },
+            'OpenTelemetry::Instrumentation::ActiveRecord' => {
+              # Capture SQL queries in span attributes
+              db_statement: :include,
+            },
+            'OpenTelemetry::Instrumentation::ActionPack' => {
+              # Include controller and action in span names
+              enable_recognize_route: true,
+            },
+          })
+        end
+        ```
+
+        ### What gets instrumented automatically
+
+        - **ActionPack**: HTTP request handling, controller actions
+        - **ActionView**: Template rendering
+        - **ActiveRecord**: Database queries
+        - **ActiveJob**: Background job processing
+        - **ActionMailer**: Email sending
+
+        ### Adding manual spans
+
+        Create custom child spans to trace specific operations:
+
+        ```ruby
+        class OrdersController < ApplicationController
+          def create
+            tracer = OpenTelemetry.tracer_provider.tracer('my-rails-app')
+
+            tracer.in_span('process-order') do |span|
+              span.set_attribute('order.total', params[:total])
+              span.add_event('order.validated')
+
+              # Your order processing logic
+              @order = Order.create!(order_params)
+
+              span.set_attribute('order.id', @order.id)
+            end
+
+            render json: @order
+          end
+        end
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="sinatra" label="Sinatra" category="web">
+
+        This guide shows you how to add OpenTelemetry instrumentation to a Sinatra application.
+
+        ### Install Sinatra instrumentation
+
+        Add to your `Gemfile`:
+
+        ```ruby:Gemfile
+        gem 'opentelemetry-sdk'
+        gem 'opentelemetry-exporter-otlp'
+        gem 'opentelemetry-instrumentation-sinatra'
+        gem 'opentelemetry-instrumentation-rack'
+        ```
+
+        ### Configure OpenTelemetry
+
+        Create a configuration file:
+
+        ```ruby:config/opentelemetry.rb
+        require 'opentelemetry/sdk'
+        require 'opentelemetry/exporter/otlp'
+        require 'opentelemetry/instrumentation/sinatra'
+        require 'opentelemetry/instrumentation/rack'
+
+        OpenTelemetry::SDK.configure do |c|
+          c.use 'OpenTelemetry::Instrumentation::Sinatra'
+          c.use 'OpenTelemetry::Instrumentation::Rack'
+        end
+        ```
+
+        ### Complete Sinatra example
+
+        ```ruby:app.rb
+        require 'sinatra'
+        require_relative 'config/opentelemetry'
+
+        get '/' do
+          'Hello from instrumented Sinatra!'
+        end
+
+        get '/users/:id' do
+          tracer = OpenTelemetry.tracer_provider.tracer('my-sinatra-app')
+
+          tracer.in_span('fetch-user') do |span|
+            span.set_attribute('user.id', params[:id])
+            # Your logic here
+          end
+
+          { user_id: params[:id] }.to_json
+        end
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="sidekiq" label="Sidekiq" category="background">
+
+        This guide shows you how to add OpenTelemetry instrumentation to Sidekiq background jobs.
+
+        ### Install Sidekiq instrumentation
+
+        If using `opentelemetry-instrumentation-all`, Sidekiq is automatically instrumented. Otherwise, add:
+
+        ```ruby:Gemfile
+        gem 'opentelemetry-instrumentation-sidekiq'
+        ```
+
+        ### Configure Sidekiq instrumentation
+
+        ```ruby:config/initializers/opentelemetry.rb
+        require 'opentelemetry/sdk'
+        require 'opentelemetry/exporter/otlp'
+        require 'opentelemetry/instrumentation/sidekiq'
+
+        OpenTelemetry::SDK.configure do |c|
+          c.use 'OpenTelemetry::Instrumentation::Sidekiq', {
+            # Propagate trace context to background jobs
+            propagation_style: :link,
+            # Include job arguments in spans
+            span_naming: :job_class,
+          }
+        end
+        ```
+
+        ### Example instrumented worker
+
+        ```ruby:app/workers/order_processor.rb
+        class OrderProcessor
+          include Sidekiq::Worker
+
+          def perform(order_id)
+            tracer = OpenTelemetry.tracer_provider.tracer('my-rails-app')
+
+            tracer.in_span('process-order-async') do |span|
+              span.set_attribute('order.id', order_id)
+
+              order = Order.find(order_id)
+              order.process!
+
+              span.add_event('order.processed')
+            end
+          end
+        end
+        ```
+
+        ### Trace context propagation
+
+        When a web request enqueues a Sidekiq job, the trace context is automatically propagated, linking the background job span to the original request span.
+
+    </LibraryTab>
+    <LibraryTab value="redis" label="Redis" category="database">
+
+        This guide shows you how to add OpenTelemetry instrumentation to Redis operations.
+
+        ### Install Redis instrumentation
+
+        If using `opentelemetry-instrumentation-all`, Redis is automatically instrumented. Otherwise, add:
+
+        ```ruby:Gemfile
+        gem 'opentelemetry-instrumentation-redis'
+        ```
+
+        ### Configure Redis instrumentation
+
+        ```ruby:config/initializers/opentelemetry.rb
+        require 'opentelemetry/sdk'
+        require 'opentelemetry/exporter/otlp'
+        require 'opentelemetry/instrumentation/redis'
+
+        OpenTelemetry::SDK.configure do |c|
+          c.use 'OpenTelemetry::Instrumentation::Redis', {
+            # Include Redis commands in span attributes
+            db_statement: :include,
+          }
+        end
+        ```
+
+        ### Example usage
+
+        All Redis operations are automatically traced:
+
+        ```ruby
+        class CacheService
+          def initialize
+            @redis = Redis.new(url: ENV['REDIS_URL'])
+          end
+
+          def get_user(user_id)
+            # This Redis GET operation creates a span automatically
+            cached = @redis.get("user:#{user_id}")
+            return JSON.parse(cached) if cached
+
+            user = User.find(user_id)
+            @redis.setex("user:#{user_id}", 3600, user.to_json)
+            user
+          end
+        end
+        ```
+
+    </LibraryTab>
+    <LibraryTab value="pg" label="PostgreSQL" category="database">
+
+        This guide shows you how to add OpenTelemetry instrumentation to PostgreSQL operations using the `pg` gem.
+
+        ### Install PG instrumentation
+
+        If using `opentelemetry-instrumentation-all`, PG is automatically instrumented. Otherwise, add:
+
+        ```ruby:Gemfile
+        gem 'opentelemetry-instrumentation-pg'
+        ```
+
+        ### Configure PG instrumentation
+
+        ```ruby:config/initializers/opentelemetry.rb
+        require 'opentelemetry/sdk'
+        require 'opentelemetry/exporter/otlp'
+        require 'opentelemetry/instrumentation/pg'
+
+        OpenTelemetry::SDK.configure do |c|
+          c.use 'OpenTelemetry::Instrumentation::PG', {
+            # Include SQL statements in span attributes
+            db_statement: :include,
+            # Obfuscate sensitive values in queries
+            obfuscation_limit: 2000,
+          }
+        end
+        ```
+
+        ### What gets traced
+
+        All database operations using the `pg` gem are automatically traced:
+        - `exec`, `exec_params`, `exec_prepared`
+        - `query`, `async_exec`
+        - Transaction blocks
+
+        For Rails applications using ActiveRecord with PostgreSQL, the `opentelemetry-instrumentation-active_record` gem provides more detailed Rails-specific tracing.
+
+    </LibraryTab>
+    <LibraryTab value="resque" label="Resque" category="background">
+
+        This guide shows you how to add OpenTelemetry instrumentation to Resque background jobs.
+
+        ### Install Resque instrumentation
+
+        If using `opentelemetry-instrumentation-all`, Resque is automatically instrumented. Otherwise, add:
+
+        ```ruby:Gemfile
+        gem 'opentelemetry-instrumentation-resque'
+        ```
+
+        ### Configure Resque instrumentation
+
+        ```ruby:config/initializers/opentelemetry.rb
+        require 'opentelemetry/sdk'
+        require 'opentelemetry/exporter/otlp'
+        require 'opentelemetry/instrumentation/resque'
+
+        OpenTelemetry::SDK.configure do |c|
+          c.use 'OpenTelemetry::Instrumentation::Resque', {
+            propagation_style: :link,
+            span_naming: :job_class,
+          }
+        end
+        ```
+
+        ### Example instrumented job
+
+        ```ruby:app/jobs/email_job.rb
+        class EmailJob
+          @queue = :emails
+
+          def self.perform(user_id, template)
+            tracer = OpenTelemetry.tracer_provider.tracer('my-rails-app')
+
+            tracer.in_span('send-email') do |span|
+              span.set_attribute('user.id', user_id)
+              span.set_attribute('email.template', template)
+
+              user = User.find(user_id)
+              UserMailer.send(template, user).deliver_now
+
+              span.add_event('email.sent')
+            end
+          end
+        end
+        ```
+
+    </LibraryTab>
+</LibraryTabs>
+
+## Validate
+
+After running your instrumented application, verify traces appear in SigNoz:
+
+1. Generate some traffic by making requests to your application.
+2. Open SigNoz and navigate to **Traces**.
+3. Click **Refresh** and look for new trace entries from your application.
+4. Click on any trace to view detailed span information and timing.
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Why don't traces appear in SigNoz?
+
+**Check environment variables are set:**
+
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+echo $OTEL_SERVICE_NAME
+```
+
+**Verify the OpenTelemetry initializer loads:**
+
+Add debug logging to your initializer:
+
+```ruby:config/initializers/opentelemetry.rb
+require 'opentelemetry/sdk'
+require 'opentelemetry/exporter/otlp'
+require 'opentelemetry/instrumentation/all'
+
+OpenTelemetry::SDK.configure do |c|
+  c.use_all
+end
+
+Rails.logger.info "OpenTelemetry configured with service: #{ENV['OTEL_SERVICE_NAME']}"
+Rails.logger.info "OpenTelemetry endpoint: #{ENV['OTEL_EXPORTER_OTLP_ENDPOINT']}"
+```
+
+**Verify network connectivity:**
+
+```bash
+# For SigNoz Cloud
+curl -v https://ingest.<region>.signoz.cloud:443/v1/traces
+```
+
+### Why do OTLP exports fail with `connection refused`?
+
+- **VM**: Verify the endpoint URL and that your firewall allows outbound HTTPS
+- **Kubernetes**: Ensure the OTel Collector service is running and accessible
+- **Self-hosted**: Confirm the collector is listening on the expected port
+
+### Why are some Rails requests not traced?
+
+Check if the instrumentation gem is properly required:
+
+```ruby
+# Verify instrumentations are loaded
+puts OpenTelemetry.tracer_provider.tracer('test').class
+```
+
+Ensure the initializer runs before Rails fully starts by using `config/initializers/` directory.
+
+### Why do I see duplicate spans?
+
+This can happen if you have both `opentelemetry-instrumentation-all` and individual instrumentation gems. Use one or the other:
+
+```ruby:Gemfile
+# Option 1: Use the all-in-one gem (recommended)
+gem 'opentelemetry-instrumentation-all'
+
+# Option 2: Use individual gems (if you need only specific instrumentations)
+# gem 'opentelemetry-instrumentation-rails'
+# gem 'opentelemetry-instrumentation-sidekiq'
+```
+</details>
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+## Next steps
+
+- Need to create custom spans or add attributes yourself? Use the [Manual Instrumentation in Ruby guide](https://signoz.io/docs/instrumentation/manual-instrumentation/ruby/manual-instrumentation/) once the base setup is in place.
+- [Set up alerts](https://signoz.io/docs/alerts-management/notification-channel/slack/) for your Rails application
+- [Create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize metrics
+
+## Sample Ruby application
+
+We have included a sample Ruby application with README.md at [Sample Rails App Github Repo](https://github.com/SigNoz/sample-rails-app).
