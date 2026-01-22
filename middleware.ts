@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { waitUntil } from '@vercel/functions'
+import { waitUntil, ipAddress } from '@vercel/functions'
 import { v4 as uuidv4 } from 'uuid'
 import { detectBotFromUserAgent, logEventServerSide } from './utils/logEvent'
 
@@ -38,6 +38,7 @@ export function middleware(req: NextRequest) {
   const referer = req.headers.get('referer') || req.headers.get('referrer') || 'direct'
   const ip =
     req.ip || req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+  const vercelIp = ipAddress(req) || 'unknown'
 
   // Log bot requests
   if (isBot) {
@@ -57,6 +58,7 @@ export function middleware(req: NextRequest) {
           custom_is_bot: true,
           custom_request_method: req.method,
           custom_has_javascript: false,
+          custom_vercel_ip: vercelIp,
         },
         anonymousId,
       })
@@ -65,6 +67,16 @@ export function middleware(req: NextRequest) {
 
   // Prepare response
   const res = NextResponse.next()
+
+  const currentVercelIpCookie = req.cookies.get('vercel_ip')?.value
+  if (currentVercelIpCookie !== vercelIp && vercelIp !== 'unknown') {
+    res.cookies.set('vercel_ip', vercelIp, {
+      path: '/',
+      httpOnly: false,
+      sameSite: 'lax',
+      maxAge: 60 * 60,
+    })
+  }
 
   // Set user IP in a cookie accessible to the client
   const currentIpCookie = req.cookies.get('user_ip')?.value

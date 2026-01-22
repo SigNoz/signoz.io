@@ -67,10 +67,12 @@ export const useLogEvent = () => {
 
       const utmParams = getStoredUtmParams()
       const userIp = Cookies.get('user_ip')
+      const vercelIp = Cookies.get('vercel_ip')
 
       const enhancedAttributes = {
         ...attributes,
         custom_ip: userIp || 'unknown',
+        custom_vercel_ip: vercelIp || 'unknown',
         custom_os: getOS(),
         custom_timezone: getTimezone(),
         ...getTimezoneAnalysis(),
