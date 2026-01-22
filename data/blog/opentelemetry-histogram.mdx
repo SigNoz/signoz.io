@@ -1,0 +1,207 @@
+---
+title: OpenTelemetry Histograms Explained in Detail with Examples and Implementation
+slug: opentelemetry-histogram
+date: 2026-01-19
+tags: [OpenTelemetry, Metrics]
+authors: [dhruv_ahuja]
+image: /img/blog/common/opentelemetry-histogram.webp
+description: Learn how OpenTelemetry histograms work, how to configure buckets and exponential histograms, and how they work in Python.
+keywords: [opentelemetry histogram, otel metrics, exponential histograms, prometheus histogram, metric aggregation]
+---
+
+In the context of [OpenTelemetry](https://signoz.io/opentelemetry/) (OTel), a histogram is a core metric type that shows the distribution of values, like request latencies. Counters and gauges tell you totals and point-in-time values, not its *shape*.
+
+Consider an application serving 100 requests per second that responds slowly only for a few users. Histograms help understand *how slow* the requests are getting, and for *what percentage* of users.
+
+You’ll learn how OTel histograms bucket values, what the SDK exports, what the different types of histograms are, and the best practices to keep in mind while using histograms in your applications.
+
+## What are OpenTelemetry Histograms?
+
+Given a time period and multiple numeric data points, OpenTelemetry histograms describe how these data points *fall across* or distribute across a numeric range. A histogram groups these values into **buckets**, where each bucket represents a value range and stores a count of how many values fall into that range.
+
+By visualizing observations (values recorded by a histogram) distributed across these buckets, histograms help analyze statistical trends and understand the shape your application’s key workflows take. 
+
+OpenTelemetry histogram buckets include the **upper value but exclude the lower value**. Considering a bucket setup for API response times (ms):
+
+`bucket_range = [0, 5, 10, 15, 20, 50, 75, 100, 250, 500, 1000, 2500, 5000]`
+
+Here, values up to and including 0 go into the first bucket, values greater than 0 and up to 5 go into the bucket, and so on until the final bucket. This final bucket acts as an **overflow** bucket, meaning any value greater than 5000 goes there.
+
+When distributing values that belong to the middle of a range, such as 35, the histogram simply checks the upper bounds of the bucket, finds the bucket whose upper bound is greater than or equal to that value, and increments the counter for that bucket.
+
+<Figure src="/img/blog/2026/01/opentelemetry-histogram.webp" alt="A histogram stores values in buckets corresponding to its range." caption="A histogram stores values in buckets corresponding to its range." />
+
+For the bucket distribution above, we’ll be able to better understand our application’s performance if we record 100 such values. It’s possible that out of those 100 requests, the API responds to 90 requests within 100ms. But out of the remaining 10 requests, 8 responses were made under 500ms, and 2 responses took over a second.
+
+If you are running this app in production, you might have Service-Level Objectives (SLOs) that mandate that 95% of requests (the 95th percentile or p95) should complete under 100ms. In this case, you would violate the SLOs and would need to diagnose and address the issues causing these latency spikes.
+
+<Figure src="/img/blog/2026/01/opentelemetry-histogram-percentile.webp" alt="Histograms help us understand the relevance of data over a time frame." caption="Histograms help us understand the relevance of data over a time frame." />
+
+Now that we have covered how OpenTelemetry histograms work, we’ll look at how OpenTelemetry SDKs actually process histogram data.
+
+### How does OpenTelemetry Process Histogram Data?
+
+During export, the OpenTelemetry SDK performs [*temporal aggregation*](https://signoz.io/docs/metrics-management/types-and-aggregation/#aggregation) on the data recorded within an application, producing a stream of aggregated data points with multiple fields.
+
+Following are <a href="https://opentelemetry.io/docs/specs/otel/metrics/data-model/#histogram" rel="noopener noreferrer nofollow" target="_blank">the metrics</a> that the OTel Python SDK exports, and how they map to real-world usage:
+
+1. **Count:** the number of observations made (total number of requests)
+2. **Sum:** the total sum of all recorded values for the duration (the combined duration of those requests)
+3. **Buckets:** bucket counters and their boundaries that represent the distribution of the observations; counters include an extra overflow bucket (observability backends will use these to calculate percentiles)
+4. **(Optional) Min:** the minimum recorded value (fastest response in the time period)
+5. **(Optional) Max:** the maximum recorded value (slowest response in the time period)
+
+Now that we’re clear on how histograms fundamentally work, we need to understand the types of histograms available for use.
+
+## The Two Types of Histograms
+
+OTel supports two histogram implementations: explicit buckets and exponential histograms. Both serve different purposes, and have their own distinct characteristics that are important to understand, before diving into the implementation.
+
+### Explicit Bucket Histograms
+
+Explicit bucket histograms are the “default” choice for most OpenTelemetry SDK implementations, and the original histogram implementation that OpenTelemetry shipped with. 
+
+When creating an explicit bucket histogram, you have the choice to provide your own array of bucket boundaries that you wish to use, or use the default boundaries that the SDK ships with.
+
+<Figure src="/img/blog/2026/01/opentelemetry-histogram-data-export.webp" alt="Exporting metrics data for an explicit bucket histogram configured with default bucket boundaries." caption="Exporting metrics data for an explicit bucket histogram configured with default bucket boundaries." />
+
+Here, the default boundaries put more resolution into the lower range. This aligns with the typical monitoring use case where small values tend to be more important as compared to larger values, such as when measuring payload sizes.
+
+Consider this scenario: a developer checking the p90 payload sizes might be more concerned if the size jumped from 50kb to 100kb, since that is a more marginal increase, compared to a jump from 5000kb to 5500kb. If the p90 size is 5000kb, a 500kb increase is likely less concerning, as they are already processing large messages at that point.
+
+While the default boundaries can feel too rigid, you must be well aware of the expected data distribution and your KPIs to create buckets that remain relevant as your **data evolves over time**.
+
+### Exponential Histograms
+
+To solve the “bucket planning” problem faced with explicit bucket histograms, OpenTelemetry <a href="https://github.com/open-telemetry/oteps/blob/main/text/0149-exponential-histogram.md" rel="noopener noreferrer nofollow" target="_blank">introduced exponential histograms</a>. They are a more modern implementation that can effectively track evolving data distributions throughout an application’s lifecycle and changing usage patterns.
+
+Exponential histograms (as the name suggests) use an exponential formula to maintain bucket boundaries and a `scale` parameter that controls the number of buckets to create. A higher scale value means higher precision with more buckets that cover smaller ranges as compared to lower scale levels.
+
+<Figure src="/img/blog/2026/01/opentelemetry-histogram-scaling.webp" alt="Exponential histograms use the scale parameter to manage bucket distributions." caption="Exponential histograms use the scale parameter to manage bucket distributions." />
+
+This flexibility ensures exponential histograms can accurately represent the *long tail* observations (such as p99 latencies), where most values in a distribution are smaller and clustered in lower buckets, but a few larger values require more detail. By creating buckets dynamically, exponential histograms help developers avoid creating any “filler” buckets to cover larger ranges, such as a `[1750, 2000]` range bucket to record arbitrary responses falling within that range.
+
+You can <a href="https://opentelemetry-python.readthedocs.io/en/latest/_modules/opentelemetry/sdk/metrics/_internal/aggregation.html#ExponentialBucketHistogramAggregation" rel="noopener noreferrer nofollow" target="_blank">configure parameters</a> like bucket counts and the maximum scale value. However, The SDK chooses the scale point to use per batch of data, and may downscale it based on user configuration.
+
+The OpenTelemetry SDK will automatically maintain the maximum possible scale value that keeps your bucket count under the set limit. Since bucket counts directly affect memory usage within applications, this behaviour helps manage memory while retaining best possible precision.
+
+## How to Use OpenTelemetry Histograms?
+
+The following Python code snippet will help you understand how you can implement histograms in your applications. We have kept the configuration simple so you can focus on the core implementation details.
+
+```python
+from opentelemetry.metrics import set_meter_provider, get_meter_provider
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import ConsoleMetricExporter, PeriodicExportingMetricReader
+from opentelemetry.sdk.resources import Resource
+
+# every second, export all observations to the console
+reader = PeriodicExportingMetricReader(
+    exporter=ConsoleMetricExporter(),
+    export_interval_millis=1000
+)
+
+SERVICE_NAME = "otel-histogram-demo"
+SERVICE_VERSION = "0.1.0"
+
+# configure meter provider registering the reader and identifier resource attributes
+meter_provider = MeterProvider(
+    metric_readers=[reader],
+    resource = Resource(attributes={
+        "service.name": SERVICE_NAME,
+        "service.version": SERVICE_VERSION,
+    })
+)
+
+# set the global meter provider to derive the histogram from
+set_meter_provider(meter_provider)
+meter = get_meter_provider().get_meter(SERVICE_NAME, SERVICE_VERSION)
+
+# initialize the histogram
+histogram = meter.create_histogram(
+    name="demo_latencies",
+    unit="ms",
+    description="Duration of demo HTTP requests",
+)
+
+# record values
+histogram.record(99.9)
+
+# include attributes during observations that add context
+histogram.record(50, attributes={
+    "http.route": "/v1/users", "http.method": "GET"
+})
+```
+
+When you run this script, you’ll see two separate metric data points for the two observations in your terminal window. OpenTelemetry maintains data integrity across all distinct “contexts” by separating the data streams for each set of unique attributes.
+
+<Figure src="/img/blog/2026/01/opentelemetry-histogram-attributes.webp" alt="OpenTelemetry SDK maintains distinct metrics for each unique set of attributes." caption="OpenTelemetry SDK maintains distinct metrics for each unique set of attributes." />
+
+For example, If we add a new observation for the same route, but with a different HTTP method, the SDK will maintain a third set of data points:
+
+```python
+histogram.record(50, attributes={
+    "http.route": "/v1/users", "http.method": "POST"
+})
+```
+
+<KeyPointCallout title="Enabling Exponential Histograms in SigNoz">
+
+The above example covers explicit bucket histograms that have stable support across all observability platforms. As of Jan 19, 2026, exponential histograms are still seeing varying levels of adoption across the landscape.
+
+SigNoz currently supports exponential histograms on the self-hosted version. To enable them, you must:
+
+- set `enable_exp_hist: true` in the `clickhousemetricswrite` and `signozclickhousemetrics` exporters.
+- use the Delta temporality for your exponential histograms
+
+</KeyPointCallout>
+
+## Best Practices (and Mistakes to Avoid) while using OpenTelemetry Histograms
+
+### Label Your Observations
+
+As seen above, it is critical to add attributes that help uniquely categorize observations. These attributes are what help you derive context from generated data points and understand application behaviour.
+
+Attributes such as `payload_type` and `payload_origin` separate the sizes based on each unique message payload type and origin recorded by your application. It could be the difference between understanding that “p90 of payloads is higher than expected!” and “p90 of the `user_data` payloads originating from the `payments` service are spiking”.
+
+### Control Metric Cardinality
+
+Although labelling your observations is critical, your observability bills can *explode* and seriously degrade the performance of your observability pipelines, if you don’t control the cardinality of your data.
+
+Since buckets are created for each unique combination of attributes, if a developer adds a high cardinality attribute like `user_id` or `transaction_id` when registering an observation, **every single request** with a unique value will forcibly create a new set of buckets.
+
+This can multiply the amount of data generated and transferred, starving your application of memory and network bandwidth, and significantly increase the storage used by the observability backend.
+
+### Use Metric Views to Transform Data
+
+When using histograms in multiple places in an application, you may want to configure the behaviour of certain histograms (or even other metric types), such as changing their temporality, or modifying certain attributes for some histograms.
+
+OpenTelemetry provides a powerful feature known as Views that help transform and manage data. To implement views for your histograms, please refer [this guide](https://signoz.io/opentelemetry/customize-metrics-streams-produced-by-opentelemetry-python-sdk/).
+
+### Setup Alerts for Key Metrics
+
+One major use-case of setting up histograms is to ensure your application meets your business requirements, such as responses staying below defined SLOs. To ensure you meet these targets, you should setup alerts for the key metrics. Alerts help you proactively catch and resolve any potential issues as they occur.
+
+<Figure src="/img/blog/2026/01/opentelemetry-histogram-alert.webp" alt="A view of the SigNoz alert configuration process: visualize and define the query, link alert with Slack channels." caption="A view of the SigNoz alert configuration process: visualize and define the query, link alert with Slack channels." />
+
+## Next Steps
+
+After reading this blog, we hope you’ve learnt enough to create your own histograms that help you understand how important application flows perform in the real world. However, this is only one part of the observability journey. To further gain insights into the various components of your application systems, you need to connect metrics with traces and logs.
+
+[SigNoz](https://signoz.io/) lets you correlate metrics with traces and logs in a single pane, so you can link a latency spike to the trace and related logs. This will help you understand which request led to which events, and how those events affected your latencies or message throughput rates.
+
+You can try it out with [**SigNoz Cloud**](https://signoz.io/teams/) or self-host the [**Community Edition**](https://github.com/SigNoz/signoz) for free. 
+
+## Frequently Asked Questions
+
+### **What is an OpenTelemetry histogram?**
+
+An OpenTelemetry histogram is a metric type used to measure the distribution of numeric values over time, such as request latency. Instead of storing individual measurements, histograms distribute observations across buckets, while also tracking total count and sum across the time duration. These captured metrics allow observability backends like [SigNoz](https://signoz.io/) to aggregate and visualize this data meaningfully.
+
+### How do OpenTelemetry histogram percentiles work?
+
+OpenTelemetry histograms export aggregated metrics calculated from the recorded observations. Your observability backend reads this data to calculate percentiles like p95 or p99 over a time window. The accuracy of percentiles depends on the bucket resolution (number of buckets defined across the range), and the type of histogram used.
+
+### **What is the difference between explicit and exponential histograms in OpenTelemetry?**
+
+Explicit histograms use fixed bucket boundaries, whether default or user-defined, while exponential histograms use dynamic buckets distributions that can scale to cover large value ranges. Exponential histograms are more memory-efficient and better suited for workloads with higher variable latency, but backend support is still in-progress compared to explicit histograms.
