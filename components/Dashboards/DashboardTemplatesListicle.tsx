@@ -158,6 +158,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'ClickHouse Dashboard Template',
   },
   {
+    name: 'Codex (OpenAI)',
+    href: '/docs/dashboards/dashboard-templates/codex-dashboard',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'Codex Dashboard Template',
+  },
+  {
     name: 'Cost Meter',
     href: '/docs/dashboards/dashboard-templates/cost-meter',
     icon: <BarChart3 className="h-7 w-7 text-blue-500" />,
