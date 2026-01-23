@@ -71,6 +71,12 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'Claude Code Monitoring',
   },
   {
+    name: 'Codex (OpenAI)',
+    href: '/docs/codex-monitoring',
+    icon: <SiOpenai className="h-7 w-7 text-white" />,
+    clickName: 'Codex (OpenAI) Monitoring',
+  },
+  {
     name: 'Crew AI',
     href: '/docs/crewai-observability',
     icon: (
