@@ -1,470 +1,288 @@
 ---
-date: 2026-01-17
+date: 2026-01-23
 id: opentelemetry-java
-title: Send Metrics from Java application
-description: Learn how to instrument your Java application with OpenTelemetry to send metrics to SigNoz
+title: Send Metrics from Java Application using OpenTelemetry
+description: Send custom and runtime metrics from your Java application to SigNoz using the OpenTelemetry Java agent.
 
 doc_type: howto
 ---
 
-This guide shows you how to instrument your Java application with OpenTelemetry to send metrics to SigNoz. You will learn how to collect JVM runtime metrics, auto-instrument libraries, and create custom metrics.
+This guide shows you how to send custom and runtime metrics from your Java application to SigNoz using the OpenTelemetry Java agent.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-    Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Prerequisites
 
 - Java 8 or later (Java 17+ recommended for enhanced JVM metrics)
 - A SigNoz Cloud account or self-hosted SigNoz instance
-- Maven or Gradle build tool
 
 <KeyPointCallout title="Why Java 17+ for enhanced metrics?" defaultCollapsed={true}>
-Java 17+ enables **JFR-based (Java Flight Recorder) metrics** collection, providing deeper runtime insights with lower overhead. JFR captures detailed GC events, memory allocation patterns, thread contention, and CPU profiling data that aren't available through standard JMX/MBeans on Java 8. OpenTelemetry provides separate instrumentation packages: `runtime-telemetry-java8` for Java 8-16 and `runtime-telemetry-java17` for Java 17+, with the latter offering richer telemetry through the JFR event streaming API.
+Java 17+ enables **JFR-based (Java Flight Recorder) metrics** collection, providing deeper runtime insights with lower overhead. JFR captures detailed GC events, memory allocation patterns, thread contention, and CPU profiling data that aren't available through standard JMX/MBeans on Java 8.
 </KeyPointCallout>
 
 ## Send metrics to SigNoz
 
 <Tabs entityName="deployment">
 <TabItem value="vm" label="VM" default>
-<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
-    A VM is a virtual computer that runs on physical hardware. This includes:
-    - **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
-    - **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
-    - **Bare metal servers**: Physical servers running Linux/Unix directly
 
-    Use this section if you're deploying your Java application directly on a server or VM without containerization.
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your Java application directly on a server or VM without containerization.
 </KeyPointCallout>
 
-### Step 1. Set environment variables
-Set the following environment variables to configure the OpenTelemetry exporter:
+### Step 1. Download the OpenTelemetry Java agent
+
 ```bash
-export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics"
-export OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+### Step 2. Set environment variables
+
+```bash
 export OTEL_SERVICE_NAME="<service-name>"
-```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
-
-</TabItem>
-
-<TabItem value="k8s" label="Kubernetes">
-### Step 1. Set environment variables
-Add these environment variables to your deployment manifest:
-```yaml
-env:
-- name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
-  value: 'https://ingest.<region>.signoz.cloud:443/v1/metrics'
-- name: OTEL_EXPORTER_OTLP_METRICS_HEADERS
-  value: 'signoz-ingestion-key=<your-ingestion-key>'
-- name: OTEL_SERVICE_NAME
-  value: '<service-name>'
-```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
-</TabItem>
-
-<TabItem value="windows" label="Windows">
-### Step 1. Set environment variables (PowerShell)
-```powershell
-$env:OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = "https://ingest.<region>.signoz.cloud:443/v1/metrics"
-$env:OTEL_EXPORTER_OTLP_METRICS_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
-$env:OTEL_SERVICE_NAME = "<service-name>"
-```
-Replace the following:
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`).
-- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service-name>`: A descriptive name for your service.
-</TabItem>
-
-<TabItem value="docker" label="Docker">
-### Step 1. Set environment variables in Dockerfile
-Add environment variables to your Dockerfile:
-```dockerfile:Dockerfile
-# ... build stages ...
-
-# Set OpenTelemetry environment variables
-ENV OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics"
-ENV OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-ENV OTEL_SERVICE_NAME="<service-name>"
-
-CMD ["java", "-jar", "app.jar"]
-```
-
-Or pass them at runtime using `docker run`:
-```bash
-docker run -e OTEL_EXPORTER_OTLP_METRICS_ENDPOINT="https://ingest.<region>.signoz.cloud:443/v1/metrics" \
-    -e OTEL_EXPORTER_OTLP_METRICS_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
-    -e OTEL_SERVICE_NAME="<service-name>" \
-    your-image:latest
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_METRICS_EXPORTER="otlp"
+export OTEL_METRIC_EXPORT_INTERVAL="60000"
+export OTEL_TRACES_EXPORTER="none"
+export OTEL_LOGS_EXPORTER="none"
 ```
 
 Replace the following:
 - `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service-name>`: A descriptive name for your service (e.g., `payment-service`).
-</TabItem>
-</Tabs>
 
-### Step 2. Install OpenTelemetry packages
+<KeyPointCallout title="Why disable traces and logs?" defaultCollapsed={true}>
+The Java agent auto-instruments web frameworks like Spring Boot, JAX-RS, and Servlet containers, generating traces for every HTTP request. Since traces and logs export is enabled by default, these would be sent to SigNoz even though this guide only covers metrics.
+
+For applications handling many requests, this can generate significant data volume and costs. Setting `OTEL_TRACES_EXPORTER` and `OTEL_LOGS_EXPORTER` to `none` disables them while keeping metrics working. If you want traces or logs later, change them to `otlp` or remove these variables.
+</KeyPointCallout>
+
+### Step 3. Add OpenTelemetry API dependency
+
+Add the OpenTelemetry API to your project. The agent provides the implementation at runtime.
 
 <Tabs>
 <TabItem value="maven" label="Maven" default>
 
-Add the OpenTelemetry BOM and dependencies to your `pom.xml`:
-
 ```xml:pom.xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-bom</artifactId>
-            <version>1.58.0</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
-
-<dependencies>
-    <!-- OpenTelemetry API -->
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-api</artifactId>
-    </dependency>
-
-    <!-- OpenTelemetry SDK -->
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-sdk</artifactId>
-    </dependency>
-
-    <!-- OTLP Exporter -->
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-exporter-otlp</artifactId>
-    </dependency>
-
-    <!-- SDK Autoconfigure -->
-    <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
-    </dependency>
-
-    <!-- Semantic Conventions -->
-    <dependency>
-        <groupId>io.opentelemetry.semconv</groupId>
-        <artifactId>opentelemetry-semconv</artifactId>
-        <version>1.37.0</version>
-    </dependency>
-</dependencies>
+<dependency>
+  <groupId>io.opentelemetry</groupId>
+  <artifactId>opentelemetry-api</artifactId>
+  <version>1.57.0</version>
+</dependency>
 ```
 
 </TabItem>
 <TabItem value="gradle" label="Gradle">
 
-Add the OpenTelemetry dependencies to your `build.gradle`:
-
 ```groovy:build.gradle
-dependencies {
-    // OpenTelemetry BOM for version management
-    implementation platform('io.opentelemetry:opentelemetry-bom:1.58.0')
-
-    // OpenTelemetry API
-    implementation 'io.opentelemetry:opentelemetry-api'
-
-    // OpenTelemetry SDK
-    implementation 'io.opentelemetry:opentelemetry-sdk'
-
-    // OTLP Exporter
-    implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
-
-    // SDK Autoconfigure
-    implementation 'io.opentelemetry:opentelemetry-sdk-extension-autoconfigure'
-
-    // Semantic Conventions
-    implementation 'io.opentelemetry.semconv:opentelemetry-semconv:1.37.0'
-}
-```
-
-Or using Kotlin DSL (`build.gradle.kts`):
-
-```kotlin:build.gradle.kts
-dependencies {
-    // OpenTelemetry BOM for version management
-    implementation(platform("io.opentelemetry:opentelemetry-bom:1.58.0"))
-
-    // OpenTelemetry API
-    implementation("io.opentelemetry:opentelemetry-api")
-
-    // OpenTelemetry SDK
-    implementation("io.opentelemetry:opentelemetry-sdk")
-
-    // OTLP Exporter
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp")
-
-    // SDK Autoconfigure
-    implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-
-    // Semantic Conventions
-    implementation("io.opentelemetry.semconv:opentelemetry-semconv:1.37.0")
-}
+implementation 'io.opentelemetry:opentelemetry-api:1.57.0'
 ```
 
 </TabItem>
 </Tabs>
 
-### Step 3. Initialize the Meter Provider
+<Admonition type="info">
+The version above is current as of this writing. Check the <a href="https://github.com/open-telemetry/opentelemetry-java/releases" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Java releases</a> for the latest versions.
+</Admonition>
 
-Create a helper class to configure the OpenTelemetry Meter Provider. This provider is responsible for creating meters and exporting metrics. It automatically uses the environment variables configured in Step 1.
+### Step 4. Add custom metrics to your application
 
-```java:src/main/java/com/example/OtelConfig.java
-package com.example;
+Use `GlobalOpenTelemetry.getMeter()` to create metrics. The agent configures the MeterProvider automatically.
 
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.metrics.SdkMeterProvider;
-import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
-import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ServiceAttributes;
-
-import java.time.Duration;
-
-public class OtelConfig {
-
-    private static OpenTelemetrySdk openTelemetry;
-
-    public static OpenTelemetry initOpenTelemetry() {
-        // Get configuration from environment variables
-        String endpoint = System.getenv("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT");
-        String headers = System.getenv("OTEL_EXPORTER_OTLP_METRICS_HEADERS");
-        String serviceName = System.getenv("OTEL_SERVICE_NAME");
-
-        // Create resource with service information
-        Resource resource = Resource.getDefault()
-                .merge(Resource.create(Attributes.of(
-                        ServiceAttributes.SERVICE_NAME, serviceName != null ? serviceName : "unknown-service"
-                )));
-
-        // Build OTLP HTTP metric exporter
-        OtlpHttpMetricExporter metricExporter = OtlpHttpMetricExporter.builder()
-                .setEndpoint(endpoint != null ? endpoint : "https://ingest.us.signoz.cloud:443/v1/metrics")
-                .addHeader("signoz-ingestion-key", extractIngestionKey(headers))
-                .setTimeout(Duration.ofSeconds(10))
-                .build();
-
-        // Create MeterProvider with periodic reader (exports every 60 seconds)
-        SdkMeterProvider meterProvider = SdkMeterProvider.builder()
-                .setResource(resource)
-                .registerMetricReader(
-                        PeriodicMetricReader.builder(metricExporter)
-                                .setInterval(Duration.ofSeconds(60))
-                                .build())
-                .build();
-
-        // Build and register the OpenTelemetry SDK
-        openTelemetry = OpenTelemetrySdk.builder()
-                .setMeterProvider(meterProvider)
-                .build();
-
-        // Register shutdown hook for graceful cleanup
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            openTelemetry.close();
-        }));
-
-        return openTelemetry;
-    }
-
-    private static String extractIngestionKey(String headers) {
-        if (headers == null || headers.isEmpty()) {
-            return "";
-        }
-        // Parse "signoz-ingestion-key=<key>" format
-        if (headers.contains("signoz-ingestion-key=")) {
-            return headers.split("signoz-ingestion-key=")[1].split(",")[0];
-        }
-        return "";
-    }
-
-    public static void shutdown() {
-        if (openTelemetry != null) {
-            openTelemetry.close();
-        }
-    }
-}
-```
-
-<KeyPointCallout title="Why 60 seconds export interval?" defaultCollapsed={true}>
-This guide uses the OpenTelemetry default of 60 seconds, which reduces network overhead and is well-suited for production Java applications. For faster feedback during development, you can reduce this to 10 seconds by changing `.setInterval(Duration.ofSeconds(10))`. Shorter intervals provide more real-time visibility but increase network traffic and storage costs.
-</KeyPointCallout>
-
-### Step 4. Instrument your application
-
-Here's a complete example that tracks HTTP requests with a counter metric:
-
-```java:src/main/java/com/example/Application.java
-package com.example;
-
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
+```java:OrderService.java
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
+public class OrderService {
+    private static final Meter meter = GlobalOpenTelemetry.getMeter("order-service");
+    private static final LongCounter ordersCounter = meter
+            .counterBuilder("orders.processed")
+            .setDescription("Total number of orders processed")
+            .build();
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-
-public class Application {
-
-    public static void main(String[] args) throws IOException {
-        // Initialize OpenTelemetry
-        OpenTelemetry openTelemetry = OtelConfig.initOpenTelemetry();
-
-        // Get a meter from the provider
-        Meter meter = openTelemetry.getMeter("com.example.myapp");
-
-        // Define a counter metric
-        LongCounter requestCounter = meter
-                .counterBuilder("http.requests")
-                .setDescription("Total number of HTTP requests")
-                .setUnit("{request}")
-                .build();
-
-        // Create HTTP server
-        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-
-        server.createContext("/hello", new HttpHandler() {
-            @Override
-            public void handle(HttpExchange exchange) throws IOException {
-                // Record the request
-                requestCounter.add(1, Attributes.of(
-                        AttributeKey.stringKey("method"), exchange.getRequestMethod(),
-                        AttributeKey.stringKey("route"), "/hello",
-                        AttributeKey.longKey("status"), 200L
-                ));
-
-                // Send response
-                String response = "Hello, World!";
-                exchange.sendResponseHeaders(200, response.length());
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response.getBytes());
-                }
-            }
-        });
-
-        server.setExecutor(null);
-        server.start();
-        System.out.println("Server listening on port 8080...");
+    public void processOrder(String orderId) {
+        // Your business logic here
+        ordersCounter.add(1);
     }
 }
 ```
 
-## Library instrumentation
+<Admonition type="info">
+This example shows a Counter, which only increases. OpenTelemetry supports other metric types like UpDownCounter, Histogram, and Observable Gauge. See [Custom Metrics Examples](#custom-metrics-examples) for complete examples of each type.
+</Admonition>
 
-You can use OpenTelemetry's instrumentation libraries for automatic JVM runtime metrics collection, or create custom metrics manually.
+### Step 5. Run your application
 
-<Tabs>
-<TabItem value="jvm-runtime" label="JVM Runtime Metrics" default>
-
-The OpenTelemetry Java instrumentation provides JVM runtime metrics collection for monitoring memory usage, garbage collection, thread states, and more.
-
-### Install
-
-<Tabs>
-<TabItem value="maven-runtime" label="Maven" default>
-
-For Java 8+:
-```xml:pom.xml
-<dependency>
-    <groupId>io.opentelemetry.instrumentation</groupId>
-    <artifactId>opentelemetry-runtime-telemetry-java8</artifactId>
-    <version>2.23.0-alpha</version>
-</dependency>
-```
-
-For Java 17+ (includes JFR-based metrics):
-```xml:pom.xml
-<dependency>
-    <groupId>io.opentelemetry.instrumentation</groupId>
-    <artifactId>opentelemetry-runtime-telemetry-java17</artifactId>
-    <version>2.23.0-alpha</version>
-</dependency>
+```bash
+java -javaagent:./opentelemetry-javaagent.jar -jar your-app.jar
 ```
 
 </TabItem>
-<TabItem value="gradle-runtime" label="Gradle">
+<TabItem value="k8s" label="Kubernetes">
 
-For Java 8+:
-```groovy:build.gradle
-implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java8:2.23.0-alpha'
+### Step 1. Add the agent to your Dockerfile
+
+```dockerfile
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+COPY target/<my-app>.jar app.jar
+
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
+
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
 ```
 
-For Java 17+ (includes JFR-based metrics):
-```groovy:build.gradle
-implementation 'io.opentelemetry.instrumentation:opentelemetry-runtime-telemetry-java17:2.23.0-alpha'
+### Step 2. Add environment variables to your deployment
+
+```yaml
+env:
+- name: OTEL_SERVICE_NAME
+  value: '<service-name>'
+- name: OTEL_EXPORTER_OTLP_ENDPOINT
+  value: 'https://ingest.<region>.signoz.cloud:443'
+- name: OTEL_EXPORTER_OTLP_HEADERS
+  value: 'signoz-ingestion-key=<your-ingestion-key>'
+- name: OTEL_METRICS_EXPORTER
+  value: 'otlp'
+- name: OTEL_METRIC_EXPORT_INTERVAL
+  value: '60000'
+- name: OTEL_TRACES_EXPORTER
+  value: 'none'
+- name: OTEL_LOGS_EXPORTER
+  value: 'none'
+```
+
+Replace `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+
+### Step 3. Add OpenTelemetry API and custom metrics
+
+Follow Step 3 and Step 4 from the VM tab to add the dependency and custom metrics code.
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+### Step 1. Download the OpenTelemetry Java agent
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar" -OutFile "opentelemetry-javaagent.jar"
+```
+
+### Step 2. Set environment variables
+
+```powershell
+$env:OTEL_SERVICE_NAME = "<service-name>"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT = "https://ingest.<region>.signoz.cloud:443"
+$env:OTEL_EXPORTER_OTLP_HEADERS = "signoz-ingestion-key=<your-ingestion-key>"
+$env:OTEL_METRICS_EXPORTER = "otlp"
+$env:OTEL_METRIC_EXPORT_INTERVAL = "60000"
+$env:OTEL_TRACES_EXPORTER = "none"
+$env:OTEL_LOGS_EXPORTER = "none"
+```
+
+Replace `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+
+### Step 3. Add OpenTelemetry API and custom metrics
+
+Follow Step 3 and Step 4 from the VM tab to add the dependency and custom metrics code.
+
+### Step 4. Run your application
+
+```powershell
+java -javaagent:.\opentelemetry-javaagent.jar -jar your-app.jar
+```
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+### Step 1. Add the agent to your Dockerfile
+
+```dockerfile
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+COPY target/<my-app>.jar app.jar
+
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -O opentelemetry-javaagent.jar
+
+ENV OTEL_SERVICE_NAME="<service-name>"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+ENV OTEL_METRICS_EXPORTER="otlp"
+ENV OTEL_METRIC_EXPORT_INTERVAL="60000"
+ENV OTEL_TRACES_EXPORTER="none"
+ENV OTEL_LOGS_EXPORTER="none"
+
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
+```
+
+Replace `<my-app>.jar`, `<region>`, `<your-ingestion-key>`, and `<service-name>` with your values.
+
+### Step 2. Add OpenTelemetry API and custom metrics
+
+Follow Step 3 and Step 4 from the VM tab to add the dependency and custom metrics code.
+
+### Step 3. Build and run
+
+```bash
+docker build -t my-java-app .
+docker run -p 8080:8080 my-java-app
+```
+
+Or pass environment variables at runtime:
+
+```bash
+docker run -p 8080:8080 \
+  -e OTEL_SERVICE_NAME="my-service" \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.us.signoz.cloud:443" \
+  -e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<key>" \
+  -e OTEL_METRICS_EXPORTER="otlp" \
+  -e OTEL_METRIC_EXPORT_INTERVAL="60000" \
+  -e OTEL_TRACES_EXPORTER="none" \
+  -e OTEL_LOGS_EXPORTER="none" \
+  my-java-app
 ```
 
 </TabItem>
 </Tabs>
 
-### Usage
+<Admonition type="info">
+The Java agent automatically generates HTTP metrics (`http.server.request.duration` and `http.client.request.duration`) for instrumented web frameworks like Spring Boot, JAX-RS, and Servlet containers. See the <a href="https://opentelemetry.io/docs/specs/semconv/http/http-metrics/" target="_blank" rel="noopener noreferrer nofollow">HTTP metrics semantic conventions</a> for details.
+</Admonition>
 
-```java:src/main/java/com/example/JvmMetricsExample.java
-package com.example;
+## Validate
 
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.instrumentation.runtimemetrics.java8.RuntimeMetrics;
+Once your application is running with the Java agent:
 
-public class JvmMetricsExample {
+1. Trigger some application activity to generate metrics.
+2. In SigNoz, go to **Metrics** > **Metrics Explorer**.
+3. Search for your custom metric (e.g., `orders.processed`).
+4. JVM metrics like `jvm.memory.used` and `jvm.cpu.time` are collected automatically by the agent.
 
-    public static void main(String[] args) {
-        // Initialize OpenTelemetry (uses env vars from Step 1)
-        OpenTelemetry openTelemetry = OtelConfig.initOpenTelemetry();
-
-        // Start JVM runtime metrics collection
-        RuntimeMetrics runtimeMetrics = RuntimeMetrics.builder(openTelemetry)
-                .build();
-
-        System.out.println("JVM runtime metrics collection started...");
-
-        // Your application code here
-        // The metrics will be automatically collected and exported
-
-        // Register shutdown hook for cleanup
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            runtimeMetrics.close();
-            OtelConfig.shutdown();
-        }));
-
-        // Keep application running
-        try {
-            Thread.currentThread().join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-}
-```
-
-You can use the pre-configured [JVM Metrics Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/jvm-metrics/) to visualize these metrics.
+<Admonition type="info">
+JVM runtime metrics (memory, GC, threads, CPU) are collected automatically by the agent. See [JVM Runtime Metrics](#jvm-runtime-metrics) for the full list.
+</Admonition>
 
 <details>
 <ToggleHeading>
-### Exported Metrics
+
+## JVM Runtime Metrics
+
 </ToggleHeading>
 
-The `RuntimeMetrics` library automatically exports the following JVM runtime metrics:
+The Java agent automatically collects JVM runtime metrics. No additional configuration is needed.
+
+### Exported Metrics
 
 **Memory Metrics:**
 - `jvm.memory.used` - Current memory usage by memory pool
@@ -479,7 +297,7 @@ The `RuntimeMetrics` library automatically exports the following JVM runtime met
 - `jvm.thread.count` - Number of executing threads
 
 **Class Loading Metrics:**
-- `jvm.class.loaded` - Number of classes currently loaded
+- `jvm.class.loaded` - Number of classes loaded since JVM start
 - `jvm.class.unloaded` - Total number of classes unloaded
 - `jvm.class.count` - Number of classes currently loaded
 
@@ -489,202 +307,170 @@ The `RuntimeMetrics` library automatically exports the following JVM runtime met
 - `jvm.cpu.recent_utilization` - Recent CPU utilization
 
 <Admonition type="info">
-Metric names and types follow the OpenTelemetry semantic conventions for JVM runtime metrics. For the complete specification, see the [JVM runtime semantic conventions](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/).
+Use the pre-configured [JVM Metrics Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/jvm-metrics/) to visualize these metrics.
 </Admonition>
 
 </details>
 
-</TabItem>
-</Tabs>
-
-## Validate
-
-Once you have configured your application to start sending metrics to SigNoz, you can start visualizing the metrics in the [metrics explorer](https://signoz.io/docs/metrics-management/metrics-explorer/).
-
 <details>
 <ToggleHeading>
-## Custom Instrumentation
+
+## Custom Metrics Examples
+
 </ToggleHeading>
 
-Create custom metrics to track business logic with all metric types: Counter, UpDownCounter, Histogram, and Gauge.
+OpenTelemetry provides four metric instrument types. Each example shows how to create and use the instrument.
 
-### Metric Types
+### Counter
 
-- **Counter**: A value that only goes up (e.g., total requests, orders processed)
-- **UpDownCounter**: A value that can go up or down (e.g., queue size, active connections)
-- **Histogram**: A distribution of values (e.g., request duration, response size)
-- **Gauge**: A current point-in-time value (e.g., temperature, current memory usage)
+A value that only increases (e.g., total requests, orders processed).
 
-### Usage
-
-```java:src/main/java/com/example/CustomMetricsExample.java
-package com.example;
-
-import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.DoubleGauge;
-import io.opentelemetry.api.metrics.DoubleHistogram;
+```java
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
+
+Meter meter = GlobalOpenTelemetry.getMeter("my-service");
+
+LongCounter requestCounter = meter
+        .counterBuilder("http.requests.total")
+        .setDescription("Total number of HTTP requests")
+        .build();
+
+// Increment the counter
+requestCounter.add(1);
+```
+
+### UpDownCounter
+
+A value that can increase or decrease (e.g., queue size, active connections).
+
+```java
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.Meter;
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
+Meter meter = GlobalOpenTelemetry.getMeter("my-service");
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.util.Random;
+LongUpDownCounter activeRequests = meter
+        .upDownCounterBuilder("http.requests.active")
+        .setDescription("Number of active requests")
+        .build();
 
-public class CustomMetricsExample {
+// Increment when request starts
+activeRequests.add(1);
 
-    public static void main(String[] args) throws IOException {
-        // Initialize OpenTelemetry (uses env vars from Step 1)
-        OpenTelemetry openTelemetry = OtelConfig.initOpenTelemetry();
-
-        // Get a meter from the provider
-        Meter meter = openTelemetry.getMeter("com.example.custom-metrics");
-
-        // Counter: Total request count (monotonically increasing)
-        LongCounter requestCounter = meter
-                .counterBuilder("http.requests.total")
-                .setDescription("Total number of HTTP requests")
-                .setUnit("{request}")
-                .build();
-
-        // UpDownCounter: Active requests (can increase or decrease)
-        LongUpDownCounter activeRequests = meter
-                .upDownCounterBuilder("http.requests.active")
-                .setDescription("Number of requests currently being processed")
-                .setUnit("{request}")
-                .build();
-
-        // Histogram: Request duration distribution
-        DoubleHistogram requestDuration = meter
-                .histogramBuilder("http.request.duration")
-                .setDescription("HTTP request duration")
-                .setUnit("ms")
-                .build();
-
-        // Gauge: Current temperature or any point-in-time value
-        DoubleGauge temperatureGauge = meter
-                .gaugeBuilder("system.temperature")
-                .setDescription("Current system temperature")
-                .setUnit("Cel")
-                .build();
-
-        Random random = new Random();
-
-        // Create HTTP server
-        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-
-        server.createContext("/process", new HttpHandler() {
-            @Override
-            public void handle(HttpExchange exchange) throws IOException {
-                long startTime = System.currentTimeMillis();
-
-                // Track active requests (UpDownCounter)
-                activeRequests.add(1);
-
-                try {
-                    // Simulate processing
-                    Thread.sleep(random.nextInt(200) + 50);
-
-                    // Send response
-                    String response = "Processed!";
-                    exchange.sendResponseHeaders(200, response.length());
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(response.getBytes());
-                    }
-
-                    // Record request count (Counter)
-                    requestCounter.add(1, Attributes.of(
-                            AttributeKey.stringKey("method"), exchange.getRequestMethod(),
-                            AttributeKey.stringKey("route"), "/process",
-                            AttributeKey.longKey("status"), 200L
-                    ));
-
-                    // Record request duration (Histogram)
-                    double duration = System.currentTimeMillis() - startTime;
-                    requestDuration.record(duration, Attributes.of(
-                            AttributeKey.stringKey("route"), "/process"
-                    ));
-
-                    // Update temperature gauge (Gauge)
-                    temperatureGauge.set(20.0 + random.nextDouble() * 10);
-
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    exchange.sendResponseHeaders(500, 0);
-                } finally {
-                    // Decrement active requests
-                    activeRequests.add(-1);
-                }
-            }
-        });
-
-        server.setExecutor(null);
-        server.start();
-        System.out.println("Server listening on port 8080...");
-    }
-}
+// Decrement when request ends
+activeRequests.add(-1);
 ```
 
-### Exported Metrics
+### Histogram
 
-The custom instrumentation example above exports the following metrics:
+A distribution of values (e.g., request duration, response size).
 
-- `http.requests.total` (Counter) - Total count of HTTP requests with attributes for method, route, and status code
-- `http.requests.active` (UpDownCounter) - Current number of requests being processed
-- `http.request.duration` (Histogram) - Distribution of HTTP request durations in milliseconds
-- `system.temperature` (Gauge) - Current system temperature reading
+```java
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.Meter;
 
-You can create additional metrics based on your application's needs by using the meter to create counters, histograms, up/down counters, and gauges to track business metrics, performance indicators, or any other relevant data.
+Meter meter = GlobalOpenTelemetry.getMeter("my-service");
+
+DoubleHistogram requestDuration = meter
+        .histogramBuilder("http.request.duration")
+        .setDescription("HTTP request duration")
+        .setUnit("ms")
+        .build();
+
+// Record a duration value
+long startTime = System.currentTimeMillis();
+// ... process request ...
+requestDuration.record(System.currentTimeMillis() - startTime);
+```
+
+### Gauge
+
+A point-in-time value via callback (e.g., temperature, memory usage).
+
+```java
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.ObservableDoubleGauge;
+
+Meter meter = GlobalOpenTelemetry.getMeter("my-service");
+
+ObservableDoubleGauge memoryGauge = meter
+        .gaugeBuilder("app.memory.usage")
+        .setDescription("Current memory usage")
+        .setUnit("By")
+        .buildWithCallback(measurement -> {
+            Runtime runtime = Runtime.getRuntime();
+            measurement.record(runtime.totalMemory() - runtime.freeMemory());
+        });
+```
 
 </details>
 
 <details>
 <ToggleHeading>
+
 ## Troubleshooting
+
 </ToggleHeading>
 
 ### Metrics not appearing?
 
-1. **Check Environment Variables**: Ensure `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` is set correctly:
-    - For HTTP (used in this guide): `https://ingest.<region>.signoz.cloud:443/v1/metrics`
-    - For gRPC: `https://ingest.<region>.signoz.cloud:443`
+**Check environment variables:**
+```bash
+echo $OTEL_EXPORTER_OTLP_ENDPOINT
+echo $OTEL_METRICS_EXPORTER
+```
 
-2. **Check Exporter Protocol**: This guide uses `OtlpHttpMetricExporter`. If you need gRPC, use `OtlpGrpcMetricExporter` instead and add the `opentelemetry-exporter-otlp` dependency.
+**Enable debug logging:**
+```bash
+OTEL_LOG_LEVEL=debug java -javaagent:./opentelemetry-javaagent.jar -jar app.jar
+```
 
-3. **Check Console Errors**: The OpenTelemetry SDK logs errors to the console. Check your application logs for any connection refused or authentication errors.
+**Verify agent is attached:**
+Look for this log line on startup:
+```
+[otel.javaagent] INFO io.opentelemetry.javaagent.tooling.VersionLogger - opentelemetry-javaagent - version: X.X.X
+```
 
-4. **Export Interval**: By default, metrics are exported every 60 seconds. Wait at least one minute after starting your application to see metrics.
+### GlobalOpenTelemetry.getMeter() returns no-op?
+
+Make sure the Java agent is attached. Without the agent, `GlobalOpenTelemetry` returns a no-op implementation.
+
+```bash
+# Correct - agent flag before -jar
+java -javaagent:./agent.jar -jar app.jar
+
+# Wrong - agent flag after -jar is ignored
+java -jar app.jar -javaagent:./agent.jar
+```
+
+### Metrics delayed or not updating?
+
+`OTEL_METRIC_EXPORT_INTERVAL` controls how often metrics are exported in milliseconds. The default is 60000 (60 seconds), so metrics may take up to a minute to appear.
+
+To reduce the interval for testing:
+
+```bash
+export OTEL_METRIC_EXPORT_INTERVAL=10000  # 10 seconds
+```
 
 ### Authentication errors
 
-If you see errors like "Unauthorized" or "403 Forbidden":
-- Verify your ingestion key is correct in `OTEL_EXPORTER_OTLP_METRICS_HEADERS`
+If you see "Unauthorized" or "403 Forbidden":
+- Verify your ingestion key is correct in `OTEL_EXPORTER_OTLP_HEADERS`
 - Ensure the header format is exactly: `signoz-ingestion-key=<your-key>` (no extra spaces)
-- Check that your ingestion key is active in the SigNoz Cloud dashboard
-
-### "Connection Refused" errors
-
-- If running locally and sending to SigNoz Cloud, check your internet connection and firewall.
-- If sending to a self-hosted collector, ensure the collector is running and listening on port 4318 (HTTP) or 4317 (gRPC).
-
-### ClassNotFoundException or NoClassDefFoundError
-
-- Ensure all OpenTelemetry dependencies are correctly added to your project
-- Verify that the BOM version matches across all dependencies
-- Run `mvn dependency:tree` or `gradle dependencies` to check for version conflicts
 
 </details>
 
 <details>
 <ToggleHeading>
+
 ## Setup OpenTelemetry Collector (Optional)
+
 </ToggleHeading>
 
 ### What is the OpenTelemetry Collector?
