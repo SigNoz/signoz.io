@@ -5,7 +5,6 @@ import {
   allDocs,
   allComparisons,
   allGuides,
-  allOpentelemetries,
 } from '../.contentlayer/generated/index.mjs'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 
@@ -30,7 +29,6 @@ const searchIndexes = () => {
     ...allBlogs,
     ...allComparisons,
     ...allGuides,
-    ...allOpentelemetries,
     ...allDocs,
   ])
   console.log('Search Indexes generated...')

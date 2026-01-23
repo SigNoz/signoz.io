@@ -25,6 +25,8 @@ import {
   SiFlydotio,
   SiEnvoyproxy,
   SiGo,
+  SiNodedotjs,
+  SiPython,
 } from 'react-icons/si'
 import { FaJava, FaServer, FaDatabase, FaCloud } from 'react-icons/fa'
 import IconCardGrid from '../Card/IconCardGrid'
@@ -526,6 +528,18 @@ export default function MetricsQuickStartOverview({
             href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java',
             icon: <FaJava className="h-7 w-7 text-red-600" />,
             clickName: 'Java Metrics Link',
+          },
+          {
+            name: 'Node.js',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
+            icon: <SiNodedotjs className="h-7 w-7 text-green-500" />,
+            clickName: 'Node.js Metrics Link',
+          },
+          {
+            name: 'Python',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-python',
+            icon: <SiPython className="h-7 w-7 text-blue-500" />,
+            clickName: 'Python Metrics Link',
           },
         ]}
         sectionName="Application Metrics"

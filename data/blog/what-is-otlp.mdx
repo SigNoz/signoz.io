@@ -5,6 +5,7 @@ date: 2026-01-05
 tags: [Observability, OpenTelemetry]
 authors: [dhruv_ahuja]
 description: "A comprehensive guide to OTLP - the vendor-neutral protocol unifying traces, metrics, and logs transmission. Learn about its goals, architecture, and how it helps solve observability fragmentation."
+image: /img/blog/2026/01/what-is-otlp-image.webp
 keywords: [otlp, opentelemetry]
 ---
 
@@ -36,7 +37,7 @@ In the observability landscape, **data is sacred**, and data consistency is an e
 
 OpenTelemetry built OTLP to deliver on these requirements while being efficient and highly performant with data transmission over the wire. It leverages the Protobuf message protocol to minimize the payload size and build a robust message schema, and smartly organizes and batches data to reduce network round trips. Further, it uses a request-response model that guarantees message delivery and enables servers to signal when under load, preventing data loss.
 
-<Figure src="/img/blog/2026/01/what-is-otlp-image%201.webp" alt="OTLP maintains performance and reliability under load with smart data transmission principles." caption="OTLP maintains performance and reliability under load with smart data transmission principles." />
+<Figure src="/img/blog/2026/01/what-is-otlp-flow.webp" alt="OTLP maintains performance and reliability under load with smart data transmission principles." caption="OTLP maintains performance and reliability under load with smart data transmission principles." />
 
 These design decisions enable OTLP to be performant and reliable across observability pipelines of all sizes, and to remain flexible to change as the observability landscape evolves.
 
@@ -70,7 +71,7 @@ OTLP servers can return one of three response types, with each response affectin
 - **Partial Success:** A critical feature of OTLP, where servers ingest valid data while **rejecting only the specific malformed items**. The response includes <a href="https://github.com/open-telemetry/opentelemetry-proto/blob/v1.9.0/opentelemetry/proto/collector/trace/v1/trace_service.proto#L76" rel="noopener noreferrer nofollow" target="_blank">details on the failure</a> so the client knows exactly what went wrong. Since these rejections occur due to deterministic issues (like invalid formatting), the client does not retry such requests, saving CPU and network resources.
 - **Failure:** Indicates that the server failed to process the data. Clients retry requests for transient errors such as network timeout. In case of permanent errors like data validation, the client drops the data to prevent blocking the pipeline with malformed requests.
 
-<Figure src="/img/blog/2026/01/what-is-otlp-image%203.webp" alt="OTLP servers can respond to client requests in three ways: full success- where server accepts entire payload, partial success- subset of data is accepted, rest is deterministically rejected, and failure response- clients retry if transient errors else drop the data on permanent errors (such as validation failure)." caption="Clients process the next batch of data after acknowledgement, or retry on transient failures" />
+<Figure src="/img/blog/2026/01/what-is-otlp-consistency.webp" alt="OTLP servers can respond to client requests in three ways: full success- where server accepts entire payload, partial success- subset of data is accepted, rest is deterministically rejected, and failure response- clients retry if transient errors else drop the data on permanent errors (such as validation failure)." caption="Clients process the next batch of data after acknowledgement, or retry on transient failures" />
 
 ### Smart Batching and Data Organization
 
@@ -92,7 +93,7 @@ High-throughput OTLP clients can easily overwhelm the servers consuming their da
 
 When a server is unable to deal with incoming data, rather than crashing silently, it responds with a specific signal (eg., HTTP 429 `Too Many Requests` response or `RESOURCE_EXHAUSTED` in gRPC). Crucially, it also includes a `Retry-After` header for HTTP, status codes and metadata for gRPC, that tells the client exactly how many seconds it should wait before trying again. This simple mechanism helps avoid the “thundering herd” problem, where clients continue retrying requests without delay, overwhelming the server completely.
 
-<Figure src="/img/blog/2026/01/what-is-otlp-image%204.webp" alt="OTLP nodes use backpressure signalling to avoid system failures" caption="OTLP nodes use backpressure signalling to avoid system failures" />
+<Figure src="/img/blog/2026/01/what-is-otlp-backpressure.webp" alt="OTLP nodes use backpressure signalling to avoid system failures" caption="OTLP nodes use backpressure signalling to avoid system failures" />
 
 Finally, OTLP supports `gzip` compression to support high-demand scenarios. This enables clients to significantly reduce network bandwidth by minimizing payload size, in exchange for some CPU cost (for compressing-decompressing the messages).
 

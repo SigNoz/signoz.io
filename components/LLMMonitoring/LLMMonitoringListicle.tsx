@@ -91,6 +91,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'DeepSeek Monitoring',
   },
   {
+    name: 'Google ADK',
+    href: '/docs/google-adk-observability',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
+        alt="Google ADK Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Google ADK Monitoring',
+  },
+  {
     name: 'Google Gemini',
     href: '/docs/google-gemini-monitoring',
     icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
@@ -115,6 +127,18 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/langchain-observability',
     icon: <SiLangchain className="h-7 w-7 text-white" />,
     clickName: 'LangChain Monitoring',
+  },
+  {
+    name: 'Langtrace',
+    href: '/docs/langtrace',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/langtrace-logo.webp"
+        alt="Langtrace Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Langtrace',
   },
   {
     name: 'LiteLLM',
@@ -157,6 +181,18 @@ const LLMMonitoringData: IconCardData[] = [
     clickName: 'OpenAI Monitoring',
   },
   {
+    name: 'OpenLIT',
+    href: '/docs/openlit',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/openlit-logo.webp"
+        alt="OpenLIT Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'OpenLIT',
+  },
+  {
     name: 'Pipecat',
     href: '/docs/pipecat-monitoring',
     icon: (
@@ -191,6 +227,18 @@ const LLMMonitoringData: IconCardData[] = [
     href: '/docs/temporal-observability',
     icon: <SiTemporal className="h-7 w-7 text-purple-600" />,
     clickName: 'Temporal Monitoring',
+  },
+  {
+    name: 'Traceloop (OpenLLMetry)',
+    href: '/docs/traceloop',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/traceloop-logo.webp"
+        alt="Traceloop Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Traceloop (OpenLLMetry)',
   },
   {
     name: 'Vercel AI SDK',

@@ -220,6 +220,18 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'GCP Compute Engine Dashboard Template',
   },
   {
+    name: 'Google ADK',
+    href: '/docs/dashboards/dashboard-templates/google-adk-dashboard',
+    icon: (
+      <img
+        src="/svgs/icons/LLMMonitoring/google-adk-logo.webp"
+        alt="Google ADK Icon"
+        className="h-7 w-7"
+      />
+    ),
+    clickName: 'Google ADK Dashboard Template',
+  },
+  {
     name: 'Google Gemini',
     href: 'https://github.com/SigNoz/dashboards/tree/main/google-gemini',
     icon: <SiGooglegemini className="h-7 w-7 text-blue-500" />,
