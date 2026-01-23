@@ -1,0 +1,554 @@
+---
+date: 2026-01-18
+title: Collect Host Metrics with OpenTelemetry
+id: opentelemetry-hostmetrics
+description: Collect host metrics like CPU, memory, disk, and network from your servers using the OpenTelemetry hostmetrics receiver and send them to SigNoz.
+doc_type: howto
+hide_table_of_contents: true
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+Host metrics are fundamental performance indicators collected directly from a system's operating system. These metrics provide granular visibility into the physical or virtual server's resource utilization and health status.
+
+The OpenTelemetry hostmetrics receiver collects metrics on CPU, memory, disk, network, paging, and system performance.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- An instance of SigNoz (either [Cloud](https://signoz.io/teams/) or [Self-Hosted](https://signoz.io/docs/install/self-host/))
+
+<Tabs entityName="platform">
+
+<TabItem value="vm" label="Virtual Machine" default>
+
+<KeyPointCallout title="What classifies as VM?" defaultCollapsed={true}>
+A VM is a virtual computer that runs on physical hardware. This includes:
+- **Cloud VMs**: AWS EC2, Google Compute Engine, Azure VMs, DigitalOcean Droplets
+- **On-premise VMs**: VMware, VirtualBox, Hyper-V, KVM
+- **Bare metal servers**: Physical servers running Linux/Unix directly
+
+Use this section if you're deploying your application directly on a server or VM without containerization.
+
+</KeyPointCallout>
+
+## Step 1: Install OpenTelemetry Collector
+
+Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install OpenTelemetry Collector.
+
+## Step 2: Configure the Collector
+
+### Configure the Hostmetrics Receiver
+
+Open your OpenTelemetry Collector configuration file which is typically located at `/etc/otelcol-contrib/config.yaml`.
+
+Add the `hostmetrics` receiver which scrapes metrics from the host system, add it to the `receivers` section:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      nfs: {} # Linux only
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+      system: {}
+```
+
+### Configure the Processors
+
+Add `resourcedetection` processor to the `processors` section to enrich metrics with resource attributes:
+
+```yaml:config.yaml {3-4}
+processors:
+  batch:
+  resourcedetection:
+    detectors: [env, system]
+```
+
+<Admonition type="info">
+  The `resourcedetection` processor automatically adds resource attributes like hostname and OS information to your metrics.
+</Admonition>
+
+### Configure the Exporters
+
+Add `otlp` exporter with SigNoz endpoint and ingestion key to the `exporters` section:
+
+```yaml:config.yaml {2-7}
+exporters:
+  otlp:
+    endpoint: 'ingest.<region>.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '<your-ingestion-key>'
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+### Configure the Service
+
+Enable `hostmetrics` receiver, `resourcedetection` and `batch` processors in the `service` section:
+
+```yaml:config.yaml {4-6}
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+<details>
+<summary>View Complete Configuration</summary>
+
+Here is how the complete `config.yaml` file should look:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      nfs: {} # Linux only
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+      system: {}
+
+processors:
+  batch:
+  resourcedetection:
+    detectors: [env, system]
+
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<your-ingestion-key>"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+</details>
+
+## Step 3: Run the Collector
+
+After saving the configuration, restart the collector service to apply changes.
+
+<Tabs>
+<TabItem value="systemd" label="Systemd" default>
+
+If you are using systemd to manage the collector service:
+
+```bash
+sudo systemctl restart otelcol-contrib
+sudo systemctl status otelcol-contrib
+```
+
+</TabItem>
+<TabItem value="manual" label="Manual Binary">
+
+If you are running the binary manually (e.g., for testing):
+
+```bash
+./otelcol-contrib --config config.yaml
+```
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="docker" label="Docker">
+
+<KeyPointCallout title="Want to monitor Docker container metrics?" defaultCollapsed={true}>
+  This section explains how to run the collector as a Docker container to collect **Host Metrics** (like CPU/Memory of the underlying Node).
+
+  If you want to monitor the performance of your Docker containers themselves (e.g. CPU/Memory usage per container), please refer to the [Docker Container Metrics](https://signoz.io/docs/metrics-management/docker-container-metrics/) documentation.
+</KeyPointCallout>
+
+## Step 1: Install OpenTelemetry Collector
+
+Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/opentelemetry-collection-agents/docker/install/) to install OpenTelemetry Collector.
+
+## Step 2: Configure the Collector
+
+To collect host metrics from a Docker container, you must bind mount the host filesystem.
+
+### Configure the Hostmetrics Receiver
+
+Create a `config.yaml` file and add the following configuration. Note the `root_path` setting which is required for Docker.
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    root_path: /hostfs  # Required: points to the host filesystem mounted inside the container
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+        mute_process_user_error: true
+      processes: {}
+      system: {}
+```
+
+### Configure the Processors
+
+Add resource detection processor to enrich metrics:
+
+```yaml:config.yaml {2-3}
+processors:
+  resourcedetection:
+    detectors: [env, system]
+```
+
+### Configure the Exporters
+
+Add the exporter configuration:
+
+```yaml:config.yaml {2-7}
+exporters:
+  otlp:
+    endpoint: 'ingest.<region>.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '<your-ingestion-key>'
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+### Configure the Service
+
+Set up the pipeline:
+
+```yaml:config.yaml {4-6}
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+<Admonition type="note">
+  The `mute_process_*_error` settings suppress common errors when the collector can't access certain process information due to permissions. This is normal in containerized or restricted environments.
+</Admonition>
+
+<details>
+<summary>View Complete Configuration</summary>
+
+Here is how the complete `config.yaml` file should look:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    root_path: /hostfs
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+        mute_process_user_error: true
+      processes: {}
+      system: {}
+
+processors:
+  batch:
+  resourcedetection:
+    detectors: [env, system]
+
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<your-ingestion-key>"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+</details>
+
+## Step 3: Run the Collector
+
+Run the collector container with the `--volume` flag to mount the host root directory to `/hostfs`.
+
+```bash
+docker run -d \
+  --name otelcol-hostmetrics \
+  --volume /:/hostfs:ro \
+  --volume $(pwd)/config.yaml:/etc/otelcol-contrib/config.yaml \
+  otel/opentelemetry-collector-contrib:latest \
+  --config=/etc/otelcol-contrib/config.yaml
+```
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+## Step 1: Install OpenTelemetry Collector
+
+Follow the [OpenTelemetry Collector Installation Guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install OpenTelemetry Collector.
+
+## Step 2: Configure the Collector
+
+1.  Locate your `config.yaml` file.
+    - **Default:** `C:\Program Files\OpenTelemetry Collector\config.yaml`
+
+### Configure the Hostmetrics Receiver
+
+Add the following to your `config.yaml`:
+
+```yaml:config.yaml
+receivers:
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+        mute_process_user_error: true
+      system: {}
+```
+
+### Configure the Processors
+
+Add the resource detection processor:
+
+```yaml:config.yaml {2-3}
+processors:
+  resourcedetection:
+    detectors: [env, system]
+```
+
+### Configure the Exporters
+
+Configure the OTLP exporter:
+
+```yaml:config.yaml {2-7}
+exporters:
+  otlp:
+    endpoint: 'ingest.<region>.signoz.cloud:443'
+    tls:
+      insecure: false
+    headers:
+      'signoz-ingestion-key': '<your-ingestion-key>'
+```
+
+Replace the following:
+
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
+- `<your-ingestion-key>`: Your [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+### Configure the Service
+
+Enable the pipeline:
+
+```yaml:config.yaml {4-6}
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+## Step 3: Run the Collector
+
+After saving the configuration, run the collector service to apply changes.
+ 
+ ```powershell
+ .\otelcol-contrib.exe --config config.yaml
+ ```
+
+</TabItem>
+</Tabs>
+
+<details>
+<ToggleHeading>
+
+## Advanced Configuration
+
+</ToggleHeading>
+
+### Configure Different Frequencies
+
+You can configure different collection intervals for different metrics by defining multiple `hostmetrics` receivers. This is useful if you want frequently changing metrics (like CPU/Memory) to be collected more often than stable ones (like Filesystem).
+
+```yaml:config.yaml
+receivers:
+  # Receiver for high-frequency metrics (e.g., every 10s)
+  hostmetrics/fast:
+    collection_interval: 10s
+    scrapers:
+      cpu: {}
+      memory: {}
+
+  # Receiver for low-frequency metrics (e.g., every 1m)
+  hostmetrics/slow:
+    collection_interval: 60s
+    scrapers:
+      filesystem: {}
+      disk: {}
+      network: {}
+
+service:
+  pipelines:
+    metrics:
+      receivers: [hostmetrics/fast, hostmetrics/slow]
+      # ... other processors and exporters
+```
+
+</details>
+
+## Verification
+
+Once configured, verify that metrics are flowing to SigNoz.
+
+1.  Go to the **Infrastructure Monitoring** section in SigNoz (Hosts tab).
+2.  You should see your host listed with metrics like CPU and Memory usage.
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-setup-output.webp"
+  alt="List of Hosts in SigNoz Infrastructure Tab"
+  caption="List of Hosts in SigNoz Infrastructure Tab"
+/>
+
+<Figure
+  src="/img/docs/infrastructure-monitoring/host-setup-output-detailed.webp"
+  alt="Detailed View of a Host"
+  caption="Detailed View of a Host"
+/>
+
+<details>
+<ToggleHeading>
+
+## Troubleshooting
+
+</ToggleHeading>
+
+### No metrics appearing in SigNoz
+
+**Symptoms:** Host not visible in Infrastructure Monitoring > Hosts tab.
+
+**Resolution:**
+
+1. Check collector logs for errors.
+
+   **Linux (Systemd):**
+
+   ```bash
+   journalctl -u otelcol-contrib -f
+   ```
+
+   **Docker:**
+
+   ```bash
+   docker logs otelcol-hostmetrics -f
+   ```
+
+   **Windows (PowerShell):**
+
+   ```powershell
+   Get-Content "C:\Program Files\OpenTelemetry Collector\otelcol.log" -Wait
+   ```
+
+2. Verify the hostmetrics receiver is enabled in your config.
+3. Ensure the collector can reach the SigNoz endpoint (port 443 for Cloud, 4317 for Self-Hosted).
+
+### Connection Refused
+
+**Symptoms:** Logs show connection refused errors.
+
+**Resolution:**
+
+- Ensure the OTLP endpoint is reachable.
+- Verify the correct port is being used.
+- Check firewall settings.
+
+### Invalid Key (Cloud)
+
+**Symptoms:** HTTP 401 Unauthorized errors in logs.
+
+**Resolution:**
+
+- Double-check your ingestion key in `config.yaml`.
+- Ensure it matches the key in SigNoz (Settings > Ingestion Settings).
+
+</details>
+
+## Next Steps
+
+- [Visualize Host Metrics using Dashboard Templates](https://signoz.io/docs/userguide/dashboard-templates/)
+- [Set up Alerts for Host Metrics](https://signoz.io/docs/userguide/alerts-management/)
+- [Learn more about Infrastructure Monitoring](https://signoz.io/docs/userguide/infrastructure-monitoring/)
+
+## Get Help
+
+<GetHelp />

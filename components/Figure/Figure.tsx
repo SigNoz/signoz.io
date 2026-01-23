@@ -32,13 +32,21 @@ export default function Figure({
         <img src={src} alt={alt} className={className} />
         <figcaption className={captionClassName}>
           <i>
-            {caption}{' '}
-            {link && sourceText && (
+            {link && !sourceText ? (
+              <a href={link} target="_blank" rel="noopener noreferrer">
+                {caption}
+              </a>
+            ) : (
               <>
-                Source:{' '}
-                <a href={link} target="_blank" rel="noopener noreferrer">
-                  {sourceText}
-                </a>
+                {caption}{' '}
+                {link && sourceText && (
+                  <>
+                    Source:{' '}
+                    <a href={link} target="_blank" rel="noopener noreferrer">
+                      {sourceText}
+                    </a>
+                  </>
+                )}
               </>
             )}
           </i>

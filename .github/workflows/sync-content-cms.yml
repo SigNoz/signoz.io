@@ -23,7 +23,7 @@ on:
 
 env:
   # Configurable: Array of folders to sync to CMS
-  SYNC_FOLDERS: '["faqs", "case-study"]'
+  SYNC_FOLDERS: '["faqs", "case-study", "opentelemetry"]'
   
   # Strapi Configuration
   CMS_API_URL: ${{ secrets.CMS_API_URL }}
@@ -46,9 +46,6 @@ jobs:
     name: Detect Changed Files
     runs-on: ubuntu-latest
     outputs:
-      changed_files: ${{ steps.changed-content.outputs.all_changed_files }}
-      deleted_files: ${{ steps.changed-content.outputs.deleted_files }}
-      changed_assets: ${{ steps.changed-assets.outputs.all_changed_files }}
       any_changed: ${{ steps.changed-content.outputs.any_changed }}
       any_deleted: ${{ steps.changed-content.outputs.any_deleted }}
       any_assets_changed: ${{ steps.changed-assets.outputs.any_changed }}
@@ -70,6 +67,21 @@ jobs:
             data/**/*.md
           json: true
           escape_json: false
+          write_output_files: true
+
+      - name: Rename Content Output Files
+        run: |
+          if [ -f .github/outputs/all_changed_files.json ]; then
+            mv .github/outputs/all_changed_files.json .github/outputs/content_changed_files.json
+          else
+            echo "[]" > .github/outputs/content_changed_files.json
+          fi
+          
+          if [ -f .github/outputs/deleted_files.json ]; then
+            mv .github/outputs/deleted_files.json .github/outputs/content_deleted_files.json
+          else
+            echo "[]" > .github/outputs/content_deleted_files.json
+          fi
 
       - name: Get Changed Asset Files
         id: changed-assets
@@ -79,6 +91,15 @@ jobs:
             data-assets/**
           json: true
           escape_json: false
+          write_output_files: true
+
+      - name: Rename Asset Output Files
+        run: |
+          if [ -f .github/outputs/all_changed_files.json ]; then
+            mv .github/outputs/all_changed_files.json .github/outputs/assets_changed_files.json
+          else
+            echo "[]" > .github/outputs/assets_changed_files.json
+          fi
 
       - name: Check if Sync is Required
         id: check-sync
@@ -120,23 +141,30 @@ jobs:
             echo "📦 Deployment Status: draft"
           fi
 
-      - name: Display Changed Files
+      - name: Upload Changed Files Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: changed-files-json
+          path: .github/outputs/*.json
+          retention-days: 1
+
+      - name: Display Changed Files Summary
         if: steps.changed-content.outputs.any_changed == 'true'
         run: |
-          echo "📝 Changed files detected:"
-          echo '${{ steps.changed-content.outputs.all_changed_files }}' | jq -r '.[]'
+          echo "📝 Changed content files detected."
+          echo "Count: $(jq '. | length' .github/outputs/content_changed_files.json)"
 
-      - name: Display Deleted Files
+      - name: Display Deleted Files Summary
         if: steps.changed-content.outputs.any_deleted == 'true'
         run: |
-          echo "🗑️ Deleted files detected:"
-          echo '${{ steps.changed-content.outputs.deleted_files }}' | jq -r '.[]'
+          echo "🗑️ Deleted content files detected."
+          echo "Count: $(jq '. | length' .github/outputs/content_deleted_files.json)"
           
-      - name: Display Changed Assets
+      - name: Display Changed Assets Summary
         if: steps.changed-assets.outputs.any_changed == 'true'
         run: |
-          echo "🖼️ Changed assets detected:"
-          echo '${{ steps.changed-assets.outputs.all_changed_files }}' | jq -r '.[]'
+          echo "🖼️ Changed assets detected."
+          echo "Count: $(jq '. | length' .github/outputs/assets_changed_files.json)"
 
   sync-to-cms:
     name: Sync Content to CMS
@@ -155,6 +183,12 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+
+      - name: Download Changed Files Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: changed-files-json
+          path: .github/outputs
 
       - name: Install Dependencies
         run: |
@@ -199,9 +233,9 @@ jobs:
       - name: Sync Content to Strapi
         id: sync
         env:
-          CHANGED_FILES: ${{ needs.detect-changes.outputs.changed_files }}
-          DELETED_FILES: ${{ needs.detect-changes.outputs.deleted_files }}
-          CHANGED_ASSETS: ${{ needs.detect-changes.outputs.changed_assets }}
+          CHANGED_FILES_PATH: .github/outputs/content_changed_files.json
+          DELETED_FILES_PATH: .github/outputs/content_deleted_files.json
+          CHANGED_ASSETS_PATH: .github/outputs/assets_changed_files.json
           DEPLOYMENT_STATUS: ${{ needs.detect-changes.outputs.deployment_status }}
         run: node scripts/sync-content-to-strapi.js
 
