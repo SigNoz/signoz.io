@@ -246,13 +246,17 @@ const DashboardTemplatesData: IconCardData[] = [
   {
     name: 'Grok',
     href: '/docs/dashboards/dashboard-templates/grok-dashboard',
-    icon: <img src="/svgs/icons/LLMMonitoring/grok-logo.svg" alt="Grok Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/grok-logo.webp" alt="Grok Icon" className="h-7 w-7" />
+    ),
     clickName: 'xAi Grok Dashboard Template',
   },
   {
     name: 'Groq',
     href: '/docs/dashboards/dashboard-templates/groq-dashboard',
-    icon: <img src="/svgs/icons/LLMMonitoring/groq-logo.svg" alt="Groq Icon" className="h-7 w-7" />,
+    icon: (
+      <img src="/svgs/icons/LLMMonitoring/groq-logo.webp" alt="Groq Icon" className="h-7 w-7" />
+    ),
     clickName: 'Groq Dashboard Template',
   },
   {
