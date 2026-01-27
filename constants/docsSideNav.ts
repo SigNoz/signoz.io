@@ -1223,8 +1223,8 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/logs-management/send-logs/choosing-log-collection-method',
-            label: 'Choosing a Collection Method',
+            route: '/docs/logs-management/send-logs/log-export-methods',
+            label: 'Log export methods',
           },
           {
             type: 'doc',
