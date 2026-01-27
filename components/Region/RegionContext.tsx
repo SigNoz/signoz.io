@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { QUERY_PARAMS } from '@/constants/queryParams'
+import { ONBOARDING_SOURCE } from '@/constants/globals'
 
 interface Cluster {
   cloud_provider: string
@@ -38,6 +40,8 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+  const isOnboarding = source === ONBOARDING_SOURCE
 
   useEffect(() => {
     const fetchRegions = async () => {
@@ -80,7 +84,7 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           setCloudRegionState(null)
         }
       }
-    } else if (regions.length > 0) {
+    } else if (regions.length > 0 && !isOnboarding) {
       // Set default region if no param exists and regions are loaded
       const firstRegion = regions[0]
       const firstCluster = firstRegion?.clusters[0]
