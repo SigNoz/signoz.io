@@ -1559,6 +1559,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet',
+                label: '.NET',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
                 label: 'Node.js',
               },
