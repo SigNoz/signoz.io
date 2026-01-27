@@ -74,6 +74,14 @@ import ToggleHeading from './Headings/ToggleHeading'
 import AWSMonitoringListicle from './AWS/AWSMonitoringListicle'
 import AWSOneClickListicle from './AWS/AWSOneClickListicle'
 
+import CardinalityExplosion from './HighCardinalityData/CardinalityExplosion';
+import MemoryGauge from './HighCardinalityData/MemoryGauge';
+import QueryRace from './HighCardinalityData/QueryRace';
+import SamplingAggregation from './HighCardinalityData/SamplingAggregation';
+import UsersAnalogy from './HighCardinalityData/UsersAnalogy';
+import Tooltip from './ui/Tooltip';
+import DatabaseTable from './HighCardinalityData/DatabaseTable';
+
 export const components: MDXComponents = {
   ToggleHeading,
   Image,
@@ -146,4 +154,11 @@ export const components: MDXComponents = {
   CICDMonitoringListicle,
   AWSMonitoringListicle,
   AWSOneClickListicle,
+  CardinalityExplosion,
+  MemoryGauge,
+  QueryRace,
+  SamplingAggregation,
+  UsersAnalogy,
+  Tooltip,
+  DatabaseTable,
 }

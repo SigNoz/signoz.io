@@ -167,7 +167,6 @@ export default async function Page(props: { params: { slug: string[] } }) {
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
-        <PageFeedback />
       </Layout>
     </>
   )

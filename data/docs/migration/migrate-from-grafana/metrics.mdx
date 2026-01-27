@@ -1,7 +1,6 @@
 ---
-date: 2025-11-30
+date: 2026-01-18
 id: migrate-from-grafana-metrics
-
 title: Migrate Metrics from LGTM Stack
 description: Learn how to migrate your metrics from Prometheus/Mimir (LGTM Stack) to SigNoz using OpenTelemetry.
 doc_type: howto
@@ -19,7 +18,7 @@ This guide walks you through migrating metrics from Prometheus, Mimir, or Grafan
 SigNoz supports Prometheus metrics natively, so migration typically involves pointing your existing exporters to the OpenTelemetry Collector or using the Collector to scrape your targets.
 
 <KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
-Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+  Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
 </KeyPointCallout>
 
 ## Prerequisites
@@ -48,11 +47,11 @@ This will give you a list of jobs (e.g., `node_exporter`, `kubernetes-pods`, `my
 
 Group your metrics by how they are collected:
 
-| Source Type | Migration Path |
-|-------------|----------------|
+| Source Type              | Migration Path                             |
+| ------------------------ | ------------------------------------------ | ----------------------------------------------------- |
 | **Prometheus Exporters** | `node_exporter`, `postgres_exporter`, etc. | [Use Prometheus Receiver](#from-prometheus-exporters) |
-| **Application Metrics** | `/metrics` endpoint on your app | [Use Prometheus Receiver](#from-application-metrics) |
-| **Grafana Agent** | Using Grafana Agent for collection | [Migrate to OTel Collector](#from-grafana-agent) |
+| **Application Metrics**  | `/metrics` endpoint on your app            | [Use Prometheus Receiver](#from-application-metrics)  |
+| **Grafana Agent**        | Using Grafana Agent for collection         | [Migrate to OTel Collector](#from-grafana-agent)      |
 
 ## Step 2: Set Up the OpenTelemetry Collector
 
@@ -103,15 +102,15 @@ While the Prometheus Receiver allows you to continue using your existing Prometh
 
 Here are some common Prometheus exporters and their OpenTelemetry equivalents:
 
-| Prometheus Exporter | OpenTelemetry Receiver | Description |
-|---------------------|------------------------|-------------|
-| node_exporter | [hostmetrics](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver) | Collects system metrics (CPU, memory, disk, network) |
-| mysqld_exporter | [mysqld](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mysqlreceiver) | Collects MySQL server metrics |
-| redis_exporter | [redis](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/redisreceiver) | Collects Redis metrics |
-| mongodb_exporter | [mongodb](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mongodbreceiver) | Collects MongoDB metrics |
-| postgres_exporter | [postgresql](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/postgresqlreceiver) | Collects PostgreSQL metrics |
-| kafka_exporter | [kafka](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kafkametricsreceiver) | Collects Kafka metrics |
-| nginx_exporter | [nginx](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver) | Collects NGINX metrics |
+| Prometheus Exporter | OpenTelemetry Receiver                                                                                                | Description                                          |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| node_exporter       | [hostmetrics](https://signoz.io/docs/userguide/hostmetrics/)                                                          | Collects system metrics (CPU, memory, disk, network) |
+| mysqld_exporter     | [mysqld](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mysqlreceiver)          | Collects MySQL server metrics                        |
+| redis_exporter      | [redis](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/redisreceiver)           | Collects Redis metrics                               |
+| mongodb_exporter    | [mongodb](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mongodbreceiver)       | Collects MongoDB metrics                             |
+| postgres_exporter   | [postgresql](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/postgresqlreceiver) | Collects PostgreSQL metrics                          |
+| kafka_exporter      | [kafka](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kafkametricsreceiver)    | Collects Kafka metrics                               |
+| nginx_exporter      | [nginx](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver)           | Collects NGINX metrics                               |
 
 SigNoz supports all the receivers that are listed in the [OpenTelemetry Registry](https://opentelemetry.io/ecosystem/registry/?component=receiver). To configure a new metric receiver, follow these instructions [here](https://signoz.io/docs/userguide/otel-metrics-receivers/#steps).
 
@@ -164,10 +163,15 @@ Compare your SigNoz metrics against your original inventory.
 2. Use the **List View** to browse available metrics.
 3. Click a metric name to see its attributes and values.
 
-<Figure src="/img/docs/migration/metrics-explorer.webp" alt="SigNoz Metrics Explorer showing list of available metrics" caption="SigNoz Metrics Explorer interface" />
+<Figure
+  src="/img/docs/migration/metrics-explorer.webp"
+  alt="SigNoz Metrics Explorer showing list of available metrics"
+  caption="SigNoz Metrics Explorer interface"
+/>
 
 <details>
 <ToggleHeading>
+
 ## Troubleshooting
 </ToggleHeading>
 

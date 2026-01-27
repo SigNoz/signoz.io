@@ -43,24 +43,25 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
       )}
 
       {/* Grid of Icon Cards */}
-      <div className={`grid gap-4 ${gridCols}`}>
+      <ul className={`grid gap-4 ${gridCols} list-none p-0`}>
         {cards.map((card, index) => (
-          <TrackingLink
-            key={index}
-            href={card.href}
-            className="flex flex-col items-center justify-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 text-center no-underline transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
-            clickType="Nav Click"
-            clickName={card.clickName}
-            clickText={card.name}
-            clickLocation={sectionName}
-          >
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
-              {card.icon}
-            </div>
-            <span className="text-sm font-medium text-signoz_vanilla-100">{card.name}</span>
-          </TrackingLink>
+          <li key={index} className="h-full w-full">
+            <TrackingLink
+              href={card.href}
+              className="flex h-full w-full flex-col items-center justify-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 text-center no-underline transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
+              clickType="Nav Click"
+              clickName={card.clickName}
+              clickText={card.name}
+              clickLocation={sectionName}
+            >
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
+                {card.icon}
+              </div>
+              <span className="text-sm font-medium text-signoz_vanilla-100">{card.name}</span>
+            </TrackingLink>
+          </li>
         ))}
-      </div>
+      </ul>
 
       {/* Optional View All Link */}
       {viewAllHref && (

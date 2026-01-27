@@ -573,12 +573,17 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/ruby/',
-          destination: '/docs/instrumentation/ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/ruby-on-rails/',
-          destination: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
           permanent: true,
         },
         {
@@ -635,8 +640,18 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/manual-instrumentation/javascript/nodejs/',
-          destination:
-            '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/nodejs-manual-instrumentation/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          destination: '/docs/instrumentation/javascript/nodejs-manual-instrumentation/',
+          permanent: true,
+        },
+        {
+          source:
+            '/docs/instrumentation/manual-instrumentation/javascript/nodejs-selective-instrumentation/',
+          destination: '/docs/instrumentation/javascript/nodejs-selective-instrumentation/',
           permanent: true,
         },
         {
@@ -1221,6 +1236,21 @@ module.exports = () => {
         {
           source: '/docs/userguide/python-logs-auto-instrumentation/',
           destination: '/docs/logs-management/send-logs/python-logs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/llm-community-integrations/',
+          destination: '/docs/llm-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/hostmetrics/',
+          destination: '/docs/infrastructure-monitoring/hostmetrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/k8s-metrics/',
+          destination: '/docs/infrastructure-monitoring/k8s-metrics/',
           permanent: true,
         },
       ]
