@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import { ChevronDown } from 'lucide-react'
 import { cn } from 'app/lib/utils'
 import { useRegion } from './RegionContext'
+import Link from 'next/link'
 
 interface RegionOption {
   label: string
@@ -43,7 +43,7 @@ export const RegionDropdown = () => {
   const currentValue = region && cloudRegion ? `${region}_${cloudRegion}` : ''
 
   return (
-    <div className="relative w-fit min-w-[180px]">
+    <div className="relative w-fit min-w-[180px] rounded-md border border-signoz_slate-500 p-4">
       <label htmlFor="region-dropdown" className="text-xs uppercase">
         Selected Region
       </label>
@@ -64,6 +64,15 @@ export const RegionDropdown = () => {
           </option>
         ))}
       </select>
+      <div className="mt-2 text-xs">
+        Applies to code snippets on this page (and other Cloud docs pages).
+      </div>
+      <Link
+        href="/docs/ingestion/signoz-cloud/overview#endpoint"
+        className="text-xs text-signoz_robin-500"
+      >
+        How do I find my workspace region?
+      </Link>
     </div>
   )
 }
