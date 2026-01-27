@@ -4,6 +4,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
 
+const defaultFrameAncestors =
+  "'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud"
+
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
@@ -15,7 +18,7 @@ const ContentSecurityPolicy = `
   font-src * 'self';
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
-  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
+  frame-ancestors ${process.env.CSP_FRAME_ANCESTORS || defaultFrameAncestors};
 `
 
 const securityHeaders = [
