@@ -100,7 +100,7 @@ export const RegionAwarePre = (props: any) => {
       list.push({ search: '<region>', replace: region })
     }
     if (ingestionKey) {
-      list.push({ search: '<ingestion-key>', replace: ingestionKey })
+      list.push({ search: '<your-ingestion-key>', replace: ingestionKey })
       list.push({ search: '<SIGNOZ_INGESTION_KEY>', replace: ingestionKey })
     }
     return list
