@@ -1557,6 +1557,16 @@ const docsSideNav = [
                 route: '/docs/metrics-management/send-metrics/applications/golang',
                 label: 'Golang',
               },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
+                label: 'Node.js',
+              },
+              {
+                type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-python',
+                label: 'Python',
+              },
             ],
           },
           {
@@ -1948,6 +1958,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/grok-dashboard',
             label: 'Grok',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/groq-dashboard',
+            label: 'Groq',
           },
           {
             type: 'doc',
@@ -2480,6 +2495,11 @@ const docsSideNav = [
       {
         route: '/docs/grok-monitoring',
         label: 'Grok',
+        type: 'doc',
+      },
+      {
+        route: '/docs/groq-observability',
+        label: 'Groq',
         type: 'doc',
       },
       {

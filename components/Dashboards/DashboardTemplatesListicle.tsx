@@ -250,6 +250,12 @@ const DashboardTemplatesData: IconCardData[] = [
     clickName: 'xAi Grok Dashboard Template',
   },
   {
+    name: 'Groq',
+    href: '/docs/dashboards/dashboard-templates/groq-dashboard',
+    icon: <img src="/svgs/icons/LLMMonitoring/groq-logo.svg" alt="Groq Icon" className="h-7 w-7" />,
+    clickName: 'Groq Dashboard Template',
+  },
+  {
     name: 'Hadoop',
     href: 'https://github.com/SigNoz/dashboards/tree/main/hadoop',
     icon: <Server className="h-7 w-7 text-yellow-600" />,
