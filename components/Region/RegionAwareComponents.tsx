@@ -3,7 +3,6 @@
 import React, { isValidElement, cloneElement, ReactNode } from 'react'
 import Pre from 'pliny/ui/Pre'
 import { useRegion } from './RegionContext'
-import { useIngestionKey } from '@/components/IngestionKey/IngestionKeyContext'
 
 type Replacement = {
   search: string
@@ -92,19 +91,14 @@ const processCodeChildren = (children: ReactNode, replacements: Replacement[]): 
 
 export const RegionAwarePre = (props: any) => {
   const { region } = useRegion()
-  const { ingestionKey } = useIngestionKey()
 
   const replacements = React.useMemo(() => {
     const list: Replacement[] = []
     if (region && region !== 'none') {
       list.push({ search: '<region>', replace: region })
     }
-    if (ingestionKey) {
-      list.push({ search: '<your-ingestion-key>', replace: ingestionKey })
-      list.push({ search: '<SIGNOZ_INGESTION_KEY>', replace: ingestionKey })
-    }
     return list
-  }, [region, ingestionKey])
+  }, [region])
 
   const modifiedChildren = React.useMemo(() => {
     if (replacements.length === 0) return props.children
@@ -116,19 +110,14 @@ export const RegionAwarePre = (props: any) => {
 
 export const RegionAwareCode = (props: any) => {
   const { region } = useRegion()
-  const { ingestionKey } = useIngestionKey()
 
   const replacements = React.useMemo(() => {
     const list: Replacement[] = []
     if (region && region !== 'none') {
       list.push({ search: '<region>', replace: region })
     }
-    if (ingestionKey) {
-      list.push({ search: '<ingestion-key>', replace: ingestionKey })
-      list.push({ search: '<SIGNOZ_INGESTION_KEY>', replace: ingestionKey })
-    }
     return list
-  }, [region, ingestionKey])
+  }, [region])
 
   const modifiedChildren = React.useMemo(() => {
     if (replacements.length === 0) return props.children

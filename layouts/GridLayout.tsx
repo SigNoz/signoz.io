@@ -9,7 +9,6 @@ import React from 'react'
 import BlogPostCard from 'app/resource-center/Shared/BlogPostCard'
 import { Frown, HeartCrack, ChevronLeft, ChevronRight } from 'lucide-react'
 import { RegionProvider } from '@/components/Region/RegionContext'
-import { IngestionKeyProvider } from '@/components/IngestionKey/IngestionKeyContext'
 
 export interface PaginationProps {
   totalPages: number
@@ -208,34 +207,32 @@ export default function GridLayout({
 
   return (
     <RegionProvider>
-      <IngestionKeyProvider>
-        <div className="container mx-auto p-0">
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            <div className="my-8 flex flex-col">
-              <div
-                className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full ${isDarkMode ? 'text-signoz_slate-100' : 'text-signoz_slate-300'}`}
-              >
-                All posts
-              </div>
+      <div className="container mx-auto p-0">
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          <div className="my-8 flex flex-col">
+            <div
+              className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full ${isDarkMode ? 'text-signoz_slate-100' : 'text-signoz_slate-300'}`}
+            >
+              All posts
+            </div>
 
-              <div className="mt-4 grid gap-x-6 gap-y-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                {displayPosts.map((post, index) => {
-                  return <BlogPostCard key={index} blog={post} />
-                })}
-              </div>
+            <div className="mt-4 grid gap-x-6 gap-y-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {displayPosts.map((post, index) => {
+                return <BlogPostCard key={index} blog={post} />
+              })}
             </div>
           </div>
-          {pagination && pagination.totalPages > 1 && !searchValue && (
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              pageRoute={pagination.pageRoute}
-              postsPerPage={postsPerPage}
-              totalPosts={totalPosts}
-            />
-          )}
         </div>
-      </IngestionKeyProvider>
+        {pagination && pagination.totalPages > 1 && !searchValue && (
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            pageRoute={pagination.pageRoute}
+            postsPerPage={postsPerPage}
+            totalPosts={totalPosts}
+          />
+        )}
+      </div>
     </RegionProvider>
   )
 }

@@ -12,7 +12,6 @@ import { useEffect } from 'react'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { RegionProvider } from '@/components/Region/RegionContext'
-import { IngestionKeyProvider } from '@/components/IngestionKey/IngestionKeyContext'
 
 export interface tocItemProps {
   url: string
@@ -52,29 +51,27 @@ export default function DocLayout({ children }: LayoutProps) {
 
   return (
     <RegionProvider>
-      <IngestionKeyProvider>
-        <main ref={mainRef} className="">
-          <SectionContainer>
-            {source !== ONBOARDING_SOURCE && <ProgressBar target={mainRef} />}
+      <main ref={mainRef} className="">
+        <SectionContainer>
+          {source !== ONBOARDING_SOURCE && <ProgressBar target={mainRef} />}
 
-            <div className="doc overflow-clip max-sm:px-4">
-              {source !== ONBOARDING_SOURCE && (
-                <div className="doc-sidenav border-r border-signoz_slate-500">
-                  <DocsSidebar />
-                </div>
-              )}
-
-              <div
-                className={`doc-content py-6 md:px-0 lg:px-4 ${
-                  source === ONBOARDING_SOURCE ? 'product-onboarding' : ''
-                }`}
-              >
-                {children}
+          <div className="doc overflow-clip max-sm:px-4">
+            {source !== ONBOARDING_SOURCE && (
+              <div className="doc-sidenav border-r border-signoz_slate-500">
+                <DocsSidebar />
               </div>
+            )}
+
+            <div
+              className={`doc-content py-6 md:px-0 lg:px-4 ${
+                source === ONBOARDING_SOURCE ? 'product-onboarding' : ''
+              }`}
+            >
+              {children}
             </div>
-          </SectionContainer>
-        </main>
-      </IngestionKeyProvider>
+          </div>
+        </SectionContainer>
+      </main>
     </RegionProvider>
   )
 }
