@@ -11,8 +11,9 @@ import TableOfContents from '../DocsTOC/DocsTOC'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
-import CopyAsMarkdown from '@/components/CopyAsMarkdown'
+import OpenInAI from '@/components/OpenInAI'
 import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
+import { usePathname } from 'next/navigation'
 
 const DocContent: React.FC<{
   title: string
@@ -22,6 +23,7 @@ const DocContent: React.FC<{
   editLink?: string
 }> = ({ title, post, toc, hideTableOfContents, editLink }) => {
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const lastUpdatedDate = post?.lastmod || post?.date
   const formattedDate = lastUpdatedDate
     ? new Date(lastUpdatedDate).toLocaleDateString('en-US', {
@@ -52,12 +54,11 @@ const DocContent: React.FC<{
             <h1 className="mt-2 text-3xl leading-tight">{title}</h1>
           </div>
           {!isIntroductionPage && post.body?.raw && (
-            <CopyAsMarkdown
+            <OpenInAI
               markdownContent={post.body.raw}
+              pageUrl={pathname}
               className="shrink-0"
-              buttonVariant="ghost"
-              buttonSize="sm"
-              label="Copy markdown"
+              copyLabel="Copy markdown"
               docSlug={post.slug}
             />
           )}
