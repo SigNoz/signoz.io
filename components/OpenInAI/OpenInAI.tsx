@@ -76,7 +76,9 @@ const PerplexityIcon = memo(function PerplexityIcon() {
 // Types
 interface OpenInAIProps {
   /** The raw markdown content - for copy functionality */
-  markdownContent: string
+  markdownContent?: string
+  /** Optional async generator for copy functionality */
+  getMarkdownContent?: () => Promise<string> | string
   /** The current page URL (can be relative, will be made absolute) */
   pageUrl: string
   /** Optional slug for analytics */
@@ -100,10 +102,10 @@ const buildChatGPTUrl = (pageUrl: string): string =>
   `https://chatgpt.com/?hints=search&q=${encodeURIComponent(`Read from ${pageUrl} so I can ask questions about it.`)}`
 
 const buildClaudeUrl = (pageUrl: string): string =>
-  `https://claude.ai/new?q=${encodeURIComponent(`Read from ${pageUrl}.md so I can ask questions about it.`)}`
+  `https://claude.ai/new?q=${encodeURIComponent(`Read from ${pageUrl} so I can ask questions about it.`)}`
 
 const buildPerplexityUrl = (pageUrl: string): string =>
-  `https://www.perplexity.ai/search/new?q=${encodeURIComponent(`Read from ${pageUrl}.md so I can ask questions about it.`)}`
+  `https://www.perplexity.ai/search/new?q=${encodeURIComponent(`Read from ${pageUrl} so I can ask questions about it.`)}`
 
 // AI options configuration - defined outside component as static data
 const AI_OPTIONS: AIOption[] = [
@@ -152,6 +154,7 @@ function getAbsoluteUrl(url: string): string {
 // Main component
 function OpenInAI({
   markdownContent,
+  getMarkdownContent,
   pageUrl,
   docSlug,
   className,
@@ -167,11 +170,15 @@ function OpenInAI({
 
   // Memoized copy handler
   const handleCopy = useCallback(async () => {
-    if (!markdownContent || isLoading) return
+    if (isLoading) return
+
+    const resolvedContent = getMarkdownContent ? await getMarkdownContent() : markdownContent
+
+    if (!resolvedContent) return
 
     setIsLoading(true)
     try {
-      await navigator.clipboard.writeText(markdownContent)
+      await navigator.clipboard.writeText(resolvedContent)
       logEvent({
         eventName: 'Website Click',
         eventType: 'track',
@@ -190,7 +197,7 @@ function OpenInAI({
     } finally {
       setIsLoading(false)
     }
-  }, [markdownContent, isLoading, logEvent, copyLabel, docSlug])
+  }, [markdownContent, getMarkdownContent, isLoading, logEvent, copyLabel, docSlug])
 
   // Memoized AI open handler factory
   const handleOpenInAI = useCallback(
@@ -212,7 +219,7 @@ function OpenInAI({
     [logEvent, absolutePageUrl, docSlug]
   )
 
-  const isDisabled = isLoading || !markdownContent
+  const isDisabled = isLoading || (!markdownContent && !getMarkdownContent)
 
   return (
     <div className={cn('flex items-center', className)}>

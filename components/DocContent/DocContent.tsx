@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import { Edit } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { components } from '@/components/MDXComponents'
@@ -14,6 +14,7 @@ import { ONBOARDING_SOURCE } from '@/constants/globals'
 import OpenInAI from '@/components/OpenInAI'
 import TagsWithTooltips from '@/components/TagsWithTooltips/TagsWithTooltips'
 import { usePathname } from 'next/navigation'
+import { buildCopyMarkdownFromRendered } from '@/utils/docs/buildCopyMarkdownFromRendered'
 
 const DocContent: React.FC<{
   title: string
@@ -42,6 +43,25 @@ const DocContent: React.FC<{
   const shouldRenderTOC =
     !effectiveHideTOC && Array.isArray(toc) && toc.length > 0 && source !== ONBOARDING_SOURCE
   const shouldReserveTocColumn = source !== ONBOARDING_SOURCE
+  const articleRef = useRef<HTMLElement | null>(null)
+
+  const docTags = useMemo(() => post?.docTags || [], [post?.docTags])
+
+  const fallbackMarkdown = useMemo(() => {
+    const tagLine = docTags.length > 0 ? `Tags: ${docTags.join(', ')}` : ''
+    return [`# ${title}`, tagLine, post?.body?.raw || ''].filter(Boolean).join('\n\n')
+  }, [docTags, post?.body?.raw, title])
+
+  const getMarkdownContent = useCallback(async () => {
+    if (!articleRef.current) {
+      return fallbackMarkdown
+    }
+    return buildCopyMarkdownFromRendered(articleRef.current, {
+      title,
+      tags: docTags,
+      includeTagDefinitions: true,
+    })
+  }, [docTags, fallbackMarkdown, title])
 
   return (
     <>
@@ -55,7 +75,7 @@ const DocContent: React.FC<{
           </div>
           {!isIntroductionPage && post.body?.raw && (
             <OpenInAI
-              markdownContent={post.body.raw}
+              getMarkdownContent={getMarkdownContent}
               pageUrl={pathname}
               className="shrink-0"
               copyLabel="Copy markdown"
@@ -63,7 +83,7 @@ const DocContent: React.FC<{
             />
           )}
         </div>
-        <article className="prose prose-slate max-w-none pb-6 dark:prose-invert">
+        <article ref={articleRef} className="prose prose-slate max-w-none pb-6 dark:prose-invert">
           <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
         </article>
         <div className="mt-8 flex items-center justify-between text-sm">
