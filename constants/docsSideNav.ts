@@ -1561,12 +1561,6 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route:
-                      '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jvm-metrics',
-                    label: 'JVM Metrics',
-                  },
-                  {
-                    type: 'doc',
-                    route:
                       '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics',
                     label: 'JMX Metrics',
                   },

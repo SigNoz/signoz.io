@@ -267,48 +267,43 @@ Once your application is running with the Java agent:
 1. Trigger some application activity to generate metrics.
 2. In SigNoz, go to **Metrics** > **Metrics Explorer**.
 3. Search for your custom metric (e.g., `orders.processed`).
-4. JVM metrics like `jvm.memory.used` and `jvm.cpu.time` are collected automatically by the agent.
-
-<Admonition type="info">
-JVM runtime metrics (memory, GC, threads, CPU) are collected automatically by the agent. See [JVM Runtime Metrics](#jvm-runtime-metrics) for the full list.
-</Admonition>
+4. JVM metrics like `jvm.memory.used` and `jvm.cpu.time` are collected automatically by the agent. See [Runtime Metrics](#runtime-metrics) for the full list.
 
 <details>
 <ToggleHeading>
 
-## JVM Runtime Metrics
+## Runtime Metrics
 
 </ToggleHeading>
 
-The Java agent automatically collects JVM runtime metrics. No additional configuration is needed.
+The Java agent automatically collects JVM runtime metrics with zero configuration. These metrics are exported alongside any custom metrics you define.
 
 ### Exported Metrics
 
-**Memory Metrics:**
-- `jvm.memory.used` - Current memory usage by memory pool
-- `jvm.memory.committed` - Committed memory by memory pool
-- `jvm.memory.limit` - Maximum memory available by memory pool
-- `jvm.memory.used_after_last_gc` - Memory used after the last garbage collection
+| Category | Metric | Description |
+|----------|--------|-------------|
+| **Memory** | `jvm.memory.used` | Current memory usage by memory pool |
+| | `jvm.memory.committed` | Committed memory by memory pool |
+| | `jvm.memory.limit` | Maximum memory available by memory pool |
+| | `jvm.memory.used_after_last_gc` | Memory used after the last garbage collection |
+| **GC** | `jvm.gc.duration` | Time spent in garbage collection (histogram) |
+| **Threads** | `jvm.thread.count` | Number of executing threads |
+| **Classes** | `jvm.class.loaded` | Number of classes loaded since JVM start |
+| | `jvm.class.unloaded` | Total number of classes unloaded |
+| | `jvm.class.count` | Number of classes currently loaded |
+| **CPU** | `jvm.cpu.time` | CPU time used by the process |
+| | `jvm.cpu.count` | Number of available processors |
+| | `jvm.cpu.recent_utilization` | Recent CPU utilization |
 
-**Garbage Collection Metrics:**
-- `jvm.gc.duration` - Time spent in garbage collection (histogram)
+### Visualize Runtime Metrics
 
-**Thread Metrics:**
-- `jvm.thread.count` - Number of executing threads
+Import the pre-built JVM dashboard to visualize these metrics:
 
-**Class Loading Metrics:**
-- `jvm.class.loaded` - Number of classes loaded since JVM start
-- `jvm.class.unloaded` - Total number of classes unloaded
-- `jvm.class.count` - Number of classes currently loaded
+1. Download the <a href="https://github.com/SigNoz/dashboards/tree/main/jvm" target="_blank" rel="noopener noreferrer nofollow">JVM dashboard JSON</a>
+2. In SigNoz, go to **Dashboards** → **New Dashboard** → **Import JSON**
+3. Paste the JSON content or upload the file
 
-**CPU Metrics:**
-- `jvm.cpu.time` - CPU time used by the process
-- `jvm.cpu.count` - Number of available processors
-- `jvm.cpu.recent_utilization` - Recent CPU utilization
-
-<Admonition type="info">
-Use the pre-configured [JVM Metrics Dashboard](https://signoz.io/docs/dashboards/dashboard-templates/jvm-metrics/) to visualize these metrics.
-</Admonition>
+See the [JVM Dashboard Template](https://signoz.io/docs/dashboards/dashboard-templates/jvm-metrics/) for details on available panels.
 
 </details>
 
