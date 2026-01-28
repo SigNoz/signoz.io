@@ -1,0 +1,444 @@
+---
+date: 2026-01-21
+id: groq-monitoring-with-opentelemetry
+title: Groq Observability & Monitoring with OpenTelemetry
+description: Observability and monitoring for Groq usage and performance with OpenTelemetry instrumentation to send traces, logs, and metrics to SigNoz
+doc_type: howto
+---
+
+## Overview
+
+This guide walks you through setting up observability and monitoring for Groq using [OpenTelemetry](https://opentelemetry.io/) and exporting traces, logs, and metrics to SigNoz. With this integration, you can observe and track various metrics for your Groq applications and llm usage.
+
+Monitoring Groq in your AI applications with telemetry ensures full observability across your AI and LLM workflows. By leveraging SigNoz, you can analyze correlated traces, logs, and metrics in unified dashboards, configure alerts, and gain actionable insights to continuously improve reliability, responsiveness, and user experience.
+
+## Prerequisites
+
+- A [SigNoz Cloud account](https://signoz.io/teams/) with an active ingestion key or [Self Hosted SigNoz instance](https://signoz.io/docs/install/self-host/)
+- Internet access to send telemetry data to SigNoz Cloud
+- Python 3.10+ with `groq` installed
+- For Python: `pip` installed for managing Python packages
+- A Groq API key. You can get it from <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer nofollow">Groq platform</a>
+
+
+## Monitoring Groq
+
+For more information on getting started with Groq in your Python environment, refer to the [Groq quickstart guide](https://console.groq.com/docs/quickstart).
+
+<Tabs>
+<TabItem value="No Code" label="No Code(Recommended)" default>
+
+No code auto-instrumentation is recommended for quick setup with minimal code changes. It's ideal when you want to get observability up and running without modifying your application code and are leveraging standard instrumentor libraries. 
+
+### Step 1: Install the necessary packages in your Python environment.
+
+```bash
+pip install \
+  opentelemetry-distro \
+  opentelemetry-exporter-otlp \
+  httpx \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  groq \
+  openinference-instrumentation-groq
+```
+
+### Step 2: Add Automatic Instrumentation
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+
+### Step 3: Configure logging level
+
+To ensure logs are properly captured and exported, configure the root logger to emit logs at the DEBUG level or higher:
+
+```python
+import logging
+
+logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger("httpx").setLevel(logging.DEBUG)
+```
+
+This sets the minimum log level for the root logger to DEBUG, which ensures that `logger.debug()` calls and higher severity logs (INFO, WARNING, ERROR, CRITICAL) are captured by the OpenTelemetry logging auto-instrumentation and sent to SigNoz.
+
+
+### Step 4: Create an example Groq application
+
+```python:main.py
+import os
+from groq import Groq
+from dotenv import load_dotenv
+import logging
+
+logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger("httpx").setLevel(logging.DEBUG)
+
+load_dotenv()
+
+client = Groq(
+    api_key=os.environ.get("GROQ_API_KEY"),
+)
+
+chat_completion = client.chat.completions.create(
+    messages=[
+        {
+            "role": "user",
+            "content": "What is SigNoz?",
+        }
+    ],
+    model="openai/gpt-oss-20b",
+)
+
+print(chat_completion.choices[0].message.content)
+```
+
+<Admonition type="important">
+  Before running this code, ensure that you have set the environment variable `GROQ_API_KEY` with your generated Groq API key.
+</Admonition>
+
+### Step 5: Run your application with auto-instrumentation
+
+Run your application with the following environment variables set. This configures OpenTelemetry to export traces, logs, and metrics to SigNoz Cloud and enables automatic log correlation:
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your_ingestion_key>" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+OTEL_TRACES_EXPORTER=otlp \
+OTEL_METRICS_EXPORTER=otlp \
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_PYTHON_LOG_CORRELATION=true \
+OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
+opentelemetry-instrument <your_run_command>
+```
+- **`<service_name>`** is the name of your service
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your_ingestion_key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Replace `<your_run_command>` with the actual command you would use to run your application. In this case we would use: `python main.py`
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+</TabItem>
+
+<TabItem value="Manual" label="Manual" default>
+
+Code-based manual instrumentation gives you fine-grained control over your telemetry configuration. Use this approach when you need to customize resource attributes, sampling strategies, or integrate with existing observability infrastructure.
+
+### Step 1: Install additional OpenTelemetry dependencies
+
+```bash
+pip install \
+  opentelemetry-api \
+  opentelemetry-sdk \
+  opentelemetry-exporter-otlp \
+  opentelemetry-instrumentation-httpx \
+  opentelemetry-instrumentation-system-metrics \
+  groq \
+  openinference-instrumentation-groq
+```
+
+### Step 2: Import the necessary modules in your Python application
+
+**Traces:**
+
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from openinference.instrumentation.groq import GroqInstrumentor
+```
+
+**Metrics:**
+
+```python
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+```
+
+### Step 3: Set up Traces
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry import trace
+from openinference.instrumentation.groq import GroqInstrumentor
+import os
+
+
+resource = Resource.create({"service.name": "<service_name>"})
+provider = TracerProvider(resource=resource)
+span_exporter = OTLPSpanExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_TRACES_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+processor = BatchSpanProcessor(span_exporter)
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+
+GroqInstrumentor().instrument(tracer_provider=provider)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_TRACES_ENDPOINT`** → SigNoz Cloud trace endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/traces`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+
+### Step 4: Set up Metrics
+
+```python
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry import metrics
+from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+import os
+
+resource = Resource.create({"service.name": "<service-name>"})
+metric_exporter = OTLPMetricExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_METRICS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+reader = PeriodicExportingMetricReader(metric_exporter)
+metric_provider = MeterProvider(metric_readers=[reader], resource=resource)
+metrics.set_meter_provider(metric_provider)
+
+meter = metrics.get_meter(__name__)
+
+# turn on out-of-the-box metrics
+SystemMetricsInstrumentor().instrument()
+HTTPXClientInstrumentor().instrument()
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_METRICS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint):`https://ingest.<region>.signoz.cloud:443/v1/metrics`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+<Admonition type="important">
+   SystemMetricsInstrumentor provides system metrics (CPU, memory, etc.), and HTTPXClientInstrumentor provides outbound HTTP request metrics such as request duration. If you want to add custom metrics to your Groq application, see [Python Custom Metrics](https://signoz.io/opentelemetry/python-custom-metrics/).
+</Admonition>
+
+### Step 5: Set up Logs
+
+```python
+import logging
+from opentelemetry.sdk.resources import Resource
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+import os
+
+resource = Resource.create({"service.name": "<service_name>"})
+logger_provider = LoggerProvider(resource=resource)
+set_logger_provider(logger_provider)
+
+otlp_log_exporter = OTLPLogExporter(
+    endpoint= os.getenv("OTEL_EXPORTER_LOGS_ENDPOINT"),
+    headers={"signoz-ingestion-key": os.getenv("SIGNOZ_INGESTION_KEY")},
+)
+logger_provider.add_log_record_processor(
+    BatchLogRecordProcessor(otlp_log_exporter)
+)
+# Attach OTel logging handler to root logger
+handler = LoggingHandler(level=logging.INFO, logger_provider=logger_provider)
+logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+logger = logging.getLogger(__name__)
+
+# Enable httpx logging to capture HTTP requests
+httpx_logger = logging.getLogger("httpx")
+httpx_logger.setLevel(logging.DEBUG)
+httpx_logger.addHandler(handler)
+```
+
+- **`<service_name>`** is the name of your service
+- **`OTEL_EXPORTER_LOGS_ENDPOINT`** → SigNoz Cloud endpoint with appropriate [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint): `https://ingest.<region>.signoz.cloud:443/v1/logs`
+- **`SIGNOZ_INGESTION_KEY`** → Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+<Admonition type="info">
+  Using self-hosted SigNoz? Most steps are identical. To adapt this guide, update the endpoint and
+  remove the ingestion key header as shown in
+  <a href="https://signoz.io/docs/ingestion/cloud-vs-self-hosted#cloud-to-self-hosted" target="_blank" rel="noopener noreferrer">Cloud → Self-Hosted</a>.
+</Admonition>
+
+### Step 6: Run an example Groq application
+
+<Admonition type="important">
+   Ensure you have completed the steps above (traces, logs, and metrics configuration) before running this code. All OpenTelemetry instrumentation must be initialized first.
+</Admonition>
+
+```python:main.py
+import os
+from groq import Groq
+from dotenv import load_dotenv
+import logging
+
+logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger("httpx").setLevel(logging.DEBUG)
+
+load_dotenv()
+
+client = Groq(
+    api_key=os.environ.get("GROQ_API_KEY"),
+)
+
+chat_completion = client.chat.completions.create(
+    messages=[
+        {
+            "role": "user",
+            "content": "What is SigNoz?",
+        }
+    ],
+    model="openai/gpt-oss-20b",
+)
+
+print(chat_completion.choices[0].message.content)
+```
+
+<Admonition type="important">
+  Before running this code, ensure that you have set the environment variable `GROQ_API_KEY` with your generated Groq API key.
+</Admonition>
+
+</TabItem>
+</Tabs>
+
+## View Traces, Logs, and Metrics in SigNoz
+
+Your Groq agent usage should now automatically emit traces and metrics.
+
+You should be able to view traces in Signoz Cloud under the traces tab:
+
+<Figure
+  src="/img/docs/llm/groq/groq-traces.webp"
+  alt="Groq Trace View"
+  caption="Groq Trace View"
+/>
+
+When you click on a trace in SigNoz, you'll see a detailed view of the trace, including all associated spans, along with their events and attributes.
+
+<Figure
+  src="/img/docs/llm/groq/groq-detailed-traces.webp"
+  alt="Groq Detailed Trace View"
+  caption="Groq Detailed Trace View"
+/>
+
+You should be able to view logs in SigNoz Cloud under the logs tab. You can also view logs by clicking on the “Related Logs” button in the trace view to see correlated logs:
+
+<figure data-zoomable align="center">
+  <img src="/img/docs/llm/groq/related-logs.webp" alt="Related logs" width="300" />
+  <figcaption>
+    <i>Related logs button</i>
+  </figcaption>
+</figure>
+
+<Figure
+  src="/img/docs/llm/groq/groq-logs.webp"
+  alt="Groq Logs View"
+  caption="Groq Logs View"
+/>
+
+When you click on any of these logs in SigNoz, you'll see a detailed view of the log, including attributes:
+
+<Figure
+  src="/img/docs/llm/groq/groq-detailed-logs.webp"
+  alt="Groq Detailed Log View"
+  caption="Groq Detailed Logs View"
+/>
+
+You should be able to see Groq related metrics in Signoz Cloud under the metrics tab:
+
+<Figure
+  src="/img/docs/llm/groq/groq-metrics.webp"
+  alt="Groq Metrics View"
+  caption="Groq Metrics View"
+/>
+
+When you click on any of these metrics in SigNoz, you'll see a detailed view of the metric, including attributes:
+
+<Figure
+  src="/img/docs/llm/groq/groq-detailed-metrics.webp"
+  alt="Groq Detailed Metrics View"
+  caption="Groq Detailed Metrics View"
+/>
+
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+If you don't see your telemetry data:
+
+1. **Verify network connectivity** - Ensure your application can reach SigNoz Cloud endpoints
+2. **Check ingestion key** - Verify your SigNoz ingestion key is correct
+3. **Wait for data** - OpenTelemetry batches data before sending, so wait 10-30 seconds after making API calls
+4. **Try a console exporter** — Enable a console exporter locally to confirm that your application is generating telemetry data before it’s sent to SigNoz
+
+</details>
+
+## Next Steps
+
+You can also check out our custom Groq dashboard [here](https://signoz.io/docs/dashboards/dashboard-templates/groq-dashboard/) which provides specialized visualizations for monitoring your Groq usage in applications. The dashboard includes pre-built charts specifically tailored for LLM usage, along with import instructions to get started quickly.
+
+<Figure
+  src="/img/docs/llm/groq/groq-dashboard.webp"
+  alt="Groq Dashboard"
+  caption="Groq Dashboard Template"
+/>
+
+
+<details>
+<ToggleHeading>
+## Setup OpenTelemetry Collector (Optional)
+</ToggleHeading>
+
+### What is the OpenTelemetry Collector?
+
+Think of the OTel Collector as a middleman between your app and SigNoz. Instead of your application sending data directly to SigNoz, it sends everything to the Collector first, which then forwards it along.
+
+### Why use it?
+
+- **Cleaning up data** — Filter out noisy traces you don't care about, or remove sensitive info before it leaves your servers.
+- **Keeping your app lightweight** — Let the Collector handle batching, retries, and compression instead of your application code.
+- **Adding context automatically** — The Collector can tag your data with useful info like which Kubernetes pod or cloud region it came from.
+- **Future flexibility** — Want to send data to multiple backends later? The Collector makes that easy without changing your app.
+
+See [Switch from direct export to Collector](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/switch-to-collector/) for step-by-step instructions to convert your setup.
+
+For more details, see [Why use the OpenTelemetry Collector?](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/why-to-use-collector/) and the [Collector configuration guide](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/).
+
+</details>
+
+Additional resources:
+- Set up [alerts](https://signoz.io/docs/product-features/alert-management) for high latency or error rates
+- Learn more about [querying traces](https://signoz.io/docs/product-features/trace-explorer)
+- Explore [log correlation](https://signoz.io/docs/product-features/logs-explorer)
+
+

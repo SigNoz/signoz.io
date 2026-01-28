@@ -25,6 +25,7 @@ import {
   SiFlydotio,
   SiEnvoyproxy,
   SiGo,
+  SiDotnet,
   SiNodedotjs,
   SiPython,
 } from 'react-icons/si'
@@ -528,6 +529,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java',
             icon: <FaJava className="h-7 w-7 text-red-600" />,
             clickName: 'Java Metrics Link',
+          },
+          {
+            name: '.NET',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet',
+            icon: <SiDotnet className="h-7 w-7 text-blue-600" />,
+            clickName: '.NET Metrics Link',
           },
           {
             name: 'Node.js',
