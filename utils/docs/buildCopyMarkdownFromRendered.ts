@@ -44,8 +44,39 @@ const withCodeFence = (code: string, language: string) => {
   return `\`\`\`${language}\n${safeCode}\n\`\`\``
 }
 
+const expandTabsInClone = (clone: HTMLElement) => {
+  const tabRoots = Array.from(clone.querySelectorAll('[data-tabs-root]'))
+
+  tabRoots.forEach((root) => {
+    const labelMap = new Map<string, string>()
+    const tabButtons = Array.from(root.querySelectorAll('button[data-tab-value]'))
+
+    tabButtons.forEach((button) => {
+      const value = button.getAttribute('data-tab-value') || ''
+      const label = button.textContent?.trim() || value
+      if (value) {
+        labelMap.set(value, label)
+      }
+    })
+
+    const panels = Array.from(root.querySelectorAll('div[data-tab-value]'))
+    panels.forEach((panel) => {
+      const value = panel.getAttribute('data-tab-value') || ''
+      const label = labelMap.get(value) || value
+      panel.removeAttribute('hidden')
+      panel.removeAttribute('aria-hidden')
+      if (label) {
+        const heading = panel.ownerDocument.createElement('h3')
+        heading.textContent = label
+        panel.insertBefore(heading, panel.firstChild)
+      }
+    })
+  })
+}
+
 const cloneAndCleanArticle = (articleEl: HTMLElement): HTMLElement => {
   const clone = articleEl.cloneNode(true) as HTMLElement
+  expandTabsInClone(clone)
   CLEANUP_SELECTORS.forEach((selector) => {
     clone.querySelectorAll(selector).forEach((node) => node.remove())
   })
