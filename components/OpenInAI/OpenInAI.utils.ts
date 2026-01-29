@@ -10,3 +10,15 @@ export function getAbsoluteUrl(url: string): string {
 
   return `${SIGNOZ_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`
 }
+
+export function buildChatGPTUrl(pageUrl: string): string {
+  return `https://chatgpt.com/?hints=search&q=${encodeURIComponent(`Read from ${pageUrl} so I can ask questions about it.`)}`
+}
+
+export function buildClaudeUrl(pageUrl: string): string {
+  return `https://claude.ai/new?q=${encodeURIComponent(`Read from ${pageUrl} so I can ask questions about it.`)}`
+}
+
+export function buildPerplexityUrl(pageUrl: string): string {
+  return `https://www.perplexity.ai/search/new?q=${encodeURIComponent(`Read from ${pageUrl} so I can ask questions about it.`)}`
+}

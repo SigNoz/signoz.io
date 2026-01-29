@@ -1,19 +1,10 @@
 import { SiClaude, SiOpenai, SiPerplexity } from 'react-icons/si'
 
 import type { AIOption } from './OpenInAI.types'
+import { buildChatGPTUrl, buildClaudeUrl, buildPerplexityUrl } from './OpenInAI.utils'
 
 export const COPY_FEEDBACK_DURATION_MS = 2000
 export const SIGNOZ_BASE_URL = 'https://signoz.io'
-
-// URL builder functions - pure functions for better testability
-const buildChatGPTUrl = (pageUrl: string): string =>
-  `https://chatgpt.com/?hints=search&q=${encodeURIComponent(`Read from ${pageUrl} so I can ask questions about it.`)}`
-
-const buildClaudeUrl = (pageUrl: string): string =>
-  `https://claude.ai/new?q=${encodeURIComponent(`Read from ${pageUrl} so I can ask questions about it.`)}`
-
-const buildPerplexityUrl = (pageUrl: string): string =>
-  `https://www.perplexity.ai/search/new?q=${encodeURIComponent(`Read from ${pageUrl} so I can ask questions about it.`)}`
 
 export const AI_OPTIONS: AIOption[] = [
   {
