@@ -33,17 +33,6 @@ const buildTagHeader = (tags: string[], includeTagDefinitions: boolean): string 
   return lines.join('\n')
 }
 
-const getLanguageFromClassName = (className: string | null) => {
-  if (!className) return ''
-  const match = className.match(/language-([^\s]+)/)
-  return match?.[1] ?? ''
-}
-
-const withCodeFence = (code: string, language: string) => {
-  const safeCode = code.replace(/\n$/, '')
-  return `\`\`\`${language}\n${safeCode}\n\`\`\``
-}
-
 const expandTabsInClone = (clone: HTMLElement) => {
   const tabRoots = Array.from(clone.querySelectorAll('[data-tabs-root]'))
 
@@ -93,42 +82,23 @@ export async function buildCopyMarkdownFromRendered(
   articleEl: HTMLElement,
   options: BuildCopyMarkdownOptions
 ): Promise<string> {
-  const { default: TurndownService } = await import('turndown')
-  const gfmPlugin = await import('turndown-plugin-gfm')
-
-  const turndownService = new TurndownService({
-    headingStyle: 'atx',
-    codeBlockStyle: 'fenced',
-    bulletListMarker: '-',
-  })
-
-  const gfm =
-    'gfm' in gfmPlugin
-      ? gfmPlugin.gfm
-      : gfmPlugin.default?.gfm || gfmPlugin.default || gfmPlugin.gfm
-
-  if (gfm) {
-    turndownService.use(gfm)
-  }
-
-  turndownService.addRule('fencedCodeBlock', {
-    filter: (node) => {
-      if (node.nodeName !== 'PRE') return false
-      const firstChild = node.firstChild as HTMLElement | null
-      return Boolean(firstChild && firstChild.nodeName === 'CODE')
-    },
-    replacement: (_content, node) => {
-      const codeNode = (node as HTMLElement).querySelector('code')
-      if (!codeNode) {
-        return ''
-      }
-      const language = getLanguageFromClassName(codeNode.className)
-      return `\n\n${withCodeFence(codeNode.textContent || '', language)}\n\n`
-    },
-  })
+  const { unified } = await import('unified')
+  const { default: rehypeRemark } = await import('rehype-remark')
+  const { default: remarkStringify } = await import('remark-stringify')
+  const { default: remarkGfm } = await import('remark-gfm')
+  const { fromDom } = await import('hast-util-from-dom')
 
   const cleanedArticle = cloneAndCleanArticle(articleEl)
-  const bodyMarkdown = normalizeWhitespace(turndownService.turndown(cleanedArticle))
+  const hast = fromDom(cleanedArticle)
+
+  const processor = unified().use(rehypeRemark).use(remarkGfm).use(remarkStringify, {
+    bullet: '-',
+    fences: true,
+    resourceLink: true,
+  })
+
+  const mdast = await processor.run(hast as any)
+  const bodyMarkdown = normalizeWhitespace(processor.stringify(mdast as any))
 
   const headerLines = [`# ${options.title}`]
   const tagsHeader = buildTagHeader(options.tags, options.includeTagDefinitions)
