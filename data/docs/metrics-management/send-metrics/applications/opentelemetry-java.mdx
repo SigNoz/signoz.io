@@ -260,20 +260,6 @@ docker run -p 8080:8080 \
 The Java agent automatically generates HTTP metrics (`http.server.request.duration` and `http.client.request.duration`) for instrumented web frameworks like Spring Boot, JAX-RS, and Servlet containers. See the <a href="https://opentelemetry.io/docs/specs/semconv/http/http-metrics/" target="_blank" rel="noopener noreferrer nofollow">HTTP metrics semantic conventions</a> for details.
 </Admonition>
 
-<KeyPointCallout title="Want only JVM and custom metrics?" defaultCollapsed={true}>
-By default, the Java agent generates HTTP metrics for web frameworks. To collect only JVM runtime metrics and custom metrics (via `getMeter()`), add these environment variables:
-
-```bash
-export OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED="false"
-export OTEL_INSTRUMENTATION_OPENTELEMETRY_API_ENABLED="true"
-export OTEL_INSTRUMENTATION_RUNTIME_TELEMETRY_JAVA8_ENABLED="true"
-```
-
-This disables all auto-instrumentation (including HTTP metrics) while keeping:
-- **JVM runtime metrics**: `jvm.memory.used`, `jvm.gc.duration`, `jvm.thread.count`, etc.
-- **Custom metrics**: Any metrics you create via `GlobalOpenTelemetry.getMeter()`
-</KeyPointCallout>
-
 ## Validate
 
 Once your application is running with the Java agent:
