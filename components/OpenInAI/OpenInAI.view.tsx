@@ -3,30 +3,15 @@
 import { Fragment, memo, useCallback, useMemo, useRef, useState } from 'react'
 import { Menu, Transition } from '@headlessui/react'
 import { ChevronDown, Copy, Check, ExternalLink } from 'lucide-react'
-import { cn } from 'app/lib/utils'
-import { useLogEvent } from 'hooks/useLogEvent'
 
+import { cn } from '../../app/lib/utils'
+import { useLogEvent } from '@/hooks/useLogEvent'
 import Button from '@/components/ui/Button'
 
-import { AI_OPTIONS, COPY_FEEDBACK_DURATION_MS, SIGNOZ_BASE_URL } from './OpenInAI.constants'
+import { AI_OPTIONS, COPY_FEEDBACK_DURATION_MS } from './OpenInAI.constants'
 import type { AIOption, OpenInAIProps } from './OpenInAI.types'
+import { getAbsoluteUrl } from './OpenInAI.utils'
 
-// Utility function to get absolute URL - handles SSR safely
-function getAbsoluteUrl(url: string): string {
-  // Already absolute
-  if (url.startsWith('http')) return url
-
-  // Client-side: use window.location.origin
-  if (typeof window !== 'undefined') {
-    const origin = window.location.origin
-    return `${origin}${url.startsWith('/') ? '' : '/'}${url}`
-  }
-
-  // SSR fallback
-  return `${SIGNOZ_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`
-}
-
-// Main component
 function OpenInAI({
   markdownContent,
   getMarkdownContent,
@@ -40,11 +25,9 @@ function OpenInAI({
   const isCopyingRef = useRef(false)
   const logEvent = useLogEvent()
 
-  // Memoize absolute URL to prevent recalculation on every render
   const absolutePageUrl = useMemo(() => getAbsoluteUrl(pageUrl), [pageUrl])
   const canCopy = Boolean(markdownContent || getMarkdownContent)
 
-  // Memoized copy handler
   const handleCopy = useCallback(async () => {
     if (!canCopy || isCopyingRef.current) return
 
@@ -76,7 +59,6 @@ function OpenInAI({
     }
   }, [canCopy, markdownContent, getMarkdownContent, logEvent, copyLabel, docSlug])
 
-  // Memoized AI open handler factory
   const handleOpenInAI = useCallback(
     (option: AIOption) => {
       logEvent({
@@ -99,9 +81,7 @@ function OpenInAI({
 
   return (
     <div className={cn('flex items-center', className)}>
-      {/* Button group container */}
       <div className="flex items-center rounded-md border border-signoz_slate-400 bg-signoz_ink-400">
-        {/* Copy markdown button */}
         <Button
           isButton={true}
           type="button"
@@ -120,10 +100,8 @@ function OpenInAI({
           <span className="hidden lg:inline">{copied ? 'Copied!' : copyLabel}</span>
         </Button>
 
-        {/* Divider */}
         <div className="h-4 w-px bg-signoz_slate-400" aria-hidden="true" />
 
-        {/* Dropdown trigger */}
         <Menu as="div" className="relative">
           {({ open }) => (
             <>
@@ -160,7 +138,6 @@ function OpenInAI({
                   modal={false}
                   className="absolute right-0 z-50 mt-2 min-w-[280px] origin-top-right rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 py-1 shadow-xl focus:outline-none"
                 >
-                  {/* Copy markdown option in dropdown */}
                   <Menu.Item disabled={isCopyDisabled}>
                     {({ active, disabled }) => (
                       <button
@@ -194,14 +171,12 @@ function OpenInAI({
                     )}
                   </Menu.Item>
 
-                  {/* Divider */}
                   <div
                     className="my-1 border-t border-signoz_slate-400"
                     role="separator"
                     aria-hidden="true"
                   />
 
-                  {/* AI options */}
                   {AI_OPTIONS.map((option) => (
                     <Menu.Item key={option.id}>
                       {({ active }) => (

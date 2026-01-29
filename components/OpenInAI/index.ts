@@ -1,1 +1,1 @@
-export { default } from './OpenInAI'
+export { default } from './OpenInAI.view'
