@@ -370,7 +370,7 @@ export default function MetricsQuickStartOverview({
         cards={[
           {
             name: 'JVM',
-            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#runtime-metrics',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
             icon: <FaJava className="h-7 w-7 text-red-600" />,
             clickName: 'JVM Metrics Link',
           },

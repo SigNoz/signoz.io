@@ -111,7 +111,7 @@ module.exports = () => {
         {
           source: '/docs/tutorial/jvm-metrics/',
           destination:
-            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#runtime-metrics',
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
           permanent: true,
         },
         {
