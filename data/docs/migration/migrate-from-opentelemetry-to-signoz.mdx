@@ -36,13 +36,13 @@ Set the following environment variables for your application:
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 
 # Replace with your SigNoz ingestion key
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 ```
 
 If you are defining the OTLP configuration directly in your code (instead of using environment variables), update the OTLP exporter settings:
 
 - **Endpoint**: `https://ingest.<region>.signoz.cloud:443`
-- **Headers**: Set `signoz-ingestion-key` to `<SIGNOZ_INGESTION_KEY>`
+- **Headers**: Set `signoz-ingestion-key` to `<your-ingestion-key>`
 
 *Note: The exact syntax depends on the language SDK. Check the [SigNoz Instrumentation docs](https://signoz.io/docs/instrumentation/) for examples.*
 
@@ -54,14 +54,14 @@ exporters:
   otlp:
     endpoint: ingest.<region>.signoz.cloud:443
     headers:
-      signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+      signoz-ingestion-key: <your-ingestion-key>
     tls:
       insecure: false
 ```
 
-Replace the following placeholders:
-- `<region>`: Your SigNoz Cloud region (e.g., `us`, `eu`, `in`).
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Ingestion Key.
+Verify these values:
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 <Admonition type="tip">
   We also recommend configuring the [Resource Detection Processor](https://signoz.io/docs/opentelemetry-collection-agents/opentelemetry-collector/configuration/#resource-detection-processor) to automatically detect resource attributes from the host environment.
