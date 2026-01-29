@@ -370,7 +370,7 @@ export default function MetricsQuickStartOverview({
         cards={[
           {
             name: 'JVM',
-            href: '/docs/tutorial/jvm-metrics',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
             icon: <FaJava className="h-7 w-7 text-red-600" />,
             clickName: 'JVM Metrics Link',
           },
@@ -523,6 +523,12 @@ export default function MetricsQuickStartOverview({
             href: '/docs/metrics-management/send-metrics/applications/golang',
             icon: <SiGo className="h-7 w-7 text-cyan-500" />,
             clickName: 'Golang Metrics Link',
+          },
+          {
+            name: 'Java',
+            href: '/docs/metrics-management/send-metrics/applications/opentelemetry-java',
+            icon: <FaJava className="h-7 w-7 text-red-600" />,
+            clickName: 'Java Metrics Link',
           },
           {
             name: '.NET',
