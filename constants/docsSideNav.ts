@@ -1573,6 +1573,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-dotnet',
+                label: '.NET',
+              },
+              {
+                type: 'doc',
                 route: '/docs/metrics-management/send-metrics/applications/opentelemetry-nodejs',
                 label: 'Node.js',
               },
@@ -1890,6 +1895,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/codex-dashboard',
+            label: 'Codex (OpenAI)',
+          },
+          {
+            type: 'doc',
             route: '/docs/dashboards/dashboard-templates/cost-meter',
             label: 'Cost Meter',
           },
@@ -1955,6 +1965,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/dashboards/dashboard-templates/grok-dashboard',
             label: 'Grok',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/dashboard-templates/groq-dashboard',
+            label: 'Groq',
           },
           {
             type: 'doc',
@@ -2465,6 +2480,11 @@ const docsSideNav = [
         type: 'doc',
       },
       {
+        route: '/docs/codex-monitoring',
+        label: 'Codex (OpenAI)',
+        type: 'doc',
+      },
+      {
         route: '/docs/crewai-observability',
         label: 'Crew AI',
         type: 'doc',
@@ -2487,6 +2507,11 @@ const docsSideNav = [
       {
         route: '/docs/grok-monitoring',
         label: 'Grok',
+        type: 'doc',
+      },
+      {
+        route: '/docs/groq-observability',
+        label: 'Groq',
         type: 'doc',
       },
       {
