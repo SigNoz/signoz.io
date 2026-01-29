@@ -51,9 +51,19 @@ export JAVA_OPTS="-Dcom.sun.management.jmxremote \
 
 ## Step 2. Download the JMX metrics JAR
 
-The OTel Collector JMX receiver requires the JMX Metric Gatherer JAR file (version 1.9+). Download it from the <a href="https://github.com/open-telemetry/opentelemetry-java-contrib/releases" target="_blank" rel="noopener noreferrer nofollow">OpenTelemetry Java Contrib releases</a>.
+The OTel Collector JMX receiver requires the JMX Metric Gatherer JAR file. Download it from <a href="https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/" target="_blank" rel="noopener noreferrer nofollow">Maven Central</a>.
 
-Look for the file named `opentelemetry-java-contrib-jmx-metrics.jar` in the release assets and place it in a location accessible to the OTel Collector (e.g., `/opt/opentelemetry-java-contrib-jmx-metrics.jar`).
+<Admonition type="info">
+The JMX receiver validates the JAR file hash. The JAR version must be compatible with your OTel Collector version. For example, Collector v0.144.0 requires JAR version 1.52.0-alpha or earlier supported versions. If you see "jar hash does not match known versions" error, download a JAR version that matches your collector.
+</Admonition>
+
+For example, to download version 1.52.0-alpha:
+
+```bash
+curl -sLO https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/1.52.0-alpha/opentelemetry-jmx-scraper-1.52.0-alpha.jar
+```
+
+Place the JAR in a location accessible to the OTel Collector (e.g., `/opt/opentelemetry-jmx-scraper.jar`).
 
 ## Step 3. Configure the OTel Collector JMX receiver
 
