@@ -1553,6 +1553,20 @@ const docsSideNav = [
             isExpanded: false,
             items: [
               {
+                type: 'category',
+                label: 'Java',
+                route: '/docs/metrics-management/send-metrics/applications/opentelemetry-java',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route:
+                      '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics',
+                    label: 'JMX Metrics',
+                  },
+                ],
+              },
+              {
                 type: 'doc',
                 route: '/docs/metrics-management/send-metrics/applications/golang',
                 label: 'Golang',
@@ -1637,23 +1651,6 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/metrics-management/nginx-metrics',
                 label: 'NGINX',
-              },
-            ],
-          },
-          {
-            type: 'category',
-            label: 'Runtimes',
-            isExpanded: false,
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/tutorial/jvm-metrics',
-                label: 'JVM',
-              },
-              {
-                type: 'doc',
-                route: '/docs/tutorial/jmx-metrics',
-                label: 'JMX Metrics',
               },
             ],
           },

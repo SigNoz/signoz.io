@@ -1,0 +1,249 @@
+---
+date: 2026-01-26
+id: jmx-metrics
+title: JMX Metrics
+description: Collect JMX metrics from any Java application using the OpenTelemetry Collector JMX receiver
+tags: [SigNoz Cloud, Self-Host]
+doc_type: howto
+---
+
+This guide shows you how to collect JMX (Java Management Extensions) metrics from any Java application using the OpenTelemetry Collector's JMX receiver. This approach works with any JVM-based application including Kafka, Cassandra, Tomcat, and custom Java services.
+
+<KeyPointCallout title="Using self-hosted SigNoz?" defaultCollapsed={true}>
+Most steps are identical. To adapt this guide, update the endpoint and remove the ingestion key header as shown in [Cloud → Self-Hosted](https://signoz.io/docs/ingestion/cloud-vs-self-hosted/#cloud-to-self-hosted).
+</KeyPointCallout>
+
+## Prerequisites
+
+- A Java application with JMX enabled
+- A SigNoz Cloud account or self-hosted SigNoz instance
+- OpenTelemetry Collector configured to send data to SigNoz
+
+## Step 1. Enable JMX on your Java application
+
+Configure your Java application to expose JMX metrics by adding these JVM arguments:
+
+```bash
+java \
+  -Dcom.sun.management.jmxremote \
+  -Dcom.sun.management.jmxremote.port=<jmx-port> \
+  -Dcom.sun.management.jmxremote.rmi.port=<jmx-port> \
+  -Dcom.sun.management.jmxremote.ssl=false \
+  -Dcom.sun.management.jmxremote.authenticate=false \
+  -jar your-application.jar
+```
+
+Replace `<jmx-port>` with your chosen port (e.g., `9999`).
+
+<Admonition type="warning">
+The example above disables SSL and authentication for simplicity. For production environments, enable authentication and SSL. See the [JMX security documentation](https://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html) for details.
+</Admonition>
+
+For environment variable configuration:
+
+```bash
+export JAVA_OPTS="-Dcom.sun.management.jmxremote \
+  -Dcom.sun.management.jmxremote.port=9999 \
+  -Dcom.sun.management.jmxremote.rmi.port=9999 \
+  -Dcom.sun.management.jmxremote.ssl=false \
+  -Dcom.sun.management.jmxremote.authenticate=false"
+```
+
+## Step 2. Download the JMX metrics JAR
+
+The OTel Collector JMX receiver requires the JMX Metric Gatherer JAR file. Download it from <a href="https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/" target="_blank" rel="noopener noreferrer nofollow">Maven Central</a>.
+
+<Admonition type="info">
+The JMX receiver validates the JAR file hash. The JAR version must be compatible with your OTel Collector version. For example, Collector v0.144.0 requires JAR version 1.52.0-alpha or earlier supported versions. If you see "jar hash does not match known versions" error, download a JAR version that matches your collector.
+</Admonition>
+
+For example, to download version 1.52.0-alpha:
+
+```bash
+curl -sLO https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-jmx-scraper/1.52.0-alpha/opentelemetry-jmx-scraper-1.52.0-alpha.jar
+```
+
+Place the JAR in a location accessible to the OTel Collector (e.g., `/opt/opentelemetry-jmx-scraper.jar`).
+
+## Step 3. Configure the OTel Collector JMX receiver
+
+Add the JMX receiver to your `otel-collector-config.yaml`. Append the following to your existing `receivers` section:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  jmx:
+    jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
+    endpoint: <app-host>:<jmx-port>
+    target_system: jvm
+```
+
+Replace:
+- `<app-host>`: Hostname or IP of your Java application
+- `<jmx-port>`: The JMX port configured in Step 1 (e.g., `9999`)
+
+### Supported target systems
+
+The `target_system` parameter determines which pre-built metric definitions to use. Choose based on your application:
+
+| Target System | Description |
+|---------------|-------------|
+| `jvm` | Generic JVM metrics (memory, threads, GC) |
+| `activemq` | Apache ActiveMQ broker metrics |
+| `cassandra` | Apache Cassandra database metrics |
+| `hbase` | Apache HBase metrics |
+| `hadoop` | Apache Hadoop metrics |
+| `jetty` | Eclipse Jetty server metrics |
+| `kafka` | Apache Kafka broker metrics |
+| `kafka-consumer` | Kafka consumer metrics |
+| `kafka-producer` | Kafka producer metrics |
+| `solr` | Apache Solr search metrics |
+| `tomcat` | Apache Tomcat server metrics |
+| `wildfly` | WildFly/JBoss application server metrics |
+
+You can specify multiple systems as a comma-separated list:
+
+```yaml
+target_system: jvm,tomcat,kafka
+```
+
+<details>
+<ToggleHeading>
+### Optional authentication
+</ToggleHeading>
+
+If your JMX endpoint requires authentication:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  jmx:
+    jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
+    endpoint: <app-host>:<jmx-port>
+    target_system: jvm
+    username: <jmx-username>
+    password: <jmx-password>
+```
+
+</details>
+
+## Step 4. Enable the JMX receiver in your pipeline
+
+Add the JMX receiver to your metrics pipeline:
+
+```yaml:otel-collector-config.yaml
+service:
+  pipelines:
+    metrics/jmx:
+      receivers: [jmx]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+<Admonition type="info">
+Using a separate pipeline (`metrics/jmx`) keeps JMX metrics isolated. You can also add `jmx` to an existing metrics pipeline if preferred.
+</Admonition>
+
+Restart the OTel Collector to apply changes:
+
+```bash
+# For Docker deployments
+docker compose restart otel-collector
+
+# For Kubernetes deployments
+kubectl rollout restart deployment otel-collector
+```
+
+## Validate
+
+1. Check OTel Collector logs to confirm successful JMX connection:
+   ```bash
+   docker logs otel-collector 2>&1 | grep -i jmx
+   ```
+
+2. Open SigNoz and go to **Metrics** → **Query Builder**
+3. Search for metrics starting with `jvm_` (e.g., `jvm_memory_used`, `jvm_threads_current`)
+4. Verify metrics are being received from your application
+
+<details>
+<ToggleHeading>
+## Example: Complete configuration
+</ToggleHeading>
+
+Here's a complete example for monitoring a Kafka broker:
+
+```yaml:otel-collector-config.yaml
+receivers:
+  jmx/kafka:
+    jar_path: /opt/opentelemetry-java-contrib-jmx-metrics.jar
+    endpoint: kafka-broker:9999
+    target_system: kafka,jvm
+    collection_interval: 10s
+
+processors:
+  batch:
+    timeout: 10s
+  resourcedetection:
+    detectors: [env, system]
+
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
+
+service:
+  pipelines:
+    metrics/kafka:
+      receivers: [jmx/kafka]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+```
+
+Replace `<region>` and `<your-ingestion-key>` with your SigNoz Cloud values.
+
+</details>
+
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### "Connection refused" when connecting to JMX?
+
+- Verify the Java application is running with JMX enabled
+- Check that the JMX port is correct and accessible
+- Ensure no firewall is blocking the connection
+- For Docker: ensure the container exposes the JMX port
+
+### "Failed to load JAR" error?
+
+- Verify the `jar_path` points to the correct location
+- Check file permissions on the JAR file
+- Ensure the JAR file was downloaded successfully (not corrupted)
+
+### No metrics appearing in SigNoz?
+
+- Check OTel Collector logs for errors
+- Verify the `target_system` matches your application type
+- Ensure the JMX receiver is included in the pipeline
+- Confirm the pipeline exports to the correct destination
+
+### Authentication errors?
+
+- Verify username and password are correct
+- Check that the JMX endpoint is configured to accept the provided credentials
+- For SSL-enabled endpoints, additional TLS configuration may be required
+
+### Metrics delayed or missing?
+
+- Increase `collection_interval` if the application is under heavy load
+- Check network latency between Collector and Java application
+- Verify the Java application isn't restarting frequently
+
+</details>
+
+## Next steps
+
+- [JVM Runtime Metrics](https://signoz.io/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics) for JVM runtime metrics using the OpenTelemetry Java agent
+- [JMX Dashboard Templates](https://github.com/SigNoz/dashboards/tree/main/jmx) for pre-built visualizations
+- [Creating custom dashboards](https://signoz.io/docs/userguide/dashboards/) to build your own metric panels
+- [Setup alerts](https://signoz.io/docs/setup-alerts-notification/) to get notified on resource thresholds

@@ -109,6 +109,24 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/tutorial/jvm-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/jmx-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/send-metrics/runtimes/java-metrics/jmx-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
+          permanent: true,
+        },
+        {
           source: '/docs/migration/opentelemetry-datadog-receiver/',
           destination: '/docs/migration/migrate-from-datadog/opentelemetry-datadog-receiver/',
           permanent: true,
