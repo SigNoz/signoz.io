@@ -80,14 +80,7 @@ const cloneAndCleanArticle = (articleEl: HTMLElement): HTMLElement => {
   CLEANUP_SELECTORS.forEach((selector) => {
     clone.querySelectorAll(selector).forEach((node) => node.remove())
   })
-  clone.querySelectorAll('.content-header-link').forEach((node) => {
-    const anchor = node.closest('a')
-    if (anchor) {
-      anchor.remove()
-    } else {
-      node.remove()
-    }
-  })
+
   clone.querySelectorAll('a').forEach((node) => {
     if (node.textContent?.trim()) return
     if (node.querySelector('img, svg')) return
