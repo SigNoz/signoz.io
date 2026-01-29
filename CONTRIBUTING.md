@@ -110,7 +110,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
   - Define on first use, then use the short form consistently.
   - Examples: “OpenTelemetry (OTel),” “OpenTelemetry Collector (OTel Collector),” “OpenTelemetry Protocol (OTLP).”
 - Placeholders and variables
-  - Use angle-bracket placeholders like `<service-name>`, `<region>`, `<SIGNOZ_INGESTION_KEY>`.
+  - Must use angle-bracket placeholders like `<service-name>`, `<region>`, `<SIGNOZ_INGESTION_KEY>`.
   - Immediately below the snippet, explain what each placeholder means.
 
 ## Documentation types and Diátaxis
@@ -214,7 +214,7 @@ Every doc should be skimmable and actionable.
       otlphttp:
         endpoint: https://ingest.<region>.signoz.cloud:443
         headers:
-          signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+          signoz-ingestion-key: <your-ingestion-key>
     service:
       pipelines:
         traces:
@@ -222,8 +222,8 @@ Every doc should be skimmable and actionable.
     ```
     This configures the OTel Collector to export traces to SigNoz Cloud using the OTLP/HTTP protocol. Read more about OTel Collector configuration [here](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/).
     Replace the following placeholders:
-    - `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
-    - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
   - **Append, don't replace**: When showing OpenTelemetry Collector configuration (e.g., adding a new receiver or exporter), show only the specific snippet to add and instruct the user to **append** it to their existing `otel-collector-config.yaml` and **enable** it in the pipeline. Avoid showing a full `otel-collector-config.yaml` that users might copy-paste, overwriting their existing setup (like resource detectors or other processors).
     - ✅ "Add the `filelog` receiver to your `receivers` section and enable it in `service.pipelines.logs`."
