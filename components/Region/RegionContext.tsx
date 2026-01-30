@@ -29,6 +29,39 @@ interface RegionContextType {
   isLoading: boolean
 }
 
+const FALLBACK_REGIONS: RegionData[] = [
+  {
+    name: 'us',
+    dns: 'us.signoz.cloud',
+    clusters: [
+      {
+        cloud_provider: 'gcp',
+        cloud_region: 'us-central1',
+      },
+    ],
+  },
+  {
+    name: 'eu',
+    dns: 'eu.signoz.cloud',
+    clusters: [
+      {
+        cloud_provider: 'gcp',
+        cloud_region: 'europe-central2',
+      },
+    ],
+  },
+  {
+    name: 'in',
+    dns: 'in.signoz.cloud',
+    clusters: [
+      {
+        cloud_provider: 'gcp',
+        cloud_region: 'asia-south1',
+      },
+    ],
+  },
+]
+
 const RegionContext = createContext<RegionContextType | undefined>(undefined)
 
 export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -48,11 +81,14 @@ export const RegionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/regions`)
         const data: RegionResponse = await response.json()
-        if (data.status === 'success') {
+        if (data.status === 'success' && data.data && data.data.length > 0) {
           setRegions(data.data)
+        } else {
+          setRegions(FALLBACK_REGIONS)
         }
       } catch (error) {
         console.error('Failed to fetch regions:', error)
+        setRegions(FALLBACK_REGIONS)
       } finally {
         setIsLoading(false)
       }
