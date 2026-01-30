@@ -20,7 +20,7 @@ const RegionTable = () => {
       name: region.name,
       cloudRegion: cluster.cloud_region,
       provider: cluster.cloud_provider,
-      dns: region.dns,
+      dns: `ingest.${region.dns}`,
     }))
   )
 
