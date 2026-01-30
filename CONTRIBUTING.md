@@ -132,7 +132,7 @@ These guidelines apply when your PR changes website code (for example: `app/**`,
   - Define on first use, then use the short form consistently.
   - Examples: “OpenTelemetry (OTel),” “OpenTelemetry Collector (OTel Collector),” “OpenTelemetry Protocol (OTLP).”
 - Placeholders and variables
-  - Must use angle-bracket placeholders like `<service-name>`, `<region>`, `<SIGNOZ_INGESTION_KEY>`.
+  - Must use angle-bracket placeholders like `<service-name>`, `<region>`, `<your-ingestion-key>`.
   - Immediately below the snippet, explain what each placeholder means.
 
 ## Documentation types and Diátaxis
