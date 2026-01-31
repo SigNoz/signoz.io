@@ -28,7 +28,7 @@ All services between the initial and the target service must maintain common log
 
 Just like trace context (`trace_id` and `span_id`), OpenTelemetry SDKs parse the baggage context, and instrumentation libraries propagate it across service boundaries automatically. This frees application developers from writing custom code to manage arbitrary metadata for downstream services, cutting down on high-maintenance duplicate code and preventing tight coupling across the application system.
 
-<Figure src="/img/blog/2026/01/otel-baggage-image%201.webp" alt="OTel baggage automatically propagates global metadata context across service boundaries." caption="OTel baggage automatically propagates global metadata context across service boundaries." />
+<Figure src="/img/blog/2026/01/otel-baggage-propagation.webp" alt="OTel baggage automatically propagates global metadata context across service boundaries." caption="OTel baggage automatically propagates global metadata context across service boundaries." />
 
 In some cases, this can reduce the need for a central data source to manage contextual metadata, such as a NoSQL database like Redis, saving developer time spent on maintaining relevant application logic.
 
@@ -48,7 +48,7 @@ The service can then set a span attribute capturing the context of the A/B testi
 
 Unlike span attributes, which are stored in the observability backend for analyzing and visualizing operations in microscopic detail, baggage context is more arbitrary, and observability backends do not store it by default. As seen in the above example, you can choose to store it through telemetry attributes based on your business needs.
 
-<Figure src="/img/blog/2026/01/otel-baggage-image%202.webp" alt="Baggage is used for passing business logic at runtime, and is not stored by observability backends." caption="Baggage is used for passing business logic at runtime, and is not stored by observability backends." />
+<Figure src="/img/blog/2026/01/otel-baggage-runtime.webp" alt="Baggage is used for passing business logic at runtime, and is not stored by observability backends." caption="Baggage is used for passing business logic at runtime, and is not stored by observability backends." />
 
 We’ll now look at how the OpenTelemetry baggage implementation works with Python code with a comprehensive hands-on demo.
 
@@ -84,7 +84,7 @@ Copy the `.env.example` to `.env` and set your SigNoz region and ingestion key v
 cp .env.example .env
 ```
 
-<Figure src="/img/blog/2026/01/otel-baggage-image%203.webp" alt="Fill your SigNoz ingestion details to enable the application to export telemetry." caption="Fill your SigNoz ingestion details to enable the application to export telemetry." />
+<Figure src="/img/blog/2026/01/otel-baggage-setup.webp" alt="Fill your SigNoz ingestion details to enable the application to export telemetry." caption="Fill your SigNoz ingestion details to enable the application to export telemetry." />
 
 Setup the virtual environment, activate it, and install the dependencies.
 
@@ -102,7 +102,7 @@ honcho start
 
 You’ll see honcho start the three scripts as separate processes; it injects the environment variables it reads from the `.env` file into each child process. We can safely ignore any deprecation warnings from external libraries as these do not affect our application.
 
-<Figure src="/img/blog/2026/01/otel-baggage-image%204.webp" alt="Running our microservices in one pane using honcho. Honcho injects env vars into each service automatically." caption="Running our microservices in one pane using honcho. Honcho injects env vars into each service automatically." />
+<Figure src="/img/blog/2026/01/otel-baggage-honcho.webp" alt="Running our microservices in one pane using honcho. Honcho injects env vars into each service automatically." caption="Running our microservices in one pane using honcho. Honcho injects env vars into each service automatically." />
 
 Before we actually go ahead with interacting with the application in the browser, you should understand its architecture and logical flow, and how we have each service interacts with baggage metadata.
 
@@ -214,7 +214,7 @@ Since baggage is immutable, the SDK creates a new instance each time we modify t
 
 To begin visualizing the data flow, first visit `http://localhost:8888/` , where you will be greeted by a page like below. Based on a random chance, you will receive 10 to 25% discount on listed items, or no discount at all. You can use the `Try Again` button to refresh the page and try your luck again.
 
-<Figure src="/img/blog/2026/01/otel-baggage-CleanShot_2026-01-30_at_20.24.192x.webp" alt="Application frontend showcasing items with discounted prices, and baggage flow in the footer." caption="Application frontend showcasing items with discounted prices, and baggage flow in the footer." />
+<Figure src="/img/blog/2026/01/otel-baggage-frontend.webp" alt="Application frontend showcasing items with discounted prices, and baggage flow in the footer." caption="Application frontend showcasing items with discounted prices, and baggage flow in the footer." />
 
 To visualize the telemetry data generated by the application, visit your SigNoz instance once you have refreshed the page several times and understood how the propagation mechanism works.
 
@@ -226,7 +226,7 @@ service.name in ['baggage-frontend', 'baggage-processor', 'baggage-pricing'] AND
 
 Then, click on any root span to open the trace detail view. This page breaks down the operations that happen when we visit our application at `http://localhost:8888/` or refresh the page. Click on the tiny arrows on the spans to further expand the *waterfall* view.
 
-<Figure src="/img/blog/2026/01/otel-baggage-image%205.webp" alt="SigNoz Trace Detail View showcasing a breakdown of a distributed trace." caption="SigNoz Trace Detail View showcasing a breakdown of a distributed trace." />
+<Figure src="/img/blog/2026/01/otel-baggage-trace.webp" alt="SigNoz Trace Detail View showcasing a breakdown of a distributed trace." caption="SigNoz Trace Detail View showcasing a breakdown of a distributed trace." />
 
 The flow matches with what we explained above, where the frontend calls the pricing service, which then calls the processor. After gathering the item data and pricing details, the frontend serves a Jinja HTML template, which is rendered in our browser.
 
@@ -234,11 +234,11 @@ We can also see that the root span contains our custom `discount_`-based span at
 
 We are also **correlating telemetry signals**: OpenTelemetry auto-instrumentation links application logs to all emitted traces as we’ve configured the `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` variable. Click on the Logs button under the `Related Signals` label on the right to view logs associated with that particular span.
 
-<Figure src="/img/blog/2026/01/otel-baggage-image%206.webp" alt="OpenTelemetry signal correlation enables users to check span-level logs within Traces view." caption="OpenTelemetry signal correlation enables users to check span-level logs within Traces view." />
+<Figure src="/img/blog/2026/01/otel-baggage-correlation.webp" alt="OpenTelemetry signal correlation enables users to check span-level logs within Traces view." caption="OpenTelemetry signal correlation enables users to check span-level logs within Traces view." />
 
 Clicking on the `Open in Logs Explorer` button will open the dedicated logs view for the complete trace.
 
-<Figure src="/img/blog/2026/01/otel-baggage-image%207.webp" alt="SigNoz logs view when accessing all logs for a given trace in one click." caption="SigNoz logs view when accessing all logs for a given trace in one click." />
+<Figure src="/img/blog/2026/01/otel-baggage-logs.webp" alt="SigNoz logs view when accessing all logs for a given trace in one click." caption="SigNoz logs view when accessing all logs for a given trace in one click." />
 
 ## Conclusion
 
@@ -248,6 +248,6 @@ If you have utilized SigNoz like we showcased above, you must also realize the i
 
 [SigNoz](https://signoz.io/) is the all-in-one OpenTelemetry-native observability platform that provides traces, metrics, and logs in one pane. It has many more features that leverage correlation, such as pre-built APM dashboards and Exception trackers.
 
-<Figure src="/img/blog/2026/01/otel-baggage-image%208.webp" alt="SigNoz provides pre-built APM dashboards for all services ingesting trace data." caption="SigNoz provides pre-built APM dashboards for all services ingesting trace data." />
+<Figure src="/img/blog/2026/01/otel-baggage-dashboard.webp" alt="SigNoz provides pre-built APM dashboards for all services ingesting trace data." caption="SigNoz provides pre-built APM dashboards for all services ingesting trace data." />
 
 You can try it out with [**SigNoz Cloud**](https://signoz.io/teams/) or self-host the [**Community Edition**](https://github.com/SigNoz/signoz) for free.
