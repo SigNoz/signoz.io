@@ -102,9 +102,13 @@ const DocContent: React.FC<{
       </div>
 
       {shouldRenderTOC ? (
-        <TableOfContents toc={toc} hideTableOfContents={effectiveHideTOC} source={source || ''} />
+        <>
+          <TableOfContents toc={toc} hideTableOfContents={!shouldRenderTOC} source={source || ''} />
+        </>
       ) : shouldReserveTocColumn ? (
-        <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+        <>
+          <div className="doc-toc doc-toc--placeholder" aria-hidden="true" />
+        </>
       ) : null}
     </>
   )

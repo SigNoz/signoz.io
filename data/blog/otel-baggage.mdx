@@ -1,0 +1,253 @@
+---
+title: "How OpenTelemetry Baggage Enables Global Context for Distributed Systems"
+slug: otel-baggage
+date: 2026-01-31
+tags: [opentelemetry, observability]
+authors: [dhruv_ahuja]
+description: Understand OpenTelemetry Baggage - Learn what it is and how it enables cross-signal context propagation, and its usage via a hands-on demo.
+keywords: [otel baggage, opentelemetry, context propagation, otel, demo]
+---
+
+[OpenTelemetry](https://signoz.io/opentelemetry/) (OTel) baggage is a signal that allows you to pass “global” metadata, like a customer ID or a feature flag, across every service in a distributed system. While standard tracing captures the *what* of an operation, it is often restricted to individual spans. Baggage fills this gap by automating *context propagation* across distributed systems.
+
+This write-up explains how Baggage works, how it helps resolve "parameter drilling", and enables you to affect application behaviour during a request. You’ll also see how it works practically via a hands-on demo.
+
+## What is OpenTelemetry Baggage?
+
+Baggage is one of OpenTelemetry’s established <a href="https://opentelemetry.io/docs/concepts/signals/" rel="noopener noreferrer nofollow" target="_blank">observability signals</a>, that primarily complements the three major signals considered the “pillars of observability” - traces, metrics, and logs. It introduces a standard way of propagating context across components in a *distributed* request, even if you aren’t exporting other signals for that request.
+
+A baggage is an *immutable* object that holds metadata as key-value pairs, similar to how [resource attributes](https://signoz.io/blog/otel-resource-attributes/) are defined. When OpenTelemetry-instrumented applications make or receive API calls, most libraries (such as HTTP clients) automatically inject and extract the baggage via HTTP header or gRPC metadata.
+
+With its implementation as a “utility” signal, baggage solves two primary problems for developers of modern applications.
+
+### Baggage Reduces Parameter “Drilling” & Tight Coupling Across Services
+
+Typically, to propagate data across services, you must either use custom headers or pass parameters via request payload. The problem arises when the data being sent from one service is required by a downstream service with multiple services in-between. Each service must implement logic to parse the data from incoming requests and re-attach it during API calls to downstream services.
+
+All services between the initial and the target service must maintain common logic, leading to tight coupling. For a parameter name change, you would adjust the logic across all services and deploy a new version for the changes to take effect! This is known as *parameter drilling*, where some code is stuck propagating information for components down the line.
+
+Just like trace context (`trace_id` and `span_id`), OpenTelemetry SDKs parse the baggage context, and instrumentation libraries propagate it across service boundaries automatically. This frees application developers from writing custom code to manage arbitrary metadata for downstream services, cutting down on high-maintenance duplicate code and preventing tight coupling across the application system.
+
+<Figure src="/img/blog/2026/01/otel-baggage-propagation.webp" alt="OTel baggage automatically propagates global metadata context across service boundaries." caption="OTel baggage automatically propagates global metadata context across service boundaries." />
+
+In some cases, this can reduce the need for a central data source to manage contextual metadata, such as a NoSQL database like Redis, saving developer time spent on maintaining relevant application logic.
+
+<KeyPointCallout title="Propagation of Sensitive Data">
+
+Since baggage context is automatically propagated across API calls, any PII data or secret keys may be attached to external API calls. Always check your baggage and remove any sensitive keys before making third-party web requests.
+
+</KeyPointCallout>
+
+### Using Baggage to Drive Real-Time Application Logic
+
+Metadata associated via baggage travels independently of the trace context and can be used by services independently. Since trace context is focused on correlating requests across services, and span attributes describe the operations as they happen for later analysis, applications cannot use this context *proactively*. But by utilizing baggage context, applications can decide which operations to execute (whether to call a function/method), or how *the trace will take shape* during its execution itself.
+
+For example, a load balancer can mark an incoming request for A/B testing of a new feature maintained by service C. In this case, service C can read the baggage when processing the request, check the baggage, and accordingly call the method for the new feature, or default to the old method.
+
+The service can then set a span attribute capturing the context of the A/B testing, such as `span.set_attribute("new_feature_used", True)`, enabling users to filter by traces where the new feature is being used.
+
+Unlike span attributes, which are stored in the observability backend for analyzing and visualizing operations in microscopic detail, baggage context is more arbitrary, and observability backends do not store it by default. As seen in the above example, you can choose to store it through telemetry attributes based on your business needs.
+
+<Figure src="/img/blog/2026/01/otel-baggage-runtime.webp" alt="Baggage is used for passing business logic at runtime, and is not stored by observability backends." caption="Baggage is used for passing business logic at runtime, and is not stored by observability backends." />
+
+We’ll now look at how the OpenTelemetry baggage implementation works with Python code with a comprehensive hands-on demo.
+
+## Implementing OTel Baggage in Applications
+
+Now that you understand the problems that baggage solves for distributed systems, the next step is understanding how it actually works with application code. We’ve prepared an example that emulates a microservice architecture, and showcases how services interact with baggage during a request flow.
+
+### Prerequisites
+
+- Python 3.10 (or later) installed (<a href="https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank">Download from here</a>).
+- A [SigNoz Cloud account](https://signoz.io/teams/) to export and analyze the generated telemetry data.
+
+**Setting up SigNoz**
+
+SigNoz is an OpenTelemetry-native observability platform that provides logs, traces, and metrics in a single pane. To set it up:
+
+- [**Sign up**](https://signoz.io/teams/) for a free SigNoz Cloud account.
+- [Follow this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to create ingestion keys for your account.
+- Ensure the region and ingestion key information is readily accessible for the next steps.
+
+### Preparing the OTel Baggage Demo
+
+To prepare the OTel baggage demo for use, you must first clone the [SigNoz examples GitHub repo](https://github.com/SigNoz/examples), that hosts all examples we maintain for various blogs.
+
+```bash
+git clone https://github.com/SigNoz/examples.git
+cd examples/python/otel-baggage-demo
+```
+
+Copy the `.env.example` to `.env` and set your SigNoz region and ingestion key values in the `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` environment variables respectively.
+
+```bash
+cp .env.example .env
+```
+
+<Figure src="/img/blog/2026/01/otel-baggage-setup.webp" alt="Fill your SigNoz ingestion details to enable the application to export telemetry." caption="Fill your SigNoz ingestion details to enable the application to export telemetry." />
+
+Setup the virtual environment, activate it, and install the dependencies.
+
+```bash
+python3.10 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+We’ll use <a href="https://github.com/nickstenning/honcho?tab=readme-ov-file" rel="noopener noreferrer nofollow" target="_blank">honcho</a> to automatically source our environment variables and run all three scripts in one terminal window. This allows us to manage all three services from a single terminal window.
+
+```bash
+honcho start
+```
+
+You’ll see honcho start the three scripts as separate processes; it injects the environment variables it reads from the `.env` file into each child process. We can safely ignore any deprecation warnings from external libraries as these do not affect our application.
+
+<Figure src="/img/blog/2026/01/otel-baggage-honcho.webp" alt="Running our microservices in one pane using honcho. Honcho injects env vars into each service automatically." caption="Running our microservices in one pane using honcho. Honcho injects env vars into each service automatically." />
+
+Before we actually go ahead with interacting with the application in the browser, you should understand its architecture and logical flow, and how we have each service interacts with baggage metadata.
+
+### Demo Application Architecture Overview
+
+<KeyPointCallout title="Skip to Visualization">
+
+Feel free to [jump to the next section](#visualizing-telemetry-flow-with-signoz) if you want to go hands-on with the application directly.
+
+</KeyPointCallout>
+
+The demo application has a relatively simple architecture, where the user interacts with the `frontend` via web browser. The `frontend` then interacts with the `pricing` service which gets item data from `processor`.
+
+These services are nothing but simple Python scripts serving web requests using the Flask web framework, and emulate more complex web services present in real distributed systems.
+
+```bash
+❯ tree -L 2 --du .
+[      30534]  .
+├── [       2614]  frontend.py
+├── [       3029]  pricing.py
+├── [       2975]  processor.py
+├── [        542]  Procfile
+├── [       5536]  README.md
+├── [       1352]  requirements.txt
+└── [      14102]  templates
+    └── [      14006]  index.html
+
+       30534 bytes used in 2 directories, 7 files
+```
+
+The `frontend` script acts like a real frontend by calling a backend API, parsing its JSON response, and rendering the UI in the browser. `pricing` acts like a thin wrapper by calculating the discount percentage, and calling `processor` which returns items with their original and discounted pricing.
+
+### How Baggage Propagation Works in Code
+
+For each request, the `frontend` determines whether the user is “lucky” and receives a discount or not. It adds its decision as context to the baggage, and calls the `pricing` service.
+
+```python
+# Set baggage; key-value pairs should be strings
+ctx = set_baggage("discount_eligible", str(discount_eligible).lower())
+token = context.attach(ctx)
+
+try:
+    # Call pricing to get items (baggage auto-propagates)
+    response = requests.get("http://localhost:8889/", timeout=5)
+		...
+```
+
+`pricing` receives the request, and checks the baggage. If the user is lucky, it calculates the discount percentage and adds the discount percentage to the baggage and calls the `processor` service’s `/get-items` endpoint.
+
+```python
+# Read baggage set by frontend
+discount_eligible = get_baggage("discount_eligible")
+
+...
+
+# Add discount percentage to baggage
+ctx = set_baggage("discount_pct", str(discount_pct))
+token = context.attach(ctx)
+
+# Call processor to get items (baggage auto-propagates)
+response = requests.get("http://localhost:8890/get-items", timeout=5)
+```
+
+The `processor` checks whether the user is lucky. If lucky, it gets the discount percentage, and applies the discount to all items and returns the processed list as response to the `pricing` service.
+
+```python
+# Read baggage
+discount_eligible = get_baggage("discount_eligible")
+discount_pct = get_baggage("discount_pct")
+
+# Process items with discount calculations
+processed_items = []
+for item in ITEMS:
+    ...
+    processed_items.append({
+        "id": item["id"],
+        "name": item["name"],
+        "original_price": round(original_price, 2),
+        "discounted_price": round(discounted_price, 2),
+        "has_discount": discount_eligible == "true" and original_price != discounted_price
+    })
+```
+
+`pricing` wraps this data and returns its own JSON response to the `frontend`, which finally renders a Jinja HTML template to the user with item details and the prices, based on whether the user was lucky or not.
+
+```python
+# skipping previously showcased code for brevity
+...
+
+# set baggage attributes for tracing for analysis with observability backend like SigNoz
+span = trace.get_current_span()
+span.set_attribute("discount_eligible", discount_eligible)
+span.set_attribute("discount_pct", discount_pct)
+
+# Render template
+return render_template(
+    'index.html',
+		...
+)
+```
+
+At each step of the request flow, services in the application system interact with baggage without having to manually extract it. OTel SDKs automatically attach the baggage context with the current request context for us, enabling us to focus on our business logic.
+
+However, implementations must re-attach baggage to the execution context when modifying the contents of the baggage object. For example, when processing the request in the `pricing` service, we first read the baggage value from the context, add a new value to the baggage, and re-attach it to the current context.
+
+Since baggage is immutable, the SDK creates a new instance each time we modify the contents of the active baggage object. We must attach the final instance to the context before making API calls to ensure the correct metadata gets propagated to downstream services.
+
+### Visualizing Telemetry Flow with SigNoz
+
+To begin visualizing the data flow, first visit `http://localhost:8888/` , where you will be greeted by a page like below. Based on a random chance, you will receive 10 to 25% discount on listed items, or no discount at all. You can use the `Try Again` button to refresh the page and try your luck again.
+
+<Figure src="/img/blog/2026/01/otel-baggage-frontend.webp" alt="Application frontend showcasing items with discounted prices, and baggage flow in the footer." caption="Application frontend showcasing items with discounted prices, and baggage flow in the footer." />
+
+To visualize the telemetry data generated by the application, visit your SigNoz instance once you have refreshed the page several times and understood how the propagation mechanism works.
+
+On opening the Trace Explorer view, you will see that you have multiple spans coming from services with `baggage-` in the name prefix. You can open any single span, or use this query to filter to only root spans:
+
+```
+service.name in ['baggage-frontend', 'baggage-processor', 'baggage-pricing'] AND isRoot = 'true'
+```
+
+Then, click on any root span to open the trace detail view. This page breaks down the operations that happen when we visit our application at `http://localhost:8888/` or refresh the page. Click on the tiny arrows on the spans to further expand the *waterfall* view.
+
+<Figure src="/img/blog/2026/01/otel-baggage-trace.webp" alt="SigNoz Trace Detail View showcasing a breakdown of a distributed trace." caption="SigNoz Trace Detail View showcasing a breakdown of a distributed trace." />
+
+The flow matches with what we explained above, where the frontend calls the pricing service, which then calls the processor. After gathering the item data and pricing details, the frontend serves a Jinja HTML template, which is rendered in our browser.
+
+We can also see that the root span contains our custom `discount_`-based span attributes. By attaching baggage context to the attributes of other signals, we can store them in observability backends to gain more insights into application behaviour.
+
+We are also **correlating telemetry signals**: OpenTelemetry auto-instrumentation links application logs to all emitted traces as we’ve configured the `OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED` variable. Click on the Logs button under the `Related Signals` label on the right to view logs associated with that particular span.
+
+<Figure src="/img/blog/2026/01/otel-baggage-correlation.webp" alt="OpenTelemetry signal correlation enables users to check span-level logs within Traces view." caption="OpenTelemetry signal correlation enables users to check span-level logs within Traces view." />
+
+Clicking on the `Open in Logs Explorer` button will open the dedicated logs view for the complete trace.
+
+<Figure src="/img/blog/2026/01/otel-baggage-logs.webp" alt="SigNoz logs view when accessing all logs for a given trace in one click." caption="SigNoz logs view when accessing all logs for a given trace in one click." />
+
+## Conclusion
+
+We’ve now covered in detail what baggage is, how it works and its utility for OpenTelemetry-instrumented applications. We’ve also gone over a hands-on demo that showcases how helpful baggage is for scaling distributed microservices and reducing the manual overhead of global context management.
+
+If you have utilized SigNoz like we showcased above, you must also realize the importance of telemetry correlation, and how it quickly allows developers to understand how their applications are behaving, and cross-check the events that led to a particular outcome (by jumping from traces → logs in one click).
+
+[SigNoz](https://signoz.io/) is the all-in-one OpenTelemetry-native observability platform that provides traces, metrics, and logs in one pane. It has many more features that leverage correlation, such as pre-built APM dashboards and Exception trackers.
+
+<Figure src="/img/blog/2026/01/otel-baggage-dashboard.webp" alt="SigNoz provides pre-built APM dashboards for all services ingesting trace data." caption="SigNoz provides pre-built APM dashboards for all services ingesting trace data." />
+
+You can try it out with [**SigNoz Cloud**](https://signoz.io/teams/) or self-host the [**Community Edition**](https://github.com/SigNoz/signoz) for free.

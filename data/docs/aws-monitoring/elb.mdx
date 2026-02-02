@@ -359,11 +359,11 @@ def lambda_handler(event, context):
             json_data = [convert_log_line_to_json(line) for line in list_of_strings]
             
             req_headers = {
-                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+                     'signoz-ingestion-key': '<your-ingestion-key>',
                      'Content-Type': 'application/json'
                 }
             # Specify the HTTP endpoint for sending the data
-            http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'  # Replace <region> with us, eu, or in
+            http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'  # Replace `<region>` with your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) 
 
             # Send the JSON data to the specified HTTP endpoint
             response = requests.post(http_url, json=json_data, headers=req_headers)
@@ -373,10 +373,10 @@ def lambda_handler(event, context):
 ```
 
 
-Replace the following placeholders:
+Verify these values:
 - `<name_of_your_bucket>`: The name of your S3 bucket containing ELB logs.
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz ingestion key. See [Ingestion Keys](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for details.
-- `<region>`: Your SigNoz Cloud region (`us`, `eu`, or `in`). See [SigNoz Cloud endpoints](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for details.
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<region>`: Your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 
 Here’s how a raw, unprocessed ELB log line looks like:
 
@@ -462,7 +462,7 @@ def process_log_file(file_path):
         list_of_strings = json.loads(result)
         json_data = [convert_log_line_to_json(line) for line in list_of_strings]
         req_headers = {
-                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+                     'signoz-ingestion-key': '<your-ingestion-key>',
                      'Content-Type': 'application/json'
                 }
         http_url = 'https://ingest.<region>.signoz.cloud:443/logs/json'
@@ -623,7 +623,7 @@ metrics:
     aws_statistics: [Sum]
 ```
 
-Replace the following:
+Verify these values:
 - `<aws-region>`: Your AWS region where ELBs are deployed (e.g., `us-east-1`, `eu-west-1`, `ap-south-1`).
 
 See <a href="https://github.com/prometheus/cloudwatch_exporter/tree/master/examples" target="_blank" rel="noopener noreferrer nofollow">example configurations</a> for more service templates.
@@ -690,7 +690,7 @@ receivers:
             - targets: ['<exporter-host>:9106']
 ```
 
-Replace the following:
+Verify these values:
 - `<exporter-host>`: The hostname or IP where the CloudWatch Exporter is running. Use `localhost` if running on the same machine.
 
 Enable the `prometheus` receiver in your metrics pipeline by updating the `service` section:
