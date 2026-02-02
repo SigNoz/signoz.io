@@ -2,15 +2,17 @@
 
 Thanks for helping improve SigNoz documentation. Clear, complete docs are critical for adoption of SigNoz and for the broader OpenTelemetry ecosystem. This guide explains how to contribute and the standards we follow.
 
-- Scope: The guidelines below apply to product documentation pages under `data/docs/**`.
+- Scope: The documentation content guidelines below apply to product documentation pages under `data/docs/**`.
 - Development setup and local preview are in `README.md`.
 - A blog contribution workflow is included later for convenience, but the content/style rules in this guide are specific to docs (not blogs).
+- If your PR changes site code (for example: `app/**`, `components/**`, `hooks/**`, `utils/**`), follow [Site Code Guidelines](#site-code-guidelines).
 - For questions or clarifications, open a draft PR early and ask for feedback.
 
 ## Table of Contents
 
 - [Workflow](#workflow)
 - [Git Hooks and Checks](#git-hooks-and-checks)
+- [Site Code Guidelines](#site-code-guidelines)
 - [General Guidelines](#general-guidelines)
 - [Documentation types and Diátaxis](#documentation-types-and-diátaxis)
 - [Content Structure](#content-structure)
@@ -70,6 +72,26 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
   - When a PR is labeled `add-to-onboarding`, this job checks that the PR includes docs changes. If none are found, the job fails with a message.
   - If docs are present, it auto-creates an onboarding issue listing changed docs and comments on the PR with a link.
 
+## Website Code Guidelines
+
+These guidelines apply when your PR changes website code (for example: `app/**`, `components/**`, `hooks/**`, `utils/**`).
+
+- Prefer existing icon libraries
+  - Use `lucide-react` or `react-icons` for icons.
+  - If you need a custom brand/logo asset, place it under `public/svgs/**` and reference it via `/svgs/...` (avoid inline SVG blobs in components).
+- Prefer existing UI primitives
+  - Use existing components in `components/ui/**` (for example `components/ui/Button`) instead of raw HTML elements for interactive UI.
+  - Avoid styling overrides unless necessary; keep Tailwind classes consistent with existing patterns.
+- Keep types/constants co-located and reusable
+  - Move component-local types/constants into separate files (for example `MyComponent.types.ts`, `MyComponent.constants.ts`) and export from the folder `index.ts` when needed outside the folder.
+- Avoid concurrent async invocations
+  - For click handlers that do async work, prevent multiple concurrent runs (set loading state before `await` and/or guard with a ref).
+- Be deliberate about DOM cleanup/transforms
+  - When cleaning up rendered DOM before transforming (for example, HTML → Markdown), avoid redundant selectors and ensure cleanup order matches the intended behavior.
+- Dependencies must be justified
+  - Do not add new packages unless they are required and there is no existing dependency that fits.
+  - If you add a dependency, include a short justification in the PR description and ensure it is used in code.
+
 ## General Guidelines
 
 - Assume basic language/library knowledge
@@ -110,7 +132,7 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
   - Define on first use, then use the short form consistently.
   - Examples: “OpenTelemetry (OTel),” “OpenTelemetry Collector (OTel Collector),” “OpenTelemetry Protocol (OTLP).”
 - Placeholders and variables
-  - Use angle-bracket placeholders like `<service-name>`, `<region>`, `<SIGNOZ_INGESTION_KEY>`.
+  - Must use angle-bracket placeholders like `<service-name>`, `<region>`, `<your-ingestion-key>`.
   - Immediately below the snippet, explain what each placeholder means.
 
 ## Documentation types and Diátaxis
@@ -214,16 +236,17 @@ Every doc should be skimmable and actionable.
       otlphttp:
         endpoint: https://ingest.<region>.signoz.cloud:443
         headers:
-          signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
+          signoz-ingestion-key: <your-ingestion-key>
     service:
       pipelines:
         traces:
           exporters: [otlphttp]
     ```
     This configures the OTel Collector to export traces to SigNoz Cloud using the OTLP/HTTP protocol. Read more about OTel Collector configuration [here](https://signoz.io/docs/collection-agents/opentelemetry-collector/configuration/).
-    Replace the following placeholders:
-    - `<region>`: Your SigNoz Cloud region, for example `us`, `eu`, or `in`.
-    - `<SIGNOZ_INGESTION_KEY>`: Ingestion key for your SigNoz Cloud org. See https://signoz.io/docs/ingestion/signoz-cloud/keys/
+    
+    Verify these values:
+    - `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+    - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
   - **Append, don't replace**: When showing OpenTelemetry Collector configuration (e.g., adding a new receiver or exporter), show only the specific snippet to add and instruct the user to **append** it to their existing `otel-collector-config.yaml` and **enable** it in the pipeline. Avoid showing a full `otel-collector-config.yaml` that users might copy-paste, overwriting their existing setup (like resource detectors or other processors).
     - ✅ "Add the `filelog` receiver to your `receivers` section and enable it in `service.pipelines.logs`."
