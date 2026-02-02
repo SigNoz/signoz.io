@@ -15,7 +15,7 @@ const SigNozStats: React.FC = () => {
       id: 2,
       logo: '/img/index_features/github.svg',
       name: 'GitHub Stars',
-      value: '24k+',
+      value: '25k+',
     },
   ]
 

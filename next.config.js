@@ -4,6 +4,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 })
 
+const defaultFrameAncestors =
+  "'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud"
+
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
@@ -15,7 +18,7 @@ const ContentSecurityPolicy = `
   font-src * 'self';
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
-  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
+  frame-ancestors ${process.env.CSP_FRAME_ANCESTORS || defaultFrameAncestors};
 `
 
 const securityHeaders = [
@@ -123,6 +126,24 @@ module.exports = () => {
         {
           source: '/docs/instrumentation/opentelemetry-wordpress/',
           destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/jvm-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/#jvm-runtime-metrics',
+          permanent: true,
+        },
+        {
+          source: '/docs/tutorial/jmx-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/metrics-management/send-metrics/runtimes/java-metrics/jmx-metrics/',
+          destination:
+            '/docs/metrics-management/send-metrics/applications/opentelemetry-java/jmx-metrics/',
           permanent: true,
         },
         {
@@ -583,12 +604,17 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/ruby/',
-          destination: '/docs/instrumentation/ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
           permanent: true,
         },
         {
           source: '/docs/instrumentation/ruby-on-rails/',
-          destination: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby/',
           permanent: true,
         },
         {

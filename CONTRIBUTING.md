@@ -2,15 +2,17 @@
 
 Thanks for helping improve SigNoz documentation. Clear, complete docs are critical for adoption of SigNoz and for the broader OpenTelemetry ecosystem. This guide explains how to contribute and the standards we follow.
 
-- Scope: The guidelines below apply to product documentation pages under `data/docs/**`.
+- Scope: The documentation content guidelines below apply to product documentation pages under `data/docs/**`.
 - Development setup and local preview are in `README.md`.
 - A blog contribution workflow is included later for convenience, but the content/style rules in this guide are specific to docs (not blogs).
+- If your PR changes site code (for example: `app/**`, `components/**`, `hooks/**`, `utils/**`), follow [Site Code Guidelines](#site-code-guidelines).
 - For questions or clarifications, open a draft PR early and ask for feedback.
 
 ## Table of Contents
 
 - [Workflow](#workflow)
 - [Git Hooks and Checks](#git-hooks-and-checks)
+- [Site Code Guidelines](#site-code-guidelines)
 - [General Guidelines](#general-guidelines)
 - [Documentation types and Diátaxis](#documentation-types-and-diátaxis)
 - [Content Structure](#content-structure)
@@ -69,6 +71,26 @@ Thanks for helping improve SigNoz documentation. Clear, complete docs are critic
 - Add to Onboarding (label-driven)
   - When a PR is labeled `add-to-onboarding`, this job checks that the PR includes docs changes. If none are found, the job fails with a message.
   - If docs are present, it auto-creates an onboarding issue listing changed docs and comments on the PR with a link.
+
+## Website Code Guidelines
+
+These guidelines apply when your PR changes website code (for example: `app/**`, `components/**`, `hooks/**`, `utils/**`).
+
+- Prefer existing icon libraries
+  - Use `lucide-react` or `react-icons` for icons.
+  - If you need a custom brand/logo asset, place it under `public/svgs/**` and reference it via `/svgs/...` (avoid inline SVG blobs in components).
+- Prefer existing UI primitives
+  - Use existing components in `components/ui/**` (for example `components/ui/Button`) instead of raw HTML elements for interactive UI.
+  - Avoid styling overrides unless necessary; keep Tailwind classes consistent with existing patterns.
+- Keep types/constants co-located and reusable
+  - Move component-local types/constants into separate files (for example `MyComponent.types.ts`, `MyComponent.constants.ts`) and export from the folder `index.ts` when needed outside the folder.
+- Avoid concurrent async invocations
+  - For click handlers that do async work, prevent multiple concurrent runs (set loading state before `await` and/or guard with a ref).
+- Be deliberate about DOM cleanup/transforms
+  - When cleaning up rendered DOM before transforming (for example, HTML → Markdown), avoid redundant selectors and ensure cleanup order matches the intended behavior.
+- Dependencies must be justified
+  - Do not add new packages unless they are required and there is no existing dependency that fits.
+  - If you add a dependency, include a short justification in the PR description and ensure it is used in code.
 
 ## General Guidelines
 
