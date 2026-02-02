@@ -1124,8 +1124,8 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'Tutorials',
-        // route: '',
+        label: 'User Guides',
+        route: '/docs/traces-management/guides/overview',
         items: [
           {
             type: 'doc',
