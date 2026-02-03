@@ -10,7 +10,7 @@ import GetHelp from '@/components/shared/get-help.md'
 
 This guide shows you how to send logs from a Convex backend to SigNoz using **Convex log streaming** and a **Webhook Bridge**.
 
-Convex log streaming sends logs as JSON or JSONL webhooks with HMAC-SHA256 signatures. SigNoz ingests logs via its JSON logs endpoint. You'll need deploy a small Express service that:
+Convex log streaming sends logs as JSON or JSONL webhooks with HMAC-SHA256 signatures. SigNoz ingests logs via its JSON logs endpoint. You'll need to deploy a small Express service that:
 
 1. Receives and verifies Convex webhook requests
 2. Transforms Convex log events for SigNoz
@@ -151,7 +151,7 @@ async function sendToSigNoz(logs) {
   const transformedLogs = logs.map((log) => {
     const newLog = { ...log };
 
-    // Set resource attributes (service.name for SigNoz grouping)
+    // Set resource attributes
     newLog.resources = {
       "service.name": serviceName,
     };
@@ -242,6 +242,11 @@ SIGNOZ_REGION=<region> \
 SIGNOZ_INGESTION_KEY=<your-ingestion-key> \
 node index.js
 ```
+
+Verify these values:
+- `<your-convex-secret>`: The HMAC secret from your Convex dashboard (see Step 4)
+- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 Verify it's running:
 
@@ -338,7 +343,8 @@ Logs should appear within a few seconds.
 ## Next Steps
 
 - Explore the [Logs Explorer](https://signoz.io/docs/userguide/logs/) to query and filter Convex logs
-- Create [alerts](https://signoz.io/docs/userguide/alerts-management/) on Convex error logs
+- Create [alerts](https://signoz.io/docs/userguide/alerts-management/) on Convex error logs or specific log patterns
+- Learn how to [create dashboards](https://signoz.io/docs/userguide/manage-dashboards/) to visualize your Convex log trends
 
 ## Get Help
 

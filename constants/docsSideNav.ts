@@ -1329,11 +1329,6 @@ const docsSideNav = [
 
           {
             type: 'doc',
-            route: '/docs/logs-management/send-logs/convex-log-streams-signoz',
-            label: 'Convex logs',
-          },
-          {
-            type: 'doc',
             route: '/docs/userguide/send-cloudwatch-logs-to-signoz',
             label: 'Cloudwatch logs',
           },
@@ -1341,6 +1336,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/cloudflare-logs',
             label: 'Cloudflare logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/convex-log-streams-signoz',
+            label: 'Convex logs',
           },
           {
             type: 'doc',
