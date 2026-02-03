@@ -1282,6 +1282,7 @@ module.exports = () => {
         {
           source: '/docs/userguide/k8s-metrics/',
           destination: '/docs/infrastructure-monitoring/k8s-metrics/',
+          permanent: true,
         },
         {
           source: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
