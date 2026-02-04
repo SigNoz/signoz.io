@@ -33,6 +33,12 @@ const CustomLink = ({ href, ...rest }: LinkProps & AnchorHTMLAttributes<HTMLAnch
       if (cloudRegionParam) {
         finalHref = `${finalHref}&cloud_region=${cloudRegionParam}`
       }
+
+      return <Link href={finalHref} {...rest} target="_blank" />
+    }
+
+    if (href.startsWith('https://signoz.io/')) {
+      return <Link href={finalHref} {...rest} target="_blank" />
     }
 
     return <Link href={finalHref} {...rest} />
