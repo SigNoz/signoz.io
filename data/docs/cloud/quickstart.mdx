@@ -2,7 +2,7 @@
 title: Send Demo App Telemetry to SigNoz Cloud in minutes
 id: quickstart
 tags : [SigNoz Cloud]
-date: 2026-01-28
+date: 2026-02-03
 doc_type: howto
 description: Set up the OpenTelemetry Demo Application to send logs, metrics, and traces to SigNoz Cloud in minutes.
 ---
@@ -38,13 +38,12 @@ git clone https://github.com/SigNoz/opentelemetry-demo-lite.git
 cd opentelemetry-demo-lite
 ```
 
-### Step 2: Configure Environment Variables
+### Step 2: Start the Demo App
 
-Set the following environment variables to send data to SigNoz Cloud:
+From the root of the `opentelemetry-demo-lite` directory, run:
 
 ```bash
-export OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443
-export SIGNOZ_INGESTION_KEY=<your-ingestion-key>
+OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 SIGNOZ_INGESTION_KEY=<your-ingestion-key> docker compose up -d
 ```
 
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](/docs/ingestion/signoz-cloud/keys/)
@@ -57,9 +56,7 @@ OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443
 SIGNOZ_INGESTION_KEY=<your-ingestion-key>
 ```
 
-### Step 3: Start the Demo App
-
-From the root of the `opentelemetry-demo-lite` directory, run:
+Then run:
 
 ```bash
 docker compose up -d
@@ -91,6 +88,53 @@ The application is pre-configured to send telemetry data to SigNoz Cloud automat
 
 You are now successfully sending data to SigNoz Cloud!
 
+<details>
+<ToggleHeading>
+## Troubleshooting
+</ToggleHeading>
+
+### Enable collector's debug logging
+
+Edit `otel-collector-config.yaml` and change the log level from `info` to `debug`:
+
+```yaml
+service:
+  telemetry:
+    logs:
+      level: debug
+```
+
+Restart with rebuild to apply changes:
+
+```bash
+docker compose up -d --build
+```
+
+Check the OTel Collector logs for detailed export information:
+
+```bash
+docker compose logs otel-col
+```
+
+Look for successful export messages or errors like connection failures and authentication issues.
+
+### Containers not starting
+
+If containers are failing to start, check the logs for the specific service:
+
+```bash
+docker compose logs <service-name>
+```
+
+Ensure Docker has adequate memory and no port conflicts exist.
+
+### Services not appearing in SigNoz
+
+- Verify your `OTLP_ENDPOINT` and `SIGNOZ_INGESTION_KEY` are set correctly
+- Check network connectivity to the SigNoz endpoint
+- Wait 2-3 minutes after starting the demo app (OpenTelemetry buffers data before sending)
+
+</details>
 
 ## Next Steps
 
