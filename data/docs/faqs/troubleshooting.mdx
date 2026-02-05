@@ -62,27 +62,3 @@ A. You might need to zoom out a bit to see your service.
 4. If needed, inspect traces in the Traces tab to confirm calls between services are present.
 
 </details>
-
-### Why am I seeing "connection is draining" errors when pushing metrics to SigNoz?
-
-A. These "connection is draining" errors are expected and occur occasionally as the SigNoz ingestor system automatically scales up and down. The errors you're seeing indicate temporary connection issues, but they don't result in data loss.
-
-<details>
-
-<summary> Show detailed steps </summary>
-
-When you see these errors:
-
-- The failed requests are automatically retried with exponential backoff for up to 5 minutes
-- The retries will eventually succeed, ensuring your metrics data is delivered
-- This is normal behavior and not a cause for concern
-
-**When to be concerned:**
-
-Only worry if you see "dropping data" messages in your logs, as this would indicate actual data loss.
-
-**Frequency:**
-
-Seeing these errors 2-3 times per day is within normal operating parameters and doesn't require any action on your part. The retry mechanism built into the OTLP exporter ensures reliable delivery of your observability data despite these temporary connection issues.
-
-</details>
