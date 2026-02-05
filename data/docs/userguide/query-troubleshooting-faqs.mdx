@@ -1,0 +1,60 @@
+---
+date: 2026-02-05
+id: query-troubleshooting-faqs
+title: Query Troubleshooting - FAQs
+description: Frequently Asked Questions About Query Builder and Formula Queries
+doc_type: howto
+---
+
+### Q. Why is my formula query (A/B) not showing any data?
+
+A. When using formula queries like `A/B` in dashboards, the most common reason for missing data is mismatched timestamps and label sets between the queries.
+
+<details>
+
+<summary> Show detailed explanation and solution </summary>
+
+**Common Issue: Mismatched timestamps and label sets**
+
+For a formula like `A/B` to work, both queries A and B must have:
+- Matching timestamps
+- Matching label sets
+
+If your queries A and B have different filter conditions (especially different states or grouping labels), there may be no common label set to evaluate the formula against, resulting in no data.
+
+**Example: Calculating Error Rate**
+
+Here's a practical example of calculating error rate using the Metrics Query Builder:
+
+**Query A (Errors)**
+- **Metric**: `signoz_calls_total`
+- **Filters (WHERE)**: `status_code = STATUS_CODE_ERROR` (or whatever "error" value your data uses)
+- **Aggregation**: `rate` (per min / per sec — keep it consistent with Query B)
+- **Group by**: `service_name`, `operation` (or `service_name`, `http_route` if you prefer route-level)
+
+**Query B (Total)**
+- **Metric**: `signoz_calls_total`
+- **Filters (WHERE)**: _(no status_code filter — this captures all calls)_
+- **Aggregation**: `rate` (same time unit as Query A)
+- **Group by**: `service_name`, `operation` (must match Query A exactly)
+
+**Formula**
+In the Formula field:
+- `A / B` (for a ratio between 0 and 1)
+- Or `(A / B) * 100` (for a percentage between 0 and 100)
+
+**Important**: If you see the error message "Please build and run a valid query to see the result", this typically means:
+- One or both queries (A or B) are not returning any data, or
+- The label sets between A and B don't match, preventing formula evaluation
+
+**To resolve this issue:**
+
+1. **Set the correct aggregation interval**: If you're reporting metrics at 5-minute intervals, manually set the aggregation interval to 300 seconds instead of leaving it on auto.
+
+2. **Ensure compatible label sets**: Make sure your queries A and B can produce data points with matching timestamps and label combinations. The `Group by` fields in both queries must be identical. If they have different filter conditions that prevent overlap, consider adjusting your queries to have compatible label sets.
+
+3. **Verify each query independently**: Run Query A and Query B separately first to ensure both are returning data before combining them in a formula.
+
+4. **Check for zero or near-zero values**: While near-zero values shouldn't prevent formula evaluation, ensure your data contains the expected values for both queries.
+
+</details>
