@@ -236,51 +236,14 @@ Selecting the appropriate visualization tool is crucial for maximizing the value
 
 Remember — there's no one-size-fits-all solution. The best tool depends on your specific needs, existing infrastructure, and team expertise.
 
-## Popular OpenTelemetry Visualization Tools
-
-Let's explore some widely-used options for visualizing OpenTelemetry data:
-
-### Open-source Options
-
-1. **SigNoz:** An open-core, full-stack observability platform built **natively for OpenTelemetry.**
-2. **Jaeger**:
-    - Specializes in distributed tracing visualization
-    - Offers a powerful query language for trace analysis
-    - Provides service dependency graphs and flame graphs for performance insights
-3. **Prometheus**:
-    - Focuses on metrics collection and visualization
-    - Features a flexible query language (PromQL) for data analysis
-    - Includes a built-in alerting system
-4. **Grafana**:
-    - Creates highly customizable dashboards
-    - Supports multiple data sources, including Prometheus and Jaeger
-    - Offers a wide range of visualization types and plugins
-
-### Commercial Solutions
-
-Several vendor-agnostic commercial options provide comprehensive OpenTelemetry visualization capabilities:
-
-- **Datadog**: Offers extensive integrations and AI-powered analytics.
-- **New Relic**: Provides a unified platform for metrics, traces, and logs.
-- **Honeycomb**: Specializes in high-cardinality observability data.
-
-Cloud providers also offer native observability solutions compatible with OpenTelemetry:
-
-- Amazon CloudWatch
-- Google Cloud Operations Suite
-- Azure Monitor
-
-These commercial options often provide additional features like advanced analytics, anomaly detection, and integrated incident management — but at a cost.
-
 ## Visualizing OpenTelemetry data with SigNoz
 
-For any user of an observability platform, a dashboard is the first place to visit to understand system health patterns and track key metrics. Dashboards must be intuitive to use, easy to maintain and flexible to match the needs of the power users.
-
-Let us see what kind of visualizations are possible with OpenTelemetry data.
+Noting the above requirements, SigNoz aims to provide a comprehensive visualization experience across all features (and not just Traces, Metrics, and Logs). While a dashboard might be the first place an engineer looks at when debugging a critical issue, that is just the starting point.
+Building on its OpenTelemetry-native foundations, SigNoz provides several forms of visualizations, let's understand what these are.
 
 **Application Metrics**
 
-[SigNoz](https://signoz.io/blog/open-source-datadog-alternative/) comes with out-of-box charts for the popular RED(requests, error, and duration) metrics.
+[SigNoz](https://signoz.io/blog/open-source-datadog-alternative/) comes with out-of-box charts for the popular RED(requests, error, and duration) metrics. Acting as the "bird's eye view", these metrics help you quickly track application health, derive high-level insights and take actions (via telemetry *correlation*) as you notice anomalies.
 
 <Figure src="/img/blog/2026/02/opentelemetry-visualization-metrics.webp" alt="When a service exports data to SigNoz, it generates intuitive RED metric dashboards by default." caption="When a service exports data to SigNoz, it generates intuitive RED metric dashboards by default." />
 
@@ -290,7 +253,7 @@ The tracing data captured with OpenTelemetry can be visualized with the help of 
 
 <Figure src="/img/blog/common/signoz_flamegraphs.webp" alt="SigNoz distributed traces view provides detailed breakdown via Flamegraphs and Gantt charts." caption="SigNoz distributed traces view provides detailed breakdown via Flamegraphs and Gantt charts." />
 
-**Trace aggregates**
+**Trace Aggregates**
 
 Using SigNoz dashboards, you can visualize and dissect aggregated trace data collected with OpenTelemetry. These trace aggregates visualizations helps you create service-centric views. For example, you can see the P99 latency of all your services to pinpoint the services facing performance issues.
 
@@ -305,6 +268,14 @@ OpenTelemetry provides <a href="https://github.com/open-telemetry/opentelemetry-
 With AI becoming a core necessity, infrastructure isn’t is the only use-case, and all modern day applications tend to interact with LLMs in some manner. An emerging use-case is the monitoring of your LLM calls to track the token burn, chat context, etc. for your models, whether it is within applications or with developer-centric tools such as [Claude Code](https://signoz.io/blog/claude-code-monitoring-with-opentelemetry/).
 
 <Figure src="/img/docs/dashboards/dashboard-templates/claude-code-dashboard.webp" alt="Create custom dashboards to track LLM usage for services such as Claude Code." caption="Create custom dashboards to track LLM usage for services such as Claude Code." />
+
+**Infrastructure Metrics**
+
+While trace aggregates, APM metrics and the like are great for observing the *business logic*, they don't provide visibility into the underlying infrastructure. You are leaving a blind spot in your observability pipeline if you aren't visualizing host-level metrics such as CPU, memory, disk, etc. SigNoz provides dedicated dashboards per-host to track infrastructure health, and correlates all logs and traces emitted by the applications running on that host. 
+
+<Figure src="/img/blog/2026/02/opentelemetry-visualization-infra.webp" alt="Visualize host-level metrics such as CPU, memory, disk, etc. and access correlated telemetry in SigNoz." caption="Visualize host-level metrics such as CPU, memory, disk, etc. and access correlated telemetry in SigNoz." />
+
+If [SigNoz](https://signoz.io/) sounds like the right tool for visualizing the telemetry data generated by your application systems, sign up today for [**SigNoz Cloud**](https://signoz.io/teams/) or self-host the [**Community Edition**](https://github.com/SigNoz/signoz) for free.
 
 ## Best Practices for Effective OpenTelemetry Visualization
 
@@ -374,7 +345,6 @@ By anticipating and addressing these challenges, you can create a more effective
 - Common challenges include dealing with high-cardinality data and managing large data volumes.
 
 ## FAQs
-
 ### What's the difference between OpenTelemetry and visualization tools?
 
 OpenTelemetry is a framework for collecting and exporting telemetry data. Visualization tools take this data and create graphical representations. While OpenTelemetry standardizes data collection, visualization tools focus on presenting that data in meaningful ways.
