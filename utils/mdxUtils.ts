@@ -147,7 +147,7 @@ export const transformComparison = (comparison: MDXContent) => {
     keywords,
     slug,
     content: comparison.content,
-    body: { raw: comparison.content || '', code: '' },
+    body: { raw: '', code: '' },
     toc: generateTOC(comparison.content || ''),
     readingTime: readingTimeStats,
     path,
