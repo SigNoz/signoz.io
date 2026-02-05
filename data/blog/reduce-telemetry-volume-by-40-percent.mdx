@@ -138,16 +138,18 @@ You can disable the generation of these scheduler spans by using system properti
 | **Spring Scheduling** | `otel.instrumentation.spring-scheduling.enabled=false` |
 | **Quartz** | `otel.instrumentation.quartz.enabled=false` |
 
-### **#8. SDK Misalignment**
+### #8. SDK Misalignment
 
 Another massive source of enterprise waste occurs when a framework like [Trino](https://trino.io/) initialises its own internal OpenTelemetry SDK instance instead of joining the global instance provided by the Java agent. 
 
 This results in two parallel telemetry pipelines running in one JVM doubling memory overhead and network traffic. Because the instances are separate, the valuable business spans from the framework often miss the agent's auto-detected resource attributes like Kubernetes namespace, making the data invisible to standard production queries and hence can become excess or not useful.
 
-![A GitHub issue mentioning something similar](attachment:d7b30944-0cb9-45d0-8e32-202e33479eef:Screenshot_2026-01-30_at_11.11.52_PM.png)
 
-A GitHub issue mentioning something similar
-
+<Figure 
+  src="/img/blog/2026/02/sdk-misalignment.webp" 
+  alt="A GitHub issue mentioning something similar" 
+  caption="A GitHub issue mentioning something similar" 
+/>
 ## Mitigation Strategies 🚒
 
 Now, that we saw several ways in which your application could generate telemetry, this section is really broad overview on how you can try to mitigate the waste generated.
