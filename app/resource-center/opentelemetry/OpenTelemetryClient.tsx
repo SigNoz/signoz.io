@@ -11,7 +11,7 @@ export default function OpenTelemetryClient({
   initialArticles,
   comparisons,
 }: {
-  initialArticles?: any[]
+  initialArticles?: MDXContent[]
   comparisons?: MDXContent[]
 }) {
   const [activeTab, setActiveTab] = useState('openTelemetry-tab')

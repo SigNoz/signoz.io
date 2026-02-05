@@ -77,6 +77,11 @@ const getComparisons = async () => {
   }
 }
 
+type ContentIndexItem = {
+  prefix: string
+  collection: (Blog | Guide | MDXContent)[]
+}
+
 function normalizeRoute(route: string) {
   // Strip domain if present
   const withoutDomain = route.replace(/^https?:\/\/[^/]+/i, '')
@@ -88,7 +93,7 @@ function normalizeRoute(route: string) {
   return normalized
 }
 
-function findContentTitle(route: string, contentIndex: any[]) {
+function findContentTitle(route: string, contentIndex: ContentIndexItem[]) {
   const normalized = normalizeRoute(route)
   const matchingCollection = contentIndex.find(({ prefix }) => normalized.startsWith(prefix))
   if (!matchingCollection) {
@@ -100,7 +105,7 @@ function findContentTitle(route: string, contentIndex: any[]) {
   return entry?.title || null
 }
 
-function fallbackLabelFromRoute(route: string, contentIndex: any[]) {
+function fallbackLabelFromRoute(route: string, contentIndex: ContentIndexItem[]) {
   const slug = route.split('/').filter(Boolean).pop() || ''
   return (
     findContentTitle(route, contentIndex) ||
@@ -108,7 +113,7 @@ function fallbackLabelFromRoute(route: string, contentIndex: any[]) {
   )
 }
 
-function articleToDoc(article: RawHubArticle, contentIndex: any[]): HubNavDoc {
+function articleToDoc(article: RawHubArticle, contentIndex: ContentIndexItem[]): HubNavDoc {
   const route = normalizeRoute(article.url)
   const title = findContentTitle(route, contentIndex) || fallbackLabelFromRoute(route, contentIndex)
 
@@ -120,7 +125,7 @@ function articleToDoc(article: RawHubArticle, contentIndex: any[]): HubNavDoc {
   }
 }
 
-function mapGroupToCategory(group: RawHubGroup, contentIndex: any[]): HubNavCategory {
+function mapGroupToCategory(group: RawHubGroup, contentIndex: ContentIndexItem[]): HubNavCategory {
   const items: HubNavItem[] = []
 
   if (group.sections) {

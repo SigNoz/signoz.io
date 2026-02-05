@@ -115,7 +115,7 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
 }
 
 interface OpenTelemetryProps {
-  articles?: any[]
+  articles?: MDXContent[]
 }
 
 export default function OpenTelemetry({ articles = [] }: OpenTelemetryProps) {
