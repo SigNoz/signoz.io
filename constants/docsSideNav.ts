@@ -2692,6 +2692,19 @@ const docsSideNav = [
         route: '/docs/aws-monitoring/vpc',
         label: 'VPC',
       },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Troubleshooting',
+        route: '/docs/aws-monitoring/troubleshooting',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/troubleshooting/faqs',
+            label: 'FAQs',
+          },
+        ],
+      },
     ],
   },
   {
