@@ -137,16 +137,15 @@ app.post("/webhook", async (req, res) => {
 });
 
 async function sendToSigNoz(logs) {
-  const region = process.env.SIGNOZ_REGION;
-  const ingestionKey = process.env.SIGNOZ_INGESTION_KEY;
+  const ingestionKey = process.env.SIGNOZ_INGESTION_KEY || "<your-ingestion-key>";
   const serviceName = process.env.SERVICE_NAME || "convex-logs";
 
-  if (!region || !ingestionKey) {
-    console.warn("Skipping SigNoz export: Missing SIGNOZ_REGION or SIGNOZ_INGESTION_KEY");
+  if (!ingestionKey) {
+    console.warn("Skipping SigNoz export: Missing SIGNOZ_INGESTION_KEY");
     return;
   }
 
-  const url = `https://ingest.${region}.signoz.cloud:443/logs/json`;
+  const url = `https://ingest.<region>.signoz.cloud:443/logs/json`;
 
   const transformedLogs = logs.map((log) => {
     const newLog = { ...log };
@@ -225,7 +224,6 @@ Add `"type": "module"` to your `package.json` to enable ES modules:
 Configure the following environment variables:
 
 - `WEBHOOK_SECRET`: The HMAC secret from your Convex dashboard
-- `SIGNOZ_REGION`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `SIGNOZ_INGESTION_KEY`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `SERVICE_NAME`: (Optional) Service name for logs in SigNoz, defaults to `convex-logs`
 - `PORT`: (Optional) Server port, defaults to `3080`
@@ -236,14 +234,12 @@ Start the bridge with environment variables:
 
 ```bash
 WEBHOOK_SECRET=<your-convex-secret> \
-SIGNOZ_REGION=<region> \
 SIGNOZ_INGESTION_KEY=<your-ingestion-key> \
 node index.js
 ```
 
 Verify these values:
 - `<your-convex-secret>`: The HMAC secret from your Convex dashboard (see Step 4)
-- `<region>`: Your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<your-ingestion-key>`: Your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 Verify it's running:
@@ -309,7 +305,7 @@ Logs should appear within a few seconds.
 
 **Possible causes**
 - Webhook Bridge not reachable from the internet
-- `SIGNOZ_REGION` or `SIGNOZ_INGESTION_KEY` is incorrect
+- `SIGNOZ_INGESTION_KEY` is incorrect
 - `WEBHOOK_SECRET` doesn't match the Convex dashboard
 
 **Fix**
